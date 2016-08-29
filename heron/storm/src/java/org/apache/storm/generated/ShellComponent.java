@@ -14,6 +14,33 @@
 
 package org.apache.storm.generated;
 
-public class InvalidTopologyException extends Exception {
-  private static final long serialVersionUID = 8232369763475884914L;
+public class ShellComponent {
+  private String execution_command; // required
+  private String script; // required
+
+  public ShellComponent() {
+
+  }
+
+  public ShellComponent(String execution_command, String script) {
+    this.execution_command = execution_command;
+    this.script = script;
+  }
+
+  public String get_execution_command() {
+    return execution_command;
+  }
+
+  public void set_execution_command(String execution_command) {
+    this.execution_command = execution_command;
+  }
+
+  public String get_script() {
+    return script;
+  }
+
+  public void set_script(String script) {
+    this.script = script;
+  }
+
 }

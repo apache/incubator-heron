@@ -12,18 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.apache.storm.metric.api;
+package com.twitter.heron.examples;
 
-@SuppressWarnings("rawtypes")
-public class MetricDelegate implements com.twitter.heron.api.metric.IMetric {
-  private IMetric delegate;
+import java.util.Map;
 
-  public MetricDelegate(IMetric delegate) {
-    this.delegate = delegate;
+import org.apache.storm.task.ShellBolt;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
+
+public class SplitSentence extends ShellBolt implements IRichBolt {
+  private static final long serialVersionUID = 1L;
+
+  public SplitSentence() {
+    super("python", "splitsentence.py");
   }
 
   @Override
-  public Object getValueAndReset() {
-    return delegate.getValueAndReset();
+  public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    declarer.declare(new Fields("word"));
   }
+
+  @Override
+  public Map<String, Object> getComponentConfiguration() {
+    return null;
+  }
+
 }
