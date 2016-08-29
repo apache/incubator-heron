@@ -31,8 +31,8 @@ import java.lang.annotation.RetentionPolicy;
  * {@link Public}. Avoid using non public classes as these classes
  * could be removed or change in incompatible ways.</li>
  *
- * <li>Hadoop projects must only use classes that are marked
- * {@link LimitedPrivate} or {@link Public}</li>
+ * <li>Heron topologies must only use classes that are marked {@link Public}. Heron administrators
+ * may use classes that are {@link LimitedPrivate} or {@link Public}</li>
  *
  * <li> Methods may have a different annotation that it is more restrictive
  * compared to the audience classification of the class. Example: A class
