@@ -21,7 +21,8 @@ TEST_CASES = [
     'KILL_TMASTER',
     'KILL_STMGR',
     'KILL_METRICSMGR',
-    'KILL_STMGR_METRICSMGR'
+    'KILL_STMGR_METRICSMGR',
+    'SCALE_UP'
 ]
 # Retry variables in case the output is different from the input
 RETRY_COUNT = 5
@@ -110,6 +111,8 @@ def runTest(test, topologyName, params):
     boltPid = getPid('container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT),
                      params['workingDirectory'])
     killProcess(boltPid)
+  elif test == 'SCALE_UP':
+    scaleUp(params['cliPath'], params['cluster'], params['topologyName'])
 
   # block until ./heron-stmgr exists
   processList = getProcesses()
@@ -243,6 +246,21 @@ def restartShard(heronCliPath, testCluster, topologyName, shardNum):
   if subprocess.call(splitcmd) != 0:
     raise RuntimeError("Unable to kill TMaster")
   logging.info("Killed TMaster")
+
+def scaleUp(heronCliPath, testCluster, topologyName):
+  splitcmd = [
+      '%s' % (heronCliPath),
+      'update',
+      '--verbose',
+      '%s' % (testCluster),
+      '%s' % (topologyName),
+      '--component-parallelism=paused-local-spout:2',
+      '--component-parallelism=identity-bolt:2'
+  ]
+  logging.info("Increasing number of component instances: %s", splitcmd)
+  if subprocess.call(splitcmd) != 0:
+    raise RuntimeError("Unable to update topology")
+  logging.info("Increased number of component instances")
 
 def getProcesses():
   '''
