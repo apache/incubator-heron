@@ -252,7 +252,7 @@ def main():
   max_log_bytes = system_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
   log_file = os.path.join(log_dir, instance_id + ".log.0")
-  log.init_rotating_logger(level=logging.DEBUG, logfile=log_file,
+  log.init_rotating_logger(level=logging.INFO, logfile=log_file,
                            max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +

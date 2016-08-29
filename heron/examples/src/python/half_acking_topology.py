@@ -29,7 +29,7 @@ if __name__ == '__main__':
   builder = TopologyBuilder(name=sys.argv[1])
 
   word_spout = builder.add_spout("word_spout", WordSpout, par=2)
-  count_bolt = builder.add_bolt("half_ack_bolt", HalfAckBolt, par=2,
+  half_ack_bolt = builder.add_bolt("half_ack_bolt", HalfAckBolt, par=2,
                                 inputs={word_spout: Grouping.fields('word')},
                                 config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
 
