@@ -72,7 +72,8 @@ class SingleThreadHeronInstance(object):
                               self.gateway_metrics, socket_options, self.sys_config)
     self._metrics_client = \
       MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
-                           self.out_metrics, self.socket_map, socket_options, self.gateway_metrics,
+                           self.out_metrics, self.in_stream, self.out_stream,
+                           self.socket_map, socket_options, self.gateway_metrics,
                            self.sys_config)
     self.my_pplan_helper = None
 
