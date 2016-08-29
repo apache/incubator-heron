@@ -23,10 +23,10 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class YarnSchedulerTest {
   @Test
-  public void delegatesToDriverOnSchedule() {
+  public void delegatesToDriverOnSchedule() throws Exception {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
-    Mockito.when(mockHeronDriver.scheduleTMasterContainer()).thenReturn(true);
+    Mockito.doNothing().when(mockHeronDriver).scheduleTMasterContainer();
 
     IScheduler scheduler = new YarnScheduler();
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);

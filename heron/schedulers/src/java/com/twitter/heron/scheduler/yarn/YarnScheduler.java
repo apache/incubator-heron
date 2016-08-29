@@ -42,11 +42,14 @@ public class YarnScheduler implements IScheduler {
     LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
 
-    if (!driver.scheduleTMasterContainer()) {
+    try {
+      driver.scheduleTMasterContainer();
+      driver.scheduleHeronWorkers(packing);
+      return true;
+    } catch (HeronMasterDriver.ContainerAllocationException e) {
+      LOG.log(Level.ALL, "Failed to allocate containers for topology", e);
       return false;
     }
-
-    return driver.scheduleHeronWorkers(packing);
   }
 
   @Override
@@ -65,10 +68,16 @@ public class YarnScheduler implements IScheduler {
   public boolean onRestart(RestartTopologyRequest request) {
     int containerId = request.getContainerIndex();
 
-    if (containerId == -1) {
-      return HeronMasterDriverProvider.getInstance().restartTopology();
-    } else {
-      return HeronMasterDriverProvider.getInstance().restartWorker(String.valueOf(containerId));
+    try {
+      if (containerId == -1) {
+        HeronMasterDriverProvider.getInstance().restartTopology();
+      } else {
+        HeronMasterDriverProvider.getInstance().restartWorker(String.valueOf(containerId));
+      }
+      return true;
+    } catch (HeronMasterDriver.ContainerAllocationException e) {
+      LOG.log(Level.ALL, "Failed to allocate containers after restart", e);
+      return false;
     }
   }
 
