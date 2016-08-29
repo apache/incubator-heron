@@ -142,30 +142,24 @@ public class HeronMasterDriver {
   /**
    * Requests container for TMaster as container/executor id 0.
    */
-  boolean scheduleTMasterContainer() {
+  void scheduleTMasterContainer() throws ContainerAllocationException {
     LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
     // TODO: https://github.com/twitter/heron/issues/951: colocate TMaster and Scheduler
-    AllocatedEvaluator container =
-        launchContainerForExecutor(new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB));
-    return container != null;
+    launchContainerForExecutor(new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB));
   }
 
   /**
    * Container allocation is asynchronous. Request containers serially to ensure allocated resources
    * match the required resources
    */
-  boolean scheduleHeronWorkers(PackingPlan topologyPacking) {
+  void scheduleHeronWorkers(PackingPlan topologyPacking) throws ContainerAllocationException {
     this.packing = topologyPacking;
     for (Entry<String, ContainerPlan> entry : topologyPacking.containers.entrySet()) {
       Resource reqResource = entry.getValue().resource;
       int mem = getMemInMBForExecutor(reqResource);
       int cores = getCpuForExecutor(reqResource);
-      AllocatedEvaluator container = launchContainerForExecutor(entry.getKey(), cores, mem);
-      if (container == null) {
-        return false;
-      }
+      launchContainerForExecutor(entry.getKey(), cores, mem);
     }
-    return true;
   }
 
   public void killTopology() {
@@ -179,15 +173,13 @@ public class HeronMasterDriver {
     }
   }
 
-  public boolean restartTopology() {
-    boolean result = true;
+  public void restartTopology() throws ContainerAllocationException {
     for (HeronWorker worker : multiKeyWorkerMap.getHeronWorkers()) {
-      result &= restartWorker(worker.workerId);
+      restartWorker(worker.workerId);
     }
-    return result;
   }
 
-  public boolean restartWorker(String id) {
+  public void restartWorker(String id) throws ContainerAllocationException {
     LOG.log(Level.INFO, "Find & restart container for id={0}", id);
 
     HeronWorker worker = multiKeyWorkerMap.lookupByWorkerId(id);
@@ -196,7 +188,7 @@ public class HeronMasterDriver {
       ContainerPlan containerPlan = packing.containers.get(id);
       if (containerPlan == null) {
         LOG.log(Level.WARNING, "There is no container for {0} in packing plan.", id);
-        return false;
+        return;
       }
       Resource resource = containerPlan.resource;
       worker = new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource));
@@ -206,27 +198,22 @@ public class HeronMasterDriver {
       evaluator.close();
     }
 
-    AllocatedEvaluator container = launchContainerForExecutor(worker);
-    return container != null;
+    launchContainerForExecutor(worker);
   }
 
   @VisibleForTesting
   AllocatedEvaluator launchContainerForExecutor(final String executorId,
-                                                        final int cpu,
-                                                        final int mem) {
+                                                final int cpu,
+                                                final int mem) throws ContainerAllocationException {
     return launchContainerForExecutor(new HeronWorker(executorId, cpu, mem));
   }
 
-  private AllocatedEvaluator launchContainerForExecutor(final HeronWorker worker) {
+  private AllocatedEvaluator launchContainerForExecutor(final HeronWorker worker)
+      throws ContainerAllocationException {
     Future<AllocatedEvaluator> result = executor.submit(new Callable<AllocatedEvaluator>() {
       @Override
       public AllocatedEvaluator call() throws Exception {
         AllocatedEvaluator evaluator = allocateContainer(worker.workerId, worker.cores, worker.mem);
-        if (evaluator == null) {
-          LOG.log(Level.WARNING, "Could not allocate container for id {0}", worker.workerId);
-          return null;
-        }
-
         Configuration context = createContextConfig(worker.workerId);
 
         LOG.log(Level.INFO,
@@ -241,30 +228,24 @@ public class HeronMasterDriver {
     try {
       return result.get();
     } catch (InterruptedException e) {
-      LOG.log(Level.SEVERE, "Interrupted while waiting for container", e);
+      throw new ContainerAllocationException("Interrupted while waiting for container", e);
     } catch (ExecutionException e) {
-      LOG.log(Level.SEVERE, "Error while waiting for container", e);
+      throw new ContainerAllocationException("Error while allocating container", e);
     }
-    return null;
   }
 
-  AllocatedEvaluator allocateContainer(String id, int cpu, int mem) {
+  AllocatedEvaluator allocateContainer(String id, int cpu, int mem) throws InterruptedException {
     EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
 
     LOG.log(Level.INFO, "Requesting container for executor, id: {0}, mem: {1}, cpu: {2}",
         new Object[]{id, mem, cpu});
     requestor.submit(evaluatorRequest);
 
-    try {
-      AllocatedEvaluator evaluator = allocatedContainerQ.take();
-      LOG.log(Level.INFO,
-          "Container {0} is allocated for executor, id: {1}",
-          new Object[]{evaluator.getId(), id});
-      return evaluator;
-    } catch (InterruptedException e) {
-      LOG.log(Level.WARNING, "Interrupted while waiting for container allocation", e);
-      return null;
-    }
+    AllocatedEvaluator evaluator = allocatedContainerQ.take();
+    LOG.log(Level.INFO,
+        "Container {0} is allocated for executor, id: {1}",
+        new Object[]{evaluator.getId(), id});
+    return evaluator;
   }
 
   Configuration createContextConfig(String executorId) {
@@ -400,6 +381,18 @@ public class HeronMasterDriver {
   }
 
   /**
+   * {@link ContainerAllocationException} represents an error while trying to allocate a
+   * container
+   */
+  public static final class ContainerAllocationException extends Exception {
+    static final long serialVersionUID = 1L;
+
+    public ContainerAllocationException(String message, Exception e) {
+      super(message, e);
+    }
+  }
+
+  /**
    * {@link HeronSchedulerLauncher} is the first class initialized on the server by REEF. This is
    * responsible for unpacking binaries and launching Heron Scheduler.
    */
@@ -469,7 +462,11 @@ public class HeronMasterDriver {
           new Object[]{worker.workerId, evaluator.getId()});
       multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
 
-      launchContainerForExecutor(worker);
+      try {
+        launchContainerForExecutor(worker);
+      } catch (ContainerAllocationException e) {
+        LOG.log(Level.SEVERE, "Failed to relaunch failed container: " + worker.workerId, e);
+      }
     }
   }
 
