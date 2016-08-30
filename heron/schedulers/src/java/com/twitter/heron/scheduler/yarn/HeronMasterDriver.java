@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.context.ContextConfiguration;
@@ -182,23 +183,24 @@ public class HeronMasterDriver {
   public void restartWorker(String id) throws ContainerAllocationException {
     LOG.log(Level.INFO, "Find & restart container for id={0}", id);
 
-    HeronWorker worker = multiKeyWorkerMap.lookupByWorkerId(id);
-    if (worker == null) {
+    Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(id);
+    if (!worker.isPresent()) {
       LOG.log(Level.WARNING, "Active container for {0} not found. Requesting a new one.", id);
       ContainerPlan containerPlan = packing.containers.get(id);
       if (containerPlan == null) {
-        LOG.log(Level.WARNING, "There is no container for {0} in packing plan.", id);
-        return;
+        throw new IllegalArgumentException(
+            String.format("There is no container for %s in packing plan.", id));
       }
       Resource resource = containerPlan.resource;
-      worker = new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource));
+      worker = Optional.of(
+          new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource)));
     } else {
-      AllocatedEvaluator evaluator = multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
+      AllocatedEvaluator evaluator = multiKeyWorkerMap.detachEvaluatorAndRemove(worker.get());
       LOG.log(Level.INFO, "Shutting down container {0}", evaluator.getId());
       evaluator.close();
     }
 
-    launchContainerForExecutor(worker);
+    launchContainerForExecutor(worker.get());
   }
 
   @VisibleForTesting
@@ -281,8 +283,8 @@ public class HeronMasterDriver {
   }
 
   void submitHeronExecutorTask(String workerId) {
-    HeronWorker worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
-    if (worker == null) {
+    Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
+    if (!worker.isPresent()) {
       LOG.log(Level.SEVERE, "Container for id: {0} not found.", workerId);
       return;
     }
@@ -308,7 +310,7 @@ public class HeronMasterDriver {
         .set(HeronTaskConfiguration.CONTAINER_ID, workerId)
         .set(HeronTaskConfiguration.VERBOSE, verboseMode)
         .build();
-    worker.context.submitTask(taskConf);
+    worker.get().context.submitTask(taskConf);
   }
 
   /**
@@ -352,7 +354,7 @@ public class HeronMasterDriver {
       }
     }
 
-    HeronWorker lookupByWorkerId(String workerId) {
+    Optional<HeronWorker> lookupByWorkerId(String workerId) {
       HeronWorker worker;
       synchronized (workerMap) {
         worker = workerMap.get(workerId);
@@ -360,7 +362,7 @@ public class HeronMasterDriver {
       if (worker == null) {
         LOG.log(Level.WARNING, "Container for executor id: {0} not found.", workerId);
       }
-      return worker;
+      return Optional.fromNullable(worker);
     }
 
     AllocatedEvaluator detachEvaluatorAndRemove(HeronWorker worker) {
@@ -484,13 +486,13 @@ public class HeronMasterDriver {
       }
 
       String workerId = context.getId();
-      HeronWorker worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
-      if (worker == null) {
+      Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
+      if (!worker.isPresent()) {
         context.close();
         return;
       }
 
-      worker.context = context;
+      worker.get().context = context;
       submitHeronExecutorTask(workerId);
     }
   }
