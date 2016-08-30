@@ -16,6 +16,7 @@ java_library(
     ]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:classification",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/proto:proto_common_java",
@@ -70,6 +71,7 @@ scheduler_deps_files = \
 packing_deps_files = [
     "//heron/api/src/java:api-java",
     ":common-spi-java",
+    "//heron/api/src/java:classification",
     "//heron/common/src/java:config-java",
     "//heron/proto:proto_packing_plan_java",
     "//heron/proto:proto_topology_java"
@@ -183,7 +185,9 @@ java_binary(
         "**/spi/uploader/**/*.java",
         "**/spi/utils/**/*.java",
     ]),
-    deps = utils_deps_files,
+    deps = [
+        "//heron/api/src/java:classification"
+    ] + utils_deps_files,
 )
 
 genrule(

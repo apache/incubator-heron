@@ -24,9 +24,11 @@ import com.twitter.heron.spi.packing.Resource;
 
 public class NullPacking implements IPacking {
 
+  @Override
   public void initialize(Config config, TopologyAPI.Topology topology) {
   }
 
+  @Override
   public PackingPlan pack() {
     return new PackingPlan(
         "",
