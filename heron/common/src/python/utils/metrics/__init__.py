@@ -17,3 +17,5 @@ from .metrics_helper import (GatewayMetrics,
                              SpoutMetrics,
                              BoltMetrics,
                              MetricsCollector)
+
+from .global_metrics import  import GlobalMetrics
