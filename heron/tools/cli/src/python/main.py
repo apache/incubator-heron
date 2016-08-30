@@ -68,7 +68,6 @@ def create_parser():
   Main parser
   :return:
   '''
-  #parser = argparse.ArgumentParser(
   parser = hrc_parse.HeronArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
