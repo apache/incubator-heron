@@ -13,8 +13,6 @@
 # limitations under the License.
 
 #!/usr/bin/env python2.7
-
-''' heron-executor '''
 import atexit
 import base64
 import json
@@ -37,7 +35,6 @@ from heron.statemgrs.src.python import statemanagerfactory
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 Log = log.Log
-STATEMGRS_KEY = "statemgrs"
 
 def print_usage():
   print (
@@ -651,8 +648,6 @@ class HeronExecutor(object):
                  (self.shard, str(self.packing_plan), str(new_packing_plan)))
         self.update_packing_plan(new_packing_plan)
 
-        # pylint: disable=fixme
-        # TODO: handle relaunch of running topology scenario
         Log.info("Updating executor processes")
         self.launch()
       else:
