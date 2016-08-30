@@ -226,39 +226,20 @@ public class SchedulerStateManagerAdaptor {
   public void cleanState(String topologyName) {
     LOG.fine("Cleaning up topology state");
 
-    Boolean result;
-
-    result = deleteTMasterLocation(topologyName);
-    if (result == null || !result) {
-      LOG.warning("Failed to clear TMaster location.");
-    }
-
-    result = deletePackingPlan(topologyName);
-    if (result == null || !result) {
-      LOG.warning("Failed to clear packing plan.");
-    }
-
-    result = deletePhysicalPlan(topologyName);
-    if (result == null || !result) {
-      LOG.warning("Failed to clear physical plan.");
-    }
-
-    result = deleteSchedulerLocation(topologyName);
-    if (result == null || !result) {
-      LOG.warning("Failed to clear scheduler location.");
-    }
-
-    result = deleteExecutionState(topologyName);
-    if (result == null || !result) {
-      LOG.severe("Failed to clear execution state");
-    }
-
-    result = deleteTopology(topologyName);
-    if (result == null || !result) {
-      LOG.severe("Failed to clear topology definition");
-    }
+    logDeleteStatus(deleteTMasterLocation(topologyName), "topology master");
+    logDeleteStatus(deletePackingPlan(topologyName), "packing plan");
+    logDeleteStatus(deletePhysicalPlan(topologyName), "physical plan");
+    logDeleteStatus(deleteSchedulerLocation(topologyName), "scheduler");
+    logDeleteStatus(deleteExecutionState(topologyName), "execution state");
+    logDeleteStatus(deleteTopology(topologyName), "topology definition");
 
     LOG.fine("Cleaned up topology state");
+  }
+
+  private void logDeleteStatus(Boolean success, String name) {
+    if (success == null || !success) {
+      LOG.warning("Failed to clear state for " + name);
+    }
   }
 
   /**
