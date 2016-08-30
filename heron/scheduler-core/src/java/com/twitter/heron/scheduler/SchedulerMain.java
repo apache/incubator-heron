@@ -33,11 +33,13 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -351,6 +353,15 @@ public class SchedulerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
+      // get a packed plan and schedule it
+      PackingPlans.PackingPlan serializedPackingPlan = adaptor.getPackingPlan(topology.getName());
+      if (serializedPackingPlan == null) {
+        LOG.severe("Failed to obtain a valid PackingPlan from the state manager");
+        return false;
+      }
+      LOG.log(Level.INFO, "Packing plan fetched from state: {0}", serializedPackingPlan);
+      PackingPlan packedPlan = new PackingPlanProtoDeserializer().fromProto(serializedPackingPlan);
+
       // build the runtime config
       LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
@@ -359,12 +370,6 @@ public class SchedulerMain {
           .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
 
-      // get a packed plan and schedule it
-      PackingPlan packedPlan = launcherUtils.createPackingPlan(config, runtime);
-      if (packedPlan == null) {
-        LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
-        return false;
-      }
       Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packedPlan);
 
       // invoke scheduler
