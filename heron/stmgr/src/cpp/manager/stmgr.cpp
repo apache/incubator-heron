@@ -459,10 +459,10 @@ void StMgr::PopulateXorManagers(
 
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
-void StMgr::HandleStreamManagerData(const sp_string&, proto::stmgr::TupleStreamMessage* _message) {
+void StMgr::HandleStreamManagerData(const sp_string&, proto::stmgr::TupleStreamMessage2* _message) {
   // We received message from another stream manager
   sp_int32 task_id = _message->task_id();
-//  SendInBound(task_id, _message->mutable_set());
+  SendInBound(task_id, _message->mutable_set());
 }
 
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
@@ -591,13 +591,13 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
     //delete _tuple;
     tuple_cache_->release(_task_id, _tuple);
   } else {
-//    proto::stmgr::TupleStreamMessage* out = new proto::stmgr::TupleStreamMessage();
-//    out->set_task_id(_task_id);
-//    out->mutable_set()->CopyFrom(*_tuple);
-//    clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
-//
-////    delete _tuple;
-//    tuple_cache_->release(_task_id, _tuple);
+    proto::stmgr::TupleStreamMessage2* out = new proto::stmgr::TupleStreamMessage2();
+    out->set_task_id(_task_id);
+    out->mutable_set()->CopyFrom(*_tuple);
+    clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
+
+//    delete _tuple;
+    tuple_cache_->release(_task_id, _tuple);
   }
 }
 

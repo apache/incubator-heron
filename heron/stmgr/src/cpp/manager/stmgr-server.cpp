@@ -252,7 +252,7 @@ void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
 }
 
 void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
-                                           proto::stmgr::TupleStreamMessage* _message) {
+                                           proto::stmgr::TupleStreamMessage2* _message) {
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection" << std::endl;

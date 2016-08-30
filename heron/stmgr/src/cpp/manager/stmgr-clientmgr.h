@@ -42,7 +42,7 @@ class StMgrClientMgr {
   virtual ~StMgrClientMgr();
 
   void NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan);
-  void SendTupleStreamMessage(const sp_string& _stmgr_id, proto::stmgr::TupleStreamMessage* _msg);
+  void SendTupleStreamMessage(const sp_string& _stmgr_id, proto::stmgr::TupleStreamMessage2* _msg);
 
   // Forward the call to the stmgr
   void StartBackPressureOnServer(const sp_string& _other_stmgr_id);

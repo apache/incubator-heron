@@ -59,7 +59,7 @@ class StMgr {
   // Called by tmaster client when a new physical plan is available
   void NewPhysicalPlan(proto::system::PhysicalPlan* pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
-                               proto::stmgr::TupleStreamMessage* _message);
+                               proto::stmgr::TupleStreamMessage2* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::stmgr::TupleMessage* _message);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);

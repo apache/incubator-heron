@@ -165,7 +165,7 @@ void StMgrClient::SendHelloRequest() {
   return;
 }
 
-void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage* _msg) {
+void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _msg) {
   if (IsConnected()) {
     stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg->ByteSize());
     if (_msg->set().has_data()) {
@@ -197,7 +197,7 @@ void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage* _msg)
   }
 }
 
-void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
+void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
   release(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
