@@ -559,7 +559,7 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr() << " " << _message->message_id();
 
-    delete _message;
+    release(_message);
     return;
   }
   CHECK(rstmgrs_.find(_conn) != rstmgrs_.end());
@@ -568,7 +568,7 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
 
   StartBackPressureOnSpouts();
 
-  delete _message;
+  release(_message);
 }
 
 void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
@@ -579,7 +579,7 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr();
 
-    delete _message;
+    release(_message);
     return;
   }
   CHECK(rstmgrs_.find(_conn) != rstmgrs_.end());
@@ -592,7 +592,7 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
     AttemptStopBackPressureFromSpouts();
   }
 
-  delete _message;
+  release(_message);
 }
 
 void StMgrServer::SendStartBackPressureToOtherStMgrs() {
