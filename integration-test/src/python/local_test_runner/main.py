@@ -48,7 +48,7 @@ HERON_TMASTER = 'heron-tmaster'
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
 # pylint: disable=too-many-return-statements, too-many-branches,
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements too-many-locals
 def runTest(test, topologyName, params):
   ''' Runs the test for one topology '''
   #submit topology
@@ -144,19 +144,20 @@ def runTest(test, topologyName, params):
     _safe_delete_file(params['outputFile'])
 
   if test == 'SCALE_UP':
-    url = 'http://localhost:%s/topologies/physicalplan?cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology' % params['trackerPort']
+    url = 'http://localhost:%s/topologies/physicalplan?' % params['trackerPort']\
+          + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
     response = urllib.urlopen(url)
     physical_plan_json = json.loads(response.read())
     expected_instance_count = 5
     def assert_scaling():
       if 'result' not in physical_plan_json:
-        log.error("Could not find result json in physical plan request to tracker: %s" % url)
+        logging.error("Could not find result json in physical plan request to tracker: %s" % url)
         return False
 
       instances = physical_plan_json['result']['instances']
       instance_count = len(instances)
       if instance_count != expected_instance_count:
-        log.error("Found %s instances but expected %s: %s" %
+        logging.error("Found %s instances but expected %s: %s" %
                   (instance_count, expected_instance_count, instances))
         return False
 
