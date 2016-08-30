@@ -83,4 +83,16 @@ public interface IScheduler extends AutoCloseable {
    * send RestartTopologyResponse correspondingly according to this method's return value.
    */
   boolean onRestart(Scheduler.RestartTopologyRequest request);
+
+  /**
+   * Called by SchedulerServer when it receives a http request to update topology,
+   * while the http request body would be the protobuf Scheduler.UpdateTopologyRequest.
+   * The SchedulerServer would parse the request body and feed with this method.
+   * It would be invoked in the executors of SchedulerServer.
+   *
+   * @param request The UpdateTopologyRequest sent from local heron-cli
+   * @return true if the IScheduler updates the topology successfully. SchedulerServer would
+   * send UpdateTopologyResponse correspondingly according to this method's return value.
+   */
+  boolean onUpdate(Scheduler.UpdateTopologyRequest request);
 }

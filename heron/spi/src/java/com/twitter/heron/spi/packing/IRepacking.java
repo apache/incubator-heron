@@ -22,6 +22,8 @@ public interface IRepacking extends AutoCloseable {
 
   /**
    * Initialize the packing algorithm with the static config and the associated topology
+   * @param config topology config
+   * @param topology topology to repack
    */
   void initialize(Config config, TopologyAPI.Topology topology);
 

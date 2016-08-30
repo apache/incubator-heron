@@ -106,6 +106,9 @@ public class LocalScheduler implements IScheduler {
           if (isTopologyKilled) {
             LOG.info("Topology is killed. Not to start new executors.");
             return;
+          } else if (!processToContainer.containsKey(containerExecutor)) {
+            LOG.log(Level.INFO, "Container {0} is killed. No need to relaunch.", container);
+            return;
           }
           LOG.log(Level.INFO, "Trying to restart container {0}", container);
           // restart the container
@@ -141,9 +144,11 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
     LOG.info("# of containers: " + numContainers);
 
-    // for each container, run its own executor
-    for (int i = 0; i < numContainers; i++) {
-      startExecutor(i);
+    synchronized (processToContainer) {
+      // for each container, run its own executor
+      for (int i = 0; i < numContainers; i++) {
+        startExecutor(i);
+      }
     }
 
     LOG.info("Executor for each container have been started.");
@@ -169,20 +174,22 @@ public class LocalScheduler implements IScheduler {
     // set the flag that the topology being killed
     isTopologyKilled = true;
 
-    // destroy/kill the process for each container
-    for (Process p : processToContainer.keySet()) {
+    synchronized (processToContainer) {
+      // destroy/kill the process for each container
+      for (Process p : processToContainer.keySet()) {
 
-      // get the container index for the process
-      int index = processToContainer.get(p);
-      LOG.info("Killing executor for container: " + index);
+        // get the container index for the process
+        int index = processToContainer.get(p);
+        LOG.info("Killing executor for container: " + index);
 
-      // destroy the process
-      p.destroy();
-      LOG.info("Killed executor for container: " + index);
+        // destroy the process
+        p.destroy();
+        LOG.info("Killed executor for container: " + index);
+      }
+
+      // clear the mapping between process and container ids
+      processToContainer.clear();
     }
-
-    // clear the mapping between process and container ids
-    processToContainer.clear();
 
     return true;
   }
@@ -225,17 +232,23 @@ public class LocalScheduler implements IScheduler {
     return true;
   }
 
-  public boolean isTopologyKilled() {
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
+  }
+
+  boolean isTopologyKilled() {
     return isTopologyKilled;
   }
 
   // This method shall be used only for unit test
-  protected ExecutorService getMonitorService() {
+  ExecutorService getMonitorService() {
     return monitorService;
   }
 
   // This method shall be used only for unit test
-  protected Map<Process, Integer> getProcessToContainer() {
+  Map<Process, Integer> getProcessToContainer() {
     return processToContainer;
   }
 }
