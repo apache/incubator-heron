@@ -20,6 +20,8 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -106,7 +108,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   /**
    * Handler to restart a topology
    */
-  protected boolean restartTopologyHandler(String topologyName) {
+  @VisibleForTesting
+  boolean restartTopologyHandler(String topologyName) {
     Integer containerId = Context.topologyContainerId(config);
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
@@ -139,7 +142,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   /**
    * Handler to kill a topology
    */
-  protected boolean killTopologyHandler(String topologyName) {
+  @VisibleForTesting
+  boolean killTopologyHandler(String topologyName) {
     Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
         .setTopologyName(topologyName).build();
 
@@ -162,12 +166,13 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   /**
    * Handler to update a topology
    */
-  private boolean updateTopologyHandler(String topologyName, String newParallelism) {
+  @VisibleForTesting
+  boolean updateTopologyHandler(String topologyName, String newParallelism) {
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = manager.getTopology(topologyName);
-    Map<String, Integer> changeRequests = parallelismChangeRequests(newParallelism);
+    Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
     PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
         topology);
@@ -202,7 +207,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     Boolean result;
 
-    // It is possible that TMasterLocation, PackingPlan, PhysicalPlan and SchedulerLocation are nots
+    // It is possible that TMasterLocation, PackingPlan, PhysicalPlan and SchedulerLocation are not
     // set. Just log but don't consider it a failure and don't return false
     result = statemgr.deleteTMasterLocation(topologyName);
     if (result == null || !result) {
@@ -242,9 +247,10 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     return true;
   }
 
-  private PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
-                                                       Map<String, Integer> changeRequests,
-                                                       TopologyAPI.Topology topology) {
+  @VisibleForTesting
+  PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
+                                               Map<String, Integer> changeRequests,
+                                               TopologyAPI.Topology topology) {
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     PackingPlan currentPackingPlan = deserializer.fromProto(currentProtoPlan);
@@ -259,7 +265,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       // create an instance of the packing class
       packing = ReflectionUtils.newInstance(repackingClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      throw new RuntimeException("Failed to instantiate packing instance " + e);
+      throw new IllegalArgumentException(
+          "Failed to instantiate packing instance: " + repackingClass, e);
     }
     try {
       packing.initialize(config, topology);
@@ -270,8 +277,9 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
   }
 
-  private Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,
-                                                Map<String, Integer> changeRequests) {
+  @VisibleForTesting
+  Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,
+                                        Map<String, Integer> changeRequests) {
     for (String component : changeRequests.keySet()) {
       if (!componentCounts.containsKey(component)) {
         throw new IllegalArgumentException(
@@ -288,19 +296,21 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     return changeRequests;
   }
 
-  // TODO: better error handling
-  private Map<String, Integer> parallelismChangeRequests(String newParallelism) {
+  @VisibleForTesting
+  Map<String, Integer> parseNewParallelismParam(String newParallelism) {
     Map<String, Integer> changes = new HashMap<>();
-    for (String componentValuePair : newParallelism.split(",")) {
-      String[] kvp = componentValuePair.split(":", 2);
-      changes.put(kvp[0], Integer.parseInt(kvp[1]));
+    try {
+      for (String componentValuePair : newParallelism.split(",")) {
+        if (componentValuePair.length() == 0) {
+          continue;
+        }
+        String[] kvp = componentValuePair.split(":", 2);
+        changes.put(kvp[0], Integer.parseInt(kvp[1]));
+      }
+    } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+      throw new IllegalArgumentException("Invalid parallelism parameter found. Expected: "
+          + "<component>:<parallelism>[,<component>:<parallelism>], Found: " + newParallelism);
     }
     return changes;
-  }
-
-  protected void assertTrue(boolean condition, String message, Object... values) {
-    if (!condition) {
-      throw new RuntimeException("ERROR: " + String.format(message, values));
-    }
   }
 }
