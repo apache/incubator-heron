@@ -13,6 +13,8 @@
 # limitations under the License.
 
 #!/usr/bin/env python2.7
+""" The Heron executor is a process that runs on a container and is responsible for starting and
+monitoring the processes of the topology and it's support services."""
 import atexit
 import base64
 import json
