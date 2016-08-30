@@ -75,8 +75,7 @@ class TupleCache {
      // TODO(mfu):
      // TODO(mfu): Figure out a way to clean it when to shutdown the process
     std::list<proto::system::HeronTupleSet2*> _heron_tuple_set_pool;
-    inline proto::system::HeronTupleSet2* acquire()
-    {
+    inline proto::system::HeronTupleSet2* acquire() {
       if (_heron_tuple_set_pool.empty()) {
         return new proto::system::HeronTupleSet2();
       }
@@ -86,8 +85,7 @@ class TupleCache {
       return set;
     }
 
-    inline proto::system::HeronTupleSet2* acquire_clean_set()
-    {
+    inline proto::system::HeronTupleSet2* acquire_clean_set() {
      proto::system::HeronTupleSet2* set = acquire();
      set->Clear();
 

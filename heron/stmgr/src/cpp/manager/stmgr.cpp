@@ -472,10 +472,10 @@ void StMgr::HandleStreamManagerData(const sp_string&, proto::stmgr::TupleStreamM
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   // TODO(mfu): No need Clear the current_data_out_
   if (_message->has_data()) {
-//    current_data_out_.mutable_set()->set_allocated_data(_message->release_data());  // avoids copying
-//    current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
-//    server_->SendToInstance2(_task_id, current_data_out_);
-//    current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
+  // current_data_out_.mutable_set()->set_allocated_data(_message->release_data());// avoids copying
+  // current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
+  // server_->SendToInstance2(_task_id, current_data_out_);
+  // current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
     server_->SendToInstance2(_task_id, *_message);
   }
   if (_message->has_control()) {
@@ -507,7 +507,8 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       CHECK_EQ(_task_id, ack_tuple.roots(j).taskid());
       if (xor_mgrs_->anchor(_task_id, ack_tuple.roots(j).key(), ack_tuple.ackedtuple())) {
         // This tuple tree is all over
-        proto::system::AckTuple* a = current_control_out_.mutable_set()->mutable_control()->add_acks();
+        proto::system::AckTuple* a;
+        a = current_control_out_.mutable_set()->mutable_control()->add_acks();
         proto::system::RootId* r = a->add_roots();
         r->set_key(ack_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -524,7 +525,8 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       CHECK_EQ(_task_id, fail_tuple.roots(j).taskid());
       if (xor_mgrs_->remove(_task_id, fail_tuple.roots(j).key())) {
         // This tuple tree is failed
-        proto::system::AckTuple* f = current_control_out_.mutable_set()->mutable_control()->add_fails();
+        proto::system::AckTuple* f;
+        f = current_control_out_.mutable_set()->mutable_control()->add_fails();
         proto::system::RootId* r = f->add_roots();
         r->set_key(fail_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -607,7 +609,7 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
 //    LOG(INFO) << "tuple has control? " << _tuple->has_control() << std::endl;
     // Our own loopback
     SendInBound(_task_id, _tuple);
-    //delete _tuple;
+    // delete _tuple;
     tuple_cache_->release(_task_id, _tuple);
   } else {
     proto::stmgr::TupleStreamMessage2* out = new proto::stmgr::TupleStreamMessage2();

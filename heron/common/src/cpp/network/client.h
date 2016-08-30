@@ -35,6 +35,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <list>
 #include <typeindex>
 #include "basics/basics.h"
 #include "glog/logging.h"
@@ -172,34 +173,34 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-   // TODO(mfu):
-   // TODO(mfu): Figure out a way to clean it when to shutdown the process
+  // TODO(mfu):
+  // TODO(mfu): Figure out a way to clean it when to shutdown the process
   std::unordered_map<std::type_index, std::list<void*>> _heron_message_pool;
 
-//  template<typename M>
-//  inline M* acquire(std::type_index t)
-//  {
-//    if (_heron_message_pool[t].empty()) {
-//      return new M();
-//    }
-//
-//    M* m = (M*)_heron_message_pool[t].front();
-//    _heron_message_pool[t].pop_front();
-//    return m;
-//  }
+  //  template<typename M>
+  //  inline M* acquire(std::type_index t)
+  //  {
+  //    if (_heron_message_pool[t].empty()) {
+  //      return new M();
+  //    }
+  //
+  //    M* m = (M*)_heron_message_pool[t].front();
+  //    _heron_message_pool[t].pop_front();
+  //    return m;
+  //  }
 
-//  template<typename M>
-//  inline M* acquire_clean_set(std::type_index t)
-//  {
-//   M* m = acquire(t);
-//   m->Clear();
-//
-//   return m;
-//  }
+  //  template<typename M>
+  //  inline M* acquire_clean_set(std::type_index t)
+  //  {
+  //   M* m = acquire(t);
+  //   m->Clear();
+  //
+  //   return m;
+  //  }
 
   template<typename M>
-  inline void release(M* m) {
-    _heron_message_pool[typeid(M)].push_back((void*)m);
+  void release(M* m) {
+    _heron_message_pool[typeid(M)].push_back(static_cast<void*>(m));
   }
 
  protected:
@@ -290,7 +291,7 @@ class Client : public BaseClient {
     if (_heron_message_pool[t].empty()) {
       m = new M();
     }  else {
-      m = (M*)_heron_message_pool[t].front();
+      m = static_cast<M*>(_heron_message_pool[t].front());
       _heron_message_pool[t].pop_front();
     }
 

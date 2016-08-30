@@ -17,6 +17,7 @@
 #include "util/tuple-cache.h"
 #include <iostream>
 #include <map>
+#include <string>
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
