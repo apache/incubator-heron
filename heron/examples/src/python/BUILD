@@ -23,6 +23,12 @@ pex_binary(
     deps = [":example-py"],
 )
 
+pex_binary(
+    name = "half_acking",
+    srcs = ["half_acking_topology.py"],
+    deps = [":example-py"],
+)
+
 # without main method
 pex_binary(
     name = "custom_grouping",
@@ -35,3 +41,5 @@ pex_binary(
     srcs = ["multi_stream_topology.py"],
     deps = [":example-py"],
 )
+
+
