@@ -13,7 +13,6 @@
 # limitations under the License.
 
 #!/usr/bin/env python2.7
-''' heron-executor '''
 import atexit
 import base64
 import json
@@ -27,33 +26,26 @@ import threading
 import time
 import yaml
 
+from functools import partial
+
 from heron.common.src.python.utils import log
+# pylint: disable=unused-import
+from heron.proto.packing_plan_pb2 import PackingPlan
+from heron.statemgrs.src.python import statemanagerfactory
+from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 Log = log.Log
 
 def print_usage():
   print (
-      "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
-      " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
-      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
-      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
+      "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
+      " <instance_distribution_ignored> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
+      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
+      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
-      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
+      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
-
-def extract_triplets(s):
-  """
-  given a string s of the form "a:b:c:d:e:f...", extract triplets
-  [('a', 'b', 'c'), ('d', 'e', 'f')]
-  """
-  t = s.split(':')
-  assert len(t) % 3 == 0
-  result = []
-  while len(t) > 0:
-    result.append((t[0], t[1], t[2]))
-    t = t[3:]
-  return result
 
 def id_list(prefix, start, count):
   ids = []
@@ -181,19 +173,18 @@ class HeronExecutor(object):
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
 
-    # these get set when we call update_instance_distribution
-    self.instance_distribution = {}
+    # these get set when we call update_packing_plan
+    self.packing_plan = None
     self.stmgr_ids = []
     self.metricsmgr_ids = []
     self.heron_shell_ids = []
-
-    # this will soon be refactored to get instance dist dynamically at runtime instead of args
-    self.update_instance_distribution(self.parse_instance_distribution(args[5]))
 
     # processes_to_monitor gets set once processes are launched. we need to synchronize rw to this
     # dict since is used by multiple threads
     self.process_lock = threading.RLock()
     self.processes_to_monitor = {}
+
+    self.state_managers = []
 
   def initialize(self):
     """
@@ -216,27 +207,18 @@ class HeronExecutor(object):
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
 
+  def update_packing_plan(self, new_packing_plan):
+    self.packing_plan = new_packing_plan
+    num_containers = len(self.packing_plan.container_plans)
+    self.stmgr_ids = stmgr_list(num_containers)
+    self.metricsmgr_ids = metricsmgr_list(num_containers)
+    self.heron_shell_ids = heron_shell_list(num_containers)
+
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
     with open(heron_internals_config_file, 'r') as stream:
       heron_internals_config = yaml.load(stream)
     return heron_internals_config['heron.logging.directory']
-
-  def update_instance_distribution(self, new_distribution):
-    self.instance_distribution = new_distribution
-    self.stmgr_ids = stmgr_list(len(self.instance_distribution))
-    self.metricsmgr_ids = metricsmgr_list(len(self.instance_distribution))
-    self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
-
-  # pylint: disable=no-self-use
-  def parse_instance_distribution(self, encoded_distribution):
-    # First get the container id to distribution encoding
-    f1 = map(lambda z: (int(z[0]), ':'.join(z[1:])),
-             map(lambda x: x.split(':'), encoded_distribution.split(',')))
-    # Next get the triplets
-    f2 = map(lambda x: {x[0] : extract_triplets(x[1])}, f1)
-    # Finally convert that into a map
-    return reduce(lambda x, y: dict(x.items() + y.items()), f2)
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
@@ -387,11 +369,13 @@ class HeronExecutor(object):
     the stream logic of the topology
     '''
     retval = {}
-    # First lets make sure that our shard id is a valid one
-    assert self.shard in self.instance_distribution
-    my_instances = self.instance_distribution[self.shard]
+    instance_plans = self._get_instance_plans(self.packing_plan, self.shard)
     instance_info = []
-    for (component_name, global_task_id, component_index) in my_instances:
+    for instance_plan in instance_plans:
+      tokens = instance_plan.id.split(":")
+      global_task_id = tokens[2]
+      component_index = tokens[3]
+      component_name = instance_plan.component_name
       instance_id = "container_%s_%s_%s" % (str(self.shard), component_name, str(global_task_id))
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
@@ -426,6 +410,21 @@ class HeronExecutor(object):
       raise ValueError("Unrecognized package type: %s" % self.pkg_type)
 
     return retval
+
+  def _get_instance_plans(self, packing_plan, container_id):
+    """
+    For the given packing_plan, return the container plan with the given container_id. If protobufs
+    supported maps, we could just get the plan by id, but it doesn't so we have a collection of
+    containers to iterate over.
+    """
+    this_container_plan = None
+    for container_plan in packing_plan.container_plans:
+      if container_plan.id == str(container_id):
+        this_container_plan = container_plan
+
+    # make sure that our shard id is a valid one
+    assert this_container_plan is not None
+    return this_container_plan.instance_plans
 
   # Returns the common heron support processes that all containers get, like the heron shell
   def _get_heron_support_processes(self):
@@ -527,6 +526,10 @@ class HeronExecutor(object):
             log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
+    # During shutdown the watch might get triggered with the empty packing plan
+    if len(self.packing_plan.container_plans) == 0:
+      return {}
+
     if self.shard == 0:
       commands = self._get_tmaster_processes()
     else:
@@ -564,8 +567,12 @@ class HeronExecutor(object):
     return commands_to_kill, commands_to_keep, commands_to_start
 
   def launch(self):
+    ''' Determines the commands to be run and compares them with the existing running commands.
+    Then starts new ones required and kills old ones no longer required.
+    '''
     with self.process_lock:
-      current_commands = dict(map((lambda x: (x[1], x[2])), self.processes_to_monitor.values()))
+      current_commands = dict(map((lambda process: (process.name, process.command)),
+                                  self.processes_to_monitor.values()))
       updated_commands = self.get_commands_to_run()
 
       # get the commands to kill, keep and start
@@ -584,6 +591,82 @@ class HeronExecutor(object):
                (len(commands_to_kill), len(commands_to_keep),
                 len(commands_to_start), len(self.processes_to_monitor)))
 
+  def __get_state_manager_locations(self, state_manager_config_file='heron-conf/statemgr.yaml'):
+    """ reads configs to determine which state manager to use """
+    with open(state_manager_config_file, 'r') as stream:
+      config = yaml.load(stream)
+
+    # need to convert from the format in statemgr.yaml to the format that the python state managers
+    # takes. first, set reasonable defaults to local
+    state_manager_location =\
+      {
+          'type': 'file',
+          'name': 'local',
+          'tunnelhost': 'localhost',
+          'rootpath': '~/.herondata/repository/state/local',
+      }
+
+    if 'heron.statemgr.connection.string' in config:
+      state_manager_location['hostport'] = config['heron.statemgr.connection.string']
+    if 'heron.statemgr.tunnel.host' in config:
+      state_manager_location['tunnelhost'] = config['heron.statemgr.tunnel.host']
+
+    state_manager_class = config['heron.class.state.manager']
+    if state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
+      state_manager_location['type'] = 'zookeeper'
+      state_manager_location['name'] = 'zk'
+      if 'heron.statemgr.root.path' in config:
+        state_manager_location['rootpath'] = config['heron.statemgr.root.path']
+
+    elif state_manager_class != 'com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager':
+      Log.error("FATAL: unrecognized heron.class.state.manager found in %s: %s" %
+                (state_manager_config_file, config))
+      sys.exit(1)
+
+    Log.info("state manager configs: %s " % state_manager_location)
+
+    return [state_manager_location]
+
+  # pylint: disable=global-statement
+  def start_state_manager_watches(self):
+    """
+    Receive updates to the packing plan from the statemgrs and update processes as needed.
+    """
+    statemgr_config = StateMgrConfig()
+    statemgr_config.set_state_locations(self.__get_state_manager_locations())
+    self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+
+    # pylint: disable=unused-argument
+    def on_packing_plan_watch(state_manager, new_packing_plan):
+      Log.info(
+          "State watch triggered for packing plan change. New PackingPlan: %s" %
+          str(new_packing_plan))
+
+      if self.packing_plan != new_packing_plan:
+        Log.info("State watch triggered for PackingPlan update, PackingPlan change detected on "\
+                 "shard %s, relaunching. Existing: %s, New: %s" %
+                 (self.shard, str(self.packing_plan), str(new_packing_plan)))
+        self.update_packing_plan(new_packing_plan)
+
+        Log.info("Updating executor processes")
+        self.launch()
+      else:
+        Log.info("State watch triggered for PackingPlan update but PackingPlan not changed so "\
+                 "not relaunching. Existing: %s, New: %s" %
+                 (str(self.packing_plan), str(new_packing_plan)))
+
+    for state_manager in self.state_managers:
+      # The callback function with the bound
+      # state_manager as first variable.
+      onPackingPlanWatch = partial(on_packing_plan_watch, state_manager)
+      state_manager.get_packing_plan(self.topology_name, onPackingPlanWatch)
+      Log.info("Registered state watch for packing plan changes with state manager %s." %
+               str(state_manager))
+
+  def stop_state_manager_watches(self):
+    Log.info("Stopping state managers")
+    for state_manager in self.state_managers:
+      state_manager.stop()
 
 def main():
   """Register exit handlers, initialize the executor and run it."""
@@ -608,6 +691,7 @@ def main():
     # We would do nothing here but just exit
     # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
     Log.info('signal_handler invoked with signal %s', signal_to_handle)
+    executor.stop_state_manager_watches()
     sys.exit(signal_to_handle)
 
   def setup(shardid):
@@ -636,7 +720,7 @@ def main():
   setup(executor.shard)
 
   executor.initialize()
-  executor.launch()
+  executor.start_state_manager_watches()
   executor.start_process_monitor()
 
 if __name__ == "__main__":
