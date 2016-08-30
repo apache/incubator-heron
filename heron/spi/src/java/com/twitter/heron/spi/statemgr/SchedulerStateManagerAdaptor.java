@@ -209,15 +209,6 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
-   * Checks to see if the execution state exists
-   *
-   * @return a boolean indicating whether the execution state exists or not
-   */
-  public boolean doesExecutionStateExist(String topologyName) {
-    return awaitResult(delegate.executionStateExists(topologyName));
-  }
-
-  /**
    * Clean all states of a heron topology. This goes through each piece of state that needs
    * to be cleaned up and will log out a warning if it could not be cleaned up properly.
    * TMasterLocation, PackingPlan, PhysicalPlan, SchedulerLocation, ExecutionState, and Topology
