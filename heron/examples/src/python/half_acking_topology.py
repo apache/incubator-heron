@@ -30,8 +30,8 @@ if __name__ == '__main__':
 
   word_spout = builder.add_spout("word_spout", WordSpout, par=2)
   half_ack_bolt = builder.add_bolt("half_ack_bolt", HalfAckBolt, par=2,
-                                inputs={word_spout: Grouping.fields('word')},
-                                config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
+                                   inputs={word_spout: Grouping.fields('word')},
+                                   config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
 
   topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True,
                      constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000,
