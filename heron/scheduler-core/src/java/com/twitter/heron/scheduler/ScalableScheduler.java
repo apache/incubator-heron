@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
-import java.util.Map;
+import java.util.Set;
 
 import com.twitter.heron.spi.packing.PackingPlan;
 
@@ -21,16 +21,16 @@ public interface ScalableScheduler {
   /**
    * Requests new containers for scaling a topology
    *
-   * @param containers ContainerId to ContainerPlan map
+   * @param containers Set of containers to be added by the scheduler
    */
-  void addContainers(Map<String, PackingPlan.ContainerPlan> containers);
+  void addContainers(Set<PackingPlan.ContainerPlan> containers);
 
   /**
    * Requests containers to be released for down-scaling a topology
    *
-   * @param existingContainers Map of containers currently managed by the scheduler
-   * @param containersToRemove ContainerId to ContainerPlan map
+   * @param existingContainers Set of containers currently managed by the scheduler
+   * @param containersToRemove Set of containers to be remove by the scheduler
    */
-  void removeContainers(Map<String, PackingPlan.ContainerPlan> existingContainers,
-                        Map<String, PackingPlan.ContainerPlan> containersToRemove);
+  void removeContainers(Set<PackingPlan.ContainerPlan> existingContainers,
+                        Set<PackingPlan.ContainerPlan> containersToRemove);
 }
