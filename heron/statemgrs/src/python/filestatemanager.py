@@ -107,8 +107,11 @@ class FileStateManager(StateManager):
 
     while not self.monitoring_thread_stop_signal:
       topologies_path = self.get_topologies_path()
-      topologies = filter(
-          lambda f: os.path.isfile(os.path.join(topologies_path, f)), os.listdir(topologies_path))
+
+      topologies = []
+      if os.path.isdir(topologies_path):
+        topologies = filter(
+            lambda f: os.path.isfile(os.path.join(topologies_path, f)), os.listdir(topologies_path))
       if set(topologies) != set(self.topologies_directory):
         for callback in self.topologies_watchers:
           callback(topologies)
