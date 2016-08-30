@@ -127,3 +127,16 @@ pex_test(
     size = "small",
 )
 
+pex_test(
+    name = "global_metrics_unittest",
+    srcs = ["global_metrics_unittest.py", "mock_generator.py"],
+    deps = [
+        "//heron/common/tests/python:pytest-py"
+    ],
+    reqs = [
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
+    ],
+    size = "small",
+)

@@ -29,23 +29,24 @@
 It serves the same functionality as GlobalMetrics.java
 """
 import threading
-from heron.common.src.python.utils.log import Log
-from heron.proto import metrics_pb2
-import heron.common.src.python.constants as constants
+from .metrics import MultiCountMetric
 
-from .metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
-                      ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)
-
-metricsContainer = MultiCountMetric();
+metricsContainer = MultiCountMetric()
 registered = False
+root_name = '__auto__'
 
 lock = threading.Lock()
 
 def incr(key, to_add=1):
   metricsContainer.incr(key, to_add)
-  
+
 def safe_incr(key, to_add=1):
   with lock:
     metricsContainer.incr(key, to_add)
 
-
+def init(metrics_collector, metrics_bucket):
+  with lock:
+    global registered
+    if not registered:
+      metrics_collector.register_metric(root_name, metricsContainer, metrics_bucket)
+      registered = True
