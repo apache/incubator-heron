@@ -640,8 +640,8 @@ void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                              proto::system::HeronDataTuple* _tuple,
                              const std::vector<sp_int32>& _out_tasks) {
   bool first_iteration = true;
-  for (auto iter = _out_tasks.begin(); iter != _out_tasks.end(); ++iter) {
-    sp_int64 tuple_key = tuple_cache_->add_data_tuple(*iter, _streamid, _tuple);
+  for (auto& i : _out_tasks) {
+    sp_int64 tuple_key = tuple_cache_->add_data_tuple(i, _streamid, _tuple);
     if (_tuple->roots_size() > 0) {
       // Anchored tuple
       if (_local_spout) {
