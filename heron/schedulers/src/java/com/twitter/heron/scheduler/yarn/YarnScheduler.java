@@ -39,7 +39,7 @@ public class YarnScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
+    LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.getId());
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
     driver.scheduleTMasterContainer();
     driver.scheduleHeronWorkers(packing);
