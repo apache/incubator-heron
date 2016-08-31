@@ -18,6 +18,7 @@
 #define SRC_CPP_SVCS_STMGR_SRC_UTIL_TUPLE_CACHE_H_
 
 #include <list>
+#include <vector>
 #include <map>
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -74,25 +75,24 @@ class TupleCache {
 
      // TODO(mfu):
      // TODO(mfu): Figure out a way to clean it when to shutdown the process
-    std::list<proto::system::HeronTupleSet2*> _heron_tuple_set_pool;
+    std::vector<proto::system::HeronTupleSet2*> _heron_tuple_set_pool;
     inline proto::system::HeronTupleSet2* acquire() {
       if (_heron_tuple_set_pool.empty()) {
         return new proto::system::HeronTupleSet2();
       }
 
-      proto::system::HeronTupleSet2* set = _heron_tuple_set_pool.front();
-      _heron_tuple_set_pool.pop_front();
+      proto::system::HeronTupleSet2* set = _heron_tuple_set_pool.back();
+      _heron_tuple_set_pool.pop_back();
       return set;
     }
 
-    inline proto::system::HeronTupleSet2* acquire_clean_set() {
+    proto::system::HeronTupleSet2* acquire_clean_set() {
      proto::system::HeronTupleSet2* set = acquire();
      set->Clear();
-
      return set;
     }
 
-    inline void release(proto::system::HeronTupleSet2* set) {
+    void release(proto::system::HeronTupleSet2* set) {
       _heron_tuple_set_pool.push_back(set);
     }
 

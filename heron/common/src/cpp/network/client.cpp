@@ -28,13 +28,6 @@ Client::Client(EventLoop* eventLoop, const NetworkOptions& _options)
 
 Client::~Client() {
   delete message_rid_gen_;
-
-  for (auto& m : _heron_message_pool) {
-    for (auto& n : m.second) {
-      delete n;
-    }
-    m.second.clear();
-  }
 }
 
 void Client::Start() { Start_Base(); }
