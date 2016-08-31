@@ -26,11 +26,11 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 
 /**
- * Packing utilities for for testing
+ * Packing utilities for testing
  */
-public final class PackingUtils {
+public final class PackingTestUtils {
 
-  private PackingUtils() {
+  private PackingTestUtils() {
   }
 
   public static PackingPlan createTestPackingPlan(String topologyName, IPacking packing) {
