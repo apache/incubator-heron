@@ -16,16 +16,24 @@ package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import com.google.common.base.Optional;
 
 public class PackingPlan {
   private final String id;
-  private final Map<String, ContainerPlan> containers;
+  private final Map<String, ContainerPlan> containersMap;
+  private final Set<ContainerPlan> containers;
   private final Resource resource;
 
-  public PackingPlan(String id, Map<String, ContainerPlan> containers, Resource resource) {
+  public PackingPlan(String id, Set<ContainerPlan> containers, Resource resource) {
     this.id = id;
     this.containers = containers;
     this.resource = resource;
+    containersMap = new HashMap<>();
+    for (ContainerPlan containerPlan : containers) {
+      containersMap.put(containerPlan.getId(), containerPlan);
+    }
   }
 
   public String getId() {
@@ -36,13 +44,12 @@ public class PackingPlan {
     return resource;
   }
 
-  /**
-   * Get the containers created in this packing plan
-   *
-   * @return Map describing the container info
-   */
-  public Map<String, ContainerPlan> getContainers() {
-    return this.containers;
+  public Set<ContainerPlan> getContainers() {
+    return containers;
+  }
+
+  public Optional<ContainerPlan> getContainer(String containerId) {
+    return Optional.fromNullable(this.containersMap.get(containerId));
   }
 
   public Integer getInstanceCount() {
@@ -58,8 +65,8 @@ public class PackingPlan {
    */
   public Map<String, Integer> getComponentCounts() {
     Map<String, Integer> componentCounts = new HashMap<>();
-    for (ContainerPlan containerPlan : getContainers().values()) {
-      for (InstancePlan instancePlan : containerPlan.getInstances().values()) {
+    for (ContainerPlan containerPlan : getContainers()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
         Integer count = 0;
         if (componentCounts.containsKey(instancePlan.getComponentName())) {
           count = componentCounts.get(instancePlan.getComponentName());
@@ -77,11 +84,11 @@ public class PackingPlan {
    */
   public String getInstanceDistribution() {
     StringBuilder[] containerBuilder = new StringBuilder[this.getContainers().size()];
-    for (PackingPlan.ContainerPlan container : this.getContainers().values()) {
+    for (PackingPlan.ContainerPlan container : this.getContainers()) {
       int index = Integer.parseInt(container.id);
       containerBuilder[index - 1] = new StringBuilder();
 
-      for (PackingPlan.InstancePlan instance : container.getInstances().values()) {
+      for (PackingPlan.InstancePlan instance : container.getInstances()) {
         String[] tokens = instance.getId().split(":");
         containerBuilder[index - 1].append(
             String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
@@ -108,8 +115,8 @@ public class PackingPlan {
   public String getComponentRamDistribution() {
     Map<String, Long> ramMap = new HashMap<>();
     // The implementation assumes instances for the same component require same ram
-    for (ContainerPlan containerPlan : this.getContainers().values()) {
-      for (InstancePlan instancePlan : containerPlan.getInstances().values()) {
+    for (ContainerPlan containerPlan : this.getContainers()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
         ramMap.put(instancePlan.getComponentName(), instancePlan.getResource().ram);
       }
     }
@@ -211,12 +218,10 @@ public class PackingPlan {
 
   public static class ContainerPlan {
     private final String id;
-    private final Map<String, InstancePlan> instances;
+    private final Set<InstancePlan> instances;
     private final Resource resource;
 
-    public ContainerPlan(String id,
-                         Map<String, InstancePlan> instances,
-                         Resource resource) {
+    public ContainerPlan(String id, Set<InstancePlan> instances, Resource resource) {
       this.id = id;
       this.instances = instances;
       this.resource = resource;
@@ -226,7 +231,7 @@ public class PackingPlan {
       return id;
     }
 
-    public Map<String, InstancePlan> getInstances() {
+    public Set<InstancePlan> getInstances() {
       return instances;
     }
 

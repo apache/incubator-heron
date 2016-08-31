@@ -17,8 +17,10 @@ package com.twitter.heron.packing.binpacking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -161,13 +163,12 @@ public class FirstFitDecreasingPacking implements IPacking {
     // Get the instances using FFD allocation
     Map<String, List<String>> ffdAllocation = getFFDAllocation();
     // Construct the PackingPlan
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    Resource resource = estimateResources(ffdAllocation, containerPlanMap, ramMap, false);
+    Resource resource = estimateResources(ffdAllocation, containerPlans, ramMap, false);
 
-    PackingPlan plan = new PackingPlan(topology.getId(), containerPlanMap, resource);
-    return plan;
+    return new PackingPlan(topology.getId(), containerPlans, resource);
   }
 
   @Override
@@ -182,7 +183,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    * @return Resources required
    */
   private Resource estimateResources(Map<String, List<String>> ffdAllocation,
-                                     Map<String, PackingPlan.ContainerPlan> containerPlanMap,
+                                     Set<PackingPlan.ContainerPlan> containerPlans,
                                      Map<String, Long> ramMap,
                                      boolean scale) {
     long topologyRam = 0;
@@ -199,7 +200,7 @@ public class FirstFitDecreasingPacking implements IPacking {
       double containerCpu = 0;
 
       // Calculate the resource required for single instance
-      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+      Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
       for (String instanceId : instanceList) {
         long instanceRam = 0;
@@ -226,7 +227,7 @@ public class FirstFitDecreasingPacking implements IPacking {
                 getComponentName(instanceId),
                 resource);
         // Insert it into the map
-        instancePlanMap.put(instanceId, instancePlan);
+        instancePlans.add(instancePlan);
       }
 
       containerCpu += (paddingPercentage * containerCpu) / 100;
@@ -237,9 +238,9 @@ public class FirstFitDecreasingPacking implements IPacking {
           new Resource(Math.round(containerCpu), containerRam, containerDiskInBytes);
 
       PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+          new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
 
-      containerPlanMap.put(containerId, containerPlan);
+      containerPlans.add(containerPlan);
       topologyRam += containerRam;
       topologyCpu += Math.round(containerCpu);
       topologyDisk += containerDiskInBytes;

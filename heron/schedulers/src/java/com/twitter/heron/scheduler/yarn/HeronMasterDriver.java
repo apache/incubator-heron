@@ -28,6 +28,8 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Optional;
+
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.context.ContextConfiguration;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
@@ -156,16 +158,17 @@ public class HeronMasterDriver {
    */
   void scheduleHeronWorkers(PackingPlan topologyPacking) {
     this.packing = topologyPacking;
-    for (Entry<String, ContainerPlan> entry : topologyPacking.getContainers().entrySet()) {
-      Resource reqResource = entry.getValue().getResource();
+    for (ContainerPlan containerPlan : topologyPacking.getContainers()) {
+      Resource reqResource = containerPlan.getResource();
 
       int mem = getMemInMBForExecutor(reqResource);
       try {
-        launchContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
+        launchContainerForExecutor(containerPlan.getId(), getCpuForExecutor(reqResource), mem);
       } catch (InterruptedException e) {
         // Fail deployment of topology if there is a error starting any worker
         LOG.log(Level.SEVERE, "Container allocation for id:{0} failed. Attempting to close "
-            + "currently allocated resources for {1}", new Object[]{entry.getKey(), topologyName});
+            + "currently allocated resources for {1}",
+            new Object[]{containerPlan.getId(), topologyName});
         killTopology();
         throw new RuntimeException("Failed to allocate container for workers", e);
       }
@@ -397,13 +400,14 @@ public class HeronMasterDriver {
         if (executorId.equals(TMASTER_CONTAINER_ID)) {
           launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
         } else {
-          if (packing.getContainers().get(executorId) == null) {
+          Optional<ContainerPlan> containerPlan = packing.getContainer(executorId);
+          if (!containerPlan.isPresent()) {
             LOG.log(Level.SEVERE,
                 "Missing container {0} in packing, skipping container request",
                 executorId);
             return;
           }
-          Resource reqResource = packing.getContainers().get(executorId).getResource();
+          Resource reqResource = containerPlan.get().getResource();
           launchContainerForExecutor(executorId,
               getCpuForExecutor(reqResource),
               getMemInMBForExecutor(reqResource));

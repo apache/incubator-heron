@@ -25,7 +25,7 @@ public class PackingPlanProtoSerializer {
         .setId(packingPlan.getId())
         .setResource(builder(packingPlan.getResource()));
 
-    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers().values()) {
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       builder.addContainerPlans(builder(containerPlan));
     }
 
@@ -37,7 +37,7 @@ public class PackingPlanProtoSerializer {
         .setId(containerPlan.getId())
         .setResource(builder(containerPlan.getResource()));
 
-    for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+    for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
       builder.addInstancePlans(builder(instancePlan));
     }
 

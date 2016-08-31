@@ -15,8 +15,8 @@
 package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
@@ -84,7 +84,7 @@ public class HeronMasterDriverTest {
     Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig("1");
     Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig("2");
 
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     addContainer("1", 2.0, 2048L, containers);
     addContainer("2", 4.0, 2050L, containers);
 
@@ -97,10 +97,11 @@ public class HeronMasterDriverTest {
   private void addContainer(String id,
                             double cpu,
                             long mem,
-                            Map<String, PackingPlan.ContainerPlan> containers) {
+                            Set<PackingPlan.ContainerPlan> containers) {
     Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
-    PackingPlan.ContainerPlan container = new PackingPlan.ContainerPlan(id, null, resource);
-    containers.put(container.getId(), container);
+    PackingPlan.ContainerPlan container
+        = new PackingPlan.ContainerPlan(id, new HashSet<PackingPlan.InstancePlan>(), resource);
+    containers.add(container);
   }
 
   @Test
@@ -206,9 +207,9 @@ public class HeronMasterDriverTest {
     Mockito.when(mockWorkerEvaluator.getId()).thenReturn("worker");
     Mockito.doReturn(mockWorkerEvaluator).when(spyDriver).allocateContainer("1", 1, 1024);
 
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     addContainer("1", 1.0, 1024L, containers);
-    PackingPlan packing = new PackingPlan("packingId", containers, null);
+    PackingPlan packing = new PackingPlan("packingId", containers, new Resource(1.5, 2, 3));
     spyDriver.scheduleHeronWorkers(packing);
     Mockito.verify(mockWorkerEvaluator, Mockito.timeout(1000).times(1))
         .submitContext(Mockito.any(Configuration.class));
