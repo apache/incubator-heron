@@ -24,9 +24,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.S3ClientOptions;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -75,6 +79,8 @@ public class S3Uploader implements IUploader {
     bucket = S3Context.bucket(config);
     String accessKey = S3Context.accessKey(config);
     String accessSecret = S3Context.secretKey(config);
+    String uri = S3Context.uri(config);
+    String customRegion = S3Context.region(config);
 
     if (bucket == null || bucket.isEmpty()) {
       throw new RuntimeException("Missing heron.uploader.s3.bucket config value");
@@ -89,7 +95,37 @@ public class S3Uploader implements IUploader {
     }
 
     AWSCredentials credentials = new BasicAWSCredentials(accessKey, accessSecret);
-    s3Client = new AmazonS3Client(credentials);
+
+    if (uri != null && !uri.isEmpty()) {
+      URI uriObj;
+
+      try  {
+        uriObj = new URI(uri);
+      } catch (URISyntaxException e) {
+        throw new RuntimeException("Invalid heron.uploader.s3.uri config value");
+      }
+      ClientConfiguration clientCfg = new ClientConfiguration();
+
+      clientCfg.setProxyHost(uriObj.getHost());
+      clientCfg.setProxyPort(uriObj.getPort());
+
+      s3Client = new AmazonS3Client(credentials, clientCfg);
+      s3Client.setEndpoint(uri);
+
+      if (customRegion != null) {
+        s3Client.setRegion(Region.getRegion(Regions.valueOf(customRegion)));
+      }
+
+      final S3ClientOptions clientOptions = S3ClientOptions.builder()
+          .setPathStyleAccess(true)
+          .disableChunkedEncoding()
+          .setPayloadSigningEnabled(true)
+          .build();
+
+      s3Client.setS3ClientOptions(clientOptions);
+    } else {
+      s3Client = new AmazonS3Client(credentials);
+    }
 
     final String topologyName = Context.topologyName(config);
     final String topologyPackageLocation = Context.topologyPackageFile(config);
