@@ -15,7 +15,6 @@
 import sys
 
 from heron.pyheron.src.python import Grouping, TopologyBuilder, constants
-
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import CountBolt
 

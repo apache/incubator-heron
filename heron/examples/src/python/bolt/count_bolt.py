@@ -14,6 +14,7 @@
 """module for example bolt: CountBolt"""
 from collections import Counter
 from heron.pyheron.src.python import Bolt
+from heron.common.src.python.utils.metrics import global_metrics
 
 # pylint: disable=unused-argument
 class CountBolt(Bolt):
@@ -36,6 +37,7 @@ class CountBolt(Bolt):
   def process(self, tup):
     word = tup.values[0]
     self._increment(word, 10 if word == "heron" else 1)
+    global_metrics.safe_incr('count')
 
   def process_tick(self, tup):
     self.log("Got tick tuple!")
