@@ -496,6 +496,8 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
     LOG(ERROR) << "Received start back pressure message from unknown stream manager "
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr() << " " << _message->message_id();
+
+    delete _message;
     return;
   }
   CHECK(rstmgrs_.find(_conn) != rstmgrs_.end());
@@ -503,6 +505,8 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
   stmgrs_who_announced_back_pressure_.insert(stmgr_id);
 
   StartBackPressureOnSpouts();
+
+  delete _message;
 }
 
 void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
@@ -512,6 +516,8 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
     LOG(ERROR) << "Received stop back pressure message from unknown stream manager "
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr();
+
+    delete _message;
     return;
   }
   CHECK(rstmgrs_.find(_conn) != rstmgrs_.end());
@@ -523,6 +529,8 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
     stmgrs_who_announced_back_pressure_.erase(stmgr_id);
     AttemptStopBackPressureFromSpouts();
   }
+
+  delete _message;
 }
 
 void StMgrServer::SendStartBackPressureToOtherStMgrs() {
