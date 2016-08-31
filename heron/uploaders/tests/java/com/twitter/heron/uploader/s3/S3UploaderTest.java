@@ -16,6 +16,7 @@ package com.twitter.heron.uploader.s3;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -37,10 +38,14 @@ public class S3UploaderTest {
   private S3Uploader uploader;
   private AmazonS3Client mockS3Client;
   private Config.Builder configBuilder;
+  private File tempFile;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     mockS3Client = mock(AmazonS3Client.class);
+
+    tempFile = File.createTempFile("temp-file-name", ".tmp");
+    tempFile.deleteOnExit();
 
     configBuilder = Config.newBuilder()
         .put(S3Context.HERON_UPLOADER_S3_BUCKET, "bucket")
@@ -52,6 +57,35 @@ public class S3UploaderTest {
     uploader = new S3Uploader();
     uploader.initialize(configBuilder.build());
     uploader.s3Client = mockS3Client;
+  }
+
+  @Test
+  public void uploadTopologyToS3CompatibleStorage() throws Exception {
+    Map<String, String> env = System.getenv();
+
+    String s3Url = env.get("S3_URL");
+    String accessKey = env.get("S3_ACCESS_KEY");
+    String secretKey = env.get("S3_SECRET_KEY");
+
+    if (s3Url == null || accessKey == null || secretKey == null) {
+      // skip test no detail provided
+      return;
+    }
+
+    Config.Builder s3Config = Config.newBuilder()
+        .put(S3Context.HERON_UPLOADER_S3_BUCKET, "testbucket")
+        .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, accessKey)
+        .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, secretKey)
+        .put(S3Context.HERON_UPLOADER_S3_URI, s3Url)
+        .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
+        .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), tempFile.getAbsolutePath());
+
+    S3Uploader s3Uploader = new S3Uploader();
+    s3Uploader.initialize(s3Config.build());
+
+
+    String expectedUri = s3Url + "testbucket/test-topology/" + tempFile.getName();
+    assertEquals(new URI(expectedUri), s3Uploader.uploadPackage());
   }
 
   @Test
