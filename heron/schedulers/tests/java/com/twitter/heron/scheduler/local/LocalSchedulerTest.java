@@ -14,8 +14,8 @@
 
 package com.twitter.heron.scheduler.local;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +30,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 
 public class LocalSchedulerTest {
@@ -110,8 +111,8 @@ public class LocalSchedulerTest {
     //now verify add container adds new container
     Process mockProcessWorker2 = Mockito.mock(Process.class);
     Mockito.doReturn(mockProcessWorker2).when(scheduler).startExecutorProcess(2);
-    HashMap<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-    HashMap<String, PackingPlan.ContainerPlan> spyContainers = Mockito.spy(containers);
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    Set<PackingPlan.ContainerPlan> spyContainers = Mockito.spy(containers);
 
     Mockito.doReturn(1).when(spyContainers).size();
     scheduler.addContainers(spyContainers);
@@ -140,11 +141,11 @@ public class LocalSchedulerTest {
         when(scheduler).startExecutorMonitor(Mockito.anyInt(), Mockito.any(Process.class));
 
     Process[] processes = new Process[LOCAL_NUM_CONTAINER];
-    HashMap<String, PackingPlan.ContainerPlan> existingContainers = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> existingContainers = new HashSet<>();
     for (int i = 0; i < LOCAL_NUM_CONTAINER; i++) {
       processes[i] = Mockito.mock(Process.class);
       Mockito.doReturn(processes[i]).when(scheduler).startExecutorProcess(i);
-      existingContainers.put("" + i, Mockito.mock(PackingPlan.ContainerPlan.class));
+      existingContainers.add(PackingTestUtils.testContainerPlan("" + i));
     }
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
@@ -152,21 +153,23 @@ public class LocalSchedulerTest {
     Assert.assertEquals(LOCAL_NUM_CONTAINER, scheduler.getProcessToContainer().size());
     Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(Mockito.anyInt());
 
-    Map<String, PackingPlan.ContainerPlan> containersToRemove = new HashMap<>();
-    containersToRemove.put("" + (LOCAL_NUM_CONTAINER - 1), null);
+    Set<PackingPlan.ContainerPlan> containersToRemove = new HashSet<>();
+    PackingPlan.ContainerPlan containerToRemove =
+        PackingTestUtils.testContainerPlan("" + (LOCAL_NUM_CONTAINER - 1));
+    containersToRemove.add(containerToRemove);
     scheduler.removeContainers(existingContainers, containersToRemove);
-    existingContainers.remove((LOCAL_NUM_CONTAINER - 1) + "");
+    existingContainers.remove(containerToRemove);
     Assert.assertEquals(existingContainers.size(), scheduler.getProcessToContainer().size());
     Mockito.verify(processes[LOCAL_NUM_CONTAINER - 1]).destroy();
     // verify no new process restarts
     Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(Mockito.anyInt());
 
     containersToRemove.clear();
-    containersToRemove.put("1", null);
-    containersToRemove.put("2", null);
+    containersToRemove.add(PackingTestUtils.testContainerPlan("1"));
+    containersToRemove.add(PackingTestUtils.testContainerPlan("2"));
     scheduler.removeContainers(existingContainers, containersToRemove);
-    existingContainers.remove("1");
-    existingContainers.remove("2");
+    existingContainers.remove(PackingTestUtils.testContainerPlan("1"));
+    existingContainers.remove(PackingTestUtils.testContainerPlan("2"));
 
     Assert.assertEquals(existingContainers.size(), scheduler.getProcessToContainer().size());
     Mockito.verify(processes[1]).destroy();

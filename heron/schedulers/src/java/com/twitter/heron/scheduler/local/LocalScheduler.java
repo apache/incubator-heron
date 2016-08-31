@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -256,7 +257,7 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void addContainers(Map<String, PackingPlan.ContainerPlan> containers) {
+  public void addContainers(Set<PackingPlan.ContainerPlan> containers) {
     synchronized (processToContainer) {
       int activeContainerCount = processToContainer.size();
 
@@ -270,8 +271,8 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void removeContainers(Map<String, PackingPlan.ContainerPlan> existingContainers,
-                               Map<String, PackingPlan.ContainerPlan> containersToRemove) {
+  public void removeContainers(Set<PackingPlan.ContainerPlan> existingContainers,
+                               Set<PackingPlan.ContainerPlan> containersToRemove) {
     LOG.log(Level.INFO,
         "Kill {0} of {1} containers",
         new Object[]{containersToRemove.size(), existingContainers.size()});
@@ -288,18 +289,19 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
         containerToProcessMap.put(entry.getValue(), entry.getKey());
       }
 
-      for (String containerIdToRemove : containersToRemove.keySet()) {
-        Process process = containerToProcessMap.get(Integer.valueOf(containerIdToRemove));
+      for (PackingPlan.ContainerPlan containerToRemove : containersToRemove) {
+        String containerId = containerToRemove.getId();
+        Process process = containerToProcessMap.get(Integer.valueOf(containerId));
         if (process == null) {
-          LOG.log(Level.WARNING, "Container for id:{0} not found.", containerIdToRemove);
+          LOG.log(Level.WARNING, "Container for id:{0} not found.", containerId);
           continue;
         }
 
         // remove the process so that it is not monitored and relaunched
-        LOG.info("Killing executor for container: " + containerIdToRemove);
+        LOG.info("Killing executor for container: " + containerId);
         processToContainer.remove(process);
         process.destroy();
-        LOG.info("Killed executor for container: " + containerIdToRemove);
+        LOG.info("Killed executor for container: " + containerId);
       }
     }
   }

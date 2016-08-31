@@ -35,7 +35,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.PackingUtils;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 import static org.mockito.Mockito.any;
@@ -153,9 +153,9 @@ public class RuntimeManagerRunnerTest {
     String newParallelism = "foo:3,bar:6";
 
     PackingPlans.PackingPlan currentPlan =
-        PackingUtils.createTestProtoPackingPlan(TOPOLOGY_NAME, packing);
+        PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
     PackingPlans.PackingPlan proposedPlan =
-        PackingUtils.createTestProtoPackingPlan(TOPOLOGY_NAME, packing);
+        PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
     Map<String, Integer> changeRequests = runner.parseNewParallelismParam(newParallelism);
 
     when(manager.getPackingPlan(eq(TOPOLOGY_NAME))).thenReturn(currentPlan);

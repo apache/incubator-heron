@@ -15,17 +15,22 @@
 package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class PackingPlan {
   public final String id;
   public final Map<String, ContainerPlan> containers;
   public final Resource resource;
 
+  private final Set<ContainerPlan> containerSet;
+
   public PackingPlan(String id, Map<String, ContainerPlan> containers, Resource resource) {
     this.id = id;
     this.containers = containers;
     this.resource = resource;
+    containerSet = new HashSet<>(containers.values());
   }
 
   @Override
@@ -103,6 +108,10 @@ public class PackingPlan {
    */
   public Map<String, ContainerPlan> getContainers() {
     return this.containers;
+  }
+
+  public Set<ContainerPlan> getContainerSet() {
+    return this.containerSet;
   }
 
   /**
@@ -208,6 +217,10 @@ public class PackingPlan {
       this.id = id;
       this.instances = instances;
       this.resource = resource;
+    }
+
+    public String getId() {
+      return id;
     }
 
     @Override

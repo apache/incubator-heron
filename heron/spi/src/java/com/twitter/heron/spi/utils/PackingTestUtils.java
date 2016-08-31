@@ -24,16 +24,33 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
+import com.twitter.heron.spi.packing.Resource;
 
 /**
  * Packing utilities for for testing
  */
-public final class PackingUtils {
+public final class PackingTestUtils {
 
-  private PackingUtils() {
+  private PackingTestUtils() {
   }
 
-  public static PackingPlan createTestPackingPlan(String topologyName, IPacking packing) {
+  public static PackingPlan.ContainerPlan testContainerPlan(String containerId) {
+    Resource resource = new Resource(7.5, 6, 9);
+    Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+    for (int index : new Integer[]{0, 1}) {
+      String instanceId = "instance-" + index;
+      String componentName = "componentName-" + index;
+      instancePlanMap.put(instanceId, testInstancePlan(instanceId, componentName));
+    }
+    return new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+  }
+
+  private static PackingPlan.InstancePlan testInstancePlan(String id, String componentName) {
+    Resource resource = new Resource(1.5, 2, 3);
+    return new PackingPlan.InstancePlan(id, componentName, resource);
+  }
+
+  public static PackingPlan testPackingPlan(String topologyName, IPacking packing) {
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("testSpout", 2);
 
@@ -56,9 +73,9 @@ public final class PackingUtils {
     return packing.pack();
   }
 
-  public static PackingPlans.PackingPlan createTestProtoPackingPlan(
+  public static PackingPlans.PackingPlan testProtoPackingPlan(
       String topologyName, IPacking packing) {
-    PackingPlan plan = createTestPackingPlan(topologyName, packing);
+    PackingPlan plan = testPackingPlan(topologyName, packing);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     return serializer.toProto(plan);
   }

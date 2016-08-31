@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -131,13 +132,13 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void addContainers(Map<String, PackingPlan.ContainerPlan> containersToAdd) {
+  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     controller.addContainers(containersToAdd.size());
   }
 
   @Override
-  public void removeContainers(Map<String, PackingPlan.ContainerPlan> existingContainers,
-                               Map<String, PackingPlan.ContainerPlan> containersToRemove) {
+  public void removeContainers(Set<PackingPlan.ContainerPlan> existingContainers,
+                               Set<PackingPlan.ContainerPlan> containersToRemove) {
     controller.removeContainers(existingContainers.size(), containersToRemove.size());
   }
 

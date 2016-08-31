@@ -14,8 +14,9 @@
 package com.twitter.heron.scheduler;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -112,7 +113,7 @@ public class UpdateTopologyManager {
         "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
 
     ContainerDelta containerDelta = getContainerDelta(
-        existingPackingPlan.containers, proposedPackingPlan.containers);
+        existingPackingPlan.getContainerSet(), proposedPackingPlan.getContainerSet());
     int newContainerCount = containerDelta.getContainersToAdd().size();
     int removableContainerCount = containerDelta.getContainersToRemove().size();
 
@@ -153,7 +154,7 @@ public class UpdateTopologyManager {
 
     if (removableContainerCount > 0) {
       scalableScheduler.get().removeContainers(
-          existingPackingPlan.containers,
+          existingPackingPlan.getContainerSet(),
           containerDelta.getContainersToRemove());
     }
   }
@@ -183,8 +184,8 @@ public class UpdateTopologyManager {
   }
 
   @VisibleForTesting
-  ContainerDelta getContainerDelta(Map<String, PackingPlan.ContainerPlan> currentContainers,
-                                   Map<String, PackingPlan.ContainerPlan> proposedContainers) {
+  ContainerDelta getContainerDelta(Set<PackingPlan.ContainerPlan> currentContainers,
+                                   Set<PackingPlan.ContainerPlan> proposedContainers) {
     ContainerDelta containerDelta = new ContainerDelta(currentContainers, proposedContainers);
     return containerDelta;
   }
@@ -201,33 +202,33 @@ public class UpdateTopologyManager {
 
   @VisibleForTesting
   class ContainerDelta {
-    private final Map<String, PackingPlan.ContainerPlan> containersToAdd;
-    private final Map<String, PackingPlan.ContainerPlan> containersToRemove;
+    private final Set<PackingPlan.ContainerPlan> containersToAdd;
+    private final Set<PackingPlan.ContainerPlan> containersToRemove;
 
-    ContainerDelta(Map<String, PackingPlan.ContainerPlan> currentContainers,
-                   Map<String, PackingPlan.ContainerPlan> proposedContainers) {
-      Map<String, PackingPlan.ContainerPlan> toAdd = new HashMap<>();
-      for (String containerId : proposedContainers.keySet()) {
-        if (!currentContainers.containsKey(containerId)) {
-          toAdd.put(containerId, proposedContainers.get(containerId));
+    ContainerDelta(Set<PackingPlan.ContainerPlan> currentContainers,
+                   Set<PackingPlan.ContainerPlan> proposedContainers) {
+      Set<PackingPlan.ContainerPlan> toAdd = new HashSet<>();
+      for (PackingPlan.ContainerPlan proposedContainerPlan : proposedContainers) {
+        if (!currentContainers.contains(proposedContainerPlan)) {
+          toAdd.add(proposedContainerPlan);
         }
       }
-      this.containersToAdd = Collections.unmodifiableMap(toAdd);
+      this.containersToAdd = Collections.unmodifiableSet(toAdd);
 
-      Map<String, PackingPlan.ContainerPlan> toRemove = new HashMap<>();
-      for (String containerId : currentContainers.keySet()) {
-        if (!proposedContainers.containsKey(containerId)) {
-          toRemove.put(containerId, currentContainers.get(containerId));
+      Set<PackingPlan.ContainerPlan> toRemove = new HashSet<>();
+      for (PackingPlan.ContainerPlan curentContainerPlan : currentContainers) {
+        if (!proposedContainers.contains(curentContainerPlan)) {
+          toRemove.add(curentContainerPlan);
         }
       }
-      this.containersToRemove = Collections.unmodifiableMap(toRemove);
+      this.containersToRemove = Collections.unmodifiableSet(toRemove);
     }
 
-    public Map<String, PackingPlan.ContainerPlan> getContainersToRemove() {
+    public Set<PackingPlan.ContainerPlan> getContainersToRemove() {
       return containersToRemove;
     }
 
-    public Map<String, PackingPlan.ContainerPlan> getContainersToAdd() {
+    public Set<PackingPlan.ContainerPlan> getContainersToAdd() {
       return containersToAdd;
     }
   }
