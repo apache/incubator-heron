@@ -156,8 +156,8 @@ public class HeronMasterDriver {
    */
   void scheduleHeronWorkers(PackingPlan topologyPacking) {
     this.packing = topologyPacking;
-    for (Entry<String, ContainerPlan> entry : topologyPacking.containers.entrySet()) {
-      Resource reqResource = entry.getValue().resource;
+    for (Entry<String, ContainerPlan> entry : topologyPacking.getContainers().entrySet()) {
+      Resource reqResource = entry.getValue().getResource();
 
       int mem = getMemInMBForExecutor(reqResource);
       try {
@@ -397,13 +397,13 @@ public class HeronMasterDriver {
         if (executorId.equals(TMASTER_CONTAINER_ID)) {
           launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
         } else {
-          if (packing.containers.get(executorId) == null) {
+          if (packing.getContainers().get(executorId) == null) {
             LOG.log(Level.SEVERE,
                 "Missing container {0} in packing, skipping container request",
                 executorId);
             return;
           }
-          Resource reqResource = packing.containers.get(executorId).resource;
+          Resource reqResource = packing.getContainers().get(executorId).getResource();
           launchContainerForExecutor(executorId,
               getCpuForExecutor(reqResource),
               getMemInMBForExecutor(reqResource));
