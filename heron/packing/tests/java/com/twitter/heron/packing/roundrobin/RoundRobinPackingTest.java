@@ -40,7 +40,7 @@ public class RoundRobinPackingTest {
   private int countCompoment(String component, Map<String, PackingPlan.InstancePlan> instances) {
     int count = 0;
     for (PackingPlan.InstancePlan pair : instances.values()) {
-      if (component.equals(RoundRobinPacking.getComponentName(pair.id))) {
+      if (component.equals(RoundRobinPacking.getComponentName(pair.getId()))) {
         count++;
       }
     }
@@ -125,20 +125,20 @@ public class RoundRobinPackingTest {
     Assert.assertEquals(
         (Math.max(spoutParallelism, boltParallelism)
             + RoundRobinPacking.DEFAULT_CPU_PADDING_PER_CONTAINER) * (numContainers + 1),
-        packingPlanNoExplicitResourcesConfig.resource.cpu, DELTA);
+        packingPlanNoExplicitResourcesConfig.getResource().cpu, DELTA);
 
     Assert.assertEquals(
         (spoutParallelism + boltParallelism) * Constants.GB
             + RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER * numContainers,
-        packingPlanNoExplicitResourcesConfig.resource.ram);
+        packingPlanNoExplicitResourcesConfig.getResource().ram);
 
     Assert.assertEquals(
         (Math.max(spoutParallelism, boltParallelism) * Constants.GB
             + RoundRobinPacking.DEFAULT_DISK_PADDING_PER_CONTAINER) * (numContainers + 1),
-        packingPlanNoExplicitResourcesConfig.resource.disk);
+        packingPlanNoExplicitResourcesConfig.getResource().disk);
 
     Assert.assertEquals(numContainers,
-        packingPlanNoExplicitResourcesConfig.containers.size());
+        packingPlanNoExplicitResourcesConfig.getContainers().size());
   }
 
   /**
@@ -167,39 +167,39 @@ public class RoundRobinPackingTest {
         getRoundRobinPackingPlan(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(containerCpu * (numContainers + 1),
-        packingPlanExplicitResourcesConfig.resource.cpu, DELTA);
+        packingPlanExplicitResourcesConfig.getResource().cpu, DELTA);
 
     // The total recommended ram should be in the range of configured ram, account for rounding
     // errors
     Assert.assertEquals((double) containerRam * numContainers,
-        (double) packingPlanExplicitResourcesConfig.resource.ram,
+        (double) packingPlanExplicitResourcesConfig.getResource().ram,
         spoutParallelism + boltParallelism);
 
     Assert.assertEquals(containerDisk * (numContainers + 1),
-        packingPlanExplicitResourcesConfig.resource.disk);
+        packingPlanExplicitResourcesConfig.getResource().disk);
 
     Assert.assertEquals(numContainers,
-        packingPlanExplicitResourcesConfig.containers.size());
+        packingPlanExplicitResourcesConfig.getContainers().size());
 
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.containers.values()) {
-      Assert.assertEquals(containerCpu, containerPlan.resource.cpu, DELTA);
+        : packingPlanExplicitResourcesConfig.getContainers().values()) {
+      Assert.assertEquals(containerCpu, containerPlan.getResource().cpu, DELTA);
 
       Assert.assertEquals((double) containerRam,
-          (double) containerPlan.resource.ram,
-          containerPlan.instances.size());
+          (double) containerPlan.getResource().ram,
+          containerPlan.getInstances().size());
 
-      Assert.assertEquals(containerDisk, containerPlan.resource.disk);
+      Assert.assertEquals(containerDisk, containerPlan.getResource().disk);
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
       Set<Resource> resources = new HashSet<>();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        resources.add(instancePlan.resource);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        resources.add(instancePlan.getResource());
       }
 
       Assert.assertEquals(1, resources.size());
-      int instancesCount = containerPlan.instances.values().size();
+      int instancesCount = containerPlan.getInstances().values().size();
       Assert.assertEquals(
           (containerRam - RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) / instancesCount,
           resources.iterator().next().ram);
@@ -238,15 +238,15 @@ public class RoundRobinPackingTest {
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.containers.values()) {
+        : packingPlanExplicitRamMap.getContainers().values()) {
       // The containerRam should be ignored, since we set the complete component ram map
-      Assert.assertNotEquals(containerRam, containerPlan.resource.ram);
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.resource.ram);
+      Assert.assertNotEquals(containerRam, containerPlan.getResource().ram);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
+          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
         }
-        if (instancePlan.componentName.equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.resource.ram);
+        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
+          Assert.assertEquals(spoutRam, instancePlan.getResource().ram);
         }
       }
     }
@@ -281,13 +281,13 @@ public class RoundRobinPackingTest {
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.containers.values()) {
-      Assert.assertEquals(containerRam, containerPlan.resource.ram);
+        : packingPlanExplicitRamMap.getContainers().values()) {
+      Assert.assertEquals(containerRam, containerPlan.getResource().ram);
       int boltCount = 0;
-      int instancesCount = containerPlan.instances.size();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.resource.ram);
+      int instancesCount = containerPlan.getInstances().size();
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
+          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
           boltCount++;
         }
       }
@@ -295,13 +295,13 @@ public class RoundRobinPackingTest {
       // Ram for spout should be:
       // (containerRam - all ram for bolt - ram for padding) / (# of spouts)
       int spoutCount = instancesCount - boltCount;
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(SPOUT_NAME)) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
           Assert.assertEquals(
               (containerRam
                   - boltCount * boltRam
                   - RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) / spoutCount,
-              instancePlan.resource.ram);
+              instancePlan.getResource().ram);
         }
       }
     }
@@ -326,16 +326,16 @@ public class RoundRobinPackingTest {
     // Two components
     Assert.assertEquals(2 * componentParallelism, numInstance);
     PackingPlan output = getRoundRobinPackingPlan(topology);
-    Assert.assertEquals(numContainers, output.containers.size());
+    Assert.assertEquals(numContainers, output.getContainers().size());
 
-    for (PackingPlan.ContainerPlan container : output.containers.values()) {
-      Assert.assertEquals(numInstance / numContainers, container.instances.size());
+    for (PackingPlan.ContainerPlan container : output.getContainers().values()) {
+      Assert.assertEquals(numInstance / numContainers, container.getInstances().size());
 
       // Verify each container got 2 spout and 2 bolt and container 1 got
       Assert.assertEquals(
-          2, countCompoment("spout", container.instances));
+          2, countCompoment("spout", container.getInstances()));
       Assert.assertEquals(
-          2, countCompoment("bolt", container.instances));
+          2, countCompoment("bolt", container.getInstances()));
     }
   }
 }

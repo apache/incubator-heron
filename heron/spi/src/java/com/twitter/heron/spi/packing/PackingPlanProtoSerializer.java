@@ -34,10 +34,10 @@ public class PackingPlanProtoSerializer {
 
   private PackingPlans.ContainerPlan.Builder builder(PackingPlan.ContainerPlan containerPlan) {
     PackingPlans.ContainerPlan.Builder builder = PackingPlans.ContainerPlan.newBuilder()
-        .setId(containerPlan.id)
-        .setResource(builder(containerPlan.resource));
+        .setId(containerPlan.getId())
+        .setResource(builder(containerPlan.getResource()));
 
-    for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
+    for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
       builder.addInstancePlans(builder(instancePlan));
     }
 
@@ -46,9 +46,9 @@ public class PackingPlanProtoSerializer {
 
   private PackingPlans.InstancePlan.Builder builder(PackingPlan.InstancePlan instancePlan) {
     return PackingPlans.InstancePlan.newBuilder()
-        .setId(instancePlan.id)
-        .setComponentName(instancePlan.componentName)
-        .setResource(builder(instancePlan.resource));
+        .setId(instancePlan.getId())
+        .setComponentName(instancePlan.getComponentName())
+        .setResource(builder(instancePlan.getResource()));
   }
 
   private PackingPlans.Resource.Builder builder(Resource resource) {

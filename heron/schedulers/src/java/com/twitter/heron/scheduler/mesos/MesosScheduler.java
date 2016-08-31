@@ -250,8 +250,8 @@ public class MesosScheduler implements IScheduler {
     double cpu = 0;
     double disk = 0;
     double mem = 0;
-    for (PackingPlan.ContainerPlan cp : packing.containers.values()) {
-      Resource containerResource = cp.resource;
+    for (PackingPlan.ContainerPlan cp : packing.getContainers().values()) {
+      Resource containerResource = cp.getResource();
       cpu = Math.max(cpu, containerResource.cpu);
       disk = Math.max(disk, containerResource.disk);
       mem = Math.max(mem, containerResource.ram);
