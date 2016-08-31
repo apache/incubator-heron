@@ -185,7 +185,7 @@ public class HeronMasterDriver {
 
     Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(id);
     if (!worker.isPresent()) {
-      LOG.log(Level.WARNING, "Active container for {0} not found. Requesting a new one.", id);
+      LOG.log(Level.WARNING, "Requesting a new container for: {0}", id);
       ContainerPlan containerPlan = packing.containers.get(id);
       if (containerPlan == null) {
         throw new IllegalArgumentException(
@@ -285,7 +285,6 @@ public class HeronMasterDriver {
   void submitHeronExecutorTask(String workerId) {
     Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
     if (!worker.isPresent()) {
-      LOG.log(Level.SEVERE, "Container for id: {0} not found.", workerId);
       return;
     }
 
@@ -348,9 +347,9 @@ public class HeronMasterDriver {
       }
     }
 
-    HeronWorker lookupByEvaluatorId(String evaluatorId) {
+    Optional<HeronWorker> lookupByEvaluatorId(String evaluatorId) {
       synchronized (workerMap) {
-        return evaluatorWorkerMap.get(evaluatorId);
+        return Optional.fromNullable(evaluatorWorkerMap.get(evaluatorId));
       }
     }
 
@@ -453,21 +452,21 @@ public class HeronMasterDriver {
     @Override
     public void onNext(FailedEvaluator evaluator) {
       LOG.log(Level.WARNING, "Container:{0} failed", evaluator.getId());
-      HeronWorker worker = multiKeyWorkerMap.lookupByEvaluatorId(evaluator.getId());
-      if (worker == null) {
+      Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByEvaluatorId(evaluator.getId());
+      if (!worker.isPresent()) {
         LOG.log(Level.WARNING,
             "Unknown executor id for failed container: {0}, skip renew action",
             evaluator.getId());
         return;
       }
       LOG.log(Level.INFO, "Trying to relaunch executor {0} running on failed container {1}",
-          new Object[]{worker.workerId, evaluator.getId()});
-      multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
+          new Object[]{worker.get().workerId, evaluator.getId()});
+      multiKeyWorkerMap.detachEvaluatorAndRemove(worker.get());
 
       try {
-        launchContainerForExecutor(worker);
+        launchContainerForExecutor(worker.get());
       } catch (ContainerAllocationException e) {
-        LOG.log(Level.SEVERE, "Failed to relaunch failed container: " + worker.workerId, e);
+        LOG.log(Level.SEVERE, "Failed to relaunch failed container: " + worker.get().workerId, e);
       }
     }
   }
