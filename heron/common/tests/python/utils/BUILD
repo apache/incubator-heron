@@ -8,7 +8,7 @@ pex_library(
         "//heron/common/tests/python:pytest-py",
     ],
     reqs = [
-        "mock==1.0.1"
+        "mock==1.0.1",
     ]
 )
 
@@ -149,9 +149,10 @@ pex_test(
 
 pex_test(
     name = "global_metrics_unittest",
-    srcs = ["global_metrics_unittest.py", "mock_generator.py"],
+    srcs = ["global_metrics_unittest.py"],
     deps = [
-        "//heron/common/tests/python:pytest-py"
+        "//heron/common/tests/python:pytest-py",
+        "//heron/common/tests/python/utils:common-utils-mock"
     ],
     reqs = [
         "py==1.4.27",
