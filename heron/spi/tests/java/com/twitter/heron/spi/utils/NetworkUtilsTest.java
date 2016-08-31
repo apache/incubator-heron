@@ -92,7 +92,7 @@ public class NetworkUtilsTest {
 
     HttpExchange exchange = Mockito.mock(HttpExchange.class);
     Headers headers = Mockito.mock(Headers.class);
-    Mockito.doReturn("" + expectedBytes.length).
+    Mockito.doReturn(Integer.toString(expectedBytes.length)).
         when(headers).getFirst(Matchers.anyString());
 
     Mockito.doReturn(headers).when(exchange).getRequestHeaders();

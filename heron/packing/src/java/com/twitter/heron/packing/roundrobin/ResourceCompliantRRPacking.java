@@ -105,7 +105,7 @@ public class ResourceCompliantRRPacking implements IPacking {
   protected int numAdjustments;
 
   public static String getContainerId(int index) {
-    return "" + index;
+    return Integer.toString(index);
   }
 
   public static String getInstanceId(
