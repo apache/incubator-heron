@@ -26,7 +26,8 @@ public interface ScalableScheduler {
   void addContainers(Set<PackingPlan.ContainerPlan> containers);
 
   /**
-   * Requests containers to be released for down-scaling a topology
+   * Requests containers to be released for down-scaling a topology. The {@code containersToRemove}
+   * must be a subset of {@code existingContainers}.
    *
    * @param existingContainers Set of containers currently managed by the scheduler
    * @param containersToRemove Set of containers to be remove by the scheduler

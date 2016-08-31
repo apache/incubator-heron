@@ -26,6 +26,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
@@ -242,12 +244,12 @@ public class LocalScheduler implements IScheduler {
     return isTopologyKilled;
   }
 
-  // This method shall be used only for unit test
+  @VisibleForTesting
   ExecutorService getMonitorService() {
     return monitorService;
   }
 
-  // This method shall be used only for unit test
+  @VisibleForTesting
   Map<Process, Integer> getProcessToContainer() {
     return processToContainer;
   }
