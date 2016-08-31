@@ -85,14 +85,7 @@ public class SchedulerMainTest {
     stateManager = Mockito.mock(IStateManager.class);
     scheduler = Mockito.mock(IScheduler.class);
 
-    Map<String, PackingPlan.InstancePlan> instances = new HashMap<>();
-    instances.put("1:1:1:1",
-        new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-    containers.put("1", new PackingPlan.ContainerPlan("1", instances, new Resource(1, 1, 1)));
-    PackingPlan packingPlan = new PackingPlan("packing-id", containers, new Resource(1, 1, 1));
-    final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
-    future.set(new PackingPlanProtoSerializer().toProto(packingPlan));
+    final SettableFuture<PackingPlans.PackingPlan> future = getTestPacking();
     Mockito.when(stateManager.getPackingPlan(null, iTopologyName)).thenReturn(future);
 
     // Mock ReflectionUtils stuff
@@ -123,6 +116,19 @@ public class SchedulerMainTest {
     // Avoid infinite waiting
     Shutdown shutdown = Mockito.mock(Shutdown.class);
     Mockito.doReturn(shutdown).when(schedulerMain).getShutdown();
+  }
+
+  // TODO reuse PackingTestUtils.createTestProtoPackingPlan once PR#1321 is merged
+  private SettableFuture<PackingPlans.PackingPlan> getTestPacking() {
+    Map<String, PackingPlan.InstancePlan> instances = new HashMap<>();
+    instances.put("1:1:1:1",
+        new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
+    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+    containers.put("1", new PackingPlan.ContainerPlan("1", instances, new Resource(1, 1, 1)));
+    PackingPlan packingPlan = new PackingPlan("packing-id", containers, new Resource(1, 1, 1));
+    final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
+    future.set(new PackingPlanProtoSerializer().toProto(packingPlan));
+    return future;
   }
 
   // Exceptions during reflection --

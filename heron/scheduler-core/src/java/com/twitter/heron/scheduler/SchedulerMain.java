@@ -356,7 +356,8 @@ public class SchedulerMain {
       // get a packed plan and schedule it
       PackingPlans.PackingPlan serializedPackingPlan = adaptor.getPackingPlan(topology.getName());
       if (serializedPackingPlan == null) {
-        LOG.severe("Failed to obtain a valid PackingPlan from the state manager");
+        LOG.log(Level.SEVERE, "Failed to fetch PackingPlan for topology:{0} from the state manager",
+            topology.getName());
         return false;
       }
       LOG.log(Level.INFO, "Packing plan fetched from state: {0}", serializedPackingPlan);
