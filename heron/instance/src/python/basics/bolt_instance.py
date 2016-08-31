@@ -18,7 +18,7 @@ import Queue
 
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
-from heron.common.src.python.utils.metrics import BoltMetrics
+from heron.common.src.python.utils.metrics import global_metrics, BoltMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import tuple_pb2
 from heron.pyheron.src.python import Stream
@@ -54,6 +54,11 @@ class BoltInstance(BaseInstance):
     self.bolt_metrics.register_metrics(context, self.sys_config)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
+
+    # prepare global metrics
+    interval = float(self.sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+    collector = context.get_metrics_collector()
+    global_metrics.init(collector, interval)
 
     # prepare for custom grouping
     self.pplan_helper.prepare_custom_grouping(context)
