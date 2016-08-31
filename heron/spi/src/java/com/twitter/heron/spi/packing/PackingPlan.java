@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 
 public class PackingPlan {
   private final String id;
@@ -28,7 +29,7 @@ public class PackingPlan {
 
   public PackingPlan(String id, Set<ContainerPlan> containers, Resource resource) {
     this.id = id;
-    this.containers = containers;
+    this.containers = ImmutableSet.copyOf(containers);
     this.resource = resource;
     containersMap = new HashMap<>();
     for (ContainerPlan containerPlan : containers) {
@@ -223,7 +224,7 @@ public class PackingPlan {
 
     public ContainerPlan(String id, Set<InstancePlan> instances, Resource resource) {
       this.id = id;
-      this.instances = instances;
+      this.instances = ImmutableSet.copyOf(instances);
       this.resource = resource;
     }
 
