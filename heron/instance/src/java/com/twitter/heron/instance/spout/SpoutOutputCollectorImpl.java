@@ -195,14 +195,14 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
   private List<Integer> admitSpoutTuple(String streamId, List<Object> tuple, Object messageId) {
     // First check whether this tuple is sane
-    helper.checkOutputSchema(streamId, tuple);
+//    helper.checkOutputSchema(streamId, tuple);
 
     // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
-    List<Integer> customGroupingTargetTaskIds =
-        helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
-
-    // Invoke user-defined emit task hook
-    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
+//    List<Integer> customGroupingTargetTaskIds =
+//        helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
+//
+//    // Invoke user-defined emit task hook
+//    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
 
     // Start construct the data tuple
     HeronTuples.HeronDataTuple.Builder bldr = HeronTuples.HeronDataTuple.newBuilder();
@@ -210,12 +210,12 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     // set the key. This is mostly ignored
     bldr.setKey(0);
 
-    if (customGroupingTargetTaskIds != null) {
-      // It is a CustomStreamGrouping
-      for (Integer taskId : customGroupingTargetTaskIds) {
-        bldr.addDestTaskIds(taskId);
-      }
-    }
+//    if (customGroupingTargetTaskIds != null) {
+//      // It is a CustomStreamGrouping
+//      for (Integer taskId : customGroupingTargetTaskIds) {
+//        bldr.addDestTaskIds(taskId);
+//      }
+//    }
 
     if (messageId != null) {
       RootTupleInfo tupleInfo = new RootTupleInfo(streamId, messageId);
@@ -240,13 +240,13 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
       tupleSizeInBytes += b.length;
     }
 
-    long latency = System.nanoTime() - startTime;
-    spoutMetrics.serializeDataTuple(streamId, latency);
+//    long latency = System.nanoTime() - startTime;
+//    spoutMetrics.serializeDataTuple(streamId, latency);
 
     // submit to outputter
     outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
     totalTuplesEmitted++;
-    spoutMetrics.emittedTuple(streamId);
+//    spoutMetrics.emittedTuple(streamId);
 
     // TODO:- remove this after changing the api
     return null;

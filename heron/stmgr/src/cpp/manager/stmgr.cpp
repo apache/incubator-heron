@@ -80,6 +80,8 @@ void StMgr::Init() {
   sp_int32 metrics_export_interval_sec =
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
+  _tuple = new proto::system::HeronDataTuple();
+
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       IpUtils::getHostName(), stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
@@ -135,6 +137,8 @@ StMgr::~StMgr() {
   CleanupXorManagers();
   delete hydrated_topology_;
   delete metrics_manager_client_;
+
+  delete _tuple;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
@@ -537,40 +541,55 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
 
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
-                               proto::stmgr::TupleMessage* _message) {
+                               proto::system::HeronTupleSet2* _message) {
   // Note:- Process data before control
   // This is to make sure that anchored emits are sent out
   // before any acks/fails
 
-  if (_message->set().has_data()) {
-    proto::system::HeronDataTupleSet* d = _message->mutable_set()->mutable_data();
+  if (_message->has_data()) {
+    proto::system::HeronDataTupleSet2* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =
         make_pair(d->stream().component_name(), d->stream().id());
     if (stream_consumers_.find(stream) != stream_consumers_.end()) {
       StreamConsumers* s_consumer = stream_consumers_.find(stream)->second;
+
+      // 1. only shuffle grouping
+      // 2. no acking
+      if (s_consumer->isShuffleGrouping()) {
+         out_tasks.clear();
+         s_consumer->GetListToSend(*_tuple, out_tasks);
+
+         DrainInstanceData(out_tasks.front(), _message);
+//         LOG(INFO) << "We did a short cut for shuffle-grouping";
+         // We do an early return
+         return;
+      }
+
       for (sp_int32 i = 0; i < d->tuples_size(); ++i) {
+        _tuple->ParsePartialFromString(d->tuples(i));
+
         // just to make sure that instances do not set any key
-        CHECK_EQ(d->tuples(i).key(), 0);
+        CHECK_EQ(_tuple->key(), 0);
         out_tasks.clear();
-        s_consumer->GetListToSend(d->tuples(i), out_tasks);
+        s_consumer->GetListToSend(*_tuple, out_tasks);
         // In addition to out_tasks, the instance might have asked
         // us to send the tuple to some more tasks
-        for (sp_int32 j = 0; j < d->tuples(i).dest_task_ids_size(); ++j) {
-          out_tasks.push_back(d->tuples(i).dest_task_ids(j));
+        for (sp_int32 j = 0; j < _tuple->dest_task_ids_size(); ++j) {
+          out_tasks.push_back(_tuple->dest_task_ids(j));
         }
         if (out_tasks.empty()) {
           LOG(ERROR) << "Nobody to send the tuple to";
         }
         // TODO(vikasr) Do a fast path that does not involve copying
-        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), d->mutable_tuples(i), out_tasks);
+        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), _tuple, out_tasks);
       }
     } else {
       LOG(ERROR) << "Nobody consumes stream " << stream.second << " from component "
                  << stream.first;
     }
   }
-  if (_message->set().has_control()) {
-    proto::system::HeronControlTupleSet* c = _message->mutable_set()->mutable_control();
+  if (_message->has_control()) {
+    proto::system::HeronControlTupleSet* c = _message->mutable_control();
     CHECK_EQ(c->emits_size(), 0);
     for (sp_int32 i = 0; i < c->acks_size(); ++i) {
       CopyControlOutBound(c->acks(i), false);

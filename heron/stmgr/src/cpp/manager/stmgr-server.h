@@ -85,7 +85,7 @@ class StMgrServer : public Server {
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
                                      proto::stmgr::RegisterInstanceRequest* _request);
-  void HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMessage* _message);
+  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet2* _message);
 
   // Backpressure message from and to other stream managers
   void HandleStartBackPressureMessage(Connection* _conn,

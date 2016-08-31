@@ -165,10 +165,10 @@ public final class WordCountTopology {
       throw new RuntimeException("Specify topology name");
     }
 
-    int parallelism = 80;
+    int parallelism = 1;
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
-    builder.setBolt("consumer", new ConsumerBolt(), parallelism)
+    builder.setBolt("consumer", new ConsumerBolt(), 2 * parallelism)
         .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);

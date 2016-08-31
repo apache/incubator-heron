@@ -350,7 +350,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
   delete _request;
 }
 
-void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMessage* _message) {
+void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet2* _message) {
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping.." << std::endl;
@@ -358,14 +358,14 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMe
     return;
   }
 //  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
-  if (_message->set().has_data()) {
+  if (_message->has_data()) {
     stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
-        ->incr_by(_message->set().data().tuples_size());
-  } else if (_message->set().has_control()) {
+        ->incr_by(_message->data().tuples_size());
+  } else if (_message->has_control()) {
     stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_FROM_INSTANCES)
-        ->incr_by(_message->set().control().acks_size());
+        ->incr_by(_message->control().acks_size());
     stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_FROM_INSTANCES)
-        ->incr_by(_message->set().control().fails_size());
+        ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
   release(_message);

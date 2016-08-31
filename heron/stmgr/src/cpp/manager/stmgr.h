@@ -61,7 +61,7 @@ class StMgr {
   void HandleStreamManagerData(const sp_string& _stmgr_id,
                                proto::stmgr::TupleStreamMessage2* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
-                          proto::stmgr::TupleMessage* _message);
+                          proto::system::HeronTupleSet2* _message);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
@@ -156,6 +156,8 @@ class StMgr {
   proto::stmgr::TupleMessage2 current_data_out_;
   proto::stmgr::TupleMessage2 current_control_out_;
   std::vector<sp_int32> out_tasks;
+
+  proto::system::HeronDataTuple* _tuple;
 };
 
 }  // namespace stmgr

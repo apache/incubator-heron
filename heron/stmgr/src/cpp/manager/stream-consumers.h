@@ -19,14 +19,17 @@
 
 #include <list>
 #include <vector>
+#include <typeinfo>   // operator typeid
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
+#include "grouping/shuffle-grouping.h"
 
 namespace heron {
 namespace stmgr {
 
 class Grouping;
+class ShuffleGrouping;
 
 class StreamConsumers {
  public:
@@ -38,6 +41,14 @@ class StreamConsumers {
                    const std::vector<sp_int32>& _task_ids);
 
   void GetListToSend(const proto::system::HeronDataTuple& _tuple, std::vector<sp_int32>& _return);
+
+  inline bool isShuffleGrouping() {
+    if (consumers_.size() == 1 &&
+        typeid(ShuffleGrouping) == typeid(*(consumers_.front()))) {
+      return true;
+    }
+    return false;
+  }
 
  private:
   std::list<Grouping*> consumers_;

@@ -55,6 +55,5 @@ void StreamConsumers::GetListToSend(const proto::system::HeronDataTuple& _tuple,
     (*iter)->GetListToSend(_tuple, _return);
   }
 }
-
 }  // namespace stmgr
 }  // namespace heron

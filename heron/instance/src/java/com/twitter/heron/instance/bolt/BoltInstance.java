@@ -175,21 +175,22 @@ public class BoltInstance implements IInstance {
     TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
         dataTuple.getRootsList(), values);
 
-    long deserializedTime = System.nanoTime();
+//    long deserializedTime = System.nanoTime();
 
     // Delegate to the use defined bolt
     bolt.execute(t);
 
-    long executeLatency = System.nanoTime() - deserializedTime;
+//    long executeLatency = System.nanoTime() - deserializedTime;
+//
+//    // Invoke user-defined execute task hook
+//    topologyContext.invokeHookBoltExecute(t, executeLatency);
+//
+//    boltMetrics.deserializeDataTuple(stream.getId(), stream.getComponentName(),
+//        deserializedTime - startTime);
+//
+//    // Update metrics
+//    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
 
-    // Invoke user-defined execute task hook
-    topologyContext.invokeHookBoltExecute(t, executeLatency);
-
-    boltMetrics.deserializeDataTuple(stream.getId(), stream.getComponentName(),
-        deserializedTime - startTime);
-
-    // Update metrics
-    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
   }
 
   @Override

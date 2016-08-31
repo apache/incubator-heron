@@ -239,14 +239,15 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
         }
         outputter.addAckTuple(bldr, tupleSizeInBytes);
       }
-      long latency = System.nanoTime() - tuplImpl.getCreationTime();
+//      long latency = System.nanoTime() - tuplImpl.getCreationTime();
+//
+//      // Invoke user-defined boltAck task hook
+//      helper.getTopologyContext().
+//          invokeHookBoltAck(tuple, latency);
+//
+//
+//      boltMetrics.ackedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
 
-      // Invoke user-defined boltAck task hook
-      helper.getTopologyContext().
-          invokeHookBoltAck(tuple, latency);
-
-
-      boltMetrics.ackedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
     }
   }
 
