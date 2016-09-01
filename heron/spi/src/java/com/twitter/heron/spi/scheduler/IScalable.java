@@ -20,12 +20,12 @@ import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
- * Schedulers that implement {@code IScalableScheduler} support scaling topologies up or down by
+ * Schedulers that implement {@code IScalable} support scaling topologies up or down by
  * adding or removing containers.
  */
 @InterfaceAudience.LimitedPrivate
 @InterfaceStability.Unstable
-public interface IScalableScheduler extends IScheduler {
+public interface IScalable {
   /**
    * Requests new containers for scaling a topology
    *
