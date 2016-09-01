@@ -14,7 +14,9 @@
 package com.twitter.heron.spi.utils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -36,13 +38,13 @@ public final class PackingTestUtils {
 
   public static PackingPlan.ContainerPlan testContainerPlan(String containerId) {
     Resource resource = new Resource(7.5, 6, 9);
-    Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+    Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
     for (int index : new Integer[]{0, 1}) {
       String instanceId = "instance-" + index;
       String componentName = "componentName-" + index;
-      instancePlanMap.put(instanceId, testInstancePlan(instanceId, componentName));
+      instancePlans.add(testInstancePlan(instanceId, componentName));
     }
-    return new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+    return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
   }
 
   private static PackingPlan.InstancePlan testInstancePlan(String id, String componentName) {

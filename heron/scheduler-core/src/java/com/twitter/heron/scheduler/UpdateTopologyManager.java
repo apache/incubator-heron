@@ -109,11 +109,11 @@ public class UpdateTopologyManager {
     PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
     PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
 
-    assertTrue(proposedPackingPlan.containers.size() > 0,
+    assertTrue(proposedPackingPlan.getContainers().size() > 0,
         "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
 
     ContainerDelta containerDelta = getContainerDelta(
-        existingPackingPlan.getContainerSet(), proposedPackingPlan.getContainerSet());
+        existingPackingPlan.getContainers(), proposedPackingPlan.getContainers());
     int newContainerCount = containerDelta.getContainersToAdd().size();
     int removableContainerCount = containerDelta.getContainersToRemove().size();
 
@@ -154,7 +154,7 @@ public class UpdateTopologyManager {
 
     if (removableContainerCount > 0) {
       scalableScheduler.get().removeContainers(
-          existingPackingPlan.getContainerSet(),
+          existingPackingPlan.getContainers(),
           containerDelta.getContainersToRemove());
     }
   }
@@ -186,8 +186,7 @@ public class UpdateTopologyManager {
   @VisibleForTesting
   ContainerDelta getContainerDelta(Set<PackingPlan.ContainerPlan> currentContainers,
                                    Set<PackingPlan.ContainerPlan> proposedContainers) {
-    ContainerDelta containerDelta = new ContainerDelta(currentContainers, proposedContainers);
-    return containerDelta;
+    return new ContainerDelta(currentContainers, proposedContainers);
   }
 
   private void assertTrue(boolean condition, String message, Object... values) {

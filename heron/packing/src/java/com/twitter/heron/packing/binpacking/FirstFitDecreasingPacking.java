@@ -183,27 +183,27 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         componentChanges);
 
     // Construct the PackingPlan
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    Resource resource = estimateResources(ffdAllocation, containerPlanMap, ramMap, true);
+    Resource resource = estimateResources(ffdAllocation, containerPlans, ramMap, true);
 
     //merge the two plans
-    Map<String, PackingPlan.ContainerPlan> totalContainerPlanMap = new HashMap<>();
-    totalContainerPlanMap.putAll(containerPlanMap);
-    totalContainerPlanMap.putAll(currentPackingPlan.getContainers());
+    Set<PackingPlan.ContainerPlan> totalContainerPlans = new HashSet<>();
+    totalContainerPlans.addAll(containerPlans);
+    totalContainerPlans.addAll(currentPackingPlan.getContainers());
 
     Resource total = new Resource(
         resource.getCpu() + currentPackingPlan.getResource().getCpu(),
         resource.getRam() + currentPackingPlan.getResource().getRam(),
         resource.getDisk() + currentPackingPlan.getResource().getDisk());
 
-    PackingPlan plan = new PackingPlan(topology.getId(), totalContainerPlanMap, total);
+    PackingPlan plan = new PackingPlan(topology.getId(), totalContainerPlans, total);
 
-    LOG.info("Created a packing plan with " + containerPlanMap.size() + " containers");
-    for (String key : containerPlanMap.keySet()) {
-      LOG.info("Container  " + key + " consists of "
-          + containerPlanMap.get(key).instances.toString());
+    LOG.info("Created a packing plan with " + containerPlans.size() + " containers");
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      LOG.info(String.format(
+          "Container %s consists of %s", containerPlan.getId(), containerPlan.getInstances()));
     }
     LOG.info("Topology Resources " + resource.toString());
     return plan;

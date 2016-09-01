@@ -31,12 +31,13 @@ import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.tang.exceptions.InjectionException;
 
-import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronCompletedTaskHandler;
-import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronContainerAllocationHandler;
-import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronExecutorContainerErrorHandler;
-import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronExecutorLauncher;
-import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronRunningTaskHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.ContainerAllocationHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.FailedContainerHandler;
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronSchedulerLauncher;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronWorkerLauncher;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronWorkerStartHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronWorkerTaskCompletedErrorHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronWorkerTaskFailureHandler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -131,11 +132,12 @@ public class YarnLauncher implements ILauncher {
         .setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
         .set(DriverConfiguration.DRIVER_IDENTIFIER, topologyName)
         .set(DriverConfiguration.ON_DRIVER_STARTED, HeronSchedulerLauncher.class)
-        .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronContainerAllocationHandler.class)
-        .set(DriverConfiguration.ON_EVALUATOR_FAILED, HeronExecutorContainerErrorHandler.class)
-        .set(DriverConfiguration.ON_CONTEXT_ACTIVE, HeronExecutorLauncher.class)
-        .set(DriverConfiguration.ON_TASK_RUNNING, HeronRunningTaskHandler.class)
-        .set(DriverConfiguration.ON_TASK_COMPLETED, HeronCompletedTaskHandler.class)
+        .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, ContainerAllocationHandler.class)
+        .set(DriverConfiguration.ON_EVALUATOR_FAILED, FailedContainerHandler.class)
+        .set(DriverConfiguration.ON_CONTEXT_ACTIVE, HeronWorkerLauncher.class)
+        .set(DriverConfiguration.ON_TASK_RUNNING, HeronWorkerStartHandler.class)
+        .set(DriverConfiguration.ON_TASK_COMPLETED, HeronWorkerTaskCompletedErrorHandler.class)
+        .set(DriverConfiguration.ON_TASK_FAILED, HeronWorkerTaskFailureHandler.class)
         .set(DriverConfiguration.GLOBAL_FILES, topologyPackageLocation)
         .set(DriverConfiguration.GLOBAL_FILES, coreReleasePackage)
         .set(HeronDriverConfiguration.TOPOLOGY_NAME, topologyName)
