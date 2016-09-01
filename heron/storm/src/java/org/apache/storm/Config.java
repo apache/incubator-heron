@@ -260,6 +260,53 @@ public class Config extends com.twitter.heron.api.Config {
   public static final String TOPOLOGY_PROJECT_NAME = "topology.project.name";
 
   /**
+   * A list of hosts of ZooKeeper servers used to manage the cluster.
+   */
+  public static final String STORM_ZOOKEEPER_SERVERS = "storm.zookeeper.servers";
+
+  /**
+   * The port Storm will use to connect to each of the ZooKeeper servers.
+   */
+  public static final String STORM_ZOOKEEPER_PORT = "storm.zookeeper.port";
+
+  /**
+   * The root directory in ZooKeeper for metadata about TransactionalSpouts.
+   */
+  public static final String TRANSACTIONAL_ZOOKEEPER_ROOT = "transactional.zookeeper.root";
+
+  /**
+   * The session timeout for clients to ZooKeeper.
+   */
+  public static final String STORM_ZOOKEEPER_SESSION_TIMEOUT = "storm.zookeeper.session.timeout";
+
+  /**
+   * The connection timeout for clients to ZooKeeper.
+   */
+  public static final String STORM_ZOOKEEPER_CONNECTION_TIMEOUT = "storm.zookeeper.connection.timeout";
+
+  /**
+   * The number of times to retry a Zookeeper operation.
+   */
+  public static final String STORM_ZOOKEEPER_RETRY_TIMES="storm.zookeeper.retry.times";
+
+  /**
+   * The interval between retries of a Zookeeper operation.
+   */
+  public static final String STORM_ZOOKEEPER_RETRY_INTERVAL="storm.zookeeper.retry.interval";
+
+  /**
+   * The list of zookeeper servers in which to keep the transactional state. If null (which is default),
+   * will use storm.zookeeper.servers
+   */
+  public static final String TRANSACTIONAL_ZOOKEEPER_SERVERS="transactional.zookeeper.servers";
+
+  /**
+   * The port to use to connect to the transactional zookeeper servers. If null (which is default),
+   * will use storm.zookeeper.port
+   */
+  public static final String TRANSACTIONAL_ZOOKEEPER_PORT="transactional.zookeeper.port";
+
+  /**
    * ----  DO NOT USE -----
    * This variable is used to rewrite the TOPOLOGY_AUTO_TASK_HOOKS variable.
    * As such this is a strictly internal config variable that is not exposed the user

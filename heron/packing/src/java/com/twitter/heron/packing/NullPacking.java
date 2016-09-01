@@ -16,6 +16,7 @@ package com.twitter.heron.packing;
 
 import java.util.HashMap;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -23,9 +24,11 @@ import com.twitter.heron.spi.packing.Resource;
 
 public class NullPacking implements IPacking {
 
-  public void initialize(Config config, Config runtime) {
+  @Override
+  public void initialize(Config config, TopologyAPI.Topology topology) {
   }
 
+  @Override
   public PackingPlan pack() {
     return new PackingPlan(
         "",

@@ -1,5 +1,5 @@
 '''Common heron metrics module'''
-__all__ = ['metrics', 'metrics_helper']
+__all__ = ['metrics', 'metrics_helper', 'global_metrics']
 
 from .metrics import (IMetric,
                       CountMetric,

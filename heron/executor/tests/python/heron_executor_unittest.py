@@ -17,6 +17,7 @@ import unittest2 as unittest
 
 from heron.executor.src.python.heron_executor import ProcessInfo
 from heron.executor.src.python.heron_executor import HeronExecutor
+from heron.proto.packing_plan_pb2 import PackingPlan
 
 # pylint: disable=unused-argument
 # pylint: disable=missing-docstring
@@ -63,9 +64,21 @@ class MockExecutor(HeronExecutor):
 
 class HeronExecutorTest(unittest.TestCase):
   """Unittest for Heron Executor"""
-  dist_expected = {1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]}
+
   shell_command_expected = 'heron_shell_binary --port=shell-port ' \
                            '--log_file_prefix=fake_dir/heron-shell.log'
+
+  def build_packing_plan(self, instance_distribution):
+    packing_plan = PackingPlan()
+    for container_id in instance_distribution.keys():
+      container_plan = packing_plan.container_plans.add()
+      container_plan.id = str(container_id)
+      for (component_name, global_task_id, component_index) in instance_distribution[container_id]:
+        instance_plan = container_plan.instance_plans.add()
+        instance_plan.id = "%s:%s:%s:%s" %\
+                           (container_id, component_name, global_task_id, component_index)
+        instance_plan.component_name = component_name
+    return packing_plan
 
   # pylint: disable=no-self-argument
   def get_expected_metricsmgr_command(container_id):
@@ -124,6 +137,8 @@ class HeronExecutorTest(unittest.TestCase):
     self.maxDiff = None
     self.executor_0 = MockExecutor(self.get_args(0))
     self.executor_1 = MockExecutor(self.get_args(1))
+    self.packing_plan_expected = self.build_packing_plan(
+      {1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]})
 
   # ./heron-executor <shardid> <topname> <topid> <topdefnfile>
   # <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
@@ -146,14 +161,10 @@ class HeronExecutorTest(unittest.TestCase):
     scheduler_classpath scheduler_port python_instance_binary
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
-  def test_parse_instance_distribution(self):
-    dist_found = self.executor_0.parse_instance_distribution("1:word:3:0:exclaim1:2:0:exclaim1:1:0")
-    self.assertEquals(self.dist_expected, dist_found)
+  def test_update_packing_plan(self):
+    self.executor_0.update_packing_plan(self.packing_plan_expected)
 
-  def test_update_instance_distribution(self):
-    self.executor_0.update_instance_distribution(self.dist_expected)
-
-    self.assertEquals(self.dist_expected, self.executor_0.instance_distribution)
+    self.assertEquals(self.packing_plan_expected, self.executor_0.packing_plan)
     self.assertEquals(["stmgr-1"], self.executor_0.stmgr_ids)
     self.assertEquals(["metricsmgr-0", "metricsmgr-1"], self.executor_0.metricsmgr_ids)
     self.assertEquals(["heron-shell-0", "heron-shell-1"], self.executor_0.heron_shell_ids)
@@ -165,7 +176,7 @@ class HeronExecutorTest(unittest.TestCase):
     self.do_test_launch(self.executor_1, self.expected_processes_container_1)
 
   def do_test_launch(self, executor, expected_processes):
-    executor.update_instance_distribution(self.dist_expected)
+    executor.update_packing_plan(self.packing_plan_expected)
     executor.launch()
     monitored_processes = executor.processes_to_monitor
 
@@ -186,7 +197,7 @@ class HeronExecutorTest(unittest.TestCase):
 
   def test_change_instance_dist_container_1(self):
     MockPOpen.set_next_pid(37)
-    self.executor_1.update_instance_distribution(self.dist_expected)
+    self.executor_1.update_packing_plan(self.packing_plan_expected)
     current_commands = self.executor_1.get_commands_to_run()
 
     self.assertEquals(dict(
@@ -194,9 +205,9 @@ class HeronExecutorTest(unittest.TestCase):
             self.expected_processes_container_1)), current_commands)
 
     # update instance distribution
-    new_distribution = \
-      self.executor_1.parse_instance_distribution("1:word:3:0:word:2:0:exclaim1:1:0")
-    self.executor_1.update_instance_distribution(new_distribution)
+    new_packing_plan = self.build_packing_plan(
+      {1:[('word', '3', '0'), ('word', '2', '0'), ('exclaim1', '1', '0')]})
+    self.executor_1.update_packing_plan(new_packing_plan)
     updated_commands = self.executor_1.get_commands_to_run()
 
     # get the commands to kill, keep and start and verify

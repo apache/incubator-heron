@@ -12,13 +12,13 @@ api_deps_files =  \
 
 java_library(
     name = "api-java",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(["com/twitter/heron/api/**/*.java"]),
     deps = api_deps_files,
 )
 
 java_binary(
     name = "api-unshaded",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(["com/twitter/heron/api/**/*.java"]),
     deps = api_deps_files,
 )
 
@@ -27,4 +27,10 @@ genrule(
     srcs = [":api-unshaded_deploy.jar"],
     outs = ["heron-api.jar"],
     cmd  = "cp $< $@",
+)
+
+java_library(
+    name = "classification",
+    srcs = glob(["com/twitter/heron/classification/**/*.java"]),
+    resources = ["//heron/api/src:processor-service-conf"],
 )

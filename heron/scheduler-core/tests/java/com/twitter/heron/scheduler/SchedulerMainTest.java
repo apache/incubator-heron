@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.util.concurrent.SettableFuture;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,11 +32,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -46,18 +49,17 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-    TopologyUtils.class, ReflectionUtils.class, SchedulerUtils.class})
+    TopologyUtils.class, ReflectionUtils.class, SchedulerUtils.class, TopologyAPI.Topology.class})
 public class SchedulerMainTest {
   private static final String STATE_MANAGER_CLASS = "STATE_MANAGER_CLASS";
-  private static final String PACKING_CLASS = "PACKING_CLASS";
   private static final String SCHEDULER_CLASS = "SCHEDULER_CLASS";
   @Rule
   public final ExpectedException exception = ExpectedException.none();
   private IStateManager stateManager;
-  private IPacking packing;
   private IScheduler scheduler;
   private SchedulerMain schedulerMain;
   private SchedulerServer schedulerServer;
+  private String iTopologyName = "topologyName";
 
   /**
    * Basic setup before executing a test case
@@ -69,42 +71,27 @@ public class SchedulerMainTest {
         when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
         thenReturn(STATE_MANAGER_CLASS);
     Mockito.
-        when(config.getStringValue(ConfigKeys.get("PACKING_CLASS"))).
-        thenReturn(PACKING_CLASS);
-    Mockito.
         when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).
         thenReturn(SCHEDULER_CLASS);
 
-    String iTopologyName = "topologyName";
     int iSchedulerServerPort = 0;
 
     TopologyAPI.Topology topology =
         TopologyTests.createTopology(
             iTopologyName, new com.twitter.heron.api.Config(),
             new HashMap<String, Integer>(), new HashMap<String, Integer>());
-    String packingString = "dummyPackingString";
 
     // Mock objects to be verified
     stateManager = Mockito.mock(IStateManager.class);
-    packing = Mockito.mock(IPacking.class);
     scheduler = Mockito.mock(IScheduler.class);
 
-    PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    Mockito.when(packing.pack()).thenReturn(packingPlan);
-    Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(packingString);
-
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-    containers.put("dummy", new PackingPlan.ContainerPlan("dummy", null,
-        new Resource(1, 1, 1)));
-
-    Mockito.when(packingPlan.getContainers()).thenReturn(containers);
+    final SettableFuture<PackingPlans.PackingPlan> future = getTestPacking();
+    Mockito.when(stateManager.getPackingPlan(null, iTopologyName)).thenReturn(future);
 
     // Mock ReflectionUtils stuff
     PowerMockito.spy(ReflectionUtils.class);
     PowerMockito.doReturn(stateManager).
         when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
-    PowerMockito.doReturn(packing).
-        when(ReflectionUtils.class, "newInstance", PACKING_CLASS);
     PowerMockito.doReturn(scheduler).
         when(ReflectionUtils.class, "newInstance", SCHEDULER_CLASS);
 
@@ -131,6 +118,19 @@ public class SchedulerMainTest {
     Mockito.doReturn(shutdown).when(schedulerMain).getShutdown();
   }
 
+  // TODO reuse PackingTestUtils.createTestProtoPackingPlan once PR#1321 is merged
+  private SettableFuture<PackingPlans.PackingPlan> getTestPacking() {
+    Map<String, PackingPlan.InstancePlan> instances = new HashMap<>();
+    instances.put("1:1:1:1",
+        new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
+    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+    containers.put("1", new PackingPlan.ContainerPlan("1", instances, new Resource(1, 1, 1)));
+    PackingPlan packingPlan = new PackingPlan("packing-id", containers, new Resource(1, 1, 1));
+    final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
+    future.set(new PackingPlanProtoSerializer().toProto(packingPlan));
+    return future;
+  }
+
   // Exceptions during reflection --
   // 1. should return false executing runScheduler()
   // 2. Nothing should be initialized
@@ -140,8 +140,8 @@ public class SchedulerMainTest {
         when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
     Assert.assertFalse(schedulerMain.runScheduler());
     Mockito.verify(stateManager, Mockito.never()).initialize(Mockito.any(Config.class));
-    Mockito.verify(packing, Mockito.never()).
-        initialize(Mockito.any(Config.class), Mockito.any(Config.class));
+
+    Mockito.verify(stateManager, Mockito.never()).getPackingPlan(null, iTopologyName);
     Mockito.verify(scheduler, Mockito.never()).
         initialize(Mockito.any(Config.class), Mockito.any(Config.class));
   }
@@ -172,7 +172,6 @@ public class SchedulerMainTest {
     Mockito.doReturn(false).when(scheduler).onSchedule(Mockito.any(PackingPlan.class));
     Assert.assertFalse(schedulerMain.runScheduler());
     Mockito.verify(stateManager).close();
-    Mockito.verify(packing).close();
     Mockito.verify(scheduler).close();
     Mockito.verify(schedulerServer, Mockito.never()).start();
   }
@@ -204,7 +203,6 @@ public class SchedulerMainTest {
     Assert.assertFalse(schedulerMain.runScheduler());
 
     Mockito.verify(stateManager).close();
-    Mockito.verify(packing).close();
     Mockito.verify(scheduler).close();
     Mockito.verify(schedulerServer).stop();
   }

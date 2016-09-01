@@ -101,7 +101,7 @@ public class HeronMasterDriverTest {
                             Map<String, PackingPlan.ContainerPlan> containers) {
     Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
     PackingPlan.ContainerPlan container = new PackingPlan.ContainerPlan(id, null, resource);
-    containers.put(container.id, container);
+    containers.put(container.getId(), container);
   }
 
   @Test

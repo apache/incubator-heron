@@ -37,10 +37,10 @@ class MetricsMgrClientTest(unittest.TestCase):
 
   def test_on_connect_error(self):
     self.metrics_client.on_connect(StatusCode.CONNECT_ERROR)
-    self.assertEqual(len(self.metrics_client.looper.timer_tasks), 1)
-    self.assertEqual(self.metrics_client.looper.timer_tasks[0][1].__name__, 'start_connect')
+    self.assertEqual(len(self.metrics_client.looper.timer_tasks), 2)
+    self.assertEqual(self.metrics_client.looper.timer_tasks[1][1].__name__, 'start_connect')
 
   def test_on_error(self):
     self.metrics_client.on_error()
-    self.assertEqual(len(self.metrics_client.looper.timer_tasks), 1)
-    self.assertEqual(self.metrics_client.looper.timer_tasks[0][1].__name__, 'start_connect')
+    self.assertEqual(len(self.metrics_client.looper.timer_tasks), 2)
+    self.assertEqual(self.metrics_client.looper.timer_tasks[1][1].__name__, 'start_connect')
