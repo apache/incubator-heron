@@ -14,8 +14,8 @@
 
 package com.twitter.heron.scheduler.slurm;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -108,15 +108,15 @@ public class SlurmSchedulerTest {
     PackingPlan plan =
         new PackingPlan(
             PACKING_PLAN_ID,
-            new HashMap<String, PackingPlan.ContainerPlan>(),
+            new HashSet<PackingPlan.ContainerPlan>(),
             Mockito.mock(Resource.class));
     Assert.assertTrue(plan.getContainers().isEmpty());
     // Fail to schedule due to PackingPlan is empty
     Assert.assertFalse(scheduler.onSchedule(plan));
 
     // Construct valid PackingPlan
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-    containers.put(CONTAINER_ID, Mockito.mock(PackingPlan.ContainerPlan.class));
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
     PackingPlan validPlan =
         new PackingPlan(PACKING_PLAN_ID, containers, Mockito.mock(Resource.class));
 

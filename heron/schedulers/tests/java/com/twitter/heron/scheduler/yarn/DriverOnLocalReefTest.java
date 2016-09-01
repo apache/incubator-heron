@@ -15,8 +15,8 @@
 package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -101,10 +101,10 @@ public class DriverOnLocalReefTest {
     private void addContainer(String id,
                               double cpu,
                               long mem,
-                              Map<String, PackingPlan.ContainerPlan> containers) {
+                              Set<PackingPlan.ContainerPlan> containers) {
       Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
       PackingPlan.ContainerPlan container = new PackingPlan.ContainerPlan(id, null, resource);
-      containers.put(container.getId(), container);
+      containers.add(container);
     }
 
     class DriverStarter implements EventHandler<StartTime> {
@@ -113,7 +113,7 @@ public class DriverOnLocalReefTest {
         try {
           counter = new CountDownLatch(2);
           driver.scheduleTMasterContainer();
-          Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+          Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
           addContainer("1", 1.0, 512L, containers);
           PackingPlan packing = new PackingPlan("packingId", containers, null);
           driver.scheduleHeronWorkers(packing);
