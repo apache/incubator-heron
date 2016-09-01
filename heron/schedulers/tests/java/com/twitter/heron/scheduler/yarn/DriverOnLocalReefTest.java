@@ -110,15 +110,17 @@ public class DriverOnLocalReefTest {
     class DriverStarter implements EventHandler<StartTime> {
       @Override
       public void onNext(StartTime startTime) {
-        counter = new CountDownLatch(2);
-        driver.scheduleTMasterContainer();
-        Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-        addContainer("1", 1.0, 512L, containers);
-        PackingPlan packing = new PackingPlan("packingId", containers, null);
-        driver.scheduleHeronWorkers(packing);
         try {
+          counter = new CountDownLatch(2);
+          driver.scheduleTMasterContainer();
+          Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+          addContainer("1", 1.0, 512L, containers);
+          PackingPlan packing = new PackingPlan("packingId", containers, null);
+          driver.scheduleHeronWorkers(packing);
           counter.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        } catch (HeronMasterDriver.ContainerAllocationException e) {
           throw new RuntimeException(e);
         }
       }
@@ -127,7 +129,7 @@ public class DriverOnLocalReefTest {
     class Allocated implements EventHandler<AllocatedEvaluator> {
       @Override
       public void onNext(AllocatedEvaluator evaluator) {
-        driver.new HeronContainerAllocationHandler().onNext(evaluator);
+        driver.new ContainerAllocationHandler().onNext(evaluator);
       }
     }
 
