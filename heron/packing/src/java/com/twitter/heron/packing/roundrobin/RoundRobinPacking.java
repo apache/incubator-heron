@@ -16,8 +16,10 @@ package com.twitter.heron.packing.roundrobin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -108,7 +110,7 @@ public class RoundRobinPacking implements IPacking {
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
 
     // Construct the PackingPlan
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
     long topologyRam = 0;
     for (Map.Entry<String, List<String>> entry : roundRobinAllocation.entrySet()) {
       String containerId = entry.getKey();
@@ -140,21 +142,22 @@ public class RoundRobinPacking implements IPacking {
       Resource resource =
           new Resource(containerCpu, containerRam, containerDiskInBytes);
       PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+          new PackingPlan.ContainerPlan(
+              containerId, new HashSet<>(instancePlanMap.values()), resource);
 
-      containerPlanMap.put(containerId, containerPlan);
+      containerPlans.add(containerPlan);
       topologyRam += containerRam;
     }
 
     // Take the heron internal container into account
-    int totalContainer = containerPlanMap.size() + 1;
+    int totalContainer = containerPlans.size() + 1;
     long topologyDisk = totalContainer * containerDiskInBytes;
     double topologyCpu = totalContainer * containerCpu;
 
     Resource resource = new Resource(
         topologyCpu, topologyRam, topologyDisk);
 
-    PackingPlan plan = new PackingPlan(topology.getId(), containerPlanMap, resource);
+    PackingPlan plan = new PackingPlan(topology.getId(), containerPlans, resource);
 
     // Check whether it is a valid PackingPlan
     if (!isValidPackingPlan(plan)) {
@@ -342,8 +345,8 @@ public class RoundRobinPacking implements IPacking {
    * @return true if it is valid. Otherwise return false
    */
   protected boolean isValidPackingPlan(PackingPlan plan) {
-    for (PackingPlan.ContainerPlan containerPlan : plan.getContainers().values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+    for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Safe check
         if (instancePlan.getResource().ram < MIN_RAM_PER_INSTANCE) {
           LOG.severe(String.format(
@@ -360,7 +363,7 @@ public class RoundRobinPacking implements IPacking {
 
 
   public static String getContainerId(int index) {
-    return "" + index;
+    return Integer.toString(index);
   }
 
   public static String getInstanceId(

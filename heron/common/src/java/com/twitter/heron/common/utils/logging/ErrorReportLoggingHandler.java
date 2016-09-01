@@ -85,7 +85,7 @@ public class ErrorReportLoggingHandler extends Handler {
         exceptionDataBuilder.setCount(exceptionDataBuilder.getCount() + 1);
         exceptionDataBuilder.setLasttime(new Date().toString());
         exceptionDataBuilder.setStacktrace(trace);
-        exceptionDataBuilder.setLogging("" + record.getMessage());
+        exceptionDataBuilder.setLogging(record.getMessage());
       }
     }
   }

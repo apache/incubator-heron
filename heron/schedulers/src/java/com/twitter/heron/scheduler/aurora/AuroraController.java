@@ -77,7 +77,7 @@ class AuroraController {
   boolean restartJob(int containerId) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "restart"));
     if (containerId != -1) {
-      auroraCmd.add(String.format("%s/%s", jobSpec, "" + containerId));
+      auroraCmd.add(String.format("%s/%s", jobSpec, Integer.toString(containerId)));
     } else {
       auroraCmd.add(jobSpec);
     }
@@ -140,6 +140,6 @@ class AuroraController {
     // Note that we can not use "--no-batching" since "restart" command does not accept it.
     // So we play a small trick here by setting batch size Integer.MAX_VALUE.
     auroraCmd.add("--batch-size");
-    auroraCmd.add("" + Integer.MAX_VALUE);
+    auroraCmd.add(Integer.toString(Integer.MAX_VALUE));
   }
 }

@@ -260,7 +260,7 @@ public class FirstFitDecreasingPackingTest {
         packingPlanExplicitResourcesConfig.getResource().disk);
 
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.getContainers().values()) {
+        : packingPlanExplicitResourcesConfig.getContainers()) {
       Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
               + (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceCpuDefault)),
           (long) containerPlan.getResource().cpu);
@@ -276,7 +276,7 @@ public class FirstFitDecreasingPackingTest {
       // All instances' resource requirement should be equal
       // So the size of set should be 1
       Set<Resource> resources = new HashSet<>();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         resources.add(instancePlan.getResource());
       }
 
@@ -338,9 +338,9 @@ public class FirstFitDecreasingPackingTest {
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers().values()) {
+        : packingPlanExplicitRamMap.getContainers()) {
       Assert.assertNotEquals(maxContainerRam, containerPlan.getResource().ram);
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
           Assert.assertEquals(boltRam, instancePlan.getResource().ram);
         }
@@ -402,8 +402,8 @@ public class FirstFitDecreasingPackingTest {
 
     // Ram for bolt/spout should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers().values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        : packingPlanExplicitRamMap.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
           Assert.assertEquals(boltRam, instancePlan.getResource().ram);
         }
@@ -463,8 +463,8 @@ public class FirstFitDecreasingPackingTest {
         packingPlanExplicitRamMap.getResource().disk);
 
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers().values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        : packingPlanExplicitRamMap.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Ram for bolt should be the value in component ram map
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
           Assert.assertEquals(boltRam, instancePlan.getResource().ram);
@@ -526,8 +526,8 @@ public class FirstFitDecreasingPackingTest {
         packingPlanExplicitRamMap.getResource().disk);
 
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers().values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        : packingPlanExplicitRamMap.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Ram for bolt should be the value in component ram map
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
           Assert.assertEquals(boltRam, instancePlan.getResource().ram);
