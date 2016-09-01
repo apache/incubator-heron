@@ -100,6 +100,14 @@ public final class Utils {
     return TypeUtils.getInteger(o);
   }
 
+  public static boolean getBoolean(Object o, boolean defaultValue) {
+    if (o == null) {
+      return defaultValue;
+    } else {
+      return TypeUtils.getBoolean(o);
+    }
+  }
+
   public static byte[] toByteArray(ByteBuffer buffer) {
     return com.twitter.heron.api.utils.Utils.toByteArray(buffer);
   }

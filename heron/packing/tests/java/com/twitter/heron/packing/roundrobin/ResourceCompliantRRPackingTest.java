@@ -47,7 +47,7 @@ public class ResourceCompliantRRPackingTest {
   private int countComponent(String component, Map<String, PackingPlan.InstancePlan> instances) {
     int count = 0;
     for (PackingPlan.InstancePlan pair : instances.values()) {
-      if (component.equals(RoundRobinPacking.getComponentName(pair.id))) {
+      if (component.equals(RoundRobinPacking.getComponentName(pair.getId()))) {
         count++;
       }
     }
@@ -87,7 +87,7 @@ public class ResourceCompliantRRPackingTest {
         .build();
 
     ResourceCompliantRRPacking packing = new ResourceCompliantRRPacking();
-    packing.initialize(config, runtime);
+    packing.initialize(config, topology);
     PackingPlan output = packing.pack();
 
     return output;
@@ -135,7 +135,7 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlanNoExplicitResourcesConfig =
         getResourceCompliantRRPackingPlan(topologyNoExplicitResourcesConfig);
 
-    Assert.assertEquals(packingPlanNoExplicitResourcesConfig.containers.size(), numContainers);
+    Assert.assertEquals(packingPlanNoExplicitResourcesConfig.getContainers().size(), numContainers);
 
     //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
     //consists of 2 spouts and 1 bolt (3 instances)
@@ -144,21 +144,21 @@ public class ResourceCompliantRRPackingTest {
             + Math.round(3 * instanceCpuDefault
             + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlanNoExplicitResourcesConfig.resource.cpu);
+        (long) packingPlanNoExplicitResourcesConfig.getResource().cpu);
 
     Assert.assertEquals((4 * instanceRamDefault)
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceRamDefault))
             + 3 * instanceRamDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceRamDefault))
             + instanceRamDefault,
-        packingPlanNoExplicitResourcesConfig.resource.ram);
+        packingPlanNoExplicitResourcesConfig.getResource().ram);
 
     Assert.assertEquals(4 * instanceDiskDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceDiskDefault))
             + 3 * instanceDiskDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlanNoExplicitResourcesConfig.resource.disk);
+        packingPlanNoExplicitResourcesConfig.getResource().disk);
   }
 
   /**
@@ -181,7 +181,7 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topology);
 
-    Assert.assertEquals(packingPlan.containers.size(), numContainers);
+    Assert.assertEquals(packingPlan.getContainers().size(), numContainers);
 
     //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
     //consists of 2 spouts and 1 bolt (3 instances)
@@ -190,21 +190,21 @@ public class ResourceCompliantRRPackingTest {
             + Math.round(3 * instanceCpuDefault
             + padding / 100.0 * (3 * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlan.resource.cpu);
+        (long) packingPlan.getResource().cpu);
 
     Assert.assertEquals((4 * instanceRamDefault)
             + (long) ((padding / 100.0) * (4 * instanceRamDefault))
             + 3 * instanceRamDefault
             + (long) ((padding / 100.0) * (3 * instanceRamDefault))
             + instanceRamDefault,
-        packingPlan.resource.ram);
+        packingPlan.getResource().ram);
 
     Assert.assertEquals(4 * instanceDiskDefault
             + (long) ((padding / 100.0) * (4 * instanceDiskDefault))
             + 3 * instanceDiskDefault
             + (long) ((padding / 100.0) * (3 * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlan.resource.disk);
+        packingPlan.getResource().disk);
   }
 
   /**
@@ -233,42 +233,42 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlanExplicitResourcesConfig =
         getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
 
-    Assert.assertEquals(packingPlanExplicitResourcesConfig.containers.size(), numContainers);
+    Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), numContainers);
 
     Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
             + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault
             + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.resource.cpu);
+        (long) packingPlanExplicitResourcesConfig.getResource().cpu);
 
     Assert.assertEquals(totalInstances * instanceRamDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault)
             + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.resource.ram);
+        packingPlanExplicitResourcesConfig.getResource().ram);
 
     Assert.assertEquals(totalInstances * instanceDiskDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault)
             + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.resource.disk);
+        packingPlanExplicitResourcesConfig.getResource().disk);
 
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.containers.values()) {
+        : packingPlanExplicitResourcesConfig.getContainers().values()) {
       Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
               + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault),
-          (long) containerPlan.resource.cpu);
+          (long) containerPlan.getResource().cpu);
 
       Assert.assertEquals(totalInstances * instanceRamDefault
               + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault),
-          containerPlan.resource.ram);
+          containerPlan.getResource().ram);
 
       Assert.assertEquals(totalInstances * instanceDiskDefault
               + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault),
-          containerPlan.resource.disk);
+          containerPlan.getResource().disk);
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
       Set<Resource> resources = new HashSet<>();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        resources.add(instancePlan.resource);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        resources.add(instancePlan.getResource());
       }
 
       Assert.assertEquals(1, resources.size());
@@ -301,7 +301,7 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlanExplicitResourcesConfig =
         getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
 
-    Assert.assertEquals(packingPlanExplicitResourcesConfig.containers.size(), numContainers);
+    Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), numContainers);
 
     //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
     //consists of 2 spouts and 1 bolt (3 instances)
@@ -310,27 +310,27 @@ public class ResourceCompliantRRPackingTest {
             + Math.round(3 * instanceCpuDefault
             + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.resource.cpu);
+        (long) packingPlanExplicitResourcesConfig.getResource().cpu);
 
     Assert.assertEquals((4 * instanceRamDefault)
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceRamDefault))
             + 3 * instanceRamDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceRamDefault))
             + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.resource.ram);
+        packingPlanExplicitResourcesConfig.getResource().ram);
 
     Assert.assertEquals(4 * instanceDiskDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceDiskDefault))
             + 3 * instanceDiskDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.resource.disk);
+        packingPlanExplicitResourcesConfig.getResource().disk);
 
     // Ram for bolt/spout should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.containers.values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        Assert.assertEquals(instanceRamDefault, instancePlan.resource.ram);
+        : packingPlanExplicitResourcesConfig.getContainers().values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        Assert.assertEquals(instanceRamDefault, instancePlan.getResource().ram);
       }
     }
   }
@@ -365,15 +365,15 @@ public class ResourceCompliantRRPackingTest {
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.containers.values()) {
+        : packingPlanExplicitRamMap.getContainers().values()) {
       // The containerRam should be ignored, since we set the complete component ram map
-      Assert.assertNotEquals(containerRam, containerPlan.resource.ram);
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.resource.ram);
+      Assert.assertNotEquals(containerRam, containerPlan.getResource().ram);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
+          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
         }
-        if (instancePlan.componentName.equals(SPOUT_NAME)) {
-          Assert.assertEquals(instanceRamDefault, instancePlan.resource.ram);
+        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
+          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().ram);
         }
       }
     }
@@ -410,14 +410,14 @@ public class ResourceCompliantRRPackingTest {
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.containers.values()) {
-      Assert.assertNotEquals(containerRam, containerPlan.resource.ram);
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.resource.ram);
+        : packingPlanExplicitRamMap.getContainers().values()) {
+      Assert.assertNotEquals(containerRam, containerPlan.getResource().ram);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
+          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
         }
-        if (instancePlan.componentName.equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.resource.ram);
+        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
+          Assert.assertEquals(spoutRam, instancePlan.getResource().ram);
         }
       }
     }
@@ -445,7 +445,7 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topology);
-    Assert.assertEquals(packingPlan.containers.size(), 4);
+    Assert.assertEquals(packingPlan.getContainers().size(), 4);
 
     //The first 3 containers consist of 1 spout and 1 bolt (2 instances) and the fourth container
     //consists of 1 spout (1 instance)
@@ -458,7 +458,7 @@ public class ResourceCompliantRRPackingTest {
             + Math.round(HERON_INTERNAL_CONTAINERS * instanceCpuDefault
             + DEFAULT_CONTAINER_PADDING / 100.0 * (HERON_INTERNAL_CONTAINERS * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlan.resource.cpu);
+        (long) packingPlan.getResource().cpu);
 
     Assert.assertEquals(2 * instanceRamDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
@@ -470,7 +470,7 @@ public class ResourceCompliantRRPackingTest {
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0)
             * (HERON_INTERNAL_CONTAINERS * instanceRamDefault))
             + instanceRamDefault,
-        packingPlan.resource.ram);
+        packingPlan.getResource().ram);
 
     Assert.assertEquals(2 * instanceDiskDefault
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
@@ -482,7 +482,7 @@ public class ResourceCompliantRRPackingTest {
             + (long) ((DEFAULT_CONTAINER_PADDING / 100.0)
             * (HERON_INTERNAL_CONTAINERS * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlan.resource.disk);
+        packingPlan.getResource().disk);
   }
 
   /**
@@ -513,7 +513,7 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
-    Assert.assertEquals(packingPlan.containers.size(), 7);
+    Assert.assertEquals(packingPlan.getContainers().size(), 7);
   }
 
   /**
@@ -535,14 +535,14 @@ public class ResourceCompliantRRPackingTest {
     // Two components
     Assert.assertEquals(2 * componentParallelism, numInstance);
     PackingPlan output = getResourceCompliantRRPackingPlan(topology);
-    Assert.assertEquals(numContainers, output.containers.size());
+    Assert.assertEquals(numContainers, output.getContainers().size());
 
-    for (PackingPlan.ContainerPlan container : output.containers.values()) {
-      Assert.assertEquals(numInstance / numContainers, container.instances.size());
+    for (PackingPlan.ContainerPlan container : output.getContainers().values()) {
+      Assert.assertEquals(numInstance / numContainers, container.getInstances().size());
       Assert.assertEquals(
-          2, countComponent("spout", container.instances));
+          2, countComponent("spout", container.getInstances()));
       Assert.assertEquals(
-          2, countComponent("bolt", container.instances));
+          2, countComponent("bolt", container.getInstances()));
     }
   }
 }

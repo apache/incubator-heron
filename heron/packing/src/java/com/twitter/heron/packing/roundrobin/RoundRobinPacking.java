@@ -88,9 +88,8 @@ public class RoundRobinPacking implements IPacking {
   protected long instanceDiskDefault;
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
-
+  public void initialize(Config config, TopologyAPI.Topology inputTopology) {
+    this.topology = inputTopology;
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
@@ -343,13 +342,13 @@ public class RoundRobinPacking implements IPacking {
    * @return true if it is valid. Otherwise return false
    */
   protected boolean isValidPackingPlan(PackingPlan plan) {
-    for (PackingPlan.ContainerPlan containerPlan : plan.containers.values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
+    for (PackingPlan.ContainerPlan containerPlan : plan.getContainers().values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances().values()) {
         // Safe check
-        if (instancePlan.resource.ram < MIN_RAM_PER_INSTANCE) {
+        if (instancePlan.getResource().ram < MIN_RAM_PER_INSTANCE) {
           LOG.severe(String.format(
               "Require at least %dMB ram. Given on %d MB",
-              MIN_RAM_PER_INSTANCE / Constants.MB, instancePlan.resource.ram / Constants.MB));
+              MIN_RAM_PER_INSTANCE / Constants.MB, instancePlan.getResource().ram / Constants.MB));
 
           return false;
         }

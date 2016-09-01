@@ -75,7 +75,7 @@ public class SlurmScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    if (packing == null || packing.containers.isEmpty()) {
+    if (packing == null || packing.getContainers().isEmpty()) {
       LOG.log(Level.SEVERE, "No container requested. Can't schedule");
       return false;
     }
