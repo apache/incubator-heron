@@ -20,14 +20,22 @@
 
     <packaging>jar</packaging>
     <groupId>org.apache.storm</groupId>
-    <artifactId>storm-kafka</artifactId>
+    <artifactId>kafka-spout</artifactId>
     <version>SNAPSHOT</version>
-    <name>storm-kafka</name>
-    <description>Storm Spouts for Apache Kafka</description>
+    <name>kafka-spout</name>
+    <description>Spouts for Apache Kafka</description>
 
     <build>
         <plugins>
-            <plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <configuration>
+                   <source>1.7</source>
+                   <target>1.7</target>
+               </configuration>
+           </plugin>
+           <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.7.2.201409121644</version>
@@ -48,8 +56,8 @@
                 </executions>
             </plugin>
         </plugins>
-        <sourceDirectory>src/jvm</sourceDirectory>
-        <testSourceDirectory>src/test</testSourceDirectory>
+        <sourceDirectory>src/java</sourceDirectory>
+        <testSourceDirectory>tests/java</testSourceDirectory>
     </build>
     <dependencies>
         <dependency>
