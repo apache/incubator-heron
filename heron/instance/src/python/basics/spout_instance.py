@@ -19,7 +19,7 @@ import collections
 
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
-from heron.common.src.python.utils.metrics import SpoutMetrics
+from heron.common.src.python.utils.metrics import global_metrics, SpoutMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import topology_pb2, tuple_pb2
 from heron.pyheron.src.python import Stream
@@ -64,6 +64,11 @@ class SpoutInstance(BaseInstance):
     self.spout_metrics.register_metrics(context, self.sys_config)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
+
+    # prepare global metrics
+    interval = float(self.sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+    collector = context.get_metrics_collector()
+    global_metrics.init(collector, interval)
 
     # prepare for custom grouping
     self.pplan_helper.prepare_custom_grouping(context)

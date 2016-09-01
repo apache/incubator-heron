@@ -20,6 +20,7 @@ from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.network import SingleThreadStmgrClient, MetricsManagerClient
 import heron.common.src.python.constants as constants
 import heron.common.tests.python.mock_protobuf as mock_protobuf
+from mock import Mock
 
 class MockSTStmgrClient(SingleThreadStmgrClient):
   HOST = '127.0.0.1'
@@ -48,10 +49,12 @@ class MockMetricsManagerClient(MetricsManagerClient):
   PORT = 9000
   def __init__(self):
     socket_options = SocketOptions(32768, 16, 32768, 16, 1024000, 1024000)
-    sys_config = {constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC: 10}
+    sys_config = {constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC: 10,
+                  constants.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC: 10}
+    stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     MetricsManagerClient.__init__(self, EventLooper(), self.HOST, self.PORT,
-                                  mock_protobuf.get_mock_instance(), HeronCommunicator(), {},
-                                  socket_options, sys_config)
+                                  mock_protobuf.get_mock_instance(), HeronCommunicator(),
+                                  stream, stream, {}, socket_options, Mock(), sys_config)
     self.register_req_called = False
 
   def _send_register_req(self):
