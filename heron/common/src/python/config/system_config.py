@@ -13,7 +13,7 @@
 # limitations under the License.
 ''' sys_config '''
 # pylint: disable=global-statement
-sys_config = None
+sys_config = {}
 
 def set_sys_config(config):
   global sys_config
