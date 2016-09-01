@@ -48,7 +48,7 @@ HERON_TMASTER = 'heron-tmaster'
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
 # pylint: disable=too-many-return-statements, too-many-branches,
-# pylint: disable=too-many-statements too-many-locals
+# pylint: disable=too-many-statements, too-many-locals
 def runTest(test, topologyName, params):
   ''' Runs the test for one topology '''
   #submit topology
@@ -158,7 +158,7 @@ def runTest(test, topologyName, params):
       instance_count = len(instances)
       if instance_count != expected_instance_count:
         logging.error("Found %s instances but expected %s: %s" %
-                  (instance_count, expected_instance_count, instances))
+                      (instance_count, expected_instance_count, instances))
         return False
 
       return True
