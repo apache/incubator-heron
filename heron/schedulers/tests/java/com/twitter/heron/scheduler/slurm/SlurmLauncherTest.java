@@ -15,7 +15,7 @@
 package com.twitter.heron.scheduler.slurm;
 
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class SlurmLauncherTest {
     PackingPlan plan =
         new PackingPlan(
             "plan.id",
-            new HashMap<String, PackingPlan.ContainerPlan>(),
+            new HashSet<PackingPlan.ContainerPlan>(),
             Mockito.mock(Resource.class));
 
     PowerMockito.spy(SlurmContext.class);

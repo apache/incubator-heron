@@ -14,7 +14,7 @@
 
 package com.twitter.heron.packing;
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
@@ -32,7 +32,7 @@ public class NullPacking implements IPacking {
   public PackingPlan pack() {
     return new PackingPlan(
         "",
-        new HashMap<String, PackingPlan.ContainerPlan>(),
+        new HashSet<PackingPlan.ContainerPlan>(),
         new Resource(0.0, 0L, 0L));
   }
 

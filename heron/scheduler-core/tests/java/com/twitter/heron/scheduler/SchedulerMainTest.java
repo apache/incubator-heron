@@ -15,8 +15,9 @@
 package com.twitter.heron.scheduler;
 
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -120,11 +121,10 @@ public class SchedulerMainTest {
 
   // TODO reuse PackingTestUtils.createTestProtoPackingPlan once PR#1321 is merged
   private SettableFuture<PackingPlans.PackingPlan> getTestPacking() {
-    Map<String, PackingPlan.InstancePlan> instances = new HashMap<>();
-    instances.put("1:1:1:1",
-        new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-    containers.put("1", new PackingPlan.ContainerPlan("1", instances, new Resource(1, 1, 1)));
+    Set<PackingPlan.InstancePlan> instances = new HashSet<>();
+    instances.add(new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(new PackingPlan.ContainerPlan("1", instances, new Resource(1, 1, 1)));
     PackingPlan packingPlan = new PackingPlan("packing-id", containers, new Resource(1, 1, 1));
     final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
     future.set(new PackingPlanProtoSerializer().toProto(packingPlan));

@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -155,12 +154,12 @@ public class HeronMasterDriver {
    */
   void scheduleHeronWorkers(PackingPlan topologyPacking) throws ContainerAllocationException {
     this.packing = topologyPacking;
-    for (Entry<String, ContainerPlan> entry : topologyPacking.getContainers().entrySet()) {
-      Resource reqResource = entry.getValue().getResource();
+    for (ContainerPlan containerPlan : topologyPacking.getContainers()) {
+      Resource reqResource = containerPlan.getResource();
 
       int mem = getMemInMBForExecutor(reqResource);
       int cores = getCpuForExecutor(reqResource);
-      launchContainerForExecutor(entry.getKey(), cores, mem);
+      launchContainerForExecutor(containerPlan.getId(), cores, mem);
     }
   }
 
@@ -187,12 +186,12 @@ public class HeronMasterDriver {
     Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(id);
     if (!worker.isPresent()) {
       LOG.log(Level.WARNING, "Requesting a new container for: {0}", id);
-      ContainerPlan containerPlan = packing.getContainers().get(id);
-      if (containerPlan == null) {
+      Optional<ContainerPlan> containerPlan = packing.getContainer(id);
+      if (!containerPlan.isPresent()) {
         throw new IllegalArgumentException(
             String.format("There is no container for %s in packing plan.", id));
       }
-      Resource resource = containerPlan.getResource();
+      Resource resource = containerPlan.get().getResource();
       worker = Optional.of(
           new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource)));
     } else {

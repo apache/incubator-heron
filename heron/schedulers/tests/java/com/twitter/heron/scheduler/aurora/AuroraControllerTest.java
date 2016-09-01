@@ -83,7 +83,7 @@ public class AuroraControllerTest {
     List<String> expectedCommand =
         new ArrayList<>(Arrays.asList("aurora", "job", "killall",
             String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME),
-            VERBOSE_CONFIG, BATCH_CONFIG, "" + Integer.MAX_VALUE));
+            VERBOSE_CONFIG, BATCH_CONFIG, Integer.toString(Integer.MAX_VALUE)));
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
@@ -102,7 +102,7 @@ public class AuroraControllerTest {
     List<String> expectedCommand =
         new ArrayList<>(Arrays.asList("aurora", "job", "restart",
             String.format("%s/%s/%s/%s/%d", CLUSTER, ROLE, ENV, JOB_NAME, containerId),
-            VERBOSE_CONFIG, BATCH_CONFIG, "" + Integer.MAX_VALUE));
+            VERBOSE_CONFIG, BATCH_CONFIG, Integer.toString(Integer.MAX_VALUE)));
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));

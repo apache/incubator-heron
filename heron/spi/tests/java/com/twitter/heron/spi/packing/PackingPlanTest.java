@@ -16,8 +16,10 @@ package com.twitter.heron.spi.packing;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,13 +31,13 @@ public class PackingPlanTest {
     Resource resource =
         new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
     for (Map.Entry<String, List<String>> entry : basePacking.entrySet()) {
       String containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
 
-      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+      Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
       for (String instanceId : instanceList) {
         String componentName = instanceId.split(":")[1];
@@ -47,16 +49,16 @@ public class PackingPlanTest {
         }
         PackingPlan.InstancePlan instancePlan =
             new PackingPlan.InstancePlan(instanceId, componentName, instanceResource);
-        instancePlanMap.put(instanceId, instancePlan);
+        instancePlans.add(instancePlan);
       }
 
       PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+          new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
 
-      containerPlanMap.put(containerId, containerPlan);
+      containerPlans.add(containerPlan);
     }
 
-    return new PackingPlan("", containerPlanMap, resource);
+    return new PackingPlan("", containerPlans, resource);
   }
 
   @Test

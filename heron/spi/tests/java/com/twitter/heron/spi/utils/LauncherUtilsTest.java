@@ -14,8 +14,8 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,14 +67,14 @@ public class LauncherUtilsTest {
     Assert.assertNull(Runtime.instanceDistribution(runtime));
     Assert.assertNull(Runtime.componentRamMap(runtime));
 
-    Map<String, PackingPlan.ContainerPlan> containerMap = new HashMap<>();
-    containerMap.put("1", null);
-    containerMap.put("2", null);
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
+    containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
 
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);
     Mockito.when(mockPacking.getInstanceDistribution()).thenReturn("instances");
     Mockito.when(mockPacking.getComponentRamDistribution()).thenReturn("ramMap");
-    Mockito.when(mockPacking.getContainers()).thenReturn(containerMap);
+    Mockito.when(mockPacking.getContainers()).thenReturn(containers);
 
     Config newRuntime = LauncherUtils.getInstance()
         .createConfigWithPackingDetails(runtime, mockPacking);

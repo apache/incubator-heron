@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.twitter.heron.spi.packing;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.twitter.heron.proto.system.PackingPlans;
 
@@ -24,9 +24,9 @@ import com.twitter.heron.proto.system.PackingPlans;
 public class PackingPlanProtoDeserializer {
 
   public PackingPlan fromProto(PackingPlans.PackingPlan packingPlan) {
-    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     for (PackingPlans.ContainerPlan containerPlan : packingPlan.getContainerPlansList()) {
-      containers.put(containerPlan.getId(), convert(containerPlan));
+      containers.add(convert(containerPlan));
     }
 
     return new PackingPlan(
@@ -36,9 +36,9 @@ public class PackingPlanProtoDeserializer {
   }
 
   private PackingPlan.ContainerPlan convert(PackingPlans.ContainerPlan containerPlan) {
-    Map<String, PackingPlan.InstancePlan> instances = new HashMap<>();
+    Set<PackingPlan.InstancePlan> instances = new HashSet<>();
     for (PackingPlans.InstancePlan instancePlan : containerPlan.getInstancePlansList()) {
-      instances.put(instancePlan.getId(), convert(instancePlan));
+      instances.add(convert(instancePlan));
     }
 
     return new PackingPlan.ContainerPlan(
