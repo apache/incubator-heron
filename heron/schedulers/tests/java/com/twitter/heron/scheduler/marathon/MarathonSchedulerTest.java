@@ -78,7 +78,7 @@ public class MarathonSchedulerTest {
             PACKING_PLAN_ID,
             new HashMap<String, PackingPlan.ContainerPlan>(),
             Mockito.mock(Resource.class));
-    Assert.assertTrue(pplan.containers.isEmpty());
+    Assert.assertTrue(pplan.getContainers().isEmpty());
     // Fail to schedule due to PackingPlan is empty
     Assert.assertFalse(scheduler.onSchedule(pplan));
 

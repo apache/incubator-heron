@@ -82,7 +82,7 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    if (packing == null || packing.containers.isEmpty()) {
+    if (packing == null || packing.getContainers().isEmpty()) {
       LOG.severe("No container requested. Can't schedule");
       return false;
     }
@@ -166,7 +166,7 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
     // Align the cpu, ram, disk to the maximal one
     Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Update total topology resource requirement on Aurora clusters
-    packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
+    packing.getResource().ram = containerResource.ram * (packing.getContainers().size() + 1);
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());

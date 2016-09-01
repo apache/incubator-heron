@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class PackingPlan {
-  public final String id;
-  public final Map<String, ContainerPlan> containers;
-  public final Resource resource;
+  private final String id;
+  private final Map<String, ContainerPlan> containers;
+  private final Resource resource;
 
   private final Set<ContainerPlan> containerSet;
 
@@ -31,66 +31,6 @@ public class PackingPlan {
     this.containers = containers;
     this.resource = resource;
     containerSet = new HashSet<>(containers.values());
-  }
-
-  @Override
-  public String toString() {
-    return String.format("{plan-id: %s, containers-list: %s, plan-resource: %s}",
-        id, containers.toString(), resource);
-  }
-
-  public Integer getInstanceCount() {
-    Integer totalInstances = 0;
-    for (Integer count : getComponentCounts().values()) {
-      totalInstances += count;
-    }
-    return totalInstances;
-  }
-
-  /**
-   * Return a map containing the count of all of the components, keyed by name
-   */
-  public Map<String, Integer> getComponentCounts() {
-    Map<String, Integer> componentCounts = new HashMap<>();
-    for (ContainerPlan containerPlan : containers.values()) {
-      for (InstancePlan instancePlan : containerPlan.instances.values()) {
-        Integer count = 0;
-        if (componentCounts.containsKey(instancePlan.componentName)) {
-          count = componentCounts.get(instancePlan.componentName);
-        }
-        componentCounts.put(instancePlan.componentName, ++count);
-      }
-    }
-    return componentCounts;
-  }
-
-  /**
-   * Get the String describing instance distribution from PackingPlan, used by executor
-   *
-   * @return String describing instance distribution
-   */
-  public String getInstanceDistribution() {
-    StringBuilder[] containerBuilder = new StringBuilder[this.containers.size()];
-    for (PackingPlan.ContainerPlan container : this.containers.values()) {
-      int index = Integer.parseInt(container.id);
-      containerBuilder[index - 1] = new StringBuilder();
-
-      for (PackingPlan.InstancePlan instance : container.instances.values()) {
-        String[] tokens = instance.id.split(":");
-        containerBuilder[index - 1].append(
-            String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
-      }
-      containerBuilder[index - 1].deleteCharAt(containerBuilder[index - 1].length() - 1);
-    }
-
-    StringBuilder packingBuilder = new StringBuilder();
-    for (int i = 0; i < containerBuilder.length; ++i) {
-      StringBuilder builder = containerBuilder[i];
-      packingBuilder.append(String.format("%d:%s,", i + 1, builder.toString()));
-    }
-    packingBuilder.deleteCharAt(packingBuilder.length() - 1);
-
-    return packingBuilder.toString();
   }
 
   public String getId() {
@@ -110,8 +50,58 @@ public class PackingPlan {
     return this.containers;
   }
 
-  public Set<ContainerPlan> getContainerSet() {
-    return this.containerSet;
+  public Integer getInstanceCount() {
+    Integer totalInstances = 0;
+    for (Integer count : getComponentCounts().values()) {
+      totalInstances += count;
+    }
+    return totalInstances;
+  }
+
+  /**
+   * Return a map containing the count of all of the components, keyed by name
+   */
+  public Map<String, Integer> getComponentCounts() {
+    Map<String, Integer> componentCounts = new HashMap<>();
+    for (ContainerPlan containerPlan : getContainers().values()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        Integer count = 0;
+        if (componentCounts.containsKey(instancePlan.getComponentName())) {
+          count = componentCounts.get(instancePlan.getComponentName());
+        }
+        componentCounts.put(instancePlan.getComponentName(), ++count);
+      }
+    }
+    return componentCounts;
+  }
+
+  /**
+   * Get the String describing instance distribution from PackingPlan, used by executor
+   *
+   * @return String describing instance distribution
+   */
+  public String getInstanceDistribution() {
+    StringBuilder[] containerBuilder = new StringBuilder[this.getContainers().size()];
+    for (PackingPlan.ContainerPlan container : this.getContainers().values()) {
+      int index = Integer.parseInt(container.id);
+      containerBuilder[index - 1] = new StringBuilder();
+
+      for (PackingPlan.InstancePlan instance : container.getInstances().values()) {
+        String[] tokens = instance.getId().split(":");
+        containerBuilder[index - 1].append(
+            String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
+      }
+      containerBuilder[index - 1].deleteCharAt(containerBuilder[index - 1].length() - 1);
+    }
+
+    StringBuilder packingBuilder = new StringBuilder();
+    for (int i = 0; i < containerBuilder.length; ++i) {
+      StringBuilder builder = containerBuilder[i];
+      packingBuilder.append(String.format("%d:%s,", i + 1, builder.toString()));
+    }
+    packingBuilder.deleteCharAt(packingBuilder.length() - 1);
+
+    return packingBuilder.toString();
   }
 
   /**
@@ -123,9 +113,9 @@ public class PackingPlan {
   public String getComponentRamDistribution() {
     Map<String, Long> ramMap = new HashMap<>();
     // The implementation assumes instances for the same component require same ram
-    for (ContainerPlan containerPlan : this.containers.values()) {
-      for (InstancePlan instancePlan : containerPlan.instances.values()) {
-        ramMap.put(instancePlan.componentName, instancePlan.resource.ram);
+    for (ContainerPlan containerPlan : this.getContainers().values()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances().values()) {
+        ramMap.put(instancePlan.getComponentName(), instancePlan.getResource().ram);
       }
     }
 
@@ -138,6 +128,12 @@ public class PackingPlan {
     // Remove the duplicated "," at the end
     ramMapBuilder.deleteCharAt(ramMapBuilder.length() - 1);
     return ramMapBuilder.toString();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("{plan-id: %s, containers-list: %s, plan-resource: %s}",
+        getId(), getContainers().toString(), getResource());
   }
 
   @Override
@@ -165,14 +161,26 @@ public class PackingPlan {
   }
 
   public static class InstancePlan {
-    public final String id;
-    public final String componentName;
-    public final Resource resource;
+    private final String id;
+    private final String componentName;
+    private final Resource resource;
 
     public InstancePlan(String id, String componentName, Resource resource) {
       this.id = id;
       this.componentName = componentName;
       this.resource = resource;
+    }
+
+    public String getId() {
+      return id;
+    }
+
+    public String getComponentName() {
+      return componentName;
+    }
+
+    public Resource getResource() {
+      return resource;
     }
 
     @Override
@@ -186,30 +194,30 @@ public class PackingPlan {
 
       InstancePlan that = (InstancePlan) o;
 
-      return id.equals(that.id)
-          && componentName.equals(that.componentName)
-          && resource.equals(that.resource);
+      return getId().equals(that.getId())
+          && getComponentName().equals(that.getComponentName())
+          && getResource().equals(that.getResource());
     }
 
     @Override
     public int hashCode() {
-      int result = id.hashCode();
-      result = 31 * result + componentName.hashCode();
-      result = 31 * result + resource.hashCode();
+      int result = getId().hashCode();
+      result = 31 * result + getComponentName().hashCode();
+      result = 31 * result + getResource().hashCode();
       return result;
     }
 
     @Override
     public String toString() {
       return String.format("{instance-id: %s, componentName: %s, instance-resource: %s}",
-          id, componentName, resource.toString());
+          getId(), getComponentName(), getResource().toString());
     }
   }
 
   public static class ContainerPlan {
-    public final String id;
-    public final Map<String, InstancePlan> instances;
-    public final Resource resource;
+    private final String id;
+    private final Map<String, InstancePlan> instances;
+    private final Resource resource;
 
     public ContainerPlan(String id,
                          Map<String, InstancePlan> instances,
@@ -221,6 +229,14 @@ public class PackingPlan {
 
     public String getId() {
       return id;
+    }
+
+    public Map<String, InstancePlan> getInstances() {
+      return instances;
+    }
+
+    public Resource getResource() {
+      return resource;
     }
 
     @Override
@@ -235,22 +251,22 @@ public class PackingPlan {
       ContainerPlan that = (ContainerPlan) o;
 
       return id.equals(that.id)
-          && instances.equals(that.instances)
-          && resource.equals(that.resource);
+          && getInstances().equals(that.getInstances())
+          && getResource().equals(that.getResource());
     }
 
     @Override
     public int hashCode() {
       int result = id.hashCode();
-      result = 31 * result + instances.hashCode();
-      result = 31 * result + resource.hashCode();
+      result = 31 * result + getInstances().hashCode();
+      result = 31 * result + getResource().hashCode();
       return result;
     }
 
     @Override
     public String toString() {
       return String.format("{container-id: %s, instances-list: %s, container-resource: %s}",
-          id, instances.toString(), resource);
+          id, getInstances().toString(), getResource());
     }
   }
 }

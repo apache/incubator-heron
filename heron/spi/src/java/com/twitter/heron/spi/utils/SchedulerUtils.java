@@ -435,8 +435,8 @@ public final class SchedulerUtils {
   public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
     Resource maxResource = new Resource(0, 0, 0);
 
-    for (PackingPlan.ContainerPlan entry : packingPlan.containers.values()) {
-      Resource resource = entry.resource;
+    for (PackingPlan.ContainerPlan entry : packingPlan.getContainers().values()) {
+      Resource resource = entry.getResource();
       maxResource.ram = Math.max(maxResource.ram, resource.ram);
       maxResource.cpu = Math.max(maxResource.cpu, resource.cpu);
       maxResource.disk = Math.max(maxResource.disk, resource.disk);

@@ -62,7 +62,7 @@ public class MarathonScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    if (packing == null || packing.containers.isEmpty()) {
+    if (packing == null || packing.getContainers().isEmpty()) {
       LOG.severe("No container requested. Can't schedule");
       return false;
     }
@@ -107,7 +107,7 @@ public class MarathonScheduler implements IScheduler {
     // Align resources to maximal requested resource
     Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Add ram for tmaster container
-    packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
+    packing.getResource().ram = containerResource.ram * (packing.getContainers().size() + 1);
 
     // Create app conf list for each container
     ArrayNode instances = mapper.createArrayNode();
