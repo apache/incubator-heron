@@ -39,39 +39,6 @@ public abstract class FileSystemStateManager implements IStateManager {
   // Store the root address of the hierarchical file system
   protected String rootAddress;
 
-  protected enum StateLocation {
-    TMASTER_LOCATION("tmasters", "TMaster location"),
-    TOPOLOGY("topologies", "Topologies"),
-    PACKING_PLAN("packingplans", "Packing plan"),
-    PHYSICAL_PLAN("pplans", "Physical plan"),
-    EXECUTION_STATE("executionstate", "Execution state"),
-    SCHEDULER_LOCATION("schedulers", "Scheduler location");
-
-    private final String dir;
-    private final String name;
-
-    StateLocation(String dir, String name) {
-      this.dir = dir;
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getDirectory(String root) {
-      return concatPath(root, dir);
-    }
-
-    public String getNodePath(String root, String topology) {
-      return concatPath(getDirectory(root), topology);
-    }
-
-    private static String concatPath(String basePath, String appendPath) {
-      return String.format("%s/%s", basePath, appendPath);
-    }
-  }
-
   protected abstract ListenableFuture<Boolean> nodeExists(String path);
 
   protected abstract ListenableFuture<Boolean> deleteNode(String path);

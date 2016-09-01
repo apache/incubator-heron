@@ -217,20 +217,11 @@ public class SchedulerStateManagerAdaptor {
   public void cleanState(String topologyName) {
     LOG.fine("Cleaning up topology state");
 
-    logDeleteStatus(deleteTMasterLocation(topologyName), "topology master");
-    logDeleteStatus(deletePackingPlan(topologyName), "packing plan");
-    logDeleteStatus(deletePhysicalPlan(topologyName), "physical plan");
-    logDeleteStatus(deleteSchedulerLocation(topologyName), "scheduler");
-    logDeleteStatus(deleteExecutionState(topologyName), "execution state");
-    logDeleteStatus(deleteTopology(topologyName), "topology definition");
+    for (IStateManager.StateLocation stateLocation : IStateManager.StateLocation.values()) {
+      stateLocation.delete(delegate, topologyName);
+    }
 
     LOG.fine("Cleaned up topology state");
-  }
-
-  private void logDeleteStatus(Boolean success, String name) {
-    if (success == null || !success) {
-      LOG.warning("Failed to clear state for " + name);
-    }
   }
 
   /**

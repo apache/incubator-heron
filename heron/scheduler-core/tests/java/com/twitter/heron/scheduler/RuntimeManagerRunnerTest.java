@@ -109,15 +109,9 @@ public class RuntimeManagerRunnerTest {
     Assert.assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
     Mockito.verify(client).killTopology(killTopologyRequest);
 
-    // Failed to clean states
-    Mockito.when(client.killTopology(killTopologyRequest)).thenReturn(true);
-    Mockito.doReturn(false).when(adaptor).cleanState(Mockito.eq(TOPOLOGY_NAME));
-    Assert.assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
-    Mockito.verify(client, Mockito.times(2)).killTopology(killTopologyRequest);
-
     // Success case
-    Mockito.doReturn(true).when(adaptor).cleanState(Mockito.eq(TOPOLOGY_NAME));
+    Mockito.doReturn(true).when(client).killTopology(killTopologyRequest);
     Assert.assertTrue(runner.killTopologyHandler(TOPOLOGY_NAME));
-    Mockito.verify(client, Mockito.times(3)).killTopology(killTopologyRequest);
+    Mockito.verify(client, Mockito.times(2)).killTopology(killTopologyRequest);
   }
 }
