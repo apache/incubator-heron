@@ -35,4 +35,12 @@ public interface ISchedulerClient {
    * @return true if killed successfully
    */
   boolean killTopology(Scheduler.KillTopologyRequest killTopologyRequest);
+
+  /**
+   * Update a topology on given UpdateTopologyRequest
+   *
+   * @param updateTopologyRequest info for update command
+   * @return true if updated successfully
+   */
+  boolean updateTopology(Scheduler.UpdateTopologyRequest updateTopologyRequest);
 }

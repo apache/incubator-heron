@@ -14,8 +14,6 @@
 
 package com.twitter.heron.scheduler.client;
 
-import java.util.logging.Logger;
-
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
@@ -25,8 +23,6 @@ import com.twitter.heron.spi.scheduler.IScheduler;
  * This class manages topology by invoking IScheduler's interface directly as a library.
  */
 public class LibrarySchedulerClient implements ISchedulerClient {
-  private static final Logger LOG = Logger.getLogger(LibrarySchedulerClient.class.getName());
-
   private final Config config;
   private final Config runtime;
   private final IScheduler scheduler;
@@ -58,6 +54,20 @@ public class LibrarySchedulerClient implements ISchedulerClient {
     try {
       scheduler.initialize(config, runtime);
       ret = scheduler.onKill(killTopologyRequest);
+    } finally {
+      SysUtils.closeIgnoringExceptions(scheduler);
+    }
+
+    return ret;
+  }
+
+  @Override
+  public boolean updateTopology(Scheduler.UpdateTopologyRequest updateTopologyRequest) {
+    boolean ret = false;
+
+    try {
+      scheduler.initialize(config, runtime);
+      ret = scheduler.onUpdate(updateTopologyRequest);
     } finally {
       SysUtils.closeIgnoringExceptions(scheduler);
     }
