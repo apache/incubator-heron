@@ -291,3 +291,18 @@ maven_jar(
   name = "org_mockito_mockito_all",
   artifact = "org.mockito:mockito-all:1.10.19",
 )
+
+maven_jar(
+  name = "org_apache_kafka_kafka_210",
+  artifact = "org.apache.kafka:kafka_2.10:0.8.2.1",
+)
+
+maven_jar(
+  name = "org_apache_kafka_kafka_clients",
+  artifact = "org.apache.kafka:kafka-clients:0.8.2.1",
+)
+
+maven_jar(
+  name = "org_scala_lang_scala_library",
+  artifact = "org.scala-lang:scala-library:2.10.3",
+)
