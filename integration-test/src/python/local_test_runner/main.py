@@ -151,14 +151,14 @@ def runTest(test, topologyName, params):
     expected_instance_count = 5
     def assert_scaling():
       if 'result' not in physical_plan_json:
-        logging.error("Could not find result json in physical plan request to tracker: %s" % url)
+        logging.error("Could not find result json in physical plan request to tracker: %s", url)
         return False
 
       instances = physical_plan_json['result']['instances']
       instance_count = len(instances)
       if instance_count != expected_instance_count:
-        logging.error("Found %s instances but expected %s: %s" %
-                      (instance_count, expected_instance_count, instances))
+        logging.error("Found %s instances but expected %s: %s",
+                      instance_count, expected_instance_count, instances)
         return False
 
       return True

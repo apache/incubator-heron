@@ -29,21 +29,21 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
-import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.ScalableScheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
 
-public class LocalScheduler implements IScheduler, ScalableScheduler {
+public class LocalScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
   // executor service for monitoring all the containers
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
@@ -59,8 +59,7 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
-    this.updateTopologyManager =
-        new UpdateTopologyManager(runtime, Optional.<ScalableScheduler>of(this));
+    this.updateTopologyManager = new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
   }
 
   @Override
@@ -75,6 +74,7 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   /**
    * Start executor process via running an async shell process
    */
+  @VisibleForTesting
   protected Process startExecutorProcess(int container) {
     return ShellUtils.runASyncProcess(true,
         getExecutorCommand(container),
@@ -85,6 +85,7 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   /**
    * Start the executor for the given container
    */
+  @VisibleForTesting
   protected void startExecutor(final int container) {
     LOG.info("Starting a new executor for container: " + container);
 
@@ -102,6 +103,7 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   /**
    * Start the monitor of a given executor
    */
+  @VisibleForTesting
   protected void startExecutorMonitor(final int container, final Process containerExecutor) {
     // add the container for monitoring
     Runnable r = new Runnable() {
@@ -133,7 +135,7 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
     monitorService.submit(r);
   }
 
-  protected String[] getExecutorCommand(int container) {
+  private String[] getExecutorCommand(int container) {
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
     for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
       freePorts.add(SysUtils.getFreePort());
@@ -246,7 +248,6 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   @Override
   public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
     try {
-      TopologyAPI.Topology topology = Runtime.topology(runtime);
       updateTopologyManager.updateTopology(
           request.getCurrentPackingPlan(), request.getProposedPackingPlan());
     } catch (ExecutionException | InterruptedException e) {
@@ -271,18 +272,12 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void removeContainers(Set<PackingPlan.ContainerPlan> existingContainers,
-                               Set<PackingPlan.ContainerPlan> containersToRemove) {
+  public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     LOG.log(Level.INFO,
         "Kill {0} of {1} containers",
-        new Object[]{containersToRemove.size(), existingContainers.size()});
+        new Object[]{containersToRemove.size(), processToContainer.size()});
 
     synchronized (processToContainer) {
-      if (existingContainers.size() != processToContainer.size()) {
-        throw new RuntimeException(String.format("Container count error: expected %d != active %d",
-            existingContainers.size(), processToContainer.size()));
-      }
-
       // Create a inverse map to be able to get process instance from container id
       Map<Integer, Process> containerToProcessMap = new HashMap<>();
       for (Map.Entry<Process, Integer> entry : processToContainer.entrySet()) {
@@ -306,17 +301,17 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
     }
   }
 
-
+  @VisibleForTesting
   boolean isTopologyKilled() {
     return isTopologyKilled;
   }
 
-  // This method shall be used only for unit test
+  @VisibleForTesting
   ExecutorService getMonitorService() {
     return monitorService;
   }
 
-  // This method shall be used only for unit test
+  @VisibleForTesting
   Map<Process, Integer> getProcessToContainer() {
     return processToContainer;
   }

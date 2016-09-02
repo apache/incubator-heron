@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''Stream Manager client for single-thread heron instance in python'''
+from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
@@ -31,7 +32,7 @@ class SingleThreadStmgrClient(HeronClient):
   3. Handle relative response for requests
   """
   def __init__(self, looper, heron_instance_cls, strmgr_host, port, topology_name, topology_id,
-               instance, sock_map, gateway_metrics, socket_options, sys_config):
+               instance, sock_map, gateway_metrics, socket_options):
     HeronClient.__init__(self, looper, strmgr_host, port, sock_map, socket_options)
     self.heron_instance_cls = heron_instance_cls
     self.topology_name = topology_name
@@ -40,7 +41,7 @@ class SingleThreadStmgrClient(HeronClient):
     self.instance = instance
     self.gateway_metrics = gateway_metrics
     self._pplan_helper = None
-    self.sys_config = sys_config
+    self.sys_config = system_config.get_sys_config()
 
   # send register request
   def on_connect(self, status):

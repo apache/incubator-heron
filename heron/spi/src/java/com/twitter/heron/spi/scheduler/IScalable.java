@@ -11,26 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.twitter.heron.scheduler;
+package com.twitter.heron.spi.scheduler;
 
 import java.util.Set;
 
+import com.twitter.heron.classification.InterfaceAudience;
+import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.spi.packing.PackingPlan;
 
-public interface ScalableScheduler {
+/**
+ * Schedulers that implement {@code IScalable} support scaling topologies up or down by
+ * adding or removing containers.
+ */
+@InterfaceAudience.LimitedPrivate
+@InterfaceStability.Unstable
+public interface IScalable {
   /**
    * Requests new containers for scaling a topology
    *
-   * @param containers Set of containers to be added by the scheduler
+   * @param containersToAdd Set of containers to be added by the scheduler
    */
-  void addContainers(Set<PackingPlan.ContainerPlan> containers);
+  void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
 
   /**
-   * Requests containers to be released for down-scaling a topology
+   * Requests containers to be released for down-scaling a topology.
    *
-   * @param existingContainers Set of containers currently managed by the scheduler
    * @param containersToRemove Set of containers to be removed by the scheduler
    */
-  void removeContainers(Set<PackingPlan.ContainerPlan> existingContainers,
-                        Set<PackingPlan.ContainerPlan> containersToRemove);
+  void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);
 }

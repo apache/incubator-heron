@@ -29,27 +29,11 @@ import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.packing.Resource;
 
 /**
- * Packing utilities for for testing
+ * Packing utilities for testing
  */
 public final class PackingTestUtils {
 
   private PackingTestUtils() {
-  }
-
-  public static PackingPlan.ContainerPlan testContainerPlan(String containerId) {
-    Resource resource = new Resource(7.5, 6, 9);
-    Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
-    for (int index : new Integer[]{0, 1}) {
-      String instanceId = "instance-" + index;
-      String componentName = "componentName-" + index;
-      instancePlans.add(testInstancePlan(instanceId, componentName));
-    }
-    return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
-  }
-
-  private static PackingPlan.InstancePlan testInstancePlan(String id, String componentName) {
-    Resource resource = new Resource(1.5, 2, 3);
-    return new PackingPlan.InstancePlan(id, componentName, resource);
   }
 
   public static PackingPlan testPackingPlan(String topologyName, IPacking packing) {
@@ -80,5 +64,21 @@ public final class PackingTestUtils {
     PackingPlan plan = testPackingPlan(topologyName, packing);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     return serializer.toProto(plan);
+  }
+
+  public static PackingPlan.ContainerPlan testContainerPlan(String containerId) {
+    Resource resource = new Resource(7.5, 6, 9);
+    Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
+    for (int index : new Integer[]{0, 1}) {
+      String instanceId = "instance-" + index;
+      String componentName = "componentName-" + index;
+      instancePlans.add(testInstancePlan(instanceId, componentName));
+    }
+    return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
+  }
+
+  private static PackingPlan.InstancePlan testInstancePlan(String id, String componentName) {
+    Resource resource = new Resource(1.5, 2, 3);
+    return new PackingPlan.InstancePlan(id, componentName, resource);
   }
 }

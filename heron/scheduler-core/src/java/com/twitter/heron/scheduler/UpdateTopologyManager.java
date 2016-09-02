@@ -29,6 +29,7 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
+import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 
@@ -40,15 +41,15 @@ public class UpdateTopologyManager {
   private static final Logger LOG = Logger.getLogger(UpdateTopologyManager.class.getName());
 
   private Config runtime;
-  private Optional<ScalableScheduler> scalableScheduler;
+  private Optional<IScalable> scalableScheduler;
   private PackingPlanProtoDeserializer deserializer;
 
-  public UpdateTopologyManager(Config runtime, Optional<ScalableScheduler> scalableScheduler) {
+  public UpdateTopologyManager(Config runtime, Optional<IScalable> scalableScheduler) {
     this(runtime, scalableScheduler, new PackingPlanProtoDeserializer());
   }
 
   public UpdateTopologyManager(Config runtime,
-                               Optional<ScalableScheduler> scalableScheduler,
+                               Optional<IScalable> scalableScheduler,
                                PackingPlanProtoDeserializer deserializer) {
     this.runtime = runtime;
     this.scalableScheduler = scalableScheduler;
@@ -153,9 +154,7 @@ public class UpdateTopologyManager {
     logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
 
     if (removableContainerCount > 0) {
-      scalableScheduler.get().removeContainers(
-          existingPackingPlan.getContainers(),
-          containerDelta.getContainersToRemove());
+      scalableScheduler.get().removeContainers(containerDelta.getContainersToRemove());
     }
   }
 

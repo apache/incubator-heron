@@ -118,7 +118,7 @@ public class PackingPlan {
     // The implementation assumes instances for the same component require same ram
     for (ContainerPlan containerPlan : this.getContainers()) {
       for (InstancePlan instancePlan : containerPlan.getInstances()) {
-        ramMap.put(instancePlan.getComponentName(), instancePlan.getResource().ram);
+        ramMap.put(instancePlan.getComponentName(), instancePlan.getResource().getRam());
       }
     }
 

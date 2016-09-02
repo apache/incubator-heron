@@ -157,7 +157,7 @@ public class LocalSchedulerTest {
     PackingPlan.ContainerPlan containerToRemove =
         PackingTestUtils.testContainerPlan("" + (LOCAL_NUM_CONTAINER - 1));
     containersToRemove.add(containerToRemove);
-    scheduler.removeContainers(existingContainers, containersToRemove);
+    scheduler.removeContainers(containersToRemove);
     existingContainers.remove(containerToRemove);
     Assert.assertEquals(existingContainers.size(), scheduler.getProcessToContainer().size());
     Mockito.verify(processes[LOCAL_NUM_CONTAINER - 1]).destroy();
@@ -167,7 +167,7 @@ public class LocalSchedulerTest {
     containersToRemove.clear();
     containersToRemove.add(PackingTestUtils.testContainerPlan("1"));
     containersToRemove.add(PackingTestUtils.testContainerPlan("2"));
-    scheduler.removeContainers(existingContainers, containersToRemove);
+    scheduler.removeContainers(containersToRemove);
     existingContainers.remove(PackingTestUtils.testContainerPlan("1"));
     existingContainers.remove(PackingTestUtils.testContainerPlan("2"));
 

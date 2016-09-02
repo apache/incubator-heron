@@ -32,19 +32,19 @@ import com.google.common.base.Optional;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.ScalableScheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
-public class AuroraScheduler implements IScheduler, ScalableScheduler {
+public class AuroraScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(AuroraLauncher.class.getName());
 
   private Config config;
@@ -58,7 +58,7 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
     this.runtime = mRuntime;
     this.controller = getController();
     this.updateTopologyManager =
-        new UpdateTopologyManager(runtime, Optional.<ScalableScheduler>of(this));
+        new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
   }
 
   /**
@@ -137,9 +137,8 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void removeContainers(Set<PackingPlan.ContainerPlan> existingContainers,
-                               Set<PackingPlan.ContainerPlan> containersToRemove) {
-    controller.removeContainers(existingContainers.size(), containersToRemove.size());
+  public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
+    controller.removeContainers(containersToRemove);
   }
 
   /**
@@ -165,8 +164,6 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
 
     // Align the cpu, ram, disk to the maximal one
     Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
-    // Update total topology resource requirement on Aurora clusters
-    packing.getResource().ram = containerResource.ram * (packing.getContainers().size() + 1);
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
@@ -199,9 +196,9 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
     auroraProperties.put("SANDBOX_PYTHON_INSTANCE_BINARY",
         Context.pythonInstanceSandboxBinary(config));
 
-    auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
-    auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");
-    auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
+    auroraProperties.put("CPUS_PER_CONTAINER", Double.toString(containerResource.getCpu()));
+    auroraProperties.put("DISK_PER_CONTAINER", Long.toString(containerResource.getDisk()));
+    auroraProperties.put("RAM_PER_CONTAINER", Long.toString(containerResource.getRam()));
 
     auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
 

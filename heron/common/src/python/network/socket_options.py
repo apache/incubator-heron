@@ -16,14 +16,15 @@
 from collections import namedtuple
 from heron.common.src.python.utils.log import Log
 import heron.common.src.python.constants as const
+from heron.common.src.python.config import system_config
 
 SocketOptions = namedtuple('Options', 'nw_write_batch_size_bytes, nw_write_batch_time_ms, '
                                       'nw_read_batch_size_bytes, nw_read_batch_time_ms, '
                                       'sock_send_buf_size_bytes, sock_recv_buf_size_bytes')
 
-
-def create_socket_options(sys_config):
+def create_socket_options():
   """Creates SocketOptions object from a given sys_config dict"""
+  sys_config = system_config.get_sys_config()
   opt_list = [const.INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES,
               const.INSTANCE_NETWORK_WRITE_BATCH_TIME_MS,
               const.INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES,

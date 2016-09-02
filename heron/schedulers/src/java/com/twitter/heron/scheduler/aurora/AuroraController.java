@@ -18,8 +18,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
@@ -87,13 +91,14 @@ class AuroraController {
     return runProcess(auroraCmd);
   }
 
-  void removeContainers(Integer existingContainerCount, Integer count) {
-    String instancesToKill = getInstancesIdsToKill(existingContainerCount, count);
+  void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
+    String instancesToKill = getInstancesIdsToKill(containersToRemove);
     //aurora job kill <cluster>/<role>/<env>/<name>/<instance_ids>
     List<String> auroraCmd =
         new ArrayList<>(Arrays.asList("aurora", "job", "kill",
             jobSpec + "/" + instancesToKill));
-    LOG.info(String.format("Killing %s aurora containers: %s", count, auroraCmd));
+    LOG.info(String.format(
+        "Killing %s aurora containers: %s", containersToRemove.size(), auroraCmd));
     if (!runProcess(auroraCmd)) {
       throw new RuntimeException("Failed to kill freed aurora instances: " + instancesToKill);
     }
@@ -112,19 +117,20 @@ class AuroraController {
   }
 
   // Utils method for unit tests
+  @VisibleForTesting
   boolean runProcess(List<String> auroraCmd) {
     return 0 == ShellUtils.runProcess(
         isVerbose, auroraCmd.toArray(new String[auroraCmd.size()]),
         new StringBuilder(), new StringBuilder());
   }
 
-  private static String getInstancesIdsToKill(int totalCount, int numToKill) {
+  private static String getInstancesIdsToKill(Set<PackingPlan.ContainerPlan> containersToRemove) {
     StringBuilder ids = new StringBuilder();
-    for (int id = totalCount - numToKill + 1; id <= totalCount; id++) {
+    for (PackingPlan.ContainerPlan containerPlan : containersToRemove) {
       if (ids.length() > 0) {
         ids.append(",");
       }
-      ids.append(id);
+      ids.append(containerPlan.getId());
     }
     return ids.toString();
   }

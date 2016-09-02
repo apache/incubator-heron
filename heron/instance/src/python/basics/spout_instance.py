@@ -32,8 +32,8 @@ from .base_instance import BaseInstance
 class SpoutInstance(BaseInstance):
   """The base class for all heron spouts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
-    super(SpoutInstance, self).__init__(pplan_helper, in_stream, out_stream, looper, sys_config)
+  def __init__(self, pplan_helper, in_stream, out_stream, looper):
+    super(SpoutInstance, self).__init__(pplan_helper, in_stream, out_stream, looper)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if not self.pplan_helper.is_spout:
@@ -61,7 +61,7 @@ class SpoutInstance(BaseInstance):
 
   def start(self):
     context = self.pplan_helper.context
-    self.spout_metrics.register_metrics(context, self.sys_config)
+    self.spout_metrics.register_metrics(context)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
 

@@ -30,14 +30,13 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
+import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class UpdateTopologyManagerTest {
   @Test
   public void computesContainerDeltaAccurately() {
-    PackingPlan.ContainerPlan mockContainerPlan = Mockito.mock(PackingPlan.ContainerPlan.class);
-
     Set<PackingPlan.ContainerPlan> currentPlan = new HashSet<>();
     for (int i = 1; i < 5; i++) {
       currentPlan.add(PackingTestUtils.testContainerPlan("current-" + i));
@@ -90,7 +89,7 @@ public class UpdateTopologyManagerTest {
     Config mockRuntime = Mockito.mock(Config.class);
     Mockito.when(mockRuntime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(mockStateMgr);
 
-    ScalableScheduler mockScheduler = Mockito.mock(ScalableScheduler.class);
+    IScalable mockScheduler = Mockito.mock(IScalable.class);
 
     UpdateTopologyManager updateManager
         = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler), deserializer);
@@ -116,8 +115,7 @@ public class UpdateTopologyManagerTest {
     spyUpdateManager.updateTopology(currentPlan, proposedProtoPlan);
 
     Mockito.verify(mockScheduler).addContainers(containersToAdd);
-    Mockito.verify(mockScheduler).removeContainers(
-        currentPacking.getContainers(), containersToRemove);
+    Mockito.verify(mockScheduler).removeContainers(containersToRemove);
   }
 
 }

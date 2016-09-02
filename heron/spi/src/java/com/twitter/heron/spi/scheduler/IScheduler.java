@@ -14,9 +14,10 @@
 
 package com.twitter.heron.spi.scheduler;
 
-
 import java.util.List;
 
+import com.twitter.heron.classification.InterfaceAudience;
+import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -25,6 +26,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
  * Scheduler object responsible for bringing up topology. Will be instantiated using no-arg
  * constructor.
  */
+@InterfaceAudience.LimitedPrivate
+@InterfaceStability.Evolving
 public interface IScheduler extends AutoCloseable {
   /**
    * This will initialize scheduler using config file. Will be called during start.
