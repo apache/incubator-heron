@@ -172,8 +172,9 @@ public class UpdateTopologyManager {
    * For each of the components with changed parallelism we need to update the Topology configs to
    * represent the change.
    */
-  private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
-                                                    Map<String, Integer> proposedComponentCounts) {
+  @VisibleForTesting
+  static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
+                                            Map<String, Integer> proposedComponentCounts) {
     TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
     for (String componentName : proposedComponentCounts.keySet()) {
       Integer parallelism = proposedComponentCounts.get(componentName);

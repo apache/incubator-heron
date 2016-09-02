@@ -13,7 +13,9 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Optional;
@@ -23,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.UpdateTopologyManager.ContainerDelta;
 import com.twitter.heron.spi.common.Config;
@@ -33,6 +36,7 @@ import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
+import com.twitter.heron.spi.utils.TopologyTests;
 
 public class UpdateTopologyManagerTest {
 
@@ -91,6 +95,78 @@ public class UpdateTopologyManagerTest {
 
     Mockito.verify(mockScheduler).addContainers(expectedContainersToAdd);
     Mockito.verify(mockScheduler).removeContainers(expectedContainersToRemove);
+  }
+
+  @Test
+  public void testUpdateTopology() {
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt1", 1);
+    bolts.put("bolt7", 7);
+
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout3", 3);
+    spouts.put("spout5", 5);
+
+    TopologyAPI.Topology topology = TopologyTests.createTopology(
+        "test", new com.twitter.heron.api.Config(), spouts, bolts);
+
+    // assert that the initial config settings are as expected
+    assertParallelism(topology, spouts, bolts);
+
+    Map<String, Integer> boltUpdates = new HashMap<>();
+    boltUpdates.put("bolt1", 3);
+    boltUpdates.put("bolt7", 2);
+
+    Map<String, Integer> spoutUpdates = new HashMap<>();
+    spoutUpdates.put("spout3", 8);
+
+    Map<String, Integer> updates = new HashMap<>();
+    updates.putAll(boltUpdates);
+    updates.putAll(spoutUpdates);
+
+    // assert that the updated topology config settings are as expected
+    topology = UpdateTopologyManager.mergeTopology(topology, updates);
+    bolts.putAll(boltUpdates);
+    spouts.putAll(spoutUpdates);
+
+    assertParallelism(topology, spouts, bolts);
+  }
+
+  private void assertParallelism(TopologyAPI.Topology topology,
+                                 Map<String, Integer> expectedSouts,
+                                 Map<String, Integer> expectedBolts) {
+    for (String boltName : expectedBolts.keySet()) {
+      String foundParallelism = null;
+      for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
+        foundParallelism = getParallelism(bolt.getComp(), boltName);
+        if (foundParallelism != null) {
+          break;
+        }
+      }
+      Assert.assertEquals(Integer.toString(expectedBolts.get(boltName)), foundParallelism);
+    }
+
+    for (String spoutName : expectedSouts.keySet()) {
+      String foundParallelism = null;
+      for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
+        foundParallelism = getParallelism(spout.getComp(), spoutName);
+        if (foundParallelism != null) {
+          break;
+        }
+      }
+      Assert.assertEquals(Integer.toString(expectedSouts.get(spoutName)), foundParallelism);
+    }
+  }
+
+  private static String getParallelism(TopologyAPI.Component component, String componentName) {
+    if (component.getName().equals(componentName)) {
+      for (TopologyAPI.Config.KeyValue keyValue : component.getConfig().getKvsList()) {
+        if (keyValue.getKey().equals(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
+          return keyValue.getValue();
+        }
+      }
+    }
+    return null;
   }
 
   private static Set<PackingPlan.ContainerPlan> buildContainerSet(String... containerIds) {
