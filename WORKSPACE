@@ -92,6 +92,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_curator_curator_test",
+  artifact = "org.apache.curator:curator-test:" + curator_version,
+)
+
+maven_jar(
   name = "com_google_guava_guava",
   artifact = "com.google.guava:guava:18.0",
 )
@@ -305,4 +310,19 @@ maven_jar(
 maven_jar(
   name = "org_scala_lang_scala_library",
   artifact = "org.scala-lang:scala-library:2.10.3",
+)
+
+maven_jar(
+  name = "log4j_log4j",
+  artifact = "log4j:log4j:1.2.17",
+)
+
+maven_jar(
+  name = "com_yammer_metrics_metrics_core",
+  artifact = "com.yammer.metrics:metrics-core:2.2.0",
+)
+
+maven_jar(
+  name = "com_101tec_zkclient",
+  artifact = "com.101tec:zkclient:0.3"
 )
