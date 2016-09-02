@@ -45,55 +45,9 @@ public class UpdateTopologyManager {
   private PackingPlanProtoDeserializer deserializer;
 
   public UpdateTopologyManager(Config runtime, Optional<IScalable> scalableScheduler) {
-    this(runtime, scalableScheduler, new PackingPlanProtoDeserializer());
-  }
-
-  public UpdateTopologyManager(Config runtime,
-                               Optional<IScalable> scalableScheduler,
-                               PackingPlanProtoDeserializer deserializer) {
     this.runtime = runtime;
     this.scalableScheduler = scalableScheduler;
-    this.deserializer = deserializer;
-  }
-
-  private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
-                                                    String componentName,
-                                                    int parallelism) {
-    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
-    for (TopologyAPI.Bolt.Builder boltBuilder : builder.getBoltsBuilderList()) {
-      updateComponent(boltBuilder.getCompBuilder(), componentName, parallelism);
-    }
-    for (TopologyAPI.Spout.Builder spoutBuilder : builder.getSpoutsBuilderList()) {
-      updateComponent(spoutBuilder.getCompBuilder(), componentName, parallelism);
-    }
-    return builder.build();
-  }
-
-  private static void updateComponent(TopologyAPI.Component.Builder compBuilder,
-                                      String componentName,
-                                      int parallelism) {
-    for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
-        : compBuilder.getAllFields().entrySet()) {
-      if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
-        TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
-        boolean keyFound = false;
-        for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
-          if (kvBuilder.getKey().equals(
-              com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
-            kvBuilder.setValue(Integer.toString(parallelism));
-            keyFound = true;
-            break;
-          }
-        }
-        if (!keyFound) {
-          TopologyAPI.Config.KeyValue.Builder kvBuilder =
-              TopologyAPI.Config.KeyValue.newBuilder();
-          kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
-          kvBuilder.setValue(Integer.toString(parallelism));
-          confBuilder.addKvs(kvBuilder);
-        }
-      }
-    }
+    this.deserializer = new PackingPlanProtoDeserializer();
   }
 
   /**
@@ -113,7 +67,7 @@ public class UpdateTopologyManager {
     assertTrue(proposedPackingPlan.getContainers().size() > 0,
         "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
 
-    ContainerDelta containerDelta = getContainerDelta(
+    ContainerDelta containerDelta = new ContainerDelta(
         existingPackingPlan.getContainers(), proposedPackingPlan.getContainers());
     int newContainerCount = containerDelta.getContainersToAdd().size();
     int removableContainerCount = containerDelta.getContainersToRemove().size();
@@ -164,11 +118,7 @@ public class UpdateTopologyManager {
                                           SchedulerStateManagerAdaptor stateManager) {
     TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
     Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
-    for (String componentName : proposedComponentCounts.keySet()) {
-      Integer parallelism = proposedComponentCounts.get(componentName);
-      updatedTopology = mergeTopology(updatedTopology, componentName, parallelism);
-    }
-    return updatedTopology;
+    return mergeTopology(updatedTopology, proposedComponentCounts);
   }
 
   @VisibleForTesting
@@ -183,26 +133,11 @@ public class UpdateTopologyManager {
   }
 
   @VisibleForTesting
-  ContainerDelta getContainerDelta(Set<PackingPlan.ContainerPlan> currentContainers,
-                                   Set<PackingPlan.ContainerPlan> proposedContainers) {
-    return new ContainerDelta(currentContainers, proposedContainers);
-  }
-
-  private void assertTrue(boolean condition, String message, Object... values) {
-    if (!condition) {
-      throw new RuntimeException("ERROR: " + String.format(message, values));
-    }
-  }
-
-  private void logFine(String format, Object... values) {
-    LOG.fine(String.format(format, values));
-  }
-
-  @VisibleForTesting
-  class ContainerDelta {
+  static class ContainerDelta {
     private final Set<PackingPlan.ContainerPlan> containersToAdd;
     private final Set<PackingPlan.ContainerPlan> containersToRemove;
 
+    @VisibleForTesting
     ContainerDelta(Set<PackingPlan.ContainerPlan> currentContainers,
                    Set<PackingPlan.ContainerPlan> proposedContainers) {
       Set<PackingPlan.ContainerPlan> toAdd = new HashSet<>();
@@ -222,12 +157,92 @@ public class UpdateTopologyManager {
       this.containersToRemove = Collections.unmodifiableSet(toRemove);
     }
 
-    public Set<PackingPlan.ContainerPlan> getContainersToRemove() {
+    @VisibleForTesting
+    Set<PackingPlan.ContainerPlan> getContainersToRemove() {
       return containersToRemove;
     }
 
-    public Set<PackingPlan.ContainerPlan> getContainersToAdd() {
+    @VisibleForTesting
+    Set<PackingPlan.ContainerPlan> getContainersToAdd() {
       return containersToAdd;
     }
+  }
+
+  /**
+   * For each of the components with changed parallelism we need to update the Topology configs to
+   * represent the change.
+   */
+  private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
+                                                    Map<String, Integer> proposedComponentCounts) {
+    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
+    for (String componentName : proposedComponentCounts.keySet()) {
+      Integer parallelism = proposedComponentCounts.get(componentName);
+
+      boolean updated = false;
+      for (TopologyAPI.Bolt.Builder boltBuilder : builder.getBoltsBuilderList()) {
+        if (updateComponent(boltBuilder.getCompBuilder(), componentName, parallelism)) {
+          updated = true;
+          break;
+        }
+      }
+
+      if (!updated) {
+        for (TopologyAPI.Spout.Builder spoutBuilder : builder.getSpoutsBuilderList()) {
+          if (updateComponent(spoutBuilder.getCompBuilder(), componentName, parallelism)) {
+            break;
+          }
+        }
+      }
+    }
+
+    return builder.build();
+  }
+
+  /**
+   * Go through all fields in the component builder until one is found where "name=componentName".
+   * When found, go through the confs in the conf builder to find the parallelism field and update
+   * that.
+   *
+   * @return true if the component was found and updated, which might not always happen. For example
+   * if the component is a spout, it won't be found if a bolt builder is passed.
+   */
+  private static boolean updateComponent(TopologyAPI.Component.Builder compBuilder,
+                                         String componentName,
+                                         int parallelism) {
+    for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
+        : compBuilder.getAllFields().entrySet()) {
+      if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
+        TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
+        boolean keyFound = false;
+        // no way to get a KeyValue builder with a get(key) so we have to iterate until found.
+        for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
+          if (kvBuilder.getKey().equals(
+              com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
+            kvBuilder.setValue(Integer.toString(parallelism));
+            keyFound = true;
+            break;
+          }
+        }
+        if (!keyFound) {
+          TopologyAPI.Config.KeyValue.Builder kvBuilder =
+              TopologyAPI.Config.KeyValue.newBuilder();
+          kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
+          kvBuilder.setValue(Integer.toString(parallelism));
+          confBuilder.addKvs(kvBuilder);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static void assertTrue(boolean condition, String message, Object... values) {
+    if (!condition) {
+      throw new RuntimeException("ERROR: " + String.format(message, values));
+    }
+  }
+
+  private static void logFine(String format, Object... values) {
+    LOG.fine(String.format(format, values));
   }
 }

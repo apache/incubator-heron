@@ -19,48 +19,42 @@ import java.util.Set;
 import com.google.common.base.Optional;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.UpdateTopologyManager.ContainerDelta;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class UpdateTopologyManagerTest {
+
+  private Set<PackingPlan.ContainerPlan> currentContainerPlan;
+  private Set<PackingPlan.ContainerPlan> proposedContainerPlan;
+  private Set<PackingPlan.ContainerPlan> expectedContainersToAdd;
+  private Set<PackingPlan.ContainerPlan> expectedContainersToRemove;
+
+  @Before
+  public void init() {
+    currentContainerPlan = buildContainerSet("current-1", "current-2", "current-3", "current-4");
+    proposedContainerPlan = buildContainerSet("current-1", "current-3", "new-1", "new-2");
+    expectedContainersToAdd = buildContainerSet("new-1", "new-2");
+    expectedContainersToRemove = buildContainerSet("current-2", "current-4");
+  }
+
   @Test
-  public void computesContainerDeltaAccurately() {
-    Set<PackingPlan.ContainerPlan> currentPlan = new HashSet<>();
-    for (int i = 1; i < 5; i++) {
-      currentPlan.add(PackingTestUtils.testContainerPlan("current-" + i));
-    }
-
-    Set<PackingPlan.ContainerPlan> updatedPlan = new HashSet<>();
-    updatedPlan.add(PackingTestUtils.testContainerPlan("current-1"));
-    updatedPlan.add(PackingTestUtils.testContainerPlan("current-3"));
-    updatedPlan.add(PackingTestUtils.testContainerPlan("new-1"));
-    updatedPlan.add(PackingTestUtils.testContainerPlan("new-2"));
-
-    UpdateTopologyManager manager = new UpdateTopologyManager(null, null);
-    ContainerDelta result = manager.getContainerDelta(currentPlan, updatedPlan);
+  public void testContainerDelta() {
+    ContainerDelta result =  new ContainerDelta(currentContainerPlan, proposedContainerPlan);
     Assert.assertNotNull(result);
-    Assert.assertEquals(2, result.getContainersToAdd().size());
-    Assert.assertTrue(result.getContainersToAdd().contains(
-        PackingTestUtils.testContainerPlan("new-1")));
-    Assert.assertTrue(result.getContainersToAdd().contains(
-        PackingTestUtils.testContainerPlan("new-2")));
-    Assert.assertEquals(2, result.getContainersToRemove().size());
-    Assert.assertTrue(result.getContainersToRemove().contains(
-        PackingTestUtils.testContainerPlan("current-2")));
-    Assert.assertTrue(result.getContainersToRemove().contains(
-        PackingTestUtils.testContainerPlan("current-4")));
+    Assert.assertEquals(expectedContainersToAdd, result.getContainersToAdd());
+    Assert.assertEquals(expectedContainersToRemove, result.getContainersToRemove());
   }
 
   /**
@@ -68,22 +62,15 @@ public class UpdateTopologyManagerTest {
    */
   @Test
   public void requestsToAddAndRemoveContainers() throws Exception {
-    PackingPlanProtoDeserializer deserializer = Mockito.mock(PackingPlanProtoDeserializer.class);
-    String topologyName = "testTopology";
-    IPacking packing = new RoundRobinPacking();
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
 
-    Set<PackingPlan.ContainerPlan> currentContainers = new HashSet<>();
-    PackingPlans.PackingPlan currentPlan =
-        PackingTestUtils.testProtoPackingPlan(topologyName, packing);
-    PackingPlan currentPacking = new PackingPlan("current", currentContainers, null);
-    Mockito.when(deserializer.fromProto(currentPlan)).thenReturn(currentPacking);
+    PackingPlan currentPacking
+        = new PackingPlan("current", currentContainerPlan, new Resource(0.5, 1, 2));
+    PackingPlan proposedPacking
+        = new PackingPlan("proposed", proposedContainerPlan, new Resource(0.5, 1, 2));
 
-    PackingPlan proposedPlan = PackingTestUtils.testPackingPlan(topologyName, packing);
-    Set<PackingPlan.ContainerPlan> proposedContainers = proposedPlan.getContainers();
-    PackingPlans.PackingPlan proposedProtoPlan =
-        PackingTestUtils.testProtoPackingPlan(topologyName, packing);
-    PackingPlan proposedPacking = new PackingPlan("proposed", proposedContainers, null);
-    Mockito.when(deserializer.fromProto(proposedProtoPlan)).thenReturn(proposedPacking);
+    PackingPlans.PackingPlan currentProtoPlan = serializer.toProto(currentPacking);
+    PackingPlans.PackingPlan proposedProtoPlan = serializer.toProto(proposedPacking);
 
     SchedulerStateManagerAdaptor mockStateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
     Config mockRuntime = Mockito.mock(Config.class);
@@ -92,30 +79,25 @@ public class UpdateTopologyManagerTest {
     IScalable mockScheduler = Mockito.mock(IScalable.class);
 
     UpdateTopologyManager updateManager
-        = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler), deserializer);
+        = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler));
     UpdateTopologyManager spyUpdateManager = Mockito.spy(updateManager);
 
     Mockito.doNothing().when(spyUpdateManager)
-        .validateCurrentPackingPlan(currentPlan, null, mockStateMgr);
+        .validateCurrentPackingPlan(currentProtoPlan, null, mockStateMgr);
     Mockito.doReturn(null).when(spyUpdateManager).
         getUpdatedTopology(null, proposedPacking, mockStateMgr);
 
-    Set<PackingPlan.ContainerPlan> containersToAdd = new HashSet<>();
-    containersToAdd.add(PackingTestUtils.testContainerPlan("a1"));
-    Set<PackingPlan.ContainerPlan> containersToRemove = new HashSet<>();
-    containersToRemove.add(PackingTestUtils.testContainerPlan("r1"));
+    spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
-    ContainerDelta mockContainerDelta = Mockito.mock(ContainerDelta.class);
-    Mockito.when(mockContainerDelta.getContainersToAdd()).thenReturn(containersToAdd);
-    Mockito.when(mockContainerDelta.getContainersToRemove()).thenReturn(containersToRemove);
-
-    Mockito.doReturn(mockContainerDelta).when(spyUpdateManager).getContainerDelta(
-        currentPacking.getContainers(), proposedPacking.getContainers());
-
-    spyUpdateManager.updateTopology(currentPlan, proposedProtoPlan);
-
-    Mockito.verify(mockScheduler).addContainers(containersToAdd);
-    Mockito.verify(mockScheduler).removeContainers(containersToRemove);
+    Mockito.verify(mockScheduler).addContainers(expectedContainersToAdd);
+    Mockito.verify(mockScheduler).removeContainers(expectedContainersToRemove);
   }
 
+  private static Set<PackingPlan.ContainerPlan> buildContainerSet(String... containerIds) {
+    Set<PackingPlan.ContainerPlan> containerPlan = new HashSet<>();
+    for (String containerId : containerIds) {
+      containerPlan.add(PackingTestUtils.testContainerPlan(containerId));
+    }
+    return containerPlan;
+  }
 }

@@ -7,7 +7,6 @@ packing_deps_files = [
     "//heron/spi/src/java:packing-spi-java",
 ]
 
-
 nullpacking_deps_files = \
     heron_java_proto_files() + \
     packing_deps_files
@@ -38,7 +37,7 @@ java_binary(
     name = 'null-packing-unshaded',
     srcs = glob(["**/NullPacking.java"]),
     deps = nullpacking_deps_files,
-    )
+)
 
 genrule(
     name = "heron-null-packing",
