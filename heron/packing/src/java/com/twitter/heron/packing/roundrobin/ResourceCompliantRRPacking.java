@@ -169,10 +169,6 @@ public class ResourceCompliantRRPacking implements IPacking {
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
         Integer.toString(DEFAULT_CONTAINER_PADDING_PERCENTAGE)));
 
-    long topologyRam = 0;
-    long topologyDisk = 0;
-    double topologyCpu = 0.0;
-
     for (Map.Entry<String, List<String>> entry : resourceCompliantRRAllocation.entrySet()) {
 
       String containerId = entry.getKey();
@@ -224,20 +220,9 @@ public class ResourceCompliantRRPacking implements IPacking {
           new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
 
       containerPlans.add(containerPlan);
-      topologyRam += containerRam;
-      topologyCpu += Math.round(containerCpu);
-      topologyDisk += containerDiskInBytes;
     }
 
-    // Take the heron internal container into account and the application master for YARN
-    // scheduler
-    topologyRam += instanceRamDefault;
-    topologyDisk += instanceDiskDefault;
-    topologyCpu += instanceCpuDefault;
-
-    Resource resource = new Resource(topologyCpu, topologyRam, topologyDisk);
-
-    return new PackingPlan(topology.getId(), containerPlans, resource);
+    return new PackingPlan(topology.getId(), containerPlans);
   }
 
   @Override

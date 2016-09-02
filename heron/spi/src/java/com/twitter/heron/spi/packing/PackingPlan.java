@@ -25,12 +25,10 @@ public class PackingPlan {
   private final String id;
   private final Map<String, ContainerPlan> containersMap;
   private final Set<ContainerPlan> containers;
-  private final Resource resource;
 
-  public PackingPlan(String id, Set<ContainerPlan> containers, Resource resource) {
+  public PackingPlan(String id, Set<ContainerPlan> containers) {
     this.id = id;
     this.containers = ImmutableSet.copyOf(containers);
-    this.resource = resource;
     containersMap = new HashMap<>();
     for (ContainerPlan containerPlan : containers) {
       containersMap.put(containerPlan.getId(), containerPlan);
@@ -39,10 +37,6 @@ public class PackingPlan {
 
   public String getId() {
     return id;
-  }
-
-  public Resource getResource() {
-    return resource;
   }
 
   public Set<ContainerPlan> getContainers() {
@@ -135,8 +129,8 @@ public class PackingPlan {
 
   @Override
   public String toString() {
-    return String.format("{plan-id: %s, containers-list: %s, plan-resource: %s}",
-        getId(), getContainers().toString(), getResource());
+    return String.format("{plan-id: %s, containers-list: %s}",
+        getId(), getContainers().toString());
   }
 
   @Override
@@ -151,15 +145,13 @@ public class PackingPlan {
     PackingPlan that = (PackingPlan) o;
 
     return getId().equals(that.getId())
-        && getContainers().equals(that.getContainers())
-        && getResource().equals(that.getResource());
+        && getContainers().equals(that.getContainers());
   }
 
   @Override
   public int hashCode() {
     int result = getId().hashCode();
     result = 31 * result + getContainers().hashCode();
-    result = 31 * result + getResource().hashCode();
     return result;
   }
 

@@ -58,7 +58,7 @@ public class PackingPlanTest {
       containerPlans.add(containerPlan);
     }
 
-    return new PackingPlan("", containerPlans, resource);
+    return new PackingPlan("", containerPlans);
   }
 
   @Test
