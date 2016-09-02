@@ -433,15 +433,15 @@ public final class SchedulerUtils {
    * Get a resource that requires the maximum amount of ram, cpu and disk
    */
   public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
-    Resource maxResource = new Resource(0, 0, 0);
-
+    double maxCpu = 0;
+    long maxRam = 0;
+    long maxDisk = 0;
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      Resource resource = containerPlan.getResource();
-      maxResource.ram = Math.max(maxResource.ram, resource.ram);
-      maxResource.cpu = Math.max(maxResource.cpu, resource.cpu);
-      maxResource.disk = Math.max(maxResource.disk, resource.disk);
+      maxCpu = Math.max(maxCpu, containerPlan.getResource().getCpu());
+      maxRam = Math.max(maxRam, containerPlan.getResource().getRam());
+      maxDisk = Math.max(maxDisk, containerPlan.getResource().getDisk());
     }
 
-    return maxResource;
+    return new Resource(maxCpu, maxRam, maxDisk);
   }
 }
