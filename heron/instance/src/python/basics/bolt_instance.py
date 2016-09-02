@@ -51,7 +51,7 @@ class BoltInstance(BaseInstance):
 
   def start(self):
     context = self.pplan_helper.context
-    self.bolt_metrics.register_metrics(context, self.sys_config)
+    self.bolt_metrics.register_metrics(context)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
 

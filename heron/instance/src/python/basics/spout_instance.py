@@ -61,7 +61,7 @@ class SpoutInstance(BaseInstance):
 
   def start(self):
     context = self.pplan_helper.context
-    self.spout_metrics.register_metrics(context, self.sys_config)
+    self.spout_metrics.register_metrics(context)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
 
