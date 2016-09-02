@@ -2,11 +2,11 @@ package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/pex_rules", "pex_library", "pex_test")
 
-
 pex_library(
     name = "instance-network-mock",
     srcs = ["mock_generator.py"],
     deps = [
+        "//heron/common/tests/python:pytest-py",
         "//heron/instance/src/python/network:pyheron-network-py",
     ],
     reqs = [
@@ -19,6 +19,7 @@ pex_test(
     srcs = ["st_stmgr_client_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
+        "//heron/instance/src/python/network:pyheron-network-py",
         "//heron/instance/tests/python/network:instance-network-mock",
     ],
     reqs = [
@@ -34,6 +35,7 @@ pex_test(
     srcs = ["metricsmgr_client_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
+        "//heron/instance/src/python/network:pyheron-network-py",
         "//heron/instance/tests/python/network:instance-network-mock",
     ],
     reqs = [

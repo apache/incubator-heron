@@ -14,6 +14,7 @@
 '''outgoing_tuple_helper.py: module to provide a helper class for preparing and pushing tuples'''
 import sys
 
+from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.proto import tuple_pb2, topology_pb2
 
@@ -41,7 +42,7 @@ class OutgoingTupleHelper(object):
   make_tuple_set = lambda _: tuple_pb2.HeronTupleSet()
   make_stream_id = lambda _: topology_pb2.StreamId()
 
-  def __init__(self, pplan_helper, out_stream, sys_config):
+  def __init__(self, pplan_helper, out_stream):
     self.out_stream = out_stream
     self.pplan_helper = pplan_helper
 
@@ -51,11 +52,13 @@ class OutgoingTupleHelper(object):
     self.current_data_tuple_size_in_bytes = 0
     self.total_data_emitted_in_bytes = 0
 
+    self.sys_config = system_config.get_sys_config()
+
     # read the config values
-    self.data_tuple_set_capacity = sys_config[constants.INSTANCE_SET_DATA_TUPLE_CAPACITY]
-    self.max_data_tuple_size_in_bytes = sys_config.get(constants.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES,
-                                                       sys.maxint)
-    self.control_tuple_set_capacity = sys_config[constants.INSTANCE_SET_CONTROL_TUPLE_CAPACITY]
+    self.data_tuple_set_capacity = self.sys_config[constants.INSTANCE_SET_DATA_TUPLE_CAPACITY]
+    self.max_data_tuple_size_in_bytes =\
+      self.sys_config.get(constants.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES, sys.maxint)
+    self.control_tuple_set_capacity = self.sys_config[constants.INSTANCE_SET_CONTROL_TUPLE_CAPACITY]
 
   def send_out_tuples(self):
     """Sends out currently buffered tuples into the Out-Stream"""
