@@ -13,9 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Optional;
@@ -75,18 +73,18 @@ public class UpdateTopologyManagerTest {
     String topologyName = "testTopology";
     IPacking packing = new RoundRobinPacking();
 
-    Map<String, PackingPlan.ContainerPlan> currentContainers = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> currentContainers = new HashSet<>();
     PackingPlans.PackingPlan currentPlan =
         PackingTestUtils.testProtoPackingPlan(topologyName, packing);
     PackingPlan currentPacking = new PackingPlan("current", currentContainers, null);
     Mockito.when(deserializer.fromProto(currentPlan)).thenReturn(currentPacking);
 
-    Map<String, PackingPlan.ContainerPlan> proposedContainers = new HashMap<>();
-    proposedContainers.put("container", null);
-    PackingPlans.PackingPlan proposedPlan =
+    PackingPlan proposedPlan = PackingTestUtils.testPackingPlan(topologyName, packing);
+    Set<PackingPlan.ContainerPlan> proposedContainers = proposedPlan.getContainers();
+    PackingPlans.PackingPlan proposedProtoPlan =
         PackingTestUtils.testProtoPackingPlan(topologyName, packing);
     PackingPlan proposedPacking = new PackingPlan("proposed", proposedContainers, null);
-    Mockito.when(deserializer.fromProto(proposedPlan)).thenReturn(proposedPacking);
+    Mockito.when(deserializer.fromProto(proposedProtoPlan)).thenReturn(proposedPacking);
 
     SchedulerStateManagerAdaptor mockStateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
     Config mockRuntime = Mockito.mock(Config.class);
@@ -113,13 +111,13 @@ public class UpdateTopologyManagerTest {
     Mockito.when(mockContainerDelta.getContainersToRemove()).thenReturn(containersToRemove);
 
     Mockito.doReturn(mockContainerDelta).when(spyUpdateManager).getContainerDelta(
-        currentPacking.getContainerSet(), proposedPacking.getContainerSet());
+        currentPacking.getContainers(), proposedPacking.getContainers());
 
-    spyUpdateManager.updateTopology(currentPlan, proposedPlan);
+    spyUpdateManager.updateTopology(currentPlan, proposedProtoPlan);
 
     Mockito.verify(mockScheduler).addContainers(containersToAdd);
     Mockito.verify(mockScheduler).removeContainers(
-        currentPacking.getContainerSet(), containersToRemove);
+        currentPacking.getContainers(), containersToRemove);
   }
 
 }
