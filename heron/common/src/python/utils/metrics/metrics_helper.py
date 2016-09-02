@@ -14,6 +14,7 @@
 '''metrics_helper: helper classes for managing common metrics'''
 
 from heron.common.src.python.utils.log import Log
+from heron.common.src.python.config import system_config
 from heron.proto import metrics_pb2
 import heron.common.src.python.constants as constants
 
@@ -111,7 +112,8 @@ class GatewayMetrics(BaseMetricsHelper):
              IN_STREAM_QUEUE_EXPECTED_CAPACITY: MeanReducedMetric(),
              OUT_STREAM_QUEUE_EXPECTED_CAPACITY: MeanReducedMetric()}
 
-  def __init__(self, metrics_collector, sys_config):
+  def __init__(self, metrics_collector):
+    sys_config = system_config.get_sys_config()
     super(GatewayMetrics, self).__init__(self.metrics)
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
@@ -155,12 +157,13 @@ class ComponentMetrics(BaseMetricsHelper):
     metrics.update(additional_metrics)
     super(ComponentMetrics, self).__init__(metrics)
 
-  def register_metrics(self, context, sys_config):
+  # pylint: disable=arguments-differ
+  def register_metrics(self, context):
     """Registers metrics to context
 
     :param context: Topology Context
-    :param sys_config: System config
     """
+    sys_config = system_config.get_sys_config()
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     collector = context.get_metrics_collector()
     super(ComponentMetrics, self).register_metrics(collector, interval)

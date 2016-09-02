@@ -116,7 +116,7 @@ def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit %s/%s/%s %s %s %s --verbose" % (
+  cmd = "%s submit %s/%s/%s %s %s %s" % (
       heronCliPath, cluster, role, env, jarPath, classPath, args)
 
   if pkgUri is not None:
