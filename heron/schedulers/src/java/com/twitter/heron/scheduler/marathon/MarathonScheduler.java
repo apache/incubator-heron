@@ -75,6 +75,12 @@ public class MarathonScheduler implements IScheduler {
   }
 
   @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
+  }
+
+  @Override
   public List<String> getJobLinks() {
     List<String> jobLinks = new LinkedList<>();
     String marathonGroupLink = MarathonContext.getSchedulerURI(config)

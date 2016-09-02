@@ -110,6 +110,12 @@ public class SlurmScheduler implements IScheduler {
     return true;
   }
 
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
+  }
+
   protected String getJobIdFilePath() {
     return new File(workingDirectory, SlurmContext.jobIdFile(config)).getPath();
   }

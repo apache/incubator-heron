@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler.KillTopologyRequest;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
+import com.twitter.heron.proto.scheduler.Scheduler.UpdateTopologyRequest;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -79,6 +80,12 @@ public class YarnScheduler implements IScheduler {
       LOG.log(Level.ALL, "Failed to allocate containers after restart", e);
       return false;
     }
+  }
+
+  @Override
+  public boolean onUpdate(UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
   }
 
   @Override
