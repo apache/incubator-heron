@@ -348,10 +348,11 @@ public class RoundRobinPacking implements IPacking {
     for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Safe check
-        if (instancePlan.getResource().ram < MIN_RAM_PER_INSTANCE) {
+        if (instancePlan.getResource().getRam() < MIN_RAM_PER_INSTANCE) {
           LOG.severe(String.format(
               "Require at least %dMB ram. Given on %d MB",
-              MIN_RAM_PER_INSTANCE / Constants.MB, instancePlan.getResource().ram / Constants.MB));
+              MIN_RAM_PER_INSTANCE / Constants.MB,
+              instancePlan.getResource().getRam() / Constants.MB));
 
           return false;
         }
