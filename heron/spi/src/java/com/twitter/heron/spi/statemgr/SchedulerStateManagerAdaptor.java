@@ -217,9 +217,7 @@ public class SchedulerStateManagerAdaptor {
   public void cleanState(String topologyName) {
     LOG.fine("Cleaning up topology state");
 
-    for (IStateManager.StateLocation stateLocation : IStateManager.StateLocation.values()) {
-      stateLocation.delete(delegate, topologyName);
-    }
+    IStateManager.StateLocation.deleteAll(delegate, topologyName);
 
     LOG.fine("Cleaned up topology state");
   }

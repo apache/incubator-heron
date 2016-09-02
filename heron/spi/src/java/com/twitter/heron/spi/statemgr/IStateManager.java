@@ -79,6 +79,12 @@ public interface IStateManager extends AutoCloseable {
       return concatPath(getDirectory(root), topology);
     }
 
+    public static void deleteAll(IStateManager stateManager, String topology) {
+      for (IStateManager.StateLocation stateLocation : IStateManager.StateLocation.values()) {
+        stateLocation.delete(stateManager, topology);
+      }
+    }
+
     public void delete(IStateManager stateManager, String topology) {
       switch(this) {
         case TMASTER_LOCATION:
