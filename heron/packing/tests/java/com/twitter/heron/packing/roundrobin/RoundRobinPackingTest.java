@@ -125,17 +125,17 @@ public class RoundRobinPackingTest {
     Assert.assertEquals(
         (Math.max(spoutParallelism, boltParallelism)
             + RoundRobinPacking.DEFAULT_CPU_PADDING_PER_CONTAINER) * (numContainers + 1),
-        packingPlanNoExplicitResourcesConfig.getResource().cpu, DELTA);
+        packingPlanNoExplicitResourcesConfig.getResource().getCpu(), DELTA);
 
     Assert.assertEquals(
         (spoutParallelism + boltParallelism) * Constants.GB
             + RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER * numContainers,
-        packingPlanNoExplicitResourcesConfig.getResource().ram);
+        packingPlanNoExplicitResourcesConfig.getResource().getRam());
 
     Assert.assertEquals(
         (Math.max(spoutParallelism, boltParallelism) * Constants.GB
             + RoundRobinPacking.DEFAULT_DISK_PADDING_PER_CONTAINER) * (numContainers + 1),
-        packingPlanNoExplicitResourcesConfig.getResource().disk);
+        packingPlanNoExplicitResourcesConfig.getResource().getDisk());
 
     Assert.assertEquals(numContainers,
         packingPlanNoExplicitResourcesConfig.getContainers().size());
@@ -167,29 +167,29 @@ public class RoundRobinPackingTest {
         getRoundRobinPackingPlan(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(containerCpu * (numContainers + 1),
-        packingPlanExplicitResourcesConfig.getResource().cpu, DELTA);
+        packingPlanExplicitResourcesConfig.getResource().getCpu(), DELTA);
 
     // The total recommended ram should be in the range of configured ram, account for rounding
     // errors
     Assert.assertEquals((double) containerRam * numContainers,
-        (double) packingPlanExplicitResourcesConfig.getResource().ram,
+        (double) packingPlanExplicitResourcesConfig.getResource().getRam(),
         spoutParallelism + boltParallelism);
 
     Assert.assertEquals(containerDisk * (numContainers + 1),
-        packingPlanExplicitResourcesConfig.getResource().disk);
+        packingPlanExplicitResourcesConfig.getResource().getDisk());
 
     Assert.assertEquals(numContainers,
         packingPlanExplicitResourcesConfig.getContainers().size());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
-      Assert.assertEquals(containerCpu, containerPlan.getResource().cpu, DELTA);
+      Assert.assertEquals(containerCpu, containerPlan.getResource().getCpu(), DELTA);
 
       Assert.assertEquals((double) containerRam,
-          (double) containerPlan.getResource().ram,
+          (double) containerPlan.getResource().getRam(),
           containerPlan.getInstances().size());
 
-      Assert.assertEquals(containerDisk, containerPlan.getResource().disk);
+      Assert.assertEquals(containerDisk, containerPlan.getResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
@@ -202,7 +202,7 @@ public class RoundRobinPackingTest {
       int instancesCount = containerPlan.getInstances().size();
       Assert.assertEquals(
           (containerRam - RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) / instancesCount,
-          resources.iterator().next().ram);
+          resources.iterator().next().getRam());
     }
   }
 
@@ -240,13 +240,13 @@ public class RoundRobinPackingTest {
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
       // The containerRam should be ignored, since we set the complete component ram map
-      Assert.assertNotEquals(containerRam, containerPlan.getResource().ram);
+      Assert.assertNotEquals(containerRam, containerPlan.getResource().getRam());
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
+          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
         }
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.getResource().ram);
+          Assert.assertEquals(spoutRam, instancePlan.getResource().getRam());
         }
       }
     }
@@ -282,12 +282,12 @@ public class RoundRobinPackingTest {
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
-      Assert.assertEquals(containerRam, containerPlan.getResource().ram);
+      Assert.assertEquals(containerRam, containerPlan.getResource().getRam());
       int boltCount = 0;
       int instancesCount = containerPlan.getInstances().size();
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
+          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
           boltCount++;
         }
       }
@@ -301,7 +301,7 @@ public class RoundRobinPackingTest {
               (containerRam
                   - boltCount * boltRam
                   - RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) / spoutCount,
-              instancePlan.getResource().ram);
+              instancePlan.getResource().getRam());
         }
       }
     }

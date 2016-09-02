@@ -266,11 +266,11 @@ public class HeronMasterDriver {
   }
 
   private int getCpuForExecutor(Resource resource) {
-    return (int) Math.ceil(resource.cpu);
+    return (int) Math.ceil(resource.getCpu());
   }
 
   private int getMemInMBForExecutor(Resource resource) {
-    Long ram = resource.ram / MB;
+    Long ram = resource.getRam() / MB;
     return ram.intValue();
   }
 

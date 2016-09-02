@@ -133,7 +133,7 @@ public class FirstFitDecreasingPackingTest {
         + (long) ((DEFAULT_CONTAINER_PADDING / 100.0
         * totalInstances * instanceRamDefault));
 
-    Assert.assertEquals(packingPlan.getResource().ram, totalRam);
+    Assert.assertEquals(packingPlan.getResource().getRam(), totalRam);
 
     double totalCpu = Math.round(spoutParallelism * instanceCpuDefault
         + (DEFAULT_CONTAINER_PADDING / 100.0 * spoutParallelism * instanceCpuDefault))
@@ -141,14 +141,14 @@ public class FirstFitDecreasingPackingTest {
         + (DEFAULT_CONTAINER_PADDING / 100.0 * boltParallelism * instanceCpuDefault))
         + instanceCpuDefault;
 
-    Assert.assertEquals((long) packingPlan.getResource().cpu, (long) totalCpu);
+    Assert.assertEquals((long) packingPlan.getResource().getCpu(), (long) totalCpu);
 
     long totalDisk = (totalInstances + HERON_INTERNAL_CONTAINERS)
         * instanceDiskDefault
         + (long) ((DEFAULT_CONTAINER_PADDING / 100.0
         * totalInstances * instanceDiskDefault));
 
-    Assert.assertEquals(packingPlan.getResource().disk, totalDisk);
+    Assert.assertEquals(packingPlan.getResource().getDisk(), totalDisk);
   }
 
   /**
@@ -176,7 +176,7 @@ public class FirstFitDecreasingPackingTest {
         * instanceRamDefault
         + ((long) (padding / 100.0 * totalInstances * instanceRamDefault));
 
-    Assert.assertEquals(packingPlan.getResource().ram, totalRam);
+    Assert.assertEquals(packingPlan.getResource().getRam(), totalRam);
 
     double totalCpu = Math.round(spoutParallelism * instanceCpuDefault
         + (padding / 100.0 * spoutParallelism * instanceCpuDefault))
@@ -184,13 +184,13 @@ public class FirstFitDecreasingPackingTest {
         + (padding / 100.0 * boltParallelism * instanceCpuDefault))
         + instanceCpuDefault;
 
-    Assert.assertEquals((long) packingPlan.getResource().cpu, (long) totalCpu);
+    Assert.assertEquals((long) packingPlan.getResource().getCpu(), (long) totalCpu);
 
     long totalDisk = (totalInstances + HERON_INTERNAL_CONTAINERS)
         * instanceDiskDefault
         + (long) (padding / 100.0 * totalInstances * instanceDiskDefault);
 
-    Assert.assertEquals(packingPlan.getResource().disk, totalDisk);
+    Assert.assertEquals(packingPlan.getResource().getDisk(), totalDisk);
   }
 
 
@@ -226,31 +226,31 @@ public class FirstFitDecreasingPackingTest {
     Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
             + (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceCpuDefault)
             + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.getResource().cpu);
+        (long) packingPlanExplicitResourcesConfig.getResource().getCpu());
 
     Assert.assertEquals(totalInstances * instanceRamDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceRamDefault)
             + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.getResource().ram);
+        packingPlanExplicitResourcesConfig.getResource().getRam());
 
     Assert.assertEquals(totalInstances * instanceDiskDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceDiskDefault)
             + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.getResource().disk);
+        packingPlanExplicitResourcesConfig.getResource().getDisk());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
       Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
               + (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceCpuDefault)),
-          (long) containerPlan.getResource().cpu);
+          (long) containerPlan.getResource().getCpu());
 
       Assert.assertEquals(totalInstances * instanceRamDefault
               + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceRamDefault),
-          containerPlan.getResource().ram);
+          containerPlan.getResource().getRam());
 
       Assert.assertEquals(totalInstances * instanceDiskDefault
               + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances * instanceDiskDefault),
-          containerPlan.getResource().disk);
+          containerPlan.getResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
@@ -260,7 +260,7 @@ public class FirstFitDecreasingPackingTest {
       }
 
       Assert.assertEquals(1, resources.size());
-      Assert.assertEquals(instanceRamDefault, resources.iterator().next().ram);
+      Assert.assertEquals(instanceRamDefault, resources.iterator().next().getRam());
     }
   }
 
@@ -302,29 +302,29 @@ public class FirstFitDecreasingPackingTest {
     Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
             + DEFAULT_CONTAINER_PADDING / 100.0 * (totalInstances * instanceCpuDefault)
             + instanceCpuDefault),
-        (long) packingPlanExplicitRamMap.getResource().cpu);
+        (long) packingPlanExplicitRamMap.getResource().getCpu());
 
     Assert.assertEquals(spoutParallelism * spoutRam + boltParallelism * boltRam
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (spoutParallelism * spoutRam
             + boltParallelism * boltRam))
             + instanceRamDefault,
-        packingPlanExplicitRamMap.getResource().ram);
+        packingPlanExplicitRamMap.getResource().getRam());
 
     Assert.assertEquals(totalInstances * instanceDiskDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (totalInstances * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlanExplicitRamMap.getResource().disk);
+        packingPlanExplicitRamMap.getResource().getDisk());
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
-      Assert.assertNotEquals(maxContainerRam, containerPlan.getResource().ram);
+      Assert.assertNotEquals(maxContainerRam, containerPlan.getResource().getRam());
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
+          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
         }
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.getResource().ram);
+          Assert.assertEquals(spoutRam, instancePlan.getResource().getRam());
         }
       }
     }
@@ -363,31 +363,31 @@ public class FirstFitDecreasingPackingTest {
             + Math.round(boltParallelism * instanceCpuDefault
             + DEFAULT_CONTAINER_PADDING / 100.0 * (boltParallelism * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlanExplicitRamMap.getResource().cpu);
+        (long) packingPlanExplicitRamMap.getResource().getCpu());
 
     Assert.assertEquals((spoutParallelism * spoutRam)
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (spoutParallelism * spoutRam))
             + boltParallelism * boltRam
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (boltParallelism * boltRam))
             + instanceRamDefault,
-        packingPlanExplicitRamMap.getResource().ram);
+        packingPlanExplicitRamMap.getResource().getRam());
 
     Assert.assertEquals(spoutParallelism * instanceDiskDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (spoutParallelism * instanceDiskDefault))
             + boltParallelism * instanceDiskDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (boltParallelism * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlanExplicitRamMap.getResource().disk);
+        packingPlanExplicitRamMap.getResource().getDisk());
 
     // Ram for bolt/spout should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
+          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
         }
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.getResource().ram);
+          Assert.assertEquals(spoutRam, instancePlan.getResource().getRam());
         }
       }
     }
@@ -425,31 +425,31 @@ public class FirstFitDecreasingPackingTest {
             + Math.round(3 * instanceCpuDefault
             + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlanExplicitRamMap.getResource().cpu);
+        (long) packingPlanExplicitRamMap.getResource().getCpu());
 
     Assert.assertEquals(2 * boltRam + 2 * instanceRamDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (2 * boltRam + 2 * instanceRamDefault))
             + boltRam + 2 * instanceRamDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (boltRam + 2 * instanceRamDefault))
             + instanceRamDefault,
-        packingPlanExplicitRamMap.getResource().ram);
+        packingPlanExplicitRamMap.getResource().getRam());
 
     Assert.assertEquals(4 * instanceDiskDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceDiskDefault))
             + 3 * instanceDiskDefault
             + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlanExplicitRamMap.getResource().disk);
+        packingPlanExplicitRamMap.getResource().getDisk());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Ram for bolt should be the value in component ram map
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
+          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
         }
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().ram);
+          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().getRam());
         }
       }
     }
@@ -488,31 +488,31 @@ public class FirstFitDecreasingPackingTest {
             + Math.round(3 * instanceCpuDefault
             + padding / 100.0 * (3 * instanceCpuDefault))
             + instanceCpuDefault),
-        (long) packingPlanExplicitRamMap.getResource().cpu);
+        (long) packingPlanExplicitRamMap.getResource().getCpu());
 
     Assert.assertEquals(2 * boltRam + 2 * instanceRamDefault
             + (long) (padding / 100.0 * (2 * boltRam + 2 * instanceRamDefault))
             + boltRam + 2 * instanceRamDefault
             + (long) (padding / 100.0 * (boltRam + 2 * instanceRamDefault))
             + instanceRamDefault,
-        packingPlanExplicitRamMap.getResource().ram);
+        packingPlanExplicitRamMap.getResource().getRam());
 
     Assert.assertEquals(4 * instanceDiskDefault
             + (long) (padding / 100.0 * (4 * instanceDiskDefault))
             + 3 * instanceDiskDefault
             + (long) (padding / 100.0 * (3 * instanceDiskDefault))
             + instanceDiskDefault,
-        packingPlanExplicitRamMap.getResource().disk);
+        packingPlanExplicitRamMap.getResource().getDisk());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Ram for bolt should be the value in component ram map
         if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().ram);
+          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
         }
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().ram);
+          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().getRam());
         }
       }
     }

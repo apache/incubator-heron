@@ -100,8 +100,6 @@ public class MarathonScheduler implements IScheduler {
     // TODO (nlu): use heterogeneous resources
     // Align resources to maximal requested resource
     Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
-    // Add ram for tmaster container
-    packing.getResource().ram = containerResource.ram * (packing.getContainers().size() + 1);
 
     // Create app conf list for each container
     ArrayNode instances = mapper.createArrayNode();
@@ -110,9 +108,9 @@ public class MarathonScheduler implements IScheduler {
 
       instance.put(MarathonConstants.ID, Integer.toString(i));
       instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
-      instance.put(MarathonConstants.CPU, containerResource.cpu);
-      instance.put(MarathonConstants.MEMORY, containerResource.ram / Constants.MB);
-      instance.put(MarathonConstants.DISK, containerResource.disk / Constants.MB);
+      instance.put(MarathonConstants.CPU, containerResource.getCpu());
+      instance.put(MarathonConstants.MEMORY, containerResource.getRam() / Constants.MB);
+      instance.put(MarathonConstants.DISK, containerResource.getDisk() / Constants.MB);
       instance.set(MarathonConstants.PORT_DEFINITIONS, getPorts(mapper));
       instance.put(MarathonConstants.INSTANCES, 1);
       instance.set(MarathonConstants.LABELS, getLabels(mapper));
