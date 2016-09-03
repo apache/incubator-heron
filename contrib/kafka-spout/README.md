@@ -1,7 +1,7 @@
 Kafka Spout
 ====================
 
-Provides spout implementations for consuming data from Apache Kafka 1.8.x. Trident kafka spout and
+Provides spout implementations for consuming data from Apache Kafka 0.8.x. Trident kafka spout and
 kafka-bolt is not supported.
 
 ##Spouts
