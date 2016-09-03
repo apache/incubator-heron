@@ -28,6 +28,7 @@
 #include "zookeeper/zkclient.h"
 #include "proto/metrics.pb.h"
 #include "proto/tmaster.pb.h"
+#include "proto/topology.pb.h"
 #include "config/heron-internals-config-reader.h"
 
 namespace {
@@ -96,6 +97,7 @@ void TMetricsCollector::AddExceptionsForComponent(const sp_string& component_nam
 void TMetricsCollector::AddMetric(const PublishMetrics& _metrics) {
   for (sp_int32 i = 0; i < _metrics.metrics_size(); ++i) {
     const sp_string& component_name = _metrics.metrics(i).component_name();
+    LOG(INFO) << "Add metrics for component " << component_name << std::endl;
     AddMetricsForComponent(component_name, _metrics.metrics(i));
   }
   for (int i = 0; i < _metrics.exceptions_size(); i++) {
@@ -104,12 +106,34 @@ void TMetricsCollector::AddMetric(const PublishMetrics& _metrics) {
   }
 }
 
-MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request) {
+MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request,
+                                              const proto::api::Topology* _topology) {
   MetricResponse* response = new MetricResponse();
+
   if (metrics_.find(_request.component_name()) == metrics_.end()) {
-    LOG(ERROR) << "GetMetrics request received for unknown component " << _request.component_name();
-    response->mutable_status()->set_status(proto::system::NOTOK);
-    response->mutable_status()->set_message("Unknown component");
+    bool component_exists = false;
+    for (int i = 0; i < _topology->spouts_size(); i++) {
+      if ((_topology->spouts(i)).comp().name() == _request.component_name()) {
+        component_exists = true;
+      }
+    }
+    for (int i = 0; i < _topology->bolts_size(); i++) {
+      if ((_topology->bolts(i)).comp().name() == _request.component_name()) {
+        component_exists = true;
+      }
+    }
+    if (component_exists) {
+      LOG(WARNING) << "Metrics for " << _request.component_name() << " is not available";
+      response->mutable_status()->set_status(proto::system::NOTOK);
+      response->mutable_status()->set_message("Metrics not available for component: " + \
+                                              _request.component_name());
+    } else {
+      LOG(ERROR) << "GetMetrics request received for unknown component "
+                 << _request.component_name();
+      response->mutable_status()->set_status(proto::system::NOTOK);
+      response->mutable_status()->set_message("Unknown component: " + _request.component_name());
+    }
+
   } else if (!_request.has_interval() && !_request.has_explicit_interval()) {
     LOG(ERROR) << "GetMetrics request does not have either interval "
                << " nor explicit interval";

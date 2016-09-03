@@ -24,6 +24,7 @@
 #include "basics/sptypes.h"
 #include "network/event_loop.h"
 #include "proto/tmaster.pb.h"
+#include "proto/topology.pb.h"
 #include "metrics/tmaster-metrics.h"
 
 namespace heron {
@@ -46,7 +47,8 @@ class TMetricsCollector {
 
   // Returns a new response to fetch metrics. The request gets propagated to Component's and
   // Instance's get metrics. Doesn't own Response.
-  proto::tmaster::MetricResponse* GetMetrics(const proto::tmaster::MetricRequest& _request);
+  proto::tmaster::MetricResponse* GetMetrics(const proto::tmaster::MetricRequest& _request,
+                                             const proto::api::Topology* _topology);
 
   // Returns response for fetching exceptions. Doesn't own response.
   proto::tmaster::ExceptionLogResponse* GetExceptions(
