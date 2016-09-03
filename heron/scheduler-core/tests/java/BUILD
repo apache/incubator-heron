@@ -31,6 +31,7 @@ java_library(
   deps = scheduler_deps_files + [
     "//heron/statemgrs/src/java:null-statemgr-java",
     "//heron/schedulers/src/java:null-scheduler-java",
+    "//heron/packing/src/java:roundrobin-packing",
   ],
 )
 
