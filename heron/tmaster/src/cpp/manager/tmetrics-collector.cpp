@@ -97,7 +97,6 @@ void TMetricsCollector::AddExceptionsForComponent(const sp_string& component_nam
 void TMetricsCollector::AddMetric(const PublishMetrics& _metrics) {
   for (sp_int32 i = 0; i < _metrics.metrics_size(); ++i) {
     const sp_string& component_name = _metrics.metrics(i).component_name();
-    LOG(INFO) << "Add metrics for component " << component_name << std::endl;
     AddMetricsForComponent(component_name, _metrics.metrics(i));
   }
   for (int i = 0; i < _metrics.exceptions_size(); i++) {

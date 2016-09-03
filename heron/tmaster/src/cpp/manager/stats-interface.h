@@ -21,7 +21,6 @@
 #include "proto/tmaster.pb.h"
 #include "basics/basics.h"
 
-
 namespace heron {
 namespace tmaster {
 
