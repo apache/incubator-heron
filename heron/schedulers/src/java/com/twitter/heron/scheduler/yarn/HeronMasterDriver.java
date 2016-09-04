@@ -73,7 +73,7 @@ import com.twitter.heron.spi.packing.Resource;
 @Unit
 public class HeronMasterDriver {
   static final int TM_MEM_SIZE_MB = 1024;
-  static final int TMASTER_CONTAINER_ID = 0;
+  static final String TMASTER_CONTAINER_ID = "0";
   static final int MB = 1024 * 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
   private final String topologyPackageName;
@@ -180,7 +180,7 @@ public class HeronMasterDriver {
     }
   }
 
-  public void restartWorker(int id) throws ContainerAllocationException {
+  public void restartWorker(String id) throws ContainerAllocationException {
     LOG.log(Level.INFO, "Find & restart container for id={0}", id);
 
     Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(id);
@@ -204,7 +204,7 @@ public class HeronMasterDriver {
   }
 
   @VisibleForTesting
-  AllocatedEvaluator launchContainerForExecutor(final int executorId,
+  AllocatedEvaluator launchContainerForExecutor(final String executorId,
                                                 final int cpu,
                                                 final int mem) throws ContainerAllocationException {
     return launchContainerForExecutor(new HeronWorker(executorId, cpu, mem));
@@ -236,7 +236,7 @@ public class HeronMasterDriver {
     }
   }
 
-  AllocatedEvaluator allocateContainer(int id, int cpu, int mem) throws InterruptedException {
+  AllocatedEvaluator allocateContainer(String id, int cpu, int mem) throws InterruptedException {
     EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
 
     LOG.log(Level.INFO, "Requesting container for executor, id: {0}, mem: {1}, cpu: {2}",
@@ -250,9 +250,9 @@ public class HeronMasterDriver {
     return evaluator;
   }
 
-  Configuration createContextConfig(int executorId) {
+  Configuration createContextConfig(String executorId) {
     return ContextConfiguration.CONF
-        .set(ContextConfiguration.IDENTIFIER, executorId + "")
+        .set(ContextConfiguration.IDENTIFIER, executorId)
         .build();
   }
 
@@ -282,7 +282,7 @@ public class HeronMasterDriver {
     return packing.getComponentRamDistribution();
   }
 
-  void submitHeronExecutorTask(int workerId) {
+  void submitHeronExecutorTask(String workerId) {
     Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
     if (!worker.isPresent()) {
       return;
@@ -296,7 +296,7 @@ public class HeronMasterDriver {
     final Configuration taskConf = HeronTaskConfiguration.CONF
         .set(TaskConfiguration.TASK, HeronExecutorTask.class)
         .set(TaskConfiguration.ON_CLOSE, HeronExecutorTask.HeronExecutorTaskTerminator.class)
-        .set(TaskConfiguration.IDENTIFIER, workerId + "")
+        .set(TaskConfiguration.IDENTIFIER, workerId)
         .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
         .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
         .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
@@ -318,13 +318,13 @@ public class HeronMasterDriver {
    * owns one heron worker id and its handlers
    */
   private static final class HeronWorker {
-    private int workerId;
+    private String workerId;
     private int cores;
     private int mem;
     private AllocatedEvaluator evaluator;
     private ActiveContext context;
 
-    HeronWorker(int id, int cores, int mem) {
+    HeronWorker(String id, int cores, int mem) {
       this.workerId = id;
       this.cores = cores;
       this.mem = mem;
@@ -336,7 +336,7 @@ public class HeronMasterDriver {
    * {@link HeronWorker} instance. It also ensures thread safety and update order.
    */
   private static final class MultiKeyWorkerMap {
-    private Map<Integer, HeronWorker> workerMap = new HashMap<>();
+    private Map<String, HeronWorker> workerMap = new HashMap<>();
     private Map<String, HeronWorker> evaluatorWorkerMap = new HashMap<>();
 
     void assignEvaluatorToWorker(HeronWorker worker, AllocatedEvaluator evaluator) {
@@ -353,7 +353,7 @@ public class HeronMasterDriver {
       }
     }
 
-    Optional<HeronWorker> lookupByWorkerId(int workerId) {
+    Optional<HeronWorker> lookupByWorkerId(String workerId) {
       HeronWorker worker;
       synchronized (workerMap) {
         worker = workerMap.get(workerId);
@@ -484,7 +484,7 @@ public class HeronMasterDriver {
         return;
       }
 
-      int workerId = Integer.valueOf(context.getId());
+      String workerId = context.getId();
       Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(workerId);
       if (!worker.isPresent()) {
         context.close();
@@ -517,7 +517,7 @@ public class HeronMasterDriver {
         return;
       }
 
-      submitHeronExecutorTask(Integer.valueOf(failedTask.getId()));
+      submitHeronExecutorTask(failedTask.getId());
     }
   }
 
@@ -530,7 +530,7 @@ public class HeronMasterDriver {
         return;
       }
       LOG.log(Level.WARNING, "Task should not complete, relaunching {0}", task.getId());
-      submitHeronExecutorTask(Integer.valueOf(task.getId()));
+      submitHeronExecutorTask(task.getId());
     }
   }
 }

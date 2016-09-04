@@ -104,6 +104,10 @@ public class ResourceCompliantRRPacking implements IPacking {
   protected int numContainers;
   protected int numAdjustments;
 
+  public static String getContainerId(int index) {
+    return Integer.toString(index);
+  }
+
   public static String getInstanceId(
       int containerIdx, String componentName, int instanceIdx, int componentIdx) {
     return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
@@ -145,7 +149,8 @@ public class ResourceCompliantRRPacking implements IPacking {
   public PackingPlan pack() {
     int adjustments = this.numAdjustments;
     // Get the instances using a resource compliant round robin allocation
-    Map<Integer, List<String>> resourceCompliantRRAllocation = getResourceCompliantRRAllocation();
+    Map<String, List<String>> resourceCompliantRRAllocation
+        = getResourceCompliantRRAllocation();
 
     while (resourceCompliantRRAllocation == null) {
       if (this.numAdjustments > adjustments) {
@@ -168,9 +173,9 @@ public class ResourceCompliantRRPacking implements IPacking {
     long topologyDisk = 0;
     double topologyCpu = 0.0;
 
-    for (Map.Entry<Integer, List<String>> entry : resourceCompliantRRAllocation.entrySet()) {
+    for (Map.Entry<String, List<String>> entry : resourceCompliantRRAllocation.entrySet()) {
 
-      int containerId = entry.getKey();
+      String containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
 
       long containerRam = 0;
@@ -278,9 +283,9 @@ public class ResourceCompliantRRPacking implements IPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  protected Map<Integer, List<String>> getResourceCompliantRRAllocation() {
+  protected Map<String, List<String>> getResourceCompliantRRAllocation() {
 
-    Map<Integer, List<String>> allocation = new HashMap<>();
+    Map<String, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getRAMInstances();
 
@@ -292,7 +297,7 @@ public class ResourceCompliantRRPacking implements IPacking {
     }
 
     for (int i = 1; i <= numContainers; ++i) {
-      allocation.put(i, new ArrayList<String>());
+      allocation.put(getContainerId(i), new ArrayList<String>());
     }
     for (int i = 0; i <= numContainers - 1; i++) {
       allocateNewContainer(containers);
@@ -308,7 +313,7 @@ public class ResourceCompliantRRPacking implements IPacking {
       for (int i = 0; i < numInstance; ++i) {
         if (placeResourceCompliantRRInstance(containers, containerId,
             ramRequirement, instanceCpuDefault, instanceDiskDefault)) {
-          allocation.get(containerId)
+          allocation.get(getContainerId(containerId))
               .add(getInstanceId(containerId, component, globalTaskIndex, i));
         } else {
           List<TopologyAPI.Config.KeyValue> topologyConfig
