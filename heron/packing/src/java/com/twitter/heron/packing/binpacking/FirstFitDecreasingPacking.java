@@ -108,10 +108,6 @@ public class FirstFitDecreasingPacking implements IPacking {
 
   protected int paddingPercentage;
 
-  public static String getContainerId(int index) {
-    return Integer.toString(index);
-  }
-
   public static String getInstanceId(
       int containerIdx, String componentName, int instanceIdx, int componentIdx) {
     return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
@@ -161,7 +157,7 @@ public class FirstFitDecreasingPacking implements IPacking {
   @Override
   public PackingPlan pack() {
     // Get the instances using FFD allocation
-    Map<String, List<String>> ffdAllocation = getFFDAllocation();
+    Map<Integer, List<String>> ffdAllocation = getFFDAllocation();
     // Construct the PackingPlan
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
@@ -182,7 +178,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    *
    * @return Resources required
    */
-  private Resource estimateResources(Map<String, List<String>> ffdAllocation,
+  private Resource estimateResources(Map<Integer, List<String>> ffdAllocation,
                                      Set<PackingPlan.ContainerPlan> containerPlans,
                                      Map<String, Long> ramMap,
                                      boolean scale) {
@@ -190,9 +186,9 @@ public class FirstFitDecreasingPacking implements IPacking {
     long topologyDisk = 0;
     double topologyCpu = 0.0;
 
-    for (Map.Entry<String, List<String>> entry : ffdAllocation.entrySet()) {
+    for (Map.Entry<Integer, List<String>> entry : ffdAllocation.entrySet()) {
 
-      String containerId = entry.getKey();
+      int containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
 
       long containerRam = 0;
@@ -297,7 +293,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  protected Map<String, List<String>> getFFDAllocation() {
+  protected Map<Integer, List<String>> getFFDAllocation() {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     return placeInstances(parallelismMap, 0);
   }
@@ -307,9 +303,9 @@ public class FirstFitDecreasingPacking implements IPacking {
    *
    * @return true if a placement was found, false otherwise
    */
-  private Map<String, List<String>> placeInstances(Map<String, Integer> parallelismMap,
-                                                   int numContainers) {
-    Map<String, List<String>> allocation = new HashMap<>();
+  private Map<Integer, List<String>> placeInstances(Map<String, Integer> parallelismMap,
+                                                         int numContainers) {
+    Map<Integer, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
     int globalTaskIndex = 1;
@@ -320,13 +316,13 @@ public class FirstFitDecreasingPacking implements IPacking {
         int containerId = placeFFDInstance(containers,
             ramRequirements.get(i).getRamRequirement(),
             instanceCpuDefault, instanceDiskDefault);
-        if (allocation.containsKey(getContainerId(containerId + numContainers))) {
-          allocation.get(getContainerId(containerId + numContainers)).
+        if (allocation.containsKey(containerId + numContainers)) {
+          allocation.get(containerId + numContainers).
               add(getInstanceId(containerId + numContainers, component, globalTaskIndex, j));
         } else {
           ArrayList<String> instance = new ArrayList<>();
           instance.add(getInstanceId(containerId + numContainers, component, globalTaskIndex, j));
-          allocation.put(getContainerId(containerId + numContainers), instance);
+          allocation.put(containerId + numContainers, instance);
         }
         globalTaskIndex++;
       }

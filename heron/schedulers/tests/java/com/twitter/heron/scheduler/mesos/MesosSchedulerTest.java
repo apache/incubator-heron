@@ -128,7 +128,7 @@ public class MesosSchedulerTest {
     Resource containerResources = new Resource(CPU, MEM, DISK);
     PackingPlan.ContainerPlan containerPlan =
         new PackingPlan.ContainerPlan(
-            "id", new HashSet<PackingPlan.InstancePlan>(), containerResources);
+            0, new HashSet<PackingPlan.InstancePlan>(), containerResources);
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
     containerPlans.add(containerPlan);
