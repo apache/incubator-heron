@@ -72,7 +72,7 @@ class HeronExecutorTest(unittest.TestCase):
     packing_plan = PackingPlan()
     for container_id in instance_distribution.keys():
       container_plan = packing_plan.container_plans.add()
-      container_plan.id = str(container_id)
+      container_plan.id = int(container_id)
       for (component_name, global_task_id, component_index) in instance_distribution[container_id]:
         instance_plan = container_plan.instance_plans.add()
         instance_plan.id = "%s:%s:%s:%s" %\
