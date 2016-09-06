@@ -122,7 +122,7 @@ MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request,
       }
     }
     if (component_exists) {
-      LOG(WARNING) << "Metrics for " << _request.component_name() << " is not available";
+      LOG(WARNING) << "Metrics for " << _request.component_name() << " are not available";
       response->mutable_status()->set_status(proto::system::NOTOK);
       response->mutable_status()->set_message("Metrics not available for component: " + \
                                               _request.component_name());
