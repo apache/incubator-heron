@@ -31,7 +31,6 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
 
 public class MarathonSchedulerTest {
   private static final String TOPOLOGY_CONF = "topology_conf";
@@ -76,8 +75,8 @@ public class MarathonSchedulerTest {
     PackingPlan pplan  =
         new PackingPlan(
             PACKING_PLAN_ID,
-            new HashSet<PackingPlan.ContainerPlan>(),
-            Mockito.mock(Resource.class));
+            new HashSet<PackingPlan.ContainerPlan>()
+        );
     Assert.assertTrue(pplan.getContainers().isEmpty());
     // Fail to schedule due to PackingPlan is empty
     Assert.assertFalse(scheduler.onSchedule(pplan));
@@ -85,7 +84,7 @@ public class MarathonSchedulerTest {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
     PackingPlan validPlan =
-        new PackingPlan(PACKING_PLAN_ID, containers, Mockito.mock(Resource.class));
+        new PackingPlan(PACKING_PLAN_ID, containers);
 
     // Failed to submit topology due to controller failure
     Mockito.doReturn(false).when(controller).submitTopology(Mockito.anyString());
