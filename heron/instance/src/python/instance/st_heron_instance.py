@@ -23,7 +23,7 @@ import yaml
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
-from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
+from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
@@ -64,6 +64,7 @@ class SingleThreadHeronInstance(object):
       register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY])
     self.metrics_collector = MetricsCollector(self.looper, self.out_metrics)
     self.gateway_metrics = GatewayMetrics(self.metrics_collector)
+    self.jvm_metrics = PyMetrics(self.metrics_collector)
 
     # Create socket options and socket clients
     socket_options = create_socket_options()
@@ -74,7 +75,7 @@ class SingleThreadHeronInstance(object):
     self._metrics_client = \
       MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
                            self.out_metrics, self.in_stream, self.out_stream,
-                           self.socket_map, socket_options, self.gateway_metrics)
+                           self.socket_map, socket_options, self.gateway_metrics, self.jvm_metrics)
     self.my_pplan_helper = None
 
     # my_instance is a AssignedInstance tuple

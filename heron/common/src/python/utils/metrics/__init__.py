@@ -9,7 +9,7 @@ from .metrics import (IMetric,
                       ReducedMetric,
                       MultiReducedMetric,
                       AssignableMetrics,
-                      MultiAssignableMetric,
+                      MultiAssignableMetrics,
                       MeanReducedMetric,
                       MultiMeanReducedMetric)
 
