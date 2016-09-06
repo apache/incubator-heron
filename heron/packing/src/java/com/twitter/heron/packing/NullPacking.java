@@ -20,7 +20,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
 
 public class NullPacking implements IPacking {
 
@@ -30,10 +29,7 @@ public class NullPacking implements IPacking {
 
   @Override
   public PackingPlan pack() {
-    return new PackingPlan(
-        "",
-        new HashSet<PackingPlan.ContainerPlan>(),
-        new Resource(0.0, 0L, 0L));
+    return new PackingPlan("", new HashSet<PackingPlan.ContainerPlan>());
   }
 
   @Override

@@ -422,7 +422,7 @@ class HeronExecutor(object):
     """
     this_container_plan = None
     for container_plan in packing_plan.container_plans:
-      if container_plan.id == str(container_id):
+      if container_plan.id == container_id:
         this_container_plan = container_plan
 
     # make sure that our shard id is a valid one

@@ -104,10 +104,6 @@ public class ResourceCompliantRRPacking implements IPacking {
   protected int numContainers;
   protected int numAdjustments;
 
-  public static String getContainerId(int index) {
-    return Integer.toString(index);
-  }
-
   public static String getInstanceId(
       int containerIdx, String componentName, int instanceIdx, int componentIdx) {
     return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
@@ -149,8 +145,7 @@ public class ResourceCompliantRRPacking implements IPacking {
   public PackingPlan pack() {
     int adjustments = this.numAdjustments;
     // Get the instances using a resource compliant round robin allocation
-    Map<String, List<String>> resourceCompliantRRAllocation
-        = getResourceCompliantRRAllocation();
+    Map<Integer, List<String>> resourceCompliantRRAllocation = getResourceCompliantRRAllocation();
 
     while (resourceCompliantRRAllocation == null) {
       if (this.numAdjustments > adjustments) {
@@ -169,13 +164,9 @@ public class ResourceCompliantRRPacking implements IPacking {
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
         Integer.toString(DEFAULT_CONTAINER_PADDING_PERCENTAGE)));
 
-    long topologyRam = 0;
-    long topologyDisk = 0;
-    double topologyCpu = 0.0;
+    for (Map.Entry<Integer, List<String>> entry : resourceCompliantRRAllocation.entrySet()) {
 
-    for (Map.Entry<String, List<String>> entry : resourceCompliantRRAllocation.entrySet()) {
-
-      String containerId = entry.getKey();
+      int containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
 
       long containerRam = 0;
@@ -224,20 +215,9 @@ public class ResourceCompliantRRPacking implements IPacking {
           new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
 
       containerPlans.add(containerPlan);
-      topologyRam += containerRam;
-      topologyCpu += Math.round(containerCpu);
-      topologyDisk += containerDiskInBytes;
     }
 
-    // Take the heron internal container into account and the application master for YARN
-    // scheduler
-    topologyRam += instanceRamDefault;
-    topologyDisk += instanceDiskDefault;
-    topologyCpu += instanceCpuDefault;
-
-    Resource resource = new Resource(topologyCpu, topologyRam, topologyDisk);
-
-    return new PackingPlan(topology.getId(), containerPlans, resource);
+    return new PackingPlan(topology.getId(), containerPlans);
   }
 
   @Override
@@ -283,9 +263,9 @@ public class ResourceCompliantRRPacking implements IPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  protected Map<String, List<String>> getResourceCompliantRRAllocation() {
+  protected Map<Integer, List<String>> getResourceCompliantRRAllocation() {
 
-    Map<String, List<String>> allocation = new HashMap<>();
+    Map<Integer, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getRAMInstances();
 
@@ -297,7 +277,7 @@ public class ResourceCompliantRRPacking implements IPacking {
     }
 
     for (int i = 1; i <= numContainers; ++i) {
-      allocation.put(getContainerId(i), new ArrayList<String>());
+      allocation.put(i, new ArrayList<String>());
     }
     for (int i = 0; i <= numContainers - 1; i++) {
       allocateNewContainer(containers);
@@ -313,7 +293,7 @@ public class ResourceCompliantRRPacking implements IPacking {
       for (int i = 0; i < numInstance; ++i) {
         if (placeResourceCompliantRRInstance(containers, containerId,
             ramRequirement, instanceCpuDefault, instanceDiskDefault)) {
-          allocation.get(getContainerId(containerId))
+          allocation.get(containerId)
               .add(getInstanceId(containerId, component, globalTaskIndex, i));
         } else {
           List<TopologyAPI.Config.KeyValue> topologyConfig

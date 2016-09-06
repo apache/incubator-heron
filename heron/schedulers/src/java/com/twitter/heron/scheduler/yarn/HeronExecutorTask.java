@@ -75,7 +75,7 @@ public class HeronExecutorTask implements Task {
 
   @Inject
   public HeronExecutorTask(final REEFFileNames fileNames,
-                           @Parameter(HeronExecutorId.class) String heronExecutorId,
+                           @Parameter(HeronExecutorId.class) int heronExecutorId,
                            @Parameter(Cluster.class) String cluster,
                            @Parameter(Role.class) String role,
                            @Parameter(TopologyName.class) String topologyName,
@@ -86,7 +86,7 @@ public class HeronExecutorTask implements Task {
                            @Parameter(PackedPlan.class) String packedPlan,
                            @Parameter(ComponentRamMap.class) String componentRamMap,
                            @Parameter(VerboseLogMode.class) boolean verboseMode) {
-    this.heronExecutorId = Integer.valueOf(heronExecutorId);
+    this.heronExecutorId = heronExecutorId;
     this.cluster = cluster;
     this.role = role;
     this.topologyName = topologyName;

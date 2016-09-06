@@ -98,7 +98,7 @@ public class DriverOnLocalReefTest {
       driver = new HeronMasterDriver(requestor, null, "", "", "", "", null, null, null, 0, false);
     }
 
-    private void addContainer(String id,
+    private void addContainer(int id,
                               double cpu,
                               long mem,
                               Set<PackingPlan.ContainerPlan> containers) {
@@ -114,8 +114,8 @@ public class DriverOnLocalReefTest {
           counter = new CountDownLatch(2);
           driver.scheduleTMasterContainer();
           Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-          addContainer("1", 1.0, 512L, containers);
-          PackingPlan packing = new PackingPlan("packingId", containers, null);
+          addContainer(1, 1.0, 512L, containers);
+          PackingPlan packing = new PackingPlan("packingId", containers);
           driver.scheduleHeronWorkers(packing);
           counter.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
