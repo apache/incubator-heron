@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -75,19 +77,22 @@ public class RoundRobinPacking implements IPacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
 
   // TODO(mfu): Read these values from Config
-  public static final long DEFAULT_DISK_PADDING_PER_CONTAINER = 12L * Constants.GB;
-  public static final long DEFAULT_RAM_PADDING_PER_CONTAINER = 2L * Constants.GB;
-  public static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1;
-  public static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
+  @VisibleForTesting
+  static final long DEFAULT_DISK_PADDING_PER_CONTAINER = 12L * Constants.GB;
+  @VisibleForTesting
+  static final long DEFAULT_RAM_PADDING_PER_CONTAINER = 2L * Constants.GB;
+  @VisibleForTesting
+  static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1;
+  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
 
   // Use as a stub as default number value when getting config value
-  public static final String NOT_SPECIFIED_NUMBER_VALUE = "-1";
+  private static final String NOT_SPECIFIED_NUMBER_VALUE = "-1";
 
-  protected TopologyAPI.Topology topology;
+  private TopologyAPI.Topology topology;
 
-  protected long instanceRamDefault;
-  protected double instanceCpuDefault;
-  protected long instanceDiskDefault;
+  private long instanceRamDefault;
+  private double instanceCpuDefault;
+  private long instanceDiskDefault;
 
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
@@ -146,18 +151,9 @@ public class RoundRobinPacking implements IPacking {
               containerId, new HashSet<>(instancePlanMap.values()), resource);
 
       containerPlans.add(containerPlan);
-      topologyRam += containerRam;
     }
 
-    // Take the heron internal container into account
-    int totalContainer = containerPlans.size() + 1;
-    long topologyDisk = totalContainer * containerDiskInBytes;
-    double topologyCpu = totalContainer * containerCpu;
-
-    Resource resource = new Resource(
-        topologyCpu, topologyRam, topologyDisk);
-
-    PackingPlan plan = new PackingPlan(topology.getId(), containerPlans, resource);
+    PackingPlan plan = new PackingPlan(topology.getId(), containerPlans);
 
     // Check whether it is a valid PackingPlan
     if (!isValidPackingPlan(plan)) {

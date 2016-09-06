@@ -29,10 +29,7 @@ public class PackingPlanProtoDeserializer {
       containers.add(convert(containerPlan));
     }
 
-    return new PackingPlan(
-        packingPlan.getId(),
-        containers,
-        convert(packingPlan.getResource()));
+    return new PackingPlan(packingPlan.getId(), containers);
   }
 
   private PackingPlan.ContainerPlan convert(PackingPlans.ContainerPlan containerPlan) {

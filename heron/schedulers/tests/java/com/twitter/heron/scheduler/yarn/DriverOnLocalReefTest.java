@@ -115,7 +115,7 @@ public class DriverOnLocalReefTest {
           driver.scheduleTMasterContainer();
           Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
           addContainer(1, 1.0, 512L, containers);
-          PackingPlan packing = new PackingPlan("packingId", containers, null);
+          PackingPlan packing = new PackingPlan("packingId", containers);
           driver.scheduleHeronWorkers(packing);
           counter.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {

@@ -43,7 +43,6 @@ import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.LauncherUtils;
@@ -129,7 +128,6 @@ public class LaunchRunnerTest {
         new HashSet<PackingPlan.ContainerPlan>());
     Mockito.when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
     Mockito.when(packingPlan.getId()).thenReturn("packing_plan_id");
-    Mockito.when(packingPlan.getResource()).thenReturn(new Resource(0, 0, 0));
     Mockito.when(packing.pack()).thenReturn(packingPlan);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
 

@@ -125,7 +125,7 @@ public class SchedulerMainTest {
     instances.add(new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(new PackingPlan.ContainerPlan(1, instances, new Resource(1, 1, 1)));
-    PackingPlan packingPlan = new PackingPlan("packing-id", containers, new Resource(1, 1, 1));
+    PackingPlan packingPlan = new PackingPlan("packing-id", containers);
     final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
     future.set(new PackingPlanProtoSerializer().toProto(packingPlan));
     return future;
