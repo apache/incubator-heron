@@ -34,6 +34,7 @@ from heron.common.src.python.utils import log
 # pylint: disable=unused-import
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.statemgrs.src.python import statemanagerfactory
+from heron.statemgrs.src.python import configloader
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 Log = log.Log
@@ -593,49 +594,13 @@ class HeronExecutor(object):
                (len(commands_to_kill), len(commands_to_keep),
                 len(commands_to_start), len(self.processes_to_monitor)))
 
-  def __get_state_manager_locations(self, state_manager_config_file='heron-conf/statemgr.yaml'):
-    """ reads configs to determine which state manager to use """
-    with open(state_manager_config_file, 'r') as stream:
-      config = yaml.load(stream)
-
-    # need to convert from the format in statemgr.yaml to the format that the python state managers
-    # takes. first, set reasonable defaults to local
-    state_manager_location =\
-      {
-          'type': 'file',
-          'name': 'local',
-          'tunnelhost': 'localhost',
-          'rootpath': '~/.herondata/repository/state/local',
-      }
-
-    if 'heron.statemgr.connection.string' in config:
-      state_manager_location['hostport'] = config['heron.statemgr.connection.string']
-    if 'heron.statemgr.tunnel.host' in config:
-      state_manager_location['tunnelhost'] = config['heron.statemgr.tunnel.host']
-
-    state_manager_class = config['heron.class.state.manager']
-    if state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
-      state_manager_location['type'] = 'zookeeper'
-      state_manager_location['name'] = 'zk'
-      if 'heron.statemgr.root.path' in config:
-        state_manager_location['rootpath'] = config['heron.statemgr.root.path']
-
-    elif state_manager_class != 'com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager':
-      Log.error("FATAL: unrecognized heron.class.state.manager found in %s: %s" %
-                (state_manager_config_file, config))
-      sys.exit(1)
-
-    Log.info("state manager configs: %s " % state_manager_location)
-
-    return [state_manager_location]
-
   # pylint: disable=global-statement
   def start_state_manager_watches(self):
     """
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
     statemgr_config = StateMgrConfig()
-    statemgr_config.set_state_locations(self.__get_state_manager_locations())
+    statemgr_config.set_state_locations(configloader.load_state_manager_locations(self.cluster))
     self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
 
     # pylint: disable=unused-argument
