@@ -110,13 +110,9 @@ public class FirstFitDecreasingPacking implements IPacking {
 
   private int paddingPercentage;
 
-  private static String getContainerId(int index) {
-    return Integer.toString(index);
-  }
-
-  private static String getInstanceId(
-      int containerIdx, String componentName, int instanceIdx, int componentIdx) {
-    return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
+  public static String getInstanceId(
+      int containerId, String componentName, int instanceId, int componentId) {
+    return String.format("%d:%s:%d:%d", containerId, componentName, instanceId, componentId);
   }
 
   @VisibleForTesting
@@ -164,8 +160,7 @@ public class FirstFitDecreasingPacking implements IPacking {
   @Override
   public PackingPlan pack() {
     // Get the instances using FFD allocation
-    Map<String, List<String>> ffdAllocation = getFFDAllocation();
-
+    Map<Integer, List<String>> ffdAllocation = getFFDAllocation();
     // Construct the PackingPlan
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
@@ -184,10 +179,10 @@ public class FirstFitDecreasingPacking implements IPacking {
    * @return Set<PackingPlan.ContainerPlan> container plans
    */
   private Set<PackingPlan.ContainerPlan> buildContainerPlans(
-      Map<String, List<String>> ffdAllocation, Map<String, Long> ramMap) {
+      Map<Integer, List<String>> ffdAllocation, Map<String, Long> ramMap) {
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
-    for (String containerId : ffdAllocation.keySet()) {
+    for (Integer containerId : ffdAllocation.keySet()) {
       List<String> instanceList = ffdAllocation.get(containerId);
 
       long containerRam = 0;
@@ -281,7 +276,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<String, List<String>> getFFDAllocation() {
+  protected Map<Integer, List<String>> getFFDAllocation() {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     return placeInstances(parallelismMap, 0);
   }
@@ -291,9 +286,9 @@ public class FirstFitDecreasingPacking implements IPacking {
    *
    * @return true if a placement was found, false otherwise
    */
-  private Map<String, List<String>> placeInstances(Map<String, Integer> parallelismMap,
-                                                   int numContainers) {
-    Map<String, List<String>> allocation = new HashMap<>();
+  private Map<Integer, List<String>> placeInstances(Map<String, Integer> parallelismMap,
+                                                         int numContainers) {
+    Map<Integer, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
     int globalTaskIndex = 1;
@@ -304,13 +299,13 @@ public class FirstFitDecreasingPacking implements IPacking {
         int containerId = placeFFDInstance(containers,
             ramRequirement.getRamRequirement(),
             instanceCpuDefault, instanceDiskDefault);
-        if (allocation.containsKey(getContainerId(containerId + numContainers))) {
-          allocation.get(getContainerId(containerId + numContainers)).
+        if (allocation.containsKey(containerId + numContainers)) {
+          allocation.get(containerId + numContainers).
               add(getInstanceId(containerId + numContainers, component, globalTaskIndex, j));
         } else {
           ArrayList<String> instance = new ArrayList<>();
           instance.add(getInstanceId(containerId + numContainers, component, globalTaskIndex, j));
-          allocation.put(getContainerId(containerId + numContainers), instance);
+          allocation.put(containerId + numContainers, instance);
         }
         globalTaskIndex++;
       }

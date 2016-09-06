@@ -42,7 +42,7 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> ENV = new RequiredParameter<>();
   public static final RequiredParameter<String> PACKED_PLAN = new RequiredParameter<>();
   public static final RequiredParameter<String> COMPONENT_RAM_MAP = new RequiredParameter<>();
-  public static final RequiredParameter<String> CONTAINER_ID = new RequiredParameter<>();
+  public static final RequiredParameter<Integer> CONTAINER_ID = new RequiredParameter<>();
   public static final OptionalParameter<Boolean> VERBOSE = new OptionalParameter<>();
 
   public static final ConfigurationModule CONF = new HeronTaskConfiguration()
