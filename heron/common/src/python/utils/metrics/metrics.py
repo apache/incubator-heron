@@ -141,23 +141,23 @@ class MultiReducedMetric(IMetric):
       ret[key] = value.get_value_and_reset()
       self.value[key] = value
     return ret
-  
+
 class AssignableMetrics(IMetric):
   """AssignableMetrics"""
   def __init__(self, init_val):
     self.value = init_val
-    
+
   def update(self, value):
     self.value = value
 
   def get_value_and_reset(self):
-    return value
-  
+    return self.value
+
 class MultiAssignableMetrics(IMetric):
   """MultiAssignableMetrics"""
   def __init__(self):
     self.map = {}
-    
+
   def update(self, key, value):
     if key not in self.map:
       self.map[key] = AssignableMetrics(value)
