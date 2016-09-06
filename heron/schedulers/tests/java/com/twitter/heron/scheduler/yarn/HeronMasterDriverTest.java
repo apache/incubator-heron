@@ -89,7 +89,7 @@ public class HeronMasterDriverTest {
     addContainer(1, 2.0, 2048L, containers);
     addContainer(2, 4.0, 2050L, containers);
 
-    PackingPlan packing = new PackingPlan("packingId", containers, null);
+    PackingPlan packing = new PackingPlan("packingId", containers);
     spyDriver.scheduleHeronWorkers(packing);
     Mockito.verify(mockEvaluator1, Mockito.timeout(1000).times(1)).submitContext(mockConfig);
     Mockito.verify(mockEvaluator2, Mockito.timeout(1000).times(1)).submitContext(mockConfig);
@@ -199,7 +199,7 @@ public class HeronMasterDriverTest {
 
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     addContainer(1, 1.0, 1024L, containers);
-    PackingPlan packing = new PackingPlan("packingId", containers, new Resource(1.5, 2, 3));
+    PackingPlan packing = new PackingPlan("packingId", containers);
     spyDriver.scheduleHeronWorkers(packing);
     Mockito.verify(mockWorkerEvaluator, Mockito.timeout(1000).times(1))
         .submitContext(Mockito.any(Configuration.class));

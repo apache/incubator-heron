@@ -132,8 +132,7 @@ public class MesosSchedulerTest {
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
     containerPlans.add(containerPlan);
-    PackingPlan packingPlan = new PackingPlan(TOPOLOGY_NAME, containerPlans, containerResources);
-
+    PackingPlan packingPlan = new PackingPlan(TOPOLOGY_NAME, containerPlans);
 
     BaseContainer container = scheduler.getBaseContainer(0, packingPlan);
 
