@@ -132,29 +132,6 @@ public class ResourceCompliantRRPackingTest {
         getResourceCompliantRRPackingPlan(topologyNoExplicitResourcesConfig);
 
     Assert.assertEquals(packingPlanNoExplicitResourcesConfig.getContainers().size(), numContainers);
-
-    //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
-    //consists of 2 spouts and 1 bolt (3 instances)
-    Assert.assertEquals((long) (Math.round(4 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceCpuDefault))
-            + Math.round(3 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlanNoExplicitResourcesConfig.getResource().getCpu());
-
-    Assert.assertEquals((4 * instanceRamDefault)
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceRamDefault))
-            + 3 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlanNoExplicitResourcesConfig.getResource().getRam());
-
-    Assert.assertEquals(4 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceDiskDefault))
-            + 3 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlanNoExplicitResourcesConfig.getResource().getDisk());
   }
 
   /**
@@ -178,29 +155,6 @@ public class ResourceCompliantRRPackingTest {
         getResourceCompliantRRPackingPlan(topology);
 
     Assert.assertEquals(packingPlan.getContainers().size(), numContainers);
-
-    //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
-    //consists of 2 spouts and 1 bolt (3 instances)
-    Assert.assertEquals((long) (Math.round(4 * instanceCpuDefault
-            + padding / 100.0 * (4 * instanceCpuDefault))
-            + Math.round(3 * instanceCpuDefault
-            + padding / 100.0 * (3 * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlan.getResource().getCpu());
-
-    Assert.assertEquals((4 * instanceRamDefault)
-            + (long) ((padding / 100.0) * (4 * instanceRamDefault))
-            + 3 * instanceRamDefault
-            + (long) ((padding / 100.0) * (3 * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlan.getResource().getRam());
-
-    Assert.assertEquals(4 * instanceDiskDefault
-            + (long) ((padding / 100.0) * (4 * instanceDiskDefault))
-            + 3 * instanceDiskDefault
-            + (long) ((padding / 100.0) * (3 * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlan.getResource().getDisk());
   }
 
   /**
@@ -230,21 +184,6 @@ public class ResourceCompliantRRPackingTest {
         getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), numContainers);
-
-    Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
-            + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault
-            + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.getResource().getCpu());
-
-    Assert.assertEquals(totalInstances * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault)
-            + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.getResource().getRam());
-
-    Assert.assertEquals(totalInstances * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault)
-            + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.getResource().getDisk());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
@@ -298,29 +237,6 @@ public class ResourceCompliantRRPackingTest {
         getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), numContainers);
-
-    //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
-    //consists of 2 spouts and 1 bolt (3 instances)
-    Assert.assertEquals((long) (Math.round(4 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceCpuDefault))
-            + Math.round(3 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.getResource().getCpu());
-
-    Assert.assertEquals((4 * instanceRamDefault)
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceRamDefault))
-            + 3 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.getResource().getRam());
-
-    Assert.assertEquals(4 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceDiskDefault))
-            + 3 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.getResource().getDisk());
 
     // Ram for bolt/spout should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
@@ -442,43 +358,6 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topology);
     Assert.assertEquals(packingPlan.getContainers().size(), 4);
-
-    //The first 3 containers consist of 1 spout and 1 bolt (2 instances) and the fourth container
-    //consists of 1 spout (1 instance)
-    Assert.assertEquals((long) (Math.round(2 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (2 * instanceCpuDefault))
-            + Math.round(2 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (2 * instanceCpuDefault))
-            + Math.round(2 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (2 * instanceCpuDefault))
-            + Math.round(HERON_INTERNAL_CONTAINERS * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (HERON_INTERNAL_CONTAINERS * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlan.getResource().getCpu());
-
-    Assert.assertEquals(2 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
-            + 2 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
-            + 2 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
-            + HERON_INTERNAL_CONTAINERS * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0)
-            * (HERON_INTERNAL_CONTAINERS * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlan.getResource().getRam());
-
-    Assert.assertEquals(2 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
-            + 2 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
-            + 2 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
-            + HERON_INTERNAL_CONTAINERS * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0)
-            * (HERON_INTERNAL_CONTAINERS * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlan.getResource().getDisk());
   }
 
   /**

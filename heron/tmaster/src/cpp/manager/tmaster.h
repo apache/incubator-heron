@@ -67,6 +67,7 @@ class TMaster {
   // TODO(mfu): Should we provide this?
   // topology_ should only be used to construct physical plan when TMaster first starts
   // Providing an accessor is bug prone.
+  // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
 
  private:

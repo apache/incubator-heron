@@ -134,13 +134,13 @@
         </dependency>
         <dependency>
             <groupId>com.twitter.heron</groupId>
-            <artifactId>local-heron-api</artifactId>
+            <artifactId>heron-api</artifactId>
             <version>SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.twitter.heron</groupId>
-            <artifactId>local-heron-storm</artifactId>
+            <artifactId>heron-storm</artifactId>
             <version>SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
