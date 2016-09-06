@@ -122,10 +122,11 @@ MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request,
       }
     }
     if (component_exists) {
-      LOG(WARNING) << "Metrics for " << _request.component_name() << " are not available";
+      LOG(WARNING) << "Metrics for component `" << _request.component_name()
+                                                << "` are not available";
       response->mutable_status()->set_status(proto::system::NOTOK);
-      response->mutable_status()->set_message("Metrics not available for component: " + \
-                                              _request.component_name());
+      response->mutable_status()->set_message("Metrics not available for component `" + \
+                                              _request.component_name() + "`");
     } else {
       LOG(ERROR) << "GetMetrics request received for unknown component "
                  << _request.component_name();
@@ -134,7 +135,7 @@ MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request,
     }
 
   } else if (!_request.has_interval() && !_request.has_explicit_interval()) {
-    LOG(ERROR) << "GetMetrics request does not have either interval "
+    LOG(ERROR) << "GetMetrics request does not have either interval"
                << " nor explicit interval";
     response->mutable_status()->set_status(proto::system::NOTOK);
     response->mutable_status()->set_message("No interval or explicit interval set");
