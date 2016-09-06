@@ -114,11 +114,15 @@ MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request,
     for (int i = 0; i < _topology->spouts_size(); i++) {
       if ((_topology->spouts(i)).comp().name() == _request.component_name()) {
         component_exists = true;
+        break;
       }
     }
-    for (int i = 0; i < _topology->bolts_size(); i++) {
-      if ((_topology->bolts(i)).comp().name() == _request.component_name()) {
-        component_exists = true;
+    if (!component_exists) {
+      for (int i = 0; i < _topology->bolts_size(); i++) {
+        if ((_topology->bolts(i)).comp().name() == _request.component_name()) {
+          component_exists = true;
+          break;
+        }
       }
     }
     if (component_exists) {
