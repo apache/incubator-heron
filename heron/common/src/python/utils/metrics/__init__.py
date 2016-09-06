@@ -1,5 +1,5 @@
 '''Common heron metrics module'''
-__all__ = ['metrics', 'metrics_helper', 'global_metrics']
+__all__ = ['metrics', 'metrics_helper', 'global_metrics', 'py_metrics']
 
 from .metrics import (IMetric,
                       CountMetric,
@@ -8,6 +8,8 @@ from .metrics import (IMetric,
                       MeanReducer,
                       ReducedMetric,
                       MultiReducedMetric,
+                      AssignableMetrics,
+                      MultiAssignableMetric,
                       MeanReducedMetric,
                       MultiMeanReducedMetric)
 
@@ -17,3 +19,5 @@ from .metrics_helper import (GatewayMetrics,
                              SpoutMetrics,
                              BoltMetrics,
                              MetricsCollector)
+
+from .py_metrics import PyMetrics
