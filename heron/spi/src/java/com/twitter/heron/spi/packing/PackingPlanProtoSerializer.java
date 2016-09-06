@@ -22,8 +22,7 @@ public class PackingPlanProtoSerializer {
 
   public PackingPlans.PackingPlan toProto(PackingPlan packingPlan) {
     PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder()
-        .setId(packingPlan.getId())
-        .setResource(builder(packingPlan.getResource()));
+        .setId(packingPlan.getId());
 
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
       builder.addContainerPlans(builder(containerPlan));

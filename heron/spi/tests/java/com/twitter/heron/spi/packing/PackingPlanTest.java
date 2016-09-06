@@ -27,14 +27,14 @@ import org.junit.Test;
 import com.twitter.heron.spi.common.Constants;
 
 public class PackingPlanTest {
-  private static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
+  private static PackingPlan generatePacking(Map<Integer, List<String>> basePacking) {
     Resource resource =
         new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
-    for (Map.Entry<String, List<String>> entry : basePacking.entrySet()) {
-      String containerId = entry.getKey();
+    for (Map.Entry<Integer, List<String>> entry : basePacking.entrySet()) {
+      int containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
 
       Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
@@ -58,13 +58,13 @@ public class PackingPlanTest {
       containerPlans.add(containerPlan);
     }
 
-    return new PackingPlan("", containerPlans, resource);
+    return new PackingPlan("", containerPlans);
   }
 
   @Test
   public void testPackingToString() {
-    Map<String, List<String>> packing = new HashMap<>();
-    packing.put("1", Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
+    Map<Integer, List<String>> packing = new HashMap<>();
+    packing.put(1, Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
     String expectedStr0 = "1:spout:1:0:bolt:3:0";
     String expectedStr1 = "1:bolt:3:0:spout:1:0";
 
@@ -73,7 +73,7 @@ public class PackingPlanTest {
 
     Assert.assertTrue(packingStr.equals(expectedStr0) || packingStr.equals(expectedStr1));
 
-    packing.put("2", Arrays.asList("2:spout:2:1"));
+    packing.put(2, Arrays.asList("2:spout:2:1"));
     packingPlan = generatePacking(packing);
     packingStr = packingPlan.getInstanceDistribution();
 
@@ -97,9 +97,9 @@ public class PackingPlanTest {
 
   @Test
   public void testPackingPlanSerde() {
-    Map<String, List<String>> packing = new HashMap<>();
-    packing.put("1", Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
-    packing.put("2", Arrays.asList("2:spout:2:1"));
+    Map<Integer, List<String>> packing = new HashMap<>();
+    packing.put(1, Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
+    packing.put(2, Arrays.asList("2:spout:2:1"));
     PackingPlan packingPlan = generatePacking(packing);
 
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();

@@ -19,7 +19,7 @@ message InstancePlan {
 }
 
 message ContainerPlan {
-  required string id = 1;
+  required int32 id = 1;
   repeated InstancePlan instance_plans = 2;
   required Resource resource = 3;
 }
@@ -27,5 +27,4 @@ message ContainerPlan {
 message PackingPlan {
   required string id = 1;
   repeated ContainerPlan container_plans = 2;
-  required Resource resource = 3;
 }

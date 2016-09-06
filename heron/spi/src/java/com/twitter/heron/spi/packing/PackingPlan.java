@@ -23,14 +23,12 @@ import com.google.common.collect.ImmutableSet;
 
 public class PackingPlan {
   private final String id;
-  private final Map<String, ContainerPlan> containersMap;
+  private final Map<Integer, ContainerPlan> containersMap;
   private final Set<ContainerPlan> containers;
-  private final Resource resource;
 
-  public PackingPlan(String id, Set<ContainerPlan> containers, Resource resource) {
+  public PackingPlan(String id, Set<ContainerPlan> containers) {
     this.id = id;
     this.containers = ImmutableSet.copyOf(containers);
-    this.resource = resource;
     containersMap = new HashMap<>();
     for (ContainerPlan containerPlan : containers) {
       containersMap.put(containerPlan.getId(), containerPlan);
@@ -41,15 +39,11 @@ public class PackingPlan {
     return id;
   }
 
-  public Resource getResource() {
-    return resource;
-  }
-
   public Set<ContainerPlan> getContainers() {
     return containers;
   }
 
-  public Optional<ContainerPlan> getContainer(String containerId) {
+  public Optional<ContainerPlan> getContainer(int containerId) {
     return Optional.fromNullable(this.containersMap.get(containerId));
   }
 
@@ -86,7 +80,7 @@ public class PackingPlan {
   public String getInstanceDistribution() {
     StringBuilder[] containerBuilder = new StringBuilder[this.getContainers().size()];
     for (PackingPlan.ContainerPlan container : this.getContainers()) {
-      int index = Integer.parseInt(container.id);
+      int index = container.id;
       containerBuilder[index - 1] = new StringBuilder();
 
       for (PackingPlan.InstancePlan instance : container.getInstances()) {
@@ -135,8 +129,8 @@ public class PackingPlan {
 
   @Override
   public String toString() {
-    return String.format("{plan-id: %s, containers-list: %s, plan-resource: %s}",
-        getId(), getContainers().toString(), getResource());
+    return String.format("{plan-id: %s, containers-list: %s}",
+        getId(), getContainers().toString());
   }
 
   @Override
@@ -151,15 +145,13 @@ public class PackingPlan {
     PackingPlan that = (PackingPlan) o;
 
     return getId().equals(that.getId())
-        && getContainers().equals(that.getContainers())
-        && getResource().equals(that.getResource());
+        && getContainers().equals(that.getContainers());
   }
 
   @Override
   public int hashCode() {
     int result = getId().hashCode();
     result = 31 * result + getContainers().hashCode();
-    result = 31 * result + getResource().hashCode();
     return result;
   }
 
@@ -218,17 +210,17 @@ public class PackingPlan {
   }
 
   public static class ContainerPlan {
-    private final String id;
+    private final int id;
     private final Set<InstancePlan> instances;
     private final Resource resource;
 
-    public ContainerPlan(String id, Set<InstancePlan> instances, Resource resource) {
+    public ContainerPlan(int id, Set<InstancePlan> instances, Resource resource) {
       this.id = id;
       this.instances = ImmutableSet.copyOf(instances);
       this.resource = resource;
     }
 
-    public String getId() {
+    public int getId() {
       return id;
     }
 
@@ -251,14 +243,14 @@ public class PackingPlan {
 
       ContainerPlan that = (ContainerPlan) o;
 
-      return id.equals(that.id)
+      return id == that.id
           && getInstances().equals(that.getInstances())
           && getResource().equals(that.getResource());
     }
 
     @Override
     public int hashCode() {
-      int result = id.hashCode();
+      int result = id;
       result = 31 * result + getInstances().hashCode();
       result = 31 * result + getResource().hashCode();
       return result;

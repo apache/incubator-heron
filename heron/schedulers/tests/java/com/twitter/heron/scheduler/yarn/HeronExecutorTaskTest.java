@@ -108,7 +108,7 @@ public class HeronExecutorTaskTest {
 
   private HeronExecutorTask getSpyOnHeronExecutorTask(REEFFileNames mockFiles) {
     HeronExecutorTask task = new HeronExecutorTask(mockFiles,
-        "5",
+        5,
         "cluster",
         "role",
         "testTopology",
