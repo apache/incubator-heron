@@ -28,10 +28,11 @@
 import psutil
 import traceback
 from .metrics import MultiCountMetric, AssignableMetrics
-
+from .metrics_helper import BaseMetricsHelper
+from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 
-class PyMetrics(object):
+class PyMetrics(BaseMetricsHelper):
   """Helper class to collect PyHeron program metrics"""
   def __init__(self):
     self.process = psutil.Process()
@@ -51,9 +52,24 @@ class PyMetrics(object):
     # vms: “Virtual Memory Size”, this is the total
     # amount of virtual memory used by the process.
     self.virtual_memory = AssignableMetrics(0)
-    
-  def register_metrics(self):
-    return
+    PY_SYS_CPU_TIME = '__py-sys-cpu-time-secs'
+    PY_USER_CPU_TIME = '__py-user-cpu-time-secs'
+    PY_FD_NUMS = '__py-file-descriptors-number'
+    PY_PHYSICAL_MEMORY = '__py-physical-memory-byte'
+    PY_VIRTUAL_MEMORY = '__py-virtual-memory-byte'
+    self.metrics = {PY_SYS_CPU_TIME: self.sys_cpu_time,
+                    PY_USER_CPU_TIME: self.user_cpu_time,
+                    PY_FD_NUMS: self.fd_nums,
+                    PY_PHYSICAL_MEMORY: self.physical_memory,
+                    PY_VIRTUAL_MEMORY: self.virtual_memory}
+
+
+  def __init__(self, metrics_collector):
+    super(PyMetrics, self).__init__(self.metrics)
+    sys_config = system_config.get_sys_config()
+    interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+    self.register_metrics(metrics_collector, interval)
+
     
   def update_cpu_time(self):
     try:
