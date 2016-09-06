@@ -315,7 +315,7 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                         ->GetHeronTmasterNetworkStatsOptionsMaximumPacketMb() *
                                     1024 * 1024);
   stats_options.set_socket_family(PF_INET);
-  stats_ = new StatsInterface(eventLoop_, stats_options, metrics_collector_);
+  stats_ = new StatsInterface(eventLoop_, stats_options, metrics_collector_, this);
 }
 
 void TMaster::ActivateTopology(VCallback<proto::system::StatusCode> cb) {

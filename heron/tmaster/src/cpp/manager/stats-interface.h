@@ -25,11 +25,12 @@ namespace heron {
 namespace tmaster {
 
 class TMetricsCollector;
+class TMaster;
 
 class StatsInterface {
  public:
   StatsInterface(EventLoop* eventLoop, const NetworkOptions& options,
-                 TMetricsCollector* _collector);
+                 TMetricsCollector* _collector, TMaster* tmaster);
   virtual ~StatsInterface();
 
  private:
@@ -40,6 +41,7 @@ class StatsInterface {
 
   HTTPServer* http_server_;  // Our http server
   TMetricsCollector* metrics_collector_;
+  TMaster* tmaster_;
 };
 }  // namespace tmaster
 }  // namespace heron
