@@ -70,8 +70,6 @@ def __replace(config, wildcards, config_file):
     original_value = config_value
     if isinstance(config_value, basestring):
       for token in wildcards:
-        print("config_value: %s, token: %s wildcard value: %s" %
-              (config_value, token, wildcards[token]))
         if wildcards[token]:
           config_value = config_value.replace(token, wildcards[token])
       found = re.findall(r'\${[A-Z_]+}', config_value)
