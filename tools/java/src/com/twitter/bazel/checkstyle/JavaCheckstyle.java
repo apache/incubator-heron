@@ -95,7 +95,9 @@ public final class JavaCheckstyle {
 
     // Filter out files under heron/storm directory due to license issues
     Collection<String> sourceFiles = Collections2.filter(jInfo.getSourceFileList(),
-        Predicates.not(Predicates.containsPattern("heron/storm/src/java"))
+        Predicates.not(Predicates.or(
+                Predicates.containsPattern("heron/storm/src/java"),
+                Predicates.containsPattern("contrib/kafka-spout")))
     );
 
     return sourceFiles.toArray(new String[sourceFiles.size()]);
