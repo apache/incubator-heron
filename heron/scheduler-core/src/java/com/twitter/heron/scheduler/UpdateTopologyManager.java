@@ -81,9 +81,6 @@ public class UpdateTopologyManager {
 
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
-    // assert found PackingPlan is same as existing PackingPlan.
-    validateCurrentPackingPlan(existingProtoPackingPlan, topologyName, stateManager);
-
     // fetch the topology, which will need to be updated
     TopologyAPI.Topology updatedTopology =
         getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
@@ -119,17 +116,6 @@ public class UpdateTopologyManager {
     TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
     Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
     return mergeTopology(updatedTopology, proposedComponentCounts);
-  }
-
-  @VisibleForTesting
-  void validateCurrentPackingPlan(PackingPlans.PackingPlan existingProtoPackingPlan,
-                                  String topologyName,
-                                  SchedulerStateManagerAdaptor stateManager) {
-    PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
-    assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
-        "Existing packing plan received does not equal the packing plan found in the state "
-            + "manager. Not updating updatedTopology. Received: %s, Found: %s",
-        existingProtoPackingPlan, foundPackingPlan);
   }
 
   /**

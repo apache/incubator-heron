@@ -87,8 +87,6 @@ public class UpdateTopologyManagerTest {
         = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler));
     UpdateTopologyManager spyUpdateManager = Mockito.spy(updateManager);
 
-    Mockito.doNothing().when(spyUpdateManager)
-        .validateCurrentPackingPlan(currentProtoPlan, null, mockStateMgr);
     Mockito.doReturn(null).when(spyUpdateManager).
         getUpdatedTopology(null, proposedPacking, mockStateMgr);
 
