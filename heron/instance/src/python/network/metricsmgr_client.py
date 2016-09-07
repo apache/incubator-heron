@@ -52,7 +52,7 @@ class MetricsManagerClient(HeronClient):
     self.looper.register_timer_task_in_sec(self._update_in_out_stream_metrics_tasks, interval)
 
   def _update_py_metrics(self):
-    self.jvm_metrics.update_all()
+    self.py_metrics.update_all()
     interval = float(self.sys_config[constants.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC])
     self.looper.register_timer_task_in_sec(self._update_py_metrics, interval)
 
