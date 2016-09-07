@@ -46,10 +46,12 @@ public class UpdateTopologyManagerTest {
 
   @Before
   public void init() {
-    currentContainerPlan = buildContainerSet(1, 2, 3, 4);
-    proposedContainerPlan = buildContainerSet(1, 3, 5, 6);
-    expectedContainersToAdd = buildContainerSet(5, 6);
-    expectedContainersToRemove = buildContainerSet(2, 4);
+    Integer[] instanceIndexA = new Integer[] {37, 48, 59};
+    Integer[] instanceIndexB = new Integer[] {17, 22};
+    currentContainerPlan = buildContainerSet(new Integer[] {1, 2, 3, 4}, instanceIndexA);
+    proposedContainerPlan = buildContainerSet(new Integer[] {1, 3, 5, 6}, instanceIndexB);
+    expectedContainersToAdd = buildContainerSet(new Integer[] {5, 6}, instanceIndexB);
+    expectedContainersToRemove = buildContainerSet(new Integer[] {2, 4}, instanceIndexA);
   }
 
   @Test
@@ -168,10 +170,11 @@ public class UpdateTopologyManagerTest {
     return null;
   }
 
-  private static Set<PackingPlan.ContainerPlan> buildContainerSet(int... containerIds) {
+  private static Set<PackingPlan.ContainerPlan> buildContainerSet(Integer[] containerIds,
+                                                                  Integer[] instanceIndexes) {
     Set<PackingPlan.ContainerPlan> containerPlan = new HashSet<>();
     for (int containerId : containerIds) {
-      containerPlan.add(PackingTestUtils.testContainerPlan(containerId));
+      containerPlan.add(PackingTestUtils.testContainerPlan(containerId, instanceIndexes));
     }
     return containerPlan;
   }
