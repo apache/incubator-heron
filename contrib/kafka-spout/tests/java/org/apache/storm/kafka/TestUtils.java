@@ -32,7 +32,10 @@ import kafka.message.Message;
 import kafka.message.MessageAndOffset;
 import static org.junit.Assert.assertEquals;
 
-public class TestUtils {
+public final class TestUtils {
+
+  private TestUtils() {
+  }
 
   public static final String TOPIC = "test";
 
@@ -40,7 +43,8 @@ public class TestUtils {
     return buildPartitionInfo(numPartitions, 9092);
   }
 
-  public static List<GlobalPartitionInformation> buildPartitionInfoList(GlobalPartitionInformation partitionInformation) {
+  public static List<GlobalPartitionInformation> buildPartitionInfoList(
+      GlobalPartitionInformation partitionInformation) {
     List<GlobalPartitionInformation> map = new ArrayList<GlobalPartitionInformation>();
     map.add(partitionInformation);
     return map;
@@ -49,7 +53,8 @@ public class TestUtils {
   public static GlobalPartitionInformation buildPartitionInfo(int numPartitions, int brokerPort) {
     GlobalPartitionInformation globalPartitionInformation = new GlobalPartitionInformation(TOPIC);
     for (int i = 0; i < numPartitions; i++) {
-      globalPartitionInformation.addPartition(i, Broker.fromString("broker-" + i + " :" + brokerPort));
+      globalPartitionInformation.addPartition(i,
+          Broker.fromString("broker-" + i + " :" + brokerPort));
     }
     return globalPartitionInformation;
   }
@@ -57,7 +62,8 @@ public class TestUtils {
   public static SimpleConsumer getKafkaConsumer(KafkaTestBroker broker) {
     BrokerHosts brokerHosts = getBrokerHosts(broker);
     KafkaConfig kafkaConfig = new KafkaConfig(brokerHosts, TOPIC);
-    SimpleConsumer simpleConsumer = new SimpleConsumer("localhost", broker.getPort(), 60000, 1024, "testClient");
+    SimpleConsumer simpleConsumer = new SimpleConsumer("localhost",
+        broker.getPort(), 60000, 1024, "testClient");
     return simpleConsumer;
   }
 
@@ -69,7 +75,8 @@ public class TestUtils {
 
   private static BrokerHosts getBrokerHosts(KafkaTestBroker broker) {
     GlobalPartitionInformation globalPartitionInformation = new GlobalPartitionInformation(TOPIC);
-    globalPartitionInformation.addPartition(0, Broker.fromString(broker.getBrokerConnectionString()));
+    globalPartitionInformation.addPartition(0,
+        Broker.fromString(broker.getBrokerConnectionString()));
     return new StaticHosts(globalPartitionInformation);
   }
 
@@ -82,10 +89,14 @@ public class TestUtils {
     return props;
   }
 
-  public static boolean verifyMessage(String key, String message, KafkaTestBroker broker, SimpleConsumer simpleConsumer) {
-    long lastMessageOffset = KafkaUtils.getOffset(simpleConsumer, TestUtils.TOPIC, 0, OffsetRequest.LatestTime()) - 1;
-    ByteBufferMessageSet messageAndOffsets = KafkaUtils.fetchMessages(TestUtils.getKafkaConfig(broker), simpleConsumer,
-        new Partition(Broker.fromString(broker.getBrokerConnectionString()), TestUtils.TOPIC, 0), lastMessageOffset);
+  public static boolean verifyMessage(String key, String message,
+                                      KafkaTestBroker broker, SimpleConsumer simpleConsumer) {
+    long lastMessageOffset =
+        KafkaUtils.getOffset(simpleConsumer, TestUtils.TOPIC, 0, OffsetRequest.LatestTime()) - 1;
+    ByteBufferMessageSet messageAndOffsets =
+        KafkaUtils.fetchMessages(TestUtils.getKafkaConfig(broker), simpleConsumer,
+            new Partition(Broker.fromString(broker.getBrokerConnectionString()),
+                TestUtils.TOPIC, 0), lastMessageOffset);
     MessageAndOffset messageAndOffset = messageAndOffsets.iterator().next();
     Message kafkaMessage = messageAndOffset.message();
     ByteBuffer messageKeyBuffer = kafkaMessage.key();

@@ -286,7 +286,8 @@ public class Config extends com.twitter.heron.api.Config {
   /**
    * The connection timeout for clients to ZooKeeper.
    */
-  public static final String STORM_ZOOKEEPER_CONNECTION_TIMEOUT = "storm.zookeeper.connection.timeout";
+  public static final String STORM_ZOOKEEPER_CONNECTION_TIMEOUT =
+      "storm.zookeeper.connection.timeout";
 
   /**
    * The number of times to retry a Zookeeper operation.

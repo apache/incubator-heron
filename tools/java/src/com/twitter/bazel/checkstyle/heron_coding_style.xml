@@ -63,7 +63,7 @@ limitations under the License.
 
     <!-- Verify that all Java classes have a header -->
     <module name="Header">
-      <property name="headerFile" value="tools/java/src/com/twitter/bazel/checkstyle/header.txt"/>
+      <property name="headerFile" value="tools/java/src/com/twitter/bazel/checkstyle/heron_header.txt"/>
       <property name="fileExtensions" value="java"/>
       <property name="ignoreLines" value="2,6,8"/>
       <message key="header.mismatch"

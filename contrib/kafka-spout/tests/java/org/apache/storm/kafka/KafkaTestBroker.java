@@ -56,6 +56,7 @@ public class KafkaTestBroker {
       KafkaConfig config = buildKafkaConfig(zookeeperConnectionString);
       kafka = new KafkaServerStartable(config);
       kafka.startup();
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception ex) {
       throw new RuntimeException("Could not start test broker", ex);
     }

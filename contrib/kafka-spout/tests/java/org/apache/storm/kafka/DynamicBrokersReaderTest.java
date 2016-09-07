@@ -40,7 +40,8 @@ import static org.junit.Assert.assertNotNull;
  * Time: 20:35
  */
 public class DynamicBrokersReaderTest {
-  private DynamicBrokersReader dynamicBrokersReader, wildCardBrokerReader;
+  private DynamicBrokersReader dynamicBrokersReader;
+  private DynamicBrokersReader wildCardBrokerReader;
   private String masterPath = "/brokers";
   private String topic = "testing1";
   private String secondTopic = "testing2";
@@ -67,7 +68,8 @@ public class DynamicBrokersReaderTest {
     conf2.putAll(conf);
     conf2.put("kafka.topic.wildcard.match", true);
 
-    wildCardBrokerReader = new DynamicBrokersReader(conf2, connectionString, masterPath, "^test.*$");
+    wildCardBrokerReader =
+        new DynamicBrokersReader(conf2, connectionString, masterPath, "^test.*$");
     zookeeper.start();
   }
 
@@ -78,21 +80,25 @@ public class DynamicBrokersReaderTest {
     server.close();
   }
 
-  private void addPartition(int id, String host, int port, String topic) throws Exception {
-    writePartitionId(id, topic);
-    writeLeader(id, 0, topic);
+  private void addPartition(int id, String host, int port, String aTopic) throws Exception {
+    writePartitionId(id, aTopic);
+    writeLeader(id, 0, aTopic);
     writeLeaderDetails(0, host, port);
   }
 
-  private void addPartition(int id, int leader, String host, int port, String topic) throws Exception {
-    writePartitionId(id, topic);
-    writeLeader(id, leader, topic);
+  private void addPartition(int id,
+                            int leader,
+                            String host,
+                            int port,
+                            String aTopic) throws Exception {
+    writePartitionId(id, aTopic);
+    writeLeader(id, leader, aTopic);
     writeLeaderDetails(leader, host, port);
   }
 
-  private void writePartitionId(int id, String topic) throws Exception {
-    String path = dynamicBrokersReader.partitionPath(topic);
-    writeDataToPath(path, ("" + id));
+  private void writePartitionId(int id, String aTopic) throws Exception {
+    String path = dynamicBrokersReader.partitionPath(aTopic);
+    writeDataToPath(path, "" + id);
   }
 
   private void writeDataToPath(String path, String data) throws Exception {
@@ -100,22 +106,28 @@ public class DynamicBrokersReaderTest {
     zookeeper.setData().forPath(path, data.getBytes());
   }
 
-  private void writeLeader(int id, int leaderId, String topic) throws Exception {
-    String path = dynamicBrokersReader.partitionPath(topic) + "/" + id + "/state";
-    String value = " { \"controller_epoch\":4, \"isr\":[ 1, 0 ], \"leader\":" + leaderId + ", \"leader_epoch\":1, \"version\":1 }";
+  private void writeLeader(int id, int leaderId, String aTopic) throws Exception {
+    String path = dynamicBrokersReader.partitionPath(aTopic) + "/" + id + "/state";
+    String value =
+        " { \"controller_epoch\":4, \"isr\":[ 1, 0 ], \"leader\":"
+            + leaderId + ", \"leader_epoch\":1, \"version\":1 }";
     writeDataToPath(path, value);
   }
 
   private void writeLeaderDetails(int leaderId, String host, int port) throws Exception {
     String path = dynamicBrokersReader.brokerPath() + "/" + leaderId;
-    String value = "{ \"host\":\"" + host + "\", \"jmx_port\":9999, \"port\":" + port + ", \"version\":1 }";
+    String value =
+        "{ \"host\":\"" + host + "\", \"jmx_port\":9999, \"port\":" + port + ", \"version\":1 }";
     writeDataToPath(path, value);
   }
 
 
-  private GlobalPartitionInformation getByTopic(List<GlobalPartitionInformation> partitions, String topic) {
+  private GlobalPartitionInformation getByTopic(List<GlobalPartitionInformation> partitions,
+                                                String aTopic) {
     for (GlobalPartitionInformation partitionInformation : partitions) {
-      if (partitionInformation.getTopic().equals(topic)) return partitionInformation;
+      if (partitionInformation.getTopic().equals(aTopic)) {
+        return partitionInformation;
+      }
     }
     return null;
   }
@@ -245,7 +257,8 @@ public class DynamicBrokersReaderTest {
     conf.put(Config.STORM_ZOOKEEPER_RETRY_TIMES, 4);
     conf.put(Config.STORM_ZOOKEEPER_RETRY_INTERVAL, 5);
 
-    DynamicBrokersReader dynamicBrokersReader1 = new DynamicBrokersReader(conf, connectionString, masterPath, topic);
+    DynamicBrokersReader dynamicBrokersReader1 =
+        new DynamicBrokersReader(conf, connectionString, masterPath, topic);
 
   }
 }
