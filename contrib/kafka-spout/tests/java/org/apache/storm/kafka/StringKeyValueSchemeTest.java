@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,46 +17,46 @@
  */
 package org.apache.storm.kafka;
 
-import org.apache.storm.tuple.Fields;
-import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
-
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Collections;
+
+import com.google.common.collect.ImmutableMap;
+
+import org.apache.storm.tuple.Fields;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class StringKeyValueSchemeTest {
 
-    private StringKeyValueScheme scheme = new StringKeyValueScheme();
+  private StringKeyValueScheme scheme = new StringKeyValueScheme();
 
-    @Test
-    public void testDeserialize() throws Exception {
-        assertEquals(Collections.singletonList("test"), scheme.deserialize(wrapString("test")));
-    }
+  @Test
+  public void testDeserialize() throws Exception {
+    assertEquals(Collections.singletonList("test"), scheme.deserialize(wrapString("test")));
+  }
 
-    @Test
-    public void testGetOutputFields() throws Exception {
-        Fields outputFields = scheme.getOutputFields();
-        assertTrue(outputFields.contains(StringScheme.STRING_SCHEME_KEY));
-        assertEquals(1, outputFields.size());
-    }
+  @Test
+  public void testGetOutputFields() throws Exception {
+    Fields outputFields = scheme.getOutputFields();
+    assertTrue(outputFields.contains(StringScheme.STRING_SCHEME_KEY));
+    assertEquals(1, outputFields.size());
+  }
 
-    @Test
-    public void testDeserializeWithNullKeyAndValue() throws Exception {
-        assertEquals(Collections.singletonList("test"),
-            scheme.deserializeKeyAndValue(null, wrapString("test")));
-    }
+  @Test
+  public void testDeserializeWithNullKeyAndValue() throws Exception {
+    assertEquals(Collections.singletonList("test"),
+        scheme.deserializeKeyAndValue(null, wrapString("test")));
+  }
 
-    @Test
-    public void testDeserializeWithKeyAndValue() throws Exception {
-        assertEquals(Collections.singletonList(ImmutableMap.of("key", "test")),
-                scheme.deserializeKeyAndValue(wrapString("key"), wrapString("test")));
-    }
+  @Test
+  public void testDeserializeWithKeyAndValue() throws Exception {
+    assertEquals(Collections.singletonList(ImmutableMap.of("key", "test")),
+        scheme.deserializeKeyAndValue(wrapString("key"), wrapString("test")));
+  }
 
-    private static byte[] wrapString(String s) {
-        return s.getBytes(Charset.defaultCharset());
-    }
+  private static byte[] wrapString(String s) {
+    return s.getBytes(Charset.defaultCharset());
+  }
 }

@@ -17,11 +17,11 @@
  */
 package org.apache.storm.kafka;
 
-import org.apache.storm.utils.Utils;
-import org.apache.kafka.common.serialization.Serializer;
-
 import java.nio.ByteBuffer;
 import java.util.Map;
+
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.storm.utils.Utils;
 
 public class ByteBufferSerializer implements Serializer<ByteBuffer> {
   @Override

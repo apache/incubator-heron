@@ -19,7 +19,9 @@ package org.apache.storm.kafka;
 
 public class TopicOffsetOutOfRangeException extends RuntimeException {
 
-    public TopicOffsetOutOfRangeException(String message) {
-        super(message);
-    }
+  private static final long serialVersionUID = -8259406595461854132L;
+
+  public TopicOffsetOutOfRangeException(String message) {
+    super(message);
+  }
 }
