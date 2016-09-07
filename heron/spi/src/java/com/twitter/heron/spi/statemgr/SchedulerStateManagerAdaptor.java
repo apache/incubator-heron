@@ -209,6 +209,20 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
+   * Clean all states of a heron topology. This goes through each piece of state that needs
+   * to be cleaned up and will log out a warning if it could not be cleaned up properly.
+   * TMasterLocation, PackingPlan, PhysicalPlan, SchedulerLocation, ExecutionState, and Topology
+   * @param topologyName the name of the topology that we should clean the state for
+   */
+  public void cleanState(String topologyName) {
+    LOG.fine("Cleaning up topology state");
+
+    IStateManager.StateLocation.deleteAll(delegate, topologyName);
+
+    LOG.fine("Cleaned up topology state");
+  }
+
+  /**
    * Get the execution state for the given topology
    *
    * @return ExecutionState

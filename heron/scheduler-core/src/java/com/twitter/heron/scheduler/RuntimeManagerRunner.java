@@ -137,63 +137,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // clean up the state of the topology in state manager
-    if (!cleanState(topologyName, Runtime.schedulerStateManagerAdaptor(runtime))) {
-      LOG.severe("Failed to clean topology state");
-      return false;
-    }
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    statemgr.cleanState(topologyName);
 
     // Clean the connection when we are done.
     LOG.fine("Scheduler killed topology successfully.");
-    return true;
-  }
-
-  /**
-   * Clean all states of a heron topology
-   * 1. Topology def and ExecutionState are required to exist to delete
-   * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
-   */
-  protected boolean cleanState(
-      String topologyName,
-      SchedulerStateManagerAdaptor statemgr) {
-    LOG.fine("Cleaning up topology state");
-
-    Boolean result;
-
-    // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
-    // Just log but don't consider them failure
-    result = statemgr.deleteTMasterLocation(topologyName);
-    if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
-      LOG.warning("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deletePhysicalPlan(topologyName);
-    if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
-      LOG.warning("Failed to clear physical plan. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deleteSchedulerLocation(topologyName);
-    if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
-      LOG.warning("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
-    }
-
-    result = statemgr.deleteExecutionState(topologyName);
-    if (result == null || !result) {
-      LOG.severe("Failed to clear execution state");
-      return false;
-    }
-
-    // Set topology def at last since we determine whether a topology is running
-    // by checking the existence of topology def
-    result = statemgr.deleteTopology(topologyName);
-    if (result == null || !result) {
-      LOG.severe("Failed to clear topology definition");
-      return false;
-    }
-
-    LOG.fine("Cleaned up topology state");
     return true;
   }
 }

@@ -255,8 +255,7 @@ public class LaunchRunnerTest {
         Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME));
     Mockito.verify(statemgr).setExecutionState(
         Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME));
-    Mockito.verify(statemgr).deleteExecutionState(Mockito.eq(TOPOLOGY_NAME));
-    Mockito.verify(statemgr).deleteTopology(Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr).cleanState(Mockito.eq(TOPOLOGY_NAME));
   }
 
   @Test

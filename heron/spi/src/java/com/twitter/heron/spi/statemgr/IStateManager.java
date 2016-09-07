@@ -51,6 +51,70 @@ import com.twitter.heron.spi.common.Config;
  */
 
 public interface IStateManager extends AutoCloseable {
+  enum StateLocation {
+    TMASTER_LOCATION("tmasters", "TMaster location"),
+    TOPOLOGY("topologies", "Topologies"),
+    PACKING_PLAN("packingplans", "Packing plan"),
+    PHYSICAL_PLAN("pplans", "Physical plan"),
+    EXECUTION_STATE("executionstate", "Execution state"),
+    SCHEDULER_LOCATION("schedulers", "Scheduler location");
+
+    private final String dir;
+    private final String name;
+
+    StateLocation(String dir, String name) {
+      this.dir = dir;
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getDirectory(String root) {
+      return concatPath(root, dir);
+    }
+
+    public String getNodePath(String root, String topology) {
+      return concatPath(getDirectory(root), topology);
+    }
+
+    public static void deleteAll(IStateManager stateManager, String topology) {
+      for (IStateManager.StateLocation stateLocation : IStateManager.StateLocation.values()) {
+        stateLocation.delete(stateManager, topology);
+      }
+    }
+
+    public void delete(IStateManager stateManager, String topology) {
+      switch(this) {
+        case TMASTER_LOCATION:
+          stateManager.deleteTMasterLocation(topology);
+          break;
+        case TOPOLOGY:
+          stateManager.deleteTopology(topology);
+          break;
+        case PACKING_PLAN:
+          stateManager.deletePackingPlan(topology);
+          break;
+        case PHYSICAL_PLAN:
+          stateManager.deletePhysicalPlan(topology);
+          break;
+        case EXECUTION_STATE:
+          stateManager.deleteExecutionState(topology);
+          break;
+        case SCHEDULER_LOCATION:
+          stateManager.deleteSchedulerLocation(topology);
+          break;
+        default:
+          // This should never be reached, nothing to do.
+      }
+    }
+
+    private static String concatPath(String basePath, String appendPath) {
+      return String.format("%s/%s", basePath, appendPath);
+    }
+  }
+
   /**
    * Initialize StateManager with the incoming context.
    */
@@ -138,6 +202,8 @@ public interface IStateManager extends AutoCloseable {
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName);
+
+
 
   /**
    * Get the tmaster location for the given topology

@@ -31,6 +31,7 @@ import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -214,6 +215,11 @@ public class CuratorStateManager extends FileSystemStateManager {
     try {
       client.delete().withVersion(-1).forPath(path);
       LOG.info("Deleted node for path: " + path);
+      result.set(true);
+
+    } catch (KeeperException.NoNodeException e) {
+      LOG.warning("deleteNode called for " + path
+          + " but it does not exist so there's nothing to delete");
       result.set(true);
 
       // Suppress it since forPath() throws Exception

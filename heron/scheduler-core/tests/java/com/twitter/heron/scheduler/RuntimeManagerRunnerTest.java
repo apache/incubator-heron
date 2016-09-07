@@ -101,22 +101,17 @@ public class RuntimeManagerRunnerTest {
     RuntimeManagerRunner runner =
         Mockito.spy(new RuntimeManagerRunner(config, runtime, Command.KILL, client));
 
+    SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(adaptor);
+
     // Failed to invoke client's killTopology
     Mockito.when(client.killTopology(killTopologyRequest)).thenReturn(false);
     Assert.assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
     Mockito.verify(client).killTopology(killTopologyRequest);
 
-    // Failed to clean states
-    Mockito.when(client.killTopology(killTopologyRequest)).thenReturn(true);
-    Mockito.doReturn(false).when(runner).cleanState(
-        Mockito.eq(TOPOLOGY_NAME), Mockito.any(SchedulerStateManagerAdaptor.class));
-    Assert.assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
-    Mockito.verify(client, Mockito.times(2)).killTopology(killTopologyRequest);
-
     // Success case
-    Mockito.doReturn(true).when(runner).cleanState(
-        Mockito.eq(TOPOLOGY_NAME), Mockito.any(SchedulerStateManagerAdaptor.class));
+    Mockito.doReturn(true).when(client).killTopology(killTopologyRequest);
     Assert.assertTrue(runner.killTopologyHandler(TOPOLOGY_NAME));
-    Mockito.verify(client, Mockito.times(3)).killTopology(killTopologyRequest);
+    Mockito.verify(client, Mockito.times(2)).killTopology(killTopologyRequest);
   }
 }

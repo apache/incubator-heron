@@ -160,9 +160,7 @@ public class LaunchRunner implements Callable<Boolean> {
 
     // launch the topology, clear the state if it fails
     if (!launcher.launch(packedPlan)) {
-      statemgr.deleteExecutionState(topologyName);
-      statemgr.deletePackingPlan(topologyName);
-      statemgr.deleteTopology(topologyName);
+      statemgr.cleanState(topologyName);
       LOG.log(Level.SEVERE, "Failed to launch topology");
       return false;
     }

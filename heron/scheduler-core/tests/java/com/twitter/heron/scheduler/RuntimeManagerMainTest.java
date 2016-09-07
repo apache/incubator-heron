@@ -29,7 +29,7 @@ import com.twitter.heron.statemgr.NullStateManager;
 public class RuntimeManagerMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String TOPOLOGY_ID = "topologyId";
-  private static final Command MOCK_COMMAND = Command.KILL;
+  private static final Command MOCK_COMMAND = Command.SUBMIT;
 
   @Test
   public void testValidateRuntimeManage() throws Exception {
@@ -124,5 +124,30 @@ public class RuntimeManagerMainTest {
     Mockito.doReturn(true).when(runtimeManagerMain).
         callRuntimeManagerRunner(Mockito.any(Config.class), Mockito.eq(client));
     Assert.assertTrue(runtimeManagerMain.manageTopology());
+  }
+
+  /**
+   * Do not validate the topology runtime during the kill command
+   */
+  @Test
+  public void testManageTopologyKillCommandShouldNotValidate() throws Exception {
+    Config config = Mockito.mock(Config.class);
+    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+
+    RuntimeManagerMain runtimeManagerMain =
+        Mockito.spy(new RuntimeManagerMain(config, Command.KILL));
+
+    // Valid state manager class
+    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+        thenReturn(NullStateManager.class.getName());
+
+    ISchedulerClient client = Mockito.mock(ISchedulerClient.class);
+    Mockito.doReturn(client).when(runtimeManagerMain).
+        getSchedulerClient(Mockito.any(Config.class));
+
+    Assert.assertFalse(runtimeManagerMain.manageTopology());
+    Mockito.verify(runtimeManagerMain, Mockito.times(0))
+        .validateRuntimeManage(Mockito.any(SchedulerStateManagerAdaptor.class),
+            Mockito.eq(TOPOLOGY_NAME));
   }
 }
