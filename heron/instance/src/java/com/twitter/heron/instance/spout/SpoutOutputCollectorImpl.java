@@ -198,8 +198,9 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 //    helper.checkOutputSchema(streamId, tuple);
 
     // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
-//    List<Integer> customGroupingTargetTaskIds =
-//        helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
+    // TODO(mfu): FIX it
+    List<Integer> customGroupingTargetTaskIds =
+        helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
 //
 //    // Invoke user-defined emit task hook
 //    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
@@ -210,12 +211,13 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     // set the key. This is mostly ignored
     bldr.setKey(0);
 
-//    if (customGroupingTargetTaskIds != null) {
-//      // It is a CustomStreamGrouping
-//      for (Integer taskId : customGroupingTargetTaskIds) {
-//        bldr.addDestTaskIds(taskId);
-//      }
-//    }
+    // TODO(mfu): FIX IT
+    if (customGroupingTargetTaskIds != null) {
+      // It is a CustomStreamGrouping
+      for (Integer taskId : customGroupingTargetTaskIds) {
+        bldr.addDestTaskIds(taskId);
+      }
+    }
 
     if (messageId != null) {
       RootTupleInfo tupleInfo = new RootTupleInfo(streamId, messageId);
