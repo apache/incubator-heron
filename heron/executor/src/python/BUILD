@@ -6,7 +6,7 @@ pex_library(
     name = "executor-py",
     srcs = ["heron_executor.py"],
     deps = [
-        "//heron/statemgrs/src/python:zk-statemgr-py",
+        "//heron/statemgrs/src/python:statemgr-py",
         "//heron/common/src/python:common-log-py",
     ],
     reqs = ["pyyaml==3.10"],
