@@ -137,7 +137,7 @@ public class UpdateTopologyManager {
    * added and those to be removed. Whether to add or remove a container is determined by the id of
    * the container. Proposed containers with an id not in the existing set are to be added, while
    * current container ids not in the proposed set are to be removed.
-   * </P>
+   *
    * It is important to note that the container comparison is done by id only, and does not include
    * the InstancePlans in the container, which for a given container might change in the proposed
    * plan.
