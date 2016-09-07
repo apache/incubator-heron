@@ -79,7 +79,7 @@ public final class PackingUtils {
    * Estimate the per instance and topology resources for the packing plan based on the ramMap,
    * instance defaults and paddingPercentage.
    *
-   * @return Set<PackingPlan.ContainerPlan> container plans
+   * @return container plans
    */
   public static Set<PackingPlan.ContainerPlan> buildContainerPlans(
       Map<Integer, List<String>> containerInstances,
