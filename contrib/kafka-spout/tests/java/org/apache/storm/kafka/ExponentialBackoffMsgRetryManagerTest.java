@@ -32,23 +32,27 @@ public class ExponentialBackoffMsgRetryManagerTest {
   public void testImmediateRetry() throws Exception {
 
 
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.failed(TEST_OFFSET);
     Long next = manager.nextFailedMessageToRetry();
     assertEquals("expect test offset next available for retry", TEST_OFFSET, next);
-    assertTrue("message should be ready for retry immediately", manager.shouldReEmitMsg(TEST_OFFSET));
+    assertTrue("message should be ready for retry immediately",
+        manager.shouldReEmitMsg(TEST_OFFSET));
 
     manager.retryStarted(TEST_OFFSET);
 
     manager.failed(TEST_OFFSET);
     next = manager.nextFailedMessageToRetry();
     assertEquals("expect test offset next available for retry", TEST_OFFSET, next);
-    assertTrue("message should be ready for retry immediately", manager.shouldReEmitMsg(TEST_OFFSET));
+    assertTrue("message should be ready for retry immediately",
+        manager.shouldReEmitMsg(TEST_OFFSET));
   }
 
   @Test
   public void testSingleDelay() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(100, 1d, 1000, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(100, 1d, 1000, Integer.MAX_VALUE);
     manager.failed(TEST_OFFSET);
     Thread.sleep(5);
     Long next = manager.nextFailedMessageToRetry();
@@ -65,14 +69,16 @@ public class ExponentialBackoffMsgRetryManagerTest {
   public void testExponentialBackoff() throws Exception {
     final long initial = 10;
     final double mult = 2d;
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(initial, mult, initial * 10, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(initial, mult, initial * 10, Integer.MAX_VALUE);
 
     long expectedWaitTime = initial;
     for (long i = 0L; i < 3L; ++i) {
       manager.failed(TEST_OFFSET);
 
       Thread.sleep((expectedWaitTime + 1L) / 2L);
-      assertFalse("message should not be ready for retry yet", manager.shouldReEmitMsg(TEST_OFFSET));
+      assertFalse("message should not be ready for retry yet",
+          manager.shouldReEmitMsg(TEST_OFFSET));
 
       Thread.sleep((expectedWaitTime + 1L) / 2L);
       Long next = manager.nextFailedMessageToRetry();
@@ -89,7 +95,8 @@ public class ExponentialBackoffMsgRetryManagerTest {
     final long initial = 10;
     final double mult = 2d;
     final long max = 20;
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(initial, mult, max, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(initial, mult, max, Integer.MAX_VALUE);
 
     manager.failed(TEST_OFFSET);
     Thread.sleep(initial);
@@ -98,12 +105,14 @@ public class ExponentialBackoffMsgRetryManagerTest {
     manager.failed(TEST_OFFSET);
     manager.failed(TEST_OFFSET2);
 
-    // although TEST_OFFSET failed first, it's retry delay time is longer b/c this is the second retry
-    // so TEST_OFFSET2 should come first
+    // although TEST_OFFSET failed first, it's retry delay time is longer b/c this is the second
+    // retry so TEST_OFFSET2 should come first
 
     Thread.sleep(initial * 2);
-    assertTrue("message " + TEST_OFFSET + "should be ready for retry", manager.shouldReEmitMsg(TEST_OFFSET));
-    assertTrue("message " + TEST_OFFSET2 + "should be ready for retry", manager.shouldReEmitMsg(TEST_OFFSET2));
+    assertTrue("message " + TEST_OFFSET + "should be ready for retry",
+        manager.shouldReEmitMsg(TEST_OFFSET));
+    assertTrue("message " + TEST_OFFSET2 + "should be ready for retry",
+        manager.shouldReEmitMsg(TEST_OFFSET2));
 
     Long next = manager.nextFailedMessageToRetry();
     assertEquals("expect first message to retry is " + TEST_OFFSET2, TEST_OFFSET2, next);
@@ -127,11 +136,13 @@ public class ExponentialBackoffMsgRetryManagerTest {
 
   @Test
   public void testQueriesAfterRetriedAlready() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.failed(TEST_OFFSET);
     Long next = manager.nextFailedMessageToRetry();
     assertEquals("expect test offset next available for retry", TEST_OFFSET, next);
-    assertTrue("message should be ready for retry immediately", manager.shouldReEmitMsg(TEST_OFFSET));
+    assertTrue("message should be ready for retry immediately",
+        manager.shouldReEmitMsg(TEST_OFFSET));
 
     manager.retryStarted(TEST_OFFSET);
     next = manager.nextFailedMessageToRetry();
@@ -141,13 +152,15 @@ public class ExponentialBackoffMsgRetryManagerTest {
 
   @Test(expected = IllegalStateException.class)
   public void testRetryWithoutFail() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.retryStarted(TEST_OFFSET);
   }
 
   @Test(expected = IllegalStateException.class)
   public void testFailRetryRetry() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.failed(TEST_OFFSET);
     try {
       manager.retryStarted(TEST_OFFSET);
@@ -164,14 +177,16 @@ public class ExponentialBackoffMsgRetryManagerTest {
     final long initial = 100;
     final double mult = 2d;
     final long max = 2000;
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(initial, mult, max, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(initial, mult, max, Integer.MAX_VALUE);
 
     long expectedWaitTime = initial;
     for (long i = 0L; i < 4L; ++i) {
       manager.failed(TEST_OFFSET);
 
       Thread.sleep((expectedWaitTime + 1L) / 2L);
-      assertFalse("message should not be ready for retry yet", manager.shouldReEmitMsg(TEST_OFFSET));
+      assertFalse("message should not be ready for retry yet",
+          manager.shouldReEmitMsg(TEST_OFFSET));
 
       Thread.sleep((expectedWaitTime + 1L) / 2L);
       Long next = manager.nextFailedMessageToRetry();
@@ -185,7 +200,8 @@ public class ExponentialBackoffMsgRetryManagerTest {
 
   @Test
   public void testFailThenAck() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.failed(TEST_OFFSET);
     assertTrue("message should be ready for retry", manager.shouldReEmitMsg(TEST_OFFSET));
 
@@ -198,7 +214,8 @@ public class ExponentialBackoffMsgRetryManagerTest {
 
   @Test
   public void testAckThenFail() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.acked(TEST_OFFSET);
     assertFalse("message should not be ready after acked", manager.shouldReEmitMsg(TEST_OFFSET));
 
@@ -211,7 +228,8 @@ public class ExponentialBackoffMsgRetryManagerTest {
 
   @Test
   public void testClearInvalidMessages() throws Exception {
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(0, 0d, 0, Integer.MAX_VALUE);
     manager.failed(TEST_OFFSET);
     manager.failed(TEST_OFFSET2);
     manager.failed(TEST_OFFSET3);
@@ -236,7 +254,8 @@ public class ExponentialBackoffMsgRetryManagerTest {
     final double mult = 2d;
     final long max = 2000;
     final int maxRetries = 2;
-    ExponentialBackoffMsgRetryManager manager = buildExponentialBackoffMsgRetryManager(initial, mult, max, maxRetries);
+    ExponentialBackoffMsgRetryManager manager =
+        buildExponentialBackoffMsgRetryManager(initial, mult, max, maxRetries);
     assertTrue(manager.retryFurther(TEST_OFFSET));
     manager.failed(TEST_OFFSET);
 
@@ -246,16 +265,18 @@ public class ExponentialBackoffMsgRetryManagerTest {
     assertFalse(manager.retryFurther(TEST_OFFSET));
   }
 
-  private ExponentialBackoffMsgRetryManager buildExponentialBackoffMsgRetryManager(long retryInitialDelayMs,
-                                                                                   double retryDelayMultiplier,
-                                                                                   long retryDelayMaxMs,
-                                                                                   int retryLimit) {
+  private ExponentialBackoffMsgRetryManager buildExponentialBackoffMsgRetryManager(
+      long retryInitialDelayMs,
+      double retryDelayMultiplier,
+      long retryDelayMaxMs,
+      int retryLimit) {
     SpoutConfig spoutConfig = new SpoutConfig(null, null, null, null);
     spoutConfig.retryInitialDelayMs = retryInitialDelayMs;
     spoutConfig.retryDelayMultiplier = retryDelayMultiplier;
     spoutConfig.retryDelayMaxMs = retryDelayMaxMs;
     spoutConfig.retryLimit = retryLimit;
-    ExponentialBackoffMsgRetryManager exponentialBackoffMsgRetryManager = new ExponentialBackoffMsgRetryManager();
+    ExponentialBackoffMsgRetryManager exponentialBackoffMsgRetryManager =
+        new ExponentialBackoffMsgRetryManager();
     exponentialBackoffMsgRetryManager.prepare(spoutConfig, null);
     return exponentialBackoffMsgRetryManager;
   }
