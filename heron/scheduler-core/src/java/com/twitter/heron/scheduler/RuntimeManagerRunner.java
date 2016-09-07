@@ -216,12 +216,12 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     result = statemgr.deletePackingPlan(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear packing plan. Check whether TMaster set it correctly.");
+      LOG.warning("Failed to clear packing plan. Check whether Launcher set it correctly.");
     }
 
     result = statemgr.deletePhysicalPlan(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear physical plan. Check whether Launcher set it correctly.");
+      LOG.warning("Failed to clear physical plan. Check whether TMaster set it correctly.");
     }
 
     result = statemgr.deleteSchedulerLocation(topologyName);
