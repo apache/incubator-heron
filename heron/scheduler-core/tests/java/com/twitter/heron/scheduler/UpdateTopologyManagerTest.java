@@ -32,7 +32,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
@@ -47,10 +46,10 @@ public class UpdateTopologyManagerTest {
 
   @Before
   public void init() {
-    currentContainerPlan = buildContainerSet("current-1", "current-2", "current-3", "current-4");
-    proposedContainerPlan = buildContainerSet("current-1", "current-3", "new-1", "new-2");
-    expectedContainersToAdd = buildContainerSet("new-1", "new-2");
-    expectedContainersToRemove = buildContainerSet("current-2", "current-4");
+    currentContainerPlan = buildContainerSet(1, 2, 3, 4);
+    proposedContainerPlan = buildContainerSet(1, 3, 5, 6);
+    expectedContainersToAdd = buildContainerSet(5, 6);
+    expectedContainersToRemove = buildContainerSet(2, 4);
   }
 
   @Test
@@ -69,9 +68,9 @@ public class UpdateTopologyManagerTest {
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
 
     PackingPlan currentPacking
-        = new PackingPlan("current", currentContainerPlan, new Resource(0.5, 1, 2));
+        = new PackingPlan("current", currentContainerPlan);
     PackingPlan proposedPacking
-        = new PackingPlan("proposed", proposedContainerPlan, new Resource(0.5, 1, 2));
+        = new PackingPlan("proposed", proposedContainerPlan);
 
     PackingPlans.PackingPlan currentProtoPlan = serializer.toProto(currentPacking);
     PackingPlans.PackingPlan proposedProtoPlan = serializer.toProto(proposedPacking);
@@ -169,9 +168,9 @@ public class UpdateTopologyManagerTest {
     return null;
   }
 
-  private static Set<PackingPlan.ContainerPlan> buildContainerSet(String... containerIds) {
+  private static Set<PackingPlan.ContainerPlan> buildContainerSet(int... containerIds) {
     Set<PackingPlan.ContainerPlan> containerPlan = new HashSet<>();
-    for (String containerId : containerIds) {
+    for (int containerId : containerIds) {
       containerPlan.add(PackingTestUtils.testContainerPlan(containerId));
     }
     return containerPlan;

@@ -145,7 +145,7 @@ public class LocalSchedulerTest {
     for (int i = 0; i < LOCAL_NUM_CONTAINER; i++) {
       processes[i] = Mockito.mock(Process.class);
       Mockito.doReturn(processes[i]).when(scheduler).startExecutorProcess(i);
-      existingContainers.add(PackingTestUtils.testContainerPlan("" + i));
+      existingContainers.add(PackingTestUtils.testContainerPlan(i));
     }
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
@@ -155,7 +155,7 @@ public class LocalSchedulerTest {
 
     Set<PackingPlan.ContainerPlan> containersToRemove = new HashSet<>();
     PackingPlan.ContainerPlan containerToRemove =
-        PackingTestUtils.testContainerPlan("" + (LOCAL_NUM_CONTAINER - 1));
+        PackingTestUtils.testContainerPlan(LOCAL_NUM_CONTAINER - 1);
     containersToRemove.add(containerToRemove);
     scheduler.removeContainers(containersToRemove);
     existingContainers.remove(containerToRemove);
@@ -165,11 +165,11 @@ public class LocalSchedulerTest {
     Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(Mockito.anyInt());
 
     containersToRemove.clear();
-    containersToRemove.add(PackingTestUtils.testContainerPlan("1"));
-    containersToRemove.add(PackingTestUtils.testContainerPlan("2"));
+    containersToRemove.add(PackingTestUtils.testContainerPlan(1));
+    containersToRemove.add(PackingTestUtils.testContainerPlan(2));
     scheduler.removeContainers(containersToRemove);
-    existingContainers.remove(PackingTestUtils.testContainerPlan("1"));
-    existingContainers.remove(PackingTestUtils.testContainerPlan("2"));
+    existingContainers.remove(PackingTestUtils.testContainerPlan(1));
+    existingContainers.remove(PackingTestUtils.testContainerPlan(2));
 
     Assert.assertEquals(existingContainers.size(), scheduler.getProcessToContainer().size());
     Mockito.verify(processes[1]).destroy();
