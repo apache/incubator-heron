@@ -74,8 +74,6 @@ function print_timer_summary {
   done
 }
 
-BAZEL_ARGS="--bazelrc=tools/travis-ci/bazel.rc --config=ubuntu"
-
 # Uncomment below to test changes:
 #T="task one"
 #start_timer "$T"
