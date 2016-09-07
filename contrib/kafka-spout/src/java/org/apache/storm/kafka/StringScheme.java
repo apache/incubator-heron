@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,18 +26,19 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 public class StringScheme implements Scheme {
-    private static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
-    public static final String STRING_SCHEME_KEY = "str";
+  private static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
+  public static final String STRING_SCHEME_KEY = "str";
+  private static final long serialVersionUID = -1806461122261145598L;
 
-    public List<Object> deserialize(byte[] bytes) {
-        return new Values(deserializeString(bytes));
-    }
+  public List<Object> deserialize(byte[] bytes) {
+    return new Values(deserializeString(bytes));
+  }
 
-    public static String deserializeString(byte[] bytes) {
-        return new String(bytes, UTF8_CHARSET);
-    }
+  public static String deserializeString(byte[] bytes) {
+    return new String(bytes, UTF8_CHARSET);
+  }
 
-    public Fields getOutputFields() {
-        return new Fields(STRING_SCHEME_KEY);
-    }
+  public Fields getOutputFields() {
+    return new Fields(STRING_SCHEME_KEY);
+  }
 }
