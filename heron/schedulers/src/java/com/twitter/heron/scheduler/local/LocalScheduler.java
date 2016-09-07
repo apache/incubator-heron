@@ -285,8 +285,8 @@ public class LocalScheduler implements IScheduler, IScalable {
       }
 
       for (PackingPlan.ContainerPlan containerToRemove : containersToRemove) {
-        String containerId = containerToRemove.getId();
-        Process process = containerToProcessMap.get(Integer.valueOf(containerId));
+        int containerId = containerToRemove.getId();
+        Process process = containerToProcessMap.get(containerId);
         if (process == null) {
           LOG.log(Level.WARNING, "Container for id:{0} not found.", containerId);
           continue;

@@ -66,7 +66,7 @@ public final class PackingTestUtils {
     return serializer.toProto(plan);
   }
 
-  public static PackingPlan.ContainerPlan testContainerPlan(String containerId) {
+  public static PackingPlan.ContainerPlan testContainerPlan(int containerId) {
     Resource resource = new Resource(7.5, 6, 9);
     Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
     for (int index : new Integer[]{0, 1}) {
