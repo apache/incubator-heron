@@ -14,13 +14,19 @@ PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integ
 # build test related jar
 T="heron build integration-test"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu integration-test/src/...
+python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel build $BAZEL_ARGS integration-test/src/...
 end_timer "$T"
 
 # install client
 T="heron client install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=ubuntu -- scripts/packages:heron-client-install.sh --user
+python ${DIR}/save-logs.py "heron_client_install.txt" bazel run $BAZEL_ARGS -- scripts/packages:heron-client-install.sh --user
+end_timer "$T"
+
+# install tools
+T="heron tools install"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_tools_install.txt" bazel run $BAZEL_ARGS -- scripts/packages:heron-tools-install.sh --user
 end_timer "$T"
 
 # run local integration test
