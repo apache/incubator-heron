@@ -14,15 +14,14 @@
 
 package com.twitter.heron.packing.roundrobin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -40,28 +39,18 @@ public class RoundRobinPackingTest {
   private int countCompoment(String component, Set<PackingPlan.InstancePlan> instances) {
     int count = 0;
     for (PackingPlan.InstancePlan pair : instances) {
-      if (component.equals(RoundRobinPacking.getComponentName(pair.getId()))) {
+      if (component.equals(PackingUtils.getComponentName(pair.getId()))) {
         count++;
       }
     }
     return count;
   }
 
-  protected TopologyAPI.Topology getTopology(
+  private TopologyAPI.Topology getTopology(
       int spoutParallelism, int boltParallelism,
       com.twitter.heron.api.Config topologyConfig) {
-    // Setup the spout parallelism
-    Map<String, Integer> spouts = new HashMap<>();
-    spouts.put(SPOUT_NAME, spoutParallelism);
-
-    // Setup the bolt parallelism
-    Map<String, Integer> bolts = new HashMap<>();
-    bolts.put(BOLT_NAME, boltParallelism);
-
-    TopologyAPI.Topology topology =
-        TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
-
-    return topology;
+    return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
+        spoutParallelism, boltParallelism);
   }
 
   protected PackingPlan getRoundRobinPackingPlan(TopologyAPI.Topology topology) {
@@ -71,15 +60,9 @@ public class RoundRobinPackingTest {
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     RoundRobinPacking packing = new RoundRobinPacking();
     packing.initialize(config, topology);
-    PackingPlan output = packing.pack();
-
-    return output;
+    return packing.pack();
   }
 
   @Test
@@ -97,11 +80,8 @@ public class RoundRobinPackingTest {
 
     topologyConfig.setContainerRamRequested(containerRam);
 
-    TopologyAPI.Topology topology =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-
-    PackingPlan packingPlan =
-        getRoundRobinPackingPlan(topology);
+    TopologyAPI.Topology topology =  getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlan = getRoundRobinPackingPlan(topology);
 
     Assert.assertNull(packingPlan);
   }
