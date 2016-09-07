@@ -193,6 +193,12 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       return false;
     }
 
+    result = statemgr.deletePackingPlan(topologyName);
+    if (result == null || !result) {
+      LOG.severe("Failed to clear packing plan");
+      return false;
+    }
+
     LOG.fine("Cleaned up topology state");
     return true;
   }
