@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -47,7 +48,7 @@ public class FirstFitDecreasingPackingTest {
   }
 
 
-  protected PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
+  private PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
@@ -91,6 +92,8 @@ public class FirstFitDecreasingPackingTest {
   public void testDefaultContainerSize() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
 
@@ -98,6 +101,7 @@ public class FirstFitDecreasingPackingTest {
     PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
 
     Assert.assertEquals(packingPlan.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
 
   /**
@@ -108,6 +112,8 @@ public class FirstFitDecreasingPackingTest {
     int spoutParallelism = 4;
     int boltParallelism = 3;
     int padding = 50;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
 
@@ -116,6 +122,7 @@ public class FirstFitDecreasingPackingTest {
     PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
 
     Assert.assertEquals(packingPlan.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
 
 
@@ -146,6 +153,8 @@ public class FirstFitDecreasingPackingTest {
         getFirstFitDecreasingPackingPlan(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), 1);
+    Assert.assertEquals(
+        (Integer) totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
@@ -180,6 +189,7 @@ public class FirstFitDecreasingPackingTest {
   public void testCompleteRamMapRequested() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -206,20 +216,9 @@ public class FirstFitDecreasingPackingTest {
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
 
     Assert.assertEquals(packingPlanExplicitRamMap.getContainers().size(), 1);
-
-    // Ram for bolt should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers()) {
-      Assert.assertNotEquals(maxContainerRam, containerPlan.getResource().getRam());
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
-        }
-        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.getResource().getRam());
-        }
-      }
-    }
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, maxContainerRam);
   }
 
   /**
@@ -229,6 +228,7 @@ public class FirstFitDecreasingPackingTest {
   public void testCompleteRamMapRequested2() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -249,19 +249,10 @@ public class FirstFitDecreasingPackingTest {
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
 
     Assert.assertEquals(packingPlanExplicitRamMap.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    // Ram for bolt/spout should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
-        }
-        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.getResource().getRam());
-        }
-      }
-    }
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, maxContainerRam);
   }
 
   /**
@@ -271,6 +262,7 @@ public class FirstFitDecreasingPackingTest {
   public void testPartialRamMap() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -290,19 +282,10 @@ public class FirstFitDecreasingPackingTest {
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
 
     Assert.assertEquals(packingPlanExplicitRamMap.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        // Ram for bolt should be the value in component ram map
-        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
-        }
-        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().getRam());
-        }
-      }
-    }
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, instanceRamDefault, maxContainerRam);
   }
 
   /**
@@ -312,6 +295,8 @@ public class FirstFitDecreasingPackingTest {
   public void testPartialRamMapWithPadding() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
 
@@ -331,19 +316,10 @@ public class FirstFitDecreasingPackingTest {
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
 
     Assert.assertEquals(packingPlanExplicitRamMap.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        // Ram for bolt should be the value in component ram map
-        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
-        }
-        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(instanceRamDefault, instancePlan.getResource().getRam());
-        }
-      }
-    }
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, instanceRamDefault, null);
   }
 
   /**
@@ -353,6 +329,7 @@ public class FirstFitDecreasingPackingTest {
   public void testInvalidRamInstance() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -370,5 +347,6 @@ public class FirstFitDecreasingPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlanExplicitRamMap =
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
   }
 }
