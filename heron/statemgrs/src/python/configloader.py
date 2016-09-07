@@ -80,6 +80,7 @@ def __replace(config, wildcards, config_file):
   return config
 
 if __name__ == "__main__":
+  """ helper main method used to verify config files, intended for manual verification only """
   if len(sys.argv) > 1:
     locations = load_state_manager_locations('local', sys.argv[1])
   else:
