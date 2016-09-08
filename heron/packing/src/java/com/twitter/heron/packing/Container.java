@@ -15,6 +15,8 @@
 
 package com.twitter.heron.packing;
 
+import com.twitter.heron.spi.packing.Resource;
+
 /**
  * Class that describes a container used to place Heron Instances with specific memory, CpuCores and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
@@ -31,13 +33,13 @@ public class Container {
   private double maxCpuCores;
   private long maxDisk;
 
-  public Container(long maxRam, double maxCpuCores, long maxDisk) {
+  public Container(Resource resource) {
     this.usedRam = 0;
     this.usedCpuCores = 0;
     this.usedDisk = 0;
-    this.maxRam = maxRam;
-    this.maxCpuCores = maxCpuCores;
-    this.maxDisk = maxDisk;
+    this.maxRam = resource.getRam();
+    this.maxCpuCores = resource.getCpu();
+    this.maxDisk = resource.getDisk();
   }
 
   /**
@@ -45,14 +47,10 @@ public class Container {
    *
    * @return true if the container has space otherwise return false
    */
-  public boolean hasSpace(long ram, double cpuCores, long disk) {
-    if (usedRam + ram <= maxRam
+  private boolean hasSpace(long ram, double cpuCores, long disk) {
+    return usedRam + ram <= maxRam
         && usedCpuCores + cpuCores <= maxCpuCores
-        && usedDisk + disk <= maxDisk) {
-
-      return true;
-    }
-    return false;
+        && usedDisk + disk <= maxDisk;
   }
 
   /**
@@ -61,16 +59,14 @@ public class Container {
    *
    * @return true if the instance can be added to the container, false otherwise
    */
-  public boolean add(long ram, double cpuCores, long disk) {
-    if (this.hasSpace(ram, cpuCores, disk)) {
-      usedRam += ram;
-      usedCpuCores += cpuCores;
-      usedDisk += disk;
+  public boolean add(Resource resource) {
+    if (this.hasSpace(resource.getRam(), resource.getCpu(), resource.getDisk())) {
+      usedRam += resource.getRam();
+      usedCpuCores += resource.getCpu();
+      usedDisk += resource.getDisk();
       return true;
     } else {
       return false;
     }
   }
-
-
 }
