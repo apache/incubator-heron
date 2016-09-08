@@ -92,9 +92,8 @@ class AuroraController {
   void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     String instancesToKill = getInstancesIdsToKill(containersToRemove);
     //aurora job kill <cluster>/<role>/<env>/<name>/<instance_ids>
-    List<String> auroraCmd =
-        new ArrayList<>(Arrays.asList("aurora", "job", "kill",
-            jobSpec + "/" + instancesToKill));
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList(
+        "aurora", "job", "kill", jobSpec + "/" + instancesToKill));
     LOG.info(String.format(
         "Killing %s aurora containers: %s", containersToRemove.size(), auroraCmd));
     if (!runProcess(auroraCmd)) {
@@ -105,9 +104,8 @@ class AuroraController {
   void addContainers(Integer count) {
     //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
     //clone instance 0
-    List<String> auroraCmd =
-        new ArrayList<>(Arrays.asList("aurora", "job", "add", "--wait-until",
-            "RUNNING", jobSpec + "/0", count.toString()));
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList(
+        "aurora", "job", "add", "--wait-until", "RUNNING", jobSpec + "/0", count.toString()));
     LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
     if (!runProcess(auroraCmd)) {
       throw new RuntimeException("Failed to create " + count + " new aurora instances");
