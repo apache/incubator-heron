@@ -245,8 +245,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private Map<Integer, List<String>> getFFDAllocation(PackingPlan currentPackingPlan,
                                                       Map<String, Integer> componentChanges) {
     int numContainers = currentPackingPlan.getContainers().size();
-    Map<String, Integer> parallelismMap = componentChanges;
-    return placeInstances(parallelismMap, numContainers);
+    return placeInstances(componentChanges, numContainers);
   }
 
   /**
