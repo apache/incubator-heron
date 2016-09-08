@@ -324,7 +324,6 @@ public class FirstFitDecreasingPackingTest {
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
   }
 
-
   /**
    * Test the scenario where the max container size is the default
    * and scaling is requested.
