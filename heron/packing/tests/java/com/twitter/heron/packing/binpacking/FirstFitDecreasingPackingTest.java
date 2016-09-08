@@ -14,7 +14,9 @@
 
 package com.twitter.heron.packing.binpacking;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
