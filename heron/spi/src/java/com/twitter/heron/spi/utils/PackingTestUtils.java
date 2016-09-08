@@ -14,7 +14,9 @@
 package com.twitter.heron.spi.utils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -24,6 +26,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
+import com.twitter.heron.spi.packing.Resource;
 
 /**
  * Packing utilities for testing
@@ -33,7 +36,7 @@ public final class PackingTestUtils {
   private PackingTestUtils() {
   }
 
-  public static PackingPlan createTestPackingPlan(String topologyName, IPacking packing) {
+  public static PackingPlan testPackingPlan(String topologyName, IPacking packing) {
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("testSpout", 2);
 
@@ -56,10 +59,31 @@ public final class PackingTestUtils {
     return packing.pack();
   }
 
-  public static PackingPlans.PackingPlan createTestProtoPackingPlan(
+  public static PackingPlans.PackingPlan testProtoPackingPlan(
       String topologyName, IPacking packing) {
-    PackingPlan plan = createTestPackingPlan(topologyName, packing);
+    PackingPlan plan = testPackingPlan(topologyName, packing);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     return serializer.toProto(plan);
+  }
+
+  public static PackingPlan.ContainerPlan testContainerPlan(int containerId) {
+    return testContainerPlan(containerId, 0, 1);
+  }
+
+  public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
+                                                            Integer... instanceIndices) {
+    Resource resource = new Resource(7.5, 6, 9);
+    Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
+    for (int index : instanceIndices) {
+      String instanceId = "instance-" + index;
+      String componentName = "componentName-" + index;
+      instancePlans.add(testInstancePlan(instanceId, componentName));
+    }
+    return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
+  }
+
+  private static PackingPlan.InstancePlan testInstancePlan(String id, String componentName) {
+    Resource resource = new Resource(1.5, 2, 3);
+    return new PackingPlan.InstancePlan(id, componentName, resource);
   }
 }
