@@ -92,7 +92,6 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * 11. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of ram for an instance is less than the minimal required value or .
  */
-
 public class FirstFitDecreasingPacking implements IPacking {
 
   private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
@@ -210,7 +209,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    * @return true if a placement was found, false otherwise
    */
   private Map<Integer, List<String>> placeInstances(Map<String, Integer> parallelismMap,
-                                                         int numContainers) {
+                                                    int numContainers) {
     Map<Integer, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
