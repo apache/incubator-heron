@@ -19,36 +19,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
  * This file defines Utils methods used by Aurora
  */
-public class AuroraController {
-
-  private final String jobName;
-  private final String cluster;
-  private final String role;
-  private final String env;
+class AuroraController {
+  private final String jobSpec;
   private final boolean isVerbose;
 
-  public AuroraController(
+  AuroraController(
       String jobName,
       String cluster,
       String role,
       String env,
       boolean isVerbose) {
-    this.jobName = jobName;
-    this.cluster = cluster;
-    this.role = role;
-    this.env = env;
     this.isVerbose = isVerbose;
+    this.jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
   }
 
   // Create an aurora job
-  public boolean createJob(
-      String auroraFilename,
-      Map<String, String> bindings) {
+  boolean createJob(String auroraFilename, Map<String, String> bindings) {
     List<String> auroraCmd =
         new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 
@@ -57,7 +50,6 @@ public class AuroraController {
       auroraCmd.add(String.format("%s=%s", binding.getKey(), binding.getValue()));
     }
 
-    String jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
     auroraCmd.add(jobSpec);
     auroraCmd.add(auroraFilename);
 
@@ -69,9 +61,8 @@ public class AuroraController {
   }
 
   // Kill an aurora job
-  public boolean killJob() {
+  boolean killJob() {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "killall"));
-    String jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
     auroraCmd.add(jobSpec);
 
     appendAuroraCommandOptions(auroraCmd, isVerbose);
@@ -80,13 +71,13 @@ public class AuroraController {
   }
 
   // Restart an aurora job
-  public boolean restartJob(int containerId) {
+  boolean restartJob(int containerId) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "restart"));
-    String jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
     if (containerId != -1) {
-      jobSpec = String.format("%s/%s", jobSpec, Integer.toString(containerId));
+      auroraCmd.add(String.format("%s/%s", jobSpec, Integer.toString(containerId)));
+    } else {
+      auroraCmd.add(jobSpec);
     }
-    auroraCmd.add(jobSpec);
 
     appendAuroraCommandOptions(auroraCmd, isVerbose);
 
@@ -94,7 +85,8 @@ public class AuroraController {
   }
 
   // Utils method for unit tests
-  protected boolean runProcess(List<String> auroraCmd) {
+  @VisibleForTesting
+  boolean runProcess(List<String> auroraCmd) {
     return 0 == ShellUtils.runProcess(
         isVerbose, auroraCmd.toArray(new String[auroraCmd.size()]),
         new StringBuilder(), new StringBuilder());

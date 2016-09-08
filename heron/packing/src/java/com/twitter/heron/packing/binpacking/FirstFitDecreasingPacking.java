@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.Container;
@@ -92,13 +93,13 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * 11. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of ram for an instance is less than the minimal required value or .
  */
-
 public class FirstFitDecreasingPacking implements IPacking {
 
   private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
+  private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
   private TopologyAPI.Topology topology;
 
   private Resource defaultInstanceResources;
@@ -210,7 +211,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    * @return true if a placement was found, false otherwise
    */
   private Map<Integer, List<String>> placeInstances(Map<String, Integer> parallelismMap,
-                                                         int numContainers) {
+                                                    int numContainers) {
     Map<Integer, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
