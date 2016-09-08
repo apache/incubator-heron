@@ -63,6 +63,21 @@ public final class TopologyUtils {
     return defaultValue;
   }
 
+  public static Long getConfigWithDefault(
+      List<TopologyAPI.Config.KeyValue> config, String key, Long defaultValue) {
+    return Long.parseLong(getConfigWithDefault(config, key, Long.toString(defaultValue)));
+  }
+
+  public static Integer getConfigWithDefault(
+      List<TopologyAPI.Config.KeyValue> config, String key, Integer defaultValue) {
+    return Integer.parseInt(getConfigWithDefault(config, key, Integer.toString(defaultValue)));
+  }
+
+  public static Double getConfigWithDefault(
+      List<TopologyAPI.Config.KeyValue> config, String key, Double defaultValue) {
+    return Double.parseDouble(getConfigWithDefault(config, key, Double.toString(defaultValue)));
+  }
+
   public static String getConfigWithException(
       List<TopologyAPI.Config.KeyValue> config, String key) {
     for (TopologyAPI.Config.KeyValue kv : config) {
@@ -177,7 +192,8 @@ public final class TopologyUtils {
     Set<String> componentNames = getComponentParallelism(topology).keySet();
 
     // Parse the config value
-    String ramMapStr = getConfigWithDefault(topologyConfig, Config.TOPOLOGY_COMPONENT_RAMMAP, null);
+    String ramMapStr = getConfigWithDefault(
+        topologyConfig, Config.TOPOLOGY_COMPONENT_RAMMAP, (String) null);
     if (ramMapStr != null) {
       String[] ramMapTokens = ramMapStr.split(",");
       for (String token : ramMapTokens) {
