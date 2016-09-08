@@ -126,7 +126,7 @@ public class UpdateTopologyManager {
    *
    * It is important to note that the container comparison is done by id only, and does not include
    * the InstancePlans in the container, which for a given container might change in the proposed
-   * plan.
+   * plan. Changing the size of a container is not supported and will be ignored.
    */
   @VisibleForTesting
   static class ContainerDelta {

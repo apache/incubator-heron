@@ -46,9 +46,7 @@ class AuroraController {
   }
 
   // Create an aurora job
-  boolean createJob(
-      String auroraFilename,
-      Map<String, String> bindings) {
+  boolean createJob(String auroraFilename, Map<String, String> bindings) {
     List<String> auroraCmd =
         new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 

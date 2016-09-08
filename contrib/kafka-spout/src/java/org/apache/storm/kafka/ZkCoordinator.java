@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,97 +17,127 @@
  */
 package org.apache.storm.kafka;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.storm.kafka.trident.GlobalPartitionInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.storm.kafka.trident.GlobalPartitionInformation;
-
-import java.util.*;
 
 import static org.apache.storm.kafka.KafkaUtils.taskId;
 
 public class ZkCoordinator implements PartitionCoordinator {
-    private static final Logger LOG = LoggerFactory.getLogger(ZkCoordinator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ZkCoordinator.class);
 
-    SpoutConfig _spoutConfig;
-    int _taskIndex;
-    int _totalTasks;
-    String _topologyInstanceId;
-    Map<Partition, PartitionManager> _managers = new HashMap();
-    List<PartitionManager> _cachedList = new ArrayList<PartitionManager>();
-    Long _lastRefreshTime = null;
-    int _refreshFreqMs;
-    DynamicPartitionConnections _connections;
-    DynamicBrokersReader _reader;
-    ZkState _state;
-    Map _stormConf;
+  private SpoutConfig spoutConfig;
+  private int taskIndex;
+  private int totalTasks;
+  private String topologyInstanceId;
+  private Map<Partition, PartitionManager> managers = new HashMap<>();
+  private List<PartitionManager> cachedList = new ArrayList<PartitionManager>();
+  private Long lastRefreshTime = null;
+  private int refreshFreqMs;
+  private DynamicPartitionConnections connections;
+  private  DynamicBrokersReader reader;
+  private ZkState state;
+  private Map<String, Object> stormConf;
 
-    public ZkCoordinator(DynamicPartitionConnections connections, Map stormConf, SpoutConfig spoutConfig, ZkState state, int taskIndex, int totalTasks, String topologyInstanceId) {
-        this(connections, stormConf, spoutConfig, state, taskIndex, totalTasks, topologyInstanceId, buildReader(stormConf, spoutConfig));
+  public ZkCoordinator(DynamicPartitionConnections connections,
+                       Map<String, Object> stormConf,
+                       SpoutConfig spoutConfig,
+                       ZkState state,
+                       int taskIndex,
+                       int totalTasks,
+                       String topologyInstanceId) {
+    this(connections, stormConf, spoutConfig, state, taskIndex,
+        totalTasks, topologyInstanceId, buildReader(stormConf, spoutConfig));
+  }
+
+  public ZkCoordinator(DynamicPartitionConnections connections,
+                       Map<String, Object> stormConf,
+                       SpoutConfig spoutConfig,
+                       ZkState state,
+                       int taskIndex,
+                       int totalTasks,
+                       String topologyInstanceId,
+                       DynamicBrokersReader reader) {
+    this.spoutConfig = spoutConfig;
+    this.connections = connections;
+    this.taskIndex = taskIndex;
+    this.totalTasks = totalTasks;
+    this.topologyInstanceId = topologyInstanceId;
+    this.stormConf = stormConf;
+    this.state = state;
+    ZkHosts brokerConf = (ZkHosts) spoutConfig.hosts;
+    this.refreshFreqMs = brokerConf.refreshFreqSecs * 1000;
+    this.reader = reader;
+  }
+
+  public int getTaskIndex() {
+    return this.taskIndex;
+  }
+
+  private static DynamicBrokersReader buildReader(Map<String, Object> stormConf,
+                                                  SpoutConfig spoutConfig) {
+    ZkHosts hosts = (ZkHosts) spoutConfig.hosts;
+    return new DynamicBrokersReader(stormConf, hosts.brokerZkStr,
+        hosts.brokerZkPath, spoutConfig.topic);
+  }
+
+  @Override
+  public List<PartitionManager> getMyManagedPartitions() {
+    if (lastRefreshTime == null
+        || (System.currentTimeMillis() - lastRefreshTime) > refreshFreqMs) {
+      refresh();
+      lastRefreshTime = System.currentTimeMillis();
     }
+    return cachedList;
+  }
 
-    public ZkCoordinator(DynamicPartitionConnections connections, Map stormConf, SpoutConfig spoutConfig, ZkState state, int taskIndex, int totalTasks, String topologyInstanceId, DynamicBrokersReader reader) {
-        _spoutConfig = spoutConfig;
-        _connections = connections;
-        _taskIndex = taskIndex;
-        _totalTasks = totalTasks;
-        _topologyInstanceId = topologyInstanceId;
-        _stormConf = stormConf;
-        _state = state;
-        ZkHosts brokerConf = (ZkHosts) spoutConfig.hosts;
-        _refreshFreqMs = brokerConf.refreshFreqSecs * 1000;
-        _reader = reader;
+  @Override
+  public void refresh() {
+    try {
+      LOG.info(taskId(taskIndex, totalTasks) + "Refreshing partition manager connections");
+      List<GlobalPartitionInformation> brokerInfo = reader.getBrokerInfo();
+      List<Partition> mine =
+          KafkaUtils.calculatePartitionsForTask(brokerInfo, totalTasks, taskIndex);
+
+      Set<Partition> curr = managers.keySet();
+      Set<Partition> newPartitions = new HashSet<Partition>(mine);
+      newPartitions.removeAll(curr);
+
+      Set<Partition> deletedPartitions = new HashSet<Partition>(curr);
+      deletedPartitions.removeAll(mine);
+
+      LOG.info(taskId(taskIndex, totalTasks)
+          + "Deleted partition managers: " + deletedPartitions.toString());
+
+      for (Partition id : deletedPartitions) {
+        PartitionManager man = managers.remove(id);
+        man.close();
+      }
+      LOG.info(taskId(taskIndex, totalTasks)
+          + "New partition managers: " + newPartitions.toString());
+
+      for (Partition id : newPartitions) {
+        PartitionManager man = new PartitionManager(connections, topologyInstanceId, state,
+            stormConf, spoutConfig, id);
+        managers.put(id, man);
+      }
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+    cachedList = new ArrayList<PartitionManager>(managers.values());
+    LOG.info(taskId(taskIndex, totalTasks) + "Finished refreshing");
+  }
 
-    private static DynamicBrokersReader buildReader(Map stormConf, SpoutConfig spoutConfig) {
-        ZkHosts hosts = (ZkHosts) spoutConfig.hosts;
-        return new DynamicBrokersReader(stormConf, hosts.brokerZkStr, hosts.brokerZkPath, spoutConfig.topic);
-    }
-
-    @Override
-    public List<PartitionManager> getMyManagedPartitions() {
-        if (_lastRefreshTime == null || (System.currentTimeMillis() - _lastRefreshTime) > _refreshFreqMs) {
-            refresh();
-            _lastRefreshTime = System.currentTimeMillis();
-        }
-        return _cachedList;
-    }
-
-    @Override
-    public void refresh() {
-        try {
-            LOG.info(taskId(_taskIndex, _totalTasks) + "Refreshing partition manager connections");
-            List<GlobalPartitionInformation> brokerInfo = _reader.getBrokerInfo();
-            List<Partition> mine = KafkaUtils.calculatePartitionsForTask(brokerInfo, _totalTasks, _taskIndex);
-
-            Set<Partition> curr = _managers.keySet();
-            Set<Partition> newPartitions = new HashSet<Partition>(mine);
-            newPartitions.removeAll(curr);
-
-            Set<Partition> deletedPartitions = new HashSet<Partition>(curr);
-            deletedPartitions.removeAll(mine);
-
-            LOG.info(taskId(_taskIndex, _totalTasks) + "Deleted partition managers: " + deletedPartitions.toString());
-
-            for (Partition id : deletedPartitions) {
-                PartitionManager man = _managers.remove(id);
-                man.close();
-            }
-            LOG.info(taskId(_taskIndex, _totalTasks) + "New partition managers: " + newPartitions.toString());
-
-            for (Partition id : newPartitions) {
-                PartitionManager man = new PartitionManager(_connections, _topologyInstanceId, _state, _stormConf, _spoutConfig, id);
-                _managers.put(id, man);
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        _cachedList = new ArrayList<PartitionManager>(_managers.values());
-        LOG.info(taskId(_taskIndex, _totalTasks) + "Finished refreshing");
-    }
-
-    @Override
-    public PartitionManager getManager(Partition partition) {
-        return _managers.get(partition);
-    }
+  @Override
+  public PartitionManager getManager(Partition partition) {
+    return managers.get(partition);
+  }
 }

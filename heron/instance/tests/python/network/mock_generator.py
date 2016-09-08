@@ -56,7 +56,7 @@ class MockMetricsManagerClient(MetricsManagerClient):
       stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
       MetricsManagerClient.__init__(self, EventLooper(), self.HOST, self.PORT,
                                   mock_protobuf.get_mock_instance(), HeronCommunicator(),
-                                  stream, stream, {}, socket_options, Mock())
+                                  stream, stream, {}, socket_options, Mock(), Mock())
     self.register_req_called = False
 
   def _send_register_req(self):

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,11 +17,9 @@
  */
 package org.apache.storm.kafka;
 
-import org.apache.kafka.common.serialization.Serializer;
-
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.Map;
+
+import org.apache.kafka.common.serialization.Serializer;
 
 public class IntSerializer implements Serializer<Integer> {
   @Override
@@ -30,12 +28,12 @@ public class IntSerializer implements Serializer<Integer> {
 
   @Override
   public byte[] serialize(String topic, Integer val) {
-    return new byte[] {
-            (byte) (val >>> 24),
-            (byte) (val >>> 16),
-            (byte) (val >>> 8),
-            val.byteValue()
-        };
+    return new byte[]{
+        (byte) (val >>> 24),
+        (byte) (val >>> 16),
+        (byte) (val >>> 8),
+        val.byteValue()
+    };
   }
 
   @Override
