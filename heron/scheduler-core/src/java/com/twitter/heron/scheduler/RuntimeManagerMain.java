@@ -94,6 +94,13 @@ public class RuntimeManagerMain {
         .required()
         .build();
 
+    Option componentParallelism = Option.builder("a")
+        .desc("Component parallelism to update: <name>:<value>,<name>:<value>,...")
+        .longOpt("component_parallelism")
+        .hasArgs()
+        .argName("component parallelism")
+        .build();
+
     Option configFile = Option.builder("p")
         .desc("Path of the config files")
         .longOpt("config_path")
@@ -146,6 +153,7 @@ public class RuntimeManagerMain {
     options.addOption(command);
     options.addOption(heronHome);
     options.addOption(containerId);
+    options.addOption(componentParallelism);
     options.addOption(verbose);
 
     return options;
@@ -205,6 +213,7 @@ public class RuntimeManagerMain {
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
+    String componentParallelism = cmd.getOptionValue("component_parallelism");
 
     // Optional argument in the case of restart
     // TODO(karthik): convert into CLI
@@ -227,6 +236,12 @@ public class RuntimeManagerMain {
         .put(Keys.environ(), environ)
         .put(Keys.verbose(), verbose)
         .put(Keys.topologyContainerId(), containerId);
+
+    // This is a command line option, but not a valid config key. Hence we don't use Keys
+    if (componentParallelism != null) {
+      commandLineConfig.put(
+          RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY, componentParallelism);
+    }
 
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
@@ -332,7 +347,6 @@ public class RuntimeManagerMain {
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(statemgr);
     }
-
     return isSuccessful;
   }
 
@@ -366,9 +380,7 @@ public class RuntimeManagerMain {
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
 
     // invoke the appropriate handlers based on command
-    boolean ret = runtimeManagerRunner.call();
-
-    return ret;
+    return runtimeManagerRunner.call();
   }
 
   protected ISchedulerClient getSchedulerClient(Config runtime) {
