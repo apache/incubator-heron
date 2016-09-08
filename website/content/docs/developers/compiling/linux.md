@@ -32,12 +32,13 @@ export CC=/usr/bin/gcc-4.8
 export CCX=/usr/bin/g++-4.8
 ```
 
-### Step 4 --- Install JDK 8
+### Step 4 --- Install JDK 8 and set JAVA_HOME
 
 ```bash
 $ sudo add-apt-repository ppa:webupd8team/java
 $ sudo apt-get update -y
 $ sudo apt-get install oracle-java8-installer -y
+$ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
 ```
 
 #### Step 5 - Install Bazel {{% bazelVersion %}}
@@ -51,31 +52,36 @@ chmod +x /tmp/bazel.sh
 Make sure to download the appropriate version of Bazel (currently {{%
 bazelVersion %}}).
 
-### Step 6 --- Make sure the Bazel executable is in your `PATH`
+### Step 6 --- Install python development tools
+```bash
+$ sudo apt-get install  python-dev python-pip
+```
+
+### Step 7 --- Make sure the Bazel executable is in your `PATH`
 
 ```bash
 $ export PATH="$PATH:$HOME/bin"
 ```
 
-### Step 7 --- Fetch the latest version of Heron's source code
+### Step 8 --- Fetch the latest version of Heron's source code
 
 ```bash
 $ git clone https://github.com/twitter/heron.git && cd heron
 ```
 
-### Step 8 --- Configure Heron for building with Bazel
+### Step 9 --- Configure Heron for building with Bazel
 
 ```bash
 $ ./bazel_configure.py
 ```
 
-### Step 9 --- Build the project
+### Step 10 --- Build the project
 
 ```bash
 $ bazel build --config=ubuntu heron/...  
 ```
 
-### Step 10 --- Build the packages
+### Step 11 --- Build the packages
 
 ```bash
 $ bazel build --config=ubuntu scripts/packages:binpkgs  
