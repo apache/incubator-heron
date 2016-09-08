@@ -14,15 +14,15 @@
 
 package com.twitter.heron.packing.roundrobin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.AssertPacking;
+import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -37,49 +37,23 @@ public class RoundRobinPackingTest {
   private static final String SPOUT_NAME = "spout";
   private static final double DELTA = 0.1;
 
-  private int countCompoment(String component, Set<PackingPlan.InstancePlan> instances) {
-    int count = 0;
-    for (PackingPlan.InstancePlan pair : instances) {
-      if (component.equals(RoundRobinPacking.getComponentName(pair.getId()))) {
-        count++;
-      }
-    }
-    return count;
-  }
-
-  protected TopologyAPI.Topology getTopology(
+  private TopologyAPI.Topology getTopology(
       int spoutParallelism, int boltParallelism,
       com.twitter.heron.api.Config topologyConfig) {
-    // Setup the spout parallelism
-    Map<String, Integer> spouts = new HashMap<>();
-    spouts.put(SPOUT_NAME, spoutParallelism);
-
-    // Setup the bolt parallelism
-    Map<String, Integer> bolts = new HashMap<>();
-    bolts.put(BOLT_NAME, boltParallelism);
-
-    TopologyAPI.Topology topology =
-        TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
-
-    return topology;
+    return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
+        spoutParallelism, boltParallelism);
   }
 
-  protected PackingPlan getRoundRobinPackingPlan(TopologyAPI.Topology topology) {
+  private PackingPlan getRoundRobinPackingPlan(TopologyAPI.Topology topology) {
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     RoundRobinPacking packing = new RoundRobinPacking();
     packing.initialize(config, topology);
-    PackingPlan output = packing.pack();
-
-    return output;
+    return packing.pack();
   }
 
   @Test
@@ -97,11 +71,8 @@ public class RoundRobinPackingTest {
 
     topologyConfig.setContainerRamRequested(containerRam);
 
-    TopologyAPI.Topology topology =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-
-    PackingPlan packingPlan =
-        getRoundRobinPackingPlan(topology);
+    TopologyAPI.Topology topology =  getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlan = getRoundRobinPackingPlan(topology);
 
     Assert.assertNull(packingPlan);
   }
@@ -111,6 +82,7 @@ public class RoundRobinPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -124,6 +96,7 @@ public class RoundRobinPackingTest {
 
     Assert.assertEquals(numContainers,
         packingPlanNoExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanNoExplicitResourcesConfig.getInstanceCount());
   }
 
   /**
@@ -134,6 +107,7 @@ public class RoundRobinPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -153,6 +127,7 @@ public class RoundRobinPackingTest {
 
     Assert.assertEquals(numContainers,
         packingPlanExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
@@ -187,6 +162,7 @@ public class RoundRobinPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -209,20 +185,9 @@ public class RoundRobinPackingTest {
     PackingPlan packingPlanExplicitRamMap =
         getRoundRobinPackingPlan(topologyExplicitRamMap);
 
-    // Ram for bolt should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.getContainers()) {
-      // The containerRam should be ignored, since we set the complete component ram map
-      Assert.assertNotEquals(containerRam, containerPlan.getResource().getRam());
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        if (instancePlan.getComponentName().equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.getResource().getRam());
-        }
-        if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.getResource().getRam());
-        }
-      }
-    }
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, containerRam);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
   }
 
   /**
@@ -233,6 +198,7 @@ public class RoundRobinPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -251,6 +217,7 @@ public class RoundRobinPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlanExplicitRamMap =
         getRoundRobinPackingPlan(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
@@ -300,15 +267,26 @@ public class RoundRobinPackingTest {
     Assert.assertEquals(2 * componentParallelism, numInstance);
     PackingPlan output = getRoundRobinPackingPlan(topology);
     Assert.assertEquals(numContainers, output.getContainers().size());
+    Assert.assertEquals((Integer) numInstance, output.getInstanceCount());
 
     for (PackingPlan.ContainerPlan container : output.getContainers()) {
       Assert.assertEquals(numInstance / numContainers, container.getInstances().size());
 
       // Verify each container got 2 spout and 2 bolt and container 1 got
-      Assert.assertEquals(
-          2, countCompoment("spout", container.getInstances()));
-      Assert.assertEquals(
-          2, countCompoment("bolt", container.getInstances()));
+      assertComponentCount(container, "spout", 2);
+      assertComponentCount(container, "bolt", 2);
     }
   }
+
+  private static void assertComponentCount(
+      PackingPlan.ContainerPlan containerPlan, String componentName, int expectedCount) {
+    int count = 0;
+    for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+      if (componentName.equals(PackingUtils.getComponentName(instancePlan.getId()))) {
+        count++;
+      }
+    }
+    Assert.assertEquals(expectedCount, count);
+  }
+
 }

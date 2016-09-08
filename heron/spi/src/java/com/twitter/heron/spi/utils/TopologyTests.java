@@ -105,4 +105,18 @@ public final class TopologyTests {
     return createTopologyWithConnection(
         topologyName, heronConfig, spouts, bolts, new HashMap<String, String>());
   }
+
+  public static TopologyAPI.Topology createTopology(String topologyName, Config topologyConfig,
+                                                    String spoutName, String boltName,
+                                                    int spoutParallelism, int boltParallelism) {
+    // Setup the spout parallelism
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put(spoutName, spoutParallelism);
+
+    // Setup the bolt parallelism
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put(boltName, boltParallelism);
+
+    return TopologyTests.createTopology(topologyName, topologyConfig, spouts, bolts);
+  }
 }
