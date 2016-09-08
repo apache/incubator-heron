@@ -51,7 +51,6 @@ public class FirstFitDecreasingPackingTest {
         spoutParallelism, boltParallelism);
   }
 
-
   private static PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())

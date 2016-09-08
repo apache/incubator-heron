@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.Container;
@@ -99,7 +98,6 @@ public class FirstFitDecreasingPacking implements IPacking {
   private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
-  private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
   private TopologyAPI.Topology topology;
 
   private Resource defaultInstanceResources;
