@@ -9,7 +9,7 @@ pex_library(
         exclude = ["main.py"]
     ),
     reqs = [
-        "requests==2.3.0",
+        "requests==2.11.1",
         "tornado==4.0.2",
     ],
 )
