@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,7 +19,9 @@ package org.apache.storm.kafka;
 
 public class TopicOffsetOutOfRangeException extends RuntimeException {
 
-    public TopicOffsetOutOfRangeException(String message) {
-        super(message);
-    }
+  private static final long serialVersionUID = -8259406595461854132L;
+
+  public TopicOffsetOutOfRangeException(String message) {
+    super(message);
+  }
 }
