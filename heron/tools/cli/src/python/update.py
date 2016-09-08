@@ -23,10 +23,7 @@ import logging
 import re
 
 def create_parser(subparsers):
-  '''
-  :param subparsers:
-  :return:
-  '''
+  """ Create the parse for the update command """
   parser = subparsers.add_parser(
       'update',
       help='Update a topology',
@@ -62,13 +59,7 @@ def create_parser(subparsers):
 
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
-  '''
-  :param command:
-  :param parser:
-  :param cl_args:
-  :param unknown_args:
-  :return:
-  '''
+  """ run the update command """
   topology_name = cl_args['topology-name']
   try:
     new_args = [
