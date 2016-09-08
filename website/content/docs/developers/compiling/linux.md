@@ -32,12 +32,13 @@ export CC=/usr/bin/gcc-4.8
 export CCX=/usr/bin/g++-4.8
 ```
 
-### Step 4 --- Install JDK 8
+### Step 4 --- Install JDK 8 and set JAVA_HOME
 
 ```bash
 $ sudo add-apt-repository ppa:webupd8team/java
 $ sudo apt-get update -y
 $ sudo apt-get install oracle-java8-installer -y
+$ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
 ```
 
 #### Step 5 - Install Bazel {{% bazelVersion %}}
