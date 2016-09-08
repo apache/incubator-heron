@@ -176,14 +176,13 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     totalContainerPlans.addAll(containerPlans);
     totalContainerPlans.addAll(currentPackingPlan.getContainers());
 
-    PackingPlan plan = new PackingPlan(topology.getId(), totalContainerPlans);
-
     LOG.info(String.format("Created a packing plan with %d containers",  containerPlans.size()));
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       LOG.info(String.format(
           "Container %s consists of %s", containerPlan.getId(), containerPlan.getInstances()));
     }
-    return plan;
+
+    return new PackingPlan(topology.getId(), totalContainerPlans);
   }
 
   @Override
