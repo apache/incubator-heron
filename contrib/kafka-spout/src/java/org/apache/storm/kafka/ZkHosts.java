@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,19 @@ package org.apache.storm.kafka;
 
 
 public class ZkHosts implements BrokerHosts {
-    private static final String DEFAULT_ZK_PATH = "/brokers";
+  private static final String DEFAULT_ZK_PATH = "/brokers";
+  private static final long serialVersionUID = 7491826942378389674L;
 
-    public String brokerZkStr = null;
-    public String brokerZkPath = null; // e.g., /kafka/brokers
-    public int refreshFreqSecs = 60;
+  public String brokerZkStr = null;
+  public String brokerZkPath = null; // e.g., /kafka/brokers
+  public int refreshFreqSecs = 60;
 
-    public ZkHosts(String brokerZkStr, String brokerZkPath) {
-        this.brokerZkStr = brokerZkStr;
-        this.brokerZkPath = brokerZkPath;
-    }
+  public ZkHosts(String brokerZkStr, String brokerZkPath) {
+    this.brokerZkStr = brokerZkStr;
+    this.brokerZkPath = brokerZkPath;
+  }
 
-    public ZkHosts(String brokerZkStr) {
-        this(brokerZkStr, DEFAULT_ZK_PATH);
-    }
+  public ZkHosts(String brokerZkStr) {
+    this(brokerZkStr, DEFAULT_ZK_PATH);
+  }
 }

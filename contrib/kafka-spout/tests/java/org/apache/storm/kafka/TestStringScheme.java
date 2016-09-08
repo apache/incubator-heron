@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,10 +17,9 @@
  */
 package org.apache.storm.kafka;
 
-import org.junit.Test;
-
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

@@ -35,6 +35,6 @@ extra_action(
     requires_action_output = True,
     cmd = "$(location //tools/java/src/com/twitter/bazel/checkstyle:checkstyle_java) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
-          "--checkstyle_config_file tools/java/src/com/twitter/bazel/checkstyle/coding_style.xml"
+          "--heron_checkstyle_config_file tools/java/src/com/twitter/bazel/checkstyle/heron_coding_style.xml " +
+          "--apache_checkstyle_config_file tools/java/src/com/twitter/bazel/checkstyle/apache_coding_style.xml"
 )
-

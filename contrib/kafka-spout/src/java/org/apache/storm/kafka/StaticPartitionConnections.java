@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,36 +17,37 @@
  */
 package org.apache.storm.kafka;
 
-import kafka.javaapi.consumer.SimpleConsumer;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import kafka.javaapi.consumer.SimpleConsumer;
+
 public class StaticPartitionConnections {
-    Map<Integer, SimpleConsumer> _kafka = new HashMap<Integer, SimpleConsumer>();
-    KafkaConfig _config;
-    StaticHosts hosts;
+  private Map<Integer, SimpleConsumer> kafka = new HashMap<Integer, SimpleConsumer>();
+  private KafkaConfig config;
+  private StaticHosts hosts;
 
-    public StaticPartitionConnections(KafkaConfig conf) {
-        _config = conf;
-        if (!(conf.hosts instanceof StaticHosts)) {
-            throw new RuntimeException("Must configure with static hosts");
-        }
-        this.hosts = (StaticHosts) conf.hosts;
+  public StaticPartitionConnections(KafkaConfig conf) {
+    config = conf;
+    if (!(conf.hosts instanceof StaticHosts)) {
+      throw new RuntimeException("Must configure with static hosts");
     }
+    this.hosts = (StaticHosts) conf.hosts;
+  }
 
-    public SimpleConsumer getConsumer(int partition) {
-        if (!_kafka.containsKey(partition)) {
-            Broker hp = hosts.getPartitionInformation().getBrokerFor(partition);
-            _kafka.put(partition, new SimpleConsumer(hp.host, hp.port, _config.socketTimeoutMs, _config.bufferSizeBytes, _config.clientId));
+  public SimpleConsumer getConsumer(int partition) {
+    if (!kafka.containsKey(partition)) {
+      Broker hp = hosts.getPartitionInformation().getBrokerFor(partition);
+      kafka.put(partition, new SimpleConsumer(hp.host,
+          hp.port, config.socketTimeoutMs, config.bufferSizeBytes, config.clientId));
 
-        }
-        return _kafka.get(partition);
     }
+    return kafka.get(partition);
+  }
 
-    public void close() {
-        for (SimpleConsumer consumer : _kafka.values()) {
-            consumer.close();
-        }
+  public void close() {
+    for (SimpleConsumer consumer : kafka.values()) {
+      consumer.close();
     }
+  }
 }
