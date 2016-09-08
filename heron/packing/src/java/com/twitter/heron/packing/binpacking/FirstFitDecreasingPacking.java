@@ -17,9 +17,11 @@ package com.twitter.heron.packing.binpacking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.Container;
@@ -93,13 +95,13 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * 11. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of ram for an instance is less than the minimal required value or .
  */
-
 public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
+  private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
   private TopologyAPI.Topology topology;
 
   private Resource defaultInstanceResources;
@@ -160,13 +162,14 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
     // Get the instances using FFD allocation
-    Map<Integer, List<String>> ffdAllocation = getFFDAllocation(currentPackingPlan,
-        componentChanges);
+    Map<Integer, List<String>> ffdAllocation =
+        getFFDAllocation(currentPackingPlan, componentChanges);
 
     // Construct the PackingPlan
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    Set<PackingPlan.ContainerPlan> containerPlans = buildContainerPlans(ffdAllocation, ramMap);
+    Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
+        ffdAllocation, ramMap, defaultInstanceResources, paddingPercentage);
 
     //merge the two plans
     Set<PackingPlan.ContainerPlan> totalContainerPlans = new HashSet<>();
@@ -175,7 +178,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     PackingPlan plan = new PackingPlan(topology.getId(), totalContainerPlans);
 
-    LOG.info("Created a packing plan with " + containerPlans.size() + " containers");
+    LOG.info(String.format("Created a packing plan with %d containers",  containerPlans.size()));
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       LOG.info(String.format(
           "Container %s consists of %s", containerPlan.getId(), containerPlan.getInstances()));
@@ -240,8 +243,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  protected Map<Integer, List<String>> getFFDAllocation(PackingPlan currentPackingPlan,
-                                                       Map<String, Integer> componentChanges) {
+  private Map<Integer, List<String>> getFFDAllocation(PackingPlan currentPackingPlan,
+                                                      Map<String, Integer> componentChanges) {
     int numContainers = currentPackingPlan.getContainers().size();
     Map<String, Integer> parallelismMap = componentChanges;
     return placeInstances(parallelismMap, numContainers);
