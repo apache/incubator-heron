@@ -89,8 +89,7 @@ def run(command, parser, cl_args, unknown_args):
     )
 
   except Exception as ex:
-    print 'Error: %s' % str(ex)
-    Log.error('Failed to update topology \'%s\'' % topology_name)
+    Log.error('Failed to update topology \'%s\': %s', topology_name, ex)
     return False
 
   Log.info('Successfully updated topology \'%s\'' % topology_name)
