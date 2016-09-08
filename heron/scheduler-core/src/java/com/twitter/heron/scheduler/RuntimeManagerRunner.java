@@ -216,7 +216,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     result = statemgr.deletePackingPlan(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear packing plan. Check whether TMaster set it correctly.");
+      LOG.warning("Failed to clear packing plan. Check whether Launcher set it correctly.");
     }
 
     result = statemgr.deletePhysicalPlan(topologyName);
@@ -258,6 +258,14 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentCounts = currentPackingPlan.getComponentCounts();
     Map<String, Integer> componentChanges = parallelismDelta(componentCounts, changeRequests);
 
+    for (String componentName : componentChanges.keySet()) {
+      Integer change = componentChanges.get(componentName);
+      if (change < 0) {
+        throw new IllegalArgumentException(String.format(
+            "Request made to change component %s parallelism by %d. Scaling component "
+                + "parallelism down is not currently supported.", componentName, change));
+      }
+    }
     // Create an instance of the packing class
     String repackingClass = Context.repackingClass(config);
     IRepacking packing;
@@ -280,6 +288,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   @VisibleForTesting
   Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,
                                         Map<String, Integer> changeRequests) {
+    Map<String, Integer> componentDeltas = new HashMap<>();
     for (String component : changeRequests.keySet()) {
       if (!componentCounts.containsKey(component)) {
         throw new IllegalArgumentException(
@@ -287,13 +296,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       }
       Integer newValue = changeRequests.get(component);
       Integer delta = newValue - componentCounts.get(component);
-      if (delta == 0) {
-        changeRequests.remove(component);
-      } else {
-        changeRequests.put(component, delta);
+      if (delta != 0) {
+        componentDeltas.put(component, delta);
       }
     }
-    return changeRequests;
+    return componentDeltas;
   }
 
   @VisibleForTesting

@@ -118,7 +118,6 @@ public class RuntimeManagerRunnerTest {
         .setTopologyName(TOPOLOGY_NAME).build();
     ISchedulerClient client = Mockito.mock(ISchedulerClient.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.KILL, client);
-//    RuntimeManagerRunner runner =  Mockito.mock(RuntimeManagerRunner.class);
 
     // Failed to invoke client's killTopology
     Mockito.when(client.killTopology(killTopologyRequest)).thenReturn(false);
@@ -172,6 +171,24 @@ public class RuntimeManagerRunnerTest {
     when(client.updateTopology(updateTopologyRequest)).thenReturn(true);
     Assert.assertTrue(runner.updateTopologyHandler(TOPOLOGY_NAME, newParallelism));
     verify(client, Mockito.times(1)).updateTopology(updateTopologyRequest);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testScaleDownNotSupported() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+
+    PackingPlans.PackingPlan currentPlan =
+        PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, new RoundRobinPacking());
+
+    try {
+      runner.buildNewPackingPlan(
+          currentPlan, runner.parseNewParallelismParam("testSpout:1,testBolt:4"), null);
+    } catch (IllegalArgumentException e) {
+      Assert.assertEquals(e.getMessage(),
+          "Request made to change component testSpout parallelism by -1. Scaling component "
+          + "parallelism down is not currently supported.");
+      throw e;
+    }
   }
 
   @Test

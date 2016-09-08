@@ -81,9 +81,6 @@ public class UpdateTopologyManager {
 
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
-    // assert found PackingPlan is same as existing PackingPlan.
-    validateCurrentPackingPlan(existingProtoPackingPlan, topologyName, stateManager);
-
     // fetch the topology, which will need to be updated
     TopologyAPI.Topology updatedTopology =
         getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
@@ -121,17 +118,16 @@ public class UpdateTopologyManager {
     return mergeTopology(updatedTopology, proposedComponentCounts);
   }
 
-  @VisibleForTesting
-  void validateCurrentPackingPlan(PackingPlans.PackingPlan existingProtoPackingPlan,
-                                  String topologyName,
-                                  SchedulerStateManagerAdaptor stateManager) {
-    PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
-    assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
-        "Existing packing plan received does not equal the packing plan found in the state "
-            + "manager. Not updating updatedTopology. Received: %s, Found: %s",
-        existingProtoPackingPlan, foundPackingPlan);
-  }
-
+  /**
+   * Given both a current and proposed set of containers, determines the set of containers to be
+   * added and those to be removed. Whether to add or remove a container is determined by the id of
+   * the container. Proposed containers with an id not in the existing set are to be added, while
+   * current container ids not in the proposed set are to be removed.
+   *
+   * It is important to note that the container comparison is done by id only, and does not include
+   * the InstancePlans in the container, which for a given container might change in the proposed
+   * plan.
+   */
   @VisibleForTesting
   static class ContainerDelta {
     private final Set<PackingPlan.ContainerPlan> containersToAdd;
@@ -140,18 +136,22 @@ public class UpdateTopologyManager {
     @VisibleForTesting
     ContainerDelta(Set<PackingPlan.ContainerPlan> currentContainers,
                    Set<PackingPlan.ContainerPlan> proposedContainers) {
+
+      Set<Integer> currentContainerIds = toIdSet(currentContainers);
+      Set<Integer> proposedContainerIds = toIdSet(proposedContainers);
+
       Set<PackingPlan.ContainerPlan> toAdd = new HashSet<>();
       for (PackingPlan.ContainerPlan proposedContainerPlan : proposedContainers) {
-        if (!currentContainers.contains(proposedContainerPlan)) {
+        if (!currentContainerIds.contains(proposedContainerPlan.getId())) {
           toAdd.add(proposedContainerPlan);
         }
       }
       this.containersToAdd = Collections.unmodifiableSet(toAdd);
 
       Set<PackingPlan.ContainerPlan> toRemove = new HashSet<>();
-      for (PackingPlan.ContainerPlan curentContainerPlan : currentContainers) {
-        if (!proposedContainers.contains(curentContainerPlan)) {
-          toRemove.add(curentContainerPlan);
+      for (PackingPlan.ContainerPlan currentContainerPlan : currentContainers) {
+        if (!proposedContainerIds.contains(currentContainerPlan.getId())) {
+          toRemove.add(currentContainerPlan);
         }
       }
       this.containersToRemove = Collections.unmodifiableSet(toRemove);
@@ -235,6 +235,14 @@ public class UpdateTopologyManager {
       }
     }
     return false;
+  }
+
+  private static Set<Integer> toIdSet(Set<PackingPlan.ContainerPlan> containers) {
+    Set<Integer> currentContainerMap = new HashSet<>();
+    for (PackingPlan.ContainerPlan container : containers) {
+      currentContainerMap.add(container.getId());
+    }
+    return currentContainerMap;
   }
 
   private static void assertTrue(boolean condition, String message, Object... values) {
