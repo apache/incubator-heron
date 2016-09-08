@@ -121,3 +121,6 @@ website/node_modules/
 website/public/
 website/static/
 /bin/
+
+# Visual Studio Code
+.vscode
