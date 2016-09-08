@@ -9,7 +9,7 @@ pex_library(
         "//heron/common/src/python:common-py",
         "//heron/tools/common/src/python:common-py",
         "//heron/tools/common/src/python:tracker-py",
-        "//heron/statemgrs/src/python:zk-statemgr-py",
+        "//heron/statemgrs/src/python:statemgr-py",
         "//heron/proto:proto-py",
     ],
     reqs = [

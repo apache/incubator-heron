@@ -2,6 +2,7 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 packing_deps_files = [
+    ":packing-utils",
     "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:packing-spi-java",
     "//heron/packing/src/java:roundrobin-packing",
@@ -28,6 +29,17 @@ binpacking_deps_files = \
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:utils-spi-java",
     ]
+
+java_library(
+    name = "packing-utils",
+    srcs = glob(
+        ["com/twitter/heron/packing/*.java"]
+    ),
+    deps = [
+        "//heron/spi/src/java:packing-spi-java",
+        "//third_party/java:junit4",
+    ],
+)
 
 java_test(
     name = "RoundRobinPackingTest",
