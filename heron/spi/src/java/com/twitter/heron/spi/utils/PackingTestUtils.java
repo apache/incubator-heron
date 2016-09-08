@@ -67,9 +67,14 @@ public final class PackingTestUtils {
   }
 
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId) {
+    return testContainerPlan(containerId, 0, 1);
+  }
+
+  public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
+                                                            Integer... instanceIndices) {
     Resource resource = new Resource(7.5, 6, 9);
     Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
-    for (int index : new Integer[]{0, 1}) {
+    for (int index : instanceIndices) {
       String instanceId = "instance-" + index;
       String componentName = "componentName-" + index;
       instancePlans.add(testInstancePlan(instanceId, componentName));

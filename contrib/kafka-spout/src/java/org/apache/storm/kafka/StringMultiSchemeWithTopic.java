@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,31 +17,31 @@
  */
 package org.apache.storm.kafka;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.storm.spout.MultiScheme;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.List;
-
 public class StringMultiSchemeWithTopic
-        implements MultiScheme {
-    public static final String STRING_SCHEME_KEY = "str";
+    implements MultiScheme {
+  public static final String STRING_SCHEME_KEY = "str";
 
-    public static final String TOPIC_KEY = "topic";
+  public static final String TOPIC_KEY = "topic";
+  private static final long serialVersionUID = 1985667152241541458L;
 
-    @Override
-    public Iterable<List<Object>> deserialize(byte[] bytes) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Iterable<List<Object>> deserialize(byte[] bytes) {
+    throw new UnsupportedOperationException();
+  }
 
-    public Iterable<List<Object>> deserializeWithTopic(String topic, byte[] bytes) {
-        List<Object> items = new Values(StringScheme.deserializeString(bytes), topic);
-        return Collections.singletonList(items);
-    }
+  public Iterable<List<Object>> deserializeWithTopic(String topic, byte[] bytes) {
+    List<Object> items = new Values(StringScheme.deserializeString(bytes), topic);
+    return Collections.singletonList(items);
+  }
 
-    public Fields getOutputFields() {
-        return new Fields(STRING_SCHEME_KEY, TOPIC_KEY);
-    }
+  public Fields getOutputFields() {
+    return new Fields(STRING_SCHEME_KEY, TOPIC_KEY);
+  }
 }

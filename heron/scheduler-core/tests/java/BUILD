@@ -42,6 +42,7 @@ java_tests(
     "com.twitter.heron.scheduler.RuntimeManagerMainTest",
     "com.twitter.heron.scheduler.SubmitterMainTest",
     "com.twitter.heron.scheduler.SchedulerMainTest",
+    "com.twitter.heron.scheduler.UpdateTopologyManagerTest",
     "com.twitter.heron.scheduler.server.SchedulerServerTest",
     "com.twitter.heron.scheduler.client.LibrarySchedulerClientTest",
     "com.twitter.heron.scheduler.client.HttpServiceSchedulerClientTest",
