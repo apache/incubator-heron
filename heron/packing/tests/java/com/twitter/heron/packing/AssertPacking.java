@@ -66,7 +66,6 @@ public final class AssertPacking {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         containerRam += instancePlan.getResource().getRam();
       }
-      //System.out.println(containerRam + " " + maxRamforResources);
       Assert.assertTrue(containerRam <= maxRamforResources);
     }
   }
