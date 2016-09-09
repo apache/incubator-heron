@@ -65,7 +65,9 @@ class TestTemplate(object):
       self._inject_test_data()
       _sleep("before checking for results", 30)
 
-      self.pre_check_results()
+      if not self.pre_check_results():
+        self.cleanup_test()
+        return False
     except Exception as e:
       logging.error("Test failed, attempting to clean up: %s", e)
       self.cleanup_test()
@@ -92,8 +94,9 @@ class TestTemplate(object):
   def execute_test_case(self):
     pass
 
+  # pylint: disable=no-self-use
   def pre_check_results(self):
-    pass
+    return True
 
   def cleanup_test(self):
     try:
