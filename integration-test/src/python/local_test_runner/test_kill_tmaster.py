@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''test_kill_tmaster.py'''
+"""test_kill_tmaster.py"""
 import logging
 import subprocess
 import test_template
@@ -25,9 +25,9 @@ class TestKillTMaster(test_template.TestTemplate):
     restart_shard(self.params['cliPath'], self.params['cluster'],
                   self.params['topologyName'], TMASTER_SHARD)
 
-def restart_shard(heronCliPath, testCluster, topology_name, shardNum):
-  ''' restart tmaster '''
-  splitcmd = [heronCliPath, 'restart', '--verbose', testCluster, topology_name, str(shardNum)]
+def restart_shard(heron_cli_path, test_cluster, topology_name, shard_num):
+  """ restart tmaster """
+  splitcmd = [heron_cli_path, 'restart', '--verbose', test_cluster, topology_name, str(shard_num)]
 
   logging.info("Killing TMaster: %s", splitcmd)
   if subprocess.call(splitcmd) != 0:

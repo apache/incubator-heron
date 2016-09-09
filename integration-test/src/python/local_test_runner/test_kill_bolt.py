@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''test_kill_bolt.py'''
+"""test_kill_bolt.py"""
 import logging
 import test_template
 

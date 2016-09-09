@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''test_kill_stmgr_metricsmgr.py'''
+"""test_kill_stmgr_metricsmgr.py"""
 import test_template
 
 class TestKillStmgrMetricsMgr(test_template.TestTemplate):

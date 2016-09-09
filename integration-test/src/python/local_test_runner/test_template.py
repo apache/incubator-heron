@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' test_template.py '''
+""" test_template.py """
 import logging
 import os
 import time
@@ -132,9 +132,9 @@ class TestTemplate(object):
     """
     expected_result = ""
     actual_result = ""
-    retriesLeft = RETRY_COUNT
-    while retriesLeft > 0:
-      retriesLeft -= 1
+    retries_left = RETRY_COUNT
+    while retries_left > 0:
+      retries_left -= 1
       try:
         with open(self.params['readFile'], 'r') as f:
           expected_result = f.read()
@@ -148,12 +148,12 @@ class TestTemplate(object):
       # if we get expected result, no need to retry
       if expected_result == actual_result:
         break
-      if retriesLeft > 0:
+      if retries_left > 0:
         expected_result = ""
         actual_result = ""
         logging.info("Failed to get expected results for test %s (attempt %s/%s), "\
                      + "retrying after %s seconds",
-                     self.testname, RETRY_COUNT - retriesLeft, RETRY_COUNT, RETRY_INTERVAL)
+                     self.testname, RETRY_COUNT - retries_left, RETRY_COUNT, RETRY_INTERVAL)
         time.sleep(RETRY_INTERVAL)
 
     self.cleanup_test()
@@ -172,10 +172,10 @@ class TestTemplate(object):
 
   # pylint: disable=no-self-use
   def get_pid(self, processName, heronWorkingDirectory):
-    '''
+    """
     opens .pid file of process and reads the first and only line, which should be the process pid
     if fail, return -1
-    '''
+    """
     process_pid_file = os.path.join(heronWorkingDirectory, processName + '.pid')
     try:
       with open(process_pid_file, 'r') as f:
@@ -187,7 +187,7 @@ class TestTemplate(object):
 
   # pylint: disable=no-self-use
   def kill_process(self, process_number):
-    ''' kills process by running unix command kill '''
+    """ kills process by running unix command kill """
     if process_number < 1:
       raise RuntimeError(
         "Not attempting to kill process id < 1 passed to kill_process: %d" % process_number)
@@ -219,41 +219,26 @@ class TestTemplate(object):
 
 def _block_until_topology_running():
   # block until ./heron-stmgr exists
-  processList = _get_processes()
-  while not _process_exists(processList, HERON_STMGR_CMD):
-    processList = _get_processes()
+  process_list = _get_processes()
+  while not _process_exists(process_list, HERON_STMGR_CMD):
+    process_list = _get_processes()
 
-def _submit_topology(heronCliPath, testCluster, testJarPath, topologyClassPath,
-                     topology_name, inputFile, outputFile):
-  ''' Submit topology using heron-cli '''
+def _submit_topology(heron_cli_path, test_cluster, test_jar_path, topology_class_path,
+                     topology_name, input_file, output_file):
+  """ Submit topology using heron-cli """
   # unicode string messes up subprocess.call quotations, must change into string type
   splitcmd = [
-      '%s' % (heronCliPath),
-      'submit',
-      '--verbose',
-      '--',
-      '%s' % (testCluster),
-      '%s' % (testJarPath),
-      '%s' % (topologyClassPath),
-      '%s' % (topology_name),
-      '%s' % (inputFile),
-      '%s' % (outputFile),
-      '%d' % (len(TEST_INPUT))
+      heron_cli_path, 'submit', '--verbose', '--', test_cluster, test_jar_path,
+      topology_class_path, topology_name, input_file, output_file, str(len(TEST_INPUT))
   ]
   logging.info("Submitting topology: %s", splitcmd)
   p = subprocess.Popen(splitcmd)
   p.wait()
   logging.info("Submitted topology %s", topology_name)
 
-def _kill_topology(heronCliPath, testCluster, topology_name):
-  ''' Kill a topology using heron-cli '''
-  splitcmd = [
-      '%s' % (heronCliPath),
-      'kill',
-      '--verbose',
-      '%s' % (testCluster),
-      '%s' % (topology_name),
-  ]
+def _kill_topology(heron_cli_path, test_cluster, topology_name):
+  """ Kill a topology using heron-cli """
+  splitcmd = [heron_cli_path, 'kill', '--verbose', test_cluster, topology_name]
   logging.info("Killing topology: %s", splitcmd)
   # this call can be blocking, no need for subprocess
   if subprocess.call(splitcmd) != 0:
@@ -261,33 +246,33 @@ def _kill_topology(heronCliPath, testCluster, topology_name):
   logging.info("Successfully killed topology %s", topology_name)
 
 def _get_processes():
-  '''
+  """
   returns a list of process tuples (pid, cmd)
   This only applies only for local scheduler as it uses the ps command
   and assumes the topology will be running on different processes on same machine
-  '''
+  """
   # pylint: disable=fixme
   # TODO: if the submit fails before we get here (e.g., Topology already exists), this hangs
   processes = subprocess.check_output(['ps', '-o', 'pid,args'])
   processes = processes.split('\n')
   processes = processes[1:] # remove first line, which is name of columns
-  processList = []
+  process_list = []
   for process in processes:
     # remove empty lines
     if process == '':
       continue
     pretuple = process.split(' ', 1)
-    processList.append(ProcessTuple(pretuple[0], pretuple[1]))
-  return processList
+    process_list.append(ProcessTuple(pretuple[0], pretuple[1]))
+  return process_list
 
 def _sleep(message, seconds):
   logging.info("Sleeping for %d seconds %s", seconds, message)
   time.sleep(seconds)
 
-def _process_exists(processList, processCmd):
-  ''' check if a process is running '''
-  for process in processList:
-    if processCmd in process.cmd:
+def _process_exists(process_list, process_cmd):
+  """ check if a process is running """
+  for process in process_list:
+    if process_cmd in process.cmd:
       return True
   return False
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 #!/usr/bin/env python2.7
 
-''' main.py '''
+""" main.py """
 import getpass
 import json
 import logging
@@ -43,7 +43,7 @@ DEFAULT_TEST_CONF_FILE = "resources/test.conf"
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
 def run_all_tests(args):
-  ''' Run the test for each topology specified in the conf file '''
+  """ Run the test for each topology specified in the conf file """
   successes = []
   failures = []
   for testclass in TEST_CLASSES:
@@ -55,23 +55,23 @@ def run_all_tests(args):
       successes += [testname]
     else:
       failures += [testname]
-  return (successes, failures)
+  return successes, failures
 
 def main():
-  ''' main '''
+  """ main """
   root = logging.getLogger()
   root.setLevel(logging.DEBUG)
 
   # Read the configuration file from package
   conf_file = DEFAULT_TEST_CONF_FILE
-  confString = pkgutil.get_data(__name__, conf_file)
+  conf_string = pkgutil.get_data(__name__, conf_file)
   decoder = json.JSONDecoder(strict=False)
 
   # Convert the conf file to a json format
-  conf = decoder.decode(confString)
+  conf = decoder.decode(conf_string)
 
   # Get the directory of the heron root, which should be the directory that the script is run from
-  heronRepoDirectory = os.getcwd()
+  heron_repo_directory = os.getcwd()
 
   args = dict()
   home_directory = os.path.expanduser("~")
@@ -89,7 +89,7 @@ def main():
   args['cliPath'] = os.path.expanduser(conf['heronCliPath'])
   args['outputFile'] = os.path.join(args['workingDirectory'], conf['topology']['outputFile'])
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
-  args['testJarPath'] = os.path.join(heronRepoDirectory, conf['testJarPath'])
+  args['testJarPath'] = os.path.join(heron_repo_directory, conf['testJarPath'])
 
   start_time = time.time()
   (successes, failures) = run_all_tests(args)
