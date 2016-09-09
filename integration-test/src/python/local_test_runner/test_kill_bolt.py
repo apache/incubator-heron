@@ -24,5 +24,5 @@ class TestKillBolt(test_template.TestTemplate):
   def execute_test_case(self):
     logging.info("Executing kill bolt")
     bolt_pid = self.get_pid(
-      'container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT), self.params['workingDirectory'])
+        'container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT), self.params['workingDirectory'])
     self.kill_process(bolt_pid)

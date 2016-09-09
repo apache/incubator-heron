@@ -193,7 +193,7 @@ class TestTemplate(object):
     """ kills process by running unix command kill """
     if process_number < 1:
       raise RuntimeError(
-        "Not attempting to kill process id < 1 passed to kill_process: %d" % process_number)
+          "Not attempting to kill process id < 1 passed to kill_process: %d" % process_number)
 
     logging.info("Killing process number %s", process_number)
 
@@ -217,7 +217,7 @@ class TestTemplate(object):
   def kill_metricsmgr(self):
     logging.info("Executing kill metrics manager")
     metricsmgr_pid = self.get_pid(
-      '%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), self.params['workingDirectory'])
+        '%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), self.params['workingDirectory'])
     self.kill_process(metricsmgr_pid)
 
 def _block_until_topology_running():
