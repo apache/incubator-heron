@@ -347,6 +347,9 @@ public class FirstFitDecreasingPackingTest {
     Assert.assertEquals(3, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
         newPackingPlan.getInstanceCount());
+    AssertPacking.assertContainers(newPackingPlan.getContainers(),
+        BOLT_NAME, SPOUT_NAME,  instanceDefaultResources.getRam(),
+        instanceDefaultResources.getRam(), null);
   }
 
   /**
