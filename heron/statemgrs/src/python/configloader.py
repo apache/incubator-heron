@@ -26,7 +26,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
   with open(state_manager_config_file, 'r') as stream:
     config = yaml.load(stream)
 
-  home_dir = os.getenv('HOME')
+  home_dir = os.path.expanduser("~")
   wildcards = {
       "~" : home_dir,
       "${HOME}" : home_dir,
