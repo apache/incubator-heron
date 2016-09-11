@@ -94,7 +94,7 @@ public final class JavaCheckstyle {
   private static void checkStyle(String[] files, String config) throws IOException {
     if (files.length == 0) {
       LOG.fine("No java files found by checkstyle");
-      return ;
+      return;
     }
 
     LOG.fine(files.length + " java files found by checkstyle");
@@ -120,7 +120,8 @@ public final class JavaCheckstyle {
     ));
   }
 
-  private static String[] getSourceFiles(String extraActionFile, Predicate<String> predicate) {
+  private static String[] getSourceFiles(String extraActionFile,
+                                         Predicate<CharSequence> predicate) {
     ExtraActionInfo info = ExtraActionUtils.getExtraActionInfo(extraActionFile);
     JavaCompileInfo jInfo = info.getExtension(JavaCompileInfo.javaCompileInfo);
 
