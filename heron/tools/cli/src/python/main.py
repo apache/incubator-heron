@@ -31,6 +31,7 @@ import heron.tools.cli.src.python.deactivate as deactivate
 import heron.tools.cli.src.python.kill as kill
 import heron.tools.cli.src.python.restart as restart
 import heron.tools.cli.src.python.submit as submit
+import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
 
 Log = log.Log
@@ -84,6 +85,7 @@ def create_parser():
   kill.create_parser(subparsers)
   restart.create_parser(subparsers)
   submit.create_parser(subparsers)
+  update.create_parser(subparsers)
   version.create_parser(subparsers)
 
   return parser
@@ -105,6 +107,7 @@ def run(command, parser, command_args, unknown_args):
       'kill':kill,
       'restart':restart,
       'submit':submit,
+      'update':update,
       'help':cli_help,
       'version':version,
   }
