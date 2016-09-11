@@ -14,7 +14,9 @@
 
 package com.twitter.heron.packing.binpacking;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -64,6 +66,21 @@ public class FirstFitDecreasingPackingTest {
     return packing.pack();
   }
 
+  private static PackingPlan getFirstFitDecreasingPackingPlanRepack(
+      TopologyAPI.Topology topology,
+      PackingPlan currentPackingPlan,
+      Map<String, Integer> componentChanges) {
+    Config config = Config.newBuilder()
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .putAll(ClusterDefaults.getDefaults())
+        .build();
+
+    FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
+    packing.initialize(config, topology);
+    return packing.repack(currentPackingPlan, componentChanges);
+  }
+
   @Before
   public void setUp() {
     this.spoutParallelism = 4;
@@ -94,7 +111,7 @@ public class FirstFitDecreasingPackingTest {
     topologyConfig.setContainerMaxRamHint(containerRam);
 
     getFirstFitDecreasingPackingPlan(
-            getTopology(spoutParallelism, boltParallelism, topologyConfig));
+        getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
   /**
@@ -106,6 +123,8 @@ public class FirstFitDecreasingPackingTest {
 
     Assert.assertEquals(2, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+    AssertPacking.assertContainerRam(packingPlan.getContainers(),
+        4 * instanceDefaultResources.getRam());
   }
 
   /**
@@ -114,6 +133,7 @@ public class FirstFitDecreasingPackingTest {
   @Test
   public void testDefaultContainerSizeWithPadding() throws Exception {
     int padding = 50;
+    int defaultNumInstancesperContainer = 4;
 
     topologyConfig.setContainerPaddingPercentage(padding);
     TopologyAPI.Topology newTopology =
@@ -122,6 +142,8 @@ public class FirstFitDecreasingPackingTest {
 
     Assert.assertEquals(2, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+    AssertPacking.assertContainerRam(packingPlan.getContainers(),
+        defaultNumInstancesperContainer * instanceDefaultResources.getRam());
   }
 
   /**
@@ -150,17 +172,17 @@ public class FirstFitDecreasingPackingTest {
         : packingPlanExplicitResourcesConfig.getContainers()) {
       Assert.assertEquals(Math.round(totalInstances * instanceDefaultResources.getCpu()
               + (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances
-                 * instanceDefaultResources.getCpu())),
+              * instanceDefaultResources.getCpu())),
           (long) containerPlan.getResource().getCpu());
 
       Assert.assertEquals(totalInstances * instanceDefaultResources.getRam()
               + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances
-                        * instanceDefaultResources.getRam()),
+              * instanceDefaultResources.getRam()),
           containerPlan.getResource().getRam());
 
       Assert.assertEquals(totalInstances * instanceDefaultResources.getDisk()
               + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances
-                        * instanceDefaultResources.getDisk()),
+              * instanceDefaultResources.getDisk()),
           containerPlan.getResource().getDisk());
 
       // All instances' resource requirement should be equal
@@ -205,6 +227,8 @@ public class FirstFitDecreasingPackingTest {
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
     AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, maxContainerRam);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        maxContainerRam);
   }
 
   /**
@@ -232,6 +256,8 @@ public class FirstFitDecreasingPackingTest {
 
     AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, maxContainerRam);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        maxContainerRam);
   }
 
   /**
@@ -258,6 +284,8 @@ public class FirstFitDecreasingPackingTest {
 
     AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), maxContainerRam);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        maxContainerRam);
   }
 
   /**
@@ -285,6 +313,8 @@ public class FirstFitDecreasingPackingTest {
 
     AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        maxContainerRam);
   }
 
   /**
@@ -293,6 +323,7 @@ public class FirstFitDecreasingPackingTest {
   @Test(expected = RuntimeException.class)
   public void testInvalidRamInstance() throws Exception {
     long maxContainerRam = 10L * Constants.GB;
+    int defaultNumInstancesperContainer = 4;
 
     // Explicit set component ram map
     long boltRam = 0L * Constants.GB;
@@ -305,5 +336,80 @@ public class FirstFitDecreasingPackingTest {
     PackingPlan packingPlanExplicitRamMap =
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        defaultNumInstancesperContainer * instanceDefaultResources.getRam());
+  }
+
+  /**
+   * Test the scenario where the max container size is the default
+   * and scaling is requested.
+   */
+  @Test
+  public void testDefaultContainerSizeRepack() throws Exception {
+    int defaultNumInstancesperContainer = 4;
+
+    topologyConfig.setComponentRam(BOLT_NAME, instanceDefaultResources.getRam());
+    topologyConfig.setComponentRam(SPOUT_NAME, instanceDefaultResources.getRam());
+
+    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
+
+    Assert.assertEquals(packingPlan.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+
+    int numScalingInstances = 3;
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(BOLT_NAME, numScalingInstances);
+    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(topology, packingPlan,
+        componentChanges);
+
+    Assert.assertEquals(3, newPackingPlan.getContainers().size());
+    Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
+        newPackingPlan.getInstanceCount());
+    AssertPacking.assertContainers(newPackingPlan.getContainers(),
+        BOLT_NAME, SPOUT_NAME, instanceDefaultResources.getRam(),
+        instanceDefaultResources.getRam(), null);
+    AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
+        defaultNumInstancesperContainer * instanceDefaultResources.getRam());
+
+  }
+
+  /**
+   * Test the scenario ram map config is partially set and scaling is requested
+   */
+  @Test
+  public void testPartialRamMapScaling() throws Exception {
+    // Explicit set resources for container
+    long maxContainerRam = 10L * Constants.GB;
+
+    // Explicit set component ram map
+    long boltRam = 4L * Constants.GB;
+
+    topologyConfig.setContainerMaxRamHint(maxContainerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap =
+        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+
+    Assert.assertEquals(2, packingPlanExplicitRamMap.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
+
+    int numScalingInstances = 3;
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(BOLT_NAME, numScalingInstances);
+    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(topologyExplicitRamMap,
+        packingPlanExplicitRamMap,
+        componentChanges);
+
+    Assert.assertEquals(4, newPackingPlan.getContainers().size());
+    Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
+        newPackingPlan.getInstanceCount());
+    AssertPacking.assertContainers(newPackingPlan.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
+    AssertPacking.assertContainerRam(newPackingPlan.getContainers(), maxContainerRam);
   }
 }
