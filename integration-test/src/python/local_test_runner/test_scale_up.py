@@ -31,25 +31,19 @@ class TestScaleUp(test_template.TestTemplate):
     response = urllib.urlopen(url)
     physical_plan_json = json.loads(response.read())
     expected_instance_count = 5
-    def assert_scaling():
-      if 'result' not in physical_plan_json:
-        logging.error("Could not find result json in physical plan request to tracker: %s", url)
-        return False
 
-      instances = physical_plan_json['result']['instances']
-      instance_count = len(instances)
-      if instance_count != expected_instance_count:
-        logging.error("Found %s instances but expected %s: %s",
-                      instance_count, expected_instance_count, instances)
-        return False
+    if 'result' not in physical_plan_json:
+      logging.error("Could not find result json in physical plan request to tracker: %s", url)
+      return False
 
-      return True
+    instances = physical_plan_json['result']['instances']
+    instance_count = len(instances)
+    if instance_count != expected_instance_count:
+      logging.error("Found %s instances but expected %s: %s",
+                    instance_count, expected_instance_count, instances)
+      return False
 
-    scaling_asserted = assert_scaling()
-    if not scaling_asserted:
-      self.cleanup_test()
-
-    return scaling_asserted
+    return True
 
 def scale_up(heron_cli_path, test_cluster, topology_name):
   splitcmd = [
