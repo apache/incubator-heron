@@ -21,6 +21,7 @@ import heron.tools.common.src.python.utils.config as config
 import argparse
 import logging
 import re
+import traceback
 
 def create_parser(subparsers):
   """ Create the parse for the update command """
@@ -89,8 +90,7 @@ def run(command, parser, cl_args, unknown_args):
     )
 
   except Exception as ex:
-    print 'Error: %s' % str(ex)
-    Log.error('Failed to update topology \'%s\'' % topology_name)
+    Log.error('Failed to update topology \'%s\': %s', topology_name, traceback.format_exc(ex))
     return False
 
   Log.info('Successfully updated topology \'%s\'' % topology_name)
