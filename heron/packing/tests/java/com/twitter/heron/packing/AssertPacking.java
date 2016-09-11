@@ -58,4 +58,15 @@ public final class AssertPacking {
     Assert.assertTrue("Bolt not found in any of the container plans: " + boltName, boltFound);
     Assert.assertTrue("Spout not found in any of the container plans: " + spoutName, spoutFound);
   }
+
+  public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
+                                        long maxRamforResources) {
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      long containerRam = 0;
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        containerRam += instancePlan.getResource().getRam();
+      }
+      Assert.assertTrue(containerRam <= maxRamforResources);
+    }
+  }
 }

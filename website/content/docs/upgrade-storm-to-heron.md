@@ -23,8 +23,8 @@ Once the script is downloaded, run it while setting the `--user` and
 `--maven` flags:
 
 ```bash
-$ chmod +x heron-api-install-0.14.2-PLATFORM.sh
-$ ./heron-api-install-0.14.2-PLATFORM.sh --user --maven
+$ chmod +x heron-api-install-{{% heronVersion %}}-PLATFORM.sh
+$ ./heron-api-install-{{% heronVersion %}}-PLATFORM.sh --user --maven
 Heron API installer
 -------------------
 
@@ -36,12 +36,12 @@ Heron API is now installed!
 
 See http://heronstreaming.io/docs/getting-started for how to use Heron.
 
-heron.build.version : '0.14.2'
-heron.build.time : Sat Aug  6 12:35:47 PDT 2016
-heron.build.timestamp : 1470512147000
+heron.build.version : '{{% heronVersion %}}'
+heron.build.time : ...
+heron.build.timestamp : ...
 heron.build.host : ${HOSTNAME}
 heron.build.user : ${USERNAME}
-heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
+heron.build.git.revision : ...
 heron.build.git.status : Clean
 ```
 
