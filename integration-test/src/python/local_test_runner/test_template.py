@@ -174,12 +174,12 @@ class TestTemplate(object):
       return False
 
   # pylint: disable=no-self-use
-  def get_pid(self, processName, heronWorkingDirectory):
+  def get_pid(self, process_name, heron_working_directory):
     """
     opens .pid file of process and reads the first and only line, which should be the process pid
     if fail, return -1
     """
-    process_pid_file = os.path.join(heronWorkingDirectory, processName + '.pid')
+    process_pid_file = os.path.join(heron_working_directory, process_name + '.pid')
     try:
       with open(process_pid_file, 'r') as f:
         pid = f.readline()
