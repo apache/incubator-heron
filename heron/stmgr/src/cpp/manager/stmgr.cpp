@@ -431,9 +431,9 @@ void StMgr::PopulateStreamConsumers(
       std::pair<sp_string, sp_string> p = make_pair(is.stream().component_name(), is.stream().id());
       proto::api::StreamSchema* schema = schema_map[p];
       const sp_string& component_name = _topology->bolts(i).comp().name();
-      CHECK(_component_to_task_ids.find(component_name) != _component_to_task_ids.end());
-      const std::vector<sp_int32>& component_task_ids =
-          _component_to_task_ids.find(component_name)->second;
+      auto iter = _component_to_task_ids.find(component_name);
+      CHECK(iter != _component_to_task_ids.end());
+      const std::vector<sp_int32>& component_task_ids = iter->second;
       if (stream_consumers_.find(p) == stream_consumers_.end()) {
         stream_consumers_[p] = new StreamConsumers(is, *schema, component_task_ids);
       } else {
@@ -552,8 +552,9 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
     proto::system::HeronDataTupleSet2* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =
         make_pair(d->stream().component_name(), d->stream().id());
-    if (stream_consumers_.find(stream) != stream_consumers_.end()) {
-      StreamConsumers* s_consumer = stream_consumers_.find(stream)->second;
+    auto s = stream_consumers_.find(stream);
+    if (s != stream_consumers_.end()) {
+      StreamConsumers* s_consumer = s->second;
 
       // 1. only shuffle grouping
       // 2. no acking

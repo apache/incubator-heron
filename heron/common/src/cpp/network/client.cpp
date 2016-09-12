@@ -89,8 +89,9 @@ void Client::HandleClose_Base(NetworkErrorCode _status) { HandleClose(_status); 
 void Client::Init() { message_rid_gen_ = new REQID_Generator(); }
 
 void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
-  CHECK(requestResponseMap_.find(_request->GetTypeName()) != requestResponseMap_.end());
-  const sp_string& _expected_response_type = requestResponseMap_[_request->GetTypeName()];
+  auto iter = requestResponseMap_.find(_request->GetTypeName());
+  CHECK(iter != requestResponseMap_.end());
+  const sp_string& _expected_response_type = iter->second;
   if (state_ != CONNECTED) {
     delete _request;
     responseHandlers[_expected_response_type](NULL, WRITE_ERROR);

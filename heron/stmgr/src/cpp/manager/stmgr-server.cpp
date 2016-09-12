@@ -564,8 +564,9 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
     release(_message);
     return;
   }
-  CHECK(rstmgrs_.find(_conn) != rstmgrs_.end());
-  sp_string stmgr_id = rstmgrs_.find(_conn)->second;
+  auto iter = rstmgrs_.find(_conn);
+  CHECK(iter != rstmgrs_.end());
+  sp_string stmgr_id = iter->second;
   stmgrs_who_announced_back_pressure_.insert(stmgr_id);
 
   StartBackPressureOnSpouts();
@@ -584,8 +585,9 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
     release(_message);
     return;
   }
-  CHECK(rstmgrs_.find(_conn) != rstmgrs_.end());
-  sp_string stmgr_id = rstmgrs_.find(_conn)->second;
+  auto iter = rstmgrs_.find(_conn);
+  CHECK(iter != rstmgrs_.end());
+  sp_string stmgr_id = iter->second;
   // Did we receive a start back pressure message from this stmgr to
   // begin with? We could have been dead at the time of the announcement
   if (stmgrs_who_announced_back_pressure_.find(stmgr_id) !=
