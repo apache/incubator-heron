@@ -27,7 +27,6 @@ ADD artifacts /heron
 WORKDIR /heron
 
 #run heron installers
-RUN /heron/heron-tools-install-*-ubuntu16.04.sh && \
-    /heron/heron-client-install-*-ubuntu16.04.sh && \
+RUN /heron/heron-client-install-*-ubuntu16.04.sh && \
     /heron/heron-tools-install-*-ubuntu16.04.sh
 
