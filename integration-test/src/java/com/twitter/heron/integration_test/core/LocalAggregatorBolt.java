@@ -50,9 +50,11 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
   public void prepare(Map<String, Object> map,
                       TopologyContext topologyContext,
                       OutputCollector outputCollector) {
+    LOG.info("Preparing to write tuples to file: " + localFilePath);
     try {
       File outputFile = new File(localFilePath);
       if (!outputFile.exists()) {
+        LOG.info("Creating new file to write tuples to: " + localFilePath);
         outputFile.createNewFile();
       }
       bw = new BufferedWriter(
@@ -76,6 +78,7 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
   public void execute(Tuple tuple) {
     try {
       String data = tuple.getString(0);
+      LOG.info("Write tuple date to output file: " + data);
       bw.write(data);
       bw.newLine();
     } catch (IOException e) {

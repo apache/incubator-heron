@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
@@ -38,6 +39,8 @@ import com.twitter.heron.api.tuple.Values;
  */
 public class PausedLocalFileSpout extends BaseRichSpout {
   private static final long serialVersionUID = 7233454257997083024L;
+  private static final Logger LOG = Logger.getLogger(PausedLocalFileSpout.class.getName());
+
   private BufferedReader br = null;
   private SpoutOutputCollector collector;
   private String[] paths;
@@ -75,6 +78,7 @@ public class PausedLocalFileSpout extends BaseRichSpout {
       // busy loop until file is created. Don't throw any exceptions
     }
     try {
+      LOG.info("Creating reader for input data from file " + file.getAbsolutePath());
       // read from local file
       br = new BufferedReader(
           new FileReader(file),
@@ -117,6 +121,7 @@ public class PausedLocalFileSpout extends BaseRichSpout {
       // if at EoF, do not close buffered reader. Instead, keep polling from file until there is
       // more content, and do not emit anything if data is null
       if ((currentLine = br.readLine()) != null) {
+        LOG.info("Emitting tuple from input data file: " + currentLine);
         collector.emit(new Values(currentLine), "MESSAGE_ID");
       }
     } catch (IOException e) {
