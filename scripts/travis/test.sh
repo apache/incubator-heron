@@ -23,6 +23,12 @@ start_timer "$T"
 python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=ubuntu -- scripts/packages:heron-client-install.sh --user
 end_timer "$T"
 
+# install tools
+T="heron tools install"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=ubuntu -- scripts/packages:heron-tools-install.sh --user
+end_timer "$T"
+
 # run local integration test
 T="heron integration-test local"
 start_timer "$T"
