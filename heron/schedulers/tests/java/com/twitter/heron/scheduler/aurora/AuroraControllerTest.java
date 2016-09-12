@@ -16,9 +16,12 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,6 +32,9 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.utils.PackingTestUtils;
+
 public class AuroraControllerTest {
   private static final String JOB_NAME = "jobName";
   private static final String CLUSTER = "cluster";
@@ -36,6 +42,7 @@ public class AuroraControllerTest {
   private static final String ENV = "gz";
   private static final String VERBOSE_CONFIG = "--verbose";
   private static final String BATCH_CONFIG = "--batch-size";
+  private static final String JOB_SPEC = String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME);
   private static final boolean IS_VERBOSE = true;
 
   private AuroraController controller;
@@ -62,10 +69,8 @@ public class AuroraControllerTest {
   public void testCreateJob() throws Exception {
     String auroraFilename = "file.aurora";
     Map<String, String> bindings = new HashMap<>();
-    List<String> expectedCommand =
-        new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING",
-            String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME),
-            auroraFilename, VERBOSE_CONFIG));
+    List<String> expectedCommand = asList("aurora job create --wait-until RUNNING %s %s %s",
+            JOB_SPEC, auroraFilename, VERBOSE_CONFIG);
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
@@ -80,10 +85,8 @@ public class AuroraControllerTest {
 
   @Test
   public void testKillJob() throws Exception {
-    List<String> expectedCommand =
-        new ArrayList<>(Arrays.asList("aurora", "job", "killall",
-            String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME),
-            VERBOSE_CONFIG, BATCH_CONFIG, Integer.toString(Integer.MAX_VALUE)));
+    List<String> expectedCommand = asList("aurora job killall %s %s %s %d",
+        JOB_SPEC, VERBOSE_CONFIG, BATCH_CONFIG, Integer.MAX_VALUE);
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
@@ -99,10 +102,8 @@ public class AuroraControllerTest {
   @Test
   public void testRestartJob() throws Exception {
     int containerId = 1;
-    List<String> expectedCommand =
-        new ArrayList<>(Arrays.asList("aurora", "job", "restart",
-            String.format("%s/%s/%s/%s/%d", CLUSTER, ROLE, ENV, JOB_NAME, containerId),
-            VERBOSE_CONFIG, BATCH_CONFIG, Integer.toString(Integer.MAX_VALUE)));
+    List<String> expectedCommand = asList("aurora job restart %s/%s %s %s %d",
+        JOB_SPEC, containerId, VERBOSE_CONFIG, BATCH_CONFIG, Integer.MAX_VALUE);
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
@@ -113,5 +114,39 @@ public class AuroraControllerTest {
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertTrue(controller.restartJob(containerId));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
+  }
+
+  @Test
+  public void testRemoveContainers() {
+    class ContainerPlanComparator implements Comparator<PackingPlan.ContainerPlan> {
+      @Override
+      public int compare(PackingPlan.ContainerPlan o1, PackingPlan.ContainerPlan o2) {
+        return ((Integer) o1.getId()).compareTo(o2.getId());
+      }
+    }
+    SortedSet<PackingPlan.ContainerPlan> containers = new TreeSet<>(new ContainerPlanComparator());
+    containers.add(PackingTestUtils.testContainerPlan(3));
+    containers.add(PackingTestUtils.testContainerPlan(5));
+
+    List<String> expectedCommand = asList("aurora job kill %s/3,5", JOB_SPEC);
+
+    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
+    controller.removeContainers(containers);
+    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+  }
+
+  @Test
+  public void testAddContainers() {
+    Integer containersToAdd = 3;
+    List<String> expectedCommand = asList(
+        "aurora job add --wait-until RUNNING %s/0 %s", JOB_SPEC, containersToAdd.toString());
+
+    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
+    controller.addContainers(containersToAdd);
+    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+  }
+
+  private static List<String> asList(String command, Object... values) {
+    return new ArrayList<>(Arrays.asList(String.format(command, values).split(" ")));
   }
 }

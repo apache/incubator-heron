@@ -18,15 +18,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
  * This file defines Utils methods used by Aurora
  */
 class AuroraController {
+  private static final Logger LOG = Logger.getLogger(AuroraController.class.getName());
+
   private final String jobSpec;
   private final boolean isVerbose;
 
@@ -84,12 +89,46 @@ class AuroraController {
     return runProcess(auroraCmd);
   }
 
+  void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
+    String instancesToKill = getInstancesIdsToKill(containersToRemove);
+    //aurora job kill <cluster>/<role>/<env>/<name>/<instance_ids>
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList(
+        "aurora", "job", "kill", jobSpec + "/" + instancesToKill));
+    LOG.info(String.format(
+        "Killing %s aurora containers: %s", containersToRemove.size(), auroraCmd));
+    if (!runProcess(auroraCmd)) {
+      throw new RuntimeException("Failed to kill freed aurora instances: " + instancesToKill);
+    }
+  }
+
+  void addContainers(Integer count) {
+    //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
+    //clone instance 0
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList(
+        "aurora", "job", "add", "--wait-until", "RUNNING", jobSpec + "/0", count.toString()));
+    LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
+    if (!runProcess(auroraCmd)) {
+      throw new RuntimeException("Failed to create " + count + " new aurora instances");
+    }
+  }
+
   // Utils method for unit tests
   @VisibleForTesting
   boolean runProcess(List<String> auroraCmd) {
     return 0 == ShellUtils.runProcess(
         isVerbose, auroraCmd.toArray(new String[auroraCmd.size()]),
         new StringBuilder(), new StringBuilder());
+  }
+
+  private static String getInstancesIdsToKill(Set<PackingPlan.ContainerPlan> containersToRemove) {
+    StringBuilder ids = new StringBuilder();
+    for (PackingPlan.ContainerPlan containerPlan : containersToRemove) {
+      if (ids.length() > 0) {
+        ids.append(",");
+      }
+      ids.append(containerPlan.getId());
+    }
+    return ids.toString();
   }
 
   // Static method to append verbose and batching options if needed
