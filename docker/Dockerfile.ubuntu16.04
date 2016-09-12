@@ -1,0 +1,41 @@
+FROM ubuntu:16.04
+
+# This is passed to the heron build command via the --config flag
+ENV TARGET_PLATFORM ubuntu
+ENV bazelVersion 0.2.3
+
+RUN apt-get update && apt-get -y install \
+      automake \
+      build-essential \
+      cmake \
+      curl \
+      libssl-dev \
+      git \
+      libtool \
+      libunwind8 \
+      libunwind-setjmp0-dev \
+      python \
+      python2.7-dev \
+      python-software-properties \
+      software-properties-common \
+      python-setuptools \
+      zip \
+      unzip \
+      wget
+
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /var/cache/oracle-jdk8-installer
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
+      && chmod +x /tmp/bazel.sh \
+      && /tmp/bazel.sh
+
+ADD bazelrc /root/.bazelrc
+ADD compile-platform.sh /compile-platform.sh
+
