@@ -359,8 +359,8 @@ public class FirstFitDecreasingPackingTest {
     int numScalingInstances = 3;
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(BOLT_NAME, numScalingInstances);
-    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(topology, packingPlan,
-        componentChanges);
+    PackingPlan newPackingPlan =
+        getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
 
     Assert.assertEquals(3, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
@@ -370,7 +370,6 @@ public class FirstFitDecreasingPackingTest {
         instanceDefaultResources.getRam(), null);
     AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
         defaultNumInstancesperContainer * instanceDefaultResources.getRam());
-
   }
 
   /**
@@ -401,9 +400,8 @@ public class FirstFitDecreasingPackingTest {
     int numScalingInstances = 3;
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(BOLT_NAME, numScalingInstances);
-    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(topologyExplicitRamMap,
-        packingPlanExplicitRamMap,
-        componentChanges);
+    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(
+        topologyExplicitRamMap, packingPlanExplicitRamMap, componentChanges);
 
     Assert.assertEquals(4, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
