@@ -20,6 +20,8 @@ import logging
 import os
 import pkgutil
 import time
+import socket
+import subprocess
 import sys
 from collections import namedtuple
 
@@ -28,12 +30,14 @@ import test_kill_metricsmgr
 import test_kill_stmgr
 import test_kill_stmgr_metricsmgr
 import test_kill_tmaster
+import test_scale_up
 
 TEST_CLASSES = [
     test_kill_tmaster.TestKillTMaster,
     test_kill_stmgr.TestKillStmgr,
     test_kill_metricsmgr.TestKillMetricsMgr,
     test_kill_stmgr_metricsmgr.TestKillStmgrMetricsMgr,
+    test_scale_up.TestScaleUp,
     # test_kill_bolt.TestKillBolt,
 ]
 
@@ -46,16 +50,40 @@ def run_all_tests(args):
   """ Run the test for each topology specified in the conf file """
   successes = []
   failures = []
-  for testclass in TEST_CLASSES:
-    testname = testclass.__name__
-    logging.info("==== Starting test %s of %s: %s ====",
-                 len(successes) + len(failures) + 1, len(TEST_CLASSES), testname)
-    template = testclass(testname, args)
-    if template.run_test(): # testcase passed
-      successes += [testname]
-    else:
-      failures += [testname]
+  tracker_process = _start_tracker(args['trackerPath'], args['trackerPort'])
+
+  try:
+    for testclass in TEST_CLASSES:
+      testname = testclass.__name__
+      logging.info("==== Starting test %s of %s: %s ====",
+                   len(successes) + len(failures) + 1, len(TEST_CLASSES), testname)
+      template = testclass(testname, args)
+      if template.run_test(): # testcase passed
+        successes += [testname]
+      else:
+        failures += [testname]
+  except Exception as e:
+    logging.error("Exception thrown while running tests: %s", str(e))
+  finally:
+    tracker_process.kill()
+
   return successes, failures
+
+def _start_tracker(tracker_path, tracker_port):
+  splitcmd = [tracker_path, '--verbose', '--port=%s' % tracker_port]
+
+  logging.info("Starting heron tracker: %s", splitcmd)
+  popen = subprocess.Popen(splitcmd)
+  logging.info("Successfully started heron tracker on port %s", tracker_port)
+  return popen
+
+def _random_port():
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.bind(("", 0))
+  s.listen(1)
+  port = s.getsockname()[1]
+  s.close()
+  return port
 
 def main():
   """ main """
@@ -87,6 +115,8 @@ def main():
       args['topologyName']
   )
   args['cliPath'] = os.path.expanduser(conf['heronCliPath'])
+  args['trackerPath'] = os.path.expanduser(conf['heronTrackerPath'])
+  args['trackerPort'] = _random_port()
   args['outputFile'] = os.path.join(args['workingDirectory'], conf['topology']['outputFile'])
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
   args['testJarPath'] = os.path.join(heron_repo_directory, conf['testJarPath'])
