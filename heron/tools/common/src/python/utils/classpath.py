@@ -23,8 +23,8 @@ def valid_path(path):
   '''
   # check if the suffic of classpath suffix exists as directory
   if path.endswith('*'):
-    Log.debug('Checking classpath entry suffix as directory: %s', path[-1])
-    if os.path.isdir(path[-1]):
+    Log.debug('Checking classpath entry suffix as directory: %s', path[:-1])
+    if os.path.isdir(path[:-1]):
       return True
     return False
 
