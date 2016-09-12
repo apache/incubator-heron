@@ -115,13 +115,11 @@ public final class PackingUtils {
         double instanceCpu = instanceDefaults.getCpu();
         containerCpu += instanceCpu;
 
-        Resource resource =
-            new Resource(instanceCpu, instanceRam, instanceDisk);
         PackingPlan.InstancePlan instancePlan =
             new PackingPlan.InstancePlan(
                 instanceId,
                 getComponentName(instanceId),
-                resource);
+                new Resource(instanceCpu, instanceRam, instanceDisk));
         // Insert it into the map
         instancePlans.add(instancePlan);
       }
@@ -142,6 +140,11 @@ public final class PackingUtils {
     return containerPlans;
   }
 
+  // TODO: The instanceId string is actually assumed to be the specific format shown below, which
+  // should not be the case. For example, if instanceIds are generated with reused instanceIdx
+  // values, tuples can be mis-routed. Instead of loading the instance id with delimited tokens
+  // with hidden meaning and consequences, we should promote these concepts into the InstancePlan
+  // object as first-class concepts that are properly typed.
   public static String getInstanceId(
       int containerIdx, String componentName, int instanceIdx, int componentIdx) {
     return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
@@ -149,5 +152,9 @@ public final class PackingUtils {
 
   public static String getComponentName(String instanceId) {
     return instanceId.split(":")[1];
+  }
+
+  public static Integer getGlobalInstanceIndex(String instanceId) {
+    return Integer.parseInt(instanceId.split(":")[2]);
   }
 }

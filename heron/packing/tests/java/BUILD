@@ -36,6 +36,7 @@ java_library(
         ["com/twitter/heron/packing/*.java"]
     ),
     deps = [
+        "//heron/packing/src/java:roundrobin-packing",
         "//heron/spi/src/java:packing-spi-java",
         "//third_party/java:junit4",
     ],

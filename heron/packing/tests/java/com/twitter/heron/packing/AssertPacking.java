@@ -13,6 +13,9 @@
 // limitations under the License.
 package com.twitter.heron.packing;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -38,6 +41,9 @@ public final class AssertPacking {
                                       Long notExpectedContainerRam) {
     boolean boltFound = false;
     boolean spoutFound = false;
+    List<Integer> expectedInstanceIndecies = new ArrayList<>();
+    List<Integer> foundInstanceIndecies = new ArrayList<>();
+    int expectedInstanceIndex = 1;
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
@@ -45,6 +51,8 @@ public final class AssertPacking {
             notExpectedContainerRam, (Long) containerPlan.getResource().getRam());
       }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        expectedInstanceIndecies.add(expectedInstanceIndex++);
+        foundInstanceIndecies.add(PackingUtils.getGlobalInstanceIndex(instancePlan.getId()));
         if (instancePlan.getComponentName().equals(boltName)) {
           Assert.assertEquals(expectedBoltRam, instancePlan.getResource().getRam());
           boltFound = true;
@@ -57,6 +65,10 @@ public final class AssertPacking {
     }
     Assert.assertTrue("Bolt not found in any of the container plans: " + boltName, boltFound);
     Assert.assertTrue("Spout not found in any of the container plans: " + spoutName, spoutFound);
+
+    Collections.sort(foundInstanceIndecies);
+    Assert.assertEquals("Unexpected instance global id set found.",
+        expectedInstanceIndecies, foundInstanceIndecies);
   }
 
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
