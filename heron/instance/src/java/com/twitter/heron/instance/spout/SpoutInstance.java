@@ -261,8 +261,8 @@ public class SpoutInstance implements IInstance {
     // We would reuse the System.nanoTime()
     long currentTime = startOfCycle;
 
-    while (!ackEnabled ||
-        (ackEnabled && (maxSpoutPending > collector.numInFlight()))) {
+    while (!ackEnabled
+        || (ackEnabled && (maxSpoutPending > collector.numInFlight()))) {
       // Delegate to the use defined spout
       spout.nextTuple();
 

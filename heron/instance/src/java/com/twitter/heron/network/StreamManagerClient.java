@@ -216,9 +216,6 @@ public class StreamManagerClient extends HeronClient {
     }
   }
 
-  HeronTuples.HeronDataTupleSet2.Builder dataBuilder =
-      HeronTuples.HeronDataTupleSet2.newBuilder();
-
   private void sendStreamMessageIfNeeded() {
     if (isStreamMgrReadyReceiveTuples()) {
       if (getOutstandingPackets() <= 0) {
