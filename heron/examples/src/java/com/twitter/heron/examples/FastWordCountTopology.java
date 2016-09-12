@@ -108,12 +108,12 @@ public class FastWordCountTopology {
         count = 0;
       count++;
       counts.put(word, count);
-//      collector.emit(new Values(word, count));
+      collector.emit(new Values(word, count));
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-//      declarer.declare(new Fields("word", "count"));
+      declarer.declare(new Fields("word", "count"));
     }
   }
 
@@ -123,10 +123,11 @@ public class FastWordCountTopology {
 
     builder.setSpout("spout", new FastRandomSentenceSpout(), 1);
 
-    builder.setBolt("split", new SplitSentence(), 4).shuffleGrouping("spout");
-    builder.setBolt("count", new WordCount(), 4).fieldsGrouping("split", new Fields("word"));
+    builder.setBolt("split", new SplitSentence(), 2).shuffleGrouping("spout");
+    builder.setBolt("count", new WordCount(), 1).fieldsGrouping("split", new Fields("word"));
 
     Config conf = new Config();
+    conf.setComponentRam("split", 2L * 1024 * 1024 * 1024);
 
     String name = "wc-test";
     if (args != null && args.length > 0) {

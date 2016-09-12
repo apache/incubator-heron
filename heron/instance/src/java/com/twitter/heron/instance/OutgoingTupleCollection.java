@@ -151,8 +151,6 @@ public class OutgoingTupleCollection {
                                 Communicator<HeronTuples.HeronTupleSet> out) {
     // The Communicator has un-bounded capacity so the offer will always be successful
     out.offer(bldr.build());
-//    System.out.println("Sleep. Not to produce more tuples");
-//    Utils.sleep(3600 * 1000);
   }
 
   // Return true we could offer item to outQueue

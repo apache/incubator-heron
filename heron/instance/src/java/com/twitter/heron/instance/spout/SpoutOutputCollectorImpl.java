@@ -194,16 +194,10 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
   /////////////////////////////////////////////////////////
 
   private List<Integer> admitSpoutTuple(String streamId, List<Object> tuple, Object messageId) {
-    // First check whether this tuple is sane
-//    helper.checkOutputSchema(streamId, tuple);
-
-    // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
-    // TODO(mfu): FIX it
-    List<Integer> customGroupingTargetTaskIds =
-        helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
-//
-//    // Invoke user-defined emit task hook
-//    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
+    // No need to send tuples if it is already terminated
+    if (helper.isTerminatedComponent()) {
+      return null;
+    }
 
     // Start construct the data tuple
     HeronTuples.HeronDataTuple.Builder bldr = HeronTuples.HeronDataTuple.newBuilder();
@@ -211,13 +205,20 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     // set the key. This is mostly ignored
     bldr.setKey(0);
 
-    // TODO(mfu): FIX IT
-    if (customGroupingTargetTaskIds != null) {
-      // It is a CustomStreamGrouping
-      for (Integer taskId : customGroupingTargetTaskIds) {
-        bldr.addDestTaskIds(taskId);
+    // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
+    List<Integer> customGroupingTargetTaskIds = null;
+    if (!helper.isCustomGroupingEmpty()) {
+      customGroupingTargetTaskIds =
+          helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
+
+      if (customGroupingTargetTaskIds != null) {
+        // It is a CustomStreamGrouping
+        bldr.addAllDestTaskIds(customGroupingTargetTaskIds);
       }
     }
+
+    // Invoke user-defined emit task hook
+    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
 
     if (messageId != null) {
       RootTupleInfo tupleInfo = new RootTupleInfo(streamId, messageId);
@@ -232,8 +233,6 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
     long tupleSizeInBytes = 0;
 
-    long startTime = System.nanoTime();
-
     // Serialize it
     for (Object obj : tuple) {
       byte[] b = serializer.serialize(obj);
@@ -242,13 +241,10 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
       tupleSizeInBytes += b.length;
     }
 
-//    long latency = System.nanoTime() - startTime;
-//    spoutMetrics.serializeDataTuple(streamId, latency);
-
     // submit to outputter
     outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
     totalTuplesEmitted++;
-//    spoutMetrics.emittedTuple(streamId);
+    spoutMetrics.emittedTuple(streamId);
 
     // TODO:- remove this after changing the api
     return null;
