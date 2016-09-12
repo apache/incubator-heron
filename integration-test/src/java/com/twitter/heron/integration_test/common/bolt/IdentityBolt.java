@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.common.bolt;
 
+import java.util.logging.Logger;
+
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
@@ -21,6 +23,7 @@ import com.twitter.heron.api.tuple.Tuple;
 
 public class IdentityBolt extends BaseBasicBolt {
   private static final long serialVersionUID = 2167298598594517481L;
+  private static final Logger LOG = Logger.getLogger(IdentityBolt.class.getName());
   private Fields fields;
 
   public IdentityBolt(Fields fields) {
@@ -29,6 +32,14 @@ public class IdentityBolt extends BaseBasicBolt {
 
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
+    StringBuilder sb = new StringBuilder();
+    for (Object o : input.getValues()) {
+      if (sb.length() > 0) {
+        sb.append(",");
+      }
+      sb.append(o.toString());
+    }
+    LOG.info("Receiving and emitting tuple values: " + sb.toString());
     collector.emit(input.getValues());
   }
 

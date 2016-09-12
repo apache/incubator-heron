@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ test_template.py """
+import json
 import logging
 import os
 import time
+import urllib
 import signal
 import subprocess
 from collections import namedtuple
@@ -26,7 +28,7 @@ TEST_INPUT = ["1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n",
 
 # Retry variables in case the output is different from the input
 RETRY_COUNT = 5
-RETRY_INTERVAL = 30
+RETRY_INTERVAL = 10
 # Topology shard definitions
 NON_TMASTER_SHARD = 1
 # Topology process name definitions
@@ -53,19 +55,15 @@ class TestTemplate(object):
     """ Runs the test template """
 
     try:
-      self.submit_topology()
-      _block_until_topology_running()
-
       self._prepare_test_data()
+      self.submit_topology()
+      self._block_until_topology_running()
 
-      _sleep("to allow time for startup", 30)
       self.execute_test_case()
-      _block_until_topology_running()
+      physical_plan_json = self._block_until_topology_running()
 
       self._inject_test_data()
-      _sleep("before checking for results", 30)
-
-      if not self.pre_check_results():
+      if not self.pre_check_results(physical_plan_json):
         self.cleanup_test()
         return False
     except Exception as e:
@@ -94,8 +92,8 @@ class TestTemplate(object):
   def execute_test_case(self):
     pass
 
-  # pylint: disable=no-self-use
-  def pre_check_results(self):
+  # pylint: disable=no-self-use,unused-argument
+  def pre_check_results(self, physical_plan_json):
     return True
 
   def cleanup_test(self):
@@ -136,6 +134,7 @@ class TestTemplate(object):
     expected_result = ""
     actual_result = ""
     retries_left = RETRY_COUNT
+    _sleep("before trying to check results for test %s" % self.testname, RETRY_INTERVAL)
     while retries_left > 0:
       retries_left -= 1
       try:
@@ -146,8 +145,9 @@ class TestTemplate(object):
       except Exception as e:
         logging.error(
             "Failed to read expected or actual results from file for test %s: %s", self.testname, e)
-        self.cleanup_test()
-        return False
+        if retries_left == 0:
+          self.cleanup_test()
+          return False
       # if we get expected result, no need to retry
       if expected_result == actual_result:
         break
@@ -220,7 +220,40 @@ class TestTemplate(object):
         '%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), self.params['workingDirectory'])
     self.kill_process(metricsmgr_pid)
 
-def _block_until_topology_running():
+  def _get_tracker_pplan(self):
+    url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
+          + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
+    logging.debug("Fetching packing plan from %s", url)
+    logging.debug("Info URL %s", url.replace('physicalplan', 'info'))
+    response = urllib.urlopen(url)
+    physical_plan_json = json.loads(response.read())
+
+    if 'result' not in physical_plan_json:
+      logging.error("Could not find result json in physical plan request to tracker: %s", url)
+      return None
+
+    return physical_plan_json['result']
+
+  def _block_until_topology_running(self):
+    retries_left = RETRY_COUNT
+    _sleep("before trying to fetch pplan for test %s" % self.testname, RETRY_INTERVAL)
+    while retries_left > 0:
+      retries_left -= 1
+      packing_plan = self._get_tracker_pplan()
+      if packing_plan and len(packing_plan['instances']) > 0:
+        logging.info("Successfully fetched pplan from tracker for test %s after %s attempts.",
+                     self.testname, RETRY_COUNT - retries_left)
+        return packing_plan
+      if retries_left > 0:
+        _sleep("before trying again to fetch pplan for test %s (attempt %s/%s)" %
+               (self.testname, RETRY_COUNT - retries_left, RETRY_COUNT), RETRY_INTERVAL)
+      else:
+        logging.error("Failed to get plan from tracker for test %s after %s attempts.",
+                      self.testname, RETRY_COUNT)
+        self.cleanup_test()
+        return None
+
+def _block_until_stmgr_running():
   # block until ./heron-stmgr exists
   process_list = _get_processes()
   while not _process_exists(process_list, HERON_STMGR_CMD):
