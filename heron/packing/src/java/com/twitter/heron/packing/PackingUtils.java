@@ -145,6 +145,7 @@ public final class PackingUtils {
   // values, tuples can be mis-routed. Instead of loading the instance id with delimited tokens
   // with hidden meaning and consequences, we should promote these concepts into the InstancePlan
   // object as first-class concepts that are properly typed.
+  // See https://github.com/twitter/heron/issues/1376
   public static String getInstanceId(
       int containerIdx, String componentName, int instanceIdx, int componentIdx) {
     return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
