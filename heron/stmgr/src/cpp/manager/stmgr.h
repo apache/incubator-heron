@@ -19,6 +19,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <chrono>
@@ -127,9 +128,9 @@ class StMgr {
   EventLoop* eventLoop_;
 
   // Map of task_id to stmgr_id
-  std::map<sp_int32, sp_string> task_id_to_stmgr_;
+  std::unordered_map<sp_int32, sp_string> task_id_to_stmgr_;
   // map of <component, streamid> to its consumers
-  std::map<std::pair<sp_string, sp_string>, StreamConsumers*> stream_consumers_;
+  std::unordered_map<std::pair<sp_string, sp_string>, StreamConsumers*> stream_consumers_;
   // xor managers
   XorManager* xor_mgrs_;
   // Tuple Cache to optimize message building
