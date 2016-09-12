@@ -275,9 +275,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         if (instances == null) {
           instances = new ArrayList<>();
         }
-        instances.add(PackingUtils.getInstanceId(containerId, component, globalTaskIndex, j));
+        instances.add(PackingUtils.getInstanceId(containerId, component, globalTaskIndex++, j));
         allocation.put(containerId, instances);
-        globalTaskIndex++;
       }
     }
     return allocation;
