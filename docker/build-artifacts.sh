@@ -148,7 +148,7 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> [source-tarball] <output-directory> "
     echo "  "
-    echo "Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7"
+    echo "Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, ubuntu16.04 centos7"
     echo "  "
     echo "Example:"
     echo "  ./build-artifacts.sh ubuntu14.04 0.12.0 ."
