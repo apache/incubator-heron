@@ -20,17 +20,27 @@ import test_template
 
 class TestScaleUp(test_template.TestTemplate):
 
+  expected_container_count = 1
+  expected_instance_count = 3
+
+  def get_expected_container_count(self):
+    return self.expected_container_count
+
+  def get_expected_min_instance_count(self):
+    return self.expected_instance_count
+
   def execute_test_case(self):
     scale_up(self.params['cliPath'], self.params['cluster'], self.params['topologyName'])
+    self.expected_container_count += 1
+    self.expected_instance_count += 2
 
   def pre_check_results(self, physical_plan_json):
-    expected_instance_count = 5
 
     instances = physical_plan_json['instances']
     instance_count = len(instances)
-    if instance_count != expected_instance_count:
+    if instance_count != self.expected_instance_count:
       logging.error("Found %s instances but expected %s: %s",
-                    instance_count, expected_instance_count, instances)
+                    instance_count, self.expected_instance_count, instances)
       return False
 
     return True
