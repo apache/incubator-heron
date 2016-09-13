@@ -54,7 +54,6 @@ public class HeronMasterDriverTest {
         0,
         false);
     spyDriver = Mockito.spy(driver);
-    Mockito.doReturn("").when(spyDriver).getPackingAsString();
     Mockito.doReturn("").when(spyDriver).getComponentRamMap();
   }
 

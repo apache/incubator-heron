@@ -141,7 +141,7 @@ class HeronExecutorTest(unittest.TestCase):
       {1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]})
 
   # ./heron-executor <shardid> <topname> <topid> <topdefnfile>
-  # <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
+  # <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
   # <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>
   # <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>
   # <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>
@@ -152,7 +152,7 @@ class HeronExecutorTest(unittest.TestCase):
   def get_args(shard_id):
     return ("""
     ./heron-executor %d topname topid topdefnfile
-    1:word:3:0:exclaim1:2:0:exclaim1:1:0 zknode zkroot tmaster_binary stmgr_binary
+    zknode zkroot tmaster_binary stmgr_binary
     metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
     master_port tmaster_controller_port tmaster_stats_port
     %s exclaim1:536870912,word:536870912 "" jar topology_bin_file

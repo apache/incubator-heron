@@ -42,7 +42,7 @@ Log = log.Log
 def print_usage():
   print (
       "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
-      " <instance_distribution_ignored> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
+      " <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
@@ -129,20 +129,20 @@ class HeronExecutor(object):
     self.topology_name = args[2]
     self.topology_id = args[3]
     self.topology_defn_file = args[4]
-    self.zknode = args[6]
-    self.zkroot = args[7]
-    self.tmaster_binary = args[8]
-    self.stmgr_binary = args[9]
-    self.metricsmgr_classpath = args[10]
+    self.zknode = args[5]
+    self.zkroot = args[6]
+    self.tmaster_binary = args[7]
+    self.stmgr_binary = args[8]
+    self.metricsmgr_classpath = args[9]
     self.instance_jvm_opts =\
-        base64.b64decode(args[11].lstrip('"').rstrip('"').replace('&equals;', '='))
-    self.classpath = args[12]
-    self.master_port = args[13]
-    self.tmaster_controller_port = args[14]
-    self.tmaster_stats_port = args[15]
-    self.heron_internals_config_file = args[16]
+        base64.b64decode(args[10].lstrip('"').rstrip('"').replace('&equals;', '='))
+    self.classpath = args[11]
+    self.master_port = args[12]
+    self.tmaster_controller_port = args[13]
+    self.tmaster_stats_port = args[14]
+    self.heron_internals_config_file = args[15]
     self.component_rammap =\
-        map(lambda x: {x.split(':')[0]: int(x.split(':')[1])}, args[17].split(','))
+        map(lambda x: {x.split(':')[0]: int(x.split(':')[1])}, args[16].split(','))
     self.component_rammap =\
         reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
 
@@ -152,26 +152,26 @@ class HeronExecutor(object):
     self.component_jvm_opts = {}
     # First we need to decode the base64 string back to a json map string
     component_jvm_opts_in_json =\
-        base64.b64decode(args[18].lstrip('"').rstrip('"').replace('&equals;', '='))
+        base64.b64decode(args[17].lstrip('"').rstrip('"').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
         # In json, the component name and jvm options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
-    self.pkg_type = args[19]
-    self.topology_bin_file = args[20]
-    self.heron_java_home = args[21]
-    self.shell_port = args[22]
-    self.heron_shell_binary = args[23]
-    self.metricsmgr_port = args[24]
-    self.cluster = args[25]
-    self.role = args[26]
-    self.environ = args[27]
-    self.instance_classpath = args[28]
-    self.metrics_sinks_config_file = args[29]
-    self.scheduler_classpath = args[30]
-    self.scheduler_port = args[31]
-    self.python_instance_binary = args[32]
+    self.pkg_type = args[18]
+    self.topology_bin_file = args[19]
+    self.heron_java_home = args[20]
+    self.shell_port = args[21]
+    self.heron_shell_binary = args[22]
+    self.metricsmgr_port = args[23]
+    self.cluster = args[24]
+    self.role = args[25]
+    self.environ = args[26]
+    self.instance_classpath = args[27]
+    self.metrics_sinks_config_file = args[28]
+    self.scheduler_classpath = args[29]
+    self.scheduler_port = args[30]
+    self.python_instance_binary = args[31]
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -640,7 +640,7 @@ class HeronExecutor(object):
 
 def main():
   """Register exit handlers, initialize the executor and run it."""
-  expected = 33
+  expected = 32
   if len(sys.argv) != expected:
     Log.error("Expected %s arguments but received %s: %s" % (expected, len(sys.argv), sys.argv))
     print_usage()

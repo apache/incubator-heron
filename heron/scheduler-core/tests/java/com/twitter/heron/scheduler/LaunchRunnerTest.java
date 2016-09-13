@@ -56,7 +56,6 @@ public class LaunchRunnerTest {
   private static final String CLUSTER = "testCluster";
   private static final String ROLE = "testRole";
   private static final String ENVIRON = "testEnviron";
-  private static final String MOCK_PACKING_STRING = "mockPackString";
   private static final String BUILD_VERSION = "live";
   private static final String BUILD_USER = "user";
 
@@ -129,7 +128,6 @@ public class LaunchRunnerTest {
     Mockito.when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
     Mockito.when(packingPlan.getId()).thenReturn("packing_plan_id");
     Mockito.when(packing.pack()).thenReturn(packingPlan);
-    Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
 
     LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
     Mockito.when(

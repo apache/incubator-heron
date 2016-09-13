@@ -144,7 +144,6 @@ public class LauncherUtils {
     Config ytruntime;
     ytruntime = Config.newBuilder()
         .putAll(runtime)
-        .put(Keys.instanceDistribution(), packing.getInstanceDistribution())
         .put(Keys.componentRamMap(), packing.getComponentRamDistribution())
         .put(Keys.numContainers(), 1 + packing.getContainers().size())
         .build();

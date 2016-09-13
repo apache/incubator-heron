@@ -199,7 +199,6 @@ public final class SchedulerUtils {
     commands.add(topology.getName());
     commands.add(topology.getId());
     commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    commands.add(Runtime.instanceDistribution(runtime));
     commands.add(Context.stateManagerConnectionString(config));
     commands.add(Context.stateManagerRootPath(config));
     commands.add(Context.tmasterSandboxBinary(config));

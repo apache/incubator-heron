@@ -62,34 +62,10 @@ public class PackingPlanTest {
   }
 
   @Test
-  public void testPackingToString() {
+  public void testComponentRamDistribution() {
     Map<Integer, List<String>> packing = new HashMap<>();
     packing.put(1, Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
-    String expectedStr0 = "1:spout:1:0:bolt:3:0";
-    String expectedStr1 = "1:bolt:3:0:spout:1:0";
-
     PackingPlan packingPlan = generatePacking(packing);
-    String packingStr = packingPlan.getInstanceDistribution();
-
-    Assert.assertTrue(packingStr.equals(expectedStr0) || packingStr.equals(expectedStr1));
-
-    packing.put(2, Arrays.asList("2:spout:2:1"));
-    packingPlan = generatePacking(packing);
-    packingStr = packingPlan.getInstanceDistribution();
-
-    for (String component : packingStr.split(",")) {
-      if (component.startsWith("1:")) {
-        // This is the packing str for container 1
-        Assert.assertTrue(component.equals(expectedStr0) || component.equals(expectedStr1));
-      } else if (component.startsWith("2:")) {
-        // This is the packing str for container 2
-        Assert.assertEquals("2:spout:2:1", component);
-      } else {
-        // Unexpected container string
-        throw new RuntimeException(String.format(
-            "Unexpected component id found in instance distribution: %s", component));
-      }
-    }
 
     String ramDistStr = packingPlan.getComponentRamDistribution();
     Assert.assertEquals("spout:3221225472,bolt:2147483648", ramDistStr);
@@ -108,9 +84,6 @@ public class PackingPlanTest {
     PackingPlan newPackingPlan = deserializer.fromProto(serializer.toProto(packingPlan));
     Assert.assertEquals("Packing plan not the same after converting to protobuf object and back",
         newPackingPlan, packingPlan);
-    Assert.assertEquals("Packing plan instance distribution not the same after converting to "
-            + "protobuf object and back",
-        newPackingPlan.getInstanceDistribution(), packingPlan.getInstanceDistribution());
     Assert.assertEquals("Packing plan ram distribution not the same after converting to "
             + "protobuf object and back",
         newPackingPlan.getComponentRamDistribution(), packingPlan.getComponentRamDistribution());

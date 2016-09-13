@@ -73,35 +73,6 @@ public class PackingPlan {
   }
 
   /**
-   * Get the String describing instance distribution from PackingPlan, used by executor
-   *
-   * @return String describing instance distribution
-   */
-  public String getInstanceDistribution() {
-    StringBuilder[] containerBuilder = new StringBuilder[this.getContainers().size()];
-    for (PackingPlan.ContainerPlan container : this.getContainers()) {
-      int index = container.id;
-      containerBuilder[index - 1] = new StringBuilder();
-
-      for (PackingPlan.InstancePlan instance : container.getInstances()) {
-        String[] tokens = instance.getId().split(":");
-        containerBuilder[index - 1].append(
-            String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
-      }
-      containerBuilder[index - 1].deleteCharAt(containerBuilder[index - 1].length() - 1);
-    }
-
-    StringBuilder packingBuilder = new StringBuilder();
-    for (int i = 0; i < containerBuilder.length; ++i) {
-      StringBuilder builder = containerBuilder[i];
-      packingBuilder.append(String.format("%d:%s,", i + 1, builder.toString()));
-    }
-    packingBuilder.deleteCharAt(packingBuilder.length() - 1);
-
-    return packingBuilder.toString();
-  }
-
-  /**
    * Get the formatted String describing component ram distribution from PackingPlan,
    * used by executor
    *
