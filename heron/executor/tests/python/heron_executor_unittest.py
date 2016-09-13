@@ -91,7 +91,7 @@ class HeronExecutorTest(unittest.TestCase):
            "metricsmgr_port topname topid %s " \
            "metrics_sinks_config_file" % (container_id, INTERNAL_CONF_PATH)
 
-  def get_expected_instance_command(component_name, instance_id, container_id=1):
+  def get_expected_instance_command(component_name, instance_id, container_id):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxPermSize=128M " \
            "-XX:PermSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark " \
@@ -113,7 +113,7 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'heron-tmaster',
                   'tmaster_binary master_port '
                   'tmaster_controller_port tmaster_stats_port '
-                  'topname topid zknode zkroot stmgr-1 '
+                  'topname topid zknode zkroot stmgr-1,stmgr-7 '
                   '%s metrics_sinks_config_file metricsmgr_port' % INTERNAL_CONF_PATH),
   ]
 
@@ -123,13 +123,26 @@ class HeronExecutorTest(unittest.TestCase):
                   'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
                   'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port '
                   'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
-      ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3)),
+      ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
-                  get_expected_instance_command('exclaim1', 1)),
+                  get_expected_instance_command('exclaim1', 1, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_2',
-                  get_expected_instance_command('exclaim1', 2)),
+                  get_expected_instance_command('exclaim1', 2, 1)),
       ProcessInfo(MockPOpen(), 'heron-shell-1', shell_command_expected),
       ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
+  ]
+
+  MockPOpen.set_next_pid(37)
+  expected_processes_container_7 = [
+      ProcessInfo(MockPOpen(), 'container_7_word_11', get_expected_instance_command('word', 11, 7)),
+      ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
+                  get_expected_instance_command('exclaim1', 210, 7)),
+      ProcessInfo(MockPOpen(), 'stmgr-7',
+                'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
+                'container_7_word_11,container_7_exclaim1_210 master_port '
+                'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
+      ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
+      ProcessInfo(MockPOpen(), 'heron-shell-7', shell_command_expected),
   ]
 
   def setUp(self):
@@ -137,8 +150,11 @@ class HeronExecutorTest(unittest.TestCase):
     self.maxDiff = None
     self.executor_0 = MockExecutor(self.get_args(0))
     self.executor_1 = MockExecutor(self.get_args(1))
-    self.packing_plan_expected = self.build_packing_plan(
-      {1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]})
+    self.executor_7 = MockExecutor(self.get_args(7))
+    self.packing_plan_expected = self.build_packing_plan({
+      1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')],
+      7:[('word', '11', '0'), ('exclaim1', '210', '0')],
+    })
 
   # ./heron-executor <shardid> <topname> <topid> <topdefnfile>
   # <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
@@ -165,15 +181,20 @@ class HeronExecutorTest(unittest.TestCase):
     self.executor_0.update_packing_plan(self.packing_plan_expected)
 
     self.assertEquals(self.packing_plan_expected, self.executor_0.packing_plan)
-    self.assertEquals(["stmgr-1"], self.executor_0.stmgr_ids)
-    self.assertEquals(["metricsmgr-0", "metricsmgr-1"], self.executor_0.metricsmgr_ids)
-    self.assertEquals(["heron-shell-0", "heron-shell-1"], self.executor_0.heron_shell_ids)
+    self.assertEquals({1: "stmgr-1", 7: "stmgr-7"}, self.executor_0.stmgr_ids)
+    self.assertEquals(
+      {0: "metricsmgr-0", 1: "metricsmgr-1", 7: "metricsmgr-7"}, self.executor_0.metricsmgr_ids)
+    self.assertEquals(
+      {0: "heron-shell-0", 1: "heron-shell-1", 7: "heron-shell-7"}, self.executor_0.heron_shell_ids)
 
   def test_launch_container_0(self):
     self.do_test_launch(self.executor_0, self.expected_processes_container_0)
 
   def test_launch_container_1(self):
     self.do_test_launch(self.executor_1, self.expected_processes_container_1)
+
+  def test_launch_container_7(self):
+    self.do_test_launch(self.executor_7, self.expected_processes_container_7)
 
   def do_test_launch(self, executor, expected_processes):
     executor.update_packing_plan(self.packing_plan_expected)
@@ -187,6 +208,8 @@ class HeronExecutorTest(unittest.TestCase):
     found_monitored = map(lambda (pid, process_info):
                           (pid, process_info.name, process_info.command_str),
                           monitored_processes.items())
+    found_processes.sort(key=lambda tuple: tuple[0])
+    found_monitored.sort(key=lambda tuple: tuple[0])
     print "do_test_commands - found_processes: %s found_monitored: %s" \
           % (found_processes, found_monitored)
     self.assertEquals(found_processes, found_monitored)
