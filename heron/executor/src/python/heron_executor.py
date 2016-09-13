@@ -331,8 +331,8 @@ class HeronExecutor(object):
                            self.topology_id,
                            instance_id,
                            component_name,
-                           global_task_id,
-                           component_index,
+                           str(global_task_id),
+                           str(component_index),
                            self.stmgr_ids[self.shard - 1],
                            self.master_port,
                            self.metricsmgr_port,
@@ -352,8 +352,8 @@ class HeronExecutor(object):
                       self.topology_id,
                       instance_id,
                       component_name,
-                      global_task_id,
-                      component_index,
+                      str(global_task_id),
+                      str(component_index),
                       self.stmgr_ids[self.shard - 1],
                       self.master_port,
                       self.metricsmgr_port,
@@ -378,7 +378,7 @@ class HeronExecutor(object):
       global_task_id = instance_plan.task_id
       component_index = instance_plan.component_index
       component_name = instance_plan.component_name
-      instance_id = "container_%s_%s_%s" % (str(self.shard), component_name, str(global_task_id))
+      instance_id = "container_%s_%s_%d" % (str(self.shard), component_name, global_task_id)
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
     stmgr_cmd = [
