@@ -15,13 +15,17 @@
 
 package com.twitter.heron.packing;
 
+import java.util.ArrayList;
+
 import com.twitter.heron.spi.packing.Resource;
 
 /**
  * Class that describes a container used to place Heron Instances with specific memory, CpuCores and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
-public class Container {
+public class Container   {
+
+  private ArrayList<Integer> globalInstanceIndices;
 
   //Resources currently used by the container.
   private long usedRam;
@@ -40,6 +44,7 @@ public class Container {
     this.maxRam = resource.getRam();
     this.maxCpuCores = resource.getCpu();
     this.maxDisk = resource.getDisk();
+    globalInstanceIndices = new ArrayList<Integer>();
   }
 
   /**
@@ -59,14 +64,16 @@ public class Container {
    *
    * @return true if the instance can be added to the container, false otherwise
    */
-  public boolean add(Resource resource) {
+  public boolean add(Resource resource, int instanceIndex) {
     if (this.hasSpace(resource.getRam(), resource.getCpu(), resource.getDisk())) {
       usedRam += resource.getRam();
       usedCpuCores += resource.getCpu();
       usedDisk += resource.getDisk();
+      globalInstanceIndices.add(instanceIndex);
       return true;
     } else {
       return false;
     }
   }
+
 }

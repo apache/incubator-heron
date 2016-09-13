@@ -41,7 +41,6 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
-
 /**
  * FirstFitDecreasing packing algorithm
  * <p>
@@ -239,23 +238,66 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
+
   private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
-                                                          Map<String, Integer> componentChanges) {
-    int numContainers = currentPackingPlan.getContainers().size();
-    int maxInstanceIndex = 0;
-    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
+                                                      Map<String, Integer> componentChanges) {
+    Map<String, Integer> componentsToScaleDown = getComponentsToScaleDown(componentChanges);
+    if (componentsToScaleDown.isEmpty()) {
+      int numContainers = currentPackingPlan.getContainers().size();
+      int maxInstanceIndex = 0;
+      for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          maxInstanceIndex = Math.max(
+              maxInstanceIndex, instancePlan.getTaskId());
+        }
+      }
+      return assignInstancesToContainers(componentChanges, numContainers + 1, maxInstanceIndex + 1);
+    } else {
+      ArrayList<Container> containers = getContainers(currentPackingPlan);
+    }
+    return null;
+  }
+
+  /**
+   * Identifies which components need to be scaled down
+   *
+   * @return Map &lt; component name, scale down factor &gt;
+   */
+  private Map<String, Integer> getComponentsToScaleDown(Map<String, Integer> componentChanges) {
+
+    Map<String, Integer> componentsToScaleDown = new HashMap<String, Integer>();
+    for (Map.Entry<String, Integer> entry : componentChanges.entrySet()) {
+      if (entry.getValue() < 0) {
+        componentsToScaleDown.put(entry.getKey(), entry.getValue());
       }
     }
-    return assignInstancesToContainers(componentChanges, numContainers + 1, maxInstanceIndex + 1);
+    return componentsToScaleDown;
   }
+
+  /**
+   * Generates the containers that correspond to the current packing plan
+   * along with their associated instances.
+   *
+   * @return List of containers for the current packing plan
+   */
+  private ArrayList<Container> getContainers(PackingPlan currentPackingPlan) {
+
+    ArrayList<Container> containers = new ArrayList<>();
+    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+      int containerId = allocateNewContainer(containers);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        containers.get(containerId - 1).add(instancePlan.getResource(), instancePlan.getTaskId());
+      }
+    }
+    return containers;
+  }
+
 
   /**
    * Place a set of instances into container using the FFD heuristic. Adds new containers and
    * instances starting at {@code firstContainerIndex) and {@code firstTaskIndex}, respectively.
    *
-   * @return true if a placement was found, false otherwise
+   * @return the new instance allocation
    */
   private Map<Integer, List<InstanceId>> assignInstancesToContainers(
       Map<String, Integer> parallelismMap, int firstContainerIndex, int firstTaskIndex) {
@@ -270,7 +312,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         Resource instanceResource =
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
         // placeFFDInstance returns containerIds that are 1-based so we have to offset by 1
-        int containerId = placeFFDInstance(containers, instanceResource) + firstContainerIndex - 1;
+        int containerId = placeFFDInstance(containers, instanceResource, globalTaskIndex)
+            + firstContainerIndex - 1;
         List<InstanceId> instances = allocation.get(containerId);
         if (instances == null) {
           instances = new ArrayList<>();
@@ -287,18 +330,19 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return the container Id that incorporated the instance
    */
-  private int placeFFDInstance(ArrayList<Container> containers, Resource instanceResource) {
+  private int placeFFDInstance(ArrayList<Container> containers, Resource instanceResource,
+                               int globalInstanceIndex) {
     boolean placed = false;
     int containerId = 0;
     for (int i = 0; i < containers.size() && !placed; i++) {
-      if (containers.get(i).add(instanceResource)) {
+      if (containers.get(i).add(instanceResource, globalInstanceIndex)) {
         placed = true;
         containerId = i + 1;
       }
     }
     if (!placed) {
       containerId = allocateNewContainer(containers);
-      containers.get(containerId - 1).add(instanceResource);
+      containers.get(containerId - 1).add(instanceResource, globalInstanceIndex);
     }
     return containerId;
   }
