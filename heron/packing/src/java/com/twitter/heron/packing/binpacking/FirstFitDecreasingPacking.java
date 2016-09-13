@@ -32,6 +32,7 @@ import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -146,7 +147,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   @Override
   public PackingPlan pack() {
     // Get the instances using FFD allocation
-    Map<Integer, List<String>> ffdAllocation = getFFDAllocation();
+    Map<Integer, List<InstanceId>> ffdAllocation = getFFDAllocation();
     // Construct the PackingPlan
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
@@ -164,7 +165,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
     // Get the instances using FFD allocation
-    Map<Integer, List<String>> ffdAllocation =
+    Map<Integer, List<InstanceId>> ffdAllocation =
         getFFDAllocation(currentPackingPlan, componentChanges);
 
     // Construct the PackingPlan
@@ -228,7 +229,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<Integer, List<String>> getFFDAllocation() {
+  private Map<Integer, List<InstanceId>> getFFDAllocation() {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     return assignInstancesToContainers(parallelismMap, 1, 1);
   }
@@ -238,14 +239,13 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<Integer, List<String>> getFFDAllocation(PackingPlan currentPackingPlan,
-                                                      Map<String, Integer> componentChanges) {
+  private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
+                                                          Map<String, Integer> componentChanges) {
     int numContainers = currentPackingPlan.getContainers().size();
     int maxInstanceIndex = 0;
     for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        maxInstanceIndex = Math.max(
-            maxInstanceIndex, PackingUtils.getGlobalInstanceIndex(instancePlan.getId()));
+        maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
       }
     }
     return assignInstancesToContainers(componentChanges, numContainers + 1, maxInstanceIndex + 1);
@@ -257,9 +257,9 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return true if a placement was found, false otherwise
    */
-  private Map<Integer, List<String>> assignInstancesToContainers(
+  private Map<Integer, List<InstanceId>> assignInstancesToContainers(
       Map<String, Integer> parallelismMap, int firstContainerIndex, int firstTaskIndex) {
-    Map<Integer, List<String>> allocation = new HashMap<>();
+    Map<Integer, List<InstanceId>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
     int globalTaskIndex = firstTaskIndex;
@@ -271,11 +271,11 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
         // placeFFDInstance returns containerIds that are 1-based so we have to offset by 1
         int containerId = placeFFDInstance(containers, instanceResource) + firstContainerIndex - 1;
-        List<String> instances = allocation.get(containerId);
+        List<InstanceId> instances = allocation.get(containerId);
         if (instances == null) {
           instances = new ArrayList<>();
         }
-        instances.add(PackingUtils.getInstanceId(containerId, component, globalTaskIndex++, j));
+        instances.add(new InstanceId(component, globalTaskIndex++, j));
         allocation.put(containerId, instances);
       }
     }

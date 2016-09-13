@@ -25,11 +25,11 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -106,10 +106,10 @@ public class RoundRobinPacking implements IPacking {
   @Override
   public PackingPlan pack() {
     // Get the instances' round-robin allocation
-    Map<Integer, List<String>> roundRobinAllocation = getRoundRobinAllocation();
+    Map<Integer, List<InstanceId>> roundRobinAllocation = getRoundRobinAllocation();
 
     // Get the ram map for every instance
-    Map<Integer, Map<String, Long>> instancesRamMap =
+    Map<Integer, Map<InstanceId, Long>> instancesRamMap =
         getInstancesRamMapInContainer(roundRobinAllocation);
 
     long containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
@@ -117,15 +117,13 @@ public class RoundRobinPacking implements IPacking {
 
     // Construct the PackingPlan
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
-    long topologyRam = 0;
-    for (Map.Entry<Integer, List<String>> entry : roundRobinAllocation.entrySet()) {
-      int containerId = entry.getKey();
-      List<String> instanceList = entry.getValue();
+    for (int containerId : roundRobinAllocation.keySet()) {
+      List<InstanceId> instanceList = roundRobinAllocation.get(containerId);
 
       // Calculate the resource required for single instance
-      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+      Map<InstanceId, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
       long containerRam = DEFAULT_RAM_PADDING_PER_CONTAINER;
-      for (String instanceId : instanceList) {
+      for (InstanceId instanceId : instanceList) {
         long instanceRam = instancesRamMap.get(containerId).get(instanceId);
 
         // Currently not yet support disk or cpu config for different components,
@@ -133,23 +131,16 @@ public class RoundRobinPacking implements IPacking {
         long instanceDisk = instanceDiskDefault;
         double instanceCpu = instanceCpuDefault;
 
-        Resource resource =
-            new Resource(instanceCpu, instanceRam, instanceDisk);
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(
-                instanceId,
-                PackingUtils.getComponentName(instanceId),
-                resource);
+        Resource resource = new Resource(instanceCpu, instanceRam, instanceDisk);
+
         // Insert it into the map
-        instancePlanMap.put(instanceId, instancePlan);
+        instancePlanMap.put(instanceId, new PackingPlan.InstancePlan(instanceId, resource));
         containerRam += instanceRam;
       }
 
-      Resource resource =
-          new Resource(containerCpu, containerRam, containerDiskInBytes);
-      PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(
-              containerId, new HashSet<>(instancePlanMap.values()), resource);
+      Resource resource = new Resource(containerCpu, containerRam, containerDiskInBytes);
+      PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
+          containerId, new HashSet<>(instancePlanMap.values()), resource);
 
       containerPlans.add(containerPlan);
     }
@@ -174,22 +165,22 @@ public class RoundRobinPacking implements IPacking {
    * @param allocation the allocation of instances in different container
    * @return A map: (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
    */
-  private Map<Integer, Map<String, Long>> getInstancesRamMapInContainer(
-      Map<Integer, List<String>> allocation) {
+  private Map<Integer, Map<InstanceId, Long>> getInstancesRamMapInContainer(
+      Map<Integer, List<InstanceId>> allocation) {
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    Map<Integer, Map<String, Long>> instancesRamMapInContainer = new HashMap<>();
+    Map<Integer, Map<InstanceId, Long>> instancesRamMapInContainer = new HashMap<>();
 
-    for (Map.Entry<Integer, List<String>> entry : allocation.entrySet()) {
-      int containerId = entry.getKey();
-      Map<String, Long> ramInsideContainer = new HashMap<>();
+    for (int containerId : allocation.keySet()) {
+      List<InstanceId> instanceIds = allocation.get(containerId);
+      Map<InstanceId, Long> ramInsideContainer = new HashMap<>();
       instancesRamMapInContainer.put(containerId, ramInsideContainer);
-      List<String> instancesToBeAccounted = new ArrayList<>();
+      List<InstanceId> instancesToBeAccounted = new ArrayList<>();
 
       // Calculate the actual value
       long usedRam = 0;
-      for (String instanceId : entry.getValue()) {
-        String componentName = PackingUtils.getComponentName(instanceId);
+      for (InstanceId instanceId : instanceIds) {
+        String componentName = instanceId.getComponentName();
         if (ramMap.containsKey(componentName)) {
           long ram = ramMap.get(componentName);
           ramInsideContainer.put(instanceId, ram);
@@ -220,7 +211,7 @@ public class RoundRobinPacking implements IPacking {
         }
 
         // Put the results in instancesRam
-        for (String instanceId : instancesToBeAccounted) {
+        for (InstanceId instanceId : instancesToBeAccounted) {
           ramInsideContainer.put(instanceId, individualInstanceRam);
         }
       }
@@ -235,8 +226,8 @@ public class RoundRobinPacking implements IPacking {
    *
    * @return containerId -&gt; list of InstanceId belonging to this container
    */
-  private Map<Integer, List<String>> getRoundRobinAllocation() {
-    Map<Integer, List<String>> allocation = new HashMap<>();
+  private Map<Integer, List<InstanceId>> getRoundRobinAllocation() {
+    Map<Integer, List<InstanceId>> allocation = new HashMap<>();
     int numContainer = TopologyUtils.getNumContainers(topology);
     int totalInstance = TopologyUtils.getTotalInstance(topology);
     if (numContainer > totalInstance) {
@@ -244,7 +235,7 @@ public class RoundRobinPacking implements IPacking {
     }
 
     for (int i = 1; i <= numContainer; ++i) {
-      allocation.put(i, new ArrayList<String>());
+      allocation.put(i, new ArrayList<InstanceId>());
     }
 
     int index = 1;
@@ -253,7 +244,7 @@ public class RoundRobinPacking implements IPacking {
     for (String component : parallelismMap.keySet()) {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
-        allocation.get(index).add(PackingUtils.getInstanceId(index, component, globalTaskIndex, i));
+        allocation.get(index).add(new InstanceId(component, globalTaskIndex, i));
         index = (index == numContainer) ? 1 : index + 1;
         globalTaskIndex++;
       }
@@ -267,9 +258,9 @@ public class RoundRobinPacking implements IPacking {
    * @param allocation the instances' allocation
    * @return # of instances in the largest container
    */
-  private int getLargestContainerSize(Map<Integer, List<String>> allocation) {
+  private int getLargestContainerSize(Map<Integer, List<InstanceId>> allocation) {
     int max = 0;
-    for (List<String> instances : allocation.values()) {
+    for (List<InstanceId> instances : allocation.values()) {
       if (instances.size() > max) {
         max = instances.size();
       }
@@ -283,7 +274,7 @@ public class RoundRobinPacking implements IPacking {
    * @param allocation packing output.
    * @return cpu per container.
    */
-  private double getContainerCpuHint(Map<Integer, List<String>> allocation) {
+  private double getContainerCpuHint(Map<Integer, List<InstanceId>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     double defaultContainerCpu =
         DEFAULT_CPU_PADDING_PER_CONTAINER + getLargestContainerSize(allocation);
@@ -301,7 +292,7 @@ public class RoundRobinPacking implements IPacking {
    * @param allocation packing output.
    * @return disk per container.
    */
-  private long getContainerDiskHint(Map<Integer, List<String>> allocation) {
+  private long getContainerDiskHint(Map<Integer, List<InstanceId>> allocation) {
     long defaultContainerDisk =
         instanceDiskDefault * getLargestContainerSize(allocation)
             + DEFAULT_DISK_PADDING_PER_CONTAINER;
@@ -321,7 +312,7 @@ public class RoundRobinPacking implements IPacking {
    * @param allocation packing
    * @return Container ram requirement
    */
-  private long getContainerRamHint(Map<Integer, List<String>> allocation) {
+  private long getContainerRamHint(Map<Integer, List<InstanceId>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     String ramHint = TopologyUtils.getConfigWithDefault(

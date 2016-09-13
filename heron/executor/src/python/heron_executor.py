@@ -375,9 +375,8 @@ class HeronExecutor(object):
     instance_plans = self._get_instance_plans(self.packing_plan, self.shard)
     instance_info = []
     for instance_plan in instance_plans:
-      tokens = instance_plan.id.split(":")
-      global_task_id = tokens[2]
-      component_index = tokens[3]
+      global_task_id = instance_plan.task_id
+      component_index = instance_plan.component_index
       component_name = instance_plan.component_name
       instance_id = "container_%s_%s_%s" % (str(self.shard), component_name, str(global_task_id))
       instance_info.append((instance_id, component_name, global_task_id, component_index))

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -82,14 +83,14 @@ public final class PackingUtils {
    * @return container plans
    */
   public static Set<PackingPlan.ContainerPlan> buildContainerPlans(
-      Map<Integer, List<String>> containerInstances,
+      Map<Integer, List<InstanceId>> containerInstances,
       Map<String, Long> ramMap,
       Resource instanceDefaults,
       double paddingPercentage) {
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
     for (Integer containerId : containerInstances.keySet()) {
-      List<String> instanceList = containerInstances.get(containerId);
+      List<InstanceId> instanceList = containerInstances.get(containerId);
 
       long containerRam = 0;
       long containerDiskInBytes = 0;
@@ -98,10 +99,10 @@ public final class PackingUtils {
       // Calculate the resource required for single instance
       Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
-      for (String instanceId : instanceList) {
+      for (InstanceId instanceId : instanceList) {
         long instanceRam = 0;
-        if (ramMap.containsKey(getComponentName(instanceId))) {
-          instanceRam = ramMap.get(getComponentName(instanceId));
+        if (ramMap.containsKey(instanceId.getComponentName())) {
+          instanceRam = ramMap.get(instanceId.getComponentName());
         } else {
           instanceRam = instanceDefaults.getRam();
         }
@@ -115,13 +116,9 @@ public final class PackingUtils {
         double instanceCpu = instanceDefaults.getCpu();
         containerCpu += instanceCpu;
 
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(
-                instanceId,
-                getComponentName(instanceId),
-                new Resource(instanceCpu, instanceRam, instanceDisk));
         // Insert it into the map
-        instancePlans.add(instancePlan);
+        instancePlans.add(new PackingPlan.InstancePlan(instanceId,
+            new Resource(instanceCpu, instanceRam, instanceDisk)));
       }
 
       containerCpu += (paddingPercentage * containerCpu) / 100;
@@ -138,24 +135,5 @@ public final class PackingUtils {
     }
 
     return containerPlans;
-  }
-
-  // TODO: The instanceId string is actually assumed to be the specific format shown below, which
-  // should not be the case. For example, if instanceIds are generated with reused instanceIdx
-  // values, tuples can be mis-routed. Instead of loading the instance id with delimited tokens
-  // with hidden meaning and consequences, we should promote these concepts into the InstancePlan
-  // object as first-class concepts that are properly typed.
-  // See https://github.com/twitter/heron/issues/1376
-  public static String getInstanceId(
-      int containerIdx, String componentName, int instanceIdx, int componentIdx) {
-    return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
-  }
-
-  public static String getComponentName(String instanceId) {
-    return instanceId.split(":")[1];
-  }
-
-  public static Integer getGlobalInstanceIndex(String instanceId) {
-    return Integer.parseInt(instanceId.split(":")[2]);
   }
 }

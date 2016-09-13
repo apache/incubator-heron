@@ -45,8 +45,9 @@ public class PackingPlanProtoSerializer {
 
   private PackingPlans.InstancePlan.Builder builder(PackingPlan.InstancePlan instancePlan) {
     return PackingPlans.InstancePlan.newBuilder()
-        .setId(instancePlan.getId())
         .setComponentName(instancePlan.getComponentName())
+        .setTaskId(instancePlan.getTaskId())
+        .setComponentIndex(instancePlan.getComponentIndex())
         .setResource(builder(instancePlan.getResource()));
   }
 
