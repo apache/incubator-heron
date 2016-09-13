@@ -37,6 +37,7 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.packing.Resource;
@@ -122,7 +123,8 @@ public class SchedulerMainTest {
   // TODO reuse PackingTestUtils.createTestProtoPackingPlan once PR#1321 is merged
   private SettableFuture<PackingPlans.PackingPlan> getTestPacking() {
     Set<PackingPlan.InstancePlan> instances = new HashSet<>();
-    instances.add(new PackingPlan.InstancePlan("1:1:1:1", "dummy", new Resource(1, 1, 1)));
+    instances.add(
+        new PackingPlan.InstancePlan(new InstanceId("dummy", 1, 1), new Resource(1, 1, 1)));
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(new PackingPlan.ContainerPlan(1, instances, new Resource(1, 1, 1)));
     PackingPlan packingPlan = new PackingPlan("packing-id", containers);

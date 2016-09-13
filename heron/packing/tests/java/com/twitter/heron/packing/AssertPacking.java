@@ -52,7 +52,7 @@ public final class AssertPacking {
       }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         expectedInstanceIndecies.add(expectedInstanceIndex++);
-        foundInstanceIndecies.add(PackingUtils.getGlobalInstanceIndex(instancePlan.getId()));
+        foundInstanceIndecies.add(instancePlan.getTaskId());
         if (instancePlan.getComponentName().equals(boltName)) {
           Assert.assertEquals(expectedBoltRam, instancePlan.getResource().getRam());
           boltFound = true;
