@@ -230,7 +230,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private Map<Integer, List<String>> getFFDAllocation() {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    return assignInstancestoContainers(parallelismMap, 0);
+    return assignInstancesToContainers(parallelismMap, 1, 1);
   }
 
   /**
@@ -241,40 +241,42 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private Map<Integer, List<String>> getFFDAllocation(PackingPlan currentPackingPlan,
                                                       Map<String, Integer> componentChanges) {
     int numContainers = currentPackingPlan.getContainers().size();
-    return assignInstancestoContainers(componentChanges, numContainers);
+    int maxInstanceIndex = 0;
+    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        maxInstanceIndex = Math.max(
+            maxInstanceIndex, PackingUtils.getGlobalInstanceIndex(instancePlan.getId()));
+      }
+    }
+    return assignInstancesToContainers(componentChanges, numContainers + 1, maxInstanceIndex + 1);
   }
 
   /**
-   * Place a set of instances into the containers using the FFD heuristic.
-   * The method starts with an existing number of containers and
-   * may add extra containers if needed.
+   * Place a set of instances into container using the FFD heuristic. Adds new containers and
+   * instances starting at {@code firstContainerIndex) and {@code firstTaskIndex}, respectively.
    *
    * @return true if a placement was found, false otherwise
    */
-  private Map<Integer, List<String>> assignInstancestoContainers(
-      Map<String, Integer> parallelismMap,
-      int startNumContainers) {
+  private Map<Integer, List<String>> assignInstancesToContainers(
+      Map<String, Integer> parallelismMap, int firstContainerIndex, int firstTaskIndex) {
     Map<Integer, List<String>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
-    int globalTaskIndex = 1;
+    int globalTaskIndex = firstTaskIndex;
     for (RamRequirement ramRequirement : ramRequirements) {
       String component = ramRequirement.getComponentName();
       int numInstance = parallelismMap.get(component);
       for (int j = 0; j < numInstance; j++) {
         Resource instanceResource =
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
-        int containerId = placeFFDInstance(containers, instanceResource);
-        if (allocation.containsKey(containerId + startNumContainers)) {
-          allocation.get(containerId + startNumContainers).add(PackingUtils.getInstanceId(
-              containerId + startNumContainers, component, globalTaskIndex, j));
-        } else {
-          ArrayList<String> instance = new ArrayList<>();
-          instance.add(PackingUtils.getInstanceId(
-              containerId + startNumContainers, component, globalTaskIndex, j));
-          allocation.put(containerId + startNumContainers, instance);
+        // placeFFDInstance returns containerIds that are 1-based so we have to offset by 1
+        int containerId = placeFFDInstance(containers, instanceResource) + firstContainerIndex - 1;
+        List<String> instances = allocation.get(containerId);
+        if (instances == null) {
+          instances = new ArrayList<>();
         }
-        globalTaskIndex++;
+        instances.add(PackingUtils.getInstanceId(containerId, component, globalTaskIndex++, j));
+        allocation.put(containerId, instances);
       }
     }
     return allocation;
