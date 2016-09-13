@@ -13,34 +13,34 @@
 # limitations under the License.
 
 """test_scale_up.py"""
-import json
 import logging
 import subprocess
-import urllib
 
 import test_template
 
 class TestScaleUp(test_template.TestTemplate):
 
+  expected_container_count = 1
+  expected_instance_count = 3
+
+  def get_expected_container_count(self):
+    return self.expected_container_count
+
+  def get_expected_min_instance_count(self):
+    return self.expected_instance_count
+
   def execute_test_case(self):
     scale_up(self.params['cliPath'], self.params['cluster'], self.params['topologyName'])
+    self.expected_container_count += 1
+    self.expected_instance_count += 2
 
-  def pre_check_results(self):
-    url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
-          + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
-    response = urllib.urlopen(url)
-    physical_plan_json = json.loads(response.read())
-    expected_instance_count = 5
+  def pre_check_results(self, physical_plan_json):
 
-    if 'result' not in physical_plan_json:
-      logging.error("Could not find result json in physical plan request to tracker: %s", url)
-      return False
-
-    instances = physical_plan_json['result']['instances']
+    instances = physical_plan_json['instances']
     instance_count = len(instances)
-    if instance_count != expected_instance_count:
+    if instance_count != self.expected_instance_count:
       logging.error("Found %s instances but expected %s: %s",
-                    instance_count, expected_instance_count, instances)
+                    instance_count, self.expected_instance_count, instances)
       return False
 
     return True

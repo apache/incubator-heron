@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ test_template.py """
+import json
 import logging
 import os
 import time
+import urllib
 import signal
 import subprocess
 from collections import namedtuple
@@ -26,7 +28,7 @@ TEST_INPUT = ["1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n",
 
 # Retry variables in case the output is different from the input
 RETRY_COUNT = 5
-RETRY_INTERVAL = 30
+RETRY_INTERVAL = 10
 # Topology shard definitions
 NON_TMASTER_SHARD = 1
 # Topology process name definitions
@@ -53,19 +55,28 @@ class TestTemplate(object):
     """ Runs the test template """
 
     try:
-      self.submit_topology()
-      _block_until_topology_running()
-
+      # prepare test data, start the topology and block until it's running
       self._prepare_test_data()
+      self.submit_topology()
+      _block_until_stmgr_running(self.get_expected_container_count())
 
-      _sleep("to allow time for startup", 30)
+      if not self._block_until_topology_running(self.get_expected_min_instance_count()):
+        self.cleanup_test()
+        return False
+
+      # Execute the specific test logic and block until topology is running again
       self.execute_test_case()
-      _block_until_topology_running()
 
+      _block_until_stmgr_running(self.get_expected_container_count())
+      physical_plan_json =\
+        self._block_until_topology_running(self.get_expected_min_instance_count())
+      if not physical_plan_json:
+        self.cleanup_test()
+        return False
+
+      # trigger the test data to flow and invoke the pre_check_results hook
       self._inject_test_data()
-      _sleep("before checking for results", 30)
-
-      if not self.pre_check_results():
+      if not self.pre_check_results(physical_plan_json):
         self.cleanup_test()
         return False
     except Exception as e:
@@ -73,6 +84,7 @@ class TestTemplate(object):
       self.cleanup_test()
       return False
 
+    # finally verify the expected results
     return self._check_results()
 
   def submit_topology(self):
@@ -91,11 +103,17 @@ class TestTemplate(object):
       logging.error("Failed to submit %s topology: %s", self.params['topologyName'], str(e))
       return False
 
+  def get_expected_container_count(self):
+    return 1
+
+  def get_expected_min_instance_count(self):
+    return 1
+
   def execute_test_case(self):
     pass
 
-  # pylint: disable=no-self-use
-  def pre_check_results(self):
+  # pylint: disable=no-self-use,unused-argument
+  def pre_check_results(self, physical_plan_json):
     return True
 
   def cleanup_test(self):
@@ -136,6 +154,7 @@ class TestTemplate(object):
     expected_result = ""
     actual_result = ""
     retries_left = RETRY_COUNT
+    _sleep("before trying to check results for test %s" % self.testname, RETRY_INTERVAL)
     while retries_left > 0:
       retries_left -= 1
       try:
@@ -146,14 +165,19 @@ class TestTemplate(object):
       except Exception as e:
         logging.error(
             "Failed to read expected or actual results from file for test %s: %s", self.testname, e)
-        self.cleanup_test()
-        return False
+        if retries_left == 0:
+          self.cleanup_test()
+          return False
       # if we get expected result, no need to retry
-      if expected_result == actual_result:
+      expected_sorted = sorted(expected_result.split('\n'))
+      actual_sorted = sorted(actual_result.split('\n'))
+      if expected_sorted == actual_sorted:
         break
       if retries_left > 0:
         expected_result = ""
         actual_result = ""
+        expected_sorted = []
+        actual_sorted = []
         logging.info("Failed to get expected results for test %s (attempt %s/%s), "\
                      + "retrying after %s seconds",
                      self.testname, RETRY_COUNT - retries_left, RETRY_COUNT, RETRY_INTERVAL)
@@ -162,15 +186,15 @@ class TestTemplate(object):
     self.cleanup_test()
 
     # Compare the actual and expected result
-    if actual_result == expected_result:
+    if actual_sorted == expected_sorted:
       logging.info("Actual result matched expected result for test %s", self.testname)
-      logging.info("Actual result ---------- \n" + actual_result)
-      logging.info("Expected result ---------- \n" + expected_result)
+      logging.info("Actual result ---------- \n%s", actual_sorted)
+      logging.info("Expected result ---------- \n%s", expected_sorted)
       return True
     else:
       logging.error("Actual result did not match expected result for test %s", self.testname)
-      logging.info("Actual result ---------- \n" + actual_result)
-      logging.info("Expected result ---------- \n" + expected_result)
+      logging.info("Actual result ---------- \n%s", actual_sorted)
+      logging.info("Expected result ---------- \n%s", expected_sorted)
       return False
 
   # pylint: disable=no-self-use
@@ -220,10 +244,51 @@ class TestTemplate(object):
         '%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), self.params['workingDirectory'])
     self.kill_process(metricsmgr_pid)
 
-def _block_until_topology_running():
+  def _get_tracker_pplan(self):
+    url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
+          + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
+    logging.debug("Fetching packing plan from %s", url)
+    response = urllib.urlopen(url)
+    physical_plan_json = json.loads(response.read())
+
+    if 'result' not in physical_plan_json:
+      logging.error("Could not find result json in physical plan request to tracker: %s", url)
+      return None
+
+    return physical_plan_json['result']
+
+  def _block_until_topology_running(self, min_instances):
+    retries_left = RETRY_COUNT
+    _sleep("before trying to fetch pplan for test %s" % self.testname, RETRY_INTERVAL)
+    while retries_left > 0:
+      retries_left -= 1
+      packing_plan = self._get_tracker_pplan()
+      if packing_plan:
+        instances_found = len(packing_plan['instances'])
+        if instances_found >= min_instances:
+          logging.info("Successfully fetched pplan from tracker for test %s after %s attempts.",
+                       self.testname, RETRY_COUNT - retries_left)
+          return packing_plan
+        elif retries_left == 0:
+          logging.error(
+            "Got pplan from tracker for test %s but the number of instances found (%d) was less" +\
+            "than min expected (%s).", self.testname, instances_found, min_instances)
+          self.cleanup_test()
+          return None
+
+      if retries_left > 0:
+        _sleep("before trying again to fetch pplan for test %s (attempt %s/%s)" %
+               (self.testname, RETRY_COUNT - retries_left, RETRY_COUNT), RETRY_INTERVAL)
+      else:
+        logging.error("Failed to get pplan from tracker for test %s after %s attempts.",
+                      self.testname, RETRY_COUNT)
+        self.cleanup_test()
+        return None
+
+def _block_until_stmgr_running(expected_stmgrs):
   # block until ./heron-stmgr exists
   process_list = _get_processes()
-  while not _process_exists(process_list, HERON_STMGR_CMD):
+  while not _processes_exists(process_list, HERON_STMGR_CMD, expected_stmgrs):
     process_list = _get_processes()
 
 def _submit_topology(heron_cli_path, test_cluster, test_jar_path, topology_class_path,
@@ -272,12 +337,14 @@ def _sleep(message, seconds):
   logging.info("Sleeping for %d seconds %s", seconds, message)
   time.sleep(seconds)
 
-def _process_exists(process_list, process_cmd):
+def _processes_exists(process_list, process_cmd, min_processes):
   """ check if a process is running """
+  proccess_count = 0
   for process in process_list:
     if process_cmd in process.cmd:
-      return True
-  return False
+      proccess_count += 1
+
+  return proccess_count >= min_processes
 
 def _safe_delete_file(file_name):
   if os.path.isfile(file_name) and os.path.exists(file_name):
