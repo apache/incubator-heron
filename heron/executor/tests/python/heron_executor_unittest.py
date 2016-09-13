@@ -75,9 +75,9 @@ class HeronExecutorTest(unittest.TestCase):
       container_plan.id = int(container_id)
       for (component_name, global_task_id, component_index) in instance_distribution[container_id]:
         instance_plan = container_plan.instance_plans.add()
-        instance_plan.id = "%s:%s:%s:%s" %\
-                           (container_id, component_name, global_task_id, component_index)
         instance_plan.component_name = component_name
+        instance_plan.task_id = int(global_task_id)
+        instance_plan.component_index = int(component_index)
     return packing_plan
 
   # pylint: disable=no-self-argument
