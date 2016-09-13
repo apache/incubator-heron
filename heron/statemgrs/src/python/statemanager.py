@@ -122,7 +122,7 @@ class StateManager:
     return localport
 
   def terminate_ssh_tunnel(self):
-    if self.tunnel:
+    if hasattr(self, 'tunnel') and self.tunnel:
       self.tunnel.terminate()
 
   @abc.abstractmethod

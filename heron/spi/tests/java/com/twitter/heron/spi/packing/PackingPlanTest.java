@@ -27,29 +27,25 @@ import org.junit.Test;
 import com.twitter.heron.spi.common.Constants;
 
 public class PackingPlanTest {
-  private static PackingPlan generatePacking(Map<Integer, List<String>> basePacking) {
-    Resource resource =
-        new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
+  private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking) {
+    Resource resource = new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
-    for (Map.Entry<Integer, List<String>> entry : basePacking.entrySet()) {
-      int containerId = entry.getKey();
-      List<String> instanceList = entry.getValue();
+    for (int containerId : basePacking.keySet()) {
+      List<InstanceId> instanceList = basePacking.get(containerId);
 
       Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
-      for (String instanceId : instanceList) {
-        String componentName = instanceId.split(":")[1];
+      for (InstanceId instanceId : instanceList) {
+        String componentName = instanceId.getComponentName();
         Resource instanceResource;
         if ("bolt".equals(componentName)) {
           instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
         } else {
           instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
         }
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(instanceId, componentName, instanceResource);
-        instancePlans.add(instancePlan);
+        instancePlans.add(new PackingPlan.InstancePlan(instanceId, instanceResource));
       }
 
       PackingPlan.ContainerPlan containerPlan =
@@ -63,8 +59,10 @@ public class PackingPlanTest {
 
   @Test
   public void testComponentRamDistribution() {
-    Map<Integer, List<String>> packing = new HashMap<>();
-    packing.put(1, Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
+    Map<Integer, List<InstanceId>> packing = new HashMap<>();
+    packing.put(1, Arrays.asList(
+        new InstanceId("spout", 1, 0),
+        new InstanceId("bolt", 3, 0)));
     PackingPlan packingPlan = generatePacking(packing);
 
     String ramDistStr = packingPlan.getComponentRamDistribution();
@@ -73,9 +71,13 @@ public class PackingPlanTest {
 
   @Test
   public void testPackingPlanSerde() {
-    Map<Integer, List<String>> packing = new HashMap<>();
-    packing.put(1, Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
-    packing.put(2, Arrays.asList("2:spout:2:1"));
+    Map<Integer, List<InstanceId>> packing = new HashMap<>();
+    packing.put(1, Arrays.asList(
+        new InstanceId("spout", 1, 0),
+        new InstanceId("bolt", 3, 0)));
+    packing.put(2, Arrays.asList(
+        new InstanceId("spout", 2, 1)));
+
     PackingPlan packingPlan = generatePacking(packing);
 
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();

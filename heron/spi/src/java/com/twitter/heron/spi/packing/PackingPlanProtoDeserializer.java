@@ -39,15 +39,15 @@ public class PackingPlanProtoDeserializer {
     }
 
     return new PackingPlan.ContainerPlan(
-        containerPlan.getId(),
-        instances,
-        convert(containerPlan.getResource()));
+        containerPlan.getId(), instances, convert(containerPlan.getResource()));
   }
 
   private PackingPlan.InstancePlan convert(PackingPlans.InstancePlan instancePlan) {
     return new PackingPlan.InstancePlan(
-        instancePlan.getId(),
-        instancePlan.getComponentName(),
+        new InstanceId(
+            instancePlan.getComponentName(),
+            instancePlan.getTaskId(),
+            instancePlan.getComponentIndex()),
         convert(instancePlan.getResource()));
   }
 
