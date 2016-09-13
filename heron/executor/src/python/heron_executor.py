@@ -555,9 +555,12 @@ class HeronExecutor(object):
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
     for current_name, current_command in current_commands.iteritems():
+      # Always restart tmaster to pick up new state. The stream manager is also restarted, but
+      # we shouldn't need to do that and work is being done to fix that on the steam manager
       if current_name in updated_commands.keys() and \
         current_command == updated_commands[current_name] and \
-        current_name != 'heron-tmaster': # always restart tmaster of instance dist has changed
+        current_name != 'heron-tmaster' and \
+        not current_name.startswith('stmgr-'):
         commands_to_keep[current_name] = current_command
       else:
         commands_to_kill[current_name] = current_command
