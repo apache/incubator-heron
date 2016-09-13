@@ -103,9 +103,11 @@ class TestTemplate(object):
       logging.error("Failed to submit %s topology: %s", self.params['topologyName'], str(e))
       return False
 
+  # pylint: disable=no-self-use
   def get_expected_container_count(self):
     return 1
 
+  # pylint: disable=no-self-use
   def get_expected_min_instance_count(self):
     return 1
 
@@ -271,8 +273,8 @@ class TestTemplate(object):
           return packing_plan
         elif retries_left == 0:
           logging.error(
-            "Got pplan from tracker for test %s but the number of instances found (%d) was less" +\
-            "than min expected (%s).", self.testname, instances_found, min_instances)
+              "Got pplan from tracker for test %s but the number of instances found (%d) was " +\
+              "less than min expected (%s).", self.testname, instances_found, min_instances)
           self.cleanup_test()
           return None
 
