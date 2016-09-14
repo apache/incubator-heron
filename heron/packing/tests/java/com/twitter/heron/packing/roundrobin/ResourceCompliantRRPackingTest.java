@@ -22,7 +22,6 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.AssertPacking;
-import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -45,8 +44,8 @@ public class ResourceCompliantRRPackingTest {
 
   private int countComponent(String component, Set<PackingPlan.InstancePlan> instances) {
     int count = 0;
-    for (PackingPlan.InstancePlan pair : instances) {
-      if (component.equals(PackingUtils.getComponentName(pair.getId()))) {
+    for (PackingPlan.InstancePlan instancePlan : instances) {
+      if (component.equals(instancePlan.getComponentName())) {
         count++;
       }
     }

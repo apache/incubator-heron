@@ -24,6 +24,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.packing.Resource;
@@ -74,16 +75,16 @@ public final class PackingTestUtils {
                                                             Integer... instanceIndices) {
     Resource resource = new Resource(7.5, 6, 9);
     Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
-    for (int index : instanceIndices) {
-      String instanceId = "instance-" + index;
-      String componentName = "componentName-" + index;
-      instancePlans.add(testInstancePlan(instanceId, componentName));
+    for (int instanceIndex : instanceIndices) {
+      String componentName = "componentName-" + instanceIndex;
+      instancePlans.add(testInstancePlan(componentName, instanceIndex));
     }
     return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
   }
 
-  private static PackingPlan.InstancePlan testInstancePlan(String id, String componentName) {
+  private static PackingPlan.InstancePlan testInstancePlan(
+      String componentName, int instanceIndex) {
     Resource resource = new Resource(1.5, 2, 3);
-    return new PackingPlan.InstancePlan(id, componentName, resource);
+    return new PackingPlan.InstancePlan(new InstanceId(componentName, instanceIndex, 1), resource);
   }
 }

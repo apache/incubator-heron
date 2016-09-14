@@ -31,8 +31,10 @@ import test_kill_stmgr
 import test_kill_stmgr_metricsmgr
 import test_kill_tmaster
 import test_scale_up
+import test_template
 
 TEST_CLASSES = [
+    test_template.TestTemplate,
     test_kill_tmaster.TestKillTMaster,
     test_kill_stmgr.TestKillStmgr,
     test_kill_metricsmgr.TestKillMetricsMgr,

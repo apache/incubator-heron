@@ -29,6 +29,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -132,7 +133,7 @@ public class ResourceCompliantRRPacking implements IPacking {
   public PackingPlan pack() {
     int adjustments = this.numAdjustments;
     // Get the instances using a resource compliant round robin allocation
-    Map<Integer, List<String>> containerInstances = getResourceCompliantRRAllocation();
+    Map<Integer, List<InstanceId>> containerInstances = getResourceCompliantRRAllocation();
 
     while (containerInstances == null) {
       if (this.numAdjustments > adjustments) {
@@ -201,9 +202,9 @@ public class ResourceCompliantRRPacking implements IPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<Integer, List<String>> getResourceCompliantRRAllocation() {
+  private Map<Integer, List<InstanceId>> getResourceCompliantRRAllocation() {
 
-    Map<Integer, List<String>> allocation = new HashMap<>();
+    Map<Integer, List<InstanceId>> allocation = new HashMap<>();
     ArrayList<Container> containers = new ArrayList<>();
     ArrayList<RamRequirement> ramRequirements = getRAMInstances();
 
@@ -215,7 +216,7 @@ public class ResourceCompliantRRPacking implements IPacking {
     }
 
     for (int i = 1; i <= numContainers; ++i) {
-      allocation.put(i, new ArrayList<String>());
+      allocation.put(i, new ArrayList<InstanceId>());
     }
     for (int i = 0; i <= numContainers - 1; i++) {
       allocateNewContainer(containers);
@@ -231,15 +232,12 @@ public class ResourceCompliantRRPacking implements IPacking {
       for (int i = 0; i < numInstance; ++i) {
         Resource instanceResource = this.defaultInstanceResources.cloneWithRam(ramRequirement);
         if (placeResourceCompliantRRInstance(containers, containerId, instanceResource)) {
-          allocation.get(containerId).add(PackingUtils.getInstanceId(
-              containerId, component, globalTaskIndex, i));
+          allocation.get(containerId).add(new InstanceId(component, globalTaskIndex, i));
         } else {
-          List<TopologyAPI.Config.KeyValue> topologyConfig
-              = topology.getTopologyConfig().getKvsList();
           //Automatically adjust the number of containers
           increaseNumContainers();
           LOG.info(String.format("Increasing the number of containers to "
-              + this.numContainers + " and attempting packing again."));
+              + "%s and attempting packing again.", this.numContainers));
           return null;
         }
         containerId = (containerId == numContainers) ? 1 : containerId + 1;
