@@ -50,23 +50,26 @@ def print_usage():
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
 
-def id_list(prefix, start, count):
-  ids = []
-  for i in range(start, count + 1):
-    ids.append(prefix + str(i))
+def id_map(prefix, container_plans, add_zero_id=False):
+  ids = {}
+  if add_zero_id:
+    ids[0] = "%s-0" % prefix
+
+  for container_plan in container_plans:
+    ids[container_plan.id] = "%s-%d" % (prefix, container_plan.id)
   return ids
 
-def stmgr_list(count):
-  return id_list("stmgr-", 1, count)
+def stmgr_map(container_plans):
+  return id_map("stmgr", container_plans)
 
-def metricsmgr_list(count):
-  return id_list("metricsmgr-", 0, count)
+def metricsmgr_map(container_plans):
+  return id_map("metricsmgr", container_plans, True)
 
-def heron_shell_list(count):
-  return id_list("heron-shell-", 0, count)
+def heron_shell_map(container_plans):
+  return id_map("heron-shell", container_plans, True)
 
 def get_heron_executor_process_name(shard_id):
-  return 'heron-executor-' + str(shard_id)
+  return 'heron-executor-%d' % shard_id
 
 def get_process_pid_filename(process_name):
   return '%s.pid' % process_name
@@ -178,9 +181,9 @@ class HeronExecutor(object):
 
     # these get set when we call update_packing_plan
     self.packing_plan = None
-    self.stmgr_ids = []
-    self.metricsmgr_ids = []
-    self.heron_shell_ids = []
+    self.stmgr_ids = {}
+    self.metricsmgr_ids = {}
+    self.heron_shell_ids = {}
 
     # processes_to_monitor gets set once processes are launched. we need to synchronize rw to this
     # dict since is used by multiple threads
@@ -212,10 +215,9 @@ class HeronExecutor(object):
 
   def update_packing_plan(self, new_packing_plan):
     self.packing_plan = new_packing_plan
-    num_containers = len(self.packing_plan.container_plans)
-    self.stmgr_ids = stmgr_list(num_containers)
-    self.metricsmgr_ids = metricsmgr_list(num_containers)
-    self.heron_shell_ids = heron_shell_list(num_containers)
+    self.stmgr_ids = stmgr_map(self.packing_plan.container_plans)
+    self.metricsmgr_ids = metricsmgr_map(self.packing_plan.container_plans)
+    self.heron_shell_ids = heron_shell_map(self.packing_plan.container_plans)
 
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
@@ -269,7 +271,7 @@ class HeronExecutor(object):
         self.topology_id,
         self.zknode,
         self.zkroot,
-        ','.join(self.stmgr_ids),
+        ','.join(self.stmgr_ids.values()),
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
         self.metricsmgr_port]
@@ -333,7 +335,7 @@ class HeronExecutor(object):
                            component_name,
                            str(global_task_id),
                            str(component_index),
-                           self.stmgr_ids[self.shard - 1],
+                           self.stmgr_ids[self.shard],
                            self.master_port,
                            self.metricsmgr_port,
                            self.heron_internals_config_file])
@@ -354,7 +356,7 @@ class HeronExecutor(object):
                       component_name,
                       str(global_task_id),
                       str(component_index),
-                      self.stmgr_ids[self.shard - 1],
+                      self.stmgr_ids[self.shard],
                       self.master_port,
                       self.metricsmgr_port,
                       self.heron_internals_config_file,
@@ -388,13 +390,13 @@ class HeronExecutor(object):
         self.topology_defn_file,
         self.zknode,
         self.zkroot,
-        self.stmgr_ids[self.shard - 1],
+        self.stmgr_ids[self.shard],
         ','.join(map(lambda x: x[0], instance_info)),
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
         self.heron_internals_config_file]
-    retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
+    retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
