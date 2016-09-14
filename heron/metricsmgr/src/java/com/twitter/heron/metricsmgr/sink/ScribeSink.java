@@ -263,7 +263,8 @@ public class ScribeSink implements IMetricsSink {
   }
 
   private String connectionString() {
-    return String.format("<%s:%d>", config.get(KEY_SCRIBE_HOST), config.get(KEY_SCRIBE_PORT));
+    return String.format("<%s:%d>", config.get(KEY_SCRIBE_HOST),
+            TypeUtils.getInteger(config.get(KEY_SCRIBE_PORT)));
   }
 
   private void flushCounters() {
