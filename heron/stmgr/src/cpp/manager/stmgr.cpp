@@ -610,17 +610,12 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
 //    LOG(INFO) << "tuple has control? " << _tuple->has_control() << std::endl;
     // Our own loopback
     SendInBound(_task_id, _tuple);
-    // delete _tuple;
-    tuple_cache_->release(_task_id, _tuple);
   } else {
-    proto::stmgr::TupleStreamMessage2* out = new proto::stmgr::TupleStreamMessage2();
-    out->set_task_id(_task_id);
-    out->mutable_set()->CopyFrom(*_tuple);
-    clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
-
-//    delete _tuple;
-    tuple_cache_->release(_task_id, _tuple);
+    clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
   }
+
+  // release tuple
+  tuple_cache_->release(_task_id, _tuple);
 }
 
 void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail) {

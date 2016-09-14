@@ -109,7 +109,7 @@ class Client : public BaseClient {
 
   // This interface is used if you want to communicate with the other end
   // on a non-request-response based communication.
-  void SendMessage(google::protobuf::Message* _message);
+  void SendMessage(const google::protobuf::Message& _message);
 
   // Add a timer to be invoked after msecs microseconds. Returns the timer id.
   sp_int64 AddTimer(VCallback<> cb, sp_int64 msecs);
@@ -183,6 +183,11 @@ class Client : public BaseClient {
     _heron_message_pool.release(m);
   }
 
+  template<typename M>
+  M* acquire(M* m) {
+    return _heron_message_pool.acquire(m);
+  }
+
  protected:
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
@@ -220,7 +225,7 @@ class Client : public BaseClient {
   void Init();
 
   void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
-  void InternalSendMessage(google::protobuf::Message* _request);
+  void InternalSendMessage(const google::protobuf::Message& _message);
   void InternalSendResponse(OutgoingPacket* _packet);
 
   // Internal method to be called by the Connection class

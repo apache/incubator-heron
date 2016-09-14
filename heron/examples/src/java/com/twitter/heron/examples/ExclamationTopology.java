@@ -49,8 +49,8 @@ public final class ExclamationTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
     conf.setComponentRam("word", 3L * 1024 * 1024 * 1024);
     conf.setComponentRam("exclaim1", 3L * 1024 * 1024 * 1024);
-    conf.setContainerDiskRequested(1024L * 1024 * 1024);
-    conf.setContainerCpuRequested(1);
+    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
+    conf.setContainerCpuRequested(5);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(1);

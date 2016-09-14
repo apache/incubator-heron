@@ -134,6 +134,7 @@ public final class FastWordCountTopology {
 
     Config conf = new Config();
     conf.setComponentRam("split", 2L * 1024 * 1024 * 1024);
+    conf.setComponentRam("count", 3L * 1024 * 1024 * 1024);
 
     String name = "wc-test";
     if (args != null && args.length > 0) {
@@ -141,6 +142,8 @@ public final class FastWordCountTopology {
     }
 
     conf.setNumWorkers(1);
+    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
+    conf.setContainerCpuRequested(8);
     StormSubmitter.submitTopology(name, conf, builder.createTopology());
   }
 }

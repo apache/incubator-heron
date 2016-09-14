@@ -212,6 +212,11 @@ class Server : public BaseServer {
     _heron_message_pool.release(m);
   }
 
+  template<typename M>
+  M* acquire(M* m) {
+    return _heron_message_pool.acquire(m);
+  }
+
  private:
   // When a new packet arrives on the connection, this is invoked by the Connection
   void OnNewPacket(Connection* connection, IncomingPacket* packet);
