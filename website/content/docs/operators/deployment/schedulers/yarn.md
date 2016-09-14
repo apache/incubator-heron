@@ -30,7 +30,7 @@ containers are allocated for each topology.
 
 ### Configuring the Heron client classpath
 
-After 0.14.3 version released, it is unnecessary to copy hadoop-lib-jars to `HERON_INSTALL_DIR/lib/scheduler` like what 0.14.1 & 0.14.2 version requested. [#1245](https://github.com/twitter/heron/issues/1245) added `extra-launch-classpath` arguments, which makes easier and more convenient to submit a topology to YARN.
+After 0.14.3 version released, it is unnecessary to copy hadoop-lib-jars to `HERON_INSTALL_DIR/lib/scheduler` like what 0.14.1 & 0.14.2 version requested. [#1245](https://github.com/twitter/heron/issues/1245) added `extra-launch-classpath` arguments, which makes it easier and more convenient to submit a topology to YARN.
 
 ***There is something you should pay attention to*** if you want to submit a topology to YARN, no matter which version of Heron you use.
 
