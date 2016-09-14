@@ -269,10 +269,6 @@ public class Keys {
     return ConfigKeys.get("COMPONENT_JVM_OPTS_IN_BASE64");
   }
 
-  public static String instanceDistribution() {
-    return ConfigKeys.get("INSTANCE_DISTRIBUTION");
-  }
-
   public static String instanceJvmOpts() {
     return ConfigKeys.get("INSTANCE_JVM_OPTS_IN_BASE64");
   }

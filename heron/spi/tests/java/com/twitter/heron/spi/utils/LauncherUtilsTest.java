@@ -64,7 +64,6 @@ public class LauncherUtilsTest {
   @Test
   public void constructsRuntimeWithPackingProperly() {
     Config runtime = Config.newBuilder().put("key-23", "value-34").build();
-    Assert.assertNull(Runtime.instanceDistribution(runtime));
     Assert.assertNull(Runtime.componentRamMap(runtime));
 
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
@@ -72,15 +71,12 @@ public class LauncherUtilsTest {
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
 
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);
-    Mockito.when(mockPacking.getInstanceDistribution()).thenReturn("instances");
     Mockito.when(mockPacking.getComponentRamDistribution()).thenReturn("ramMap");
     Mockito.when(mockPacking.getContainers()).thenReturn(containers);
 
     Config newRuntime = LauncherUtils.getInstance()
         .createConfigWithPackingDetails(runtime, mockPacking);
-    Assert.assertNull(Runtime.instanceDistribution(runtime));
     Assert.assertNull(Runtime.componentRamMap(runtime));
-    Assert.assertEquals("instances", Runtime.instanceDistribution(newRuntime));
     Assert.assertEquals("ramMap", Runtime.componentRamMap(newRuntime));
     Assert.assertEquals(3, Runtime.numContainers(newRuntime).longValue());
     Assert.assertEquals("value-34", newRuntime.getStringValue("key-23"));

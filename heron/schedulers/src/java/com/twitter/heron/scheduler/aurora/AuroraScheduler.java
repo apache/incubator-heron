@@ -170,7 +170,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
     auroraProperties.put("TOPOLOGY_DEFINITION_FILE",
         FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put("INSTANCE_DISTRIBUTION", Runtime.instanceDistribution(runtime));
     auroraProperties.put("STATEMGR_CONNECTION_STRING",
         Context.stateManagerConnectionString(config));
     auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));

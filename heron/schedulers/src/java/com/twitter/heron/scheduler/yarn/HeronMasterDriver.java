@@ -274,10 +274,6 @@ public class HeronMasterDriver {
     return ram.intValue();
   }
 
-  String getPackingAsString() {
-    return packing.getInstanceDistribution();
-  }
-
   String getComponentRamMap() {
     return packing.getComponentRamDistribution();
   }
@@ -304,7 +300,6 @@ public class HeronMasterDriver {
         .set(HeronTaskConfiguration.ROLE, role)
         .set(HeronTaskConfiguration.ENV, env)
         .set(HeronTaskConfiguration.CLUSTER, cluster)
-        .set(HeronTaskConfiguration.PACKED_PLAN, getPackingAsString())
         .set(HeronTaskConfiguration.COMPONENT_RAM_MAP, getComponentRamMap())
         .set(HeronTaskConfiguration.CONTAINER_ID, workerId)
         .set(HeronTaskConfiguration.VERBOSE, verboseMode)

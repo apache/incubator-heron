@@ -38,7 +38,6 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMa
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronExecutorId;
-import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.PackedPlan;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
@@ -63,7 +62,6 @@ public class HeronExecutorTask implements Task {
   private final String topologyName;
   private final String env;
   private final String topologyJar;
-  private final String packedPlan;
   private final String componentRamMap;
   private final boolean verboseMode;
 
@@ -83,7 +81,6 @@ public class HeronExecutorTask implements Task {
                            @Parameter(TopologyPackageName.class) String topologyPackageName,
                            @Parameter(HeronCorePackageName.class) String heronCorePackageName,
                            @Parameter(TopologyJar.class) String topologyJar,
-                           @Parameter(PackedPlan.class) String packedPlan,
                            @Parameter(ComponentRamMap.class) String componentRamMap,
                            @Parameter(VerboseLogMode.class) boolean verboseMode) {
     this.heronExecutorId = heronExecutorId;
@@ -94,7 +91,6 @@ public class HeronExecutorTask implements Task {
     this.heronCorePackageName = heronCorePackageName;
     this.env = env;
     this.topologyJar = topologyJar;
-    this.packedPlan = packedPlan;
     this.componentRamMap = componentRamMap;
     this.verboseMode = verboseMode;
 
@@ -161,7 +157,6 @@ public class HeronExecutorTask implements Task {
     }
 
     Config runtime = Config.newBuilder()
-        .put(Keys.instanceDistribution(), packedPlan)
         .put(Keys.componentRamMap(), componentRamMap)
         .put(Keys.topologyDefinition(), topology)
         .build();
