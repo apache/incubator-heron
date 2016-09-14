@@ -42,10 +42,6 @@ public class HeronConfigurationOptions {
   public class HeronCorePackageName implements Name<String> {
   }
 
-  @NamedParameter(doc = "Topology packing plan representation")
-  public class PackedPlan implements Name<String> {
-  }
-
   @NamedParameter(doc = "Component Ram Distribution")
   public class ComponentRamMap implements Name<String> {
   }

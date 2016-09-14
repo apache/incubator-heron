@@ -69,10 +69,6 @@ public final class Runtime {
     return runtime.getStringValue(Keys.componentJvmOpts());
   }
 
-  public static String instanceDistribution(Config runtime) {
-    return runtime.getStringValue(Keys.instanceDistribution());
-  }
-
   public static String instanceJvmOpts(Config runtime) {
     return runtime.getStringValue(Keys.instanceJvmOpts());
   }

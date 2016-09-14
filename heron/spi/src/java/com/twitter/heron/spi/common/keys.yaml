@@ -125,7 +125,6 @@ LAUNCHER_CLASS_INSTANCE:             heron.runtime.launcher.class.instance
 
 COMPONENT_RAMMAP:                    heron.runtime.component.rammap
 COMPONENT_JVM_OPTS_IN_BASE64:        heron.runtime.component.jvm.opts.in.base64
-INSTANCE_DISTRIBUTION:               heron.runtime.instance.distribution
 INSTANCE_JVM_OPTS_IN_BASE64:         heron.runtime.instance.jvm.opts.in.base64
 
 NUM_CONTAINERS:                      heron.runtime.num.containers
