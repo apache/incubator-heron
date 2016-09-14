@@ -32,11 +32,11 @@ public final class InstanceId {
     return componentName;
   }
 
-  int getTaskId() {
+  public int getTaskId() {
     return taskId;
   }
 
-  int getComponentIndex() {
+  public int getComponentIndex() {
     return componentIndex;
   }
 
@@ -51,7 +51,7 @@ public final class InstanceId {
 
     InstanceId that = (InstanceId) o;
 
-    return taskId != that.taskId
+    return taskId == that.taskId
         && componentIndex == that.componentIndex
         && componentName.equals(that.componentName);
   }

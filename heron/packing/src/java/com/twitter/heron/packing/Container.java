@@ -17,15 +17,16 @@ package com.twitter.heron.packing;
 
 import java.util.ArrayList;
 
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.Resource;
 
 /**
  * Class that describes a container used to place Heron Instances with specific memory, CpuCores and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
-public class Container   {
+public class Container {
 
-  private ArrayList<Integer> globalInstanceIndices;
+  private ArrayList<InstanceId> instanceIds;
 
   //Resources currently used by the container.
   private long usedRam;
@@ -44,7 +45,7 @@ public class Container   {
     this.maxRam = resource.getRam();
     this.maxCpuCores = resource.getCpu();
     this.maxDisk = resource.getDisk();
-    globalInstanceIndices = new ArrayList<Integer>();
+    instanceIds = new ArrayList<InstanceId>();
   }
 
   /**
@@ -64,16 +65,43 @@ public class Container   {
    *
    * @return true if the instance can be added to the container, false otherwise
    */
-  public boolean add(Resource resource, int instanceIndex) {
+  public boolean add(Resource resource, InstanceId instanceId) {
     if (this.hasSpace(resource.getRam(), resource.getCpu(), resource.getDisk())) {
       usedRam += resource.getRam();
       usedCpuCores += resource.getCpu();
       usedDisk += resource.getDisk();
-      globalInstanceIndices.add(instanceIndex);
+      instanceIds.add(instanceId);
       return true;
     } else {
       return false;
     }
   }
 
+  /**
+   * Remove an instance of a particular component from a container and update its
+   * corresponding resources.
+   *
+   * @return instanceId if the instance is removed the container, -1 otherwise
+   */
+  public InstanceId remove(Resource resource, String component) {
+    InstanceId instanceId = instanceOfComponent(component);
+    if (instanceId != null) {
+      usedRam -= resource.getRam();
+      usedCpuCores -= resource.getCpu();
+      usedDisk -= resource.getDisk();
+      instanceIds.remove(instanceId);
+      return instanceId;
+    } else {
+      return null;
+    }
+  }
+
+  public InstanceId instanceOfComponent(String component) {
+    for (int i = 0; i < instanceIds.size(); i++) {
+      if (instanceIds.get(i).getComponentName().equals(component)) {
+        return instanceIds.get(i);
+      }
+    }
+    return null;
+  }
 }

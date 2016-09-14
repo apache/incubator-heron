@@ -147,7 +147,7 @@ public class PackingPlan {
       return taskId;
     }
 
-    int getComponentIndex() {
+    public int getComponentIndex() {
       return componentIndex;
     }
 
@@ -189,7 +189,7 @@ public class PackingPlan {
     }
   }
 
-  public static class ContainerPlan {
+  public static class ContainerPlan implements Comparable<ContainerPlan> {
     private final int id;
     private final Set<InstancePlan> instances;
     private final Resource resource;
@@ -226,6 +226,11 @@ public class PackingPlan {
       return id == that.id
           && getInstances().equals(that.getInstances())
           && getResource().equals(that.getResource());
+    }
+
+    @Override
+    public int compareTo(ContainerPlan c) {
+      return Integer.compare(this.getId(), c.getId());
     }
 
     @Override
