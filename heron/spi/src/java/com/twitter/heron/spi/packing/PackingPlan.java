@@ -84,9 +84,8 @@ public class PackingPlan {
       containerBuilder[index - 1] = new StringBuilder();
 
       for (PackingPlan.InstancePlan instance : container.getInstances()) {
-        String[] tokens = instance.getId().split(":");
-        containerBuilder[index - 1].append(
-            String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
+        containerBuilder[index - 1].append(String.format("%s:%s:%s:",
+            instance.getComponentName(), instance.getTaskId(), instance.getComponentIndex()));
       }
       containerBuilder[index - 1].deleteCharAt(containerBuilder[index - 1].length() - 1);
     }
@@ -156,22 +155,28 @@ public class PackingPlan {
   }
 
   public static class InstancePlan {
-    private final String id;
     private final String componentName;
+    private final int taskId;
+    private final int componentIndex;
     private final Resource resource;
 
-    public InstancePlan(String id, String componentName, Resource resource) {
-      this.id = id;
-      this.componentName = componentName;
+    public InstancePlan(InstanceId instanceId, Resource resource) {
+      this.componentName = instanceId.getComponentName();
+      this.taskId = instanceId.getTaskId();
+      this.componentIndex = instanceId.getComponentIndex();
       this.resource = resource;
-    }
-
-    public String getId() {
-      return id;
     }
 
     public String getComponentName() {
       return componentName;
+    }
+
+    public int getTaskId() {
+      return taskId;
+    }
+
+    int getComponentIndex() {
+      return componentIndex;
     }
 
     public Resource getResource() {
@@ -189,23 +194,26 @@ public class PackingPlan {
 
       InstancePlan that = (InstancePlan) o;
 
-      return getId().equals(that.getId())
-          && getComponentName().equals(that.getComponentName())
+      return getComponentName().equals(that.getComponentName())
+          && getTaskId() == that.getTaskId()
+          && getComponentIndex() == that.getComponentIndex()
           && getResource().equals(that.getResource());
     }
 
     @Override
     public int hashCode() {
-      int result = getId().hashCode();
-      result = 31 * result + getComponentName().hashCode();
+      int result = getComponentName().hashCode();
+      result = 31 * result + ((Integer) getTaskId()).hashCode();
+      result = 31 * result + ((Integer) getComponentIndex()).hashCode();
       result = 31 * result + getResource().hashCode();
       return result;
     }
 
     @Override
     public String toString() {
-      return String.format("{instance-id: %s, componentName: %s, instance-resource: %s}",
-          getId(), getComponentName(), getResource().toString());
+      return String.format(
+          "{component-name: %s, task-id: %s, component-index: %s, instance-resource: %s}",
+          getComponentName(), getTaskId(), getComponentIndex(), getResource().toString());
     }
   }
 

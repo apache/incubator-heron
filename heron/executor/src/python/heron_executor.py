@@ -331,8 +331,8 @@ class HeronExecutor(object):
                            self.topology_id,
                            instance_id,
                            component_name,
-                           global_task_id,
-                           component_index,
+                           str(global_task_id),
+                           str(component_index),
                            self.stmgr_ids[self.shard - 1],
                            self.master_port,
                            self.metricsmgr_port,
@@ -352,8 +352,8 @@ class HeronExecutor(object):
                       self.topology_id,
                       instance_id,
                       component_name,
-                      global_task_id,
-                      component_index,
+                      str(global_task_id),
+                      str(component_index),
                       self.stmgr_ids[self.shard - 1],
                       self.master_port,
                       self.metricsmgr_port,
@@ -375,11 +375,10 @@ class HeronExecutor(object):
     instance_plans = self._get_instance_plans(self.packing_plan, self.shard)
     instance_info = []
     for instance_plan in instance_plans:
-      tokens = instance_plan.id.split(":")
-      global_task_id = tokens[2]
-      component_index = tokens[3]
+      global_task_id = instance_plan.task_id
+      component_index = instance_plan.component_index
       component_name = instance_plan.component_name
-      instance_id = "container_%s_%s_%s" % (str(self.shard), component_name, str(global_task_id))
+      instance_id = "container_%s_%s_%d" % (str(self.shard), component_name, global_task_id)
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
     stmgr_cmd = [
@@ -555,9 +554,12 @@ class HeronExecutor(object):
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
     for current_name, current_command in current_commands.iteritems():
+      # Always restart tmaster to pick up new state. The stream manager is also restarted, but
+      # we shouldn't need to do that and work is being done to fix that on the steam manager
       if current_name in updated_commands.keys() and \
         current_command == updated_commands[current_name] and \
-        current_name != 'heron-tmaster': # always restart tmaster of instance dist has changed
+        current_name != 'heron-tmaster' and \
+        not current_name.startswith('stmgr-'):
         commands_to_keep[current_name] = current_command
       else:
         commands_to_kill[current_name] = current_command
