@@ -81,21 +81,31 @@ public class Container {
    * Remove an instance of a particular component from a container and update its
    * corresponding resources.
    *
-   * @return instanceId if the instance is removed the container, -1 otherwise
+   * @return instanceId if the instance is removed the container.
+   * Return null if the container is empty or
+   * does not contain an instance of the given component.
    */
   public InstanceId remove(Resource resource, String component) {
-    InstanceId instanceId = instanceOfComponent(component);
-    if (instanceId != null) {
-      usedRam -= resource.getRam();
-      usedCpuCores -= resource.getCpu();
-      usedDisk -= resource.getDisk();
-      instanceIds.remove(instanceId);
-      return instanceId;
-    } else {
-      return null;
+    if (!instanceIds.isEmpty()) {
+      InstanceId instanceId = instanceOfComponent(component);
+      if (instanceId != null) {
+        usedRam -= resource.getRam();
+        usedCpuCores -= resource.getCpu();
+        usedDisk -= resource.getDisk();
+        instanceIds.remove(instanceId);
+        return instanceId;
+      } else {
+        return null;
+      }
     }
+    return null;
   }
 
+  /**
+   * Find whether an instance of a particular component is assigned to the container
+   *
+   * @return the instanceId if an instance is found, null otherwise
+   */
   public InstanceId instanceOfComponent(String component) {
     for (int i = 0; i < instanceIds.size(); i++) {
       if (instanceIds.get(i).getComponentName().equals(component)) {

@@ -412,8 +412,34 @@ public class FirstFitDecreasingPackingTest {
     AssertPacking.assertContainerRam(newPackingPlan.getContainers(), maxContainerRam);
   }
 
+  @Test(expected = RuntimeException.class)
+  public void testScaleDownException() throws Exception {
+    int defaultNumInstancesperContainer = 4;
+
+    topologyConfig.setComponentRam(BOLT_NAME, instanceDefaultResources.getRam());
+    topologyConfig.setComponentRam(SPOUT_NAME, instanceDefaultResources.getRam());
+
+    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
+
+    Assert.assertEquals(packingPlan.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
+
+    getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
+
+    int spoutScalingDown = -5;
+    Map<String, Integer> componentChanges2 = new HashMap<>();
+    //try to remove more spout instances than possible
+    componentChanges2.put(SPOUT_NAME, spoutScalingDown);
+
+    getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
+  }
+
+
   /**
-   * Test the scenario where the mscaling down is requested
+   * Test the scenario where the scaling down is requested
    */
   @Test
   public void testScaleDown() throws Exception {
@@ -430,7 +456,6 @@ public class FirstFitDecreasingPackingTest {
     int spoutScalingDown = -3;
     int boltScalingDown = -2;
 
-    System.out.println("KKKKKKKKKKKKKKKKK");
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(SPOUT_NAME, spoutScalingDown); //leave 1 spout
     componentChanges.put(BOLT_NAME, boltScalingDown); //leave 1 bolt
@@ -440,11 +465,79 @@ public class FirstFitDecreasingPackingTest {
     Assert.assertEquals(2, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingDown),
         newPackingPlan.getInstanceCount());
-    AssertPacking.assertContainers(newPackingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, instanceDefaultResources.getRam(),
-        instanceDefaultResources.getRam(), null);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        BOLT_NAME, 1);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        SPOUT_NAME, 1);
     AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
         defaultNumInstancesperContainer * instanceDefaultResources.getRam());
   }
 
+  /**
+   * Test the scenario where scaling down is requested
+   */
+  @Test
+  public void removeFirstContainer() throws Exception {
+    int defaultNumInstancesperContainer = 4;
+
+    topologyConfig.setComponentRam(BOLT_NAME, instanceDefaultResources.getRam());
+    topologyConfig.setComponentRam(SPOUT_NAME, instanceDefaultResources.getRam());
+
+    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
+
+    Assert.assertEquals(packingPlan.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+
+    int spoutScalingDown = -4;
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingDown); //leave 0 spouts
+    PackingPlan newPackingPlan =
+        getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
+
+    Assert.assertEquals(1, newPackingPlan.getContainers().size());
+    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown),
+        newPackingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        BOLT_NAME, 3);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        SPOUT_NAME, 0);
+    AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
+        defaultNumInstancesperContainer * instanceDefaultResources.getRam());
+  }
+
+  /**
+   * Test the scenario where scaling down and up is simultaneously requested
+   */
+  @Test
+  public void scaleDownAndUp() throws Exception {
+    int defaultNumInstancesperContainer = 4;
+
+    topologyConfig.setComponentRam(BOLT_NAME, instanceDefaultResources.getRam());
+    topologyConfig.setComponentRam(SPOUT_NAME, instanceDefaultResources.getRam());
+
+    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
+
+    Assert.assertEquals(packingPlan.getContainers().size(), 2);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+
+    int spoutScalingDown = -4;
+    int boltScalingUp = 6;
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingDown); // 0 spouts
+    componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
+    PackingPlan newPackingPlan =
+        getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
+
+    Assert.assertEquals(3, newPackingPlan.getContainers().size());
+    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingUp),
+        newPackingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        BOLT_NAME, 9);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        SPOUT_NAME, 0);
+    AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
+        defaultNumInstancesperContainer * instanceDefaultResources.getRam());
+  }
 }

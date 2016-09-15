@@ -71,6 +71,24 @@ public final class AssertPacking {
         expectedInstanceIndecies, foundInstanceIndecies);
   }
 
+  /**
+   * Verifies that the containerPlan contains a specific number of instances for the given component.
+   */
+  public static void assertNumInstances(Set<PackingPlan.ContainerPlan> containerPlans,
+                                        String component, int numInstances) {
+    int instancesFound = 0;
+    // Ram for bolt should be the value in component ram map
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        if (instancePlan.getComponentName().equals(component)) {
+          instancesFound++;
+        }
+      }
+    }
+    Assert.assertEquals("Components " + component + " found in the container plans: ",
+        instancesFound, numInstances);
+  }
+
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
                                         long maxRamforResources) {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
