@@ -141,7 +141,7 @@ public final class FastWordCountTopology {
       name = args[0];
     }
 
-    conf.setNumWorkers(1);
+    conf.setNumWorkers(80);
     conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
     conf.setContainerCpuRequested(8);
     StormSubmitter.submitTopology(name, conf, builder.createTopology());
