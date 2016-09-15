@@ -60,9 +60,9 @@ class StMgr {
   // Called by tmaster client when a new physical plan is available
   void NewPhysicalPlan(proto::system::PhysicalPlan* pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
-                               proto::stmgr::TupleStreamMessage2* _message);
+                               const proto::stmgr::TupleStreamMessage2& _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
-                          proto::system::HeronTupleSet2* _message);
+                          proto::system::HeronTupleSet* _message);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
@@ -158,7 +158,11 @@ class StMgr {
   proto::stmgr::TupleMessage2 current_control_out_;
   std::vector<sp_int32> out_tasks;
 
-  proto::system::HeronDataTuple* _tuple;
+  bool is_acking_enabled;
+
+  proto::system::HeronTupleSet2* tuple_set_from_other_stmgr_;
+
+  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };
 
 }  // namespace stmgr

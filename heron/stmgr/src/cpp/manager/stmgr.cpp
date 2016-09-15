@@ -33,6 +33,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 #include "config/heron-internals-config-reader.h"
+#include "config/helper.h"
 #include "statemgr/heron-statemgr.h"
 #include "metrics/metrics.h"
 #include "metrics/metrics-mgr-st.h"
@@ -80,8 +81,6 @@ void StMgr::Init() {
   sp_int32 metrics_export_interval_sec =
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
-  _tuple = new proto::system::HeronDataTuple();
-
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       IpUtils::getHostName(), stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
@@ -122,6 +121,12 @@ void StMgr::Init() {
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateProcessMetrics(status);
   }, true, PROCESS_METRICS_FREQUENCY), 0);
+
+  //
+  is_acking_enabled =
+    heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
+
+  tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
 }
 
 StMgr::~StMgr() {
@@ -138,7 +143,7 @@ StMgr::~StMgr() {
   delete hydrated_topology_;
   delete metrics_manager_client_;
 
-  delete _tuple;
+  delete tuple_set_from_other_stmgr_;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
@@ -463,19 +468,24 @@ void StMgr::PopulateXorManagers(
 
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
-void StMgr::HandleStreamManagerData(const sp_string&, proto::stmgr::TupleStreamMessage2* _message) {
+void StMgr::HandleStreamManagerData(const sp_string&,
+                                    const proto::stmgr::TupleStreamMessage2& _message) {
   // We received message from another stream manager
-  sp_int32 task_id = _message->task_id();
-  SendInBound(task_id, _message->mutable_set());
+  sp_int32 _task_id = _message.task_id();
+
+  // We have a shortcut for non-acking case
+  if (!is_acking_enabled) {
+    server_->SendToInstance2(_task_id, _message.set().size(),
+                             heron_tuple_set_2_, _message.set().c_str());
+  } else {
+    tuple_set_from_other_stmgr_->ParsePartialFromString(_message.set());
+
+    SendInBound(_task_id, tuple_set_from_other_stmgr_);
+  }
 }
 
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
-  // TODO(mfu): No need Clear the current_data_out_
   if (_message->has_data()) {
-  // current_data_out_.mutable_set()->set_allocated_data(_message->release_data());// avoids copying
-  // current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
-  // server_->SendToInstance2(_task_id, current_data_out_);
-  // current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
     server_->SendToInstance2(_task_id, *_message);
   }
   if (_message->has_control()) {
@@ -543,34 +553,20 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
 
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
-                               proto::system::HeronTupleSet2* _message) {
+                               proto::system::HeronTupleSet* _message) {
   // Note:- Process data before control
   // This is to make sure that anchored emits are sent out
   // before any acks/fails
 
   if (_message->has_data()) {
-    proto::system::HeronDataTupleSet2* d = _message->mutable_data();
+    proto::system::HeronDataTupleSet* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =
         make_pair(d->stream().component_name(), d->stream().id());
     auto s = stream_consumers_.find(stream);
     if (s != stream_consumers_.end()) {
       StreamConsumers* s_consumer = s->second;
-
-      // 1. only shuffle grouping
-      // 2. no acking
-      if (s_consumer->isShuffleGrouping()) {
-         out_tasks.clear();
-         s_consumer->GetListToSend(*_tuple, out_tasks);
-
-         DrainInstanceData(out_tasks.front(), _message);
-//         LOG(INFO) << "We did a short cut for shuffle-grouping";
-         // We do an early return
-         return;
-      }
-
       for (sp_int32 i = 0; i < d->tuples_size(); ++i) {
-        _tuple->ParsePartialFromString(d->tuples(i));
-
+        proto::system::HeronDataTuple* _tuple = d->mutable_tuples(i);
         // just to make sure that instances do not set any key
         CHECK_EQ(_tuple->key(), 0);
         out_tasks.clear();

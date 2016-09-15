@@ -131,6 +131,11 @@ class Server : public BaseServer {
   // message is now owned by the Server class
   void SendMessage(Connection* connection, const google::protobuf::Message& message);
 
+  void SendMessage(Connection* _connection,
+                   sp_int32 _byte_size,
+                   const sp_string _type_name,
+                   const char* _message);
+
   // Close a connection. This function doesn't return anything.
   // When the connection is attempted to be closed(which can happen
   // at a later time if using thread pool), The HandleConnectionClose

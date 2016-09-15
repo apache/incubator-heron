@@ -171,7 +171,7 @@ public final class WordCountTopology {
     }
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
-    builder.setBolt("consumer", new ConsumerBolt(), parallelism)
+    builder.setBolt("consumer", new ConsumerBolt(), 2 * parallelism)
         .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
@@ -179,10 +179,10 @@ public final class WordCountTopology {
     /*
     Set config here
     */
-    conf.setComponentRam("word", 3L * 1024 * 1024 * 1024);
+    conf.setComponentRam("word", 2L * 1024 * 1024 * 1024);
     conf.setComponentRam("consumer", 3L * 1024 * 1024 * 1024);
-    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
-    conf.setContainerCpuRequested(5);
+//    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
+    conf.setContainerCpuRequested(6);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

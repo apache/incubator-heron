@@ -49,6 +49,10 @@ class StMgrServer : public Server {
 
   void SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage2& _message);
   void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
+  void SendToInstance2(sp_int32 _task_id,
+                       sp_int32 _byte_size,
+                       const sp_string _type_name,
+                       const char* _message);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
@@ -85,7 +89,7 @@ class StMgrServer : public Server {
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
                                      proto::stmgr::RegisterInstanceRequest* _request);
-  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet2* _message);
+  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
 
   // Backpressure message from and to other stream managers
   void HandleStartBackPressureMessage(Connection* _conn,

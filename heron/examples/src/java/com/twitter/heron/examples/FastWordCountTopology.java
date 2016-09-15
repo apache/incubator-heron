@@ -127,10 +127,10 @@ public final class FastWordCountTopology {
 
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("spout", new FastRandomSentenceSpout(), 1);
+    builder.setSpout("spout", new FastRandomSentenceSpout(), 10);
 
-    builder.setBolt("split", new SplitSentence(), 2).shuffleGrouping("spout");
-    builder.setBolt("count", new WordCount(), 1).fieldsGrouping("split", new Fields("word"));
+    builder.setBolt("split", new SplitSentence(), 240).shuffleGrouping("spout");
+    builder.setBolt("count", new WordCount(), 80).fieldsGrouping("split", new Fields("word"));
 
     Config conf = new Config();
     conf.setComponentRam("split", 2L * 1024 * 1024 * 1024);
@@ -141,7 +141,7 @@ public final class FastWordCountTopology {
       name = args[0];
     }
 
-    conf.setNumWorkers(1);
+    conf.setNumWorkers(80);
     conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
     conf.setContainerCpuRequested(8);
     StormSubmitter.submitTopology(name, conf, builder.createTopology());

@@ -256,18 +256,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection" << std::endl;
-  } else {
-    stmgr_server_metrics_->scope(METRIC_BYTES_FROM_STMGRS)->incr_by(_message->ByteSize());
-    if (_message->set().has_data()) {
-      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_STMGRS)
-          ->incr_by(_message->set().data().tuples_size());
-    } else if (_message->set().has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_FROM_STMGRS)
-          ->incr_by(_message->set().control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_FROM_STMGRS)
-          ->incr_by(_message->set().control().fails_size());
-    }
-    stmgr_->HandleStreamManagerData(iter->second, _message);
+    stmgr_->HandleStreamManagerData(iter->second, *_message);
   }
   release(_message);
 }
@@ -351,7 +340,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
 }
 
 void StMgrServer::HandleTupleSetMessage(Connection* _conn,
-                                        proto::system::HeronTupleSet2* _message) {
+                                        proto::system::HeronTupleSet* _message) {
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping.." << std::endl;
@@ -403,6 +392,24 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
           ->incr_by(_message.set().control().fails_size());
     }
     SendMessage(iter->second->conn_, _message);
+  }
+}
+
+void StMgrServer::SendToInstance2(sp_int32 _task_id,
+                                  sp_int32 _byte_size,
+                                  const sp_string _type_name,
+                                  const char* _message) {
+  bool drop = false;
+  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
+               << std::endl;
+    drop = true;
+  }
+
+  if (drop) {
+  } else {
+    SendMessage(iter->second->conn_, _byte_size, _type_name, _message);
   }
 }
 

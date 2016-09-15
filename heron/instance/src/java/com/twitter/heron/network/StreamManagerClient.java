@@ -221,26 +221,12 @@ public class StreamManagerClient extends HeronClient {
       if (getOutstandingPackets() <= 0) {
         // In order to avoid packets back up in Client side,
         // We would poll message from queue and send them only when there are no outstanding packets
-        while (!outStreamQueue.isEmpty()) {
+        if (!outStreamQueue.isEmpty()) {
           HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
 
-          HeronTuples.HeronTupleSet2.Builder builder = HeronTuples.HeronTupleSet2.newBuilder();
-
-          // Add control tuples only when it has
-          if (tupleSet.hasControl()) {
-            builder.setControl(tupleSet.getControl());
-          } else {
-            // Either control or data
-            HeronTuples.HeronDataTupleSet2.Builder dataBuilder =
-                HeronTuples.HeronDataTupleSet2.newBuilder();
-            dataBuilder.setStream(tupleSet.getData().getStream());
-            for (HeronTuples.HeronDataTuple tuple : tupleSet.getData().getTuplesList()) {
-              dataBuilder.addTuples(tuple.toByteString());
-            }
-            builder.setData(dataBuilder);
+          for (int i = 0; i < 20; i++) {
+            sendMessage(tupleSet);
           }
-
-          sendMessage(builder.build());
         }
       }
 

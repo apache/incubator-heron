@@ -80,5 +80,6 @@ message TupleMessage2 {
 // Tuples exchanged between stream managers
 message TupleStreamMessage2 {
   required int32 task_id = 1;
-  required heron.proto.system.HeronTupleSet2 set = 2;
+  // serialized data
+  required bytes set = 2;
 }

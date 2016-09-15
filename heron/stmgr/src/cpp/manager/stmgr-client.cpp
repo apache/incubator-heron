@@ -167,28 +167,8 @@ void StMgrClient::SendHelloRequest() {
 
 void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
   if (IsConnected()) {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg.ByteSize());
-    if (_msg.set().has_data()) {
-      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS)
-          ->incr_by(_msg.set().data().tuples_size());
-    } else if (_msg.set().has_control()) {
-      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS)
-          ->incr_by(_msg.set().control().acks_size());
-      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS)
-          ->incr_by(_msg.set().control().fails_size());
-    }
     SendMessage(_msg);
   } else {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS_LOST)->incr_by(_msg.ByteSize());
-    if (_msg.set().has_data()) {
-      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg.set().data().tuples_size());
-    } else if (_msg.set().has_control()) {
-      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg.set().control().acks_size());
-      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg.set().control().fails_size());
-    }
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << other_stmgr_id_ << " because it is not connected";

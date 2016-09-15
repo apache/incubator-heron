@@ -49,6 +49,25 @@ void Server::SendResponse(REQID _id, Connection* _connection,
   return;
 }
 
+void Server::SendMessage(Connection* _connection,
+                         sp_int32 _byte_size,
+                         const sp_string _type_name,
+                         const char* _message) {
+  // Generate a zero reqid
+  REQID rid = REQID_Generator::generate_zero_reqid();
+
+  sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_type_name) +
+                          REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(_byte_size);
+
+  OutgoingPacket* opkt = new OutgoingPacket(data_size);
+
+  CHECK_EQ(opkt->PackString(_type_name), 0);
+  CHECK_EQ(opkt->PackREQID(rid), 0);
+  CHECK_EQ(opkt->PackProtocolBuffer(_message, _byte_size), 0);
+  InternalSendResponse(_connection, opkt);
+  return;
+}
+
 void Server::SendMessage(Connection* _connection, const google::protobuf::Message& _message) {
   // Generate a zero reqid
   REQID rid = REQID_Generator::generate_zero_reqid();

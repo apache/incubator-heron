@@ -214,6 +214,18 @@ sp_int32 OutgoingPacket::PackProtocolBuffer(const google::protobuf::Message& _pr
   return 0;
 }
 
+sp_int32 OutgoingPacket::PackProtocolBuffer(const char* _message,
+                                            sp_int32 _byte_size) {
+  if (PackInt(_byte_size) != 0) return -1;
+  if (_byte_size + position_ > total_packet_size_) {
+    return -1;
+  }
+
+  memcpy(data_ + position_, _message, _byte_size);
+  position_ += _byte_size;
+  return 0;
+}
+
 sp_int32 OutgoingPacket::PackREQID(const REQID& _rid) {
   if (REQID_size + position_ > total_packet_size_) {
     return -1;
