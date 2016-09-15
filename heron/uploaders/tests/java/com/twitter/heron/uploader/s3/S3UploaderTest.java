@@ -83,7 +83,6 @@ public class S3UploaderTest {
     S3Uploader s3Uploader = new S3Uploader();
     s3Uploader.initialize(s3Config.build());
 
-
     String expectedUri = s3Url + "testbucket/test-topology/" + tempFile.getName();
     assertEquals(new URI(expectedUri), s3Uploader.uploadPackage());
   }
