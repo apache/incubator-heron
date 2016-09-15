@@ -137,22 +137,10 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
   std::string* added_tuple = current_->mutable_data()->add_tuples();
   _tuple->SerializePartialToString(added_tuple);
 
-//  LOG(INFO) << "tuple has control? " << current_->has_control() << std::endl;
-
   sp_int64 tuple_size = _tuple->GetCachedSize();
   current_size_ += tuple_size;
   *_total_size += tuple_size;
   return tuple_key;
-
-//  proto::system::HeronDataTuple* added_tuple;
-//  added_tuple = current_->mutable_data()->add_tuples();
-//  added_tuple->CopyFrom(*_tuple);
-//  sp_int64 tuple_key = RandUtils::lrand();
-//  added_tuple->set_key(tuple_key);
-//  sp_int64 tuple_size = added_tuple->ByteSize();
-//  current_size_ += tuple_size;
-//  *_total_size += tuple_size;
-//  return tuple_key;
 }
 
 void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
@@ -206,7 +194,6 @@ void TupleCache::TupleList::drain(
   sp_int32 drained = 0;
   // we have to drain from back
   while (!tuples_.empty()) {
-//    LOG(INFO) << "tuple has control? " << tuples_.back()->has_control() << std::endl;
     _drainer(_task_id, tuples_.back());  // Drain cleans up the structure
     tuples_.pop_back();
     drained++;

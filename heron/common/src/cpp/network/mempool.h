@@ -54,6 +54,7 @@ class MemPool {
   MemPool() {
   }
 
+  // TODO(cwang): we have a memory leak here.
   ~MemPool() {
     for (auto& m : map_) {
       for (auto& n : m.second) {

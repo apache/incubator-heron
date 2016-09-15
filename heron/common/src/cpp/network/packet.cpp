@@ -208,7 +208,6 @@ sp_int32 OutgoingPacket::PackProtocolBuffer(const google::protobuf::Message& _pr
   if (_byte_size + position_ > total_packet_size_) {
     return -1;
   }
-//  if (!_proto.SerializePartialToArray(data_ + position_, _byte_size)) return -1;
   if (!_proto.SerializeWithCachedSizesToArray((unsigned char*)(data_ + position_))) return -1;
   position_ += _byte_size;
   return 0;

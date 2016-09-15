@@ -74,8 +74,8 @@ class TupleCache {
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
 
      // TODO(mfu):
-     // TODO(mfu): Figure out a way to clean it when to shutdown the process
     std::vector<proto::system::HeronTupleSet2*> _heron_tuple_set_pool;
+
     inline proto::system::HeronTupleSet2* acquire() {
       if (_heron_tuple_set_pool.empty()) {
         return new proto::system::HeronTupleSet2();

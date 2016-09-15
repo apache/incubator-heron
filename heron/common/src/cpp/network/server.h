@@ -209,7 +209,6 @@ class Server : public BaseServer {
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status);
 
   // TODO(mfu):
-  // TODO(mfu): Figure out a way to clean it when to shutdown the process
   MemPool<google::protobuf::Message> _heron_message_pool;
 
   template<typename M>
@@ -261,7 +260,6 @@ class Server : public BaseServer {
       CloseConnection(_conn);
       return;
     }
-//    CHECK(m->IsInitialized());
 
     std::function<void()> cb = std::bind(method, _t, _conn, m);
 

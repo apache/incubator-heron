@@ -496,8 +496,6 @@ void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _messa
 
 void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
-//  // prepare in case we want to send it out
-//  proto::stmgr::TupleMessage out;
   current_control_out_.Clear();
 
   // First go over emits. This makes sure that new emits makes
@@ -603,14 +601,12 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
 void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple) {
   const sp_string& dest_stmgr_id = task_id_to_stmgr_[_task_id];
   if (dest_stmgr_id == stmgr_id_) {
-//    LOG(INFO) << "tuple has control? " << _tuple->has_control() << std::endl;
     // Our own loopback
     SendInBound(_task_id, _tuple);
   } else {
     clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
   }
 
-  // release tuple
   tuple_cache_->release(_task_id, _tuple);
 }
 

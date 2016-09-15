@@ -175,7 +175,6 @@ class Client : public BaseClient {
   EventLoop* getEventLoop() { return eventLoop_; }
 
   // TODO(mfu):
-  // TODO(mfu): Figure out a way to clean it when to shutdown the process
   MemPool<google::protobuf::Message> _heron_message_pool;
 
   template<typename M>

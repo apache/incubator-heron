@@ -347,7 +347,6 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
     release(_message);
     return;
   }
-//  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
   if (_message->has_data()) {
     stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->data().tuples_size());
@@ -370,7 +369,6 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
     drop = true;
   }
   if (drop) {
-//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
     if (_message.set().has_data()) {
       stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.set().data().tuples_size());
@@ -381,7 +379,6 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
           ->incr_by(_message.set().control().fails_size());
     }
   } else {
-//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
     if (_message.set().has_data()) {
       stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
           ->incr_by(_message.set().data().tuples_size());
@@ -423,7 +420,6 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
     drop = true;
   }
   if (drop) {
-//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
     if (_message.has_data()) {
       stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.data().tuples_size());
@@ -434,7 +430,6 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
           ->incr_by(_message.control().fails_size());
     }
   } else {
-//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
     if (_message.has_data()) {
       stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
           ->incr_by(_message.data().tuples_size());
