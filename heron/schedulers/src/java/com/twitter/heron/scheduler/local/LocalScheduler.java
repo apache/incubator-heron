@@ -39,7 +39,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
 
@@ -152,15 +151,15 @@ public class LocalScheduler implements IScheduler, IScalable {
    */
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    long numContainers = Runtime.numContainers(runtime);
-
     LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
-    LOG.info("# of containers: " + numContainers);
 
     synchronized (processToContainer) {
+      LOG.info("Starting executor for TMaster");
+      startExecutor(0);
+
       // for each container, run its own executor
-      for (int i = 0; i < numContainers; i++) {
-        startExecutor(i);
+      for (PackingPlan.ContainerPlan container : packing.getContainers()) {
+        startExecutor(container.getId());
       }
     }
 
@@ -260,13 +259,12 @@ public class LocalScheduler implements IScheduler, IScalable {
   @Override
   public void addContainers(Set<PackingPlan.ContainerPlan> containers) {
     synchronized (processToContainer) {
-      int activeContainerCount = processToContainer.size();
-
-      for (int i = 0; i < containers.size(); i++) {
-        // if number of active container is 2, then there is 1 TMaster container (id=0) and 1 worker
-        // (id = 1). Then the next container to be added will have id = 2, same as current container
-        // count
-        startExecutor(activeContainerCount + i);
+      for (PackingPlan.ContainerPlan container : containers) {
+        if (processToContainer.containsKey(container.getId())) {
+          throw new RuntimeException(String.format("Found active container for %s, "
+              + "cannot launch a duplicate container.", container.getId()));
+        }
+        startExecutor(container.getId());
       }
     }
   }
