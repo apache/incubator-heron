@@ -170,6 +170,5 @@ class MultiAssignableMetrics(IMetric):
       ret[k] = self.map[k].get_value_and_reset()
     return ret
 
-
 MeanReducedMetric = lambda: ReducedMetric(MeanReducer)
 MultiMeanReducedMetric = lambda: MultiReducedMetric(MeanReducer)
