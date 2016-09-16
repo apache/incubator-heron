@@ -193,11 +193,20 @@ public class PackingPlan {
     private final int id;
     private final Set<InstancePlan> instances;
     private final Resource resource;
+    private final Optional<Resource> scheduledResource;
 
     public ContainerPlan(int id, Set<InstancePlan> instances, Resource resource) {
+      this(id, instances, resource, null);
+    }
+
+    public ContainerPlan(int id,
+                         Set<InstancePlan> instances,
+                         Resource resource,
+                         Resource scheduledResource) {
       this.id = id;
       this.instances = ImmutableSet.copyOf(instances);
       this.resource = resource;
+      this.scheduledResource = Optional.fromNullable(scheduledResource);
     }
 
     public int getId() {
@@ -210,6 +219,10 @@ public class PackingPlan {
 
     public Resource getResource() {
       return resource;
+    }
+
+    public Optional<Resource> getScheduledResource() {
+      return scheduledResource;
     }
 
     @Override
@@ -225,7 +238,8 @@ public class PackingPlan {
 
       return id == that.id
           && getInstances().equals(that.getInstances())
-          && getResource().equals(that.getResource());
+          && getResource().equals(that.getResource())
+          && getScheduledResource().equals(that.getScheduledResource());
     }
 
     @Override
@@ -233,13 +247,21 @@ public class PackingPlan {
       int result = id;
       result = 31 * result + getInstances().hashCode();
       result = 31 * result + getResource().hashCode();
+      if (scheduledResource.isPresent()) {
+        result = 31 * result + getScheduledResource().get().hashCode();
+      }
       return result;
     }
 
     @Override
     public String toString() {
-      return String.format("{container-id: %s, instances-list: %s, container-resource: %s}",
+      String str = String.format("{container-id: %s, instances-list: %s, estimated-resource: %s",
           id, getInstances().toString(), getResource());
+      if (scheduledResource.isPresent()) {
+        str = String.format("%s, scheduled-resource: %s", str, getScheduledResource().get());
+      }
+
+      return str + "}";
     }
   }
 }

@@ -17,8 +17,10 @@ package com.twitter.heron.spi.utils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +33,7 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -431,7 +434,7 @@ public final class SchedulerUtils {
   /**
    * Get a resource that requires the maximum amount of ram, cpu and disk
    */
-  public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
+  public static PackingPlan gethomogenizedContainerPlan(PackingPlan packingPlan) {
     double maxCpu = 0;
     long maxRam = 0;
     long maxDisk = 0;
@@ -441,6 +444,28 @@ public final class SchedulerUtils {
       maxDisk = Math.max(maxDisk, containerPlan.getResource().getDisk());
     }
 
-    return new Resource(maxCpu, maxRam, maxDisk);
+    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
+    Set<PackingPlan.ContainerPlan> updatedContainers = new HashSet<>();
+    for (PackingPlan.ContainerPlan container : packingPlan.getContainers()) {
+      PackingPlan.ContainerPlan updatedContainer = new PackingPlan.ContainerPlan(container.getId(),
+          container.getInstances(), container.getResource(), maxResource);
+      updatedContainers.add(updatedContainer);
+    }
+
+    PackingPlan updatedPackingPlan = new PackingPlan(packingPlan.getId(), updatedContainers);
+    return updatedPackingPlan;
+  }
+
+  /**
+   * Replaces persisted packing plan in state manager.
+   */
+  public static void psersistUpdatedPackingPlan(String topologyName,
+                                                PackingPlan updatedPackingPlan,
+                                                Config runtime) {
+    LOG.log(Level.INFO, "Updating scheduled-resource in packing plan: {0}", topologyName);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    stateManager.deletePackingPlan(topologyName);
+    stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
   }
 }

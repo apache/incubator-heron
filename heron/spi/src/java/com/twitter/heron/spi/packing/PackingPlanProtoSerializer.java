@@ -36,6 +36,10 @@ public class PackingPlanProtoSerializer {
         .setId(containerPlan.getId())
         .setResource(builder(containerPlan.getResource()));
 
+    if (containerPlan.getScheduledResource().isPresent()) {
+      builder.setScheduledResource(builder(containerPlan.getScheduledResource().get()));
+    }
+
     for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
       builder.addInstancePlans(builder(instancePlan));
     }

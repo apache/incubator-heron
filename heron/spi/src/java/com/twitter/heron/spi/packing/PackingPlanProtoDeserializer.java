@@ -39,7 +39,10 @@ public class PackingPlanProtoDeserializer {
     }
 
     return new PackingPlan.ContainerPlan(
-        containerPlan.getId(), instances, convert(containerPlan.getResource()));
+        containerPlan.getId(),
+        instances,
+        convert(containerPlan.getResource()),
+        convert(containerPlan.getScheduledResource()));
   }
 
   private PackingPlan.InstancePlan convert(PackingPlans.InstancePlan instancePlan) {
@@ -52,6 +55,9 @@ public class PackingPlanProtoDeserializer {
   }
 
   private Resource convert(PackingPlans.Resource resource) {
+    if (resource == null) {
+      return null;
+    }
     return new Resource(resource.getCpu(), resource.getRam(), resource.getDisk());
   }
 }
