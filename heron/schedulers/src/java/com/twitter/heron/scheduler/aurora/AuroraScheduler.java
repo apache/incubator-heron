@@ -166,7 +166,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     PackingPlan updatedPackingPlan = SchedulerUtils.gethomogenizedContainerPlan(packing);
     SchedulerUtils.psersistUpdatedPackingPlan(topology.getName(), updatedPackingPlan, runtime);
 
-    Resource containerResource = updatedPackingPlan.getContainers().iterator().next().getResource();
+    Resource containerResource = updatedPackingPlan.getContainers()
+        .iterator().next().getRequiredResource();
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());

@@ -192,20 +192,20 @@ public class PackingPlan {
   public static class ContainerPlan {
     private final int id;
     private final Set<InstancePlan> instances;
-    private final Resource resource;
+    private final Resource requiredResource;
     private final Optional<Resource> scheduledResource;
 
-    public ContainerPlan(int id, Set<InstancePlan> instances, Resource resource) {
-      this(id, instances, resource, null);
+    public ContainerPlan(int id, Set<InstancePlan> instances, Resource requiredResource) {
+      this(id, instances, requiredResource, null);
     }
 
     public ContainerPlan(int id,
                          Set<InstancePlan> instances,
-                         Resource resource,
+                         Resource requiredResource,
                          Resource scheduledResource) {
       this.id = id;
       this.instances = ImmutableSet.copyOf(instances);
-      this.resource = resource;
+      this.requiredResource = requiredResource;
       this.scheduledResource = Optional.fromNullable(scheduledResource);
     }
 
@@ -217,8 +217,8 @@ public class PackingPlan {
       return instances;
     }
 
-    public Resource getResource() {
-      return resource;
+    public Resource getRequiredResource() {
+      return requiredResource;
     }
 
     public Optional<Resource> getScheduledResource() {
@@ -238,7 +238,7 @@ public class PackingPlan {
 
       return id == that.id
           && getInstances().equals(that.getInstances())
-          && getResource().equals(that.getResource())
+          && getRequiredResource().equals(that.getRequiredResource())
           && getScheduledResource().equals(that.getScheduledResource());
     }
 
@@ -246,7 +246,7 @@ public class PackingPlan {
     public int hashCode() {
       int result = id;
       result = 31 * result + getInstances().hashCode();
-      result = 31 * result + getResource().hashCode();
+      result = 31 * result + getRequiredResource().hashCode();
       if (scheduledResource.isPresent()) {
         result = 31 * result + getScheduledResource().get().hashCode();
       }
@@ -255,8 +255,8 @@ public class PackingPlan {
 
     @Override
     public String toString() {
-      String str = String.format("{container-id: %s, instances-list: %s, estimated-resource: %s",
-          id, getInstances().toString(), getResource());
+      String str = String.format("{container-id: %s, instances-list: %s, required-resource: %s",
+          id, getInstances().toString(), getRequiredResource());
       if (scheduledResource.isPresent()) {
         str = String.format("%s, scheduled-resource: %s", str, getScheduledResource().get());
       }

@@ -130,13 +130,13 @@ public class RoundRobinPackingTest {
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
-      Assert.assertEquals(containerCpu, containerPlan.getResource().getCpu(), DELTA);
+      Assert.assertEquals(containerCpu, containerPlan.getRequiredResource().getCpu(), DELTA);
 
       Assert.assertEquals((double) containerRam,
-          (double) containerPlan.getResource().getRam(),
+          (double) containerPlan.getRequiredResource().getRam(),
           containerPlan.getInstances().size());
 
-      Assert.assertEquals(containerDisk, containerPlan.getResource().getDisk());
+      Assert.assertEquals(containerDisk, containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
@@ -221,7 +221,7 @@ public class RoundRobinPackingTest {
     // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
-      Assert.assertEquals(containerRam, containerPlan.getResource().getRam());
+      Assert.assertEquals(containerRam, containerPlan.getRequiredResource().getRam());
       int boltCount = 0;
       int instancesCount = containerPlan.getInstances().size();
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {

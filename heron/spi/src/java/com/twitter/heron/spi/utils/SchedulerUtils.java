@@ -439,16 +439,16 @@ public final class SchedulerUtils {
     long maxRam = 0;
     long maxDisk = 0;
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      maxCpu = Math.max(maxCpu, containerPlan.getResource().getCpu());
-      maxRam = Math.max(maxRam, containerPlan.getResource().getRam());
-      maxDisk = Math.max(maxDisk, containerPlan.getResource().getDisk());
+      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
+      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
+      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
     }
 
     Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
     Set<PackingPlan.ContainerPlan> updatedContainers = new HashSet<>();
     for (PackingPlan.ContainerPlan container : packingPlan.getContainers()) {
       PackingPlan.ContainerPlan updatedContainer = new PackingPlan.ContainerPlan(container.getId(),
-          container.getInstances(), container.getResource(), maxResource);
+          container.getInstances(), container.getRequiredResource(), maxResource);
       updatedContainers.add(updatedContainer);
     }
 

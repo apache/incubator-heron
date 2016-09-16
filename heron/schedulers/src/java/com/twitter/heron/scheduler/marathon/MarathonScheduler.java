@@ -109,7 +109,8 @@ public class MarathonScheduler implements IScheduler {
     SchedulerUtils.psersistUpdatedPackingPlan(Runtime.topologyName(runtime),
         updatedPackingPlan, runtime);
 
-    Resource containerResource = updatedPackingPlan.getContainers().iterator().next().getResource();
+    Resource containerResource = updatedPackingPlan.getContainers()
+        .iterator().next().getRequiredResource();
 
     // Create app conf list for each container
     ArrayNode instances = mapper.createArrayNode();
