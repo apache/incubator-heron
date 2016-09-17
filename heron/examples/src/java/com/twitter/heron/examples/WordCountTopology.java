@@ -171,7 +171,7 @@ public final class WordCountTopology {
     }
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
-    builder.setBolt("consumer", new ConsumerBolt(), 2 * parallelism)
+    builder.setBolt("consumer", new ConsumerBolt(), parallelism)
         .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
