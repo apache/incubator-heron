@@ -154,7 +154,6 @@ class StMgr {
   sp_int32 shell_port_;
 
   // TODO(mfu):
-  proto::stmgr::TupleMessage2 current_data_out_;
   proto::stmgr::TupleMessage2 current_control_out_;
   std::vector<sp_int32> out_tasks;
 

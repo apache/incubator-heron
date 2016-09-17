@@ -65,13 +65,13 @@ public class BoltMetrics {
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 
-    topologyContext.registerMetric("__ack-count", ackCount, interval);
-    topologyContext.registerMetric("__process-latency", processLatency, interval);
-    topologyContext.registerMetric("__fail-latency", failLatency, interval);
-    topologyContext.registerMetric("__fail-count", failCount, interval);
-    topologyContext.registerMetric("__execute-count", executeCount, interval);
-    topologyContext.registerMetric("__execute-latency", executeLatency, interval);
-    topologyContext.registerMetric("__emit-count", emitCount, interval);
+    topologyContext.registerMetric("__ack-count/default", ackCount, interval);
+    topologyContext.registerMetric("__process-latency/default", processLatency, interval);
+    topologyContext.registerMetric("__fail-latency/default", failLatency, interval);
+    topologyContext.registerMetric("__fail-count/default", failCount, interval);
+    topologyContext.registerMetric("__execute-count/default", executeCount, interval);
+    topologyContext.registerMetric("__execute-latency/default", executeLatency, interval);
+    topologyContext.registerMetric("__emit-count/default", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
   }
 

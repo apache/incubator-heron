@@ -69,12 +69,12 @@ public class SpoutMetrics {
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 
-    topologyContext.registerMetric("__ack-count", ackCount, interval);
-    topologyContext.registerMetric("__complete-latency", completeLatency, interval);
-    topologyContext.registerMetric("__fail-latency", failLatency, interval);
-    topologyContext.registerMetric("__fail-count", failCount, interval);
-    topologyContext.registerMetric("__timeout-count", timeoutCount, interval);
-    topologyContext.registerMetric("__emit-count", emitCount, interval);
+    topologyContext.registerMetric("__ack-count/default", ackCount, interval);
+    topologyContext.registerMetric("__complete-latency/default", completeLatency, interval);
+    topologyContext.registerMetric("__fail-latency/default", failLatency, interval);
+    topologyContext.registerMetric("__fail-count/default", failCount, interval);
+    topologyContext.registerMetric("__timeout-count/default", timeoutCount, interval);
+    topologyContext.registerMetric("__emit-count/default", emitCount, interval);
     topologyContext.registerMetric("__next-tuple-latency", nextTupleLatency, interval);
     topologyContext.registerMetric("__next-tuple-count", nextTupleCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
