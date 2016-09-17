@@ -15,7 +15,6 @@
 package com.twitter.heron.packing.binpacking;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,7 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.common.base.Optional;
+
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.Container;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.RamRequirement;
@@ -42,6 +44,7 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
+
 /**
  * FirstFitDecreasing packing algorithm
  * <p>
@@ -257,19 +260,19 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       assignInstancesToContainers(containers, allocation, componentsToScaleUp,
           maxInstanceIndex + 1);
     }
-    cleanAllocation(allocation);
+    removeEmptyContainers(allocation);
     return allocation;
   }
 
   /**
    * Removes containers from tha allocation that do not contain any instances
    */
-  private void cleanAllocation(Map<Integer, List<InstanceId>> allocation) {
-    Iterator<Map.Entry<Integer, List<InstanceId>>> entries = allocation.entrySet().iterator();
-    while (entries.hasNext()) {
-      Map.Entry<Integer, List<InstanceId>> entry = entries.next();
-      if (entry.getValue().isEmpty()) {
-        entries.remove();
+  private void removeEmptyContainers(Map<Integer, List<InstanceId>> allocation) {
+    Iterator<Integer> containerIds = allocation.keySet().iterator();
+    while (containerIds.hasNext()) {
+      Integer containerId = containerIds.next();
+      if (allocation.get(containerId).isEmpty()) {
+        containerIds.remove();
       }
     }
   }
@@ -312,13 +315,14 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private ArrayList<Container> getContainers(PackingPlan currentPackingPlan) {
     ArrayList<Container> containers = new ArrayList<>();
-    Object[] currentContainers = currentPackingPlan.getContainers().toArray();
+
     //sort containers based on containerIds;
-    Arrays.sort(currentContainers);
+    PackingPlan.ContainerPlan[] currentContainers =
+        PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
     for (int i = 0; i < currentContainers.length; i++) {
       int containerId = allocateNewContainer(containers);
       for (PackingPlan.InstancePlan instancePlan
-          : ((PackingPlan.ContainerPlan) currentContainers[i]).getInstances()) {
+          : currentContainers[i].getInstances()) {
         containers.get(containerId - 1).add(instancePlan.getResource(),
             new InstanceId(instancePlan.getComponentName(), instancePlan.getTaskId(),
                 instancePlan.getComponentIndex()));
@@ -347,6 +351,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   /**
    * Assigns instances to containers
+   *
    * @param containers helper data structure that describes the containers' status
    * @param allocation existing packing plan
    * @param parallelismMap component parallelism
@@ -377,6 +382,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   /**
    * Removes instances from containers during scaling down
+   *
    * @param containers helper data structure that describes the containers' status
    * @param allocation existing packing plan
    * @param componentsToScaleDown scale down factor for the components.
@@ -392,15 +398,11 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       for (int j = 0; j < numInstancesToRemove; j++) {
         Resource instanceResource =
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
-        IdPair idPair = removeFFDInstance(containers, instanceResource, component);
-        if (idPair == null) {
-          throw new RuntimeException("Cannot perform scale down."
-              + " No more instances of component " + component + " exist"
-              + " in the containers.");
-        }
-        List<InstanceId> instances = allocation.get(idPair.getContainerId());
-        instances.remove(idPair.getInstanceId());
-        allocation.put(idPair.getContainerId(), instances);
+        Pair<Integer, InstanceId> idPair = removeFFDInstance(containers, instanceResource,
+            component);
+        List<InstanceId> instances = allocation.get(idPair.first);
+        instances.remove(idPair.second);
+        allocation.put(idPair.first, instances);
       }
     }
   }
@@ -432,19 +434,24 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return the pairId that captures the corresponding container and instance id.
    */
-  private IdPair removeFFDInstance(ArrayList<Container> containers, Resource instanceResource,
-                                   String component) {
+  private Pair<Integer, InstanceId> removeFFDInstance(ArrayList<Container> containers,
+                                                      Resource instanceResource,
+                                                      String component)
+      throws RuntimeException {
     boolean removed = false;
     int containerId = 0;
     for (int i = 0; i < containers.size() && !removed; i++) {
-      InstanceId instanceId = containers.get(i).remove(instanceResource, component);
-      if (instanceId != null) {
+      Optional<InstanceId> instanceId = containers.get(i).removeAnyInstanceOfComponent(
+          instanceResource, component);
+      if (instanceId.isPresent()) {
         removed = true;
         containerId = i + 1;
-        return new IdPair(containerId, instanceId);
+        return new Pair<Integer, InstanceId>(containerId, instanceId.get());
       }
     }
-    return null;
+    throw new RuntimeException("Cannot remove instance."
+        + " No more instances of component " + component + " exist"
+        + " in the containers.");
   }
 
   /**
@@ -456,23 +463,5 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private int allocateNewContainer(ArrayList<Container> containers) {
     containers.add(new Container(maxContainerResources));
     return containers.size();
-  }
-
-  private class IdPair {
-    private int containerId;
-    private InstanceId instanceId;
-
-    protected IdPair(int cId, InstanceId instId) {
-      this.containerId = cId;
-      this.instanceId = instId;
-    }
-
-    public int getContainerId() {
-      return containerId;
-    }
-
-    public InstanceId getInstanceId() {
-      return instanceId;
-    }
   }
 }

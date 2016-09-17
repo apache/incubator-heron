@@ -17,6 +17,8 @@ package com.twitter.heron.packing;
 
 import java.util.ArrayList;
 
+import com.google.common.base.Optional;
+
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -82,36 +84,31 @@ public class Container {
    * corresponding resources.
    *
    * @return instanceId if the instance is removed the container.
-   * Return null if the container is empty or
-   * does not contain an instance of the given component.
+   * Return void if an instance is not found
    */
-  public InstanceId remove(Resource resource, String component) {
-    if (!instanceIds.isEmpty()) {
-      InstanceId instanceId = instanceOfComponent(component);
-      if (instanceId != null) {
-        usedRam -= resource.getRam();
-        usedCpuCores -= resource.getCpu();
-        usedDisk -= resource.getDisk();
-        instanceIds.remove(instanceId);
-        return instanceId;
-      } else {
-        return null;
-      }
+  public Optional<InstanceId> removeAnyInstanceOfComponent(Resource resource, String component) {
+    Optional<InstanceId> instanceId = getAnyInstanceOfComponent(component);
+    if (instanceId.isPresent()) {
+      usedRam -= resource.getRam();
+      usedCpuCores -= resource.getCpu();
+      usedDisk -= resource.getDisk();
+      instanceIds.remove(instanceId.get());
+      return Optional.of(instanceId.get());
     }
-    return null;
+    return Optional.absent();
   }
 
   /**
-   * Find whether an instance of a particular component is assigned to the container
+   * Find whether any instance of a particular component is assigned to the container
    *
-   * @return the instanceId if an instance is found, null otherwise
+   * @return the instanceId if an instance is found, void otherwise
    */
-  public InstanceId instanceOfComponent(String component) {
+  public Optional<InstanceId> getAnyInstanceOfComponent(String component) {
     for (int i = 0; i < instanceIds.size(); i++) {
       if (instanceIds.get(i).getComponentName().equals(component)) {
-        return instanceIds.get(i);
+        return Optional.of(instanceIds.get(i));
       }
     }
-    return null;
+    return Optional.absent();
   }
 }

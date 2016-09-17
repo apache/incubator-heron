@@ -90,22 +90,4 @@ public class PackingPlanTest {
             + "protobuf object and back",
         newPackingPlan.getComponentRamDistribution(), packingPlan.getComponentRamDistribution());
   }
-
-  @Test
-  public void testContainerSorting() {
-    Map<Integer, List<InstanceId>> packing = new HashMap<>();
-    packing.put(1, Arrays.asList(
-        new InstanceId("spout", 1, 0),
-        new InstanceId("bolt", 3, 0)));
-    packing.put(3, Arrays.asList(new InstanceId("spout", 2, 1)));
-    packing.put(2, Arrays.asList(new InstanceId("spout", 4, 1)));
-    PackingPlan packingPlan = generatePacking(packing);
-
-    Object[] currentContainers = packingPlan.getContainers().toArray();
-    Arrays.sort(currentContainers);
-    Assert.assertEquals(currentContainers.length, packingPlan.getContainers().size());
-    for (int i = 0; i < currentContainers.length; i++) {
-      Assert.assertEquals(((PackingPlan.ContainerPlan) currentContainers[i]).getId(), i + 1);
-    }
-  }
 }

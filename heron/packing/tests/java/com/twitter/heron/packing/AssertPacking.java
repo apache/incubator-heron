@@ -77,7 +77,6 @@ public final class AssertPacking {
   public static void assertNumInstances(Set<PackingPlan.ContainerPlan> containerPlans,
                                         String component, int numInstances) {
     int instancesFound = 0;
-    // Ram for bolt should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(component)) {
@@ -85,8 +84,7 @@ public final class AssertPacking {
         }
       }
     }
-    Assert.assertEquals("Components " + component + " found in the container plans: ",
-        instancesFound, numInstances);
+    Assert.assertEquals(numInstances, instancesFound);
   }
 
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,

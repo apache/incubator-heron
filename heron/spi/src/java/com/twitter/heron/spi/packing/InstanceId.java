@@ -63,4 +63,9 @@ public final class InstanceId {
     result = 31 * result + componentIndex;
     return result;
   }
+
+  @Override
+  public String toString() {
+    return componentName + " " + taskId + " " + componentIndex;
+  }
 }
