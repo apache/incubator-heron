@@ -15,7 +15,7 @@
 import gc
 import psutil
 import traceback
-from .metrics import AssignableMetrics
+from .metrics import AssignableMetrics, MultiAssignableMetrics
 from .metrics_helper import BaseMetricsHelper
 import heron.common.src.python.constants as constants
 from heron.common.src.python.config import system_config
@@ -31,7 +31,7 @@ class PyMetrics(BaseMetricsHelper):
     # total user cpu time
     self.user_cpu_time = AssignableMetrics(0)
     # threads cpu usage
-    self.threads = AssignableMetrics(0)
+    self.threads = MultiAssignableMetrics()
     # number of open file descriptors
     self.fd_nums = AssignableMetrics(0)
     # number of threads
@@ -85,8 +85,8 @@ class PyMetrics(BaseMetricsHelper):
 
   def update_threads_time(self):
     try:
-      tt = self.process.threads()
-      self.threads.update([(t.id, t.user_time, t.system_time) for t in tt])
+      for t in self.process.threads():
+        self.threads.update(t.id, (t.user_time, t.system_time))
     except Exception as e:
       Log.error(traceback.format_exc(e))
 
@@ -111,9 +111,9 @@ class PyMetrics(BaseMetricsHelper):
       self.g1_count.update(c1)
       self.g2_count.update(c2)
       self.g3_count.update(c3)
-      self.t1_count.update(t1)
-      self.t2_count.update(t2)
-      self.t3_count.update(t3)
+      self.g1_threshold.update(t1)
+      self.g2_threshold.update(t2)
+      self.g3_threshold.update(t3)
     except Exception as e:
       Log.error(traceback.format_exc(e))
 
