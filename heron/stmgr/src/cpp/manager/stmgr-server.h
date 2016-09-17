@@ -47,7 +47,6 @@ class StMgrServer : public Server {
               heron::common::MetricsMgrSt* _metrics_manager_client);
   virtual ~StMgrServer();
 
-  void SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage2& _message);
   void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
   void SendToInstance2(sp_int32 _task_id,
                        sp_int32 _byte_size,

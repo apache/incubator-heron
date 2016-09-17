@@ -496,7 +496,7 @@ void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _messa
 
 void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
-  current_control_out_.Clear();
+  current_control_tuple_set_.Clear();
 
   // First go over emits. This makes sure that new emits makes
   // a tuples stay alive before we process its acks
@@ -516,7 +516,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       if (xor_mgrs_->anchor(_task_id, ack_tuple.roots(j).key(), ack_tuple.ackedtuple())) {
         // This tuple tree is all over
         proto::system::AckTuple* a;
-        a = current_control_out_.mutable_set()->mutable_control()->add_acks();
+        a = current_control_tuple_set_.mutable_control()->add_acks();
         proto::system::RootId* r = a->add_roots();
         r->set_key(ack_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -534,7 +534,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       if (xor_mgrs_->remove(_task_id, fail_tuple.roots(j).key())) {
         // This tuple tree is failed
         proto::system::AckTuple* f;
-        f = current_control_out_.mutable_set()->mutable_control()->add_fails();
+        f = current_control_tuple_set_.mutable_control()->add_fails();
         proto::system::RootId* r = f->add_roots();
         r->set_key(fail_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -544,8 +544,8 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
   }
 
   // Check if we need to send this out
-  if (current_control_out_.has_set()) {
-    server_->SendToInstance(_task_id, current_control_out_);
+  if (current_control_tuple_set_.has_control()) {
+    server_->SendToInstance2(_task_id, current_control_tuple_set_);
   }
 }
 

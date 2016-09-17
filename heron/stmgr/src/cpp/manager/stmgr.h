@@ -154,7 +154,7 @@ class StMgr {
   sp_int32 shell_port_;
 
   // TODO(mfu):
-  proto::stmgr::TupleMessage2 current_control_out_;
+  proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks;
 
   bool is_acking_enabled;

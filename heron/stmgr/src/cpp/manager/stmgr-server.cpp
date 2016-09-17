@@ -361,38 +361,6 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
   release(_message);
 }
 
-void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage2& _message) {
-  bool drop = false;
-  auto iter = instance_info_.find(_task_id);
-  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
-               << std::endl;
-    drop = true;
-  }
-  if (drop) {
-    if (_message.set().has_data()) {
-      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.set().data().tuples_size());
-    } else if (_message.set().has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.set().control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.set().control().fails_size());
-    }
-  } else {
-    if (_message.set().has_data()) {
-      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.set().data().tuples_size());
-    } else if (_message.set().has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.set().control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.set().control().fails_size());
-    }
-    SendMessage(iter->second->conn_, _message);
-  }
-}
-
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
                                   sp_int32 _byte_size,
                                   const sp_string _type_name,
@@ -421,20 +389,14 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
     drop = true;
   }
   if (drop) {
-    if (_message.has_data()) {
-      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.data().tuples_size());
-    } else if (_message.has_control()) {
+    if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.control().fails_size());
     }
   } else {
-    if (_message.has_data()) {
-      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.data().tuples_size());
-    } else if (_message.has_control()) {
+    if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
