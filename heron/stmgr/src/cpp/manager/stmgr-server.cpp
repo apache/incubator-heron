@@ -496,9 +496,10 @@ void StMgrServer::StopBackPressureConnectionCb(Connection* _connection) {
 void StMgrServer::ConnectionBufferChangeCb(Connection* _connection) {
   // Find the instance this connection belongs to
   const sp_string& instance_name = GetInstanceName(_connection);
-  CHECK_NE(instance_name, "");
-  sp_int32 bytes = _connection->getOutstandingBytes();
-  queue_metric_map_[instance_name]->SetValue(bytes);
+  if (instance_name != "") {
+    sp_int32 bytes = _connection->getOutstandingBytes();
+    queue_metric_map_[instance_name]->SetValue(bytes);
+  }
 }
 
 void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
