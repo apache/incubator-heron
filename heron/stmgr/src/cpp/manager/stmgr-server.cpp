@@ -409,10 +409,6 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
     }
     SendMessage(iter->second->conn_, _message);
   }
-
-  const sp_string& instance_id = instance_info_[_task_id]->instance_->instance_id();
-  sp_int32 bytes = iter->second->conn_->getOutstandingBytes();
-  queue_metric_map_[instance_id]->SetValue(bytes);
 }
 
 void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
