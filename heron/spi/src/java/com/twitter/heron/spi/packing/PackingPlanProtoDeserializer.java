@@ -55,9 +55,10 @@ public class PackingPlanProtoDeserializer {
   }
 
   private Resource convert(PackingPlans.Resource resource) {
-    if (resource == null) {
-      return null;
+    Resource result = null;
+    if (resource != null && resource.isInitialized()) {
+      result = new Resource(resource.getCpu(), resource.getRam(), resource.getDisk());
     }
-    return new Resource(resource.getCpu(), resource.getRam(), resource.getDisk());
+    return result;
   }
 }
