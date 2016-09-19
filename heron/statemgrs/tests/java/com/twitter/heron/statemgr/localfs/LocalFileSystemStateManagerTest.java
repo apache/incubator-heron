@@ -93,6 +93,7 @@ public class LocalFileSystemStateManagerTest {
         .setTopologyName(TOPOLOGY_NAME)
         .build();
     PowerMockito.spy(FileUtils.class);
+    PowerMockito.doReturn(true).when(FileUtils.class, "isFileExists", Matchers.anyString());
     PowerMockito.doReturn(location.toByteArray()).
         when(FileUtils.class, "readFromFile", Matchers.anyString());
 

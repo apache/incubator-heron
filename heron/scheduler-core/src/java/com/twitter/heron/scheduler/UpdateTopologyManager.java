@@ -122,8 +122,9 @@ public class UpdateTopologyManager {
     }
   }
 
-  private void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
-                                  final TopologyAPI.Topology topology)
+  @VisibleForTesting
+  void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
+                          final TopologyAPI.Topology topology)
       throws InterruptedException {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
@@ -147,8 +148,10 @@ public class UpdateTopologyManager {
     }
   }
 
-  private void reactivateTopology(SchedulerStateManagerAdaptor stateManager,
-                                  TopologyAPI.Topology topology, int removableContainerCount) {
+  @VisibleForTesting
+  void reactivateTopology(SchedulerStateManagerAdaptor stateManager,
+                          TopologyAPI.Topology topology,
+                          int removableContainerCount) {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     int waitSeconds = TopologyUtils.getConfigWithDefault(

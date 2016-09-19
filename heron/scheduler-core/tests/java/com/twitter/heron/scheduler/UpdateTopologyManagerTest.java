@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.any;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -89,6 +90,12 @@ public class UpdateTopologyManagerTest {
 
     Mockito.doReturn(null).when(spyUpdateManager).
         getUpdatedTopology(null, proposedPacking, mockStateMgr);
+    Mockito.doNothing().when(spyUpdateManager).deactivateTopology(
+        any(SchedulerStateManagerAdaptor.class), any(TopologyAPI.Topology.class));
+    Mockito.doNothing().when(spyUpdateManager).reactivateTopology(
+        any(SchedulerStateManagerAdaptor.class),
+        any(TopologyAPI.Topology.class),
+        any(Integer.class));
 
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
