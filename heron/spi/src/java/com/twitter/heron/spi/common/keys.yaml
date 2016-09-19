@@ -62,6 +62,11 @@ SCHEDULER_IS_SERVICE:                heron.scheduler.is.service
 SCHEDULER_JAR:                       heron.jars.scheduler
 
 ################################################################################
+# keys for Topology Update command
+################################################################################
+TOPOLOGY_UPDATE_DEACTIVATE_SECONDS:  heron.topology.update.deactivate.seconds
+
+################################################################################
 # keys for config provided files and directories
 ################################################################################
 INTERNALS_CONFIG_FILE:               heron.internals.config.file

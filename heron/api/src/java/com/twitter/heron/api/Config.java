@@ -172,6 +172,12 @@ public class Config extends HashMap<String, Object> {
    * through this key. The value will be of the format "cp1:cp2:cp3..."
    */
   public static final String TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath";
+
+  public static final String TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS =
+      "topology.update.deactivate.wait.secs";
+  public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
+      "topology.update.reactivate.wait.secs";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -202,6 +208,8 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CAP_TICKET);
     apiVars.add(TOPOLOGY_PROJECT_NAME);
     apiVars.add(TOPOLOGY_ADDITIONAL_CLASSPATH);
+    apiVars.add(TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS);
+    apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
   }
 
   public Config() {
@@ -290,6 +298,14 @@ public class Config extends HashMap<String, Object> {
 
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
+  }
+
+  public static void setUpdateDeactivateWaitDuration(Map<String, Object> conf, int seconds) {
+    conf.put(Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, Integer.toString(seconds));
+  }
+
+  public static void setUpdateReactivateWaitDuration(Map<String, Object> conf, int seconds) {
+    conf.put(Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, Integer.toString(seconds));
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {

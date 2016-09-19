@@ -61,6 +61,7 @@ public final class SchedulerUtils {
     // The java executable should be "{JAVA_HOME}/bin/java"
     String javaExecutable = String.format("%s/%s", Context.javaSandboxHome(config), "bin/java");
     commands.add(javaExecutable);
+    commands.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
     commands.add("-cp");
 
     // Construct the complete classpath to start scheduler

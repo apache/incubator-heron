@@ -14,6 +14,7 @@
 
 package com.twitter.heron.spi.statemgr;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -57,6 +58,10 @@ public class SchedulerStateManagerAdaptor {
     this.timeout = timeout;
   }
 
+  public IStateManager getStateManager() {
+    return delegate;
+  }
+
   /**
    * Waits for ListenableFuture to terminate. Cancels on timeout
    */
@@ -67,7 +72,7 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Waits for ListenableFuture to terminate. Cancels on timeout
    */
-  protected <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
+  public <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
     try {
       return future.get(time, unit);
     } catch (InterruptedException | TimeoutException | ExecutionException e) {

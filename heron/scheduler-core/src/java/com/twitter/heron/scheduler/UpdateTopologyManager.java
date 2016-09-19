@@ -15,23 +15,30 @@ package com.twitter.heron.scheduler;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TMasterUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Class that is able to update a topology. This includes changing the parallelism of
@@ -85,9 +92,12 @@ public class UpdateTopologyManager {
     TopologyAPI.Topology updatedTopology =
         getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
 
+    // deactivate and sleep
+    deactivateTopology(stateManager, updatedTopology);
+
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
-    if (newContainerCount > 0) {
+    if (newContainerCount > 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
     }
 
@@ -104,8 +114,94 @@ public class UpdateTopologyManager {
     // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
     logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
 
-    if (removableContainerCount > 0) {
+    // reactivate topology
+    reactivateTopology(stateManager, updatedTopology, removableContainerCount);
+
+    if (removableContainerCount > 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().removeContainers(containerDelta.getContainersToRemove());
+    }
+  }
+
+  private void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
+                                  final TopologyAPI.Topology topology)
+      throws InterruptedException {
+
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS,
+            5L); //TODO: set to 0 after testing
+
+    logInfo("Deactivating topology %s before handling update request", topology.getName());
+
+    assertTrue(TMasterUtils.transitionTopologyState(
+            topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
+            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED),
+        "Failed to deactivate topology %s. Aborting update request", topology.getName());
+
+    if (deactivateSleepSeconds > 0) {
+      logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
+          topology.getName(), deactivateSleepSeconds);
+      Thread.sleep(deactivateSleepSeconds * 1000);
+    } else {
+      logInfo("Deactivated topology %d.", topology.getName());
+    }
+  }
+
+  private void reactivateTopology(SchedulerStateManagerAdaptor stateManager,
+                                  TopologyAPI.Topology topology, int removableContainerCount) {
+
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    int waitSeconds = TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 60);
+
+    logInfo("Registering a watch for packing plan to be set before re-activating topology %s. "
+            + "Will wait up to %s seconds for packing plan to be reset by TMaster",
+        topology.getName(), waitSeconds);
+
+    if (waitSeconds > 0) { // TODO: don't use this logic here. Only for testing.
+      ListenableFuture<PhysicalPlans.PhysicalPlan> future = stateManager.getStateManager()
+          .getPhysicalPlan(
+              new ReactivateCallback(stateManager, topology.getName(), removableContainerCount),
+              topology.getName());
+
+      // TODO: spawn in another thread
+      PhysicalPlans.PhysicalPlan physicalPlan =
+          stateManager.awaitResult(future, waitSeconds, TimeUnit.SECONDS);
+
+      logInfo("Got new physical plan: %s", physicalPlan);
+    }
+  }
+
+  private class ReactivateCallback implements WatchCallback {
+    private SchedulerStateManagerAdaptor stateManager;
+    private String topologyName;
+    private int removableContainerCount;
+
+    private ReactivateCallback(SchedulerStateManagerAdaptor stateManager,
+                               String topologyName, int removableContainerCount) {
+      this.stateManager = stateManager;
+      this.topologyName = topologyName;
+      this.removableContainerCount = removableContainerCount;
+    }
+
+    @Override
+    public void processWatch(String path, WatchEventType eventType) {
+      logInfo(
+          "Physical plan update watch triggered for path=foo, eventType=%s. Reactivating topology",
+          eventType);
+
+      boolean reactivated = TMasterUtils.transitionTopologyState(
+              topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
+              TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
+
+      if (removableContainerCount < 1) {
+        assertTrue(reactivated,
+            "Topology reactivation failed for topology %s after topology update", topologyName);
+      } else {
+        assertTrue(reactivated, "Topology reactivation failed for topology %s after topology update "
+            + "but before releasing %d no longer used containers",
+            topologyName, removableContainerCount);
+      }
     }
   }
 
@@ -251,6 +347,9 @@ public class UpdateTopologyManager {
     }
   }
 
+  private static void logInfo(String format, Object... values) {
+    LOG.info(String.format(format, values));
+  }
   private static void logFine(String format, Object... values) {
     LOG.fine(String.format(format, values));
   }
