@@ -172,7 +172,7 @@ public class UpdateTopologyManager {
     }
   }
 
-  private class ReactivateCallback implements WatchCallback {
+  private final class ReactivateCallback implements WatchCallback {
     private SchedulerStateManagerAdaptor stateManager;
     private String topologyName;
     private int removableContainerCount;
@@ -198,8 +198,8 @@ public class UpdateTopologyManager {
         assertTrue(reactivated,
             "Topology reactivation failed for topology %s after topology update", topologyName);
       } else {
-        assertTrue(reactivated, "Topology reactivation failed for topology %s after topology update "
-            + "but before releasing %d no longer used containers",
+        assertTrue(reactivated, "Topology reactivation failed for topology %s after topology "
+            + "update but before releasing %d no longer used containers",
             topologyName, removableContainerCount);
       }
     }
