@@ -30,19 +30,29 @@ containers are allocated for each topology.
 
 ### Configuring the Heron client classpath
 
-After 0.14.3 version released, it is unnecessary to copy hadoop-lib-jars to `HERON_INSTALL_DIR/lib/scheduler` like what 0.14.1 & 0.14.2 version requested. [#1245](https://github.com/twitter/heron/issues/1245) added `extra-launch-classpath` arguments, which makes it easier and more convenient to submit a topology to YARN.
+**Under 0.14.2 version (including 0.14.2)**
+  1. Command `hadoop classpath` provides a list of jars needed to submit a hadoop job. Copy all jars to `HERON_INSTALL_DIR/lib/scheduler`.
+   * Do not copy commons-cli jar if it is older than version 1.3.1.
+  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
+ -`HERON_INSTALL_DIR/lib/scheduler` too.
 
-***There is something you should pay attention to*** if you want to submit a topology to YARN, no matter which version of Heron you use.
+**After 0.14.3 version released**
 
-For `localfs-state-manager`
+It is unnecessary to copy hadoop-classpath-jars to `HERON_INSTALL_DIR/lib/scheduler` like what 0.14.2 version requested. [#1245](https://github.com/twitter/heron/issues/1245) added `extra-launch-classpath` arguments, which makes it easier and more convenient to submit a topology to YARN.
 
-* The version of common-cli jar should be greater than or equal to 1.3.1.
-
-For `zookeeper-state-manager`
-
-* The version of common-cli jar should be greater than or equal to 1.3.1.
-* The version of curator-framework jar should be greater than or equal to 2.10.0
-* The version of curator-client jar should be greater than or equal to 2.10.0
+> **Tips**
+>
+>***No matter which version of Heron you are using, there is something user should pay attention to*** if you want to submit a topology to YARN.
+>
+>For `localfs-state-manager`
+>
+>* The version of common-cli jar should be greater than or equal to 1.3.1.
+>
+>For `zookeeper-state-manager`
+>
+>* The version of common-cli jar should be greater than or equal to 1.3.1.
+>* The version of curator-framework jar should be greater than or equal to 2.10.0
+>* The version of curator-client jar should be greater than or equal to 2.10.0
 
 ### Configure the YARN scheduler
 
@@ -63,7 +73,18 @@ deployment on a multi-node YARN cluster.
 ### Topology Submission
 **Command**
 
+**Under 0.14.2 version (including 0.14.2)**
+
+`$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology`
+
+
+**After 0.14.3 version released**
+
 `$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology --extra-launch-classpath <extra-classpath-value>`
+
+>**Tips**
+>
+>More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***What you should concern is the path you set must exists.***
 
 **Sample Output**
 
