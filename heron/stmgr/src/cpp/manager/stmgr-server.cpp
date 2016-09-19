@@ -127,11 +127,9 @@ StMgrServer::~StMgrServer() {
     }
   }
 
-  QueueMetricMap::iterator qmmIter;
-  for (qmmIter = queue_metric_map_.begin(); qmmIter != queue_metric_map_.end(); ++qmmIter) {
-    sp_string instance_id = qmmIter->first;
-    for (TaskIdInstanceDataMap::iterator iter = instance_info_.begin();
-         iter != instance_info_.end(); ++iter) {
+  for (auto qmmIter = queue_metric_map_.begin(); qmmIter != queue_metric_map_.end(); ++qmmIter) {
+    const sp_string& instance_id = qmmIter->first;
+    for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
       if (iter->second->instance_->instance_id() != instance_id) continue;
       InstanceData* data = iter->second;
       Connection* iConn = data->conn_;
@@ -331,7 +329,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
         instance_metric_map_[instance_id] = instance_metric;
       }
       if (queue_metric_map_.find(instance_id) == queue_metric_map_.end()) {
-        heron::common::AssignableMetric* queue_metric = new heron::common::AssignableMetric(0);
+        auto queue_metric = new heron::common::AssignableMetric(0);
         metrics_manager_client_->register_metric(MakeQueueSizeCompIdMetricName(instance_id),
                                                  queue_metric);
         queue_metric_map_[instance_id] = queue_metric;
