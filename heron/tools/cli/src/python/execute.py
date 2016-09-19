@@ -27,8 +27,7 @@ import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.jars as jars
 
 ################################################################################
-def heron_class(class_name, lib_jars, extra_jars=None,
-                args=None, java_defines=None, debug_port=None):
+def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=None):
   '''
   Execute a heron class given the args and the jars needed for class path
   :param class_name:
@@ -56,9 +55,6 @@ def heron_class(class_name, lib_jars, extra_jars=None,
   all_args = [config.get_java_path(), "-client", "-Xmx1g"] + \
              java_opts + \
              ["-cp", config.get_classpath(extra_jars + lib_jars)]
-
-  if debug_port:
-    all_args += ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d" % debug_port]
 
   all_args += [class_name] + list(args)
 
