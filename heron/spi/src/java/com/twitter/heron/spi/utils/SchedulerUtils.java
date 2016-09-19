@@ -434,7 +434,7 @@ public final class SchedulerUtils {
   /**
    * Get a resource that requires the maximum amount of ram, cpu and disk
    */
-  public static PackingPlan gethomogenizedContainerPlan(PackingPlan packingPlan) {
+  public static PackingPlan getHomogenizedContainerPlan(PackingPlan packingPlan) {
     double maxCpu = 0;
     long maxRam = 0;
     long maxDisk = 0;
@@ -459,13 +459,20 @@ public final class SchedulerUtils {
   /**
    * Replaces persisted packing plan in state manager.
    */
-  public static void psersistUpdatedPackingPlan(String topologyName,
-                                                PackingPlan updatedPackingPlan,
-                                                Config runtime) {
+  public static void persistUpdatedPackingPlan(String topologyName,
+                                               PackingPlan updatedPackingPlan,
+                                               Config runtime) {
     LOG.log(Level.INFO, "Updating scheduled-resource in packing plan: {0}", topologyName);
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
-    stateManager.deletePackingPlan(topologyName);
-    stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
+    boolean result = stateManager.deletePackingPlan(topologyName);
+    if (!result) {
+      throw new RuntimeException(String.format("Failed to delete %s's packing plan", topologyName));
+    }
+
+    result = stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
+    if (!result) {
+      throw new RuntimeException(String.format("Failed to save %s's packing plan", topologyName));
+    }
   }
 }

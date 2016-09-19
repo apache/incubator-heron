@@ -15,11 +15,14 @@
 package com.twitter.heron.spi.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -27,7 +30,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, ShellUtils.class, SchedulerUtils.class})
@@ -167,5 +174,64 @@ public class SchedulerUtilsTest {
             "--topology_bin", null, "--http_port", "1"};
     Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
         Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
+  }
+
+  @Test
+  public void updatesPackingPlanWithUniformSizedContainers() {
+    SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    Mockito.when(adaptor.deletePackingPlan("topology")).thenReturn(true);
+    Mockito.when(adaptor.setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
+        Mockito.eq("topology"))).thenReturn(true);
+    Config runtime = Mockito.mock(Config.class);
+    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(adaptor);
+
+    PackingPlan packing = createPackingPlan();
+    SchedulerUtils.persistUpdatedPackingPlan("topology", packing, runtime);
+    InOrder inOrder = Mockito.inOrder(adaptor);
+    inOrder.verify(adaptor).deletePackingPlan("topology");
+    inOrder.verify(adaptor).setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
+        Mockito.eq("topology"));
+  }
+
+  @Test
+  public void updatesPackingPlanInStateManager() {
+    PackingPlan plan = createPackingPlan();
+    PackingPlan newPlan = SchedulerUtils.getHomogenizedContainerPlan(plan);
+
+    PackingPlan.ContainerPlan[] containerArray
+        = newPlan.getContainers().toArray(new PackingPlan.ContainerPlan[2]);
+    Assert.assertEquals(2, newPlan.getContainers().size());
+
+    PackingPlan.ContainerPlan largeContainer = containerArray[0];
+    PackingPlan.ContainerPlan smallContainer = containerArray[1];
+
+    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
+        > smallContainer.getRequiredResource().getCpu());
+    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
+        > smallContainer.getRequiredResource().getRam());
+    Assert.assertTrue(largeContainer.getScheduledResource().isPresent());
+    Assert.assertTrue(smallContainer.getScheduledResource().isPresent());
+    Assert.assertEquals(largeContainer.getScheduledResource().get().getCpu(),
+        smallContainer.getScheduledResource().get().getCpu(), 0.1);
+    Assert.assertEquals(largeContainer.getScheduledResource().get().getRam(),
+        smallContainer.getScheduledResource().get().getRam());
+  }
+
+  private PackingPlan createPackingPlan() {
+    PackingPlan.ContainerPlan largeContainer = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
+    PackingPlan.ContainerPlan smallContainer = PackingTestUtils.testContainerPlan(2, 3);
+
+    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
+        > smallContainer.getRequiredResource().getCpu());
+    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
+        > smallContainer.getRequiredResource().getRam());
+    Assert.assertFalse(largeContainer.getScheduledResource().isPresent());
+    Assert.assertFalse(smallContainer.getScheduledResource().isPresent());
+
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(largeContainer);
+    containers.add(smallContainer);
+
+    return new PackingPlan("id", containers);
   }
 }
