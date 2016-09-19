@@ -185,3 +185,36 @@ above.
 
 1. This should be handled in the same was as internal bolt - by increasing the
    parallelism or RAM for the component.
+
+#### 6. Debug JAVA topologies.
+Jar containing the code for building the topology along with the spout and Bolt 
+code is deployed in the containers. Heron instance is started in each continer, each
+heron instance is responsible for running a Bolt or a spout. One way to debug the 
+code in JAVA is to write debug logs to the log files for tracking and debugging 
+purposes.
+
+Logging must be the preferred mode for debugging as it helps to find issues in short term 
+and in longevity of topology . But if you want to do a step by step debuging of you JVM
+process. This can be achieved by enabling remote debugging for the heron Instance.
+
+*What to do* -
+
+1. Add the java options to enable debuggin on all the Heron Instances that will be started.
+   This can be achieved by adding the options "-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n" .
+```java
+    conf.setDebug(true);
+    conf.setMaxSpoutPending(10);
+    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+    conf.setComponentJvmOptions("word",
+           "-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n");
+    conf.setComponentJvmOptions("exclaim1",
+           "-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n");
+```
+
+2. Use the steps as given in the tutorial to setup remote debugging eith eclipse.
+   [Setup Remote Debugging in Eclipse](http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.user%2Ftasks%2Ftask-remotejava_launch_config.htm) . 
+   To setup remote debugging with intelij use [remote debugging](https://www.jetbrains.com/help/idea/2016.2/run-debug-configuration-remote.html) .
+
+3. Once the topology is activated start the debugger at localhost:port if in standalone local
+   deployment or &lt;IP/hostname&gt;:port for multi container remote deployment. And you will be able 
+   to debug the code step by step.
