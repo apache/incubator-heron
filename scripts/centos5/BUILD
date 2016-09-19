@@ -56,7 +56,7 @@ genrule(
         "--cp $(location hshell)                   heron-core/bin/heron-shell",
         "--cp $(location hstmgr)                   heron-core/bin/heron-stmgr",
         "--cp $(location htmaster)                 heron-core/bin/heron-tmaster",
-        "--cp $(location hpyinstance")             heron-core/bin/heron-python-instance",
+        "--cp $(location hpyinstance)              heron-core/bin/heron-python-instance",
         "--cp $(location hscheduler)               heron-core/lib/scheduler/heron-scheduler.jar",
         "--cp $(location hscheduler-aurora)        heron-core/lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hscheduler-local)         heron-core/lib/scheduler/heron-local-scheduler.jar",
