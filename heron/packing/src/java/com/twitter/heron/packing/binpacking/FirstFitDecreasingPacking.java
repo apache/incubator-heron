@@ -44,7 +44,6 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
-
 /**
  * FirstFitDecreasing packing algorithm
  * <p>
@@ -176,7 +175,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         ffdAllocation, ramMap, defaultInstanceResources, paddingPercentage);
-
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
@@ -323,9 +321,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       int containerId = allocateNewContainer(containers);
       for (PackingPlan.InstancePlan instancePlan
           : currentContainers[i].getInstances()) {
-        containers.get(containerId - 1).add(instancePlan.getResource(),
-            new InstanceId(instancePlan.getComponentName(), instancePlan.getTaskId(),
-                instancePlan.getComponentIndex()));
+        containers.get(containerId - 1).add(instancePlan);
       }
     }
     return containers;
@@ -368,8 +364,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       for (int j = 0; j < numInstance; j++) {
         Resource instanceResource =
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
-        int containerId = placeFFDInstance(containers, instanceResource, new InstanceId(
-            component, globalTaskIndex, j));
+        int containerId = placeFFDInstance(containers, new PackingPlan.InstancePlan(new InstanceId(
+            component, globalTaskIndex, j), instanceResource));
         List<InstanceId> instances = allocation.get(containerId);
         if (instances == null) {
           instances = new ArrayList<>();
@@ -398,8 +394,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       for (int j = 0; j < numInstancesToRemove; j++) {
         Resource instanceResource =
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
-        Pair<Integer, InstanceId> idPair = removeFFDInstance(containers, instanceResource,
-            component);
+        Pair<Integer, InstanceId> idPair = removeFFDInstance(containers, component);
         List<InstanceId> instances = allocation.get(idPair.first);
         instances.remove(idPair.second);
         allocation.put(idPair.first, instances);
@@ -412,19 +407,19 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return the container Id that incorporated the instance
    */
-  private int placeFFDInstance(ArrayList<Container> containers, Resource instanceResource,
-                               InstanceId instanceId) {
+  private int placeFFDInstance(ArrayList<Container> containers,
+                               PackingPlan.InstancePlan instancePlan) {
     boolean placed = false;
     int containerId = 0;
     for (int i = 0; i < containers.size() && !placed; i++) {
-      if (containers.get(i).add(instanceResource, instanceId)) {
+      if (containers.get(i).add(instancePlan)) {
         placed = true;
         containerId = i + 1;
       }
     }
     if (!placed) {
       containerId = allocateNewContainer(containers);
-      containers.get(containerId - 1).add(instanceResource, instanceId);
+      containers.get(containerId - 1).add(instancePlan);
     }
     return containerId;
   }
@@ -435,18 +430,19 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    * @return the pairId that captures the corresponding container and instance id.
    */
   private Pair<Integer, InstanceId> removeFFDInstance(ArrayList<Container> containers,
-                                                      Resource instanceResource,
                                                       String component)
       throws RuntimeException {
     boolean removed = false;
     int containerId = 0;
     for (int i = 0; i < containers.size() && !removed; i++) {
-      Optional<InstanceId> instanceId = containers.get(i).removeAnyInstanceOfComponent(
-          instanceResource, component);
-      if (instanceId.isPresent()) {
+      Optional<PackingPlan.InstancePlan> instancePlan =
+          containers.get(i).removeAnyInstanceOfComponent(component);
+      if (instancePlan.isPresent()) {
         removed = true;
         containerId = i + 1;
-        return new Pair<Integer, InstanceId>(containerId, instanceId.get());
+        PackingPlan.InstancePlan plan = instancePlan.get();
+        return new Pair<Integer, InstanceId>(containerId, new InstanceId(plan.getComponentName(),
+            plan.getTaskId(), plan.getComponentIndex()));
       }
     }
     throw new RuntimeException("Cannot remove instance."

@@ -229,8 +229,9 @@ public class ResourceCompliantRRPacking implements IPacking {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
         Resource instanceResource = this.defaultInstanceResources.cloneWithRam(ramRequirement);
-        if (placeResourceCompliantRRInstance(containers, containerId, instanceResource,
-            new InstanceId(component, globalTaskIndex, i))) {
+        if (placeResourceCompliantRRInstance(containers, containerId,
+            new PackingPlan.InstancePlan(new InstanceId(component, globalTaskIndex, i),
+                instanceResource))) {
           allocation.get(containerId).add(new InstanceId(component, globalTaskIndex, i));
         } else {
           //Automatically adjust the number of containers
@@ -253,8 +254,8 @@ public class ResourceCompliantRRPacking implements IPacking {
    * @return true if the container incorporated the instance, otherwise return false
    */
   private boolean placeResourceCompliantRRInstance(ArrayList<Container> containers, int containerId,
-                                                   Resource resource, InstanceId instanceId) {
-    return containers.get(containerId - 1).add(resource, instanceId);
+                                                   PackingPlan.InstancePlan instancePlan) {
+    return containers.get(containerId - 1).add(instancePlan);
   }
 
   /**

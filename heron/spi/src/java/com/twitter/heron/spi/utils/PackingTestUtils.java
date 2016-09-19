@@ -87,4 +87,5 @@ public final class PackingTestUtils {
     Resource resource = new Resource(1.5, 2, 3);
     return new PackingPlan.InstancePlan(new InstanceId(componentName, instanceIndex, 1), resource);
   }
+
 }
