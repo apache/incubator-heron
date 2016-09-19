@@ -84,7 +84,7 @@ deployment on a multi-node YARN cluster.
 
 >**Tips**
 >
->More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***What you should concern is the path you set must exists.***
+>More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
 
 **Sample Output**
 
