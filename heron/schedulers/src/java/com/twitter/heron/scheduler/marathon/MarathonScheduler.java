@@ -105,7 +105,7 @@ public class MarathonScheduler implements IScheduler {
 
     // TODO (nlu): use heterogeneous resources
     // Align resources to maximal requested resource
-    PackingPlan updatedPackingPlan = SchedulerUtils.getHomogenizedContainerPlan(packing);
+    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime),
         updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtime));
 

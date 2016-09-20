@@ -180,51 +180,12 @@ public class SchedulerUtilsTest {
     Mockito.when(adaptor.setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
         Mockito.eq("topology"))).thenReturn(true);
 
-    PackingPlan packing = createPackingPlan();
+    PackingPlan.ContainerPlan container = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(container);
+    PackingPlan packing = new PackingPlan("id", containers);
     SchedulerUtils.persistUpdatedPackingPlan("topology", packing, adaptor);
     Mockito.verify(adaptor).setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
         Mockito.eq("topology"));
-  }
-
-  @Test
-  public void getHomogenizedContainerPlanWillReturnUpdatedPacking() {
-    PackingPlan plan = createPackingPlan();
-    PackingPlan newPlan = SchedulerUtils.getHomogenizedContainerPlan(plan);
-
-    PackingPlan.ContainerPlan[] containerArray
-        = newPlan.getContainers().toArray(new PackingPlan.ContainerPlan[2]);
-    Assert.assertEquals(2, newPlan.getContainers().size());
-
-    PackingPlan.ContainerPlan largeContainer = containerArray[0];
-    PackingPlan.ContainerPlan smallContainer = containerArray[1];
-
-    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
-        > smallContainer.getRequiredResource().getCpu());
-    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
-        > smallContainer.getRequiredResource().getRam());
-    Assert.assertTrue(largeContainer.getScheduledResource().isPresent());
-    Assert.assertTrue(smallContainer.getScheduledResource().isPresent());
-    Assert.assertEquals(largeContainer.getScheduledResource().get().getCpu(),
-        smallContainer.getScheduledResource().get().getCpu(), 0.1);
-    Assert.assertEquals(largeContainer.getScheduledResource().get().getRam(),
-        smallContainer.getScheduledResource().get().getRam());
-  }
-
-  private PackingPlan createPackingPlan() {
-    PackingPlan.ContainerPlan largeContainer = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
-    PackingPlan.ContainerPlan smallContainer = PackingTestUtils.testContainerPlan(2, 3);
-
-    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
-        > smallContainer.getRequiredResource().getCpu());
-    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
-        > smallContainer.getRequiredResource().getRam());
-    Assert.assertFalse(largeContainer.getScheduledResource().isPresent());
-    Assert.assertFalse(smallContainer.getScheduledResource().isPresent());
-
-    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-    containers.add(largeContainer);
-    containers.add(smallContainer);
-
-    return new PackingPlan("id", containers);
   }
 }

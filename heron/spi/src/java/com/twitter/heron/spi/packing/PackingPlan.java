@@ -15,6 +15,7 @@
 package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,31 @@ public class PackingPlan {
     for (ContainerPlan containerPlan : containers) {
       containersMap.put(containerPlan.getId(), containerPlan);
     }
+  }
+
+  /**
+   * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
+   * required by containers in the packing plan and updates the containers of the clone with the
+   * max resource information
+   */
+  public PackingPlan cloneWithHomogeneousScheduledResource() {
+    double maxCpu = 0;
+    long maxRam = 0;
+    long maxDisk = 0;
+    for (ContainerPlan containerPlan : getContainers()) {
+      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
+      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
+      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
+    }
+
+    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
+    Set<ContainerPlan> updatedContainers = new HashSet<>();
+    for (ContainerPlan container : getContainers()) {
+      updatedContainers.add(container.cloneWithScheduledResource(maxResource));
+    }
+
+    PackingPlan updatedPackingPlan = new PackingPlan(getId(), updatedContainers);
+    return updatedPackingPlan;
   }
 
   public String getId() {
@@ -251,6 +277,13 @@ public class PackingPlan {
         result = 31 * result + getScheduledResource().get().hashCode();
       }
       return result;
+    }
+
+    /**
+     * Returns a {@link ContainerPlan} with updated scheduledResource
+     */
+    public ContainerPlan cloneWithScheduledResource(Resource resource) {
+      return new ContainerPlan(getId(), getInstances(), getRequiredResource(), resource);
     }
 
     @Override

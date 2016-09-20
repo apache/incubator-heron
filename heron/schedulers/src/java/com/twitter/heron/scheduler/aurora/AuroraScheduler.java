@@ -163,7 +163,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // Align the cpu, ram, disk to the maximal one
-    PackingPlan updatedPackingPlan = SchedulerUtils.getHomogenizedContainerPlan(packing);
+    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
     SchedulerUtils.persistUpdatedPackingPlan(topology.getName(), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 

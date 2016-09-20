@@ -17,10 +17,8 @@ package com.twitter.heron.spi.utils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +32,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -429,31 +426,6 @@ public final class SchedulerUtils {
     }
 
     return true;
-  }
-
-  /**
-   * Get a resource that requires the maximum amount of ram, cpu and disk
-   */
-  public static PackingPlan getHomogenizedContainerPlan(PackingPlan packingPlan) {
-    double maxCpu = 0;
-    long maxRam = 0;
-    long maxDisk = 0;
-    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
-      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
-      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
-    }
-
-    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
-    Set<PackingPlan.ContainerPlan> updatedContainers = new HashSet<>();
-    for (PackingPlan.ContainerPlan container : packingPlan.getContainers()) {
-      PackingPlan.ContainerPlan updatedContainer = new PackingPlan.ContainerPlan(container.getId(),
-          container.getInstances(), container.getRequiredResource(), maxResource);
-      updatedContainers.add(updatedContainer);
-    }
-
-    PackingPlan updatedPackingPlan = new PackingPlan(packingPlan.getId(), updatedContainers);
-    return updatedPackingPlan;
   }
 
   /**

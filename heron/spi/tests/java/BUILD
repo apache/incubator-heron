@@ -18,6 +18,7 @@ util_deps_files = \
 packing_deps_files = \
     common_deps_files + [
         "//heron/spi/src/java:packing-spi-java",
+        "//heron/spi/src/java:utils-spi-java",
     ]
 
 proto_deps_files = \
