@@ -48,7 +48,7 @@ public final class AssertPacking {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
         Assert.assertNotEquals(
-            notExpectedContainerRam, (Long) containerPlan.getResource().getRam());
+            notExpectedContainerRam, (Long) containerPlan.getRequiredResource().getRam());
       }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         expectedInstanceIndecies.add(expectedInstanceIndex++);

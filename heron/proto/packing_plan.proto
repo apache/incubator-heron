@@ -22,7 +22,8 @@ message InstancePlan {
 message ContainerPlan {
   required int32 id = 1;
   repeated InstancePlan instance_plans = 2;
-  required Resource resource = 3;
+  required Resource requiredResource = 3;
+  optional Resource scheduledResource = 4;
 }
 
 message PackingPlan {

@@ -31,7 +31,7 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -429,18 +429,17 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Get a resource that requires the maximum amount of ram, cpu and disk
+   * Replaces persisted packing plan in state manager.
    */
-  public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
-    double maxCpu = 0;
-    long maxRam = 0;
-    long maxDisk = 0;
-    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      maxCpu = Math.max(maxCpu, containerPlan.getResource().getCpu());
-      maxRam = Math.max(maxRam, containerPlan.getResource().getRam());
-      maxDisk = Math.max(maxDisk, containerPlan.getResource().getDisk());
+  public static void persistUpdatedPackingPlan(String topologyName,
+                                               PackingPlan updatedPackingPlan,
+                                               SchedulerStateManagerAdaptor stateManager) {
+    LOG.log(Level.INFO, "Updating scheduled-resource in packing plan: {0}", topologyName);
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    boolean result =
+        stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
+    if (!result) {
+      throw new RuntimeException(String.format("Failed to save %s's packing plan", topologyName));
     }
-
-    return new Resource(maxCpu, maxRam, maxDisk);
   }
 }
