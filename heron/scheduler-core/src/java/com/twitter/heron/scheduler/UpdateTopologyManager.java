@@ -139,7 +139,7 @@ public class UpdateTopologyManager implements Closeable {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 5L);
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 0L);
 
     logInfo("Deactivating topology %s before handling update request", topology.getName());
     assertTrue(TMasterUtils.transitionTopologyState(
