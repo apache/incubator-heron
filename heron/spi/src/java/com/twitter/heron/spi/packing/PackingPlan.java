@@ -282,7 +282,7 @@ public class PackingPlan {
     /**
      * Returns a {@link ContainerPlan} with updated scheduledResource
      */
-    public ContainerPlan cloneWithScheduledResource(Resource resource) {
+    private ContainerPlan cloneWithScheduledResource(Resource resource) {
       return new ContainerPlan(getId(), getInstances(), getRequiredResource(), resource);
     }
 
