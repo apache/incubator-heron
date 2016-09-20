@@ -124,7 +124,7 @@ def main():
   args['testJarPath'] = os.path.join(heron_repo_directory, conf['testJarPath'])
 
   test_classes = TEST_CLASSES
-  if (sys.argv > 1):
+  if (sys.argv > 2):
     first_arg = sys.argv[1]
     class_name = first_arg.split(".")
     if first_arg == "-h" or len(class_name) < 2:
