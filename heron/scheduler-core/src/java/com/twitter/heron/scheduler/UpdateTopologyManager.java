@@ -13,18 +13,21 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -35,7 +38,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -44,17 +46,25 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * Class that is able to update a topology. This includes changing the parallelism of
  * topology components
  */
-public class UpdateTopologyManager {
+public class UpdateTopologyManager implements Closeable {
   private static final Logger LOG = Logger.getLogger(UpdateTopologyManager.class.getName());
 
   private Config runtime;
   private Optional<IScalable> scalableScheduler;
   private PackingPlanProtoDeserializer deserializer;
+  private ScheduledThreadPoolExecutor reactivateExecutorService;
 
   public UpdateTopologyManager(Config runtime, Optional<IScalable> scalableScheduler) {
     this.runtime = runtime;
     this.scalableScheduler = scalableScheduler;
     this.deserializer = new PackingPlanProtoDeserializer();
+    this.reactivateExecutorService = new ScheduledThreadPoolExecutor(1);
+    this.reactivateExecutorService.setMaximumPoolSize(1);
+  }
+
+  @Override
+  public void close() {
+    this.reactivateExecutorService.shutdownNow();
   }
 
   /**
@@ -129,11 +139,9 @@ public class UpdateTopologyManager {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS,
-            5L); //TODO: set to 0 after testing
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 5L);
 
     logInfo("Deactivating topology %s before handling update request", topology.getName());
-
     assertTrue(TMasterUtils.transitionTopologyState(
             topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
             TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED),
@@ -144,7 +152,7 @@ public class UpdateTopologyManager {
           topology.getName(), deactivateSleepSeconds);
       Thread.sleep(deactivateSleepSeconds * 1000);
     } else {
-      logInfo("Deactivated topology %d.", topology.getName());
+      logInfo("Deactivated topology %s.", topology.getName());
     }
   }
 
@@ -154,56 +162,82 @@ public class UpdateTopologyManager {
                           int removableContainerCount) {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    int waitSeconds = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 60);
+    long waitSeconds = TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 5*60L);
+    long delaySeconds = 10;
 
-    logInfo("Registering a watch for packing plan to be set before re-activating topology %s. "
-            + "Will wait up to %s seconds for packing plan to be reset by TMaster",
+    logInfo("Waiting for packing plan to be set before re-activating topology %s. "
+            + "Will wait up to %s seconds for packing plan to be reset",
         topology.getName(), waitSeconds);
-
-    if (waitSeconds > 0) { // TODO: don't use this logic here. Only for testing.
-      ListenableFuture<PhysicalPlans.PhysicalPlan> future = stateManager.getStateManager()
-          .getPhysicalPlan(
-              new ReactivateCallback(stateManager, topology.getName(), removableContainerCount),
-              topology.getName());
-
-      // TODO: spawn in another thread
-      PhysicalPlans.PhysicalPlan physicalPlan =
-          stateManager.awaitResult(future, waitSeconds, TimeUnit.SECONDS);
-
-      logInfo("Got new physical plan: %s", physicalPlan);
-    }
+    Reenabler reenabler = new Reenabler(
+        stateManager, topology, waitSeconds, removableContainerCount);
+    Future<?> future = this.reactivateExecutorService.scheduleWithFixedDelay(
+        reenabler, delaySeconds, delaySeconds, TimeUnit.SECONDS);
+    reenabler.setFutureRunnable(future);
   }
 
-  private final class ReactivateCallback implements WatchCallback {
+  private final class Reenabler implements Runnable {
     private SchedulerStateManagerAdaptor stateManager;
     private String topologyName;
     private int removableContainerCount;
+    private long timeoutTime;
+    private Future<?> futureRunnable;
+    private volatile boolean cancelled = false;
 
-    private ReactivateCallback(SchedulerStateManagerAdaptor stateManager,
-                               String topologyName, int removableContainerCount) {
+    private Reenabler(SchedulerStateManagerAdaptor stateManager,
+                     TopologyAPI.Topology topology,
+                     long timeoutSeconds,
+                     int removableContainerCount) {
       this.stateManager = stateManager;
-      this.topologyName = topologyName;
       this.removableContainerCount = removableContainerCount;
+      this.topologyName = topology.getName();
+      this.timeoutTime = System.currentTimeMillis() + timeoutSeconds * 1000;
+    }
+
+    private synchronized void setFutureRunnable(Future<?> futureRunnable) {
+      this.futureRunnable = futureRunnable;
+      if(this.cancelled) {
+        cancel();
+      }
+    }
+
+    private void cancel() {
+      this.cancelled = true;
+      if (this.futureRunnable != null && !this.futureRunnable.isCancelled()) {
+        logInfo("Cancelling Topology reactivation task for topology %s", topologyName);
+        this.futureRunnable.cancel(true);
+      }
     }
 
     @Override
-    public void processWatch(String path, WatchEventType eventType) {
-      logInfo(
-          "Physical plan update watch triggered for path=foo, eventType=%s. Reactivating topology",
-          eventType);
+    public synchronized void run() {
+      PhysicalPlans.PhysicalPlan physicalPlan = stateManager.getPhysicalPlan(topologyName);
+      if (physicalPlan != null) {
+        logInfo("Received packing plan for topology %s. "
+            + "Reactivating topology after scaling event", topologyName);
+        boolean reactivated = TMasterUtils.transitionTopologyState(
+            topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
+            TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
 
-      boolean reactivated = TMasterUtils.transitionTopologyState(
-              topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
-              TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
+        cancel();
 
-      if (removableContainerCount < 1) {
-        assertTrue(reactivated,
-            "Topology reactivation failed for topology %s after topology update", topologyName);
+        if (removableContainerCount < 1) {
+          assertTrue(reactivated,
+              "Topology reactivation failed for topology %s after topology update", topologyName);
+        } else {
+          assertTrue(reactivated, "Topology reactivation failed for topology %s after topology "
+                  + "update but before releasing %d no longer used containers",
+              topologyName, removableContainerCount);
+        }
+        return;
       } else {
-        assertTrue(reactivated, "Topology reactivation failed for topology %s after topology "
-            + "update but before releasing %d no longer used containers",
-            topologyName, removableContainerCount);
+        logInfo("Received null packing plan for topology %s.", topologyName);
+      }
+
+      if (System.currentTimeMillis() > this.timeoutTime) {
+        LOG.warning(String.format("New packing plan not received within configured timeout for "
+            + "topology %s. Not reactivating", topologyName));
+        cancel();
       }
     }
   }

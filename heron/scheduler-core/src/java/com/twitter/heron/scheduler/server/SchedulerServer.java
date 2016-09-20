@@ -29,31 +29,29 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 public class SchedulerServer {
 
   // initialize the various URL end points
-  public static final String KILL_REQUEST_CONTEXT = "/kill";
-  public static final String RESTART_REQUEST_CONTEXT = "/restart";
-  public static final String UPDATE_REQUEST_CONTEXT = "/update";
+  private static final String KILL_REQUEST_CONTEXT = "/kill";
+  private static final String RESTART_REQUEST_CONTEXT = "/restart";
+  private static final String UPDATE_REQUEST_CONTEXT = "/update";
 
   private static final int SERVER_BACK_LOG = 0;
 
   private final HttpServer schedulerServer;
-  private final Config runtime;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   public SchedulerServer(Config runtime, IScheduler scheduler, int port)
       throws IOException {
 
-    this.runtime = runtime;
     this.schedulerServer = createServer(port, executorService);
 
     // associate handlers with the URL service end points
     this.schedulerServer.createContext(KILL_REQUEST_CONTEXT,
-        new KillRequestHandler(runtime, scheduler));
+        new ExceptionalRequestHandler(new KillRequestHandler(scheduler), runtime));
 
     this.schedulerServer.createContext(RESTART_REQUEST_CONTEXT,
-        new RestartRequestHandler(runtime, scheduler));
+        new ExceptionalRequestHandler(new RestartRequestHandler(scheduler), runtime));
 
     this.schedulerServer.createContext(UPDATE_REQUEST_CONTEXT,
-        new UpdateRequestHandler(runtime, scheduler));
+        new ExceptionalRequestHandler(new UpdateRequestHandler(scheduler), runtime));
   }
 
   public void start() {

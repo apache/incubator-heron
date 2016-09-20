@@ -20,15 +20,13 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
-public class RestartRequestHandler implements HttpHandler {
+class RestartRequestHandler implements HttpHandler {
   private IScheduler scheduler;
 
-  public RestartRequestHandler(Config runtime, IScheduler scheduler) {
+  RestartRequestHandler(IScheduler scheduler) {
     this.scheduler = scheduler;
   }
 
@@ -44,14 +42,8 @@ public class RestartRequestHandler implements HttpHandler {
             .mergeFrom(requestBody)
             .build();
 
-    // restart the topology
-    boolean isRestartSuccessfully = scheduler.onRestart(restartTopologyRequest);
-
-    // prepare the response
-    Scheduler.SchedulerResponse response =
-        SchedulerUtils.constructSchedulerResponse(isRestartSuccessfully);
-
-    // send the response back
-    NetworkUtils.sendHttpResponse(exchange, response.toByteArray());
+    if (!scheduler.onRestart(restartTopologyRequest)) {
+      throw new RuntimeException("Failed to process restartTopologyRequest");
+    }
   }
 }

@@ -68,6 +68,8 @@ public class LocalScheduler implements IScheduler, IScalable {
 
     // Clear the map
     processToContainer.clear();
+
+    updateTopologyManager.close();
   }
 
   /**
@@ -126,7 +128,9 @@ public class LocalScheduler implements IScheduler, IScalable {
           // restart the container
           startExecutor(processToContainer.remove(containerExecutor));
         } catch (InterruptedException e) {
-          LOG.log(Level.SEVERE, "Process is interrupted: ", e);
+          if (!isTopologyKilled) {
+            LOG.log(Level.SEVERE, "Process is interrupted: ", e);
+          }
         }
       }
     };
