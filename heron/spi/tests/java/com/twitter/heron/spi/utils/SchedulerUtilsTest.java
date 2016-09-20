@@ -22,7 +22,6 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -32,7 +31,6 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -177,24 +175,19 @@ public class SchedulerUtilsTest {
   }
 
   @Test
-  public void updatesPackingPlanWithUniformSizedContainers() {
+  public void persistUpdatedPackingPlanWillUpdatesStateManager() {
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
-    Mockito.when(adaptor.deletePackingPlan("topology")).thenReturn(true);
     Mockito.when(adaptor.setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
         Mockito.eq("topology"))).thenReturn(true);
-    Config runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(adaptor);
 
     PackingPlan packing = createPackingPlan();
-    SchedulerUtils.persistUpdatedPackingPlan("topology", packing, runtime);
-    InOrder inOrder = Mockito.inOrder(adaptor);
-    inOrder.verify(adaptor).deletePackingPlan("topology");
-    inOrder.verify(adaptor).setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
+    SchedulerUtils.persistUpdatedPackingPlan("topology", packing, adaptor);
+    Mockito.verify(adaptor).setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
         Mockito.eq("topology"));
   }
 
   @Test
-  public void updatesPackingPlanInStateManager() {
+  public void getHomogenizedContainerPlanWillReturnUpdatedPacking() {
     PackingPlan plan = createPackingPlan();
     PackingPlan newPlan = SchedulerUtils.getHomogenizedContainerPlan(plan);
 

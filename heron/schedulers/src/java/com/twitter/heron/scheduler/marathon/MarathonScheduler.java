@@ -107,7 +107,7 @@ public class MarathonScheduler implements IScheduler {
     // Align resources to maximal requested resource
     PackingPlan updatedPackingPlan = SchedulerUtils.getHomogenizedContainerPlan(packing);
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime),
-        updatedPackingPlan, runtime);
+        updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtime));
 
     Resource containerResource = updatedPackingPlan.getContainers()
         .iterator().next().getRequiredResource();

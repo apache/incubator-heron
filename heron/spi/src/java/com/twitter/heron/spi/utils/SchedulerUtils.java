@@ -461,16 +461,11 @@ public final class SchedulerUtils {
    */
   public static void persistUpdatedPackingPlan(String topologyName,
                                                PackingPlan updatedPackingPlan,
-                                               Config runtime) {
+                                               SchedulerStateManagerAdaptor stateManager) {
     LOG.log(Level.INFO, "Updating scheduled-resource in packing plan: {0}", topologyName);
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
-    boolean result = stateManager.deletePackingPlan(topologyName);
-    if (!result) {
-      throw new RuntimeException(String.format("Failed to delete %s's packing plan", topologyName));
-    }
-
-    result = stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
+    boolean result =
+        stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
     if (!result) {
       throw new RuntimeException(String.format("Failed to save %s's packing plan", topologyName));
     }
