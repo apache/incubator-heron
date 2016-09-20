@@ -173,7 +173,7 @@ public class PackingPlan {
       return taskId;
     }
 
-    int getComponentIndex() {
+    public int getComponentIndex() {
       return componentIndex;
     }
 

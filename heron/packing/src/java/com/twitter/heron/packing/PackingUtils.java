@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.twitter.heron.packing;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -136,4 +138,26 @@ public final class PackingUtils {
 
     return containerPlans;
   }
+
+  /**
+   * Sort the container plans based on the container Ids
+   * @param containers
+   * @return sorted array of container plans
+   */
+  public static PackingPlan.ContainerPlan[] sortOnContainerId(
+      Set<PackingPlan.ContainerPlan> containers) {
+    ArrayList<Integer> containerIds = new ArrayList<>();
+    PackingPlan.ContainerPlan[] currentContainers =
+        new PackingPlan.ContainerPlan[containers.size()];
+    for (PackingPlan.ContainerPlan container : containers) {
+      containerIds.add(container.getId());
+    }
+    Collections.sort(containerIds);
+    for (PackingPlan.ContainerPlan container : containers) {
+      int position = containerIds.indexOf(container.getId());
+      currentContainers[position] = container;
+    }
+    return currentContainers;
+  }
+
 }
