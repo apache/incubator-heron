@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class PackingPlanTest {
   private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking) {
@@ -89,5 +90,42 @@ public class PackingPlanTest {
     Assert.assertEquals("Packing plan ram distribution not the same after converting to "
             + "protobuf object and back",
         newPackingPlan.getComponentRamDistribution(), packingPlan.getComponentRamDistribution());
+  }
+
+  @Test
+  public void cloneWithHomogeneousScheduledResourceWillReturnUpdatedPacking() {
+    PackingPlan.ContainerPlan largeContainer = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
+    PackingPlan.ContainerPlan smallContainer = PackingTestUtils.testContainerPlan(2, 3);
+
+    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
+        > smallContainer.getRequiredResource().getCpu());
+    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
+        > smallContainer.getRequiredResource().getRam());
+    Assert.assertFalse(largeContainer.getScheduledResource().isPresent());
+    Assert.assertFalse(smallContainer.getScheduledResource().isPresent());
+
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(largeContainer);
+    containers.add(smallContainer);
+
+    PackingPlan plan = new PackingPlan("id", containers).cloneWithHomogeneousScheduledResource();
+
+    PackingPlan.ContainerPlan[] containerArray
+        = plan.getContainers().toArray(new PackingPlan.ContainerPlan[2]);
+    Assert.assertEquals(2, plan.getContainers().size());
+
+    largeContainer = containerArray[0];
+    smallContainer = containerArray[1];
+
+    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
+        > smallContainer.getRequiredResource().getCpu());
+    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
+        > smallContainer.getRequiredResource().getRam());
+    Assert.assertTrue(largeContainer.getScheduledResource().isPresent());
+    Assert.assertTrue(smallContainer.getScheduledResource().isPresent());
+    Assert.assertEquals(largeContainer.getScheduledResource().get().getCpu(),
+        smallContainer.getScheduledResource().get().getCpu(), 0.1);
+    Assert.assertEquals(largeContainer.getScheduledResource().get().getRam(),
+        smallContainer.getScheduledResource().get().getRam());
   }
 }

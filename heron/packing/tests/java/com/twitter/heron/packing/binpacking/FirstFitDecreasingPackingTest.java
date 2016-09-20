@@ -173,17 +173,17 @@ public class FirstFitDecreasingPackingTest {
       Assert.assertEquals(Math.round(totalInstances * instanceDefaultResources.getCpu()
               + (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances
               * instanceDefaultResources.getCpu())),
-          (long) containerPlan.getResource().getCpu());
+          (long) containerPlan.getRequiredResource().getCpu());
 
       Assert.assertEquals(totalInstances * instanceDefaultResources.getRam()
               + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances
               * instanceDefaultResources.getRam()),
-          containerPlan.getResource().getRam());
+          containerPlan.getRequiredResource().getRam());
 
       Assert.assertEquals(totalInstances * instanceDefaultResources.getDisk()
               + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * totalInstances
               * instanceDefaultResources.getDisk()),
-          containerPlan.getResource().getDisk());
+          containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1

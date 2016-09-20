@@ -15,9 +15,7 @@
 package com.twitter.heron.scheduler;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -33,16 +31,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.Shutdown;
@@ -120,16 +117,11 @@ public class SchedulerMainTest {
     Mockito.doReturn(shutdown).when(schedulerMain).getShutdown();
   }
 
-  // TODO reuse PackingTestUtils.createTestProtoPackingPlan once PR#1321 is merged
   private SettableFuture<PackingPlans.PackingPlan> getTestPacking() {
-    Set<PackingPlan.InstancePlan> instances = new HashSet<>();
-    instances.add(
-        new PackingPlan.InstancePlan(new InstanceId("dummy", 1, 1), new Resource(1, 1, 1)));
-    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-    containers.add(new PackingPlan.ContainerPlan(1, instances, new Resource(1, 1, 1)));
-    PackingPlan packingPlan = new PackingPlan("packing-id", containers);
+    PackingPlans.PackingPlan packingPlan =
+        PackingTestUtils.testProtoPackingPlan("testTopology", new RoundRobinPacking());
     final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
-    future.set(new PackingPlanProtoSerializer().toProto(packingPlan));
+    future.set(packingPlan);
     return future;
   }
 
