@@ -23,23 +23,22 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
 /**
- * Class that describes a container used to place Heron Instances with specific memory, CpuCores and disk
+ * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
 public class Container {
 
   private HashSet<PackingPlan.InstancePlan> instances;
 
-  //Maximum resources that can be assigned to the container.
-  private long maxRam;
-  private double maxCpuCores;
-  private long maxDisk;
+  private Resource capacity;
 
-  public Container(Resource resource) {
-    this.maxRam = resource.getRam();
-    this.maxCpuCores = resource.getCpu();
-    this.maxDisk = resource.getDisk();
-    instances = new HashSet<PackingPlan.InstancePlan>();
+  /**
+   * Creates a container with a specific capacity
+   * @param capacity the capacity of the container in terms of cpu, ram and disk
+   */
+  public Container(Resource capacity) {
+    this.capacity = capacity;
+    this.instances = new HashSet<PackingPlan.InstancePlan>();
   }
 
   /**
@@ -49,9 +48,9 @@ public class Container {
    */
   private boolean hasSpace(Resource resource) {
     Resource usedResources = this.getTotalUsedResources();
-    return usedResources.getRam() + resource.getRam() <= this.maxRam
-        && usedResources.getCpu() + resource.getCpu() <= this.maxCpuCores
-        && usedResources.getDisk() + resource.getDisk() <= this.maxDisk;
+    return usedResources.getRam() + resource.getRam() <= this.capacity.getRam()
+        && usedResources.getCpu() + resource.getCpu() <= this.capacity.getCpu()
+        && usedResources.getDisk() + resource.getDisk() <= this.capacity.getDisk();
   }
 
   /**
@@ -100,7 +99,7 @@ public class Container {
     if (instancePlan.isPresent()) {
       PackingPlan.InstancePlan plan = instancePlan.get();
       this.instances.remove(plan);
-      return Optional.of(plan);
+      return instancePlan;
     }
     return Optional.absent();
   }

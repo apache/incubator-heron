@@ -392,8 +392,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       String component = ramRequirement.getComponentName();
       int numInstancesToRemove = -componentsToScaleDown.get(component);
       for (int j = 0; j < numInstancesToRemove; j++) {
-        Resource instanceResource =
-            this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
         Pair<Integer, InstanceId> idPair = removeFFDInstance(containers, component);
         List<InstanceId> instances = allocation.get(idPair.first);
         instances.remove(idPair.second);

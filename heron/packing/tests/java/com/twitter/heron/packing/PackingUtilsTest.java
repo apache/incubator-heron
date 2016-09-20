@@ -13,63 +13,24 @@
 // limitations under the License.
 package com.twitter.heron.packing;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking;
-import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.utils.TopologyTests;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class PackingUtilsTest {
 
-  private static final String BOLT_NAME = "bolt";
-  private static final String SPOUT_NAME = "spout";
-
-  private int spoutParallelism;
-  private int boltParallelism;
-  private com.twitter.heron.api.Config topologyConfig;
-  private TopologyAPI.Topology topology;
-  private int totalInstances;
-
-  private static TopologyAPI.Topology getTopology(
-      int spoutParallelism, int boltParallelism,
-      com.twitter.heron.api.Config topologyConfig) {
-    return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
-        spoutParallelism, boltParallelism);
-  }
-
-  private static PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-
-    FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
-
-    packing.initialize(config, topology);
-    return packing.pack();
-  }
-
-  @Before
-  public void setUp() {
-    this.spoutParallelism = 4;
-    this.boltParallelism = 3;
-    this.totalInstances = spoutParallelism + boltParallelism;
-    // Set up the topology and its config
-    this.topologyConfig = new com.twitter.heron.api.Config();
-    this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
+  private static Set<PackingPlan.ContainerPlan> generateContainers(Integer[] containerIds,
+                                                                   Integer[] instanceIds) {
+    Set<PackingPlan.ContainerPlan> containerPlan = new HashSet<>();
+    for (int containerId : containerIds) {
+      containerPlan.add(PackingTestUtils.testContainerPlan(containerId, instanceIds));
+    }
+    return containerPlan;
   }
 
   /**
@@ -78,18 +39,13 @@ public class PackingUtilsTest {
   @Test
   public void testContainerSortOnId() {
 
-    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
+    Integer[] containerIds = {5, 4, 1, 2, 3};
+    Integer[] instanceIds = {1, 2, 3};
+    Set<PackingPlan.ContainerPlan> containers = generateContainers(containerIds, instanceIds);
 
-    Assert.assertEquals(packingPlan.getContainers().size(), 2);
-    Assert.assertEquals((long) packingPlan.getInstanceCount(), totalInstances);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, boltParallelism);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, spoutParallelism);
+    PackingPlan.ContainerPlan[] currentContainers = PackingUtils.sortOnContainerId(containers);
 
-    PackingPlan.ContainerPlan[] currentContainers = packingPlan.getContainers().toArray(
-        new PackingPlan.ContainerPlan[1]);
-
-    Assert.assertEquals(currentContainers.length, packingPlan.getContainers().size());
-
+    Assert.assertEquals(containerIds.length, currentContainers.length);
     for (int i = 0; i < currentContainers.length; i++) {
       Assert.assertEquals((currentContainers[i]).getId(), i + 1);
     }

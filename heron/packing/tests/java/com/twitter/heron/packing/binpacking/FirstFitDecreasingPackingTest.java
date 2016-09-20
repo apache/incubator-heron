@@ -81,33 +81,32 @@ public class FirstFitDecreasingPackingTest {
     return packing.repack(currentPackingPlan, componentChanges);
   }
 
-  PackingPlan doScalingTest(TopologyAPI.Topology t,
-                            Map<String, Integer> componentChanges, long boltRam, long spoutRam,
-                            int numContainersBeforeRepack) {
-    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(t);
+  private static PackingPlan doScalingTest(TopologyAPI.Topology topology,
+                                           Map<String, Integer> componentChanges, long boltRam,
+                                           int boltParallelism, long spoutRam, int spoutParallelism,
+                                           int numContainersBeforeRepack,
+                                           int totalInstancesExpected) {
+    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
 
     Assert.assertEquals(numContainersBeforeRepack, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+    Assert.assertEquals(totalInstancesExpected, (int) packingPlan.getInstanceCount());
     AssertPacking.assertContainers(packingPlan.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, null);
     AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, boltParallelism);
     AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, spoutParallelism);
 
     PackingPlan newPackingPlan =
-        getFirstFitDecreasingPackingPlanRepack(t, packingPlan, componentChanges);
+        getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
     return newPackingPlan;
-
   }
 
-  PackingPlan doDefaultScalingTest(Map<String, Integer> componentChanges,
-                                   int numContainersBeforeRepack) {
-    topologyConfig.setComponentRam(BOLT_NAME, instanceDefaultResources.getRam());
-    topologyConfig.setComponentRam(SPOUT_NAME, instanceDefaultResources.getRam());
+  private PackingPlan doDefaultScalingTest(Map<String, Integer> componentChanges,
+                                           int numContainersBeforeRepack) {
     PackingPlan newPackingPlan = doScalingTest(topology, componentChanges,
-        instanceDefaultResources.getRam(), instanceDefaultResources.getRam(),
-        numContainersBeforeRepack);
+        instanceDefaultResources.getRam(), boltParallelism,
+        instanceDefaultResources.getRam(), spoutParallelism,
+        numContainersBeforeRepack, totalInstances);
     return newPackingPlan;
-
   }
 
   @Before
@@ -433,7 +432,8 @@ public class FirstFitDecreasingPackingTest {
 
     int numContainersBeforeRepack = 2;
     PackingPlan newPackingPlan = doScalingTest(topologyExplicitRamMap, componentChanges, boltRam,
-        instanceDefaultResources.getRam(), numContainersBeforeRepack);
+        boltParallelism, instanceDefaultResources.getRam(), spoutParallelism,
+        numContainersBeforeRepack, totalInstances);
 
     Assert.assertEquals(3, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
