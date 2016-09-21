@@ -107,8 +107,7 @@ public final class TopologyUtils {
 
   public static String getInstanceJvmOptions(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    return
-        getConfigWithDefault(topologyConfig, Config.TOPOLOGY_WORKER_CHILDOPTS, "");
+    return getConfigWithDefault(topologyConfig, Config.TOPOLOGY_WORKER_CHILDOPTS, "");
   }
 
   public static String getComponentJvmOptions(TopologyAPI.Topology topology) {
