@@ -14,7 +14,6 @@
 package com.twitter.heron.scheduler;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -163,7 +162,7 @@ public class UpdateTopologyManager implements Closeable {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long waitSeconds = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 5*60L);
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 5 * 60L);
     long delaySeconds = 10;
 
     logInfo("Waiting for packing plan to be set before re-activating topology %s. "
@@ -196,7 +195,7 @@ public class UpdateTopologyManager implements Closeable {
 
     private synchronized void setFutureRunnable(Future<?> futureRunnable) {
       this.futureRunnable = futureRunnable;
-      if(this.cancelled) {
+      if (this.cancelled) {
         cancel();
       }
     }

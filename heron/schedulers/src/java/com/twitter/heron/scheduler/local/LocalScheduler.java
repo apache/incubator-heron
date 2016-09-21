@@ -69,7 +69,9 @@ public class LocalScheduler implements IScheduler, IScalable {
     // Clear the map
     processToContainer.clear();
 
-    updateTopologyManager.close();
+    if (updateTopologyManager != null) {
+      updateTopologyManager.close();
+    }
   }
 
   /**

@@ -58,6 +58,7 @@ public class LocalSchedulerTest {
   @Test
   public void testClose() throws Exception {
     LocalScheduler localScheduler = new LocalScheduler();
+    localScheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
     // The MonitorService should started
     ExecutorService monitorService = localScheduler.getMonitorService();
     Assert.assertFalse(monitorService.isShutdown());
