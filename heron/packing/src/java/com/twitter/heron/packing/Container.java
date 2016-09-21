@@ -15,31 +15,30 @@
 
 package com.twitter.heron.packing;
 
+import java.util.HashSet;
+
+import com.google.common.base.Optional;
+
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
 /**
- * Class that describes a container used to place Heron Instances with specific memory, CpuCores and disk
+ * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
 public class Container {
 
-  //Resources currently used by the container.
-  private long usedRam;
-  private double usedCpuCores;
-  private long usedDisk;
+  private HashSet<PackingPlan.InstancePlan> instances;
 
-  //Maximum resources that can be assigned to the container.
-  private long maxRam;
-  private double maxCpuCores;
-  private long maxDisk;
+  private Resource capacity;
 
-  public Container(Resource resource) {
-    this.usedRam = 0;
-    this.usedCpuCores = 0;
-    this.usedDisk = 0;
-    this.maxRam = resource.getRam();
-    this.maxCpuCores = resource.getCpu();
-    this.maxDisk = resource.getDisk();
+  /**
+   * Creates a container with a specific capacity
+   * @param capacity the capacity of the container in terms of cpu, ram and disk
+   */
+  public Container(Resource capacity) {
+    this.capacity = capacity;
+    this.instances = new HashSet<PackingPlan.InstancePlan>();
   }
 
   /**
@@ -47,10 +46,30 @@ public class Container {
    *
    * @return true if the container has space otherwise return false
    */
-  private boolean hasSpace(long ram, double cpuCores, long disk) {
-    return usedRam + ram <= maxRam
-        && usedCpuCores + cpuCores <= maxCpuCores
-        && usedDisk + disk <= maxDisk;
+  private boolean hasSpace(Resource resource) {
+    Resource usedResources = this.getTotalUsedResources();
+    return usedResources.getRam() + resource.getRam() <= this.capacity.getRam()
+        && usedResources.getCpu() + resource.getCpu() <= this.capacity.getCpu()
+        && usedResources.getDisk() + resource.getDisk() <= this.capacity.getDisk();
+  }
+
+  /**
+   * Computes the used resources of the container by taking into account the resources
+   * allocated for each instance.
+   *
+   * @return a Resource object that describes the used cpu, ram and disk in the container.
+   */
+  private Resource getTotalUsedResources() {
+    long usedRam = 0;
+    double usedCpuCores = 0;
+    long usedDisk = 0;
+    for (PackingPlan.InstancePlan instancePlan : this.instances) {
+      Resource resource = instancePlan.getResource();
+      usedRam += resource.getRam();
+      usedCpuCores += resource.getCpu();
+      usedDisk += resource.getDisk();
+    }
+    return new Resource(usedCpuCores, usedRam, usedDisk);
   }
 
   /**
@@ -59,14 +78,43 @@ public class Container {
    *
    * @return true if the instance can be added to the container, false otherwise
    */
-  public boolean add(Resource resource) {
-    if (this.hasSpace(resource.getRam(), resource.getCpu(), resource.getDisk())) {
-      usedRam += resource.getRam();
-      usedCpuCores += resource.getCpu();
-      usedDisk += resource.getDisk();
+  public boolean add(PackingPlan.InstancePlan instancePlan) {
+    if (this.hasSpace(instancePlan.getResource())) {
+      this.instances.add(instancePlan);
       return true;
     } else {
       return false;
     }
+  }
+
+  /**
+   * Remove an instance of a particular component from a container and update its
+   * corresponding resources.
+   *
+   * @return the corresponding instance plan if the instance is removed the container.
+   * Return void if an instance is not found
+   */
+  public Optional<PackingPlan.InstancePlan> removeAnyInstanceOfComponent(String component) {
+    Optional<PackingPlan.InstancePlan> instancePlan = getAnyInstanceOfComponent(component);
+    if (instancePlan.isPresent()) {
+      PackingPlan.InstancePlan plan = instancePlan.get();
+      this.instances.remove(plan);
+      return instancePlan;
+    }
+    return Optional.absent();
+  }
+
+  /**
+   * Find whether any instance of a particular component is assigned to the container
+   *
+   * @return the instancePlan that corresponds to the instance if it is found, void otherwise
+   */
+  public Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String component) {
+    for (PackingPlan.InstancePlan instancePlan : this.instances) {
+      if (instancePlan.getComponentName().equals(component)) {
+        return Optional.of(instancePlan);
+      }
+    }
+    return Optional.absent();
   }
 }

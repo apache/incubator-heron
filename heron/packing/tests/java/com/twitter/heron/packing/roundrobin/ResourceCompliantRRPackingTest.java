@@ -176,15 +176,15 @@ public class ResourceCompliantRRPackingTest {
         : packingPlanExplicitResourcesConfig.getContainers()) {
       Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
               + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault),
-          (long) containerPlan.getResource().getCpu());
+          (long) containerPlan.getRequiredResource().getCpu());
 
       Assert.assertEquals(totalInstances * instanceRamDefault
               + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault),
-          containerPlan.getResource().getRam());
+          containerPlan.getRequiredResource().getRam());
 
       Assert.assertEquals(totalInstances * instanceDiskDefault
               + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault),
-          containerPlan.getResource().getDisk());
+          containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1

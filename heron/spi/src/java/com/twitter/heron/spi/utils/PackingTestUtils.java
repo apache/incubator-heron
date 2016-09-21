@@ -22,6 +22,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.InstanceId;
@@ -73,18 +74,25 @@ public final class PackingTestUtils {
 
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
                                                             Integer... instanceIndices) {
-    Resource resource = new Resource(7.5, 6, 9);
+    double cpu = 1.5;
+    long ram = Constants.GB;
+
     Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
     for (int instanceIndex : instanceIndices) {
       String componentName = "componentName-" + instanceIndex;
-      instancePlans.add(testInstancePlan(componentName, instanceIndex));
+      PackingPlan.InstancePlan instance = testInstancePlan(componentName, instanceIndex);
+      instancePlans.add(instance);
+      cpu += instance.getResource().getCpu();
+      ram += instance.getResource().getRam();
     }
+    Resource resource = new Resource(cpu, ram, ram);
     return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
   }
 
   private static PackingPlan.InstancePlan testInstancePlan(
       String componentName, int instanceIndex) {
-    Resource resource = new Resource(1.5, 2, 3);
+    Resource resource = new Resource(1.5, 2 * Constants.GB, 3);
     return new PackingPlan.InstancePlan(new InstanceId(componentName, instanceIndex, 1), resource);
   }
+
 }

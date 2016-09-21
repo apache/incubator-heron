@@ -32,11 +32,11 @@ public final class InstanceId {
     return componentName;
   }
 
-  int getTaskId() {
+  public int getTaskId() {
     return taskId;
   }
 
-  int getComponentIndex() {
+  public int getComponentIndex() {
     return componentIndex;
   }
 
@@ -51,7 +51,7 @@ public final class InstanceId {
 
     InstanceId that = (InstanceId) o;
 
-    return taskId != that.taskId
+    return taskId == that.taskId
         && componentIndex == that.componentIndex
         && componentName.equals(that.componentName);
   }
@@ -62,5 +62,11 @@ public final class InstanceId {
     result = 31 * result + taskId;
     result = 31 * result + componentIndex;
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Component Name: %s, Task Id: %d, Component Index: %d",
+        componentName, taskId, componentIndex);
   }
 }

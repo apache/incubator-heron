@@ -15,6 +15,7 @@
 package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,31 @@ public class PackingPlan {
     for (ContainerPlan containerPlan : containers) {
       containersMap.put(containerPlan.getId(), containerPlan);
     }
+  }
+
+  /**
+   * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
+   * required by containers in the packing plan and updates the containers of the clone with the
+   * max resource information
+   */
+  public PackingPlan cloneWithHomogeneousScheduledResource() {
+    double maxCpu = 0;
+    long maxRam = 0;
+    long maxDisk = 0;
+    for (ContainerPlan containerPlan : getContainers()) {
+      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
+      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
+      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
+    }
+
+    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
+    Set<ContainerPlan> updatedContainers = new HashSet<>();
+    for (ContainerPlan container : getContainers()) {
+      updatedContainers.add(container.cloneWithScheduledResource(maxResource));
+    }
+
+    PackingPlan updatedPackingPlan = new PackingPlan(getId(), updatedContainers);
+    return updatedPackingPlan;
   }
 
   public String getId() {
@@ -147,7 +173,7 @@ public class PackingPlan {
       return taskId;
     }
 
-    int getComponentIndex() {
+    public int getComponentIndex() {
       return componentIndex;
     }
 
@@ -192,12 +218,21 @@ public class PackingPlan {
   public static class ContainerPlan {
     private final int id;
     private final Set<InstancePlan> instances;
-    private final Resource resource;
+    private final Resource requiredResource;
+    private final Optional<Resource> scheduledResource;
 
-    public ContainerPlan(int id, Set<InstancePlan> instances, Resource resource) {
+    public ContainerPlan(int id, Set<InstancePlan> instances, Resource requiredResource) {
+      this(id, instances, requiredResource, null);
+    }
+
+    public ContainerPlan(int id,
+                         Set<InstancePlan> instances,
+                         Resource requiredResource,
+                         Resource scheduledResource) {
       this.id = id;
       this.instances = ImmutableSet.copyOf(instances);
-      this.resource = resource;
+      this.requiredResource = requiredResource;
+      this.scheduledResource = Optional.fromNullable(scheduledResource);
     }
 
     public int getId() {
@@ -208,8 +243,12 @@ public class PackingPlan {
       return instances;
     }
 
-    public Resource getResource() {
-      return resource;
+    public Resource getRequiredResource() {
+      return requiredResource;
+    }
+
+    public Optional<Resource> getScheduledResource() {
+      return scheduledResource;
     }
 
     @Override
@@ -225,21 +264,37 @@ public class PackingPlan {
 
       return id == that.id
           && getInstances().equals(that.getInstances())
-          && getResource().equals(that.getResource());
+          && getRequiredResource().equals(that.getRequiredResource())
+          && getScheduledResource().equals(that.getScheduledResource());
     }
 
     @Override
     public int hashCode() {
       int result = id;
       result = 31 * result + getInstances().hashCode();
-      result = 31 * result + getResource().hashCode();
+      result = 31 * result + getRequiredResource().hashCode();
+      if (scheduledResource.isPresent()) {
+        result = 31 * result + getScheduledResource().get().hashCode();
+      }
       return result;
+    }
+
+    /**
+     * Returns a {@link ContainerPlan} with updated scheduledResource
+     */
+    private ContainerPlan cloneWithScheduledResource(Resource resource) {
+      return new ContainerPlan(getId(), getInstances(), getRequiredResource(), resource);
     }
 
     @Override
     public String toString() {
-      return String.format("{container-id: %s, instances-list: %s, container-resource: %s}",
-          id, getInstances().toString(), getResource());
+      String str = String.format("{container-id: %s, instances-list: %s, required-resource: %s",
+          id, getInstances().toString(), getRequiredResource());
+      if (scheduledResource.isPresent()) {
+        str = String.format("%s, scheduled-resource: %s", str, getScheduledResource().get());
+      }
+
+      return str + "}";
     }
   }
 }
