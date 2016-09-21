@@ -146,9 +146,9 @@ public class ResourceCompliantRRPacking implements IPacking {
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    int paddingPercentage = Integer.parseInt(TopologyUtils.getConfigWithDefault(
+    int paddingPercentage = TopologyUtils.getConfigWithDefault(
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
-        Integer.toString(DEFAULT_CONTAINER_PADDING_PERCENTAGE)));
+        DEFAULT_CONTAINER_PADDING_PERCENTAGE);
 
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         containerInstances, ramMap, this.defaultInstanceResources, paddingPercentage);
