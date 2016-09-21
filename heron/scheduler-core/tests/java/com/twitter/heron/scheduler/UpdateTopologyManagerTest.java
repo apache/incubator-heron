@@ -24,6 +24,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -70,10 +72,8 @@ public class UpdateTopologyManagerTest {
   public void requestsToAddAndRemoveContainers() throws Exception {
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
 
-    PackingPlan currentPacking
-        = new PackingPlan("current", currentContainerPlan);
-    PackingPlan proposedPacking
-        = new PackingPlan("proposed", proposedContainerPlan);
+    PackingPlan currentPacking = new PackingPlan("current", currentContainerPlan);
+    PackingPlan proposedPacking = new PackingPlan("proposed", proposedContainerPlan);
 
     PackingPlans.PackingPlan currentProtoPlan = serializer.toProto(currentPacking);
     PackingPlans.PackingPlan proposedProtoPlan = serializer.toProto(proposedPacking);
@@ -90,15 +90,17 @@ public class UpdateTopologyManagerTest {
 
     Mockito.doReturn(null).when(spyUpdateManager).
         getUpdatedTopology(null, proposedPacking, mockStateMgr);
-    Mockito.doNothing().when(spyUpdateManager).deactivateTopology(
-        any(SchedulerStateManagerAdaptor.class), any(TopologyAPI.Topology.class));
-    Mockito.doNothing().when(spyUpdateManager).reactivateTopology(
-        any(SchedulerStateManagerAdaptor.class),
-        any(TopologyAPI.Topology.class),
-        any(Integer.class));
+    Mockito.doNothing().when(spyUpdateManager)
+        .deactivateTopology(eq(mockStateMgr), any(TopologyAPI.Topology.class));
+    Mockito.doNothing().when(spyUpdateManager)
+        .reactivateTopology(eq(mockStateMgr), any(TopologyAPI.Topology.class), any(Integer.class));
 
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
+    Mockito.verify(spyUpdateManager)
+        .deactivateTopology(eq(mockStateMgr), any(TopologyAPI.Topology.class));
+    Mockito.verify(spyUpdateManager)
+        .reactivateTopology(eq(mockStateMgr), any(TopologyAPI.Topology.class), eq(2));
     Mockito.verify(mockScheduler).addContainers(expectedContainersToAdd);
     Mockito.verify(mockScheduler).removeContainers(expectedContainersToRemove);
   }

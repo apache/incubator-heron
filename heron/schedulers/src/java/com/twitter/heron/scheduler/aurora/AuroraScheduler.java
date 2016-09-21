@@ -76,7 +76,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void close() {
-    updateTopologyManager.close();
+    if (updateTopologyManager != null) {
+      updateTopologyManager.close();
+    }
   }
 
   @Override

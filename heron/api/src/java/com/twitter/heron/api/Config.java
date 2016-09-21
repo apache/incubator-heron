@@ -173,8 +173,14 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath";
 
+  /**
+   * Amount of time to wait after deactivating a topology before updating it
+   */
   public static final String TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS =
       "topology.update.deactivate.wait.secs";
+  /**
+   * After updating a topology, amount of time to wait for it to come back up before reactivating it
+   */
   public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
       "topology.update.reactivate.wait.secs";
 

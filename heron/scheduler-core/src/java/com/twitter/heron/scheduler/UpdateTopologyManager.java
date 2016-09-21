@@ -41,6 +41,9 @@ import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS;
+import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS;
+
 /**
  * Class that is able to update a topology. This includes changing the parallelism of
  * topology components
@@ -138,7 +141,7 @@ public class UpdateTopologyManager implements Closeable {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 0L);
+        topologyConfig, TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 0L);
 
     logInfo("Deactivating topology %s before handling update request", topology.getName());
     assertTrue(TMasterUtils.transitionTopologyState(
@@ -162,20 +165,19 @@ public class UpdateTopologyManager implements Closeable {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long waitSeconds = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 5 * 60L);
+        topologyConfig, TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 10 * 60L);
     long delaySeconds = 10;
 
     logInfo("Waiting for packing plan to be set before re-activating topology %s. "
             + "Will wait up to %s seconds for packing plan to be reset",
         topology.getName(), waitSeconds);
-    Reenabler reenabler = new Reenabler(
-        stateManager, topology, waitSeconds, removableContainerCount);
+    Enabler enabler = new Enabler(stateManager, topology, waitSeconds, removableContainerCount);
     Future<?> future = this.reactivateExecutorService.scheduleWithFixedDelay(
-        reenabler, delaySeconds, delaySeconds, TimeUnit.SECONDS);
-    reenabler.setFutureRunnable(future);
+        enabler, delaySeconds, delaySeconds, TimeUnit.SECONDS);
+    enabler.setFutureRunnable(future);
   }
 
-  private final class Reenabler implements Runnable {
+  private final class Enabler implements Runnable {
     private SchedulerStateManagerAdaptor stateManager;
     private String topologyName;
     private int removableContainerCount;
@@ -183,10 +185,10 @@ public class UpdateTopologyManager implements Closeable {
     private Future<?> futureRunnable;
     private volatile boolean cancelled = false;
 
-    private Reenabler(SchedulerStateManagerAdaptor stateManager,
-                     TopologyAPI.Topology topology,
-                     long timeoutSeconds,
-                     int removableContainerCount) {
+    private Enabler(SchedulerStateManagerAdaptor stateManager,
+                    TopologyAPI.Topology topology,
+                    long timeoutSeconds,
+                    int removableContainerCount) {
       this.stateManager = stateManager;
       this.removableContainerCount = removableContainerCount;
       this.topologyName = topology.getName();

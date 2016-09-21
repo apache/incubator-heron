@@ -65,6 +65,7 @@ SCHEDULER_JAR:                       heron.jars.scheduler
 # keys for Topology Update command
 ################################################################################
 TOPOLOGY_UPDATE_DEACTIVATE_SECONDS:  heron.topology.update.deactivate.seconds
+TOPOLOGY_UPDATE_REACTIVATE_SECONDS:  heron.topology.update.reactivate.seconds
 
 ################################################################################
 # keys for config provided files and directories
