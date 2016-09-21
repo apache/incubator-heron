@@ -15,27 +15,19 @@
 package com.twitter.heron.scheduler.server;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 public class KillRequestHandler implements HttpHandler {
-  private static final Logger LOG = Logger.getLogger(KillRequestHandler.class.getName());
-
   private IScheduler scheduler;
-  private Config runtime;
 
-  public KillRequestHandler(Config runtime, IScheduler scheduler) {
+  KillRequestHandler(IScheduler scheduler) {
     this.scheduler = scheduler;
-    this.runtime = runtime;
   }
 
   @Override
@@ -50,18 +42,11 @@ public class KillRequestHandler implements HttpHandler {
             .mergeFrom(requestBody)
             .build();
 
-    // kill the topology
-    boolean isKillSuccessfully = scheduler.onKill(killTopologyRequest);
-
-    // prepare the response
-    Scheduler.SchedulerResponse response =
-        SchedulerUtils.constructSchedulerResponse(isKillSuccessfully);
-
-    // Send the response back
-    NetworkUtils.sendHttpResponse(exchange, response.toByteArray());
-
-    // tell the scheduler to shutdown
-    LOG.info("Kill request handler issuing a terminate request to scheduler");
-    Runtime.schedulerShutdown(runtime).terminate();
+    if (!scheduler.onKill(killTopologyRequest)) {
+      throw new RuntimeException("Failed to process killTopologyRequest");
+    } else {
+      throw new TerminateSchedulerException(
+          "Kill request handled successfully - terminating scheduler");
+    }
   }
 }
