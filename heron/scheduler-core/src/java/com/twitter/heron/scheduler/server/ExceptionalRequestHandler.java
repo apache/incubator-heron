@@ -52,10 +52,10 @@ class ExceptionalRequestHandler implements HttpHandler {
       delegate.handle(exchange);
       sendResponse(exchange, true);
     } catch (TerminateSchedulerException e) {
-      handleFailure(exchange, e);
+      sendResponse(exchange, true);
 
       // tell the scheduler to shutdown
-      LOG.info("Kill request handler issuing a terminate request to scheduler");
+      LOG.info("Request handler issuing a terminate request to scheduler");
       try {
         scheduler.close();
       } finally {
