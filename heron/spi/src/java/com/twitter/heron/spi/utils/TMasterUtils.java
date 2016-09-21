@@ -26,6 +26,11 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class TMasterUtils {
+  public enum TMasterCommand {
+    ACTIVATE,
+    DEACTIVATE
+  }
+
   private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
 
   private TMasterUtils() {
@@ -107,7 +112,7 @@ public final class TMasterUtils {
   }
 
   public static boolean transitionTopologyState(String topologyName,
-                                                String topologyStateControlCommand,
+                                                TMasterCommand topologyStateControlCommand,
                                                 SchedulerStateManagerAdaptor statemgr,
                                                 TopologyAPI.TopologyState startState,
                                                 TopologyAPI.TopologyState expectedState) {
@@ -118,7 +123,8 @@ public final class TMasterUtils {
     }
 
     if (state == expectedState) {
-      LOG.log(Level.SEVERE, "Topology is already {0}ed", topologyStateControlCommand);
+      LOG.log(Level.SEVERE, "Topology {0} command received topology {1} but already in {2} state",
+          new Object[] {topologyStateControlCommand, topologyName, state});
       return true;
     }
 
@@ -127,13 +133,15 @@ public final class TMasterUtils {
       return false;
     }
 
-    if (!TMasterUtils.sendToTMaster(topologyStateControlCommand, topologyName, statemgr)) {
+    if (!TMasterUtils.sendToTMaster(
+        topologyStateControlCommand.name().toLowerCase(), topologyName, statemgr)) {
       LOG.log(Level.SEVERE, "Failed to {0} topology: {1} ",
           new Object[]{topologyStateControlCommand, topologyName});
       return false;
     }
 
-    LOG.log(Level.INFO, "Topology {0}ed successfully.", topologyStateControlCommand);
+    LOG.log(Level.INFO,
+        "Topology command {0} completed successfully.", topologyStateControlCommand);
     return true;
   }
 }
