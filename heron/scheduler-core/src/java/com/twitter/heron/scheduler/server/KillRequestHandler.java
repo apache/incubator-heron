@@ -43,7 +43,10 @@ public class KillRequestHandler implements HttpHandler {
             .build();
 
     if (!scheduler.onKill(killTopologyRequest)) {
-      throw new TerminateSchedulerException("Failed to process killTopologyRequest");
+      throw new RuntimeException("Failed to process killTopologyRequest");
+    } else {
+      throw new TerminateSchedulerException(
+          "Kill request handled successfully - terminating scheduler");
     }
   }
 }
