@@ -1,16 +1,16 @@
-//  Copyright 2016 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.scheduler.server;
 
 import java.io.IOException;
@@ -45,6 +45,7 @@ class ExceptionalRequestHandler implements HttpHandler {
     this.scheduler = scheduler;
   }
 
+  @SuppressWarnings("IllegalCatch")
   @Override
   public void handle(HttpExchange exchange) throws IOException {
 
@@ -61,13 +62,12 @@ class ExceptionalRequestHandler implements HttpHandler {
       } finally {
         Runtime.schedulerShutdown(runtime).terminate();
       }
-    }
-    catch (Throwable e) {
+    } catch (Exception e) {
       handleFailure(exchange, e);
     }
   }
 
-  private static void handleFailure(HttpExchange exchange, Throwable e) {
+  private static void handleFailure(HttpExchange exchange, Exception e) {
     LOG.log(Level.SEVERE,
         String.format("Failed to handle %s request", exchange.getRequestURI()), e);
     sendResponse(exchange, false);
