@@ -103,7 +103,10 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
                                                                 String path,
                                                                 Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
-    byte[] data = FileUtils.readFromFile(path);
+    byte[] data = new byte[]{};
+    if (FileUtils.isFileExists(path)) {
+      data = FileUtils.readFromFile(path);
+    }
     if (data.length == 0) {
       future.set(null);
       return future;
