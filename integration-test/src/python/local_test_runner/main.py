@@ -48,18 +48,18 @@ DEFAULT_TEST_CONF_FILE = "resources/test.conf"
 
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
-def run_all_tests(args):
+def run_tests(test_classes, args):
   """ Run the test for each topology specified in the conf file """
   successes = []
   failures = []
   tracker_process = _start_tracker(args['trackerPath'], args['trackerPort'])
 
   try:
-    for testclass in TEST_CLASSES:
-      testname = testclass.__name__
+    for test_class in test_classes:
+      testname = test_class.__name__
       logging.info("==== Starting test %s of %s: %s ====",
-                   len(successes) + len(failures) + 1, len(TEST_CLASSES), testname)
-      template = testclass(testname, args)
+                   len(successes) + len(failures) + 1, len(test_classes), testname)
+      template = test_class(testname, args)
       if template.run_test(): # testcase passed
         successes += [testname]
       else:
@@ -123,8 +123,17 @@ def main():
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
   args['testJarPath'] = os.path.join(heron_repo_directory, conf['testJarPath'])
 
+  test_classes = TEST_CLASSES
+  if len(sys.argv) > 1:
+    first_arg = sys.argv[1]
+    class_name = first_arg.split(".")
+    if first_arg == "-h" or len(class_name) < 2:
+      usage()
+    import importlib
+    test_classes = [getattr(importlib.import_module(class_name[0]), class_name[1])]
+
   start_time = time.time()
-  (successes, failures) = run_all_tests(args)
+  (successes, failures) = run_tests(test_classes, args)
   elapsed_time = time.time() - start_time
   total = len(failures) + len(successes)
 
@@ -137,6 +146,10 @@ def main():
     for test in failures:
       logging.error("  - %s", test)
     sys.exit(1)
+
+def usage():
+  logging.info("Usage: python %s [<test_module>.<testname>]", sys.argv[0])
+  sys.exit(1)
 
 if __name__ == '__main__':
   main()
