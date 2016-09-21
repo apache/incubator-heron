@@ -36,22 +36,24 @@ public class SchedulerServer {
   private static final int SERVER_BACK_LOG = 0;
 
   private final HttpServer schedulerServer;
+  private final IScheduler scheduler;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   public SchedulerServer(Config runtime, IScheduler scheduler, int port)
       throws IOException {
 
+    this.scheduler = scheduler;
     this.schedulerServer = createServer(port, executorService);
 
     // associate handlers with the URL service end points
     this.schedulerServer.createContext(KILL_REQUEST_CONTEXT,
-        new ExceptionalRequestHandler(new KillRequestHandler(scheduler), runtime));
+        new ExceptionalRequestHandler(new KillRequestHandler(scheduler), runtime, scheduler));
 
     this.schedulerServer.createContext(RESTART_REQUEST_CONTEXT,
-        new ExceptionalRequestHandler(new RestartRequestHandler(scheduler), runtime));
+        new ExceptionalRequestHandler(new RestartRequestHandler(scheduler), runtime, scheduler));
 
     this.schedulerServer.createContext(UPDATE_REQUEST_CONTEXT,
-        new ExceptionalRequestHandler(new UpdateRequestHandler(scheduler), runtime));
+        new ExceptionalRequestHandler(new UpdateRequestHandler(scheduler), runtime, scheduler));
   }
 
   public void start() {
@@ -60,6 +62,7 @@ public class SchedulerServer {
 
   public void stop() {
     schedulerServer.stop(0);
+    scheduler.close();
 
     // Stopping the server will not shut down the Executor
     // We have to shut it down explicitly

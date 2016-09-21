@@ -22,6 +22,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -36,10 +37,12 @@ class ExceptionalRequestHandler implements HttpHandler {
   private static final Logger LOG = Logger.getLogger(ExceptionalRequestHandler.class.getName());
   private HttpHandler delegate;
   private Config runtime;
+  private IScheduler scheduler;
 
-  ExceptionalRequestHandler(HttpHandler delegate, Config runtime) {
+  ExceptionalRequestHandler(HttpHandler delegate, Config runtime, IScheduler scheduler) {
     this.delegate = delegate;
     this.runtime = runtime;
+    this.scheduler = scheduler;
   }
 
   @Override
@@ -53,7 +56,11 @@ class ExceptionalRequestHandler implements HttpHandler {
 
       // tell the scheduler to shutdown
       LOG.info("Kill request handler issuing a terminate request to scheduler");
-      Runtime.schedulerShutdown(runtime).terminate();
+      try {
+        scheduler.close();
+      } finally {
+        Runtime.schedulerShutdown(runtime).terminate();
+      }
     }
     catch (Throwable e) {
       handleFailure(exchange, e);
