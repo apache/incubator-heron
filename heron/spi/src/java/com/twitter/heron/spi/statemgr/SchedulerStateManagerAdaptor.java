@@ -57,10 +57,6 @@ public class SchedulerStateManagerAdaptor {
     this.timeout = timeout;
   }
 
-  public IStateManager getStateManager() {
-    return delegate;
-  }
-
   /**
    * Waits for ListenableFuture to terminate. Cancels on timeout
    */
@@ -71,7 +67,7 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Waits for ListenableFuture to terminate. Cancels on timeout
    */
-  public <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
+  protected <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
     try {
       return future.get(time, unit);
     } catch (InterruptedException | TimeoutException | ExecutionException e) {
