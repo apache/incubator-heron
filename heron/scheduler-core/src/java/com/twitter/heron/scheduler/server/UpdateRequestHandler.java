@@ -19,15 +19,13 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 class UpdateRequestHandler implements HttpHandler {
   private IScheduler scheduler;
 
-  UpdateRequestHandler(Config runtime, IScheduler scheduler) {
+  UpdateRequestHandler(IScheduler scheduler) {
     this.scheduler = scheduler;
   }
 
@@ -43,14 +41,8 @@ class UpdateRequestHandler implements HttpHandler {
             .mergeFrom(requestBody)
             .build();
 
-    // update the topology
-    boolean isUpdateSuccessfully = scheduler.onUpdate(updateTopologyRequest);
-
-    // prepare the response
-    Scheduler.SchedulerResponse response =
-        SchedulerUtils.constructSchedulerResponse(isUpdateSuccessfully);
-
-    // send the response back
-    NetworkUtils.sendHttpResponse(exchange, response.toByteArray());
+    if (!scheduler.onUpdate(updateTopologyRequest)) {
+      throw new RuntimeException("Failed to process updateTopologyRequest");
+    }
   }
 }
