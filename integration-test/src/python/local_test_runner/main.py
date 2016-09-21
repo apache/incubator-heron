@@ -124,7 +124,7 @@ def main():
   args['testJarPath'] = os.path.join(heron_repo_directory, conf['testJarPath'])
 
   test_classes = TEST_CLASSES
-  if (len(sys.argv) > 1):
+  if len(sys.argv) > 1:
     first_arg = sys.argv[1]
     class_name = first_arg.split(".")
     if first_arg == "-h" or len(class_name) < 2:
@@ -148,7 +148,7 @@ def main():
     sys.exit(1)
 
 def usage():
-  logging.info("Usage: python %s <test_module>.<testname>" % sys.argv[0])
+  logging.info("Usage: python %s [<test_module>.<testname>]", sys.argv[0])
   sys.exit(1)
 
 if __name__ == '__main__':
