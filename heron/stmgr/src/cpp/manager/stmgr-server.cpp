@@ -112,11 +112,10 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
 StMgrServer::~StMgrServer() {
   Stop();
   // Unregister and delete the metrics.
-  InstanceMetricMap::iterator immIter;
-  for (immIter = instance_metric_map_.begin(); immIter != instance_metric_map_.end(); ++immIter) {
+  for (auto immIter = instance_metric_map_.begin();
+      immIter != instance_metric_map_.end(); ++immIter) {
     sp_string instance_id = immIter->first;
-    for (TaskIdInstanceDataMap::iterator iter = instance_info_.begin();
-         iter != instance_info_.end(); ++iter) {
+    for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
       if (iter->second->instance_->instance_id() != instance_id) continue;
       InstanceData* data = iter->second;
       Connection* iConn = data->conn_;
@@ -147,15 +146,13 @@ StMgrServer::~StMgrServer() {
   delete back_pressure_metric_initiated_;
 
   // cleanup the instance info
-  for (TaskIdInstanceDataMap::iterator iter = instance_info_.begin(); iter != instance_info_.end();
-       ++iter) {
+  for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     delete iter->second;
   }
 }
 
 void StMgrServer::GetInstanceInfo(std::vector<proto::system::Instance*>& _return) {
-  TaskIdInstanceDataMap::iterator iter;
-  for (iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+  for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     _return.push_back(iter->second->instance_);
   }
 }
@@ -205,15 +202,14 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
   AttemptStopBackPressureFromSpouts();
 
   // Now cleanup the data structures
-  ConnectionStreamManagerMap::iterator siter;
-  siter = rstmgrs_.find(_conn);
+  auto siter = rstmgrs_.find(_conn);
   if (siter != rstmgrs_.end()) {
     LOG(INFO) << "Stmgr " << siter->second << " closed connection";
     stmgrs_.erase(siter->second);
     rstmgrs_.erase(_conn);
   }
 
-  ConnectionTaskIdMap::iterator iiter = active_instances_.find(_conn);
+  auto iiter = active_instances_.find(_conn);
   if (iiter != active_instances_.end()) {
     sp_int32 task_id = iiter->second;
     CHECK(instance_info_.find(task_id) != instance_info_.end());
@@ -257,7 +253,7 @@ void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
 
 void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
                                            proto::stmgr::TupleStreamMessage* _message) {
-  ConnectionStreamManagerMap::iterator iter = rstmgrs_.find(_conn);
+  auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection" << std::endl;
   } else {
@@ -323,7 +319,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
       instance_info_[task_id] = new InstanceData(_request->release_instance());
       // Create a metric for this instance
       if (instance_metric_map_.find(instance_id) == instance_metric_map_.end()) {
-        heron::common::TimeSpentMetric* instance_metric = new heron::common::TimeSpentMetric();
+        auto instance_metric = new heron::common::TimeSpentMetric();
         metrics_manager_client_->register_metric(MakeBackPressureCompIdMetricName(instance_id),
                                                  instance_metric);
         instance_metric_map_[instance_id] = instance_metric;
@@ -355,7 +351,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
 }
 
 void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMessage* _message) {
-  ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
+  auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping.." << std::endl;
     delete _message;
@@ -377,7 +373,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMe
 
 void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage& _message) {
   bool drop = false;
-  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
+  auto iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
                << std::endl;
@@ -414,8 +410,7 @@ void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _p
   ComputeLocalSpouts(_pplan);
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
-  ConnectionTaskIdMap::iterator iter;
-  for (iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
+  for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
     SendMessage(iter->first, new_assignment);
   }
 }
@@ -423,8 +418,7 @@ void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _p
 void StMgrServer::ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan) {
   std::set<sp_int32> local_spouts;
   config::PhysicalPlanHelper::GetLocalSpouts(_pplan, stmgr_id_, local_spouts);
-  TaskIdInstanceDataMap::iterator iter;
-  for (iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+  for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (local_spouts.find(iter->first) != local_spouts.end()) {
       iter->second->set_local_spout();
     }
@@ -433,8 +427,8 @@ void StMgrServer::ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan) 
 
 sp_string StMgrServer::GetInstanceName(Connection* _connection) {
   // Indicate which instance component had back pressure
-  ConnectionTaskIdMap::iterator itr;
-  if ((itr = active_instances_.find(_connection)) != active_instances_.end()) {
+  auto itr = active_instances_.find(_connection);
+  if (itr != active_instances_.end()) {
     sp_int32 task_id = itr->second;
     const sp_string& instance_id = instance_info_[task_id]->instance_->instance_id();
     return instance_id;
@@ -585,8 +579,7 @@ void StMgrServer::StartBackPressureOnSpouts() {
 
     spouts_under_back_pressure_ = true;
     // Put back pressure on all spouts
-    TaskIdInstanceDataMap::iterator iiter;
-    for (iiter = instance_info_.begin(); iiter != instance_info_.end(); ++iiter) {
+    for (auto iiter = instance_info_.begin(); iiter != instance_info_.end(); ++iiter) {
       if (!iiter->second->local_spout_) continue;
       if (!iiter->second->conn_) continue;
       if (!iiter->second->conn_->isUnderBackPressure()) iiter->second->conn_->putBackPressure();
@@ -602,8 +595,7 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
     spouts_under_back_pressure_ = false;
 
     // Remove backpressure from all pipes
-    TaskIdInstanceDataMap::iterator iiter;
-    for (iiter = instance_info_.begin(); iiter != instance_info_.end(); ++iiter) {
+    for (auto iiter = instance_info_.begin(); iiter != instance_info_.end(); ++iiter) {
       if (!iiter->second->local_spout_) continue;
       if (!iiter->second->conn_) continue;
       if (iiter->second->conn_->isUnderBackPressure()) iiter->second->conn_->removeBackPressure();

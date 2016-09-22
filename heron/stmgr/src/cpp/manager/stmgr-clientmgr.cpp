@@ -85,9 +85,8 @@ void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) 
   }
 
   // We need to remove any unused ports
-  std::map<sp_string, StMgrClient*>::iterator iter;
   std::set<sp_string> to_remove;
-  for (iter = clients_.begin(); iter != clients_.end(); ++iter) {
+  for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
     if (all_stmgrs.find(iter->first) == all_stmgrs.end()) {
       // This stmgr is no longer there in the physical map
       to_remove.insert(iter->first);
@@ -95,7 +94,7 @@ void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) 
   }
 
   // Now go over to_remove to remove all the unused stmgrs
-  for (std::set<sp_string>::iterator iter = to_remove.begin(); iter != to_remove.end(); ++iter) {
+  for (auto iter = to_remove.begin(); iter != to_remove.end(); ++iter) {
     LOG(INFO) << "Stmgr " << *iter << " no longer required";
     clients_[*iter]->Quit();  // This will delete itself.
     clients_.erase(*iter);
@@ -124,8 +123,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
 
 void StMgrClientMgr::SendTupleStreamMessage(const sp_string& _stmgr_id,
                                             proto::stmgr::TupleStreamMessage* _msg) {
-  std::map<sp_string, StMgrClient*>::iterator iter;
-  iter = clients_.find(_stmgr_id);
+  auto iter = clients_.find(_stmgr_id);
   CHECK(iter != clients_.end());
   clients_[_stmgr_id]->SendTupleStreamMessage(_msg);
 }
@@ -140,15 +138,13 @@ void StMgrClientMgr::StopBackPressureOnServer(const sp_string& _other_stmgr_id) 
 }
 
 void StMgrClientMgr::SendStartBackPressureToOtherStMgrs() {
-  std::map<sp_string, StMgrClient*>::iterator iter;
-  for (iter = clients_.begin(); iter != clients_.end(); ++iter) {
+  for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
     iter->second->SendStartBackPressureMessage();
   }
 }
 
 void StMgrClientMgr::SendStopBackPressureToOtherStMgrs() {
-  std::map<sp_string, StMgrClient*>::iterator iter;
-  for (iter = clients_.begin(); iter != clients_.end(); ++iter) {
+  for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
     iter->second->SendStopBackPressureMessage();
   }
 }
