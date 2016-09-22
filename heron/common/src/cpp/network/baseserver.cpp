@@ -129,7 +129,7 @@ void BaseServer::OnNewConnection(EventLoop::Status _status) {
   if (_status == EventLoop::READ_EVENT) {
     // The EventLoop indicated that the socket is writable.
     // Which means that a new client has connected to it.
-    ConnectionEndPoint* endPoint = new ConnectionEndPoint(options_.get_sin_family() != AF_INET);
+    auto endPoint = new ConnectionEndPoint(options_.get_sin_family() != AF_INET);
     struct sockaddr* serv_addr = endPoint->addr();
     socklen_t addrlen = endPoint->addrlen();
     sp_int32 fd = accept(listen_fd_, serv_addr, &addrlen);

@@ -252,12 +252,15 @@ public class MesosScheduler implements IScheduler {
    */
   protected void fillResourcesRequirementForBaseContainer(
       BaseContainer container, Integer containerIndex, PackingPlan packing) {
-    Resource maxResourceContainer = SchedulerUtils.getMaxRequiredResource(packing);
+    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
+    Resource maxResourceContainer =
+        updatedPackingPlan.getContainers().iterator().next().getRequiredResource();
+
     double cpu = 0;
     double disk = 0;
     double mem = 0;
     for (PackingPlan.ContainerPlan cp : packing.getContainers()) {
-      Resource containerResource = cp.getResource();
+      Resource containerResource = cp.getRequiredResource();
       cpu = Math.max(cpu, containerResource.getCpu());
       disk = Math.max(disk, containerResource.getDisk());
       mem = Math.max(mem, containerResource.getRam());

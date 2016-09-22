@@ -91,8 +91,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * Handler to activate a topology
    */
   private boolean activateTopologyHandler(String topologyName) {
-    return TMasterUtils.transitionTopologyState(
-        topologyName, "activat", Runtime.schedulerStateManagerAdaptor(runtime),
+    return TMasterUtils.transitionTopologyState(topologyName,
+        TMasterUtils.TMasterCommand.ACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
         TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
   }
 
@@ -100,8 +100,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * Handler to deactivate a topology
    */
   private boolean deactivateTopologyHandler(String topologyName) {
-    return TMasterUtils.transitionTopologyState(
-        topologyName, "deactivat", Runtime.schedulerStateManagerAdaptor(runtime),
+    return TMasterUtils.transitionTopologyState(topologyName,
+        TMasterUtils.TMasterCommand.DEACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
         TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED);
   }
 

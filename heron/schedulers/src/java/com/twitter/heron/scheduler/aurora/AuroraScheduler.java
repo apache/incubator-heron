@@ -57,8 +57,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.controller = getController();
-    this.updateTopologyManager =
-        new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
+    this.updateTopologyManager = new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
   }
 
   /**
@@ -163,7 +162,12 @@ public class AuroraScheduler implements IScheduler, IScalable {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // Align the cpu, ram, disk to the maximal one
-    Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
+    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
+    SchedulerUtils.persistUpdatedPackingPlan(topology.getName(), updatedPackingPlan,
+        Runtime.schedulerStateManagerAdaptor(runtime));
+
+    Resource containerResource = updatedPackingPlan.getContainers()
+        .iterator().next().getRequiredResource();
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());

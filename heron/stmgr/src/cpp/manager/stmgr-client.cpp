@@ -156,7 +156,7 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
 void StMgrClient::OnReConnectTimer() { Start(); }
 
 void StMgrClient::SendHelloRequest() {
-  proto::stmgr::StrMgrHelloRequest* request = new proto::stmgr::StrMgrHelloRequest();
+  auto request = new proto::stmgr::StrMgrHelloRequest();
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
   request->set_stmgr(our_stmgr_id_);
@@ -220,7 +220,7 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StartBackPressureMessage* message = new proto::stmgr::StartBackPressureMessage();
+  auto message = new proto::stmgr::StartBackPressureMessage();
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
@@ -232,7 +232,7 @@ void StMgrClient::SendStopBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StopBackPressureMessage* message = new proto::stmgr::StopBackPressureMessage();
+  auto message = new proto::stmgr::StopBackPressureMessage();
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);

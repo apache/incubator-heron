@@ -155,7 +155,7 @@ public class HeronMasterDriver {
   void scheduleHeronWorkers(PackingPlan topologyPacking) throws ContainerAllocationException {
     this.packing = topologyPacking;
     for (ContainerPlan containerPlan : topologyPacking.getContainers()) {
-      Resource reqResource = containerPlan.getResource();
+      Resource reqResource = containerPlan.getRequiredResource();
 
       int mem = getMemInMBForExecutor(reqResource);
       int cores = getCpuForExecutor(reqResource);
@@ -191,7 +191,7 @@ public class HeronMasterDriver {
         throw new IllegalArgumentException(
             String.format("There is no container for %s in packing plan.", id));
       }
-      Resource resource = containerPlan.get().getResource();
+      Resource resource = containerPlan.get().getRequiredResource();
       worker = Optional.of(
           new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource)));
     } else {
