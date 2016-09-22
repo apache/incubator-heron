@@ -62,16 +62,14 @@ TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoo
 }
 
 TMetricsCollector::~TMetricsCollector() {
-  std::map<sp_string, ComponentMetrics*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     delete iter->second;
   }
   delete tmetrics_info_;
 }
 
 void TMetricsCollector::Purge(EventLoop::Status) {
-  std::map<sp_string, ComponentMetrics*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->Purge();
   }
   auto cb = [this](EventLoop::Status status) { this->Purge(status); };
@@ -107,7 +105,7 @@ void TMetricsCollector::AddMetric(const PublishMetrics& _metrics) {
 
 MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request,
                                               const proto::api::Topology* _topology) {
-  MetricResponse* response = new MetricResponse();
+  auto response = new MetricResponse();
 
   if (metrics_.find(_request.component_name()) == metrics_.end()) {
     bool component_exists = false;
@@ -175,7 +173,7 @@ void TMetricsCollector::GetExceptionsHelper(const ExceptionLogRequest& request,
 }
 
 ExceptionLogResponse* TMetricsCollector::GetExceptions(const ExceptionLogRequest& request) {
-  ExceptionLogResponse* response = new ExceptionLogResponse();
+  auto response = new ExceptionLogResponse();
   if (metrics_.find(request.component_name()) == metrics_.end()) {
     LOG(ERROR) << "GetExceptions request received for unknown component "
                << request.component_name();
@@ -190,7 +188,7 @@ ExceptionLogResponse* TMetricsCollector::GetExceptions(const ExceptionLogRequest
 }
 
 ExceptionLogResponse* TMetricsCollector::GetExceptionsSummary(const ExceptionLogRequest& request) {
-  ExceptionLogResponse* response = new ExceptionLogResponse();
+  auto response = new ExceptionLogResponse();
 
   if (metrics_.find(request.component_name()) == metrics_.end()) {
     LOG(ERROR) << "GetExceptionSummary request received for unknown component "
@@ -203,7 +201,7 @@ ExceptionLogResponse* TMetricsCollector::GetExceptionsSummary(const ExceptionLog
   response->mutable_status()->set_message("OK");
 
   // Owns this pointer.
-  ExceptionLogResponse* all_exceptions = new ExceptionLogResponse();
+  auto all_exceptions = new ExceptionLogResponse();
   GetExceptionsHelper(request, all_exceptions);  // Store un aggregated exceptions.
   AggregateExceptions(*all_exceptions, response);
   delete all_exceptions;
@@ -226,7 +224,7 @@ void TMetricsCollector::AggregateExceptions(const ExceptionLogResponse& all_exce
     if (pos != std::string::npos) {
       const std::string class_name = stack_trace.substr(0, pos);
       if (exception_summary.find(class_name) == exception_summary.end()) {
-        TmasterExceptionLog* new_exception = new TmasterExceptionLog();
+        auto new_exception = new TmasterExceptionLog();
         new_exception->CopyFrom(log);
         new_exception->set_stacktrace(class_name);
         exception_summary[class_name] = new_exception;
@@ -238,8 +236,7 @@ void TMetricsCollector::AggregateExceptions(const ExceptionLogResponse& all_exce
     }
   }
 
-  for (std::map<std::string, TmasterExceptionLog*>::iterator summary_iter =
-           exception_summary.begin();
+  for (auto summary_iter = exception_summary.begin();
        summary_iter != exception_summary.end(); ++summary_iter) {
     aggregate_exceptions->add_exceptions()->CopyFrom(*(summary_iter->second));
     delete summary_iter->second;  // Remove the temporary object holding exception summary
@@ -259,15 +256,13 @@ TMetricsCollector::ComponentMetrics::ComponentMetrics(const sp_string& component
     : component_name_(component_name), nbuckets_(nbuckets), bucket_interval_(bucket_interval) {}
 
 TMetricsCollector::ComponentMetrics::~ComponentMetrics() {
-  std::map<sp_string, InstanceMetrics*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     delete iter->second;
   }
 }
 
 void TMetricsCollector::ComponentMetrics::Purge() {
-  std::map<sp_string, InstanceMetrics*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->Purge();
   }
 }
@@ -298,8 +293,7 @@ void TMetricsCollector::ComponentMetrics::GetMetrics(const MetricRequest& _reque
                                                      MetricResponse* _response) {
   if (_request.instance_id_size() == 0) {
     // This means that all instances need to be returned
-    std::map<sp_string, InstanceMetrics*>::iterator iter;
-    for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+    for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
       iter->second->GetMetrics(_request, start_time, end_time, _response);
       if (_response->status().status() != proto::system::OK) {
         return;
@@ -331,8 +325,7 @@ void TMetricsCollector::ComponentMetrics::GetExceptionsForInstance(const sp_stri
 }
 
 void TMetricsCollector::ComponentMetrics::GetAllExceptions(ExceptionLogResponse* response) {
-  for (std::map<sp_string, InstanceMetrics*>::iterator iter = metrics_.begin();
-       iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->GetExceptionLog(response);
   }
 }
@@ -342,19 +335,16 @@ TMetricsCollector::InstanceMetrics::InstanceMetrics(const sp_string& instance_id
     : instance_id_(instance_id), nbuckets_(nbuckets), bucket_interval_(bucket_interval) {}
 
 TMetricsCollector::InstanceMetrics::~InstanceMetrics() {
-  std::map<sp_string, Metric*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     delete iter->second;
   }
-  std::list<TmasterExceptionLog*>::iterator ex_iter;
-  for (ex_iter = exceptions_.begin(); ex_iter != exceptions_.end(); ++ex_iter) {
+  for (auto ex_iter = exceptions_.begin(); ex_iter != exceptions_.end(); ++ex_iter) {
     delete *ex_iter;
   }
 }
 
 void TMetricsCollector::InstanceMetrics::Purge() {
-  std::map<sp_string, Metric*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->Purge();
   }
 }
@@ -371,7 +361,7 @@ void TMetricsCollector::InstanceMetrics::AddExceptions(const TmasterExceptionLog
   // TODO(kramasamy): Aggregate exceptions across minutely buckets. Try to avoid duplication of
   // hash-fuction
   // used to aggregate in heron-worker.
-  TmasterExceptionLog* new_exception = new TmasterExceptionLog();
+  auto new_exception = new TmasterExceptionLog();
   new_exception->CopyFrom(exception);
   exceptions_.push_back(new_exception);
   sp_uint32 max_exception = config::HeronInternalsConfigReader::Instance()
@@ -405,8 +395,7 @@ void TMetricsCollector::InstanceMetrics::GetMetrics(const MetricRequest& request
 }
 
 void TMetricsCollector::InstanceMetrics::GetExceptionLog(ExceptionLogResponse* response) {
-  std::list<TmasterExceptionLog*>::iterator ex_iter;
-  for (ex_iter = exceptions_.begin(); ex_iter != exceptions_.end(); ++ex_iter) {
+  for (auto ex_iter = exceptions_.begin(); ex_iter != exceptions_.end(); ++ex_iter) {
     response->add_exceptions()->CopyFrom(*(*ex_iter));
   }
 }
@@ -425,8 +414,7 @@ TMetricsCollector::Metric::Metric(const sp_string& name,
 }
 
 TMetricsCollector::Metric::~Metric() {
-  std::list<TimeBucket*>::iterator iter;
-  for (iter = data_.begin(); iter != data_.end(); ++iter) {
+  for (auto iter = data_.begin(); iter != data_.end(); ++iter) {
     delete *iter;
   }
 }
@@ -458,7 +446,7 @@ void TMetricsCollector::Metric::GetMetrics(bool minutely, sp_int64 start_time, s
   _response->set_name(name_);
   if (minutely) {
     // we need minutely data
-    for (std::list<TimeBucket*>::iterator iter = data_.begin(); iter != data_.end(); ++iter) {
+    for (auto iter = data_.begin(); iter != data_.end(); ++iter) {
       TimeBucket* bucket = *iter;
       // Does this time bucket have overlap with needed range
       if (bucket->overlaps(start_time, end_time)) {
@@ -504,7 +492,7 @@ void TMetricsCollector::Metric::GetMetrics(bool minutely, sp_int64 start_time, s
       // we want only for a specific interval
       sp_int64 total_items = 0;
       sp_double64 total_count = 0;
-      for (std::list<TimeBucket*>::iterator iter = data_.begin(); iter != data_.end(); ++iter) {
+      for (auto iter = data_.begin(); iter != data_.end(); ++iter) {
         TimeBucket* bucket = *iter;
         // Does this time bucket have overlap with needed range
         if (bucket->overlaps(start_time, end_time)) {
