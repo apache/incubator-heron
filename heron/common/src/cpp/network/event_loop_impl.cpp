@@ -293,7 +293,7 @@ void EventLoopImpl::handleInstantCallback(Status) {
   // Make sure that we don't invoke cb's that get added as part of invocation of
   // other callbacks.
   mInstantZeroTimerId = -1;
-  OrderedCallbackList::iterator enditr = --(mListInstantCallbacks.end());
+  auto enditr = --(mListInstantCallbacks.end());
 
   for (auto itr = mListInstantCallbacks.begin();; ++itr) {
     (*itr)();
