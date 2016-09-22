@@ -168,6 +168,9 @@ class Server : public BaseServer {
   // Backpressure Reliever
   virtual void StopBackPressureConnectionCb(Connection* _connection);
 
+  // Connection buffer size monitor
+  virtual void ConnectionBufferChangeCb(Connection* _connection);
+
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
