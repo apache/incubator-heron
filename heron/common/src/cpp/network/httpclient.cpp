@@ -51,7 +51,7 @@ void httpdonecb(struct evhttp_request* _request, void* _arg) {
   OutgoingHTTPRequest* request = combo->request_;
   delete combo;
   if (client) {
-    IncomingHTTPResponse* response = new IncomingHTTPResponse(_request);
+    auto response = new IncomingHTTPResponse(_request);
     client->HandleRequestDone(request, response);
   }
 }
@@ -64,8 +64,7 @@ void httpconnectionclose(struct evhttp_connection* _connection, void* _arg) {
 HTTPClient::HTTPClient(EventLoop* eventLoop, AsyncDNS* _dns) : eventLoop_(eventLoop), dns_(_dns) {}
 
 HTTPClient::~HTTPClient() {
-  std::unordered_map<std::pair<sp_string, sp_int32>, struct evhttp_connection*>::iterator iter;
-  for (iter = connections_.begin(); iter != connections_.end(); ++iter) {
+  for (auto iter = connections_.begin(); iter != connections_.end(); ++iter) {
     evhttp_connection_set_closecb(iter->second, NULL, NULL);
     evhttp_connection_free(iter->second);
   }
@@ -86,7 +85,7 @@ sp_int32 HTTPClient::SendRequest(OutgoingHTTPRequest* _request,
     connection = connections_[pr];
   }
 
-  Combo* combo = new Combo(_request, this);
+  auto combo = new Combo(_request, this);
   struct evhttp_request* httprequest = CreateUnderlyingRequest(_request, combo);
   if (!httprequest) {
     delete combo;
@@ -143,9 +142,8 @@ struct evhttp_request* HTTPClient::CreateUnderlyingRequest(OutgoingHTTPRequest* 
   }
 
   // Next add all reqeusted headers
-  const std::unordered_map<sp_string, sp_string>& header = _request->header();
-  for (std::unordered_map<sp_string, sp_string>::const_iterator iter = header.begin();
-       iter != header.end(); ++iter) {
+  const auto& header = _request->header();
+  for (auto iter = header.begin(); iter != header.end(); ++iter) {
     if (evhttp_add_header(request->output_headers, iter->first.c_str(), iter->second.c_str()) !=
         0) {
       evhttp_request_free(request);

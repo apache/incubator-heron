@@ -39,7 +39,7 @@ void Server::SendResponse(REQID _id, Connection* _connection,
   sp_int32 byte_size = _response.ByteSize();
   sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
                         REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  OutgoingPacket* opkt = new OutgoingPacket(data_size);
+  auto opkt = new OutgoingPacket(data_size);
   CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(_id), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(_response, byte_size), 0);
@@ -72,7 +72,7 @@ void Server::SendRequest(Connection* _conn, google::protobuf::Message* _request,
 BaseConnection* Server::CreateConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
                                          EventLoop* eventLoop) {
   // Create the connection object and register our callbacks on various events.
-  Connection* conn = new Connection(_endpoint, _options, eventLoop);
+  auto conn = new Connection(_endpoint, _options, eventLoop);
   auto npcb = [conn, this](IncomingPacket* packet) { this->OnNewPacket(conn, packet); };
   conn->registerForNewPacket(npcb);
 
@@ -192,7 +192,7 @@ void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _
   sp_int32 byte_size = _request->ByteSize();
   sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  OutgoingPacket* opkt = new OutgoingPacket(sop);
+  auto opkt = new OutgoingPacket(sop);
   CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(rid), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(*_request, byte_size), 0);
