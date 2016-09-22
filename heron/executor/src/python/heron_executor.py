@@ -15,6 +15,7 @@
 #!/usr/bin/env python2.7
 """ The Heron executor is a process that runs on a container and is responsible for starting and
 monitoring the processes of the topology and it's support services."""
+import argparse
 import atexit
 import base64
 import json
@@ -24,11 +25,14 @@ import signal
 import string
 import subprocess
 import sys
+import stat
 import threading
 import time
 import yaml
 
 from functools import partial
+
+
 
 from heron.common.src.python.utils import log
 # pylint: disable=unused-import
@@ -125,27 +129,31 @@ class HeronExecutor(object):
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
   def __init__(self, args, shell_env):
+    parsed_args = self.parse_args(args)
+
     self.shell_env = shell_env
     self.max_runs = 100
     self.interval_between_runs = 10
-    self.shard = int(args[1])
-    self.topology_name = args[2]
-    self.topology_id = args[3]
-    self.topology_defn_file = args[4]
-    self.zknode = args[5]
-    self.zkroot = args[6]
-    self.tmaster_binary = args[7]
-    self.stmgr_binary = args[8]
-    self.metricsmgr_classpath = args[9]
+    self.shard = int(parsed_args.shard)
+    self.topology_name = parsed_args.topology_name
+    self.topology_id = parsed_args.topology_id
+    self.topology_defn_file = parsed_args.topology_defn_file
+    self.zknode = parsed_args.zknode
+    self.zkroot = parsed_args.zkroot
+    self.tmaster_binary = parsed_args.tmaster_binary
+    self.stmgr_binary = parsed_args.stmgr_binary
+    self.metricsmgr_classpath = parsed_args.metricsmgr_classpath
     self.instance_jvm_opts =\
-        base64.b64decode(args[10].lstrip('"').rstrip('"').replace('&equals;', '='))
-    self.classpath = args[11]
-    self.master_port = args[12]
-    self.tmaster_controller_port = args[13]
-    self.tmaster_stats_port = args[14]
-    self.heron_internals_config_file = args[15]
+        base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
+                         rstrip('"').replace('&equals;', '='))
+    self.classpath = parsed_args.classpath
+    self.master_port = parsed_args.master_port
+    self.tmaster_controller_port = parsed_args.tmaster_controller_port
+    self.tmaster_stats_port = parsed_args.tmaster_stats_port
+    self.heron_internals_config_file = parsed_args.heron_internals_config_file
     self.component_rammap =\
-        map(lambda x: {x.split(':')[0]: int(x.split(':')[1])}, args[16].split(','))
+        map(lambda x: {x.split(':')[0]:
+                           int(x.split(':')[1])}, parsed_args.component_rammap.split(','))
     self.component_rammap =\
         reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
 
@@ -155,26 +163,27 @@ class HeronExecutor(object):
     self.component_jvm_opts = {}
     # First we need to decode the base64 string back to a json map string
     component_jvm_opts_in_json =\
-        base64.b64decode(args[17].lstrip('"').rstrip('"').replace('&equals;', '='))
+        base64.b64decode(args.component_jvm_opts_in_base64.
+                         lstrip('"').rstrip('"').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
         # In json, the component name and jvm options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
-    self.pkg_type = args[18]
-    self.topology_bin_file = args[19]
-    self.heron_java_home = args[20]
-    self.shell_port = args[21]
-    self.heron_shell_binary = args[22]
-    self.metricsmgr_port = args[23]
-    self.cluster = args[24]
-    self.role = args[25]
-    self.environ = args[26]
-    self.instance_classpath = args[27]
-    self.metrics_sinks_config_file = args[28]
-    self.scheduler_classpath = args[29]
-    self.scheduler_port = args[30]
-    self.python_instance_binary = args[31]
+    self.pkg_type = parsed_args.pkg_type
+    self.topology_bin_file = parsed_args.topology_bin_file
+    self.heron_java_home = parsed_args.heron_java_home
+    self.shell_port = parsed_args.shell_port
+    self.heron_shell_binary = parsed_args.heron_shell_binary
+    self.metricsmgr_port = parsed_args.metricsmgr_port
+    self.cluster = parsed_args.cluster
+    self.role = parsed_args.role
+    self.environ = parsed_args.environ
+    self.instance_classpath = parsed_args.instance_classpath
+    self.metrics_sinks_config_file = parsed_args.metrics_sinks_config_file
+    self.scheduler_classpath = parsed_args.scheduler_classpath
+    self.scheduler_port = parsed_args.scheduler_port
+    self.python_instance_binary = parsed_args.python_instance_binary
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -192,6 +201,45 @@ class HeronExecutor(object):
 
     self.state_managers = []
 
+  @staticmethod
+  def parse_args(args):
+    """Uses python argparse to collect positional args"""
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("shard", type=int)
+    parser.add_argument("topology_name")
+    parser.add_argument("topology_id")
+    parser.add_argument("topology_defn_file")
+    parser.add_argument("zknode")
+    parser.add_argument("zkroot")
+    parser.add_argument("tmaster_binary")
+    parser.add_argument("stmgr_binary")
+    parser.add_argument("metricsmgr_classpath")
+    parser.add_argument("instance_jvm_opts")
+    parser.add_argument("classpath")
+    parser.add_argument("master_port", type=int)
+    parser.add_argument("tmaster_controller_port", type=int)
+    parser.add_argument("tmaster_stats_port", type=int)
+    parser.add_argument("heron_internals_config_file")
+    parser.add_argument("component_rammap")
+    parser.add_argument("component_jvm_opts_in_base64")
+    parser.add_argument("pkg_type")
+    parser.add_argument("topology_bin_file")
+    parser.add_argument("heron_java_home")
+    parser.add_argument("shell_port", type=int)
+    parser.add_argument("heron_shell_binary")
+    parser.add_argument("metricsmgr_port", type=int)
+    parser.add_argument("cluster")
+    parser.add_argument("role")
+    parser.add_argument("environ")
+    parser.add_argument("instance_classpath")
+    parser.add_argument("metrics_sinks_config_file")
+    parser.add_argument("scheduler_classpath")
+    parser.add_argument("scheduler_port", type=int)
+    parser.add_argument("python_instance_binary")
+
+    return parser.parse_args(args[1:])
+
   def initialize(self):
     """
     Initialize the environment. Done with a method call outside of the constructor for 2 reasons:
@@ -200,8 +248,19 @@ class HeronExecutor(object):
     constructor
     """
     create_folders = 'mkdir -p %s' % self.log_dir
-    chmod_binaries = 'chmod a+rx . && chmod a+x %s && chmod +x %s %s %s' \
-        % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
+    chmod_x_binaries = [self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary]
+    binaries_to_chmod = []
+
+    for binary in chmod_x_binaries:
+      stat_result = os.stat(binary)[stat.ST_MODE]
+      if not stat_result & stat.S_IXOTH:
+        binaries_to_chmod.append(binary)
+
+    chmod_binaries = 'chmod a+rx . && chmod a+x %s' \
+        % self.log_dir
+
+    if len(binaries_to_chmod) > 0:
+      chmod_binaries += '&& chmod +x ' + ' '.join(binaries_to_chmod)
 
     commands = [create_folders, chmod_binaries]
 
@@ -647,12 +706,6 @@ class HeronExecutor(object):
 
 def main():
   """Register exit handlers, initialize the executor and run it."""
-  expected = 32
-  if len(sys.argv) != expected:
-    Log.error("Expected %s arguments but received %s: %s" % (expected, len(sys.argv), sys.argv))
-    print_usage()
-    sys.exit(1)
-
   # Since Heron on YARN runs as headless users, pex compiled
   # binaries should be exploded into the container working
   # directory. In order to do this, we need to set the
