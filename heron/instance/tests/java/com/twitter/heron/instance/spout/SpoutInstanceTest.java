@@ -245,9 +245,9 @@ public class SpoutInstanceTest {
               metricsName.add(metricDatum.getName());
             }
 
-            Assert.assertTrue(metricsName.contains("__ack-count"));
-            Assert.assertTrue(metricsName.contains("__complete-latency"));
-            Assert.assertTrue(metricsName.contains("__emit-count"));
+            Assert.assertTrue(metricsName.contains("__ack-count/default"));
+            Assert.assertTrue(metricsName.contains("__complete-latency/default"));
+            Assert.assertTrue(metricsName.contains("__emit-count/default"));
             Assert.assertTrue(metricsName.contains("__next-tuple-latency"));
             Assert.assertTrue(metricsName.contains("__next-tuple-count"));
 
