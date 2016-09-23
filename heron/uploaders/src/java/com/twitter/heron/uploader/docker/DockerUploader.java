@@ -18,7 +18,6 @@ import com.twitter.heron.spi.uploader.IUploader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,12 +94,12 @@ public class DockerUploader implements IUploader{
         // get the topology package file, role, and name
         File topologyPackageLocation =
                 new File(Context.topologyPackageFile(config));
-        Optional<String> role = Optional.ofNullable(Context.role(config)).filter(s -> !s.isEmpty());
+        String role = Context.role(config);
         String topologyName = Context.topologyName(config);
 
         // check that the base image is defined
-        Optional<String> baseImage = Optional.ofNullable(DockerContext.baseImage(config));
-        if(!baseImage.isPresent()){
+        String baseImage = DockerContext.baseImage(config);
+        if(baseImage == null || baseImage.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to create Dockerfile without base image specified.");
             return null;
         }
@@ -110,8 +109,8 @@ public class DockerUploader implements IUploader{
         LOG.info("Creating DockerUploader file in " + workingDir.getAbsolutePath());
         try{
             dockerfile.newDockerfile(workingDir)
-                    .FROM(baseImage.get())
-                    .ADD(topologyPackageLocation.getName(), "/home/"+role.orElse("heron")+"/"+topologyName)
+                    .FROM(baseImage)
+                    .ADD(topologyPackageLocation.getName(), "/home/"+ role == null || role.isEmpty() ? "heron" : role +"/"+topologyName)
                     .write();
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "Error Writing DockerUploader File", e);
@@ -120,12 +119,25 @@ public class DockerUploader implements IUploader{
 
         // build the tag name
         final StringBuilder tagNameBuilder = new StringBuilder();
-        Optional.ofNullable(DockerContext.dockerRepository(config)).ifPresent(s -> tagNameBuilder.append(s).append("/"));
-        Optional.ofNullable(Context.cluster(config)).filter(s -> !s.isEmpty())
-                .map(this::toSnakeCase).ifPresent(s -> tagNameBuilder.append(s).append("/"));
-        role.map(this::toSnakeCase).ifPresent(s -> tagNameBuilder.append(s).append("/"));
-        Optional.ofNullable(Context.environ(config)).filter(s1 -> !s1.isEmpty())
-                .map(this::toSnakeCase).ifPresent(s -> tagNameBuilder.append(s).append("/"));
+        String repository = DockerContext.dockerRepository(config);
+        if (repository != null && !repository.isEmpty()){
+            tagNameBuilder.append(repository).append("/");
+        }
+
+        String cluster = Context.cluster(config);
+        if (cluster != null && !cluster.isEmpty()){
+            tagNameBuilder.append(toSnakeCase(cluster)).append("/");
+        }
+
+        if (role != null && !role.isEmpty()) {
+            tagNameBuilder.append(toSnakeCase(role)).append("/");
+        }
+
+        String environ = Context.environ(config);
+        if (environ != null && !environ.isEmpty()){
+            tagNameBuilder.append(toSnakeCase(environ)).append("/");
+        }
+
         tagNameBuilder.append(toSnakeCase(topologyName)).append(":").append(UUID.randomUUID().toString());
         String tagName = tagNameBuilder.toString();
 
