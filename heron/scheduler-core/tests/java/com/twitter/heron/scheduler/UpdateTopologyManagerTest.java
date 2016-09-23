@@ -90,6 +90,8 @@ public class UpdateTopologyManagerTest {
 
     Mockito.doReturn(null).when(spyUpdateManager).
         getUpdatedTopology(null, proposedPacking, mockStateMgr);
+    Mockito.doReturn(serializer.toProto(currentPacking)).when(spyUpdateManager).
+        getPackingPlan(eq(mockStateMgr), any(String.class));
     Mockito.doNothing().when(spyUpdateManager)
         .deactivateTopology(eq(mockStateMgr), any(TopologyAPI.Topology.class));
     Mockito.doNothing().when(spyUpdateManager)
