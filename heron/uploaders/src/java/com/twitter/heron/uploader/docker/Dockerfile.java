@@ -1,3 +1,5 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -29,7 +31,7 @@ class Dockerfile {
   /**
    * Simple builder that roughly matches the bits of the DockerUploader Spec
    */
-  class DockerfileBuilder {
+  static class DockerfileBuilder {
 
     private final File directory;
     private final List<String> commands = new ArrayList<>();

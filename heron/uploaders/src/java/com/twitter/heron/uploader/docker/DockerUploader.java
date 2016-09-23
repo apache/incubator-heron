@@ -1,3 +1,5 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,16 +13,16 @@
 // limitations under the License.
 package com.twitter.heron.uploader.docker;
 
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.uploader.IUploader;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.uploader.IUploader;
 
 /**
  * IUploader Implementation that creates a DockerUploader Image for the Topology
@@ -66,11 +68,11 @@ import java.util.logging.Logger;
  * </code>
  * </p>
  */
-public class DockerUploader implements IUploader {
+public final class DockerUploader implements IUploader {
 
   private static final Logger LOG = Logger.getLogger(DockerUploader.class.getName());
 
-  private Config config;
+  private Config configuration;
   private final Dockerfile dockerfile;
   private final DockerDaemon dockerDaemon;
 
@@ -85,7 +87,7 @@ public class DockerUploader implements IUploader {
 
   @Override
   public void initialize(Config config) {
-    this.config = config;
+    this.configuration = config;
     LOG.info("Initializing DockerUploader Uploader");
   }
 
@@ -93,12 +95,12 @@ public class DockerUploader implements IUploader {
   public URI uploadPackage() {
     // get the topology package file, role, and name
     File topologyPackageLocation =
-        new File(Context.topologyPackageFile(config));
-    String role = Context.role(config);
-    String topologyName = Context.topologyName(config);
+        new File(Context.topologyPackageFile(configuration));
+    String role = Context.role(configuration);
+    String topologyName = Context.topologyName(configuration);
 
     // check that the base image is defined
-    String baseImage = DockerContext.baseImage(config);
+    String baseImage = DockerContext.baseImage(configuration);
     if (baseImage == null || baseImage.isEmpty()) {
       LOG.log(Level.SEVERE, "Unable to create Dockerfile without base image specified.");
       return null;
@@ -110,7 +112,8 @@ public class DockerUploader implements IUploader {
     try {
       dockerfile.newDockerfile(workingDir)
           .FROM(baseImage)
-          .ADD(topologyPackageLocation.getName(), "/home/" + (role == null || role.isEmpty() ? "heron" : role) + "/" + topologyName)
+          .ADD(topologyPackageLocation.getName(), "/home/" +
+              (role == null || role.isEmpty() ? "heron" : role) + "/" + topologyName)
           .write();
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Error Writing DockerUploader File", e);
@@ -119,12 +122,12 @@ public class DockerUploader implements IUploader {
 
     // build the tag name
     final StringBuilder tagNameBuilder = new StringBuilder();
-    String repository = DockerContext.dockerRepository(config);
+    String repository = DockerContext.dockerRepository(configuration);
     if (repository != null && !repository.isEmpty()) {
       tagNameBuilder.append(repository).append("/");
     }
 
-    String cluster = Context.cluster(config);
+    String cluster = Context.cluster(configuration);
     if (cluster != null && !cluster.isEmpty()) {
       tagNameBuilder.append(toSnakeCase(cluster)).append("/");
     }
@@ -133,12 +136,13 @@ public class DockerUploader implements IUploader {
       tagNameBuilder.append(toSnakeCase(role)).append("/");
     }
 
-    String environ = Context.environ(config);
+    String environ = Context.environ(configuration);
     if (environ != null && !environ.isEmpty()) {
       tagNameBuilder.append(toSnakeCase(environ)).append("/");
     }
 
-    tagNameBuilder.append(toSnakeCase(topologyName)).append(":").append(UUID.randomUUID().toString());
+    tagNameBuilder.append(toSnakeCase(topologyName)).append(":")
+        .append(UUID.randomUUID().toString());
     String tagName = tagNameBuilder.toString();
 
     // try to build the Dockerfile
@@ -147,7 +151,7 @@ public class DockerUploader implements IUploader {
     }
 
     // if pushing try to push
-    if (DockerContext.push(config)) {
+    if (DockerContext.push(configuration)) {
       if (!dockerDaemon.push(tagName)) {
         return null;
       }

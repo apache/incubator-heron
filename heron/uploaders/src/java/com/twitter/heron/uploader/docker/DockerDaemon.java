@@ -1,3 +1,5 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,11 +13,11 @@
 // limitations under the License.
 package com.twitter.heron.uploader.docker;
 
-import com.twitter.heron.spi.utils.ShellUtils;
-
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
  * Provides a wrapper around the DockerUploader command line client

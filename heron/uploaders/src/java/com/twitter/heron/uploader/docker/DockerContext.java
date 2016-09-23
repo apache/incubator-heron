@@ -1,3 +1,5 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +16,7 @@ package com.twitter.heron.uploader.docker;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
-class DockerContext extends Context {
+final class DockerContext extends Context {
 
   public static final String HERON_UPLOADER_DOCKER_BASE = "heron.uploader.docker.base";
   public static final String HERON_UPLOADER_DOCKER_REPOSITORY = "heron.uploader.docker.repository";
