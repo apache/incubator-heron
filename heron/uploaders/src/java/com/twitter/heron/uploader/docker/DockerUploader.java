@@ -34,10 +34,11 @@ import com.twitter.heron.spi.uploader.IUploader;
  * </p>
  * <p>
  * The topology definition will be written to "/home/[role]/[topology-name]"
- * if no role is given "heron" is used
+ * if no role is given "default" is used
  * The URI returned by uploadPackage is the fully qualified tag name it will be
  * "[docker-repository]/[cluster]/[role]/[env]/[topology-name]:[UUID]"
- * if any of the values are not specified then they are omitted.
+ * if role or env are not specified then "default" is used, if docker-repository is not
+ * specified then it is omitted.
  * UUIDs are used for the version in order to ensure that previously cached images won't get used.
  * Per docker requirements role, env, and topology-name are all snake cased with Capital letters
  * made lowercase and proceeded by a - unless the first character. for instance TopologyName would
@@ -112,8 +113,7 @@ public final class DockerUploader implements IUploader {
     try {
       dockerfile.newDockerfile(workingDir)
           .FROM(baseImage)
-          .ADD(topologyPackageLocation.getName(), "/home/" +
-              (role == null || role.isEmpty() ? "heron" : role) + "/" + topologyName)
+          .ADD(topologyPackageLocation.getName(), "/home/" + role + "/" + topologyName)
           .write();
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Error Writing DockerUploader File", e);
@@ -127,23 +127,13 @@ public final class DockerUploader implements IUploader {
       tagNameBuilder.append(repository).append("/");
     }
 
-    String cluster = Context.cluster(configuration);
-    if (cluster != null && !cluster.isEmpty()) {
-      tagNameBuilder.append(toSnakeCase(cluster)).append("/");
-    }
-
-    if (role != null && !role.isEmpty()) {
-      tagNameBuilder.append(toSnakeCase(role)).append("/");
-    }
-
-    String environ = Context.environ(configuration);
-    if (environ != null && !environ.isEmpty()) {
-      tagNameBuilder.append(toSnakeCase(environ)).append("/");
-    }
-
-    tagNameBuilder.append(toSnakeCase(topologyName)).append(":")
-        .append(UUID.randomUUID().toString());
-    String tagName = tagNameBuilder.toString();
+    String tagName = tagNameBuilder
+        .append(toSnakeCase(Context.cluster(configuration))).append("/")
+        .append(toSnakeCase(role)).append("/")
+        .append(toSnakeCase(Context.environ(configuration))).append("/")
+        .append(toSnakeCase(topologyName)).append(":")
+        .append(UUID.randomUUID().toString())
+        .toString();
 
     // try to build the Dockerfile
     if (!dockerDaemon.build(workingDir, tagName)) {

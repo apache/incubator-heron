@@ -39,6 +39,9 @@ public class DockerUploaderTest {
       .put("heron.topology.package.file", "/test/topology_package.tar")
       .put("heron.topology.name", "TestTopology")
       .put("heron.uploader.docker.base", "ubuntu:trusty")
+      .put("heron.config.cluster", "local")
+      .put("heron.config.role", "default")
+      .put("heron.config.environ", "default")
       .build();
 
   @Before
@@ -64,26 +67,14 @@ public class DockerUploaderTest {
       }
     }));
     inOrder.verify(builder).FROM(eq("ubuntu:trusty"));
-    inOrder.verify(builder).ADD(eq("topology_package.tar"), eq("/home/heron/TestTopology"));
+    inOrder.verify(builder).ADD(eq("topology_package.tar"), eq("/home/default/TestTopology"));
     inOrder.verify(builder).write();
-  }
-
-  @Test
-  public void testDockerFileCreationUsesRoleIfPresent() throws Exception {
-    dockerUploader.initialize(Config.newBuilder().putAll(config)
-        .put("heron.config.role", "tester").build());
-    Dockerfile.DockerfileBuilder builder = mock(Dockerfile.DockerfileBuilder.class);
-    when(dockerfile.newDockerfile(any(File.class))).thenReturn(builder);
-    when(builder.FROM(anyString())).thenReturn(builder);
-    when(builder.ADD(anyString(), anyString())).thenReturn(builder);
-    dockerUploader.uploadPackage();
-    verify(builder).ADD(anyString(), eq("/home/tester/TestTopology"));
   }
 
   @Test
   public void testTagConstruction() {
     assertTrue("Tag doesn't match regex", dockerUploader.uploadPackage().toString()
-        .matches("test-topology:[0-9A-Fa-f-]+"));
+        .matches("local/default/default/test-topology:[0-9A-Fa-f-]+"));
   }
 
   @Test
@@ -91,34 +82,7 @@ public class DockerUploaderTest {
     dockerUploader.initialize(Config.newBuilder().putAll(config)
         .put("heron.uploader.docker.repository", "dockerUploader.example.com").build());
     assertTrue("Tag doesn't match regex", dockerUploader.uploadPackage().toString()
-        .matches("dockerUploader.example.com/test-topology:[0-9A-Fa-f-]+"));
-  }
-
-  @Test
-  public void testTagConstructionWithCluster() {
-    dockerUploader.initialize(Config.newBuilder().putAll(config)
-        .put("heron.config.cluster", "local").build());
-    assertTrue("Tag doesn't match regex", dockerUploader.uploadPackage().toString()
-        .matches("local/test-topology:[0-9A-Fa-f-]+"));
-  }
-
-  @Test
-  public void testTagConstructionWithClusterAndRole() {
-    dockerUploader.initialize(Config.newBuilder().putAll(config)
-        .put("heron.config.cluster", "local")
-        .put("heron.config.role", "tester").build());
-    assertTrue("Tag doesn't match regex", dockerUploader.uploadPackage().toString()
-        .matches("local/tester/test-topology:[0-9A-Fa-f-]+"));
-  }
-
-  @Test
-  public void testTagConstructionWithClusterAndRoleAndEnv() {
-    dockerUploader.initialize(Config.newBuilder().putAll(config)
-        .put("heron.config.cluster", "local")
-        .put("heron.config.role", "tester")
-        .put("heron.config.environ", "devel").build());
-    assertTrue("Tag doesn't match regex", dockerUploader.uploadPackage().toString()
-        .matches("local/tester/devel/test-topology:[0-9A-Fa-f-]+"));
+        .matches("dockerUploader.example.com/local/default/default/test-topology:[0-9A-Fa-f-]+"));
   }
 
   @Test
