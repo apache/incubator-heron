@@ -54,7 +54,7 @@ public class DockerUploaderTest {
 
   @Test
   public void testDockerFileCreation() throws Exception {
-    Dockerfile.DockerfileBuilder builder = mock(Dockerfile.DockerfileBuilder.class);
+    Dockerfile.IDockerfileBuilder builder = mock(Dockerfile.IDockerfileBuilder.class);
     when(dockerfile.newDockerfile(any(File.class))).thenReturn(builder);
     when(builder.FROM(anyString())).thenReturn(builder);
     when(builder.ADD(anyString(), anyString())).thenReturn(builder);

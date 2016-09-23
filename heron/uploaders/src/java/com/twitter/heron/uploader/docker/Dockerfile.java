@@ -28,10 +28,35 @@ import java.util.List;
  */
 class Dockerfile {
 
+  interface IDockerfileBuilder {
+
+    /**
+     * DockerUploader FROM directive
+     * @param image the base image
+     */
+    IDockerfileBuilder FROM(String image);
+
+
+    /**
+     * DockerUploader ADD directive
+     * @param file     the source file
+     * @param location the target location
+     */
+    IDockerfileBuilder ADD(String file, String location);
+
+
+    /**
+     * Write the Dockerfile, if a Dockerfile already exists overwrite
+     * @throws IOException if unable to write or overwrite
+     */
+    void write() throws IOException;
+
+  }
+
   /**
    * Simple builder that roughly matches the bits of the DockerUploader Spec
    */
-  static class DockerfileBuilder {
+  final class DockerfileBuilder implements IDockerfileBuilder {
 
     private final File directory;
     private final List<String> commands = new ArrayList<>();
@@ -40,33 +65,20 @@ class Dockerfile {
       this.directory = directory;
     }
 
-    /**
-     * DockerUploader FROM directive
-     *
-     * @param image the base image
-     */
-    DockerfileBuilder FROM(String image) {
+    @Override
+    public DockerfileBuilder FROM(String image) {
       commands.add("FROM " + image);
       return this;
     }
 
-    /**
-     * DockerUploader ADD directive
-     *
-     * @param file     the source file
-     * @param location the target location
-     */
-    DockerfileBuilder ADD(String file, String location) {
+    @Override
+    public DockerfileBuilder ADD(String file, String location) {
       commands.add("ADD " + file + "\t" + location);
       return this;
     }
 
-    /**
-     * Write the Dockerfile, if a Dockerfile already exists overwrite
-     *
-     * @throws IOException if unable to write or overwrite
-     */
-    void write() throws IOException {
+    @Override
+    public void write() throws IOException {
       File file = new File(directory, "Dockerfile");
       if (file.exists()) {
         if (!file.delete()) {
@@ -94,9 +106,9 @@ class Dockerfile {
    * The file will be called Dockerfile
    *
    * @param directory the directory in which to create the docker file
-   * @return a new DockerfileBuilder for the given directory
+   * @return a new IDockerfileBuilder for the given directory
    */
-  DockerfileBuilder newDockerfile(File directory) {
+  IDockerfileBuilder newDockerfile(File directory) {
     return new DockerfileBuilder(directory);
   }
 
