@@ -224,6 +224,8 @@ public class StreamManagerClient extends HeronClient {
         while (!outStreamQueue.isEmpty()) {
           HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
 
+          gatewayMetrics.updateSentPacketsCount(1);
+          gatewayMetrics.updateSentPacketsSize(tupleSet.getSerializedSize());
           sendMessage(tupleSet);
         }
       }
