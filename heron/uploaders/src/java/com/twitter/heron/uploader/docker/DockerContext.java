@@ -16,20 +16,20 @@ import com.twitter.heron.spi.common.Context;
 
 class DockerContext extends Context {
 
-    public static final String HERON_UPLOADER_DOCKER_BASE = "heron.uploader.docker.base";
-    public static final String HERON_UPLOADER_DOCKER_REPOSITORY = "heron.uploader.docker.repository";
-    public static final String HERON_UPLOADER_DOCKER_PUSH = "heron.uploader.docker.push";
+  public static final String HERON_UPLOADER_DOCKER_BASE = "heron.uploader.docker.base";
+  public static final String HERON_UPLOADER_DOCKER_REPOSITORY = "heron.uploader.docker.repository";
+  public static final String HERON_UPLOADER_DOCKER_PUSH = "heron.uploader.docker.push";
 
-    public static String baseImage(Config config) {
-        return config.getStringValue(HERON_UPLOADER_DOCKER_BASE);
-    }
+  public static String baseImage(Config config) {
+    return config.getStringValue(HERON_UPLOADER_DOCKER_BASE);
+  }
 
-    public static String dockerRepository(Config config){
-        return config.getStringValue(HERON_UPLOADER_DOCKER_REPOSITORY);
-    }
+  public static String dockerRepository(Config config) {
+    return config.getStringValue(HERON_UPLOADER_DOCKER_REPOSITORY);
+  }
 
-    public static boolean push(Config config) {
-        return config.getBooleanValue(HERON_UPLOADER_DOCKER_PUSH, false);
-    }
+  public static boolean push(Config config) {
+    return config.getBooleanValue(HERON_UPLOADER_DOCKER_PUSH, false);
+  }
 
 }

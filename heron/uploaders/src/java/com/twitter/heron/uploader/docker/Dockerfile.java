@@ -26,72 +26,76 @@ import java.util.List;
  */
 class Dockerfile {
 
-    /**
-     * Simple builder that roughly matches the bits of the DockerUploader Spec
-     */
-    class DockerfileBuilder {
+  /**
+   * Simple builder that roughly matches the bits of the DockerUploader Spec
+   */
+  class DockerfileBuilder {
 
-        private final File directory;
-        private final List<String> commands = new ArrayList<>();
+    private final File directory;
+    private final List<String> commands = new ArrayList<>();
 
-        private DockerfileBuilder(File directory){
-            this.directory = directory;
-        }
-
-        /**
-         * DockerUploader FROM directive
-         * @param image the base image
-         */
-        DockerfileBuilder FROM(String image){
-            commands.add("FROM " + image);
-            return this;
-        }
-
-        /**
-         * DockerUploader ADD directive
-         * @param file the source file
-         * @param location the target location
-         */
-        DockerfileBuilder ADD(String file, String location) {
-            commands.add("ADD " + file + "\t" + location);
-            return this;
-        }
-
-        /**
-         * Write the Dockerfile, if a Dockerfile already exists overwrite
-         * @throws IOException if unable to write or overwrite
-         */
-        void write() throws IOException {
-            File file = new File(directory,"Dockerfile");
-            if (file.exists()){
-                if (!file.delete()){
-                    throw new IOException("Unable to delete existing Dockerfile");
-                }
-            }
-            if (!file.createNewFile()){
-                throw new IOException("Unable to create Dockerfile");
-            }
-            try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                try (PrintWriter writer = new PrintWriter(outputStream)){
-                    for(String command : commands) {
-                        writer.println(command);
-                    }
-                    writer.flush();
-                }
-                outputStream.flush();
-            }
-        }
-
+    private DockerfileBuilder(File directory) {
+      this.directory = directory;
     }
 
     /**
-     * Create a new DockerfileBuilder for a docker file in the given directory
-     * The file will be called Dockerfile
-     * @param directory the directory in which to create the docker file
-     * @return a new DockerfileBuilder for the given directory
+     * DockerUploader FROM directive
+     *
+     * @param image the base image
      */
-    DockerfileBuilder newDockerfile(File directory){
-        return new DockerfileBuilder(directory);
+    DockerfileBuilder FROM(String image) {
+      commands.add("FROM " + image);
+      return this;
     }
+
+    /**
+     * DockerUploader ADD directive
+     *
+     * @param file     the source file
+     * @param location the target location
+     */
+    DockerfileBuilder ADD(String file, String location) {
+      commands.add("ADD " + file + "\t" + location);
+      return this;
+    }
+
+    /**
+     * Write the Dockerfile, if a Dockerfile already exists overwrite
+     *
+     * @throws IOException if unable to write or overwrite
+     */
+    void write() throws IOException {
+      File file = new File(directory, "Dockerfile");
+      if (file.exists()) {
+        if (!file.delete()) {
+          throw new IOException("Unable to delete existing Dockerfile");
+        }
+      }
+      if (!file.createNewFile()) {
+        throw new IOException("Unable to create Dockerfile");
+      }
+      try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        try (PrintWriter writer = new PrintWriter(outputStream)) {
+          for (String command : commands) {
+            writer.println(command);
+          }
+          writer.flush();
+        }
+        outputStream.flush();
+      }
+    }
+
+  }
+
+  /**
+   * Create a new DockerfileBuilder for a docker file in the given directory
+   * The file will be called Dockerfile
+   *
+   * @param directory the directory in which to create the docker file
+   * @return a new DockerfileBuilder for the given directory
+   */
+  DockerfileBuilder newDockerfile(File directory) {
+    return new DockerfileBuilder(directory);
+  }
 
 }

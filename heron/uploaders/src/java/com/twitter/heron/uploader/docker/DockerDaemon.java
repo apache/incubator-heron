@@ -24,29 +24,29 @@ import java.util.logging.Logger;
  */
 class DockerDaemon {
 
-    private static final Logger LOG = Logger.getLogger(DockerDaemon.class.getName());
+  private static final Logger LOG = Logger.getLogger(DockerDaemon.class.getName());
 
-    boolean build(File workingDirectory, String tag){
-        String[] dockerCommand = {"docker","build", "--no-cache=true", "--pull=true", "-t", tag,
-                workingDirectory.getAbsolutePath()};
-        StringBuilder stdLog = new StringBuilder();
-        LOG.info("Creating DockerUploader Image with Tag " + tag);
-        if (0 != ShellUtils.runProcess(true,dockerCommand, stdLog, stdLog)) {
-            LOG.log(Level.SEVERE, stdLog.toString());
-            return false;
-        }
-        return true;
+  boolean build(File workingDirectory, String tag) {
+    String[] dockerCommand = {"docker", "build", "--no-cache=true", "--pull=true", "-t", tag,
+        workingDirectory.getAbsolutePath()};
+    StringBuilder stdLog = new StringBuilder();
+    LOG.info("Creating DockerUploader Image with Tag " + tag);
+    if (0 != ShellUtils.runProcess(true, dockerCommand, stdLog, stdLog)) {
+      LOG.log(Level.SEVERE, stdLog.toString());
+      return false;
     }
+    return true;
+  }
 
-    boolean push(String tag) {
-        String[] dockerPublish = {"docker", "push", tag};
-        StringBuilder stdLog = new StringBuilder();
-        LOG.info("pushing docker image with tag " + tag);
-        if (0 != ShellUtils.runProcess(true, dockerPublish, stdLog, stdLog)) {
-            LOG.log(Level.SEVERE, stdLog.toString());
-            return false;
-        }
-        return true;
+  boolean push(String tag) {
+    String[] dockerPublish = {"docker", "push", tag};
+    StringBuilder stdLog = new StringBuilder();
+    LOG.info("pushing docker image with tag " + tag);
+    if (0 != ShellUtils.runProcess(true, dockerPublish, stdLog, stdLog)) {
+      LOG.log(Level.SEVERE, stdLog.toString());
+      return false;
     }
+    return true;
+  }
 
 }
