@@ -208,7 +208,6 @@ class Server : public BaseServer {
   // Called when the connection is closed
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status);
 
-  // TODO(mfu):
   MemPool<google::protobuf::Message> _heron_message_pool;
 
   template<typename M>
