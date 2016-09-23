@@ -185,3 +185,35 @@ above.
 
 1. This should be handled in the same was as internal bolt - by increasing the
    parallelism or RAM for the component.
+
+#### 7. Debugging Java topologies.
+The jar containing the code for building the topology, along with the spout and bolt 
+code, is deployed in the containers. A Heron Instance is started in each container, 
+with each Heron Instance responsible for running a bolt or a spout. One way to debug 
+Java code is to write debug logs to the log files for tracking and debugging purposes.
+
+Logging is the preferred mode for debugging as it makes it easer to find issues in both 
+the short and long term in the topology. If you want to perform step-by-step debugging 
+of a JVM process, however, this can be achieved by enabling remote debugging for the Heron Instance.
+
+Follow these steps to enable remote debugging:
+
+1. Add the java options to enable debuggin on all the Heron Instances that will be started.
+   This can be achieved by adding the options ```-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n```. Here's an example:
+
+    ```java
+    conf.setDebug(true);
+    conf.setMaxSpoutPending(10);
+    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+    conf.setComponentJvmOptions("word",
+           "-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n");
+    conf.setComponentJvmOptions("exclaim1",
+           "-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n");
+    ```
+
+2. Use the steps as given in the tutorial to setup remote debugging eith eclipse.
+   [set up Remote Debugging in Eclipse](http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.user%2Ftasks%2Ftask-remotejava_launch_config.htm) . 
+   To setup remote debugging with intelij use [remote debugging instructions](https://www.jetbrains.com/help/idea/2016.2/run-debug-configuration-remote.html) .
+ 
+3. Once the topology is activated start the debugger at ```localhost:{port}``` if in standalone
+   local deployment or ``` {IP}/{hostname}:{port}``` for multi container remote deployment. And you will be able to debug the code step by step.
