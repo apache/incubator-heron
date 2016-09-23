@@ -110,7 +110,7 @@ public class DockerUploader implements IUploader{
         try{
             dockerfile.newDockerfile(workingDir)
                     .FROM(baseImage)
-                    .ADD(topologyPackageLocation.getName(), "/home/"+ role == null || role.isEmpty() ? "heron" : role +"/"+topologyName)
+                    .ADD(topologyPackageLocation.getName(), "/home/"+ (role == null || role.isEmpty() ? "heron" : role) +"/"+topologyName)
                     .write();
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "Error Writing DockerUploader File", e);
