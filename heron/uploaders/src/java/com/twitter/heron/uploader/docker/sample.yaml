@@ -1,0 +1,11 @@
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:         com.twitter.heron.uploader.docker.DockerUploader
+
+#base image
+heron.uploader.docker.base:                      ubuntu:latest
+
+#repository prefix:
+heron.uploader.docker.repository:                docker.example.com
+
+#push
+heron.uploader.docker.push:                      false

@@ -107,3 +107,22 @@ genrule(
     outs = ["heron-scp-uploader.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name = 'docker-uploader-java',
+    srcs = glob(["**/docker/**/*.java"]),
+    deps = uploader_spi_files,
+)
+
+java_binary(
+    name = 'docker-uploader-unshaded',
+    srcs = glob(["**/docker/**/*.java"]),
+    deps = uploader_spi_files,
+)
+
+genrule(
+    name = "heron-docker-uploader",
+    srcs = [":docker-uploader-unshaded_deploy.jar"],
+    outs = ["heron-docker-uploader.jar"],
+    cmd  = "cp $< $@",
+)
