@@ -555,8 +555,7 @@ void TearCommonResources(CommonResources& common) {
 
   for (size_t i = 0; i < common.ss_list_.size(); ++i) delete common.ss_list_[i];
 
-  for (std::map<sp_string, heron::proto::system::Instance*>::iterator itr =
-           common.instanceid_instance_.begin();
+  for (auto itr = common.instanceid_instance_.begin();
        itr != common.instanceid_instance_.end(); ++itr)
     delete itr->second;
 
@@ -1632,8 +1631,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   VerifyMetricsMgrTMaster(common);
 
   // Kill the metrics mgr
-  for (std::vector<EventLoopImpl*>::iterator iter = common.ss_list_.begin();
-       iter != common.ss_list_.end(); ++iter) {
+  for (auto iter = common.ss_list_.begin(); iter != common.ss_list_.end(); ++iter) {
     if (*iter == mmgr_ss) {
       common.ss_list_.erase(iter);
       break;
