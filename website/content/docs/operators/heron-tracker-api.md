@@ -443,11 +443,15 @@ Note that these timeseries are associated with their instances.
 
 ##### TS
 
-    TS(componentName, instance, metricName)
+```text
+TS(componentName, instance, metricName)
+```
 
 Example:
 
-    TS(component1, *, __emit-count/stream1)
+```text
+TS(component1, *, __emit-count/stream1)
+```
 
 Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
 Accepts a list of 3 elements:
@@ -463,9 +467,16 @@ a multivariate time series.
 
 ##### DEFAULT
 
-    DEFAULT(0, TS(component1, *, __emit-count/stream1))      <-- If the second operator returns more than one timeline, so will the DEFAULT operator.
+```text
+DEFAULT(0, TS(component1, *, __emit-count/stream1))
+```
+If the second operator returns more than one timeline, so will the
+DEFAULT operator.
 
-    DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default)))     <-- Second operator can be any operator
+```text
+DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default))) <--
+```
+Second operator can be any operator
 
 Default Operator. This operator is responsible for filling missing values in the metrics timeline.
 Must have 2 arguments
@@ -479,7 +490,9 @@ Returns a univariate or multivariate time series, based on what the second opera
 
 ##### SUM
 
-    SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+```text
+SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+```
 
 Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
 each of which must be one of the following two types:
@@ -494,7 +507,9 @@ Note that "instance" attribute is not there in the result.
 
 ##### MAX
 
-    MAX(100, TS(component1, *, metric1))
+```text
+MAX(100, TS(component1, *, metric1))
+```
 
 Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
 Each argument must be one of the following types:
@@ -509,7 +524,9 @@ Note that "instance" attribute is not included in the result.
 
 ##### PERCENTILE
 
-    PERCENTILE(99, TS(component1, *, metric1))
+```text
+PERCENTILE(99, TS(component1, *, metric1))
+```
 
 Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
 This is a more general type of query similar to MAX. Note that `PERCENTILE(100, TS...)` is equivalent to `Max(TS...)`.
@@ -527,7 +544,9 @@ for each timestamp. Note that "instance" attribute is not there in the result.
 
 ##### DIVIDE
 
-    DIVIDE(TS(component1, *, metrics1), 100)
+```text
+DIVIDE(TS(component1, *, metrics1), 100)
+```
 
 Divide Operator. Accepts two arguments, both can be univariate or multivariate.
 Each can be of one of the following types:
@@ -554,7 +573,9 @@ Three main cases are:
 
 ##### MULTIPLY
 
-    MULTIPLY(10, TS(component1, *, metrics1))
+```text
+MULTIPLY(10, TS(component1, *, metrics1))
+```
 
 Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:
@@ -582,9 +603,11 @@ Three main cases are:
 
 ##### SUBTRACT
 
-    SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
+```text
+SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
 
-    SUBTRACT(TS(component1, instance1, metrics1), 100)
+SUBTRACT(TS(component1, instance1, metrics1), 100)
+```
 
 Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:
@@ -612,9 +635,11 @@ Three main cases are:
 
 ##### RATE
 
-    RATE(SUM(TS(component1, *, metrics1)))
+```text
+RATE(SUM(TS(component1, *, metrics1)))
 
-    RATE(TS(component1, *, metrics2))
+RATE(TS(component1, *, metrics2))
+```
 
 Rate Operator. This operator is used to find rate of change for all timeseries.
 Accepts a only a single argument, which must be an Operators which returns univariate or multivariate time series.

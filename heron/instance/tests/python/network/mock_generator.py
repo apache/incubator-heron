@@ -13,13 +13,15 @@
 # limitations under the License.
 '''mock_generator for instance/network'''
 # pylint : disable=missing-docstring
-
 from heron.common.src.python.basics import EventLooper
 from heron.common.src.python.network import SocketOptions
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.network import SingleThreadStmgrClient, MetricsManagerClient
 import heron.common.src.python.constants as constants
 import heron.common.tests.python.mock_protobuf as mock_protobuf
+from mock import Mock
+
+from mock import patch
 
 class MockSTStmgrClient(SingleThreadStmgrClient):
   HOST = '127.0.0.1'
@@ -27,12 +29,12 @@ class MockSTStmgrClient(SingleThreadStmgrClient):
 
   def __init__(self):
     socket_options = SocketOptions(32768, 16, 32768, 16, 1024000, 1024000)
-    sys_config = {constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC: 10}
-    SingleThreadStmgrClient.__init__(self, EventLooper(), None, self.HOST, self.PORT,
-                                     "topology_name", "topology_id",
-                                     mock_protobuf.get_mock_instance(), {},
-                                     None, socket_options, sys_config)
-
+    with patch("heron.common.src.python.config.system_config.get_sys_config",
+               side_effect=lambda: {constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC: 10}):
+      SingleThreadStmgrClient.__init__(self, EventLooper(), None, self.HOST, self.PORT,
+                                       "topology_name", "topology_id",
+                                       mock_protobuf.get_mock_instance(), {},
+                                       None, socket_options)
     self.register_msg_called = False
     self.handle_register_response_called = False
 
@@ -48,10 +50,13 @@ class MockMetricsManagerClient(MetricsManagerClient):
   PORT = 9000
   def __init__(self):
     socket_options = SocketOptions(32768, 16, 32768, 16, 1024000, 1024000)
-    sys_config = {constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC: 10}
-    MetricsManagerClient.__init__(self, EventLooper(), self.HOST, self.PORT,
-                                  mock_protobuf.get_mock_instance(), HeronCommunicator(), {},
-                                  socket_options, sys_config)
+    with patch("heron.common.src.python.config.system_config.get_sys_config",
+               side_effect=lambda: {constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC: 10,
+                                    constants.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC: 10}):
+      stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
+      MetricsManagerClient.__init__(self, EventLooper(), self.HOST, self.PORT,
+                                  mock_protobuf.get_mock_instance(), HeronCommunicator(),
+                                  stream, stream, {}, socket_options, Mock(), Mock())
     self.register_req_called = False
 
   def _send_register_req(self):

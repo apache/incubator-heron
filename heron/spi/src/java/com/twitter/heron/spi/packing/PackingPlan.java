@@ -15,61 +15,87 @@
 package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 
 public class PackingPlan {
-  public final String id;
-  public final Map<String, ContainerPlan> containers;
-  public final Resource resource;
+  private final String id;
+  private final Map<Integer, ContainerPlan> containersMap;
+  private final Set<ContainerPlan> containers;
 
-  public PackingPlan(String id, Map<String, ContainerPlan> containers, Resource resource) {
+  public PackingPlan(String id, Set<ContainerPlan> containers) {
     this.id = id;
-    this.containers = containers;
-    this.resource = resource;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("{plan-id: %s, containers-list: %s, plan-resource: %s}",
-        id, containers.toString(), resource);
+    this.containers = ImmutableSet.copyOf(containers);
+    containersMap = new HashMap<>();
+    for (ContainerPlan containerPlan : containers) {
+      containersMap.put(containerPlan.getId(), containerPlan);
+    }
   }
 
   /**
-   * Get the String describing instance distribution from PackingPlan, used by executor
-   *
-   * @return String describing instance distribution
+   * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
+   * required by containers in the packing plan and updates the containers of the clone with the
+   * max resource information
    */
-  public String getInstanceDistribution() {
-    StringBuilder[] containerBuilder = new StringBuilder[this.containers.size()];
-    for (PackingPlan.ContainerPlan container : this.containers.values()) {
-      int index = Integer.parseInt(container.id);
-      containerBuilder[index - 1] = new StringBuilder();
+  public PackingPlan cloneWithHomogeneousScheduledResource() {
+    double maxCpu = 0;
+    long maxRam = 0;
+    long maxDisk = 0;
+    for (ContainerPlan containerPlan : getContainers()) {
+      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
+      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
+      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
+    }
 
-      for (PackingPlan.InstancePlan instance : container.instances.values()) {
-        String[] tokens = instance.id.split(":");
-        containerBuilder[index - 1].append(
-            String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
+    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
+    Set<ContainerPlan> updatedContainers = new HashSet<>();
+    for (ContainerPlan container : getContainers()) {
+      updatedContainers.add(container.cloneWithScheduledResource(maxResource));
+    }
+
+    PackingPlan updatedPackingPlan = new PackingPlan(getId(), updatedContainers);
+    return updatedPackingPlan;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public Set<ContainerPlan> getContainers() {
+    return containers;
+  }
+
+  public Optional<ContainerPlan> getContainer(int containerId) {
+    return Optional.fromNullable(this.containersMap.get(containerId));
+  }
+
+  public Integer getInstanceCount() {
+    Integer totalInstances = 0;
+    for (Integer count : getComponentCounts().values()) {
+      totalInstances += count;
+    }
+    return totalInstances;
+  }
+
+  /**
+   * Return a map containing the count of all of the components, keyed by name
+   */
+  public Map<String, Integer> getComponentCounts() {
+    Map<String, Integer> componentCounts = new HashMap<>();
+    for (ContainerPlan containerPlan : getContainers()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
+        Integer count = 0;
+        if (componentCounts.containsKey(instancePlan.getComponentName())) {
+          count = componentCounts.get(instancePlan.getComponentName());
+        }
+        componentCounts.put(instancePlan.getComponentName(), ++count);
       }
-      containerBuilder[index - 1].deleteCharAt(containerBuilder[index - 1].length() - 1);
     }
-
-    StringBuilder packingBuilder = new StringBuilder();
-    for (int i = 0; i < containerBuilder.length; ++i) {
-      StringBuilder builder = containerBuilder[i];
-      packingBuilder.append(String.format("%d:%s,", i + 1, builder.toString()));
-    }
-    packingBuilder.deleteCharAt(packingBuilder.length() - 1);
-
-    return packingBuilder.toString();
-  }
-
-  /**
-   * Get the containers created in this packing plan
-   *
-   * @return Map describing the container info
-   */
-  public Map<String, ContainerPlan> getContainers() {
-    return this.containers;
+    return componentCounts;
   }
 
   /**
@@ -81,9 +107,9 @@ public class PackingPlan {
   public String getComponentRamDistribution() {
     Map<String, Long> ramMap = new HashMap<>();
     // The implementation assumes instances for the same component require same ram
-    for (ContainerPlan containerPlan : this.containers.values()) {
-      for (InstancePlan instancePlan : containerPlan.instances.values()) {
-        ramMap.put(instancePlan.componentName, instancePlan.resource.ram);
+    for (ContainerPlan containerPlan : this.getContainers()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
+        ramMap.put(instancePlan.getComponentName(), instancePlan.getResource().getRam());
       }
     }
 
@@ -98,41 +124,177 @@ public class PackingPlan {
     return ramMapBuilder.toString();
   }
 
-  public static class InstancePlan {
-    public final String id;
-    public final String componentName;
-    public final Resource resource;
+  @Override
+  public String toString() {
+    return String.format("{plan-id: %s, containers-list: %s}",
+        getId(), getContainers().toString());
+  }
 
-    public InstancePlan(String id, String componentName, Resource resource) {
-      this.id = id;
-      this.componentName = componentName;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    PackingPlan that = (PackingPlan) o;
+
+    return getId().equals(that.getId())
+        && getContainers().equals(that.getContainers());
+  }
+
+  @Override
+  public int hashCode() {
+    int result = getId().hashCode();
+    result = 31 * result + getContainers().hashCode();
+    return result;
+  }
+
+  public static class InstancePlan {
+    private final String componentName;
+    private final int taskId;
+    private final int componentIndex;
+    private final Resource resource;
+
+    public InstancePlan(InstanceId instanceId, Resource resource) {
+      this.componentName = instanceId.getComponentName();
+      this.taskId = instanceId.getTaskId();
+      this.componentIndex = instanceId.getComponentIndex();
       this.resource = resource;
+    }
+
+    public String getComponentName() {
+      return componentName;
+    }
+
+    public int getTaskId() {
+      return taskId;
+    }
+
+    public int getComponentIndex() {
+      return componentIndex;
+    }
+
+    public Resource getResource() {
+      return resource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      InstancePlan that = (InstancePlan) o;
+
+      return getComponentName().equals(that.getComponentName())
+          && getTaskId() == that.getTaskId()
+          && getComponentIndex() == that.getComponentIndex()
+          && getResource().equals(that.getResource());
+    }
+
+    @Override
+    public int hashCode() {
+      int result = getComponentName().hashCode();
+      result = 31 * result + ((Integer) getTaskId()).hashCode();
+      result = 31 * result + ((Integer) getComponentIndex()).hashCode();
+      result = 31 * result + getResource().hashCode();
+      return result;
     }
 
     @Override
     public String toString() {
-      return String.format("{instance-id: %s, componentName: %s, instance-resource: %s}",
-          id, componentName, resource.toString());
+      return String.format(
+          "{component-name: %s, task-id: %s, component-index: %s, instance-resource: %s}",
+          getComponentName(), getTaskId(), getComponentIndex(), getResource().toString());
     }
   }
 
   public static class ContainerPlan {
-    public final String id;
-    public final Map<String, InstancePlan> instances;
-    public final Resource resource;
+    private final int id;
+    private final Set<InstancePlan> instances;
+    private final Resource requiredResource;
+    private final Optional<Resource> scheduledResource;
 
-    public ContainerPlan(String id,
-                         Map<String, InstancePlan> instances,
-                         Resource resource) {
+    public ContainerPlan(int id, Set<InstancePlan> instances, Resource requiredResource) {
+      this(id, instances, requiredResource, null);
+    }
+
+    public ContainerPlan(int id,
+                         Set<InstancePlan> instances,
+                         Resource requiredResource,
+                         Resource scheduledResource) {
       this.id = id;
-      this.instances = instances;
-      this.resource = resource;
+      this.instances = ImmutableSet.copyOf(instances);
+      this.requiredResource = requiredResource;
+      this.scheduledResource = Optional.fromNullable(scheduledResource);
+    }
+
+    public int getId() {
+      return id;
+    }
+
+    public Set<InstancePlan> getInstances() {
+      return instances;
+    }
+
+    public Resource getRequiredResource() {
+      return requiredResource;
+    }
+
+    public Optional<Resource> getScheduledResource() {
+      return scheduledResource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      ContainerPlan that = (ContainerPlan) o;
+
+      return id == that.id
+          && getInstances().equals(that.getInstances())
+          && getRequiredResource().equals(that.getRequiredResource())
+          && getScheduledResource().equals(that.getScheduledResource());
+    }
+
+    @Override
+    public int hashCode() {
+      int result = id;
+      result = 31 * result + getInstances().hashCode();
+      result = 31 * result + getRequiredResource().hashCode();
+      if (scheduledResource.isPresent()) {
+        result = 31 * result + getScheduledResource().get().hashCode();
+      }
+      return result;
+    }
+
+    /**
+     * Returns a {@link ContainerPlan} with updated scheduledResource
+     */
+    private ContainerPlan cloneWithScheduledResource(Resource resource) {
+      return new ContainerPlan(getId(), getInstances(), getRequiredResource(), resource);
     }
 
     @Override
     public String toString() {
-      return String.format("{container-id: %s, instances-list: %s, container-resource: %s}",
-          id, instances.toString(), resource);
+      String str = String.format("{container-id: %s, instances-list: %s, required-resource: %s",
+          id, getInstances().toString(), getRequiredResource());
+      if (scheduledResource.isPresent()) {
+        str = String.format("%s, scheduled-resource: %s", str, getScheduledResource().get());
+      }
+
+      return str + "}";
     }
   }
 }

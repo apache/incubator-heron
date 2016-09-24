@@ -16,80 +16,116 @@ package com.twitter.heron.spi.packing;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class PackingPlanTest {
-  private static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
-    Resource resource =
-        new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
+  private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking) {
+    Resource resource = new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
-    for (Map.Entry<String, List<String>> entry : basePacking.entrySet()) {
-      String containerId = entry.getKey();
-      List<String> instanceList = entry.getValue();
+    for (int containerId : basePacking.keySet()) {
+      List<InstanceId> instanceList = basePacking.get(containerId);
 
-      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+      Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
-      for (String instanceId : instanceList) {
-        String componentName = instanceId.split(":")[1];
+      for (InstanceId instanceId : instanceList) {
+        String componentName = instanceId.getComponentName();
         Resource instanceResource;
         if ("bolt".equals(componentName)) {
           instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
         } else {
           instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
         }
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(instanceId, componentName, instanceResource);
-        instancePlanMap.put(instanceId, instancePlan);
+        instancePlans.add(new PackingPlan.InstancePlan(instanceId, instanceResource));
       }
 
       PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+          new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
 
-      containerPlanMap.put(containerId, containerPlan);
+      containerPlans.add(containerPlan);
     }
 
-    return new PackingPlan("", containerPlanMap, resource);
+    return new PackingPlan("", containerPlans);
   }
 
   @Test
-  public void testPackingToString() {
-    Map<String, List<String>> packing = new HashMap<>();
-    packing.put("1", Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
-    String expectedStr0 = "1:spout:1:0:bolt:3:0";
-    String expectedStr1 = "1:bolt:3:0:spout:1:0";
-
+  public void testComponentRamDistribution() {
+    Map<Integer, List<InstanceId>> packing = new HashMap<>();
+    packing.put(1, Arrays.asList(
+        new InstanceId("spout", 1, 0),
+        new InstanceId("bolt", 3, 0)));
     PackingPlan packingPlan = generatePacking(packing);
-    String packingStr = packingPlan.getInstanceDistribution();
-
-    Assert.assertTrue(packingStr.equals(expectedStr0) || packingStr.equals(expectedStr1));
-
-    packing.put("2", Arrays.asList("2:spout:2:1"));
-    packingPlan = generatePacking(packing);
-    packingStr = packingPlan.getInstanceDistribution();
-
-    for (String component : packingStr.split(",")) {
-      if (component.startsWith("1:")) {
-        // This is the packing str for container 1
-        Assert.assertTrue(component.equals(expectedStr0) || component.equals(expectedStr1));
-      } else if (component.startsWith("2:")) {
-        // This is the packing str for container 2
-        Assert.assertEquals("2:spout:2:1", component);
-      } else {
-        // Unexpected container string
-        throw new RuntimeException(String.format(
-            "Unexpected component id found in instance distribution: %s", component));
-      }
-    }
 
     String ramDistStr = packingPlan.getComponentRamDistribution();
     Assert.assertEquals("spout:3221225472,bolt:2147483648", ramDistStr);
+  }
+
+  @Test
+  public void testPackingPlanSerde() {
+    Map<Integer, List<InstanceId>> packing = new HashMap<>();
+    packing.put(1, Arrays.asList(
+        new InstanceId("spout", 1, 0),
+        new InstanceId("bolt", 3, 0)));
+    packing.put(2, Arrays.asList(
+        new InstanceId("spout", 2, 1)));
+
+    PackingPlan packingPlan = generatePacking(packing);
+
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
+
+    PackingPlan newPackingPlan = deserializer.fromProto(serializer.toProto(packingPlan));
+    Assert.assertEquals("Packing plan not the same after converting to protobuf object and back",
+        newPackingPlan, packingPlan);
+    Assert.assertEquals("Packing plan ram distribution not the same after converting to "
+            + "protobuf object and back",
+        newPackingPlan.getComponentRamDistribution(), packingPlan.getComponentRamDistribution());
+  }
+
+  @Test
+  public void cloneWithHomogeneousScheduledResourceWillReturnUpdatedPacking() {
+    PackingPlan.ContainerPlan largeContainer = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
+    PackingPlan.ContainerPlan smallContainer = PackingTestUtils.testContainerPlan(2, 3);
+
+    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
+        > smallContainer.getRequiredResource().getCpu());
+    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
+        > smallContainer.getRequiredResource().getRam());
+    Assert.assertFalse(largeContainer.getScheduledResource().isPresent());
+    Assert.assertFalse(smallContainer.getScheduledResource().isPresent());
+
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(largeContainer);
+    containers.add(smallContainer);
+
+    PackingPlan plan = new PackingPlan("id", containers).cloneWithHomogeneousScheduledResource();
+
+    PackingPlan.ContainerPlan[] containerArray
+        = plan.getContainers().toArray(new PackingPlan.ContainerPlan[2]);
+    Assert.assertEquals(2, plan.getContainers().size());
+
+    largeContainer = containerArray[0];
+    smallContainer = containerArray[1];
+
+    Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
+        > smallContainer.getRequiredResource().getCpu());
+    Assert.assertTrue(largeContainer.getRequiredResource().getRam()
+        > smallContainer.getRequiredResource().getRam());
+    Assert.assertTrue(largeContainer.getScheduledResource().isPresent());
+    Assert.assertTrue(smallContainer.getScheduledResource().isPresent());
+    Assert.assertEquals(largeContainer.getScheduledResource().get().getCpu(),
+        smallContainer.getScheduledResource().get().getCpu(), 0.1);
+    Assert.assertEquals(largeContainer.getScheduledResource().get().getRam(),
+        smallContainer.getScheduledResource().get().getRam());
   }
 }

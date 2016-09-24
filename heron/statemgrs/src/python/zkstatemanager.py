@@ -15,6 +15,7 @@
 import sys
 
 from heron.proto.execution_state_pb2 import ExecutionState
+from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
 from heron.proto.scheduler_pb2 import SchedulerLocation
 from heron.proto.tmaster_pb2 import TMasterLocation
@@ -29,7 +30,6 @@ from kazoo.exceptions import NodeExistsError
 from kazoo.exceptions import NoNodeError
 from kazoo.exceptions import NotEmptyError
 from kazoo.exceptions import ZookeeperError
-
 
 # pylint: disable=attribute-defined-outside-init
 class ZkStateManager(StateManager):
@@ -206,6 +206,53 @@ class ZkStateManager(StateManager):
     except Exception:
       # Just re raise the exception.
       raise
+
+  def get_packing_plan(self, topologyName, callback=None):
+    """ get packing plan """
+    isWatching = False
+
+    # Temp dict used to return result
+    # if callback is not provided.
+    ret = {
+        "result": None
+    }
+    if callback:
+      isWatching = True
+    else:
+      def callback(data):
+        """ Custom callback to get the topologies right now. """
+        ret["result"] = data
+
+    self._get_packing_plan_with_watch(topologyName, callback, isWatching)
+
+    # The topologies are now populated with the data.
+    return ret["result"]
+
+  def _get_packing_plan_with_watch(self, topologyName, callback, isWatching):
+    """
+    Helper function to get packing_plan with
+    a callback. The future watch is placed
+    only if isWatching is True.
+    """
+    path = self.get_packing_plan_path(topologyName)
+    if isWatching:
+      LOG.info("Adding data watch for path: " + path)
+
+    # pylint: disable=unused-argument,unused-variable
+    @self.client.DataWatch(path)
+    def watch_packing_plan(data, stats):
+      """ watch the packing plan for updates """
+      if data:
+        packing_plan = PackingPlan()
+        packing_plan.ParseFromString(data)
+        callback(packing_plan)
+      else:
+        callback(None)
+
+      # Returning False will result in no future watches
+      # being triggered. If isWatching is True, then
+      # the future watches will be triggered.
+      return isWatching
 
   def get_pplan(self, topologyName, callback=None):
     """ get physical plan """

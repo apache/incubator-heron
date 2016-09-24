@@ -38,7 +38,6 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMa
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronExecutorId;
-import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.PackedPlan;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
@@ -63,7 +62,6 @@ public class HeronExecutorTask implements Task {
   private final String topologyName;
   private final String env;
   private final String topologyJar;
-  private final String packedPlan;
   private final String componentRamMap;
   private final boolean verboseMode;
 
@@ -75,7 +73,7 @@ public class HeronExecutorTask implements Task {
 
   @Inject
   public HeronExecutorTask(final REEFFileNames fileNames,
-                           @Parameter(HeronExecutorId.class) String heronExecutorId,
+                           @Parameter(HeronExecutorId.class) int heronExecutorId,
                            @Parameter(Cluster.class) String cluster,
                            @Parameter(Role.class) String role,
                            @Parameter(TopologyName.class) String topologyName,
@@ -83,10 +81,9 @@ public class HeronExecutorTask implements Task {
                            @Parameter(TopologyPackageName.class) String topologyPackageName,
                            @Parameter(HeronCorePackageName.class) String heronCorePackageName,
                            @Parameter(TopologyJar.class) String topologyJar,
-                           @Parameter(PackedPlan.class) String packedPlan,
                            @Parameter(ComponentRamMap.class) String componentRamMap,
                            @Parameter(VerboseLogMode.class) boolean verboseMode) {
-    this.heronExecutorId = Integer.valueOf(heronExecutorId);
+    this.heronExecutorId = heronExecutorId;
     this.cluster = cluster;
     this.role = role;
     this.topologyName = topologyName;
@@ -94,7 +91,6 @@ public class HeronExecutorTask implements Task {
     this.heronCorePackageName = heronCorePackageName;
     this.env = env;
     this.topologyJar = topologyJar;
-    this.packedPlan = packedPlan;
     this.componentRamMap = componentRamMap;
     this.verboseMode = verboseMode;
 
@@ -130,6 +126,7 @@ public class HeronExecutorTask implements Task {
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     try {
       regularExecutor.waitFor();
+      LOG.log(Level.WARNING, "Heron executor process terminated");
     } catch (InterruptedException e) {
       LOG.log(Level.INFO, "Destroy heron executor-id: {0}", heronExecutorId);
       regularExecutor.destroy();
@@ -160,7 +157,6 @@ public class HeronExecutorTask implements Task {
     }
 
     Config runtime = Config.newBuilder()
-        .put(Keys.instanceDistribution(), packedPlan)
         .put(Keys.componentRamMap(), componentRamMap)
         .put(Keys.topologyDefinition(), topology)
         .build();

@@ -4,8 +4,14 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 packing_deps_files = [
     "//heron/spi/src/java:common-spi-java",
+    "//heron/common/src/java:basics-java",
     "//heron/spi/src/java:packing-spi-java",
+    "@com_google_guava_guava//jar",
 ]
+
+nullpacking_deps_files = \
+    heron_java_proto_files() + \
+    packing_deps_files
 
 roundrobin_deps_files = \
     heron_java_proto_files() + \
@@ -26,13 +32,13 @@ binpacking_deps_files = \
 java_library(
     name = 'null-packing',
     srcs = glob(["**/NullPacking.java"]),
-    deps = packing_deps_files,
+    deps = nullpacking_deps_files,
 )
 
 java_binary(
     name = 'null-packing-unshaded',
     srcs = glob(["**/NullPacking.java"]),
-    deps = packing_deps_files,
+    deps = nullpacking_deps_files,
 )
 
 genrule(

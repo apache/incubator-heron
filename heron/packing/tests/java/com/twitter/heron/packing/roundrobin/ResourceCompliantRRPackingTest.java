@@ -14,15 +14,14 @@
 
 package com.twitter.heron.packing.roundrobin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -38,16 +37,15 @@ public class ResourceCompliantRRPackingTest {
   private static final String BOLT_NAME = "bolt";
   private static final String SPOUT_NAME = "spout";
   private static final int DEFAULT_CONTAINER_PADDING = 10;
-  private static final int HERON_INTERNAL_CONTAINERS = 1;
 
   private long instanceRamDefault;
   private double instanceCpuDefault;
   private long instanceDiskDefault;
 
-  private int countComponent(String component, Map<String, PackingPlan.InstancePlan> instances) {
+  private int countComponent(String component, Set<PackingPlan.InstancePlan> instances) {
     int count = 0;
-    for (PackingPlan.InstancePlan pair : instances.values()) {
-      if (component.equals(RoundRobinPacking.getComponentName(pair.id))) {
+    for (PackingPlan.InstancePlan instancePlan : instances) {
+      if (component.equals(instancePlan.getComponentName())) {
         count++;
       }
     }
@@ -57,18 +55,8 @@ public class ResourceCompliantRRPackingTest {
   private TopologyAPI.Topology getTopology(
       int spoutParallelism, int boltParallelism,
       com.twitter.heron.api.Config topologyConfig) {
-    // Setup the spout parallelism
-    Map<String, Integer> spouts = new HashMap<>();
-    spouts.put(SPOUT_NAME, spoutParallelism);
-
-    // Setup the bolt parallelism
-    Map<String, Integer> bolts = new HashMap<>();
-    bolts.put(BOLT_NAME, boltParallelism);
-
-    TopologyAPI.Topology topology =
-        TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
-
-    return topology;
+    return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
+        spoutParallelism, boltParallelism);
   }
 
   private PackingPlan getResourceCompliantRRPackingPlan(TopologyAPI.Topology topology) {
@@ -79,18 +67,12 @@ public class ResourceCompliantRRPackingTest {
         .build();
 
     this.instanceRamDefault = Context.instanceRam(config);
-    this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
+    this.instanceCpuDefault = Context.instanceCpu(config);
     this.instanceDiskDefault = Context.instanceDisk(config);
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     ResourceCompliantRRPacking packing = new ResourceCompliantRRPacking();
-    packing.initialize(config, runtime);
-    PackingPlan output = packing.pack();
-
-    return output;
+    packing.initialize(config, topology);
+    return packing.pack();
   }
 
   @Test(expected = RuntimeException.class)
@@ -108,8 +90,7 @@ public class ResourceCompliantRRPackingTest {
 
     topologyConfig.setContainerRamRequested(containerRam);
 
-    TopologyAPI.Topology topology =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    TopologyAPI.Topology topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     getResourceCompliantRRPackingPlan(topology);
   }
@@ -122,7 +103,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
-    int totalInstances = spoutParallelism + boltParallelism;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -135,30 +116,8 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlanNoExplicitResourcesConfig =
         getResourceCompliantRRPackingPlan(topologyNoExplicitResourcesConfig);
 
-    Assert.assertEquals(packingPlanNoExplicitResourcesConfig.containers.size(), numContainers);
-
-    //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
-    //consists of 2 spouts and 1 bolt (3 instances)
-    Assert.assertEquals((long) (Math.round(4 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceCpuDefault))
-            + Math.round(3 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlanNoExplicitResourcesConfig.resource.cpu);
-
-    Assert.assertEquals((4 * instanceRamDefault)
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceRamDefault))
-            + 3 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlanNoExplicitResourcesConfig.resource.ram);
-
-    Assert.assertEquals(4 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceDiskDefault))
-            + 3 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlanNoExplicitResourcesConfig.resource.disk);
+    Assert.assertEquals(packingPlanNoExplicitResourcesConfig.getContainers().size(), numContainers);
+    Assert.assertEquals(totalInstances, packingPlanNoExplicitResourcesConfig.getInstanceCount());
   }
 
   /**
@@ -170,41 +129,18 @@ public class ResourceCompliantRRPackingTest {
     int spoutParallelism = 4;
     int boltParallelism = 3;
     int padding = 50;
-    int totalInstances = spoutParallelism + boltParallelism;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     topologyConfig.setContainerPaddingPercentage(padding);
-    TopologyAPI.Topology topology =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    TopologyAPI.Topology topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    PackingPlan packingPlan =
-        getResourceCompliantRRPackingPlan(topology);
+    PackingPlan packingPlan = getResourceCompliantRRPackingPlan(topology);
 
-    Assert.assertEquals(packingPlan.containers.size(), numContainers);
-
-    //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
-    //consists of 2 spouts and 1 bolt (3 instances)
-    Assert.assertEquals((long) (Math.round(4 * instanceCpuDefault
-            + padding / 100.0 * (4 * instanceCpuDefault))
-            + Math.round(3 * instanceCpuDefault
-            + padding / 100.0 * (3 * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlan.resource.cpu);
-
-    Assert.assertEquals((4 * instanceRamDefault)
-            + (long) ((padding / 100.0) * (4 * instanceRamDefault))
-            + 3 * instanceRamDefault
-            + (long) ((padding / 100.0) * (3 * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlan.resource.ram);
-
-    Assert.assertEquals(4 * instanceDiskDefault
-            + (long) ((padding / 100.0) * (4 * instanceDiskDefault))
-            + 3 * instanceDiskDefault
-            + (long) ((padding / 100.0) * (3 * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlan.resource.disk);
+    Assert.assertEquals(packingPlan.getContainers().size(), numContainers);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
 
   /**
@@ -215,7 +151,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 1;
     int spoutParallelism = 4;
     int boltParallelism = 3;
-    int totalInstances = spoutParallelism + boltParallelism;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -233,46 +169,32 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlanExplicitResourcesConfig =
         getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
 
-    Assert.assertEquals(packingPlanExplicitResourcesConfig.containers.size(), numContainers);
-
-    Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
-            + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault
-            + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.resource.cpu);
-
-    Assert.assertEquals(totalInstances * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault)
-            + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.resource.ram);
-
-    Assert.assertEquals(totalInstances * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault)
-            + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.resource.disk);
+    Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), numContainers);
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
 
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.containers.values()) {
+        : packingPlanExplicitResourcesConfig.getContainers()) {
       Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
               + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault),
-          (long) containerPlan.resource.cpu);
+          (long) containerPlan.getRequiredResource().getCpu());
 
       Assert.assertEquals(totalInstances * instanceRamDefault
               + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault),
-          containerPlan.resource.ram);
+          containerPlan.getRequiredResource().getRam());
 
       Assert.assertEquals(totalInstances * instanceDiskDefault
               + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault),
-          containerPlan.resource.disk);
+          containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
       Set<Resource> resources = new HashSet<>();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        resources.add(instancePlan.resource);
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        resources.add(instancePlan.getResource());
       }
 
       Assert.assertEquals(1, resources.size());
-      Assert.assertEquals(instanceRamDefault, resources.iterator().next().ram);
+      Assert.assertEquals(instanceRamDefault, resources.iterator().next().getRam());
     }
   }
 
@@ -284,6 +206,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -301,36 +224,14 @@ public class ResourceCompliantRRPackingTest {
     PackingPlan packingPlanExplicitResourcesConfig =
         getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
 
-    Assert.assertEquals(packingPlanExplicitResourcesConfig.containers.size(), numContainers);
-
-    //The first container consists 2 spouts and 2 bolts (4 instances) and the second container
-    //consists of 2 spouts and 1 bolt (3 instances)
-    Assert.assertEquals((long) (Math.round(4 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceCpuDefault))
-            + Math.round(3 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlanExplicitResourcesConfig.resource.cpu);
-
-    Assert.assertEquals((4 * instanceRamDefault)
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceRamDefault))
-            + 3 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlanExplicitResourcesConfig.resource.ram);
-
-    Assert.assertEquals(4 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (4 * instanceDiskDefault))
-            + 3 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (3 * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlanExplicitResourcesConfig.resource.disk);
+    Assert.assertEquals(packingPlanExplicitResourcesConfig.getContainers().size(), numContainers);
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
 
     // Ram for bolt/spout should be the value in component ram map
     for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.containers.values()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        Assert.assertEquals(instanceRamDefault, instancePlan.resource.ram);
+        : packingPlanExplicitResourcesConfig.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        Assert.assertEquals(instanceRamDefault, instancePlan.getResource().getRam());
       }
     }
   }
@@ -343,6 +244,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -362,21 +264,10 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlanExplicitRamMap =
         getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    // Ram for bolt should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.containers.values()) {
-      // The containerRam should be ignored, since we set the complete component ram map
-      Assert.assertNotEquals(containerRam, containerPlan.resource.ram);
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.resource.ram);
-        }
-        if (instancePlan.componentName.equals(SPOUT_NAME)) {
-          Assert.assertEquals(instanceRamDefault, instancePlan.resource.ram);
-        }
-      }
-    }
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, instanceRamDefault, containerRam);
   }
 
   /**
@@ -387,6 +278,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -407,20 +299,10 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlanExplicitRamMap =
         getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    // Ram for bolt should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitRamMap.containers.values()) {
-      Assert.assertNotEquals(containerRam, containerPlan.resource.ram);
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
-        if (instancePlan.componentName.equals(BOLT_NAME)) {
-          Assert.assertEquals(boltRam, instancePlan.resource.ram);
-        }
-        if (instancePlan.componentName.equals(SPOUT_NAME)) {
-          Assert.assertEquals(spoutRam, instancePlan.resource.ram);
-        }
-      }
-    }
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, containerRam);
   }
 
   /**
@@ -431,6 +313,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 1;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -445,44 +328,8 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topology);
-    Assert.assertEquals(packingPlan.containers.size(), 4);
-
-    //The first 3 containers consist of 1 spout and 1 bolt (2 instances) and the fourth container
-    //consists of 1 spout (1 instance)
-    Assert.assertEquals((long) (Math.round(2 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (2 * instanceCpuDefault))
-            + Math.round(2 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (2 * instanceCpuDefault))
-            + Math.round(2 * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (2 * instanceCpuDefault))
-            + Math.round(HERON_INTERNAL_CONTAINERS * instanceCpuDefault
-            + DEFAULT_CONTAINER_PADDING / 100.0 * (HERON_INTERNAL_CONTAINERS * instanceCpuDefault))
-            + instanceCpuDefault),
-        (long) packingPlan.resource.cpu);
-
-    Assert.assertEquals(2 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
-            + 2 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
-            + 2 * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceRamDefault))
-            + HERON_INTERNAL_CONTAINERS * instanceRamDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0)
-            * (HERON_INTERNAL_CONTAINERS * instanceRamDefault))
-            + instanceRamDefault,
-        packingPlan.resource.ram);
-
-    Assert.assertEquals(2 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
-            + 2 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
-            + 2 * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * (2 * instanceDiskDefault))
-            + HERON_INTERNAL_CONTAINERS * instanceDiskDefault
-            + (long) ((DEFAULT_CONTAINER_PADDING / 100.0)
-            * (HERON_INTERNAL_CONTAINERS * instanceDiskDefault))
-            + instanceDiskDefault,
-        packingPlan.resource.disk);
+    Assert.assertEquals(packingPlan.getContainers().size(), 4);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
 
   /**
@@ -493,6 +340,7 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 1;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -513,7 +361,8 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
-    Assert.assertEquals(packingPlan.containers.size(), 7);
+    Assert.assertEquals(packingPlan.getContainers().size(), 7);
+    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
 
   /**
@@ -535,14 +384,15 @@ public class ResourceCompliantRRPackingTest {
     // Two components
     Assert.assertEquals(2 * componentParallelism, numInstance);
     PackingPlan output = getResourceCompliantRRPackingPlan(topology);
-    Assert.assertEquals(numContainers, output.containers.size());
+    Assert.assertEquals(numContainers, output.getContainers().size());
+    Assert.assertEquals((Integer) numInstance, output.getInstanceCount());
 
-    for (PackingPlan.ContainerPlan container : output.containers.values()) {
-      Assert.assertEquals(numInstance / numContainers, container.instances.size());
+    for (PackingPlan.ContainerPlan container : output.getContainers()) {
+      Assert.assertEquals(numInstance / numContainers, container.getInstances().size());
       Assert.assertEquals(
-          2, countComponent("spout", container.instances));
+          2, countComponent("spout", container.getInstances()));
       Assert.assertEquals(
-          2, countComponent("bolt", container.instances));
+          2, countComponent("bolt", container.getInstances()));
     }
   }
 }

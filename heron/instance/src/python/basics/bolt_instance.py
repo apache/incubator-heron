@@ -18,7 +18,7 @@ import Queue
 
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
-from heron.common.src.python.utils.metrics import BoltMetrics
+from heron.common.src.python.utils.metrics import global_metrics, BoltMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import tuple_pb2
 from heron.pyheron.src.python import Stream
@@ -30,8 +30,8 @@ from .base_instance import BaseInstance
 class BoltInstance(BaseInstance):
   """The base class for all heron bolts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
-    super(BoltInstance, self).__init__(pplan_helper, in_stream, out_stream, looper, sys_config)
+  def __init__(self, pplan_helper, in_stream, out_stream, looper):
+    super(BoltInstance, self).__init__(pplan_helper, in_stream, out_stream, looper)
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")
@@ -51,9 +51,14 @@ class BoltInstance(BaseInstance):
 
   def start(self):
     context = self.pplan_helper.context
-    self.bolt_metrics.register_metrics(context, self.sys_config)
+    self.bolt_metrics.register_metrics(context)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
+
+    # prepare global metrics
+    interval = float(self.sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+    collector = context.get_metrics_collector()
+    global_metrics.init(collector, interval)
 
     # prepare for custom grouping
     self.pplan_helper.prepare_custom_grouping(context)
@@ -218,7 +223,7 @@ class BoltInstance(BaseInstance):
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
         start_time = time.time()
-        self.bolt_impl.process(tick)
+        self.bolt_impl.process_tick(tick)
         tick_execute_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
         self.bolt_metrics.execute_tuple(tick.id, tick.component, tick_execute_latency_ns)
         self.output_helper.send_out_tuples()

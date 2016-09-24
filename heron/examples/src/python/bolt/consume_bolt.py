@@ -21,8 +21,8 @@ class ConsumeBolt(Bolt):
     self.total = 0
 
   def process(self, tup):
-    if self.is_tick(tup):
-      self.log("Got tick tuple!")
-      self.log("Total received data tuple: %d" % self.total)
-    else:
-      self.total += 1
+    self.total += 1
+
+  def process_tick(self, tup):
+    self.log("Got tick tuple!")
+    self.log("Total received data tuple: %d" % self.total)

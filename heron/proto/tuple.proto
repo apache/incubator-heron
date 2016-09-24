@@ -30,14 +30,14 @@ message HeronDataTupleSet {
   repeated HeronDataTuple tuples = 2;
 }
 
-// Note:- only one of the acks/fails are set
+// Note:- only one of the acks/fails/emits is set
 message HeronControlTupleSet {
   repeated AckTuple acks = 1;
   repeated AckTuple fails = 2;
   repeated AckTuple emits = 3;
 }
-  
-// Note:- Only one of data/acks/fails are set in any message
+
+// Note:- Only one of data/control is set in any message
 message HeronTupleSet {
   optional HeronDataTupleSet data = 1;
   optional HeronControlTupleSet control = 2;

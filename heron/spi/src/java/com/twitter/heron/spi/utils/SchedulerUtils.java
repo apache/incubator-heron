@@ -31,7 +31,7 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -199,7 +199,6 @@ public final class SchedulerUtils {
     commands.add(topology.getName());
     commands.add(topology.getId());
     commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    commands.add(Runtime.instanceDistribution(runtime));
     commands.add(Context.stateManagerConnectionString(config));
     commands.add(Context.stateManagerRootPath(config));
     commands.add(Context.tmasterSandboxBinary(config));
@@ -430,18 +429,17 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Get a resource that requires the maximum amount of ram, cpu and disk
+   * Replaces persisted packing plan in state manager.
    */
-  public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
-    Resource maxResource = new Resource(0, 0, 0);
-
-    for (PackingPlan.ContainerPlan entry : packingPlan.containers.values()) {
-      Resource resource = entry.resource;
-      maxResource.ram = Math.max(maxResource.ram, resource.ram);
-      maxResource.cpu = Math.max(maxResource.cpu, resource.cpu);
-      maxResource.disk = Math.max(maxResource.disk, resource.disk);
+  public static void persistUpdatedPackingPlan(String topologyName,
+                                               PackingPlan updatedPackingPlan,
+                                               SchedulerStateManagerAdaptor stateManager) {
+    LOG.log(Level.INFO, "Updating scheduled-resource in packing plan: {0}", topologyName);
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    boolean result =
+        stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
+    if (!result) {
+      throw new RuntimeException(String.format("Failed to save %s's packing plan", topologyName));
     }
-
-    return maxResource;
   }
 }

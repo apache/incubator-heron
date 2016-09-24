@@ -48,6 +48,7 @@ UPLOADER_CLASS:                      heron.class.uploader
 LAUNCHER_CLASS:                      heron.class.launcher
 SCHEDULER_CLASS:                     heron.class.scheduler
 PACKING_CLASS:                       heron.class.packing.algorithm
+REPACKING_CLASS:                     heron.class.repacking.algorithm
 STATE_MANAGER_CLASS:                 heron.class.state.manager
 
 ################################################################################
@@ -124,7 +125,6 @@ LAUNCHER_CLASS_INSTANCE:             heron.runtime.launcher.class.instance
 
 COMPONENT_RAMMAP:                    heron.runtime.component.rammap
 COMPONENT_JVM_OPTS_IN_BASE64:        heron.runtime.component.jvm.opts.in.base64
-INSTANCE_DISTRIBUTION:               heron.runtime.instance.distribution
 INSTANCE_JVM_OPTS_IN_BASE64:         heron.runtime.instance.jvm.opts.in.base64
 
 NUM_CONTAINERS:                      heron.runtime.num.containers

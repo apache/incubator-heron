@@ -15,7 +15,9 @@
 package com.twitter.heron.spi.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,7 +29,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, ShellUtils.class, SchedulerUtils.class})
@@ -167,5 +172,20 @@ public class SchedulerUtilsTest {
             "--topology_bin", null, "--http_port", "1"};
     Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
         Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
+  }
+
+  @Test
+  public void persistUpdatedPackingPlanWillUpdatesStateManager() {
+    SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    Mockito.when(adaptor.setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
+        Mockito.eq("topology"))).thenReturn(true);
+
+    PackingPlan.ContainerPlan container = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(container);
+    PackingPlan packing = new PackingPlan("id", containers);
+    SchedulerUtils.persistUpdatedPackingPlan("topology", packing, adaptor);
+    Mockito.verify(adaptor).setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
+        Mockito.eq("topology"));
   }
 }

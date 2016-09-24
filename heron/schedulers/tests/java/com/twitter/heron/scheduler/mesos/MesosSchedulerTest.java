@@ -15,8 +15,10 @@
 package com.twitter.heron.scheduler.mesos;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.mesos.SchedulerDriver;
 import org.junit.After;
@@ -126,12 +128,11 @@ public class MesosSchedulerTest {
     Resource containerResources = new Resource(CPU, MEM, DISK);
     PackingPlan.ContainerPlan containerPlan =
         new PackingPlan.ContainerPlan(
-            "id", new HashMap<String, PackingPlan.InstancePlan>(), containerResources);
+            0, new HashSet<PackingPlan.InstancePlan>(), containerResources);
 
-    Map<String, PackingPlan.ContainerPlan> map = new HashMap<>();
-    map.put("id", containerPlan);
-    PackingPlan packingPlan = new PackingPlan(TOPOLOGY_NAME, map, containerResources);
-
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
+    containerPlans.add(containerPlan);
+    PackingPlan packingPlan = new PackingPlan(TOPOLOGY_NAME, containerPlans);
 
     BaseContainer container = scheduler.getBaseContainer(0, packingPlan);
 

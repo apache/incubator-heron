@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -36,9 +37,11 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -53,7 +56,6 @@ public class LaunchRunnerTest {
   private static final String CLUSTER = "testCluster";
   private static final String ROLE = "testRole";
   private static final String ENVIRON = "testEnviron";
-  private static final String MOCK_PACKING_STRING = "mockPackString";
   private static final String BUILD_VERSION = "live";
   private static final String BUILD_USER = "user";
 
@@ -112,6 +114,7 @@ public class LaunchRunnerTest {
   private static Config createRunnerRuntime() throws Exception {
     Config runtime = Mockito.spy(Config.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
+    IPacking packing = Mockito.mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
 
@@ -120,7 +123,11 @@ public class LaunchRunnerTest {
     Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
+    Mockito.when(packingPlan.getContainers()).thenReturn(
+        new HashSet<PackingPlan.ContainerPlan>());
+    Mockito.when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
+    Mockito.when(packingPlan.getId()).thenReturn("packing_plan_id");
+    Mockito.when(packing.pack()).thenReturn(packingPlan);
 
     LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
     Mockito.when(
@@ -228,6 +235,10 @@ public class LaunchRunnerTest {
         statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
     Mockito.when(
+        statemgr.setPackingPlan(
+            Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    Mockito.when(
         statemgr.setExecutionState(
             Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
@@ -256,6 +267,10 @@ public class LaunchRunnerTest {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
         statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    Mockito.when(
+        statemgr.setPackingPlan(
+            Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
     Mockito.when(
         statemgr.setExecutionState(

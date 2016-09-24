@@ -15,7 +15,7 @@
 package com.twitter.heron.scheduler.slurm;
 
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,7 +28,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.LauncherUtils;
 
@@ -59,11 +58,7 @@ public class SlurmLauncherTest {
     Config config = createRunnerConfig();
     Config runtime = Mockito.mock(Config.class);
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    PackingPlan plan =
-        new PackingPlan(
-            "plan.id",
-            new HashMap<String, PackingPlan.ContainerPlan>(),
-            Mockito.mock(Resource.class));
+    PackingPlan plan = new PackingPlan("plan.id", new HashSet<PackingPlan.ContainerPlan>());
 
     PowerMockito.spy(SlurmContext.class);
     PowerMockito.doReturn(WORKING_DIRECTORY).when(SlurmContext.class, "workingDirectory", config);

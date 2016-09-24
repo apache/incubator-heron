@@ -16,6 +16,7 @@ java_library(
     ]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:classification",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/proto:proto_common_java",
@@ -23,6 +24,7 @@ java_library(
         "//heron/proto:proto_scheduler_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/proto:proto_topology_java",
+        "//heron/proto:proto_packing_plan_java",
         "//heron/proto:proto_physical_plan_java",
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
@@ -62,13 +64,19 @@ scheduler_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
         ":packing-spi-java",
+        "//heron/api/src/java:classification",
         "//heron/common/src/java:config-java",
         "@com_google_guava_guava//jar",
     ]
 
 packing_deps_files = [
+    "//heron/api/src/java:api-java",
     ":common-spi-java",
+    "//heron/api/src/java:classification",
     "//heron/common/src/java:config-java",
+    "//heron/proto:proto_packing_plan_java",
+    "//heron/proto:proto_topology_java",
+    "@com_google_guava_guava//jar",
 ]
 
 uploader_deps_files = [
@@ -179,7 +187,9 @@ java_binary(
         "**/spi/uploader/**/*.java",
         "**/spi/utils/**/*.java",
     ]),
-    deps = utils_deps_files,
+    deps = [
+        "//heron/api/src/java:classification"
+    ] + utils_deps_files,
 )
 
 genrule(

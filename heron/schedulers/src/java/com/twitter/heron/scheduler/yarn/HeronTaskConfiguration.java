@@ -25,7 +25,6 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMa
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronExecutorId;
-import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.PackedPlan;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
@@ -40,9 +39,8 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> CLUSTER = new RequiredParameter<>();
   public static final RequiredParameter<String> ROLE = new RequiredParameter<>();
   public static final RequiredParameter<String> ENV = new RequiredParameter<>();
-  public static final RequiredParameter<String> PACKED_PLAN = new RequiredParameter<>();
   public static final RequiredParameter<String> COMPONENT_RAM_MAP = new RequiredParameter<>();
-  public static final RequiredParameter<String> CONTAINER_ID = new RequiredParameter<>();
+  public static final RequiredParameter<Integer> CONTAINER_ID = new RequiredParameter<>();
   public static final OptionalParameter<Boolean> VERBOSE = new OptionalParameter<>();
 
   public static final ConfigurationModule CONF = new HeronTaskConfiguration()
@@ -54,7 +52,6 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
       .bindNamedParameter(Cluster.class, CLUSTER)
       .bindNamedParameter(Environ.class, ENV)
       .bindNamedParameter(Role.class, ROLE)
-      .bindNamedParameter(PackedPlan.class, PACKED_PLAN)
       .bindNamedParameter(ComponentRamMap.class, COMPONENT_RAM_MAP)
       .bindNamedParameter(HeronExecutorId.class, CONTAINER_ID)
       .bindNamedParameter(VerboseLogMode.class, VERBOSE)

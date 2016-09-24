@@ -18,9 +18,9 @@ package com.twitter.heron.spi.packing;
  * Definition of Resources. Used to form packing structure output.
  */
 public class Resource {
-  public double cpu;
-  public long ram;
-  public long disk;
+  private double cpu;
+  private long ram;
+  private long disk;
 
   public Resource(double cpu, long ram, long disk) {
     this.cpu = cpu;
@@ -32,7 +32,9 @@ public class Resource {
   public boolean equals(Object obj) {
     if (obj instanceof Resource) {
       Resource r = (Resource) obj;
-      return (this.cpu == r.cpu) && (this.ram == r.ram) && (this.disk == r.disk);
+      return (this.getCpu() == r.getCpu())
+          && (this.getRam() == r.getRam())
+          && (this.getDisk() == r.getDisk());
     } else {
       return false;
     }
@@ -50,13 +52,19 @@ public class Resource {
     return disk;
   }
 
+  public Resource cloneWithRam(long newRam) {
+    return new Resource(this.getCpu(), newRam, this.getDisk());
+  }
+
   @Override
   public int hashCode() {
-    return (Long.hashCode(ram) << 2) & (Long.hashCode(disk) << 1) & (Double.hashCode(cpu));
+    return (Long.valueOf(getRam()).hashCode() << 2)
+         & (Long.valueOf(getDisk()).hashCode() << 1)
+         & (Double.valueOf(getCpu()).hashCode());
   }
 
   @Override
   public String toString() {
-    return String.format("{cpu: %f, ram: %d, disk: %d}", cpu, ram, disk);
+    return String.format("{cpu: %f, ram: %d, disk: %d}", getCpu(), getRam(), getDisk());
   }
 }

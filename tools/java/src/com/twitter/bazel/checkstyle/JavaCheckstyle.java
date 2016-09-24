@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.devtools.build.lib.actions.extra.ExtraActionInfo;
@@ -56,10 +57,15 @@ public final class JavaCheckstyle {
         .longOpt("extra_action_file")
         .desc("bazel extra action protobuf file")
         .build());
-    options.addOption(Option.builder("c")
+    options.addOption(Option.builder("hc")
         .required(true).hasArg()
-        .longOpt("checkstyle_config_file")
+        .longOpt("heron_checkstyle_config_file")
         .desc("checkstyle config file")
+        .build());
+    options.addOption(Option.builder("ac")
+        .required(true).hasArg()
+        .longOpt("apache_checkstyle_config_file")
+        .desc("checkstyle config file for imported source files")
         .build());
 
     try {
@@ -67,21 +73,17 @@ public final class JavaCheckstyle {
       CommandLine line = parser.parse(options, args);
 
       String extraActionFile = line.getOptionValue("f");
-      String configFile = line.getOptionValue("c");
+      String configFile = line.getOptionValue("hc");
+      String apacheConfigFile = line.getOptionValue("ac");
 
-      String[] sourceFiles = getSourceFiles(extraActionFile);
-      if (sourceFiles.length == 0) {
-        LOG.fine("No java files found by checkstyle");
-        return;
-      }
+      // check heron source file style
+      String[] heronSourceFiles = getHeronSourceFiles(extraActionFile);
+      checkStyle(heronSourceFiles, configFile);
 
-      LOG.fine(sourceFiles.length + " java files found by checkstyle");
+      // check other apache source file style
+      String[] apacheSourceFiles = getApacheSourceFiles(extraActionFile);
+      checkStyle(apacheSourceFiles, apacheConfigFile);
 
-      String[] checkstyleArgs = (String[]) ArrayUtils.addAll(
-          new String[]{"-c", configFile}, sourceFiles);
-
-      LOG.fine("checkstyle args: " + Joiner.on(" ").join(checkstyleArgs));
-      com.puppycrawl.tools.checkstyle.Main.main(checkstyleArgs);
     } catch (ParseException exp) {
       LOG.severe(String.format("Invalid input to %s: %s", CLASSNAME, exp.getMessage()));
       HelpFormatter formatter = new HelpFormatter();
@@ -89,14 +91,41 @@ public final class JavaCheckstyle {
     }
   }
 
-  private static String[] getSourceFiles(String extraActionFile) {
+  private static void checkStyle(String[] files, String config) throws IOException {
+    if (files.length == 0) {
+      LOG.fine("No java files found by checkstyle");
+      return;
+    }
+
+    LOG.fine(files.length + " java files found by checkstyle");
+
+    String[] checkstyleArgs = (String[]) ArrayUtils.addAll(
+        new String[]{"-c", config}, files);
+
+    LOG.fine("checkstyle args: " + Joiner.on(" ").join(checkstyleArgs));
+    com.puppycrawl.tools.checkstyle.Main.main(checkstyleArgs);
+  }
+
+  private static String[] getHeronSourceFiles(String extraActionFile) {
+    return getSourceFiles(extraActionFile, Predicates.not(Predicates.or(
+        Predicates.containsPattern("heron/storm.src.java"),
+        Predicates.containsPattern("contrib")
+    )));
+  }
+
+  private static String[] getApacheSourceFiles(String extraActionFile) {
+    return getSourceFiles(extraActionFile, Predicates.or(
+        Predicates.containsPattern("heron/storm.src.java"),
+        Predicates.containsPattern("contrib")
+    ));
+  }
+
+  private static String[] getSourceFiles(String extraActionFile,
+                                         Predicate<CharSequence> predicate) {
     ExtraActionInfo info = ExtraActionUtils.getExtraActionInfo(extraActionFile);
     JavaCompileInfo jInfo = info.getExtension(JavaCompileInfo.javaCompileInfo);
 
-    // Filter out files under heron/storm directory due to license issues
-    Collection<String> sourceFiles = Collections2.filter(jInfo.getSourceFileList(),
-        Predicates.not(Predicates.containsPattern("heron/storm/src/java"))
-    );
+    Collection<String> sourceFiles = Collections2.filter(jInfo.getSourceFileList(), predicate);
 
     return sourceFiles.toArray(new String[sourceFiles.size()]);
   }

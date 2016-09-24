@@ -43,13 +43,14 @@ class Spout(BaseSpout):
                    Note that types of string values in the config have been automatically converted,
                    meaning that number strings and boolean strings are converted to appropriate
                    types.
-    :type context: dict
+    :type context: :class:`pyheron.TopologyContext`
     :param context: This object can be used to get information about this task's place within the
                     topology, including the task id and component id of this task, input and output
                     information, etc.
     """
     pass
 
+  @abstractmethod
   def close(self):
     """Called when this spout is going to be shutdown
 
@@ -84,6 +85,8 @@ class Spout(BaseSpout):
     message off the queue and prevent it from being replayed.
 
     *Should be implemented by a subclass.*
+
+    :param tup_id: the ID of the HeronTuple that has been fully acknowledged.
     """
     pass
 
@@ -98,9 +101,13 @@ class Spout(BaseSpout):
     message back on the queue to be replayed at a later time.
 
     *Should be implemented by a subclass.*
+
+    :param tup_id: the ID of the HeronTuple that has failed either due to a bolt calling ``fail()``
+                   or timeout
     """
     pass
 
+  @abstractmethod
   def activate(self):
     """Called when a spout has been activated out of a deactivated mode
 
@@ -110,6 +117,7 @@ class Spout(BaseSpout):
     """
     pass
 
+  @abstractmethod
   def deactivate(self):
     """Called when a spout has been deactivated
 

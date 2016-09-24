@@ -17,6 +17,7 @@ import socket
 import subprocess
 
 HERON_EXECUTION_STATE_PREFIX = "{0}/executionstate/"
+HERON_PACKING_PLANS_PREFIX = "{0}/packingplans/"
 HERON_PPLANS_PREFIX = "{0}/pplans/"
 HERON_SCHEDULER_LOCATION_PREFIX = "{0}/schedulers/"
 HERON_TMASTER_PREFIX = "{0}/tmasters/"
@@ -121,7 +122,7 @@ class StateManager:
     return localport
 
   def terminate_ssh_tunnel(self):
-    if self.tunnel:
+    if hasattr(self, 'tunnel') and self.tunnel:
       self.tunnel.terminate()
 
   @abc.abstractmethod
@@ -139,6 +140,9 @@ class StateManager:
 
   def get_topology_path(self, topologyName):
     return HERON_TOPOLOGIES_KEY.format(self.rootpath) + "/" + topologyName
+
+  def get_packing_plan_path(self, topologyName):
+    return HERON_PACKING_PLANS_PREFIX.format(self.rootpath) + topologyName
 
   def get_pplan_path(self, topologyName):
     return HERON_PPLANS_PREFIX.format(self.rootpath) + topologyName
@@ -166,6 +170,16 @@ class StateManager:
 
   @abc.abstractmethod
   def delete_topology(self, topologyName):
+    pass
+
+  @abc.abstractmethod
+  def get_packing_plan(self, topologyName, callback=None):
+    """
+    Gets the packing_plan for the topology.
+    If the callback is provided,
+    sets watch on the path and calls the callback
+    with the new packing_plan.
+    """
     pass
 
   @abc.abstractmethod

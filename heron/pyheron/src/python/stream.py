@@ -1,10 +1,10 @@
-# Copyright 2016 Twitter. All rights reserved.
+# Copyright 2016 - Parsely, Inc. (d/b/a Parse.ly)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -115,7 +115,9 @@ class Grouping(object):
 
   @classmethod
   def custom(cls, classpath):
-    """Custom grouping from a given classpath
+    """Custom grouping from a given classpath to an implementation of ICustomGrouping
+
+    This method does not exist in the Streamparse API.
 
     :param classpath: classpath to the ICustomGrouping class to use
     """
@@ -149,3 +151,8 @@ class Grouping(object):
     else:
       raise NotImplementedError("Custom grouping implemented in Java for Python topology"
                                 "is not yet supported.")
+
+  @classmethod
+  def custom_object(cls, java_class_name, arg_list):
+    """Tuples will be assigned to tasks by the given Java class."""
+    raise NotImplementedError("custom_object() method is not yet implemented")

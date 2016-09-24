@@ -31,6 +31,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 
@@ -92,6 +93,7 @@ public class LocalFileSystemStateManagerTest {
         .setTopologyName(TOPOLOGY_NAME)
         .build();
     PowerMockito.spy(FileUtils.class);
+    PowerMockito.doReturn(true).when(FileUtils.class, "isFileExists", Matchers.anyString());
     PowerMockito.doReturn(location.toByteArray()).
         when(FileUtils.class, "readFromFile", Matchers.anyString());
 
@@ -145,6 +147,18 @@ public class LocalFileSystemStateManagerTest {
         topology.toByteArray(), false);
   }
 
+  @Test
+  public void testSetPackingPlan() throws Exception {
+    initMocks();
+    PackingPlans.PackingPlan packingPlan = PackingPlans.PackingPlan.getDefaultInstance();
+
+    Assert.assertTrue(manager.setPackingPlan(packingPlan, TOPOLOGY_NAME).get());
+
+    assertWriteToFile(
+        String.format("%s/%s/%s", ROOT_ADDR, "packingplans", TOPOLOGY_NAME),
+        packingPlan.toByteArray(), true);
+  }
+
   /**
    * Method: deleteExecutionState()
    */
@@ -167,6 +181,15 @@ public class LocalFileSystemStateManagerTest {
     Assert.assertTrue(manager.deleteTopology(TOPOLOGY_NAME).get());
 
     assertDeleteFile(String.format("%s/%s/%s", ROOT_ADDR, "topologies", TOPOLOGY_NAME));
+  }
+
+  @Test
+  public void testDeletePackingPlan() throws Exception {
+    initMocks();
+
+    Assert.assertTrue(manager.deletePackingPlan(TOPOLOGY_NAME).get());
+
+    assertDeleteFile(String.format("%s/%s/%s", ROOT_ADDR, "packingplans", TOPOLOGY_NAME));
   }
 
   private static void assertWriteToFile(String path, byte[] bytes, boolean overwrite) {

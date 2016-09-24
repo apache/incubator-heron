@@ -1,5 +1,5 @@
-'''module for base component that needs to be packaged into pyheron'''
+'''module for base component'''
 __all__ = ['base_component', 'component_spec']
 
-from .base_component import BaseComponent
+from .base_component import BaseComponent, NotCompatibleError
 from .component_spec import HeronComponentSpec, GlobalStreamId

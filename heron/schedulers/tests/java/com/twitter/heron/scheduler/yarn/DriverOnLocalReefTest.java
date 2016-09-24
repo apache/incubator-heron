@@ -15,8 +15,8 @@
 package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -98,27 +98,29 @@ public class DriverOnLocalReefTest {
       driver = new HeronMasterDriver(requestor, null, "", "", "", "", null, null, null, 0, false);
     }
 
-    private void addContainer(String id,
+    private void addContainer(int id,
                               double cpu,
                               long mem,
-                              Map<String, PackingPlan.ContainerPlan> containers) {
+                              Set<PackingPlan.ContainerPlan> containers) {
       Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
       PackingPlan.ContainerPlan container = new PackingPlan.ContainerPlan(id, null, resource);
-      containers.put(container.id, container);
+      containers.add(container);
     }
 
     class DriverStarter implements EventHandler<StartTime> {
       @Override
       public void onNext(StartTime startTime) {
-        counter = new CountDownLatch(2);
-        driver.scheduleTMasterContainer();
-        Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
-        addContainer("1", 1.0, 512L, containers);
-        PackingPlan packing = new PackingPlan("packingId", containers, null);
-        driver.scheduleHeronWorkers(packing);
         try {
+          counter = new CountDownLatch(2);
+          driver.scheduleTMasterContainer();
+          Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+          addContainer(1, 1.0, 512L, containers);
+          PackingPlan packing = new PackingPlan("packingId", containers);
+          driver.scheduleHeronWorkers(packing);
           counter.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        } catch (HeronMasterDriver.ContainerAllocationException e) {
           throw new RuntimeException(e);
         }
       }
@@ -127,7 +129,7 @@ public class DriverOnLocalReefTest {
     class Allocated implements EventHandler<AllocatedEvaluator> {
       @Override
       public void onNext(AllocatedEvaluator evaluator) {
-        driver.new HeronContainerAllocationHandler().onNext(evaluator);
+        driver.new ContainerAllocationHandler().onNext(evaluator);
       }
     }
 

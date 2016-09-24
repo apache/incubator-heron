@@ -98,17 +98,17 @@ public class HeronExecutorTaskTest {
     PowerMockito.doReturn(mockProcess).when(
         ShellUtils.class,
         "runASyncProcess",
-        Mockito.eq(true),
         Mockito.eq(testCmd),
         Mockito.any(File.class),
-        Mockito.eq(env));
+        Mockito.eq(env),
+        Mockito.any(String.class));
     spyTask.call(null);
     Mockito.verify(mockProcess).waitFor();
   }
 
   private HeronExecutorTask getSpyOnHeronExecutorTask(REEFFileNames mockFiles) {
     HeronExecutorTask task = new HeronExecutorTask(mockFiles,
-        "5",
+        5,
         "cluster",
         "role",
         "testTopology",
@@ -116,7 +116,6 @@ public class HeronExecutorTaskTest {
         "package",
         "core",
         "jar",
-        "packedPlan",
         "componentRamMap",
         false);
     return Mockito.spy(task);

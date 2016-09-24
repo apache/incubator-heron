@@ -180,6 +180,12 @@ public class MesosScheduler implements IScheduler {
     return mesosFramework.restartJob(containerId);
   }
 
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
+  }
+
   protected MesosFramework getMesosFramework() {
     return new MesosFramework(config, runtime);
   }
@@ -246,20 +252,23 @@ public class MesosScheduler implements IScheduler {
    */
   protected void fillResourcesRequirementForBaseContainer(
       BaseContainer container, Integer containerIndex, PackingPlan packing) {
-    Resource maxResourceContainer = SchedulerUtils.getMaxRequiredResource(packing);
+    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
+    Resource maxResourceContainer =
+        updatedPackingPlan.getContainers().iterator().next().getRequiredResource();
+
     double cpu = 0;
     double disk = 0;
     double mem = 0;
-    for (PackingPlan.ContainerPlan cp : packing.containers.values()) {
-      Resource containerResource = cp.resource;
-      cpu = Math.max(cpu, containerResource.cpu);
-      disk = Math.max(disk, containerResource.disk);
-      mem = Math.max(mem, containerResource.ram);
+    for (PackingPlan.ContainerPlan cp : packing.getContainers()) {
+      Resource containerResource = cp.getRequiredResource();
+      cpu = Math.max(cpu, containerResource.getCpu());
+      disk = Math.max(disk, containerResource.getDisk());
+      mem = Math.max(mem, containerResource.getRam());
     }
-    container.cpu = maxResourceContainer.cpu;
+    container.cpu = maxResourceContainer.getCpu();
     // Convert them from bytes to MB
-    container.diskInMB = maxResourceContainer.disk / Constants.MB;
-    container.memInMB = maxResourceContainer.ram / Constants.MB;
+    container.diskInMB = maxResourceContainer.getDisk() / Constants.MB;
+    container.memInMB = maxResourceContainer.getRam() / Constants.MB;
     container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
   }
 }

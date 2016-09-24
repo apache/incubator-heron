@@ -21,8 +21,9 @@ import signal
 import yaml
 
 from heron.common.src.python.basics import GatewayLooper
+from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
-from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
+from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
@@ -41,7 +42,7 @@ class SingleThreadHeronInstance(object):
   STREAM_MGR_HOST = "127.0.0.1"
   METRICS_MGR_HOST = "127.0.0.1"
   def __init__(self, topology_name, topology_id, instance,
-               stream_port, metrics_port, topo_pex_file_path, sys_config):
+               stream_port, metrics_port, topo_pex_file_path):
     # Basic information about this heron instance
     self.topology_name = topology_name
     self.topology_id = topology_id
@@ -49,7 +50,7 @@ class SingleThreadHeronInstance(object):
     self.stream_port = stream_port
     self.metrics_port = metrics_port
     self.topo_pex_file_abs_path = os.path.abspath(topo_pex_file_path)
-    self.sys_config = sys_config
+    self.sys_config = system_config.get_sys_config()
 
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     self.out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
@@ -62,17 +63,19 @@ class SingleThreadHeronInstance(object):
     self.out_metrics.\
       register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY])
     self.metrics_collector = MetricsCollector(self.looper, self.out_metrics)
-    self.gateway_metrics = GatewayMetrics(self.metrics_collector, sys_config)
+    self.gateway_metrics = GatewayMetrics(self.metrics_collector)
+    self.py_metrics = PyMetrics(self.metrics_collector)
 
     # Create socket options and socket clients
-    socket_options = create_socket_options(self.sys_config)
+    socket_options = create_socket_options()
     self._stmgr_client = \
       SingleThreadStmgrClient(self.looper, self, self.STREAM_MGR_HOST, stream_port,
                               topology_name, topology_id, instance, self.socket_map,
-                              self.gateway_metrics, socket_options, self.sys_config)
+                              self.gateway_metrics, socket_options)
     self._metrics_client = \
       MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
-                           self.out_metrics, self.socket_map, socket_options, self.sys_config)
+                           self.out_metrics, self.in_stream, self.out_stream,
+                           self.socket_map, socket_options, self.gateway_metrics, self.py_metrics)
     self.my_pplan_helper = None
 
     # my_instance is a AssignedInstance tuple
@@ -158,7 +161,7 @@ class SingleThreadHeronInstance(object):
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY])
 
       py_spout_instance = SpoutInstance(self.my_pplan_helper, self.in_stream, self.out_stream,
-                                        self.looper, self.sys_config)
+                                        self.looper)
       self.my_instance = AssignedInstance(is_spout=True,
                                           protobuf=my_spout,
                                           py_class=py_spout_instance)
@@ -174,7 +177,7 @@ class SingleThreadHeronInstance(object):
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY])
 
       py_bolt_instance = BoltInstance(self.my_pplan_helper, self.in_stream, self.out_stream,
-                                      self.looper, self.sys_config)
+                                      self.looper)
       self.my_instance = AssignedInstance(is_spout=False,
                                           protobuf=my_bolt,
                                           py_class=py_bolt_instance)
@@ -230,8 +233,10 @@ def main():
   stmgr_id = sys.argv[7]
   stmgr_port = sys.argv[8]
   metrics_port = sys.argv[9]
-  system_config = yaml_config_reader(sys.argv[10])
+  sys_config = yaml_config_reader(sys.argv[10])
   topology_pex_file_path = sys.argv[11]
+
+  system_config.set_sys_config(sys_config)
 
   # create the protobuf instance
   instance_info = physical_plan_pb2.InstanceInfo()
@@ -245,9 +250,9 @@ def main():
   instance.info.MergeFrom(instance_info)
 
   # Logging init
-  log_dir = os.path.abspath(system_config[constants.HERON_LOGGING_DIRECTORY])
-  max_log_files = system_config[constants.HERON_LOGGING_MAXIMUM_FILES]
-  max_log_bytes = system_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
+  log_dir = os.path.abspath(sys_config[constants.HERON_LOGGING_DIRECTORY])
+  max_log_files = sys_config[constants.HERON_LOGGING_MAXIMUM_FILES]
+  max_log_bytes = sys_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
   log_file = os.path.join(log_dir, instance_id + ".log.0")
   log.init_rotating_logger(level=logging.INFO, logfile=log_file,
@@ -259,10 +264,10 @@ def main():
            " and stmgrId: " + stmgr_id + " and stmgrPort: " + stmgr_port +
            " and metricsManagerPort: " + metrics_port +
            "\n **Topology Pex file located at: " + topology_pex_file_path)
-  Log.debug("System config: " + str(system_config))
+  Log.debug("System config: " + str(sys_config))
 
   heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance, stmgr_port,
-                                             metrics_port, topology_pex_file_path, system_config)
+                                             metrics_port, topology_pex_file_path)
   heron_instance.start()
 
 if __name__ == '__main__':

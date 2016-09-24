@@ -44,7 +44,7 @@ void Client::SendResponse(REQID _id, const google::protobuf::Message& _response)
   sp_int32 byte_size = _response.ByteSize();
   sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
                         REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  OutgoingPacket* opkt = new OutgoingPacket(data_size);
+  auto opkt = new OutgoingPacket(data_size);
   CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(_id), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(_response, byte_size), 0);
@@ -62,7 +62,7 @@ sp_int32 Client::RemoveTimer(sp_int64 timer_id) { return RemoveTimer_Base(timer_
 
 BaseConnection* Client::CreateConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
                                          EventLoop* eventLoop) {
-  Connection* conn = new Connection(_endpoint, _options, eventLoop);
+  auto conn = new Connection(_endpoint, _options, eventLoop);
 
   conn->registerForNewPacket([this](IncomingPacket* pkt) { this->OnNewPacket(pkt); });
   // Backpressure reliever - will point to the inheritor of this class in case the virtual function
@@ -105,7 +105,7 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
   sp_int32 byte_size = _request->ByteSize();
   sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  OutgoingPacket* opkt = new OutgoingPacket(sop);
+  auto opkt = new OutgoingPacket(sop);
   CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(rid), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(*_request, byte_size), 0);
@@ -141,7 +141,7 @@ void Client::InternalSendMessage(google::protobuf::Message* _message) {
   sp_int32 byte_size = _message->ByteSize();
   sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  OutgoingPacket* opkt = new OutgoingPacket(sop);
+  auto opkt = new OutgoingPacket(sop);
   CHECK_EQ(opkt->PackString(_message->GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(rid), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(*_message, byte_size), 0);

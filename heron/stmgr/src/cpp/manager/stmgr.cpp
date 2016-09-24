@@ -165,7 +165,7 @@ void StMgr::UpdateProcessMetrics(EventLoop::Status) {
 
 void StMgr::FetchTMasterLocation() {
   LOG(INFO) << "Fetching TMaster Location";
-  proto::tmaster::TMasterLocation* tmaster = new proto::tmaster::TMasterLocation();
+  auto tmaster = new proto::tmaster::TMasterLocation();
 
   auto cb = [tmaster, this](proto::system::StatusCode status) {
     this->OnTMasterLocationFetch(tmaster, status);
@@ -377,8 +377,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
 }
 
 void StMgr::CleanupStreamConsumers() {
-  std::map<std::pair<sp_string, sp_string>, StreamConsumers*>::iterator iter;
-  for (iter = stream_consumers_.begin(); iter != stream_consumers_.end(); ++iter) {
+  for (auto iter = stream_consumers_.begin(); iter != stream_consumers_.end(); ++iter) {
     delete iter->second;
   }
   stream_consumers_.clear();
@@ -586,7 +585,7 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet* _
     SendInBound(_task_id, _tuple);
     delete _tuple;
   } else {
-    proto::stmgr::TupleStreamMessage* out = new proto::stmgr::TupleStreamMessage();
+    auto out = new proto::stmgr::TupleStreamMessage();
     out->set_task_id(_task_id);
     out->set_allocated_set(_tuple);
     clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
@@ -612,8 +611,7 @@ void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                              const proto::system::HeronDataTuple& _tuple,
                              const std::list<sp_int32>& _out_tasks) {
   bool first_iteration = true;
-  for (std::list<sp_int32>::const_iterator iter = _out_tasks.begin(); iter != _out_tasks.end();
-       ++iter) {
+  for (auto iter = _out_tasks.begin(); iter != _out_tasks.end(); ++iter) {
     sp_int64 tuple_key = tuple_cache_->add_data_tuple(*iter, _streamid, _tuple);
     if (_tuple.roots_size() > 0) {
       // Anchored tuple

@@ -36,17 +36,15 @@ namespace common {
 MultiMeanMetric::MultiMeanMetric() {}
 
 MultiMeanMetric::~MultiMeanMetric() {
-  std::map<sp_string, MeanMetric*>::iterator iter;
-  for (iter = value_.begin(); iter != value_.end(); ++iter) {
+  for (auto iter = value_.begin(); iter != value_.end(); ++iter) {
     delete iter->second;
   }
 }
 
 MeanMetric* MultiMeanMetric::scope(const sp_string& _key) {
-  std::map<sp_string, MeanMetric*>::iterator iter;
-  iter = value_.find(_key);
+  auto iter = value_.find(_key);
   if (iter == value_.end()) {
-    MeanMetric* m = new MeanMetric();
+    auto m = new MeanMetric();
     value_[_key] = m;
     return m;
   } else {
@@ -55,8 +53,7 @@ MeanMetric* MultiMeanMetric::scope(const sp_string& _key) {
 }
 void MultiMeanMetric::GetAndReset(const sp_string& _prefix,
                                   proto::system::MetricPublisherPublishMessage* _message) {
-  std::map<sp_string, MeanMetric*>::iterator iter;
-  for (iter = value_.begin(); iter != value_.end(); ++iter) {
+  for (auto iter = value_.begin(); iter != value_.end(); ++iter) {
     iter->second->GetAndReset(_prefix + "/" + iter->first, _message);
   }
 }

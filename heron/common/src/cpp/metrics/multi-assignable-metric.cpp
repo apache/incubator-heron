@@ -35,17 +35,15 @@ namespace common {
 MultiAssignableMetric::MultiAssignableMetric() {}
 
 MultiAssignableMetric::~MultiAssignableMetric() {
-  std::map<sp_string, AssignableMetric*>::iterator iter;
-  for (iter = value_.begin(); iter != value_.end(); ++iter) {
+  for (auto iter = value_.begin(); iter != value_.end(); ++iter) {
     delete iter->second;
   }
 }
 
 AssignableMetric* MultiAssignableMetric::scope(const sp_string& _key) {
-  std::map<sp_string, AssignableMetric*>::iterator iter;
-  iter = value_.find(_key);
+  auto iter = value_.find(_key);
   if (iter == value_.end()) {
-    AssignableMetric* m = new AssignableMetric(0);
+    auto m = new AssignableMetric(0);
     value_[_key] = m;
     return m;
   } else {
@@ -55,8 +53,7 @@ AssignableMetric* MultiAssignableMetric::scope(const sp_string& _key) {
 
 void MultiAssignableMetric::GetAndReset(const sp_string& _prefix,
                                         proto::system::MetricPublisherPublishMessage* _message) {
-  std::map<sp_string, AssignableMetric*>::iterator iter;
-  for (iter = value_.begin(); iter != value_.end(); ++iter) {
+  for (auto iter = value_.begin(); iter != value_.end(); ++iter) {
     iter->second->GetAndReset(_prefix + "/" + iter->first, _message);
   }
 }

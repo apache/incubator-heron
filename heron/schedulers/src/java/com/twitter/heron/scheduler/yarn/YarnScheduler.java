@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler.KillTopologyRequest;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
+import com.twitter.heron.proto.scheduler.Scheduler.UpdateTopologyRequest;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -39,11 +40,17 @@ public class YarnScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
+    LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.getId());
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
-    driver.scheduleTMasterContainer();
-    driver.scheduleHeronWorkers(packing);
-    return true;
+
+    try {
+      driver.scheduleTMasterContainer();
+      driver.scheduleHeronWorkers(packing);
+      return true;
+    } catch (HeronMasterDriver.ContainerAllocationException e) {
+      LOG.log(Level.ALL, "Failed to allocate containers for topology", e);
+      return false;
+    }
   }
 
   @Override
@@ -62,16 +69,27 @@ public class YarnScheduler implements IScheduler {
   public boolean onRestart(RestartTopologyRequest request) {
     int containerId = request.getContainerIndex();
 
-    if (containerId == -1) {
-      HeronMasterDriverProvider.getInstance().restartTopology();
-    } else {
-      HeronMasterDriverProvider.getInstance().restartContainer(String.valueOf(containerId));
+    try {
+      if (containerId == -1) {
+        HeronMasterDriverProvider.getInstance().restartTopology();
+      } else {
+        HeronMasterDriverProvider.getInstance().restartWorker(containerId);
+      }
+      return true;
+    } catch (HeronMasterDriver.ContainerAllocationException e) {
+      LOG.log(Level.ALL, "Failed to allocate containers after restart", e);
+      return false;
     }
+  }
 
-    return true;
+  @Override
+  public boolean onUpdate(UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
   }
 
   @Override
   public void close() {
+    HeronMasterDriverProvider.getInstance().killTopology();
   }
 }

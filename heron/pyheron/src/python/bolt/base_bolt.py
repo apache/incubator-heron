@@ -1,10 +1,10 @@
-# Copyright 2016 Twitter. All rights reserved.
+# Copyright 2016 - Parsely, Inc. (d/b/a Parse.ly)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@ import copy
 
 from heron.common.src.python.utils.tuple import TupleHelper
 
-from ..component import HeronComponentSpec, BaseComponent
+from ..component import HeronComponentSpec, BaseComponent, NotCompatibleError
 from ..stream import Stream
 
 class BaseBolt(BaseComponent):
@@ -42,7 +42,7 @@ class BaseBolt(BaseComponent):
 
     This method takes an optional ``outputs`` argument for supporting dynamic output fields
     declaration. However, it is recommended that ``outputs`` should be declared as
-    an attribute of your ``Spout`` subclass. Also, some ways of declaring inputs is not supported
+    an attribute of your ``Bolt`` subclass. Also, some ways of declaring inputs is not supported
     in this implementation; please read the documentation below.
 
     :type name: str
@@ -76,7 +76,7 @@ class BaseBolt(BaseComponent):
       # avoid modification to cls.outputs
       _outputs = copy.copy(cls.outputs)
     else:
-      _outputs = None
+      _outputs = []
 
     if optional_outputs is not None:
       assert isinstance(optional_outputs, (list, tuple))
@@ -95,7 +95,7 @@ class BaseBolt(BaseComponent):
 
     :type tup: list or tuple
     :param tup: the new output Tuple to send from this bolt,
-                should only contain only serializable data.
+                which should contain only serializable data.
     :type stream: str
     :param stream: the ID of the stream to emit this Tuple to.
                    Leave empty to emit to the default stream.
@@ -110,7 +110,7 @@ class BaseBolt(BaseComponent):
 
   @staticmethod
   def is_tick(tup):
-    """Returns whether or not the given HeronTuple is a tick Tuple
+    """Returns whether or not a given HeronTuple is a tick Tuple
 
     It is compatible with StreamParse API.
     """
@@ -129,3 +129,8 @@ class BaseBolt(BaseComponent):
     It is compatible with StreamParse API.
     """
     self.delegate.fail(tup)
+
+  # pylint: disable=no-self-use
+  def read_tuple(self):
+    """Streamparse API that is not applicable for PyHeron"""
+    raise NotCompatibleError("run() method is not applicable in Heron.")

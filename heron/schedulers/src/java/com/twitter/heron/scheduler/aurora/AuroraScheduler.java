@@ -20,35 +20,44 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.google.common.base.Optional;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
-public class AuroraScheduler implements IScheduler {
+public class AuroraScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(AuroraLauncher.class.getName());
 
   private Config config;
   private Config runtime;
   private AuroraController controller;
+  private UpdateTopologyManager updateTopologyManager;
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.controller = getController();
+    this.updateTopologyManager = new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
   }
 
   /**
@@ -72,7 +81,7 @@ public class AuroraScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    if (packing == null || packing.containers.isEmpty()) {
+    if (packing == null || packing.getContainers().isEmpty()) {
       LOG.severe("No container requested. Can't schedule");
       return false;
     }
@@ -109,6 +118,28 @@ public class AuroraScheduler implements IScheduler {
     return controller.restartJob(containerId);
   }
 
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    try {
+      updateTopologyManager.updateTopology(
+          request.getCurrentPackingPlan(), request.getProposedPackingPlan());
+    } catch (ExecutionException | InterruptedException e) {
+      LOG.log(Level.SEVERE, "Could not update topology for request: " + request, e);
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+    controller.addContainers(containersToAdd.size());
+  }
+
+  @Override
+  public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
+    controller.removeContainers(containersToRemove);
+  }
+
   /**
    * Encode the JVM options
    *
@@ -131,16 +162,18 @@ public class AuroraScheduler implements IScheduler {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // Align the cpu, ram, disk to the maximal one
-    Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
-    // Update total topology resource requirement on Aurora clusters
-    packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
+    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
+    SchedulerUtils.persistUpdatedPackingPlan(topology.getName(), updatedPackingPlan,
+        Runtime.schedulerStateManagerAdaptor(runtime));
+
+    Resource containerResource = updatedPackingPlan.getContainers()
+        .iterator().next().getRequiredResource();
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
     auroraProperties.put("TOPOLOGY_DEFINITION_FILE",
         FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put("INSTANCE_DISTRIBUTION", Runtime.instanceDistribution(runtime));
     auroraProperties.put("STATEMGR_CONNECTION_STRING",
         Context.stateManagerConnectionString(config));
     auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
@@ -166,9 +199,9 @@ public class AuroraScheduler implements IScheduler {
     auroraProperties.put("SANDBOX_PYTHON_INSTANCE_BINARY",
         Context.pythonInstanceSandboxBinary(config));
 
-    auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
-    auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");
-    auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
+    auroraProperties.put("CPUS_PER_CONTAINER", Double.toString(containerResource.getCpu()));
+    auroraProperties.put("DISK_PER_CONTAINER", Long.toString(containerResource.getDisk()));
+    auroraProperties.put("RAM_PER_CONTAINER", Long.toString(containerResource.getRam()));
 
     auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
 

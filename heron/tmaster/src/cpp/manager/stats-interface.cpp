@@ -17,6 +17,7 @@
 #include "tmaster/src/cpp/manager/stats-interface.h"
 #include <iostream>
 #include <sstream>
+#include "manager/tmaster.h"
 #include "manager/tmetrics-collector.h"
 #include "metrics/tmaster-metrics.h"
 #include "basics/basics.h"
@@ -29,8 +30,8 @@ namespace heron {
 namespace tmaster {
 
 StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _options,
-                               TMetricsCollector* _collector)
-    : metrics_collector_(_collector) {
+                               TMetricsCollector* _collector, TMaster* _tmaster)
+    : metrics_collector_(_collector), tmaster_(_tmaster) {
   http_server_ = new HTTPServer(eventLoop, _options);
   // Install the handlers
   auto cbHandleStats = [this](IncomingHTTPRequest* request) { this->HandleStatsRequest(request); };
@@ -67,7 +68,8 @@ void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request) {
     delete _request;
     return;
   }
-  proto::tmaster::MetricResponse* res = metrics_collector_->GetMetrics(req);
+  proto::tmaster::MetricResponse* res =
+    metrics_collector_->GetMetrics(req, tmaster_->getInitialTopology());
   sp_string response_string;
   CHECK(res->SerializeToString(&response_string));
   OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);

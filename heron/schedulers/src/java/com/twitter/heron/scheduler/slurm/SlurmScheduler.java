@@ -75,7 +75,7 @@ public class SlurmScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    if (packing == null || packing.containers.isEmpty()) {
+    if (packing == null || packing.getContainers().isEmpty()) {
       LOG.log(Level.SEVERE, "No container requested. Can't schedule");
       return false;
     }
@@ -108,6 +108,12 @@ public class SlurmScheduler implements IScheduler {
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
     return true;
+  }
+
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
   }
 
   protected String getJobIdFilePath() {

@@ -14,6 +14,7 @@
 '''metrics_helper: helper classes for managing common metrics'''
 
 from heron.common.src.python.utils.log import Log
+from heron.common.src.python.config import system_config
 from heron.proto import metrics_pb2
 import heron.common.src.python.constants as constants
 
@@ -32,8 +33,8 @@ class BaseMetricsHelper(object):
 
   def register_metrics(self, metrics_collector, interval):
     """Registers its metrics to a given metrics collector with a given interval"""
-    for key, value in self.metrics.iteritems():
-      metrics_collector.register_metric(key, value, interval)
+    for field, metrics in self.metrics.iteritems():
+      metrics_collector.register_metric(field, metrics, interval)
 
   def update_count(self, name, incr_by=1, key=None):
     """Update the value of CountMetric or MultiCountMetric
@@ -75,6 +76,7 @@ class BaseMetricsHelper(object):
     else:
       Log.error("In update_count(): %s is registered but not supported with this method" % name)
 
+
 class GatewayMetrics(BaseMetricsHelper):
   """Metrics helper class for Gateway metric"""
   RECEIVED_PKT_SIZE = '__gateway-received-packets-size'
@@ -82,12 +84,36 @@ class GatewayMetrics(BaseMetricsHelper):
   RECEIVED_PKT_COUNT = '__gateway-received-packets-count'
   SENT_PKT_COUNT = '__gateway-sent-packets-count'
 
+  SENT_METRICS_SIZE = '__gateway-sent-metrics-size'
+  SENT_METRICS_PKT_COUNT = '__gateway-sent-metrics-packets-count'
+  SENT_METRICS_COUNT = '__gateway-sent-metrics-count'
+  SENT_EXCEPTION_COUNT = '__gateway-sent-exceptions-count'
+
+  IN_STREAM_QUEUE_SIZE = '__gateway-in-stream-queue-size'
+  OUT_STREAM_QUEUE_SIZE = '__gateway-out-stream-queue-size'
+
+  IN_STREAM_QUEUE_EXPECTED_CAPACITY = '__gateway-in-stream-queue-expected-capacity'
+  OUT_STREAM_QUEUE_EXPECTED_CAPACITY = '__gateway-out-stream-queue-expected-capacity'
+
+  IN_QUEUE_FULL_COUNT = '__gateway-in-queue-full-count'
+
   metrics = {RECEIVED_PKT_SIZE: CountMetric(),
              SENT_PKT_SIZE: CountMetric(),
              RECEIVED_PKT_COUNT: CountMetric(),
-             SENT_PKT_COUNT: CountMetric()}
+             SENT_PKT_COUNT: CountMetric(),
 
-  def __init__(self, metrics_collector, sys_config):
+             SENT_METRICS_SIZE: CountMetric(),
+             SENT_METRICS_PKT_COUNT: CountMetric(),
+             SENT_METRICS_COUNT: CountMetric(),
+             SENT_EXCEPTION_COUNT: CountMetric(),
+
+             IN_STREAM_QUEUE_SIZE: MeanReducedMetric(),
+             OUT_STREAM_QUEUE_SIZE: MeanReducedMetric(),
+             IN_STREAM_QUEUE_EXPECTED_CAPACITY: MeanReducedMetric(),
+             OUT_STREAM_QUEUE_EXPECTED_CAPACITY: MeanReducedMetric()}
+
+  def __init__(self, metrics_collector):
+    sys_config = system_config.get_sys_config()
     super(GatewayMetrics, self).__init__(self.metrics)
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
@@ -96,6 +122,21 @@ class GatewayMetrics(BaseMetricsHelper):
     """Apply updates to received packet metrics"""
     self.update_count(self.RECEIVED_PKT_COUNT)
     self.update_count(self.RECEIVED_PKT_SIZE, incr_by=received_pkt_size_bytes)
+
+  def update_sent_metrics_size(self, size):
+    self.update_count(self.SENT_METRICS_SIZE, size)
+
+  def update_sent_metrics(self, metrics_count, exceptions_count):
+    self.update_count(self.SENT_METRICS_PKT_COUNT)
+    self.update_count(self.SENT_METRICS_COUNT, metrics_count)
+    self.update_count(self.SENT_EXCEPTION_COUNT, exceptions_count)
+
+  def update_in_out_stream_metrics(self, in_size, out_size, in_expect_size, out_expect_size):
+    self.update_reduced_metric(self.IN_STREAM_QUEUE_SIZE, in_size)
+    self.update_reduced_metric(self.OUT_STREAM_QUEUE_SIZE, out_size)
+    self.update_reduced_metric(self.IN_STREAM_QUEUE_EXPECTED_CAPACITY, in_expect_size)
+    self.update_reduced_metric(self.OUT_STREAM_QUEUE_EXPECTED_CAPACITY, out_expect_size)
+
 
 class ComponentMetrics(BaseMetricsHelper):
   """Metrics to be collected for both Bolt and Spout"""
@@ -116,12 +157,13 @@ class ComponentMetrics(BaseMetricsHelper):
     metrics.update(additional_metrics)
     super(ComponentMetrics, self).__init__(metrics)
 
-  def register_metrics(self, context, sys_config):
+  # pylint: disable=arguments-differ
+  def register_metrics(self, context):
     """Registers metrics to context
 
     :param context: Topology Context
-    :param sys_config: System config
     """
+    sys_config = system_config.get_sys_config()
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     collector = context.get_metrics_collector()
     super(ComponentMetrics, self).register_metrics(collector, interval)

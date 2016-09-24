@@ -36,17 +36,15 @@ namespace common {
 MultiCountMetric::MultiCountMetric() {}
 
 MultiCountMetric::~MultiCountMetric() {
-  std::map<sp_string, CountMetric*>::iterator iter;
-  for (iter = value_.begin(); iter != value_.end(); ++iter) {
+  for (auto iter = value_.begin(); iter != value_.end(); ++iter) {
     delete iter->second;
   }
 }
 
 CountMetric* MultiCountMetric::scope(const sp_string& _key) {
-  std::map<sp_string, CountMetric*>::iterator iter;
-  iter = value_.find(_key);
+  auto iter = value_.find(_key);
   if (iter == value_.end()) {
-    CountMetric* m = new CountMetric();
+    auto m = new CountMetric();
     value_[_key] = m;
     return m;
   } else {
@@ -56,8 +54,7 @@ CountMetric* MultiCountMetric::scope(const sp_string& _key) {
 
 void MultiCountMetric::GetAndReset(const sp_string& _prefix,
                                    proto::system::MetricPublisherPublishMessage* _message) {
-  std::map<sp_string, CountMetric*>::iterator iter;
-  for (iter = value_.begin(); iter != value_.end(); ++iter) {
+  for (auto iter = value_.begin(); iter != value_.end(); ++iter) {
     iter->second->GetAndReset(_prefix + "/" + iter->first, _message);
   }
 }
