@@ -277,12 +277,11 @@ genrule(
     srcs = [
         "pyheron/requirements.txt", 
         "pyheron/setup.py",
-        "//heron/streamparse/src/python:pyheron_api_files",
     ],
     outs = generated_pyheron_egg_file,
     stamp = 1,
     tools = [
-        "//heron/streamparse/src/python:pyheron_package"
+        "//heron/pyheron/src/python:pyheron-api"
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
@@ -291,10 +290,10 @@ genrule(
         'export PYHERON_DIR=$$TMP_DIR/pyheron',
         'export PYHERON_UNZIP=$$TMP_DIR/unzipped',
         'mkdir -p $$TMP_DIR $$PYHERON_DIR',
-        'unzip -qd $$PYHERON_UNZIP $(location //heron/streamparse/src/python:pyheron_package)',
+        'unzip -qd $$PYHERON_UNZIP $(location //heron/pyheron/src/python:pyheron-api)',
         'find $$PYHERON_UNZIP -name "*.pyc" -exec rm {} \;',
-#        'mv $$PYHERON_UNZIP/heron/streamparse/src/python $$PYHERON_DIR/pyheron',
-#        'mv $$PYHERON_UNZIP/heron/common/src/python $$PYHERON_DIR/pyheron/common',
+        'mv $$PYHERON_UNZIP/heron/pyheron/src/python $$PYHERON_DIR/pyheron',
+        'mv $$PYHERON_UNZIP/heron/common/src/python $$PYHERON_DIR/pyheron/common',
         'cp $(SRCS) $$PYHERON_DIR',
         'echo "PyHeron toplevel directory: $$PYHERON_DIR"',
         'tree $$PYHERON_DIR',
