@@ -153,7 +153,6 @@ class StMgr {
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
 
-  // TODO(mfu):
   proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks;
 
