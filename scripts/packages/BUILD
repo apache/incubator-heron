@@ -277,11 +277,11 @@ genrule(
     srcs = [
         "pyheron/requirements.txt", 
         "pyheron/setup.py",
-    ],
+    ] + generated_release_files,
     outs = generated_pyheron_egg_file,
     stamp = 1,
     tools = [
-        "//heron/pyheron/src/python:pyheron-api"
+        "//heron/pyheron/src/python:pyheron-package"
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
@@ -290,7 +290,7 @@ genrule(
         'export PYHERON_DIR=$$TMP_DIR/pyheron',
         'export PYHERON_UNZIP=$$TMP_DIR/unzipped',
         'mkdir -p $$TMP_DIR $$PYHERON_DIR',
-        'unzip -qd $$PYHERON_UNZIP $(location //heron/pyheron/src/python:pyheron-api)',
+        'unzip -qd $$PYHERON_UNZIP $(location //heron/pyheron/src/python:pyheron-package)',
         'find $$PYHERON_UNZIP -name "*.pyc" -exec rm {} \;',
         'mv $$PYHERON_UNZIP/heron/pyheron/src/python $$PYHERON_DIR/pyheron',
         'mv $$PYHERON_UNZIP/heron/common/src/python $$PYHERON_DIR/pyheron/common',
@@ -299,6 +299,7 @@ genrule(
         'tree $$PYHERON_DIR',
         'cd $$PYHERON_DIR',
         '/usr/bin/env python2.7 setup.py bdist_egg',
+        'ls -l $$PYHERON_DIR/dist',
         'mv $$PYHERON_DIR/dist/pyheron-*-py2.7.egg $$OUTPUT_DIR/pyheron.egg',
         'rm -rf $$TMP_DIR',
     ]),

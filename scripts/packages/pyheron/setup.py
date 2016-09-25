@@ -1,8 +1,22 @@
 """Pyheron setuptools based setup module"""
-import os
+import os, sys
 from setuptools import setup, find_packages
 
+# read the requirements file
 here = os.path.abspath(os.path.dirname(__file__))
+
+# get the version from release yaml file
+release_yaml = os.path.join(here, 'release.yaml')
+with open(release_yaml, 'r') as f:
+  file_lines = f.readlines()
+  for line in file_lines:
+    split_line = line.strip().split(" : ")
+    if 'version' in split_line[0]:
+      version =  split_line[1].strip("'")
+release_version = version.replace("/", ".")
+
+
+# read the requirements file
 requirement_file = os.path.join(here, 'requirements.txt')
 with open(requirement_file, 'r') as f:
   raw_requirements = f.read().strip()
@@ -17,7 +31,7 @@ long_description = "Pyheron package allows a developer to write python topology 
 
 setup(
   name='pyheron',
-  version='0.0.1',
+  version=release_version,
   description='Python Topology API for Heron',
   long_description=long_description,
 
