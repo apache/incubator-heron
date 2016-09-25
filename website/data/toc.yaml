@@ -37,6 +37,8 @@ sections:
         url: /docs/operators/deployment/uploaders/s3
       - name: Secure Copy (SCP)
         url: /docs/operators/deployment/uploaders/scp
+      - name: Docker
+        url: /docs/operators/deployment/uploaders/docker
   - name: Schedulers
     sublinks:
       - name: Aurora Cluster

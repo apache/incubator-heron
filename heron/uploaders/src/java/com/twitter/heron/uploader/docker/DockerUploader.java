@@ -25,23 +25,23 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
 
 /**
- * IUploader Implementation that creates a DockerUploader Image for the Topology
+ * IUploader implementation that creates a Docker image for the Topology
  * <p>
- * The created DockerUploader Image will be based on the given base image and include the topology definition
- * and binary in a fixed location. The uploader optionally pushes the docker image to a remote repository.
+ * The created Docker image will be based on the given base image and include the topology definition
+ * and binary in a fixed location. The uploader optionally pushes the docker image to a remote registry.
  * Downstream schedulers must take responsibility for leveraging this image, by either building an additional
- * DockerUploader image based on it with the correct START command
+ * Docker image based on it with the correct CMD directive or otherwise starting the topology.
  * </p>
  * <p>
  * The topology definition will be written to "/home/[role]/[topology-name]"
  * if no role is given "default" is used
  * The URI returned by uploadPackage is the fully qualified tag name it will be
- * "[docker-repository]/[cluster]/[role]/[env]/[topology-name]:[UUID]"
- * if role or env are not specified then "default" is used, if docker-repository is not
+ * "[docker-registry]/[cluster]/[role]/[env]/[topology-name]:[UUID]"
+ * if role or env are not specified then "default" is used, if docker-registry is not
  * specified then it is omitted.
  * UUIDs are used for the version in order to ensure that previously cached images won't get used.
  * Per docker requirements role, env, and topology-name are all snake cased with Capital letters
- * made lowercase and proceeded by a - unless the first character. for instance TopologyName would
+ * made lowercase and proceeded by a "-" unless the first character, for instance TopologyName would
  * become topology-name
  * </p>
  * <p>
@@ -49,10 +49,10 @@ import com.twitter.heron.spi.uploader.IUploader;
  * <dl>
  * <dt>heron.uploader.docker.base</dt>
  * <dd>The base docker image to use in the FROM directive, must be specified</dd>
- * <dt>heron.uploader.docker.repository</dt>
- * <dd>The repository prefix to used with the image tag, may be omitted</dd>
+ * <dt>heron.uploader.docker.registry</dt>
+ * <dd>The registry prefix to used with the image tag, may be omitted</dd>
  * <dt>heron.uploader.docker.push</dt>
- * <dd>Boolean value if the docker image should be pushed to the remote repository, defaults to false</dd>
+ * <dd>Boolean value if the docker image should be pushed to the remote registry, defaults to false</dd>
  * </dl>
  * </p>
  * <p>
@@ -101,8 +101,8 @@ public final class DockerUploader implements IUploader {
     String topologyName = Context.topologyName(configuration);
 
     // check that the base image is defined
-    String baseImage = DockerContext.baseImage(configuration);
-    if (baseImage == null || baseImage.isEmpty()) {
+    String baseContainer = DockerContext.baseImage(configuration);
+    if (baseContainer == null || baseContainer.isEmpty()) {
       LOG.log(Level.SEVERE, "Unable to create Dockerfile without base image specified.");
       return null;
     }
@@ -112,7 +112,7 @@ public final class DockerUploader implements IUploader {
     LOG.info("Creating DockerUploader file in " + workingDir.getAbsolutePath());
     try {
       dockerfile.newDockerfile(workingDir)
-          .FROM(baseImage)
+          .FROM(baseContainer)
           .ADD(topologyPackageLocation.getName(), "/home/" + role + "/" + topologyName)
           .write();
     } catch (IOException e) {
@@ -122,9 +122,9 @@ public final class DockerUploader implements IUploader {
 
     // build the tag name
     final StringBuilder tagNameBuilder = new StringBuilder();
-    String repository = DockerContext.dockerRepository(configuration);
-    if (repository != null && !repository.isEmpty()) {
-      tagNameBuilder.append(repository).append("/");
+    String registry = DockerContext.dockerRegistry(configuration);
+    if (registry != null && !registry.isEmpty()) {
+      tagNameBuilder.append(registry).append("/");
     }
 
     String tagName = tagNameBuilder

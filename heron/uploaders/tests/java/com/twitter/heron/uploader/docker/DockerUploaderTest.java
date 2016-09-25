@@ -92,9 +92,9 @@ public class DockerUploaderTest {
   }
 
   @Test
-  public void testTagConstructionWithRepository() {
+  public void testTagConstructionWithRegistry() {
     dockerUploader.initialize(Config.newBuilder().putAll(config)
-        .put("heron.uploader.docker.repository", "dockerUploader.example.com").build());
+        .put("heron.uploader.docker.registry", "dockerUploader.example.com").build());
     assertTrue("Tag doesn't match regex", dockerUploader.uploadPackage().toString()
         .matches("dockerUploader.example.com/local/default/default/test-topology:[0-9A-Fa-f-]+"));
   }

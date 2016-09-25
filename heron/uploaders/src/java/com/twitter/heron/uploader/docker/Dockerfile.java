@@ -31,14 +31,14 @@ class Dockerfile {
   interface IDockerfileBuilder {
 
     /**
-     * DockerUploader FROM directive
+     * Docker FROM directive
      * @param image the base image
      */
     IDockerfileBuilder FROM(String image);
 
 
     /**
-     * DockerUploader ADD directive
+     * Docker ADD directive
      * @param file     the source file
      * @param location the target location
      */
@@ -102,7 +102,7 @@ class Dockerfile {
   }
 
   /**
-   * Create a new DockerfileBuilder for a docker file in the given directory
+   * Create a new IDockerfileBuilder for a docker file in the given directory
    * The file will be called Dockerfile
    *
    * @param directory the directory in which to create the docker file
