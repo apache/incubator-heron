@@ -50,8 +50,7 @@ MetricsMgrSt::MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port,
 MetricsMgrSt::~MetricsMgrSt() {
   CHECK_EQ(client_->getEventLoop()->unRegisterTimer(timerid_), 0);
   delete client_;
-  std::map<sp_string, IMetric*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     delete iter->second;
   }
 }
@@ -72,9 +71,8 @@ void MetricsMgrSt::gather_metrics(EventLoop::Status) {
   using heron::proto::system::MetricPublisherPublishMessage;
 
   if (metrics_.empty()) return;
-  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
-  std::map<sp_string, IMetric*>::iterator iter;
-  for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
+  auto message = new MetricPublisherPublishMessage();
+  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->GetAndReset(iter->first, message);
   }
   client_->SendMetrics(message);

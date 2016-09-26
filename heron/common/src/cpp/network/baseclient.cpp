@@ -59,7 +59,7 @@ void BaseClient::Start_Base() {
   }
 
   // construct an endpoint to store the connection information
-  ConnectionEndPoint* endpoint = new ConnectionEndPoint(options_.get_socket_family() != PF_INET);
+  auto endpoint = new ConnectionEndPoint(options_.get_socket_family() != PF_INET);
   endpoint->set_fd(fd);
   bzero(reinterpret_cast<char*>(endpoint->addr()), endpoint->addrlen());
   // Set the address

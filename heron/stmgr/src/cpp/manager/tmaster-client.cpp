@@ -190,7 +190,7 @@ void TMasterClient::OnHeartbeatTimer() {
 }
 
 void TMasterClient::SendRegisterRequest() {
-  proto::tmaster::StMgrRegisterRequest* request = new proto::tmaster::StMgrRegisterRequest();
+  auto request = new proto::tmaster::StMgrRegisterRequest();
 
   sp_string cwd;
   FileUtils::getCwd(cwd);
@@ -202,8 +202,7 @@ void TMasterClient::SendRegisterRequest() {
   stmgr->set_cwd(cwd);
   stmgr->set_pid((sp_int32)ProcessUtils::getPid());
   stmgr->set_shell_port(shell_port_);
-  for (std::vector<proto::system::Instance*>::iterator iter = instances_.begin();
-       iter != instances_.end(); ++iter) {
+  for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
     request->add_instances()->CopyFrom(*(*iter));
   }
   SendRequest(request, NULL);
@@ -211,7 +210,7 @@ void TMasterClient::SendRegisterRequest() {
 }
 
 void TMasterClient::SendHeartbeatRequest() {
-  proto::tmaster::StMgrHeartbeatRequest* request = new proto::tmaster::StMgrHeartbeatRequest();
+  auto request = new proto::tmaster::StMgrHeartbeatRequest();
   request->set_heartbeat_time(time(NULL));
   // TODO(vikasr) Send actual stats
   request->mutable_stats();

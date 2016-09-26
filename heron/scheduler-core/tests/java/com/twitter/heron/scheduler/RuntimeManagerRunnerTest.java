@@ -149,7 +149,7 @@ public class RuntimeManagerRunnerTest {
     PowerMockito.when(Runtime.schedulerStateManagerAdaptor(runtime)).thenReturn(manager);
 
     RoundRobinPacking packing = new RoundRobinPacking();
-    String newParallelism = "foo:3,bar:6";
+    String newParallelism = "testSpout:1,testBolt:4";
 
     PackingPlans.PackingPlan currentPlan =
         PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
@@ -171,24 +171,6 @@ public class RuntimeManagerRunnerTest {
     when(client.updateTopology(updateTopologyRequest)).thenReturn(true);
     Assert.assertTrue(runner.updateTopologyHandler(TOPOLOGY_NAME, newParallelism));
     verify(client, Mockito.times(1)).updateTopology(updateTopologyRequest);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testScaleDownNotSupported() {
-    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
-
-    PackingPlans.PackingPlan currentPlan =
-        PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, new RoundRobinPacking());
-
-    try {
-      runner.buildNewPackingPlan(
-          currentPlan, runner.parseNewParallelismParam("testSpout:1,testBolt:4"), null);
-    } catch (IllegalArgumentException e) {
-      Assert.assertEquals(e.getMessage(),
-          "Request made to change component testSpout parallelism by -1. Scaling component "
-          + "parallelism down is not currently supported.");
-      throw e;
-    }
   }
 
   @Test
