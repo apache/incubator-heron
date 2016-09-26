@@ -14,5 +14,6 @@
   -->
 
   <suppress files="Empty.java" checks=".*"/>
+  <suppress files="tests/.*" checks="JavadocMethod|JavadocType|JavadocStyle" />
 
 </suppressions>
