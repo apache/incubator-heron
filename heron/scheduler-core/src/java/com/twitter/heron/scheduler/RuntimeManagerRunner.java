@@ -258,14 +258,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentCounts = currentPackingPlan.getComponentCounts();
     Map<String, Integer> componentChanges = parallelismDelta(componentCounts, changeRequests);
 
-    for (String componentName : componentChanges.keySet()) {
-      Integer change = componentChanges.get(componentName);
-      if (change < 0) {
-        throw new IllegalArgumentException(String.format(
-            "Request made to change component %s parallelism by %d. Scaling component "
-                + "parallelism down is not currently supported.", componentName, change));
-      }
-    }
     // Create an instance of the packing class
     String repackingClass = Context.repackingClass(config);
     IRepacking packing;
