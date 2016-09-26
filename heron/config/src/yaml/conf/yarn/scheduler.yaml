@@ -9,3 +9,6 @@ heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLU
 
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:           ${JAVA_HOME}
+
+# yarn queue for submitting and launching the topology
+heron.scheduler.yarn.queue:                  default

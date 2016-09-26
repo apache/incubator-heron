@@ -84,7 +84,9 @@ deployment on a multi-node YARN cluster.
 
 >**Tips**
 >
->More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
+>1. More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
+>2. if you want to submit a topology to a specific YARN queue, you can set the `heron.scheduler.yarn.queue` argument in `--config-property`. For instance, `--config-property heron.scheduler.yarn.queue=test`. This configuration could be found in the [conf/yarn/scheduler]
+(https://github.com/twitter/heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml) file too. `default` would be the YARN default queue as YARN provided.
 
 **Sample Output**
 
