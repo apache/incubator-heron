@@ -34,6 +34,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
+import static org.mockito.Mockito.eq;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, ShellUtils.class, SchedulerUtils.class})
 public class SchedulerUtilsTest {
@@ -42,6 +44,7 @@ public class SchedulerUtilsTest {
   private static final String CORE_RELEASE_DEST = "core";
   private static final String TOPOLOGY_URI = "mock://uri:121/ruo#xi";
   private static final String TOPOLOGY_DEST = "topology";
+  private static final String TOPOLOGY_NAME = "topology_name";
   private static final boolean IS_DELETE_PACKAGE = true;
   private static final boolean IS_VERBOSE = true;
 
@@ -178,7 +181,7 @@ public class SchedulerUtilsTest {
   public void persistUpdatedPackingPlanWillUpdatesStateManager() {
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
     Mockito.when(adaptor
-        .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq("topology")))
+        .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME)))
         .thenReturn(true);
 
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
@@ -186,6 +189,6 @@ public class SchedulerUtilsTest {
     PackingPlan packing = new PackingPlan("id", containers);
     SchedulerUtils.persistUpdatedPackingPlan("topology", packing, adaptor);
     Mockito.verify(adaptor)
-        .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq("topology"));
+        .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
   }
 }
