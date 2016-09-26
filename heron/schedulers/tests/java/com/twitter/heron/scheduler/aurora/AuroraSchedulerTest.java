@@ -34,7 +34,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
@@ -87,11 +86,9 @@ public class AuroraSchedulerTest {
     Mockito.doReturn(controller).when(scheduler).getController();
 
     SchedulerStateManagerAdaptor stateManager = mock(SchedulerStateManagerAdaptor.class);
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyName(), TOPOLOGY_NAME)
-        .put(Keys.schedulerStateManagerAdaptor(), stateManager)
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
+    Config runtime = Mockito.mock(Config.class);
+    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(stateManager);
+    Mockito.when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
 
     scheduler.initialize(Mockito.mock(Config.class), runtime);
 
