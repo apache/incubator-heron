@@ -31,8 +31,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class HeronMasterDriverTest {
   private EvaluatorRequestor mockRequestor;
@@ -72,21 +73,26 @@ public class HeronMasterDriverTest {
 
   @Test
   public void requestsEvaluatorsForWorkers() throws Exception {
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+
+    PackingPlan.ContainerPlan container1 = PackingTestUtils.testContainerPlan(1, 1, 2);
+    containers.add(container1);
+    PackingPlan.ContainerPlan container2 = PackingTestUtils.testContainerPlan(2, 1, 2, 3);
+    containers.add(container2);
+
     AllocatedEvaluator mockEvaluator1 = Mockito.mock(AllocatedEvaluator.class);
     Mockito.when(mockEvaluator1.getId()).thenReturn("testEvaluatorId1");
-    Mockito.doReturn(mockEvaluator1).when(spyDriver).allocateContainer(1, 2, 2048);
+    Mockito.doReturn(mockEvaluator1).when(spyDriver)
+        .allocateContainer(1, getCpu(container1), getRam(container1));
 
     AllocatedEvaluator mockEvaluator2 = Mockito.mock(AllocatedEvaluator.class);
     Mockito.when(mockEvaluator2.getId()).thenReturn("testEvaluatorId2");
-    Mockito.doReturn(mockEvaluator2).when(spyDriver).allocateContainer(2, 4, 2050);
+    Mockito.doReturn(mockEvaluator2).when(spyDriver)
+        .allocateContainer(2, getCpu(container2), getRam(container2));
 
     Configuration mockConfig = Mockito.mock(Configuration.class);
     Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig(1);
     Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig(2);
-
-    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-    addContainer(1, 2.0, 2048L, containers);
-    addContainer(2, 4.0, 2050L, containers);
 
     PackingPlan packing = new PackingPlan("packingId", containers);
     spyDriver.scheduleHeronWorkers(packing);
@@ -94,14 +100,12 @@ public class HeronMasterDriverTest {
     Mockito.verify(mockEvaluator2, Mockito.timeout(1000).times(1)).submitContext(mockConfig);
   }
 
-  private void addContainer(int id,
-                            double cpu,
-                            long mem,
-                            Set<PackingPlan.ContainerPlan> containers) {
-    Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
-    PackingPlan.ContainerPlan container
-        = new PackingPlan.ContainerPlan(id, new HashSet<PackingPlan.InstancePlan>(), resource);
-    containers.add(container);
+  private int getRam(PackingPlan.ContainerPlan container1) {
+    return (int) (container1.getRequiredResource().getRam() / Constants.MB);
+  }
+
+  private int getCpu(PackingPlan.ContainerPlan container) {
+    return (int) Math.ceil(container.getRequiredResource().getCpu());
   }
 
   @Test
@@ -192,12 +196,15 @@ public class HeronMasterDriverTest {
 
   @Test
   public void handlesFailedWorkerContainer() throws Exception {
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    PackingPlan.ContainerPlan container1 = PackingTestUtils.testContainerPlan(1, 1, 2);
+    containers.add(container1);
+
     AllocatedEvaluator mockWorkerEvaluator = Mockito.mock(AllocatedEvaluator.class);
     Mockito.when(mockWorkerEvaluator.getId()).thenReturn("worker");
-    Mockito.doReturn(mockWorkerEvaluator).when(spyDriver).allocateContainer(1, 1, 1024);
+    Mockito.doReturn(mockWorkerEvaluator).when(spyDriver)
+        .allocateContainer(1, getCpu(container1), getRam(container1));
 
-    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-    addContainer(1, 1.0, 1024L, containers);
     PackingPlan packing = new PackingPlan("packingId", containers);
     spyDriver.scheduleHeronWorkers(packing);
     Mockito.verify(mockWorkerEvaluator, Mockito.timeout(1000).times(1))
@@ -207,7 +214,8 @@ public class HeronMasterDriverTest {
     Mockito.when(mockFailedContainer.getId()).thenReturn("worker");
     spyDriver.new FailedContainerHandler().onNext(mockFailedContainer);
 
-    Mockito.verify(spyDriver, Mockito.timeout(1000).times(2)).allocateContainer(1, 1, 1024);
+    Mockito.verify(spyDriver, Mockito.timeout(1000).times(2))
+        .allocateContainer(1, getCpu(container1), getRam(container1));
   }
 
   @Test
