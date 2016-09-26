@@ -300,7 +300,7 @@ genrule(
         'cd $$PYHERON_DIR',
         '/usr/bin/env python2.7 setup.py bdist_egg',
         'ls -l $$PYHERON_DIR/dist',
-        'mv $$PYHERON_DIR/dist/pyheron-*-py2.7.egg $$OUTPUT_DIR/pyheron.egg',
+        'cp $$PYHERON_DIR/dist/pyheron*py2.7.egg $$OUTPUT_DIR/pyheron.egg',
         'rm -rf $$TMP_DIR',
     ]),
 )
