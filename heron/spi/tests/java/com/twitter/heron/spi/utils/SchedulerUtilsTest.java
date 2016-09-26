@@ -177,15 +177,15 @@ public class SchedulerUtilsTest {
   @Test
   public void persistUpdatedPackingPlanWillUpdatesStateManager() {
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
-    Mockito.when(adaptor.setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
-        Mockito.eq("topology"))).thenReturn(true);
+    Mockito.when(adaptor
+        .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq("topology")))
+        .thenReturn(true);
 
-    PackingPlan.ContainerPlan container = PackingTestUtils.testContainerPlan(1, 0, 1, 2);
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-    containers.add(container);
+    containers.add(PackingTestUtils.testContainerPlan(1, 0, 1, 2));
     PackingPlan packing = new PackingPlan("id", containers);
     SchedulerUtils.persistUpdatedPackingPlan("topology", packing, adaptor);
-    Mockito.verify(adaptor).setPackingPlan(Mockito.any(PackingPlans.PackingPlan.class),
-        Mockito.eq("topology"));
+    Mockito.verify(adaptor)
+        .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq("topology"));
   }
 }

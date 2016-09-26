@@ -436,14 +436,10 @@ public final class SchedulerUtils {
                                                SchedulerStateManagerAdaptor stateManager) {
     LOG.log(Level.INFO, "Updating scheduled-resource in packing plan: {0}", topologyName);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
-    if (stateManager.getPackingPlan(topologyName) != null) {
-      stateManager.deletePackingPlan(topologyName);
-    }
 
-    boolean result =
-        stateManager.setPackingPlan(serializer.toProto(updatedPackingPlan), topologyName);
-    if (!result) {
-      throw new RuntimeException(String.format("Failed to save %s's packing plan", topologyName));
+    if (!stateManager.updatePackingPlan(serializer.toProto(updatedPackingPlan), topologyName)) {
+      throw new RuntimeException(String.format(
+          "Failed to update packing plan for topology %s", topologyName));
     }
   }
 }
