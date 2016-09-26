@@ -122,7 +122,6 @@ void StMgr::Init() {
     this->UpdateProcessMetrics(status);
   }, true, PROCESS_METRICS_FREQUENCY), 0);
 
-  //
   is_acking_enabled =
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
 
@@ -567,18 +566,18 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
         proto::system::HeronDataTuple* _tuple = d->mutable_tuples(i);
         // just to make sure that instances do not set any key
         CHECK_EQ(_tuple->key(), 0);
-        out_tasks.clear();
-        s_consumer->GetListToSend(*_tuple, out_tasks);
-        // In addition to out_tasks, the instance might have asked
+        out_tasks_.clear();
+        s_consumer->GetListToSend(*_tuple, out_tasks_);
+        // In addition to out_tasks_, the instance might have asked
         // us to send the tuple to some more tasks
         for (sp_int32 j = 0; j < _tuple->dest_task_ids_size(); ++j) {
-          out_tasks.push_back(_tuple->dest_task_ids(j));
+          out_tasks_.push_back(_tuple->dest_task_ids(j));
         }
-        if (out_tasks.empty()) {
+        if (out_tasks_.empty()) {
           LOG(ERROR) << "Nobody to send the tuple to";
         }
         // TODO(vikasr) Do a fast path that does not involve copying
-        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), _tuple, out_tasks);
+        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), _tuple, out_tasks_);
       }
     } else {
       LOG(ERROR) << "Nobody consumes stream " << stream.second << " from component "

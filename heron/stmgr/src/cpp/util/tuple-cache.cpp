@@ -106,10 +106,10 @@ TupleCache::TupleList::TupleList() {
 TupleCache::TupleList::~TupleList() {
   CHECK(tuples_.empty());
 
-  for (auto& n : _heron_tuple_set_pool) {
+  for (auto& n : heron_tuple_set_pool_) {
     delete n;
   }
-  _heron_tuple_set_pool.clear();
+  heron_tuple_set_pool_.clear();
 }
 
 sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _streamid,

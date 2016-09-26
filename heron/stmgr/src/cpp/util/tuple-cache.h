@@ -46,8 +46,7 @@ class TupleCache {
   void add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
   void add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
 
-  // TODO(mfu):
-  inline void release(sp_int32 _task_id, proto::system::HeronTupleSet2* set) {
+  void release(sp_int32 _task_id, proto::system::HeronTupleSet2* set) {
     get(_task_id)->release(set);
   }
 
@@ -73,16 +72,15 @@ class TupleCache {
     void drain(sp_int32 _task_id,
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
 
-     // TODO(mfu):
-    std::vector<proto::system::HeronTupleSet2*> _heron_tuple_set_pool;
+    std::vector<proto::system::HeronTupleSet2*> heron_tuple_set_pool_;
 
-    inline proto::system::HeronTupleSet2* acquire() {
-      if (_heron_tuple_set_pool.empty()) {
+    proto::system::HeronTupleSet2* acquire() {
+      if (heron_tuple_set_pool_.empty()) {
         return new proto::system::HeronTupleSet2();
       }
 
-      proto::system::HeronTupleSet2* set = _heron_tuple_set_pool.back();
-      _heron_tuple_set_pool.pop_back();
+      proto::system::HeronTupleSet2* set = heron_tuple_set_pool_.back();
+      heron_tuple_set_pool_.pop_back();
       return set;
     }
 
@@ -93,7 +91,7 @@ class TupleCache {
     }
 
     void release(proto::system::HeronTupleSet2* set) {
-      _heron_tuple_set_pool.push_back(set);
+      heron_tuple_set_pool_.push_back(set);
     }
 
    private:
