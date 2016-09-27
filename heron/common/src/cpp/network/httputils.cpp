@@ -177,9 +177,7 @@ void BaseHTTPRequest::parse_keyvalues(HTTPKeyValuePairs& _params, const char* _d
 
 sp_string BaseHTTPRequest::encode_keyvalues(std::unordered_map<sp_string, sp_string>& _kv) {
   std::ostringstream encoded;
-  std::unordered_map<sp_string, sp_string>::iterator kvpair;
-
-  kvpair = _kv.begin();
+  auto kvpair = _kv.begin();
   encoded << http_encode(kvpair->first) << "=" << http_encode(kvpair->second);
 
   for (; kvpair != _kv.end(); kvpair++) {
