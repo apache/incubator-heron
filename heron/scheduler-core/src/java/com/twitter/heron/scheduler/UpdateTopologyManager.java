@@ -115,13 +115,11 @@ public class UpdateTopologyManager implements Closeable {
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)
-    logFine("Deleted existing Topology: %s", stateManager.deleteTopology(topologyName));
-    logFine("Set new Topology: %s", stateManager.setTopology(updatedTopology, topologyName));
+    logFine("Update new Topology: %s", stateManager.updateTopology(updatedTopology, topologyName));
 
     // update packing plan to trigger the scaling event
-    logFine("Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
-    logFine("Set new PackingPlan: %s",
-        stateManager.setPackingPlan(proposedProtoPackingPlan, topologyName));
+    logFine("Update new PackingPlan: %s",
+        stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
 
     // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
     logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
