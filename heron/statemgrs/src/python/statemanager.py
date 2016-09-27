@@ -117,7 +117,7 @@ class StateManager:
     return localportlist
 
   def terminate_ssh_tunnel(self):
-    if hasattr(self, 'tunnel'):
+    if hasattr(self, 'tunnel') and self.tunnel:
       for tunnel in self.tunnel:
         tunnel.terminate()
 

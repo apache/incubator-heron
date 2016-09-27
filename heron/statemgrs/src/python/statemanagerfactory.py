@@ -48,11 +48,11 @@ def get_all_zk_state_managers(conf):
     name = location['name']
     hostport = location['hostport']
     hostportlist = []
-    for hostportPair in hostport.split(','):
+    for hostportpair in hostport.split(','):
       host = None
       port = None
       if ':' in hostport:
-        hostandport = hostportPair.split(':')
+        hostandport = hostportpair.split(':')
         if len(hostandport) == 2:
           host = hostandport[0]
           port = int(hostandport[1])
