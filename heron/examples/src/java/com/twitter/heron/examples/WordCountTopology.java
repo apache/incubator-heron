@@ -161,20 +161,28 @@ public final class WordCountTopology {
    * Main method
    */
   public static void main(String[] args) throws AlreadyAliveException, InvalidTopologyException {
-    if (args.length != 1) {
+    if (args.length < 1) {
       throw new RuntimeException("Specify topology name");
     }
 
-    int parallelism = 80;
+    int parallelism = 1;
+    if (args.length > 1) {
+      parallelism = Integer.parseInt(args[1]);
+    }
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
     builder.setBolt("consumer", new ConsumerBolt(), parallelism)
         .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
+
     /*
     Set config here
     */
+    conf.setComponentRam("word", 2L * 1024 * 1024 * 1024);
+    conf.setComponentRam("consumer", 3L * 1024 * 1024 * 1024);
+//    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
+    conf.setContainerCpuRequested(6);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

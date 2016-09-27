@@ -111,7 +111,9 @@ void MetricsMgrClient::SendTMasterLocation(const proto::tmaster::TMasterLocation
 }
 
 void MetricsMgrClient::SendMetrics(proto::system::MetricPublisherPublishMessage* _message) {
-  SendMessage(_message);
+  SendMessage(*_message);
+
+  delete _message;
 }
 
 void MetricsMgrClient::InternalSendTMasterLocation() {
@@ -119,7 +121,9 @@ void MetricsMgrClient::InternalSendTMasterLocation() {
   proto::system::TMasterLocationRefreshMessage* m =
       new proto::system::TMasterLocationRefreshMessage();
   m->mutable_tmaster()->CopyFrom(*tmaster_location_);
-  SendMessage(m);
+  SendMessage(*m);
+
+  delete m;
 }
 }  // namespace common
 }  // namespace heron

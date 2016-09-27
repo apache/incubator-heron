@@ -70,8 +70,7 @@ void DummyTMasterClient::CreateAndSendRegisterRequest() {
   stmgr->set_cwd(cwd);
   stmgr->set_pid((sp_int32)ProcessUtils::getPid());
   stmgr->set_shell_port(shell_port_);
-  for (std::vector<heron::proto::system::Instance*>::iterator iter = instances_.begin();
-       iter != instances_.end(); ++iter) {
+  for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
     request->add_instances()->CopyFrom(**iter);
   }
   SendRequest(request, NULL);

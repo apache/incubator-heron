@@ -35,7 +35,7 @@ class Grouping {
                           const std::vector<sp_int32>& _task_ids);
 
   virtual void GetListToSend(const proto::system::HeronDataTuple& _tuple,
-                             std::list<sp_int32>& _return) = 0;
+                             std::vector<sp_int32>& _return) = 0;
 
  protected:
   std::vector<sp_int32> task_ids_;

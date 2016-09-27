@@ -30,6 +30,21 @@
 namespace heron {
 namespace config {
 
+bool TopologyConfigHelper::IsAckingEnabled(const proto::api::Topology& _topology) {
+  sp_string value_true_ = "true";
+  std::set<sp_string> topology_config;
+  if (_topology.has_topology_config()) {
+    const proto::api::Config& cfg = _topology.topology_config();
+    for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+      if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_ENABLE_ACKING) {
+        return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+      }
+    }
+  }
+
+  return false;
+}
+
 sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topology) {
   std::set<sp_string> topology_config;
   if (_topology.has_topology_config()) {
