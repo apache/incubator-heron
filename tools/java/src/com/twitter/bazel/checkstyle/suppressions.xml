@@ -14,6 +14,8 @@
   -->
 
   <suppress files="Empty.java" checks=".*"/>
-  <suppress files="tests/.*" checks="JavadocMethod|JavadocType|JavadocStyle" />
+
+  <!-- supress javadoc requirements on files in tests folders -->
+  <suppress files="tests/.*" checks="JavadocMethod|JavadocType" />
 
 </suppressions>
