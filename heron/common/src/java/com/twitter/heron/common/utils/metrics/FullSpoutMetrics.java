@@ -14,9 +14,14 @@
 
 package com.twitter.heron.common.utils.metrics;
 
+import java.util.List;
+
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MeanReducerState;
+import com.twitter.heron.api.metric.MultiCountMetric;
+import com.twitter.heron.api.metric.MultiReducedMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -33,15 +38,16 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
  * 4. Expose methods which could be called externally to change the value of metrics
  */
 
-public class SpoutMetrics {
-  private final CountMetric ackCount;
-  private final ReducedMetric<MeanReducerState, Number, Double> completeLatency;
-  private final ReducedMetric<MeanReducerState, Number, Double> failLatency;
-  private final CountMetric failCount;
-  private final CountMetric timeoutCount;
-  private final CountMetric emitCount;
+public class FullSpoutMetrics {
+  private final MultiCountMetric ackCount;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> completeLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
+  private final MultiCountMetric failCount;
+  private final MultiCountMetric timeoutCount;
+  private final MultiCountMetric emitCount;
   private final ReducedMetric<MeanReducerState, Number, Double> nextTupleLatency;
   private final CountMetric nextTupleCount;
+  private final MultiCountMetric serializationTimeNs;
 
   // The # of times back-pressure happens on outStreamQueue so instance could not
   // produce more tuples
@@ -50,17 +56,18 @@ public class SpoutMetrics {
   // The mean # of pending-to-be-acked tuples in spout if acking is enabled
   private final ReducedMetric<MeanReducerState, Number, Double> pendingTuplesCount;
 
-  public SpoutMetrics() {
-    ackCount = new CountMetric();
-    completeLatency = new ReducedMetric<>(new MeanReducer());
-    failLatency = new ReducedMetric<>(new MeanReducer());
-    failCount = new CountMetric();
-    timeoutCount = new CountMetric();
-    emitCount = new CountMetric();
+  public FullSpoutMetrics() {
+    ackCount = new MultiCountMetric();
+    completeLatency = new MultiReducedMetric<>(new MeanReducer());
+    failLatency = new MultiReducedMetric<>(new MeanReducer());
+    failCount = new MultiCountMetric();
+    timeoutCount = new MultiCountMetric();
+    emitCount = new MultiCountMetric();
     nextTupleLatency = new ReducedMetric<>(new MeanReducer());
     nextTupleCount = new CountMetric();
     outQueueFullCount = new CountMetric();
     pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
+    serializationTimeNs = new MultiCountMetric();
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -69,16 +76,17 @@ public class SpoutMetrics {
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 
-    topologyContext.registerMetric("__ack-count/default", ackCount, interval);
-    topologyContext.registerMetric("__complete-latency/default", completeLatency, interval);
-    topologyContext.registerMetric("__fail-latency/default", failLatency, interval);
-    topologyContext.registerMetric("__fail-count/default", failCount, interval);
-    topologyContext.registerMetric("__timeout-count/default", timeoutCount, interval);
-    topologyContext.registerMetric("__emit-count/default", emitCount, interval);
+    topologyContext.registerMetric("__ack-count", ackCount, interval);
+    topologyContext.registerMetric("__complete-latency", completeLatency, interval);
+    topologyContext.registerMetric("__fail-latency", failLatency, interval);
+    topologyContext.registerMetric("__fail-count", failCount, interval);
+    topologyContext.registerMetric("__timeout-count", timeoutCount, interval);
+    topologyContext.registerMetric("__emit-count", emitCount, interval);
     topologyContext.registerMetric("__next-tuple-latency", nextTupleLatency, interval);
     topologyContext.registerMetric("__next-tuple-count", nextTupleCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
+    topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -89,24 +97,32 @@ public class SpoutMetrics {
   // since we could not have default values for them
   public void initMultiCountMetrics(PhysicalPlanHelper helper) {
     // For spout, we would consider the output stream
+    List<TopologyAPI.OutputStream> outputs = helper.getMySpout().getOutputsList();
+    for (TopologyAPI.OutputStream outputStream : outputs) {
+      String streamId = outputStream.getStream().getId();
+      ackCount.scope(streamId);
+      failCount.scope(streamId);
+      timeoutCount.scope(streamId);
+      emitCount.scope(streamId);
+    }
   }
 
   public void ackedTuple(String streamId, long latency) {
-    ackCount.incr();
-    completeLatency.update(latency);
+    ackCount.scope(streamId).incr();
+    completeLatency.scope(streamId).update(latency);
   }
 
   public void failedTuple(String streamId, long latency) {
-    failCount.incr();
-    failLatency.update(latency);
+    failCount.scope(streamId).incr();
+    failLatency.scope(streamId).update(latency);
   }
 
   public void timeoutTuple(String streamId) {
-    timeoutCount.incr();
+    timeoutCount.scope(streamId).incr();
   }
 
   public void emittedTuple(String streamId) {
-    emitCount.incr();
+    emitCount.scope(streamId).incr();
   }
 
   public void nextTuple(long latency) {
@@ -123,5 +139,7 @@ public class SpoutMetrics {
   }
 
   public void serializeDataTuple(String streamId, long latency) {
+    serializationTimeNs.scope(streamId).incrBy(latency);
   }
 }
+

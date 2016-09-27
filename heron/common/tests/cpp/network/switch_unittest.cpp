@@ -49,7 +49,7 @@ class Terminate : public Client {
 
   virtual void HandleConnect(NetworkErrorCode _status) {
     if (_status == OK) {
-      TerminateMessage* message = new TerminateMessage();
+      TerminateMessage message;
       SendMessage(message);
       return;
     }

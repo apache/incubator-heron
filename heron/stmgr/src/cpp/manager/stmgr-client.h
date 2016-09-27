@@ -43,7 +43,7 @@ class StMgrClient : public Client {
 
   void Quit();
 
-  void SendTupleStreamMessage(proto::stmgr::TupleStreamMessage* _msg);
+  void SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
   void SendStartBackPressureMessage();
   void SendStopBackPressureMessage();
 
@@ -53,7 +53,7 @@ class StMgrClient : public Client {
 
  private:
   void HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* _response, NetworkErrorCode);
-  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message);
+  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message);
 
   void OnReConnectTimer();
   void SendHelloRequest();

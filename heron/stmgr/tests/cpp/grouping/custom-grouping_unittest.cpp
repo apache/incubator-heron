@@ -48,7 +48,7 @@ TEST(CustomGrouping, test_nullop) {
 
   std::set<sp_int32> all_dests;
   for (sp_int32 i = 0; i < 1000; ++i) {
-    std::list<sp_int32> dests;
+    std::vector<sp_int32> dests;
     g->GetListToSend(tuple, dests);
     EXPECT_EQ(dests.size(), (sp_uint32)0);
   }

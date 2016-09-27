@@ -121,11 +121,20 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   return client;
 }
 
-void StMgrClientMgr::SendTupleStreamMessage(const sp_string& _stmgr_id,
-                                            proto::stmgr::TupleStreamMessage* _msg) {
+void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
+                                            const proto::system::HeronTupleSet2& _msg) {
   auto iter = clients_.find(_stmgr_id);
   CHECK(iter != clients_.end());
-  clients_[_stmgr_id]->SendTupleStreamMessage(_msg);
+
+  // Acquire the message
+  proto::stmgr::TupleStreamMessage2* out = clients_[_stmgr_id]->acquire(out);
+  out->set_task_id(_task_id);
+  _msg.SerializePartialToString(out->mutable_set());
+
+  clients_[_stmgr_id]->SendTupleStreamMessage(*out);
+
+  // Release the message
+  clients_[_stmgr_id]->release(out);
 }
 
 void StMgrClientMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {

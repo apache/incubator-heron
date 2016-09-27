@@ -31,6 +31,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * Heron needs to know how to serialize all the values in a tuple. By default, Heron
  * knows how to serialize the primitive types, strings, and byte arrays. If you want to
  * use another type, you'll need to implement and register a serializer for that type.
+ *
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TupleImpl implements Tuple {
@@ -45,22 +46,30 @@ public class TupleImpl implements Tuple {
   public TupleImpl(TopologyContext context, TopologyAPI.StreamId stream,
                    long tupleKey, List<HeronTuples.RootId> roots,
                    List<Object> values) {
+    this(context, stream, tupleKey, roots, values, System.nanoTime(), true);
+  }
+
+  public TupleImpl(TopologyContext context, TopologyAPI.StreamId stream,
+                   long tupleKey, List<HeronTuples.RootId> roots,
+                   List<Object> values, long creationTime, boolean isCheckRequired) {
     this.context = context;
     this.stream = stream;
     this.tupleKey = tupleKey;
     this.roots = roots;
     this.values = values;
-    this.creationTime = System.nanoTime();
+    this.creationTime = creationTime;
 
-    Fields schema = context.getComponentOutputFields(stream.getComponentName(),
-        stream.getId());
+    if (isCheckRequired) {
+      Fields schema = context.getComponentOutputFields(stream.getComponentName(),
+          stream.getId());
 
-    if (values.size() != schema.size()) {
-      throw new IllegalArgumentException(
-          "Tuple created with wrong number of fields. "
-              + "Expected " + schema.size() + " fields but got "
-              + values.size() + " fields"
-      );
+      if (values.size() != schema.size()) {
+        throw new IllegalArgumentException(
+            "Tuple created with wrong number of fields. "
+                + "Expected " + schema.size() + " fields but got "
+                + values.size() + " fields"
+        );
+      }
     }
   }
 

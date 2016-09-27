@@ -17,6 +17,7 @@ package com.twitter.heron.common.utils.misc;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,8 @@ public class PhysicalPlanHelper {
   private TopologyAPI.Spout mySpout;
   private TopologyAPI.Bolt myBolt;
   private TopologyContextImpl topologyContext;
+
+  private final boolean isTerminatedComponent;
 
   /**
    * Constructor for physical plan helper
@@ -134,6 +137,10 @@ public class PhysicalPlanHelper {
         }
       }
     }
+
+    // Check whether it is a terminated bolt
+    HashSet<String> terminals = getTerminatedComponentSet();
+    this.isTerminatedComponent = terminals.contains(myComponent);
   }
 
   public void checkOutputSchema(String streamId, List<Object> tuple) {
@@ -242,6 +249,68 @@ public class PhysicalPlanHelper {
 
   public List<Integer> chooseTasksForCustomStreamGrouping(String streamId, List<Object> values) {
     return customGrouper.chooseTasks(streamId, values);
+  }
+
+  public boolean isTerminatedComponent() {
+    return isTerminatedComponent;
+  }
+
+  private HashSet<String> getTerminatedComponentSet() {
+    Map<String, TopologyAPI.Bolt> bolts = new HashMap<>();
+    Map<String, TopologyAPI.Spout> spouts = new HashMap<>();
+    Map<String, HashSet<String>> prev = new HashMap<>();
+
+    for (TopologyAPI.Spout spout : pplan.getTopology().getSpoutsList()) {
+      String name = spout.getComp().getName();
+      spouts.put(name, spout);
+    }
+
+    // We will build the structure of the topologyBlr - a graph directed from children to parents,
+    // by looking only on bolts, since spout will not have parents
+    for (TopologyAPI.Bolt bolt : pplan.getTopology().getBoltsList()) {
+      String name = bolt.getComp().getName();
+      bolts.put(name, bolt);
+
+      // To get the parent's component to construct a graph of topology structure
+      for (TopologyAPI.InputStream inputStream : bolt.getInputsList()) {
+        String parent = inputStream.getStream().getComponentName();
+        if (prev.containsKey(name)) {
+          prev.get(name).add(parent);
+        } else {
+          HashSet<String> parents = new HashSet<String>();
+          parents.add(parent);
+          prev.put(name, parents);
+        }
+      }
+    }
+
+    // To find the terminal bolts defined by users and link them with "AggregatorBolt"
+    // First, "it" of course needs upstream component, we don't want the isolated bolt
+    HashSet<String> terminals = new HashSet<>();
+    // Second, "it" should not exists in the prev.valueSet, which means, it has no downstream
+    HashSet<String> nonTerminals = new HashSet<>();
+    for (HashSet<String> set : prev.values()) {
+      nonTerminals.addAll(set);
+    }
+    // Here we iterate bolt in prev.keySet() rather than bolts.keySet() due to we don't want
+    // a isolated bolt, including AggregatorBolt
+    for (String bolt : prev.keySet()) {
+      if (!nonTerminals.contains(bolt)) {
+        terminals.add(bolt);
+      }
+    }
+    // We will also consider the cases with spouts without children
+    for (String spout : spouts.keySet()) {
+      if (!nonTerminals.contains(spout)) {
+        terminals.add(spout);
+      }
+    }
+
+    return terminals;
+  }
+
+  public boolean isCustomGroupingEmpty() {
+    return customGrouper.isCustomGroupingEmpty();
   }
 }
 

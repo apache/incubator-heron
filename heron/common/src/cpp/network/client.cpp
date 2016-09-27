@@ -26,7 +26,9 @@ Client::Client(EventLoop* eventLoop, const NetworkOptions& _options)
   Init();
 }
 
-Client::~Client() { delete message_rid_gen_; }
+Client::~Client() {
+  delete message_rid_gen_;
+}
 
 void Client::Start() { Start_Base(); }
 
@@ -52,7 +54,9 @@ void Client::SendResponse(REQID _id, const google::protobuf::Message& _response)
   return;
 }
 
-void Client::SendMessage(google::protobuf::Message* _message) { InternalSendMessage(_message); }
+void Client::SendMessage(const google::protobuf::Message& _message) {
+  InternalSendMessage(_message);
+}
 
 sp_int64 Client::AddTimer(VCallback<> cb, sp_int64 _msecs) {
   return AddTimer_Base(std::move(cb), _msecs);
@@ -87,8 +91,9 @@ void Client::HandleClose_Base(NetworkErrorCode _status) { HandleClose(_status); 
 void Client::Init() { message_rid_gen_ = new REQID_Generator(); }
 
 void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
-  CHECK(requestResponseMap_.find(_request->GetTypeName()) != requestResponseMap_.end());
-  const sp_string& _expected_response_type = requestResponseMap_[_request->GetTypeName()];
+  auto iter = requestResponseMap_.find(_request->GetTypeName());
+  CHECK(iter != requestResponseMap_.end());
+  const sp_string& _expected_response_type = iter->second;
   if (state_ != CONNECTED) {
     delete _request;
     responseHandlers[_expected_response_type](NULL, WRITE_ERROR);
@@ -127,10 +132,10 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
   return;
 }
 
-void Client::InternalSendMessage(google::protobuf::Message* _message) {
+void Client::InternalSendMessage(const google::protobuf::Message& _message) {
   if (state_ != CONNECTED) {
     LOG(ERROR) << "Client is not connected. Dropping message" << std::endl;
-    delete _message;
+
     return;
   }
 
@@ -138,16 +143,13 @@ void Client::InternalSendMessage(google::protobuf::Message* _message) {
   REQID rid = REQID_Generator::generate_zero_reqid();
 
   // Make the outgoing packet
-  sp_int32 byte_size = _message->ByteSize();
-  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message->GetTypeName()) + REQID_size +
+  sp_int32 byte_size = _message.ByteSize();
+  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message.GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   auto opkt = new OutgoingPacket(sop);
-  CHECK_EQ(opkt->PackString(_message->GetTypeName()), 0);
+  CHECK_EQ(opkt->PackString(_message.GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(rid), 0);
-  CHECK_EQ(opkt->PackProtocolBuffer(*_message, byte_size), 0);
-
-  // delete the message
-  delete _message;
+  CHECK_EQ(opkt->PackProtocolBuffer(_message, byte_size), 0);
 
   Connection* conn = static_cast<Connection*>(conn_);
   if (conn->sendPacket(opkt, NULL) != 0) {

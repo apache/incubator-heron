@@ -17,6 +17,7 @@
 #include "util/tuple-cache.h"
 #include <iostream>
 #include <map>
+#include <string>
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -50,7 +51,7 @@ TupleCache::~TupleCache() {
 }
 
 sp_int64 TupleCache::add_data_tuple(sp_int32 _task_id, const proto::api::StreamId& _streamid,
-                                    const proto::system::HeronDataTuple& _tuple) {
+                                    proto::system::HeronDataTuple* _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
   return l->add_data_tuple(_streamid, _tuple, &total_size_, &tuples_cache_max_tuple_size_);
@@ -102,10 +103,17 @@ TupleCache::TupleList::TupleList() {
   last_drained_count_ = 0;
 }
 
-TupleCache::TupleList::~TupleList() { CHECK(tuples_.empty()); }
+TupleCache::TupleList::~TupleList() {
+  CHECK(tuples_.empty());
+
+  for (auto& n : heron_tuple_set_pool_) {
+    delete n;
+  }
+  heron_tuple_set_pool_.clear();
+}
 
 sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _streamid,
-                                               const proto::system::HeronDataTuple& _tuple,
+                                               proto::system::HeronDataTuple* _tuple,
                                                sp_uint64* _total_size,
                                                sp_uint64* _tuples_cache_max_tuple_size) {
   if (!current_ || current_->has_control() || current_->data().stream().id() != _streamid.id() ||
@@ -114,16 +122,22 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
-    current_->mutable_data()->mutable_stream()->CopyFrom(_streamid);
+    current_ = acquire_clean_set();
+    current_->mutable_data()->mutable_stream()->MergeFrom(_streamid);
     current_size_ = 0;
   }
-  proto::system::HeronDataTuple* added_tuple;
-  added_tuple = current_->mutable_data()->add_tuples();
-  added_tuple->CopyFrom(_tuple);
-  sp_int64 tuple_key = RandUtils::lrand();
-  added_tuple->set_key(tuple_key);
-  sp_int64 tuple_size = added_tuple->ByteSize();
+
+  sp_int64 tuple_key = 0;
+  if (_tuple->roots_size() > 0) {
+     tuple_key = RandUtils::lrand();
+  }
+  // Override in place
+  _tuple->set_key(tuple_key);
+
+  std::string* added_tuple = current_->mutable_data()->add_tuples();
+  _tuple->SerializePartialToString(added_tuple);
+
+  sp_int64 tuple_size = _tuple->GetCachedSize();
   current_size_ += tuple_size;
   *_total_size += tuple_size;
   return tuple_key;
@@ -135,7 +149,7 @@ void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -150,7 +164,7 @@ void TupleCache::TupleList::add_fail_tuple(const proto::system::AckTuple& _tuple
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -166,7 +180,7 @@ void TupleCache::TupleList::add_emit_tuple(const proto::system::AckTuple& _tuple
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -176,7 +190,7 @@ void TupleCache::TupleList::add_emit_tuple(const proto::system::AckTuple& _tuple
 }
 
 void TupleCache::TupleList::drain(
-    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet*)> _drainer) {
+    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer) {
   sp_int32 drained = 0;
   // we have to drain from back
   while (!tuples_.empty()) {
