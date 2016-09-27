@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <list>
 #include <set>
 #include <vector>
@@ -42,13 +43,14 @@ TEST(AllGrouping, test_allgrouping) {
   heron::stmgr::AllGrouping* g = new heron::stmgr::AllGrouping(task_ids);
   for (sp_int32 i = 0; i < 1000; ++i) {
     heron::proto::system::HeronDataTuple dummy;
-    std::list<sp_int32> dest;
+    std::vector<sp_int32> dest;
     g->GetListToSend(dummy, dest);
     EXPECT_EQ(dest.size(), task_ids.size());
-    dest.sort();
-    for (sp_uint32 j = 0; j < task_ids.size(); ++j) {
-      EXPECT_EQ(task_ids[j], dest.front());
-      dest.pop_front();
+    std::sort(dest.begin(), dest.end());
+
+    for (sp_int32 j = task_ids.size() - 1; j >= 0; --j) {
+      EXPECT_EQ(task_ids[j], dest.back());
+      dest.pop_back();
     }
   }
 

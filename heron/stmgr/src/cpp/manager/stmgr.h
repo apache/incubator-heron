@@ -19,9 +19,11 @@
 
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <chrono>
+#include <typeindex>
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
@@ -58,10 +60,10 @@ class StMgr {
   // Called by tmaster client when a new physical plan is available
   void NewPhysicalPlan(proto::system::PhysicalPlan* pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
-                               proto::stmgr::TupleStreamMessage* _message);
+                               const proto::stmgr::TupleStreamMessage2& _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
-                          proto::stmgr::TupleMessage* _message);
-  void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet* _tuple);
+                          proto::system::HeronTupleSet* _message);
+  void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
   // Forward the call to the StmgrServer
@@ -91,12 +93,12 @@ class StMgr {
       const std::map<sp_string, std::vector<sp_int32> >& _component_to_task_ids);
   void CleanupXorManagers();
 
-  void SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet* _message);
+  void SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void ProcessAcksAndFails(sp_int32 _task_id, const proto::system::HeronControlTupleSet& _control);
   void CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                         const proto::api::StreamId& _streamid,
-                        const proto::system::HeronDataTuple& _tuple,
-                        const std::list<sp_int32>& _out_tasks);
+                        proto::system::HeronDataTuple* _tuple,
+                        const std::vector<sp_int32>& _out_tasks);
   void CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail);
 
   sp_int32 ExtractTopologyTimeout(const proto::api::Topology& _topology);
@@ -126,9 +128,9 @@ class StMgr {
   EventLoop* eventLoop_;
 
   // Map of task_id to stmgr_id
-  std::map<sp_int32, sp_string> task_id_to_stmgr_;
+  std::unordered_map<sp_int32, sp_string> task_id_to_stmgr_;
   // map of <component, streamid> to its consumers
-  std::map<std::pair<sp_string, sp_string>, StreamConsumers*> stream_consumers_;
+  std::unordered_map<std::pair<sp_string, sp_string>, StreamConsumers*> stream_consumers_;
   // xor managers
   XorManager* xor_mgrs_;
   // Tuple Cache to optimize message building
@@ -150,6 +152,15 @@ class StMgr {
   sp_string zkroot_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
+
+  proto::system::HeronTupleSet2 current_control_tuple_set_;
+  std::vector<sp_int32> out_tasks_;
+
+  bool is_acking_enabled;
+
+  proto::system::HeronTupleSet2* tuple_set_from_other_stmgr_;
+
+  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };
 
 }  // namespace stmgr

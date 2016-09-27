@@ -251,25 +251,26 @@ public class SpoutInstance implements IInstance {
   private void produceTuple() {
     int maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
 
-
     long totalTuplesEmitted = collector.getTotalTuplesEmitted();
-
-    long totalDataEmittedInBytesBeforeCycle = collector.getTotalDataEmittedInBytes();
 
     long instanceEmitBatchTime
         = systemConfig.getInstanceEmitBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
 
-    long instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSizeBytes();
-
     long startOfCycle = System.nanoTime();
 
-    while (
-        (ackEnabled && (maxSpoutPending > collector.numInFlight()))
-            || !ackEnabled) {
+    // We would reuse the System.nanoTime()
+    long currentTime = startOfCycle;
+
+    while (!ackEnabled
+        || (ackEnabled && (maxSpoutPending > collector.numInFlight()))) {
       // Delegate to the use defined spout
-      long startTime = System.nanoTime();
       spout.nextTuple();
-      long latency = System.nanoTime() - startTime;
+
+      // Swap
+      long startTime = currentTime;
+      currentTime = System.nanoTime();
+
+      long latency = currentTime - startTime;
       spoutMetrics.nextTuple(latency);
 
       long newTotalTuplesEmitted = collector.getTotalTuplesEmitted();
@@ -281,12 +282,7 @@ public class SpoutInstance implements IInstance {
       totalTuplesEmitted = newTotalTuplesEmitted;
 
       // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - instanceEmitBatchTime > 0) {
-        break;
-      }
-
-      if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceEmitBatchSize) {
+      if (currentTime - startOfCycle - instanceEmitBatchTime > 0) {
         break;
       }
     }

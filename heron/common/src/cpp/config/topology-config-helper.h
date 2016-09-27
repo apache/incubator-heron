@@ -35,6 +35,8 @@ namespace config {
 
 class TopologyConfigHelper {
  public:
+  static bool IsAckingEnabled(const proto::api::Topology& _topology);
+
   // This returns the value of TOPOLOGY_STMGRS from the config
   static sp_int32 GetNumStMgrs(const proto::api::Topology& _topology);
 

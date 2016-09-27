@@ -49,14 +49,14 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
-# run the python integration test
-T="heron integration-test python"
-start_timer "$T"
-./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
-  -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
-  -rh localhost -rp 8080\
-  -tp integration-test/src/python/integration_test/topology/ \
-  -cl local -rl heron-staging -ev devel
-end_timer "$T"
+# temporarily disable python integration test since it is not ready
+#T="heron integration-test python"
+#start_timer "$T"
+#./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
+#  -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
+#  -rh localhost -rp 8080\
+#  -tp integration-test/src/python/integration_test/topology/ \
+#  -cl local -rl heron-staging -ev devel
+#end_timer "$T"
 
 print_timer_summary

@@ -71,3 +71,15 @@ message StopBackPressureMessage {
   required string stmgr = 3;
   required string message_id = 4;
 }
+
+// Tuples exchanged between stream managers and instances
+message TupleMessage2 {
+  required heron.proto.system.HeronTupleSet2 set = 1;
+}
+
+// Tuples exchanged between stream managers
+message TupleStreamMessage2 {
+  required int32 task_id = 1;
+  // serialized data
+  required bytes set = 2;
+}

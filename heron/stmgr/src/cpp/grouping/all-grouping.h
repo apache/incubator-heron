@@ -32,7 +32,7 @@ class AllGrouping : public Grouping {
   virtual ~AllGrouping();
 
   virtual void GetListToSend(const proto::system::HeronDataTuple& _tuple,
-                             std::list<sp_int32>& _return);
+                             std::vector<sp_int32>& _return);
 };
 
 }  // namespace stmgr

@@ -38,7 +38,7 @@ class DummyInstance : public Client {
   // Handle incoming message
   virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
   // Handle incoming tuples
-  virtual void HandleTupleMessage(heron::proto::stmgr::TupleMessage* _message);
+  virtual void HandleTupleMessage(heron::proto::system::HeronTupleSet2* _message);
   // Send tuples
   virtual void CreateAndSendTupleMessages();
   // Handle the instance assignment message
@@ -105,7 +105,7 @@ class DummyBoltInstance : public DummyInstance {
   // Handle incoming message
   virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
   // Handle incoming tuples
-  virtual void HandleTupleMessage(heron::proto::stmgr::TupleMessage* _message);
+  virtual void HandleTupleMessage(heron::proto::system::HeronTupleSet2* _message);
   virtual void HandleNewInstanceAssignmentMsg(
       heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
 
