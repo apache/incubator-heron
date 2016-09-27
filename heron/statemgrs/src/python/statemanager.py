@@ -83,9 +83,9 @@ class StateManager:
     Returns true if the host is reachable. In some cases, it may not be reachable a tunnel
     must be used.
     """
-    for (host,port) in self.hostportlist:
+    for hostport in self.hostportlist:
       try:
-        socket.create_connection((host, port), 2)
+        socket.create_connection(hostport, 2)
         return True
       except:
         continue
@@ -106,11 +106,11 @@ class StateManager:
     that can be used to communicate with the state host.
     """
     localportlist = []
-    for (host,port) in self.hostportlist:
+    for (host, port) in self.hostportlist:
       localport = self.pick_unused_port()
       self.tunnel.append(subprocess.Popen(
           ('ssh', self.tunnelhost, '-NL127.0.0.1:%d:%s:%d' % (localport, host, port))))
-      localportlist.append(('127.0.0.1',localport))
+      localportlist.append(('127.0.0.1', localport))
     return localportlist
 
   def terminate_ssh_tunnel(self):
