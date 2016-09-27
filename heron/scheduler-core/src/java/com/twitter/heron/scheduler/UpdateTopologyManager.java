@@ -172,8 +172,8 @@ public class UpdateTopologyManager implements Closeable {
             + "Will wait up to %s seconds for packing plan to be reset",
         topology.getName(), waitSeconds);
     Enabler enabler = new Enabler(stateManager, topology, waitSeconds, removableContainerCount);
-    Future<?> future = this.reactivateExecutorService.scheduleWithFixedDelay(
-        enabler, delaySeconds, delaySeconds, TimeUnit.SECONDS);
+    Future<?> future = this.reactivateExecutorService
+        .scheduleWithFixedDelay(enabler, 0, delaySeconds, TimeUnit.SECONDS);
     enabler.setFutureRunnable(future);
   }
 
