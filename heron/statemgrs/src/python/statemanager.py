@@ -90,7 +90,7 @@ class StateManager:
         socket.create_connection(hostport, 2)
         return True
       except:
-        LOG.info("StateManager %s Unable to connect to host: %s port %i" % (self.name,hostport[0], hostport[1]))
+        LOG.info("StateManager %s Unable to connect to host: %s port %i" % (self.name, hostport[0], hostport[1]))
         continue
     return False
 
