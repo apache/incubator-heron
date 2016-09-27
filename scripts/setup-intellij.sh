@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Make sure ./bazel_configure.py is run before runing this scripts
+if [[ ! -f ./scripts/compile/env_exec.sh ]] ; then
+  echo "ERROR: File ./scripts/compile_env/env_exec.sh is not found."
+  echo "Run ./bazel_configure.py first."
+  exit
+fi
+
 # Generates an IntelliJ project in heron
 
 set -o errexit
