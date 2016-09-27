@@ -107,6 +107,8 @@ public class UpdateTopologyManagerTest {
         TOPOLOGY_NAME, new com.twitter.heron.api.Config(), "spoutname", "boltname", 1, 1);
     Mockito.doReturn(topology).when(spyUpdateManager).
         getUpdatedTopology(TOPOLOGY_NAME, proposedPacking, mockStateMgr);
+    Mockito.doReturn(currentProtoPlan).when(spyUpdateManager).
+        getPackingPlan(eq(mockStateMgr), eq(TOPOLOGY_NAME));
 
     PowerMockito.spy(TMasterUtils.class);
     PowerMockito.doReturn(true).when(TMasterUtils.class, "transitionTopologyState",
