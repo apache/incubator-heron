@@ -31,6 +31,9 @@ from kazoo.exceptions import NoNodeError
 from kazoo.exceptions import NotEmptyError
 from kazoo.exceptions import ZookeeperError
 
+def _makehostportlist(hostportlist):
+  return ','.join(map(lambda hp: "%s:%i" % hp, hostportlist))
+
 # pylint: disable=attribute-defined-outside-init
 class ZkStateManager(StateManager):
   """
@@ -44,11 +47,8 @@ class ZkStateManager(StateManager):
     self.tunnelhost = tunnelhost
     self.rootpath = rootpath
 
-  def _makehostportlist(hostportlist):
-    return ','.join(map(lambda hp: "%s:%i" % hp, hostportlist))
-
   # pylint: disable=no-self-use
-  def _kazoo_client(self,hostportlist):
+  def _kazoo_client(self, hostportlist):
     """
     For Unit testing, replace this method to not
     Actually return a client
