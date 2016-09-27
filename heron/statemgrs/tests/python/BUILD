@@ -5,6 +5,7 @@ pex_test(
     srcs = [
         "configloader_unittest.py",
         "zkstatemanager_unittest.py",
+        "statemanagerfactory_unittest.py",
     ],
     deps = [
         "//heron/statemgrs/src/python:statemgr-py",
