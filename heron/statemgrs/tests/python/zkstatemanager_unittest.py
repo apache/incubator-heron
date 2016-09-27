@@ -20,7 +20,7 @@ from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 class ZkStateManagerTest(unittest.TestCase):
   """Unittest for ZkStateManager"""
 
-  class NoseFlute:
+  class MockKazooClient:
     def __init__(self):
       self.start_calls = 0
       self.stop_calls = 0
@@ -35,7 +35,7 @@ class ZkStateManagerTest(unittest.TestCase):
     # Create a a ZkStateManager that we will test with
     self.statemanager = ZkStateManager('zk', [('localhost', 2181), ('localhost', 2281)], 'heron', 'reachable.host')
     # replace creation of a KazooClient
-    self.mock_kazoo = NoseFlute()
+    self.mock_kazoo = MockKazooClient()
     self.opened_host_ports = []
 
     def kazoo_client(hostport):
