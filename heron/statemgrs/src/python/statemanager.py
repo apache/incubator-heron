@@ -16,6 +16,8 @@ import abc
 import socket
 import subprocess
 
+from heron.statemgrs.src.python.log import Log as LOG
+
 HERON_EXECUTION_STATE_PREFIX = "{0}/executionstate/"
 HERON_PACKING_PLANS_PREFIX = "{0}/packingplans/"
 HERON_PPLANS_PREFIX = "{0}/pplans/"
@@ -88,6 +90,7 @@ class StateManager:
         socket.create_connection(hostport, 2)
         return True
       except:
+        LOG.info("StateManager %s Unable to connect to host: %s port %i" % (self.name,hostport[0], hostport[1]))
         continue
     return False
 
