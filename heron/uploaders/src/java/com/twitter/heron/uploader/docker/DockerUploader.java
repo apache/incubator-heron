@@ -44,7 +44,6 @@ import com.twitter.heron.spi.uploader.IUploader;
  * made lowercase and proceeded by a "-" unless the first character, for instance TopologyName would
  * become topology-name
  * </p>
- * <p>
  * The following configuration parameters are allowed:
  * <dl>
  * <dt>heron.uploader.docker.base</dt>
@@ -54,7 +53,6 @@ import com.twitter.heron.spi.uploader.IUploader;
  * <dt>heron.uploader.docker.push</dt>
  * <dd>Boolean value if the docker image should be pushed to the remote registry, defaults to false</dd>
  * </dl>
- * </p>
  * <p>
  * The Dockerfile generated will be as follows:
  * <code>
