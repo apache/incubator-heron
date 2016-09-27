@@ -38,20 +38,30 @@ class ZkStateManager(StateManager):
   gets and sets states from there.
   """
 
-  def __init__(self, name, host, port, rootpath, tunnelhost):
+  def __init__(self, name, hostportlist, rootpath, tunnelhost):
     self.name = name
-    self.host = host
-    self.port = port
+    self.hostportlist = hostportlist
     self.tunnelhost = tunnelhost
     self.rootpath = rootpath
+
+  def _makehostportlist(hostportlist):
+    return ','.join(map(lambda hp: "%s:%i" % hp, hostportlist))
+
+  # pylint: disable=no-self-use
+  def _kazoo_client(self,hostportlist):
+    """
+    For Unit testing, replace this method to not
+    Actually return a client
+    """
+    return KazooClient(hostportlist)
 
   def start(self):
     """ state Zookeeper """
     if self.is_host_port_reachable():
-      self.client = KazooClient(self.hostport)
+      self.client = self._kazoo_client(_makehostportlist(self.hostportlist))
     else:
-      localport = self.establish_ssh_tunnel()
-      self.client = KazooClient("localhost:" + str(localport))
+      localhostports = self.establish_ssh_tunnel()
+      self.client = self._kazoo_client(_makehostportlist(localhostports))
     self.client.start()
 
     def on_connection_change(state):
