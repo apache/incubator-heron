@@ -187,7 +187,7 @@ public class SchedulerUtilsTest {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(PackingTestUtils.testContainerPlan(1, 0, 1, 2));
     PackingPlan packing = new PackingPlan("id", containers);
-    SchedulerUtils.persistUpdatedPackingPlan("topology", packing, adaptor);
+    SchedulerUtils.persistUpdatedPackingPlan(TOPOLOGY_NAME, packing, adaptor);
     Mockito.verify(adaptor)
         .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
   }
