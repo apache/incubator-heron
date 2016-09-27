@@ -165,7 +165,7 @@ public final class SerializationFactory {
     }
 
     try {
-        return serializerClass.newInstance();
+      return serializerClass.newInstance();
     } catch (InstantiationException | IllegalAccessException ex) {
       // do nothing
     }
