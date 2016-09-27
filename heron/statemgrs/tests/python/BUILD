@@ -2,7 +2,10 @@ load("/tools/rules/pex_rules", "pex_test")
 
 pex_test(
     name = "statemanager_unittest",
-    srcs = ["configloader_unittest.py"],
+    srcs = [
+        "configloader_unittest.py",
+        "zkstatemanager_unittest.py",
+    ],
     deps = [
         "//heron/statemgrs/src/python:statemgr-py",
     ],
@@ -13,3 +16,4 @@ pex_test(
     ],
     size = "small",
 )
+

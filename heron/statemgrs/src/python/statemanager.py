@@ -42,24 +42,12 @@ class StateManager:
     self.__name = newName
 
   @property
-  def host(self):
-    return self.__host
+  def hostportlist(self):
+    return self.__hostportlist
 
-  @host.setter
-  def host(self, newHost):
-    self.__host = newHost
-
-  @property
-  def port(self):
-    return self.__port
-
-  @port.setter
-  def port(self, newPort):
-    self.__port = newPort
-
-  @property
-  def hostport(self):
-    return self.host + ":" + str(self.port)
+  @hostportlist.setter
+  def hostportlist(self, newHostportList):
+    self.__hostportlist = newHostportList
 
   @property
   def rootpath(self):
@@ -82,10 +70,9 @@ class StateManager:
     self.__tunnelhost = newTunnelHost
 
   @abc.abstractmethod
-  def __init__(self, host, port, rootpath, tunnelhost):
+  def __init__(self, hostportlist, rootpath, tunnelhost):
     """
-    @param host - Host where the states are stored
-    @param port - Port to connect to
+    @param hostportlist - Hosts and ports where the states are stored
     @param rootpath - Path where the heron states are stored
     @param tunnelhost - Host to which to tunnel through if state host is not directly accessible
     """
@@ -96,11 +83,13 @@ class StateManager:
     Returns true if the host is reachable. In some cases, it may not be reachable a tunnel
     must be used.
     """
-    try:
-      socket.create_connection((self.host, self.port), 2)
-      return True
-    except:
-      return False
+    for (host,port) in self.hostportlist:
+      try:
+        socket.create_connection((host, port), 2)
+        return True
+      except:
+        continue
+    return False
 
   # pylint: disable=no-self-use
   def pick_unused_port(self):
@@ -113,17 +102,21 @@ class StateManager:
 
   def establish_ssh_tunnel(self):
     """
-    Establish an ssh tunnel and return the local port
+    Establish an ssh tunnel for each local host and port
     that can be used to communicate with the state host.
     """
-    localport = self.pick_unused_port()
-    self.tunnel = subprocess.Popen(
-        ('ssh', self.tunnelhost, '-NL%d:%s:%d' % (localport, self.host, self.port)))
-    return localport
+    localportlist = []
+    for (host,port) in self.hostportlist:
+      localport = self.pick_unused_port()
+      self.tunnel.append(subprocess.Popen(
+          ('ssh', self.tunnelhost, '-NL127.0.0.1:%d:%s:%d' % (localport, host, port))))
+      localportlist.append(('127.0.0.1',localport))
+    return localportlist
 
   def terminate_ssh_tunnel(self):
-    if hasattr(self, 'tunnel') and self.tunnel:
-      self.tunnel.terminate()
+    if hasattr(self, 'tunnel'):
+      for tunnel in self.tunnel:
+        tunnel.terminate()
 
   @abc.abstractmethod
   def start(self):
