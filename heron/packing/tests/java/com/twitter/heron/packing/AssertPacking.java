@@ -90,11 +90,7 @@ public final class AssertPacking {
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
                                         long maxRamforResources) {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      long containerRam = 0;
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        containerRam += instancePlan.getResource().getRam();
-      }
-      Assert.assertTrue(containerRam <= maxRamforResources);
+      Assert.assertTrue(containerPlan.getRequiredResource().getRam() <= maxRamforResources);
     }
   }
 }

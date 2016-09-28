@@ -32,14 +32,32 @@ public class Container {
 
   private Resource capacity;
 
+  private int paddingPercentage;
+
   /**
    * Creates a container with a specific capacity
+   *
    * @param capacity the capacity of the container in terms of cpu, ram and disk
    */
-  public Container(Resource capacity) {
+  /*public Container(Resource capacity) {
     this.capacity = capacity;
     this.instances = new HashSet<PackingPlan.InstancePlan>();
+    this.paddingPercentage = 0;
+  }*/
+
+  /**
+   * Creates a container with a specific capacity which will maintain a specific percentage
+   * of its resources for padding.
+   *
+   * @param capacity the capacity of the container in terms of cpu, ram and disk
+   * @param paddingPercentage the padding percentage
+   */
+  public Container(Resource capacity, int paddingPercentage) {
+    this.capacity = capacity;
+    this.instances = new HashSet<PackingPlan.InstancePlan>();
+    this.paddingPercentage = paddingPercentage;
   }
+
 
   /**
    * Check whether the container can accommodate a new instance with specific resource requirements
@@ -48,9 +66,12 @@ public class Container {
    */
   private boolean hasSpace(Resource resource) {
     Resource usedResources = this.getTotalUsedResources();
-    return usedResources.getRam() + resource.getRam() <= this.capacity.getRam()
-        && usedResources.getCpu() + resource.getCpu() <= this.capacity.getCpu()
-        && usedResources.getDisk() + resource.getDisk() <= this.capacity.getDisk();
+    long newRam = usedResources.getRam() + resource.getRam();
+    double newCpu = usedResources.getCpu() + resource.getCpu();
+    long newDisk = usedResources.getDisk() + resource.getDisk();
+    return newRam + (paddingPercentage * newRam) / 100 <= this.capacity.getRam()
+        && Math.round(newCpu + (paddingPercentage * newCpu) / 100) <= this.capacity.getCpu()
+        && newDisk + (paddingPercentage * newDisk) / 100 <= this.capacity.getDisk();
   }
 
   /**

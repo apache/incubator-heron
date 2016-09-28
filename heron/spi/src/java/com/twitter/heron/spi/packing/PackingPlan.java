@@ -37,11 +37,12 @@ public class PackingPlan {
   }
 
   /**
-   * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
-   * required by containers in the packing plan and updates the containers of the clone with the
-   * max resource information
+   * Computes the maximum of all the resources required by the containers in the packing plan
+   *
+   * @return maximum Resources.
    */
-  public PackingPlan cloneWithHomogeneousScheduledResource() {
+
+  public Resource getMaxContainerResources() {
     double maxCpu = 0;
     long maxRam = 0;
     long maxDisk = 0;
@@ -52,6 +53,16 @@ public class PackingPlan {
     }
 
     Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
+    return maxResource;
+  }
+
+  /**
+   * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
+   * required by containers in the packing plan and updates the containers of the clone with the
+   * max resource information
+   */
+  public PackingPlan cloneWithHomogeneousScheduledResource() {
+    Resource maxResource = getMaxContainerResources();
     Set<ContainerPlan> updatedContainers = new HashSet<>();
     for (ContainerPlan container : getContainers()) {
       updatedContainers.add(container.cloneWithScheduledResource(maxResource));

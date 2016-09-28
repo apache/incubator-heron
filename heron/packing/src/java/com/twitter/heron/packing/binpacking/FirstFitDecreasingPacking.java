@@ -44,6 +44,7 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
+
 /**
  * FirstFitDecreasing packing algorithm
  * <p>
@@ -55,11 +56,8 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * 1. Supports heterogeneous containers. The number of containers used is determined
  * by the algorithm and not by the config file.
  * The user provides a hint for the maximum container size and a padding percentage.
- * The padding percentage whose values range from [0, 100], determines the additional per container
+ * The padding percentage whose values range from [0, 100], determines the per container
  * resources allocated for system-related processes (e.g., the stream manager).
- * The algorithm might produce containers whose size is slightly higher than
- * the maximum container size provided by the user depending on the per-container instance allocation
- * and the padding configuration.
  * <p>
  * 2. The user provides a hint for the maximum CPU, RAM and Disk that can be used by each container through
  * the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
@@ -68,8 +66,8 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * If the parameters are not specified then a default value is used for the maximum container
  * size.
  * <p>
- * 3. The user provides a percentage of each container size that will be added to the resources
- * allocated by the container through the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
+ * 3. The user provides a percentage of each container size that will be used for padding
+ * through the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * If the parameter is not specified then a default value of 10 is used (10% of the container size)
  * <p>
  * 4. The ram required for one instance is calculated as:
@@ -89,14 +87,8 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * 9. The disk required for a container is calculated as:
  * (disk for instances in container) + ((paddingPercentage * disk for instances in container)
  * <p>
- * 10. The size of resources required by the whole topology is equal to
- * ((# containers used by FFD)* size of each container
- * + size of a container that includes one instance with default resource requirements).
- * We add some resources to consider the Heron internal container (i.e. the one containing Scheduler
- * and TMaster).
- * <p>
- * 11. The pack() return null if PackingPlan fails to pass the safe check, for instance,
- * the size of ram for an instance is less than the minimal required value or .
+ * 10. The pack() return null if PackingPlan fails to pass the safe check, for instance,
+ * the size of ram for an instance is less than the minimal required value.
  */
 public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
@@ -129,16 +121,25 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         Context.instanceRam(config),
         Context.instanceDisk(config));
 
-    this.maxContainerResources = new Resource(
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_CPU_HINT,
-            this.defaultInstanceResources.getCpu() * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER),
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-            this.defaultInstanceResources.getRam() * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER),
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_DISK_HINT,
-            this.defaultInstanceResources.getDisk() * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER));
-
     this.paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
         TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
+
+    double defaultCpu = this.defaultInstanceResources.getCpu()
+        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+    long defaultRam = this.defaultInstanceResources.getRam()
+        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+    long defaultDisk = this.defaultInstanceResources.getDisk()
+        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+
+    this.maxContainerResources = new Resource(
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_CPU_HINT,
+            (double) Math.round(defaultCpu + (paddingPercentage * defaultCpu) / 100)),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_RAM_HINT,
+            defaultRam + (paddingPercentage * defaultRam) / 100),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_DISK_HINT,
+            defaultDisk + (paddingPercentage * defaultDisk) / 100));
+
+
   }
 
   /**
@@ -155,6 +156,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         ffdAllocation, ramMap, this.defaultInstanceResources, this.paddingPercentage);
+
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
@@ -196,7 +198,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       if (ramMap.containsKey(component)) {
         if (!PackingUtils.isValidInstance(
             this.defaultInstanceResources.cloneWithRam(ramMap.get(component)),
-            MIN_RAM_PER_INSTANCE, maxContainerResources)) {
+            MIN_RAM_PER_INSTANCE, maxContainerResources, this.paddingPercentage)) {
           throw new RuntimeException("The topology configuration does not have "
               + "valid resource requirements. Please make sure that the instance resource "
               + "requirements do not exceed the maximum per-container resources.");
@@ -205,7 +207,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         }
       } else {
         if (!PackingUtils.isValidInstance(this.defaultInstanceResources,
-            MIN_RAM_PER_INSTANCE, maxContainerResources)) {
+            MIN_RAM_PER_INSTANCE, maxContainerResources, this.paddingPercentage)) {
           throw new RuntimeException("The topology configuration does not have "
               + "valid resource requirements. Please make sure that the instance resource "
               + "requirements do not exceed the maximum per-container resources.");
@@ -317,8 +319,10 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     //sort containers based on containerIds;
     PackingPlan.ContainerPlan[] currentContainers =
         PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
+
+    Resource capacity = currentPackingPlan.getMaxContainerResources();
     for (int i = 0; i < currentContainers.length; i++) {
-      int containerId = allocateNewContainer(containers);
+      int containerId = allocateNewContainer(containers, capacity);
       for (PackingPlan.InstancePlan instancePlan
           : currentContainers[i].getInstances()) {
         containers.get(containerId - 1).add(instancePlan);
@@ -455,7 +459,17 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    * @return the number of containers
    */
   private int allocateNewContainer(ArrayList<Container> containers) {
-    containers.add(new Container(maxContainerResources));
+    containers.add(new Container(maxContainerResources, this.paddingPercentage));
+    return containers.size();
+  }
+
+  /**
+   * Allocate a new container of a given capacity
+   *
+   * @return the number of containers
+   */
+  private int allocateNewContainer(ArrayList<Container> containers, Resource capacity) {
+    containers.add(new Container(capacity, this.paddingPercentage));
     return containers.size();
   }
 }
