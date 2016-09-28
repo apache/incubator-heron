@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,11 +26,12 @@ import org.apache.storm.task.IErrorReporter;
 import org.apache.storm.task.TopologyContext;
 
 public interface IMetricsConsumer {
-  public static class TaskInfo {
+  class TaskInfo {
     public TaskInfo() {
     }
 
-    public TaskInfo(String srcWorkerHost, int srcWorkerPort, String srcComponentId, int srcTaskId, long timestamp, int updateIntervalSecs) {
+    public TaskInfo(String srcWorkerHost, int srcWorkerPort, String srcComponentId,
+                    int srcTaskId, long timestamp, int updateIntervalSecs) {
       this.srcWorkerHost = srcWorkerHost;
       this.srcWorkerPort = srcWorkerPort;
       this.srcComponentId = srcComponentId;
@@ -48,7 +49,7 @@ public interface IMetricsConsumer {
   }
 
   // We can't move this to outside without breaking backward compatibility.
-  public static class DataPoint {
+  class DataPoint {
     public DataPoint() {
     }
 
@@ -67,8 +68,12 @@ public interface IMetricsConsumer {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof DataPoint)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof DataPoint)) {
+        return false;
+      }
 
       DataPoint dataPoint = (DataPoint) o;
 
@@ -83,7 +88,9 @@ public interface IMetricsConsumer {
     }
   }
 
-  void prepare(Map stormConf, Object registrationArgument, TopologyContext context, IErrorReporter errorReporter);
+  @SuppressWarnings("rawtypes")
+  void prepare(Map stormConf, Object registrationArgument,
+               TopologyContext context, IErrorReporter errorReporter);
 
   void handleDataPoints(TaskInfo taskInfo, Collection<DataPoint> dataPoints);
 
