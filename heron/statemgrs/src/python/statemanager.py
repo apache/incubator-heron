@@ -71,14 +71,8 @@ class StateManager:
     """ Setter for the tunnelhost to create the tunnel if host is not accessible """
     self.__tunnelhost = newTunnelHost
 
-  @abc.abstractmethod
-  def __init__(self, hostportlist, rootpath, tunnelhost):
-    """
-    @param hostportlist - Hosts and ports where the states are stored
-    @param rootpath - Path where the heron states are stored
-    @param tunnelhost - Host to which to tunnel through if state host is not directly accessible
-    """
-    pass
+  def __init__(self):
+    self.tunnel = []
 
   def is_host_port_reachable(self):
     """
@@ -90,7 +84,8 @@ class StateManager:
         socket.create_connection(hostport, 2)
         return True
       except:
-        LOG.info("StateManager %s Unable to connect to host: %s port %i" % (self.name, hostport[0], hostport[1]))
+        LOG.info("StateManager %s Unable to connect to host: %s port %i"
+                 % (self.name, hostport[0], hostport[1]))
         continue
     return False
 
@@ -117,9 +112,8 @@ class StateManager:
     return localportlist
 
   def terminate_ssh_tunnel(self):
-    if hasattr(self, 'tunnel') and self.tunnel:
-      for tunnel in self.tunnel:
-        tunnel.terminate()
+    for tunnel in self.tunnel:
+      tunnel.terminate()
 
   @abc.abstractmethod
   def start(self):

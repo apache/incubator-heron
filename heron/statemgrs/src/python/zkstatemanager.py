@@ -42,6 +42,7 @@ class ZkStateManager(StateManager):
   """
 
   def __init__(self, name, hostportlist, rootpath, tunnelhost):
+    super(ZkStateManager, self).__init__()
     self.name = name
     self.hostportlist = hostportlist
     self.tunnelhost = tunnelhost
