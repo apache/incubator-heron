@@ -31,21 +31,24 @@ class ZkStateManagerTest(unittest.TestCase):
     def stop(self):
       self.stop_calls = self.stop_calls + 1
 
+    def add_listener(self,listener):
+      pass
+
   def setUp(self):
     # Create a a ZkStateManager that we will test with
     self.statemanager = ZkStateManager('zk', [('localhost', 2181), ('localhost', 2281)], 'heron', 'reachable.host')
     # replace creation of a KazooClient
-    self.mock_kazoo = MockKazooClient()
+    self.mock_kazoo = ZkStateManagerTest.MockKazooClient()
     self.opened_host_ports = []
 
     def kazoo_client(hostport):
-      global self
       self.opened_host_ports.append(hostport)
       return self.mock_kazoo
 
     self.statemanager._kazoo_client = kazoo_client
 
   def test_start_checks_for_connection(self):
+    global did_connection_check
     did_connection_check = False
 
     def connection_check():
@@ -68,11 +71,12 @@ class ZkStateManagerTest(unittest.TestCase):
     def connection_check():
       return False
 
+    global did_open_proxy
     did_open_proxy = False
     def open_proxy():
       global did_open_proxy
       did_open_proxy = True
-      return None
+      return [('proxy', 2181), ('proxy-2', 2281)]
 
     self.statemanager.is_host_port_reachable = connection_check
     self.statemanager.establish_ssh_tunnel = open_proxy
