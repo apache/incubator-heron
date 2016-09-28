@@ -15,6 +15,6 @@ pex_test(
         "pytest==2.6.4",
         "unittest2==0.5.1",
     ],
-    size = "small",
+    size = "medium",
 )
 

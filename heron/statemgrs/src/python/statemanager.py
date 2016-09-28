@@ -109,6 +109,7 @@ class StateManager:
       self.tunnel.append(subprocess.Popen(
           ('ssh', self.tunnelhost, '-NL127.0.0.1:%d:%s:%d' % (localport, host, port))))
       localportlist.append(('127.0.0.1', localport))
+    print (localportlist)
     return localportlist
 
   def terminate_ssh_tunnel(self):
