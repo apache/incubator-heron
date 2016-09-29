@@ -44,6 +44,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.WatchCallback;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import com.twitter.heron.statemgr.zookeeper.ZkUtils;
@@ -66,9 +67,11 @@ public class CuratorStateManager extends FileSystemStateManager {
     this.isSchedulerService = Context.schedulerService(newConfig);
     this.tunnelProcesses = new ArrayList<>();
 
-    boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(newConfig);
-    if (isTunnelWhenNeeded) {
-      Pair<String, List<Process>> tunneledResults = setupZkTunnel();
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.STATE_MANAGER);
+
+    if (tunnelConfig.isTunnelNeeded()) {
+      Pair<String, List<Process>> tunneledResults = setupZkTunnel(tunnelConfig);
 
       String newConnectionString = tunneledResults.first;
       if (newConnectionString.isEmpty()) {
@@ -118,8 +121,8 @@ public class CuratorStateManager extends FileSystemStateManager {
         .build();
   }
 
-  protected Pair<String, List<Process>> setupZkTunnel() {
-    return ZkUtils.setupZkTunnel(config);
+  protected Pair<String, List<Process>> setupZkTunnel(NetworkUtils.TunnelConfig tunnelConfig) {
+    return ZkUtils.setupZkTunnel(config, tunnelConfig);
   }
 
   protected void initTree() {

@@ -35,6 +35,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
@@ -91,18 +92,22 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * Handler to activate a topology
    */
   private boolean activateTopologyHandler(String topologyName) {
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     return TMasterUtils.transitionTopologyState(topologyName,
         TMasterUtils.TMasterCommand.ACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
-        TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
+        TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
   }
 
   /**
    * Handler to deactivate a topology
    */
   private boolean deactivateTopologyHandler(String topologyName) {
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     return TMasterUtils.transitionTopologyState(topologyName,
         TMasterUtils.TMasterCommand.DEACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
-        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED);
+        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
   }
 
   /**
