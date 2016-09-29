@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.yarn;
 
 import org.apache.reef.client.DriverConfiguration;
+import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
 import org.apache.reef.tang.formats.ConfigurationModule;
 import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
 import org.apache.reef.tang.formats.OptionalParameter;
@@ -56,5 +57,6 @@ public class HeronDriverConfiguration extends ConfigurationModuleBuilder {
       .bindNamedParameter(Role.class, ROLE)
       .bindNamedParameter(HttpPort.class, HTTP_PORT)
       .bindNamedParameter(VerboseLogMode.class, VERBOSE)
+      .merge(YarnDriverConfiguration.CONF)
       .build();
 }

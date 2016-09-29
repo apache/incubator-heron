@@ -18,12 +18,12 @@ for heron.
 
 ```bash
 # Build heron-ui
-$ bazel build heron/ui/src/python:heron-ui
+$ bazel build heron/tools/ui/src/python:heron-ui
 
 # The location of heron-ui pex executable is
-# bazel-bin/heron/ui/src/python/heron-ui
+# bazel-bin/heron/tools/ui/src/python/heron-ui
 # To run using default options:
-$ ./bazel-bin/heron/ui/src/python/heron-ui
+$ ./bazel-bin/heron/tools/ui/src/python/heron-ui
 ```
 
 `heron-ui` is a self executable

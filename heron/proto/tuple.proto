@@ -42,3 +42,13 @@ message HeronTupleSet {
   optional HeronDataTupleSet data = 1;
   optional HeronControlTupleSet control = 2;
 }
+
+message HeronDataTupleSet2 {
+  required heron.proto.api.StreamId stream = 1;
+  repeated bytes tuples = 2;
+}
+
+message HeronTupleSet2 {
+  optional HeronDataTupleSet2 data = 1;
+  optional HeronControlTupleSet control = 2;
+}

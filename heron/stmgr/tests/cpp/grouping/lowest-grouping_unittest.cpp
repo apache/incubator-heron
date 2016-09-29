@@ -42,7 +42,7 @@ TEST(LowestGrouping, test_allgrouping) {
   heron::stmgr::LowestGrouping* g = new heron::stmgr::LowestGrouping(task_ids);
   for (sp_int32 i = 0; i < 1000; ++i) {
     heron::proto::system::HeronDataTuple dummy;
-    std::list<sp_int32> dest;
+    std::vector<sp_int32> dest;
     g->GetListToSend(dummy, dest);
     EXPECT_EQ(dest.size(), (sp_uint32)1);
     EXPECT_EQ(dest.front(), 0);

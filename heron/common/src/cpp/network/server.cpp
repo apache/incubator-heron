@@ -28,7 +28,9 @@ Server::Server(EventLoop* eventLoop, const NetworkOptions& _options)
   request_rid_gen_ = new REQID_Generator();
 }
 
-Server::~Server() { delete request_rid_gen_; }
+Server::~Server() {
+  delete request_rid_gen_;
+}
 
 sp_int32 Server::Start() { return Start_Base(); }
 
@@ -43,6 +45,25 @@ void Server::SendResponse(REQID _id, Connection* _connection,
   CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(_id), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(_response, byte_size), 0);
+  InternalSendResponse(_connection, opkt);
+  return;
+}
+
+void Server::SendMessage(Connection* _connection,
+                         sp_int32 _byte_size,
+                         const sp_string _type_name,
+                         const char* _message) {
+  // Generate a zero reqid
+  REQID rid = REQID_Generator::generate_zero_reqid();
+
+  sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_type_name) +
+                          REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(_byte_size);
+
+  OutgoingPacket* opkt = new OutgoingPacket(data_size);
+
+  CHECK_EQ(opkt->PackString(_type_name), 0);
+  CHECK_EQ(opkt->PackREQID(rid), 0);
+  CHECK_EQ(opkt->PackProtocolBuffer(_message, _byte_size), 0);
   InternalSendResponse(_connection, opkt);
   return;
 }

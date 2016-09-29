@@ -162,7 +162,7 @@ public final class TMasterUtils {
 
   public static void main(String[] args) throws MalformedURLException {
     String url;
-    String tunnelHost = "nest7.smfc.twitter.com";
+    String tunnelHost;
     if (args.length > 0) {
       url = args[0];
       if (args.length > 1) {

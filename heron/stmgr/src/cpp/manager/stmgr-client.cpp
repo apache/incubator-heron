@@ -165,40 +165,19 @@ void StMgrClient::SendHelloRequest() {
   return;
 }
 
-void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage* _msg) {
+void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
   if (IsConnected()) {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg->ByteSize());
-    if (_msg->set().has_data()) {
-      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS)
-          ->incr_by(_msg->set().data().tuples_size());
-    } else if (_msg->set().has_control()) {
-      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS)
-          ->incr_by(_msg->set().control().acks_size());
-      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS)
-          ->incr_by(_msg->set().control().fails_size());
-    }
     SendMessage(_msg);
   } else {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS_LOST)->incr_by(_msg->ByteSize());
-    if (_msg->set().has_data()) {
-      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg->set().data().tuples_size());
-    } else if (_msg->set().has_control()) {
-      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg->set().control().acks_size());
-      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg->set().control().fails_size());
-    }
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << other_stmgr_id_ << " because it is not connected";
     }
-    delete _msg;
   }
 }
 
-void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
-  delete _message;
+void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
+  release(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 
@@ -220,24 +199,28 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  auto message = new proto::stmgr::StartBackPressureMessage();
+  proto::stmgr::StartBackPressureMessage* message = acquire(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
-  SendMessage(message);
+  SendMessage(*message);
+
+  release(message);
 }
 
 void StMgrClient::SendStopBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  auto message = new proto::stmgr::StopBackPressureMessage();
+  proto::stmgr::StopBackPressureMessage* message = acquire(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
-  SendMessage(message);
+  SendMessage(*message);
+
+  release(message);
 }
 
 }  // namespace stmgr

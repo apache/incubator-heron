@@ -18,6 +18,7 @@
 #define SRC_CPP_SVCS_STMGR_SRC_UTIL_TUPLE_CACHE_H_
 
 #include <list>
+#include <vector>
 #include <map>
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -34,16 +35,20 @@ class TupleCache {
   virtual ~TupleCache();
 
   template <class T>
-  void RegisterDrainer(void (T::*method)(sp_int32, proto::system::HeronTupleSet*), T* _t) {
+  void RegisterDrainer(void (T::*method)(sp_int32, proto::system::HeronTupleSet2*), T* _t) {
     drainer_ = std::bind(method, _t, std::placeholders::_1, std::placeholders::_2);
   }
 
   // returns tuple key
   sp_int64 add_data_tuple(sp_int32 _task_id, const proto::api::StreamId& _streamid,
-                          const proto::system::HeronDataTuple& _tuple);
+                          proto::system::HeronDataTuple* _tuple);
   void add_ack_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
   void add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
   void add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
+
+  void release(sp_int32 _task_id, proto::system::HeronTupleSet2* set) {
+    get(_task_id)->release(set);
+  }
 
  private:
   void drain(EventLoop::Status);
@@ -58,18 +63,40 @@ class TupleCache {
     ~TupleList();
 
     sp_int64 add_data_tuple(const proto::api::StreamId& _streamid,
-                            const proto::system::HeronDataTuple& _tuple, sp_uint64* total_size_,
+                            proto::system::HeronDataTuple* _tuple, sp_uint64* total_size_,
                             sp_uint64* _tuples_cache_max_tuple_size);
     void add_ack_tuple(const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
     void add_fail_tuple(const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
     void add_emit_tuple(const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
 
     void drain(sp_int32 _task_id,
-               std::function<void(sp_int32, proto::system::HeronTupleSet*)> _drainer);
+               std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
+
+    std::vector<proto::system::HeronTupleSet2*> heron_tuple_set_pool_;
+
+    proto::system::HeronTupleSet2* acquire() {
+      if (heron_tuple_set_pool_.empty()) {
+        return new proto::system::HeronTupleSet2();
+      }
+
+      proto::system::HeronTupleSet2* set = heron_tuple_set_pool_.back();
+      heron_tuple_set_pool_.pop_back();
+      return set;
+    }
+
+    proto::system::HeronTupleSet2* acquire_clean_set() {
+     proto::system::HeronTupleSet2* set = acquire();
+     set->Clear();
+     return set;
+    }
+
+    void release(proto::system::HeronTupleSet2* set) {
+      heron_tuple_set_pool_.push_back(set);
+    }
 
    private:
-    std::list<proto::system::HeronTupleSet*> tuples_;
-    proto::system::HeronTupleSet* current_;
+    std::list<proto::system::HeronTupleSet2*> tuples_;
+    proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;
     sp_int32 last_drained_count_;
   };
@@ -79,7 +106,7 @@ class TupleCache {
   // map from task_id to the TupleList
   std::map<sp_int32, TupleList*> cache_;
   EventLoop* eventLoop_;
-  std::function<void(sp_int32, proto::system::HeronTupleSet*)> drainer_;
+  std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer_;
   sp_uint64 total_size_;
   sp_uint32 drain_threshold_bytes_;
 

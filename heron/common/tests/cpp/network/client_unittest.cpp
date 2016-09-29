@@ -38,10 +38,10 @@ TestClient::TestClient(EventLoopImpl* eventLoop, const NetworkOptions& _options,
 TestClient::~TestClient() {}
 
 void TestClient::CreateAndSendMessage() {
-  TestMessage* message = new TestMessage();
+  TestMessage message;
 
   for (sp_int32 i = 0; i < 100; ++i) {
-    message->add_message("some message");
+    message.add_message("some message");
   }
 
   SendMessage(message);
