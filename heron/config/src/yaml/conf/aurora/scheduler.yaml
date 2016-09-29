@@ -9,3 +9,24 @@ heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd
 
 # Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
+
+####################################################################
+# Following are config for tunneling
+####################################################################
+# Whether we should attempt to tunnel if there is no direct access to a remote host (e.g. TMaster)
+heron.scheduler.is.tunnel.needed:                          False
+
+# The connection timeout in ms when testing if we can connect to remote host
+heron.scheduler.tunnel.connection.timeout.ms:              1000
+
+# The number of retries when testing direct access to remote host
+heron.scheduler.tunnel.connection.retry.count:             2
+
+# The interval in ms between two retries when testing direct access to remote host
+heron.scheduler.tunnel.retry.interval.ms:                  1000
+
+# The number of retries when verifying connectivity via tunnel
+heron.scheduler.tunnel.verify.count:                       10
+
+# SSH tunnel host
+heron.scheduler.tunnel.host:                               "my.tunnel.host"

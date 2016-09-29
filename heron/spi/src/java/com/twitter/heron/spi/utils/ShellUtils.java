@@ -134,28 +134,28 @@ public final class ShellUtils {
   }
 
   public static Process runASyncProcess(
-      boolean verbose, String command, File workingDirectory) {
-    return runASyncProcess(verbose, splitTokens(command), workingDirectory);
-  }
-
-  public static Process runASyncProcess(
-      boolean verbose, String[] command, File workingDirectory, String logFileUuid) {
-    return runASyncProcess(command, workingDirectory, new HashMap<String, String>(), logFileUuid);
+      String[] command, File workingDirectory, String logFileUuid) {
+    return runASyncProcess(
+        command, workingDirectory, new HashMap<String, String>(), logFileUuid, true);
   }
 
   public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory) {
-    return runASyncProcess(verbose, command, workingDirectory, new HashMap<String, String>());
+    return runASyncProcess(command, workingDirectory, new HashMap<String, String>(), null, true);
   }
 
   public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory, Map<String, String> envs) {
-    return runASyncProcess(command, workingDirectory, envs, null);
+    return runASyncProcess(command, workingDirectory, envs, null, true);
+  }
+
+  public static Process runASyncProcess(String command) {
+    return runASyncProcess(splitTokens(command), new File("."),
+        new HashMap<String, String>(), null, false);
   }
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
-      Map<String, String> envs, String logFileUuid) {
-    // Log the command for debugging
+      Map<String, String> envs, String logFileUuid, boolean logStderr) {
     LOG.log(Level.FINE, "$> {0}", Arrays.toString(command));
 
     // the log file can help people to find out what happened between pb.start()
@@ -165,9 +165,6 @@ public final class ShellUtils {
     if (uuid == null) {
       uuid = UUID.randomUUID().toString().substring(0, 8) + "-started";
     }
-    String logFilePath = String.format("%s/%s-%s.stderr",
-        workingDirectory, commandFileName, uuid);
-    File logFile = new File(logFilePath);
 
     // For AsyncProcess, we will never inherit IO, since parent process will not
     // be guaranteed alive when children processing trying to flush to
@@ -175,7 +172,11 @@ public final class ShellUtils {
     ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory, envs);
     pb.redirectErrorStream();
 
-    pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+    if (logStderr) {
+      String logFilePath = String.format("%s/%s-%s.stderr",
+          workingDirectory, commandFileName, uuid);
+      pb.redirectOutput(ProcessBuilder.Redirect.appendTo(new File(logFilePath)));
+    }
 
     Process process = null;
     try {
@@ -218,19 +219,20 @@ public final class ShellUtils {
     return pb;
   }
 
-  public static Process establishSSHTunnelProcess(
-      String tunnelHost, int tunnelPort, String destHost, int destPort, boolean verbose) {
+  static Process establishSSHTunnelProcess(
+      String tunnelHost, int tunnelPort, String destHost, int destPort) {
     if (destHost == null
         || destHost.isEmpty()
         || "localhost".equals(destHost)
         || "127.0.0.1".equals(destHost)) {
       throw new RuntimeException("Trying to open tunnel to localhost.");
     }
-    return ShellUtils.runASyncProcess(verbose,
-        new String[]{
-            "ssh", String.format("-NL%d:%s:%d", tunnelPort, destHost, destPort), tunnelHost},
-        new File(".")
-    );
+    return ShellUtils.runASyncProcess(
+        String.format("ssh -NL%d:%s:%d %s", tunnelPort, destHost, destPort, tunnelHost));
+  }
+
+  static Process establishSocksProxyProcess(String proxyHost, int proxyPort) {
+    return ShellUtils.runASyncProcess(String.format("ssh -ND %d %s", proxyPort, proxyHost));
   }
 
   /**

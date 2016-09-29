@@ -45,6 +45,7 @@ import org.mockito.stubbing.Answer;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 
 /**
@@ -95,7 +96,7 @@ public class CuratorStateManagerTest {
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
     Mockito.doReturn(new Pair<String, List<Process>>(TUNNEL_STRING, new ArrayList<Process>()))
-        .when(spyStateManager).setupZkTunnel();
+        .when(spyStateManager).setupZkTunnel(Mockito.any(NetworkUtils.TunnelConfig.class));
     Mockito.doReturn(true)
         .when(mockClient).blockUntilConnected(Mockito.anyInt(), Mockito.any(TimeUnit.class));
 
@@ -131,7 +132,7 @@ public class CuratorStateManagerTest {
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
     Mockito.doReturn(new Pair<>(TUNNEL_STRING, tunnelProcesses))
-        .when(spyStateManager).setupZkTunnel();
+        .when(spyStateManager).setupZkTunnel(Mockito.any(NetworkUtils.TunnelConfig.class));
     Mockito.doReturn(true)
         .when(mockClient).blockUntilConnected(Mockito.anyInt(), Mockito.any(TimeUnit.class));
 

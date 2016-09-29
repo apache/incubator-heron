@@ -140,6 +140,7 @@ java_library(
         "**/spi/utils/NetworkUtils.java",
     ]),
     deps = [
+        ":common-spi-java",
         ":shell-utils-java",
         "//heron/common/src/java:basics-java",
     ],

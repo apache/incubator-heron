@@ -10,3 +10,23 @@ heron.statemgr.root.path:                       /vagrant/.herondata/repository/s
 # create the sub directories, if needed
 heron.statemgr.localfs.is.initialize.file.tree: True
 
+####################################################################
+# Following are config for tunneling
+####################################################################
+# Whether we should attempt to tunnel if there is no direct access to a remote host (e.g. Zookeeper)
+heron.statemgr.is.tunnel.needed:                          False
+
+# The connection timeout in ms when testing if we can connect to remote host
+heron.statemgr.tunnel.connection.timeout.ms:              1000
+
+# The number of retries when testing direct access to remote host
+heron.statemgr.tunnel.connection.retry.count:             2
+
+# The interval in ms between two retries when testing direct access to remote host
+heron.statemgr.tunnel.retry.interval.ms:                  1000
+
+# The number of retries when verifying connectivity via tunnel
+heron.statemgr.tunnel.verify.count:                       10
+
+# SSH tunnel host
+heron.statemgr.tunnel.host:                               "my.tunnel.host"
