@@ -87,14 +87,17 @@ public final class AssertPacking {
     Assert.assertEquals(numInstances, instancesFound);
   }
 
+  /**
+   * Verifies that the RAM allocated for every container in a packing plan is less than a given
+   * maximum value.
+   */
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
                                         long maxRamforResources) {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      long containerRam = 0;
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        containerRam += instancePlan.getResource().getRam();
-      }
-      Assert.assertTrue(containerRam <= maxRamforResources);
+      Assert.assertTrue(String.format("Container with id: %d requires more RAM (%d) than"
+              + " the maximum RAM allowed (%d)", containerPlan.getId(),
+          containerPlan.getRequiredResource().getRam(), maxRamforResources),
+          containerPlan.getRequiredResource().getRam() <= maxRamforResources);
     }
   }
 }
