@@ -19,10 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -37,6 +39,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -51,12 +54,15 @@ import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS;
 public class UpdateTopologyManager implements Closeable {
   private static final Logger LOG = Logger.getLogger(UpdateTopologyManager.class.getName());
 
+  private Config config;
   private Config runtime;
   private Optional<IScalable> scalableScheduler;
   private PackingPlanProtoDeserializer deserializer;
   private ScheduledThreadPoolExecutor reactivateExecutorService;
 
-  public UpdateTopologyManager(Config runtime, Optional<IScalable> scalableScheduler) {
+  public UpdateTopologyManager(Config config, Config runtime,
+                               Optional<IScalable> scalableScheduler) {
+    this.config = config;
     this.runtime = runtime;
     this.scalableScheduler = scalableScheduler;
     this.deserializer = new PackingPlanProtoDeserializer();
@@ -66,7 +72,7 @@ public class UpdateTopologyManager implements Closeable {
 
   @Override
   public void close() {
-    this.reactivateExecutorService.shutdownNow();
+    this.reactivateExecutorService.shutdown();
   }
 
   /**
@@ -99,13 +105,17 @@ public class UpdateTopologyManager implements Closeable {
         message);
 
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+    TopologyAPI.Topology topology = stateManager.getTopology(topologyName);
+    boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
 
     // fetch the topology, which will need to be updated
     TopologyAPI.Topology updatedTopology =
         getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
 
     // deactivate and sleep
-    deactivateTopology(stateManager, updatedTopology);
+    if (initiallyRunning) {
+      deactivateTopology(stateManager, updatedTopology);
+    }
 
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
@@ -125,7 +135,9 @@ public class UpdateTopologyManager implements Closeable {
     logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
 
     // reactivate topology
-    reactivateTopology(stateManager, updatedTopology, removableContainerCount);
+    if (initiallyRunning) {
+      reactivateTopology(stateManager, updatedTopology, removableContainerCount);
+    }
 
     if (removableContainerCount > 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().removeContainers(containerDelta.getContainersToRemove());
@@ -141,10 +153,13 @@ public class UpdateTopologyManager implements Closeable {
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
         topologyConfig, TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 0L);
 
-    logInfo("Deactivating topology %s before handling update request", topology.getName());
+    logInfo("Deactivating topology %s before handling update request: %d",
+        topology.getName(), deactivateSleepSeconds);
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     assertTrue(TMasterUtils.transitionTopologyState(
             topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
-            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED),
+            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig),
         "Failed to deactivate topology %s. Aborting update request", topology.getName());
 
     if (deactivateSleepSeconds > 0) {
@@ -159,7 +174,8 @@ public class UpdateTopologyManager implements Closeable {
   @VisibleForTesting
   void reactivateTopology(SchedulerStateManagerAdaptor stateManager,
                           TopologyAPI.Topology topology,
-                          int removableContainerCount) {
+                          int removableContainerCount)
+      throws ExecutionException, InterruptedException {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long waitSeconds = TopologyUtils.getConfigWithDefault(
@@ -173,6 +189,13 @@ public class UpdateTopologyManager implements Closeable {
     Future<?> future = this.reactivateExecutorService
         .scheduleWithFixedDelay(enabler, 0, delaySeconds, TimeUnit.SECONDS);
     enabler.setFutureRunnable(future);
+    try {
+      future.get(waitSeconds, TimeUnit.SECONDS);
+    } catch (CancellationException e) {
+      LOG.fine("Task to re-enable was cancelled.");
+    } catch (TimeoutException e) {
+      throw new ExecutionException("Timeout waiting for topology to be enabled.", e);
+    }
   }
 
   private final class Enabler implements Runnable {
@@ -211,12 +234,15 @@ public class UpdateTopologyManager implements Closeable {
     @Override
     public synchronized void run() {
       PhysicalPlans.PhysicalPlan physicalPlan = stateManager.getPhysicalPlan(topologyName);
+
       if (physicalPlan != null) {
         logInfo("Received packing plan for topology %s. "
             + "Reactivating topology after scaling event", topologyName);
+        NetworkUtils.TunnelConfig tunnelConfig =
+            NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
         boolean reactivated = TMasterUtils.transitionTopologyState(
             topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
-            TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
+            TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
 
         cancel();
 

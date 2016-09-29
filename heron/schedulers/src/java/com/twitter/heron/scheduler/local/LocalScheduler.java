@@ -58,7 +58,8 @@ public class LocalScheduler implements IScheduler, IScalable {
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
-    this.updateTopologyManager = new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
+    this.updateTopologyManager =
+        new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
   }
 
   @Override
@@ -79,7 +80,7 @@ public class LocalScheduler implements IScheduler, IScalable {
    */
   @VisibleForTesting
   protected Process startExecutorProcess(int container) {
-    return ShellUtils.runASyncProcess(true,
+    return ShellUtils.runASyncProcess(
         getExecutorCommand(container),
         new File(LocalContext.workingDirectory(config)),
         Integer.toString(container));

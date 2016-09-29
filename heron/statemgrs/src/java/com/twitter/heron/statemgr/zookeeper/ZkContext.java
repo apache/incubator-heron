@@ -26,13 +26,6 @@ public final class ZkContext extends Context {
   public static final String RETRY_INTERVAL_MS = "heron.statemgr.zookeeper.retry.interval.ms";
 
   public static final String IS_TUNNEL_NEEDED = "heron.statemgr.is.tunnel.needed";
-  public static final String TUNNEL_CONNECTION_TIMEOUT_MS =
-      "heron.statemgr.tunnel.connection.timeout.ms";
-  public static final String TUNNEL_CONNECTION_RETRY_COUNT =
-      "heron.statemgr.tunnel.connection.retry.count";
-  public static final String TUNNEL_VERIFY_COUNT = "heron.statemgr.tunnel.verify.count";
-  public static final String TUNNEL_RETRY_INTERVAL_MS = "heron.statemgr.tunnel.retry.interval.ms";
-  public static final String TUNNEL_HOST = "heron.statemgr.tunnel.host";
 
   private ZkContext() {
   }
@@ -55,33 +48,5 @@ public final class ZkContext extends Context {
 
   public static int retryIntervalMs(Config config) {
     return config.getIntegerValue(RETRY_INTERVAL_MS, 10000);
-  }
-
-  ///////////////////////////////////////////////////////
-  // Following are config for tunneling
-  ///////////////////////////////////////////////////////
-
-  public static boolean isTunnelNeeded(Config config) {
-    return config.getBooleanValue(IS_TUNNEL_NEEDED, false);
-  }
-
-  public static int tunnelConnectionTimeoutMs(Config config) {
-    return config.getIntegerValue(TUNNEL_CONNECTION_TIMEOUT_MS, 1000);
-  }
-
-  public static int tunnelConnectionRetryCount(Config config) {
-    return config.getIntegerValue(TUNNEL_CONNECTION_RETRY_COUNT, 2);
-  }
-
-  public static int tunnelVerifyCount(Config config) {
-    return config.getIntegerValue(TUNNEL_VERIFY_COUNT, 10);
-  }
-
-  public static int tunnelRetryIntervalMs(Config config) {
-    return config.getIntegerValue(TUNNEL_RETRY_INTERVAL_MS, 1000);
-  }
-
-  public static String tunnelHost(Config config) {
-    return config.getStringValue(TUNNEL_HOST, "no.tunnel.host.specified");
   }
 }

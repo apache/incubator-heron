@@ -51,6 +51,8 @@ public final class ExclamationTopology {
     conf.setComponentRam("exclaim1", 512L * 1024 * 1024);
     conf.setContainerDiskRequested(1024L * 1024 * 1024);
     conf.setContainerCpuRequested(1);
+    conf.setUpdateDeactivateWaitDuration(3);
+    //conf.setUpdateReactivateWaitDuration(30);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(1);
