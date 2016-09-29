@@ -162,7 +162,7 @@ public final class TMasterUtils {
 
   public static void main(String[] args) throws MalformedURLException {
     String url;
-    String tunnelHost;
+    String tunnelHost = null;
     if (args.length > 0) {
       url = args[0];
       if (args.length > 1) {
