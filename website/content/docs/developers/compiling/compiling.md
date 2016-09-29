@@ -87,6 +87,13 @@ packages:
 $ bazel build --config=darwin heron/...
 ```
 
+Production release packages include additional performance optimizations
+not enabled by default. Enabling these optimizations increases build time.
+To enable production optimizations, include the `opt` flag:
+```bash
+$ bazel build -c opt --config=PLATFORM heron/...
+```
+
 ### Building All Components
 
 The Bazel build process can produce either executable install scripts or
@@ -100,7 +107,7 @@ $ bazel build --config=PLATFORM scripts/packages:tarpkgs
 
 Resulting artifacts can be found in subdirectories below the `bazel-bin`
 directory. The `heron-tracker` executable, for example, can be found at
-`bazel-bin/heron/tracker/src/python/heron-tracker`.
+`bazel-bin/heron/tools/tracker/src/python/heron-tracker`.
 
 ### Building Specific Components
 
@@ -110,7 +117,7 @@ Tracker](../../../operators/heron-tracker)) by passing a target to the `bazel
 build` command. For example, the following command would build the [Heron Tracker](../../../operators/heron-tracker):
 
 ```bash
-$ bazel build --config=darwin heron/tracker/src/python:heron-tracker
+$ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
 ```
 
 ## Testing Heron
