@@ -159,30 +159,4 @@ public final class TMasterUtils {
         "Topology command {0} completed successfully.", topologyStateControlCommand);
     return true;
   }
-
-  public static void main(String[] args) throws MalformedURLException {
-    String url;
-    String tunnelHost = null;
-    if (args.length > 0) {
-      url = args[0];
-      if (args.length > 1) {
-        tunnelHost = args[1];
-      }
-    } else {
-      System.out.print(String.format(
-          "Usage: java %s <url> [proxyHost]", TMasterUtils.class.getCanonicalName()));
-      throw new RuntimeException("Invalid arguments");
-    }
-
-    boolean shouldTunnel = tunnelHost != null;
-    int timeoutMs = 10000;
-    int retry = 4;
-    int retryIntervalMs = 2000;
-    int verifyCount = 5;
-
-    NetworkUtils.TunnelConfig tunnelConfig = new NetworkUtils.TunnelConfig(
-        shouldTunnel, tunnelHost, timeoutMs, retry, retryIntervalMs, verifyCount);
-
-    sendGetRequest(new URL(url), "", tunnelConfig);
-  }
 }
