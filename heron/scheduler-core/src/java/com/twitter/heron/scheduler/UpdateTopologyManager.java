@@ -72,7 +72,7 @@ public class UpdateTopologyManager implements Closeable {
 
   @Override
   public void close() {
-    this.reactivateExecutorService.shutdown();
+    this.reactivateExecutorService.shutdownNow();
   }
 
   /**
