@@ -164,6 +164,12 @@ public final class SerializationFactory {
       // do nothing
     }
 
+    try {
+      return serializerClass.newInstance();
+    } catch (InstantiationException | IllegalAccessException ex) {
+      // do nothing
+    }
+
     throw new IllegalArgumentException(
         String.format("Unable to create serializer \"%s\" for class: %s",
             serializerClass.getName(), superClass.getName()));
