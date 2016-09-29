@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.AssertPacking;
+import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -174,17 +175,14 @@ public class ResourceCompliantRRPackingTest {
 
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
-      Assert.assertEquals(Math.round(totalInstances * instanceCpuDefault
-              + (DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceCpuDefault),
-          (long) containerPlan.getRequiredResource().getCpu());
+      Assert.assertEquals(Math.round(PackingUtils.increaseBy(totalInstances * instanceCpuDefault,
+           DEFAULT_CONTAINER_PADDING)), (long) containerPlan.getRequiredResource().getCpu());
 
-      Assert.assertEquals(totalInstances * instanceRamDefault
-              + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceRamDefault),
-          containerPlan.getRequiredResource().getRam());
+      Assert.assertEquals(PackingUtils.increaseBy(totalInstances * instanceRamDefault,
+          DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getRam());
 
-      Assert.assertEquals(totalInstances * instanceDiskDefault
-              + (long) ((DEFAULT_CONTAINER_PADDING / 100.0) * totalInstances * instanceDiskDefault),
-          containerPlan.getRequiredResource().getDisk());
+      Assert.assertEquals(PackingUtils.increaseBy(totalInstances * instanceDiskDefault,
+          DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
       // So the size of set should be 1
@@ -192,7 +190,6 @@ public class ResourceCompliantRRPackingTest {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         resources.add(instancePlan.getResource());
       }
-
       Assert.assertEquals(1, resources.size());
       Assert.assertEquals(instanceRamDefault, resources.iterator().next().getRam());
     }
@@ -328,7 +325,7 @@ public class ResourceCompliantRRPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlan =
         getResourceCompliantRRPackingPlan(topology);
-    Assert.assertEquals(packingPlan.getContainers().size(), 4);
+    Assert.assertEquals(packingPlan.getContainers().size(), 7);
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
 
@@ -347,7 +344,7 @@ public class ResourceCompliantRRPackingTest {
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
-    long containerRam = 2L * Constants.GB;
+    long containerRam = 3L * Constants.GB;
 
     // Explicit set component ram map
     long boltRam = 1L * Constants.GB;
