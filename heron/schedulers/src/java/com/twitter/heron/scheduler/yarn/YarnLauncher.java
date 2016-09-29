@@ -61,6 +61,7 @@ public class YarnLauncher implements ILauncher {
   private String role;
   private String env;
   private String queue;
+  private int driverMemory;
   private ArrayList<String> libJars = new ArrayList<>();
 
   @Override
@@ -72,6 +73,7 @@ public class YarnLauncher implements ILauncher {
     role = Context.role(config);
     env = Context.environ(config);
     queue = YarnContext.heronYarnQueue(config);
+    driverMemory = YarnContext.heronDriverMemoryMb(config);
 
     try {
       Class<?> packingClass = Class.forName(Context.packingClass(config));
@@ -153,6 +155,7 @@ public class YarnLauncher implements ILauncher {
         .set(HeronDriverConfiguration.HTTP_PORT, 0)
         .set(HeronDriverConfiguration.VERBOSE, false)
         .set(YarnDriverConfiguration.QUEUE, queue)
+        .set(DriverConfiguration.DRIVER_MEMORY, driverMemory)
         .build();
   }
 
