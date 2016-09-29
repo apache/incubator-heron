@@ -53,8 +53,7 @@ public final class PackingUtils {
       return false;
     }
 
-    long instanceRam = instanceResources.getRam()
-        + (paddingPercentage * instanceResources.getRam()) / 100;
+    long instanceRam = PackingUtils.increaseBy(instanceResources.getRam(), paddingPercentage);
     if (instanceRam > maxContainerResources.getRam()) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB ram. The current max container"
@@ -63,8 +62,8 @@ public final class PackingUtils {
       return false;
     }
 
-    double instanceCpu = Math.round(instanceResources.getCpu()
-        + (paddingPercentage * instanceResources.getCpu()) / 100);
+    double instanceCpu = Math.round(PackingUtils.increaseBy(
+        instanceResources.getCpu(), paddingPercentage));
     if (instanceCpu > maxContainerResources.getCpu()) {
       LOG.severe(String.format(
           "This instance requires containers with at least %s cpu cores. The current max container"
@@ -73,8 +72,7 @@ public final class PackingUtils {
       return false;
     }
 
-    long instanceDisk = instanceResources.getDisk()
-        + (paddingPercentage * instanceResources.getDisk()) / 100;
+    long instanceDisk = PackingUtils.increaseBy(instanceResources.getDisk(), paddingPercentage);
     if (instanceDisk > maxContainerResources.getDisk()) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB disk. The current max container"
