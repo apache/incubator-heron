@@ -18,12 +18,19 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
 public final class YarnContext extends Context {
-  public static final String HERON_SCHEDULER_YARN_QUEUE = "heron.scheduler.yarn.queue";
+  private static final String PREFIX = "heron.scheduler.yarn.";
+
+  public static final String HERON_SCHEDULER_YARN_QUEUE = PREFIX + "queue";
+  public static final String YARN_SCHEDULER_DRIVER_MEMORY_MB = PREFIX + "driver.memory.mb";
 
   private YarnContext() {
   }
 
   public static String heronYarnQueue(Config cfg) {
     return cfg.getStringValue(HERON_SCHEDULER_YARN_QUEUE, "default");
+  }
+
+  public static int heronDriverMemoryMb(Config cfg) {
+    return cfg.getIntegerValue(YARN_SCHEDULER_DRIVER_MEMORY_MB, 1024);
   }
 }
