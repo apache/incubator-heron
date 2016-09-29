@@ -53,35 +53,33 @@ public final class PackingUtils {
       return false;
     }
 
-    if (instanceResources.getRam() + (paddingPercentage * instanceResources.getRam()) / 100
-        > maxContainerResources.getRam()) {
+    long instanceRam = instanceResources.getRam()
+        + (paddingPercentage * instanceResources.getRam()) / 100;
+    if (instanceRam > maxContainerResources.getRam()) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB ram. The current max container"
               + "size is %d MB",
-          instanceResources.getRam() + (paddingPercentage * instanceResources.getRam()) / 100,
-          maxContainerResources.getRam()));
+          instanceRam, maxContainerResources.getRam()));
       return false;
     }
 
-    if (Math.round(instanceResources.getCpu()
-        + (paddingPercentage * instanceResources.getCpu()) / 100)
-        > maxContainerResources.getCpu()) {
+    double instanceCpu = Math.round(instanceResources.getCpu()
+        + (paddingPercentage * instanceResources.getCpu()) / 100);
+    if (instanceCpu > maxContainerResources.getCpu()) {
       LOG.severe(String.format(
           "This instance requires containers with at least %s cpu cores. The current max container"
               + "size is %s cores",
-          Math.round(instanceResources.getCpu()
-              + (paddingPercentage * instanceResources.getCpu()) / 100)
-              > maxContainerResources.getCpu(), maxContainerResources.getCpu()));
+          instanceCpu > maxContainerResources.getCpu(), maxContainerResources.getCpu()));
       return false;
     }
 
-    if (instanceResources.getDisk() + (paddingPercentage * instanceResources.getDisk()) / 100
-        > maxContainerResources.getDisk()) {
+    long instanceDisk = instanceResources.getDisk()
+        + (paddingPercentage * instanceResources.getDisk()) / 100;
+    if (instanceDisk > maxContainerResources.getDisk()) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB disk. The current max container"
               + "size is %d MB",
-          instanceResources.getDisk() + (paddingPercentage * instanceResources.getDisk() / 100),
-          maxContainerResources.getDisk()));
+          instanceDisk, maxContainerResources.getDisk()));
       return false;
     }
     return true;
@@ -167,6 +165,14 @@ public final class PackingUtils {
       currentContainers[position] = container;
     }
     return currentContainers;
+  }
+
+  public static long increaseBy(long value, int paddingPercentage) {
+    return value + (paddingPercentage * value) / 100;
+  }
+
+  public static double increaseBy(double value, int paddingPercentage) {
+    return value + (paddingPercentage * value) / 100;
   }
 
 }

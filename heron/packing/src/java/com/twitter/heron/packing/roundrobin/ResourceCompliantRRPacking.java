@@ -34,6 +34,11 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED;
+import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED;
+import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
+import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
+
 /**
  * ResourceCompliantRoundRobin packing algorithm
  * <p>
@@ -117,16 +122,17 @@ public class ResourceCompliantRRPacking implements IPacking {
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+
+    this.paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
+
     this.maxContainerResources = new Resource(
-        TopologyUtils.getConfigWithDefault(topologyConfig,
-            com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
-            (double) Math.round(defaultCpu + (paddingPercentage * defaultCpu) / 100)),
-        TopologyUtils.getConfigWithDefault(topologyConfig,
-            com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
-            defaultRam + (paddingPercentage * defaultRam) / 100),
-        TopologyUtils.getConfigWithDefault(topologyConfig,
-            com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED,
-            defaultDisk + (paddingPercentage * defaultDisk) / 100));
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
+            (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
+            PackingUtils.increaseBy(defaultRam, paddingPercentage)),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
+            PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
   }
 
   @Override
@@ -146,14 +152,8 @@ public class ResourceCompliantRRPacking implements IPacking {
     // Construct the PackingPlan
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    this.paddingPercentage = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
-        DEFAULT_CONTAINER_PADDING_PERCENTAGE);
-
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         containerInstances, ramMap, this.defaultInstanceResources, paddingPercentage);
-
     return new PackingPlan(topology.getId(), containerPlans);
   }
 

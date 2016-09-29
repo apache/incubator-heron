@@ -90,7 +90,10 @@ public final class AssertPacking {
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
                                         long maxRamforResources) {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      Assert.assertTrue(containerPlan.getRequiredResource().getRam() <= maxRamforResources);
+      Assert.assertTrue("Container with id: " + containerPlan.getId() + " requires more RAM " + "("
+              + containerPlan.getRequiredResource().getRam() + ")" + " than the maximimum allowed"
+              + "(" + maxRamforResources + ")",
+          containerPlan.getRequiredResource().getRam() <= maxRamforResources);
     }
   }
 }

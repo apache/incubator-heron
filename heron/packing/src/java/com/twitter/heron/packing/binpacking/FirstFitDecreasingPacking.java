@@ -133,13 +133,11 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     this.maxContainerResources = new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_CPU_HINT,
-            (double) Math.round(defaultCpu + (paddingPercentage * defaultCpu) / 100)),
+            (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-            defaultRam + (paddingPercentage * defaultRam) / 100),
+            PackingUtils.increaseBy(defaultRam, paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_DISK_HINT,
-            defaultDisk + (paddingPercentage * defaultDisk) / 100));
-
-
+            PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
   }
 
   /**

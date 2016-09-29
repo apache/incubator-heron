@@ -35,17 +35,6 @@ public class Container {
   private int paddingPercentage;
 
   /**
-   * Creates a container with a specific capacity
-   *
-   * @param capacity the capacity of the container in terms of cpu, ram and disk
-   */
-  /*public Container(Resource capacity) {
-    this.capacity = capacity;
-    this.instances = new HashSet<PackingPlan.InstancePlan>();
-    this.paddingPercentage = 0;
-  }*/
-
-  /**
    * Creates a container with a specific capacity which will maintain a specific percentage
    * of its resources for padding.
    *
@@ -69,9 +58,9 @@ public class Container {
     long newRam = usedResources.getRam() + resource.getRam();
     double newCpu = usedResources.getCpu() + resource.getCpu();
     long newDisk = usedResources.getDisk() + resource.getDisk();
-    return newRam + (paddingPercentage * newRam) / 100 <= this.capacity.getRam()
-        && Math.round(newCpu + (paddingPercentage * newCpu) / 100) <= this.capacity.getCpu()
-        && newDisk + (paddingPercentage * newDisk) / 100 <= this.capacity.getDisk();
+    return PackingUtils.increaseBy(newRam, paddingPercentage) <= this.capacity.getRam()
+        && Math.round(PackingUtils.increaseBy(newCpu, paddingPercentage)) <= this.capacity.getCpu()
+        && PackingUtils.increaseBy(newDisk, paddingPercentage) <= this.capacity.getDisk();
   }
 
   /**
