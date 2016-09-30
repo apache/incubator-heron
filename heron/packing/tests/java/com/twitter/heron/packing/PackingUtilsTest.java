@@ -13,13 +13,17 @@
 // limitations under the License.
 package com.twitter.heron.packing;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class PackingUtilsTest {
@@ -71,5 +75,39 @@ public class PackingUtilsTest {
     int padding = 1;
     double expectedResult = 10.1;
     Assert.assertEquals(0, Double.compare(PackingUtils.increaseBy(value, padding), expectedResult));
+  }
+
+  /**
+   * Tests containerAllocation method
+   */
+  @Test
+  public void testAllocateContainer() {
+    ArrayList<Container> containers = new ArrayList<>();
+    int expectedNumContainers = 1;
+    Assert.assertEquals(expectedNumContainers, PackingUtils.allocateNewContainer(containers,
+        new Resource(1, 1, 1), 10));
+  }
+
+
+  /**
+   * Tests the component scale up and down methods.
+   */
+  @Test
+  public void testComponentScaling() {
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("spout", -2);
+    componentChanges.put("bolt1", 2);
+    componentChanges.put("bolt2", -1);
+
+    Map<String, Integer> componentToScaleUp = PackingUtils.getComponentsToScaleUp(componentChanges);
+    Assert.assertEquals(1, componentToScaleUp.size());
+    Assert.assertEquals(2, (int) componentToScaleUp.get("bolt1"));
+
+    Map<String, Integer> componentToScaleDown =
+        PackingUtils.getComponentsToScaleDown(componentChanges);
+    Assert.assertEquals(2, componentToScaleDown.size());
+    Assert.assertEquals(-2, (int) componentToScaleDown.get("spout"));
+    Assert.assertEquals(-1, (int) componentToScaleDown.get("bolt2"));
   }
 }
