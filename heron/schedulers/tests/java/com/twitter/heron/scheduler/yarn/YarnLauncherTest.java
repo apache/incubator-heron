@@ -16,7 +16,9 @@ package com.twitter.heron.scheduler.yarn;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.reef.driver.parameters.DriverMemory;
 import org.apache.reef.runtime.yarn.client.parameters.JobQueue;
@@ -37,32 +39,36 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 
 public class YarnLauncherTest {
+  Map<String, String> testConfigMap = new HashMap<>();
+  Map<String, String> expectedMap = new HashMap<>();
+
   @Test
   public void getHMDriverConfConstructsReefConfig() throws Exception {
     YarnLauncher launcher = new YarnLauncher();
     YarnLauncher spyLauncher = Mockito.spy(launcher);
     Mockito.doNothing().when(spyLauncher).addLibraryToClasspathSet(Mockito.anyString());
 
-    Map<String, String> testConfigMap = new HashMap<>();
-    Map<String, String> expectedMap = new HashMap<>();
-    testConfigMap.put(Keys.topologyName(), "topology");
-    expectedMap.put(TopologyName.class.getSimpleName(), "topology");
-    testConfigMap.put(Keys.topologyBinaryFile(), "binary");
-    expectedMap.put(TopologyJar.class.getSimpleName(), "binary");
-    testConfigMap.put(Keys.topologyPackageFile(), "package");
-    expectedMap.put(TopologyPackageName.class.getSimpleName(), "package");
-    testConfigMap.put(Keys.corePackageUri(), new File(".").getAbsolutePath());
-    expectedMap.put(HeronCorePackageName.class.getSimpleName(), new File(".").getName());
-    testConfigMap.put(Keys.cluster(), "cluster");
-    expectedMap.put(Cluster.class.getSimpleName(), "cluster");
-    testConfigMap.put(Keys.role(), "role");
-    expectedMap.put(Role.class.getSimpleName(), "role");
-    testConfigMap.put(Keys.environ(), "env");
-    expectedMap.put(Environ.class.getSimpleName(), "env");
-    testConfigMap.put(YarnContext.HERON_SCHEDULER_YARN_QUEUE, "queue");
-    expectedMap.put(JobQueue.class.getSimpleName(), "queue");
-    testConfigMap.put(YarnContext.YARN_SCHEDULER_DRIVER_MEMORY_MB, "100");
-    expectedMap.put(DriverMemory.class.getSimpleName(), "100");
+    testConfigMap.clear();
+    expectedMap.clear();
+    setConfigs(Keys.topologyName(), "topology", TopologyName.class);
+    setConfigs(Keys.topologyBinaryFile(), "binary", TopologyJar.class);
+    setConfigs(Keys.topologyPackageFile(), "package", TopologyPackageName.class);
+    setConfigs(Keys.cluster(), "cluster", Cluster.class);
+    setConfigs(Keys.role(), "role", Role.class);
+    setConfigs(Keys.environ(), "env", Environ.class);
+    setConfigs(YarnContext.HERON_SCHEDULER_YARN_QUEUE, "queue", JobQueue.class);
+    setConfigs(YarnContext.YARN_SCHEDULER_DRIVER_MEMORY_MB, "123", DriverMemory.class);
+    setConfigs(Keys.corePackageUri(), new File(".").getName(), HeronCorePackageName.class);
+
+    Set<String> reefSpecificConfigs = new HashSet<>();
+    reefSpecificConfigs.add("JobControlHandler");
+    reefSpecificConfigs.add("NodeDescriptorHandler");
+    reefSpecificConfigs.add("ResourceAllocationHandler");
+    reefSpecificConfigs.add("ResourceStatusHandler");
+    reefSpecificConfigs.add("RuntimeStatusHandler");
+    reefSpecificConfigs.add("VerboseLogMode");
+    reefSpecificConfigs.add("HttpPort");
+    reefSpecificConfigs.add("DriverIdentifier");
 
     Config.Builder builder = new Config.Builder();
     for (String s : testConfigMap.keySet()) {
@@ -80,8 +86,16 @@ public class YarnLauncherTest {
       if (value != null) {
         Assert.assertEquals(value, constructedConfig.getNamedParameter(reefConfigNode));
         expectedMap.remove(reefConfigNode.getName());
+      } else {
+        reefSpecificConfigs.remove(reefConfigNode.getName());
       }
     }
     Assert.assertEquals(0, expectedMap.size());
+    Assert.assertEquals(0, reefSpecificConfigs.size());
+  }
+
+  private void setConfigs(String heronConfigKey, String value, Class<?> reefConfigKey) {
+    testConfigMap.put(heronConfigKey, value);
+    expectedMap.put(reefConfigKey.getSimpleName(), value);
   }
 }
