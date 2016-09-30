@@ -17,7 +17,6 @@ package com.twitter.heron.packing.binpacking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -160,9 +159,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   /**
    * Get a new packing plan given an existing packing plan and component-level changes.
-   * The current implementation assign the new instances into newly created containers and
-   * does not affect the contents of existing containers.
-   *
    * @return new packing plan
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
@@ -245,8 +241,9 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     Map<String, Integer> componentsToScaleUp =
         PackingUtils.getComponentsToScaleUp(componentChanges);
 
-    ArrayList<Container> containers = getContainers(currentPackingPlan);
-    Map<Integer, List<InstanceId>> allocation = getAllocation(currentPackingPlan);
+    ArrayList<Container> containers = PackingUtils.getContainers(currentPackingPlan,
+        this.paddingPercentage);
+    Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(currentPackingPlan);
     int maxInstanceIndex = 0;
     for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
@@ -260,63 +257,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       assignInstancesToContainers(containers, allocation, componentsToScaleUp,
           maxInstanceIndex + 1);
     }
-    removeEmptyContainers(allocation);
-    return allocation;
-  }
-
-  /**
-   * Removes containers from tha allocation that do not contain any instances
-   */
-  private void removeEmptyContainers(Map<Integer, List<InstanceId>> allocation) {
-    Iterator<Integer> containerIds = allocation.keySet().iterator();
-    while (containerIds.hasNext()) {
-      Integer containerId = containerIds.next();
-      if (allocation.get(containerId).isEmpty()) {
-        containerIds.remove();
-      }
-    }
-  }
-
-  /**
-   * Generates the containers that correspond to the current packing plan
-   * along with their associated instances.
-   *
-   * @return List of containers for the current packing plan
-   */
-  private ArrayList<Container> getContainers(PackingPlan currentPackingPlan) {
-    ArrayList<Container> containers = new ArrayList<>();
-
-    //sort containers based on containerIds;
-    PackingPlan.ContainerPlan[] currentContainers =
-        PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
-
-    Resource capacity = currentPackingPlan.getMaxContainerResources();
-    for (int i = 0; i < currentContainers.length; i++) {
-      int containerId = PackingUtils.allocateNewContainer(
-          containers, capacity, this.paddingPercentage);
-      for (PackingPlan.InstancePlan instancePlan
-          : currentContainers[i].getInstances()) {
-        containers.get(containerId - 1).add(instancePlan);
-      }
-    }
-    return containers;
-  }
-
-  /**
-   * Generates an instance allocation for the current packing plan
-   *
-   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
-   */
-  private Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
-    Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
-    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-      ArrayList<InstanceId> instances = new ArrayList<InstanceId>();
-      for (PackingPlan.InstancePlan instance : containerPlan.getInstances()) {
-        instances.add(new InstanceId(instance.getComponentName(), instance.getTaskId(),
-            instance.getComponentIndex()));
-      }
-      allocation.put(containerPlan.getId(), instances);
-    }
+    PackingUtils.removeEmptyContainers(allocation);
     return allocation;
   }
 

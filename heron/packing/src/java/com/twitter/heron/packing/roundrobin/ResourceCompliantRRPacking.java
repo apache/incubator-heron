@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.common.base.Optional;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.Container;
 import com.twitter.heron.packing.PackingUtils;
@@ -29,6 +31,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -82,7 +85,7 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  * 10. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of ram for an instance is less than the minimal required value.
  */
-public class ResourceCompliantRRPacking implements IPacking {
+public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
   private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
@@ -139,9 +142,10 @@ public class ResourceCompliantRRPacking implements IPacking {
   public PackingPlan pack() {
     int adjustments = this.numAdjustments;
     // Get the instances using a resource compliant round robin allocation
-    Map<Integer, List<InstanceId>> containerInstances = getResourceCompliantRRAllocation();
+    Optional<Map<Integer, List<InstanceId>>> containerInstances =
+        getResourceCompliantRRAllocation();
 
-    while (containerInstances == null) {
+    while (!containerInstances.isPresent()) {
       if (this.numAdjustments > adjustments) {
         adjustments++;
         containerInstances = getResourceCompliantRRAllocation();
@@ -153,7 +157,24 @@ public class ResourceCompliantRRPacking implements IPacking {
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
-        containerInstances, ramMap, this.defaultInstanceResources, paddingPercentage);
+        containerInstances.get(), ramMap, this.defaultInstanceResources, paddingPercentage);
+    return new PackingPlan(topology.getId(), containerPlans);
+  }
+
+  /**
+   * Get a new packing plan given an existing packing plan and component-level changes.
+   * @return new packing plan
+   */
+  public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
+    // Get the instances using Resource Compliant Round Robin allocation
+    Map<Integer, List<InstanceId>> ffdAllocation =
+        getResourceCompliantRRAllocation(currentPackingPlan, componentChanges);
+
+    // Construct the PackingPlan
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+
+    Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
+        ffdAllocation, ramMap, defaultInstanceResources, paddingPercentage);
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
@@ -167,9 +188,8 @@ public class ResourceCompliantRRPacking implements IPacking {
    * @return The list of components and their RAM requirements. Returns null if one or more
    * instances do not have valid resource requirements.
    */
-  protected ArrayList<RamRequirement> getRAMInstances() {
+  protected ArrayList<RamRequirement> getRAMInstances(Map<String, Integer> parallelismMap) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
-    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
     for (String component : parallelismMap.keySet()) {
       if (ramMap.containsKey(component)) {
@@ -202,11 +222,10 @@ public class ResourceCompliantRRPacking implements IPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<Integer, List<InstanceId>> getResourceCompliantRRAllocation() {
-
-    Map<Integer, List<InstanceId>> allocation = new HashMap<>();
+  private Optional<Map<Integer, List<InstanceId>>> getResourceCompliantRRAllocation() {
+    HashMap<Integer, List<InstanceId>> allocation = new HashMap<>();
+    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     ArrayList<Container> containers = new ArrayList<>();
-    ArrayList<RamRequirement> ramRequirements = getRAMInstances();
 
     int totalInstance = TopologyUtils.getTotalInstance(topology);
 
@@ -214,41 +233,136 @@ public class ResourceCompliantRRPacking implements IPacking {
       throw new RuntimeException("More containers allocated than instances."
           + numContainers + " allocated to host " + totalInstance + " instances.");
     }
-
     for (int i = 1; i <= numContainers; ++i) {
       allocation.put(i, new ArrayList<InstanceId>());
     }
     for (int i = 0; i <= numContainers - 1; i++) {
       PackingUtils.allocateNewContainer(containers, maxContainerResources, this.paddingPercentage);
     }
+    int noContainers = assignInstancesToContainers(containers, allocation, parallelismMap, 1);
+    if (noContainers > this.numContainers) {
+      increaseNumContainers();
+      return Optional.absent();
+    }
+    return Optional.of((Map<Integer, List<InstanceId>>) allocation);
+  }
+
+
+  /**
+   * Get the instances' allocation based on the ResourceCompliantRR packing algorithm
+   *
+   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
+   */
+
+  private Map<Integer, List<InstanceId>> getResourceCompliantRRAllocation(
+      PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
+    Map<String, Integer> componentsToScaleDown =
+        PackingUtils.getComponentsToScaleDown(componentChanges);
+    Map<String, Integer> componentsToScaleUp =
+        PackingUtils.getComponentsToScaleUp(componentChanges);
+
+    ArrayList<Container> containers = PackingUtils.getContainers(currentPackingPlan,
+        this.paddingPercentage);
+    Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(currentPackingPlan);
+    int maxInstanceIndex = 0;
+    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
+      }
+    }
+    if (!componentsToScaleDown.isEmpty()) {
+      removeInstancesFromContainers(containers, allocation, componentsToScaleDown);
+    }
+    if (!componentsToScaleUp.isEmpty()) {
+      assignInstancesToContainers(containers, allocation, componentsToScaleUp,
+          maxInstanceIndex + 1);
+    }
+    PackingUtils.removeEmptyContainers(allocation);
+    return allocation;
+  }
+
+  /**
+   * Assigns instances to containers
+   *
+   * @param containers helper data structure that describes the containers' status
+   * @param allocation existing packing plan
+   * @param parallelismMap component parallelism
+   * @param firstTaskIndex first taskId to use for the new instances
+   */
+  private int assignInstancesToContainers(
+      ArrayList<Container> containers, Map<Integer, List<InstanceId>> allocation,
+      Map<String, Integer> parallelismMap, int firstTaskIndex) {
+    ArrayList<RamRequirement> ramRequirements = getRAMInstances(parallelismMap);
     int containerId = 1;
     int globalTaskIndex = 1;
-    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     int componentIndex = 0;
     for (String component : parallelismMap.keySet()) {
       long ramRequirement = ramRequirements.get(componentIndex).getRamRequirement();
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
         Resource instanceResource = this.defaultInstanceResources.cloneWithRam(ramRequirement);
-        if (placeResourceCompliantRRInstance(containers, containerId,
-            new PackingPlan.InstancePlan(new InstanceId(component, globalTaskIndex, i),
-                instanceResource))) {
-          allocation.get(containerId).add(new InstanceId(component, globalTaskIndex, i));
-        } else {
-          //Automatically adjust the number of containers
-          increaseNumContainers();
-          LOG.info(String.format("Increasing the number of containers to "
-              + "%s and attempting packing again.", this.numContainers));
-          return null;
+        int noContainers = strictRRpolicy(allocation, containers, containerId,
+            new InstanceId(component, globalTaskIndex, i), instanceResource);
+        if (noContainers > this.numContainers) {
+          return noContainers;
         }
         containerId = (containerId == numContainers) ? 1 : containerId + 1;
         globalTaskIndex++;
       }
       componentIndex++;
     }
-    return allocation;
+    return this.numContainers;
   }
 
+  /**
+   * Performs a RR placement. If the placement cannot be performed on the existing number of containers
+   * then it will request for an increase in the number of containers
+   * @param allocation existing packing plan
+   * @param containers helper data structure that describes the containers' status
+   * @param containerId id of the container where the instance needs to be placed
+   * @param instanceId the instance that needs to be placed in the container
+   * @param instanceResource the resources required for that instance
+   * @return number of containers needed for a valid RR allocation
+   */
+  private int strictRRpolicy(Map<Integer, List<InstanceId>> allocation,
+                             ArrayList<Container> containers, int containerId,
+                             InstanceId instanceId, Resource instanceResource) {
+    int noContainers = this.numContainers;
+    if (placeResourceCompliantRRInstance(containers, containerId,
+        new PackingPlan.InstancePlan(instanceId, instanceResource))) {
+      allocation.get(containerId).add(instanceId);
+      return noContainers;
+    } else {
+      //Automatically adjust the number of containers
+      noContainers++;
+      LOG.info(String.format("Increasing the number of containers to "
+          + "%s and attempting packing again.", this.numContainers));
+      return noContainers;
+    }
+  }
+  /**
+   * Removes instances from containers during scaling down
+   *
+   * @param containers helper data structure that describes the containers' status
+   * @param allocation existing packing plan
+   * @param componentsToScaleDown scale down factor for the components.
+   */
+  private void removeInstancesFromContainers(
+      ArrayList<Container> containers, Map<Integer, List<InstanceId>> allocation,
+      Map<String, Integer> componentsToScaleDown) {
+
+   /* ArrayList<RamRequirement> ramRequirements = getRAMInstances(componentsToScaleDown);
+    for (RamRequirement ramRequirement : ramRequirements) {
+      String component = ramRequirement.getComponentName();
+      int numInstancesToRemove = -componentsToScaleDown.get(component);
+      for (int j = 0; j < numInstancesToRemove; j++) {
+        Pair<Integer, InstanceId> idPair = removeRRInstance(containers, component);
+        List<InstanceId> instances = allocation.get(idPair.first);
+        instances.remove(idPair.second);
+        allocation.put(idPair.first, instances);
+      }
+    }*/
+  }
   /**
    * Assign a particular instance to a container with a given containerId
    *

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -219,4 +220,61 @@ public final class PackingUtils {
     return componentsToScaleUp;
   }
 
+  /**
+   * Removes containers from tha allocation that do not contain any instances
+   */
+  public static void removeEmptyContainers(Map<Integer, List<InstanceId>> allocation) {
+    Iterator<Integer> containerIds = allocation.keySet().iterator();
+    while (containerIds.hasNext()) {
+      Integer containerId = containerIds.next();
+      if (allocation.get(containerId).isEmpty()) {
+        containerIds.remove();
+      }
+    }
+  }
+
+  /**
+   * Generates the containers that correspond to the current packing plan
+   * along with their associated instances.
+   *
+   * @return List of containers for the current packing plan
+   */
+  public static ArrayList<Container> getContainers(PackingPlan currentPackingPlan,
+                                                   int paddingPercentage) {
+    ArrayList<Container> containers = new ArrayList<>();
+
+    //sort containers based on containerIds;
+    PackingPlan.ContainerPlan[] currentContainers =
+        PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
+
+    Resource capacity = currentPackingPlan.getMaxContainerResources();
+    for (int i = 0; i < currentContainers.length; i++) {
+      int containerId = PackingUtils.allocateNewContainer(
+          containers, capacity, paddingPercentage);
+      for (PackingPlan.InstancePlan instancePlan
+          : currentContainers[i].getInstances()) {
+        containers.get(containerId - 1).add(instancePlan);
+      }
+    }
+    return containers;
+  }
+
+
+  /**
+   * Generates an instance allocation for the current packing plan
+   *
+   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
+   */
+  public static Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
+    Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
+    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+      ArrayList<InstanceId> instances = new ArrayList<InstanceId>();
+      for (PackingPlan.InstancePlan instance : containerPlan.getInstances()) {
+        instances.add(new InstanceId(instance.getComponentName(), instance.getTaskId(),
+            instance.getComponentIndex()));
+      }
+      allocation.put(containerPlan.getId(), instances);
+    }
+    return allocation;
+  }
 }
