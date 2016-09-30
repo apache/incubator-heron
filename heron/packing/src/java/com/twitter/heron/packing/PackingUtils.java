@@ -193,9 +193,10 @@ public final class PackingUtils {
   public static Map<String, Integer> getComponentsToScaleDown(Map<String,
       Integer> componentChanges) {
     Map<String, Integer> componentsToScaleDown = new HashMap<String, Integer>();
-    for (Map.Entry<String, Integer> entry : componentChanges.entrySet()) {
-      if (entry.getValue() < 0) {
-        componentsToScaleDown.put(entry.getKey(), entry.getValue());
+    for (String component : componentChanges.keySet()) {
+      int parallelismChange = componentChanges.get(component);
+      if (parallelismChange < 0) {
+        componentsToScaleDown.put(component, parallelismChange);
       }
     }
     return componentsToScaleDown;
@@ -209,9 +210,10 @@ public final class PackingUtils {
   public static Map<String, Integer> getComponentsToScaleUp(Map<String,
       Integer> componentChanges) {
     Map<String, Integer> componentsToScaleUp = new HashMap<String, Integer>();
-    for (Map.Entry<String, Integer> entry : componentChanges.entrySet()) {
-      if (entry.getValue() > 0) {
-        componentsToScaleUp.put(entry.getKey(), entry.getValue());
+    for (String component : componentChanges.keySet()) {
+      int parallelismChange = componentChanges.get(component);
+      if (parallelismChange > 0) {
+        componentsToScaleUp.put(component, parallelismChange);
       }
     }
     return componentsToScaleUp;
