@@ -57,7 +57,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.controller = getController();
-    this.updateTopologyManager = new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
+    this.updateTopologyManager =
+        new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
   }
 
   /**
@@ -76,7 +77,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void close() {
-    // Nothing to do here
+    if (updateTopologyManager != null) {
+      updateTopologyManager.close();
+    }
   }
 
   @Override
