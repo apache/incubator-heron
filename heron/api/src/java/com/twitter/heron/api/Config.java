@@ -306,14 +306,6 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
   }
 
-  public static void setUpdateDeactivateWaitDuration(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, Integer.toString(seconds));
-  }
-
-  public static void setUpdateReactivateWaitDuration(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, Integer.toString(seconds));
-  }
-
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
