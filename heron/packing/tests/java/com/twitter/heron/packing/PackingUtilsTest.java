@@ -50,4 +50,26 @@ public class PackingUtilsTest {
       Assert.assertEquals((currentContainers[i]).getId(), i + 1);
     }
   }
+
+  /**
+   * Tests the increaseBy method for long values
+   */
+  @Test
+  public void testIncreaseByLong() {
+    long value = 1024;
+    int padding = 1;
+    long expectedResult = 1034;
+    Assert.assertEquals(expectedResult, PackingUtils.increaseBy(value, padding));
+  }
+
+  /**
+   * Tests the increaseBy method for double values
+   */
+  @Test
+  public void testIncreaseByDouble() {
+    double value = 10.0;
+    int padding = 1;
+    double expectedResult = 10.1;
+    Assert.assertEquals(0, Double.compare(PackingUtils.increaseBy(value, padding), expectedResult));
+  }
 }

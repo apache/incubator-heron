@@ -14,14 +14,10 @@
 
 package com.twitter.heron.common.utils.metrics;
 
-import java.util.List;
-
-import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MeanReducerState;
-import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.api.metric.MultiReducedMetric;
+import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
@@ -37,18 +33,15 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
  */
 
 public class BoltMetrics {
-  private final MultiCountMetric ackCount;
-  private final MultiReducedMetric<MeanReducerState, Number, Double> processLatency;
-  private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
-  private final MultiCountMetric failCount;
-  private final MultiCountMetric executeCount;
-  private final MultiReducedMetric<MeanReducerState, Number, Double> executeLatency;
+  private final CountMetric ackCount;
+  private final ReducedMetric<MeanReducerState, Number, Double> processLatency;
+  private final ReducedMetric<MeanReducerState, Number, Double> failLatency;
+  private final CountMetric failCount;
+  private final CountMetric executeCount;
+  private final ReducedMetric<MeanReducerState, Number, Double> executeLatency;
 
   // Time in nano-seconds spending in execute() at every interval
-  private final MultiCountMetric executeTimeNs;
-  private final MultiCountMetric emitCount;
-  private final MultiCountMetric deserializationTimeNs;
-  private final MultiCountMetric serializationTimeNs;
+  private final CountMetric emitCount;
 
   // The # of times back-pressure happens on outStreamQueue
   // so instance could not produce more tuples
@@ -56,18 +49,14 @@ public class BoltMetrics {
 
 
   public BoltMetrics() {
-    ackCount = new MultiCountMetric();
-    processLatency = new MultiReducedMetric<>(new MeanReducer());
-    failLatency = new MultiReducedMetric<>(new MeanReducer());
-    failCount = new MultiCountMetric();
-    executeCount = new MultiCountMetric();
-    executeLatency = new MultiReducedMetric<>(new MeanReducer());
-    executeTimeNs = new MultiCountMetric();
-    emitCount = new MultiCountMetric();
+    ackCount = new CountMetric();
+    processLatency = new ReducedMetric<>(new MeanReducer());
+    failLatency = new ReducedMetric<>(new MeanReducer());
+    failCount = new CountMetric();
+    executeCount = new CountMetric();
+    executeLatency = new ReducedMetric<>(new MeanReducer());
+    emitCount = new CountMetric();
     outQueueFullCount = new CountMetric();
-
-    deserializationTimeNs = new MultiCountMetric();
-    serializationTimeNs = new MultiCountMetric();
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -76,18 +65,14 @@ public class BoltMetrics {
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 
-    topologyContext.registerMetric("__ack-count", ackCount, interval);
-    topologyContext.registerMetric("__process-latency", processLatency, interval);
-    topologyContext.registerMetric("__fail-latency", failLatency, interval);
-    topologyContext.registerMetric("__fail-count", failCount, interval);
-    topologyContext.registerMetric("__execute-count", executeCount, interval);
-    topologyContext.registerMetric("__execute-latency", executeLatency, interval);
-    topologyContext.registerMetric("__execute-time-ns", executeTimeNs, interval);
-    topologyContext.registerMetric("__emit-count", emitCount, interval);
+    topologyContext.registerMetric("__ack-count/default", ackCount, interval);
+    topologyContext.registerMetric("__process-latency/default", processLatency, interval);
+    topologyContext.registerMetric("__fail-latency/default", failLatency, interval);
+    topologyContext.registerMetric("__fail-count/default", failCount, interval);
+    topologyContext.registerMetric("__execute-count/default", executeCount, interval);
+    topologyContext.registerMetric("__execute-latency/default", executeLatency, interval);
+    topologyContext.registerMetric("__emit-count/default", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
-    topologyContext.registerMetric(
-        "__tuple-deserialization-time-ns", deserializationTimeNs, interval);
-    topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -97,71 +82,26 @@ public class BoltMetrics {
   // However, it will not set the Multi Reduced/Assignable Metrics,
   // since we could not have default values for them
   public void initMultiCountMetrics(PhysicalPlanHelper helper) {
-    // For bolt, we would consider both input stream and output stream
-    List<TopologyAPI.InputStream> inputs = helper.getMyBolt().getInputsList();
-    for (TopologyAPI.InputStream inputStream : inputs) {
-      String streamId = inputStream.getStream().getId();
-      String globalStreamId =
-          new StringBuilder(inputStream.getStream().getComponentName()).
-              append("/").append(streamId).toString();
 
-      ackCount.scope(streamId);
-      failCount.scope(streamId);
-      executeCount.scope(streamId);
-      executeTimeNs.scope(streamId);
-
-      ackCount.scope(globalStreamId);
-      failCount.scope(globalStreamId);
-      executeCount.scope(globalStreamId);
-      executeTimeNs.scope(globalStreamId);
-    }
-    List<TopologyAPI.OutputStream> outputs = helper.getMyBolt().getOutputsList();
-    for (TopologyAPI.OutputStream outputStream : outputs) {
-      String streamId = outputStream.getStream().getId();
-      emitCount.scope(streamId);
-    }
   }
 
   public void ackedTuple(String streamId, String sourceComponent, long latency) {
-    ackCount.scope(streamId).incr();
-    processLatency.scope(streamId).update(latency);
-
-    // Consider there are cases that different streams with the same streamId,
-    // but with different source component. We need to distinguish them too.
-    String globalStreamId =
-        new StringBuilder(sourceComponent).append("/").append(streamId).toString();
-    ackCount.scope(globalStreamId).incr();
-    processLatency.scope(globalStreamId).update(latency);
+    ackCount.incr();
+    processLatency.update(latency);
   }
 
   public void failedTuple(String streamId, String sourceComponent, long latency) {
-    failCount.scope(streamId).incr();
-    failLatency.scope(streamId).update(latency);
-
-    // Consider there are cases that different streams with the same streamId,
-    // but with different source component. We need to distinguish them too.
-    String globalStreamId =
-        new StringBuilder(sourceComponent).append("/").append(streamId).toString();
-    failCount.scope(globalStreamId).incr();
-    failLatency.scope(globalStreamId).update(latency);
+    failCount.incr();
+    failLatency.update(latency);
   }
 
   public void executeTuple(String streamId, String sourceComponent, long latency) {
-    executeCount.scope(streamId).incr();
-    executeLatency.scope(streamId).update(latency);
-    executeTimeNs.scope(streamId).incrBy(latency);
-
-    // Consider there are cases that different streams with the same streamId,
-    // but with different source component. We need to distinguish them too.
-    String globalStreamId =
-        new StringBuilder(sourceComponent).append("/").append(streamId).toString();
-    executeCount.scope(globalStreamId).incr();
-    executeLatency.scope(globalStreamId).update(latency);
-    executeTimeNs.scope(globalStreamId).incrBy(latency);
+    executeCount.incr();
+    executeLatency.update(latency);
   }
 
   public void emittedTuple(String streamId) {
-    emitCount.scope(streamId).incr();
+    emitCount.incr();
   }
 
   public void updateOutQueueFullCount() {
@@ -169,16 +109,8 @@ public class BoltMetrics {
   }
 
   public void deserializeDataTuple(String streamId, String sourceComponent, long latency) {
-    deserializationTimeNs.scope(streamId).incrBy(latency);
-
-    // Consider there are cases that different streams with the same streamId,
-    // but with different source component. We need to distinguish them too.
-    String globalStreamId =
-        new StringBuilder(sourceComponent).append("/").append(streamId).toString();
-    deserializationTimeNs.scope(globalStreamId).incrBy(latency);
   }
 
   public void serializeDataTuple(String streamId, long latency) {
-    serializationTimeNs.scope(streamId).incrBy(latency);
   }
 }

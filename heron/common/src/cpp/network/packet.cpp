@@ -78,7 +78,7 @@ sp_int32 IncomingPacket::UnPackProtocolBuffer(google::protobuf::Message* _proto)
   sp_int32 sz;
   if (UnPackInt(&sz) != 0) return -1;
   if (position_ + sz > PacketHeader::get_packet_size(header_)) return -1;
-  if (!_proto->ParseFromArray(data_ + position_, sz)) return -1;
+  if (!_proto->ParsePartialFromArray(data_ + position_, sz)) return -1;
   position_ += sz;
   return 0;
 }
@@ -208,7 +208,19 @@ sp_int32 OutgoingPacket::PackProtocolBuffer(const google::protobuf::Message& _pr
   if (_byte_size + position_ > total_packet_size_) {
     return -1;
   }
-  if (!_proto.SerializeToArray(data_ + position_, _byte_size)) return -1;
+  if (!_proto.SerializeWithCachedSizesToArray((unsigned char*)(data_ + position_))) return -1;
+  position_ += _byte_size;
+  return 0;
+}
+
+sp_int32 OutgoingPacket::PackProtocolBuffer(const char* _message,
+                                            sp_int32 _byte_size) {
+  if (PackInt(_byte_size) != 0) return -1;
+  if (_byte_size + position_ > total_packet_size_) {
+    return -1;
+  }
+
+  memcpy(data_ + position_, _message, _byte_size);
   position_ += _byte_size;
   return 0;
 }

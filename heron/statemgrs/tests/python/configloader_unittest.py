@@ -37,7 +37,7 @@ class ConfigLoaderTest(unittest.TestCase):
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/vagrant/.herondata/repository/state/aurora',
-      'tunnelhost': 'localhost',
+      'tunnelhost': 'my.tunnel.host',
       'type': 'file'
     }], self.load_locations('aurora'))
 

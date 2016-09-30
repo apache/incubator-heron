@@ -25,6 +25,7 @@ import org.apache.reef.client.ClientConfiguration;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.REEF;
 import org.apache.reef.runtime.yarn.client.YarnClientConfiguration;
+import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
 import org.apache.reef.tang.Configuration;
 import org.apache.reef.tang.Injector;
 import org.apache.reef.tang.Tang;
@@ -59,6 +60,8 @@ public class YarnLauncher implements ILauncher {
   private String cluster;
   private String role;
   private String env;
+  private String queue;
+  private int driverMemory;
   private ArrayList<String> libJars = new ArrayList<>();
 
   @Override
@@ -69,6 +72,8 @@ public class YarnLauncher implements ILauncher {
     cluster = Context.cluster(config);
     role = Context.role(config);
     env = Context.environ(config);
+    queue = YarnContext.heronYarnQueue(config);
+    driverMemory = YarnContext.heronDriverMemoryMb(config);
 
     try {
       Class<?> packingClass = Class.forName(Context.packingClass(config));
@@ -149,6 +154,8 @@ public class YarnLauncher implements ILauncher {
         .set(HeronDriverConfiguration.CLUSTER, cluster)
         .set(HeronDriverConfiguration.HTTP_PORT, 0)
         .set(HeronDriverConfiguration.VERBOSE, false)
+        .set(YarnDriverConfiguration.QUEUE, queue)
+        .set(DriverConfiguration.DRIVER_MEMORY, driverMemory)
         .build();
   }
 

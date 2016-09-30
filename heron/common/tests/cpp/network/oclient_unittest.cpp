@@ -38,9 +38,9 @@ OrderClient::OrderClient(EventLoopImpl* eventLoop, const NetworkOptions& _option
 }
 
 void OrderClient::CreateAndSendMessage() {
-  OrderMessage* message = new OrderMessage();
+  OrderMessage message;
 
-  message->set_id(msgids_++);
+  message.set_id(msgids_++);
 
   SendMessage(message);
   return;

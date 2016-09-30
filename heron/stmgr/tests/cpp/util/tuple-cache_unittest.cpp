@@ -43,7 +43,7 @@ class Drainer {
 
   ~Drainer() {}
 
-  void Drain(sp_int32 _task_id, heron::proto::system::HeronTupleSet* _t) {
+  void Drain(sp_int32 _task_id, heron::proto::system::HeronTupleSet2* _t) {
     if (_t->has_data()) {
       EXPECT_EQ(_t->has_control(), false);
       add_actual(_task_id, _t->data().tuples_size(), num_data_tuples_actual_);
@@ -111,7 +111,7 @@ TEST(TupleCache, test_simple_data_drain) {
   for (sp_int32 i = 0; i < data_tuples_count; ++i) {
     heron::proto::system::HeronDataTuple tuple;
     tuple.set_key(RandUtils::lrand());
-    g->add_data_tuple(1, dummy, tuple);
+    g->add_data_tuple(1, dummy, &tuple);
   }
 
   // 300 milliseconds second
@@ -150,7 +150,7 @@ TEST(TupleCache, test_data_ack_fail_mix) {
     if (i < data_tuples_count) {
       heron::proto::system::HeronDataTuple tuple;
       tuple.set_key(RandUtils::lrand());
-      g->add_data_tuple(1, dummy, tuple);
+      g->add_data_tuple(1, dummy, &tuple);
     }
     if (i < ack_tuples_count) {
       heron::proto::system::AckTuple tuple;
@@ -207,9 +207,9 @@ TEST(TupleCache, test_different_stream_mix) {
       heron::proto::system::HeronDataTuple tuple;
       tuple.set_key(RandUtils::lrand());
       if (i % 2 == 0) {
-        g->add_data_tuple(1, stream1, tuple);
+        g->add_data_tuple(1, stream1, &tuple);
       } else {
-        g->add_data_tuple(2, stream2, tuple);
+        g->add_data_tuple(2, stream2, &tuple);
       }
     }
     if (i < ack_tuples_count) {

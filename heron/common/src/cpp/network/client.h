@@ -35,6 +35,8 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <list>
+#include <typeindex>
 #include "basics/basics.h"
 #include "glog/logging.h"
 #include "network/connection.h"
@@ -44,6 +46,7 @@
 #include "network/networkoptions.h"
 #include "network/network_error.h"
 #include "network/packet.h"
+#include "network/mempool.h"
 
 /*
  * Client class definition
@@ -106,7 +109,7 @@ class Client : public BaseClient {
 
   // This interface is used if you want to communicate with the other end
   // on a non-request-response based communication.
-  void SendMessage(google::protobuf::Message* _message);
+  void SendMessage(const google::protobuf::Message& _message);
 
   // Add a timer to be invoked after msecs microseconds. Returns the timer id.
   sp_int64 AddTimer(VCallback<> cb, sp_int64 msecs);
@@ -171,6 +174,19 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
+  // TODO(mfu):
+  MemPool<google::protobuf::Message> _heron_message_pool;
+
+  template<typename M>
+  void release(M* m) {
+    _heron_message_pool.release(m);
+  }
+
+  template<typename M>
+  M* acquire(M* m) {
+    return _heron_message_pool.acquire(m);
+  }
+
  protected:
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
@@ -208,7 +224,7 @@ class Client : public BaseClient {
   void Init();
 
   void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
-  void InternalSendMessage(google::protobuf::Message* _request);
+  void InternalSendMessage(const google::protobuf::Message& _message);
   void InternalSendResponse(OutgoingPacket* _packet);
 
   // Internal method to be called by the Connection class
@@ -252,11 +268,12 @@ class Client : public BaseClient {
   void dispatchRequest(T* _t, void (T::*method)(REQID id, M*), IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
+
+    M* m = _heron_message_pool.acquire(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      release(m);
       return;
     }
     CHECK(m->IsInitialized());

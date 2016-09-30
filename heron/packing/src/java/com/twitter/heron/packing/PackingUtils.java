@@ -43,7 +43,8 @@ public final class PackingUtils {
    */
   public static boolean isValidInstance(Resource instanceResources,
                                         long minInstanceRam,
-                                        Resource maxContainerResources) {
+                                        Resource maxContainerResources,
+                                        int paddingPercentage) {
 
     if (instanceResources.getRam() < minInstanceRam) {
       LOG.severe(String.format(
@@ -52,27 +53,31 @@ public final class PackingUtils {
       return false;
     }
 
-    if (instanceResources.getRam() > maxContainerResources.getRam()) {
+    long instanceRam = PackingUtils.increaseBy(instanceResources.getRam(), paddingPercentage);
+    if (instanceRam > maxContainerResources.getRam()) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB ram. The current max container"
               + "size is %d MB",
-          instanceResources.getRam(), maxContainerResources.getRam()));
+          instanceRam, maxContainerResources.getRam()));
       return false;
     }
 
-    if (instanceResources.getCpu() > maxContainerResources.getCpu()) {
+    double instanceCpu = Math.round(PackingUtils.increaseBy(
+        instanceResources.getCpu(), paddingPercentage));
+    if (instanceCpu > maxContainerResources.getCpu()) {
       LOG.severe(String.format(
           "This instance requires containers with at least %s cpu cores. The current max container"
               + "size is %s cores",
-          instanceResources.getCpu(), maxContainerResources.getCpu()));
+          instanceCpu > maxContainerResources.getCpu(), maxContainerResources.getCpu()));
       return false;
     }
 
-    if (instanceResources.getDisk() > maxContainerResources.getDisk()) {
+    long instanceDisk = PackingUtils.increaseBy(instanceResources.getDisk(), paddingPercentage);
+    if (instanceDisk > maxContainerResources.getDisk()) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB disk. The current max container"
               + "size is %d MB",
-          instanceResources.getDisk(), maxContainerResources.getDisk()));
+          instanceDisk, maxContainerResources.getDisk()));
       return false;
     }
     return true;
@@ -141,7 +146,7 @@ public final class PackingUtils {
 
   /**
    * Sort the container plans based on the container Ids
-   * @param containers
+   *
    * @return sorted array of container plans
    */
   public static PackingPlan.ContainerPlan[] sortOnContainerId(
@@ -158,6 +163,14 @@ public final class PackingUtils {
       currentContainers[position] = container;
     }
     return currentContainers;
+  }
+
+  public static long increaseBy(long value, int paddingPercentage) {
+    return value + (paddingPercentage * value) / 100;
+  }
+
+  public static double increaseBy(double value, int paddingPercentage) {
+    return value + (paddingPercentage * value) / 100;
   }
 
 }

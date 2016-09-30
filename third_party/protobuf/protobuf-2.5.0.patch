@@ -22,3 +22,15 @@ diff -rupN protobuf-2.5.0/src/google/protobuf/stubs/common.h protobuf25/src/goog
    if (val == NULL) {
      GOOGLE_LOG(FATAL) << name;
    }
+diff -rupN protobuf-2.5.0/src/google/protobuf/stubs/stl_util.h protobuf-2.5.0/src/google/protobuf/stubs/stl_util.h
+--- protobuf-2.5.0/src/google/protobuf/stubs/stl_util.h	2016-09-07 22:22:15.544125062 -0700
++++ protobuf-2.5.0/src/google/protobuf/stubs/stl_util.h	2016-09-07 22:28:23.750441200 -0700
+@@ -82,7 +82,7 @@
+ // already work on all current implementations.
+ inline char* string_as_array(string* str) {
+   // DO NOT USE const_cast<char*>(str->data())! See the unittest for why.
+-  return str->empty() ? NULL : &*str->begin();
++  return &(*str)[0];
+ }
+ 
+ // STLDeleteElements() deletes all the elements in an STL container and clears

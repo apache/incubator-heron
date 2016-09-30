@@ -42,7 +42,7 @@ TEST(ShuffleGrouping, test_roundrobin) {
 
   heron::stmgr::ShuffleGrouping* g = new heron::stmgr::ShuffleGrouping(task_ids);
   heron::proto::system::HeronDataTuple dummy;
-  std::list<sp_int32> dest;
+  std::vector<sp_int32> dest;
   g->GetListToSend(dummy, dest);
   EXPECT_EQ(dest.size(), (sp_uint32)1);
   sp_int32 first = dest.front();
@@ -79,7 +79,7 @@ TEST(ShuffleGrouping, test_randomstart) {
   for (sp_int32 i = 0; i < count; ++i) {
     heron::stmgr::ShuffleGrouping* g = new heron::stmgr::ShuffleGrouping(task_ids);
     heron::proto::system::HeronDataTuple dummy;
-    std::list<sp_int32> dest;
+    std::vector<sp_int32> dest;
     g->GetListToSend(dummy, dest);
     EXPECT_EQ(dest.size(), (sp_uint32)1);
     sp_int32 first = dest.front();

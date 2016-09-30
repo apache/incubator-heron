@@ -65,6 +65,10 @@ public class CustomStreamGroupingHelper {
     return null;
   }
 
+  public boolean isCustomGroupingEmpty() {
+    return targets.isEmpty();
+  }
+
   private static class Target {
     private final String componentName;
     private final List<Integer> taskIds;

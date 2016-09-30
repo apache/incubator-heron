@@ -213,6 +213,8 @@ public class NetworkUtilsTest {
     int retryIntervalMs = -1;
     int verifyCount = -1;
     boolean isVerbose = true;
+    NetworkUtils.TunnelConfig tunnelConfig = new NetworkUtils.TunnelConfig(
+        true, tunnelHost, timeout, retryCount, retryIntervalMs, verifyCount);
 
     // Can reach directly, no need to ssh tunnel
     PowerMockito.spy(NetworkUtils.class);
@@ -221,7 +223,7 @@ public class NetworkUtilsTest {
 
     Pair<InetSocketAddress, Process> ret =
         NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
-            tunnelHost, timeout, retryCount, retryIntervalMs, verifyCount, isVerbose);
+            tunnelConfig, NetworkUtils.TunnelType.PORT_FORWARD);
     Assert.assertEquals(mockHost, ret.first.getHostName());
     Assert.assertEquals(mockPort, ret.first.getPort());
     Assert.assertEquals(mockEndpoint, ret.first.toString());
@@ -239,7 +241,7 @@ public class NetworkUtilsTest {
     PowerMockito.spy(ShellUtils.class);
     PowerMockito.doReturn(process).when(ShellUtils.class, "establishSSHTunnelProcess",
         Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
-        Mockito.anyInt(), Mockito.anyBoolean());
+        Mockito.anyInt());
 
     InetSocketAddress newAddress =
         NetworkUtils.getInetSocketAddress(
@@ -247,18 +249,16 @@ public class NetworkUtilsTest {
 
     PowerMockito.doReturn(false).when(NetworkUtils.class, "isLocationReachable",
         Mockito.eq(newAddress), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
-    ret =
-        NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
-            tunnelHost, timeout, retryCount, retryIntervalMs, verifyCount, isVerbose);
+    ret = NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
+            tunnelConfig, NetworkUtils.TunnelType.PORT_FORWARD);
     Assert.assertNull(ret.first);
     Assert.assertNull(ret.second);
 
     // Can not reach directly, but can establish ssh tunnel to reach the destination
     PowerMockito.doReturn(true).when(NetworkUtils.class, "isLocationReachable",
         Mockito.eq(newAddress), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
-    ret =
-        NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
-            tunnelHost, timeout, retryCount, retryIntervalMs, verifyCount, isVerbose);
+    ret = NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
+        tunnelConfig, NetworkUtils.TunnelType.PORT_FORWARD);
     Assert.assertEquals(NetworkUtils.LOCAL_HOST, ret.first.getHostName());
     Assert.assertEquals(mockFreePort, ret.first.getPort());
     Assert.assertEquals(process, ret.second);
