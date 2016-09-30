@@ -81,22 +81,21 @@ void DummyInstance::HandleInstanceResponse(
   delete _message;
 }
 
-void DummyInstance::HandleTupleMessage(heron::proto::stmgr::TupleMessage*) {}
+void DummyInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2*) {}
 
 void DummyInstance::HandleNewInstanceAssignmentMsg(
     heron::proto::stmgr::NewInstanceAssignmentMessage*) {}
 
 void DummyInstance::CreateAndSendInstanceRequest() {
-  heron::proto::stmgr::RegisterInstanceRequest* message =
-      new heron::proto::stmgr::RegisterInstanceRequest();
-  heron::proto::system::Instance* instance = message->mutable_instance();
+  heron::proto::stmgr::RegisterInstanceRequest message;
+  heron::proto::system::Instance* instance = message.mutable_instance();
   instance->set_instance_id(instance_id_);
   instance->set_stmgr_id(stmgr_id_);
   instance->mutable_info()->set_task_id(task_id_);
   instance->mutable_info()->set_component_index(component_index_);
   instance->mutable_info()->set_component_name(component_name_);
-  message->set_topology_name(topology_name_);
-  message->set_topology_id(topology_id_);
+  message.set_topology_name(topology_name_);
+  message.set_topology_id(topology_id_);
   SendMessage(message);
   return;
 }
@@ -143,9 +142,8 @@ void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
 void DummySpoutInstance::CreateAndSendTupleMessages() {
   for (int i = 0; (i < batch_size_) && (total_msgs_sent_ < max_msgs_to_send_);
        ++total_msgs_sent_, ++i) {
-    heron::proto::stmgr::TupleMessage* message = new heron::proto::stmgr::TupleMessage();
-    heron::proto::system::HeronTupleSet* tuple_set = message->mutable_set();
-    heron::proto::system::HeronDataTupleSet* data_set = tuple_set->mutable_data();
+    heron::proto::system::HeronTupleSet tuple_set;
+    heron::proto::system::HeronDataTupleSet* data_set = tuple_set.mutable_data();
     heron::proto::api::StreamId* tstream = data_set->mutable_stream();
     tstream->set_id(stream_id_);
     tstream->set_component_name(component_name_);
@@ -158,7 +156,7 @@ void DummySpoutInstance::CreateAndSendTupleMessages() {
     if (do_custom_grouping_) {
       tuple->add_dest_task_ids(custom_grouping_dest_task_);
     }
-    SendMessage(message);
+    SendMessage(tuple_set);
   }
   if (total_msgs_sent_ != max_msgs_to_send_) {
     AddTimer([this]() { this->CreateAndSendTupleMessages(); }, 1000);
@@ -182,8 +180,8 @@ void DummyBoltInstance::HandleInstanceResponse(
   DummyInstance::HandleInstanceResponse(_message);
 }
 
-void DummyBoltInstance::HandleTupleMessage(heron::proto::stmgr::TupleMessage* msg) {
-  if (msg->set().has_data()) msgs_recvd_ += msg->mutable_set()->mutable_data()->tuples_size();
+void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
+  if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 

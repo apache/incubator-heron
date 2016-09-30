@@ -16,12 +16,12 @@ for heron.
 
 ```bash
 # Build heron-tracker
-$ bazel build heron/tracker/src/python:heron-tracker
+$ bazel build heron/tools/tracker/src/python:heron-tracker
 
 # The location of heron-tracker pex executable is
-# bazel-bin/heron/tracker/src/python/heron-tracker
+# bazel-bin/heron/tools/tracker/src/python/heron-tracker
 # To run using default options:
-$ ./bazel-bin/heron/tracker/src/python/heron-tracker
+$ ./bazel-bin/heron/tools/tracker/src/python/heron-tracker
 ```
 
 `heron-tracker` is a self executable

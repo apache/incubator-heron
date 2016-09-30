@@ -41,7 +41,7 @@ LowestGrouping::LowestGrouping(const std::vector<sp_int32>& _task_ids) : Groupin
 LowestGrouping::~LowestGrouping() {}
 
 void LowestGrouping::GetListToSend(const proto::system::HeronDataTuple&,
-                                   std::list<sp_int32>& _return) {
+                                   std::vector<sp_int32>& _return) {
   _return.push_back(lowest_taskid_);
 }
 

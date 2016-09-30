@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.google.protobuf.ByteString;
-
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
@@ -161,48 +159,12 @@ public class BoltInstance implements IInstance {
     PrepareTickTupleTimer();
   }
 
-  private void handleDataTuple(HeronTuples.HeronDataTuple dataTuple,
-                               TopologyContextImpl topologyContext,
-                               TopologyAPI.StreamId stream) {
-    long startTime = System.nanoTime();
-
-    List<Object> values = new ArrayList<>();
-    for (ByteString b : dataTuple.getValuesList()) {
-      values.add(serializer.deserialize(b.toByteArray()));
-    }
-
-    // Decode the tuple
-    TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
-        dataTuple.getRootsList(), values);
-
-    long deserializedTime = System.nanoTime();
-
-    // Delegate to the use defined bolt
-    bolt.execute(t);
-
-    long executeLatency = System.nanoTime() - deserializedTime;
-
-    // Invoke user-defined execute task hook
-    topologyContext.invokeHookBoltExecute(t, executeLatency);
-
-    boltMetrics.deserializeDataTuple(stream.getId(), stream.getComponentName(),
-        deserializedTime - startTime);
-
-    // Update metrics
-    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
-  }
-
   @Override
   public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
-    long startOfCycle = System.nanoTime();
-
-    long totalDataEmittedInBytesBeforeCycle = collector.getTotalDataEmittedInBytes();
-
     long instanceExecuteBatchTime
         = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
 
-    long instanceExecuteBatchSize = systemConfig.getInstanceExecuteBatchSizeBytes();
-
+    long startOfCycle = System.nanoTime();
     // Read data from in Queues
     while (!inQueue.isEmpty()) {
       HeronTuples.HeronTupleSet tuples = inQueue.poll();
@@ -212,20 +174,43 @@ public class BoltInstance implements IInstance {
       if (tuples.hasControl()) {
         throw new RuntimeException("Bolt cannot get acks/fails from other components");
       }
-      TopologyAPI.StreamId stream = tuples.getData().getStream();
 
+      // Get meta data of tuples
+      TopologyAPI.StreamId stream = tuples.getData().getStream();
+      int nValues = topologyContext.getComponentOutputFields(
+          stream.getComponentName(), stream.getId()).size();
+
+      // We would reuse the System.nanoTime()
+      long currentTime = startOfCycle;
       for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
-        handleDataTuple(dataTuple, topologyContext, stream);
+        // Create the value list and fill the value
+        List<Object> values = new ArrayList<>(nValues);
+        for (int i = 0; i < nValues; i++) {
+          values.add(serializer.deserialize(dataTuple.getValues(i).toByteArray()));
+        }
+
+        // Decode the tuple
+        TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
+            dataTuple.getRootsList(), values, currentTime, false);
+
+        // Delegate to the use defined bolt
+        bolt.execute(t);
+
+        // Swap
+        long startTime = currentTime;
+        currentTime = System.nanoTime();
+
+        long executeLatency = currentTime - startTime;
+
+        // Invoke user-defined execute task hook
+        topologyContext.invokeHookBoltExecute(t, executeLatency);
+
+        // Update metrics
+        boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
       }
 
       // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - instanceExecuteBatchTime > 0) {
-        break;
-      }
-
-      // To avoid emitting too much data
-      if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceExecuteBatchSize) {
+      if (currentTime - startOfCycle - instanceExecuteBatchTime > 0) {
         break;
       }
     }

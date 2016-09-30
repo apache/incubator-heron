@@ -35,7 +35,7 @@ AllGrouping::AllGrouping(const std::vector<sp_int32>& _task_ids) : Grouping(_tas
 AllGrouping::~AllGrouping() {}
 
 void AllGrouping::GetListToSend(const proto::system::HeronDataTuple&,
-                                std::list<sp_int32>& _return) {
+                                std::vector<sp_int32>& _return) {
   for (sp_uint32 i = 0; i < task_ids_.size(); ++i) {
     _return.push_back(task_ids_[i]);
   }

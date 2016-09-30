@@ -29,6 +29,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -43,6 +44,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.TMasterUtils;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -93,6 +95,7 @@ public class UpdateTopologyManagerTest {
     when(mockStateMgr.getPhysicalPlan(TOPOLOGY_NAME))
         .thenReturn(PhysicalPlans.PhysicalPlan.getDefaultInstance());
 
+    Config mockConfig = Mockito.mock(Config.class);
     Config mockRuntime = Mockito.mock(Config.class);
     when(mockRuntime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
     when(mockRuntime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(mockStateMgr);
@@ -100,7 +103,7 @@ public class UpdateTopologyManagerTest {
     IScalable mockScheduler = Mockito.mock(IScalable.class);
 
     UpdateTopologyManager updateManager
-        = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler));
+        = new UpdateTopologyManager(mockConfig, mockRuntime, Optional.of(mockScheduler));
     UpdateTopologyManager spyUpdateManager = Mockito.spy(updateManager);
 
     TopologyAPI.Topology topology = TopologyTests.createTopology(
@@ -110,13 +113,13 @@ public class UpdateTopologyManagerTest {
     Mockito.doReturn(currentProtoPlan).when(spyUpdateManager).
         getPackingPlan(eq(mockStateMgr), eq(TOPOLOGY_NAME));
 
+    Mockito.doReturn(topology).when(mockStateMgr).getTopology(TOPOLOGY_NAME);
+    Assert.assertEquals(TopologyAPI.TopologyState.RUNNING, topology.getState());
+
     PowerMockito.spy(TMasterUtils.class);
-    PowerMockito.doReturn(true).when(TMasterUtils.class, "transitionTopologyState",
-        eq(TOPOLOGY_NAME), eq(TMasterUtils.TMasterCommand.DEACTIVATE), eq(mockStateMgr),
-        eq(TopologyAPI.TopologyState.RUNNING), eq(TopologyAPI.TopologyState.PAUSED));
-    PowerMockito.doReturn(true).when(TMasterUtils.class, "transitionTopologyState",
-        eq(TOPOLOGY_NAME), eq(TMasterUtils.TMasterCommand.ACTIVATE), eq(mockStateMgr),
-        eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING));
+    PowerMockito.doReturn(true).when(TMasterUtils.class, "sendToTMaster",
+        any(String.class), eq(TOPOLOGY_NAME),
+        eq(mockStateMgr), any(NetworkUtils.TunnelConfig.class));
 
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
@@ -128,12 +131,14 @@ public class UpdateTopologyManagerTest {
     PowerMockito.verifyStatic(times(1));
     TMasterUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
         eq(TMasterUtils.TMasterCommand.DEACTIVATE), eq(mockStateMgr),
-        eq(TopologyAPI.TopologyState.RUNNING), eq(TopologyAPI.TopologyState.PAUSED));
+        eq(TopologyAPI.TopologyState.RUNNING), eq(TopologyAPI.TopologyState.PAUSED),
+        any(NetworkUtils.TunnelConfig.class));
 
     PowerMockito.verifyStatic(times(1));
     TMasterUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
         eq(TMasterUtils.TMasterCommand.ACTIVATE), eq(mockStateMgr),
-        eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING));
+        eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING),
+        any(NetworkUtils.TunnelConfig.class));
   }
 
   @Test

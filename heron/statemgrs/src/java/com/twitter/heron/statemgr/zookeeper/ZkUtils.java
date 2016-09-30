@@ -39,17 +39,10 @@ public final class ZkUtils {
    * @param config basing on which we setup the tunnel process
    * @return Pair of (zk_format_connectionString, List of tunneled processes)
    */
-  public static Pair<String, List<Process>> setupZkTunnel(Config config) {
+  public static Pair<String, List<Process>> setupZkTunnel(Config config,
+                                                          NetworkUtils.TunnelConfig tunnelConfig) {
     // Remove all spaces
     String connectionString = Context.stateManagerConnectionString(config).replaceAll("\\s+", "");
-
-    // Read values from config
-    String tunnelHost = ZkContext.tunnelHost(config);
-    int timeout = ZkContext.tunnelConnectionTimeoutMs(config);
-    int retry = ZkContext.tunnelConnectionRetryCount(config);
-    int retryInterval = ZkContext.tunnelRetryIntervalMs(config);
-    int verifyCount = ZkContext.tunnelVerifyCount(config);
-    boolean isVerbose = Context.verbose(config);
 
     List<Pair<InetSocketAddress, Process>> ret = new ArrayList<>();
 
@@ -61,7 +54,7 @@ public final class ZkUtils {
       // Get the tunnel process if needed
       Pair<InetSocketAddress, Process> pair =
           NetworkUtils.establishSSHTunnelIfNeeded(
-              address, tunnelHost, timeout, retry, retryInterval, verifyCount, isVerbose);
+              address, tunnelConfig, NetworkUtils.TunnelType.PORT_FORWARD);
 
       ret.add(pair);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -85,7 +85,7 @@ public final class ConfigUtils {
   private static void doSerializationTranslation(Config heronConfig) {
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
         && (heronConfig.get(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
-          instanceof Boolean)
+        instanceof Boolean)
         && ((Boolean)
         heronConfig.get(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION))) {
       com.twitter.heron.api.Config.setSerializationClassName(heronConfig,
@@ -103,7 +103,7 @@ public final class ConfigUtils {
             backtype.storm.Config.TOPOLOGY_KRYO_FACTORY + " has to be set to a class name");
       }
       if (!heronConfig.containsKey(
-            backtype.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS)) {
+          backtype.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS)) {
         heronConfig.put(backtype.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, false);
       } else if (!(heronConfig.get(backtype.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS)
           instanceof Boolean)) {
@@ -121,7 +121,7 @@ public final class ConfigUtils {
    */
   private static void doTaskHooksTranslation(Config heronConfig) {
     List<String> hooks = heronConfig.getAutoTaskHooks();
-    if (hooks != null) {
+    if (hooks != null && !hooks.isEmpty()) {
       heronConfig.put(backtype.storm.Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS, hooks);
       List<String> translationHooks = new LinkedList<>();
       translationHooks.add(ITaskHookDelegate.class.getName());

@@ -447,6 +447,14 @@ public class Config extends HashMap<String, Object> {
     setComponentRam(this, component, ramInBytes);
   }
 
+  public void setUpdateDeactivateWaitDuration(int seconds) {
+    put(Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, Integer.toString(seconds));
+  }
+
+  public void setUpdateReactivateWaitDuration(int seconds) {
+    put(Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, Integer.toString(seconds));
+  }
+
   public List<String> getAutoTaskHooks() {
     return getAutoTaskHooks(this);
   }
