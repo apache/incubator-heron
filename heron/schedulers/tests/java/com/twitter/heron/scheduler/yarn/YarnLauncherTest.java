@@ -39,8 +39,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 
 public class YarnLauncherTest {
-  Map<String, String> testConfigMap = new HashMap<>();
-  Map<String, String> expectedMap = new HashMap<>();
+  private Map<String, String> testConfigMap = new HashMap<>();
+  private Map<String, String> expectedMap = new HashMap<>();
 
   @Test
   public void getHMDriverConfConstructsReefConfig() throws Exception {
