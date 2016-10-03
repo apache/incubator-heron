@@ -91,7 +91,8 @@ public class AuroraSchedulerTest {
     Mockito.when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
 
     Config mConfig = Mockito.mock(Config.class);
-    Mockito.when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE), anyString())).thenReturn(AURORA_PATH);
+    Mockito.when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE),
+        anyString())).thenReturn(AURORA_PATH);
 
     scheduler.initialize(mConfig, runtime);
 
