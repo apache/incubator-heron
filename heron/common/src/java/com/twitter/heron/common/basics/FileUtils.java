@@ -20,7 +20,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,9 +117,5 @@ public final class FileUtils {
 
   public static String getBaseName(String file) {
     return new File(file).getName();
-  }
-
-  public static String combinePaths(String path1, String path2) {
-    return Paths.get(path1, path2).toString();
   }
 }
