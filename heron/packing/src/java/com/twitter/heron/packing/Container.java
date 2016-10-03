@@ -101,6 +101,7 @@ public class Container {
    * @return true if the instance can be added to the container, false otherwise
    */
   public boolean add(PackingPlan.InstancePlan instancePlan) {
+   // System.out.println(this.capacity.toString());
     if (this.hasSpace(instancePlan.getResource())) {
       this.instances.add(instancePlan);
       return true;
