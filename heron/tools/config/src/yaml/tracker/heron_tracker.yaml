@@ -25,6 +25,15 @@ statemgrs:
 #    rootpath: "/heron"
 #    tunnelhost: "localhost"
 
+#
+# To specify multiple Zookeeper Nodes for fallback
+# -
+#    type: "zookeeper"
+#    name: "zk"
+#    hostport: "remote-zk-1:2181,remote-zk-2:2181,remote-zk-3:2181"
+#    rootpath: "/heron"
+#    tunnelhost: "remote-tunnel"
+
 # The URL that points to a topology's metrics dashboard.
 # This value can use following parameters to create a valid
 # URL based on the topology. All parameters are self-explanatory.

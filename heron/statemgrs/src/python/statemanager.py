@@ -16,6 +16,8 @@ import abc
 import socket
 import subprocess
 
+from heron.statemgrs.src.python.log import Log as LOG
+
 HERON_EXECUTION_STATE_PREFIX = "{0}/executionstate/"
 HERON_PACKING_PLANS_PREFIX = "{0}/packingplans/"
 HERON_PPLANS_PREFIX = "{0}/pplans/"
@@ -42,24 +44,12 @@ class StateManager:
     self.__name = newName
 
   @property
-  def host(self):
-    return self.__host
+  def hostportlist(self):
+    return self.__hostportlist
 
-  @host.setter
-  def host(self, newHost):
-    self.__host = newHost
-
-  @property
-  def port(self):
-    return self.__port
-
-  @port.setter
-  def port(self, newPort):
-    self.__port = newPort
-
-  @property
-  def hostport(self):
-    return self.host + ":" + str(self.port)
+  @hostportlist.setter
+  def hostportlist(self, newHostportList):
+    self.__hostportlist = newHostportList
 
   @property
   def rootpath(self):
@@ -81,26 +71,23 @@ class StateManager:
     """ Setter for the tunnelhost to create the tunnel if host is not accessible """
     self.__tunnelhost = newTunnelHost
 
-  @abc.abstractmethod
-  def __init__(self, host, port, rootpath, tunnelhost):
-    """
-    @param host - Host where the states are stored
-    @param port - Port to connect to
-    @param rootpath - Path where the heron states are stored
-    @param tunnelhost - Host to which to tunnel through if state host is not directly accessible
-    """
-    pass
+  def __init__(self):
+    self.tunnel = []
 
   def is_host_port_reachable(self):
     """
     Returns true if the host is reachable. In some cases, it may not be reachable a tunnel
     must be used.
     """
-    try:
-      socket.create_connection((self.host, self.port), 2)
-      return True
-    except:
-      return False
+    for hostport in self.hostportlist:
+      try:
+        socket.create_connection(hostport, 2)
+        return True
+      except:
+        LOG.info("StateManager %s Unable to connect to host: %s port %i"
+                 % (self.name, hostport[0], hostport[1]))
+        continue
+    return False
 
   # pylint: disable=no-self-use
   def pick_unused_port(self):
@@ -113,17 +100,20 @@ class StateManager:
 
   def establish_ssh_tunnel(self):
     """
-    Establish an ssh tunnel and return the local port
+    Establish an ssh tunnel for each local host and port
     that can be used to communicate with the state host.
     """
-    localport = self.pick_unused_port()
-    self.tunnel = subprocess.Popen(
-        ('ssh', self.tunnelhost, '-NL%d:%s:%d' % (localport, self.host, self.port)))
-    return localport
+    localportlist = []
+    for (host, port) in self.hostportlist:
+      localport = self.pick_unused_port()
+      self.tunnel.append(subprocess.Popen(
+          ('ssh', self.tunnelhost, '-NL127.0.0.1:%d:%s:%d' % (localport, host, port))))
+      localportlist.append(('127.0.0.1', localport))
+    return localportlist
 
   def terminate_ssh_tunnel(self):
-    if hasattr(self, 'tunnel') and self.tunnel:
-      self.tunnel.terminate()
+    for tunnel in self.tunnel:
+      tunnel.terminate()
 
   @abc.abstractmethod
   def start(self):
