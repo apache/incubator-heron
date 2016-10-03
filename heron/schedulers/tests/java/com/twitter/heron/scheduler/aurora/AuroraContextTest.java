@@ -23,13 +23,13 @@ public class AuroraContextTest {
 
   @Test
   public void testUsesConfigString() {
-    final String aurora_template = "/dir/test.aurora";
+    final String auroraTemplate = "/dir/test.aurora";
     Config config = Config.newBuilder()
-        .put(AuroraContext.JOB_TEMPLATE, aurora_template)
+        .put(AuroraContext.JOB_TEMPLATE, auroraTemplate)
         .put(ConfigKeys.get("HERON_CONF"), "/test")
         .build();
     Assert.assertEquals("Expected to use value from JOB_TEMPLATE config",
-        aurora_template, AuroraContext.getHeronAuroraPath(config));
+        auroraTemplate, AuroraContext.getHeronAuroraPath(config));
   }
 
   @Test
