@@ -41,6 +41,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -69,7 +70,6 @@ public class AuroraSchedulerTest {
     Mockito.doReturn(new HashMap<String, String>()).when(
         scheduler).createAuroraProperties(
         Mockito.any(PackingPlan.class));
-    Mockito.doReturn(AURORA_PATH).when(scheduler).getHeronAuroraPath();
   }
 
   @AfterClass
@@ -90,7 +90,10 @@ public class AuroraSchedulerTest {
     Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(stateManager);
     Mockito.when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
 
-    scheduler.initialize(Mockito.mock(Config.class), runtime);
+    Config mConfig = Mockito.mock(Config.class);
+    Mockito.when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE), anyString())).thenReturn(AURORA_PATH);
+
+    scheduler.initialize(mConfig, runtime);
 
     // Fail to schedule due to null PackingPlan
     Assert.assertFalse(scheduler.onSchedule(null));
