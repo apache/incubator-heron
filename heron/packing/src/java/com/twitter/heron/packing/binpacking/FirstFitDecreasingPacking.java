@@ -240,8 +240,10 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
                                                           Map<String, Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleDown = getComponentsToScaleDown(componentChanges);
-    Map<String, Integer> componentsToScaleUp = getComponentsToScaleUp(componentChanges);
+    Map<String, Integer> componentsToScaleDown =
+        PackingUtils.getComponentsToScaleDown(componentChanges);
+    Map<String, Integer> componentsToScaleUp =
+        PackingUtils.getComponentsToScaleUp(componentChanges);
 
     ArrayList<Container> containers = getContainers(currentPackingPlan);
     Map<Integer, List<InstanceId>> allocation = getAllocation(currentPackingPlan);
@@ -276,36 +278,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Identifies which components need to be scaled down
-   *
-   * @return Map &lt; component name, scale down factor &gt;
-   */
-  private Map<String, Integer> getComponentsToScaleDown(Map<String, Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleDown = new HashMap<String, Integer>();
-    for (Map.Entry<String, Integer> entry : componentChanges.entrySet()) {
-      if (entry.getValue() < 0) {
-        componentsToScaleDown.put(entry.getKey(), entry.getValue());
-      }
-    }
-    return componentsToScaleDown;
-  }
-
-  /**
-   * Identifies which components need to be scaled up
-   *
-   * @return Map &lt; component name, scale up factor &gt;
-   */
-  private Map<String, Integer> getComponentsToScaleUp(Map<String, Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleUp = new HashMap<String, Integer>();
-    for (Map.Entry<String, Integer> entry : componentChanges.entrySet()) {
-      if (entry.getValue() > 0) {
-        componentsToScaleUp.put(entry.getKey(), entry.getValue());
-      }
-    }
-    return componentsToScaleUp;
-  }
-
-  /**
    * Generates the containers that correspond to the current packing plan
    * along with their associated instances.
    *
@@ -320,7 +292,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     Resource capacity = currentPackingPlan.getMaxContainerResources();
     for (int i = 0; i < currentContainers.length; i++) {
-      int containerId = allocateNewContainer(containers, capacity);
+      int containerId = PackingUtils.allocateNewContainer(
+          containers, capacity, this.paddingPercentage);
       for (PackingPlan.InstancePlan instancePlan
           : currentContainers[i].getInstances()) {
         containers.get(containerId - 1).add(instancePlan);
@@ -418,7 +391,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       }
     }
     if (!placed) {
-      containerId = allocateNewContainer(containers);
+      containerId = PackingUtils.allocateNewContainer(containers, maxContainerResources,
+          this.paddingPercentage);
       containers.get(containerId - 1).add(instancePlan);
     }
     return containerId;
@@ -448,26 +422,5 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     throw new RuntimeException("Cannot remove instance."
         + " No more instances of component " + component + " exist"
         + " in the containers.");
-  }
-
-  /**
-   * Allocate a new container taking into account the maximum resource requirements specified
-   * in the config
-   *
-   * @return the number of containers
-   */
-  private int allocateNewContainer(ArrayList<Container> containers) {
-    containers.add(new Container(maxContainerResources, this.paddingPercentage));
-    return containers.size();
-  }
-
-  /**
-   * Allocate a new container of a given capacity
-   *
-   * @return the number of containers
-   */
-  private int allocateNewContainer(ArrayList<Container> containers, Resource capacity) {
-    containers.add(new Container(capacity, this.paddingPercentage));
-    return containers.size();
   }
 }

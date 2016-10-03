@@ -181,7 +181,6 @@ public final class WordCountTopology {
     */
     conf.setComponentRam("word", 2L * 1024 * 1024 * 1024);
     conf.setComponentRam("consumer", 3L * 1024 * 1024 * 1024);
-//    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
     conf.setContainerCpuRequested(6);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());

@@ -57,7 +57,7 @@ public final class ExclamationTopology {
       conf.setNumStmgrs(parallelism);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
-      System.out.println("Toplogy name not provided as an argument, running in simulator mode.");
+      System.out.println("Topology name not provided as an argument, running in simulator mode.");
       LocalCluster cluster = new LocalCluster();
       cluster.submitTopology("test", conf, builder.createTopology());
       Utils.sleep(10000);

@@ -219,7 +219,7 @@ public class ResourceCompliantRRPacking implements IPacking {
       allocation.put(i, new ArrayList<InstanceId>());
     }
     for (int i = 0; i <= numContainers - 1; i++) {
-      allocateNewContainer(containers);
+      PackingUtils.allocateNewContainer(containers, maxContainerResources, this.paddingPercentage);
     }
     int containerId = 1;
     int globalTaskIndex = 1;
@@ -258,18 +258,6 @@ public class ResourceCompliantRRPacking implements IPacking {
                                                    PackingPlan.InstancePlan instancePlan) {
     return containers.get(containerId - 1).add(instancePlan);
   }
-
-  /**
-   * Allocate a new container taking into account the maximum resource requirements specified
-   * in the config
-   *
-   * @return the number of containers
-   */
-  private int allocateNewContainer(ArrayList<Container> containers) {
-    containers.add(new Container(this.maxContainerResources, this.paddingPercentage));
-    return containers.size();
-  }
-
 }
 
 

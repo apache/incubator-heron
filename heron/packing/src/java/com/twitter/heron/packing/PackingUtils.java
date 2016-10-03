@@ -15,6 +15,7 @@ package com.twitter.heron.packing;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -171,6 +172,51 @@ public final class PackingUtils {
 
   public static double increaseBy(double value, int paddingPercentage) {
     return value + (paddingPercentage * value) / 100;
+  }
+
+  /**
+   * Allocate a new container of a given capacity
+   *
+   * @return the number of containers
+   */
+  public static int allocateNewContainer(ArrayList<Container> containers, Resource capacity,
+                                         int paddingPercentage) {
+    containers.add(new Container(capacity, paddingPercentage));
+    return containers.size();
+  }
+
+  /**
+   * Identifies which components need to be scaled down
+   *
+   * @return Map &lt; component name, scale down factor &gt;
+   */
+  public static Map<String, Integer> getComponentsToScaleDown(Map<String,
+      Integer> componentChanges) {
+    Map<String, Integer> componentsToScaleDown = new HashMap<String, Integer>();
+    for (String component : componentChanges.keySet()) {
+      int parallelismChange = componentChanges.get(component);
+      if (parallelismChange < 0) {
+        componentsToScaleDown.put(component, parallelismChange);
+      }
+    }
+    return componentsToScaleDown;
+  }
+
+  /**
+   * Identifies which components need to be scaled up
+   *
+   * @return Map &lt; component name, scale up factor &gt;
+   */
+  public static Map<String, Integer> getComponentsToScaleUp(Map<String,
+      Integer> componentChanges) {
+    Map<String, Integer> componentsToScaleUp = new HashMap<String, Integer>();
+    for (String component : componentChanges.keySet()) {
+      int parallelismChange = componentChanges.get(component);
+      if (parallelismChange > 0) {
+        componentsToScaleUp.put(component, parallelismChange);
+      }
+    }
+    return componentsToScaleUp;
   }
 
 }
