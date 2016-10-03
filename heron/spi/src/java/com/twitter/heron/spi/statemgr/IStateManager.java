@@ -66,6 +66,8 @@ public interface IStateManager extends AutoCloseable {
    */
   void close();
 
+  Lock getLock(String topologyName, String lockName);
+
   /**
    * Is the given topology in RUNNING state?
    *

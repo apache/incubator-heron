@@ -29,6 +29,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
+import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Watcher;
@@ -43,6 +44,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.statemgr.FileSystemStateManager;
@@ -99,6 +101,38 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     if (ZkContext.isInitializeTree(newConfig)) {
       initTree();
+    }
+  }
+
+  private final class DistributedLock implements Lock {
+    private String path;
+    private InterProcessSemaphoreMutex lock;
+
+    private DistributedLock(CuratorFramework client, String path) {
+      this.path = path;
+      this.lock = new InterProcessSemaphoreMutex(client, path);
+    }
+
+    @Override
+    public boolean tryLock(long timeout, TimeUnit unit) throws InterruptedException {
+      try {
+        return this.lock.acquire(timeout, unit);
+      } catch (InterruptedException e) {
+        throw e;
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Exception e) {
+        throw new RuntimeException("Error during tryLock(..) on distributed lock at " + path, e);
+      }
+    }
+
+    @Override
+    public void unlock() {
+      try {
+        this.lock.release();
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Exception e) {
+        throw new RuntimeException("Error during unlock() on distributed lock at " + path, e);
+      }
     }
   }
 
@@ -262,6 +296,12 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
 
     return future;
+  }
+
+  @Override
+  public Lock getLock(String topologyName, String lockName) {
+    return new DistributedLock(this.client,
+        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName));
   }
 
   @Override

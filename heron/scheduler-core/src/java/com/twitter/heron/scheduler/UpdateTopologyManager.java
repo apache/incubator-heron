@@ -26,8 +26,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -41,6 +39,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScalable;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
@@ -62,7 +61,6 @@ public class UpdateTopologyManager implements Closeable {
   private Optional<IScalable> scalableScheduler;
   private PackingPlanProtoDeserializer deserializer;
   private ScheduledThreadPoolExecutor reactivateExecutorService;
-  private Lock lock;
 
   public UpdateTopologyManager(Config config, Config runtime,
                                Optional<IScalable> scalableScheduler) {
@@ -72,7 +70,6 @@ public class UpdateTopologyManager implements Closeable {
     this.deserializer = new PackingPlanProtoDeserializer();
     this.reactivateExecutorService = new ScheduledThreadPoolExecutor(1);
     this.reactivateExecutorService.setMaximumPoolSize(1);
-    this.lock = new ReentrantLock();
   }
 
   @Override
@@ -92,8 +89,9 @@ public class UpdateTopologyManager implements Closeable {
       throws ExecutionException, InterruptedException, ConcurrentModificationException {
     String topologyName = Runtime.topologyName(runtime);
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+    Lock lock = stateManager.getLock(topologyName, "updateTopology");
 
-    if (lock.tryLock()) {
+    if (lock.tryLock(5, TimeUnit.SECONDS)) {
       try {
         PackingPlans.PackingPlan foundPackingPlan = getPackingPlan(stateManager, topologyName);
 

@@ -13,10 +13,12 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Optional;
 
@@ -32,6 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -43,6 +46,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScalable;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.PackingTestUtils;
@@ -59,6 +63,11 @@ public class UpdateTopologyManagerTest {
   private Set<PackingPlan.ContainerPlan> expectedContainersToAdd;
   private Set<PackingPlan.ContainerPlan> expectedContainersToRemove;
 
+  private PackingPlan proposedPacking;
+  private PackingPlans.PackingPlan currentProtoPlan;
+  private PackingPlans.PackingPlan proposedProtoPlan;
+  private TopologyAPI.Topology testTopology;
+
   @Before
   public void init() {
     Integer[] instanceIndexA = new Integer[] {37, 48, 59};
@@ -67,6 +76,55 @@ public class UpdateTopologyManagerTest {
     proposedContainerPlan = buildContainerSet(new Integer[] {1, 3, 5, 6}, instanceIndexB);
     expectedContainersToAdd = buildContainerSet(new Integer[] {5, 6}, instanceIndexB);
     expectedContainersToRemove = buildContainerSet(new Integer[] {2, 4}, instanceIndexA);
+
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlan currentPacking = new PackingPlan("current", currentContainerPlan);
+    proposedPacking = new PackingPlan("proposed", proposedContainerPlan);
+
+    currentProtoPlan = serializer.toProto(currentPacking);
+    proposedProtoPlan = serializer.toProto(proposedPacking);
+
+    testTopology = TopologyTests.createTopology(
+        TOPOLOGY_NAME, new com.twitter.heron.api.Config(), "spoutname", "boltname", 1, 1);
+    Assert.assertEquals(TopologyAPI.TopologyState.RUNNING, testTopology.getState());
+  }
+
+  private static Lock mockLock(boolean available) throws InterruptedException {
+    Lock lock = Mockito.mock(Lock.class);
+    when(lock.tryLock(any(Long.class), any(TimeUnit.class))).thenReturn(available);
+    return lock;
+  }
+
+  private static SchedulerStateManagerAdaptor mockStateManager(TopologyAPI.Topology topology,
+                                                               PackingPlans.PackingPlan packingPlan,
+                                                               Lock lock) {
+    SchedulerStateManagerAdaptor stateManager = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    when(stateManager.getPhysicalPlan(TOPOLOGY_NAME))
+        .thenReturn(PhysicalPlans.PhysicalPlan.getDefaultInstance());
+    when(stateManager.getTopology(TOPOLOGY_NAME)).thenReturn(topology);
+    when(stateManager.getPackingPlan(eq(TOPOLOGY_NAME))).thenReturn(packingPlan);
+    when(stateManager.getLock(eq(TOPOLOGY_NAME), eq("updateTopology"))).thenReturn(lock);
+    return stateManager;
+  }
+
+  private static Config mockRuntime(SchedulerStateManagerAdaptor stateManager) {
+    Config runtime = Mockito.mock(Config.class);
+    when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
+    when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(stateManager);
+    return runtime;
+  }
+
+  private UpdateTopologyManager spyUpdateManager(SchedulerStateManagerAdaptor stateManager,
+                                                 IScalable scheduler,
+                                                 TopologyAPI.Topology updatedTopology) {
+    Config mockRuntime = mockRuntime(stateManager);
+    UpdateTopologyManager spyUpdateManager = Mockito.spy(new UpdateTopologyManager(
+        Mockito.mock(Config.class), mockRuntime, Optional.of(scheduler))
+    );
+
+    when(spyUpdateManager.getUpdatedTopology(TOPOLOGY_NAME, this.proposedPacking, stateManager))
+        .thenReturn(updatedTopology);
+    return spyUpdateManager;
   }
 
   @Test
@@ -81,40 +139,14 @@ public class UpdateTopologyManagerTest {
    * Test scalable scheduler invocation
    */
   @Test
-  @PrepareForTest({TMasterUtils.class, Thread.class})
+  @PrepareForTest(TMasterUtils.class)
   public void requestsToAddAndRemoveContainers() throws Exception {
-    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
-
-    PackingPlan currentPacking = new PackingPlan("current", currentContainerPlan);
-    PackingPlan proposedPacking = new PackingPlan("proposed", proposedContainerPlan);
-
-    PackingPlans.PackingPlan currentProtoPlan = serializer.toProto(currentPacking);
-    PackingPlans.PackingPlan proposedProtoPlan = serializer.toProto(proposedPacking);
-
-    SchedulerStateManagerAdaptor mockStateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
-    when(mockStateMgr.getPhysicalPlan(TOPOLOGY_NAME))
-        .thenReturn(PhysicalPlans.PhysicalPlan.getDefaultInstance());
-
-    Config mockConfig = Mockito.mock(Config.class);
-    Config mockRuntime = Mockito.mock(Config.class);
-    when(mockRuntime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
-    when(mockRuntime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(mockStateMgr);
-
+    Lock lock = mockLock(true);
+    SchedulerStateManagerAdaptor mockStateMgr = mockStateManager(
+        testTopology, this.currentProtoPlan, lock);
     IScalable mockScheduler = Mockito.mock(IScalable.class);
-
-    UpdateTopologyManager updateManager
-        = new UpdateTopologyManager(mockConfig, mockRuntime, Optional.of(mockScheduler));
-    UpdateTopologyManager spyUpdateManager = Mockito.spy(updateManager);
-
-    TopologyAPI.Topology topology = TopologyTests.createTopology(
-        TOPOLOGY_NAME, new com.twitter.heron.api.Config(), "spoutname", "boltname", 1, 1);
-    Mockito.doReturn(topology).when(spyUpdateManager).
-        getUpdatedTopology(TOPOLOGY_NAME, proposedPacking, mockStateMgr);
-    Mockito.doReturn(currentProtoPlan).when(spyUpdateManager).
-        getPackingPlan(eq(mockStateMgr), eq(TOPOLOGY_NAME));
-
-    Mockito.doReturn(topology).when(mockStateMgr).getTopology(TOPOLOGY_NAME);
-    Assert.assertEquals(TopologyAPI.TopologyState.RUNNING, topology.getState());
+    UpdateTopologyManager spyUpdateManager =
+        spyUpdateManager(mockStateMgr, mockScheduler, testTopology);
 
     PowerMockito.spy(TMasterUtils.class);
     PowerMockito.doReturn(true).when(TMasterUtils.class, "sendToTMaster",
@@ -123,10 +155,12 @@ public class UpdateTopologyManagerTest {
 
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
-    Mockito.verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(topology));
-    Mockito.verify(spyUpdateManager).reactivateTopology(eq(mockStateMgr), eq(topology), eq(2));
-    Mockito.verify(mockScheduler).addContainers(expectedContainersToAdd);
-    Mockito.verify(mockScheduler).removeContainers(expectedContainersToRemove);
+    verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(testTopology));
+    verify(spyUpdateManager).reactivateTopology(eq(mockStateMgr), eq(testTopology), eq(2));
+    verify(mockScheduler).addContainers(expectedContainersToAdd);
+    verify(mockScheduler).removeContainers(expectedContainersToRemove);
+    verify(lock).tryLock(any(Long.class), any(TimeUnit.class));
+    verify(lock).unlock();
 
     PowerMockito.verifyStatic(times(1));
     TMasterUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
@@ -139,6 +173,16 @@ public class UpdateTopologyManagerTest {
         eq(TMasterUtils.TMasterCommand.ACTIVATE), eq(mockStateMgr),
         eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING),
         any(NetworkUtils.TunnelConfig.class));
+  }
+
+  @Test(expected = ConcurrentModificationException.class)
+  public void testLockTaken() throws Exception {
+    SchedulerStateManagerAdaptor mockStateMgr = mockStateManager(
+        testTopology, this.currentProtoPlan, mockLock(false));
+    UpdateTopologyManager spyUpdateManager =
+        spyUpdateManager(mockStateMgr, Mockito.mock(IScalable.class), testTopology);
+
+    spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
   }
 
   @Test
@@ -177,7 +221,7 @@ public class UpdateTopologyManagerTest {
   }
 
   private void assertParallelism(TopologyAPI.Topology topology,
-                                 Map<String, Integer> expectedSouts,
+                                 Map<String, Integer> expectedSpouts,
                                  Map<String, Integer> expectedBolts) {
     for (String boltName : expectedBolts.keySet()) {
       String foundParallelism = null;
@@ -190,7 +234,7 @@ public class UpdateTopologyManagerTest {
       Assert.assertEquals(Integer.toString(expectedBolts.get(boltName)), foundParallelism);
     }
 
-    for (String spoutName : expectedSouts.keySet()) {
+    for (String spoutName : expectedSpouts.keySet()) {
       String foundParallelism = null;
       for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
         foundParallelism = getParallelism(spout.getComp(), spoutName);
@@ -198,7 +242,7 @@ public class UpdateTopologyManagerTest {
           break;
         }
       }
-      Assert.assertEquals(Integer.toString(expectedSouts.get(spoutName)), foundParallelism);
+      Assert.assertEquals(Integer.toString(expectedSpouts.get(spoutName)), foundParallelism);
     }
   }
 
