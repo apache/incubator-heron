@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,7 +97,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     Map<String, String> auroraProperties = createAuroraProperties(updatedPackingPlan);
 
-    return controller.createJob(getHeronAuroraPath(), auroraProperties);
+    return controller.createJob(AuroraContext.getHeronAuroraPath(config), auroraProperties);
   }
 
   @Override
@@ -158,10 +157,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
         javaOpts.getBytes(Charset.forName("UTF-8")));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  protected String getHeronAuroraPath() {
-    return new File(Context.heronConf(config), "heron.aurora").getPath();
   }
 
   protected Map<String, String> createAuroraProperties(PackingPlan packing) {
