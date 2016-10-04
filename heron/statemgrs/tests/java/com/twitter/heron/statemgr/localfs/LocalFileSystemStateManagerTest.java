@@ -14,6 +14,9 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.After;
@@ -21,7 +24,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -34,6 +36,13 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.statemgr.Lock;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 
 /**
  * LocalFileSystemStateManager Tester.
@@ -43,6 +52,7 @@ import com.twitter.heron.spi.common.Keys;
 public class LocalFileSystemStateManagerTest {
 
   private static final String TOPOLOGY_NAME = "topologyName";
+  private static final String LOCK_NAME = "topologyName";
   private static final String ROOT_ADDR = "/";
   private LocalFileSystemStateManager manager;
 
@@ -62,17 +72,14 @@ public class LocalFileSystemStateManagerTest {
 
   private void initMocks() throws Exception {
     PowerMockito.spy(FileUtils.class);
-    PowerMockito.doReturn(true).
-        when(FileUtils.class, "createDirectory", Matchers.anyString());
+    PowerMockito.doReturn(true).when(FileUtils.class, "createDirectory", anyString());
 
     Assert.assertTrue(manager.initTree());
 
-    PowerMockito.doReturn(true).
-        when(FileUtils.class, "writeToFile", Mockito.anyString(), Mockito.any(byte[].class),
-            Mockito.anyBoolean());
+    PowerMockito.doReturn(true)
+        .when(FileUtils.class, "writeToFile", anyString(), any(byte[].class), anyBoolean());
 
-    PowerMockito.doReturn(true).
-        when(FileUtils.class, "deleteFile", Matchers.anyString());
+    PowerMockito.doReturn(true).when(FileUtils.class, "deleteFile", anyString());
   }
 
   @Test
@@ -80,7 +87,7 @@ public class LocalFileSystemStateManagerTest {
     initMocks();
 
     PowerMockito.verifyStatic(Mockito.atLeastOnce());
-    FileUtils.createDirectory(Matchers.anyString());
+    FileUtils.createDirectory(anyString());
   }
 
   /**
@@ -93,9 +100,9 @@ public class LocalFileSystemStateManagerTest {
         .setTopologyName(TOPOLOGY_NAME)
         .build();
     PowerMockito.spy(FileUtils.class);
-    PowerMockito.doReturn(true).when(FileUtils.class, "isFileExists", Matchers.anyString());
+    PowerMockito.doReturn(true).when(FileUtils.class, "isFileExists", anyString());
     PowerMockito.doReturn(location.toByteArray()).
-        when(FileUtils.class, "readFromFile", Matchers.anyString());
+        when(FileUtils.class, "readFromFile", anyString());
 
     Scheduler.SchedulerLocation locationFetched =
         manager.getSchedulerLocation(null, TOPOLOGY_NAME).get();
@@ -109,11 +116,11 @@ public class LocalFileSystemStateManagerTest {
   @Test
   public void testSetSchedulerLocation() throws Exception {
     Mockito.doReturn(Mockito.mock(ListenableFuture.class)).when(manager).
-        setData(Mockito.anyString(), Mockito.any(byte[].class), Mockito.anyBoolean());
+        setData(anyString(), any(byte[].class), anyBoolean());
 
     manager.setSchedulerLocation(Scheduler.SchedulerLocation.getDefaultInstance(), "");
     Mockito.verify(manager).
-        setData(Mockito.anyString(), Mockito.any(byte[].class), Mockito.eq(true));
+        setData(anyString(), any(byte[].class), eq(true));
   }
 
   /**
@@ -192,13 +199,43 @@ public class LocalFileSystemStateManagerTest {
     assertDeleteFile(String.format("%s/%s/%s", ROOT_ADDR, "packingplans", TOPOLOGY_NAME));
   }
 
+  @Test
+  public void testGetLock() throws Exception {
+    initMocks();
+    String expectedLockPath = String.format("//locks/%s/%s", TOPOLOGY_NAME, LOCK_NAME);
+    byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
+
+    Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
+
+    Assert.assertTrue(lock.tryLock(0, TimeUnit.MILLISECONDS));
+    assertWriteToFile(expectedLockPath, expectedContents, false);
+
+    lock.unlock();
+    assertDeleteFile(expectedLockPath);
+  }
+
+  @Test
+  public void testLockTaken() throws Exception {
+    String expectedLockPath = String.format("//locks/%s/%s", TOPOLOGY_NAME, LOCK_NAME);
+    byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
+
+    PowerMockito.spy(FileUtils.class);
+    PowerMockito.doReturn(false)
+        .when(FileUtils.class, "writeToFile", anyString(), any(byte[].class), anyBoolean());
+
+    Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
+
+    Assert.assertFalse(lock.tryLock(0, TimeUnit.MILLISECONDS));
+    assertWriteToFile(expectedLockPath, expectedContents, false);
+  }
+
   private static void assertWriteToFile(String path, byte[] bytes, boolean overwrite) {
-    PowerMockito.verifyStatic();
-    FileUtils.writeToFile(Matchers.eq(path), Matchers.eq(bytes), Mockito.eq(overwrite));
+    PowerMockito.verifyStatic(times(1));
+    FileUtils.writeToFile(eq(path), eq(bytes), eq(overwrite));
   }
 
   private static void assertDeleteFile(String path) {
-    PowerMockito.verifyStatic();
-    FileUtils.deleteFile(Matchers.eq(path));
+    PowerMockito.verifyStatic(times(1));
+    FileUtils.deleteFile(eq(path));
   }
 }

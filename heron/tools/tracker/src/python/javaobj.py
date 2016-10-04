@@ -21,6 +21,7 @@ library marshal, pickle and json modules.
 See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protocol.html
 """
 
+import StringIO
 import struct
 from heron.common.src.python.utils.log import Log
 

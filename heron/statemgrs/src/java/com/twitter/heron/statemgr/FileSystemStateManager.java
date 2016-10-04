@@ -45,7 +45,8 @@ public abstract class FileSystemStateManager implements IStateManager {
     PACKING_PLAN("packingplans", "Packing plan"),
     PHYSICAL_PLAN("pplans", "Physical plan"),
     EXECUTION_STATE("executionstate", "Execution state"),
-    SCHEDULER_LOCATION("schedulers", "Scheduler location");
+    SCHEDULER_LOCATION("schedulers", "Scheduler location"),
+    LOCKS("locks", "Distributed locks");
 
     private final String dir;
     private final String name;
@@ -65,6 +66,10 @@ public abstract class FileSystemStateManager implements IStateManager {
 
     public String getNodePath(String root, String topology) {
       return concatPath(getDirectory(root), topology);
+    }
+
+    public String getNodePath(String root, String topology, String extraToken) {
+      return concatPath(getNodePath(root, topology), extraToken);
     }
 
     private static String concatPath(String basePath, String appendPath) {

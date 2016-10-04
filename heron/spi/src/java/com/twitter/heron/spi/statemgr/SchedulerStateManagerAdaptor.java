@@ -81,6 +81,10 @@ public class SchedulerStateManagerAdaptor {
     }
   }
 
+  public Lock getLock(String topologyName, String lockName) {
+    return delegate.getLock(topologyName, lockName);
+  }
+
   /**
    * Is the given topology in RUNNING state?
    *

@@ -21,6 +21,7 @@ zookeeper_deps_files = \
     localfs_deps_files + [
         "@org_apache_curator_curator_client//jar",
         "@org_apache_curator_curator_framework//jar",
+        "@org_apache_curator_curator_recipes//jar",
         "@org_apache_zookeeper_zookeeper//jar",
         "//third_party/java:logging"
     ]
