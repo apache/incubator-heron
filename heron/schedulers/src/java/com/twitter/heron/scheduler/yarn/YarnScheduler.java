@@ -43,7 +43,8 @@ public class YarnScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config config, Config runtime) {
-    this.updateTopologyManager = new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
+    this.updateTopologyManager =
+        new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
   }
 
   @Override
