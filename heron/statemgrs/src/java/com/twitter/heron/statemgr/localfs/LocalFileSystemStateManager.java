@@ -42,8 +42,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   /**
    * Local filesystem implementation of a lock that mimics the file system behavior of the
-   * distributed lock. Only intended for local mode testing, not production. Not guaranteed to be
-   * truly atomic due to limitations in the underlying file system read/write semantics.
+   * distributed lock.
    */
   private final class FileSystemLock implements Lock {
     private String path;
