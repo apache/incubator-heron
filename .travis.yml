@@ -29,8 +29,8 @@ before_install:
   - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
 
   # upgrade python to 2.7.10
-  - sudo add-apt-repository ppa:fkrull/deadsnakes-python2.7
-  - sudo apt-get update
+  - sudo add-apt-repository ppa:fkrull/deadsnakes-python2.7 -y
+  - sudo apt-get update -q
   - sudo apt-get upgrade
 
   # download and install bazel
