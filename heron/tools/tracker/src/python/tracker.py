@@ -349,6 +349,7 @@ class Tracker(object):
                                      indent=2),
                 'raw' : utils.hex_escape(kvs.serialized_value)}
           except Exception:
+            Log.exception("Failed to parse data as java object")
             physicalPlan["config"][kvs.key] = {
                 'value' : 'A Java Object',
                 'raw' : utils.hex_escape(kvs.serialized_value)}
