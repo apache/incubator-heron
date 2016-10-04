@@ -29,9 +29,9 @@ before_install:
   - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
 
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.2.3-installer-linux-x86_64.sh
-  - ./bazel-0.2.3-installer-linux-x86_64.sh --user
+  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh'
+  - chmod +x bazel-0.3.1-installer-linux-x86_64.sh
+  - ./bazel-0.3.1-installer-linux-x86_64.sh --user
 
 before_script:
   # required for building the website docs
