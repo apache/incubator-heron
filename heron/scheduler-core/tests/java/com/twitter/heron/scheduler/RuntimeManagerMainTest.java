@@ -16,16 +16,22 @@ package com.twitter.heron.scheduler;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.statemgr.NullStateManager;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 
+@RunWith(PowerMockRunner.class)
 public class RuntimeManagerMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String TOPOLOGY_ID = "topologyId";
@@ -77,6 +83,7 @@ public class RuntimeManagerMainTest {
    * Test manageTopology()
    */
   @Test
+  @PrepareForTest(ReflectionUtils.class)
   public void testManageTopology() throws Exception {
     Config config = Mockito.mock(Config.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
@@ -92,7 +99,10 @@ public class RuntimeManagerMainTest {
 
     // Valid state manager class
     Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
-        thenReturn(NullStateManager.class.getName());
+        thenReturn(IStateManager.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
 
     // Failed to valid
     Mockito.doReturn(false).when(runtimeManagerMain).
