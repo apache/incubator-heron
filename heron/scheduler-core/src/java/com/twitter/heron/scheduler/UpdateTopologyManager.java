@@ -269,6 +269,7 @@ public class UpdateTopologyManager implements Closeable {
     @Override
     public synchronized void run() {
       PhysicalPlans.PhysicalPlan physicalPlan = stateManager.getPhysicalPlan(topologyName);
+
       if (physicalPlan != null) {
         logInfo("Received packing plan for topology %s. "
             + "Reactivating topology after scaling event", topologyName);
