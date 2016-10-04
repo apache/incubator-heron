@@ -67,7 +67,7 @@ public class SchedulerClientFactoryTest {
     Config config = Mockito.mock(Config.class);
     Config runtime = Mockito.mock(Config.class);
 
-    // Return a NullScheduler
+    // Return a MockScheduler
     Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS")))
         .thenReturn(IScheduler.class.getName());
     PowerMockito.mockStatic(ReflectionUtils.class);
