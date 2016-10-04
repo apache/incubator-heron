@@ -66,8 +66,6 @@ public interface IStateManager extends AutoCloseable {
    */
   void close();
 
-  Lock getLock(String topologyName, String lockName);
-
   /**
    * Return a lock object backed by the state manager store.
    *
