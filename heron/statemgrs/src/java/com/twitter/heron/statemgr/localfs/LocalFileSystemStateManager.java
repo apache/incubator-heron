@@ -14,7 +14,9 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -31,11 +33,48 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
+
+  /**
+   * Local filesystem implementation of a lock that mimics the file system behavior of the
+   * distributed lock.
+   */
+  private final class FileSystemLock implements Lock {
+    private String path;
+
+    private FileSystemLock(String path) {
+      this.path = path;
+    }
+
+    @Override
+    public boolean tryLock(long timeout, TimeUnit unit) throws InterruptedException {
+      long giveUpAtMillis = System.currentTimeMillis() + unit.toMillis(timeout);
+      byte[] fileContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
+      while (true) {
+        try {
+          if (setData(this.path, fileContents, false).get()) {
+            return true;
+          } else if (System.currentTimeMillis() >= giveUpAtMillis) {
+            return false;
+          } else {
+            TimeUnit.SECONDS.sleep(2); // need to pole the filesystem for availability
+          }
+        } catch (ExecutionException e) {
+          // this is thrown when the file exists, which means the lock can't be obtained
+        }
+      }
+    }
+
+    @Override
+    public void unlock() {
+      deleteNode(this.path);
+    }
+  }
 
   @Override
   public void initialize(Config ipconfig) {
@@ -162,6 +201,12 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // This is because when running in simulator we control when a scheduler dies and
     // comes up deterministically.
     return setData(StateLocation.SCHEDULER_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
+  public Lock getLock(String topologyName, String lockName) {
+    return new FileSystemLock(
+        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName));
   }
 
   @Override

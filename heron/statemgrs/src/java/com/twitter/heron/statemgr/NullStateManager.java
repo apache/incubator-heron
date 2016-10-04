@@ -14,6 +14,8 @@
 
 package com.twitter.heron.statemgr;
 
+import javax.naming.OperationNotSupportedException;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -25,6 +27,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
 public class NullStateManager implements IStateManager {
@@ -38,6 +41,11 @@ public class NullStateManager implements IStateManager {
   @Override
   public void close() {
 
+  }
+
+  @Override
+  public Lock getLock(String topologyName, String lockName) {
+    throw new RuntimeException(new OperationNotSupportedException());
   }
 
   @Override
