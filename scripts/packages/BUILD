@@ -32,7 +32,7 @@ generated_release_files = [
 ]
 
 generated_pyheron_egg_file = [
-    "pyheron.egg",
+    "pyheron.whl",
 ]
 
 filegroup(
@@ -298,9 +298,10 @@ genrule(
         'cp $(SRCS) $$PYHERON_DIR',
         'echo "PyHeron toplevel directory: $$PYHERON_DIR"',
         'cd $$PYHERON_DIR',
-        '/usr/bin/env python2.7 setup.py bdist_egg',
+        '/usr/bin/env python2.7 setup.py bdist_wheel',
         'ls -l $$PYHERON_DIR/dist',
-        'cp $$PYHERON_DIR/dist/pyheron*py2.7.egg $$OUTPUT_DIR/pyheron.egg',
+        'cp $$PYHERON_DIR/dist/pyheron-*-py2-*.whl $$OUTPUT_DIR',
+        'touch $$OUTPUT_DIR/pyheron.whl',
         'rm -rf $$TMP_DIR',
     ]),
 )
