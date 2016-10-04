@@ -104,6 +104,11 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
   }
 
+  /**
+   * Lock backed by {@code InterProcessSemaphoreMutex}. Guaranteed to atomically get a
+   * distributed ephemeral lock backed by zookeeper. The lock should be explicitly released to
+   * avoid unnecessary waiting by other threads waiting on it.
+   */
   private final class DistributedLock implements Lock {
     private String path;
     private InterProcessSemaphoreMutex lock;
@@ -121,7 +126,7 @@ public class CuratorStateManager extends FileSystemStateManager {
         throw e;
         // SUPPRESS CHECKSTYLE IllegalCatch
       } catch (Exception e) {
-        throw new RuntimeException("Error during tryLock(..) on distributed lock at " + path, e);
+        throw new RuntimeException("Error while trying to acquire distributed lock at " + path, e);
       }
     }
 
@@ -131,7 +136,7 @@ public class CuratorStateManager extends FileSystemStateManager {
         this.lock.release();
         // SUPPRESS CHECKSTYLE IllegalCatch
       } catch (Exception e) {
-        throw new RuntimeException("Error during unlock() on distributed lock at " + path, e);
+        throw new RuntimeException("Error while trying to release distributed lock at " + path, e);
       }
     }
   }
