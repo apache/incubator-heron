@@ -43,7 +43,7 @@ before_script:
 
   # install python module for wheel files
   # required for python packaging
-  - pip install wheel
+  - sudo pip install wheel
 
 script:
   - which gcc-4.8
