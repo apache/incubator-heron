@@ -82,13 +82,18 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_curator_curator_client",
+  artifact = "org.apache.curator:curator-client:" + curator_version,
+)
+
+maven_jar(
   name = "org_apache_curator_curator_framework",
   artifact = "org.apache.curator:curator-framework:" + curator_version,
 )
 
 maven_jar(
-  name = "org_apache_curator_curator_client",
-  artifact = "org.apache.curator:curator-client:" + curator_version,
+  name = "org_apache_curator_curator_recipes",
+  artifact = "org.apache.curator:curator-recipes:" + curator_version,
 )
 
 maven_jar(
