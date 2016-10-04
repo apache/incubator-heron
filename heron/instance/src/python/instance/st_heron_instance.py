@@ -27,7 +27,7 @@ from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, Met
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
-from heron.proto import physical_plan_pb2, stmgr_pb2
+from heron.proto import physical_plan_pb2, tuple_pb2
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
@@ -109,13 +109,38 @@ class SingleThreadHeronInstance(object):
       if self.my_pplan_helper.is_topology_running():
         self.my_instance.py_class.process_incoming_tuples()
 
+  def handle_new_tuple_set_2(self, hts2):
+    """Called when new HeronTupleSet2 arrives
+       Convert(Assemble) HeronTupleSet2(raw byte array) to HeronTupleSet
+       See more at GitHub PR #1421
+    :param tuple_msg_set: HeronTupleSet2 type
+    """
+    if self.my_pplan_helper is None or self.my_instance is None:
+      Log.error("Got tuple set when no instance assigned yet")
+    else:
+      hts = tuple_pb2.HeronTupleSet()
+      if hts2.HasField('control'):
+        hts.control.CopyFrom(hts2.control)
+      else:
+        hdts = tuple_pb2.HeronDataTupleSet()
+        hdts.stream.CopyFrom(hts2.data.stream)
+        try:
+          for trunk in hts2.data.tuples:
+            added_tuple = hdts.tuples.add()
+            added_tuple.ParseFromString(trunk)
+        except Exception:
+          Log.exception('Fail to deserialize HeronDataTuple')
+        hts.data.CopyFrom(hdts)
+      self.in_stream.offer(hts)
+      if self.my_pplan_helper.is_topology_running():
+        self.my_instance.py_class.process_incoming_tuples()
+
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
     while not self.out_stream.is_empty():
       tuple_set = self.out_stream.poll()
-      msg = stmgr_pb2.TupleMessage()
-      msg.set.CopyFrom(tuple_set)
-      self._stmgr_client.send_message(msg)
+      self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
+      self._stmgr_client.send_message(tuple_set)
 
   def handle_state_change_msg(self, new_helper):
     """Called when state change is commanded by stream manager"""
@@ -152,8 +177,8 @@ class SingleThreadHeronInstance(object):
     if pplan_helper.is_spout:
       # Starting a spout
       my_spout = pplan_helper.get_my_spout()
-      Log.info("Incarnating ourselves as spout: %s with task id %s"
-               % (pplan_helper.my_component_name, str(pplan_helper.my_task_id)))
+      Log.info("Incarnating ourselves as spout: %s with task id %s",
+               pplan_helper.my_component_name, str(pplan_helper.my_task_id))
 
       self.in_stream. \
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY])
@@ -168,8 +193,8 @@ class SingleThreadHeronInstance(object):
     else:
       # Starting a bolt
       my_bolt = pplan_helper.get_my_bolt()
-      Log.info("Incarnating ourselves as bolt: %s with task id %s"
-               % (pplan_helper.my_component_name, str(pplan_helper.my_task_id)))
+      Log.info("Incarnating ourselves as bolt: %s with task id %s",
+               pplan_helper.my_component_name, str(pplan_helper.my_task_id))
 
       self.in_stream. \
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY])
@@ -199,7 +224,7 @@ class SingleThreadHeronInstance(object):
       Log.info("Started instance successfully.")
     except Exception as e:
       Log.error(traceback.format_exc())
-      Log.error("Error when starting bolt/spout, bailing out...: %s" % e.message)
+      Log.error("Error when starting bolt/spout, bailing out...: %s", e.message)
       self.looper.exit_loop()
 
 def print_usage(argv0):
