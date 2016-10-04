@@ -8,7 +8,6 @@ jdk:
 addons:
   apt:
     sources:
-      - deadsnakes
       - ubuntu-toolchain-r-test
     packages:
       - gcc-4.8
@@ -50,4 +49,8 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version
+  - which python
+  - python -V
+  - which python2.7 
+  - python2.7 -V
   - scripts/travis/ci.sh
