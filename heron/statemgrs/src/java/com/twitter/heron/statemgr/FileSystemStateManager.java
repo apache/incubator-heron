@@ -69,7 +69,7 @@ public abstract class FileSystemStateManager implements IStateManager {
     }
 
     public String getNodePath(String root, String topology, String extraToken) {
-      return concatPath(getNodePath(root, topology), extraToken);
+      return getNodePath(root, String.format("%s__%s", topology, extraToken));
     }
 
     private static String concatPath(String basePath, String appendPath) {
