@@ -59,7 +59,7 @@ public class LocalScheduler implements IScheduler, IScalable {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.updateTopologyManager =
-        new UpdateTopologyManager(runtime, Optional.<IScalable>of(this));
+        new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
   }
 
   @Override
@@ -69,6 +69,10 @@ public class LocalScheduler implements IScheduler, IScalable {
 
     // Clear the map
     processToContainer.clear();
+
+    if (updateTopologyManager != null) {
+      updateTopologyManager.close();
+    }
   }
 
   /**

@@ -16,7 +16,6 @@ package com.twitter.heron.scheduler;
 
 import java.net.URI;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -34,6 +33,19 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ReflectionUtils.class)
 public class SubmitterMainTest {
@@ -46,21 +58,21 @@ public class SubmitterMainTest {
 
   @Test
   public void testValidateSubmit() throws Exception {
-    Config config = Mockito.mock(Config.class);
+    Config config = mock(Config.class);
 
-    SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
 
     // Topology is running
-    Mockito.when(adaptor.isTopologyRunning(Mockito.eq(TOPOLOGY_NAME))).thenReturn(true);
-    Assert.assertFalse(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    assertFalse(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
 
     // Topology is not running
-    Mockito.when(adaptor.isTopologyRunning(Mockito.eq(TOPOLOGY_NAME))).thenReturn(null);
-    Assert.assertTrue(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
-    Mockito.when(adaptor.isTopologyRunning(Mockito.eq(TOPOLOGY_NAME))).thenReturn(false);
-    Assert.assertTrue(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(null);
+    assertTrue(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(false);
+    assertTrue(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
   }
 
   /**
@@ -70,90 +82,78 @@ public class SubmitterMainTest {
   @Test
   public void testSubmitTopology() throws Exception {
     // Mock objects to be verified
-    IStateManager statemgr = Mockito.mock(IStateManager.class);
-    ILauncher launcher = Mockito.mock(ILauncher.class);
-    IPacking packing = Mockito.mock(IPacking.class);
-    IUploader uploader = Mockito.mock(IUploader.class);
+    IStateManager statemgr = mock(IStateManager.class);
+    ILauncher launcher = mock(ILauncher.class);
+    IPacking packing = mock(IPacking.class);
+    IUploader uploader = mock(IUploader.class);
 
     // Mock ReflectionUtils stuff
     PowerMockito.spy(ReflectionUtils.class);
-    PowerMockito.doReturn(statemgr).
-        when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
-    PowerMockito.doReturn(launcher).
-        when(ReflectionUtils.class, "newInstance", LAUNCHER_CLASS);
-    PowerMockito.doReturn(packing).
-        when(ReflectionUtils.class, "newInstance", PACKING_CLASS);
-    PowerMockito.doReturn(uploader).
-        when(ReflectionUtils.class, "newInstance", UPLOADER_CLASS);
+    PowerMockito.doReturn(statemgr)
+        .when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
+    PowerMockito.doReturn(launcher)
+        .when(ReflectionUtils.class, "newInstance", LAUNCHER_CLASS);
+    PowerMockito.doReturn(packing)
+        .when(ReflectionUtils.class, "newInstance", PACKING_CLASS);
+    PowerMockito.doReturn(uploader)
+        .when(ReflectionUtils.class, "newInstance", UPLOADER_CLASS);
 
-    Config config = Mockito.mock(Config.class);
-    Mockito.
-        when(config.getStringValue(ConfigKeys.get(STATE_MANAGER_CLASS))).
-        thenReturn(STATE_MANAGER_CLASS);
-    Mockito.
-        when(config.getStringValue(ConfigKeys.get(LAUNCHER_CLASS))).
-        thenReturn(LAUNCHER_CLASS);
-    Mockito.
-        when(config.getStringValue(ConfigKeys.get(PACKING_CLASS))).
-        thenReturn(PACKING_CLASS);
-    Mockito.
-        when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).
-        thenReturn(UPLOADER_CLASS);
+    Config config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get(STATE_MANAGER_CLASS)))
+        .thenReturn(STATE_MANAGER_CLASS);
+    when(config.getStringValue(ConfigKeys.get(LAUNCHER_CLASS)))
+        .thenReturn(LAUNCHER_CLASS);
+    when(config.getStringValue(ConfigKeys.get(PACKING_CLASS)))
+        .thenReturn(PACKING_CLASS);
+    when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS)))
+        .thenReturn(UPLOADER_CLASS);
 
     // Instances to test
     TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
-    SubmitterMain submitterMain = Mockito.spy(new SubmitterMain(config, topology));
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
 
     // Failed to instantiate
     final String CLASS_NOT_EXIST = "class_not_exist";
-    Mockito.
-        when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).
-        thenReturn(CLASS_NOT_EXIST);
-    Assert.assertFalse(submitterMain.submitTopology());
-    Mockito.verify(uploader, Mockito.never()).close();
-    Mockito.verify(launcher, Mockito.never()).close();
-    Mockito.verify(statemgr, Mockito.never()).close();
+    when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(CLASS_NOT_EXIST);
+    assertFalse(submitterMain.submitTopology());
+    verify(uploader, never()).close();
+    verify(launcher, never()).close();
+    verify(statemgr, never()).close();
 
     // OK to instantiate all resources
-    Mockito.
-        when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).
-        thenReturn(UPLOADER_CLASS);
+    when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
 
     // Failed to validate the submission
-    Mockito.doReturn(false).when(submitterMain).
-        validateSubmit(Mockito.any(SchedulerStateManagerAdaptor.class), Mockito.anyString());
-    Assert.assertFalse(submitterMain.submitTopology());
+    doReturn(false).when(submitterMain)
+        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
+    assertFalse(submitterMain.submitTopology());
     // Resources should be closed even the submission failed
-    Mockito.verify(uploader, Mockito.atLeastOnce()).close();
-    Mockito.verify(launcher, Mockito.atLeastOnce()).close();
-    Mockito.verify(statemgr, Mockito.atLeastOnce()).close();
+    verify(uploader, atLeastOnce()).close();
+    verify(launcher, atLeastOnce()).close();
+    verify(statemgr, atLeastOnce()).close();
 
     // validated the submission
-    Mockito.doReturn(true).when(submitterMain).
-        validateSubmit(Mockito.any(SchedulerStateManagerAdaptor.class), Mockito.anyString());
+    doReturn(true).when(submitterMain)
+        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
 
     // Failed to upload package, return null
-    Mockito.doReturn(null).when(submitterMain).
-        uploadPackage(Mockito.eq(uploader));
-    Assert.assertFalse(submitterMain.submitTopology());
+    doReturn(null).when(submitterMain).uploadPackage(eq(uploader));
+    assertFalse(submitterMain.submitTopology());
     // Should not invoke undo
-    Mockito.verify(uploader, Mockito.never()).undo();
+    verify(uploader, never()).undo();
 
     // OK to upload package
     final URI packageURI = new URI("mock://uri:924/x#ke");
-    Mockito.doReturn(packageURI).when(submitterMain).
-        uploadPackage(Mockito.eq(uploader));
+    doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
 
     // Failed to callLauncherRunner
-    Mockito.doReturn(false).when(submitterMain).
-        callLauncherRunner(Mockito.any(Config.class));
-    Assert.assertFalse(submitterMain.submitTopology());
+    doReturn(false).when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
+    assertFalse(submitterMain.submitTopology());
     // Should invoke undo
-    Mockito.verify(uploader).undo();
+    verify(uploader).undo();
 
     // Happy path
-    Mockito.doReturn(true).when(submitterMain).
-        callLauncherRunner(Mockito.any(Config.class));
-    Assert.assertTrue(submitterMain.submitTopology());
+    doReturn(true).when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
+    assertTrue(submitterMain.submitTopology());
   }
 }
