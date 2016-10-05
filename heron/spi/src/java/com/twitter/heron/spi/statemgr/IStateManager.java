@@ -67,6 +67,16 @@ public interface IStateManager extends AutoCloseable {
   void close();
 
   /**
+   * Return a lock object backed by the state manager store.
+   *
+   * @param topologyName the name of the topology
+   * @param lockName any thread may get the {@code Lock} object bound to a given name, but only one
+   * thread may obtain the actual lock from that @{code Lock} object.
+   * @return an object representing an implementation of a lock.
+   */
+  Lock getLock(String topologyName, String lockName);
+
+  /**
    * Is the given topology in RUNNING state?
    *
    * @return Boolean

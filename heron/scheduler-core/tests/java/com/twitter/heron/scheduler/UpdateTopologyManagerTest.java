@@ -20,18 +20,23 @@ import java.util.Set;
 
 import com.google.common.base.Optional;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -72,9 +77,9 @@ public class UpdateTopologyManagerTest {
   @Test
   public void testContainerDelta() {
     ContainerDelta result =  new ContainerDelta(currentContainerPlan, proposedContainerPlan);
-    Assert.assertNotNull(result);
-    Assert.assertEquals(expectedContainersToAdd, result.getContainersToAdd());
-    Assert.assertEquals(expectedContainersToRemove, result.getContainersToRemove());
+    assertNotNull(result);
+    assertEquals(expectedContainersToAdd, result.getContainersToAdd());
+    assertEquals(expectedContainersToRemove, result.getContainersToRemove());
   }
 
   /**
@@ -91,27 +96,27 @@ public class UpdateTopologyManagerTest {
     PackingPlans.PackingPlan currentProtoPlan = serializer.toProto(currentPacking);
     PackingPlans.PackingPlan proposedProtoPlan = serializer.toProto(proposedPacking);
 
-    SchedulerStateManagerAdaptor mockStateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    SchedulerStateManagerAdaptor mockStateMgr = mock(SchedulerStateManagerAdaptor.class);
     when(mockStateMgr.getPhysicalPlan(TOPOLOGY_NAME))
         .thenReturn(PhysicalPlans.PhysicalPlan.getDefaultInstance());
 
-    Config mockConfig = Mockito.mock(Config.class);
-    Config mockRuntime = Mockito.mock(Config.class);
+    Config mockConfig = mock(Config.class);
+    Config mockRuntime = mock(Config.class);
     when(mockRuntime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
     when(mockRuntime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(mockStateMgr);
 
-    IScalable mockScheduler = Mockito.mock(IScalable.class);
+    IScalable mockScheduler = mock(IScalable.class);
 
     UpdateTopologyManager updateManager
         = new UpdateTopologyManager(mockConfig, mockRuntime, Optional.of(mockScheduler));
-    UpdateTopologyManager spyUpdateManager = Mockito.spy(updateManager);
+    UpdateTopologyManager spyUpdateManager = spy(updateManager);
 
     TopologyAPI.Topology topology = TopologyTests.createTopology(
         TOPOLOGY_NAME, new com.twitter.heron.api.Config(), "spoutname", "boltname", 1, 1);
-    Mockito.doReturn(topology).when(spyUpdateManager).
+    doReturn(topology).when(spyUpdateManager).
         getUpdatedTopology(TOPOLOGY_NAME, proposedPacking, mockStateMgr);
-    Mockito.doReturn(topology).when(mockStateMgr).getTopology(TOPOLOGY_NAME);
-    Assert.assertEquals(TopologyAPI.TopologyState.RUNNING, topology.getState());
+    doReturn(topology).when(mockStateMgr).getTopology(TOPOLOGY_NAME);
+    assertEquals(TopologyAPI.TopologyState.RUNNING, topology.getState());
 
     PowerMockito.spy(TMasterUtils.class);
     PowerMockito.doReturn(true).when(TMasterUtils.class, "sendToTMaster",
@@ -120,10 +125,10 @@ public class UpdateTopologyManagerTest {
 
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
-    Mockito.verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(topology));
-    Mockito.verify(spyUpdateManager).reactivateTopology(eq(mockStateMgr), eq(topology), eq(2));
-    Mockito.verify(mockScheduler).addContainers(expectedContainersToAdd);
-    Mockito.verify(mockScheduler).removeContainers(expectedContainersToRemove);
+    verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(topology));
+    verify(spyUpdateManager).reactivateTopology(eq(mockStateMgr), eq(topology), eq(2));
+    verify(mockScheduler).addContainers(expectedContainersToAdd);
+    verify(mockScheduler).removeContainers(expectedContainersToRemove);
 
     PowerMockito.verifyStatic(times(1));
     TMasterUtils.transitionTopologyState(eq(TOPOLOGY_NAME),
@@ -184,7 +189,7 @@ public class UpdateTopologyManagerTest {
           break;
         }
       }
-      Assert.assertEquals(Integer.toString(expectedBolts.get(boltName)), foundParallelism);
+      assertEquals(Integer.toString(expectedBolts.get(boltName)), foundParallelism);
     }
 
     for (String spoutName : expectedSouts.keySet()) {
@@ -195,7 +200,7 @@ public class UpdateTopologyManagerTest {
           break;
         }
       }
-      Assert.assertEquals(Integer.toString(expectedSouts.get(spoutName)), foundParallelism);
+      assertEquals(Integer.toString(expectedSouts.get(spoutName)), foundParallelism);
     }
   }
 
