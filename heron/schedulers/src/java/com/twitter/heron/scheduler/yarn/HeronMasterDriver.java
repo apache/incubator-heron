@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -89,7 +90,7 @@ public class HeronMasterDriver {
   private final int httpPort;
   private final boolean verboseMode;
 
-  // This map contains all the active workers managed my this scheduler. The workers can be
+  // This map contains all the active workers managed by this scheduler. The workers can be
   // looked up by heron's executor id or REEF's container id.
   private MultiKeyWorkerMap multiKeyWorkerMap;
 
@@ -101,7 +102,8 @@ public class HeronMasterDriver {
   // and Queue will ensure containers are started serially.
   private ExecutorService executor = Executors.newSingleThreadExecutor();
   private BlockingQueue<AllocatedEvaluator> allocatedContainerQ = new LinkedBlockingDeque<>();
-  private PackingPlan packing;
+  private HashMap<Integer, ContainerPlan> containerPlans = new HashMap<>();
+  private String componentRamMap;
   private AtomicBoolean isTopologyKilled = new AtomicBoolean(false);
 
   @Inject
@@ -149,14 +151,28 @@ public class HeronMasterDriver {
   }
 
   /**
-   * Container allocation is asynchronous. Request containers serially to ensure allocated resources
-   * match the required resources
+   * Container allocation is asynchronous. Requests all containers in the input packing plan
+   * serially to ensure allocated resources match the required resources.
    */
   void scheduleHeronWorkers(PackingPlan topologyPacking) throws ContainerAllocationException {
-    this.packing = topologyPacking;
-    for (ContainerPlan containerPlan : topologyPacking.getContainers()) {
-      Resource reqResource = containerPlan.getRequiredResource();
+    this.componentRamMap = topologyPacking.getComponentRamDistribution();
+    scheduleHeronWorkers(topologyPacking.getContainers());
+  }
 
+  /**
+   * Container allocation is asynchronous. Requests all containers in the input set serially
+   * to ensure allocated resources match the required resources.
+   */
+  void scheduleHeronWorkers(Set<ContainerPlan> containers)
+      throws ContainerAllocationException {
+    for (ContainerPlan containerPlan : containers) {
+      if (containerPlans.containsKey(containerPlan.getId())) {
+        throw new ContainerAllocationException("Received duplicate allocation request for "
+            + containerPlan.getId());
+      }
+      containerPlans.put(containerPlan.getId(), containerPlan);
+
+      Resource reqResource = containerPlan.getRequiredResource();
       int mem = getMemInMBForExecutor(reqResource);
       int cores = getCpuForExecutor(reqResource);
       launchContainerForExecutor(containerPlan.getId(), cores, mem);
@@ -174,6 +190,24 @@ public class HeronMasterDriver {
     }
   }
 
+  /**
+   * Terminates any yarn containers associated with the given containers.
+   */
+  public void killWorkers(Set<ContainerPlan> containers) {
+    for (ContainerPlan container : containers) {
+      LOG.log(Level.INFO, "Find and kill container for executor {0}", container.getId());
+      Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(container.getId());
+      if (worker.isPresent()) {
+        LOG.log(Level.INFO, "Killing container {0} for executor {1}",
+            new Object[]{worker.get().evaluator.getId(), worker.get().workerId});
+        worker.get().evaluator.close();
+      } else {
+        LOG.log(Level.WARNING, "Did not find evaluator for {0}", container.getId());
+      }
+      containerPlans.remove(container.getId());
+    }
+  }
+
   public void restartTopology() throws ContainerAllocationException {
     for (HeronWorker worker : multiKeyWorkerMap.getHeronWorkers()) {
       restartWorker(worker.workerId);
@@ -186,12 +220,12 @@ public class HeronMasterDriver {
     Optional<HeronWorker> worker = multiKeyWorkerMap.lookupByWorkerId(id);
     if (!worker.isPresent()) {
       LOG.log(Level.WARNING, "Requesting a new container for: {0}", id);
-      Optional<ContainerPlan> containerPlan = packing.getContainer(id);
-      if (!containerPlan.isPresent()) {
+      ContainerPlan containerPlan = containerPlans.get(id);
+      if (containerPlan == null) {
         throw new IllegalArgumentException(
             String.format("There is no container for %s in packing plan.", id));
       }
-      Resource resource = containerPlan.get().getRequiredResource();
+      Resource resource = containerPlan.getRequiredResource();
       worker = Optional.of(
           new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource)));
     } else {
@@ -275,7 +309,7 @@ public class HeronMasterDriver {
   }
 
   String getComponentRamMap() {
-    return packing.getComponentRamDistribution();
+    return componentRamMap;
   }
 
   void submitHeronExecutorTask(int workerId) {
@@ -382,6 +416,10 @@ public class HeronMasterDriver {
    */
   public static final class ContainerAllocationException extends Exception {
     static final long serialVersionUID = 1L;
+
+    public ContainerAllocationException(String message) {
+      this(message, null);
+    }
 
     public ContainerAllocationException(String message, Exception e) {
       super(message, e);
