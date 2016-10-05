@@ -29,6 +29,7 @@ aurora_deps_files = [
 ]
 
 yarn_deps_files = [
+    "//heron/packing/src/java:roundrobin-packing",
     "//heron/schedulers/src/java:yarn-scheduler-java",
     "@org_apache_reef_reef_common//jar",
     "@org_apache_reef_tang//jar",
