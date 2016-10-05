@@ -97,6 +97,8 @@ public class MetricsManager {
   private final String topologyName;
   private final String metricsmgrId;
 
+  private final long mainThreadId;
+
   /**
    * Metrics manager constructor
    */
@@ -122,6 +124,8 @@ public class MetricsManager {
             this.metricsManagerServerLoop);
     this.metricsCollector = new MetricsCollector(metricsManagerServerLoop, metricsQueue);
     this.heronMetricsExportIntervalSec = systemConfig.getHeronMetricsExportIntervalSec();
+
+    this.mainThreadId = Thread.currentThread().getId();
 
     // Set up the internal Metrics Export routine
     setupInternalMetricsExport();
@@ -192,8 +196,8 @@ public class MetricsManager {
     if (args.length != 6) {
       throw new RuntimeException(
           "Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager "
-          + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
-          + "<metrics_sinks_config_filename>");
+              + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
+              + "<metrics_sinks_config_filename>");
     }
 
     String metricsmgrId = args[0];
@@ -221,7 +225,7 @@ public class MetricsManager {
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with "
-        + "Metrics Manager Id %s, Merics Manager Port: %d.",
+            + "Metrics Manager Id %s, Merics Manager Port: %d.",
         topologyName, topologyId, metricsmgrId, metricsPort));
 
     LOG.info("System Config: " + systemConfig);
@@ -328,13 +332,16 @@ public class MetricsManager {
      * Handler for uncaughtException
      */
     public void uncaughtException(Thread thread, Throwable exception) {
-      String threadName = thread.getName();
       LOG.log(Level.SEVERE,
-          "Exception caught in thread: " + threadName + " with thread id: " + thread.getId(),
+          "Exception caught in thread: " + thread.getName() + " with thread id: " + thread.getId(),
           exception);
 
-      String sinkId = threadName;
-      Integer thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
+      if (exception instanceof Error || thread.getId() == mainThreadId) {
+        LOG.severe("Would not recover from error. Metrics Manager halts immediately");
+        Runtime.getRuntime().halt(1);
+      }
+
+      String sinkId = thread.getName();
 
       // Remove the old sink executor
       SinkExecutor oldSinkExecutor = sinkExecutors.remove(sinkId);
@@ -342,10 +349,15 @@ public class MetricsManager {
       if (oldSinkExecutor != null) {
         // Remove the unneeded Communicator bind with Metrics Manager Server
         metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
+
+        // Close the sink
+        SysUtils.closeIgnoringExceptions(oldSinkExecutor);
       }
 
-      // Close the sink
-      SysUtils.closeIgnoringExceptions(oldSinkExecutor);
+      Integer thisSinkRetryAttempts = 0;
+      if (sinksRetryAttempts.containsKey(sinkId)) {
+        thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
+      }
 
       if (oldSinkExecutor != null && thisSinkRetryAttempts != 0) {
         LOG.info(String.format("Restarting IMetricsSink: %s with %d available retries",
