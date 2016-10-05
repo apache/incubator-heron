@@ -23,10 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Shared utilities for packing algorithms
@@ -218,6 +220,87 @@ public final class PackingUtils {
       }
     }
     return componentsToScaleUp;
+  }
+
+  /**
+   * Identifies the resources reclaimed by the components that will be scaled down
+   *
+   * @return Total resources reclaimed
+   */
+  public static Resource getScaleDownResource(TopologyAPI.Topology topology, Map<String, Integer>
+      componentChanges, Resource defaultInstanceResources) {
+    double cpu = 0;
+    long ram = 0;
+    long disk = 0;
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    Map<String, Integer> componentsToScaleDown = PackingUtils.getComponentsToScaleDown(
+        componentChanges);
+    for (String component : componentsToScaleDown.keySet()) {
+      int parallelismChange = -componentChanges.get(component);
+      cpu += parallelismChange * defaultInstanceResources.getCpu();
+      disk += parallelismChange * defaultInstanceResources.getDisk();
+      if (ramMap.containsKey(component)) {
+        ram += parallelismChange * ramMap.get(component);
+      } else {
+        ram += parallelismChange * defaultInstanceResources.getRam();
+      }
+    }
+    return new Resource(cpu, ram, disk);
+  }
+
+  /**
+   * Identifies the resources needed for the components that will be scaled up
+   *
+   * @return Total resources needed
+   */
+  public static Resource getScaleUpResource(TopologyAPI.Topology topology, Map<String, Integer>
+      componentChanges, Resource defaultInstanceResources) {
+    double cpu = 0;
+    long ram = 0;
+    long disk = 0;
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    Map<String, Integer> componentsToScaleUp = PackingUtils.getComponentsToScaleUp(
+        componentChanges);
+    for (String component : componentsToScaleUp.keySet()) {
+      int parallelismChange = componentChanges.get(component);
+      cpu += parallelismChange * defaultInstanceResources.getCpu();
+      disk += parallelismChange * defaultInstanceResources.getDisk();
+      if (ramMap.containsKey(component)) {
+        ram += parallelismChange * ramMap.get(component);
+      } else {
+        ram += parallelismChange * defaultInstanceResources.getRam();
+      }
+    }
+    return new Resource(cpu, ram, disk);
+  }
+
+  /**
+   * Computes the additional resources needed to accommodate a scale up and down operation
+   *
+   * @return Additional resources needed
+   */
+  public static Resource getAdditionalResources(Resource scaleupResource,
+                                                Resource scaledownResource) {
+    double cpuDifference =  scaleupResource.getCpu() - scaledownResource.getCpu();
+    double cpu = cpuDifference < 0 ? 0 : cpuDifference;
+    long ramDifference =  scaleupResource.getRam() - scaledownResource.getRam();
+    long ram =  ramDifference < 0 ? 0 : ramDifference;
+    long diskDifference = scaleupResource.getDisk() - scaledownResource.getDisk();
+    long disk = diskDifference < 0 ? 0 : diskDifference;
+    return new Resource(cpu, ram, disk);
+  }
+
+
+  /**
+   * Computes number of containers needed to accommodate a specific resource request given the container size
+   *
+   * @return Number of containers needed
+   */
+  public static double getRequiredNumContainers(Resource resourceRequest, Resource capacity) {
+    double numContainersCpu = Math.ceil(resourceRequest.getCpu() / capacity.getCpu());
+    double numContainersRam = Math.ceil((double) resourceRequest.getRam() / capacity.getRam());
+    double numContainersDisk = Math.ceil((double) resourceRequest.getDisk() / capacity.getDisk());
+    return Math.max(numContainersCpu, Math.max(numContainersRam, numContainersDisk));
   }
 
   /**

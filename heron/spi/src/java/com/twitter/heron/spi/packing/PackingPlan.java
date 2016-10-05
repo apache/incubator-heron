@@ -57,6 +57,26 @@ public class PackingPlan {
   }
 
   /**
+   * Computes the total resources required by the containers in the packing plan
+   *
+   * @return total Resources.
+   */
+
+  public Resource getTotalContainerResources() {
+    double cpu = 0;
+    long ram = 0;
+    long disk = 0;
+    for (ContainerPlan containerPlan : getContainers()) {
+      cpu += containerPlan.getRequiredResource().getCpu();
+      ram += containerPlan.getRequiredResource().getRam();
+      disk += containerPlan.getRequiredResource().getDisk();
+    }
+
+    Resource totalResource = new Resource(cpu, ram, disk);
+    return totalResource;
+  }
+
+  /**
    * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
    * required by containers in the packing plan and updates the containers of the clone with the
    * max resource information

@@ -429,13 +429,12 @@ public class ResourceCompliantRRPackingTest {
    */
   @Test
   public void testDefaultContainerSizeRepack() throws Exception {
-    int defaultNumInstancesperContainer = 4;
     int numScalingInstances = 5;
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(BOLT_NAME, numScalingInstances);
     int numContainersBeforeRepack = 2;
     PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(3, newPackingPlan.getContainers().size());
+    Assert.assertEquals(4, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
         newPackingPlan.getInstanceCount());
     AssertPacking.assertContainers(newPackingPlan.getContainers(),
@@ -444,15 +443,15 @@ public class ResourceCompliantRRPackingTest {
     for (PackingPlan.ContainerPlan containerPlan
         : newPackingPlan.getContainers()) {
       Assert.assertEquals(Math.round(PackingUtils.increaseBy(
-          defaultNumInstancesperContainer * instanceDefaultResources.getCpu(),
+          containerPlan.getInstances().size() * instanceDefaultResources.getCpu(),
           DEFAULT_CONTAINER_PADDING)), (long) containerPlan.getRequiredResource().getCpu());
 
       Assert.assertEquals(PackingUtils.increaseBy(
-          defaultNumInstancesperContainer * instanceDefaultResources.getRam(),
+          containerPlan.getInstances().size() * instanceDefaultResources.getRam(),
           DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getRam());
 
       Assert.assertEquals(PackingUtils.increaseBy(
-          defaultNumInstancesperContainer * instanceDefaultResources.getDisk(),
+          containerPlan.getInstances().size() * instanceDefaultResources.getDisk(),
           DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getDisk());
     }
   }
@@ -482,7 +481,6 @@ public class ResourceCompliantRRPackingTest {
         doScalingTest(topologyExplicitRamMap, componentChanges, boltRam,
             boltParallelism, instanceDefaultResources.getRam(), spoutParallelism,
             numContainersBeforeRepack, totalInstances);
-
     Assert.assertEquals(6, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
         newPackingPlan.getInstanceCount());
@@ -621,7 +619,6 @@ public class ResourceCompliantRRPackingTest {
     componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
     int numContainersBeforeRepack = 2;
     PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-
     Assert.assertEquals(3, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingUp),
         newPackingPlan.getInstanceCount());
@@ -716,5 +713,24 @@ public class ResourceCompliantRRPackingTest {
         BOLT_NAME, noBolts + boltScalingDown);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
         SPOUT_NAME, noSpouts + spoutScalingUp);
+  }
+
+  @Test
+  public void scaleUpMultiple() throws Exception {
+    int spoutScalingUp = 4;
+    int boltScalingUp = 4;
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingUp); // 8 spouts
+    componentChanges.put(BOLT_NAME, boltScalingUp); // 8 bolts
+    int numContainersBeforeRepack = 2;
+    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+    Assert.assertEquals(4, newPackingPlan.getContainers().size());
+    Assert.assertEquals((Integer) (totalInstances + spoutScalingUp + boltScalingUp),
+        newPackingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        BOLT_NAME, boltParallelism + boltScalingUp);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        SPOUT_NAME, spoutParallelism + spoutScalingUp);
   }
 }

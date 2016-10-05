@@ -24,13 +24,26 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.spi.common.ClusterDefaults;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.PackingTestUtils;
+import com.twitter.heron.spi.utils.TopologyTests;
 
 public class PackingUtilsTest {
+
+  private static TopologyAPI.Topology getTopology(
+      int spoutParallelism, int boltParallelism,
+      com.twitter.heron.api.Config topologyConfig) {
+    return TopologyTests.createTopology("testTopology", topologyConfig, "spout", "bolt",
+        spoutParallelism, boltParallelism);
+  }
 
   private static Set<PackingPlan.ContainerPlan> generateContainers(Integer[] containerIds,
                                                                    Integer[] instanceIds) {
@@ -225,5 +238,97 @@ public class PackingUtilsTest {
         Assert.assertEquals(container + 1, allocation.get(container).get(i).getTaskId());
       }
     }
+  }
+
+  @Test
+  public void testResourceScaleDown() {
+    int noSpouts = 6;
+    int noBolts = 3;
+    int boltScalingDown = 2;
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+
+    TopologyAPI.Topology topology = getTopology(noSpouts, noBolts, topologyConfig);
+
+    Config config = Config.newBuilder()
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .putAll(ClusterDefaults.getDefaults())
+        .build();
+
+    Resource defaultInstanceResources = new Resource(
+        Context.instanceCpu(config),
+        Context.instanceRam(config),
+        Context.instanceDisk(config));
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("bolt", -boltScalingDown); // 1 bolt
+    Resource scaledownResource = PackingUtils.getScaleDownResource(topology,
+        componentChanges, defaultInstanceResources);
+    Assert.assertEquals((long) (boltScalingDown * defaultInstanceResources.getCpu()),
+        (long) scaledownResource.getCpu());
+    Assert.assertEquals(boltScalingDown * defaultInstanceResources.getRam(),
+        scaledownResource.getRam());
+    Assert.assertEquals(boltScalingDown * defaultInstanceResources.getDisk(),
+        scaledownResource.getDisk());
+  }
+
+  @Test
+  public void testResourceScaleUp() {
+    int noSpouts = 6;
+    int noBolts = 3;
+    int boltScalingUp = 2;
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+
+    TopologyAPI.Topology topology = getTopology(noSpouts, noBolts, topologyConfig);
+
+    Config config = Config.newBuilder()
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .putAll(ClusterDefaults.getDefaults())
+        .build();
+
+    Resource defaultInstanceResources = new Resource(
+        Context.instanceCpu(config),
+        Context.instanceRam(config),
+        Context.instanceDisk(config));
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("bolt", boltScalingUp); // 5 bolts
+    Resource scaleupResource = PackingUtils.getScaleUpResource(topology,
+        componentChanges, defaultInstanceResources);
+    Assert.assertEquals((long) (boltScalingUp * defaultInstanceResources.getCpu()),
+        (long) scaleupResource.getCpu());
+    Assert.assertEquals(boltScalingUp * defaultInstanceResources.getRam(),
+        scaleupResource.getRam());
+    Assert.assertEquals(boltScalingUp * defaultInstanceResources.getDisk(),
+        scaleupResource.getDisk());
+  }
+
+  @Test
+  public void testAdditionalResource() {
+    Resource scaleUpResource = new Resource(2, 2, 2);
+    Resource scaledownResource = new Resource(1, 1, 0);
+    Resource additionalResource = PackingUtils.getAdditionalResources(scaleUpResource,
+        scaledownResource);
+    Assert.assertEquals(1, (long) additionalResource.getCpu());
+    Assert.assertEquals(1, additionalResource.getRam());
+    Assert.assertEquals(2, additionalResource.getDisk());
+  }
+
+  @Test
+  public void testAdditionalResourceNegative() {
+    Resource scaleUpResource = new Resource(2, 2, 2);
+    Resource scaledownResource = new Resource(4, 3, 1);
+    Resource additionalResource = PackingUtils.getAdditionalResources(scaleUpResource,
+        scaledownResource);
+    Assert.assertEquals(0, (long) additionalResource.getCpu());
+    Assert.assertEquals(0, additionalResource.getRam());
+    Assert.assertEquals(1, additionalResource.getDisk());
+  }
+
+  @Test
+  public void testNumRequiredContainers() {
+    Resource requestResource = new Resource(12, 13, 15);
+    Resource capacity = new Resource(2, 2, 2);
+    double numContainers = PackingUtils.getRequiredNumContainers(requestResource, capacity);
+    Assert.assertEquals(8, (long) numContainers);
   }
 }

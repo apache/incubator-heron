@@ -98,12 +98,17 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   private Resource maxContainerResources;
   private int numContainers;
   private int numAdjustments;
+  private int containerId;
 
   private int paddingPercentage;
 
-  private void increaseNumContainers() {
-    this.numContainers++;
+  private void adjustNumContainers(int additionalContainers) {
+    increaseNumContainers(additionalContainers);
     this.numAdjustments++;
+  }
+
+  private void increaseNumContainers(int additionalContainers) {
+    this.numContainers += additionalContainers;
   }
 
   @Override
@@ -115,6 +120,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         Context.instanceRam(config),
         Context.instanceDisk(config));
     this.numAdjustments = 0;
+    this.containerId = 1;
 
 
     double defaultCpu = this.defaultInstanceResources.getCpu()
@@ -164,7 +170,6 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       LOG.info("Container  " + c.getId() + " consists of "
        *   + c.getInstances().toString());
     }*/
-
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
@@ -177,6 +182,13 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     int adjustments = 0;
     this.numAdjustments = 0;
     this.numContainers = currentPackingPlan.getContainers().size();
+    this.containerId = 1;
+
+    int additionalContainers = computeNumAdditionalContainers(componentChanges, currentPackingPlan);
+    increaseNumContainers(additionalContainers);
+    LOG.info(String.format("Allocated "
+            + "%s additional containers for repack bring the number of containers to %s.",
+        additionalContainers, this.numContainers));
     // Get the instances using Resource Compliant Round Robin allocation
     Optional<Map<Integer, List<InstanceId>>> resourceCompliantRRAllocation =
         getResourceCompliantRRAllocation(currentPackingPlan, componentChanges);
@@ -192,7 +204,6 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     }
     // Construct the PackingPlan
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         resourceCompliantRRAllocation.get(), ramMap, defaultInstanceResources, paddingPercentage);
     LOG.info("Created a packing plan with " + containerPlans.size() + " containers");
@@ -200,7 +211,6 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       LOG.info("Container  " + c.getId() + " consists of "
           + c.getInstances().toString());
     }
-
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
@@ -244,6 +254,25 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   }
 
   /**
+   * Computes the additional number of containers needed to accommodate a scale up/down operation
+   *
+   * @param componentChanges parallelism changes for scale up/down
+   * @param packingPlan existing packing plan
+   * @return additional number of containers needed
+   */
+  private int computeNumAdditionalContainers(Map<String, Integer> componentChanges,
+                                             PackingPlan packingPlan) {
+    Resource scaledownResource = PackingUtils.getScaleDownResource(topology, componentChanges,
+        defaultInstanceResources);
+    Resource scaleupResource = PackingUtils.getScaleUpResource(topology, componentChanges,
+        defaultInstanceResources);
+    Resource additionalResource = PackingUtils.getAdditionalResources(scaleupResource,
+        scaledownResource);
+    return (int) PackingUtils.getRequiredNumContainers(additionalResource,
+        packingPlan.getMaxContainerResources());
+  }
+
+  /**
    * Get the instances' allocation based on the Resource Compliant Round Robin algorithm
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
@@ -265,10 +294,11 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     for (int i = 0; i <= numContainers - 1; i++) {
       PackingUtils.allocateNewContainer(containers, maxContainerResources, this.paddingPercentage);
     }
-    int noContainers = assignInstancesToContainers(containers, allocation, parallelismMap, 1,
-        "strict");
-    if (noContainers > this.numContainers) {
-      increaseNumContainers();
+    if (!assignInstancesToContainers(containers, allocation, parallelismMap, 1, "strict")) {
+      //Not enough containers. Adjust the number of containers.
+      LOG.info(String.format("Increasing the number of containers to "
+          + "%s and attempting packing again.", this.numContainers + 1));
+      adjustNumContainers(1);
       return Optional.absent();
     }
     return Optional.of((Map<Integer, List<InstanceId>>) allocation);
@@ -279,7 +309,6 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-
   private Optional<Map<Integer, List<InstanceId>>> getResourceCompliantRRAllocation(
       PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
     Map<String, Integer> componentsToScaleDown =
@@ -291,7 +320,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         this.paddingPercentage);
     Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(currentPackingPlan);
 
-    //Allocate new containers in case adjustment is needed.
+    //Allocate additional containers.
     for (int i = containers.size() + 1; i <= numContainers; ++i) {
       allocation.put(i, new ArrayList<InstanceId>());
     }
@@ -309,11 +338,12 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       removeInstancesFromContainers(containers, allocation, componentsToScaleDown);
     }
     if (!componentsToScaleUp.isEmpty()) {
-      int noContainers = assignInstancesToContainers(containers, allocation, componentsToScaleUp,
-          maxInstanceIndex + 1, "flexible");
-      //Not enough containers. Adjust the number of containers.
-      if (noContainers > this.numContainers) {
-        increaseNumContainers();
+      if (!assignInstancesToContainers(containers, allocation, componentsToScaleUp,
+          maxInstanceIndex + 1, "flexible")) {
+        //Not enough containers. Adjust the number of containers.
+        LOG.info(String.format("Increasing the number of containers to "
+            + "%s and attempting packing again.", this.numContainers + 1));
+        adjustNumContainers(1);
         return Optional.absent();
       }
     }
@@ -322,18 +352,18 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Assigns instances to containers
+   * Assigns instances to containers.
    *
    * @param containers helper data structure that describes the containers' status
    * @param allocation existing packing plan
    * @param parallelismMap component parallelism
    * @param firstTaskIndex first taskId to use for the new instances
+   * @return true if the instances fit in the existing set of containers, false otherwise.
    */
-  private int assignInstancesToContainers(
+  private boolean assignInstancesToContainers(
       ArrayList<Container> containers, Map<Integer, List<InstanceId>> allocation,
       Map<String, Integer> parallelismMap, int firstTaskIndex, String policyType) {
     ArrayList<RamRequirement> ramRequirements = getRAMInstances(parallelismMap);
-    int containerId = 1;
     int globalTaskIndex = firstTaskIndex;
     int componentIndex = 0;
     for (String component : parallelismMap.keySet()) {
@@ -341,23 +371,22 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
         Resource instanceResource = this.defaultInstanceResources.cloneWithRam(ramRequirement);
-        int noContainers = 0;
+        boolean sufficientNumContainers = true;
         if ("strict".equals(policyType)) {
-          noContainers = strictRRpolicy(allocation, containers, containerId,
+          sufficientNumContainers = strictRRpolicy(allocation, containers,
               new InstanceId(component, globalTaskIndex, i), instanceResource);
         } else if ("flexible".equals(policyType)) {
-          noContainers = flexibleRRpolicy(allocation, containers, containerId,
+          sufficientNumContainers = flexibleRRpolicy(allocation, containers,
               new InstanceId(component, globalTaskIndex, i), instanceResource);
         }
-        if (noContainers > this.numContainers) {
-          return noContainers;
+        if (!sufficientNumContainers) {
+          return false;
         }
-        containerId = (containerId == numContainers) ? 1 : containerId + 1;
         globalTaskIndex++;
       }
       componentIndex++;
     }
-    return this.numContainers;
+    return true;
   }
 
   /**
@@ -366,25 +395,22 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @param allocation existing packing plan
    * @param containers helper data structure that describes the containers' status
-   * @param containerId id of the container where the instance needs to be placed
    * @param instanceId the instance that needs to be placed in the container
    * @param instanceResource the resources required for that instance
-   * @return number of containers needed for a valid RR allocation
+   * @return true if the existing number of containers is sufficient, false otherwise
    */
-  private int strictRRpolicy(Map<Integer, List<InstanceId>> allocation,
-                             ArrayList<Container> containers, int containerId,
-                             InstanceId instanceId, Resource instanceResource) {
-    int noContainers = this.numContainers;
+  private boolean strictRRpolicy(Map<Integer, List<InstanceId>> allocation,
+                                 ArrayList<Container> containers, InstanceId instanceId,
+                                 Resource instanceResource) {
     if (placeResourceCompliantRRInstance(containers, containerId,
         new PackingPlan.InstancePlan(instanceId, instanceResource))) {
       allocation.get(containerId).add(instanceId);
-      return noContainers;
+      containerId = (containerId == numContainers) ? 1 : containerId + 1;
+      return true;
     } else {
       //Automatically adjust the number of containers
-      noContainers++;
-      LOG.info(String.format("Increasing the number of containers to "
-          + "%s and attempting packing again.", noContainers));
-      return noContainers;
+      containerId = 1;
+      return false;
     }
   }
 
@@ -394,41 +420,40 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @param allocation existing packing plan
    * @param containers helper data structure that describes the containers' status
-   * @param containerId id of the container where the instance needs to be placed
    * @param instanceId the instance that needs to be placed in the container
    * @param instanceResource the resources required for that instance
-   * @return number of containers needed for a valid RR allocation
+   * @return true if the existing number of containers is sufficient, false otherwise
    */
-  private int flexibleRRpolicy(Map<Integer, List<InstanceId>> allocation,
-                               ArrayList<Container> containers, int containerId,
-                               InstanceId instanceId, Resource instanceResource) {
-    int noContainers = this.numContainers;
+  private boolean flexibleRRpolicy(Map<Integer, List<InstanceId>> allocation,
+                                   ArrayList<Container> containers, InstanceId instanceId,
+                                   Resource instanceResource) {
     //Attempt to place on containerId
     if (placeResourceCompliantRRInstance(containers, containerId,
         new PackingPlan.InstancePlan(instanceId, instanceResource))) {
       allocation.get(containerId).add(instanceId);
-      return noContainers;
-    }
-    //If there is not enough space on containerId look at other containers in a RR fashion
-    // starting from containerId.
-    boolean containersChecked = false;
-    int currentContainer = (containerId == numContainers) ? 1 : containerId + 1;
-    while (!containersChecked) {
-      if (placeResourceCompliantRRInstance(containers, currentContainer,
-          new PackingPlan.InstancePlan(instanceId, instanceResource))) {
-        allocation.get(currentContainer).add(instanceId);
-        return noContainers;
+      containerId = (containerId == numContainers) ? 1 : containerId + 1;
+      return true;
+    } else {
+      //If there is not enough space on containerId look at other containers in a RR fashion
+      // starting from containerId.
+      boolean containersChecked = false;
+      int currentContainer = (containerId == numContainers) ? 1 : containerId + 1;
+      while (!containersChecked) {
+        if (placeResourceCompliantRRInstance(containers, currentContainer,
+            new PackingPlan.InstancePlan(instanceId, instanceResource))) {
+          allocation.get(currentContainer).add(instanceId);
+          containerId = (currentContainer == numContainers) ? 1 : currentContainer + 1;
+          return true;
+        }
+        currentContainer = (currentContainer == numContainers) ? 1 : currentContainer + 1;
+        if (currentContainer == containerId) {
+          containersChecked = true;
+        }
       }
-      currentContainer = (currentContainer == numContainers) ? 1 : currentContainer + 1;
-      if (currentContainer == containerId) {
-        containersChecked = true;
-      }
     }
-    //Not enough containers. Automatically adjust the number of containers
-    noContainers++;
-    LOG.info(String.format("Increasing the number of containers to "
-        + "%s and attempting packing again.", noContainers));
-    return noContainers;
+    //Not enough containers.
+    containerId = 1;
+    return false;
   }
 
   /**
@@ -459,9 +484,9 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @return true if the container incorporated the instance, otherwise return false
    */
-  private boolean placeResourceCompliantRRInstance(ArrayList<Container> containers, int containerId,
+  private boolean placeResourceCompliantRRInstance(ArrayList<Container> containers, int container,
                                                    PackingPlan.InstancePlan instancePlan) {
-    return containers.get(containerId - 1).add(instancePlan);
+    return containers.get(container - 1).add(instancePlan);
   }
 
   /**
@@ -472,15 +497,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   private Pair<Integer, InstanceId> removeRRInstance(ArrayList<Container> containers,
                                                      String component) throws RuntimeException {
     boolean removed = false;
-    int containerId = 0;
+    int container = 0;
     for (int i = 0; i < containers.size() && !removed; i++) {
       Optional<PackingPlan.InstancePlan> instancePlan =
           containers.get(i).removeAnyInstanceOfComponent(component);
       if (instancePlan.isPresent()) {
         removed = true;
-        containerId = i + 1;
+        container = i + 1;
         PackingPlan.InstancePlan plan = instancePlan.get();
-        return new Pair<Integer, InstanceId>(containerId, new InstanceId(plan.getComponentName(),
+        return new Pair<Integer, InstanceId>(container, new InstanceId(plan.getComponentName(),
             plan.getTaskId(), plan.getComponentIndex()));
       }
     }
