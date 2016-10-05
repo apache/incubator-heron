@@ -14,15 +14,10 @@
 package com.twitter.heron.packing;
 
 import java.util.ArrayList;
-<<<<<<< HEAD
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-=======
-import java.util.HashMap;
-import java.util.HashSet;
->>>>>>> master
 import java.util.Map;
 import java.util.Set;
 

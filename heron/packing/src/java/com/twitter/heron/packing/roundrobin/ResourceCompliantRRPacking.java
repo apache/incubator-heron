@@ -165,11 +165,6 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         resourceCompliantRRAllocation.get(), ramMap, this.defaultInstanceResources,
         paddingPercentage);
-    /*LOG.info("Created a packing plan with " + containerPlans.size() + " containers");
-    for (PackingPlan.ContainerPlan c : containerPlans) {
-      LOG.info("Container  " + c.getId() + " consists of "
-       *   + c.getInstances().toString());
-    }*/
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
@@ -206,11 +201,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         resourceCompliantRRAllocation.get(), ramMap, defaultInstanceResources, paddingPercentage);
-    LOG.info("Created a packing plan with " + containerPlans.size() + " containers");
-    for (PackingPlan.ContainerPlan c : containerPlans) {
-      LOG.info("Container  " + c.getId() + " consists of "
-          + c.getInstances().toString());
-    }
+
     return new PackingPlan(topology.getId(), containerPlans);
   }
 
