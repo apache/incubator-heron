@@ -209,7 +209,7 @@ public class LocalFileSystemStateManagerTest {
   @Test
   public void testGetLock() throws Exception {
     initMocks();
-    String expectedLockPath = String.format("//locks/%s/%s", TOPOLOGY_NAME, LOCK_NAME);
+    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME);
     byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
 
     Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
