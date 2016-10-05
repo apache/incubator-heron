@@ -15,14 +15,20 @@
 package com.twitter.heron.scheduler;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.statemgr.NullStateManager;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+@RunWith(PowerMockRunner.class)
 public class RuntimeManagerMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String TOPOLOGY_ID = "topologyId";
@@ -84,6 +91,7 @@ public class RuntimeManagerMainTest {
    * Test manageTopology()
    */
   @Test
+  @PrepareForTest(ReflectionUtils.class)
   public void testManageTopology() throws Exception {
     Config config = mock(Config.class);
     when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
@@ -97,8 +105,11 @@ public class RuntimeManagerMainTest {
     assertFalse(runtimeManagerMain.manageTopology());
 
     // Valid state manager class
-    when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS")))
-        .thenReturn(NullStateManager.class.getName());
+    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+        thenReturn(IStateManager.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
 
     // Failed to valid
     doReturn(false).when(runtimeManagerMain)
