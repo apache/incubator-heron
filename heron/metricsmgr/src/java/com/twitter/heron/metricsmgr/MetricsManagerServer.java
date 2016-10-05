@@ -80,7 +80,7 @@ public class MetricsManagerServer extends HeronServer {
    * @param port the port of endpoint to bind with
    * @param options the HeronSocketOption for HeronServer
    * @param serverMetricsCounters The MultiCountMetric to update Metircs for MetricsManagerServer
-   * @param maxPacketSize, the maximum size of IncomingPacket in bytes to handle;
+   * @param maxPacketSize the maximum size of IncomingPacket in bytes to handle;
    * server will ignore the packet if its size exceeds this value
    */
   public MetricsManagerServer(NIOLooper s, String host,

@@ -66,7 +66,8 @@ public abstract class HeronServer implements ISelectHandler {
    * @param s the NIOLooper bind with this socket server
    * @param host the host of remote endpoint to communicate with
    * @param port the port of remote endpoint to communicate with
-   * @param maxPacketSize, the maximum size of IncomingPacket in bytes to handle;
+   * @param options the HeronSocketOptions for the server
+   * @param maxPacketSize the maximum size of IncomingPacket in bytes to handle;
    * server will ignore the packet if its size exceeds this value
    */
   public HeronServer(NIOLooper s, String host, int port,
