@@ -16,15 +16,21 @@ package com.twitter.heron.scheduler.client;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.NullScheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 
+@RunWith(PowerMockRunner.class)
 public class SchedulerClientFactoryTest {
   private static final String TOPOLOGY_NAME = "shiwei_0924_jiayou";
 
@@ -55,14 +61,18 @@ public class SchedulerClientFactoryTest {
   }
 
   @Test
+  @PrepareForTest(ReflectionUtils.class)
   public void testGetLibrarySchedulerClient() throws Exception {
     // Instantiate mock objects
     Config config = Mockito.mock(Config.class);
     Config runtime = Mockito.mock(Config.class);
 
-    // Return a NullScheduler
-    Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).
-        thenReturn(NullScheduler.class.getName());
+    // Return a MockScheduler
+    Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS")))
+        .thenReturn(IScheduler.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IScheduler.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IScheduler.class.getName()));
 
     // Get a LibrarySchedulerClient
     Mockito.when(config.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"))).thenReturn(false);
@@ -72,6 +82,8 @@ public class SchedulerClientFactoryTest {
     final String SCHEDULER_CLASS_NOT_EXIST = "class_not_exist";
     Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).
         thenReturn(SCHEDULER_CLASS_NOT_EXIST);
+    PowerMockito.doThrow(new ClassNotFoundException())
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(SCHEDULER_CLASS_NOT_EXIST));
     Assert.assertNull(new SchedulerClientFactory(config, runtime).getSchedulerClient());
   }
 }
