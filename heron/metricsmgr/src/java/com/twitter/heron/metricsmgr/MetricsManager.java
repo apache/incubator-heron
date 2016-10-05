@@ -375,7 +375,6 @@ public class MetricsManager {
         }
         sinksRetryAttempts.put(sinkId, thisSinkRetryAttempts);
 
-
         // Update the list of Communicator in Metrics Manager Server
         metricsManagerServer.addSinkCommunicator(newSinkExecutor.getCommunicator());
 
