@@ -150,6 +150,9 @@ heron.metricsmgr.network.options.socket.send.buffer.size.bytes: 6553600
 # The maximum socket's received buffer size in bytes of metricsmgr's network options
 heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 8738000
 
+# The maximum packet size to handle by metrics mgr in bytes
+heron.metricsmgr.server.max.packet.size.bytes: 131072
+
 ################################################################################
 # Configs related to Heron Instance, starts with heron.instance.*
 ################################################################################

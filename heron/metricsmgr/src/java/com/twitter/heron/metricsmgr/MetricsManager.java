@@ -146,7 +146,8 @@ public class MetricsManager {
 
     // Construct the MetricsManagerServer
     metricsManagerServer = new MetricsManagerServer(metricsManagerServerLoop, serverHost,
-        serverPort, serverSocketOptions, serverCounters);
+        serverPort, serverSocketOptions, serverCounters,
+        systemConfig.getMetricsmgrServerMaxPacketSizeBytes());
 
     executors = Executors.newFixedThreadPool(config.getNumberOfSinks());
     sinkExecutors = new ConcurrentHashMap<>(config.getNumberOfSinks());
@@ -192,8 +193,8 @@ public class MetricsManager {
     if (args.length != 6) {
       throw new RuntimeException(
           "Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager "
-          + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
-          + "<metrics_sinks_config_filename>");
+              + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
+              + "<metrics_sinks_config_filename>");
     }
 
     String metricsmgrId = args[0];
@@ -221,7 +222,7 @@ public class MetricsManager {
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with "
-        + "Metrics Manager Id %s, Merics Manager Port: %d.",
+            + "Metrics Manager Id %s, Merics Manager Port: %d.",
         topologyName, topologyId, metricsmgrId, metricsPort));
 
     LOG.info("System Config: " + systemConfig);

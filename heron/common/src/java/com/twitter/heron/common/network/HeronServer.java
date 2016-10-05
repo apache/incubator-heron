@@ -46,6 +46,7 @@ public abstract class HeronServer implements ISelectHandler {
   // Define the address where we need to listen on
   private InetSocketAddress endpoint;
   private HeronSocketOptions socketOptions;
+  private int maxPacketSize;
   // Our own looper
   private NIOLooper nioLooper;
   // All the clients that we have connected
@@ -54,17 +55,27 @@ public abstract class HeronServer implements ISelectHandler {
   private Map<String, Message.Builder> requestMap;
   private Map<String, Message.Builder> messageMap;
 
+
+  public HeronServer(NIOLooper s, String host, int port, HeronSocketOptions options) {
+    this(s, host, port, options, Integer.MAX_VALUE);
+  }
+
   /**
    * Constructor
    *
    * @param s the NIOLooper bind with this socket server
    * @param host the host of remote endpoint to communicate with
    * @param port the port of remote endpoint to communicate with
+   * @param maxPacketSize, the maximum size of IncomingPacket in bytes to handle;
+   * server will ignore the packet if its size exceeds this value
    */
-  public HeronServer(NIOLooper s, String host, int port, HeronSocketOptions options) {
-    nioLooper = s;
-    endpoint = new InetSocketAddress(host, port);
-    socketOptions = options;
+  public HeronServer(NIOLooper s, String host, int port,
+                     HeronSocketOptions options, int maxPacketSize) {
+    this.nioLooper = s;
+    this.endpoint = new InetSocketAddress(host, port);
+    this.socketOptions = options;
+    this.maxPacketSize = maxPacketSize;
+
     requestMap = new HashMap<String, Message.Builder>();
     messageMap = new HashMap<String, Message.Builder>();
     activeConnections = new HashMap<SocketChannel, SocketChannelHelper>();
@@ -179,6 +190,11 @@ public abstract class HeronServer implements ISelectHandler {
    * onMessage() to handle it
    */
   private void handlePacket(SelectableChannel channel, IncomingPacket incomingPacket) {
+    if (incomingPacket.size() >= maxPacketSize) {
+      LOG.warning("Ignoring too large packet; size: " + incomingPacket.size());
+      return;
+    }
+
     String typeName = incomingPacket.unpackString();
     REQID rid = incomingPacket.unpackREQID();
     Message.Builder bldr = requestMap.get(typeName);
