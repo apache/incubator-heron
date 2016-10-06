@@ -15,6 +15,7 @@ package com.twitter.heron.scheduler;
 
 import java.io.Closeable;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScalable;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
@@ -78,12 +80,45 @@ public class UpdateTopologyManager implements Closeable {
   /**
    * Scales the topology out or in based on the proposedPackingPlan
    *
-   * @param existingProtoPackingPlan the current plan. If this isn't what's found in the state manager,
-   * the update will fail
+   * @param existingProtoPackingPlan the current plan. If this isn't what's found in the state
+   * manager, the update will fail
    * @param proposedProtoPackingPlan packing plan to change the topology to
    */
   public void updateTopology(final PackingPlans.PackingPlan existingProtoPackingPlan,
                              final PackingPlans.PackingPlan proposedProtoPackingPlan)
+      throws ExecutionException, InterruptedException, ConcurrentModificationException {
+    String topologyName = Runtime.topologyName(runtime);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+    Lock lock = stateManager.getLock(topologyName, "updateTopology");
+
+    if (lock.tryLock(5, TimeUnit.SECONDS)) {
+      try {
+        PackingPlans.PackingPlan foundPackingPlan = getPackingPlan(stateManager, topologyName);
+
+        if (!deserializer.fromProto(existingProtoPackingPlan)
+            .equals(deserializer.fromProto(foundPackingPlan))) {
+          throw new ConcurrentModificationException(String.format(
+              "The packing plan in state manager is not the same as the submitted existing "
+                  + "packing plan for topology %s. Another actor has changed it and has likely"
+                  + "performed an update on it. Failing this request, try again once other "
+                  + "update is complete", topologyName));
+        }
+
+        updateTopology(existingProtoPackingPlan, proposedProtoPackingPlan, stateManager);
+      } finally {
+        lock.unlock();
+      }
+    } else {
+      throw new ConcurrentModificationException(String.format(
+          "The update lock can not be obtained for topology %s. Another actor is performing an "
+              + "update on it. Failing this request, try again once current update is complete",
+          topologyName));
+    }
+  }
+
+  private void updateTopology(final PackingPlans.PackingPlan existingProtoPackingPlan,
+                              final PackingPlans.PackingPlan proposedProtoPackingPlan,
+                              SchedulerStateManagerAdaptor stateManager)
       throws ExecutionException, InterruptedException {
     String topologyName = Runtime.topologyName(runtime);
     PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
@@ -104,7 +139,6 @@ public class UpdateTopologyManager implements Closeable {
     assertTrue(newContainerCount + removableContainerCount == 0 || scalableScheduler.isPresent(),
         message);
 
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = stateManager.getTopology(topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
 
@@ -189,6 +223,7 @@ public class UpdateTopologyManager implements Closeable {
     Future<?> future = this.reactivateExecutorService
         .scheduleWithFixedDelay(enabler, 0, delaySeconds, TimeUnit.SECONDS);
     enabler.setFutureRunnable(future);
+
     try {
       future.get(waitSeconds, TimeUnit.SECONDS);
     } catch (CancellationException e) {
@@ -274,6 +309,12 @@ public class UpdateTopologyManager implements Closeable {
     TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
     Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
     return mergeTopology(updatedTopology, proposedComponentCounts);
+  }
+
+  @VisibleForTesting
+  PackingPlans.PackingPlan getPackingPlan(SchedulerStateManagerAdaptor stateManager,
+                                          String topologyName) {
+    return stateManager.getPackingPlan(topologyName);
   }
 
   /**
