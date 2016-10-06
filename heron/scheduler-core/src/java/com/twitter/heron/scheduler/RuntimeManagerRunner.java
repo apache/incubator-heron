@@ -40,7 +40,6 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
 
-
 public class RuntimeManagerRunner implements Callable<Boolean> {
   static final String NEW_COMPONENT_PARALLELISM_KEY = "NEW_COMPONENT_PARALLELISM";
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
@@ -178,13 +177,20 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = manager.getTopology(topologyName);
     Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
-    PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
-    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
+    PackingPlans.PackingPlan currentProtoPlan = manager.getPackingPlan(topologyName);
+
+    if (!changeDetected(currentProtoPlan, changeRequests)) {
+      LOG.warning(String.format("The component parallelism request (%s) is the same as the "
+          + "current topology parallelization. Not taking action.", newParallelism));
+      return false;
+    }
+
+    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentProtoPlan, changeRequests,
         topology);
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
-            .setCurrentPackingPlan(currentPlan)
+            .setCurrentPackingPlan(currentProtoPlan)
             .setProposedPackingPlan(proposedPlan)
             .build();
 
@@ -316,5 +322,17 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
           + "<component>:<parallelism>[,<component>:<parallelism>], Found: " + newParallelism);
     }
     return changes;
+  }
+
+  private boolean changeDetected(PackingPlans.PackingPlan currentProtoPlan,
+                                 Map<String, Integer> changeRequests) {
+    PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
+    PackingPlan currentPlan = deserializer.fromProto(currentProtoPlan);
+    for (String component : changeRequests.keySet()) {
+      if (changeRequests.get(component) != currentPlan.getComponentCounts().get(component)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

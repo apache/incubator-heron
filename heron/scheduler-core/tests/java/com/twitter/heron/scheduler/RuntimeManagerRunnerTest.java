@@ -145,6 +145,18 @@ public class RuntimeManagerRunnerTest {
   @PrepareForTest(Runtime.class)
   @Test
   public void testUpdateTopologyHandler() throws Exception {
+    String newParallelism = "testSpout:1,testBolt:4";
+    doUpdateTopologyHandlerTest(newParallelism, true);
+  }
+
+  @PrepareForTest(Runtime.class)
+  @Test
+  public void testUpdateTopologyHandlerWithSameParallelism() throws Exception {
+    String newParallelism = "testSpout:2,testBolt:3"; // same as current test packing plan
+    doUpdateTopologyHandlerTest(newParallelism, false);
+  }
+
+  private void doUpdateTopologyHandlerTest(String newParallelism, boolean expectedResult) {
     ISchedulerClient client = mock(ISchedulerClient.class);
     SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE, client);
@@ -153,7 +165,6 @@ public class RuntimeManagerRunnerTest {
     PowerMockito.when(Runtime.schedulerStateManagerAdaptor(runtime)).thenReturn(manager);
 
     RoundRobinPacking packing = new RoundRobinPacking();
-    String newParallelism = "testSpout:1,testBolt:4";
 
     PackingPlans.PackingPlan currentPlan =
         PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
@@ -171,10 +182,13 @@ public class RuntimeManagerRunnerTest {
             .setProposedPackingPlan(proposedPlan)
             .build();
 
-    // Success case
     when(client.updateTopology(updateTopologyRequest)).thenReturn(true);
-    assertTrue(runner.updateTopologyHandler(TOPOLOGY_NAME, newParallelism));
-    verify(client, times(1)).updateTopology(updateTopologyRequest);
+    boolean result = runner.updateTopologyHandler(TOPOLOGY_NAME, newParallelism);
+    assertEquals("Unexpected result when calling updateTopologyHandler with newParallelism="
+        + newParallelism, expectedResult, result);
+
+    int expectedClientUpdateCalls = expectedResult ? 1 : 0;
+    verify(client, times(expectedClientUpdateCalls)).updateTopology(updateTopologyRequest);
   }
 
   @Test
