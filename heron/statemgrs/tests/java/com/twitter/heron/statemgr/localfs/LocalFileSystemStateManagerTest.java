@@ -22,11 +22,9 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -40,11 +38,19 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.Lock;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * LocalFileSystemStateManager Tester.
@@ -68,7 +74,7 @@ public class LocalFileSystemStateManagerTest {
         .put(Keys.stateManagerRootPath(), rootPath)
         .put(LocalFileSystemKeys.initializeFileTree(), initTree)
         .build();
-    LocalFileSystemStateManager manager = Mockito.spy(new LocalFileSystemStateManager());
+    LocalFileSystemStateManager manager = spy(new LocalFileSystemStateManager());
     manager.initialize(config);
     return manager;
   }
@@ -81,7 +87,7 @@ public class LocalFileSystemStateManagerTest {
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).when(FileUtils.class, "createDirectory", anyString());
 
-    Assert.assertTrue(manager.initTree());
+    assertTrue(manager.initTree());
 
     PowerMockito.doReturn(true)
         .when(FileUtils.class, "writeToFile", anyString(), any(byte[].class), anyBoolean());
@@ -93,7 +99,7 @@ public class LocalFileSystemStateManagerTest {
   public void testInitialize() throws Exception {
     initMocks();
 
-    PowerMockito.verifyStatic(Mockito.atLeastOnce());
+    PowerMockito.verifyStatic(atLeastOnce());
     FileUtils.createDirectory(anyString());
   }
 
@@ -114,7 +120,7 @@ public class LocalFileSystemStateManagerTest {
     Scheduler.SchedulerLocation locationFetched =
         manager.getSchedulerLocation(null, TOPOLOGY_NAME).get();
 
-    Assert.assertEquals(location, locationFetched);
+    assertEquals(location, locationFetched);
   }
 
   /**
@@ -122,12 +128,11 @@ public class LocalFileSystemStateManagerTest {
    */
   @Test
   public void testSetSchedulerLocation() throws Exception {
-    Mockito.doReturn(Mockito.mock(ListenableFuture.class)).when(manager).
-        setData(anyString(), any(byte[].class), anyBoolean());
+    doReturn(mock(ListenableFuture.class)).when(manager)
+        .setData(anyString(), any(byte[].class), anyBoolean());
 
     manager.setSchedulerLocation(Scheduler.SchedulerLocation.getDefaultInstance(), "");
-    Mockito.verify(manager).
-        setData(anyString(), any(byte[].class), eq(true));
+    verify(manager).setData(anyString(), any(byte[].class), eq(true));
   }
 
   /**
@@ -139,7 +144,7 @@ public class LocalFileSystemStateManagerTest {
     ExecutionEnvironment.ExecutionState defaultState =
         ExecutionEnvironment.ExecutionState.getDefaultInstance();
 
-    Assert.assertTrue(manager.setExecutionState(defaultState, "").get());
+    assertTrue(manager.setExecutionState(defaultState, "").get());
 
     assertWriteToFile(
         String.format("%s/%s/%s", ROOT_ADDR, "executionstate", defaultState.getTopologyName()),
@@ -154,7 +159,7 @@ public class LocalFileSystemStateManagerTest {
     initMocks();
     TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
 
-    Assert.assertTrue(manager.setTopology(topology, TOPOLOGY_NAME).get());
+    assertTrue(manager.setTopology(topology, TOPOLOGY_NAME).get());
 
     assertWriteToFile(
         String.format("%s/%s/%s", ROOT_ADDR, "topologies", TOPOLOGY_NAME),
@@ -166,7 +171,7 @@ public class LocalFileSystemStateManagerTest {
     initMocks();
     PackingPlans.PackingPlan packingPlan = PackingPlans.PackingPlan.getDefaultInstance();
 
-    Assert.assertTrue(manager.setPackingPlan(packingPlan, TOPOLOGY_NAME).get());
+    assertTrue(manager.setPackingPlan(packingPlan, TOPOLOGY_NAME).get());
 
     assertWriteToFile(
         String.format("%s/%s/%s", ROOT_ADDR, "packingplans", TOPOLOGY_NAME),
@@ -180,7 +185,7 @@ public class LocalFileSystemStateManagerTest {
   public void testDeleteExecutionState() throws Exception {
     initMocks();
 
-    Assert.assertTrue(manager.deleteExecutionState(TOPOLOGY_NAME).get());
+    assertTrue(manager.deleteExecutionState(TOPOLOGY_NAME).get());
 
     assertDeleteFile(String.format("%s/%s/%s", ROOT_ADDR, "executionstate", TOPOLOGY_NAME));
   }
@@ -192,7 +197,7 @@ public class LocalFileSystemStateManagerTest {
   public void testDeleteTopology() throws Exception {
     initMocks();
 
-    Assert.assertTrue(manager.deleteTopology(TOPOLOGY_NAME).get());
+    assertTrue(manager.deleteTopology(TOPOLOGY_NAME).get());
 
     assertDeleteFile(String.format("%s/%s/%s", ROOT_ADDR, "topologies", TOPOLOGY_NAME));
   }
@@ -201,7 +206,7 @@ public class LocalFileSystemStateManagerTest {
   public void testDeletePackingPlan() throws Exception {
     initMocks();
 
-    Assert.assertTrue(manager.deletePackingPlan(TOPOLOGY_NAME).get());
+    assertTrue(manager.deletePackingPlan(TOPOLOGY_NAME).get());
 
     assertDeleteFile(String.format("%s/%s/%s", ROOT_ADDR, "packingplans", TOPOLOGY_NAME));
   }
@@ -214,7 +219,7 @@ public class LocalFileSystemStateManagerTest {
 
     Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
 
-    Assert.assertTrue(lock.tryLock(0, TimeUnit.MILLISECONDS));
+    assertTrue(lock.tryLock(0, TimeUnit.MILLISECONDS));
     assertWriteToFile(expectedLockPath, expectedContents, false);
 
     lock.unlock();
@@ -226,7 +231,7 @@ public class LocalFileSystemStateManagerTest {
     Path tempDir = Files.createTempDirectory("heron-testGetFilesystemLock");
     LocalFileSystemStateManager fsBackedManager = initMockManager(tempDir.toString(), true);
     Lock lock = fsBackedManager.getLock(TOPOLOGY_NAME, LOCK_NAME);
-    Assert.assertTrue("Failed to get lock", lock.tryLock(0, TimeUnit.MILLISECONDS));
+    assertTrue("Failed to get lock", lock.tryLock(0, TimeUnit.MILLISECONDS));
     lock.unlock();
   }
 
@@ -241,7 +246,7 @@ public class LocalFileSystemStateManagerTest {
 
     Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
 
-    Assert.assertFalse(lock.tryLock(0, TimeUnit.MILLISECONDS));
+    assertFalse(lock.tryLock(0, TimeUnit.MILLISECONDS));
     assertWriteToFile(expectedLockPath, expectedContents, false);
   }
 
