@@ -177,20 +177,20 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = manager.getTopology(topologyName);
     Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
-    PackingPlans.PackingPlan currentProtoPlan = manager.getPackingPlan(topologyName);
+    PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
 
-    if (!changeDetected(currentProtoPlan, changeRequests)) {
+    if (!changeDetected(currentPlan, changeRequests)) {
       LOG.warning(String.format("The component parallelism request (%s) is the same as the "
-          + "current topology parallelization. Not taking action.", newParallelism));
+          + "current topology parallelism. Not taking action.", newParallelism));
       return false;
     }
 
-    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentProtoPlan, changeRequests,
+    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
         topology);
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
-            .setCurrentPackingPlan(currentProtoPlan)
+            .setCurrentPackingPlan(currentPlan)
             .setProposedPackingPlan(proposedPlan)
             .build();
 
