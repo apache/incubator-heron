@@ -16,12 +16,9 @@ package com.twitter.heron.statemgr.zookeeper;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.logging.Logger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -31,15 +28,18 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
+import static org.junit.Assert.assertEquals;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(NetworkUtils.class)
 public class ZkUtilsTest {
-  private static final Logger LOG = Logger.getLogger(ZkUtilsTest.class.getName());
 
   /**
    * Test setupZkTunnel
@@ -68,28 +68,28 @@ public class ZkUtilsTest {
     String connectionString = String.format("%s:%d, %s:%d,  %s:%d   ",
         host0, port0, host1, port1, host2, port2);
 
-    Config config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING"))).
-        thenReturn(connectionString);
+    Config config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING")))
+        .thenReturn(connectionString);
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.STATE_MANAGER);
 
-    Process process = Mockito.mock(Process.class);
+    Process process = mock(Process.class);
 
     // Mock the invocation of establishSSHTunnelIfNeeded
     // address0 and address1 are directly reachable
     // address2 are reachable after tunneling
     PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(new Pair<>(address0, process)).
-        when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
+    PowerMockito.doReturn(new Pair<>(address0, process))
+        .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
             eq(address0), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
             anyInt(), anyInt(), anyInt());
-    PowerMockito.doReturn(new Pair<>(address1, process)).
-        when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
+    PowerMockito.doReturn(new Pair<>(address1, process))
+        .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
             eq(address1), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
             anyInt(), anyInt(), anyInt());
-    PowerMockito.doReturn(new Pair<>(tunnelAddress, process)).
-        when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
+    PowerMockito.doReturn(new Pair<>(tunnelAddress, process))
+        .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
             eq(address2), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
             anyInt(), anyInt(), anyInt());
 
@@ -99,10 +99,10 @@ public class ZkUtilsTest {
     String expectedConnectionString =
         String.format("%s,%s,%s",
             address0.toString(), address1.toString(), tunnelAddress.toString());
-    Assert.assertEquals(expectedConnectionString, ret.first);
-    Assert.assertEquals(3, ret.second.size());
+    assertEquals(expectedConnectionString, ret.first);
+    assertEquals(3, ret.second.size());
     for (Process p : ret.second) {
-      Assert.assertEquals(process, p);
+      assertEquals(process, p);
     }
   }
 }
