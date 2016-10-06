@@ -16,7 +16,7 @@ from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
-from heron.proto import stmgr_pb2, common_pb2
+from heron.proto import common_pb2, stmgr_pb2, tuple_pb2
 
 import heron.common.src.python.constants as constants
 
@@ -47,7 +47,7 @@ class SingleThreadStmgrClient(HeronClient):
   def on_connect(self, status):
     Log.debug("In on_connect of STStmgrClient")
     if status != StatusCode.OK:
-      Log.error("Error connecting to Stream Manager with status: %s" % str(status))
+      Log.error("Error connecting to Stream Manager with status: %s", str(status))
       retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC])
       self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
       return
@@ -55,23 +55,24 @@ class SingleThreadStmgrClient(HeronClient):
     self._send_register_req()
 
   def on_response(self, status, context, response):
-    Log.debug("In on_response with status: %s, with context: %s" % (str(status), str(context)))
+    Log.debug("In on_response with status: %s, with context: %s", str(status), str(context))
     if status != StatusCode.OK:
       raise RuntimeError("Response from Stream Manager not OK")
     if isinstance(response, stmgr_pb2.RegisterInstanceResponse):
       self._handle_register_response(response)
     else:
-      Log.error("Unknown kind of response received: %s" % response.DESCRIPTOR.full_name)
+      Log.error("Unknown kind of response received: %s", response.DESCRIPTOR.full_name)
       raise RuntimeError("Unknown kind of response received from Stream Manager")
 
   def on_incoming_message(self, message):
-    self.gateway_metrics.received_packet(message.ByteSize())
-
+    self.gateway_metrics.update_received_packet(message.ByteSize())
     if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
       Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
       self._handle_assignment_message(message.pplan)
     elif isinstance(message, stmgr_pb2.TupleMessage):
       self._handle_new_tuples(message)
+    elif isinstance(message, tuple_pb2.HeronTupleSet2):
+      self._handle_new_tuples_2(message)
     else:
       raise RuntimeError("Unknown kind of message received from Stream Manager")
 
@@ -86,8 +87,10 @@ class SingleThreadStmgrClient(HeronClient):
     # pylint: disable=unnecessary-lambda
     new_instance_builder = lambda: stmgr_pb2.NewInstanceAssignmentMessage()
     tuple_msg_builder = lambda: stmgr_pb2.TupleMessage()
+    hts2_msg_builder = lambda: tuple_pb2.HeronTupleSet2()
     self.register_on_message(new_instance_builder)
     self.register_on_message(tuple_msg_builder)
+    self.register_on_message(hts2_msg_builder)
 
   def _send_register_req(self):
     request = stmgr_pb2.RegisterInstanceRequest()
@@ -115,9 +118,16 @@ class SingleThreadStmgrClient(HeronClient):
     """Called when new TupleMessage arrives"""
     self.heron_instance_cls.handle_new_tuple_set(tuple_msg.set)
 
+  def _handle_new_tuples_2(self, hts2):
+    """Called when new HeronTupleSet2 arrives
+       Strange that we are not using TupleMessage2
+       but to keep consistency with Java part we use HeronTupleSet2
+    """
+    self.heron_instance_cls.handle_new_tuple_set_2(hts2)
+
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
-    Log.debug("In handle_assignment_message() of STStmgrClient, Physical Plan: \n%s" % str(pplan))
+    Log.debug("In handle_assignment_message() of STStmgrClient, Physical Plan: \n%s", str(pplan))
     new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id,
                                     self.heron_instance_cls.topo_pex_file_abs_path)
 
@@ -132,8 +142,8 @@ class SingleThreadStmgrClient(HeronClient):
       self.heron_instance_cls.handle_assignment_msg(new_helper)
     else:
       Log.info("Received a new Physical Plan with the same assignment -- State Change")
-      Log.info("Old state: %s, new state: %s."
-               % (self._pplan_helper.get_topology_state(), new_helper.get_topology_state()))
+      Log.info("Old state: %s, new state: %s.",
+               self._pplan_helper.get_topology_state(), new_helper.get_topology_state())
       self.heron_instance_cls.handle_state_change_msg(new_helper)
 
     self._pplan_helper = new_helper
