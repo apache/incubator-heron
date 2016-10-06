@@ -44,7 +44,7 @@ jobs = [
     service = True,
     task = heron_task,
     instances = '{{NUM_CONTAINERS}}',
-    announce = Announcer(primary_port = 'http')
+    announce = Announcer(primary_port = 'http'),
     container = Container(docker = Docker(image = heron_topology_image_uri))
   )
 ]
