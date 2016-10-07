@@ -130,7 +130,7 @@ public class MetricsManager {
     // Init the ErrorReportHandler
     ErrorReportLoggingHandler.init(
         metricsmgrId, metricsCollector, heronMetricsExportIntervalSec,
-        systemConfig.getHeronMetricsMaxExceptionsCount());
+        systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
 
     // Set up the internal Metrics Export routine
     setupInternalMetricsExport();

@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-import com.twitter.heron.api.metric.CountMetric;
+import com.twitter.heron.api.metric.ConcurrentCountMetric;
 import com.twitter.heron.api.metric.IMetric;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.proto.system.Metrics;
@@ -34,9 +34,11 @@ import com.twitter.heron.proto.system.Metrics;
  */
 public class ErrorReportLoggingHandler extends Handler {
   public static final String NO_TRACE = "No Trace";
-  public static volatile boolean initialized = false;
-  public static final CountMetric droppedExceptionsCount = new CountMetric();
-  public static int exceptionsLimit = Integer.MAX_VALUE;
+
+  private static volatile boolean initialized = false;
+  private static volatile int exceptionsLimit = Integer.MAX_VALUE;
+  private static volatile ConcurrentCountMetric droppedExceptionsCount
+      = new ConcurrentCountMetric();
 
   public ErrorReportLoggingHandler() {
     super();
@@ -139,7 +141,7 @@ public class ErrorReportLoggingHandler extends Handler {
       }
     }
 
-    public int getExceptionsCount() {
+    protected int getExceptionsCount() {
       return exceptionStore.size();
     }
 
@@ -152,7 +154,7 @@ public class ErrorReportLoggingHandler extends Handler {
     }
 
     // Returns ExceptionData.Builder object for the trace.
-    public Metrics.ExceptionData.Builder getExceptionInfo(String trace) {
+    protected Metrics.ExceptionData.Builder getExceptionInfo(String trace) {
       Metrics.ExceptionData.Builder exceptionDataBuilder =
           exceptionStore.get(getExceptionLocation(trace));
       if (exceptionDataBuilder == null) {

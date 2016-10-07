@@ -91,7 +91,7 @@ public class Gateway implements Runnable, AutoCloseable {
     ErrorReportLoggingHandler.init(
         instance.getInstanceId(), gatewayMetricsCollector,
         systemConfig.getHeronMetricsExportIntervalSec(),
-        systemConfig.getHeronMetricsMaxExceptionsCount());
+        systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
 
     // Initialize the corresponding 2 socket clients with corresponding socket options
     HeronSocketOptions socketOptions = new HeronSocketOptions(
