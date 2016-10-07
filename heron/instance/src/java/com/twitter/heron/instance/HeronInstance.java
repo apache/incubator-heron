@@ -219,6 +219,20 @@ public class HeronInstance {
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable exception) {
+      // Add try and catch block to prevent new exceptions stop the handling thread
+      try {
+        // Delegate to the actual one
+        handleException(thread, exception);
+
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Throwable t) {
+        LOG.log(Level.SEVERE, "Failed to handle exception. Process halting", t);
+        Runtime.getRuntime().halt(1);
+      }
+    }
+
+    // The actual uncaught exceptions handing logic
+    private void handleException(Thread thread, Throwable exception) {
       LOG.log(Level.SEVERE,
           String.format("Exception caught in thread: %s with id: %d",
               thread.getName(), thread.getId()), exception);
@@ -226,7 +240,8 @@ public class HeronInstance {
       // CountDownLatch to notify ForceExitTask whether exit is done
       final CountDownLatch exited = new CountDownLatch(1);
       final ExecutorService exitExecutor = Executors.newSingleThreadExecutor();
-      exitExecutor.execute(new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
+      exitExecutor.execute(
+          new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
 
       // Clean up
       if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
