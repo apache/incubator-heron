@@ -206,21 +206,28 @@ public class Simulator {
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable exception) {
-      LOG.severe("Local Mode Process exiting.");
-      LOG.log(Level.SEVERE,
-          "Exception caught in thread: " + thread.getName() + " with id: " + thread.getId(),
-          exception);
-      for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
-        handler.close();
+      // Add try and catch block to prevent new exceptions stop the handling thread
+      try {
+        LOG.severe("Local Mode Process exiting.");
+        LOG.log(Level.SEVERE,
+            "Exception caught in thread: " + thread.getName() + " with id: " + thread.getId(),
+            exception);
+        for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
+          handler.close();
+        }
+
+        // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
+        // thread in the pool. Threads may implement a clean Interrupt logic.
+        threadsPool.shutdownNow();
+
+        // not owned by HeronInstance). To be safe, not sending these interrupts.
+        Runtime.getRuntime().halt(1);
+
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Throwable t) {
+        LOG.log(Level.SEVERE, "Failed to handle exception. Process halting", t);
+        Runtime.getRuntime().halt(1);
       }
-
-      // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
-      // thread in the pool. Threads may implement a clean Interrupt logic.
-      threadsPool.shutdownNow();
-
-      // TODO : It is not clear if this signal should be sent to all the threads (including threads
-      // not owned by HeronInstance). To be safe, not sending these interrupts.
-      Runtime.getRuntime().halt(1);
     }
   }
 }
