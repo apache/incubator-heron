@@ -94,7 +94,7 @@ public final class ShellUtils {
           try {
             input.close();
           } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Failed to close the input stream", e);
           }
         }
       }
@@ -121,7 +121,7 @@ public final class ShellUtils {
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.severe("Failed to run Sync Process " + e);
+      LOG.log(Level.SEVERE, "Failed to run Sync Process ", e);
       return -1;
     }
 
@@ -146,7 +146,7 @@ public final class ShellUtils {
       stdoutThread.interrupt();
       stderrThread.interrupt();
       process.destroy();
-      LOG.severe("Running Sync Process was interrupted" + e);
+      LOG.log(Level.SEVERE, "Running Sync Process was interrupted", e);
       // Reset the interrupt status to allow other codes noticing it.
       Thread.currentThread().interrupt();
       return -1;
@@ -214,7 +214,7 @@ public final class ShellUtils {
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.severe("Failed to run Async Process " + e);
+      LOG.log(Level.SEVERE, "Failed to run Async Process ", e);
     }
 
     return process;
