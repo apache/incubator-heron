@@ -108,8 +108,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
 
   @Override
   public void reportError(Throwable error) {
-    Exception currentStack = new Exception("Reporting an error in topology code", error);
-    LOG.log(Level.SEVERE, "Error stack trace ", currentStack);
+    LOG.log(Level.SEVERE, "Reporting an error in topology code ", error);
   }
 
   @Override

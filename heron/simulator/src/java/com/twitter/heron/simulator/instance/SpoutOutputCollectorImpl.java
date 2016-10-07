@@ -121,8 +121,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
   // Log the report error and also send the stack trace to metrics manager.
   @Override
   public void reportError(Throwable error) {
-    Exception currentStack = new Exception("Reporting an error in topology code", error);
-    LOG.log(Level.SEVERE, "Error stack trace ", currentStack);
+    LOG.log(Level.SEVERE, "Reporting an error in topology code ", error);
   }
 
 
