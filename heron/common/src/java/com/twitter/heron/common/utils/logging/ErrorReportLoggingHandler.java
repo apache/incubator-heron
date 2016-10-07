@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
+import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.IMetric;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.proto.system.Metrics;
@@ -34,6 +35,8 @@ import com.twitter.heron.proto.system.Metrics;
 public class ErrorReportLoggingHandler extends Handler {
   public static final String NO_TRACE = "No Trace";
   public static volatile boolean initialized = false;
+  public static final CountMetric droppedExceptionsCount = new CountMetric();
+  public static int exceptionsLimit = Integer.MAX_VALUE;
 
   public ErrorReportLoggingHandler() {
     super();
@@ -61,9 +64,16 @@ public class ErrorReportLoggingHandler extends Handler {
     }
   }
 
-  public static synchronized void init(String instanceId, MetricsCollector context, int interval) {
+  public static void init(String instanceId, MetricsCollector collector, int interval) {
+    init(instanceId, collector, interval, Integer.MAX_VALUE);
+  }
+
+  public static synchronized void init(String instanceId, MetricsCollector collector,
+                                       int interval, int maxExceptions) {
     if (!initialized) {
-      context.registerMetric("exception_info", ExceptionRepositoryAsMetrics.INSTANCE, interval);
+      collector.registerMetric("exception_info", ExceptionRepositoryAsMetrics.INSTANCE, interval);
+      collector.registerMetric("dropped_exceptions_count", droppedExceptionsCount, interval);
+      exceptionsLimit = maxExceptions;
     }
     initialized = true;
   }
@@ -75,13 +85,20 @@ public class ErrorReportLoggingHandler extends Handler {
     // Convert Log
     Throwable throwable = record.getThrown();
     if (throwable != null) {
-      StringWriter sink = new StringWriter();
-      throwable.printStackTrace(new PrintWriter(sink, true));
-      String trace = sink.toString();
       synchronized (ExceptionRepositoryAsMetrics.INSTANCE) {
+        // We would not include the message if already exceeded the exceptions limit
+        if (ExceptionRepositoryAsMetrics.INSTANCE.getExceptionsCount() >= exceptionsLimit) {
+          droppedExceptionsCount.incr();
+          return;
+        }
+
+        // Convert the record
+        StringWriter sink = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(sink, true));
+        String trace = sink.toString();
+
         Metrics.ExceptionData.Builder exceptionDataBuilder =
             ExceptionRepositoryAsMetrics.INSTANCE.getExceptionInfo(trace);
-
         exceptionDataBuilder.setCount(exceptionDataBuilder.getCount() + 1);
         exceptionDataBuilder.setLasttime(new Date().toString());
         exceptionDataBuilder.setStacktrace(trace);
@@ -120,6 +137,10 @@ public class ErrorReportLoggingHandler extends Handler {
         exceptionStore = new HashMap<String, Metrics.ExceptionData.Builder>();
         return metricsValue;
       }
+    }
+
+    public int getExceptionsCount() {
+      return exceptionStore.size();
     }
 
     // Get the underneath exception info without reset
