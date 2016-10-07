@@ -221,39 +221,45 @@ public class HeronInstance {
     public void uncaughtException(Thread thread, Throwable exception) {
       // Add try and catch block to prevent new exceptions stop the handling thread
       try {
-        LOG.log(Level.SEVERE,
-            String.format("Exception caught in thread: %s with id: %d",
-                thread.getName(), thread.getId()), exception);
-
-        // CountDownLatch to notify ForceExitTask whether exit is done
-        final CountDownLatch exited = new CountDownLatch(1);
-        final ExecutorService exitExecutor = Executors.newSingleThreadExecutor();
-        exitExecutor.execute(
-            new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
-
-        // Clean up
-        if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
-          // Run the SlaveExitTask here since the thread throw exceptions
-          // and this Task would never be invoked on exit in future
-          new SlaveExitTask().run();
-
-          // And exit the GatewayLooper
-          gatewayLooper.exitLoop();
-        } else {
-          // If the exceptions happen in other threads
-          // We would just invoke GatewayExitTask
-          new GatewayExitTask().run();
-        }
-
-        // This notifies the ForceExitTask that the task is finished so that
-        // it is not halted forcibly.
-        exited.countDown();
+        // Delegate to the actual one
+        handleException(thread, exception);
 
         // SUPPRESS CHECKSTYLE IllegalCatch
       } catch (Throwable t) {
         LOG.log(Level.SEVERE, "Failed to handle exception. Process halting", t);
         Runtime.getRuntime().halt(1);
       }
+    }
+
+    // The actual uncaught exceptions handing logic
+    private void handleException(Thread thread, Throwable exception) {
+      LOG.log(Level.SEVERE,
+          String.format("Exception caught in thread: %s with id: %d",
+              thread.getName(), thread.getId()), exception);
+
+      // CountDownLatch to notify ForceExitTask whether exit is done
+      final CountDownLatch exited = new CountDownLatch(1);
+      final ExecutorService exitExecutor = Executors.newSingleThreadExecutor();
+      exitExecutor.execute(
+          new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
+
+      // Clean up
+      if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
+        // Run the SlaveExitTask here since the thread throw exceptions
+        // and this Task would never be invoked on exit in future
+        new SlaveExitTask().run();
+
+        // And exit the GatewayLooper
+        gatewayLooper.exitLoop();
+      } else {
+        // If the exceptions happen in other threads
+        // We would just invoke GatewayExitTask
+        new GatewayExitTask().run();
+      }
+
+      // This notifies the ForceExitTask that the task is finished so that
+      // it is not halted forcibly.
+      exited.countDown();
     }
   }
 
