@@ -66,6 +66,12 @@ public class MetricsManagerServer extends HeronServer {
   // Internal MultiCountMetric Counters
   private final MultiCountMetric serverMetricsCounters;
 
+  public MetricsManagerServer(NIOLooper s, String host,
+                              int port, HeronSocketOptions options,
+                              MultiCountMetric serverMetricsCounters) {
+    this(s, host, port, options, serverMetricsCounters, Integer.MAX_VALUE);
+  }
+
   /**
    * Constructor
    *
@@ -74,11 +80,14 @@ public class MetricsManagerServer extends HeronServer {
    * @param port the port of endpoint to bind with
    * @param options the HeronSocketOption for HeronServer
    * @param serverMetricsCounters The MultiCountMetric to update Metircs for MetricsManagerServer
+   * @param maxPacketSize the maximum size of IncomingPacket in bytes to handle;
+   * server will ignore the packet if its size exceeds this value
    */
   public MetricsManagerServer(NIOLooper s, String host,
                               int port, HeronSocketOptions options,
-                              MultiCountMetric serverMetricsCounters) {
-    super(s, host, port, options);
+                              MultiCountMetric serverMetricsCounters,
+                              int maxPacketSize) {
+    super(s, host, port, options, maxPacketSize);
 
     if (serverMetricsCounters == null) {
       throw new IllegalArgumentException("Server Metrics Counters is needed.");
@@ -160,7 +169,7 @@ public class MetricsManagerServer extends HeronServer {
   @Override
   public void onClose(SocketChannel channel) {
     LOG.log(Level.SEVERE, "Got a connection close from remote socket address: {0}",
-        new Object[] {channel.socket().getRemoteSocketAddress()});
+        new Object[]{channel.socket().getRemoteSocketAddress()});
 
     // Unregister the Publisher
     Metrics.MetricPublisher request =
@@ -169,9 +178,9 @@ public class MetricsManagerServer extends HeronServer {
       LOG.severe("Unknown connection closed");
     } else {
       LOG.log(Level.SEVERE, "Un-register publish from hostname: {0},"
-          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
-          new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
-          request.getInstanceId(), request.getInstanceIndex()});
+              + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[]{request.getHostname(), request.getComponentName(), request.getPort(),
+              request.getInstanceId(), request.getInstanceIndex()});
     }
 
     // Update Metrics
@@ -186,13 +195,13 @@ public class MetricsManagerServer extends HeronServer {
   }
 
   private void handleRegisterRequest(
-        REQID rid,
-        SocketChannel channel,
-        Metrics.MetricPublisherRegisterRequest request) {
+      REQID rid,
+      SocketChannel channel,
+      Metrics.MetricPublisherRegisterRequest request) {
     Metrics.MetricPublisher publisher = request.getPublisher();
     LOG.log(Level.SEVERE, "Got a new register publisher from hostname: {0},"
-        + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4} from {5}",
-        new Object[] {publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
+            + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4} from {5}",
+        new Object[]{publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
             publisher.getInstanceId(), publisher.getInstanceIndex(),
             channel.socket().getRemoteSocketAddress()});
 
@@ -201,8 +210,8 @@ public class MetricsManagerServer extends HeronServer {
 
     if (publisherMap.containsKey(channel.socket().getRemoteSocketAddress())) {
       LOG.log(Level.SEVERE, "Metrics publisher already exists for hostname: {0},"
-          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
-          new Object[] {publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
+              + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[]{publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
               publisher.getInstanceId(), publisher.getInstanceIndex()});
     } else {
       publisherMap.put(channel.socket().getRemoteSocketAddress(), publisher);
@@ -226,8 +235,8 @@ public class MetricsManagerServer extends HeronServer {
     if (message.getMetricsCount() <= 0 && message.getExceptionsCount() <= 0) {
       LOG.log(Level.SEVERE,
           "Publish message has no metrics nor exceptions for message from hostname: {0},"
-          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
-          new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
+              + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[]{request.getHostname(), request.getComponentName(), request.getPort(),
               request.getInstanceId(), request.getInstanceIndex()});
       return;
     }

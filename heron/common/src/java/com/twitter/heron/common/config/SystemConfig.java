@@ -311,6 +311,13 @@ public class SystemConfig {
   public static final String METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES
       = "heron.metricsmgr.network.options.socket.send.buffer.size.bytes";
 
+  /**
+   * The maximum packet size to handle by metrics mgr in bytes
+   */
+  public static final String METRICSMGR_SERVER_MAX_PACKET_SIZE_BYTES
+      = "heron.metricsmgr.server.max.packet.size.bytes";
+
+
   private Map<String, Object> config = new HashMap<>();
 
   public SystemConfig() {
@@ -538,6 +545,12 @@ public class SystemConfig {
     return TypeUtils.
         getInteger(this.config.get(
             SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
+  }
+
+  public int getMetricsmgrServerMaxPacketSizeBytes() {
+    Object value = this.config.get(
+        SystemConfig.METRICSMGR_SERVER_MAX_PACKET_SIZE_BYTES);
+    return value == null ? Integer.MAX_VALUE : TypeUtils.getInteger(value);
   }
 
   public Object put(String key, Object value) {

@@ -150,7 +150,8 @@ public class MetricsManager {
 
     // Construct the MetricsManagerServer
     metricsManagerServer = new MetricsManagerServer(metricsManagerServerLoop, serverHost,
-        serverPort, serverSocketOptions, serverCounters);
+        serverPort, serverSocketOptions, serverCounters,
+        systemConfig.getMetricsmgrServerMaxPacketSizeBytes());
 
     executors = Executors.newFixedThreadPool(config.getNumberOfSinks());
     sinkExecutors = new ConcurrentHashMap<>(config.getNumberOfSinks());
