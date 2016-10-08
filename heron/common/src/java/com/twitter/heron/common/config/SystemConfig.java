@@ -59,6 +59,12 @@ public class SystemConfig {
       = "heron.metrics.export.interval.sec";
 
   /**
+   * The maximum number of exceptions in one MetricPublisherPublishMessage protobuf
+   */
+  public static final String HERON_METRICS_MAX_EXCEPTIONS_PER_MESSAGE_COUNT
+      = "heron.metrics.max.exceptions.per.message.count";
+
+  /**
    * The queue capacity (num of items) in bolt for buffer packets to read from stream manager
    */
   public static final String INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY
@@ -538,6 +544,12 @@ public class SystemConfig {
     return TypeUtils.
         getInteger(this.config.get(
             SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
+  }
+
+  public int getHeronMetricsMaxExceptionsPerMessageCount() {
+    Object value = this.config.get(
+        SystemConfig.HERON_METRICS_MAX_EXCEPTIONS_PER_MESSAGE_COUNT);
+    return value == null ? Integer.MAX_VALUE : TypeUtils.getInteger(value);
   }
 
   public Object put(String key, Object value) {

@@ -30,6 +30,9 @@ heron.logging.err.threshold: 3
 # The interval in seconds for different components to export metrics to metrics manager
 heron.metrics.export.interval.sec: 60
 
+# The maximum count of exceptions in one MetricPublisherPublishMessage protobuf
+heron.metrics.max.exceptions.per.message.count: 1024
+
 ### heron.streammgr.* configs are for the stream manager
 
 # Maximum size in bytes of a packet to be send out from stream manager

@@ -127,6 +127,11 @@ public class MetricsManager {
 
     this.mainThreadId = Thread.currentThread().getId();
 
+    // Init the ErrorReportHandler
+    ErrorReportLoggingHandler.init(
+        metricsmgrId, metricsCollector, heronMetricsExportIntervalSec,
+        systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
+
     // Set up the internal Metrics Export routine
     setupInternalMetricsExport();
 
