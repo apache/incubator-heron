@@ -94,7 +94,7 @@ public final class ShellUtils {
           try {
             input.close();
           } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Failed to close the input stream", e);
+            LOG.log(Level.WARNING, "Failed to close the input stream", e);
           }
         }
       }
