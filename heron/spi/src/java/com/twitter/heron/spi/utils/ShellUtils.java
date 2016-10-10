@@ -82,13 +82,36 @@ public final class ShellUtils {
   }
 
   /**
+   * Start a daemon thread to read data from "input" to "out".
+   */
+  private static Thread asyncProcessStream(final InputStream input, final StringBuilder out) {
+    Thread thread = new Thread() {
+      @Override
+      public void run() {
+        try {
+          out.append(inputstreamToString(input));
+        } finally {
+          try {
+            input.close();
+          } catch (IOException e) {
+            LOG.log(Level.WARNING, "Failed to close the input stream", e);
+          }
+        }
+      }
+    };
+    thread.setDaemon(true);
+    thread.start();
+    return thread;
+  }
+
+  /**
    * run sync process
    */
   public static int runSyncProcess(
       boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory, Map<String, String> envs) {
-    StringBuilder pStdOut = stdout;
-    StringBuilder pStdErr = stderr;
+    final StringBuilder pStdOut = stdout == null ? new StringBuilder() : stdout;
+    final StringBuilder pStdErr = stderr == null ? new StringBuilder() : stderr;
 
     // Log the command for debugging
     LOG.log(Level.FINE, "Process command: `$ {0}`", Arrays.toString(cmdline));
@@ -98,27 +121,36 @@ public final class ShellUtils {
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.severe("Failed to run Sync Process " + e);
+      LOG.log(Level.SEVERE, "Failed to run Sync Process ", e);
       return -1;
     }
+
+    // Launching threads to consume stdout and stderr before "waitFor". Otherwise, output from the
+    // "process" can exhaust the available buffer for the output or error stream because neither
+    // stream is read while waiting for the process to complete. If either buffer becomes full, it
+    // can block the "process" as well, preventing all progress for both the "process" and the
+    // current thread.
+    Thread stdoutThread = asyncProcessStream(process.getInputStream(), pStdOut);
+    Thread stderrThread = asyncProcessStream(process.getErrorStream(), pStdErr);
 
     int exitValue;
 
     try {
       exitValue = process.waitFor();
+      // Make sure `pStdOut` and `pStdErr` get the buffered data
+      stdoutThread.join();
+      stderrThread.join();
     } catch (InterruptedException e) {
-      LOG.severe("Failed to check status of packer " + e);
+      // The current thread is interrupted, so try to interrupt reading threads and kill
+      // the process to return quickly.
+      stdoutThread.interrupt();
+      stderrThread.interrupt();
+      process.destroy();
+      LOG.log(Level.SEVERE, "Running Sync Process was interrupted", e);
+      // Reset the interrupt status to allow other codes noticing it.
+      Thread.currentThread().interrupt();
       return -1;
     }
-
-    if (pStdOut == null) {
-      pStdOut = new StringBuilder();
-    }
-    if (pStdErr == null) {
-      pStdErr = new StringBuilder();
-    }
-    pStdOut.append(inputstreamToString(process.getInputStream()));
-    pStdErr.append(inputstreamToString(process.getErrorStream()));
 
     String stdoutString = pStdOut.toString();
     String stderrString = pStdErr.toString();
@@ -182,7 +214,7 @@ public final class ShellUtils {
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.severe("Failed to run Async Process " + e);
+      LOG.log(Level.SEVERE, "Failed to run Async Process ", e);
     }
 
     return process;
