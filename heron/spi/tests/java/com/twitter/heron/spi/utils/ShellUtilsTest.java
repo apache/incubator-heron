@@ -16,7 +16,9 @@ package com.twitter.heron.spi.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -56,6 +58,32 @@ public class ShellUtilsTest {
     Assert.assertEquals(0, ShellUtils.runProcess(true, "echo " + testString, stdout, stderr));
     Assert.assertEquals(testString, stdout.toString().trim());
     Assert.assertTrue(stderr.toString().trim().isEmpty());
+  }
+
+  @Test(timeout = 60000)
+  public void testLargeOutput() throws IOException, InterruptedException {
+    File testScript = File.createTempFile("foo-", ".sh");
+    try {
+      // A command that fulfills the output buffers.
+      String command = "printf '.%.0s' {1..1000000}\nprintf '.%.0s' {1..1000000} >&2";
+      FileOutputStream input = new FileOutputStream(testScript);
+      try {
+        input.write(command.getBytes(StandardCharsets.UTF_8));
+      } finally {
+        input.close();
+      }
+      Assert.assertTrue("Cannot make the test script executable", testScript.setExecutable(true));
+      StringBuilder stdout = new StringBuilder();
+      StringBuilder stderr = new StringBuilder();
+      Assert.assertEquals(0,
+          ShellUtils.runProcess(true,
+              "/bin/bash -c " + testScript.getAbsolutePath(), stdout, stderr));
+      // Only checks stdout and stderr are not empty. Correctness is checked in "testRunProcess".
+      Assert.assertTrue(!stdout.toString().trim().isEmpty());
+      Assert.assertTrue(!stderr.toString().trim().isEmpty());
+    } finally {
+      testScript.delete();
+    }
   }
 
   @Test
