@@ -111,6 +111,7 @@ public class KinesisSpout implements IRichSpout, Serializable {
         this.stateManager = new ZookeeperStateManager(config, shardListGetter, getterBuilder, initialPosition);
         LOG.info(this + " open() called with topoConfig task index " + spoutContext.getThisTaskIndex()
                 + " for processing stream " + config.getStreamName());
+        activate();
     }
 
     @Override
