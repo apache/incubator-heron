@@ -4,6 +4,7 @@
   "role" : "dummy_role",
   "env" : "dummy_env",
   "resultsServerPort" : "80",
+  "cliConfigPath" : "$HOME/.heron/conf",
   "topologyClasspathPrefix" : "com.twitter.heron.integration_test.topology.",
   "releasePackageUri" : "scheme://role/name/version",
   "javaTopologies": [
