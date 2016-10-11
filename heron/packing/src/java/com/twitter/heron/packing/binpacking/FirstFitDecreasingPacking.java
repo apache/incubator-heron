@@ -239,9 +239,9 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
                                                           Map<String, Integer> componentChanges) {
     Map<String, Integer> componentsToScaleDown =
-        PackingUtils.getComponentsToScaleDown(componentChanges);
+        PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
     Map<String, Integer> componentsToScaleUp =
-        PackingUtils.getComponentsToScaleUp(componentChanges);
+        PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.UP);
 
     ArrayList<Container> containers = PackingUtils.getContainers(currentPackingPlan,
         this.paddingPercentage);

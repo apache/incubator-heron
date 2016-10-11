@@ -585,11 +585,11 @@ public class ResourceCompliantRRPackingTest {
    */
   @Test
   public void removeFirstContainer() throws Exception {
-    int spoutScalingDown = -2;
-    int boltScalingDown = -2;
+    int spoutScalingDown = -3;
+    int boltScalingDown = -3;
 
      /* The packing plan consists of two containers. The first one contains 2 spouts and 2 bolts
-       the second one contains 2 spouts and 1 bolt. During scaling we remove 2 spouts and 2 bolts
+       the second one contains 2 spouts and 1 bolt. During scaling we remove 3 spouts and 3 bolts
        and thus the first container is removed.
      */
     Map<String, Integer> componentChanges = new HashMap<>();
@@ -601,9 +601,9 @@ public class ResourceCompliantRRPackingTest {
     Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingDown),
         newPackingPlan.getInstanceCount());
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, 1);
+        BOLT_NAME, 0);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, 2);
+        SPOUT_NAME, 1);
   }
 
   /**

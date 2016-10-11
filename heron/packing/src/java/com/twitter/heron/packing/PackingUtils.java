@@ -189,37 +189,20 @@ public final class PackingUtils {
   }
 
   /**
-   * Identifies which components need to be scaled down
+   * Identifies which components need to be scaled given specific scaling direction
    *
-   * @return Map &lt; component name, scale down factor &gt;
+   * @return Map &lt; component name, scale factor &gt;
    */
-  public static Map<String, Integer> getComponentsToScaleDown(Map<String,
-      Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleDown = new HashMap<String, Integer>();
+  public static Map<String, Integer> getComponentsToScale(Map<String,
+      Integer> componentChanges, ScalingDirection scalingDirection) {
+    Map<String, Integer> componentsToScale = new HashMap<String, Integer>();
     for (String component : componentChanges.keySet()) {
       int parallelismChange = componentChanges.get(component);
-      if (parallelismChange < 0) {
-        componentsToScaleDown.put(component, parallelismChange);
+      if (scalingDirection.includes(parallelismChange)) {
+        componentsToScale.put(component, parallelismChange);
       }
     }
-    return componentsToScaleDown;
-  }
-
-  /**
-   * Identifies which components need to be scaled up
-   *
-   * @return Map &lt; component name, scale up factor &gt;
-   */
-  public static Map<String, Integer> getComponentsToScaleUp(Map<String,
-      Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleUp = new HashMap<String, Integer>();
-    for (String component : componentChanges.keySet()) {
-      int parallelismChange = componentChanges.get(component);
-      if (parallelismChange > 0) {
-        componentsToScaleUp.put(component, parallelismChange);
-      }
-    }
-    return componentsToScaleUp;
+    return componentsToScale;
   }
 
   /**
@@ -227,16 +210,18 @@ public final class PackingUtils {
    *
    * @return Total resources reclaimed
    */
-  public static Resource getScaleDownResource(TopologyAPI.Topology topology, Map<String, Integer>
-      componentChanges, Resource defaultInstanceResources) {
+  public static Resource computeTotalResourceChange(TopologyAPI.Topology topology,
+                                                    Map<String, Integer> componentChanges,
+                                                    Resource defaultInstanceResources,
+                                                    ScalingDirection scalingDirection) {
     double cpu = 0;
     long ram = 0;
     long disk = 0;
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-    Map<String, Integer> componentsToScaleDown = PackingUtils.getComponentsToScaleDown(
-        componentChanges);
-    for (String component : componentsToScaleDown.keySet()) {
-      int parallelismChange = -componentChanges.get(component);
+    Map<String, Integer> componentsToScale = PackingUtils.getComponentsToScale(
+        componentChanges, scalingDirection);
+    for (String component : componentsToScale.keySet()) {
+      int parallelismChange = Math.abs(componentChanges.get(component));
       cpu += parallelismChange * defaultInstanceResources.getCpu();
       disk += parallelismChange * defaultInstanceResources.getDisk();
       if (ramMap.containsKey(component)) {
@@ -246,61 +231,6 @@ public final class PackingUtils {
       }
     }
     return new Resource(cpu, ram, disk);
-  }
-
-  /**
-   * Identifies the resources needed for the components that will be scaled up
-   *
-   * @return Total resources needed
-   */
-  public static Resource getScaleUpResource(TopologyAPI.Topology topology, Map<String, Integer>
-      componentChanges, Resource defaultInstanceResources) {
-    double cpu = 0;
-    long ram = 0;
-    long disk = 0;
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-    Map<String, Integer> componentsToScaleUp = PackingUtils.getComponentsToScaleUp(
-        componentChanges);
-    for (String component : componentsToScaleUp.keySet()) {
-      int parallelismChange = componentChanges.get(component);
-      cpu += parallelismChange * defaultInstanceResources.getCpu();
-      disk += parallelismChange * defaultInstanceResources.getDisk();
-      if (ramMap.containsKey(component)) {
-        ram += parallelismChange * ramMap.get(component);
-      } else {
-        ram += parallelismChange * defaultInstanceResources.getRam();
-      }
-    }
-    return new Resource(cpu, ram, disk);
-  }
-
-  /**
-   * Computes the additional resources needed to accommodate a scale up and down operation
-   *
-   * @return Additional resources needed
-   */
-  public static Resource getAdditionalResources(Resource scaleupResource,
-                                                Resource scaledownResource) {
-    double cpuDifference =  scaleupResource.getCpu() - scaledownResource.getCpu();
-    double cpu = cpuDifference < 0 ? 0 : cpuDifference;
-    long ramDifference =  scaleupResource.getRam() - scaledownResource.getRam();
-    long ram =  ramDifference < 0 ? 0 : ramDifference;
-    long diskDifference = scaleupResource.getDisk() - scaledownResource.getDisk();
-    long disk = diskDifference < 0 ? 0 : diskDifference;
-    return new Resource(cpu, ram, disk);
-  }
-
-
-  /**
-   * Computes number of containers needed to accommodate a specific resource request given the container size
-   *
-   * @return Number of containers needed
-   */
-  public static double getRequiredNumContainers(Resource resourceRequest, Resource capacity) {
-    double numContainersCpu = Math.ceil(resourceRequest.getCpu() / capacity.getCpu());
-    double numContainersRam = Math.ceil((double) resourceRequest.getRam() / capacity.getRam());
-    double numContainersDisk = Math.ceil((double) resourceRequest.getDisk() / capacity.getDisk());
-    return Math.max(numContainersCpu, Math.max(numContainersRam, numContainersDisk));
   }
 
   /**
@@ -359,5 +289,22 @@ public final class PackingUtils {
       allocation.put(containerPlan.getId(), instances);
     }
     return allocation;
+  }
+
+  public enum ScalingDirection {
+    UP,
+    DOWN;
+
+    boolean includes(int parallelismChange) {
+      switch (this) {
+        case UP:
+          return parallelismChange > 0;
+        case DOWN:
+          return parallelismChange < 0;
+        default:
+          throw new IllegalArgumentException(String.format("Not valid parallelism change: %d",
+              parallelismChange));
+      }
+    }
   }
 }

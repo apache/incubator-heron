@@ -54,7 +54,8 @@ public class PackingUtilsTest {
     return containerPlan;
   }
 
-  private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking) {
+  private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking)
+      throws RuntimeException {
     Resource resource = new Resource(2.0, 6 * Constants.GB, 25 * Constants.GB);
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
@@ -67,10 +68,16 @@ public class PackingUtilsTest {
       for (InstanceId instanceId : instanceList) {
         String componentName = instanceId.getComponentName();
         Resource instanceResource;
-        if ("bolt".equals(componentName)) {
-          instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
-        } else {
-          instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+        switch (componentName) {
+          case "bolt":
+            instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
+            break;
+          case "spout":
+            instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+            break;
+          default:
+            throw new RuntimeException(String.format("%s is not a valid component name",
+                componentName));
         }
         instancePlans.add(new PackingPlan.InstancePlan(instanceId, instanceResource));
       }
@@ -147,12 +154,13 @@ public class PackingUtilsTest {
     componentChanges.put("bolt1", 2);
     componentChanges.put("bolt2", -1);
 
-    Map<String, Integer> componentToScaleUp = PackingUtils.getComponentsToScaleUp(componentChanges);
+    Map<String, Integer> componentToScaleUp = PackingUtils.getComponentsToScale(componentChanges,
+        PackingUtils.ScalingDirection.UP);
     Assert.assertEquals(1, componentToScaleUp.size());
     Assert.assertEquals(2, (int) componentToScaleUp.get("bolt1"));
 
     Map<String, Integer> componentToScaleDown =
-        PackingUtils.getComponentsToScaleDown(componentChanges);
+        PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
     Assert.assertEquals(2, componentToScaleDown.size());
     Assert.assertEquals(-2, (int) componentToScaleDown.get("spout"));
     Assert.assertEquals(-1, (int) componentToScaleDown.get("bolt2"));
@@ -261,8 +269,8 @@ public class PackingUtilsTest {
         Context.instanceDisk(config));
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put("bolt", -boltScalingDown); // 1 bolt
-    Resource scaledownResource = PackingUtils.getScaleDownResource(topology,
-        componentChanges, defaultInstanceResources);
+    Resource scaledownResource = PackingUtils.computeTotalResourceChange(topology,
+        componentChanges, defaultInstanceResources, PackingUtils.ScalingDirection.DOWN);
     Assert.assertEquals((long) (boltScalingDown * defaultInstanceResources.getCpu()),
         (long) scaledownResource.getCpu());
     Assert.assertEquals(boltScalingDown * defaultInstanceResources.getRam(),
@@ -292,43 +300,13 @@ public class PackingUtilsTest {
         Context.instanceDisk(config));
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put("bolt", boltScalingUp); // 5 bolts
-    Resource scaleupResource = PackingUtils.getScaleUpResource(topology,
-        componentChanges, defaultInstanceResources);
+    Resource scaleupResource = PackingUtils.computeTotalResourceChange(topology,
+        componentChanges, defaultInstanceResources, PackingUtils.ScalingDirection.UP);
     Assert.assertEquals((long) (boltScalingUp * defaultInstanceResources.getCpu()),
         (long) scaleupResource.getCpu());
     Assert.assertEquals(boltScalingUp * defaultInstanceResources.getRam(),
         scaleupResource.getRam());
     Assert.assertEquals(boltScalingUp * defaultInstanceResources.getDisk(),
         scaleupResource.getDisk());
-  }
-
-  @Test
-  public void testAdditionalResource() {
-    Resource scaleUpResource = new Resource(2, 2, 2);
-    Resource scaledownResource = new Resource(1, 1, 0);
-    Resource additionalResource = PackingUtils.getAdditionalResources(scaleUpResource,
-        scaledownResource);
-    Assert.assertEquals(1, (long) additionalResource.getCpu());
-    Assert.assertEquals(1, additionalResource.getRam());
-    Assert.assertEquals(2, additionalResource.getDisk());
-  }
-
-  @Test
-  public void testAdditionalResourceNegative() {
-    Resource scaleUpResource = new Resource(2, 2, 2);
-    Resource scaledownResource = new Resource(4, 3, 1);
-    Resource additionalResource = PackingUtils.getAdditionalResources(scaleUpResource,
-        scaledownResource);
-    Assert.assertEquals(0, (long) additionalResource.getCpu());
-    Assert.assertEquals(0, additionalResource.getRam());
-    Assert.assertEquals(1, additionalResource.getDisk());
-  }
-
-  @Test
-  public void testNumRequiredContainers() {
-    Resource requestResource = new Resource(12, 13, 15);
-    Resource capacity = new Resource(2, 2, 2);
-    double numContainers = PackingUtils.getRequiredNumContainers(requestResource, capacity);
-    Assert.assertEquals(8, (long) numContainers);
   }
 }
