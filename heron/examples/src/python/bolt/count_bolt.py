@@ -38,6 +38,7 @@ class CountBolt(Bolt):
     word = tup.values[0]
     self._increment(word, 10 if word == "heron" else 1)
     global_metrics.safe_incr('count')
+    self.ack(tup)
 
   def process_tick(self, tup):
     self.log("Got tick tuple!")
