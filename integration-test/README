@@ -24,10 +24,11 @@ The main components are:
    - Local test runner launches topologies locally, and polls for the actual results (from the
      local file system).
 
-To run the local integration tests on your mac run the following from the heron repo's top dir:
+To run integration tests on your mac first run the following to build the test package and install
+the heron client:
 
   bazel build --config=darwin integration-test/src/...
-
   bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
 
+To run the local integration tests on your mac run the following from the heron repo's top dir:
   python integration-test/src/python/local_test_runner/main.py

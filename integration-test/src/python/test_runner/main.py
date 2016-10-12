@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pkgutil
+import re
 import sys
 import time
 import uuid
@@ -11,7 +12,7 @@ import uuid
 from httplib import *
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.conf"
+DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.json"
 
 RETRY_ATTEMPTS = 25
 #seconds
@@ -25,7 +26,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
   #submit topology
   try:
     args = httpServerUrl + " " + topologyName
-    submitTopology(params.heronCliPath, params.cluster, params.role,
+    submitTopology(params.heronCliPath, params.cli_config_path, params.cluster, params.role,
                    params.env, params.testsBinPath, classPath,
                    params.releasePackageUri, args)
   except Exception as e:
@@ -45,7 +46,8 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
     logging.error("Fetching result failed for %s topology: %s", topologyName, str(e))
     return "fail"
   finally:
-    killTopology(params.heronCliPath, params.cluster, params.role, params.env, topologyName)
+    killTopology(params.heronCliPath, params.cli_config_path, params.cluster,
+                 params.role, params.env, topologyName)
 
   # Read expected result from the expected result file
   try:
@@ -109,15 +111,16 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
   logging.error("Failed to get HTTP Response after %d attempts", RETRY_ATTEMPTS)
   raise RuntimeError("Failed to get HTTP response")
 
-def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri, args=None):
+def submitTopology(heronCliPath, cli_config_path, cluster, role,
+                   env, jarPath, classPath, pkgUri, args=None):
   ''' Submit topology using heron-cli '''
   logging.info("Submitting topology")
 
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit %s/%s/%s %s %s %s" % (
-      heronCliPath, cluster, role, env, jarPath, classPath, args)
+  cmd = "%s submit --config-path=%s %s/%s/%s %s %s %s" % (
+      heronCliPath, cli_config_path, cluster, role, env, jarPath, classPath, args)
 
   if pkgUri is not None:
     cmd = "%s --config-property heron.package.core.uri='%s'" %(cmd, pkgUri)
@@ -131,11 +134,11 @@ def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri,
 
   raise RuntimeError("Unable to submit the topology")
 
-def killTopology(heronCliPath, cluster, role, env, topologyName):
+def killTopology(heronCliPath, cli_config_path, cluster, role, env, topologyName):
   ''' Kill a topology using heron-cli '''
   logging.info("Killing topology")
-  cmd = "%s kill %s/%s/%s %s --verbose" % (
-      heronCliPath, cluster, role, env, topologyName)
+  cmd = "%s kill --config-path=%s %s/%s/%s %s --verbose" % (
+      heronCliPath, cli_config_path, cluster, role, env, topologyName)
 
   logging.info("Submitting command: %s", cmd)
   for i in range(0, RETRY_ATTEMPTS):
@@ -149,7 +152,7 @@ def killTopology(heronCliPath, cluster, role, env, topologyName):
   logging.error("Failed to kill topology %s", topologyName)
   raise RuntimeError("Unable to kill the topology")
 
-def runAllTests(conf, args):
+def run_tests(conf, args):
   ''' Run the test for each topology specified in the conf file '''
   successes = []
   failures = []
@@ -163,6 +166,10 @@ def runAllTests(conf, args):
     pkg_type = "pex"
   else:
     raise ValueError("Unrecognized binary file type: %s" % args.testsBinPath)
+
+  if args.test_topology_pattern:
+    pattern = re.compile(args.test_topology_pattern)
+    test_topologies = filter(lambda x: pattern.match(x['topologyName']), test_topologies)
 
   total = len(test_topologies)
   current = 1
@@ -211,7 +218,10 @@ def main():
   parser.add_argument('-rp', '--results-server-port', dest='resultsServerPort',
                       default=conf['resultsServerPort'])
   parser.add_argument('-tp', '--topologies-path', dest='topologiesPath')
+  parser.add_argument('-ts', '--test-topology-pattern', dest='test_topology_pattern', default=None)
   parser.add_argument('-pi', '--release-package-uri', dest='releasePackageUri', default=None)
+  parser.add_argument('-cd', '--cli-config-path', dest='cli_config_path',
+                      default=conf['cliConfigPath'])
 
   #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',
   #                    help='comma separated test case(classpath) name that will not be run')
@@ -220,7 +230,7 @@ def main():
 
   args = parser.parse_args()
 
-  (successes, failures) = runAllTests(conf, args)
+  (successes, failures) = run_tests(conf, args)
   total = len(failures) + len(successes)
 
   if not failures:
