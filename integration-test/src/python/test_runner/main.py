@@ -174,23 +174,24 @@ def run_tests(conf, args):
   total = len(test_topologies)
   current = 1
 
-  for topologyConf in test_topologies:
-    topologyName = ("%s_%s_%s") % (timestamp, topologyConf["topologyName"], str(uuid.uuid4()))
+  for topology_conf in test_topologies:
+    topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
     if pkg_type == 'pex':
-      classPath = topologyConf["classPath"]
+      classpath = topology_conf["classPath"]
     elif pkg_type == 'jar':
-      classPath = conf["topologyClasspathPrefix"] + topologyConf["classPath"]
+      classpath = conf["topologyClasspathPrefix"] + topology_conf["classPath"]
     else:
       raise ValueError("Unrecognized package type: %s" % pkg_type)
 
-    expectedResultFilePath = args.topologiesPath + "/" + topologyConf["expectedResultRelativePath"]
+    expected_result_file_path =\
+      args.topologies_path + "/" + topology_conf["expectedResultRelativePath"]
 
-    logging.info("==== Starting test %s of %s: %s ====", current, total, topologyName)
+    logging.info("==== Starting test %s of %s: %s ====", current, total, topology_name)
     start_secs = int(time.time())
-    if run_test(topologyName, classPath, expectedResultFilePath, args) == "success":
-      successes += [(topologyName, int(time.time()) - start_secs)]
+    if run_test(topology_name, classpath, expected_result_file_path, args) == "success":
+      successes += [(topology_name, int(time.time()) - start_secs)]
     else:
-      failures += [(topologyName, int(time.time()) - start_secs)]
+      failures += [(topology_name, int(time.time()) - start_secs)]
     current += 1
   return (successes, failures)
 
@@ -218,7 +219,7 @@ def main():
   parser.add_argument('-rh', '--results-server-hostname', dest='results_server_hostname')
   parser.add_argument('-rp', '--results-server-port', dest='results_server_port', type=int,
                       default=conf['resultsServerPort'])
-  parser.add_argument('-tp', '--topologies-path', dest='topologiesPath')
+  parser.add_argument('-tp', '--topologies-path', dest='topologies_path')
   parser.add_argument('-ts', '--test-topology-pattern', dest='test_topology_pattern', default=None)
   parser.add_argument('-pi', '--release-package-uri', dest='release_package_uri', default=None)
   parser.add_argument('-cd', '--cli-config-path', dest='cli_config_path',
