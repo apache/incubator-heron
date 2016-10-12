@@ -9,7 +9,7 @@ pex_binary(
     ],
     main = "main.py",
     resources = [
-        "resources/test.conf",
+        "resources/test.json",
     ],
     reqs = ["argparse==1.4.0"],
 )
