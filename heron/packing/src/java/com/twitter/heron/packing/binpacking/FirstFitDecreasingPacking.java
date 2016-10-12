@@ -160,9 +160,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   /**
    * Get a new packing plan given an existing packing plan and component-level changes.
-   * The current implementation assign the new instances into newly created containers and
-   * does not affect the contents of existing containers.
-   *
    * @return new packing plan
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
@@ -228,7 +225,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private Map<Integer, List<InstanceId>> getFFDAllocation() {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     HashMap<Integer, List<InstanceId>> allocation = new HashMap<>();
-    assignInstancesToContainers(new ArrayList<Container>(), allocation, parallelismMap, 1);
+    assignInstancesToContainers(new ArrayList<Container>(), allocation, parallelismMap, 1,
+        maxContainerResources);
     return allocation;
   }
 
@@ -241,12 +239,14 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
                                                           Map<String, Integer> componentChanges) {
     Map<String, Integer> componentsToScaleDown =
-        PackingUtils.getComponentsToScaleDown(componentChanges);
+        PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
     Map<String, Integer> componentsToScaleUp =
-        PackingUtils.getComponentsToScaleUp(componentChanges);
+        PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.UP);
 
-    ArrayList<Container> containers = getContainers(currentPackingPlan);
-    Map<Integer, List<InstanceId>> allocation = getAllocation(currentPackingPlan);
+    ArrayList<Container> containers = PackingUtils.getContainers(currentPackingPlan,
+        this.paddingPercentage);
+    Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(currentPackingPlan);
+
     int maxInstanceIndex = 0;
     for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
@@ -258,7 +258,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     }
     if (!componentsToScaleUp.isEmpty()) {
       assignInstancesToContainers(containers, allocation, componentsToScaleUp,
-          maxInstanceIndex + 1);
+          maxInstanceIndex + 1, containers.get(0).getCapacity());
     }
     removeEmptyContainers(allocation);
     return allocation;
@@ -317,6 +317,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       }
       allocation.put(containerPlan.getId(), instances);
     }
+    PackingUtils.removeEmptyContainers(allocation);
     return allocation;
   }
 
@@ -330,7 +331,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private void assignInstancesToContainers(
       ArrayList<Container> containers, Map<Integer, List<InstanceId>> allocation,
-      Map<String, Integer> parallelismMap, int firstTaskIndex) {
+      Map<String, Integer> parallelismMap, int firstTaskIndex, Resource containerCapacity) {
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
     int globalTaskIndex = firstTaskIndex;
     for (RamRequirement ramRequirement : ramRequirements) {
@@ -340,7 +341,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         Resource instanceResource =
             this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
         int containerId = placeFFDInstance(containers, new PackingPlan.InstancePlan(new InstanceId(
-            component, globalTaskIndex, j), instanceResource));
+            component, globalTaskIndex, j), instanceResource), containerCapacity);
         List<InstanceId> instances = allocation.get(containerId);
         if (instances == null) {
           instances = new ArrayList<>();
@@ -381,7 +382,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    * @return the container Id that incorporated the instance
    */
   private int placeFFDInstance(ArrayList<Container> containers,
-                               PackingPlan.InstancePlan instancePlan) {
+                               PackingPlan.InstancePlan instancePlan,
+                               Resource containerCapacity) {
     boolean placed = false;
     int containerId = 0;
     for (int i = 0; i < containers.size() && !placed; i++) {
@@ -391,7 +393,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       }
     }
     if (!placed) {
-      containerId = PackingUtils.allocateNewContainer(containers, maxContainerResources,
+      containerId = PackingUtils.allocateNewContainer(containers, containerCapacity,
           this.paddingPercentage);
       containers.get(containerId - 1).add(instancePlan);
     }

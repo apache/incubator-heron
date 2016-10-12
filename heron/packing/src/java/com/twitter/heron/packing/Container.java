@@ -34,6 +34,18 @@ public class Container {
 
   private int paddingPercentage;
 
+  public HashSet<PackingPlan.InstancePlan> getInstances() {
+    return instances;
+  }
+
+  public Resource getCapacity() {
+    return capacity;
+  }
+
+  public int getPaddingPercentage() {
+    return paddingPercentage;
+  }
+
   /**
    * Creates a container with a specific capacity which will maintain a specific percentage
    * of its resources for padding.

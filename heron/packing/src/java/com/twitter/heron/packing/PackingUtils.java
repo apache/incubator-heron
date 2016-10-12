@@ -17,15 +17,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Shared utilities for packing algorithms
@@ -186,37 +189,122 @@ public final class PackingUtils {
   }
 
   /**
-   * Identifies which components need to be scaled down
+   * Identifies which components need to be scaled given specific scaling direction
    *
-   * @return Map &lt; component name, scale down factor &gt;
+   * @return Map &lt; component name, scale factor &gt;
    */
-  public static Map<String, Integer> getComponentsToScaleDown(Map<String,
-      Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleDown = new HashMap<String, Integer>();
+  public static Map<String, Integer> getComponentsToScale(Map<String,
+      Integer> componentChanges, ScalingDirection scalingDirection) {
+    Map<String, Integer> componentsToScale = new HashMap<String, Integer>();
     for (String component : componentChanges.keySet()) {
       int parallelismChange = componentChanges.get(component);
-      if (parallelismChange < 0) {
-        componentsToScaleDown.put(component, parallelismChange);
+      if (scalingDirection.includes(parallelismChange)) {
+        componentsToScale.put(component, parallelismChange);
       }
     }
-    return componentsToScaleDown;
+    return componentsToScale;
   }
 
   /**
-   * Identifies which components need to be scaled up
+   * Identifies the resources reclaimed by the components that will be scaled down
    *
-   * @return Map &lt; component name, scale up factor &gt;
+   * @return Total resources reclaimed
    */
-  public static Map<String, Integer> getComponentsToScaleUp(Map<String,
-      Integer> componentChanges) {
-    Map<String, Integer> componentsToScaleUp = new HashMap<String, Integer>();
-    for (String component : componentChanges.keySet()) {
-      int parallelismChange = componentChanges.get(component);
-      if (parallelismChange > 0) {
-        componentsToScaleUp.put(component, parallelismChange);
+  public static Resource computeTotalResourceChange(TopologyAPI.Topology topology,
+                                                    Map<String, Integer> componentChanges,
+                                                    Resource defaultInstanceResources,
+                                                    ScalingDirection scalingDirection) {
+    double cpu = 0;
+    long ram = 0;
+    long disk = 0;
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    Map<String, Integer> componentsToScale = PackingUtils.getComponentsToScale(
+        componentChanges, scalingDirection);
+    for (String component : componentsToScale.keySet()) {
+      int parallelismChange = Math.abs(componentChanges.get(component));
+      cpu += parallelismChange * defaultInstanceResources.getCpu();
+      disk += parallelismChange * defaultInstanceResources.getDisk();
+      if (ramMap.containsKey(component)) {
+        ram += parallelismChange * ramMap.get(component);
+      } else {
+        ram += parallelismChange * defaultInstanceResources.getRam();
       }
     }
-    return componentsToScaleUp;
+    return new Resource(cpu, ram, disk);
   }
 
+  /**
+   * Removes containers from tha allocation that do not contain any instances
+   */
+  public static void removeEmptyContainers(Map<Integer, List<InstanceId>> allocation) {
+    Iterator<Integer> containerIds = allocation.keySet().iterator();
+    while (containerIds.hasNext()) {
+      Integer containerId = containerIds.next();
+      if (allocation.get(containerId).isEmpty()) {
+        containerIds.remove();
+      }
+    }
+  }
+
+  /**
+   * Generates the containers that correspond to the current packing plan
+   * along with their associated instances.
+   *
+   * @return List of containers for the current packing plan
+   */
+  public static ArrayList<Container> getContainers(PackingPlan currentPackingPlan,
+                                                   int paddingPercentage) {
+    ArrayList<Container> containers = new ArrayList<>();
+
+    //sort containers based on containerIds;
+    PackingPlan.ContainerPlan[] currentContainers =
+        PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
+
+    Resource capacity = currentPackingPlan.getMaxContainerResources();
+    for (int i = 0; i < currentContainers.length; i++) {
+      int containerId = PackingUtils.allocateNewContainer(
+          containers, capacity, paddingPercentage);
+      for (PackingPlan.InstancePlan instancePlan
+          : currentContainers[i].getInstances()) {
+        containers.get(containerId - 1).add(instancePlan);
+      }
+    }
+    return containers;
+  }
+
+
+  /**
+   * Generates an instance allocation for the current packing plan
+   *
+   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
+   */
+  public static Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
+    Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
+    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+      ArrayList<InstanceId> instances = new ArrayList<InstanceId>();
+      for (PackingPlan.InstancePlan instance : containerPlan.getInstances()) {
+        instances.add(new InstanceId(instance.getComponentName(), instance.getTaskId(),
+            instance.getComponentIndex()));
+      }
+      allocation.put(containerPlan.getId(), instances);
+    }
+    return allocation;
+  }
+
+  public enum ScalingDirection {
+    UP,
+    DOWN;
+
+    boolean includes(int parallelismChange) {
+      switch (this) {
+        case UP:
+          return parallelismChange > 0;
+        case DOWN:
+          return parallelismChange < 0;
+        default:
+          throw new IllegalArgumentException(String.format("Not valid parallelism change: %d",
+              parallelismChange));
+      }
+    }
+  }
 }

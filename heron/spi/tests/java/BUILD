@@ -58,6 +58,14 @@ java_test(
     size = "small",
 )
 
+java_test(
+    name = "ResourceTest",
+    srcs = glob(["**/packing/ResourceTest.java"]),
+    deps = packing_deps_files,
+    size = "small",
+)
+
+
 java_library(
     name = "metrics-tests",
     srcs = glob(["**/metrics/*.java"]),
