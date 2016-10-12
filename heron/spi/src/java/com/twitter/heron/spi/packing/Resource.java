@@ -56,11 +56,39 @@ public class Resource {
     return new Resource(this.getCpu(), newRam, this.getDisk());
   }
 
+  /**
+   * Subtracts a given resource from the current resource. The results is never negative.
+   */
+  public Resource subtractAbsolute(Resource other) {
+    double cpuDifference = this.getCpu() - other.getCpu();
+    double extraCpu = Math.max(0, cpuDifference);
+    long ramDifference = this.getRam() - other.getRam();
+    long extraRam = Math.max(0, ramDifference);
+    long diskDifference = this.getDisk() - other.getDisk();
+    long extraDisk = Math.max(0, diskDifference);
+    return new Resource(extraCpu, extraRam, extraDisk);
+  }
+
+  /**
+   * Divides a resource by another resource by dividing the cpu, memory and disk values of the resources.
+   * It returns the maximum of the three results.
+   */
+  public double divideBy(Resource other) throws RuntimeException {
+    if (other.getCpu() == 0 || other.getRam() == 0 || other.getDisk() == 0) {
+      throw new RuntimeException("Division by 0.");
+    } else {
+      double cpuFactor = Math.ceil(this.getCpu() / other.getCpu());
+      double ramFactor = Math.ceil((double) this.getRam() / other.getRam());
+      double diskFactor = Math.ceil((double) this.getDisk() / other.getDisk());
+      return Math.max(cpuFactor, Math.max(ramFactor, diskFactor));
+    }
+  }
+
   @Override
   public int hashCode() {
     return (Long.valueOf(getRam()).hashCode() << 2)
-         & (Long.valueOf(getDisk()).hashCode() << 1)
-         & (Double.valueOf(getCpu()).hashCode());
+        & (Long.valueOf(getDisk()).hashCode() << 1)
+        & (Double.valueOf(getCpu()).hashCode());
   }
 
   @Override

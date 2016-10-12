@@ -548,8 +548,6 @@ public class FirstFitDecreasingPackingTest {
    */
   @Test
   public void testScaleDown() throws Exception {
-    int defaultNumInstancesperContainer = 4;
-
     int spoutScalingDown = -3;
     int boltScalingDown = -2;
 
@@ -573,8 +571,6 @@ public class FirstFitDecreasingPackingTest {
    */
   @Test
   public void removeFirstContainer() throws Exception {
-    int defaultNumInstancesperContainer = 4;
-
     /* The packing plan consists of two containers. The first one contains 4 spouts and
        the second one contains 3 bolts. During scaling we remove 4 spouts and thus the f
        first container is removed.
@@ -597,7 +593,6 @@ public class FirstFitDecreasingPackingTest {
    */
   @Test
   public void scaleDownAndUp() throws Exception {
-    int defaultNumInstancesperContainer = 4;
     int spoutScalingDown = -4;
     int boltScalingUp = 6;
 
