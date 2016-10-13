@@ -111,6 +111,11 @@ def get_http_response(server_address, server_port, topology_name):
   logging.error("Failed to get HTTP Response after %d attempts", RETRY_ATTEMPTS)
   raise RuntimeError("Failed to get HTTP response")
 
+def cluster_token(cluster, role, env):
+  if cluster == "local":
+    return cluster
+  return "%s/%s/%s" % (cluster, role, env)
+
 def submit_topology(heron_cli_path, cli_config_path, cluster, role,
                     env, jar_path, classpath, pkg_uri, args=None):
   ''' Submit topology using heron-cli '''
@@ -119,8 +124,9 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit --config-path=%s %s/%s/%s %s %s %s" %\
-        (heron_cli_path, cli_config_path, cluster, role, env, jar_path, classpath, args)
+  cmd = "%s submit --config-path=%s %s %s %s %s" %\
+        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
+         jar_path, classpath, args)
 
   if pkg_uri is not None:
     cmd = "%s --config-property heron.package.core.uri='%s'" %(cmd, pkg_uri)
@@ -137,8 +143,8 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
 def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_name):
   ''' Kill a topology using heron-cli '''
   logging.info("Killing topology")
-  cmd = "%s kill --config-path=%s %s/%s/%s %s --verbose" %\
-        (heron_cli_path, cli_config_path, cluster, role, env, topology_name)
+  cmd = "%s kill --config-path=%s %s %s --verbose" %\
+        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env), topology_name)
 
   logging.info("Submitting command: %s", cmd)
   for i in range(0, RETRY_ATTEMPTS):
