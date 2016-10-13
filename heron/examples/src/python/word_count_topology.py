@@ -32,8 +32,7 @@ if __name__ == '__main__':
                                 inputs={word_spout: Grouping.fields('word')},
                                 config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
 
-  topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True,
-                     constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000}
+  topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True}
   builder.set_config(topology_config)
 
   builder.build_and_submit()
