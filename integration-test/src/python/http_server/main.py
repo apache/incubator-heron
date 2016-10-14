@@ -9,15 +9,11 @@ import tornado.web
 RESULTS_DIRECTORY = "results"
 
 class MainHandler(tornado.web.RequestHandler):
-  '''main handler'''
   def get(self):
-    ''' get method'''
     self.write("Heron integration-test helper")
 
 class FileHandler(tornado.web.RequestHandler):
-  ''' file handler '''
   def get(self, fileName):
-    ''' get method'''
     jsonFilePath = RESULTS_DIRECTORY + "/" + fileName + ".json"
 
     if not os.path.exists(jsonFilePath):
@@ -32,7 +28,6 @@ class FileHandler(tornado.web.RequestHandler):
       self.write(data)
 
   def post(self, fileName):
-    ''' post '''
     jsonFilePath = RESULTS_DIRECTORY + "/" + fileName + ".json"
 
     #Overwrites the existing file
@@ -47,6 +42,33 @@ class FileHandler(tornado.web.RequestHandler):
         self.set_status(400)
         self.finish("Invalid Json")
 
+class MemoryMapGetAllHandler(tornado.web.RequestHandler):
+  def initialize(self, state_map):
+    self.state_map = state_map
+
+  def get(self):
+    self.set_header("Content-Type", 'application/json; charset="utf-8"')
+    self.write(tornado.escape.json_encode(self.state_map))
+
+class MemoryMapHandler(tornado.web.RequestHandler):
+  def initialize(self, state_map):
+    self.state_map = state_map
+
+  def get(self, key):
+    if key:
+      self.set_header("Content-Type", 'application/json; charset="utf-8"')
+      if key in self.state_map:
+        self.write(self.state_map[key])
+      else:
+        raise tornado.web.HTTPError(status_code=404, log_message="Key %s not found" % key)
+    else:
+      self.write(str(self.state_map))
+
+  def post(self, key):
+    data = tornado.escape.json_decode(self.request.body)
+    self.state_map[key] = tornado.escape.json_encode(data)
+    self.write("Results written to " + tornado.escape.json_encode(self.state_map) + " successfully")
+
 def main():
   '''
   Runs a tornado http server that listens for any
@@ -59,9 +81,12 @@ def main():
   if not os.path.exists(RESULTS_DIRECTORY):
     os.makedirs(RESULTS_DIRECTORY)
 
+  state_map = {}
   application = tornado.web.Application([
       (r"/", MainHandler),
-      (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler)
+      (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler),
+      (r"^/state", MemoryMapGetAllHandler, dict(state_map=state_map)),
+      (r"^/state/([a-zA-Z0-9_-]+$)", MemoryMapHandler, dict(state_map=state_map)),
   ])
 
   if len(sys.argv) == 1:
