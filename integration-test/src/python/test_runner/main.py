@@ -20,12 +20,12 @@ RETRY_INTERVAL = 10
 
 def run_test(topology_name, classpath, expected_result_file_path, params):
   ''' Runs the test for one topology '''
-  http_server_url = "http://%s:%d/results" %\
+  http_results_server_url = "http://%s:%d/results" %\
                     (params.results_server_hostname, params.results_server_port)
 
   #submit topology
   try:
-    args = http_server_url + " " + topology_name
+    args = "-r %s -t %s" % (http_results_server_url, topology_name)
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
                     params.env, params.tests_bin_path, classpath,
                     params.release_package_uri, args)

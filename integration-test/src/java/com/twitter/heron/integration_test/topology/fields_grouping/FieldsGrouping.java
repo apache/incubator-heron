@@ -13,12 +13,10 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.topology.fields_grouping;
 
-import java.net.URL;
+import java.net.MalformedURLException;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.integration_test.common.BasicConfig;
+import com.twitter.heron.integration_test.common.AbstractTestTopology;
 import com.twitter.heron.integration_test.common.bolt.CountAggregatorBolt;
 import com.twitter.heron.integration_test.common.bolt.WordCountBolt;
 import com.twitter.heron.integration_test.common.spout.ABSpout;
@@ -27,33 +25,24 @@ import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 /**
  * Topology to test fields grouping
  */
-public final class FieldsGrouping {
+public final class FieldsGrouping extends AbstractTestTopology {
 
-  private FieldsGrouping() {
+  private FieldsGrouping(String[] args) throws MalformedURLException {
+    super(args);
   }
 
-  public static void main(String[] args) throws Exception {
-    if (args.length < 2) {
-      throw new RuntimeException("HttpServerUrl and TopologyName are "
-          + "needed as command line arguments");
-    }
-
-    URL httpServerUrl = new URL(args[0]);
-    String topologyName = args[1];
-
-    TestTopologyBuilder builder = new TestTopologyBuilder(topologyName, httpServerUrl.toString());
-
+  @Override
+  protected TestTopologyBuilder buildTopology(TestTopologyBuilder builder) {
     builder.setSpout("ab-spout", new ABSpout(), 1, 400);
     builder.setBolt("count-bolt", new WordCountBolt(), 2)
         .fieldsGrouping("ab-spout", new Fields("word"));
     builder.setBolt("sum-bolt", new CountAggregatorBolt(), 1)
         .noneGrouping("count-bolt");
-
-    // Conf
-    Config conf = new BasicConfig();
-
-    // Submit it!
-    HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());
+    return builder;
   }
 
+  public static void main(String[] args) throws Exception {
+    FieldsGrouping topology = new FieldsGrouping(args);
+    topology.submit();
+  }
 }

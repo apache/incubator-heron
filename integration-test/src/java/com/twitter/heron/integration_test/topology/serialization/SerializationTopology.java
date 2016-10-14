@@ -13,51 +13,47 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.topology.serialization;
 
-import java.net.URL;
+import java.net.MalformedURLException;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.integration_test.common.BasicConfig;
+import com.twitter.heron.integration_test.common.AbstractTestTopology;
 import com.twitter.heron.integration_test.common.bolt.IncrementBolt;
 import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 
 /**
  * Topology to test Customized Java Serialization
  */
-public final class SerializationTopology {
-  private SerializationTopology() {
+public final class SerializationTopology extends AbstractTestTopology {
+
+  private SerializationTopology(String[] args) throws MalformedURLException {
+    super(args);
   }
 
-  public static void main(String[] args) throws Exception {
-    if (args.length < 2) {
-      throw new RuntimeException("HttpServerUrl and TopologyName are "
-          + "needed as command line arguments");
-    }
+  @Override
+  protected TestTopologyBuilder buildTopology(TestTopologyBuilder builder) {
 
-    URL httpServerUrl = new URL(args[0]);
-    String topologyName = args[1];
-
-    CustomObject[] inputObjects = createInputObjects();
-    TestTopologyBuilder builder = new TestTopologyBuilder(topologyName, httpServerUrl.toString());
+    CustomObject[] inputObjects = new CustomObject[]{
+        new CustomObject("A", 10),
+        new CustomObject("B", 20),
+        new CustomObject("C", 30)
+    };
 
     builder.setSpout("custom-spout", new CustomSpout(inputObjects), 1);
     builder.setBolt("check-bolt", new CustomCheckBolt(inputObjects), 1)
         .shuffleGrouping("custom-spout");
     builder.setBolt("count-bolt", new IncrementBolt(), 1)
         .shuffleGrouping("check-bolt");
-
-    // Conf
-    Config conf = new BasicConfig();
-    conf.setSerializationClassName("com.twitter.heron.api.serializer.JavaSerializer");
-
-    HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());
+    return builder;
   }
 
-  private static CustomObject[] createInputObjects() {
-    return new CustomObject[]{
-        new CustomObject("A", 10),
-        new CustomObject("B", 20),
-        new CustomObject("C", 30)
-    };
+  @Override
+  protected Config buildConfig(Config config) {
+    config.setSerializationClassName("com.twitter.heron.api.serializer.JavaSerializer");
+    return config;
+  }
+
+  public static void main(String[] args) throws Exception {
+    SerializationTopology topology = new SerializationTopology(args);
+    topology.submit();
   }
 }
