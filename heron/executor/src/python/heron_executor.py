@@ -163,7 +163,7 @@ class HeronExecutor(object):
     self.component_jvm_opts = {}
     # First we need to decode the base64 string back to a json map string
     component_jvm_opts_in_json =\
-        base64.b64decode(args.component_jvm_opts_in_base64.
+        base64.b64decode(parsed_args.component_jvm_opts_in_base64.
                          lstrip('"').rstrip('"').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
@@ -206,7 +206,7 @@ class HeronExecutor(object):
     """Uses python argparse to collect positional args"""
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("shard", type=int)
+    parser.add_argument("shard")
     parser.add_argument("topology_name")
     parser.add_argument("topology_id")
     parser.add_argument("topology_defn_file")
@@ -217,25 +217,25 @@ class HeronExecutor(object):
     parser.add_argument("metricsmgr_classpath")
     parser.add_argument("instance_jvm_opts")
     parser.add_argument("classpath")
-    parser.add_argument("master_port", type=int)
-    parser.add_argument("tmaster_controller_port", type=int)
-    parser.add_argument("tmaster_stats_port", type=int)
+    parser.add_argument("master_port")
+    parser.add_argument("tmaster_controller_port")
+    parser.add_argument("tmaster_stats_port")
     parser.add_argument("heron_internals_config_file")
     parser.add_argument("component_rammap")
     parser.add_argument("component_jvm_opts_in_base64")
     parser.add_argument("pkg_type")
     parser.add_argument("topology_bin_file")
     parser.add_argument("heron_java_home")
-    parser.add_argument("shell_port", type=int)
+    parser.add_argument("shell_port")
     parser.add_argument("heron_shell_binary")
-    parser.add_argument("metricsmgr_port", type=int)
+    parser.add_argument("metricsmgr_port")
     parser.add_argument("cluster")
     parser.add_argument("role")
     parser.add_argument("environ")
     parser.add_argument("instance_classpath")
     parser.add_argument("metrics_sinks_config_file")
     parser.add_argument("scheduler_classpath")
-    parser.add_argument("scheduler_port", type=int)
+    parser.add_argument("scheduler_port")
     parser.add_argument("python_instance_binary")
 
     return parser.parse_args(args[1:])
