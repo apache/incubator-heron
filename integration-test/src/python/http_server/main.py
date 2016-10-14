@@ -50,7 +50,7 @@ class FileHandler(tornado.web.RequestHandler):
 def main():
   '''
   Runs a tornado http server that listens for any
-  integration test josn result get/post requests
+  integration test json result get/post requests
   '''
 
   root = logging.getLogger()
