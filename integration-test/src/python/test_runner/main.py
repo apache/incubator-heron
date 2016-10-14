@@ -162,7 +162,7 @@ def run_tests(conf, args):
   ''' Run the test for each topology specified in the conf file '''
   successes = []
   failures = []
-  timestamp = str(int(time.time()))
+  timestamp = time.strftime('%Y%m%d%H%M%S')
 
   if args.tests_bin_path.endswith(".jar"):
     test_topologies = conf["javaTopologies"]
