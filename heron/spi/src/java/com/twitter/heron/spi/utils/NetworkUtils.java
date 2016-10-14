@@ -102,7 +102,7 @@ public final class NetworkUtils {
       return isTunnelNeeded;
     }
 
-    private String getTunnelHost() {
+    public String getTunnelHost() {
       return tunnelHost;
     }
 
