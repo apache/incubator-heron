@@ -84,7 +84,7 @@ def fetch_result_from_server(server_address, server_port, topology_name):
   ''' Make a http get request to fetch actual results from http server '''
   for i in range(0, RETRY_ATTEMPTS):
     logging.info("Fetching results for topology %s, retry count: %d", topology_name, i)
-    response = get_http_response(server_address, int(server_port), topology_name)
+    response = get_http_response(server_address, server_port, topology_name)
     if response.status == 200:
       return (response.status, response.read())
     elif i != RETRY_ATTEMPTS:
@@ -100,7 +100,7 @@ def get_http_response(server_address, server_port, topology_name):
   # pylint: disable=unused-variable
   for i in range(0, RETRY_ATTEMPTS):
     try:
-      connection = HTTPConnection(server_address, int(server_port))
+      connection = HTTPConnection(server_address, server_port)
       connection.request('GET', '/results/' + topology_name)
       response = connection.getresponse()
       return response
