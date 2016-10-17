@@ -133,10 +133,9 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
 
   logging.info("Submitting command: %s", cmd)
 
-  for _ in range(0, RETRY_ATTEMPTS):
-    if os.system(cmd) == 0:
-      logging.info("Successfully submitted topology")
-      return
+  if os.system(cmd) == 0:
+    logging.info("Successfully submitted topology")
+    return
 
   raise RuntimeError("Unable to submit the topology")
 
@@ -235,7 +234,10 @@ def main():
   #parser.add_argument('-et', '--enable-topologies', dest='enableTopologies', default=None,
   #                    help='comma separated test case(classpath) name that will be run only')
 
-  args = parser.parse_args()
+  args, unknown_args = parser.parse_known_args()
+  if unknown_args:
+    logging.error('Unknown argument passed to %s: %s', sys.argv[0], unknown_args[0])
+    sys.exit(1)
 
   (successes, failures) = run_tests(conf, args)
   total = len(failures) + len(successes)

@@ -14,6 +14,7 @@
 '''main method for integration test topology'''
 
 import argparse
+import logging
 import sys
 
 from .basic_one_task import basic_one_task_builder
@@ -44,11 +45,15 @@ TOPOLOGY_BUILDERS = {
     'PyHeron_IntegrationTest_GlobalGrouping': global_grouping_builder,
 }
 
+# pylint: disable=missing-docstring
 def main():
   parser = argparse.ArgumentParser(description='Python topology submitter')
   parser.add_argument('-r', '--results-server-url', dest='results_url', required=True)
   parser.add_argument('-t', '--topology-name', dest='topology_name', required=True)
-  args = parser.parse_args()
+  args, unknown_args = parser.parse_known_args()
+  if unknown_args:
+    logging.error('Unknown argument passed to %s: %s', sys.argv[0], unknown_args[0])
+    sys.exit(1)
 
   http_server_url = args.results_url
 
@@ -58,7 +63,7 @@ def main():
   topology_name = '_'.join(topology_name_with_uuid.split('_')[1:-1])
 
   if topology_name not in TOPOLOGY_BUILDERS:
-    print "%s not found in the list" % topology_name
+    logging.error("%s not found in the list", topology_name)
     sys.exit(2)
 
   builder = TOPOLOGY_BUILDERS[topology_name]
