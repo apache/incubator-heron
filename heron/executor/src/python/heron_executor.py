@@ -238,11 +238,18 @@ class HeronExecutor(object):
     parser.add_argument("scheduler_port")
     parser.add_argument("python_instance_binary")
 
-    return parser.parse_args(args[1:])
+    parsed_args, unknown_args = parser.parse_known_args(args[1:])
+
+    if unknown_args:
+      Log.error('Unknown argument: %s' % unknown_args[0])
+      parser.print_help()
+      sys.exit(1)
+
+    return parsed_args
 
   def run_command_or_exit(self, command):
     if self._run_blocking_process(command, True, self.shell_env) != 0:
-      Log.info("Failed to run command: %s. Exiting" % command)
+      Log.error("Failed to run command: %s. Exiting" % command)
       sys.exit(1)
 
   def initialize(self):
