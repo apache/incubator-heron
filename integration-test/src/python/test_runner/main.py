@@ -14,7 +14,7 @@ from httplib import *
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.json"
 
-RETRY_ATTEMPTS = 25
+RETRY_ATTEMPTS = 15
 #seconds
 RETRY_INTERVAL = 10
 
@@ -205,7 +205,6 @@ def main():
   ''' main '''
   root = logging.getLogger()
   root.setLevel(logging.DEBUG)
-  print(os.path.join(os.path.dirname(sys.modules[__name__].__file__), DEFAULT_TEST_CONF_FILE), 'rb')
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
   conf_string = pkgutil.get_data(__name__, conf_file)
