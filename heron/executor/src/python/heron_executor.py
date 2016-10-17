@@ -134,7 +134,7 @@ class HeronExecutor(object):
     self.shell_env = shell_env
     self.max_runs = 100
     self.interval_between_runs = 10
-    self.shard = int(parsed_args.shard)
+    self.shard = parsed_args.shard
     self.topology_name = parsed_args.topology_name
     self.topology_id = parsed_args.topology_id
     self.topology_defn_file = parsed_args.topology_defn_file
@@ -206,7 +206,7 @@ class HeronExecutor(object):
     """Uses python argparse to collect positional args"""
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("shard")
+    parser.add_argument("shard", type=int)
     parser.add_argument("topology_name")
     parser.add_argument("topology_id")
     parser.add_argument("topology_defn_file")
