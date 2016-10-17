@@ -77,8 +77,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
       String newConnectionString = tunneledResults.first;
       if (newConnectionString.isEmpty()) {
-        LOG.warning("Cannot connect to tunnelHost: " + tunnelConfig.getTunnelHost());
-        throw new IllegalArgumentException("Bad connectionString: " + connectionString);
+        throw new IllegalArgumentException("Cannot connect to tunnelHost: " + tunnelConfig.getTunnelHost() + "\nBad connectionString: " + connectionString);
       }
 
       // Use the new connection string
