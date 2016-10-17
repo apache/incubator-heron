@@ -28,6 +28,7 @@ java_library(
         "//heron/storm/src/java:storm-compatibility-java",
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
+        "@commons_cli_commons_cli//jar",
         ":core"
     ],
 )
