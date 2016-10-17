@@ -240,6 +240,11 @@ class HeronExecutor(object):
 
     return parser.parse_args(args[1:])
 
+  def run_command_or_exit(self, command):
+    if self._run_blocking_process(command, True, self.shell_env) != 0:
+      Log.info("Failed to run command: %s. Exiting" % command)
+      sys.exit(1)
+
   def initialize(self):
     """
     Initialize the environment. Done with a method call outside of the constructor for 2 reasons:
@@ -248,26 +253,18 @@ class HeronExecutor(object):
     constructor
     """
     create_folders = 'mkdir -p %s' % self.log_dir
+    self.run_command_or_exit(create_folders)
+
+    chmod_logs_dir = 'chmod a+rx . && chmod a+x %s' % self.log_dir
+    self.run_command_or_exit(chmod_logs_dir)
+
     chmod_x_binaries = [self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary]
-    binaries_to_chmod = []
 
     for binary in chmod_x_binaries:
       stat_result = os.stat(binary)[stat.ST_MODE]
       if not stat_result & stat.S_IXOTH:
-        binaries_to_chmod.append(binary)
-
-    chmod_binaries = 'chmod a+rx . && chmod a+x %s' \
-        % self.log_dir
-
-    if len(binaries_to_chmod) > 0:
-      chmod_binaries += '&& chmod +x ' + ' '.join(binaries_to_chmod)
-
-    commands = [create_folders, chmod_binaries]
-
-    for command in commands:
-      if self._run_blocking_process(command, True, self.shell_env) != 0:
-        Log.info("Failed to run command: %s. Exiting" % command)
-        sys.exit(1)
+        chmod_binary = 'chmod +x %s' % binary
+        self.run_command_or_exit(chmod_binary)
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
