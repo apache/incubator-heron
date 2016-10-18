@@ -18,22 +18,14 @@ RETRY_ATTEMPTS = 10
 #seconds
 RETRY_INTERVAL = 10
 
-def run_test(topology_name, classpath, expected_result_file_path, params, update_args):
+def run_test(topology_name, classpath, expected_result_file_path,
+             params, http_server_host_port, update_args, extra_topology_args):
   ''' Runs the test for one topology '''
-  http_server_host_port = "%s:%d" % (params.http_server_hostname, params.http_server_port)
-  http_server_url = "http://%s" % http_server_host_port
 
   #submit topology
   try:
-    # if the test includes an update we need to pass that info to the topology so it can send
-    # data accordingly. This flag causes the test spout to emit, then check the state of this
-    # token, then emit more.
-    extra_topology_args = ""
-    if update_args:
-      extra_topology_args = "-u topology_updated"
-
-    args = "-r %s/results -t %s -s %s/state %s" %\
-           (http_server_url, topology_name, http_server_url, extra_topology_args)
+    args = "-r http://%s/results -t %s %s" %\
+           (http_server_host_port, topology_name, extra_topology_args)
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
                     params.env, params.tests_bin_path, classpath,
                     params.release_package_uri, args)
@@ -43,12 +35,8 @@ def run_test(topology_name, classpath, expected_result_file_path, params, update
 
   logging.info("Successfully submitted %s topology", topology_name)
 
-  test_updates = False
-  if update_args:
-    test_updates = True
-
   try:
-    if test_updates:
+    if update_args:
       # wait for the topology to be started before triggering an update
       poll_state_server(http_server_host_port, topology_name, "topology_started")
       logging.info("Verified topology successfully started, proceeding to update it")
@@ -212,12 +200,16 @@ def run_tests(conf, args):
   failures = []
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
+  http_server_host_port = "%s:%d" % (args.http_server_hostname, args.http_server_port)
+
   if args.tests_bin_path.endswith(".jar"):
     test_topologies = conf["javaTopologies"]
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
+    extra_topology_args = "-s http://%s/state" % http_server_host_port
   elif args.tests_bin_path.endswith(".pex"):
     test_topologies = conf["pythonTopologies"]
     topology_classpath_prefix = ""
+    extra_topology_args = ""
   else:
     raise ValueError("Unrecognized binary file type: %s" % args.tests_bin_path)
 
@@ -239,8 +231,12 @@ def run_tests(conf, args):
     topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
+    # if the test includes an update we need to pass that info to the topology so it can send
+    # data accordingly. This flag causes the test spout to emit, then check the state of this
+    # token, then emit more.
     update_args = ""
     if "updateArgs" in topology_conf:
+      extra_topology_args = "%s -u topology_updated" % extra_topology_args
       update_args = topology_conf["updateArgs"]
 
     expected_result_file_path =\
@@ -248,8 +244,8 @@ def run_tests(conf, args):
 
     logging.info("==== Starting test %s of %s: %s ====", current, total, topology_name)
     start_secs = int(time.time())
-    if run_test(
-        topology_name, classpath, expected_result_file_path, args, update_args) == "success":
+    if run_test(topology_name, classpath, expected_result_file_path,
+                args, http_server_host_port, update_args, extra_topology_args) == "success":
       successes += [(topology_name, int(time.time()) - start_secs)]
     else:
       failures += [(topology_name, int(time.time()) - start_secs)]
