@@ -59,7 +59,7 @@ public class IntegrationTestBolt implements IRichBolt {
       terminalsToReceive += topologyContext.getComponentTasks(name).size();
     }
 
-    LOG.fine("TerminalsToReceive: " + terminalsToReceive);
+    LOG.info("TerminalsToReceive: " + terminalsToReceive);
 
     collector = new OutputCollector(new IntegrationTestBoltCollector(outputCollector));
     delegateBolt.prepare(map, topologyContext, collector);
@@ -70,7 +70,7 @@ public class IntegrationTestBolt implements IRichBolt {
     tuplesReceived++;
     String streamID = tuple.getSourceStreamId();
 
-    LOG.fine("Received a tuple: " + tuple + " ; from: " + streamID);
+    LOG.info("Received a tuple: " + tuple + " ; from: " + streamID);
 
     if (streamID.equals(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID)) {
       terminalsToReceive--;
@@ -86,6 +86,9 @@ public class IntegrationTestBolt implements IRichBolt {
         collector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID,
             tuple,
             new Values(Constants.INTEGRATION_TEST_TERMINAL));
+      } else {
+        LOG.info(String.format(
+            "Received a terminals, waiting to receive %s more", terminalsToReceive));
       }
     } else {
       currentTupleProcessing = tuple;

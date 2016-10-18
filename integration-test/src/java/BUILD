@@ -41,6 +41,7 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
+        "@commons_cli_commons_cli//jar",
         ":common",
         ":core"
     ],
@@ -67,6 +68,7 @@ java_binary(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
+        "@commons_cli_commons_cli//jar",
         "@commons_logging_commons_logging//jar",
         ":common",
         ":core"
