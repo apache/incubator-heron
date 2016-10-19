@@ -235,8 +235,9 @@ def run_tests(conf, args):
     # data accordingly. This flag causes the test spout to emit, then check the state of this
     # token, then emit more.
     update_args = ""
+    topology_args = ""
     if "updateArgs" in topology_conf:
-      extra_topology_args = "%s -u topology_updated" % extra_topology_args
+      topology_args = "%s -u topology_updated" % extra_topology_args
       update_args = topology_conf["updateArgs"]
 
     expected_result_file_path =\
@@ -245,7 +246,7 @@ def run_tests(conf, args):
     logging.info("==== Starting test %s of %s: %s ====", current, total, topology_name)
     start_secs = int(time.time())
     if run_test(topology_name, classpath, expected_result_file_path,
-                args, http_server_host_port, update_args, extra_topology_args) == "success":
+                args, http_server_host_port, update_args, topology_args) == "success":
       successes += [(topology_name, int(time.time()) - start_secs)]
     else:
       failures += [(topology_name, int(time.time()) - start_secs)]
