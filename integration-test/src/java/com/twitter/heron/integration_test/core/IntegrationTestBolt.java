@@ -82,13 +82,13 @@ public class IntegrationTestBolt implements IRichBolt {
           ((IBatchBolt) delegateBolt).finishBatch();
         }
 
-        LOG.info("Populating the terminals to downstream");
+        LOG.info("Received the last terminal, populating the terminals to downstream");
         collector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID,
             tuple,
             new Values(Constants.INTEGRATION_TEST_TERMINAL));
       } else {
         LOG.info(String.format(
-            "Received a terminals, waiting to receive %s more", terminalsToReceive));
+            "Received a terminal, need to receive %s more", terminalsToReceive));
       }
     } else {
       currentTupleProcessing = tuple;
