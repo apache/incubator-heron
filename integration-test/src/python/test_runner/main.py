@@ -235,7 +235,7 @@ def run_tests(conf, args):
     # data accordingly. This flag causes the test spout to emit, then check the state of this
     # token, then emit more.
     update_args = ""
-    topology_args = ""
+    topology_args = extra_topology_args
     if "updateArgs" in topology_conf:
       topology_args = "%s -u topology_updated" % extra_topology_args
       update_args = topology_conf["updateArgs"]
