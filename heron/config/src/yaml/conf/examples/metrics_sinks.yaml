@@ -54,7 +54,7 @@ tmaster-sink:
     "__jvm-memory-mb-total": LAST
     "__jvm-gc-collection-time-ms": LAST
     "__server/__time_spent_back_pressure_initiated": SUM
-    "__time_spent_back_pressure_by_compid/": SUM
+    "__time_spent_back_pressure_by_compid": SUM
 
 ### Config for scribe-sink
 # scribe-sink:
