@@ -14,7 +14,7 @@ from httplib import *
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.json"
 
-RETRY_ATTEMPTS = 10
+RETRY_ATTEMPTS = 25
 #seconds
 RETRY_INTERVAL = 10
 
