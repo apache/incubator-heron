@@ -27,24 +27,25 @@ import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestSpout implements IRichSpout {
   private static final long serialVersionUID = 6068686695658877942L;
-  // The times of execution
-  private static final int DEFAULT_EXECUTION_COUNT = 10;
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
   private final IRichSpout delegateSpout;
-  private boolean isDone = false;
-  private long tuplesToComplete = 0;
+  private long tuplesToAck = 0;
   private SpoutOutputCollector spoutOutputCollector;
 
   private int maxExecutions;
-
-  public IntegrationTestSpout(IRichSpout delegateSpout) {
-    this(delegateSpout, DEFAULT_EXECUTION_COUNT);
-  }
 
   public IntegrationTestSpout(IRichSpout delegateSpout, int maxExecutions) {
     assert maxExecutions > 0;
     this.delegateSpout = delegateSpout;
     this.maxExecutions = maxExecutions;
+  }
+
+  protected void resetMaxExecutions(int resetExecutions) {
+    if (!doneEmitting() || !doneAcking()) {
+      throw new RuntimeException(
+          "Can not reset resetMaxExecutions while tuples are still bing emitted or acked");
+    }
+    this.maxExecutions = resetExecutions;
   }
 
   @Override
@@ -100,8 +101,7 @@ public class IntegrationTestSpout implements IRichSpout {
     // We need a double check here rather than set the isDone == true in nextTuple()
     // Since it is possible before nextTuple we get all the acks and the topology is done
     // However, since the isDone is not set to true, we may not emit terminals; it will cause bug.
-    if (maxExecutions <= 0) {
-      isDone = true;
+    if (doneEmitting()) {
       // This is needed if all the tuples have been emited and acked
       // before maxExecutions becomes 0
       emitTerminalIfNeeded();
@@ -113,7 +113,7 @@ public class IntegrationTestSpout implements IRichSpout {
   public void ack(Object o) {
     LOG.fine("Received a ack with MessageId: " + o);
 
-    tuplesToComplete--;
+    tuplesToAck--;
     if (!o.equals(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID)) {
       delegateSpout.ack(o);
     }
@@ -124,17 +124,25 @@ public class IntegrationTestSpout implements IRichSpout {
   public void fail(Object o) {
     LOG.fine("Received a fail with MessageId: " + o);
 
-    tuplesToComplete--;
+    tuplesToAck--;
     if (!o.equals(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID)) {
       delegateSpout.fail(o);
     }
     emitTerminalIfNeeded();
   }
 
-  private void emitTerminalIfNeeded() {
-    LOG.fine(String.format("isDone = %s, tuplesToComplete = %s", isDone, tuplesToComplete));
+  protected boolean doneEmitting() {
+    return maxExecutions <= 0;
+  }
 
-    if (isDone && tuplesToComplete == 0) {
+  protected boolean doneAcking() {
+    return tuplesToAck == 0;
+  }
+
+  protected void emitTerminalIfNeeded() {
+    LOG.fine(String.format("doneEmitting = %s, tuplesToAck = %s", doneEmitting(), tuplesToAck));
+
+    if (doneEmitting() && doneAcking()) {
       LOG.info("Emitting terminals to downstream.");
       spoutOutputCollector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID,
           new Values(Constants.INTEGRATION_TEST_TERMINAL));
@@ -151,7 +159,7 @@ public class IntegrationTestSpout implements IRichSpout {
 
     @Override
     public List<Integer> emit(String s, List<Object> objects, Object o) {
-      tuplesToComplete++;
+      tuplesToAck++;
       Object messageId = o;
       if (o == null) {
         LOG.fine("Add MessageId for tuple: " + objects);
@@ -163,7 +171,7 @@ public class IntegrationTestSpout implements IRichSpout {
 
     @Override
     public void emitDirect(int i, String s, List<Object> objects, Object o) {
-      tuplesToComplete++;
+      tuplesToAck++;
       Object messageId = o;
       if (o == null) {
         messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
