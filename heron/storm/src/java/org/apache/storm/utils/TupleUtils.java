@@ -24,11 +24,8 @@ import java.util.Map;
 import org.apache.storm.Config;
 import org.apache.storm.Constants;
 import org.apache.storm.tuple.Tuple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class TupleUtils {
-  private static final Logger LOG = LoggerFactory.getLogger(TupleUtils.class);
 
   private TupleUtils() {
     // No instantiation
@@ -55,7 +52,6 @@ public final class TupleUtils {
     }
 
     if (tickFreqSecs > 0) {
-      LOG.info("Enabling tick tuple with interval [{}]", tickFreqSecs);
       conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, tickFreqSecs);
     }
 
