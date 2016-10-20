@@ -1,4 +1,3 @@
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,7 +17,10 @@
  */
 package org.apache.storm;
 
-public class Constants {
+public final class Constants {
+
+  private Constants() {}
+
   public static final String SYSTEM_COMPONENT_ID = "__system";
   public static final String SYSTEM_TICK_STREAM_ID = "__tick";
 }

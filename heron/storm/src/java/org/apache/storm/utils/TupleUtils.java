@@ -47,11 +47,7 @@ public final class TupleUtils {
 
   public static Map<String, Object> putTickFrequencyIntoComponentConfig(Map<String, Object> conf,
                                                                         int tickFreqSecs) {
-    if (conf == null) {
-      conf = new Config();
-    }
-
-    if (tickFreqSecs > 0) {
+    if (conf != null && tickFreqSecs > 0) {
       conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, tickFreqSecs);
     }
 
