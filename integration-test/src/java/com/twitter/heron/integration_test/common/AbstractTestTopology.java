@@ -14,7 +14,6 @@
 package com.twitter.heron.integration_test.common;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -37,10 +36,14 @@ import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 public abstract class AbstractTestTopology {
   private static final String TOPOLOGY_OPTION = "topology_name";
   private static final String RESULTS_URL_OPTION = "results_url";
+  private static final String STATE_URL_OPTION = "test_state_url";
+  private static final String STATE_UPDATE_TOKEN = "state_server_update_token";
 
-  private CommandLine cmd;
-  private URL httpServerResultsUrl;
-  private String topologyName;
+  private final CommandLine cmd;
+  private final String httpServerResultsUrl;
+  private final String httpServerStateUrl;
+  private final String topologyName;
+  private final String stateUpdateToken;
 
   protected AbstractTestTopology(String[] args) throws MalformedURLException {
     CommandLineParser parser = new DefaultParser();
@@ -55,8 +58,12 @@ public abstract class AbstractTestTopology {
       throw new RuntimeException(e);
     }
 
-    this.httpServerResultsUrl = new URL(cmd.getOptionValue(RESULTS_URL_OPTION));
     this.topologyName = cmd.getOptionValue(TOPOLOGY_OPTION);
+    this.httpServerResultsUrl =
+        pathAppend(cmd.getOptionValue(RESULTS_URL_OPTION), this.topologyName);
+    this.httpServerStateUrl =
+        pathAppend(cmd.getOptionValue(STATE_URL_OPTION), this.topologyName);
+    this.stateUpdateToken = cmd.getOptionValue(STATE_UPDATE_TOKEN);
   }
 
   protected abstract TestTopologyBuilder buildTopology(TestTopologyBuilder builder);
@@ -81,14 +88,28 @@ public abstract class AbstractTestTopology {
     resultsUrlOption.setRequired(true);
     options.addOption(resultsUrlOption);
 
+    Option stateUrlOption =
+        new Option("s", STATE_URL_OPTION, true, "url to post and get test state info");
+    stateUrlOption.setRequired(true);
+    options.addOption(stateUrlOption);
+
+    Option stateTokenOption = new Option("u", STATE_UPDATE_TOKEN, true,
+        "state server token to use for multi-phase test");
+    stateTokenOption.setRequired(false);
+    options.addOption(stateTokenOption);
+
     return options;
   }
 
   public final void submit() throws AlreadyAliveException, InvalidTopologyException {
     TestTopologyBuilder builder =
-        new TestTopologyBuilder(topologyName, httpServerResultsUrl.toString());
+        new TestTopologyBuilder(httpServerResultsUrl, httpServerStateUrl, stateUpdateToken);
 
     Config conf = buildConfig(new BasicConfig());
     HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
+  }
+
+  private static String pathAppend(String url, String path) {
+    return String.format("%s/%s", url, path);
   }
 }
