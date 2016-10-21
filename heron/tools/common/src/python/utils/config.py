@@ -137,6 +137,8 @@ def get_heron_dir():
   its real path is '/Users/heron-user/.heron/bin/heron/tools/common/src/python/utils/config.pyc',
   the internal variable ``path`` would be '/Users/heron-user/.heron', which is the heron directory
 
+  This means the variable `go_above_dirs` below is 9.
+
   :return: root location for heron-cli.
   """
   go_above_dirs = 9
@@ -147,6 +149,14 @@ def get_zipped_heron_dir():
   """
   This will extract heron directory from .pex file,
   with `zip_safe = False' Bazel flag added when building this .pex file
+
+  For example,
+  when __file__'s real path is
+    '/Users/heron-user/.pex/code/xxxyyy/heron/tools/common/src/python/utils/config.pyc', and
+  the internal variable ``path`` would be '/Users/heron-user/.pex/code/xxxyyy/',
+  which is the root PEX directory
+
+  This means the variable `go_above_dirs` below is 7.
 
   Specifically designed for heron-ui
 
@@ -159,18 +169,6 @@ def get_zipped_heron_dir():
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
 ################################################################################
-def get_heron_dir_explorer():
-  """
-  This will extract heron directory from .pex file.
-  From heron-cli with modification since we need to reuse cli's conf
-  :return: root location for heron-cli.
-  """
-  go_above_dirs = 10
-  path_list = os.path.realpath(__file__).split('/')[:-go_above_dirs]
-  path_list.append(CLI_DIR)
-  path = "/".join(path_list)
-  return normalized_class_path(path)
-
 def get_heron_bin_dir():
   """
   This will provide heron bin directory from .pex file.
