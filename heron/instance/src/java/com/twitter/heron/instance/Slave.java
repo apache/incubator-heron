@@ -81,9 +81,18 @@ public class Slave implements Runnable, AutoCloseable {
           if (instanceControlMsg.isNewPhysicalPlanHelper()) {
             PhysicalPlanHelper newHelper = instanceControlMsg.getNewPhysicalPlanHelper();
 
+            // Bind the MetricsCollector with topologyContext
+            newHelper.setTopologyContext(metricsCollector);
+
             if (helper == null) {
               handleNewAssignment(newHelper);
             } else {
+              LOG.info("checking if instance is UpdateableInstance: " + instance);
+              if (instance instanceof UpdateableInstance) {
+                LOG.info("instance is UpdateableInstance: " + instance);
+                ((UpdateableInstance) instance)
+                    .updateTopologyContext(newHelper.getTopologyContext());
+              }
               // Handle the state changing
               if (!helper.getTopologyState().equals(newHelper.getTopologyState())) {
                 switch (newHelper.getTopologyState()) {
@@ -123,9 +132,6 @@ public class Slave implements Runnable, AutoCloseable {
     LOG.log(Level.INFO,
         "Incarnating ourselves as {0} with task id {1}",
         new Object[]{newHelper.getMyComponent(), newHelper.getMyTaskId()});
-
-    // Bind the MetricsCollector with topologyContext
-    newHelper.setTopologyContext(metricsCollector);
 
     // During the initiation of instance,
     // we would add a bunch of tasks to slaveLooper's tasksOnWakeup

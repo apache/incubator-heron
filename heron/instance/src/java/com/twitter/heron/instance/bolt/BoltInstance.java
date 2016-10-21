@@ -24,6 +24,7 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
@@ -38,9 +39,10 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.UpdateableInstance;
 import com.twitter.heron.proto.system.HeronTuples;
 
-public class BoltInstance implements IInstance {
+public class BoltInstance implements IInstance, UpdateableInstance {
   private static final Logger LOG = Logger.getLogger(BoltInstance.class.getName());
 
   private final PhysicalPlanHelper helper;
@@ -93,6 +95,13 @@ public class BoltInstance implements IInstance {
       throw new RuntimeException("Neither java_object nor java_class_name set for bolt");
     }
     collector = new BoltOutputCollectorImpl(serializer, helper, streamOutQueue, boltMetrics);
+  }
+
+  @Override
+  public void updateTopologyContext(TopologyContext topologyContext) {
+    if (bolt instanceof UpdateableInstance) {
+      ((UpdateableInstance) bolt).updateTopologyContext(topologyContext);
+    }
   }
 
   @Override
