@@ -27,6 +27,7 @@ import tornado.template
 from tornado.options import define
 
 import heron.common.src.python.utils.log as log
+import heron.tools.common.src.python.utils.config as common_config
 from heron.tools.ui.src.python import handlers
 from heron.tools.ui.src.python import args
 
@@ -132,8 +133,12 @@ def main():
   (parsed_args, remaining) = parser.parse_known_args()
 
   if remaining:
-    child_parser.parse_args(args=remaining, namespace=parsed_args)
-    parser.print_help()
+    r = child_parser.parse_args(args=remaining, namespace=parsed_args)
+    namespace = vars(r)
+    if 'version' in namespace:
+      common_config.print_build_info(zipped_pex=True)
+    else:
+      parser.print_help()
     parser.exit()
 
   # log additional information

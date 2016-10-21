@@ -42,9 +42,5 @@ def run(command, parser, args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  release_file = config.get_heron_release_file()
-  with open(release_file) as release_info:
-    for line in release_info:
-      print line,
-
+  config.print_build_info()
   return True

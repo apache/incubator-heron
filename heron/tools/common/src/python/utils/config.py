@@ -37,6 +37,7 @@ ETC_DIR = "etc"
 LIB_DIR = "lib"
 CLI_DIR = ".heron"
 RELEASE_YAML = "release.yaml"
+ZIPPED_RELEASE_YAML = "scripts/packages/release.yaml"
 OVERRIDE_YAML = "override.yaml"
 
 # directories for heron sandbox
@@ -138,9 +139,22 @@ def get_heron_dir():
 
   :return: root location for heron-cli.
   """
-  path = "/".join(os.path.realpath(__file__).split('/')[:-9])
+  go_above_dirs = 9
+  path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
   return normalized_class_path(path)
 
+def get_zipped_heron_dir():
+  """
+  This will extract heron directory from .pex file,
+  with `zip_safe = False' Bazel flag added when building this .pex file
+
+  Specifically designed for heron-ui
+
+  :return: root location for heron-ui.
+  """
+  go_above_dirs = 7
+  path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
+  return normalized_class_path(path)
 
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
@@ -151,11 +165,11 @@ def get_heron_dir_explorer():
   From heron-cli with modification since we need to reuse cli's conf
   :return: root location for heron-cli.
   """
-  path_list = os.path.realpath(__file__).split('/')[:-10]
+  go_above_dirs = 10
+  path_list = os.path.realpath(__file__).split('/')[:-go_above_dirs]
   path_list.append(CLI_DIR)
   path = "/".join(path_list)
   return normalized_class_path(path)
-
 
 def get_heron_bin_dir():
   """
@@ -190,6 +204,17 @@ def get_heron_release_file():
   :return: absolute path of heron release.yaml file
   """
   return os.path.join(get_heron_dir(), RELEASE_YAML)
+
+
+def get_zipped_heron_release_file():
+  """
+  This will provide the path to heron release.yaml file.
+  To be used for .pex file built with `zip_safe = False` flag.
+  For example, `heron-ui'.
+
+  :return: absolute path of heron release.yaml file
+  """
+  return os.path.join(get_zipped_heron_dir(), ZIPPED_RELEASE_YAML)
 
 
 def get_heron_cluster_conf_dir(cluster, default_config_path):
@@ -324,11 +349,35 @@ def check_release_file_exists():
 
   return True
 
-def print_version():
-  release_file = get_heron_release_file()
+def print_build_info(zipped_pex=False):
+  """Print build_info from release.yaml
+
+  :param zipped_pex: True if the PEX file is built with flag `zip_safe=False'.
+  """
+  if zipped_pex:
+    release_file = get_zipped_heron_release_file()
+  else:
+    release_file = get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
       print line,
+
+def get_version_number(zipped_pex=False):
+  """Print version from release.yaml
+
+  :param zipped_pex: True if the PEX file is built with flag `zip_safe=False'.
+  """
+  if zipped_pex:
+    release_file = get_zipped_heron_release_file()
+  else:
+    release_file = get_heron_release_file()
+  with open(release_file) as release_info:
+    for line in release_info:
+      trunks = line[:-1].split(' ')
+      if trunks[0] == 'heron.build.version':
+        return trunks[-1].replace("'", "")
+    return 'unknown'
+
 
 def insert_bool(param, command_args):
   '''

@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ constants.py """
+
+import heron.tools.common.src.python.utils.config as common_config
+
 # This file contains all the constants used
 # across the tracker service.
 
 # Version Information
 
-API_VERSION = "0.14.5"
+API_VERSION = common_config.get_version_number()
 
 
 # Handler Constants
