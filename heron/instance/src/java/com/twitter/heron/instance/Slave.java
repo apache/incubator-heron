@@ -87,9 +87,7 @@ public class Slave implements Runnable, AutoCloseable {
             if (helper == null) {
               handleNewAssignment(newHelper);
             } else {
-              LOG.info("checking if instance is UpdateableInstance: " + instance);
               if (instance instanceof UpdateableInstance) {
-                LOG.info("instance is UpdateableInstance: " + instance);
                 ((UpdateableInstance) instance)
                     .updateTopologyContext(newHelper.getTopologyContext());
               }

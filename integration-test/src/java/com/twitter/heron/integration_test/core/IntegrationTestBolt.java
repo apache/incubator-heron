@@ -59,7 +59,6 @@ public class IntegrationTestBolt implements IRichBolt, UpdateableInstance {
   public void prepare(Map<String, Object> map,
                       TopologyContext context,
                       OutputCollector outputCollector) {
-    LOG.info("prepare called with TopologyContext: " + context);
     updateTopologyContext(context);
     this.collector = new OutputCollector(new IntegrationTestBoltCollector(outputCollector));
     this.delegateBolt.prepare(map, context, collector);
