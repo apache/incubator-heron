@@ -139,7 +139,7 @@ def get_heron_dir():
 
   This means the variable `go_above_dirs` below is 9.
 
-  :return: root location for heron-cli.
+  :return: root location of the .pex file
   """
   go_above_dirs = 9
   path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
@@ -158,9 +158,7 @@ def get_zipped_heron_dir():
 
   This means the variable `go_above_dirs` below is 7.
 
-  Specifically designed for heron-ui
-
-  :return: root location for heron-ui.
+  :return: root location of the .pex file.
   """
   go_above_dirs = 7
   path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
