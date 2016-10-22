@@ -32,6 +32,11 @@ generated_release_files = [
 ]
 
 filegroup(
+    name = "release_files",
+    srcs = generated_release_files,
+)
+
+filegroup(
     name = "tarpkgs",
     srcs = [
         ":heron-api",

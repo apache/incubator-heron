@@ -111,5 +111,11 @@ def create_parsers():
       help='Prints help',
       add_help=False)
 
+  version_parser = subparsers.add_parser(
+      'version',
+      help='Prints version',
+      add_help=True)
+
   help_parser.set_defaults(help=True)
+  version_parser.set_defaults(version=True)
   return (parser, child_parser)

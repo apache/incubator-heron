@@ -115,7 +115,7 @@ def run(command, parser, command_args, unknown_args):
   if command in runners:
     return runners[command].run(command, parser, command_args, unknown_args)
   else:
-    Log.error('Unknown subcommand: %s' % command)
+    Log.error('Unknown subcommand: %s', command)
     return 1
 
 def cleanup(files):
