@@ -30,8 +30,5 @@ def create_parser(subparsers):
 # pylint: disable=unused-argument
 def run(command, parser, known_args, unknown_args):
   """ run command """
-  release_file = config.get_heron_release_file()
-  with open(release_file) as release_info:
-    for line in release_info:
-      print line,
+  config.print_build_info()
   return True

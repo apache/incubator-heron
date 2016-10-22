@@ -145,7 +145,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
   except Exception as e:
-    Log.error("Unable to get valid topology location: %s" % str(e))
+    Log.error("Unable to get valid topology location: %s", str(e))
     return dict()
 
   cl_args.update(new_cl_args)
@@ -174,7 +174,7 @@ def main(args):
   command = command_line_args['subcommand']
 
   if unknown_args:
-    Log.error('Unknown argument: %s' % unknown_args[0])
+    Log.error('Unknown argument: %s', unknown_args[0])
     # show help message
     command_line_args['help-command'] = command
     command = 'help'
@@ -195,7 +195,7 @@ def main(args):
 
   if command != 'help':
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end - start))
+    Log.info('Elapsed time: %.3fs.', (end - start))
 
   return 0 if ret else 1
 

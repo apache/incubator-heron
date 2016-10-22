@@ -188,7 +188,7 @@ def main():
     parser.exit()
 
   elif remaining == ['version']:
-    common_config.print_version()
+    common_config.print_build_info()
     parser.exit()
 
   elif remaining != []:

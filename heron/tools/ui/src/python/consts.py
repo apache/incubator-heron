@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' consts.py '''
+import heron.tools.common.src.python.utils.config as common_config
 
 # default parameter - address for the web to ui to listen on
 DEFAULT_ADDRESS = "0.0.0.0"
@@ -21,3 +22,5 @@ DEFAULT_PORT = 8889
 
 # default parameter - url to connect to heron tracker
 DEFAULT_TRACKER_URL = "http://localhost:8888"
+
+VERSION = common_config.get_version_number(zipped_pex=True)
