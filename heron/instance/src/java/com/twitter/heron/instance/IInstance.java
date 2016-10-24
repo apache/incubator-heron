@@ -14,8 +14,8 @@
 
 package com.twitter.heron.instance;
 
-import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -55,7 +55,7 @@ public interface IInstance {
 
   /**
    * Update the instance. This happens when the physical plan changes (e.g., during a scaling event)
-   * @param topologyContext
+   * @param physicalPlanHelper
    */
-  void update(TopologyContext topologyContext);
+  void update(PhysicalPlanHelper physicalPlanHelper);
 }

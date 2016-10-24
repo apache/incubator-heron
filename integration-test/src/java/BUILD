@@ -9,6 +9,7 @@ java_library(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/instance/src/java:instance-java",
         "//heron/storm/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
         "//third_party/java:jackson",
