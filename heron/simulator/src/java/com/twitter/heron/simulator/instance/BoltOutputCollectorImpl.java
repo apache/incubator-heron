@@ -31,6 +31,7 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -61,6 +62,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
   // Reference to update the bolt metrics
   private final BoltMetrics boltMetrics;
   private final PhysicalPlanHelper helper;
+  private final TopologyContextImpl topologyContext;
 
   private final boolean ackEnabled;
 
@@ -76,8 +78,9 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     this.serializer = serializer;
     this.helper = helper;
     this.boltMetrics = boltMetrics;
+    this.topologyContext = helper.getTopologyContext();
 
-    Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
+    Map<String, Object> config = topologyContext.getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
         && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
       this.ackEnabled = Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
@@ -162,7 +165,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
         helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
 
     // Invoke user-defined emit task hook
-    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
+    topologyContext.invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
 
     // Start construct the data tuple
     HeronTuples.HeronDataTuple.Builder bldr = HeronTuples.HeronDataTuple.newBuilder();
@@ -235,9 +238,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       long latency = System.nanoTime() - tuplImpl.getCreationTime();
 
       // Invoke user-defined boltAck task hook
-      helper.getTopologyContext().
-          invokeHookBoltAck(tuple, latency);
-
+      topologyContext.invokeHookBoltAck(tuple, latency);
 
       boltMetrics.ackedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
     }
@@ -261,8 +262,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       long latency = System.nanoTime() - tuplImpl.getCreationTime();
 
       // Invoke user-defined boltFail task hook
-      helper.getTopologyContext().
-          invokeHookBoltFail(tuple, latency);
+      topologyContext.invokeHookBoltFail(tuple, latency);
 
       boltMetrics.failedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
     }

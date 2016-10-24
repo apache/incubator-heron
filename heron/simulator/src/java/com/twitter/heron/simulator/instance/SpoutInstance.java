@@ -24,9 +24,7 @@ import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.proto.system.HeronTuples;
-
 
 public class SpoutInstance
     extends com.twitter.heron.instance.spout.SpoutInstance implements IInstance {
@@ -40,8 +38,7 @@ public class SpoutInstance
                        Communicator<HeronTuples.HeronTupleSet> streamInQueue,
                        Communicator<HeronTuples.HeronTupleSet> streamOutQueue, SlaveLooper looper) {
     super(helper, streamInQueue, streamOutQueue, looper);
-    TopologyContextImpl topologyContext = helper.getTopologyContext();
-    Map<String, Object> config = topologyContext.getTopologyConfig();
+    Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 

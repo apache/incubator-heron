@@ -94,13 +94,12 @@ public class PhysicalPlanHelper {
     // setup outputSchema
     outputSchema = new HashMap<String, Integer>();
     List<TopologyAPI.OutputStream> outputs;
-    TopologyAPI.Component comp;
     if (mySpout != null) {
       outputs = mySpout.getOutputsList();
-      comp = mySpout.getComp();
+      component = mySpout.getComp();
     } else {
       outputs = myBolt.getOutputsList();
-      comp = myBolt.getComp();
+      component = myBolt.getComp();
     }
     for (TopologyAPI.OutputStream outputStream : outputs) {
       outputSchema.put(outputStream.getStream().getId(),
@@ -112,8 +111,6 @@ public class PhysicalPlanHelper {
     } catch (UnknownHostException e) {
       throw new RuntimeException("GetHostName failed");
     }
-
-    component = comp;
 
     // Do some setup for any custom grouping
     customGrouper = new CustomStreamGroupingHelper();
