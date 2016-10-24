@@ -100,14 +100,8 @@ public class InstanceExecutor implements Runnable {
 
   protected IInstance createInstance() {
     return (physicalPlanHelper.getMySpout() != null)
-        ? new SpoutInstance(physicalPlanHelper,
-        streamInQueue,
-        streamOutQueue,
-        looper)
-        : new BoltInstance(physicalPlanHelper,
-        streamInQueue,
-        streamOutQueue,
-        looper);
+        ? new SpoutInstance(physicalPlanHelper, streamInQueue, streamOutQueue, looper)
+        : new BoltInstance(physicalPlanHelper, streamInQueue, streamOutQueue, looper);
   }
 
   protected PhysicalPlanHelper createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan,

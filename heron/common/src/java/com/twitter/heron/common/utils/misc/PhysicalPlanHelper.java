@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
@@ -55,9 +54,7 @@ public class PhysicalPlanHelper {
   /**
    * Constructor for physical plan helper
    */
-  public PhysicalPlanHelper(
-      PhysicalPlans.PhysicalPlan pplan,
-      String instanceId) {
+  public PhysicalPlanHelper(PhysicalPlans.PhysicalPlan pplan, String instanceId) {
     this.pplan = pplan;
 
     // Get my instance
@@ -132,7 +129,7 @@ public class PhysicalPlanHelper {
               (CustomStreamGrouping) Utils.deserialize(
                   inputStream.getCustomGroupingObject().toByteArray());
           customGrouper.add(inputStream.getStream().getId(),
-              GetTaskIdsAsListForComponent(topo.getBolts(i).getComp().getName()),
+              getTaskIdsAsListForComponent(topo.getBolts(i).getComp().getName()),
               customStreamGrouping, myComponent);
         }
       }
@@ -233,7 +230,7 @@ public class PhysicalPlanHelper {
     return retval;
   }
 
-  private List<Integer> GetTaskIdsAsListForComponent(String comp) {
+  private List<Integer> getTaskIdsAsListForComponent(String comp) {
     List<Integer> retval = new LinkedList<Integer>();
     for (PhysicalPlans.Instance instance : pplan.getInstancesList()) {
       if (instance.getInfo().getComponentName().equals(comp)) {
@@ -243,8 +240,8 @@ public class PhysicalPlanHelper {
     return retval;
   }
 
-  public void prepareForCustomStreamGrouping(TopologyContext context) {
-    customGrouper.prepare(context);
+  public void prepareForCustomStreamGrouping() {
+    customGrouper.prepare(topologyContext);
   }
 
   public List<Integer> chooseTasksForCustomStreamGrouping(String streamId, List<Object> values) {
