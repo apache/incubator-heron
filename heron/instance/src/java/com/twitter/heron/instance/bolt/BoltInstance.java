@@ -41,7 +41,7 @@ import com.twitter.heron.proto.system.HeronTuples;
 
 public class BoltInstance implements IInstance {
 
-  private final PhysicalPlanHelper helper;
+  protected final PhysicalPlanHelper helper;
   protected final IBolt bolt;
   protected final BoltOutputCollectorImpl collector;
   protected final IPluggableSerializer serializer;
@@ -52,7 +52,6 @@ public class BoltInstance implements IInstance {
   private final SlaveLooper looper;
 
   private final SystemConfig systemConfig;
-  private TopologyContextImpl topologyContext;
 
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
@@ -63,8 +62,8 @@ public class BoltInstance implements IInstance {
     this.streamInQueue = streamInQueue;
     this.boltMetrics = new BoltMetrics();
     this.boltMetrics.initMultiCountMetrics(helper);
-    this.topologyContext = helper.getTopologyContext();
-    this.serializer = SerializeDeSerializeHelper.getSerializer(topologyContext.getTopologyConfig());
+    this.serializer =
+        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
 
@@ -95,6 +94,7 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void start() {
+    TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
     GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
@@ -117,7 +117,7 @@ public class BoltInstance implements IInstance {
   @Override
   public void stop() {
     // Invoke clean up hook before clean() is called
-    topologyContext.invokeHookCleanup();
+    helper.getTopologyContext().invokeHookCleanup();
 
     // Delegate to user-defined clean-up method
     bolt.cleanup();
@@ -158,6 +158,7 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+    TopologyContextImpl topologyContext = helper.getTopologyContext();
     long instanceExecuteBatchTime
         = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
 
@@ -222,7 +223,7 @@ public class BoltInstance implements IInstance {
 
   private void PrepareTickTupleTimer() {
     Object tickTupleFreqSecs =
-        topologyContext.getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+        helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
 
     if (tickTupleFreqSecs != null) {
       int freq = TypeUtils.getInteger(tickTupleFreqSecs);

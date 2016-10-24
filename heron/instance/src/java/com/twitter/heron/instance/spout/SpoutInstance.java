@@ -41,7 +41,6 @@ import com.twitter.heron.proto.system.HeronTuples;
 public class SpoutInstance implements IInstance {
   private static final Logger LOG = Logger.getLogger(SpoutInstance.class.getName());
 
-  private final int taskId;
   protected final ISpout spout;
   protected final SpoutOutputCollectorImpl collector;
   protected final SpoutMetrics spoutMetrics;
@@ -62,8 +61,6 @@ public class SpoutInstance implements IInstance {
 
   private TopologyAPI.TopologyState topologyState;
 
-  private TopologyContextImpl topologyContext;
-
   /**
    * Construct a SpoutInstance basing on given arguments
    */
@@ -76,9 +73,7 @@ public class SpoutInstance implements IInstance {
     this.streamInQueue = streamInQueue;
     this.spoutMetrics = new SpoutMetrics();
     this.spoutMetrics.initMultiCountMetrics(helper);
-    this.taskId = helper.getMyTaskId();
-    this.topologyContext = helper.getTopologyContext();
-    this.config = topologyContext.getTopologyConfig();
+    this.config = helper.getTopologyContext().getTopologyConfig();
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
     this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
@@ -117,6 +112,8 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void start() {
+    TopologyContextImpl topologyContext = helper.getTopologyContext();
+
     // Initialize the GlobalMetrics
     GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
 
@@ -140,7 +137,7 @@ public class SpoutInstance implements IInstance {
   @Override
   public void stop() {
     // Invoke clean up hook before clean() is called
-    this.topologyContext.invokeHookCleanup();
+    helper.getTopologyContext().invokeHookCleanup();
 
     // Delegate to user-defined clean-up method
     spout.close();
@@ -288,9 +285,9 @@ public class SpoutInstance implements IInstance {
 
   private void handleAckTuple(HeronTuples.AckTuple ackTuple, boolean isSuccess) {
     for (HeronTuples.RootId rt : ackTuple.getRootsList()) {
-      if (rt.getTaskid() != this.taskId) {
+      if (rt.getTaskid() != helper.getMyTaskId()) {
         throw new RuntimeException(String.format("Receiving tuple for task %d in task %d",
-            rt.getTaskid(), this.taskId));
+            rt.getTaskid(), helper.getMyTaskId()));
       } else {
         long rootId = rt.getKey();
         RootTupleInfo rootTupleInfo = collector.retireInFlight(rootId);
@@ -377,7 +374,7 @@ public class SpoutInstance implements IInstance {
     spout.ack(messageId);
 
     // Invoke user-defined task hooks
-    this.topologyContext.invokeHookSpoutAck(messageId, completeLatencyNs);
+    helper.getTopologyContext().invokeHookSpoutAck(messageId, completeLatencyNs);
 
     // Update metrics
     spoutMetrics.ackedTuple(streamId, completeLatencyNs);
@@ -388,7 +385,7 @@ public class SpoutInstance implements IInstance {
     spout.fail(messageId);
 
     // Invoke user-defined task hooks
-    this.topologyContext.invokeHookSpoutFail(messageId, failLatencyNs);
+    helper.getTopologyContext().invokeHookSpoutFail(messageId, failLatencyNs);
 
     // Update metrics
     spoutMetrics.failedTuple(streamId, failLatencyNs);
