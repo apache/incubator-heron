@@ -89,8 +89,8 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
         && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
-      this.ackingEnabled = Boolean.parseBoolean(
-          config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
+      this.ackingEnabled =
+          Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
     } else {
       this.ackingEnabled = false;
     }
@@ -115,7 +115,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
   @Override
   public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
-    admitSpoutTuple(taskId, streamId, tuple, messageId);
+    throw new RuntimeException("emitDirect Not implemented");
   }
 
   // Log the report error and also send the stack trace to metrics manager.
@@ -248,10 +248,6 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
     // TODO:- remove this after changing the api
     return null;
-  }
-
-  private void admitSpoutTuple(int taskId, String streamId, List<Object> tuple, Object messageId) {
-    throw new RuntimeException("emitDirect Not implemented");
   }
 
   private HeronTuples.RootId.Builder EstablishRootId(RootTupleInfo tupleInfo) {

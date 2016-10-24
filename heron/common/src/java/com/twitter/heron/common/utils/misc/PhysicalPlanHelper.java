@@ -253,7 +253,6 @@ public class PhysicalPlanHelper {
   }
 
   private HashSet<String> getTerminatedComponentSet() {
-    Map<String, TopologyAPI.Bolt> bolts = new HashMap<>();
     Map<String, TopologyAPI.Spout> spouts = new HashMap<>();
     Map<String, HashSet<String>> prev = new HashMap<>();
 
@@ -266,7 +265,6 @@ public class PhysicalPlanHelper {
     // by looking only on bolts, since spout will not have parents
     for (TopologyAPI.Bolt bolt : pplan.getTopology().getBoltsList()) {
       String name = bolt.getComp().getName();
-      bolts.put(name, bolt);
 
       // To get the parent's component to construct a graph of topology structure
       for (TopologyAPI.InputStream inputStream : bolt.getInputsList()) {

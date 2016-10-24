@@ -47,7 +47,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics
  * <p>
- * For Control tuples (ack&amp;fail):
+ * For Control tuples (ack &amp; fail):
  * 1. Set the anchors for a tuple
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics
@@ -103,7 +103,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       String streamId,
       Collection<Tuple> anchors,
       List<Object> tuple) {
-    admitBoltTuple(taskId, streamId, anchors, tuple);
+    throw new RuntimeException("emitDirect not supported");
   }
 
   @Override
@@ -215,13 +215,6 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
 
     // TODO:- remove this after changing the api
     return null;
-  }
-
-  private void admitBoltTuple(
-      int taskId,
-      String streamId,
-      Collection<Tuple> anchors, List<Object> tuple) {
-    throw new RuntimeException("emitDirect not supported");
   }
 
   private void admitAckTuple(Tuple tuple) {
