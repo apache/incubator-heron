@@ -26,10 +26,10 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.topology.UpdatableComponent;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.topology.UpdatableComponent;
 
 public class IntegrationTestBolt implements IRichBolt, UpdatableComponent {
   private static final long serialVersionUID = 6304554167838679097L;
