@@ -26,7 +26,6 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -35,14 +34,12 @@ public class BoltInstance
 
   private final long instanceExecuteBatchTime;
   private final long instanceExecuteBatchSize;
-  private TopologyContextImpl topologyContext;
 
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
                       Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
                       SlaveLooper looper) {
     super(helper, streamInQueue, streamOutQueue, looper);
-    this.topologyContext = helper.getTopologyContext();
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
@@ -62,7 +59,7 @@ public class BoltInstance
     }
 
     // Decode the tuple
-    TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
+    TupleImpl t = new TupleImpl(helper.getTopologyContext(), stream, dataTuple.getKey(),
         dataTuple.getRootsList(), values);
 
     long deserializedTime = System.nanoTime();
@@ -73,7 +70,7 @@ public class BoltInstance
     long executeLatency = System.nanoTime() - deserializedTime;
 
     // Invoke user-defined execute task hook
-    topologyContext.invokeHookBoltExecute(t, executeLatency);
+    helper.getTopologyContext().invokeHookBoltExecute(t, executeLatency);
 
     boltMetrics.deserializeDataTuple(stream.getId(), stream.getComponentName(),
         deserializedTime - startTime);

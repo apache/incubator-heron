@@ -33,7 +33,6 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.TupleKeyGenerator;
-import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -58,9 +57,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
   private final TupleKeyGenerator keyGenerator;
 
   private final SpoutMetrics spoutMetrics;
-  private final PhysicalPlanHelper helper;
-  private final TopologyContextImpl topologyContext;
-  private final int myTaskId;
+  private PhysicalPlanHelper helper;
 
   private final boolean ackingEnabled;
   // When acking is not enabled, if the spout does an emit with a anchor
@@ -84,13 +81,12 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     this.helper = helper;
     this.spoutMetrics = spoutMetrics;
     this.keyGenerator = new TupleKeyGenerator();
-    this.topologyContext = helper.getTopologyContext();
-    this.myTaskId = helper.getMyTaskId();
+    updatePhysicalPlanHelper(helper);
 
     // with default capacity, load factor and insertion order
     inFlightTuples = new LinkedHashMap<Long, RootTupleInfo>();
 
-    Map<String, Object> config = topologyContext.getTopologyConfig();
+    Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
         && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
       this.ackingEnabled =
@@ -105,7 +101,11 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
       immediateAcks = null;
     }
 
-    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
+    this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
+  }
+
+  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+    this.helper = physicalPlanHelper;
   }
 
   /////////////////////////////////////////////////////////
@@ -204,7 +204,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
         helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
 
     // Invoke user-defined emit task hook
-    topologyContext.invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
+    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
 
     // Start construct the data tuple
     HeronTuples.HeronDataTuple.Builder bldr = HeronTuples.HeronDataTuple.newBuilder();
@@ -258,7 +258,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     // This message is rooted
     long rootId = keyGenerator.next();
     HeronTuples.RootId.Builder rtbldr = HeronTuples.RootId.newBuilder();
-    rtbldr.setTaskid(myTaskId);
+    rtbldr.setTaskid(helper.getMyTaskId());
     rtbldr.setKey(rootId);
     inFlightTuples.put(rootId, tupleInfo);
     return rtbldr;
