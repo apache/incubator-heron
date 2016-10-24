@@ -29,9 +29,9 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.instance.UpdatableInstance;
+import com.twitter.heron.api.topology.UpdatableComponent;
 
-public class IntegrationTestBolt implements IRichBolt, UpdatableInstance {
+public class IntegrationTestBolt implements IRichBolt, UpdatableComponent {
   private static final long serialVersionUID = 6304554167838679097L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
   private final IRichBolt delegateBolt;

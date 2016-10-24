@@ -38,7 +38,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
-import com.twitter.heron.instance.UpdatableInstance;
+import com.twitter.heron.api.topology.UpdatableComponent;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class BoltInstance implements IInstance {
@@ -98,8 +98,8 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void update(PhysicalPlanHelper physicalPlanHelper) {
-    if (bolt instanceof UpdatableInstance) {
-      ((UpdatableInstance) bolt).update(physicalPlanHelper.getTopologyContext());
+    if (bolt instanceof UpdatableComponent) {
+      ((UpdatableComponent) bolt).update(physicalPlanHelper.getTopologyContext());
     }
     // TODO: update collector with new physicalPlanHelper
   }

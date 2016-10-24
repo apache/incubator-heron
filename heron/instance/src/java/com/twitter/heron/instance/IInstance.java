@@ -14,6 +14,8 @@
 
 package com.twitter.heron.instance;
 
+import com.twitter.heron.classification.InterfaceAudience;
+import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -21,7 +23,8 @@ import com.twitter.heron.proto.system.HeronTuples;
 /**
  * Implementing this interface allows an object to be target of HeronInstance
  */
-
+@InterfaceAudience.Private
+@InterfaceStability.Evolving
 public interface IInstance {
   /**
    * Do the basic setup for HeronInstance
