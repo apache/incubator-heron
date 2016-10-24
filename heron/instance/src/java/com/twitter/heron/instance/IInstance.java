@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance;
 
+import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -51,4 +52,10 @@ public interface IInstance {
    * Deactivate the instance
    */
   void deactivate();
+
+  /**
+   * Update the instance. This happens when the physical plan changes (e.g., during a scaling event)
+   * @param topologyContext
+   */
+  void update(TopologyContext topologyContext);
 }

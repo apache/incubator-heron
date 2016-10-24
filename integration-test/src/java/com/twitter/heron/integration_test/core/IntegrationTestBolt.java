@@ -29,9 +29,9 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.instance.UpdateableInstance;
+import com.twitter.heron.instance.UpdatableInstance;
 
-public class IntegrationTestBolt implements IRichBolt, UpdateableInstance {
+public class IntegrationTestBolt implements IRichBolt, UpdatableInstance {
   private static final long serialVersionUID = 6304554167838679097L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
   private final IRichBolt delegateBolt;
@@ -47,8 +47,8 @@ public class IntegrationTestBolt implements IRichBolt, UpdateableInstance {
   }
 
   @Override
-  public void updateTopologyContext(TopologyContext topologyContext) {
-    LOG.info("updateTopologyContext called with TopologyContext: " + topologyContext);
+  public void update(TopologyContext topologyContext) {
+    LOG.info("update called with TopologyContext: " + topologyContext);
     // if we get a new topology context we reset the terminalsToReceive regardless of if we've
     // already received any. The expectation is that after a change in physical plan, upstream
     // spouts will re-emit and send new terminals.
@@ -59,7 +59,7 @@ public class IntegrationTestBolt implements IRichBolt, UpdateableInstance {
   public void prepare(Map<String, Object> map,
                       TopologyContext context,
                       OutputCollector outputCollector) {
-    updateTopologyContext(context);
+    update(context);
     this.collector = new OutputCollector(new IntegrationTestBoltCollector(outputCollector));
     this.delegateBolt.prepare(map, context, collector);
   }

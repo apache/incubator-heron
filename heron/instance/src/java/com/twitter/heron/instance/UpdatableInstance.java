@@ -21,6 +21,6 @@ import com.twitter.heron.api.topology.TopologyContext;
  * elements of the physical plan, which can change during a scaling event. Instances that need to
  * adapt to such changes should implement this interface to receive a callback when a change occurs.
  */
-public interface UpdateableInstance {
-  void updateTopologyContext(TopologyContext topologyContext);
+public interface UpdatableInstance {
+  void update(TopologyContext topologyContext);
 }

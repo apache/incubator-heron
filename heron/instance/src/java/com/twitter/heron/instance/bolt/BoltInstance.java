@@ -39,10 +39,10 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
-import com.twitter.heron.instance.UpdateableInstance;
+import com.twitter.heron.instance.UpdatableInstance;
 import com.twitter.heron.proto.system.HeronTuples;
 
-public class BoltInstance implements IInstance, UpdateableInstance {
+public class BoltInstance implements IInstance {
   private static final Logger LOG = Logger.getLogger(BoltInstance.class.getName());
 
   private final PhysicalPlanHelper helper;
@@ -98,9 +98,9 @@ public class BoltInstance implements IInstance, UpdateableInstance {
   }
 
   @Override
-  public void updateTopologyContext(TopologyContext topologyContext) {
-    if (bolt instanceof UpdateableInstance) {
-      ((UpdateableInstance) bolt).updateTopologyContext(topologyContext);
+  public void update(TopologyContext topologyContext) {
+    if (bolt instanceof UpdatableInstance) {
+      ((UpdatableInstance) bolt).update(topologyContext);
     }
   }
 

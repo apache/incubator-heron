@@ -24,6 +24,7 @@ import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
@@ -36,6 +37,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.UpdatableInstance;
 import com.twitter.heron.proto.system.HeronTuples;
 
 
@@ -111,6 +113,13 @@ public class SpoutInstance implements IInstance {
     }
 
     collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
+  }
+
+  @Override
+  public void update(TopologyContext topologyContext) {
+    if (spout instanceof UpdatableInstance) {
+      ((UpdatableInstance) spout).update(topologyContext);
+    }
   }
 
   @Override
