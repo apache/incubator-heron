@@ -202,7 +202,7 @@ public final class ShellUtils {
     // be guaranteed alive when children processing trying to flush to
     // parent processes's IO.
     ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory, envs);
-    pb.redirectErrorStream();
+    pb.redirectErrorStream(true);
 
     if (logStderr) {
       String logFilePath = String.format("%s/%s-%s.stderr",
