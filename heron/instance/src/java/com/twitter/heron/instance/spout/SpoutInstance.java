@@ -24,6 +24,7 @@ import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
@@ -108,6 +109,14 @@ public class SpoutInstance implements IInstance {
 
     IPluggableSerializer serializer = SerializeDeSerializeHelper.getSerializer(config);
     collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
+  }
+
+  @Override
+  public void update(PhysicalPlanHelper physicalPlanHelper) {
+    if (spout instanceof IUpdatable) {
+      ((IUpdatable) spout).update(physicalPlanHelper.getTopologyContext());
+    }
+    collector.updatePhysicalPlanHelper(physicalPlanHelper);
   }
 
   @Override

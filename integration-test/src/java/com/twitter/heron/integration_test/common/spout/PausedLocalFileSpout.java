@@ -137,12 +137,5 @@ public class PausedLocalFileSpout extends BaseRichSpout {
       throw new RuntimeException("Unable to emit tuples normally", e);
     }
   }
-
-  public void ack(Object msgId) {
-  }
-
-  public void fail(Object msgId) {
-
-  }
 }
 
