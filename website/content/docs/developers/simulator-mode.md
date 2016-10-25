@@ -9,10 +9,10 @@ Simulator mode simulates a heron cluster in a single JVM process, which is usefu
 testing topologies. Running topologies under simulator mode is similar to running topologies on a 
 cluster.
 
-# Develop topology with simulator mode
+# Develop a topology using simulator mode
 
-To use simulator mode, simply use the ``SimulatorMode`` class, which is
-in ``storm-compatibility-unshaded_deploy.jar``  (currently under ``bazel-bin/heron/storm/src/java``).
+To run in simulator mode, use the ``SimulatorMode`` class, which is
+in ``storm-compatibility-unshaded_deploy.jar``  (under ``bazel-bin/heron/storm/src/java``).
 
 For example:
 
@@ -49,12 +49,12 @@ corresponding behaviors interactively.
 # Debug topology using IntelliJ
 
 Bolts and Spouts run as separate threads in simulator. To add breakpoints inside a bolt/spout, the 
-Suspend Policy of the breakpoint needs to be set as Thread. To change the Suspend Policy, right 
+Suspend Policy of the breakpoint needs to be set to Thread. To change the Suspend Policy, right 
 click on the breakpoint as shown in the following image:
 
 ![Set Breakpoint](/img/intellij-set-breakpoint.jpg)
 
-If it's not convenient to check the output and logs in IntelliJ console, save them to a local file 
+If it's not convenient to check the output and logs in the IntelliJ console, save them to a local file 
 by choosing `Run -> Edit Configurations....` as shown in the following image:
 
 ![Save Console](/img/intellij-save-console.jpg)

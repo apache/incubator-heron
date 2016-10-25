@@ -26,7 +26,10 @@ tools/cpp/gcc
 tools/cpp/g++
 tools/jdk/ijar
 .DS_Store
+
+# Vim
 .*.swp
+.*.swo
 
 # Compiled source #
 ###################

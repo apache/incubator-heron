@@ -16,5 +16,8 @@ pex_library(
     ),
     deps = [
         "//heron/common/src/python:common-py",
-    ]
+    ],
+    reqs = [
+        "pyyaml==3.10"
+    ],
 )
