@@ -47,7 +47,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics
  * <p>
- * For Control tuples (ack&amp;fail):
+ * For Control tuples (ack &amp; fail):
  * 1. Set the anchors for a tuple
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics
@@ -60,7 +60,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
 
   // Reference to update the bolt metrics
   private final BoltMetrics boltMetrics;
-  private final PhysicalPlanHelper helper;
+  private PhysicalPlanHelper helper;
 
   private final boolean ackEnabled;
 
@@ -74,8 +74,8 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     }
 
     this.serializer = serializer;
-    this.helper = helper;
     this.boltMetrics = boltMetrics;
+    updatePhysicalPlanHelper(helper);
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
@@ -85,7 +85,11 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       this.ackEnabled = false;
     }
 
-    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
+    this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
+  }
+
+  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+    this.helper = physicalPlanHelper;
   }
 
   /////////////////////////////////////////////////////////
@@ -103,7 +107,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       String streamId,
       Collection<Tuple> anchors,
       List<Object> tuple) {
-    admitBoltTuple(taskId, streamId, anchors, tuple);
+    throw new RuntimeException("emitDirect not supported");
   }
 
   @Override
@@ -217,13 +221,6 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     return null;
   }
 
-  private void admitBoltTuple(
-      int taskId,
-      String streamId,
-      Collection<Tuple> anchors, List<Object> tuple) {
-    throw new RuntimeException("emitDirect not supported");
-  }
-
   private void admitAckTuple(Tuple tuple) {
     if (tuple instanceof TupleImpl) {
       TupleImpl tuplImpl = (TupleImpl) tuple;
@@ -242,9 +239,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       long latency = System.nanoTime() - tuplImpl.getCreationTime();
 
       // Invoke user-defined boltAck task hook
-      helper.getTopologyContext().
-          invokeHookBoltAck(tuple, latency);
-
+      helper.getTopologyContext().invokeHookBoltAck(tuple, latency);
 
       boltMetrics.ackedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
     }
@@ -268,8 +263,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       long latency = System.nanoTime() - tuplImpl.getCreationTime();
 
       // Invoke user-defined boltFail task hook
-      helper.getTopologyContext().
-          invokeHookBoltFail(tuple, latency);
+      helper.getTopologyContext().invokeHookBoltFail(tuple, latency);
 
       boltMetrics.failedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
     }

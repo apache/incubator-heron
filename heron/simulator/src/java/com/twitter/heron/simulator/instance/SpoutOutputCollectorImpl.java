@@ -35,7 +35,6 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.TupleKeyGenerator;
 import com.twitter.heron.proto.system.HeronTuples;
 
-
 /**
  * SpoutOutputCollectorImpl is used by bolt to emit tuples, it contains:
  * 1. IPluggableSerializer serializer, which will define the serializer
@@ -58,7 +57,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
   private final TupleKeyGenerator keyGenerator;
 
   private final SpoutMetrics spoutMetrics;
-  private final PhysicalPlanHelper helper;
+  private PhysicalPlanHelper helper;
 
   private final boolean ackingEnabled;
   // When acking is not enabled, if the spout does an emit with a anchor
@@ -82,6 +81,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     this.helper = helper;
     this.spoutMetrics = spoutMetrics;
     this.keyGenerator = new TupleKeyGenerator();
+    updatePhysicalPlanHelper(helper);
 
     // with default capacity, load factor and insertion order
     inFlightTuples = new LinkedHashMap<Long, RootTupleInfo>();
@@ -89,8 +89,8 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
         && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
-      this.ackingEnabled = Boolean.parseBoolean(
-          config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
+      this.ackingEnabled =
+          Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
     } else {
       this.ackingEnabled = false;
     }
@@ -101,7 +101,11 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
       immediateAcks = null;
     }
 
-    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
+    this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
+  }
+
+  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+    this.helper = physicalPlanHelper;
   }
 
   /////////////////////////////////////////////////////////
@@ -115,7 +119,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
   @Override
   public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
-    admitSpoutTuple(taskId, streamId, tuple, messageId);
+    throw new RuntimeException("emitDirect Not implemented");
   }
 
   // Log the report error and also send the stack trace to metrics manager.
@@ -248,10 +252,6 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
     // TODO:- remove this after changing the api
     return null;
-  }
-
-  private void admitSpoutTuple(int taskId, String streamId, List<Object> tuple, Object messageId) {
-    throw new RuntimeException("emitDirect Not implemented");
   }
 
   private HeronTuples.RootId.Builder EstablishRootId(RootTupleInfo tupleInfo) {

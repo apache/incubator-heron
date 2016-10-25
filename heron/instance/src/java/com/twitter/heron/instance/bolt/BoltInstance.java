@@ -16,7 +16,6 @@ package com.twitter.heron.instance.bolt;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IBolt;
@@ -41,13 +40,12 @@ import com.twitter.heron.instance.IInstance;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class BoltInstance implements IInstance {
-  private static final Logger LOG = Logger.getLogger(BoltInstance.class.getName());
 
-  private final PhysicalPlanHelper helper;
-  private final IBolt bolt;
-  private final BoltOutputCollectorImpl collector;
-  private final IPluggableSerializer serializer;
-  private final BoltMetrics boltMetrics;
+  protected final PhysicalPlanHelper helper;
+  protected final IBolt bolt;
+  protected final BoltOutputCollectorImpl collector;
+  protected final IPluggableSerializer serializer;
+  protected final BoltMetrics boltMetrics;
   // The bolt will read Data tuples from streamInQueue
   private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
 
@@ -62,17 +60,16 @@ public class BoltInstance implements IInstance {
     this.helper = helper;
     this.looper = looper;
     this.streamInQueue = streamInQueue;
-
     this.boltMetrics = new BoltMetrics();
     this.boltMetrics.initMultiCountMetrics(helper);
+    this.serializer =
+        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
+    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
+        SystemConfig.HERON_SYSTEM_CONFIG);
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");
     }
-    TopologyContextImpl topologyContext = helper.getTopologyContext();
-    serializer = SerializeDeSerializeHelper.getSerializer(topologyContext.getTopologyConfig());
-    systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Get the bolt. Notice, in fact, we will always use the deserialization way to get bolt.
     if (helper.getMyBolt().getComp().hasSerializedObject()) {
@@ -112,7 +109,7 @@ public class BoltInstance implements IInstance {
     topologyContext.invokeHookPrepare();
 
     // Init the CustomStreamGrouping
-    helper.prepareForCustomStreamGrouping(topologyContext);
+    helper.prepareForCustomStreamGrouping();
 
     addBoltTasks();
   }
@@ -161,6 +158,7 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+    TopologyContextImpl topologyContext = helper.getTopologyContext();
     long instanceExecuteBatchTime
         = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
 
@@ -169,7 +167,6 @@ public class BoltInstance implements IInstance {
     while (!inQueue.isEmpty()) {
       HeronTuples.HeronTupleSet tuples = inQueue.poll();
 
-      TopologyContextImpl topologyContext = helper.getTopologyContext();
       // Handle the tuples
       if (tuples.hasControl()) {
         throw new RuntimeException("Bolt cannot get acks/fails from other components");
@@ -218,12 +215,10 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void activate() {
-
   }
 
   @Override
   public void deactivate() {
-
   }
 
   private void PrepareTickTupleTimer() {
