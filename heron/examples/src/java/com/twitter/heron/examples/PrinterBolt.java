@@ -19,6 +19,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
 
+@SuppressWarnings("serial")
 public class PrinterBolt extends BaseBasicBolt {
 
   @Override

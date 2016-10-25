@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.storm.Config;
 import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IWindowedBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.task.TopologyContext;
 
 public abstract class BaseWindowedBolt implements IWindowedBolt {
 

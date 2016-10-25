@@ -67,6 +67,7 @@ public class WindowedBoltExecutor implements IRichBolt {
   private transient TriggerPolicy<Tuple> triggerPolicy;
   private transient EvictionPolicy<Tuple> evictionPolicy;
   // package level for unit tests
+  // SUPPRESS CHECKSTYLE VisibilityModifier
   transient WaterMarkEventGenerator<Tuple> waterMarkEventGenerator;
 
   public WindowedBoltExecutor(IWindowedBolt bolt) {
@@ -100,17 +101,16 @@ public class WindowedBoltExecutor implements IRichBolt {
 
   private void ensureDurationLessThanTimeout(int duration, int timeout) {
     if (duration > timeout) {
-      throw new IllegalArgumentException("Window duration (length + sliding interval) value " + duration +
-          " is more than " + Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS +
-          " value " + timeout);
+      throw new IllegalArgumentException("Window duration (length + sliding interval) value "
+          + duration + " is more than " + Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS + " value "
+          + timeout);
     }
   }
 
   private void ensureCountLessThanMaxPending(int count, int maxPending) {
     if (count > maxPending) {
-      throw new IllegalArgumentException("Window count (length + sliding interval) value " + count +
-          " is more than " + Config.TOPOLOGY_MAX_SPOUT_PENDING +
-          " value " + maxPending);
+      throw new IllegalArgumentException("Window count (length + sliding interval) value " + count
+          + " is more than " + Config.TOPOLOGY_MAX_SPOUT_PENDING + " value " + maxPending);
     }
   }
 
@@ -125,7 +125,8 @@ public class WindowedBoltExecutor implements IRichBolt {
     }
 
     if (windowLengthDuration != null && slidingIntervalDuration != null) {
-      ensureDurationLessThanTimeout(windowLengthDuration.value + slidingIntervalDuration.value, topologyTimeout);
+      ensureDurationLessThanTimeout(windowLengthDuration.value
+          + slidingIntervalDuration.value, topologyTimeout);
     } else if (windowLengthDuration != null) {
       ensureDurationLessThanTimeout(windowLengthDuration.value, topologyTimeout);
     } else if (slidingIntervalDuration != null) {
@@ -133,7 +134,8 @@ public class WindowedBoltExecutor implements IRichBolt {
     }
 
     if (windowLengthCount != null && slidingIntervalCount != null) {
-      ensureCountLessThanMaxPending(windowLengthCount.value + slidingIntervalCount.value, maxSpoutPending);
+      ensureCountLessThanMaxPending(
+          windowLengthCount.value + slidingIntervalCount.value, maxSpoutPending);
     } else if (windowLengthCount != null) {
       ensureCountLessThanMaxPending(windowLengthCount.value, maxSpoutPending);
     } else if (slidingIntervalCount != null) {
@@ -142,8 +144,8 @@ public class WindowedBoltExecutor implements IRichBolt {
   }
 
   @SuppressWarnings("rawtypes")
-  private WindowManager<Tuple> initWindowManager(WindowLifecycleListener<Tuple> lifecycleListener, Map stormConf,
-                                                 TopologyContext context) {
+  private WindowManager<Tuple> initWindowManager(
+      WindowLifecycleListener<Tuple> lifecycleListener, Map stormConf, TopologyContext context) {
     WindowManager<Tuple> manager = new WindowManager<>(lifecycleListener);
     Duration windowLengthDuration = null;
     Count windowLengthCount = null;
@@ -151,17 +153,20 @@ public class WindowedBoltExecutor implements IRichBolt {
     Count slidingIntervalCount = null;
     // window length
     if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT)) {
-      windowLengthCount = new Count(Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT).toString()));
+      windowLengthCount = new Count(Integer.parseInt(stormConf.get(
+          Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT).toString()));
     } else if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS)) {
       windowLengthDuration = new Duration(
-          Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS).toString()),
-          TimeUnit.MILLISECONDS);
+          Integer.parseInt(stormConf.get(
+              Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS).toString()), TimeUnit.MILLISECONDS);
     }
     // sliding interval
     if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT)) {
-      slidingIntervalCount = new Count(Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT).toString()));
+      slidingIntervalCount = new Count(Integer.parseInt(stormConf.get(
+          Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT).toString()));
     } else if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS)) {
-      slidingIntervalDuration = new Duration(Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS).toString()), TimeUnit.MILLISECONDS);
+      slidingIntervalDuration = new Duration(Integer.parseInt(stormConf.get(
+          Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS).toString()), TimeUnit.MILLISECONDS);
     } else {
       // default is a sliding window of count 1
       slidingIntervalCount = new Count(1);
@@ -171,14 +176,16 @@ public class WindowedBoltExecutor implements IRichBolt {
       tupleTsFieldName = (String) stormConf.get(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_FIELD_NAME);
       // max lag
       if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS)) {
-        maxLagMs = Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS).toString());
+        maxLagMs = Integer.parseInt(
+            stormConf.get(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS).toString());
       } else {
         maxLagMs = DEFAULT_MAX_LAG_MS;
       }
       // watermark interval
       int watermarkInterval;
       if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)) {
-        watermarkInterval = Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS).toString());
+        watermarkInterval = Integer.parseInt(
+            stormConf.get(Config.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS).toString());
       } else {
         watermarkInterval = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }
@@ -220,25 +227,27 @@ public class WindowedBoltExecutor implements IRichBolt {
     return tupleTsFieldName != null;
   }
 
-  private TriggerPolicy<Tuple> getTriggerPolicy(Count slidingIntervalCount, Duration slidingIntervalDuration,
-                                                WindowManager<Tuple> manager) {
+  private TriggerPolicy<Tuple> getTriggerPolicy(
+      Count slidingIntervalCount, Duration slidingIntervalDuration, WindowManager<Tuple> manager) {
     if (slidingIntervalCount != null) {
       if (isTupleTs()) {
-        return new WatermarkCountTriggerPolicy<>(slidingIntervalCount.value, manager, evictionPolicy, manager);
+        return new WatermarkCountTriggerPolicy<>(
+            slidingIntervalCount.value, manager, evictionPolicy, manager);
       } else {
         return new CountTriggerPolicy<>(slidingIntervalCount.value, manager, evictionPolicy);
       }
     } else {
       if (isTupleTs()) {
-        return new WatermarkTimeTriggerPolicy<>(slidingIntervalDuration.value, manager, evictionPolicy, manager);
+        return new WatermarkTimeTriggerPolicy<>(
+            slidingIntervalDuration.value, manager, evictionPolicy, manager);
       } else {
         return new TimeTriggerPolicy<>(slidingIntervalDuration.value, manager, evictionPolicy);
       }
     }
   }
 
-  private EvictionPolicy<Tuple> getEvictionPolicy(Count windowLengthCount, Duration windowLengthDuration,
-                                                  WindowManager<Tuple> manager) {
+  private EvictionPolicy<Tuple> getEvictionPolicy(
+      Count windowLengthCount, Duration windowLengthDuration, WindowManager<Tuple> manager) {
     if (windowLengthCount != null) {
       if (isTupleTs()) {
         return new WatermarkCountEvictionPolicy<>(windowLengthCount.value);
@@ -275,7 +284,8 @@ public class WindowedBoltExecutor implements IRichBolt {
         windowManager.add(input, ts);
       } else {
         windowedOutputCollector.ack(input);
-        LOG.log(Level.INFO, String.format("Received a late tuple %s with ts %d. This will not be processed.", input, ts));
+        LOG.log(Level.INFO, String.format(
+                "Received a late tuple %s with ts %d. This will not be processed.", input, ts));
       }
     } else {
       windowManager.add(input);
@@ -308,7 +318,8 @@ public class WindowedBoltExecutor implements IRichBolt {
       }
 
       @Override
-      public void onActivation(List<Tuple> tuples, List<Tuple> newTuples, List<Tuple> expiredTuples) {
+      public void onActivation(
+          List<Tuple> tuples, List<Tuple> newTuples, List<Tuple> expiredTuples) {
         windowedOutputCollector.setContext(tuples);
         bolt.execute(new TupleWindowImpl(tuples, newTuples, expiredTuples));
       }
@@ -326,8 +337,8 @@ public class WindowedBoltExecutor implements IRichBolt {
       super(delegate);
     }
 
-    void setContext(List<Tuple> inputTuples) {
-      this.inputTuples = inputTuples;
+    void setContext(List<Tuple> newInputTuples) {
+      inputTuples = newInputTuples;
     }
 
     @Override

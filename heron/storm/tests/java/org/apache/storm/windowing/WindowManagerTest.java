@@ -1,25 +1,18 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.apache.storm.windowing;
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+package org.apache.storm.windowing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +22,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.storm.topology.base.BaseWindowedBolt.Count;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.apache.storm.topology.base.BaseWindowedBolt.Duration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -42,15 +38,23 @@ public class WindowManagerTest {
   private Listener listener;
 
   private static class Listener implements WindowLifecycleListener<Integer> {
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<Integer> onExpiryEvents = Collections.emptyList();
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<Integer> onActivationEvents = Collections.emptyList();
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<Integer> onActivationNewEvents = Collections.emptyList();
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<Integer> onActivationExpiredEvents = Collections.emptyList();
 
     // all events since last clear
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<List<Integer>> allOnExpiryEvents = new ArrayList<>();
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<List<Integer>> allOnActivationEvents = new ArrayList<>();
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<List<Integer>> allOnActivationNewEvents = new ArrayList<>();
+    // SUPPRESS CHECKSTYLE VisibilityModifier
     List<List<Integer>> allOnActivationExpiredEvents = new ArrayList<>();
 
     @Override
@@ -96,7 +100,8 @@ public class WindowManagerTest {
   @Test
   public void testCountBasedWindow() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new CountEvictionPolicy<Integer>(5);
-    TriggerPolicy<Integer> triggerPolicy = new CountTriggerPolicy<Integer>(2, windowManager, evictionPolicy);
+    TriggerPolicy<Integer> triggerPolicy =
+        new CountTriggerPolicy<Integer>(2, windowManager, evictionPolicy);
     triggerPolicy.start();
     windowManager.setEvictionPolicy(evictionPolicy);
     windowManager.setTriggerPolicy(triggerPolicy);
@@ -138,7 +143,8 @@ public class WindowManagerTest {
     int threshold = WindowManager.EXPIRE_EVENTS_THRESHOLD;
     int windowLength = 5;
     windowManager.setEvictionPolicy(new CountEvictionPolicy<Integer>(5));
-    TriggerPolicy<Integer> triggerPolicy = new TimeTriggerPolicy<Integer>(new Duration(1, TimeUnit.HOURS).value, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new TimeTriggerPolicy<Integer>(new Duration(1, TimeUnit.HOURS).value, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
     for (int i : seq(1, 5)) {
@@ -159,13 +165,15 @@ public class WindowManagerTest {
 
   @Test
   public void testTimeBasedWindow() throws Exception {
-    EvictionPolicy<Integer> evictionPolicy = new TimeEvictionPolicy<Integer>(new Duration(1, TimeUnit.SECONDS).value);
+    EvictionPolicy<Integer> evictionPolicy =
+        new TimeEvictionPolicy<Integer>(new Duration(1, TimeUnit.SECONDS).value);
     windowManager.setEvictionPolicy(evictionPolicy);
         /*
          * Don't wait for Timetrigger to fire since this could lead to timing issues in unit tests.
          * Set it to a large value and trigger manually.
           */
-    TriggerPolicy<Integer> triggerPolicy = new TimeTriggerPolicy<Integer>(new Duration(1, TimeUnit.DAYS).value, windowManager, evictionPolicy);
+    TriggerPolicy<Integer> triggerPolicy = new TimeTriggerPolicy<Integer>(
+        new Duration(1, TimeUnit.DAYS).value, windowManager, evictionPolicy);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
     long now = System.currentTimeMillis();
@@ -183,7 +191,8 @@ public class WindowManagerTest {
     assertEquals(50, listener.onExpiryEvents.size());
 
     // add more events with past ts
-    for (int i : seq(WindowManager.EXPIRE_EVENTS_THRESHOLD + 1, WindowManager.EXPIRE_EVENTS_THRESHOLD + 100)) {
+    for (int i : seq(
+        WindowManager.EXPIRE_EVENTS_THRESHOLD + 1, WindowManager.EXPIRE_EVENTS_THRESHOLD + 100)) {
       windowManager.add(i, now - 1000);
     }
     // simulate the time trigger by setting the reference time and invoking onTrigger() manually
@@ -192,19 +201,22 @@ public class WindowManagerTest {
 
     // 100 events with past ts should expire
     assertEquals(100, listener.onExpiryEvents.size());
-    assertEquals(seq(WindowManager.EXPIRE_EVENTS_THRESHOLD + 1, WindowManager.EXPIRE_EVENTS_THRESHOLD + 100),
+    assertEquals(seq(
+        WindowManager.EXPIRE_EVENTS_THRESHOLD + 1, WindowManager.EXPIRE_EVENTS_THRESHOLD + 100),
         listener.onExpiryEvents);
     List<Integer> activationsEvents = seq(51, WindowManager.EXPIRE_EVENTS_THRESHOLD);
     assertEquals(seq(51, WindowManager.EXPIRE_EVENTS_THRESHOLD), listener.onActivationEvents);
     assertEquals(seq(51, WindowManager.EXPIRE_EVENTS_THRESHOLD), listener.onActivationNewEvents);
     // activation expired list should contain even the ones expired due to EXPIRE_EVENTS_THRESHOLD
     List<Integer> expiredList = seq(1, 50);
-    expiredList.addAll(seq(WindowManager.EXPIRE_EVENTS_THRESHOLD + 1, WindowManager.EXPIRE_EVENTS_THRESHOLD + 100));
+    expiredList.addAll(seq(
+        WindowManager.EXPIRE_EVENTS_THRESHOLD + 1, WindowManager.EXPIRE_EVENTS_THRESHOLD + 100));
     assertEquals(expiredList, listener.onActivationExpiredEvents);
 
     listener.clear();
     // add more events with current ts
-    List<Integer> newEvents = seq(WindowManager.EXPIRE_EVENTS_THRESHOLD + 101, WindowManager.EXPIRE_EVENTS_THRESHOLD + 200);
+    List<Integer> newEvents = seq(
+        WindowManager.EXPIRE_EVENTS_THRESHOLD + 101, WindowManager.EXPIRE_EVENTS_THRESHOLD + 200);
     for (int i : newEvents) {
       windowManager.add(i, now);
     }
@@ -221,13 +233,15 @@ public class WindowManagerTest {
 
   @Test
   public void testTimeBasedWindowExpiry() throws Exception {
-    EvictionPolicy<Integer> evictionPolicy = new TimeEvictionPolicy<Integer>(new Duration(100, TimeUnit.MILLISECONDS).value);
+    EvictionPolicy<Integer> evictionPolicy =
+        new TimeEvictionPolicy<Integer>(new Duration(100, TimeUnit.MILLISECONDS).value);
     windowManager.setEvictionPolicy(evictionPolicy);
         /*
          * Don't wait for Timetrigger to fire since this could lead to timing issues in unit tests.
          * Set it to a large value and trigger manually.
           */
-    TriggerPolicy<Integer> triggerPolicy = new TimeTriggerPolicy<Integer>(new Duration(1, TimeUnit.DAYS).value, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new TimeTriggerPolicy<Integer>(new Duration(1, TimeUnit.DAYS).value, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
     long now = System.currentTimeMillis();
@@ -260,7 +274,8 @@ public class WindowManagerTest {
   public void testTumblingWindow() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new CountEvictionPolicy<Integer>(3);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new CountTriggerPolicy<Integer>(3, windowManager, evictionPolicy);
+    TriggerPolicy<Integer> triggerPolicy =
+        new CountTriggerPolicy<Integer>(3, windowManager, evictionPolicy);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
     windowManager.add(1);
@@ -290,7 +305,8 @@ public class WindowManagerTest {
   public void testEventTimeBasedWindow() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new WatermarkTimeEvictionPolicy<>(20);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 
@@ -355,7 +371,8 @@ public class WindowManagerTest {
   public void testCountBasedWindowWithEventTs() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new WatermarkCountEvictionPolicy<>(3);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 
@@ -393,7 +410,8 @@ public class WindowManagerTest {
   public void testCountBasedTriggerWithEventTs() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new WatermarkTimeEvictionPolicy<Integer>(20);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkCountTriggerPolicy<Integer>(3, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkCountTriggerPolicy<Integer>(3, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 
@@ -431,7 +449,8 @@ public class WindowManagerTest {
   public void testCountBasedTumblingWithSameEventTs() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new WatermarkCountEvictionPolicy<>(2);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkCountTriggerPolicy<Integer>(2, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkCountTriggerPolicy<Integer>(2, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 
@@ -459,7 +478,8 @@ public class WindowManagerTest {
   public void testCountBasedSlidingWithSameEventTs() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new WatermarkCountEvictionPolicy<>(5);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkCountTriggerPolicy<Integer>(2, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkCountTriggerPolicy<Integer>(2, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 
@@ -488,7 +508,8 @@ public class WindowManagerTest {
   public void testEventTimeLag() throws Exception {
     EvictionPolicy<Integer> evictionPolicy = new WatermarkTimeEvictionPolicy<>(20, 5);
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 
@@ -522,7 +543,8 @@ public class WindowManagerTest {
 
     };
     windowManager.setEvictionPolicy(evictionPolicy);
-    TriggerPolicy<Integer> triggerPolicy = new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
+    TriggerPolicy<Integer> triggerPolicy =
+        new WatermarkTimeTriggerPolicy<Integer>(10, windowManager, evictionPolicy, windowManager);
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
 

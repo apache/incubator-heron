@@ -71,8 +71,6 @@ public class WatermarkTimeEvictionPolicy<T> extends TimeEvictionPolicy<T> {
 
   @Override
   public String toString() {
-    return "WatermarkTimeEvictionPolicy{" +
-        "lag=" + lag +
-        "} " + super.toString();
+    return "WatermarkTimeEvictionPolicy{" + "lag=" + lag + "} " + super.toString();
   }
 }

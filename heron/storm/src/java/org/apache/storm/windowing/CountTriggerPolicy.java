@@ -68,10 +68,7 @@ public class CountTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public String toString() {
-    return "CountTriggerPolicy{" +
-        "count=" + count +
-        ", currentCount=" + currentCount +
-        ", started=" + started +
-        '}';
+    return "CountTriggerPolicy{" + "count=" + count + ", currentCount=" + currentCount
+        + ", started=" + started + '}';
   }
 }

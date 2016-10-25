@@ -14,6 +14,11 @@
 
 package com.twitter.heron.examples;
 
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -28,17 +33,13 @@ import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.Utils;
 import org.apache.storm.windowing.TupleWindow;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.List;
-import java.util.Map;
-
 import static org.apache.storm.topology.base.BaseWindowedBolt.Count;
 
 /**
  * A sample topology that demonstrates the usage of {@link org.apache.storm.topology.IWindowedBolt}
  * to calculate sliding window sum.
  */
+// SUPPRESS CHECKSTYLE HideUtilityClassConstructor
 public class SlidingWindowTopology {
 
   private static final Logger LOG = Logger.getLogger(SlidingWindowTopology.class.getName());
@@ -46,12 +47,14 @@ public class SlidingWindowTopology {
   /**
    * Computes tumbling window average
    */
+  @SuppressWarnings("serial")
   private static class TumblingWindowAvgBolt extends BaseWindowedBolt {
     private OutputCollector collector;
 
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-      this.collector = collector;
+    @SuppressWarnings("rawtypes")
+    public void prepare(Map stormConf, TopologyContext context, OutputCollector newCollector) {
+      collector = newCollector;
     }
 
     @Override
@@ -81,7 +84,8 @@ public class SlidingWindowTopology {
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("integer", new RandomIntegerSpout(), 1);
-    builder.setBolt("slidingsum", new SlidingWindowSumBolt().withWindow(new Count(30), new Count(10)), 1)
+    builder.setBolt("slidingsum",
+        new SlidingWindowSumBolt().withWindow(new Count(30), new Count(10)), 1)
         .shuffleGrouping("integer");
     builder.setBolt("tumblingavg", new TumblingWindowAvgBolt().withTumblingWindow(new Count(3)), 1)
         .shuffleGrouping("slidingsum");

@@ -86,11 +86,12 @@ public class TopologyBuilder {
    *
    * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
    * @param bolt the windowed bolt
-   * @param parallelism_hint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somwehere around the cluster.
+   * @param parallelismHint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somwehere around the cluster.
    * @return use the returned object to declare the inputs to this component
    * @throws IllegalArgumentException if {@code parallelism_hint} is not positive
    */
-  public BoltDeclarer setBolt(String id, IWindowedBolt bolt, Number parallelism_hint) throws IllegalArgumentException {
-    return setBolt(id, new WindowedBoltExecutor(bolt), parallelism_hint);
+  public BoltDeclarer setBolt(
+      String id, IWindowedBolt bolt, Number parallelismHint) throws IllegalArgumentException {
+    return setBolt(id, new WindowedBoltExecutor(bolt), parallelismHint);
   }
 }

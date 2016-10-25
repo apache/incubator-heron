@@ -68,8 +68,7 @@ public class WatermarkCountEvictionPolicy<T> extends CountEvictionPolicy<T> {
 
   @Override
   public String toString() {
-    return "WatermarkCountEvictionPolicy{" +
-        "referenceTime=" + referenceTime +
-        "} " + super.toString();
+    return "WatermarkCountEvictionPolicy{" + "referenceTime="
+        + referenceTime + "} " + super.toString();
   }
 }

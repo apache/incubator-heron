@@ -64,9 +64,7 @@ public class TimeEvictionPolicy<T> implements EvictionPolicy<T> {
 
   @Override
   public String toString() {
-    return "TimeEvictionPolicy{" +
-        "windowLength=" + windowLength +
-        ", referenceTime=" + referenceTime +
-        '}';
+    return "TimeEvictionPolicy{" + "windowLength=" + windowLength + ", referenceTime="
+        + referenceTime + '}';
   }
 }

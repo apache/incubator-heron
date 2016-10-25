@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.storm.topology.FailedException;
 import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.topology.FailedException;
 
 /**
  * Tracks tuples across input streams and periodically emits watermark events.
@@ -86,6 +86,7 @@ public class WaterMarkEventGenerator<T> implements Runnable {
         this.windowManager.add(new WaterMarkEvent<T>(waterMarkTs));
         lastWaterMarkTs = waterMarkTs;
       }
+    // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Throwable th) {
       LOG.log(Level.SEVERE, "Failed while processing watermark event ", th);
       throw th;
@@ -122,6 +123,7 @@ public class WaterMarkEventGenerator<T> implements Runnable {
   }
 
   public void start() {
-    this.executorFuture = executorService.scheduleAtFixedRate(this, interval, interval, TimeUnit.MILLISECONDS);
+    this.executorFuture =
+        executorService.scheduleAtFixedRate(this, interval, interval, TimeUnit.MILLISECONDS);
   }
 }

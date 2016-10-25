@@ -34,8 +34,9 @@ public class WatermarkCountTriggerPolicy<T> implements TriggerPolicy<T> {
   private long lastProcessedTs = 0;
   private boolean started;
 
-  public WatermarkCountTriggerPolicy(int count, TriggerHandler handler,
-                                     EvictionPolicy<T> evictionPolicy, WindowManager<T> windowManager) {
+  public WatermarkCountTriggerPolicy(
+      int count, TriggerHandler handler, EvictionPolicy<T> evictionPolicy,
+      WindowManager<T> windowManager) {
     this.count = count;
     this.handler = handler;
     this.evictionPolicy = evictionPolicy;
@@ -73,7 +74,8 @@ public class WatermarkCountTriggerPolicy<T> implements TriggerPolicy<T> {
    */
   private void handleWaterMarkEvent(Event<T> waterMarkEvent) {
     long watermarkTs = waterMarkEvent.getTimestamp();
-    List<Long> eventTs = windowManager.getSlidingCountTimestamps(lastProcessedTs, watermarkTs, count);
+    List<Long> eventTs =
+        windowManager.getSlidingCountTimestamps(lastProcessedTs, watermarkTs, count);
     for (long ts : eventTs) {
       evictionPolicy.setContext(new DefaultEvictionContext(ts, null, Long.valueOf(count)));
       handler.onTrigger();
@@ -83,10 +85,7 @@ public class WatermarkCountTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public String toString() {
-    return "WatermarkCountTriggerPolicy{" +
-        "count=" + count +
-        ", lastProcessedTs=" + lastProcessedTs +
-        ", started=" + started +
-        '}';
+    return "WatermarkCountTriggerPolicy{" + "count=" + count + ", lastProcessedTs="
+        + lastProcessedTs + ", started=" + started + '}';
   }
 }

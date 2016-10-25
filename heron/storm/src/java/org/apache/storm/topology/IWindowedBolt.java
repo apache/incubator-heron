@@ -18,11 +18,11 @@
 
 package org.apache.storm.topology;
 
+import java.util.Map;
+
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.windowing.TupleWindow;
-
-import java.util.Map;
 
 /**
  * A bolt abstraction for supporting time and count based sliding &lt; tumbling windows.

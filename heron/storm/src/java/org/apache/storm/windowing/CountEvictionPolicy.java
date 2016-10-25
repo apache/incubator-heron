@@ -68,9 +68,7 @@ public class CountEvictionPolicy<T> implements EvictionPolicy<T> {
 
   @Override
   public String toString() {
-    return "CountEvictionPolicy{" +
-        "threshold=" + threshold +
-        ", currentCount=" + currentCount +
-        '}';
+    return "CountEvictionPolicy{" + "threshold=" + threshold + ", currentCount="
+        + currentCount + '}';
   }
 }

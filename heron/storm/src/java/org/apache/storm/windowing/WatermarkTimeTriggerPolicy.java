@@ -34,8 +34,9 @@ public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
   private long nextWindowEndTs = 0;
   private boolean started;
 
-  public WatermarkTimeTriggerPolicy(long slidingIntervalMs, TriggerHandler handler, EvictionPolicy<T> evictionPolicy,
-                                    WindowManager<T> windowManager) {
+  public WatermarkTimeTriggerPolicy(
+      long slidingIntervalMs, TriggerHandler handler, EvictionPolicy<T> evictionPolicy,
+      WindowManager<T> windowManager) {
     this.slidingIntervalMs = slidingIntervalMs;
     this.handler = handler;
     this.evictionPolicy = evictionPolicy;
@@ -74,7 +75,8 @@ public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
   private void handleWaterMarkEvent(Event<T> event) {
     long watermarkTs = event.getTimestamp();
     long windowEndTs = nextWindowEndTs;
-    LOG.log(Level.FINE, String.format("Window end ts %d Watermark ts %d", windowEndTs, watermarkTs));
+    LOG.log(Level.FINE,
+        String.format("Window end ts %d Watermark ts %d", windowEndTs, watermarkTs));
     while (windowEndTs <= watermarkTs) {
       long currentCount = windowManager.getEventCount(windowEndTs);
       evictionPolicy.setContext(new DefaultEvictionContext(windowEndTs, currentCount));
@@ -89,7 +91,8 @@ public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
         long ts = getNextAlignedWindowTs(windowEndTs, watermarkTs);
         LOG.log(Level.FINE, "Next aligned window end ts {}", ts);
         if (ts == Long.MAX_VALUE) {
-          LOG.log(Level.FINE, String.format("No events to process between %d and watermark ts %d", windowEndTs, watermarkTs));
+          LOG.log(Level.FINE, String.format(
+              "No events to process between %d and watermark ts %d", windowEndTs, watermarkTs));
           break;
         }
         windowEndTs = ts;
@@ -118,10 +121,7 @@ public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public String toString() {
-    return "WatermarkTimeTriggerPolicy{" +
-        "slidingIntervalMs=" + slidingIntervalMs +
-        ", nextWindowEndTs=" + nextWindowEndTs +
-        ", started=" + started +
-        '}';
+    return "WatermarkTimeTriggerPolicy{" + "slidingIntervalMs=" + slidingIntervalMs
+        + ", nextWindowEndTs=" + nextWindowEndTs +  ", started=" + started + '}';
   }
 }

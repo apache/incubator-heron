@@ -141,7 +141,8 @@ public class WindowManager<T> implements TriggerHandler {
     prevWindowEvents.clear();
     if (!events.isEmpty()) {
       prevWindowEvents.addAll(windowEvents);
-      LOG.log(Level.FINE, "invoking windowLifecycleListener onActivation, [{}] events in window.", events.size());
+      LOG.log(Level.FINE,
+          "invoking windowLifecycleListener onActivation, [{}] events in window.", events.size());
       windowLifecycleListener.onActivation(events, newEvents, expired);
     } else {
       LOG.log(Level.FINE, "No events in the window, skipping onActivation");
@@ -281,9 +282,7 @@ public class WindowManager<T> implements TriggerHandler {
 
   @Override
   public String toString() {
-    return "WindowManager{" +
-        "evictionPolicy=" + evictionPolicy +
-        ", triggerPolicy=" + triggerPolicy +
-        '}';
+    return "WindowManager{" + "evictionPolicy=" + evictionPolicy + ", triggerPolicy="
+        + triggerPolicy + '}';
   }
 }

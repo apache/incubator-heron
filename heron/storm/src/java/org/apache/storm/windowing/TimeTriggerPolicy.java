@@ -63,7 +63,8 @@ public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public void start() {
-    executorFuture = executor.scheduleAtFixedRate(newTriggerTask(), duration, duration, TimeUnit.MILLISECONDS);
+    executorFuture =
+        executor.scheduleAtFixedRate(newTriggerTask(), duration, duration, TimeUnit.MILLISECONDS);
   }
 
   @Override
@@ -81,9 +82,7 @@ public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public String toString() {
-    return "TimeTriggerPolicy{" +
-        "duration=" + duration +
-        '}';
+    return "TimeTriggerPolicy{" + "duration=" + duration + '}';
   }
 
   /*
@@ -119,12 +118,13 @@ public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
             evictionPolicy.setContext(new DefaultEvictionContext(System.currentTimeMillis()));
           }
           handler.onTrigger();
+        // SUPPRESS CHECKSTYLE IllegalCatch
         } catch (Throwable th) {
           LOG.log(Level.SEVERE, "handler.onTrigger failed ", th);
-                    /*
-                     * propagate it so that task gets canceled and the exception
-                     * can be retrieved from executorFuture.get()
-                     */
+          /*
+           * propagate it so that task gets canceled and the exception
+           * can be retrieved from executorFuture.get()
+           */
           throw th;
         }
       }
