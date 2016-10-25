@@ -23,6 +23,7 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
@@ -90,6 +91,14 @@ public class BoltInstance implements IInstance {
       throw new RuntimeException("Neither java_object nor java_class_name set for bolt");
     }
     collector = new BoltOutputCollectorImpl(serializer, helper, streamOutQueue, boltMetrics);
+  }
+
+  @Override
+  public void update(PhysicalPlanHelper physicalPlanHelper) {
+    if (bolt instanceof IUpdatable) {
+      ((IUpdatable) bolt).update(physicalPlanHelper.getTopologyContext());
+    }
+    collector.updatePhysicalPlanHelper(physicalPlanHelper);
   }
 
   @Override

@@ -24,13 +24,14 @@ import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.bolt.IRichBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 
-public class IntegrationTestBolt implements IRichBolt {
+public class IntegrationTestBolt implements IRichBolt, IUpdatable {
   private static final long serialVersionUID = 6304554167838679097L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
   private final IRichBolt delegateBolt;
@@ -45,24 +46,37 @@ public class IntegrationTestBolt implements IRichBolt {
     this.delegateBolt = delegate;
   }
 
+  @Override
+  public void update(TopologyContext topologyContext) {
+    LOG.info("update called with TopologyContext: " + topologyContext);
+    // if we get a new topology context we reset the terminalsToReceive regardless of if we've
+    // already received any. The expectation is that after a change in physical plan, upstream
+    // spouts will re-emit and send new terminals.
+    this.terminalsToReceive = calculateTerminalsToReceive(topologyContext);
+  }
 
   @Override
   public void prepare(Map<String, Object> map,
-                      TopologyContext topologyContext,
+                      TopologyContext context,
                       OutputCollector outputCollector) {
+    update(context);
+    this.collector = new OutputCollector(new IntegrationTestBoltCollector(outputCollector));
+    this.delegateBolt.prepare(map, context, collector);
+  }
+
+  private int calculateTerminalsToReceive(TopologyContext context) {
+    int total = 0;
     // Set the # of terminal Signal to receive, = the # number all instance of upstream components
     HashSet<String> upstreamComponents = new HashSet<String>();
-    for (TopologyAPI.StreamId streamId : topologyContext.getThisSources().keySet()) {
+    for (TopologyAPI.StreamId streamId : context.getThisSources().keySet()) {
       upstreamComponents.add(streamId.getComponentName());
     }
     for (String name : upstreamComponents) {
-      terminalsToReceive += topologyContext.getComponentTasks(name).size();
+      total += context.getComponentTasks(name).size();
     }
 
-    LOG.info("TerminalsToReceive: " + terminalsToReceive);
-
-    collector = new OutputCollector(new IntegrationTestBoltCollector(outputCollector));
-    delegateBolt.prepare(map, topologyContext, collector);
+    LOG.info("TerminalsToReceive: " + total);
+    return total;
   }
 
   @Override
