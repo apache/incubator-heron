@@ -76,14 +76,15 @@ public class WindowedBoltExecutor implements IRichBolt {
   @SuppressWarnings("rawtypes")
   private int getTopologyTimeoutMillis(Map stormConf) {
     if (stormConf.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS) != null) {
-      boolean timeOutsEnabled = (boolean) stormConf.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
+      boolean timeOutsEnabled =
+          Boolean.parseBoolean(stormConf.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS).toString());
       if (!timeOutsEnabled) {
         return Integer.MAX_VALUE;
       }
     }
     int timeout = 0;
     if (stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS) != null) {
-      timeout = ((Number) stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)).intValue();
+      timeout = Integer.parseInt(stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS).toString());
     }
     return timeout * 1000;
   }
@@ -92,7 +93,7 @@ public class WindowedBoltExecutor implements IRichBolt {
   private int getMaxSpoutPending(Map stormConf) {
     int maxPending = Integer.MAX_VALUE;
     if (stormConf.get(Config.TOPOLOGY_MAX_SPOUT_PENDING) != null) {
-      maxPending = ((Number) stormConf.get(Config.TOPOLOGY_MAX_SPOUT_PENDING)).intValue();
+      maxPending = Integer.parseInt(stormConf.get(Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
     }
     return maxPending;
   }
@@ -150,17 +151,17 @@ public class WindowedBoltExecutor implements IRichBolt {
     Count slidingIntervalCount = null;
     // window length
     if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT)) {
-      windowLengthCount = new Count(((Number) stormConf.get(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT)).intValue());
+      windowLengthCount = new Count(Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT).toString()));
     } else if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS)) {
       windowLengthDuration = new Duration(
-          ((Number) stormConf.get(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS)).intValue(),
+          Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS).toString()),
           TimeUnit.MILLISECONDS);
     }
     // sliding interval
     if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT)) {
-      slidingIntervalCount = new Count(((Number) stormConf.get(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT)).intValue());
+      slidingIntervalCount = new Count(Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT).toString()));
     } else if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS)) {
-      slidingIntervalDuration = new Duration(((Number) stormConf.get(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS)).intValue(), TimeUnit.MILLISECONDS);
+      slidingIntervalDuration = new Duration(Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS).toString()), TimeUnit.MILLISECONDS);
     } else {
       // default is a sliding window of count 1
       slidingIntervalCount = new Count(1);
@@ -170,14 +171,14 @@ public class WindowedBoltExecutor implements IRichBolt {
       tupleTsFieldName = (String) stormConf.get(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_FIELD_NAME);
       // max lag
       if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS)) {
-        maxLagMs = ((Number) stormConf.get(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS)).intValue();
+        maxLagMs = Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS).toString());
       } else {
         maxLagMs = DEFAULT_MAX_LAG_MS;
       }
       // watermark interval
       int watermarkInterval;
       if (stormConf.containsKey(Config.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)) {
-        watermarkInterval = ((Number) stormConf.get(Config.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)).intValue();
+        watermarkInterval = Integer.parseInt(stormConf.get(Config.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS).toString());
       } else {
         watermarkInterval = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }

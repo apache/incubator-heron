@@ -81,11 +81,11 @@ public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
       if (handler.onTrigger()) {
         windowEndTs += slidingIntervalMs;
       } else {
-                /*
-                 * No events were found in the previous window interval.
-                 * Scan through the events in the queue to find the next
-                 * window intervals based on event ts.
-                 */
+        /*
+         * No events were found in the previous window interval.
+         * Scan through the events in the queue to find the next
+         * window intervals based on event ts.
+         */
         long ts = getNextAlignedWindowTs(windowEndTs, watermarkTs);
         LOG.log(Level.FINE, "Next aligned window end ts {}", ts);
         if (ts == Long.MAX_VALUE) {

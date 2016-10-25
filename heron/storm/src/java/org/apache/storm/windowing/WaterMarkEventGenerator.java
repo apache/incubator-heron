@@ -18,6 +18,7 @@
 
 package org.apache.storm.windowing;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,8 +43,8 @@ public class WaterMarkEventGenerator<T> implements Runnable {
   private static final Logger LOG = Logger.getLogger(WaterMarkEventGenerator.class.getName());
   private final WindowManager<T> windowManager;
   private final int eventTsLag;
-  private final Set<GlobalStreamId> inputStreams;
-  private final Map<GlobalStreamId, Long> streamToTs;
+  private final Set<String> inputStreams;
+  private final Map<String, Long> streamToTs;
   private final ScheduledExecutorService executorService;
   private final int interval;
   private ScheduledFuture<?> executorFuture;
@@ -56,7 +57,10 @@ public class WaterMarkEventGenerator<T> implements Runnable {
     executorService = Executors.newSingleThreadScheduledExecutor();
     this.interval = interval;
     this.eventTsLag = eventTsLag;
-    this.inputStreams = inputStreams;
+    this.inputStreams = new HashSet<>();
+    for (GlobalStreamId streamId: inputStreams) {
+      this.inputStreams.add(streamId.get_componentId() + "-" + streamId.get_streamId());
+    }
   }
 
   /**
@@ -65,9 +69,10 @@ public class WaterMarkEventGenerator<T> implements Runnable {
    * false if its a late event.
    */
   public boolean track(GlobalStreamId stream, long ts) {
-    Long currentVal = streamToTs.get(stream);
+    String streamId = stream.get_componentId() + "-" + stream.get_streamId();
+    Long currentVal = streamToTs.get(streamId);
     if (currentVal == null || ts > currentVal) {
-      streamToTs.put(stream, ts);
+      streamToTs.put(streamId, ts);
     }
     checkFailures();
     return ts >= lastWaterMarkTs;
