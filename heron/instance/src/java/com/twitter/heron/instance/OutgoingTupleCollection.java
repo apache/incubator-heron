@@ -18,7 +18,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -30,7 +29,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * In fact, when talking about to send out tuples, we mean we push them to the out queues.
  */
 public class OutgoingTupleCollection {
-  protected final PhysicalPlanHelper helper;
+  protected final String componentName;
   // We have just one outQueue responsible for both control tuples and data tuples
   private final Communicator<HeronTuples.HeronTupleSet> outQueue;
   private final SystemConfig systemConfig;
@@ -50,10 +49,10 @@ public class OutgoingTupleCollection {
   private int controlTupleSetCapacity;
 
   public OutgoingTupleCollection(
-      PhysicalPlanHelper helper,
+      String componentName,
       Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
-    this.helper = helper;
+    this.componentName = componentName;
     this.systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
@@ -119,7 +118,7 @@ public class OutgoingTupleCollection {
 
     TopologyAPI.StreamId.Builder sbldr = TopologyAPI.StreamId.newBuilder();
     sbldr.setId(streamId);
-    sbldr.setComponentName(helper.getMyComponent());
+    sbldr.setComponentName(componentName);
     currentDataTuple = HeronTuples.HeronDataTupleSet.newBuilder();
     currentDataTuple.setStream(sbldr);
   }
