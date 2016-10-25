@@ -24,14 +24,14 @@ import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.bolt.IRichBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.topology.UpdatableComponent;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 
-public class IntegrationTestBolt implements IRichBolt, UpdatableComponent {
+public class IntegrationTestBolt implements IRichBolt, IUpdatable {
   private static final long serialVersionUID = 6304554167838679097L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
   private final IRichBolt delegateBolt;

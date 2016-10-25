@@ -24,6 +24,6 @@ import com.twitter.heron.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public interface UpdatableComponent {
+public interface IUpdatable {
   void update(TopologyContext topologyContext);
 }

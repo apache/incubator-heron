@@ -24,6 +24,7 @@ import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
@@ -36,9 +37,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
-import com.twitter.heron.api.topology.UpdatableComponent;
 import com.twitter.heron.proto.system.HeronTuples;
-
 
 public class SpoutInstance implements IInstance {
   private static final Logger LOG = Logger.getLogger(SpoutInstance.class.getName());
@@ -116,8 +115,8 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void update(PhysicalPlanHelper physicalPlanHelper) {
-    if (spout instanceof UpdatableComponent) {
-      ((UpdatableComponent) spout).update(physicalPlanHelper.getTopologyContext());
+    if (spout instanceof IUpdatable) {
+      ((IUpdatable) spout).update(physicalPlanHelper.getTopologyContext());
     }
     // TODO: update collector with new physicalPlanHelper
   }
