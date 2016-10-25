@@ -88,15 +88,25 @@ public class ShellUtilsTest {
 
   @Test
   public void testRunAsyncProcess() throws IOException {
-    String testString = "testString";
-    StringBuilder stdout = new StringBuilder();
-    StringBuilder stderr = new StringBuilder();
-    // Sleep 1 second and echo some text.
-    Process p = ShellUtils.runASyncProcess(
-        String.format("sleep 1 && echo %s", testString));
-    // Test process is running and input stream is empty
-    wait(10, TimeUnit.MILLISECONDS);
-    Assert.assertEquals(0, p.getInputStream().available());
+    Process p = ShellUtils.runASyncProcess("sleep 30");
+    try {
+      p.exitValue();
+      Assert.fail(p + " was dead");
+    } catch (IllegalThreadStateException e) {
+      // This is expected. If the process is alive, "exitValue" will throw
+      // IllegalThreadStateException
+    }
+    p.destroy();
+  }
+
+  @Test
+  public void testRunAsyncProcessRedirectErrorStream() throws IOException {
+    Process p = ShellUtils.runASyncProcess("/bin/bash blahblah.sh");
+    String stdout = ShellUtils.inputstreamToString(p.getInputStream());
+    // "blahblah.sh" doesn't exist so "bash" will output the error message to stderr. Since stderr
+    // is redirected to stdout, stdout should contain the error message.
+    Assert.assertTrue(stdout.contains("blahblah.sh: No such file or directory"));
+    p.destroy();
   }
 
   @Test
