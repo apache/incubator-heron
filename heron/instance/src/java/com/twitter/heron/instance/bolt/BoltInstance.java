@@ -98,7 +98,7 @@ public class BoltInstance implements IInstance {
     if (bolt instanceof IUpdatable) {
       ((IUpdatable) bolt).update(physicalPlanHelper.getTopologyContext());
     }
-    // TODO: update collector with new physicalPlanHelper
+    collector.updatePhysicalPlanHelper(physicalPlanHelper);
   }
 
   @Override

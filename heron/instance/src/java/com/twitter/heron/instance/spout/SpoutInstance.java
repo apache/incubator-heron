@@ -116,7 +116,7 @@ public class SpoutInstance implements IInstance {
     if (spout instanceof IUpdatable) {
       ((IUpdatable) spout).update(physicalPlanHelper.getTopologyContext());
     }
-    // TODO: update collector with new physicalPlanHelper
+    collector.updatePhysicalPlanHelper(physicalPlanHelper);
   }
 
   @Override

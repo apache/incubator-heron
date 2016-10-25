@@ -32,7 +32,7 @@ class TestScaleUp(test_template.TestTemplate):
   def execute_test_case(self):
     scale_up(self.params['cliPath'], self.params['cluster'], self.params['topologyName'])
     self.expected_container_count += 1
-    self.expected_instance_count += 2
+    self.expected_instance_count += 1
 
   def pre_check_results(self, physical_plan_json):
 
@@ -48,7 +48,6 @@ class TestScaleUp(test_template.TestTemplate):
 def scale_up(heron_cli_path, test_cluster, topology_name):
   splitcmd = [
       heron_cli_path, 'update', '--verbose', test_cluster, topology_name,
-      '--component-parallelism=paused-local-spout:2',
       '--component-parallelism=identity-bolt:2'
   ]
   logging.info("Increasing number of component instances: %s", splitcmd)
