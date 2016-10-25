@@ -79,7 +79,6 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     }
 
     this.serializer = serializer;
-    this.helper = helper;
     this.spoutMetrics = spoutMetrics;
     this.keyGenerator = new TupleKeyGenerator();
     updatePhysicalPlanHelper(helper);
@@ -105,7 +104,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
   }
 
-  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+  void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
     this.helper = physicalPlanHelper;
   }
 

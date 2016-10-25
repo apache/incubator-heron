@@ -89,7 +89,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
   }
 
-  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+  void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
     this.helper = physicalPlanHelper;
   }
 
