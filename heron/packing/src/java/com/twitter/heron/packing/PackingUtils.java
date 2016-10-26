@@ -182,7 +182,7 @@ public final class PackingUtils {
    *
    * @return the number of containers
    */
-  public static int allocateNewContainer(ArrayList<Container> containers, Resource capacity,
+  public static int allocateNewContainer(List<Container> containers, Resource capacity,
                                          int paddingPercentage) {
     containers.add(new Container(capacity, paddingPercentage));
     return containers.size();
@@ -278,6 +278,7 @@ public final class PackingUtils {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
+  // TODO: this gets moved into the PackingPlanBuilder impl
   public static Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
     Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
     for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
