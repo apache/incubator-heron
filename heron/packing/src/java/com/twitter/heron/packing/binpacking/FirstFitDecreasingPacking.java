@@ -235,7 +235,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-
   private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
                                                           Map<String, Integer> componentChanges) {
     Map<String, Integer> componentsToScaleDown =
@@ -275,50 +274,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         containerIds.remove();
       }
     }
-  }
-
-  /**
-   * Generates the containers that correspond to the current packing plan
-   * along with their associated instances.
-   *
-   * @return List of containers for the current packing plan
-   */
-  private ArrayList<Container> getContainers(PackingPlan currentPackingPlan) {
-    ArrayList<Container> containers = new ArrayList<>();
-
-    //sort containers based on containerIds;
-    PackingPlan.ContainerPlan[] currentContainers =
-        PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
-
-    Resource capacity = currentPackingPlan.getMaxContainerResources();
-    for (int i = 0; i < currentContainers.length; i++) {
-      int containerId = PackingUtils.allocateNewContainer(
-          containers, capacity, this.paddingPercentage);
-      for (PackingPlan.InstancePlan instancePlan
-          : currentContainers[i].getInstances()) {
-        containers.get(containerId - 1).add(instancePlan);
-      }
-    }
-    return containers;
-  }
-
-  /**
-   * Generates an instance allocation for the current packing plan
-   *
-   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
-   */
-  private Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
-    Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
-    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-      ArrayList<InstanceId> instances = new ArrayList<InstanceId>();
-      for (PackingPlan.InstancePlan instance : containerPlan.getInstances()) {
-        instances.add(new InstanceId(instance.getComponentName(), instance.getTaskId(),
-            instance.getComponentIndex()));
-      }
-      allocation.put(containerPlan.getId(), instances);
-    }
-    PackingUtils.removeEmptyContainers(allocation);
-    return allocation;
   }
 
   /**
