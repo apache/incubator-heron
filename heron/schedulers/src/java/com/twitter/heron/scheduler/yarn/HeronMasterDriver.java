@@ -179,6 +179,48 @@ public class HeronMasterDriver {
     }
   }
 
+  /**
+   * YARN allocates resources in fixed increments of memory and cpu. As a result, the actual
+   * resource allocation may be little more than what was requested. This method finds the biggest
+   * heron containerPlan that will fit the allocated YARN container. In some cases the YARN CPU
+   * scheduling may be disabled, resulting in default core allocation to each container. This
+   * method can ignore core fitting in such a case.
+   */
+  @VisibleForTesting
+  Optional<ContainerPlan> findLargestFittingContainer(AllocatedEvaluator evaluator,
+                                                      Set<ContainerPlan> pendingContainers,
+                                                      boolean ignoreCpu) {
+    int allocatedRam = evaluator.getEvaluatorDescriptor().getMemory();
+    int allocatedCores = evaluator.getEvaluatorDescriptor().getNumberOfCores();
+
+    ContainerPlan biggestFittingContainer = null;
+    for (ContainerPlan container : pendingContainers) {
+      Resource resource = container.getRequiredResource();
+
+      int ram = getMemInMBForExecutor(resource);
+      if (ram > allocatedRam) {
+        continue;
+      }
+
+      if (!ignoreCpu) {
+        int cores = getCpuForExecutor(resource);
+        if (cores > allocatedCores) {
+          continue;
+        }
+      }
+
+      if (biggestFittingContainer != null) {
+        Resource maxResource = biggestFittingContainer.getRequiredResource();
+        if (resource.getRam() < maxResource.getRam() || resource.getCpu() < maxResource.getCpu()) {
+          continue;
+        }
+      }
+      biggestFittingContainer = container;
+    }
+
+    return Optional.fromNullable(biggestFittingContainer);
+  }
+
   public void killTopology() {
     LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
     isTopologyKilled.set(true);
