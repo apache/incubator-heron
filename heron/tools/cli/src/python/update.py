@@ -82,13 +82,12 @@ def run(command, parser, cl_args, unknown_args):
     lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.statemgr_jars() + jars.packing_jars()
     )
-    extra_jars = cl_args['extra_launch_classpath'].split(':')
 
     # invoke the runtime manager to kill the topology
     execute.heron_class(
         'com.twitter.heron.scheduler.RuntimeManagerMain',
         lib_jars,
-        extra_jars=extra_jars,
+        extra_jars=[],
         args=new_args
     )
 
