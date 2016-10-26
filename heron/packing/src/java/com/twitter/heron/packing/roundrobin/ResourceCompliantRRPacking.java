@@ -143,14 +143,17 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
             PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
   }
 
+  private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
+    return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
+        .setMaxContainerResource(maxContainerResources)
+        .setDefaultInstanceResource(defaultInstanceResources)
+        .setRequestedContainerPadding(paddingPercentage)
+        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+  }
+
   @Override
   public PackingPlan pack() {
-    PackingPlanBuilder planBuilder =
-        new PackingPlanBuilder(topology.getId())
-            .setMaxContainerResource(maxContainerResources)
-            .setDefaultInstanceResource(defaultInstanceResources)
-            .setRequestedContainerPadding(paddingPercentage)
-            .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+    PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
 
     int adjustments = this.numAdjustments;
     while (adjustments <= this.numAdjustments) {
@@ -184,12 +187,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         "Allocated %s additional containers for repack bring the number of containers to %s.",
         additionalContainers, this.numContainers));
 
-    PackingPlanBuilder planBuilder =
-        new PackingPlanBuilder(topology.getId(), currentPackingPlan)
-            .setMaxContainerResource(maxContainerResources)
-            .setDefaultInstanceResource(defaultInstanceResources)
-            .setRequestedContainerPadding(paddingPercentage)
-            .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+    PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
 
     int adjustments = 0;
     while (adjustments <= this.numAdjustments) {
