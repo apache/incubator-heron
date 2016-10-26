@@ -23,7 +23,6 @@ import com.twitter.heron.packing.PackingPlanBuilder;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
@@ -82,7 +81,6 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  */
 public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
-  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
