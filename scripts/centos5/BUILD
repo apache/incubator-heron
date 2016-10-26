@@ -38,6 +38,7 @@ genrule(
         ":hscheduler",
         ":hscheduler-aurora",
         ":hscheduler-local",
+        ":hbppacking",
         ":hrrpacking",
         ":hmetricsmgr",
         ":hlfsstatemgr",
@@ -60,6 +61,7 @@ genrule(
         "--cp $(location hscheduler)               heron-core/lib/scheduler/heron-scheduler.jar",
         "--cp $(location hscheduler-aurora)        heron-core/lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hscheduler-local)         heron-core/lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hbppacking)               heron-core/lib/packing/heron-binpacking-packing.jar",
         "--cp $(location hrrpacking)               heron-core/lib/packing/heron-roundrobin-packing.jar",
         "--cp $(location hmetricsmgr)              heron-core/lib/metricsmgr/heron-metricsmgr.jar",
         "--cp $(location hlfsstatemgr)             heron-core/lib/statemgr/heron-localfs-statemgr.jar",
@@ -91,6 +93,7 @@ genrule(
         ":hscheduler",
         ":hscheduler-aurora",
         ":hscheduler-local",
+        ":hbppacking",
         ":hrrpacking",
         ":hlfsstatemgr",
         ":hzkstatemgr",
@@ -121,6 +124,7 @@ genrule(
         "--cp $(location hscheduler)                 lib/scheduler/heron-scheduler.jar",
         "--cp $(location hscheduler-aurora)          lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hscheduler-local)           lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hbppacking)                 lib/packing/heron-binpacking-packing.jar",
         "--cp $(location hrrpacking)                 lib/packing/heron-roundrobin-packing.jar",
         "--cp $(location hlfsstatemgr)               lib/statemgr/heron-localfs-statemgr.jar",
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
@@ -267,6 +271,11 @@ filegroup(
 filegroup(
     name = "hscheduler-local",
     srcs = ["//heron/schedulers/src/java:heron-local-scheduler"],
+)
+
+filegroup(
+    name = "hbppacking",
+    srcs = ["//heron/packing/src/java:heron-binpacking-packing"],
 )
 
 filegroup(

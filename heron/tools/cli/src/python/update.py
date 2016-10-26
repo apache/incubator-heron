@@ -79,7 +79,9 @@ def run(command, parser, cl_args, unknown_args):
     if Log.getEffectiveLevel() == logging.DEBUG:
       new_args.append("--verbose")
 
-    lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
+    lib_jars = config.get_heron_libs(
+        jars.scheduler_jars() + jars.statemgr_jars() + jars.packing_jars()
+    )
 
     # invoke the runtime manager to kill the topology
     execute.heron_class(
