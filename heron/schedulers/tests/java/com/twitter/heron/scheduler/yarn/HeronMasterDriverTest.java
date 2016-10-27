@@ -41,8 +41,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class HeronMasterDriverTest {
   private EvaluatorRequestor mockRequestor;
@@ -51,7 +50,7 @@ public class HeronMasterDriverTest {
 
   @Before
   public void createMocks() throws IOException {
-    mockRequestor = Mockito.mock(EvaluatorRequestor.class);
+    mockRequestor = mock(EvaluatorRequestor.class);
     driver = new HeronMasterDriver(mockRequestor,
         null,
         "yarn",
@@ -71,7 +70,7 @@ public class HeronMasterDriverTest {
   public void requestsEvaluatorForTMaster() throws Exception {
     AllocatedEvaluator mockEvaluator = registerMockEvaluator("testEvaluatorId", 0, 1, 1024);
 
-    Configuration mockConfig = Mockito.mock(Configuration.class);
+    Configuration mockConfig = mock(Configuration.class);
     doReturn(mockConfig).when(spyDriver).createContextConfig(0);
 
     spyDriver.scheduleTMasterContainer();
@@ -93,7 +92,7 @@ public class HeronMasterDriverTest {
     AllocatedEvaluator mockEvaluator2 =
         registerMockEvaluator("testEvaluatorId2", 2, getCpu(container2), getRam(container2));
 
-    Configuration mockConfig = Mockito.mock(Configuration.class);
+    Configuration mockConfig = mock(Configuration.class);
     doReturn(mockConfig).when(spyDriver).createContextConfig(1);
     doReturn(mockConfig).when(spyDriver).createContextConfig(2);
 
@@ -105,10 +104,10 @@ public class HeronMasterDriverTest {
 
   @Test
   public void onKillClosesContainers() throws Exception {
-    ActiveContext mockContext1 = Mockito.mock(ActiveContext.class);
+    ActiveContext mockContext1 = mock(ActiveContext.class);
     when(mockContext1.getId()).thenReturn("0"); // TM
 
-    ActiveContext mockContext2 = Mockito.mock(ActiveContext.class);
+    ActiveContext mockContext2 = mock(ActiveContext.class);
     when(mockContext2.getId()).thenReturn("1"); // worker
 
     spyDriver.new HeronWorkerLauncher().onNext(mockContext1);
@@ -171,7 +170,7 @@ public class HeronMasterDriverTest {
     spyDriver.scheduleTMasterContainer();
     Mockito.verify(tMasterEvaluator, invokedOnce()).submitContext(anyConfiguration());
 
-    FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
+    FailedEvaluator mockFailedContainer = mock(FailedEvaluator.class);
     when(mockFailedContainer.getId()).thenReturn("tMaster");
     spyDriver.new FailedContainerHandler().onNext(mockFailedContainer);
 
@@ -190,7 +189,7 @@ public class HeronMasterDriverTest {
     spyDriver.scheduleHeronWorkers(packing);
     Mockito.verify(workerEvaluator, invokedOnce()).submitContext(anyConfiguration());
 
-    FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
+    FailedEvaluator mockFailedContainer = mock(FailedEvaluator.class);
     when(mockFailedContainer.getId()).thenReturn("worker");
     spyDriver.new FailedContainerHandler().onNext(mockFailedContainer);
 
@@ -216,7 +215,9 @@ public class HeronMasterDriverTest {
     EvaluatorRequest evaluatorRequest = driver.createEvaluatorRequest(7, 234);
     doReturn(evaluatorRequest).when(spyDriver).createEvaluatorRequest(7, 234);
 
-    AllocatedEvaluator mockEvaluator = Mockito.mock(AllocatedEvaluator.class);
+    EvaluatorDescriptor descriptor = mock(EvaluatorDescriptor.class);
+    AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
+    when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(descriptor);
     when(mockEvaluator.getId()).thenReturn("testEvaluatorId");
     spyDriver.new ContainerAllocationHandler().onNext(mockEvaluator);
 
@@ -324,14 +325,14 @@ public class HeronMasterDriverTest {
                                       int ram,
                                       int cores,
                                       int expectedContainer) {
-    EvaluatorDescriptor evaluatorDescriptor = Mockito.mock(EvaluatorDescriptor.class);
-    AllocatedEvaluator mockEvaluator = Mockito.mock(AllocatedEvaluator.class);
+    EvaluatorDescriptor evaluatorDescriptor = mock(EvaluatorDescriptor.class);
+    AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
     when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(evaluatorDescriptor);
 
     when(evaluatorDescriptor.getMemory()).thenReturn(ram);
     when(evaluatorDescriptor.getNumberOfCores()).thenReturn(cores);
     Optional<ContainerPlan> container =
-        spyDriver.findLargestFittingContainer(mockEvaluator, containers, false);
+        spyDriver.findLargestFittingWorker(mockEvaluator, containers, false);
     Assert.assertTrue(container.isPresent());
     Assert.assertEquals(expectedContainer, container.get().getId());
   }
@@ -342,22 +343,22 @@ public class HeronMasterDriverTest {
     ContainerPlan container = PackingTestUtils.testContainerPlan(1, 1, 2);
     containers.add(container);
 
-    EvaluatorDescriptor evaluatorDescriptor = Mockito.mock(EvaluatorDescriptor.class);
+    EvaluatorDescriptor evaluatorDescriptor = mock(EvaluatorDescriptor.class);
     when(evaluatorDescriptor.getMemory()).thenReturn(5 * 1024);
     when(evaluatorDescriptor.getNumberOfCores()).thenReturn(1);
-    AllocatedEvaluator mockEvaluator = Mockito.mock(AllocatedEvaluator.class);
+    AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
     when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(evaluatorDescriptor);
 
     Optional<ContainerPlan> result =
-        spyDriver.findLargestFittingContainer(mockEvaluator, containers, false);
+        spyDriver.findLargestFittingWorker(mockEvaluator, containers, false);
     Assert.assertFalse(result.isPresent());
-    result = spyDriver.findLargestFittingContainer(mockEvaluator, containers, true);
+    result = spyDriver.findLargestFittingWorker(mockEvaluator, containers, true);
     Assert.assertTrue(result.isPresent());
     Assert.assertEquals(1, result.get().getId());
   }
 
   private AllocatedEvaluator registerMockEvaluator(String name, int id, int cpu, int ram) {
-    AllocatedEvaluator mockWorkerEvaluator = Mockito.mock(AllocatedEvaluator.class);
+    AllocatedEvaluator mockWorkerEvaluator = mock(AllocatedEvaluator.class);
     when(mockWorkerEvaluator.getId()).thenReturn(name);
     try {
       doReturn(mockWorkerEvaluator).when(spyDriver).allocateContainer(id, cpu, ram);
