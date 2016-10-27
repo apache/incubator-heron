@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.PackingException;
 import com.twitter.heron.packing.PackingPlanBuilder;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.ResourceExceededException;
@@ -85,17 +86,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
   private static final Logger LOG = Logger.getLogger(ResourceCompliantRRPacking.class.getName());
-  private TopologyAPI.Topology topology;
 
+  private TopologyAPI.Topology topology;
   private Resource defaultInstanceResources;
-  private Resource maxContainerResources;
+
   private int numContainers;
   private int numAdjustments;
-  //ContainerId  to examine next. It is set to 1 when the
+  //ContainerId to examine next. It is set to 1 when the
   //algorithm restarts with a new number of containers
   private int containerId;
-
-  private int paddingPercentage;
 
   private void adjustNumContainers(int additionalContainers) {
     increaseNumContainers(additionalContainers);
@@ -106,9 +105,17 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     this.numContainers += additionalContainers;
   }
 
+  private void addContainer() {
+
+  }
+
   private void resetState() {
     this.containerId = 1;
     this.numAdjustments = 0;
+  }
+
+  private int nextContainerId(int afterId) {
+    return (afterId == numContainers) ? 1 : afterId + 1;
   }
 
   @Override
@@ -120,7 +127,10 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         Context.instanceRam(config),
         Context.instanceDisk(config));
     resetState();
+  }
 
+  private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     double defaultCpu = this.defaultInstanceResources.getCpu()
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
@@ -128,22 +138,17 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
     long defaultDisk = this.defaultInstanceResources.getDisk()
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-
-    this.paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
+    int paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
         TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
 
-    this.maxContainerResources = new Resource(
+    Resource maxContainerResources = new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
             (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
             PackingUtils.increaseBy(defaultRam, paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
             PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
-  }
 
-  private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
         .setMaxContainerResource(maxContainerResources)
         .setDefaultInstanceResource(defaultInstanceResources)
@@ -153,23 +158,27 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
   @Override
   public PackingPlan pack() {
-    PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
 
     int adjustments = this.numAdjustments;
     while (adjustments <= this.numAdjustments) {
       try {
-        planBuilder.resetNumContainers(numContainers);
+        PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
+        planBuilder.updateNumContainers(numContainers);
         planBuilder = getResourceCompliantRRAllocation(planBuilder);
+
         return planBuilder.build();
+
       } catch (ResourceExceededException e) {
         //Not enough containers. Adjust the number of containers.
-        LOG.info(String.format("Increasing the number of containers to "
-            + "%s and attempting packing again.", this.numContainers + 1));
+        LOG.info(String.format(
+            "%s Increasing the number of containers to %s and attempting to place again.",
+            e.getMessage(), this.numContainers + 1));
         adjustNumContainers(1);
+        containerId = 1;
         adjustments++;
       }
     }
-    return null; // TODO: should throw instead
+    return null; // TODO: should throw packing exception
   }
 
   /**
@@ -187,24 +196,27 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         "Allocated %s additional containers for repack bring the number of containers to %s.",
         additionalContainers, this.numContainers));
 
-    PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
-
     int adjustments = 0;
     while (adjustments <= this.numAdjustments) {
       try {
-        planBuilder.resetNumContainers(numContainers);
+        PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
+        planBuilder.updateNumContainers(numContainers);
         planBuilder = getResourceCompliantRRAllocation(
             planBuilder, currentPackingPlan, componentChanges);
+
         return planBuilder.build();
+
       } catch (ResourceExceededException e) {
         //Not enough containers. Adjust the number of containers.
-        LOG.info(String.format("Increasing the number of containers to "
-            + "%s and attempting packing again.", this.numContainers + 1));
+        LOG.info(String.format(
+            "Increasing the number of containers to %s and attempting packing again.",
+            this.numContainers + 1));
         adjustNumContainers(1);
+        containerId = 1;
         adjustments++;
       }
     }
-    return null; // TODO: should throw instead
+    return null; // TODO: should throw packing exception
   }
 
   @Override
@@ -220,6 +232,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private int computeNumAdditionalContainers(Map<String, Integer> componentChanges,
                                              PackingPlan packingPlan) {
+
     Resource scaleDownResource = PackingUtils.computeTotalResourceChange(topology, componentChanges,
         defaultInstanceResources, PackingUtils.ScalingDirection.DOWN);
     Resource scaleUpResource = PackingUtils.computeTotalResourceChange(topology, componentChanges,
@@ -235,8 +248,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     int totalInstance = TopologyUtils.getTotalInstance(topology);
 
     if (numContainers > totalInstance) {
-      throw new RuntimeException("More containers allocated than instances."
-          + numContainers + " allocated to host " + totalInstance + " instances.");
+      throw new PackingException("More containers allocated than instances. " + numContainers
+          + " containers allocated to host " + totalInstance + " instances.");
     }
 
     assignInstancesToContainers(planBuilder, parallelismMap, 1, PolicyType.STRICT);
@@ -251,6 +264,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   private PackingPlanBuilder getResourceCompliantRRAllocation(
       PackingPlanBuilder planBuilder, PackingPlan currentPackingPlan,
       Map<String, Integer> componentChanges) throws ResourceExceededException {
+
     Map<String, Integer> componentsToScaleDown =
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
     Map<String, Integer> componentsToScaleUp =
@@ -303,31 +317,20 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @param planBuilder packing plan builder
    * @param instanceId the instance that needs to be placed in the container
-   * @return true if the existing number of containers is sufficient, false otherwise
    */
-  private boolean strictRRpolicy(PackingPlanBuilder planBuilder,
-                                 InstanceId instanceId) throws ResourceExceededException {
-    try {
-      planBuilder.addInstance(containerId, instanceId);
-      containerId = nextContainerId(containerId);
-      return true;
-    } catch (ResourceExceededException e) {
-      //Automatically adjust the number of containers
-      containerId = 1;
-      throw e;
-    }
-  }
-
-  private int nextContainerId(int afterId) {
-    return (afterId == numContainers) ? 1 : afterId + 1;
+  private void strictRRpolicy(PackingPlanBuilder planBuilder,
+                              InstanceId instanceId) throws ResourceExceededException {
+    planBuilder.addInstance(containerId, instanceId);
+    containerId = nextContainerId(containerId);
   }
 
   /**
-   * Performs a RR placement. If the placement cannot be performed on the existing number of containers
-   * then it will request for an increase in the number of containers
+   * Performs a RR placement. Tries to place the instance on any container with space, starting at
+   * containerId and cycling through the container set until it can be placed.
    *
    * @param planBuilder packing plan builder
    * @param instanceId the instance that needs to be placed in the container
+   * @throws ResourceExceededException if there is no room on any container to place the instance
    */
   private void flexibleRRpolicy(PackingPlanBuilder planBuilder,
                                 InstanceId instanceId) throws ResourceExceededException {
@@ -349,8 +352,9 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     }
 
     //Not enough containers.
-    containerId = 1; // TODO: necessary?
-    throw new ResourceExceededException(); //TODO
+    throw new ResourceExceededException(String.format(
+        "Insufficient resources to add instance %s to any of the %d containers.",
+        instanceId, numContainers));
   }
 
   /**
@@ -361,10 +365,10 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private void removeInstancesFromContainers(PackingPlanBuilder packingPlanBuilder,
       Map<String, Integer> componentsToScaleDown) {
-    for (String component : componentsToScaleDown.keySet()) {
-      int numInstancesToRemove = -componentsToScaleDown.get(component);
+    for (String componentName : componentsToScaleDown.keySet()) {
+      int numInstancesToRemove = -componentsToScaleDown.get(componentName);
       for (int j = 0; j < numInstancesToRemove; j++) {
-        removeRRInstance(packingPlanBuilder, component);
+        removeRRInstance(packingPlanBuilder, componentName);
       }
     }
   }
@@ -387,9 +391,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         containersChecked = true;
       }
     }
-    throw new RuntimeException("Cannot remove instance."
-        + " No more instances of component " + component + " exist"
-        + " in the containers.");
+    throw new PackingException("Cannot remove instance. No more instances of component "
+        + component + " exist in the containers.");
   }
 
   private enum PolicyType {

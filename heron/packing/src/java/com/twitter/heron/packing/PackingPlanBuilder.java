@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 
 import com.google.common.base.Optional;
 
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -32,7 +31,6 @@ import com.twitter.heron.spi.packing.Resource;
  */
 public class PackingPlanBuilder {
   private static final Logger LOG = Logger.getLogger(PackingPlanBuilder.class.getName());
-  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
 
   private final String topologyId;
   private final PackingPlan existingPacking;
@@ -53,6 +51,7 @@ public class PackingPlanBuilder {
     this.topologyId = topologyId;
     this.existingPacking = existingPacking;
     this.containerInstances = new HashMap<Integer, List<InstanceId>>();
+    this.numContainers = 0;
   }
 
   // set resource settings
@@ -76,8 +75,7 @@ public class PackingPlanBuilder {
     return this;
   }
 
-  public PackingPlanBuilder resetNumContainers(int count) { // can be called repeatedly
-    this.containers = null;
+  public PackingPlanBuilder updateNumContainers(int count) {
     this.numContainers = count;
     return this;
   }
@@ -90,14 +88,19 @@ public class PackingPlanBuilder {
       containerInstances.put(containerId, new ArrayList<InstanceId>());
     }
 
-    long ramRequirement = getRamRequirement(instanceId.getComponentName());
-    Resource instanceResource = this.defaultInstanceResource.cloneWithRam(ramRequirement);
-    if (!containers.get(containerId - 1)
-        .add(new PackingPlan.InstancePlan(instanceId, instanceResource))) {
-      throw new ResourceExceededException(); //TODO
+    Resource instanceResource = PackingUtils.getResourceRequirement(
+        instanceId.getComponentName(), this.componentRamMap, this.defaultInstanceResource,
+        this.maxContainerResource, this.requestedContainerPadding);
+
+    if (!containers.get(containerId - 1).add(
+        new PackingPlan.InstancePlan(instanceId, instanceResource))) {
+      throw new ResourceExceededException(String.format(
+          "Insufficient container resources to add instance %s with resources %s to container %d.",
+          instanceId, instanceResource, containerId));
     }
+
     containerInstances.get(containerId).add(instanceId);
-    LOG.info(String.format("Added to container %d instance %s", containerId, instanceId));
+    LOG.fine(String.format("Added to container %d instance %s", containerId, instanceId));
     return this;
   }
 
@@ -117,9 +120,9 @@ public class PackingPlanBuilder {
   }
 
   // build container plan sets by summing up instance resources
-  // mostly impl from PackingUtils.buildContainerPlans
   public PackingPlan build() {
     PackingUtils.removeEmptyContainers(this.containerInstances);
+
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         this.containerInstances, this.componentRamMap,
         this.defaultInstanceResource, this.requestedContainerPadding);
@@ -128,8 +131,12 @@ public class PackingPlanBuilder {
   }
 
   private void initContainers() {
-    // TODO: verify required fields like numContainers are set
+    // TODO: verify required fields like resources and padding are set
     if (this.containers != null) {
+      for (int i = containers.size(); i <= numContainers - 1; i++) {
+        PackingUtils.allocateNewContainer(
+            containers, containers.get(0).getCapacity(), this.requestedContainerPadding);
+      }
       return;
     }
 
@@ -139,9 +146,9 @@ public class PackingPlanBuilder {
       newContainerInstances = new HashMap<Integer, List<InstanceId>>();
       newContainers = new ArrayList<>();
 
-      for (int i = 0; i <= numContainers - 1; i++) {
-        if (newContainerInstances.get(i) == null) {
-          newContainerInstances.put(i, new ArrayList<InstanceId>());
+      for (int containerId = 1; containerId <= numContainers; containerId++) {
+        if (newContainerInstances.get(containerId) == null) {
+          newContainerInstances.put(containerId, new ArrayList<InstanceId>());
         }
         PackingUtils.allocateNewContainer(
             newContainers, this.maxContainerResource, this.requestedContainerPadding);
@@ -149,8 +156,8 @@ public class PackingPlanBuilder {
     } else {
       newContainerInstances = PackingUtils.getAllocation(this.existingPacking);
 
-      newContainers =
-          PackingUtils.getContainers(this.existingPacking, this.requestedContainerPadding);
+      newContainers = PackingUtils.getContainers(
+          this.existingPacking, this.requestedContainerPadding);
       for (int i = newContainers.size(); i <= numContainers - 1; i++) {
         PackingUtils.allocateNewContainer(
             newContainers, newContainers.get(0).getCapacity(), this.requestedContainerPadding);
@@ -159,29 +166,5 @@ public class PackingPlanBuilder {
 
     this.containerInstances = newContainerInstances;
     this.containers = newContainers;
-  }
-
-  // TODO: exception handling
-  private long getRamRequirement(String component) {
-    if (componentRamMap.containsKey(component)) {
-      if (!PackingUtils.isValidInstance(
-          this.defaultInstanceResource.cloneWithRam(componentRamMap.get(component)),
-          MIN_RAM_PER_INSTANCE, this.maxContainerResource, this.requestedContainerPadding)) {
-        throw new RuntimeException("The topology configuration does not have "
-            + "valid resource requirements. Please make sure that the instance resource "
-            + "requirements do not exceed the maximum per-container resources.");
-      } else {
-        return componentRamMap.get(component);
-      }
-    } else {
-      if (!PackingUtils.isValidInstance(this.defaultInstanceResource,
-          MIN_RAM_PER_INSTANCE, this.maxContainerResource, this.requestedContainerPadding)) {
-        throw new RuntimeException("The topology configuration does not have "
-            + "valid resource requirements. Please make sure that the instance resource "
-            + "requirements do not exceed the maximum per-container resources.");
-      } else {
-        return this.defaultInstanceResource.getRam();
-      }
-    }
   }
 }

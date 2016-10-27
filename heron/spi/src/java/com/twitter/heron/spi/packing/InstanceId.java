@@ -66,7 +66,7 @@ public final class InstanceId {
 
   @Override
   public String toString() {
-    return String.format("Component Name: %s, Task Id: %d, Component Index: %d",
+    return String.format("{componentName: %s, taskId: %d, componentIndex: %d}",
         componentName, taskId, componentIndex);
   }
 }

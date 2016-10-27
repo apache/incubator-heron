@@ -16,22 +16,19 @@ package com.twitter.heron.packing.binpacking;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.common.base.Optional;
-
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.packing.Container;
+import com.twitter.heron.packing.PackingException;
+import com.twitter.heron.packing.PackingPlanBuilder;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.RamRequirement;
+import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
@@ -92,17 +89,17 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  */
 public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
-  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
   private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
-  private TopologyAPI.Topology topology;
 
+  private TopologyAPI.Topology topology;
   private Resource defaultInstanceResources;
   private Resource maxContainerResources;
-
   private int paddingPercentage;
+
+  private int numContainers = 0;
 
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
@@ -140,6 +137,14 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
             PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
   }
 
+  private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
+    return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
+        .setMaxContainerResource(maxContainerResources)
+        .setDefaultInstanceResource(defaultInstanceResources)
+        .setRequestedContainerPadding(paddingPercentage)
+        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+  }
+
   /**
    * Get a packing plan using First Fit Decreasing
    *
@@ -147,15 +152,17 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   @Override
   public PackingPlan pack() {
+    PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
+
     // Get the instances using FFD allocation
-    Map<Integer, List<InstanceId>> ffdAllocation = getFFDAllocation();
-    // Construct the PackingPlan
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    try {
+      planBuilder = getFFDAllocation(planBuilder);
+    } catch (ResourceExceededException e) {
+      LOG.log(Level.SEVERE, "Could not allocate all instances to packing plan", e);
+      return null; // TODO: should throw packing exception
+    }
 
-    Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
-        ffdAllocation, ramMap, this.defaultInstanceResources, this.paddingPercentage);
-
-    return new PackingPlan(topology.getId(), containerPlans);
+    return planBuilder.build();
   }
 
   /**
@@ -163,16 +170,17 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    * @return new packing plan
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
+    PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
+
     // Get the instances using FFD allocation
-    Map<Integer, List<InstanceId>> ffdAllocation =
-        getFFDAllocation(currentPackingPlan, componentChanges);
+    try {
+      planBuilder = getFFDAllocation(planBuilder, currentPackingPlan, componentChanges);
+    } catch (ResourceExceededException e) {
+      LOG.log(Level.SEVERE, "Could not allocate all instances to packing plan", e);
+      return null; // TODO: should throw packing exception
+    }
 
-    // Construct the PackingPlan
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
-    Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
-        ffdAllocation, ramMap, defaultInstanceResources, paddingPercentage);
-    return new PackingPlan(topology.getId(), containerPlans);
+    return planBuilder.build();
   }
 
   @Override
@@ -185,32 +193,15 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return The sorted list of components and their RAM requirements
    */
-  private ArrayList<RamRequirement> getSortedRAMInstances(Map<String, Integer> parallelismMap) {
+  private ArrayList<RamRequirement> getSortedRAMInstances(Set<String> componentNames) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    for (String component : parallelismMap.keySet()) {
-      if (ramMap.containsKey(component)) {
-        if (!PackingUtils.isValidInstance(
-            this.defaultInstanceResources.cloneWithRam(ramMap.get(component)),
-            MIN_RAM_PER_INSTANCE, maxContainerResources, this.paddingPercentage)) {
-          throw new RuntimeException("The topology configuration does not have "
-              + "valid resource requirements. Please make sure that the instance resource "
-              + "requirements do not exceed the maximum per-container resources.");
-        } else {
-          ramRequirements.add(new RamRequirement(component, ramMap.get(component)));
-        }
-      } else {
-        if (!PackingUtils.isValidInstance(this.defaultInstanceResources,
-            MIN_RAM_PER_INSTANCE, maxContainerResources, this.paddingPercentage)) {
-          throw new RuntimeException("The topology configuration does not have "
-              + "valid resource requirements. Please make sure that the instance resource "
-              + "requirements do not exceed the maximum per-container resources.");
-        } else {
-          ramRequirements.add(
-              new RamRequirement(component, this.defaultInstanceResources.getRam()));
-        }
-      }
+    for (String componentName : componentNames) {
+      Resource requiredResource = PackingUtils.getResourceRequirement(
+          componentName, ramMap, this.defaultInstanceResources,
+          this.maxContainerResources, this.paddingPercentage);
+      ramRequirements.add(new RamRequirement(componentName, requiredResource.getRam()));
     }
     Collections.sort(ramRequirements, Collections.reverseOrder());
 
@@ -222,12 +213,11 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<Integer, List<InstanceId>> getFFDAllocation() {
+  private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder planBuilder)
+      throws ResourceExceededException {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    HashMap<Integer, List<InstanceId>> allocation = new HashMap<>();
-    assignInstancesToContainers(new ArrayList<Container>(), allocation, parallelismMap, 1,
-        maxContainerResources);
-    return allocation;
+    assignInstancesToContainers(planBuilder, parallelismMap, 1);
+    return planBuilder;
   }
 
   /**
@@ -235,74 +225,52 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private Map<Integer, List<InstanceId>> getFFDAllocation(PackingPlan currentPackingPlan,
-                                                          Map<String, Integer> componentChanges) {
+  private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder packingPlanBuilder,
+                                              PackingPlan currentPackingPlan,
+                                              Map<String, Integer> componentChanges)
+      throws ResourceExceededException {
+    this.numContainers = currentPackingPlan.getContainers().size();
+
     Map<String, Integer> componentsToScaleDown =
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
     Map<String, Integer> componentsToScaleUp =
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.UP);
 
-    ArrayList<Container> containers = PackingUtils.getContainers(currentPackingPlan,
-        this.paddingPercentage);
-    Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(currentPackingPlan);
-
-    int maxInstanceIndex = 0;
-    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
-      }
-    }
     if (!componentsToScaleDown.isEmpty()) {
-      removeInstancesFromContainers(containers, allocation, componentsToScaleDown);
+      removeInstancesFromContainers(packingPlanBuilder, componentsToScaleDown);
     }
-    if (!componentsToScaleUp.isEmpty()) {
-      assignInstancesToContainers(containers, allocation, componentsToScaleUp,
-          maxInstanceIndex + 1, containers.get(0).getCapacity());
-    }
-    removeEmptyContainers(allocation);
-    return allocation;
-  }
 
-  /**
-   * Removes containers from tha allocation that do not contain any instances
-   */
-  private void removeEmptyContainers(Map<Integer, List<InstanceId>> allocation) {
-    Iterator<Integer> containerIds = allocation.keySet().iterator();
-    while (containerIds.hasNext()) {
-      Integer containerId = containerIds.next();
-      if (allocation.get(containerId).isEmpty()) {
-        containerIds.remove();
+    if (!componentsToScaleUp.isEmpty()) {
+      int maxInstanceIndex = 0;
+      for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
+        }
       }
+
+      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp, maxInstanceIndex + 1);
     }
+
+    return packingPlanBuilder;
   }
 
   /**
    * Assigns instances to containers
    *
-   * @param containers helper data structure that describes the containers' status
-   * @param allocation existing packing plan
+   * @param planBuilder existing packing plan
    * @param parallelismMap component parallelism
    * @param firstTaskIndex first taskId to use for the new instances
    */
-  private void assignInstancesToContainers(
-      ArrayList<Container> containers, Map<Integer, List<InstanceId>> allocation,
-      Map<String, Integer> parallelismMap, int firstTaskIndex, Resource containerCapacity) {
-    ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap);
+  private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
+      Map<String, Integer> parallelismMap, int firstTaskIndex) throws ResourceExceededException {
+    ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap.keySet());
     int globalTaskIndex = firstTaskIndex;
     for (RamRequirement ramRequirement : ramRequirements) {
       String component = ramRequirement.getComponentName();
       int numInstance = parallelismMap.get(component);
       for (int j = 0; j < numInstance; j++) {
-        Resource instanceResource =
-            this.defaultInstanceResources.cloneWithRam(ramRequirement.getRamRequirement());
-        int containerId = placeFFDInstance(containers, new PackingPlan.InstancePlan(new InstanceId(
-            component, globalTaskIndex, j), instanceResource), containerCapacity);
-        List<InstanceId> instances = allocation.get(containerId);
-        if (instances == null) {
-          instances = new ArrayList<>();
-        }
-        instances.add(new InstanceId(component, globalTaskIndex++, j));
-        allocation.put(containerId, instances);
+        placeFFDInstance(planBuilder, new InstanceId(component, globalTaskIndex, j));
+        globalTaskIndex++;
       }
     }
   }
@@ -310,23 +278,20 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   /**
    * Removes instances from containers during scaling down
    *
-   * @param containers helper data structure that describes the containers' status
-   * @param allocation existing packing plan
+   * @param packingPlanBuilder existing packing plan
    * @param componentsToScaleDown scale down factor for the components.
    */
-  private void removeInstancesFromContainers(
-      ArrayList<Container> containers, Map<Integer, List<InstanceId>> allocation,
-      Map<String, Integer> componentsToScaleDown) {
+  private void removeInstancesFromContainers(PackingPlanBuilder packingPlanBuilder,
+                                             Map<String, Integer> componentsToScaleDown) {
 
-    ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(componentsToScaleDown);
+    ArrayList<RamRequirement> ramRequirements =
+        getSortedRAMInstances(componentsToScaleDown.keySet());
+
     for (RamRequirement ramRequirement : ramRequirements) {
       String component = ramRequirement.getComponentName();
       int numInstancesToRemove = -componentsToScaleDown.get(component);
       for (int j = 0; j < numInstancesToRemove; j++) {
-        Pair<Integer, InstanceId> idPair = removeFFDInstance(containers, component);
-        List<InstanceId> instances = allocation.get(idPair.first);
-        instances.remove(idPair.second);
-        allocation.put(idPair.first, instances);
+        removeFFDInstance(packingPlanBuilder, component);
       }
     }
   }
@@ -334,50 +299,36 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   /**
    * Assign a particular instance to an existing container or to a new container
    *
-   * @return the container Id that incorporated the instance
    */
-  private int placeFFDInstance(ArrayList<Container> containers,
-                               PackingPlan.InstancePlan instancePlan,
-                               Resource containerCapacity) {
-    boolean placed = false;
-    int containerId = 0;
-    for (int i = 0; i < containers.size() && !placed; i++) {
-      if (containers.get(i).add(instancePlan)) {
-        placed = true;
-        containerId = i + 1;
+  private void placeFFDInstance(PackingPlanBuilder planBuilder,
+                                InstanceId instanceId) throws ResourceExceededException {
+    if (this.numContainers == 0) {
+      planBuilder.updateNumContainers(++numContainers);
+    }
+    for (int containerId = 1; containerId <= numContainers; containerId++) {
+      try {
+        planBuilder.addInstance(containerId, instanceId);
+        return;
+      } catch (ResourceExceededException e) {
+        // ignore since we'll continue trying
       }
     }
-    if (!placed) {
-      containerId = PackingUtils.allocateNewContainer(containers, containerCapacity,
-          this.paddingPercentage);
-      containers.get(containerId - 1).add(instancePlan);
-    }
-    return containerId;
+    planBuilder.updateNumContainers(++numContainers);
+    planBuilder.addInstance(numContainers, instanceId);
   }
 
   /**
    * Remove an instance of a particular component from the containers
    *
-   * @return the pairId that captures the corresponding container and instance id.
    */
-  private Pair<Integer, InstanceId> removeFFDInstance(ArrayList<Container> containers,
-                                                      String component)
+  private void removeFFDInstance(PackingPlanBuilder packingPlanBuilder, String component)
       throws RuntimeException {
-    boolean removed = false;
-    int containerId = 0;
-    for (int i = 0; i < containers.size() && !removed; i++) {
-      Optional<PackingPlan.InstancePlan> instancePlan =
-          containers.get(i).removeAnyInstanceOfComponent(component);
-      if (instancePlan.isPresent()) {
-        removed = true;
-        containerId = i + 1;
-        PackingPlan.InstancePlan plan = instancePlan.get();
-        return new Pair<Integer, InstanceId>(containerId, new InstanceId(plan.getComponentName(),
-            plan.getTaskId(), plan.getComponentIndex()));
+    for (int containerId = 1; containerId <= numContainers; containerId++) {
+      if (packingPlanBuilder.removeInstance(containerId, component)) {
+        return;
       }
     }
-    throw new RuntimeException("Cannot remove instance."
-        + " No more instances of component " + component + " exist"
-        + " in the containers.");
+    throw new PackingException("Cannot remove instance. No more instances of component "
+        + component + " exist in the containers.");
   }
 }

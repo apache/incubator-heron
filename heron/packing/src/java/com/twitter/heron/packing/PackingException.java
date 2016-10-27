@@ -14,12 +14,13 @@
 package com.twitter.heron.packing;
 
 /**
- * Thrown to indicate that the resources required are not available
+ * Thrown to indicate that an error occurred while creating a packing plan
  */
-public class ResourceExceededException extends Exception {
-  private static final long serialVersionUID = -3662229190395580148L;
+public class PackingException extends RuntimeException {
 
-  public ResourceExceededException(String message) {
+  private static final long serialVersionUID = -7361943148478221250L;
+
+  public PackingException(String message) {
     super(message);
   }
 }

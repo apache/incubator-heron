@@ -35,6 +35,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  */
 public final class PackingUtils {
   private static final Logger LOG = Logger.getLogger(PackingUtils.class.getName());
+  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
 
   private PackingUtils() {
   }
@@ -85,6 +86,24 @@ public final class PackingUtils {
       return false;
     }
     return true;
+  }
+
+  public static Resource getResourceRequirement(String component,
+                                                Map<String, Long> componentRamMap,
+                                                Resource defaultInstanceResource,
+                                                Resource maxContainerResource,
+                                                int paddingPercentage) {
+    long instanceRam = defaultInstanceResource.getRam();
+    if (componentRamMap.containsKey(component)) {
+      instanceRam = componentRamMap.get(component);
+    }
+    if (!isValidInstance(defaultInstanceResource.cloneWithRam(instanceRam),
+        MIN_RAM_PER_INSTANCE, maxContainerResource, paddingPercentage)) {
+      throw new RuntimeException("The topology configuration does not have "
+          + "valid resource requirements. Please make sure that the instance resource "
+          + "requirements do not exceed the maximum per-container resources.");
+    }
+    return defaultInstanceResource.cloneWithRam(instanceRam);
   }
 
   /**
