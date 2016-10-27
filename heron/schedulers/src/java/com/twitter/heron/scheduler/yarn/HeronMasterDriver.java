@@ -38,6 +38,7 @@ import com.google.common.base.Optional;
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.context.ContextConfiguration;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
+import org.apache.reef.driver.evaluator.EvaluatorDescriptor;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.evaluator.FailedEvaluator;
@@ -141,6 +142,15 @@ public class HeronMasterDriver {
     HeronMasterDriverProvider.setInstance(this);
   }
 
+  private static int getCpuForExecutor(Resource resource) {
+    return (int) Math.ceil(resource.getCpu());
+  }
+
+  private static int getMemInMBForExecutor(Resource resource) {
+    Long ram = resource.getRam() / MB;
+    return ram.intValue();
+  }
+
   /**
    * Requests container for TMaster as container/executor id 0.
    */
@@ -171,11 +181,8 @@ public class HeronMasterDriver {
             + containerPlan.getId());
       }
       containerPlans.put(containerPlan.getId(), containerPlan);
-
       Resource reqResource = containerPlan.getRequiredResource();
-      int mem = getMemInMBForExecutor(reqResource);
-      int cores = getCpuForExecutor(reqResource);
-      launchContainerForExecutor(containerPlan.getId(), cores, mem);
+      launchContainerForExecutor(new HeronWorker(containerPlan.getId(), reqResource));
     }
   }
 
@@ -187,7 +194,7 @@ public class HeronMasterDriver {
    * method can ignore core fitting in such a case.
    */
   @VisibleForTesting
-  Optional<ContainerPlan> findLargestFittingContainer(AllocatedEvaluator evaluator,
+  Optional<ContainerPlan> findLargestFittingWorker(AllocatedEvaluator evaluator,
                                                       Set<ContainerPlan> pendingContainers,
                                                       boolean ignoreCpu) {
     int allocatedRam = evaluator.getEvaluatorDescriptor().getMemory();
@@ -267,9 +274,7 @@ public class HeronMasterDriver {
         throw new IllegalArgumentException(
             String.format("There is no container for %s in packing plan.", id));
       }
-      Resource resource = containerPlan.getRequiredResource();
-      worker = Optional.of(
-          new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource)));
+      worker = Optional.of(new HeronWorker(id, containerPlan.getRequiredResource()));
     } else {
       AllocatedEvaluator evaluator = multiKeyWorkerMap.detachEvaluatorAndRemove(worker.get());
       LOG.log(Level.INFO, "Shutting down container {0}", evaluator.getId());
@@ -341,15 +346,6 @@ public class HeronMasterDriver {
         .build();
   }
 
-  private int getCpuForExecutor(Resource resource) {
-    return (int) Math.ceil(resource.getCpu());
-  }
-
-  private int getMemInMBForExecutor(Resource resource) {
-    Long ram = resource.getRam() / MB;
-    return ram.intValue();
-  }
-
   String getComponentRamMap() {
     return componentRamMap;
   }
@@ -399,6 +395,12 @@ public class HeronMasterDriver {
       this.workerId = id;
       this.cores = cores;
       this.mem = mem;
+    }
+
+    HeronWorker(int id, Resource resource) {
+      this.workerId = id;
+      this.cores = getCpuForExecutor(resource);
+      this.mem = getMemInMBForExecutor(resource);
     }
   }
 
