@@ -38,7 +38,6 @@ import org.mockito.verification.VerificationMode;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 import static org.mockito.Mockito.*;
@@ -298,30 +297,26 @@ public class HeronMasterDriverTest {
 
   @Test
   public void fitLargestContainerReturnsLargestContainer() {
-    Set<ContainerPlan> containers = new HashSet<>();
-    ContainerPlan container1 = PackingTestUtils.testContainerPlan(1, 1);
-    containers.add(container1);
-    ContainerPlan container2 = PackingTestUtils.testContainerPlan(2, 1, 2, 3);
-    containers.add(container2);
-    ContainerPlan container3 = PackingTestUtils.testContainerPlan(3, 1, 2);
-    containers.add(container3);
-    ContainerPlan container4 = PackingTestUtils.testContainerPlan(4, 1);
-    containers.add(container4);
+    Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(2, 7, 7 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(3, 5, 5 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(4, 1, 1 * 1024));
 
-    // a little over 7 GB is just fit container the largest container, id = 2
-    verifyFittingContainer(containers, 7 * 1024 + 100, 6, 2);
+    // enough memory and cores to fit largest container, 2
+    verifyFittingContainer(workers, 7 * 1024 + 100, 7, 2);
 
-    // a little over 5 GB is just fit container 3
-    verifyFittingContainer(containers, 5 * 1024 + 100, 5, 3);
+    // enough to fit 3 but not container 2
+    verifyFittingContainer(workers, 5 * 1024 + 100, 6, 3);
 
     // enough memory but not enough cores for container 2
-    verifyFittingContainer(containers, 7 * 1024 + 100, 5, 3);
+    verifyFittingContainer(workers, 7 * 1024 + 100, 5, 3);
 
     // enough cores but not enough memory for container 2
-    verifyFittingContainer(containers, 5 * 1024 + 100, 6, 3);
+    verifyFittingContainer(workers, 5 * 1024 + 100, 7, 3);
   }
 
-  private void verifyFittingContainer(Set<ContainerPlan> containers,
+  private void verifyFittingContainer(Set<HeronMasterDriver.HeronWorker> containers,
                                       int ram,
                                       int cores,
                                       int expectedContainer) {
@@ -331,30 +326,30 @@ public class HeronMasterDriverTest {
 
     when(evaluatorDescriptor.getMemory()).thenReturn(ram);
     when(evaluatorDescriptor.getNumberOfCores()).thenReturn(cores);
-    Optional<ContainerPlan> container =
+    Optional<HeronMasterDriver.HeronWorker> worker =
         spyDriver.findLargestFittingWorker(mockEvaluator, containers, false);
-    Assert.assertTrue(container.isPresent());
-    Assert.assertEquals(expectedContainer, container.get().getId());
+    Assert.assertTrue(worker.isPresent());
+    Assert.assertEquals(expectedContainer, worker.get().getWorkerId());
   }
 
   @Test
   public void fitBiggestContainerIgnoresCoresIfMissing() {
-    Set<ContainerPlan> containers = new HashSet<>();
-    ContainerPlan container = PackingTestUtils.testContainerPlan(1, 1, 2);
-    containers.add(container);
+    Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
 
     EvaluatorDescriptor evaluatorDescriptor = mock(EvaluatorDescriptor.class);
-    when(evaluatorDescriptor.getMemory()).thenReturn(5 * 1024);
+    when(evaluatorDescriptor.getMemory()).thenReturn(3 * 1024);
     when(evaluatorDescriptor.getNumberOfCores()).thenReturn(1);
     AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
     when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(evaluatorDescriptor);
 
-    Optional<ContainerPlan> result =
-        spyDriver.findLargestFittingWorker(mockEvaluator, containers, false);
+    Optional<HeronMasterDriver.HeronWorker> result =
+        spyDriver.findLargestFittingWorker(mockEvaluator, workers, false);
     Assert.assertFalse(result.isPresent());
-    result = spyDriver.findLargestFittingWorker(mockEvaluator, containers, true);
+
+    result = spyDriver.findLargestFittingWorker(mockEvaluator, workers, true);
     Assert.assertTrue(result.isPresent());
-    Assert.assertEquals(1, result.get().getId());
+    Assert.assertEquals(1, result.get().getWorkerId());
   }
 
   private AllocatedEvaluator registerMockEvaluator(String name, int id, int cpu, int ram) {

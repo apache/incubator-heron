@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -194,38 +195,33 @@ public class HeronMasterDriver {
    * method can ignore core fitting in such a case.
    */
   @VisibleForTesting
-  Optional<ContainerPlan> findLargestFittingWorker(AllocatedEvaluator evaluator,
-                                                      Set<ContainerPlan> pendingContainers,
-                                                      boolean ignoreCpu) {
+  Optional<HeronWorker> findLargestFittingWorker(AllocatedEvaluator evaluator,
+                                                 Collection<HeronWorker> pendingWorkers,
+                                                 boolean ignoreCpu) {
     int allocatedRam = evaluator.getEvaluatorDescriptor().getMemory();
     int allocatedCores = evaluator.getEvaluatorDescriptor().getNumberOfCores();
 
-    ContainerPlan biggestFittingContainer = null;
-    for (ContainerPlan container : pendingContainers) {
-      Resource resource = container.getRequiredResource();
-
-      int ram = getMemInMBForExecutor(resource);
-      if (ram > allocatedRam) {
+    HeronWorker biggestFittingWorker = null;
+    for (HeronWorker worker : pendingWorkers) {
+      if (worker.mem > allocatedRam) {
         continue;
       }
 
       if (!ignoreCpu) {
-        int cores = getCpuForExecutor(resource);
-        if (cores > allocatedCores) {
+        if (worker.cores > allocatedCores) {
           continue;
         }
       }
 
-      if (biggestFittingContainer != null) {
-        Resource maxResource = biggestFittingContainer.getRequiredResource();
-        if (resource.getRam() < maxResource.getRam() || resource.getCpu() < maxResource.getCpu()) {
+      if (biggestFittingWorker != null) {
+        if (worker.mem < biggestFittingWorker.mem || worker.cores < biggestFittingWorker.cores) {
           continue;
         }
       }
-      biggestFittingContainer = container;
+      biggestFittingWorker = worker;
     }
 
-    return Optional.fromNullable(biggestFittingContainer);
+    return Optional.fromNullable(biggestFittingWorker);
   }
 
   public void killTopology() {
@@ -384,10 +380,12 @@ public class HeronMasterDriver {
    * All the pointers in an instance are related to one container. A container is a reef object,
    * owns one heron worker id and its handlers
    */
-  private static final class HeronWorker {
+  @VisibleForTesting
+  static final class HeronWorker {
     private int workerId;
     private int cores;
     private int mem;
+
     private AllocatedEvaluator evaluator;
     private ActiveContext context;
 
@@ -401,6 +399,10 @@ public class HeronMasterDriver {
       this.workerId = id;
       this.cores = getCpuForExecutor(resource);
       this.mem = getMemInMBForExecutor(resource);
+    }
+
+    public int getWorkerId() {
+      return workerId;
     }
   }
 
