@@ -105,10 +105,6 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     this.numContainers += additionalContainers;
   }
 
-  private void addContainer() {
-
-  }
-
   private void resetState() {
     this.containerId = 1;
     this.numAdjustments = 0;

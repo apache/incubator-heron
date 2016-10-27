@@ -523,7 +523,7 @@ public class FirstFitDecreasingPackingTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testScaleXDownInvalidComponent() throws Exception {
+  public void testScaleDownInvalidComponent() throws Exception {
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
     int numContainersBeforeRepack = 2;

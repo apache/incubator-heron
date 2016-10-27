@@ -17,7 +17,6 @@ package com.twitter.heron.packing;
  * Thrown to indicate that an error occurred while creating a packing plan
  */
 public class PackingException extends RuntimeException {
-
   private static final long serialVersionUID = -7361943148478221250L;
 
   public PackingException(String message) {
