@@ -16,6 +16,7 @@ package com.twitter.heron.packing.roundrobin;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -154,27 +155,18 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
   @Override
   public PackingPlan pack() {
+    PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
+    planBuilder.updateNumContainers(numContainers);
 
-    int adjustments = this.numAdjustments;
-    while (adjustments <= this.numAdjustments) {
-      try {
-        PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
-        planBuilder.updateNumContainers(numContainers);
-        planBuilder = getResourceCompliantRRAllocation(planBuilder);
-
-        return planBuilder.build();
-
-      } catch (ResourceExceededException e) {
-        //Not enough containers. Adjust the number of containers.
-        LOG.info(String.format(
-            "%s Increasing the number of containers to %s and attempting to place again.",
-            e.getMessage(), this.numContainers + 1));
-        adjustNumContainers(1);
-        containerId = 1;
-        adjustments++;
-      }
+    // Get the instances using FFD allocation
+    try {
+      planBuilder = getResourceCompliantRRAllocation(planBuilder);
+    } catch (ResourceExceededException e) {
+      LOG.log(Level.SEVERE, "Could not allocate all instances to packing plan", e);
+      return null; // TODO: should throw packing exception
     }
-    return null; // TODO: should throw packing exception
+
+    return planBuilder.build();
   }
 
   /**
@@ -204,12 +196,12 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
       } catch (ResourceExceededException e) {
         //Not enough containers. Adjust the number of containers.
-        LOG.info(String.format(
-            "Increasing the number of containers to %s and attempting packing again.",
-            this.numContainers + 1));
         adjustNumContainers(1);
         containerId = 1;
         adjustments++;
+        LOG.info(String.format(
+            "Increasing the number of containers to %s and attempting packing again.",
+            this.numContainers));
       }
     }
     return null; // TODO: should throw packing exception
