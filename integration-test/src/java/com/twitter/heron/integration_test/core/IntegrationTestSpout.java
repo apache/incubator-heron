@@ -13,8 +13,12 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.core;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.spout.IRichSpout;
@@ -29,15 +33,19 @@ public class IntegrationTestSpout implements IRichSpout {
   private static final long serialVersionUID = 6068686695658877942L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
   private final IRichSpout delegateSpout;
+  private final String topologyStartedStateUrl;
   private long tuplesToAck = 0;
   private SpoutOutputCollector spoutOutputCollector;
-
+  private boolean hasSetStarted = false;
   private int maxExecutions;
 
-  public IntegrationTestSpout(IRichSpout delegateSpout, int maxExecutions) {
+  public IntegrationTestSpout(IRichSpout delegateSpout,
+                              int maxExecutions,
+                              String topologyStartedStateUrl) {
     assert maxExecutions > 0;
     this.delegateSpout = delegateSpout;
     this.maxExecutions = maxExecutions;
+    this.topologyStartedStateUrl = topologyStartedStateUrl;
   }
 
   protected void resetMaxExecutions(int resetExecutions) {
@@ -68,7 +76,6 @@ public class IntegrationTestSpout implements IRichSpout {
   @Override
   public void activate() {
     delegateSpout.activate();
-
   }
 
   @Override
@@ -85,13 +92,15 @@ public class IntegrationTestSpout implements IRichSpout {
     this.spoutOutputCollector = outputCollector;
     delegateSpout.open(map, topologyContext,
         new SpoutOutputCollector(new IntegrationTestSpoutCollector(outputCollector)));
-
   }
 
   @Override
   public void nextTuple() {
-    if (maxExecutions <= 0) {
+    if (doneEmitting()) {
       return;
+    } else if (!this.hasSetStarted) {
+      setStateToStarted();
+      this.hasSetStarted = true;
     }
     maxExecutions--;
 
@@ -106,6 +115,14 @@ public class IntegrationTestSpout implements IRichSpout {
       // before maxExecutions becomes 0
       emitTerminalIfNeeded();
       LOG.fine("The topology is done.");
+    } else {
+      if (getPostEmitSleepTime() > 0) {
+        try {
+          getPostEmitSleepTimeUnit().sleep(getPostEmitSleepTime());
+        } catch (InterruptedException e) {
+          LOG.log(Level.SEVERE, "Thread interrupted while trying to sleep post-emit", e);
+        }
+      }
     }
   }
 
@@ -139,18 +156,27 @@ public class IntegrationTestSpout implements IRichSpout {
     return tuplesToAck == 0;
   }
 
+  protected TimeUnit getPostEmitSleepTimeUnit() {
+    return TimeUnit.MILLISECONDS;
+  }
+
+  protected long getPostEmitSleepTime() {
+    return 0;
+  }
+
+  protected static final Values TERMINAL_TUPLE = new Values(Constants.INTEGRATION_TEST_TERMINAL);
+
   protected void emitTerminalIfNeeded() {
     LOG.fine(String.format("doneEmitting = %s, tuplesToAck = %s", doneEmitting(), tuplesToAck));
 
     if (doneEmitting() && doneAcking()) {
       LOG.info("Emitting terminals to downstream.");
-      spoutOutputCollector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID,
-          new Values(Constants.INTEGRATION_TEST_TERMINAL));
+      spoutOutputCollector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID, TERMINAL_TUPLE);
     }
     // Else, do nothing
   }
 
-  private class IntegrationTestSpoutCollector implements ISpoutOutputCollector {
+  protected class IntegrationTestSpoutCollector implements ISpoutOutputCollector {
     private final ISpoutOutputCollector delegate;
 
     IntegrationTestSpoutCollector(ISpoutOutputCollector delegate) {
@@ -166,6 +192,7 @@ public class IntegrationTestSpout implements IRichSpout {
         messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
       }
 
+      LOG.info("Emitting tuple: " + objects);
       return delegate.emit(s, objects, messageId);
     }
 
@@ -177,12 +204,25 @@ public class IntegrationTestSpout implements IRichSpout {
         messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
       }
 
+      LOG.info("Emitting tuple: " + objects);
       delegate.emitDirect(i, s, objects, messageId);
     }
 
     @Override
     public void reportError(Throwable throwable) {
       delegate.reportError(throwable);
+    }
+  }
+
+  private void setStateToStarted() {
+    if (topologyStartedStateUrl == null) {
+      return;
+    }
+    try {
+      HttpUtils.httpJsonPost(topologyStartedStateUrl, "\"true\"");
+    } catch (IOException | ParseException e) {
+      throw new RuntimeException(
+          "Failure posting topology_started state to " + topologyStartedStateUrl, e);
     }
   }
 }

@@ -37,6 +37,8 @@ public class TestTopologyBuilder extends TopologyBuilder {
   private final String outputLocation;
   private final String stateLocation;
   private final String stateUpdateToken;
+  private final SpoutWrapperType spoutWrapperType;
+
   // The structure of the topologyBlr - a graph directed from children to parents
   private final Map<String, TopologyAPI.Bolt.Builder> bolts = new HashMap<>();
   private final Map<String, TopologyAPI.Spout.Builder> spouts = new HashMap<>();
@@ -44,16 +46,24 @@ public class TestTopologyBuilder extends TopologyBuilder {
   // By default, terminalBoltClass will be AggregatorBolt, which writes to specified HTTP server
   private String terminalBoltClass = "com.twitter.heron.integration_test.core.AggregatorBolt";
 
+  public enum SpoutWrapperType {
+    DEFAULT,
+    TWO_PHASE,
+    EMIT_UNTIL
+  }
+
   public TestTopologyBuilder(String outputLocation) {
-    this(outputLocation, null, null);
+    this(outputLocation, null, null, SpoutWrapperType.DEFAULT);
   }
 
   public TestTopologyBuilder(String outputLocation,
                              String stateLocation,
-                             String stateUpdateToken) {
+                             String stateUpdateToken,
+                             SpoutWrapperType spoutWrapperType) {
     this.outputLocation = outputLocation;
     this.stateLocation = stateLocation;
     this.stateUpdateToken = stateUpdateToken;
+    this.spoutWrapperType = spoutWrapperType;
   }
 
   @Override
@@ -70,13 +80,24 @@ public class TestTopologyBuilder extends TopologyBuilder {
   // To be compatible with earlier Integration Test Framework
   public SpoutDeclarer setSpout(String id, IRichSpout spout,
                                 Number parallelismHint, int maxExecutionCount) {
+    String topologyStartedUrl = stateLocation + "_topology_started";
+    String tuplesEmittedUrl = stateLocation + "_tuples_emitted"; // TODO: spout id?
+    String topologyUpdateUrl = stateLocation + "_" + stateUpdateToken;
     IntegrationTestSpout wrappedSpout;
-    if (stateUpdateToken != null) {
-      wrappedSpout = new MultiPhaseTestSpout(spout, maxExecutionCount, 2,
-          new HttpGetCondition(stateLocation + "_" + stateUpdateToken), stateLocation);
-    } else {
-      wrappedSpout = new IntegrationTestSpout(spout, maxExecutionCount);
+    switch (spoutWrapperType) {
+      case TWO_PHASE:
+        wrappedSpout = new MultiPhaseTestSpout(spout, maxExecutionCount, 2,
+            new HttpGetCondition(topologyUpdateUrl), topologyStartedUrl);
+        break;
+      case EMIT_UNTIL:
+        wrappedSpout = new EmitUntilConditionTestSpout(spout,
+            new HttpGetCondition(topologyUpdateUrl), topologyStartedUrl, tuplesEmittedUrl);
+        break;
+      case DEFAULT:
+      default:
+        wrappedSpout = new IntegrationTestSpout(spout, maxExecutionCount, topologyStartedUrl);
     }
+
     return setSpout(id, wrappedSpout, parallelismHint);
   }
 

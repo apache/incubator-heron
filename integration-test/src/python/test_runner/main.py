@@ -18,7 +18,66 @@ RETRY_ATTEMPTS = 15
 #seconds
 RETRY_INTERVAL = 10
 
-def run_test(topology_name, classpath, expected_result_file_path,
+class FileBasedExpectedResultsHandler(object):
+  def __init__(self, file_path):
+    self.file_path = file_path
+
+  def fetch_results(self):
+    # Read expected result from the expected result file
+    try:
+      if not os.path.exists(self.file_path):
+        raise RuntimeError(" %s does not exist" % self.file_path)
+      else:
+        with open(self.file_path, "r") as expected_result_file:
+          return expected_result_file.read().rstrip()
+    except Exception as e:
+      logging.error("Failed to read expected result file %s: %s", self.file_path, str(e))
+      return "fail"
+
+class HttpBasedExpectedResultsHandler(object):
+  def __init__(self, server_host_port, topology_name, task_count):
+    self.server_host_port = server_host_port
+    self.topology_name = topology_name
+    self.task_count = task_count
+
+  # pylint: disable=unnecessary-lambda
+  def fetch_results(self):
+    try:
+      result = []
+      decoder = json.JSONDecoder(strict=False)
+      for i in range(0, self.task_count):
+        task_result = fetch_from_server(self.server_host_port, self.topology_name,
+                                        'expected results',
+                                        '/state/%s_tuples_emitted_%d' % (self.topology_name, i))
+        json_result = decoder.decode(task_result)
+        logging.info("Found %d tuples emitted from spout task %d", len(json_result), i)
+        result = result + json_result
+
+      if len(result) == 0:
+        raise RuntimeError("Expected result set is empty for topology %s", self.topology_name)
+
+      # need to convert from a list of json objects to a string of a python list,
+      # without the unicode using double quotes, not single quotes.
+      return str(map(lambda x: str(x), result)).replace("'", '"')
+    except Exception as e:
+      logging.error(
+          "Fetching expected result failed for %s topology: %s", self.topology_name, str(e))
+      return "fail"
+
+class HttpBasedActualResultsHandler(object):
+  def __init__(self, server_host_port, topology_name):
+    self.server_host_port = server_host_port
+    self.topology_name = topology_name
+
+  def fetch_results(self):
+    try:
+      return fetch_from_server(self.server_host_port, self.topology_name,
+                               'results', '/results/%s' % self.topology_name)
+    except Exception as e:
+      logging.error("Fetching result failed for %s topology: %s", self.topology_name, str(e))
+      return "fail"
+
+def run_test(topology_name, classpath, expected_result_handler, actual_result_handler,
              params, http_server_host_port, update_args, extra_topology_args):
   ''' Runs the test for one topology '''
 
@@ -47,7 +106,7 @@ def run_test(topology_name, classpath, expected_result_file_path,
       logging.info("Topology successfully updated, updating state server")
       update_state_server(http_server_host_port, topology_name, "topology_updated", "true")
 
-    return check_results(http_server_host_port, topology_name, expected_result_file_path)
+    return check_results(topology_name, expected_result_handler, actual_result_handler)
 
   except Exception as e:
     logging.error("Checking result failed for %s topology: %s", topology_name, str(e))
@@ -57,25 +116,10 @@ def run_test(topology_name, classpath, expected_result_file_path,
                   params.role, params.env, topology_name)
 
 # pylint: disable=unnecessary-lambda
-def check_results(server_host_port, topology_name, expected_result_file_path):
+def check_results(topology_name, expected_result_handler, actual_result_handler):
   """ Checks the topology results from the server with the expected results from the file """
-  # Fetch actual results. Sleep and retry if the result is not ready
-  try:
-    actual_result = fetch_result_from_server(server_host_port, topology_name)
-  except Exception as e:
-    logging.error("Fetching result failed for %s topology: %s", topology_name, str(e))
-    return "fail"
-
-  # Read expected result from the expected result file
-  try:
-    if not os.path.exists(expected_result_file_path):
-      raise RuntimeError(" %s does not exist" % expected_result_file_path)
-    else:
-      with open(expected_result_file_path, "r") as expected_result_file:
-        expected_result = expected_result_file.read().rstrip()
-  except Exception as e:
-    logging.error("Failed to read expected result file %s: %s", expected_result_file_path, str(e))
-    return "fail"
+  actual_result = actual_result_handler.fetch_results()
+  expected_result = expected_result_handler.fetch_results()
 
   # Build a new instance of json decoder since the default one could not ignore "\n"
   decoder = json.JSONDecoder(strict=False)
@@ -97,10 +141,6 @@ def check_results(server_host_port, topology_name, expected_result_file_path):
     logging.info("Actual result ---------- \n" + str(map(lambda x: str(x), actual_result)))
     logging.info("Expected result ---------- \n" + str(map(lambda x: str(x), expected_result)))
     return "fail"
-
-def fetch_result_from_server(server_host_port, topology_name):
-  return fetch_from_server(
-      server_host_port, topology_name, 'results', '/results/%s' % topology_name)
 
 def poll_state_server(server_host_port, topology_name, key):
   return fetch_from_server(
@@ -194,6 +234,7 @@ def update_topology(heron_cli_path, cli_config_path, cluster,
 
   raise RuntimeError("Failed to update topology %s", topology_name)
 
+# pylint: disable=too-many-locals
 def run_tests(conf, args):
   ''' Run the test for each topology specified in the conf file '''
   successes = []
@@ -237,21 +278,40 @@ def run_tests(conf, args):
     update_args = ""
     topology_args = extra_topology_args
     if "updateArgs" in topology_conf:
-      topology_args = "%s -u topology_updated" % extra_topology_args
       update_args = topology_conf["updateArgs"]
 
-    expected_result_file_path =\
-      args.topologies_path + "/" + topology_conf["expectedResultRelativePath"]
+    if "topologyArgs" in topology_conf:
+      if topology_conf["topologyArgs"] == "emit_util" and update_args == "":
+        raise ValueError("Specifying a test with emit_until spout wrapper without updateArgs "
+                         + "will cause the spout to emit indefinitely. Not running topology "
+                         + topology_name)
+      topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
+
+    actual_result_handler = HttpBasedActualResultsHandler(http_server_host_port, topology_name)
+    expected_result_handler =\
+      load_expected_result_handler(topology_name, topology_conf, args, http_server_host_port)
 
     logging.info("==== Starting test %s of %s: %s ====", current, total, topology_name)
     start_secs = int(time.time())
-    if run_test(topology_name, classpath, expected_result_file_path,
+    if run_test(topology_name, classpath, expected_result_handler, actual_result_handler,
                 args, http_server_host_port, update_args, topology_args) == "success":
       successes += [(topology_name, int(time.time()) - start_secs)]
     else:
       failures += [(topology_name, int(time.time()) - start_secs)]
     current += 1
   return (successes, failures)
+
+def load_expected_result_handler(topology_name, topology_conf, args, http_server_host_port):
+  if "expectedResultRelativePath" in topology_conf:
+    expected_result_file_path =\
+      args.topologies_path + "/" + topology_conf["expectedResultRelativePath"]
+    return FileBasedExpectedResultsHandler(expected_result_file_path)
+  elif "expectedHttpResultTaskCount" in topology_conf:
+    return HttpBasedExpectedResultsHandler(
+        http_server_host_port, topology_name, topology_conf["expectedHttpResultTaskCount"])
+  else:
+    raise RuntimeError("Either expectedResultRelativePath or expectedHttpResultTaskCount "
+                       + "must be specified for test %s " % topology_name)
 
 def main():
   ''' main '''
