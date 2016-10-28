@@ -226,6 +226,13 @@ public class HeronMasterDriver {
           .add(new HeronWorker(id, containerPlans.get(id).getRequiredResource()));
     }
     LOG.info("Number of workers awaiting allocation: " + workersAwaitingAllocation.size());
+
+    if (!multiKeyWorkerMap.lookupByWorkerId(TMASTER_CONTAINER_ID).isPresent()) {
+      LOG.info("TMaster is awaiting allocation too");
+      HeronWorker tMasterWorker = new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
+      workersAwaitingAllocation.add(tMasterWorker);
+    }
+
     return workersAwaitingAllocation;
   }
 
@@ -512,7 +519,7 @@ public class HeronMasterDriver {
           return;
         }
 
-        result = findLargestFittingWorker(evaluator, workersAwaitingAllocation, false);
+        result = findLargestFittingWorker(evaluator, workersAwaitingAllocation, true);
         if (!result.isPresent()) {
           LOG.warning("Could not find a fitting worker in awaiting workers");
           // TODO may need counting of missed allocation
@@ -524,16 +531,13 @@ public class HeronMasterDriver {
         LOG.info(String.format("Worker:%d, cores:%d, mem:%d fits in the allocated container",
             worker.workerId, worker.cores, worker.mem));
         workersAwaitingAllocation.remove(worker);
+        multiKeyWorkerMap.assignEvaluatorToWorker(worker, evaluator);
       }
 
-      LOG.log(Level.INFO,
-          "Activating container {0} for heron worker, id: {1}",
+      LOG.log(Level.INFO, "Activating container {0} for heron worker, id: {1}",
           new Object[]{evaluator.getId(), worker.workerId});
       Configuration context = createContextConfig(worker.workerId);
       evaluator.submitContext(context);
-      multiKeyWorkerMap.assignEvaluatorToWorker(worker, evaluator);
-      LOG.info(String.format("Container %s is allocated for worker: %d",
-          evaluator.getId(), worker.workerId));
     }
   }
 
