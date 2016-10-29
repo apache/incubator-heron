@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.packing;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +39,7 @@ public class PackingPlanBuilder {
   private int requestedContainerPadding;
   private int numContainers;
 
-  private Map<Integer, List<InstanceId>> containerInstances;
-  private List<Container> containers;
+  private Map<Integer, Container> containers;
 
   public PackingPlanBuilder(String topologyId) {
     this(topologyId, null);
@@ -50,7 +48,6 @@ public class PackingPlanBuilder {
   public PackingPlanBuilder(String topologyId, PackingPlan existingPacking) {
     this.topologyId = topologyId;
     this.existingPacking = existingPacking;
-    this.containerInstances = new HashMap<Integer, List<InstanceId>>();
     this.numContainers = 0;
   }
 
@@ -84,22 +81,18 @@ public class PackingPlanBuilder {
   public PackingPlanBuilder addInstance(Integer containerId,
                                         InstanceId instanceId) throws ResourceExceededException {
     initContainers();
-    if (containerInstances.get(containerId) == null) {
-      containerInstances.put(containerId, new ArrayList<InstanceId>());
-    }
 
     Resource instanceResource = PackingUtils.getResourceRequirement(
         instanceId.getComponentName(), this.componentRamMap, this.defaultInstanceResource,
         this.maxContainerResource, this.requestedContainerPadding);
 
-    if (!containers.get(containerId - 1).add(
+    if (!containers.get(containerId).add(
         new PackingPlan.InstancePlan(instanceId, instanceResource))) {
       throw new ResourceExceededException(String.format(
           "Insufficient container resources to add instance %s with resources %s to container %d.",
           instanceId, instanceResource, containerId));
     }
 
-    containerInstances.get(containerId).add(instanceId);
     LOG.fine(String.format("Added to container %d instance %s", containerId, instanceId));
     return this;
   }
@@ -107,24 +100,14 @@ public class PackingPlanBuilder {
   public boolean removeInstance(Integer containerId, String componentName) {
     initContainers();
     Optional<PackingPlan.InstancePlan> instancePlan =
-        containers.get(containerId - 1).removeAnyInstanceOfComponent(componentName);
-    if (!instancePlan.isPresent()) {
-      return false;
-    }
-
-    InstanceId instanceId = new InstanceId(instancePlan.get().getComponentName(),
-                                           instancePlan.get().getTaskId(),
-                                           instancePlan.get().getComponentIndex());
-    containerInstances.get(containerId).remove(instanceId);
-    return true;
+        containers.get(containerId).removeAnyInstanceOfComponent(componentName);
+    return instancePlan.isPresent();
   }
 
   // build container plan sets by summing up instance resources
   public PackingPlan build() {
-    PackingUtils.removeEmptyContainers(this.containerInstances);
-
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
-        this.containerInstances, this.componentRamMap,
+        this.containers, this.componentRamMap,
         this.defaultInstanceResource, this.requestedContainerPadding);
 
     return new PackingPlan(topologyId, containerPlans);
@@ -133,38 +116,37 @@ public class PackingPlanBuilder {
   private void initContainers() {
     // TODO: verify required fields like resources and padding are set
     if (this.containers != null) {
-      for (int i = containers.size(); i <= numContainers - 1; i++) {
-        PackingUtils.allocateNewContainer(
-            containers, containers.get(0).getCapacity(), this.requestedContainerPadding);
+      for (int containerId = containers.size() + 1; containerId <= numContainers; containerId++) {
+        containers.put(containerId,
+            new Container(containers.get(1).getCapacity(), this.requestedContainerPadding));
       }
       return;
     }
 
-    Map<Integer, List<InstanceId>> newContainerInstances;
-    ArrayList<Container> newContainers;
+    Map<Integer, Container> newContainerMap = new HashMap<>();
     if (this.existingPacking == null) {
-      newContainerInstances = new HashMap<Integer, List<InstanceId>>();
-      newContainers = new ArrayList<>();
-
       for (int containerId = 1; containerId <= numContainers; containerId++) {
-        if (newContainerInstances.get(containerId) == null) {
-          newContainerInstances.put(containerId, new ArrayList<InstanceId>());
-        }
-        PackingUtils.allocateNewContainer(
-            newContainers, this.maxContainerResource, this.requestedContainerPadding);
+        newContainerMap.put(containerId,
+            new Container(this.maxContainerResource, this.requestedContainerPadding));
       }
     } else {
-      newContainerInstances = PackingUtils.getAllocation(this.existingPacking);
-
-      newContainers = PackingUtils.getContainers(
+      // TODO: there is a bug here where the impl below assumes contiguous 1-based container ids,
+      // which might not be the case.
+      List<Container> newContainers = PackingUtils.getContainers(
           this.existingPacking, this.requestedContainerPadding);
-      for (int i = newContainers.size(); i <= numContainers - 1; i++) {
+      int containerId = 1;
+      for (Container container : newContainers) {
+        newContainerMap.put(containerId++, container);
+      }
+      for (int newContainerId = newContainers.size() + 1;
+           newContainerId <= numContainers; newContainerId++) {
         PackingUtils.allocateNewContainer(
             newContainers, newContainers.get(0).getCapacity(), this.requestedContainerPadding);
+        newContainerMap.put(newContainerId,
+            new Container(newContainerMap.get(1).getCapacity(), this.requestedContainerPadding));
       }
     }
 
-    this.containerInstances = newContainerInstances;
-    this.containers = newContainers;
+    this.containers = newContainerMap;
   }
 }

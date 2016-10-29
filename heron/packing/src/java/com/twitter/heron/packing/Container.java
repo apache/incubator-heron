@@ -70,9 +70,11 @@ public class Container {
     long newRam = usedResources.getRam() + resource.getRam();
     double newCpu = usedResources.getCpu() + resource.getCpu();
     long newDisk = usedResources.getDisk() + resource.getDisk();
-    return PackingUtils.increaseBy(newRam, paddingPercentage) <= this.capacity.getRam()
-        && Math.round(PackingUtils.increaseBy(newCpu, paddingPercentage)) <= this.capacity.getCpu()
-        && PackingUtils.increaseBy(newDisk, paddingPercentage) <= this.capacity.getDisk();
+    boolean ramOk = PackingUtils.increaseBy(newRam, paddingPercentage) <= this.capacity.getRam();
+    boolean cpuOk =
+        Math.round(PackingUtils.increaseBy(newCpu, paddingPercentage)) <= this.capacity.getCpu();
+    boolean diskOk = PackingUtils.increaseBy(newDisk, paddingPercentage) <= this.capacity.getDisk();
+    return ramOk && cpuOk && diskOk;
   }
 
   /**

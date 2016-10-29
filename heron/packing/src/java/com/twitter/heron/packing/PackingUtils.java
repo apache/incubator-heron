@@ -113,14 +113,17 @@ public final class PackingUtils {
    * @return container plans
    */
   public static Set<PackingPlan.ContainerPlan> buildContainerPlans(
-      Map<Integer, List<InstanceId>> containerInstances,
+      Map<Integer, Container> containerInstances,
       Map<String, Long> ramMap,
       Resource instanceDefaults,
       double paddingPercentage) {
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
     for (Integer containerId : containerInstances.keySet()) {
-      List<InstanceId> instanceList = containerInstances.get(containerId);
+      Container container = containerInstances.get(containerId);
+      if (container.getInstances().size() == 0) {
+        continue;
+      }
 
       long containerRam = 0;
       long containerDiskInBytes = 0;
@@ -129,8 +132,10 @@ public final class PackingUtils {
       // Calculate the resource required for single instance
       Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
-      for (InstanceId instanceId : instanceList) {
-        long instanceRam = 0;
+      for (PackingPlan.InstancePlan instancePlan : container.getInstances()) {
+        InstanceId instanceId = new InstanceId(instancePlan.getComponentName(),
+            instancePlan.getTaskId(), instancePlan.getComponentIndex());
+        long instanceRam;
         if (ramMap.containsKey(instanceId.getComponentName())) {
           instanceRam = ramMap.get(instanceId.getComponentName());
         } else {
