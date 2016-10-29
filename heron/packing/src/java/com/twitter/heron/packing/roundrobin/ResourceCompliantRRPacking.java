@@ -155,18 +155,27 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
   @Override
   public PackingPlan pack() {
-    PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
-    planBuilder.updateNumContainers(numContainers);
 
-    // Get the instances using FFD allocation
-    try {
-      planBuilder = getResourceCompliantRRAllocation(planBuilder);
-    } catch (ResourceExceededException e) {
-      LOG.log(Level.SEVERE, "Could not allocate all instances to packing plan", e);
-      return null; // TODO: should throw packing exception
+    int adjustments = this.numAdjustments;
+    while (adjustments <= this.numAdjustments) {
+      try {
+        PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
+        planBuilder.updateNumContainers(numContainers);
+        planBuilder = getResourceCompliantRRAllocation(planBuilder);
+
+        return planBuilder.build();
+
+      } catch (ResourceExceededException e) {
+        //Not enough containers. Adjust the number of containers.
+        LOG.info(String.format(
+            "%s Increasing the number of containers to %s and attempting to place again.",
+            e.getMessage(), this.numContainers + 1));
+        adjustNumContainers(1);
+        containerId = 1;
+        adjustments++;
+      }
     }
-
-    return planBuilder.build();
+    return null; // TODO: should throw packing exception
   }
 
   /**
