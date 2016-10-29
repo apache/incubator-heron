@@ -16,7 +16,6 @@ package com.twitter.heron.packing.roundrobin;
 
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
