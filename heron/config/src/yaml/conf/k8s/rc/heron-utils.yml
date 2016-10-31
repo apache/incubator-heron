@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: heron-utils
+spec:
+  replicas: 1
+  selector:
+    app: heron-utils
+  template:
+    metadata:
+      name: heron-utils
+      labels:
+        app: heron-utils
+    spec:
+      containers:
+      - name: heron-tracker
+        # TODO: figure out
+        image: heron
+        args:
+        - heron-tracker
+        ports:
+        - containerPort: 8888
+      - name: heron-ui
+        # TODO: figure out
+        image: heron
+        args:
+        - heron-ui
+        - --tracker_url=http://localhost:8888
+        ports:
+        - containerPort: 8889
