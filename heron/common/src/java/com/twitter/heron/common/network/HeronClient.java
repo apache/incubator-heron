@@ -376,7 +376,7 @@ public abstract class HeronClient implements ISelectHandler {
 
   /////////////////////////////////////////////////////////
   // This is the interface that needs to be implemented by
-  // all Heron Servers.
+  // all Heron Clients.
   /////////////////////////////////////////////////////////
 
   // What action do you want to take when the client meets errors
