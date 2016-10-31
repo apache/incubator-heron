@@ -274,24 +274,23 @@ public final class PackingUtils {
    * Generates the containers that correspond to the current packing plan
    * along with their associated instances.
    *
-   * @return List of containers for the current packing plan
+   * @return Map of containers for the current packing plan, keyed by containerId
    */
-  public static ArrayList<Container> getContainers(PackingPlan currentPackingPlan,
-                                                   int paddingPercentage) {
-    ArrayList<Container> containers = new ArrayList<>();
+  static Map<Integer, Container> getContainers(PackingPlan currentPackingPlan,
+                                               int paddingPercentage) {
+    Map<Integer, Container> containers = new HashMap<>();
 
     //sort containers based on containerIds;
-    PackingPlan.ContainerPlan[] currentContainers =
+    PackingPlan.ContainerPlan[] currentContainerPlans =
         PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
 
     Resource capacity = currentPackingPlan.getMaxContainerResources();
-    for (int i = 0; i < currentContainers.length; i++) {
-      int containerId = PackingUtils.allocateNewContainer(
-          containers, capacity, paddingPercentage);
-      for (PackingPlan.InstancePlan instancePlan
-          : currentContainers[i].getInstances()) {
-        containers.get(containerId - 1).add(instancePlan);
+    for (PackingPlan.ContainerPlan currentContainerPlan : currentContainerPlans) {
+      Container container = new Container(capacity, paddingPercentage);
+      for (PackingPlan.InstancePlan instancePlan : currentContainerPlan.getInstances()) {
+        container.add(instancePlan);
       }
+      containers.put(currentContainerPlan.getId(), container);
     }
     return containers;
   }

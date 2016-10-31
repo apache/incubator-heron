@@ -14,9 +14,10 @@
 package com.twitter.heron.packing;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import com.google.common.base.Optional;
@@ -49,6 +50,8 @@ public class PackingPlanBuilder {
     this.topologyId = topologyId;
     this.existingPacking = existingPacking;
     this.numContainers = 0;
+    this.requestedContainerPadding = 0;
+    this.componentRamMap = new HashMap<>();
   }
 
   // set resource settings
@@ -106,6 +109,7 @@ public class PackingPlanBuilder {
 
   // build container plan sets by summing up instance resources
   public PackingPlan build() {
+    assertResourceSettings();
     Set<PackingPlan.ContainerPlan> containerPlans = PackingUtils.buildContainerPlans(
         this.containers, this.componentRamMap,
         this.defaultInstanceResource, this.requestedContainerPadding);
@@ -114,39 +118,43 @@ public class PackingPlanBuilder {
   }
 
   private void initContainers() {
-    // TODO: verify required fields like resources and padding are set
-    if (this.containers != null) {
-      for (int containerId = containers.size() + 1; containerId <= numContainers; containerId++) {
-        containers.put(containerId,
-            new Container(containers.get(1).getCapacity(), this.requestedContainerPadding));
+    assertResourceSettings();
+    Map<Integer, Container> newContainerMap = this.containers;
+
+    // if this is the first time called, initialize container map with empty or existing containers
+    if (newContainerMap == null) {
+      if (this.existingPacking == null) {
+        newContainerMap = new HashMap<>();
+        for (int containerId = 1; containerId <= numContainers; containerId++) {
+          newContainerMap.put(containerId,
+              new Container(this.maxContainerResource, this.requestedContainerPadding));
+        }
+      } else {
+        newContainerMap = PackingUtils.getContainers(
+            this.existingPacking, this.requestedContainerPadding);
       }
-      return;
     }
 
-    Map<Integer, Container> newContainerMap = new HashMap<>();
-    if (this.existingPacking == null) {
-      for (int containerId = 1; containerId <= numContainers; containerId++) {
-        newContainerMap.put(containerId,
-            new Container(this.maxContainerResource, this.requestedContainerPadding));
-      }
-    } else {
-      // TODO: there is a bug here where the impl below assumes contiguous 1-based container ids,
-      // which might not be the case.
-      List<Container> newContainers = PackingUtils.getContainers(
-          this.existingPacking, this.requestedContainerPadding);
-      int containerId = 1;
-      for (Container container : newContainers) {
-        newContainerMap.put(containerId++, container);
-      }
-      for (int newContainerId = newContainers.size() + 1;
-           newContainerId <= numContainers; newContainerId++) {
-        PackingUtils.allocateNewContainer(
-            newContainers, newContainers.get(0).getCapacity(), this.requestedContainerPadding);
-        newContainerMap.put(newContainerId,
-            new Container(newContainerMap.get(1).getCapacity(), this.requestedContainerPadding));
+    if (this.numContainers > newContainerMap.size()) {
+      SortedSet<Integer> sortedIds = new TreeSet<>(newContainerMap.keySet());
+      int nextContainerId = sortedIds.last() + 1;
+      for (int i = 0; i < numContainers - newContainerMap.size(); i++) {
+        newContainerMap.put(nextContainerId++, new Container(
+            newContainerMap.get(sortedIds.first()).getCapacity(), this.requestedContainerPadding));
       }
     }
 
     this.containers = newContainerMap;
+  }
+
+  private void assertResourceSettings() {
+    if (this.defaultInstanceResource == null) {
+      throw new PackingException(
+          "defaultInstanceResource must be set on PackingPlanBuilder before modifying containers");
+    }
+    if (this.maxContainerResource == null) {
+      throw new PackingException(
+          "maxContainerResource must be set on PackingPlanBuilder before modifying containers");
+    }
   }
 }
