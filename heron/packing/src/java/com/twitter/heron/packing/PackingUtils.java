@@ -295,26 +295,6 @@ public final class PackingUtils {
     return containers;
   }
 
-
-  /**
-   * Generates an instance allocation for the current packing plan
-   *
-   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
-   */
-  // TODO: this gets moved into the PackingPlanBuilder impl
-  public static Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
-    Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
-    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-      ArrayList<InstanceId> instances = new ArrayList<InstanceId>();
-      for (PackingPlan.InstancePlan instance : containerPlan.getInstances()) {
-        instances.add(new InstanceId(instance.getComponentName(), instance.getTaskId(),
-            instance.getComponentIndex()));
-      }
-      allocation.put(containerPlan.getId(), instances);
-    }
-    return allocation;
-  }
-
   public enum ScalingDirection {
     UP,
     DOWN;

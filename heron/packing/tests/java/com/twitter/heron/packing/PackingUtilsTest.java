@@ -219,36 +219,6 @@ public class PackingUtilsTest {
     }
   }
 
-  /**
-   * Tests the getAllocation method.
-   */
-  @Test
-  public void testGetAllocation() {
-
-    Map<Integer, List<InstanceId>> packing = new HashMap<>();
-    packing.put(1, Arrays.asList(
-        new InstanceId("spout", 2, 0),
-        new InstanceId("bolt", 2, 0)));
-    packing.put(2, Arrays.asList(
-        new InstanceId("spout", 3, 0),
-        new InstanceId("bolt", 3, 0)));
-
-    PackingPlan packingPlan = generatePacking(packing);
-    Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(packingPlan);
-    Assert.assertEquals(2, allocation.size());
-    for (int i = 1; i <= 2; i++) {
-      Assert.assertEquals(2, allocation.get(i).size());
-    }
-    for (int container = 1; container <= 2; container++) {
-      Assert.assertEquals("spout", allocation.get(container).get(0).getComponentName());
-      Assert.assertEquals("bolt", allocation.get(container).get(1).getComponentName());
-      for (int i = 0; i < 2; i++) {
-        Assert.assertEquals(0, allocation.get(container).get(i).getComponentIndex());
-        Assert.assertEquals(container + 1, allocation.get(container).get(i).getTaskId());
-      }
-    }
-  }
-
   @Test
   public void testResourceScaleDown() {
     int noSpouts = 6;
