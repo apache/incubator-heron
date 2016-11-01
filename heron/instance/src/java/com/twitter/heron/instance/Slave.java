@@ -179,6 +179,8 @@ public class Slave implements Runnable, AutoCloseable {
     LOG.info("Closing the Slave Thread");
     this.metricsCollector.forceGatherAllMetrics();
     LOG.info("Cleaning up the instance");
-    instance.stop();
+    if (instance != null) {
+      instance.stop();
+    }
   }
 }
