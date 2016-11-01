@@ -80,9 +80,14 @@ public class TestTopologyBuilder extends TopologyBuilder {
   // To be compatible with earlier Integration Test Framework
   public SpoutDeclarer setSpout(String id, IRichSpout spout,
                                 Number parallelismHint, int maxExecutionCount) {
-    String topologyStartedUrl = stateLocation + "_topology_started";
-    String tuplesEmittedUrl = stateLocation + "_tuples_emitted"; // TODO: spout id?
-    String topologyUpdateUrl = stateLocation + "_" + stateUpdateToken;
+    String topologyStartedUrl = null;
+    String tuplesEmittedUrl = null;
+    String topologyUpdateUrl = null;
+    if (stateLocation != null) {
+      topologyStartedUrl = stateLocation + "_topology_started";
+      tuplesEmittedUrl = stateLocation + "_tuples_emitted";
+      topologyUpdateUrl = stateLocation + "_" + stateUpdateToken;
+    }
     IntegrationTestSpout wrappedSpout;
     switch (spoutWrapperType) {
       case TWO_PHASE:
