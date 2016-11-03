@@ -15,8 +15,10 @@ package com.twitter.heron.integration_test.core;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,12 +34,15 @@ import com.twitter.heron.api.tuple.Values;
 public class IntegrationTestSpout implements IRichSpout {
   private static final long serialVersionUID = 6068686695658877942L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
+  static final Values TERMINAL_TUPLE = new Values(Constants.INTEGRATION_TEST_TERMINAL);
+
   private final IRichSpout delegateSpout;
   private final String topologyStartedStateUrl;
   private long tuplesToAck = 0;
   private SpoutOutputCollector spoutOutputCollector;
   private boolean hasSetStarted = false;
   private int maxExecutions;
+  private Map<Object, List<Object>> pendingMessages;
 
   public IntegrationTestSpout(IRichSpout delegateSpout,
                               int maxExecutions,
@@ -46,6 +51,7 @@ public class IntegrationTestSpout implements IRichSpout {
     this.delegateSpout = delegateSpout;
     this.maxExecutions = maxExecutions;
     this.topologyStartedStateUrl = topologyStartedStateUrl;
+    this.pendingMessages = new HashMap<>();
   }
 
   protected void resetMaxExecutions(int resetExecutions) {
@@ -111,7 +117,7 @@ public class IntegrationTestSpout implements IRichSpout {
     // Since it is possible before nextTuple we get all the acks and the topology is done
     // However, since the isDone is not set to true, we may not emit terminals; it will cause bug.
     if (doneEmitting()) {
-      // This is needed if all the tuples have been emited and acked
+      // This is needed if all the tuples have been emitted and acked
       // before maxExecutions becomes 0
       emitTerminalIfNeeded();
       LOG.fine("The topology is done.");
@@ -127,25 +133,39 @@ public class IntegrationTestSpout implements IRichSpout {
   }
 
   @Override
-  public void ack(Object o) {
-    LOG.fine("Received a ack with MessageId: " + o);
+  public void ack(Object messageId) {
+    LOG.fine("Received a ack with MessageId: " + messageId);
 
     tuplesToAck--;
-    if (!o.equals(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID)) {
-      delegateSpout.ack(o);
+    if (!isTestMessageId(messageId)) {
+      delegateSpout.ack(messageId);
+    } else {
+      handleAckedMessage(messageId, pendingMessages.get(messageId));
     }
     emitTerminalIfNeeded();
   }
 
-  @Override
-  public void fail(Object o) {
-    LOG.fine("Received a fail with MessageId: " + o);
+  protected void handleAckedMessage(Object messageId, List<Object> tuple) {
+    pendingMessages.remove(messageId);
+  }
 
-    tuplesToAck--;
-    if (!o.equals(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID)) {
-      delegateSpout.fail(o);
+  @Override
+  public void fail(Object messageId) {
+    LOG.info("Received a fail with MessageId: " + messageId);
+
+    if (!isTestMessageId(messageId)) {
+      delegateSpout.fail(messageId);
+    } else {
+      if (pendingMessages.containsKey(messageId)) {
+        LOG.info("Re-emitting failed tuple with messageId " + messageId);
+        spoutOutputCollector.emit(pendingMessages.get(messageId), messageId);
+      }
     }
     emitTerminalIfNeeded();
+  }
+
+  private static boolean isTestMessageId(Object messageId) {
+    return ((String) messageId).startsWith(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID);
   }
 
   protected boolean doneEmitting() {
@@ -163,8 +183,6 @@ public class IntegrationTestSpout implements IRichSpout {
   protected long getPostEmitSleepTime() {
     return 0;
   }
-
-  protected static final Values TERMINAL_TUPLE = new Values(Constants.INTEGRATION_TEST_TERMINAL);
 
   protected void emitTerminalIfNeeded() {
     LOG.fine(String.format("doneEmitting = %s, tuplesToAck = %s", doneEmitting(), tuplesToAck));
@@ -184,33 +202,32 @@ public class IntegrationTestSpout implements IRichSpout {
     }
 
     @Override
-    public List<Integer> emit(String s, List<Object> objects, Object o) {
+    public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
       tuplesToAck++;
-      Object messageId = o;
-      if (o == null) {
-        LOG.fine("Add MessageId for tuple: " + objects);
-        messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
-      }
-
-      LOG.info("Emitting tuple: " + objects);
-      return delegate.emit(s, objects, messageId);
+      LOG.info("Emitting tuple: " + tuple);
+      return delegate.emit(streamId, tuple, getMessageId(tuple, messageId));
     }
 
     @Override
-    public void emitDirect(int i, String s, List<Object> objects, Object o) {
+    public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
       tuplesToAck++;
-      Object messageId = o;
-      if (o == null) {
-        messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
-      }
-
-      LOG.info("Emitting tuple: " + objects);
-      delegate.emitDirect(i, s, objects, messageId);
+      LOG.info("Emitting tuple: " + tuple);
+      delegate.emitDirect(taskId, streamId, tuple, getMessageId(tuple, messageId));
     }
 
     @Override
     public void reportError(Throwable throwable) {
       delegate.reportError(throwable);
+    }
+
+    private Object getMessageId(List<Object> tuple, Object messageId) {
+      Object id = messageId;
+      if (id == null) {
+        LOG.fine("Add MessageId for tuple: " + tuple);
+        id = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID + "_" + UUID.randomUUID();
+      }
+      pendingMessages.put(id, tuple);
+      return id;
     }
   }
 

@@ -34,6 +34,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 /**
  * Class that emits tuples until a given condition is met. The rate of emission is throttled and
  * once the condition is met there is an additional fixed time period where new tuples are emitted.
+ * Upon completion uploads the set of tuples emitted and acked to the state server.
  */
 class EmitUntilConditionTestSpout extends IntegrationTestSpout {
   private static final long serialVersionUID = 5231279157676404046L;
@@ -46,6 +47,7 @@ class EmitUntilConditionTestSpout extends IntegrationTestSpout {
   private final String tuplesEmittedStateServerUrl;
   private int taskIndex;
 
+  private List<String> tuplesEmitted;
   private boolean conditionCheckerRunning = false;
   private RuntimeException conditionCheckerException = null;
   private Long quittingTime = null;
@@ -59,6 +61,7 @@ class EmitUntilConditionTestSpout extends IntegrationTestSpout {
     this.tuplesEmittedStateServerUrl = tuplesEmittedStateServerUrl;
     this.postEmitSleepSeconds = 1;
     this.postConditionEmitSeconds = 10;
+    this.tuplesEmitted = new ArrayList<>();
   }
 
   private void startConditionChecker() {
@@ -77,6 +80,13 @@ class EmitUntilConditionTestSpout extends IntegrationTestSpout {
     });
   }
 
+  @Override
+  public void open(Map<String, Object> map,
+                   TopologyContext topologyContext,
+                   SpoutOutputCollector outputCollector) {
+    super.open(map, topologyContext, new EmitReportingTestSpoutCollector(outputCollector));
+    taskIndex = topologyContext.getThisTaskIndex();
+  }
 
   @Override
   protected boolean doneEmitting() {
@@ -105,15 +115,17 @@ class EmitUntilConditionTestSpout extends IntegrationTestSpout {
   }
 
   @Override
-  public void open(Map<String, Object> map,
-                   TopologyContext topologyContext,
-                   SpoutOutputCollector outputCollector) {
-    super.open(map, topologyContext, new EmitReportingTestSpoutCollector(outputCollector));
-    taskIndex = topologyContext.getThisTaskIndex();
+  protected void handleAckedMessage(Object messageId, List<Object> tuple) {
+    super.handleAckedMessage(messageId, tuple);
+    try {
+      tuplesEmitted.add(MAPPER.writeValueAsString(tuple.get(0)));
+    } catch (JsonProcessingException e) {
+      LOG.log(Level.SEVERE,
+          "Could not convert map to JSONString: " + tuple.get(0).toString(), e);
+    }
   }
 
   private final class EmitReportingTestSpoutCollector extends SpoutOutputCollector {
-    private List<String> tuplesEmitted = new ArrayList<>();
 
     private EmitReportingTestSpoutCollector(ISpoutOutputCollector delegate) {
       super(delegate);
@@ -135,15 +147,8 @@ class EmitUntilConditionTestSpout extends IntegrationTestSpout {
     private void handleTuple(String streamId, List<Object> tuple) {
       if (Constants.INTEGRATION_TEST_CONTROL_STREAM_ID.equals(streamId)
           && tuple == TERMINAL_TUPLE) {
-        // All tuples have been emitted. TODO: push tuplesEmitted to state server
+        // All tuples have been handled, push tuplesEmitted to state server
         sendTuplesEmittedToStateServer(tuplesEmitted);
-      } else {
-        try {
-          tuplesEmitted.add(MAPPER.writeValueAsString(tuple.get(0)));
-        } catch (JsonProcessingException e) {
-          LOG.log(Level.SEVERE,
-              "Could not convert map to JSONString: " + tuple.get(0).toString(), e);
-        }
       }
     }
 
