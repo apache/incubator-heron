@@ -35,6 +35,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  */
 public final class PackingUtils {
   private static final Logger LOG = Logger.getLogger(PackingUtils.class.getName());
+  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
 
   private PackingUtils() {
   }
@@ -87,6 +88,24 @@ public final class PackingUtils {
     return true;
   }
 
+  public static Resource getResourceRequirement(String component,
+                                                Map<String, Long> componentRamMap,
+                                                Resource defaultInstanceResource,
+                                                Resource maxContainerResource,
+                                                int paddingPercentage) {
+    long instanceRam = defaultInstanceResource.getRam();
+    if (componentRamMap.containsKey(component)) {
+      instanceRam = componentRamMap.get(component);
+    }
+    if (!isValidInstance(defaultInstanceResource.cloneWithRam(instanceRam),
+        MIN_RAM_PER_INSTANCE, maxContainerResource, paddingPercentage)) {
+      throw new RuntimeException("The topology configuration does not have "
+          + "valid resource requirements. Please make sure that the instance resource "
+          + "requirements do not exceed the maximum per-container resources.");
+    }
+    return defaultInstanceResource.cloneWithRam(instanceRam);
+  }
+
   /**
    * Estimate the per instance and topology resources for the packing plan based on the ramMap,
    * instance defaults and paddingPercentage.
@@ -94,14 +113,17 @@ public final class PackingUtils {
    * @return container plans
    */
   public static Set<PackingPlan.ContainerPlan> buildContainerPlans(
-      Map<Integer, List<InstanceId>> containerInstances,
+      Map<Integer, Container> containerInstances,
       Map<String, Long> ramMap,
       Resource instanceDefaults,
       double paddingPercentage) {
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
     for (Integer containerId : containerInstances.keySet()) {
-      List<InstanceId> instanceList = containerInstances.get(containerId);
+      Container container = containerInstances.get(containerId);
+      if (container.getInstances().size() == 0) {
+        continue;
+      }
 
       long containerRam = 0;
       long containerDiskInBytes = 0;
@@ -110,8 +132,10 @@ public final class PackingUtils {
       // Calculate the resource required for single instance
       Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
 
-      for (InstanceId instanceId : instanceList) {
-        long instanceRam = 0;
+      for (PackingPlan.InstancePlan instancePlan : container.getInstances()) {
+        InstanceId instanceId = new InstanceId(instancePlan.getComponentName(),
+            instancePlan.getTaskId(), instancePlan.getComponentIndex());
+        long instanceRam;
         if (ramMap.containsKey(instanceId.getComponentName())) {
           instanceRam = ramMap.get(instanceId.getComponentName());
         } else {
@@ -182,7 +206,7 @@ public final class PackingUtils {
    *
    * @return the number of containers
    */
-  public static int allocateNewContainer(ArrayList<Container> containers, Resource capacity,
+  public static int allocateNewContainer(List<Container> containers, Resource capacity,
                                          int paddingPercentage) {
     containers.add(new Container(capacity, paddingPercentage));
     return containers.size();
@@ -250,45 +274,25 @@ public final class PackingUtils {
    * Generates the containers that correspond to the current packing plan
    * along with their associated instances.
    *
-   * @return List of containers for the current packing plan
+   * @return Map of containers for the current packing plan, keyed by containerId
    */
-  public static ArrayList<Container> getContainers(PackingPlan currentPackingPlan,
-                                                   int paddingPercentage) {
-    ArrayList<Container> containers = new ArrayList<>();
+  static Map<Integer, Container> getContainers(PackingPlan currentPackingPlan,
+                                               int paddingPercentage) {
+    Map<Integer, Container> containers = new HashMap<>();
 
     //sort containers based on containerIds;
-    PackingPlan.ContainerPlan[] currentContainers =
+    PackingPlan.ContainerPlan[] currentContainerPlans =
         PackingUtils.sortOnContainerId(currentPackingPlan.getContainers());
 
     Resource capacity = currentPackingPlan.getMaxContainerResources();
-    for (int i = 0; i < currentContainers.length; i++) {
-      int containerId = PackingUtils.allocateNewContainer(
-          containers, capacity, paddingPercentage);
-      for (PackingPlan.InstancePlan instancePlan
-          : currentContainers[i].getInstances()) {
-        containers.get(containerId - 1).add(instancePlan);
+    for (PackingPlan.ContainerPlan currentContainerPlan : currentContainerPlans) {
+      Container container = new Container(capacity, paddingPercentage);
+      for (PackingPlan.InstancePlan instancePlan : currentContainerPlan.getInstances()) {
+        container.add(instancePlan);
       }
+      containers.put(currentContainerPlan.getId(), container);
     }
     return containers;
-  }
-
-
-  /**
-   * Generates an instance allocation for the current packing plan
-   *
-   * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
-   */
-  public static Map<Integer, List<InstanceId>> getAllocation(PackingPlan currentPackingPlan) {
-    Map<Integer, List<InstanceId>> allocation = new HashMap<Integer, List<InstanceId>>();
-    for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-      ArrayList<InstanceId> instances = new ArrayList<InstanceId>();
-      for (PackingPlan.InstancePlan instance : containerPlan.getInstances()) {
-        instances.add(new InstanceId(instance.getComponentName(), instance.getTaskId(),
-            instance.getComponentIndex()));
-      }
-      allocation.put(containerPlan.getId(), instances);
-    }
-    return allocation;
   }
 
   public enum ScalingDirection {

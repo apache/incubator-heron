@@ -201,50 +201,21 @@ public class PackingUtilsTest {
 
     int paddingPercentage = 10;
     Map<Integer, List<InstanceId>> packing = new HashMap<>();
-    packing.put(1, Arrays.asList(
+    packing.put(7, Arrays.asList(
         new InstanceId("spout", 1, 0),
         new InstanceId("bolt", 2, 0)));
-    packing.put(2, Arrays.asList(
+    packing.put(3, Arrays.asList(
         new InstanceId("spout", 3, 0),
         new InstanceId("bolt", 4, 0)));
 
     PackingPlan packingPlan = generatePacking(packing);
-    ArrayList<Container> containers = PackingUtils.getContainers(packingPlan, paddingPercentage);
-    Assert.assertEquals(2, containers.size());
-    for (int i = 0; i < 2; i++) {
-      Assert.assertEquals(paddingPercentage, containers.get(i).getPaddingPercentage());
-      Assert.assertEquals(packingPlan.getMaxContainerResources(), containers.get(i).getCapacity());
-      Assert.assertEquals(2, containers.get(i).getInstances().size());
-    }
-  }
-
-  /**
-   * Tests the getAllocation method.
-   */
-  @Test
-  public void testGetAllocation() {
-
-    Map<Integer, List<InstanceId>> packing = new HashMap<>();
-    packing.put(1, Arrays.asList(
-        new InstanceId("spout", 2, 0),
-        new InstanceId("bolt", 2, 0)));
-    packing.put(2, Arrays.asList(
-        new InstanceId("spout", 3, 0),
-        new InstanceId("bolt", 3, 0)));
-
-    PackingPlan packingPlan = generatePacking(packing);
-    Map<Integer, List<InstanceId>> allocation = PackingUtils.getAllocation(packingPlan);
-    Assert.assertEquals(2, allocation.size());
-    for (int i = 1; i <= 2; i++) {
-      Assert.assertEquals(2, allocation.get(i).size());
-    }
-    for (int container = 1; container <= 2; container++) {
-      Assert.assertEquals("spout", allocation.get(container).get(0).getComponentName());
-      Assert.assertEquals("bolt", allocation.get(container).get(1).getComponentName());
-      for (int i = 0; i < 2; i++) {
-        Assert.assertEquals(0, allocation.get(container).get(i).getComponentIndex());
-        Assert.assertEquals(container + 1, allocation.get(container).get(i).getTaskId());
-      }
+    Map<Integer, Container> containers = PackingUtils.getContainers(packingPlan, paddingPercentage);
+    Assert.assertEquals(packing.size(), containers.size());
+    for (Integer containerId : packing.keySet()) {
+      Container foundContainer = containers.get(containerId);
+      Assert.assertEquals(paddingPercentage, foundContainer.getPaddingPercentage());
+      Assert.assertEquals(packingPlan.getMaxContainerResources(), foundContainer.getCapacity());
+      Assert.assertEquals(2, foundContainer.getInstances().size());
     }
   }
 
