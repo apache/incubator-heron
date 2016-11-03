@@ -679,7 +679,7 @@ class HeronExecutor(object):
     # pylint: disable=unused-argument
     def on_packing_plan_watch(state_manager, new_packing_plan):
       Log.debug("State watch triggered for PackingPlan update on shard %s. Existing: %s, New: %s" %
-               (self.shard, str(self.packing_plan), str(new_packing_plan)))
+                (self.shard, str(self.packing_plan), str(new_packing_plan)))
 
       if self.packing_plan != new_packing_plan:
         Log.info("PackingPlan change detected on shard %s, relaunching effected processes."
@@ -690,7 +690,7 @@ class HeronExecutor(object):
         self.launch()
       else:
         Log.info(
-          "State watch triggered for PackingPlan update but plan not changed so not relaunching.")
+            "State watch triggered for PackingPlan update but plan not changed so not relaunching.")
 
     for state_manager in self.state_managers:
       # The callback function with the bound
