@@ -30,25 +30,6 @@ binpacking_deps_files = \
     ]
 
 java_library(
-    name = 'null-packing',
-    srcs = glob(["**/NullPacking.java"]),
-    deps = nullpacking_deps_files,
-)
-
-java_binary(
-    name = 'null-packing-unshaded',
-    srcs = glob(["**/NullPacking.java"]),
-    deps = nullpacking_deps_files,
-)
-
-genrule(
-    name = "heron-null-packing",
-    srcs = [":null-packing-unshaded_deploy.jar"],
-    outs = ["heron-null-packing.jar"],
-    cmd  = "cp $< $@",
-)
-
-java_library(
     name='roundrobin-packing',
     srcs = glob(["**/roundrobin/**/*.java","**/packing/*.java"]),
     deps = roundrobin_deps_files,
