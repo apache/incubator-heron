@@ -30,6 +30,7 @@ import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -148,9 +149,7 @@ public class RoundRobinPacking implements IPacking {
     PackingPlan plan = new PackingPlan(topology.getId(), containerPlans);
 
     // Check whether it is a valid PackingPlan
-    if (!isValidPackingPlan(plan)) {
-      return null;
-    }
+    validatePackingPlan(plan);
     return plan;
   }
 
@@ -326,23 +325,19 @@ public class RoundRobinPacking implements IPacking {
    * Check whether the PackingPlan generated is valid
    *
    * @param plan The PackingPlan to check
-   * @return true if it is valid. Otherwise return false
+   * @throws PackingException if it's not a valid plan
    */
-  private boolean isValidPackingPlan(PackingPlan plan) {
+  private void validatePackingPlan(PackingPlan plan) throws PackingException {
     for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Safe check
         if (instancePlan.getResource().getRam() < MIN_RAM_PER_INSTANCE) {
-          LOG.severe(String.format(
-              "Require at least %dMB ram. Given on %d MB",
-              MIN_RAM_PER_INSTANCE / Constants.MB,
+          throw new PackingException(String.format("Invalid packing plan generated. A minimum of "
+                  + "%d MB ram is required, but InstancePlan for component '%s' has %d MB",
+              MIN_RAM_PER_INSTANCE / Constants.MB, instancePlan.getComponentName(),
               instancePlan.getResource().getRam() / Constants.MB));
-
-          return false;
         }
       }
     }
-
-    return true;
   }
 }
