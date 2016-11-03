@@ -187,8 +187,7 @@ public class UpdateTopologyManager implements Closeable {
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
         topologyConfig, TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, 0L);
 
-    logInfo("Deactivating topology %s before handling update request: %d",
-        topology.getName(), deactivateSleepSeconds);
+    logInfo("Deactivating topology %s before handling update request", topology.getName());
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     assertTrue(TMasterUtils.transitionTopologyState(
@@ -271,7 +270,7 @@ public class UpdateTopologyManager implements Closeable {
       PhysicalPlans.PhysicalPlan physicalPlan = stateManager.getPhysicalPlan(topologyName);
 
       if (physicalPlan != null) {
-        logInfo("Received packing plan for topology %s. "
+        logInfo("Received physical plan for topology %s. "
             + "Reactivating topology after scaling event", topologyName);
         NetworkUtils.TunnelConfig tunnelConfig =
             NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
@@ -290,14 +289,15 @@ public class UpdateTopologyManager implements Closeable {
               topologyName, removableContainerCount);
         }
         return;
-      } else {
-        logInfo("Received null packing plan for topology %s.", topologyName);
       }
 
       if (System.currentTimeMillis() > this.timeoutTime) {
-        LOG.warning(String.format("New packing plan not received within configured timeout for "
+        LOG.warning(String.format("New physical plan not received within configured timeout for "
             + "topology %s. Not reactivating", topologyName));
         cancel();
+      } else {
+        logInfo("Couldn't fetch physical plan for topology %s. "
+            + " Will sleep and try again", topologyName);
       }
     }
   }
