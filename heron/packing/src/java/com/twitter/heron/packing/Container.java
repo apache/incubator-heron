@@ -26,7 +26,7 @@ import com.twitter.heron.spi.packing.Resource;
  * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
-public class Container {
+class Container {
 
   private HashSet<PackingPlan.InstancePlan> instances;
 
@@ -53,7 +53,7 @@ public class Container {
    * @param capacity the capacity of the container in terms of cpu, ram and disk
    * @param paddingPercentage the padding percentage
    */
-  public Container(Resource capacity, int paddingPercentage) {
+  Container(Resource capacity, int paddingPercentage) {
     this.capacity = capacity;
     this.instances = new HashSet<PackingPlan.InstancePlan>();
     this.paddingPercentage = paddingPercentage;
@@ -70,9 +70,11 @@ public class Container {
     long newRam = usedResources.getRam() + resource.getRam();
     double newCpu = usedResources.getCpu() + resource.getCpu();
     long newDisk = usedResources.getDisk() + resource.getDisk();
-    return PackingUtils.increaseBy(newRam, paddingPercentage) <= this.capacity.getRam()
-        && Math.round(PackingUtils.increaseBy(newCpu, paddingPercentage)) <= this.capacity.getCpu()
-        && PackingUtils.increaseBy(newDisk, paddingPercentage) <= this.capacity.getDisk();
+    boolean ramOk = PackingUtils.increaseBy(newRam, paddingPercentage) <= this.capacity.getRam();
+    boolean cpuOk =
+        Math.round(PackingUtils.increaseBy(newCpu, paddingPercentage)) <= this.capacity.getCpu();
+    boolean diskOk = PackingUtils.increaseBy(newDisk, paddingPercentage) <= this.capacity.getDisk();
+    return ramOk && cpuOk && diskOk;
   }
 
   /**
