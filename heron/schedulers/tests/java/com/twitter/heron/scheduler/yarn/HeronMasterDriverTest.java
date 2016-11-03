@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.reef.driver.context.ActiveContext;
+import com.google.common.base.Optional;
+
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
+import org.apache.reef.driver.evaluator.EvaluatorDescriptor;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.evaluator.FailedEvaluator;
@@ -30,12 +32,24 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.verification.VerificationMode;
 
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class HeronMasterDriverTest {
   private EvaluatorRequestor mockRequestor;
@@ -44,7 +58,7 @@ public class HeronMasterDriverTest {
 
   @Before
   public void createMocks() throws IOException {
-    mockRequestor = Mockito.mock(EvaluatorRequestor.class);
+    mockRequestor = mock(EvaluatorRequestor.class);
     driver = new HeronMasterDriver(mockRequestor,
         null,
         "yarn",
@@ -57,22 +71,28 @@ public class HeronMasterDriverTest {
         0,
         false);
     spyDriver = Mockito.spy(driver);
-    Mockito.doReturn("").when(spyDriver).getComponentRamMap();
+    doReturn("").when(spyDriver).getComponentRamMap();
   }
 
   @Test
-  public void requestsEvaluatorForTMaster() throws Exception {
-    AllocatedEvaluator mockEvaluator = registerMockEvaluator("testEvaluatorId", 0, 1, 1024);
+  public void requestContainerForWorkerSubmitsValidRequest() {
+    EvaluatorRequest request = spyDriver.createEvaluatorRequest(5, 786);
+    doReturn(request).when(spyDriver).createEvaluatorRequest(5, 786);
+    HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(3, 5, 786);
+    spyDriver.requestContainerForWorker(3, worker);
+    verify(mockRequestor, times(1)).submit(request);
+  }
 
-    Configuration mockConfig = Mockito.mock(Configuration.class);
-    Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig(0);
-
+  @Test
+  public void scheduleTMasterContainerRequestsContainerForTM() throws Exception {
     spyDriver.scheduleTMasterContainer();
-    Mockito.verify(mockEvaluator, invokedOnce()).submitContext(mockConfig);
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(0), anyHeronWorker());
+    verify(spyDriver, times(1)).createEvaluatorRequest(1, HeronMasterDriver.TM_MEM_SIZE_MB);
+    verify(mockRequestor, times(1)).submit(any(EvaluatorRequest.class));
   }
 
   @Test
-  public void requestsEvaluatorsForWorkers() throws Exception {
+  public void scheduleHeronWorkersRequestsContainersForPacking() throws Exception {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
 
     PackingPlan.ContainerPlan container1 = PackingTestUtils.testContainerPlan(1, 1, 2);
@@ -80,58 +100,40 @@ public class HeronMasterDriverTest {
     PackingPlan.ContainerPlan container2 = PackingTestUtils.testContainerPlan(2, 1, 2, 3);
     containers.add(container2);
 
-    AllocatedEvaluator mockEvaluator1
-        = registerMockEvaluator("testEvaluatorId1", 1, getCpu(container1), getRam(container1));
-
-    AllocatedEvaluator mockEvaluator2 =
-        registerMockEvaluator("testEvaluatorId2", 2, getCpu(container2), getRam(container2));
-
-    Configuration mockConfig = Mockito.mock(Configuration.class);
-    Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig(1);
-    Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig(2);
-
     PackingPlan packing = new PackingPlan("packingId", containers);
     spyDriver.scheduleHeronWorkers(packing);
-    Mockito.verify(mockEvaluator1, invokedOnce()).submitContext(mockConfig);
-    Mockito.verify(mockEvaluator2, invokedOnce()).submitContext(mockConfig);
+    verify(mockRequestor, times(2)).submit(any(EvaluatorRequest.class));
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(1), anyHeronWorker());
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(2), anyHeronWorker());
+    verify(spyDriver, times(1)).createEvaluatorRequest(getCpu(container1), getRam(container1));
+    verify(spyDriver, times(1)).createEvaluatorRequest(getCpu(container2), getRam(container2));
   }
 
   @Test
   public void onKillClosesContainers() throws Exception {
-    ActiveContext mockContext1 = Mockito.mock(ActiveContext.class);
-    Mockito.when(mockContext1.getId()).thenReturn("0"); // TM
-
-    ActiveContext mockContext2 = Mockito.mock(ActiveContext.class);
-    Mockito.when(mockContext2.getId()).thenReturn("1"); // worker
-
-    spyDriver.new HeronWorkerLauncher().onNext(mockContext1);
-    spyDriver.new HeronWorkerLauncher().onNext(mockContext2);
-
+    int numContainers = 3;
+    AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
     spyDriver.killTopology();
-
-    Mockito.verify(mockContext1).close();
-    Mockito.verify(mockContext2).close();
+    for (int id = 0; id < numContainers; id++) {
+      Mockito.verify(mockEvaluators[id]).close();
+      assertFalse(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
+    }
   }
 
   /**
    * Tests if all workers are killed and restarted
    */
   @Test
-  public void onRestartClosesAndStartsContainers() throws Exception {
+  public void restartTopologyClosesAndStartsContainers() throws Exception {
     int numContainers = 3;
-    AllocatedEvaluator[] mockEvaluators = new AllocatedEvaluator[numContainers];
-    for (int id = 0; id < numContainers; id++) {
-      AllocatedEvaluator mockEvaluator = registerMockEvaluator("id-" + id, id, id + 1, id + 1);
-      spyDriver.launchContainerForExecutor(id, id + 1, id + 1);
-      Mockito.verify(mockEvaluator, invokedOnce()).submitContext(anyConfiguration());
-      mockEvaluators[id] = mockEvaluator;
-    }
+    AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
 
+    verify(spyDriver, never()).requestContainerForWorker(anyInt(), anyHeronWorker());
     spyDriver.restartTopology();
 
     for (int id = 0; id < numContainers; id++) {
+      verify(spyDriver, times(1)).requestContainerForWorker(eq(id), anyHeronWorker());
       Mockito.verify(mockEvaluators[id]).close();
-      Mockito.verify(mockEvaluators[id], invokedTwice()).submitContext(anyConfiguration());
     }
   }
 
@@ -139,60 +141,48 @@ public class HeronMasterDriverTest {
    * Tests if a specific worker can be killed and restarted
    */
   @Test
-  public void restartsSpecificWorker() throws Exception {
+  public void restartWorkerRestartsSpecificWorker() throws Exception {
     int numContainers = 3;
-    AllocatedEvaluator[] mockEvaluators = new AllocatedEvaluator[numContainers];
-    for (int id = 0; id < numContainers; id++) {
-      AllocatedEvaluator mockEvaluator = registerMockEvaluator("id-" + id, id, id + 1, id + 1);
-      spyDriver.launchContainerForExecutor(id, id + 1, id + 1);
-      Mockito.verify(mockEvaluator, invokedOnce()).submitContext(anyConfiguration());
-      mockEvaluators[id] = mockEvaluator;
-    }
+    AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
 
+    verify(spyDriver, never()).requestContainerForWorker(anyInt(), anyHeronWorker());
     spyDriver.restartWorker(1);
 
-    Mockito.verify(mockEvaluators[1]).close();
-    Mockito.verify(mockEvaluators[1], invokedTwice()).submitContext(anyConfiguration());
-    Mockito.verify(mockEvaluators[0], Mockito.never()).close();
-    Mockito.verify(mockEvaluators[2], Mockito.never()).close();
+    for (int id = 0; id < numContainers; id++) {
+      if (id == 1) {
+        verify(spyDriver, times(1)).requestContainerForWorker(eq(id), anyHeronWorker());
+        Mockito.verify(mockEvaluators[1]).close();
+        assertFalse(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
+        continue;
+      }
+      verify(mockEvaluators[id], never()).close();
+      assertEquals(Integer.valueOf(id), spyDriver.lookupByEvaluatorId("e" + id).get());
+    }
   }
 
   @Test
-  public void handlesFailedTMasterContainer() throws Exception {
-    AllocatedEvaluator tMasterEvaluator = registerMockEvaluator("tMaster", 0, 1, 1024);
+  public void onNextFailedEvaluatorRestartsContainer() throws Exception {
+    int numContainers = 3;
+    AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
 
-    spyDriver.scheduleTMasterContainer();
-    Mockito.verify(tMasterEvaluator, invokedOnce()).submitContext(anyConfiguration());
-
-    FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
-    Mockito.when(mockFailedContainer.getId()).thenReturn("tMaster");
+    FailedEvaluator mockFailedContainer = mock(FailedEvaluator.class);
+    when(mockFailedContainer.getId()).thenReturn("e1");
+    verify(spyDriver, never()).requestContainerForWorker(anyInt(), anyHeronWorker());
     spyDriver.new FailedContainerHandler().onNext(mockFailedContainer);
 
-    Mockito.verify(spyDriver, invokedTwice()).allocateContainer(0, 1, 1024);
+    for (int id = 0; id < numContainers; id++) {
+      if (id == 1) {
+        verify(spyDriver, times(1)).requestContainerForWorker(eq(id), anyHeronWorker());
+        assertFalse(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
+        continue;
+      }
+      verify(mockEvaluators[id], never()).close();
+      assertEquals(Integer.valueOf(id), spyDriver.lookupByEvaluatorId("e" + id).get());
+    }
   }
 
   @Test
-  public void handlesFailedWorkerContainer() throws Exception {
-    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
-    PackingPlan.ContainerPlan container1 = PackingTestUtils.testContainerPlan(1, 1, 2);
-    containers.add(container1);
-    AllocatedEvaluator workerEvaluator =
-        registerMockEvaluator("worker", 1, getCpu(container1), getRam(container1));
-
-    PackingPlan packing = new PackingPlan("packingId", containers);
-    spyDriver.scheduleHeronWorkers(packing);
-    Mockito.verify(workerEvaluator, invokedOnce()).submitContext(anyConfiguration());
-
-    FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
-    Mockito.when(mockFailedContainer.getId()).thenReturn("worker");
-    spyDriver.new FailedContainerHandler().onNext(mockFailedContainer);
-
-    Mockito.verify(spyDriver, invokedTwice())
-        .allocateContainer(1, getCpu(container1), getRam(container1));
-  }
-
-  @Test
-  public void createsContextConfigForExecutorId() {
+  public void createContextConfigCreatesForGivenWorkerId() {
     Configuration config = driver.createContextConfig(4);
     boolean found = false;
     for (NamedParameterNode<?> namedParameterNode : config.getNamedParameters()) {
@@ -201,111 +191,193 @@ public class HeronMasterDriverTest {
         found = true;
       }
     }
-    Assert.assertTrue("\"ContextIdentifier\" didn't exist.", found);
-  }
-
-  @Test
-  public void requestsAndConsumesAllocatedContainer() throws Exception {
-    EvaluatorRequest evaluatorRequest = driver.createEvaluatorRequest(7, 234);
-    Mockito.doReturn(evaluatorRequest).when(spyDriver).createEvaluatorRequest(7, 234);
-
-    AllocatedEvaluator mockEvaluator = Mockito.mock(AllocatedEvaluator.class);
-    Mockito.when(mockEvaluator.getId()).thenReturn("testEvaluatorId");
-    spyDriver.new ContainerAllocationHandler().onNext(mockEvaluator);
-
-    AllocatedEvaluator evaluator = spyDriver.allocateContainer(5, 7, 234);
-    Mockito.verify(mockRequestor).submit(evaluatorRequest);
-    Assert.assertEquals(evaluator, mockEvaluator);
+    assertTrue("ContextIdentifier didn't exist.", found);
   }
 
   @Test(expected = HeronMasterDriver.ContainerAllocationException.class)
   public void scheduleHeronWorkersFailsOnDuplicateRequest() throws Exception {
     PackingPlan packingPlan = PackingTestUtils.testPackingPlan("test", new RoundRobinPacking());
-    PackingPlan.ContainerPlan containerPlan = packingPlan.getContainers().iterator().next();
-    AllocatedEvaluator container =
-        registerMockEvaluator("worker", 1, getCpu(containerPlan), getRam(containerPlan));
-
     spyDriver.scheduleHeronWorkers(packingPlan);
-    Mockito.verify(container, invokedOnce()).submitContext(anyConfiguration());
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(1), anyHeronWorker());
+    verify(mockRequestor, times(1)).submit(any(EvaluatorRequest.class));
 
+    PackingPlan.ContainerPlan duplicatePlan = PackingTestUtils.testContainerPlan(1);
     Set<PackingPlan.ContainerPlan> toBeAddedContainerPlans = new HashSet<>();
-    toBeAddedContainerPlans.add(containerPlan);
+    toBeAddedContainerPlans.add(duplicatePlan);
     spyDriver.scheduleHeronWorkers(toBeAddedContainerPlans);
   }
 
   @Test
   public void scheduleHeronWorkersAddsContainers() throws Exception {
     PackingPlan packingPlan = PackingTestUtils.testPackingPlan("test", new RoundRobinPacking());
-    PackingPlan.ContainerPlan containerPlan = packingPlan.getContainers().iterator().next();
-    AllocatedEvaluator container =
-        registerMockEvaluator("1", 1, getCpu(containerPlan), getRam(containerPlan));
     spyDriver.scheduleHeronWorkers(packingPlan);
-    Mockito.verify(container, invokedOnce()).submitContext(anyConfiguration());
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(1), anyHeronWorker());
+    verify(mockRequestor, times(1)).submit(any(EvaluatorRequest.class));
 
-    PackingPlan.ContainerPlan newContainerPlan = PackingTestUtils.testContainerPlan(2);
-    int ram = getRam(newContainerPlan);
-    int cpu = getCpu(newContainerPlan);
     Set<PackingPlan.ContainerPlan> toBeAddedContainerPlans = new HashSet<>();
-    toBeAddedContainerPlans.add(newContainerPlan);
+    toBeAddedContainerPlans.add(PackingTestUtils.testContainerPlan(2));
     toBeAddedContainerPlans.add(PackingTestUtils.testContainerPlan(3));
-    AllocatedEvaluator newContainer2 = registerMockEvaluator("2", 2, cpu, ram);
-    AllocatedEvaluator newContainer3 = registerMockEvaluator("3", 3, cpu, ram);
 
     spyDriver.scheduleHeronWorkers(toBeAddedContainerPlans);
-    Mockito.verify(newContainer2, invokedOnce()).submitContext(anyConfiguration());
-    Mockito.verify(newContainer3, invokedOnce()).submitContext(anyConfiguration());
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(2), anyHeronWorker());
+    verify(spyDriver, times(1)).requestContainerForWorker(eq(3), anyHeronWorker());
+    verify(mockRequestor, times(3)).submit(any(EvaluatorRequest.class));
   }
 
   @Test
   public void killWorkersTerminatesSpecificContainers() throws Exception {
     int numContainers = 5;
-    AllocatedEvaluator[] mockEvaluators = new AllocatedEvaluator[numContainers];
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     for (int id = 0; id < numContainers; id++) {
-      PackingPlan.ContainerPlan containerPlan = PackingTestUtils.testContainerPlan(id);
-      containers.add(containerPlan);
-
-      AllocatedEvaluator mockEvaluator =
-          registerMockEvaluator("id-" + id, id, getCpu(containerPlan), getRam(containerPlan));
-      mockEvaluators[id] = mockEvaluator;
+      containers.add(PackingTestUtils.testContainerPlan(id));
     }
     PackingPlan packingPlan = new PackingPlan("packing", containers);
-    spyDriver.scheduleHeronWorkers(packingPlan);
 
+    spyDriver.scheduleHeronWorkers(packingPlan);
     for (int id = 0; id < numContainers; id++) {
-      Mockito.verify(mockEvaluators[id], invokedOnce()).submitContext(anyConfiguration());
+      verify(spyDriver, times(1)).requestContainerForWorker(eq(id), anyHeronWorker());
+      assertTrue(spyDriver.lookupByContainerPlan(id).isPresent());
     }
+    verify(mockRequestor, times(numContainers)).submit(any(EvaluatorRequest.class));
+
+    AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
 
     Set<PackingPlan.ContainerPlan> containersTobeDeleted = new HashSet<>();
     containersTobeDeleted.add(PackingTestUtils.testContainerPlan(2));
     containersTobeDeleted.add(PackingTestUtils.testContainerPlan(3));
     spyDriver.killWorkers(containersTobeDeleted);
 
-    Mockito.verify(mockEvaluators[0], Mockito.never()).close();
-    Mockito.verify(mockEvaluators[1], Mockito.never()).close();
-    Mockito.verify(mockEvaluators[2]).close();
-    Mockito.verify(mockEvaluators[3]).close();
-    Mockito.verify(mockEvaluators[4], Mockito.never()).close();
-  }
-
-  private AllocatedEvaluator registerMockEvaluator(String name, int id, int cpu, int ram) {
-    AllocatedEvaluator mockWorkerEvaluator = Mockito.mock(AllocatedEvaluator.class);
-    Mockito.when(mockWorkerEvaluator.getId()).thenReturn(name);
-    try {
-      Mockito.doReturn(mockWorkerEvaluator).when(spyDriver).allocateContainer(id, cpu, ram);
-    } catch (InterruptedException e) {
-      // since this is a mock, this exception will never happen
-      e.printStackTrace();
+    for (int id = 0; id < numContainers; id++) {
+      if (id == 2 || id == 3) {
+        verify(mockEvaluators[id], times(1)).close();
+        assertFalse(spyDriver.lookupByContainerPlan(id).isPresent());
+        assertFalse(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
+        continue;
+      }
+      verify(mockEvaluators[id], never()).close();
+      assertTrue(spyDriver.lookupByContainerPlan(id).isPresent());
+      assertTrue(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
     }
-    return mockWorkerEvaluator;
   }
 
-  private VerificationMode invokedOnce() {
-    return Mockito.timeout(1000).times(1);
+  @Test
+  public void findLargestFittingWorkerReturnsLargestWorker() {
+    Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(2, 7, 7 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(3, 5, 5 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(4, 1, 1 * 1024));
+
+    // enough memory and cores to fit largest container, 2
+    verifyFittingContainer(workers, 7 * 1024 + 100, 7, 2);
+
+    // enough to fit 3 but not container 2
+    verifyFittingContainer(workers, 5 * 1024 + 100, 6, 3);
+
+    // enough memory but not enough cores for container 2
+    verifyFittingContainer(workers, 7 * 1024 + 100, 5, 3);
+
+    // enough cores but not enough memory for container 2
+    verifyFittingContainer(workers, 5 * 1024 + 100, 7, 3);
   }
 
-  private VerificationMode invokedTwice() {
-    return Mockito.timeout(1000).times(2);
+  private void verifyFittingContainer(Set<HeronMasterDriver.HeronWorker> containers,
+                                      int ram,
+                                      int cores,
+                                      int expectedContainer) {
+    EvaluatorDescriptor evaluatorDescriptor = mock(EvaluatorDescriptor.class);
+    AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
+    when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(evaluatorDescriptor);
+
+    when(evaluatorDescriptor.getMemory()).thenReturn(ram);
+    when(evaluatorDescriptor.getNumberOfCores()).thenReturn(cores);
+    Optional<HeronMasterDriver.HeronWorker> worker =
+        spyDriver.findLargestFittingWorker(mockEvaluator, containers, false);
+    assertTrue(worker.isPresent());
+    assertEquals(expectedContainer, worker.get().getWorkerId());
+  }
+
+  @Test
+  public void fitBiggestContainerIgnoresCoresIfMissing() {
+    Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
+
+    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, 3 * 1024);
+    Optional<HeronMasterDriver.HeronWorker> result =
+        spyDriver.findLargestFittingWorker(mockEvaluator, workers, false);
+    Assert.assertFalse(result.isPresent());
+
+    result = spyDriver.findLargestFittingWorker(mockEvaluator, workers, true);
+    assertTrue(result.isPresent());
+    assertEquals(1, result.get().getWorkerId());
+  }
+
+  @Test
+  public void onNextAllocatedEvaluatorStartsWorker() throws Exception {
+    PackingPlan packingPlan = PackingTestUtils.testPackingPlan("test", new RoundRobinPacking());
+    spyDriver.scheduleHeronWorkers(packingPlan);
+
+    assertTrue(spyDriver.lookupByContainerPlan(1).isPresent());
+    PackingPlan.ContainerPlan containerPlan = spyDriver.lookupByContainerPlan(1).get();
+
+    AllocatedEvaluator mockEvaluator =
+        createMockEvaluator("test", getCpu(containerPlan), getRam(containerPlan));
+
+    assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
+    spyDriver.new ContainerAllocationHandler().onNext(mockEvaluator);
+    assertTrue(spyDriver.lookupByEvaluatorId("test").isPresent());
+    assertEquals(Integer.valueOf(1), spyDriver.lookupByEvaluatorId("test").get());
+    verify(mockEvaluator, times(1)).submitContext(any(Configuration.class));
+  }
+
+  @Test
+  public void onNextAllocatedEvaluatorDiscardsExtraWorker() throws Exception {
+    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, 123);
+    assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
+    spyDriver.new ContainerAllocationHandler().onNext(mockEvaluator);
+    assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
+    verify(mockEvaluator, never()).submitContext(any(Configuration.class));
+  }
+
+  private AllocatedEvaluator[] createApplicationWithContainers(int numContainers) {
+    AllocatedEvaluator[] mockEvaluators = new AllocatedEvaluator[numContainers];
+    for (int id = 0; id < numContainers; id++) {
+      mockEvaluators[id] = simulateContainerAllocation("e" + id, 1, 123, id);
+    }
+    for (int id = 0; id < numContainers; id++) {
+      assertEquals(Integer.valueOf(id), spyDriver.lookupByEvaluatorId("e" + id).get());
+      verify(mockEvaluators[id], times(1)).submitContext(anyConfiguration());
+      verify(mockEvaluators[id], never()).close();
+    }
+    return mockEvaluators;
+  }
+
+  private AllocatedEvaluator simulateContainerAllocation(String evaluatorId,
+                                                         int cores,
+                                                         int ram,
+                                                         int workerId) {
+    AllocatedEvaluator evaluator = createMockEvaluator(evaluatorId, cores, ram);
+    HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(workerId, cores, ram);
+
+    Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
+    workers.add(worker);
+    doReturn(workers).when(spyDriver).getWorkersAwaitingAllocation();
+
+    doReturn(Optional.of(worker)).when(spyDriver)
+        .findLargestFittingWorker(eq(evaluator), eq(workers), eq(false));
+
+    spyDriver.new ContainerAllocationHandler().onNext(evaluator);
+    return evaluator;
+  }
+
+  private AllocatedEvaluator createMockEvaluator(String evaluatorId, int cores, int mem) {
+    EvaluatorDescriptor descriptor = mock(EvaluatorDescriptor.class);
+    when(descriptor.getMemory()).thenReturn(mem);
+    when(descriptor.getNumberOfCores()).thenReturn(cores);
+    AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
+    when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(descriptor);
+    when(mockEvaluator.getId()).thenReturn(evaluatorId);
+    return mockEvaluator;
   }
 
   private int getRam(PackingPlan.ContainerPlan container1) {
@@ -318,5 +390,9 @@ public class HeronMasterDriverTest {
 
   private Configuration anyConfiguration() {
     return Mockito.any(Configuration.class);
+  }
+
+  private HeronMasterDriver.HeronWorker anyHeronWorker() {
+    return any(HeronMasterDriver.HeronWorker.class);
   }
 }
