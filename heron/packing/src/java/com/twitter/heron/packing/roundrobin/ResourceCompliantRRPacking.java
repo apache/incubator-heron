@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.PackingException;
 import com.twitter.heron.packing.PackingPlanBuilder;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.ResourceExceededException;
@@ -28,6 +27,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -174,7 +174,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         adjustments++;
       }
     }
-    return null; // TODO: should throw packing exception
+    throw new PackingException(
+        String.format("Could not pack all instances into %d containers ", this.numContainers));
   }
 
   /**
@@ -212,7 +213,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
             this.numContainers));
       }
     }
-    return null; // TODO: should throw packing exception
+    throw new PackingException(
+        String.format("Could not repack all instances into %d containers ", this.numContainers));
   }
 
   @Override
