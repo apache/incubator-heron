@@ -77,6 +77,7 @@ class StMgrServer : public Server {
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
+  void UpdateQueueMetrics(EventLoop::Status);
 
   // Various handlers for different requests
 
@@ -103,9 +104,6 @@ class StMgrServer : public Server {
   void StartBackPressureConnectionCb(Connection* _connection);
   // Relieve back pressure
   void StopBackPressureConnectionCb(Connection* _connection);
-
-  // Connection buffer size metric
-  void ConnectionBufferChangeCb(Connection* _connection);
 
   // Can we free the back pressure on the spouts?
   void AttemptStopBackPressureFromSpouts();

@@ -76,6 +76,8 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pres
 // Queue size in bytes sent to each instance
 const sp_string METRIC_QUEUE_SIZE_TO_INSTANCE_COMPID = "__queue_size_bytes_to_instance_by_compid/";
 
+const sp_int64 QUEUE_METRICS_FREQUENCY = 10 * 1000 * 1000;
+
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
                          const sp_string& _stmgr_id,
@@ -107,6 +109,11 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
+
+  // Update queue related metrics every 10 seconds
+  CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
+    this->UpdateQueueMetrics(status);
+  }, true, QUEUE_METRICS_FREQUENCY), 0);
 }
 
 StMgrServer::~StMgrServer() {
@@ -163,6 +170,15 @@ sp_string StMgrServer::MakeBackPressureCompIdMetricName(const sp_string& instanc
 
 sp_string StMgrServer::MakeQueueSizeCompIdMetricName(const sp_string& instanceid) {
   return METRIC_QUEUE_SIZE_TO_INSTANCE_COMPID + instanceid;
+}
+
+void StMgrServer::UpdateQueueMetrics(EventLoop::Status) {
+  for (auto itr = active_instances_.begin(); itr != active_instances_.end(); ++itr) {
+    sp_int32 task_id = itr->second;
+    const sp_string& instance_id = instance_info_[task_id]->instance_->instance_id();
+    sp_int32 bytes = itr->first->getOutstandingBytes();
+    queue_metric_map_[instance_id]->SetValue(bytes);
+  }
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {
@@ -480,15 +496,6 @@ void StMgrServer::StopBackPressureConnectionCb(Connection* _connection) {
   }
   LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
   AttemptStopBackPressureFromSpouts();
-}
-
-void StMgrServer::ConnectionBufferChangeCb(Connection* _connection) {
-  // Find the instance this connection belongs to
-  const sp_string& instance_name = GetInstanceName(_connection);
-  if (instance_name != "") {
-    sp_int32 bytes = _connection->getOutstandingBytes();
-    queue_metric_map_[instance_name]->SetValue(bytes);
-  }
 }
 
 void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {

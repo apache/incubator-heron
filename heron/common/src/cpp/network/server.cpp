@@ -109,12 +109,6 @@ BaseConnection* Server::CreateConnection(ConnectionEndPoint* _endpoint, Connecti
 
   conn->registerForBackPressure(std::move(backpressure_starter_),
                                 std::move(backpressure_reliever_));
-
-  auto buffer_size_change_ = [this](Connection* conn) {
-    this->ConnectionBufferChangeCb(conn);
-  };
-
-  conn->registerForBufferChange(std::move(buffer_size_change_));
   return conn;
 }
 
@@ -260,8 +254,4 @@ void Server::StartBackPressureConnectionCb(Connection* conn) {
 
 void Server::StopBackPressureConnectionCb(Connection* conn) {
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
-}
-
-void Server::ConnectionBufferChangeCb(Connection* conn) {
-  // Nothing to be done here. Should be handled by inheritors if they care about buffer size change
 }
