@@ -21,7 +21,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -120,7 +122,8 @@ public class HeronMasterDriver {
   // TODO: https://github.com/twitter/heron/issues/949: implement Driver HA
 
   private String componentRamMap;
-  private AtomicBoolean isTopologyKilled = new AtomicBoolean(false);
+  private ExecutorService tMasterExecutorService;
+  private Future<?> tMasterFuture;
 
   @Inject
   public HeronMasterDriver(EvaluatorRequestor requestor,
@@ -152,6 +155,7 @@ public class HeronMasterDriver {
     this.httpPort = httpPort;
     this.verboseMode = verboseMode;
     this.multiKeyWorkerMap = new MultiKeyWorkerMap();
+    this.tMasterExecutorService = Executors.newSingleThreadExecutor();
 
     // This instance of Driver will be used for managing topology containers
     HeronMasterDriverProvider.setInstance(this);
@@ -169,11 +173,18 @@ public class HeronMasterDriver {
   /**
    * Requests container for TMaster as container/executor id 0.
    */
-  void scheduleTMasterContainer() throws ContainerAllocationException {
-    LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
-    // TODO: https://github.com/twitter/heron/issues/951: colocate TMaster and Scheduler
-    HeronWorker tMasterWorker = new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
-    requestContainerForWorker(TMASTER_CONTAINER_ID, tMasterWorker);
+  void scheduleTMasterContainer() {
+    LOG.log(Level.INFO, "Launching executor for TM: {0}", topologyName);
+    final HeronExecutorTask tMasterTask = new HeronExecutorTask(null, TMASTER_CONTAINER_ID, cluster,
+        role, topologyName, env, topologyPackageName, heronCorePackageName, topologyJar,
+        getComponentRamMap(), verboseMode);
+
+    tMasterFuture = tMasterExecutorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        tMasterTask.startExecutor();
+      }
+    });
   }
 
   /**
@@ -262,7 +273,12 @@ public class HeronMasterDriver {
 
   public void killTopology() {
     LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
-    isTopologyKilled.set(true);
+
+    LOG.log(Level.INFO, "Killing TMaster process: {0}", topologyName);
+    if (!isTopologyKilled()) {
+      tMasterFuture.cancel(true);
+    }
+    tMasterExecutorService.shutdownNow();
 
     for (HeronWorker worker : multiKeyWorkerMap.getHeronWorkers()) {
       AllocatedEvaluator evaluator = multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
@@ -390,6 +406,10 @@ public class HeronMasterDriver {
   @VisibleForTesting
   Optional<ContainerPlan> lookupByContainerPlan(int id) {
     return Optional.fromNullable(containerPlans.get(id));
+  }
+
+  private boolean isTopologyKilled() {
+    return tMasterFuture.isDone() || tMasterFuture.isCancelled();
   }
 
   /**
@@ -594,7 +614,7 @@ public class HeronMasterDriver {
   public final class HeronWorkerLauncher implements EventHandler<ActiveContext> {
     @Override
     public void onNext(ActiveContext context) {
-      if (isTopologyKilled.get()) {
+      if (isTopologyKilled()) {
         LOG.log(Level.WARNING, "Topology has been killed, close new context: {0}", context.getId());
         context.close();
         return;
@@ -628,7 +648,7 @@ public class HeronMasterDriver {
     @Override
     public void onNext(FailedTask failedTask) {
       LOG.log(Level.WARNING, "Task {0} failed. Relaunching the task", failedTask.getId());
-      if (isTopologyKilled.get()) {
+      if (isTopologyKilled()) {
         LOG.info("The topology is killed. Ignore task fail event");
         return;
       }
@@ -641,7 +661,7 @@ public class HeronMasterDriver {
     @Override
     public void onNext(CompletedTask task) {
       LOG.log(Level.INFO, "Task {0} completed.", task.getId());
-      if (isTopologyKilled.get()) {
+      if (isTopologyKilled()) {
         LOG.info("The topology is killed. Ignore task complete event");
         return;
       }
