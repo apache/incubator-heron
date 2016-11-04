@@ -26,6 +26,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -55,7 +56,7 @@ public class RoundRobinPackingTest {
     return packing.pack();
   }
 
-  @Test
+  @Test(expected = PackingException.class)
   public void testCheckFailure() throws Exception {
     int numContainers = 2;
     int spoutParallelism = 4;
@@ -71,9 +72,7 @@ public class RoundRobinPackingTest {
     topologyConfig.setContainerRamRequested(containerRam);
 
     TopologyAPI.Topology topology =  getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan = getRoundRobinPackingPlan(topology);
-
-    Assert.assertNull(packingPlan);
+    getRoundRobinPackingPlan(topology);
   }
 
   @Test
