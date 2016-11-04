@@ -19,11 +19,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.PackingException;
 import com.twitter.heron.packing.PackingPlanBuilder;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.RamRequirement;
@@ -33,6 +31,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -158,8 +157,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     try {
       planBuilder = getFFDAllocation(planBuilder);
     } catch (ResourceExceededException e) {
-      LOG.log(Level.SEVERE, "Could not allocate all instances to packing plan", e);
-      return null; // TODO: should throw packing exception
+      throw new PackingException("Could not allocate all instances to packing plan", e);
     }
 
     return planBuilder.build();
@@ -176,8 +174,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     try {
       planBuilder = getFFDAllocation(planBuilder, currentPackingPlan, componentChanges);
     } catch (ResourceExceededException e) {
-      LOG.log(Level.SEVERE, "Could not allocate all instances to packing plan", e);
-      return null; // TODO: should throw packing exception
+      throw new PackingException("Could not repack instances into existing packing plan", e);
     }
 
     return planBuilder.build();

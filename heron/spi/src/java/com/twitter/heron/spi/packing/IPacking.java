@@ -37,8 +37,9 @@ public interface IPacking extends AutoCloseable {
    * Packing algorithm output generates instance id and container id.
    *
    * @return PackingPlan describing the job to schedule.
+   * @throws PackingException if the packing plan can not be generated
    */
-  PackingPlan pack();
+  PackingPlan pack() throws PackingException;
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
