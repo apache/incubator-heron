@@ -42,13 +42,15 @@
       "topologyName" : "IntegrationTest_BasicTopologyOneTaskScaleUp",
       "classPath"    : "basic_topology_one_task.BasicTopologyOneTask",
       "updateArgs"   : "--component-parallelism=ab-spout:2 --component-parallelism=identity-bolt:3",
-      "expectedResultRelativePath" : "basic_topology_one_task/resources/BasicTopologyOneTaskScaled.json"
+      "topologyArgs" : "-u topology_updated -S emit_until",
+      "expectedHttpResultTaskCount" : 2
     },
     {
       "topologyName" : "IntegrationTest_BasicTopologyOneTaskScaleUpAndDown",
       "classPath"    : "basic_topology_one_task.BasicTopologyOneTask",
       "updateArgs"   : "--component-parallelism=ab-spout:2 --component-parallelism=identity-bolt:1",
-      "expectedResultRelativePath" : "basic_topology_one_task/resources/BasicTopologyOneTaskScaled.json"
+      "topologyArgs" : "-u topology_updated -S emit_until",
+      "expectedHttpResultTaskCount" : 2
     },
     {
       "topologyName" : "IntegrationTest_BoltDoubleEmitTuples",

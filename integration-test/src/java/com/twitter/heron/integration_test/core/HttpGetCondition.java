@@ -21,7 +21,7 @@ import java.net.URL;
 /**
  * Class that satisfies a condition once it gets a 200 response from an http get request
  */
-class HttpGetCondition implements MultiPhaseTestSpout.Condition {
+class HttpGetCondition implements Condition {
   private static final long serialVersionUID = -3370730083374050883L;
   private static final long SLEEP_MS = 10 * 1000;
   private static final int MAX_ATTEMPTS = 10;

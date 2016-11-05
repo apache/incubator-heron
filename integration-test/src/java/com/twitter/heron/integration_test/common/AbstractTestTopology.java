@@ -38,12 +38,14 @@ public abstract class AbstractTestTopology {
   private static final String RESULTS_URL_OPTION = "results_url";
   private static final String STATE_URL_OPTION = "test_state_url";
   private static final String STATE_UPDATE_TOKEN = "state_server_update_token";
+  private static final String SPOUT_WRAPPER_TOKEN = "spout_wrapper_token";
 
   private final CommandLine cmd;
   private final String httpServerResultsUrl;
   private final String httpServerStateUrl;
   private final String topologyName;
   private final String stateUpdateToken;
+  private final TestTopologyBuilder.SpoutWrapperType spoutWrapperType;
 
   protected AbstractTestTopology(String[] args) throws MalformedURLException {
     CommandLineParser parser = new DefaultParser();
@@ -64,6 +66,12 @@ public abstract class AbstractTestTopology {
     this.httpServerStateUrl =
         pathAppend(cmd.getOptionValue(STATE_URL_OPTION), this.topologyName);
     this.stateUpdateToken = cmd.getOptionValue(STATE_UPDATE_TOKEN);
+    if (cmd.getOptionValue(SPOUT_WRAPPER_TOKEN) != null) {
+      this.spoutWrapperType = TestTopologyBuilder.SpoutWrapperType.valueOf(
+          cmd.getOptionValue(SPOUT_WRAPPER_TOKEN).toUpperCase());
+    } else {
+      this.spoutWrapperType = TestTopologyBuilder.SpoutWrapperType.DEFAULT;
+    }
   }
 
   protected abstract TestTopologyBuilder buildTopology(TestTopologyBuilder builder);
@@ -94,16 +102,22 @@ public abstract class AbstractTestTopology {
     options.addOption(stateUrlOption);
 
     Option stateTokenOption = new Option("u", STATE_UPDATE_TOKEN, true,
-        "state server token to use for multi-phase test");
+        "state server token to use for spout http condition triggers");
     stateTokenOption.setRequired(false);
     options.addOption(stateTokenOption);
+
+    Option spoutWrapperOption = new Option("S", SPOUT_WRAPPER_TOKEN, true,
+        "What type of spout wrapper to use");
+    spoutWrapperOption.setType(TestTopologyBuilder.SpoutWrapperType.class);
+    spoutWrapperOption.setRequired(false);
+    options.addOption(spoutWrapperOption);
 
     return options;
   }
 
   public final void submit() throws AlreadyAliveException, InvalidTopologyException {
-    TestTopologyBuilder builder =
-        new TestTopologyBuilder(httpServerResultsUrl, httpServerStateUrl, stateUpdateToken);
+    TestTopologyBuilder builder = new TestTopologyBuilder(
+        httpServerResultsUrl, httpServerStateUrl, stateUpdateToken, spoutWrapperType);
 
     Config conf = buildConfig(new BasicConfig());
     HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());

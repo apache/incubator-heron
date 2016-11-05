@@ -24,13 +24,24 @@ import com.twitter.heron.api.tuple.Values;
 
 
 /**
- * A spout that emit "A" and "B" continuously in order, one word every "nextTuple()" called
+ * A spout that emit "A" and "B" continuously in order, one word every "nextTuple()" called. If
+ * {@code appendSequenceId} is true, appends and underscore followed by the sequence id.
  */
 public class ABSpout extends BaseRichSpout {
   private static final long serialVersionUID = 3233011943332591934L;
+  private static final String[] TO_SEND = new String[]{"A", "B"};
+
   private SpoutOutputCollector collector;
   private int emitted = 0;
-  private String[] toSend = new String[]{"A", "B"};
+  private boolean appendSequenceId;
+
+  public ABSpout() {
+    this(false);
+  }
+
+  public ABSpout(boolean appendSequenceId) {
+    this.appendSequenceId = appendSequenceId;
+  }
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
@@ -46,7 +57,11 @@ public class ABSpout extends BaseRichSpout {
 
   @Override
   public void nextTuple() {
-    String word = toSend[(emitted++) % toSend.length];
+    String word = TO_SEND[emitted % TO_SEND.length];
+    if (appendSequenceId) {
+      word = word + "_" + emitted;
+    }
     collector.emit(new Values(word));
+    emitted++;
   }
 }
