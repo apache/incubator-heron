@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.PackingException;
 import com.twitter.heron.packing.PackingPlanBuilder;
 import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.ResourceExceededException;
@@ -28,6 +27,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -91,23 +91,16 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   private Resource defaultInstanceResources;
 
   private int numContainers;
-  private int numAdjustments;
   //ContainerId to examine next. It is set to 1 when the
   //algorithm restarts with a new number of containers
   private int containerId;
-
-  private void adjustNumContainers(int additionalContainers) {
-    increaseNumContainers(additionalContainers);
-    this.numAdjustments++;
-  }
 
   private void increaseNumContainers(int additionalContainers) {
     this.numContainers += additionalContainers;
   }
 
-  private void resetState() {
+  private void resetToFirstContainer() {
     this.containerId = 1;
-    this.numAdjustments = 0;
   }
 
   private int nextContainerId(int afterId) {
@@ -122,7 +115,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         Context.instanceCpu(config),
         Context.instanceRam(config),
         Context.instanceDisk(config));
-    resetState();
+    resetToFirstContainer();
   }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
@@ -155,8 +148,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   @Override
   public PackingPlan pack() {
 
-    int adjustments = this.numAdjustments;
-    while (adjustments <= this.numAdjustments) {
+    while (true) {
       try {
         PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
         planBuilder.updateNumContainers(numContainers);
@@ -169,12 +161,10 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         LOG.info(String.format(
             "%s Increasing the number of containers to %s and attempting to place again.",
             e.getMessage(), this.numContainers + 1));
-        adjustNumContainers(1);
-        containerId = 1;
-        adjustments++;
+        increaseNumContainers(1);
+        resetToFirstContainer();
       }
     }
-    return null; // TODO: should throw packing exception
   }
 
   /**
@@ -184,7 +174,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
     this.numContainers = currentPackingPlan.getContainers().size();
-    resetState();
+    resetToFirstContainer();
 
     int additionalContainers = computeNumAdditionalContainers(componentChanges, currentPackingPlan);
     increaseNumContainers(additionalContainers);
@@ -192,8 +182,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         "Allocated %s additional containers for repack bring the number of containers to %s.",
         additionalContainers, this.numContainers));
 
-    int adjustments = 0;
-    while (adjustments <= this.numAdjustments) {
+    while (true) {
       try {
         PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
         planBuilder.updateNumContainers(numContainers);
@@ -204,15 +193,13 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
       } catch (ResourceExceededException e) {
         //Not enough containers. Adjust the number of containers.
-        adjustNumContainers(1);
-        containerId = 1;
-        adjustments++;
+        increaseNumContainers(1);
+        resetToFirstContainer();
         LOG.info(String.format(
             "Increasing the number of containers to %s and attempting packing again.",
             this.numContainers));
       }
     }
-    return null; // TODO: should throw packing exception
   }
 
   @Override
@@ -267,12 +254,12 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.UP);
 
     if (!componentsToScaleDown.isEmpty()) {
-      this.containerId = 1;
+      resetToFirstContainer();
       removeInstancesFromContainers(planBuilder, componentsToScaleDown);
     }
 
     if (!componentsToScaleUp.isEmpty()) {
-      this.containerId = 1;
+      resetToFirstContainer();
       int maxInstanceIndex = 0;
       for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
         for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
@@ -308,16 +295,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Performs a RR placement. If the placement cannot be performed on the existing number of containers
-   * then it will request for an increase in the number of containers
+   * Attempts to place the instance the current containerId.
    *
    * @param planBuilder packing plan builder
    * @param instanceId the instance that needs to be placed in the container
+   * @throws ResourceExceededException if there is no room on the current container for the instance
    */
   private void strictRRpolicy(PackingPlanBuilder planBuilder,
                               InstanceId instanceId) throws ResourceExceededException {
-    planBuilder.addInstance(containerId, instanceId);
-    containerId = nextContainerId(containerId);
+    addInstance(planBuilder, instanceId, this.containerId);
   }
 
   /**
@@ -333,15 +319,14 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     //If there is not enough space on containerId look at other containers in a RR fashion
     // starting from containerId.
     boolean containersChecked = false;
-    int currentContainer = containerId;
+    int currentContainer = this.containerId;
     while (!containersChecked) {
       try {
-        planBuilder.addInstance(currentContainer, instanceId);
-        containerId = nextContainerId(currentContainer);
+        addInstance(planBuilder, instanceId, currentContainer);
         return;
       } catch (ResourceExceededException e) {
         currentContainer = nextContainerId(currentContainer);
-        if (currentContainer == containerId) {
+        if (currentContainer == this.containerId) {
           containersChecked = true;
         }
       }
@@ -351,6 +336,18 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     throw new ResourceExceededException(String.format(
         "Insufficient resources to add instance %s to any of the %d containers.",
         instanceId, numContainers));
+  }
+
+  /**
+   * Adds an instance to the container. If successful, increments this.containerId, else throws a
+   * ResourceExceededException
+   * @throws ResourceExceededException if the instance can't be placed in the container
+   */
+  private void addInstance(PackingPlanBuilder planBuilder,
+                           InstanceId instanceId,
+                           int toContainerId) throws ResourceExceededException {
+    planBuilder.addInstance(toContainerId, instanceId);
+    this.containerId = nextContainerId(toContainerId);
   }
 
   /**
@@ -379,11 +376,11 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     int currentContainer = this.containerId;
     while (!containersChecked) {
       if (packingPlanBuilder.removeInstance(currentContainer, component)) {
-        containerId = nextContainerId(currentContainer);
+        this.containerId = nextContainerId(currentContainer);
         return;
       }
       currentContainer = nextContainerId(currentContainer);
-      if (currentContainer == containerId) {
+      if (currentContainer == this.containerId) {
         containersChecked = true;
       }
     }

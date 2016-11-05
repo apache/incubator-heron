@@ -11,15 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.twitter.heron.packing;
+package com.twitter.heron.integration_test.core;
+
+import java.io.Serializable;
 
 /**
- * Thrown to indicate that an error occurred while creating a packing plan
+ * Condition that will be satisfied before the method returns. Throws RuntimeException if it can't
  */
-public class PackingException extends RuntimeException {
-  private static final long serialVersionUID = -7361943148478221250L;
-
-  public PackingException(String message) {
-    super(message);
-  }
+interface Condition extends Serializable {
+  void satisfyCondition() throws RuntimeException;
 }
