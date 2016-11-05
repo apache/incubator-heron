@@ -32,7 +32,7 @@ public final class BasicTopologyOneTask extends AbstractTestTopology {
 
   @Override
   protected TestTopologyBuilder buildTopology(TestTopologyBuilder builder) {
-    builder.setSpout("ab-spout", new ABSpout(), 1);
+    builder.setSpout("ab-spout", new ABSpout(true), 1);
     builder.setBolt("identity-bolt", new IdentityBolt(new Fields("word")), 2)
         .shuffleGrouping("ab-spout");
     return builder;

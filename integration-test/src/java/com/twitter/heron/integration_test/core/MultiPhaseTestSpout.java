@@ -13,9 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.core;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.text.ParseException;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.spout.IRichSpout;
@@ -25,38 +22,21 @@ import com.twitter.heron.api.spout.IRichSpout;
  * to totalPhases times.
  */
 class MultiPhaseTestSpout extends IntegrationTestSpout {
-  private static final Logger LOG = Logger.getLogger(MultiPhaseTestSpout.class.getName());
   private static final long serialVersionUID = 4375157636632941400L;
+  private static final Logger LOG = Logger.getLogger(MultiPhaseTestSpout.class.getName());
 
   private final Condition restartCondition;
-  private final String httpStateServerUrl;
   private final int executionsPerPhase;
   private final int totalPhases;
   private int phasesComplete;
-  private boolean hasSetStarted;
-
-  interface Condition extends Serializable {
-    void satisfyCondition();
-  }
 
   MultiPhaseTestSpout(IRichSpout delegateSpout, int executionsPerPhase,
-                      int totalPhases, Condition restartCondition, String httpStateServerUrl) {
-    super(delegateSpout, executionsPerPhase);
+                      int totalPhases, Condition restartCondition, String topologyStartedStateUrl) {
+    super(delegateSpout, executionsPerPhase, topologyStartedStateUrl);
     this.executionsPerPhase = executionsPerPhase;
     this.totalPhases = totalPhases;
     this.restartCondition = restartCondition;
-    this.httpStateServerUrl = httpStateServerUrl;
     this.phasesComplete = 0;
-    this.hasSetStarted = false;
-  }
-
-  @Override
-  public void nextTuple() {
-    if (!this.hasSetStarted) {
-      setStateToStarted();
-      this.hasSetStarted = true;
-    }
-    super.nextTuple();
   }
 
   @Override
@@ -74,15 +54,6 @@ class MultiPhaseTestSpout extends IntegrationTestSpout {
             executionsPerPhase, phasesComplete + 1));
         super.resetMaxExecutions(this.executionsPerPhase);
       }
-    }
-  }
-
-  private void setStateToStarted() {
-    String url = httpStateServerUrl + "_topology_started";
-    try {
-      HttpUtils.httpJsonPost(url, "\"true\"");
-    } catch (IOException | ParseException e) {
-      throw new RuntimeException("Failure posting topology_started state to " + url, e);
     }
   }
 }
