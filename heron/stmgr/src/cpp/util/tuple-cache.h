@@ -17,7 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_UTIL_TUPLE_CACHE_H_
 #define SRC_CPP_SVCS_STMGR_SRC_UTIL_TUPLE_CACHE_H_
 
-#include <list>
+#include <deque>
 #include <vector>
 #include <map>
 #include "proto/messages.h"
@@ -95,7 +95,7 @@ class TupleCache {
     }
 
    private:
-    std::list<proto::system::HeronTupleSet2*> tuples_;
+    std::deque<proto::system::HeronTupleSet2*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;
     sp_int32 last_drained_count_;
