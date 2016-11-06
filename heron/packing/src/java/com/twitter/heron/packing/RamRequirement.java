@@ -31,10 +31,6 @@ public class RamRequirement implements Comparable<RamRequirement> {
     return componentName;
   }
 
-  public long getRamRequirement() {
-    return ramRequirement;
-  }
-
   @Override
   public int compareTo(RamRequirement other) {
     return Long.compare(this.ramRequirement, other.ramRequirement);

@@ -92,3 +92,12 @@ java_test(
     size = "small",
 )
 
+java_test(
+    name = "PackingPlanBuilderTest",
+    srcs = glob(
+        ["**/PackingPlanBuilderTest.java"]
+    ),
+    deps = packing_utils_deps_files,
+    size = "small",
+)
+
