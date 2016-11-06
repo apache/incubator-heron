@@ -133,7 +133,7 @@ class Container {
    *
    * @return the instancePlan that corresponds to the instance if it is found, void otherwise
    */
-  public Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String component) {
+  private Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String component) {
     for (PackingPlan.InstancePlan instancePlan : this.instances) {
       if (instancePlan.getComponentName().equals(component)) {
         return Optional.of(instancePlan);
