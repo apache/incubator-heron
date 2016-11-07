@@ -21,9 +21,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,8 +125,11 @@ public class HeronMasterDriver {
   // TODO: https://github.com/twitter/heron/issues/949: implement Driver HA
 
   private String componentRamMap;
+
+  private AtomicBoolean isTopologyKilled = new AtomicBoolean(false);
   private ExecutorService tMasterExecutorService;
   private Future<?> tMasterFuture;
+  private CountDownLatch tMasterErrorCounter = new CountDownLatch(3);
 
   @Inject
   public HeronMasterDriver(EvaluatorRequestor requestor,
@@ -173,16 +179,40 @@ public class HeronMasterDriver {
   /**
    * Requests container for TMaster as container/executor id 0.
    */
-  void scheduleTMasterContainer() {
+  void launchTMasterExecutor() {
     LOG.log(Level.INFO, "Launching executor for TM: {0}", topologyName);
-    final HeronExecutorTask tMasterTask = new HeronExecutorTask(null, TMASTER_CONTAINER_ID, cluster,
-        role, topologyName, env, topologyPackageName, heronCorePackageName, topologyJar,
+    final HeronExecutorTask tMasterTask = new HeronExecutorTask(reefFileNames, TMASTER_CONTAINER_ID,
+        cluster, role, topologyName, env, topologyPackageName, heronCorePackageName, topologyJar,
         getComponentRamMap(), verboseMode);
 
     tMasterFuture = tMasterExecutorService.submit(new Runnable() {
       @Override
       public void run() {
         tMasterTask.startExecutor();
+      }
+    });
+
+    // the following task will restart the tMaster if it fails
+    tMasterExecutorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          tMasterFuture.get();
+          LOG.log(Level.INFO, "TMaster executor terminated, {0}", topologyName);
+        } catch (InterruptedException | ExecutionException e) {
+          LOG.log(Level.WARNING, "Error while waiting for TMaster executor", e);
+        }
+
+        if (isTopologyKilled.get()) {
+          LOG.log(Level.INFO, "The topology is killed, {0}", topologyName);
+          return;
+        }
+        tMasterErrorCounter.countDown();
+        long counter = tMasterErrorCounter.getCount();
+        if (counter > 0) {
+          LOG.log(Level.WARNING, "Trying to restart (times {0}) TMaster executor", counter);
+          launchTMasterExecutor();
+        }
       }
     });
   }
@@ -261,21 +291,15 @@ public class HeronMasterDriver {
           .add(new HeronWorker(id, containerPlans.get(id).getRequiredResource()));
     }
     LOG.info("Number of workers awaiting allocation: " + workersAwaitingAllocation.size());
-
-    if (!multiKeyWorkerMap.lookupByWorkerId(TMASTER_CONTAINER_ID).isPresent()) {
-      LOG.info("TMaster is awaiting allocation too");
-      HeronWorker tMasterWorker = new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
-      workersAwaitingAllocation.add(tMasterWorker);
-    }
-
     return workersAwaitingAllocation;
   }
 
   public void killTopology() {
     LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
-
+    isTopologyKilled.set(true);
+    
     LOG.log(Level.INFO, "Killing TMaster process: {0}", topologyName);
-    if (!isTopologyKilled()) {
+    if (!tMasterFuture.isDone()) {
       tMasterFuture.cancel(true);
     }
     tMasterExecutorService.shutdownNow();
@@ -408,10 +432,6 @@ public class HeronMasterDriver {
     return Optional.fromNullable(containerPlans.get(id));
   }
 
-  private boolean isTopologyKilled() {
-    return tMasterFuture.isDone() || tMasterFuture.isCancelled();
-  }
-
   /**
    * {@link HeronWorker} is a data class which connects reef ids, heron ids and related objects.
    * All the pointers in an instance are related to one container. A container is a reef object,
@@ -522,6 +542,7 @@ public class HeronMasterDriver {
       HeronReefUtils.extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
       launchScheduler();
+      launchTMasterExecutor();
     }
 
     private void launchScheduler() {
@@ -614,7 +635,7 @@ public class HeronMasterDriver {
   public final class HeronWorkerLauncher implements EventHandler<ActiveContext> {
     @Override
     public void onNext(ActiveContext context) {
-      if (isTopologyKilled()) {
+      if (isTopologyKilled.get()) {
         LOG.log(Level.WARNING, "Topology has been killed, close new context: {0}", context.getId());
         context.close();
         return;
@@ -648,7 +669,7 @@ public class HeronMasterDriver {
     @Override
     public void onNext(FailedTask failedTask) {
       LOG.log(Level.WARNING, "Task {0} failed. Relaunching the task", failedTask.getId());
-      if (isTopologyKilled()) {
+      if (isTopologyKilled.get()) {
         LOG.info("The topology is killed. Ignore task fail event");
         return;
       }
@@ -661,7 +682,7 @@ public class HeronMasterDriver {
     @Override
     public void onNext(CompletedTask task) {
       LOG.log(Level.INFO, "Task {0} completed.", task.getId());
-      if (isTopologyKilled()) {
+      if (isTopologyKilled.get()) {
         LOG.info("The topology is killed. Ignore task complete event");
         return;
       }

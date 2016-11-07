@@ -85,7 +85,7 @@ public class HeronMasterDriverTest {
 
   @Test
   public void scheduleTMasterContainerRequestsContainerForTM() throws Exception {
-    spyDriver.scheduleTMasterContainer();
+    spyDriver.launchTMasterExecutor();
     verify(spyDriver, times(1)).requestContainerForWorker(eq(0), anyHeronWorker());
     verify(spyDriver, times(1)).createEvaluatorRequest(1, HeronMasterDriver.TM_MEM_SIZE_MB);
     verify(mockRequestor, times(1)).submit(any(EvaluatorRequest.class));

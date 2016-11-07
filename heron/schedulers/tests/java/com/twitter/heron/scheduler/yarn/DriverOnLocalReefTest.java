@@ -112,7 +112,7 @@ public class DriverOnLocalReefTest {
       public void onNext(StartTime startTime) {
         try {
           counter = new CountDownLatch(2);
-          driver.scheduleTMasterContainer();
+          driver.launchTMasterExecutor();
           Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
           addContainer(1, 1.0, 512L, containers);
           PackingPlan packing = new PackingPlan("packingId", containers);
