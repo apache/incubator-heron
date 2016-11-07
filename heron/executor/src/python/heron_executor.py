@@ -547,9 +547,16 @@ class HeronExecutor(object):
         for process_info in self.processes_to_monitor.values():
           if process_info.name == command_name:
             del self.processes_to_monitor[process_info.pid]
-            Log.info("Killing %s process with pid %s: %s" %
+            Log.info("Killing %s process with pid %d: %s" %
                      (process_info.name, process_info.pid, ' '.join(command)))
-            process_info.process.kill()
+            try:
+              process_info.process.kill()
+            except OSError, e:
+              if e.errno == 3: # No such process
+                Log.warn("Expected process %s with pid %d was not running, ignoring." %
+                         (process_info.name, process_info.pid))
+              else:
+                raise e
 
   def _start_processes(self, commands):
     """Start all commands and add them to the dict of processes to be monitored """
