@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
 #include <cstddef>
 #include <iostream>
 #include <thread>
@@ -35,7 +36,7 @@ static const sp_uint32 SERVER_PORT = 60000;
 
 extern void start_http_client(sp_uint32 _port, sp_uint64 _requests, sp_uint32 _nkeys);
 
-extern void start_http_server(sp_uint32 _port, sp_uint32 _nkeys);
+extern void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd, int sent);
 
 void TerminateRequestDone(HTTPClient* client, IncomingHTTPResponse* response) {
   delete response;
@@ -64,9 +65,24 @@ void TerminateServer(sp_uint32 port) {
 
 void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {
   // start the server thread
-  std::thread sthread(start_http_server, SERVER_PORT, nkeys);
+  int fds[2];
 
-  ::usleep(1000);
+  // choose an arbitrary number for ``sent'' as token
+  int recv, sent = 19583;
+  if (pipe(fds) < 0) {
+    std::cerr << "Unable to open pipe" << std::endl;
+    GTEST_FAIL();
+  }
+
+  std::thread sthread(start_http_server, SERVER_PORT, nkeys, fds[1], sent);
+
+  // block clients from reading from server using pipe
+  read(fds[0], &recv, sizeof(int));
+  if (recv != sent) {
+    std::cerr << "Expecting receiving number " << sent << "from pipe. "
+              << "Received " << recv << " instead." << std::endl;
+    GTEST_FAIL();
+  }
 
   // start the client threads
   std::vector<std::thread> cthreads;
