@@ -69,7 +69,7 @@ void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {
 
   // choose an arbitrary number for ``sent'' as token
   int recv, sent = 19583;
-  if (pipe(fds) < 0) {
+  if (::pipe(fds) < 0) {
     std::cerr << "Unable to open pipe" << std::endl;
     GTEST_FAIL();
   }
