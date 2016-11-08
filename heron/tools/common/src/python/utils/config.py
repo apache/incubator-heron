@@ -55,7 +55,7 @@ def create_tar(tar_filename, files, config_dir, config_files):
   '''
   Create a tar file with a given set of files
   '''
-  with contextlib.closing(tarfile.open(tar_filename, 'w:gz')) as tar:
+  with contextlib.closing(tarfile.open(tar_filename, 'w:gz', dereference=True)) as tar:
     for filename in files:
       if os.path.isfile(filename):
         tar.add(filename, arcname=os.path.basename(filename))

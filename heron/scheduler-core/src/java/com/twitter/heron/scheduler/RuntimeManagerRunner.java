@@ -194,7 +194,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
             .setProposedPackingPlan(proposedPlan)
             .build();
 
-    LOG.info("Sending Updating topology request: " + updateTopologyRequest);
+    LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
       LOG.log(Level.SEVERE, "Failed to update topology with Scheduler, updateTopologyRequest="
           + updateTopologyRequest);
@@ -279,6 +279,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       throw new IllegalArgumentException(
           "Failed to instantiate packing instance: " + repackingClass, e);
     }
+
+    LOG.info("Updating packing plan using " + repackingClass);
     try {
       packing.initialize(config, topology);
       PackingPlan packedPlan = packing.repack(currentPackingPlan, componentChanges);
