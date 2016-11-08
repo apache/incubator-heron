@@ -36,7 +36,7 @@ static const sp_uint32 SERVER_PORT = 60000;
 
 extern void start_http_client(sp_uint32 _port, sp_uint64 _requests, sp_uint32 _nkeys);
 
-extern void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd, int sent);
+extern void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd);
 
 void TerminateRequestDone(HTTPClient* client, IncomingHTTPResponse* response) {
   delete response;
@@ -68,13 +68,13 @@ void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {
   int fds[2];
 
   // choose an arbitrary number for ``sent'' as token
-  int recv, sent = 19583;
+  int recv;
   if (::pipe(fds) < 0) {
     std::cerr << "Unable to open pipe" << std::endl;
     GTEST_FAIL();
   }
 
-  std::thread sthread(start_http_server, SERVER_PORT, nkeys, fds[1], sent);
+  std::thread sthread(start_http_server, SERVER_PORT, nkeys, fds[1]);
 
   // block clients from reading from server using pipe
   read(fds[0], &recv, sizeof(int));
