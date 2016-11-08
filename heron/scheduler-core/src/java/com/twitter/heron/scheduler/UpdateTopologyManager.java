@@ -296,8 +296,9 @@ public class UpdateTopologyManager implements Closeable {
             + "topology %s. Not reactivating", topologyName));
         cancel();
       } else {
-        logInfo("Couldn't fetch physical plan for topology %s. "
-            + " Will sleep and try again", topologyName);
+        logInfo("Couldn't fetch physical plan for topology %s. This is probably because stream "
+            + "managers are still registering with TMaster. Will sleep and try again",
+            topologyName);
       }
     }
   }
