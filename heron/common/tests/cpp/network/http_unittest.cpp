@@ -78,11 +78,6 @@ void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {
 
   // block clients from reading from server using pipe
   read(fds[0], &recv, sizeof(int));
-  if (recv != sent) {
-    std::cerr << "Expecting receiving number " << sent << "from pipe. "
-              << "Received " << recv << " instead." << std::endl;
-    GTEST_FAIL();
-  }
 
   // start the client threads
   std::vector<std::thread> cthreads;
