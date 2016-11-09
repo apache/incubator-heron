@@ -155,9 +155,6 @@ public class HeronMasterDriverTest {
     }
   }
 
-  /**
-   * Tests if a specific worker can be killed and restarted
-   */
   @Test
   public void restartWorkerRestartsSpecificWorker() throws Exception {
     int numContainers = 3;
@@ -371,7 +368,7 @@ public class HeronMasterDriverTest {
     ExecutorService mockExecutorService = mock(ExecutorService.class);
     HeronMasterDriver.TMaster tMaster = spyDriver.buildTMaster(mockExecutorService);
 
-    Future mockFuture = mock(Future.class);
+    Future<?> mockFuture = mock(Future.class);
     doReturn(mockFuture).when(mockExecutorService).submit(tMaster);
 
     tMaster.launch();
@@ -388,7 +385,7 @@ public class HeronMasterDriverTest {
 
     HeronExecutorTask mockTask = mock(HeronExecutorTask.class);
     final CountDownLatch testLatch = new CountDownLatch(1);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
         testLatch.await();
