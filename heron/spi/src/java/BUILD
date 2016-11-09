@@ -133,6 +133,7 @@ java_library(
     srcs = glob([
         "**/spi/utils/ShellUtils.java",
     ]),
+    deps = [ "@com_google_guava_guava//jar" ],
 )
 
 java_library(
