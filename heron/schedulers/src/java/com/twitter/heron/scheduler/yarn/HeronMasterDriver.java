@@ -531,7 +531,7 @@ public class HeronMasterDriver {
           tMasterErrorCounter.countDown();
           long counter = tMasterErrorCounter.getCount();
           if (counter > 0) {
-            LOG.log(Level.WARNING, "Trying to restart (attempts left {0}) TMaster executor", counter);
+            LOG.log(Level.WARNING, "Restarting TMaster, attempts left: {0}", counter);
             launch();
           }
         }
