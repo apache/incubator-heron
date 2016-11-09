@@ -36,6 +36,7 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 
 import static org.junit.Assert.assertEquals;
@@ -60,7 +61,7 @@ import static org.mockito.Mockito.verify;
 public class LocalFileSystemStateManagerTest {
 
   private static final String TOPOLOGY_NAME = "topologyName";
-  private static final String LOCK_NAME = "lockName";
+  private static final IStateManager.LockName LOCK_NAME = IStateManager.LockName.UPDATE_TOPOLOGY;
   private static final String ROOT_ADDR = "/";
   private LocalFileSystemStateManager manager;
 
@@ -86,6 +87,7 @@ public class LocalFileSystemStateManagerTest {
   private void initMocks() throws Exception {
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).when(FileUtils.class, "createDirectory", anyString());
+    PowerMockito.doReturn(true).when(FileUtils.class, "isFileExists", anyString());
 
     assertTrue(manager.initTree());
 
@@ -214,7 +216,7 @@ public class LocalFileSystemStateManagerTest {
   @Test
   public void testGetLock() throws Exception {
     initMocks();
-    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME);
+    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME.getName());
     byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
 
     Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
@@ -237,7 +239,7 @@ public class LocalFileSystemStateManagerTest {
 
   @Test
   public void testLockTaken() throws Exception {
-    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME);
+    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME.getName());
     byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
 
     PowerMockito.spy(FileUtils.class);

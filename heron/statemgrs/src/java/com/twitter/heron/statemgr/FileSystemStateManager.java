@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -31,6 +32,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
 public abstract class FileSystemStateManager implements IStateManager {
@@ -79,11 +81,13 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   protected abstract ListenableFuture<Boolean> nodeExists(String path);
 
-  protected abstract ListenableFuture<Boolean> deleteNode(String path);
+  protected abstract ListenableFuture<Boolean> deleteNode(String path,
+                                                          boolean deleteChildrenIfNecessary);
 
   protected abstract <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
                                                                          String path,
                                                                          Message.Builder builder);
+  protected abstract Lock getLock(String path);
 
   protected String getStateDirectory(StateLocation location) {
     return location.getDirectory(rootAddress);
@@ -97,6 +101,12 @@ public abstract class FileSystemStateManager implements IStateManager {
   public void initialize(Config config) {
     this.rootAddress = Context.stateManagerRootPath(config);
     LOG.log(Level.FINE, "File system state manager root address: {0}", rootAddress);
+  }
+
+  @Override
+  public Lock getLock(String topologyName, LockName lockName) {
+    return getLock(
+        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName.getName()));
   }
 
   @Override
@@ -176,8 +186,28 @@ public abstract class FileSystemStateManager implements IStateManager {
     return nodeExists(getStatePath(StateLocation.TOPOLOGY, topologyName));
   }
 
+  @Override
+  public ListenableFuture<Boolean> deleteLocks(String topologyName) {
+    boolean result = true;
+    for (LockName lockName : LockName.values()) {
+      String path =
+          StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName.getName());
+      ListenableFuture<Boolean> thisResult = deleteNode(path, true);
+      try {
+        if (!thisResult.get()) {
+          result = false;
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        LOG.log(Level.WARNING, "Error while waiting on result of delete lock at " + thisResult, e);
+      }
+    }
+    final SettableFuture<Boolean> future = SettableFuture.create();
+    future.set(result);
+    return future;
+  }
+
   private ListenableFuture<Boolean> deleteNode(StateLocation location, String topologyName) {
-    return deleteNode(getStatePath(location, topologyName));
+    return deleteNode(getStatePath(location, topologyName), false);
   }
 
   private <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,

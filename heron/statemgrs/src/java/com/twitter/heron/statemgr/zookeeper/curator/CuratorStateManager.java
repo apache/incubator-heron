@@ -29,6 +29,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
+import org.apache.curator.framework.api.DeleteBuilder;
 import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
@@ -251,11 +252,15 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  protected ListenableFuture<Boolean> deleteNode(String path) {
+  protected ListenableFuture<Boolean> deleteNode(String path, boolean deleteChildrenIfNecessary) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
-      client.delete().withVersion(-1).forPath(path);
+      DeleteBuilder deleteBuilder = client.delete();
+      if (deleteChildrenIfNecessary) {
+        deleteBuilder = (DeleteBuilder) deleteBuilder.deletingChildrenIfNeeded();
+      }
+      deleteBuilder.withVersion(-1).forPath(path);
       LOG.info("Deleted node for path: " + path);
       result.set(true);
 
@@ -305,9 +310,8 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public Lock getLock(String topologyName, String lockName) {
-    return new DistributedLock(this.client,
-        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName));
+  protected Lock getLock(String path) {
+    return new DistributedLock(this.client, path);
   }
 
   @Override
@@ -372,7 +376,7 @@ public class CuratorStateManager extends FileSystemStateManager {
       result.set(true);
       return result;
     } else {
-      return deleteNode(getStatePath(StateLocation.SCHEDULER_LOCATION, topologyName));
+      return deleteNode(getStatePath(StateLocation.SCHEDULER_LOCATION, topologyName), false);
     }
   }
 
