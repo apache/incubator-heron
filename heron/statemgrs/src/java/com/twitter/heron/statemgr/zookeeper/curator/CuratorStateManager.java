@@ -33,6 +33,7 @@ import org.apache.curator.framework.api.DeleteBuilder;
 import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -263,6 +264,13 @@ public class CuratorStateManager extends FileSystemStateManager {
       deleteBuilder.withVersion(-1).forPath(path);
       LOG.info("Deleted node for path: " + path);
       result.set(true);
+
+    } catch (KeeperException e) {
+      if (KeeperException.Code.NONODE.equals(e.code())) {
+        result.set(true);
+      } else {
+        result.setException(new RuntimeException("Could not deleteNode", e));
+      }
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
