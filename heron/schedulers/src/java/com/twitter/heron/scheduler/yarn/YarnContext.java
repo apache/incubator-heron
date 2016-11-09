@@ -31,6 +31,6 @@ public final class YarnContext extends Context {
   }
 
   public static int heronDriverMemoryMb(Config cfg) {
-    return cfg.getIntegerValue(YARN_SCHEDULER_DRIVER_MEMORY_MB, 1024);
+    return cfg.getIntegerValue(YARN_SCHEDULER_DRIVER_MEMORY_MB, 2048);
   }
 }
