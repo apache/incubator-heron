@@ -13,9 +13,8 @@
 # limitations under the License.
 #!/usr/bin/env python2.7
 
+"""Classes to represent the success or failure of an integration test"""
 import logging
-
-""" Classes to represent the success or failure of an integration test """
 
 class TestFailure(Exception):
   def __init__(self, message, error=None):

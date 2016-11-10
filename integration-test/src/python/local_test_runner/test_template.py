@@ -82,15 +82,13 @@ class TestTemplate(object):
       return result
 
     except status.TestFailure as e:
-      if topology_submitted:
-        logging.error("Test failed, attempting to clean up")
-        self.cleanup_test()
       raise e
     except Exception as e:
+      raise status.TestFailure("Exception thrown during test", e)
+    finally:
       if topology_submitted:
         logging.error("Test failed, attempting to clean up")
         self.cleanup_test()
-      return status.TestFailure("Exception thrown during test", e)
 
   def submit_topology(self):
     _submit_topology(
@@ -186,17 +184,17 @@ class TestTemplate(object):
 
     # Compare the actual and expected result
     if actual_sorted == expected_sorted:
-      result = status.TestSuccess(
+      success = status.TestSuccess(
           "Actual result matched expected result for test %s" % self.testname)
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
-      return result
+      return success
     else:
-      result = status.TestFailure(
+      failure = status.TestFailure(
           "Actual result did not match expected result for test %s" % self.testname)
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
-      raise result
+      raise failure
 
   # pylint: disable=no-self-use
   def get_pid(self, process_name, heron_working_directory):
@@ -272,6 +270,7 @@ class TestTemplate(object):
           return packing_plan
         elif retries_left == 0:
           raise status.TestFailure(
+              #pylint: disable=too-many-format-args
               "Got pplan from tracker for test %s but the number of instances found (%d) was " +\
               "less than min expected (%s)." % (self.testname, instances_found, min_instances))
 
