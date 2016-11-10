@@ -234,6 +234,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     }
 
     long tupleSizeInBytes = 0;
+    long startTime = System.nanoTime();
 
     // Serialize it
     for (Object obj : tuple) {
@@ -242,6 +243,9 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
       bldr.addValues(bstr);
       tupleSizeInBytes += b.length;
     }
+
+    long latency = System.nanoTime() - startTime;
+    spoutMetrics.serializeDataTuple(streamId, latency);
 
     // submit to outputter
     outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
