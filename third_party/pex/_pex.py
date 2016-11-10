@@ -132,7 +132,7 @@ def main():
         poptions.disable_cache = options.disable_cache
 
 
-        print("pex options: %s" % poptions)
+        #print("pex options: %s" % poptions)
         os.environ["PATH"] = ".:%s:/bin:/usr/bin" % poptions.python
 
         # The version of pkg_resources.py (from setuptools) on some distros is too old for PEX. So
@@ -156,8 +156,8 @@ def main():
 
         # Add prebuilt libraries listed in the manifest.
         reqs = manifest.get('requirements', {}).keys()
-        if len(reqs) > 0:
-          print("pex requirements: %s" % reqs)
+        #if len(reqs) > 0:
+        #  print("pex requirements: %s" % reqs)
         pex_builder = build_pex(reqs, poptions,
                                 resolver_options_builder, interpreter=interpreter)
 

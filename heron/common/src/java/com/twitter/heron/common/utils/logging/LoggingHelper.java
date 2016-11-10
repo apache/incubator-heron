@@ -70,11 +70,16 @@ public final class LoggingHelper {
 
     rootLogger.setLevel(level);
 
+    if (rootLogger.getLevel().intValue() < Level.WARNING.intValue()) {
+      // zookeeper logging scares me. if people want this, we can patch to config-drive this
+      Logger.getLogger("org.apache.zookeeper").setLevel(Level.WARNING);
+    }
+
     if (isRedirectStdOutErr) {
 
       // Remove ConsoleHandler if present, to avoid StackOverflowError.
       // ConsoleHandler writes to System.err and since we are redirecting
-      // System.err to Logger, it results in an infinte loop.
+      // System.err to Logger, it results in an infinite loop.
       for (Handler handler : rootLogger.getHandlers()) {
         if (handler instanceof ConsoleHandler) {
           rootLogger.removeHandler(handler);
