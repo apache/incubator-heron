@@ -16,6 +16,7 @@
 import logging
 import subprocess
 
+import status
 import test_template
 
 class TestScaleUp(test_template.TestTemplate):
@@ -39,11 +40,8 @@ class TestScaleUp(test_template.TestTemplate):
     instances = physical_plan_json['instances']
     instance_count = len(instances)
     if instance_count != self.expected_instance_count:
-      logging.error("Found %s instances but expected %s: %s",
-                    instance_count, self.expected_instance_count, instances)
-      return False
-
-    return True
+      raise status.TestFailure("Found %s instances but expected %s: %s" %
+                               (instance_count, self.expected_instance_count, instances))
 
 def scale_up(heron_cli_path, test_cluster, topology_name):
   splitcmd = [
@@ -52,5 +50,5 @@ def scale_up(heron_cli_path, test_cluster, topology_name):
   ]
   logging.info("Increasing number of component instances: %s", splitcmd)
   if subprocess.call(splitcmd) != 0:
-    raise RuntimeError("Unable to update topology")
+    raise status.TestFailure("Unable to update topology %s" % topology_name)
   logging.info("Increased number of component instances")

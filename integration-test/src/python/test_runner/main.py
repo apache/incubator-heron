@@ -264,7 +264,7 @@ def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_
   cmd = "%s kill --config-path=%s %s %s" %\
         (heron_cli_path, cli_config_path, cluster_token(cluster, role, env), topology_name)
 
-  logging.info("Kill topology: %s", cmd)
+  logging.info("Killing topology: %s", cmd)
   if os.system(cmd) == 0:
     logging.info("Successfully killed topology %s", topology_name)
     return

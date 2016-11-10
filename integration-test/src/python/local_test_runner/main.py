@@ -25,6 +25,8 @@ import subprocess
 import sys
 from collections import namedtuple
 
+import status
+
 # import test_kill_bolt
 import test_kill_metricsmgr
 import test_kill_stmgr
@@ -60,10 +62,19 @@ def run_tests(test_classes, args):
       logging.info("==== Starting test %s of %s: %s ====",
                    len(successes) + len(failures) + 1, len(test_classes), testname)
       template = test_class(testname, args)
-      if template.run_test(): # testcase passed
-        successes += [testname]
-      else:
+      try:
+        result = template.run_test()
+        if isinstance(result, status.TestSuccess): # testcase passed
+          successes += [testname]
+        elif isinstance(result, status.TestFailure):
+          failures += [testname]
+        else:
+          logging.error(
+              "Unrecognized test response returned for test %s: %s", testname, str(result))
+          failures += [testname]
+      except status.TestFailure:
         failures += [testname]
+
   except Exception as e:
     logging.error("Exception thrown while running tests: %s", str(e))
   finally:
