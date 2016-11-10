@@ -78,7 +78,6 @@ class TestTemplate(object):
 
       # finally verify the expected results
       result = self._check_results()
-      self.cleanup_test()
       return result
 
     except status.TestFailure as e:
@@ -87,7 +86,6 @@ class TestTemplate(object):
       raise status.TestFailure("Exception thrown during test", e)
     finally:
       if topology_submitted:
-        logging.error("Test failed, attempting to clean up")
         self.cleanup_test()
 
   def submit_topology(self):
@@ -286,6 +284,7 @@ def _block_until_stmgr_running(expected_stmgrs):
   process_list = _get_processes()
   while not _processes_exists(process_list, HERON_STMGR_CMD, expected_stmgrs):
     process_list = _get_processes()
+    time.sleep(1)
 
 def _submit_topology(heron_cli_path, test_cluster, test_jar_path, topology_class_path,
                      topology_name, input_file, output_file):
