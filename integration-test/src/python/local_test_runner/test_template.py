@@ -308,7 +308,7 @@ def _submit_topology(heron_cli_path, test_cluster, test_jar_path, topology_class
 
 def _kill_topology(heron_cli_path, test_cluster, topology_name):
   """ Kill a topology using heron-cli """
-  splitcmd = [heron_cli_path, 'kill', '--verbose', test_cluster, topology_name]
+  splitcmd = [heron_cli_path, 'kill', test_cluster, topology_name]
   logging.info("Killing topology: %s", splitcmd)
   # this call can be blocking, no need for subprocess
   if subprocess.call(splitcmd) != 0:
