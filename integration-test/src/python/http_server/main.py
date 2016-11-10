@@ -6,6 +6,8 @@ import tornado.ioloop
 import tornado.escape
 import tornado.web
 
+from heron.common.src.python.utils import log
+
 RESULTS_DIRECTORY = "results"
 
 class MainHandler(tornado.web.RequestHandler):
@@ -75,8 +77,7 @@ def main():
   integration test json result get/post requests
   '''
 
-  root = logging.getLogger()
-  root.setLevel(logging.DEBUG)
+  log.configure(level=logging.DEBUG)
 
   if not os.path.exists(RESULTS_DIRECTORY):
     os.makedirs(RESULTS_DIRECTORY)

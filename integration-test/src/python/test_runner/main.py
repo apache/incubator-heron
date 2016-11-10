@@ -11,6 +11,8 @@ import uuid
 # pylint: disable=unused-wildcard-import
 from httplib import *
 
+from heron.common.src.python.utils import log
+
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.json"
 
@@ -380,8 +382,7 @@ def load_expected_result_handler(topology_name, topology_conf, args, http_server
 
 def main():
   ''' main '''
-  root = logging.getLogger()
-  root.setLevel(logging.DEBUG)
+  log.configure(level=logging.DEBUG)
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
   conf_string = pkgutil.get_data(__name__, conf_file)
