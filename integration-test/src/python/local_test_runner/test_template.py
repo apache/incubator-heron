@@ -21,7 +21,7 @@ import signal
 import subprocess
 from collections import namedtuple
 
-import status
+from ..common import status
 
 # Test input. Please set each variable as it's own line, ended with \n, otherwise the value of lines
 # passed into the topology will be incorrect, and the test will fail.

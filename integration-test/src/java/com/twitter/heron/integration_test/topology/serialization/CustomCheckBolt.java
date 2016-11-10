@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.topology.serialization;
 
+import java.util.logging.Logger;
+
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
@@ -23,6 +25,7 @@ import com.twitter.heron.api.tuple.Tuple;
  * A bolt that checks deserialization works fine
  */
 public class CustomCheckBolt extends BaseBasicBolt {
+  private static final Logger LOG = Logger.getLogger(CustomCheckBolt.class.getName());
   private static final long serialVersionUID = 3404960992657778759L;
   private int nItems;
   private CustomObject[] inputObjects;
@@ -34,7 +37,7 @@ public class CustomCheckBolt extends BaseBasicBolt {
 
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    System.out.println("Received input tuple: " + input.getValueByField("custom").toString());
+    LOG.info("Received input tuple: " + input.getValueByField("custom").toString());
     if (input.getValueByField("custom")
         .equals(inputObjects[(nItems++) % inputObjects.length])) {
       collector.emit(input.getValues());
