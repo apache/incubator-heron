@@ -89,5 +89,5 @@ def run(command, parser, cl_args, unknown_args, action):
     Log.error('Failed to %s \'%s\'' % (action, topology_name))
     return False
 
-  Log.info('Successfully %s \'%s\'' % (action, topology_name))
+  Log.info('Successfully executed %s \'%s\'' % (action, topology_name))
   return True

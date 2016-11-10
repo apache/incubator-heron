@@ -21,6 +21,8 @@ import signal
 import subprocess
 from collections import namedtuple
 
+import status
+
 # Test input. Please set each variable as it's own line, ended with \n, otherwise the value of lines
 # passed into the topology will be incorrect, and the test will fail.
 TEST_INPUT = ["1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n",
@@ -52,17 +54,16 @@ class TestTemplate(object):
   # pylint: disable=too-many-return-statements, too-many-branches,
   # pylint: disable=too-many-statements
   def run_test(self):
-    """ Runs the test template """
-
+    """ Runs the test template. Must either return TestSuccess or raise TestFailure"""
+    topology_submitted = False
     try:
       # prepare test data, start the topology and block until it's running
       self._prepare_test_data()
       self.submit_topology()
+      topology_submitted = True
       _block_until_stmgr_running(self.get_expected_container_count())
 
-      if not self._block_until_topology_running(self.get_expected_min_instance_count()):
-        self.cleanup_test()
-        return False
+      self._block_until_topology_running(self.get_expected_min_instance_count())
 
       # Execute the specific test logic and block until topology is running again
       self.execute_test_case()
@@ -70,38 +71,35 @@ class TestTemplate(object):
       _block_until_stmgr_running(self.get_expected_container_count())
       physical_plan_json =\
         self._block_until_topology_running(self.get_expected_min_instance_count())
-      if not physical_plan_json:
-        self.cleanup_test()
-        return False
 
       # trigger the test data to flow and invoke the pre_check_results hook
       self._inject_test_data()
-      if not self.pre_check_results(physical_plan_json):
-        self.cleanup_test()
-        return False
-    except Exception as e:
-      logging.error("Test failed, attempting to clean up: %s", e)
-      self.cleanup_test()
-      return False
+      self.pre_check_results(physical_plan_json)
 
-    # finally verify the expected results
-    return self._check_results()
+      # finally verify the expected results
+      result = self._check_results()
+      self.cleanup_test()
+      return result
+
+    except status.TestFailure as e:
+      raise e
+    except Exception as e:
+      raise status.TestFailure("Exception thrown during test", e)
+    finally:
+      if topology_submitted:
+        logging.error("Test failed, attempting to clean up")
+        self.cleanup_test()
 
   def submit_topology(self):
-    #submit topology
-    try:
-      _submit_topology(
-          self.params['cliPath'],
-          self.params['cluster'],
-          self.params['testJarPath'],
-          self.params['topologyClassPath'],
-          self.params['topologyName'],
-          self.params['readFile'],
-          self.params['outputFile']
-      )
-    except Exception as e:
-      logging.error("Failed to submit %s topology: %s", self.params['topologyName'], str(e))
-      return False
+    _submit_topology(
+        self.params['cliPath'],
+        self.params['cluster'],
+        self.params['testJarPath'],
+        self.params['topologyClassPath'],
+        self.params['topologyName'],
+        self.params['readFile'],
+        self.params['outputFile']
+    )
 
   # pylint: disable=no-self-use
   def get_expected_container_count(self):
@@ -123,7 +121,6 @@ class TestTemplate(object):
       _kill_topology(self.params['cliPath'], self.params['cluster'], self.params['topologyName'])
     except Exception as e:
       logging.error("Failed to kill %s topology: %s", self.params['topologyName'], str(e))
-      return False
     finally:
       self._delete_test_data_files()
 
@@ -165,11 +162,11 @@ class TestTemplate(object):
         with open(self.params['outputFile'], 'r') as g:
           actual_result = g.read()
       except Exception as e:
-        logging.error(
-            "Failed to read expected or actual results from file for test %s: %s", self.testname, e)
+        message =\
+          "Failed to read expected or actual results from file for test %s: %s" % self.testname
         if retries_left == 0:
-          self.cleanup_test()
-          return False
+          raise status.TestFailure(message, e)
+        logging.error(message, e)
       # if we get expected result, no need to retry
       expected_sorted = sorted(expected_result.split('\n'))
       actual_sorted = sorted(actual_result.split('\n'))
@@ -185,19 +182,19 @@ class TestTemplate(object):
                      self.testname, RETRY_COUNT - retries_left, RETRY_COUNT, RETRY_INTERVAL)
         time.sleep(RETRY_INTERVAL)
 
-    self.cleanup_test()
-
     # Compare the actual and expected result
     if actual_sorted == expected_sorted:
-      logging.info("Actual result matched expected result for test %s", self.testname)
+      success = status.TestSuccess(
+          "Actual result matched expected result for test %s" % self.testname)
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
-      return True
+      return success
     else:
-      logging.error("Actual result did not match expected result for test %s", self.testname)
+      failure = status.TestFailure(
+          "Actual result did not match expected result for test %s" % self.testname)
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
-      return False
+      raise failure
 
   # pylint: disable=no-self-use
   def get_pid(self, process_name, heron_working_directory):
@@ -254,8 +251,8 @@ class TestTemplate(object):
     physical_plan_json = json.loads(response.read())
 
     if 'result' not in physical_plan_json:
-      logging.error("Could not find result json in physical plan request to tracker: %s", url)
-      return None
+      raise status.TestFailure(
+          "Could not find result json in physical plan request to tracker: %s" % url)
 
     return physical_plan_json['result']
 
@@ -272,20 +269,17 @@ class TestTemplate(object):
                        self.testname, RETRY_COUNT - retries_left)
           return packing_plan
         elif retries_left == 0:
-          logging.error(
+          raise status.TestFailure(
+              #pylint: disable=too-many-format-args
               "Got pplan from tracker for test %s but the number of instances found (%d) was " +\
-              "less than min expected (%s).", self.testname, instances_found, min_instances)
-          self.cleanup_test()
-          return None
+              "less than min expected (%s)." % (self.testname, instances_found, min_instances))
 
       if retries_left > 0:
         _sleep("before trying again to fetch pplan for test %s (attempt %s/%s)" %
                (self.testname, RETRY_COUNT - retries_left, RETRY_COUNT), RETRY_INTERVAL)
       else:
-        logging.error("Failed to get pplan from tracker for test %s after %s attempts.",
-                      self.testname, RETRY_COUNT)
-        self.cleanup_test()
-        return None
+        raise status.TestFailure("Failed to get pplan from tracker for test %s after %s attempts."
+                                 % (self.testname, RETRY_COUNT))
 
 def _block_until_stmgr_running(expected_stmgrs):
   # block until ./heron-stmgr exists
@@ -304,16 +298,18 @@ def _submit_topology(heron_cli_path, test_cluster, test_jar_path, topology_class
   logging.info("Submitting topology: %s", splitcmd)
   p = subprocess.Popen(splitcmd)
   p.wait()
+  if p.returncode != 0:
+    raise status.TestFailure("Failed to submit topology %s" % topology_name)
+
   logging.info("Submitted topology %s", topology_name)
 
 def _kill_topology(heron_cli_path, test_cluster, topology_name):
   """ Kill a topology using heron-cli """
-  splitcmd = [heron_cli_path, 'kill', '--verbose', test_cluster, topology_name]
-  logging.info("Killing topology: %s", splitcmd)
+  splitcmd = [heron_cli_path, 'kill', test_cluster, topology_name]
+  logging.info("Killing topology: %s", ' '.join(splitcmd))
   # this call can be blocking, no need for subprocess
   if subprocess.call(splitcmd) != 0:
     raise RuntimeError("Unable to kill the topology: %s" % topology_name)
-  logging.info("Successfully killed topology %s", topology_name)
 
 def _get_processes():
   """
