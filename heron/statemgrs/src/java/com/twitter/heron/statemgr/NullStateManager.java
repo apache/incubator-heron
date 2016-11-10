@@ -44,7 +44,12 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public Lock getLock(String topologyName, String lockName) {
+  public Lock getLock(String topologyName, LockName lockName) {
+    throw new RuntimeException(new OperationNotSupportedException());
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteLocks(String topologyName) {
     throw new RuntimeException(new OperationNotSupportedException());
   }
 

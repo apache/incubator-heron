@@ -81,7 +81,7 @@ public class SchedulerStateManagerAdaptor {
     }
   }
 
-  public Lock getLock(String topologyName, String lockName) {
+  public Lock getLock(String topologyName, IStateManager.LockName lockName) {
     return delegate.getLock(topologyName, lockName);
   }
 
@@ -215,6 +215,10 @@ public class SchedulerStateManagerAdaptor {
    */
   public Boolean deleteSchedulerLocation(String topologyName) {
     return awaitResult(delegate.deleteSchedulerLocation(topologyName));
+  }
+
+  public Boolean deleteLocks(String topologyName) {
+    return awaitResult(delegate.deleteLocks(topologyName));
   }
 
   /**

@@ -87,6 +87,7 @@ uploader_deps_files = [
 statemgr_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
+        "//heron/api/src/java:classification",
         "//heron/common/src/java:config-java",
         "@com_google_guava_guava//jar",
     ]
@@ -132,6 +133,7 @@ java_library(
     srcs = glob([
         "**/spi/utils/ShellUtils.java",
     ]),
+    deps = [ "@com_google_guava_guava//jar" ],
 )
 
 java_library(

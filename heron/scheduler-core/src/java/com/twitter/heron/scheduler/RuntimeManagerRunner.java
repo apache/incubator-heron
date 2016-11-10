@@ -240,6 +240,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       LOG.warning("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
     }
 
+    result = statemgr.deleteLocks(topologyName);
+    if (result == null || !result) {
+      LOG.warning("Failed to delete locks. It's possible that the topology never created any.");
+    }
+
     result = statemgr.deleteExecutionState(topologyName);
     if (result == null || !result) {
       LOG.severe("Failed to clear execution state");

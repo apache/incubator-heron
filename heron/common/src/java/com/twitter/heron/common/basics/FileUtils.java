@@ -108,6 +108,10 @@ public final class FileUtils {
     return Files.exists(new File(file).toPath());
   }
 
+  public static boolean hasChildren(String file) {
+    return isDirectoryExists(file) && new File(file).list().length > 0;
+  }
+
   public static boolean isOriginalPackageJar(String packageFilename) {
     return packageFilename.endsWith(".jar");
   }

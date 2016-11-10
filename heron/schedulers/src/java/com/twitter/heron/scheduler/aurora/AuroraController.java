@@ -115,9 +115,16 @@ class AuroraController {
   // Utils method for unit tests
   @VisibleForTesting
   boolean runProcess(List<String> auroraCmd) {
-    return 0 == ShellUtils.runProcess(
-        isVerbose, auroraCmd.toArray(new String[auroraCmd.size()]),
-        new StringBuilder(), new StringBuilder());
+    StringBuilder stdout = new StringBuilder();
+    StringBuilder stderr = new StringBuilder();
+    int status =
+        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), stdout, stderr);
+
+    if (status != 0) {
+      LOG.severe(String.format(
+          "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s", auroraCmd, stdout, stderr));
+    }
+    return status == 0;
   }
 
   private static String getInstancesIdsToKill(Set<PackingPlan.ContainerPlan> containersToRemove) {

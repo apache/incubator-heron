@@ -72,7 +72,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
     @Override
     public void unlock() {
-      deleteNode(this.path);
+      deleteNode(this.path, false);
     }
   }
 
@@ -128,9 +128,18 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  protected ListenableFuture<Boolean> deleteNode(String path) {
+  protected ListenableFuture<Boolean> deleteNode(String path, boolean deleteChildrenIfNecessary) {
     final SettableFuture<Boolean> future = SettableFuture.create();
-    boolean ret = FileUtils.deleteFile(path);
+    boolean ret = true;
+    if (FileUtils.isFileExists(path)) {
+      if (!deleteChildrenIfNecessary && FileUtils.hasChildren(path)) {
+        LOG.severe("delete called on a path with children but deleteChildrenIfNecessary is false: "
+            + path);
+        ret = false;
+      } else {
+        ret = FileUtils.deleteFile(path);
+      }
+    }
     future.set(ret);
 
     return future;
@@ -204,9 +213,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public Lock getLock(String topologyName, String lockName) {
-    return new FileSystemLock(
-        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName));
+  protected Lock getLock(String path) {
+    return new FileSystemLock(path);
   }
 
   @Override

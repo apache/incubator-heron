@@ -28,6 +28,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 /**
  * Handle shell process.
  */
@@ -38,7 +40,8 @@ public final class ShellUtils {
   private ShellUtils() {
   }
 
-  public static String inputstreamToString(InputStream is) {
+  @VisibleForTesting
+  static String inputstreamToString(InputStream is) {
     char[] buffer = new char[2048];
     StringBuilder builder = new StringBuilder();
     try (Reader reader = new InputStreamReader(is, "UTF-8")) {
@@ -56,9 +59,8 @@ public final class ShellUtils {
     return builder.toString();
   }
 
-  public static int runProcess(
-      boolean verbose, String[] cmdline, StringBuilder stdout, StringBuilder stderr) {
-    return runSyncProcess(verbose, false, cmdline, stdout, stderr, null);
+  public static int runProcess(String[] cmdline, StringBuilder stdout, StringBuilder stderr) {
+    return runSyncProcess(false, false, cmdline, stdout, stderr, null);
   }
 
   public static int runProcess(
@@ -67,17 +69,9 @@ public final class ShellUtils {
   }
 
   public static int runSyncProcess(
-      boolean verbose, boolean isInheritIO, String cmdline, StringBuilder stdout,
-      StringBuilder stderr, File workingDirectory) {
-    return runSyncProcess(
-        verbose, isInheritIO, splitTokens(cmdline), stdout, stderr, workingDirectory);
-  }
-
-  public static int runSyncProcess(
       boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory) {
-    return runSyncProcess(
-        verbose, isInheritIO, cmdline, stdout, stderr, workingDirectory,
+    return runSyncProcess(isInheritIO, cmdline, stdout, stderr, workingDirectory,
         new HashMap<String, String>());
   }
 
@@ -107,8 +101,8 @@ public final class ShellUtils {
   /**
    * run sync process
    */
-  public static int runSyncProcess(
-      boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
+  private static int runSyncProcess(
+      boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory, Map<String, String> envs) {
     final StringBuilder pStdOut = stdout == null ? new StringBuilder() : stdout;
     final StringBuilder pStdErr = stderr == null ? new StringBuilder() : stderr;
@@ -284,7 +278,7 @@ public final class ShellUtils {
     // using curl copy the url to the target file
     String cmd = String.format("curl %s -o %s", uri, destination);
     int ret = runSyncProcess(isVerbose, isInheritIO,
-        cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
+        splitTokens(cmd), new StringBuilder(), new StringBuilder(), parentDirectory);
 
     return ret == 0;
   }
@@ -302,7 +296,7 @@ public final class ShellUtils {
     String cmd = String.format("tar -xvf %s", packageName);
 
     int ret = runSyncProcess(isVerbose, isInheritIO,
-        cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
+        splitTokens(cmd), new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
     return ret == 0;
   }
