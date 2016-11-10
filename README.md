@@ -31,4 +31,4 @@ We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kube
 
 The official documentation for Heron is located at [heronstreaming.io](http://heronstreaming.io). To contribute to documentation, build and run the documentation locally. More information can be
 found in the [documentation
-README](website/README.md).
+README](website/README.md) file.
