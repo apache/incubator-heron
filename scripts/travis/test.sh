@@ -32,7 +32,7 @@ end_timer "$T"
 # run local integration test
 T="heron integration-test local"
 start_timer "$T"
-python integration-test/src/python/local_test_runner/main.py
+python ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
 end_timer "$T"
 
 # run the java integration test

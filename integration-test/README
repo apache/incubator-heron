@@ -31,4 +31,7 @@ the heron client:
   bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
 
 To run the local integration tests on your mac run the following from the heron repo's top dir:
-  python integration-test/src/python/local_test_runner/main.py
+  ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
+
+To run just a single test include the module and test class:
+  ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner test_template.TestTemplate

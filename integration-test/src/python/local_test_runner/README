@@ -1,4 +1,9 @@
-Integration test for testing recovery from failure/restart in certain processes. Runs local-scheduler heron topology in local directory. Topology used spout which creates a file and blocks into files contents are filled. When file length !=0, spout emits each line to the bolt, which writes each line to another file. The integration-test framework tests the likeness of these two files. Currently, tests TMaster kill. 
+Integration test for testing various heron-cli and process failure scenarios. Runs a local-scheduler
+heron topology. The test creates an input file of test data, which a spout emits. A bolt writes each
+tuple to an output file and the two files are compared.
 
-Run main.py from heron root directory. 
-e.g. python integration-test/src/python/local_test_runner/main.py
+To run the tests:
+
+  bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
+  bazel build --config=darwin integration-test/src/...
+  ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
