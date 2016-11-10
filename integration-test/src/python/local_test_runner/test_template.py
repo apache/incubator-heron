@@ -187,13 +187,13 @@ class TestTemplate(object):
     # Compare the actual and expected result
     if actual_sorted == expected_sorted:
       result = status.TestSuccess(
-        "Actual result matched expected result for test %s" % self.testname)
+          "Actual result matched expected result for test %s" % self.testname)
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
       return result
     else:
       result = status.TestFailure(
-        "Actual result did not match expected result for test %s" % self.testname)
+          "Actual result did not match expected result for test %s" % self.testname)
       logging.info("Actual result ---------- \n%s", actual_sorted)
       logging.info("Expected result ---------- \n%s", expected_sorted)
       raise result
@@ -254,7 +254,7 @@ class TestTemplate(object):
 
     if 'result' not in physical_plan_json:
       raise status.TestFailure(
-        "Could not find result json in physical plan request to tracker: %s" % url)
+          "Could not find result json in physical plan request to tracker: %s" % url)
 
     return physical_plan_json['result']
 
@@ -280,7 +280,7 @@ class TestTemplate(object):
                (self.testname, RETRY_COUNT - retries_left, RETRY_COUNT), RETRY_INTERVAL)
       else:
         raise status.TestFailure("Failed to get pplan from tracker for test %s after %s attempts."
-                      % (self.testname, RETRY_COUNT))
+                                 % (self.testname, RETRY_COUNT))
 
 def _block_until_stmgr_running(expected_stmgrs):
   # block until ./heron-stmgr exists

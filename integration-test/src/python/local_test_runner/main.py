@@ -70,7 +70,7 @@ def run_tests(test_classes, args):
           failures += [testname]
         else:
           logging.error(
-            "Unrecognized test response returned for test %s: %s", testname, str(result))
+              "Unrecognized test response returned for test %s: %s", testname, str(result))
           failures += [testname]
       except status.TestFailure:
         failures += [testname]
