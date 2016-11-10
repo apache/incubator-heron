@@ -39,6 +39,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScalable;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -89,7 +90,7 @@ public class UpdateTopologyManager implements Closeable {
       throws ExecutionException, InterruptedException, ConcurrentModificationException {
     String topologyName = Runtime.topologyName(runtime);
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-    Lock lock = stateManager.getLock(topologyName, "updateTopology");
+    Lock lock = stateManager.getLock(topologyName, IStateManager.LockName.UPDATE_TOPOLOGY);
 
     if (lock.tryLock(5, TimeUnit.SECONDS)) {
       try {

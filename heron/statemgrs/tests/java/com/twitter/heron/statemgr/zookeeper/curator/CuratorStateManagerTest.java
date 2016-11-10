@@ -49,6 +49,7 @@ import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -319,8 +320,7 @@ public class CuratorStateManagerTest {
 
     final SettableFuture<Boolean> fakeResult = SettableFuture.create();
     fakeResult.set(false);
-    doReturn(fakeResult)
-        .when(spyStateManager).deleteNode(anyString());
+    doReturn(fakeResult).when(spyStateManager).deleteNode(anyString(), anyBoolean());
 
     ListenableFuture<Boolean> result = spyStateManager.deleteSchedulerLocation(TOPOLOGY_NAME);
     assertTrue(result.get());

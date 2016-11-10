@@ -49,6 +49,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScalable;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -106,7 +107,8 @@ public class UpdateTopologyManagerTest {
         .thenReturn(PhysicalPlans.PhysicalPlan.getDefaultInstance());
     when(stateManager.getTopology(TOPOLOGY_NAME)).thenReturn(topology);
     when(stateManager.getPackingPlan(eq(TOPOLOGY_NAME))).thenReturn(packingPlan);
-    when(stateManager.getLock(eq(TOPOLOGY_NAME), eq("updateTopology"))).thenReturn(lock);
+    when(stateManager.getLock(eq(TOPOLOGY_NAME), eq(IStateManager.LockName.UPDATE_TOPOLOGY)))
+        .thenReturn(lock);
     return stateManager;
   }
 
