@@ -43,7 +43,6 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   private final List<String> result;
 
   public AggregatorBolt(String httpPostUrl) {
-    LOG.info("HttpPostUrl : " + httpPostUrl);
     this.httpPostUrl = httpPostUrl;
     this.result = new ArrayList<String>();
   }
