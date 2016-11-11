@@ -33,7 +33,7 @@ class FileBasedExpectedResultsHandler(object):
         with open(self.file_path, "r") as expected_result_file:
           return expected_result_file.read().rstrip()
     except Exception as e:
-      raise status.TestFailure("Failed to read expected result file %s: %s" % self.file_path, e)
+      raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
 class HttpBasedExpectedResultsHandler(object):
   def __init__(self, server_host_port, topology_name, task_count):
@@ -63,7 +63,7 @@ class HttpBasedExpectedResultsHandler(object):
       return str(map(lambda x: str(x), result)).replace("'", '"')
     except Exception as e:
       raise status.TestFailure(
-          "Fetching expected result failed for %s topology: %s" % self.topology_name, e)
+          "Fetching expected result failed for %s topology" % self.topology_name, e)
 
 class HttpBasedActualResultsHandler(object):
   def __init__(self, server_host_port, topology_name):
@@ -75,8 +75,7 @@ class HttpBasedActualResultsHandler(object):
       return fetch_from_server(self.server_host_port, self.topology_name,
                                'results', '/results/%s' % self.topology_name)
     except Exception as e:
-      raise status.TestFailure(
-          "Fetching result failed for %s topology: %s" % self.topology_name, e)
+      raise status.TestFailure("Fetching result failed for %s topology" % self.topology_name, e)
 
 # pylint: disable=unnecessary-lambda
 class ExactlyOnceResultsChecker(object):
@@ -166,7 +165,7 @@ def run_test(topology_name, classpath, results_checker,
                     params.env, params.tests_bin_path, classpath,
                     params.release_package_uri, args)
   except Exception as e:
-    raise status.TestFailure("Failed to submit %s topology: %s" % topology_name, e)
+    raise status.TestFailure("Failed to submit %s topology" % topology_name, e)
 
   logging.info("Successfully submitted %s topology", topology_name)
 
@@ -185,7 +184,7 @@ def run_test(topology_name, classpath, results_checker,
     return results_checker.check_results()
 
   except Exception as e:
-    raise status.TestFailure("Checking result failed for %s topology: %s" % topology_name, e)
+    raise status.TestFailure("Checking result failed for %s topology" % topology_name, e)
   finally:
     kill_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
                   params.role, params.env, topology_name)
