@@ -25,7 +25,7 @@ import subprocess
 import sys
 from collections import namedtuple
 
-import status
+from ..common import status
 from heron.common.src.python.utils import log
 
 # import test_kill_bolt

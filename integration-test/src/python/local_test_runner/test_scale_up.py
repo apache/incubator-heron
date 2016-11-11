@@ -16,7 +16,7 @@
 import logging
 import subprocess
 
-import status
+from ..common import status
 import test_template
 
 class TestScaleUp(test_template.TestTemplate):
