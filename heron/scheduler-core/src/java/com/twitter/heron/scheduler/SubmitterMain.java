@@ -374,6 +374,7 @@ public class SubmitterMain {
 
       // create an instance of uploader
       uploader = ReflectionUtils.newInstance(uploaderClass);
+
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
       return false;
@@ -389,30 +390,31 @@ public class SubmitterMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateSubmit(adaptor, topology.getName());
+      validateSubmit(adaptor, topology.getName());
 
       // 2. Try to submit topology if valid
-      if (isValid) {
-        // invoke method to submit the topology
-        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
+      // invoke method to submit the topology
+      LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
-        // Firstly, try to upload necessary packages
-        packageURI = uploadPackage(uploader);
-        if (packageURI == null) {
-          LOG.severe("Failed to upload package.");
-          return false;
-        } else {
-          // Secondly, try to submit a topology
-          // build the runtime config
-          Config runtime = Config.newBuilder()
-              .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
-              .put(Keys.topologyPackageUri(), packageURI)
-              .put(Keys.launcherClassInstance(), launcher)
-              .build();
+      // Firstly, try to upload necessary packages
+      packageURI = uploadPackage(uploader);
+      if (packageURI == null) {
+        LOG.severe("Failed to upload package.");
+        return false;
+      } else {
+        // Secondly, try to submit a topology
+        // build the runtime config
+        Config runtime = Config.newBuilder()
+            .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
+            .put(Keys.topologyPackageUri(), packageURI)
+            .put(Keys.launcherClassInstance(), launcher)
+            .build();
 
-          isSuccessful = callLauncherRunner(runtime);
-        }
+        isSuccessful = callLauncherRunner(runtime);
       }
+    } catch (TopologyAlreadyExistsException ex) {
+      isSuccessful = false;
+      System.out.println(ex.getMessage());
     } finally {
       // 3. Do post work basing on the result
       if (!isSuccessful) {
@@ -431,16 +433,14 @@ public class SubmitterMain {
     return isSuccessful;
   }
 
-  protected boolean validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName) {
+  protected void validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName)
+      throws TopologyAlreadyExistsException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
-      LOG.severe("Topology already exists");
-      return false;
+      throw new TopologyAlreadyExistsException("Topology already exists");
     }
-
-    return true;
   }
 
   protected URI uploadPackage(IUploader uploader) {

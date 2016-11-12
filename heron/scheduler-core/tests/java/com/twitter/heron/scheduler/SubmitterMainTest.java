@@ -38,7 +38,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -64,15 +66,24 @@ public class SubmitterMainTest {
     TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
 
-    // Topology is running
-    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
-    assertFalse(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
-
     // Topology is not running
     when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(null);
-    assertTrue(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
     when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(false);
-    assertTrue(submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME));
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
+  }
+
+  @Test(expected = TopologyAlreadyExistsException.class)
+  public void testValidateSubmitWithException() throws Exception {
+    Config config = mock(Config.class);
+
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
+    SubmitterMain submitterMain = new SubmitterMain(config, topology);
+
+    // Topology is running
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
   }
 
   /**
@@ -124,8 +135,9 @@ public class SubmitterMainTest {
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
 
     // Failed to validate the submission
-    doReturn(false).when(submitterMain)
+    doThrow(TopologyAlreadyExistsException.class).when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
+
     assertFalse(submitterMain.submitTopology());
     // Resources should be closed even the submission failed
     verify(uploader, atLeastOnce()).close();
@@ -133,7 +145,7 @@ public class SubmitterMainTest {
     verify(statemgr, atLeastOnce()).close();
 
     // validated the submission
-    doReturn(true).when(submitterMain)
+    doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
 
     // Failed to upload package, return null

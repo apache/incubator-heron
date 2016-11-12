@@ -63,14 +63,17 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   heron_env['HERON_OPTIONS'] = opts.get_heron_config()
 
   # print the verbose message
-  Log.debug('$> %s' % ' '.join(all_args))
-  Log.debug('Heron options: %s' % str(heron_env["HERON_OPTIONS"]))
+  Log.debug('Invoking class using command:\n``%s\'\'', ' '.join(all_args))
+  Log.debug('Heron options: {%s}', str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
-  status = subprocess.call(all_args, env=heron_env)
-  if status != 0:
-    err_str = "User main failed with status %d. Bailing out..." % status
-    raise RuntimeError(err_str)
+  proc = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  stdout, stderr = proc.communicate()
+  retcode = proc.returncode
+  Log.debug('Dumping stderr from process:\n%s', stderr[:-1])
+  if retcode != 0 and stdout:
+    Log.error(stdout[:-1])
+  return proc.returncode
 
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
@@ -104,10 +107,10 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   lib_jars = config.get_heron_libs(jars.topology_jars())
 
   # Now execute the class
-  heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
+  return heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
 
 def heron_pex(topology_pex, topology_class_name, args=None):
-  Log.debug("Importing %s from %s" % (topology_class_name, topology_pex))
+  Log.debug("Importing %s from %s", topology_class_name, topology_pex)
   if topology_class_name == '-':
     # loading topology by running its main method (if __name__ == "__main__")
     heron_env = os.environ.copy()
@@ -116,8 +119,8 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     cmd = [topology_pex]
     if args is not None:
       cmd.extend(args)
-    Log.debug('$> %s' % ' '.join(cmd))
-    Log.debug('Heron options: %s' % str(heron_env['HERON_OPTIONS']))
+    Log.debug('$> %s', ' '.join(cmd))
+    Log.debug('Heron options: %s', str(heron_env['HERON_OPTIONS']))
 
     # invoke the command with subprocess and print error message, if any
     status = subprocess.call(cmd, env=heron_env)
@@ -130,12 +133,12 @@ def heron_pex(topology_pex, topology_class_name, args=None):
       # loading topology from Topology's subclass (no main method)
 
       # to support specifying the name of topology
-      Log.debug("args: %s" % args)
+      Log.debug("args: %s", args)
       if args is not None and isinstance(args, (list, tuple)) and len(args) > 0:
         opts.set_config('cmdline.topology.name', args[0])
 
       os.environ["HERON_OPTIONS"] = opts.get_heron_config()
-      Log.debug("Heron options: %s" % os.environ["HERON_OPTIONS"])
+      Log.debug("Heron options: %s", os.environ["HERON_OPTIONS"])
       pex_loader.load_pex(topology_pex)
       topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
       topology_class.write()

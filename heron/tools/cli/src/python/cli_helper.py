@@ -57,37 +57,36 @@ def run(command, parser, cl_args, unknown_args, action):
   :param action:        description of action taken
   :return:
   '''
-  try:
-    topology_name = cl_args['topology-name']
+  topology_name = cl_args['topology-name']
 
-    new_args = [
-        "--cluster", cl_args['cluster'],
-        "--role", cl_args['role'],
-        "--environment", cl_args['environ'],
-        "--heron_home", config.get_heron_dir(),
-        "--config_path", cl_args['config_path'],
-        "--override_config_file", cl_args['override_config_file'],
-        "--release_file", config.get_heron_release_file(),
-        "--topology_name", topology_name,
-        "--command", command,
-    ]
+  new_args = [
+      "--cluster", cl_args['cluster'],
+      "--role", cl_args['role'],
+      "--environment", cl_args['environ'],
+      "--heron_home", config.get_heron_dir(),
+      "--config_path", cl_args['config_path'],
+      "--override_config_file", cl_args['override_config_file'],
+      "--release_file", config.get_heron_release_file(),
+      "--topology_name", topology_name,
+      "--command", command,
+  ]
 
-    if Log.getEffectiveLevel() == logging.DEBUG:
-      new_args.append("--verbose")
+  if Log.getEffectiveLevel() == logging.DEBUG:
+    new_args.append("--verbose")
 
-    lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
+  lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
-    # invoke the runtime manager to kill the topology
-    execute.heron_class(
-        'com.twitter.heron.scheduler.RuntimeManagerMain',
-        lib_jars,
-        extra_jars=[],
-        args=new_args
-    )
+  # invoke the runtime manager to kill the topology
+  retcode = execute.heron_class(
+      'com.twitter.heron.scheduler.RuntimeManagerMain',
+      lib_jars,
+      extra_jars=[],
+      args=new_args
+  )
 
-  except Exception:
-    Log.error('Failed to %s \'%s\'' % (action, topology_name))
+  if retcode != 0:
+    Log.error('Failed to %s \'%s\'', action, topology_name)
     return False
-
-  Log.info('Successfully executed %s \'%s\'' % (action, topology_name))
-  return True
+  else:
+    Log.info('Successfully executed %s \'%s\'', action, topology_name)
+    return True

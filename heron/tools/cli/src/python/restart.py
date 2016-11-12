@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
+import logging
 import traceback
 from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
@@ -59,36 +60,36 @@ def run(command, parser, cl_args, unknown_args):
   :return:
   '''
   topology_name = cl_args['topology-name']
-  try:
-    container_id = cl_args['container-id']
+  container_id = cl_args['container-id']
 
-    new_args = [
-        "--cluster", cl_args['cluster'],
-        "--role", cl_args['role'],
-        "--environment", cl_args['environ'],
-        "--heron_home", config.get_heron_dir(),
-        "--config_path", cl_args['config_path'],
-        "--override_config_file", cl_args['override_config_file'],
-        "--release_file", config.get_heron_release_file(),
-        "--topology_name", topology_name,
-        "--command", command,
-        "--container_id", str(container_id)
-    ]
+  new_args = [
+      "--cluster", cl_args['cluster'],
+      "--role", cl_args['role'],
+      "--environment", cl_args['environ'],
+      "--heron_home", config.get_heron_dir(),
+      "--config_path", cl_args['config_path'],
+      "--override_config_file", cl_args['override_config_file'],
+      "--release_file", config.get_heron_release_file(),
+      "--topology_name", topology_name,
+      "--command", command,
+      "--container_id", str(container_id)
+  ]
 
-    lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
+  if Log.getEffectiveLevel() == logging.DEBUG:
+    new_args.append("--verbose")
 
-    # invoke the runtime manager to kill the topology
-    execute.heron_class(
-        'com.twitter.heron.scheduler.RuntimeManagerMain',
-        lib_jars,
-        extra_jars=[],
-        args=new_args
-    )
+  lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
-  except Exception as ex:
-    Log.debug(traceback.format_exc(ex))
+  # invoke the runtime manager to kill the topology
+  retcode = execute.heron_class(
+      'com.twitter.heron.scheduler.RuntimeManagerMain',
+      lib_jars,
+      extra_jars=[],
+      args=new_args
+  )
+  if retcode != 0:
     Log.error('Failed to restart topology \'%s\'' % topology_name)
     return False
-
-  Log.info('Successfully restarted topology \'%s\'' % topology_name)
-  return True
+  else:
+    Log.info('Successfully restarted topology \'%s\'' % topology_name)
+    return True

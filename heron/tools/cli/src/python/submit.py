@@ -17,7 +17,6 @@ import logging
 import os
 import shutil
 import tempfile
-import traceback
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -106,13 +105,12 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
-  execute.heron_class(
+  return execute.heron_class(
       class_name='com.twitter.heron.scheduler.SubmitterMain',
       lib_jars=lib_jars,
       extra_jars=extra_jars,
       args=args,
-      java_defines=[]
-  )
+      java_defines=[])
 
 
 ################################################################################
@@ -130,37 +128,33 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   if len(defn_files) == 0:
     raise Exception("No topologies found")
 
-  try:
-    for defn_file in defn_files:
+  for defn_file in defn_files:
 
-      # load the topology definition from the file
-      topology_defn = topology_pb2.Topology()
-      try:
-        handle = open(defn_file, "rb")
-        topology_defn.ParseFromString(handle.read())
-        handle.close()
+    # load the topology definition from the file
+    topology_defn = topology_pb2.Topology()
+    try:
+      handle = open(defn_file, "rb")
+      topology_defn.ParseFromString(handle.read())
+      handle.close()
 
-      except:
-        raise Exception("Could not open and parse topology defn file %s" % defn_file)
+    except:
+      raise Exception("Could not open and parse topology defn file %s" % defn_file)
 
-      # launch the topology
-      try:
-        Log.info("Launching topology \'%s\'" % topology_defn.name)
-        launch_a_topology(cl_args, tmp_dir, topology_file, defn_file)
-        Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
-
-      except Exception as ex:
-        Log.exception('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
-        raise
-
-  except:
-    raise
+    # launch the topology
+    Log.info("Launching topology \'%s\'", topology_defn.name)
+    retcode = launch_a_topology(cl_args, tmp_dir, topology_file, defn_file)
+    if retcode == 0:
+      Log.info("Topology \'%s\' launched successfully", topology_defn.name)
+    else:
+      Log.error('Failed to launch topology \'%s\'', topology_defn.name)
+      return False
+  return True
 
 
 ################################################################################
 def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
-   We use the packer to make a package for the jar and dump it
+  We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
   with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
@@ -176,27 +170,21 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
-  try:
-    execute.heron_class(
-        class_name=cl_args['topology-class-name'],
-        lib_jars=config.get_heron_libs(jars.topology_jars()),
-        extra_jars=[topology_file],
-        args=tuple(unknown_args),
-        java_defines=cl_args['topology_main_jvm_property'])
 
-  except Exception as ex:
-    Log.debug(traceback.format_exc(ex))
-    Log.error("Unable to execute topology main class")
+  retcode = execute.heron_class(
+      class_name=cl_args['topology-class-name'],
+      lib_jars=config.get_heron_libs(jars.topology_jars()),
+      extra_jars=[topology_file],
+      args=tuple(unknown_args),
+      java_defines=cl_args['topology_main_jvm_property'])
+
+  if retcode != 0:
     return False
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
-  except Exception as ex:
-    return False
-  finally:
-    shutil.rmtree(tmp_dir)
+  result = launch_topologies(cl_args, topology_file, tmp_dir)
+  shutil.rmtree(tmp_dir)
 
-  return True
+  return result
 
 
 ################################################################################
@@ -222,23 +210,20 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
   java_defines = cl_args['topology_main_jvm_property']
-  execute.heron_tar(
+  retcode = execute.heron_tar(
       cl_args['topology-class-name'],
       topology_file,
       tuple(unknown_args),
       tmp_dir,
       java_defines)
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
-
-  except Exception:
+  if retcode != 0:
     return False
 
-  finally:
-    shutil.rmtree(tmp_dir)
+  result = launch_topologies(cl_args, topology_file, tmp_dir)
+  shutil.rmtree(tmp_dir)
 
-  return True
+  return result
 
 ################################################################################
 #  Execute the pex file to create topology definition file by running
@@ -252,7 +237,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   try:
     execute.heron_pex(topology_file, topology_class_name, tuple(unknown_args))
   except Exception as ex:
-    Log.error("Error when loading a topology: %s" % str(ex))
+    Log.error("Error when loading a topology: %s", str(ex))
     return False
 
   try:
@@ -287,7 +272,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar|pex file %s does not exist" % topology_file)
+    Log.error("Topology jar|tar|pex file %s does not exist", topology_file)
     return False
 
   # check if it is a valid file type
