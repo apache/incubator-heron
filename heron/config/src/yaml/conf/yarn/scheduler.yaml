@@ -14,4 +14,4 @@ heron.directory.sandbox.java.home:           ${JAVA_HOME}
 heron.scheduler.yarn.queue:                  default
 
 # the amount of memory topology's driver (yarn application master) needs
-heron.scheduler.yarn.driver.memory.mb:           1024
+heron.scheduler.yarn.driver.memory.mb:       2048
