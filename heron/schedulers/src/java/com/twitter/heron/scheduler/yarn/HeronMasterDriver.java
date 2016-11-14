@@ -21,6 +21,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -117,9 +122,12 @@ public class HeronMasterDriver {
   // looked up by heron's executor id or REEF's container id.
   private MultiKeyWorkerMap multiKeyWorkerMap;
 
+  private TMaster tMaster;
+
   // TODO: https://github.com/twitter/heron/issues/949: implement Driver HA
 
   private String componentRamMap;
+
   private AtomicBoolean isTopologyKilled = new AtomicBoolean(false);
 
   @Inject
@@ -167,22 +175,20 @@ public class HeronMasterDriver {
   }
 
   /**
-   * Requests container for TMaster as container/executor id 0.
-   */
-  void scheduleTMasterContainer() throws ContainerAllocationException {
-    LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
-    // TODO: https://github.com/twitter/heron/issues/951: colocate TMaster and Scheduler
-    HeronWorker tMasterWorker = new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
-    requestContainerForWorker(TMASTER_CONTAINER_ID, tMasterWorker);
-  }
-
-  /**
    * Container allocation is asynchronous. Requests all containers in the input packing plan
    * serially to ensure allocated resources match the required resources.
    */
   void scheduleHeronWorkers(PackingPlan topologyPacking) throws ContainerAllocationException {
     this.componentRamMap = topologyPacking.getComponentRamDistribution();
     scheduleHeronWorkers(topologyPacking.getContainers());
+  }
+
+  /*
+   * Must be invoked after workers are scheduled. TMaster needs component ram map.
+   */
+  void launchTMaster() {
+    tMaster = buildTMaster(Executors.newSingleThreadExecutor());
+    tMaster.launch();
   }
 
   /**
@@ -250,19 +256,14 @@ public class HeronMasterDriver {
           .add(new HeronWorker(id, containerPlans.get(id).getRequiredResource()));
     }
     LOG.info("Number of workers awaiting allocation: " + workersAwaitingAllocation.size());
-
-    if (!multiKeyWorkerMap.lookupByWorkerId(TMASTER_CONTAINER_ID).isPresent()) {
-      LOG.info("TMaster is awaiting allocation too");
-      HeronWorker tMasterWorker = new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
-      workersAwaitingAllocation.add(tMasterWorker);
-    }
-
     return workersAwaitingAllocation;
   }
 
   public void killTopology() {
     LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
     isTopologyKilled.set(true);
+
+    tMaster.killTMaster();
 
     for (HeronWorker worker : multiKeyWorkerMap.getHeronWorkers()) {
       AllocatedEvaluator evaluator = multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
@@ -392,6 +393,13 @@ public class HeronMasterDriver {
     return Optional.fromNullable(containerPlans.get(id));
   }
 
+  @VisibleForTesting
+  TMaster buildTMaster(ExecutorService executor) {
+    TMaster tMasterManager = new TMaster();
+    tMasterManager.executor = executor;
+    return tMasterManager;
+  }
+
   /**
    * {@link HeronWorker} is a data class which connects reef ids, heron ids and related objects.
    * All the pointers in an instance are related to one container. A container is a reef object,
@@ -486,6 +494,68 @@ public class HeronMasterDriver {
 
     public ContainerAllocationException(String message, Exception e) {
       super(message, e);
+    }
+  }
+
+  /**
+   * This class manages the TMaster executor process, including launching the TMaster, monitoring it
+   * and killing it when needed.
+   */
+  @VisibleForTesting
+  class TMaster implements Runnable {
+    private ExecutorService executor;
+    private Future<?> tMasterFuture;
+    private CountDownLatch tMasterErrorCounter = new CountDownLatch(3);
+
+    void launch() {
+      LOG.log(Level.INFO, "Launching executor for TM: {0}", topologyName);
+
+      tMasterFuture = executor.submit(this);
+
+      // the following task will restart the tMaster if it fails
+      executor.submit(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            tMasterFuture.get();
+            LOG.log(Level.INFO, "TMaster executor terminated, {0}", topologyName);
+          } catch (InterruptedException | ExecutionException e) {
+            LOG.log(Level.WARNING, "Error while waiting for TMaster executor", e);
+          }
+
+          if (isTopologyKilled.get()) {
+            LOG.log(Level.INFO, "The topology is killed, {0}", topologyName);
+            return;
+          }
+
+          tMasterErrorCounter.countDown();
+          long counter = tMasterErrorCounter.getCount();
+          if (counter > 0) {
+            LOG.log(Level.WARNING, "Restarting TMaster, attempts left: {0}", counter);
+            launch();
+          }
+        }
+      });
+    }
+
+    void killTMaster() {
+      LOG.log(Level.INFO, "Killing TMaster process: {0}", topologyName);
+      if (!tMasterFuture.isDone()) {
+        tMasterFuture.cancel(true);
+      }
+      executor.shutdownNow();
+    }
+
+    HeronExecutorTask getTMasterExecutorTask() {
+      return new HeronExecutorTask(reefFileNames, TMASTER_CONTAINER_ID,
+          cluster, role, topologyName, env, topologyPackageName, heronCorePackageName, topologyJar,
+          getComponentRamMap(), verboseMode);
+    }
+
+    @Override
+    public void run() {
+      HeronExecutorTask tMasterTask = getTMasterExecutorTask();
+      tMasterTask.startExecutor();
     }
   }
 

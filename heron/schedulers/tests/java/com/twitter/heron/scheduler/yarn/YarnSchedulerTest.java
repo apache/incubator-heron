@@ -21,20 +21,22 @@ import org.mockito.Mockito;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
+import static org.mockito.Mockito.verify;
+
 public class YarnSchedulerTest {
   @Test
   public void delegatesToDriverOnSchedule() throws Exception {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
-    Mockito.doNothing().when(mockHeronDriver).scheduleTMasterContainer();
+    Mockito.doNothing().when(mockHeronDriver).launchTMaster();
 
     IScheduler scheduler = new YarnScheduler();
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);
     scheduler.onSchedule(mockPacking);
 
     InOrder invocationOrder = Mockito.inOrder(mockHeronDriver);
-    invocationOrder.verify(mockHeronDriver).scheduleTMasterContainer();
     invocationOrder.verify(mockHeronDriver).scheduleHeronWorkers(mockPacking);
+    invocationOrder.verify(mockHeronDriver).launchTMaster();
   }
 
   @Test
@@ -45,6 +47,6 @@ public class YarnSchedulerTest {
     IScheduler scheduler = new YarnScheduler();
     scheduler.onKill(null);
 
-    Mockito.verify(mockHeronDriver).killTopology();
+    verify(mockHeronDriver).killTopology();
   }
 }
