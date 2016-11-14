@@ -17,7 +17,7 @@ sleep 10
 # Note:
 #   wget return code is 4 (network err) even though there is no broken link.
 #   This means we should examine wget's log.
-wget --spider -r -l 10 -e robots=off -o $WGET_LOG -p "http://127.0.0.1:${PORT}/heron"
+wget --spider -r -l 10 -e robots=off -o $WGET_LOG -p "http://localhost:${PORT}/heron"
 
 # kill Hugo running in background
 killall hugo 2>/dev/null || true
