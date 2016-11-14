@@ -56,7 +56,7 @@ of 4 Heron instances.</p>
 <p>Note that these values take into account only the resources allocated for the user&rsquo;s instances.
 Additional per container resources for system-related processes such as the stream manager can be
 added to the maximum container size defined above. Thus, the algorithm might eventually produce
-containers slighltly bigger that the boundary determined by parameters 2-4. The amount of the
+containers slightly bigger that the boundary determined by parameters 2-4. The amount of the
 additional resources allocated to each container to account for additional internal Heron resource
 requirements, is determined by the padding percentage specified in parameter 5. If the user does
 not specify the padding percentage, then the system will use a default value of 10.
@@ -88,16 +88,13 @@ method can be used to set the padding percentage
 defined in parameter 5 when defining a topology.</p></li>
 </ol>
 
-<p>Here&rsquo;s an example code snippet for setting these parameters when defining a topology:
-   ```java</p>
+<p>Here&rsquo;s an example code snippet for setting these parameters when defining a topology:</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>     <span style="color: #75715e">// Set up the topology and its config</span>
+     <span style="color: #f8f8f2">com</span><span style="color: #f92672">.</span><span style="color: #a6e22e">twitter</span><span style="color: #f92672">.</span><span style="color: #a6e22e">heron</span><span style="color: #f92672">.</span><span style="color: #a6e22e">api</span><span style="color: #f92672">.</span><span style="color: #a6e22e">Config</span> <span style="color: #f8f8f2">topologyConfig</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">com</span><span style="color: #f92672">.</span><span style="color: #a6e22e">twitter</span><span style="color: #f92672">.</span><span style="color: #a6e22e">heron</span><span style="color: #f92672">.</span><span style="color: #a6e22e">api</span><span style="color: #f92672">.</span><span style="color: #a6e22e">Config</span><span style="color: #f92672">();</span>
 
-<pre><code> // Set up the topology and its config 
- com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config(); 
+     <span style="color: #66d9ef">long</span> <span style="color: #f8f8f2">maxContainerRam</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">10L</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">Constants</span><span style="color: #f92672">.</span><span style="color: #a6e22e">GB</span><span style="color: #f92672">;</span>
 
- long maxContainerRam = 10L * Constants.GB; 
-
- topologyConfig.setContainerMaxRamHint(maxContainerRam); 
- topologyConfig.setContainerPaddingPercentage(5); 
-```
-</code></pre>
+     <span style="color: #f8f8f2">topologyConfig</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setContainerMaxRamHint</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">maxContainerRam</span><span style="color: #f92672">);</span>
+     <span style="color: #f8f8f2">topologyConfig</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setContainerPaddingPercentage</span><span style="color: #f92672">(</span><span style="color: #ae81ff">5</span><span style="color: #f92672">);</span>
+</pre></div>
 </article></section></div></div></div><script src="https://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>

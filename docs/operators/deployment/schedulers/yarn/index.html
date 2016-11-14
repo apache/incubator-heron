@@ -32,22 +32,34 @@ containers are allocated for each topology.</li>
 
 <h3 id="configuring-the-heron-client-classpath">Configuring the Heron client classpath</h3>
 
-<ol>
-<li>Command <code>hadoop classpath</code> provides a list of jars needed to submit a hadoop job. Copy all jars
-to <code>HERON_INSTALL_DIR/lib/scheduler</code>.
+<p><strong>Under 0.14.2 version (including 0.14.2)</strong>
+  1. Command <code>hadoop classpath</code> provides a list of jars needed to submit a hadoop job. Copy all jars to <code>HERON_INSTALL_DIR/lib/scheduler</code>.
+   * Do not copy commons-cli jar if it is older than version 1.3.1.
+  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
+ -<code>HERON_INSTALL_DIR/lib/scheduler</code> too.</p>
 
-<ul>
-<li>Do not copy commons-cli jar if it is older than version 1.3.1.</li>
-</ul></li>
-<li>Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
-<code>HERON_INSTALL_DIR/lib/scheduler</code> too.</li>
-</ol>
+<p><strong>After 0.14.3 version released</strong></p>
+
+<p>It is unnecessary to copy hadoop-classpath-jars to <code>HERON_INSTALL_DIR/lib/scheduler</code> like what 0.14.2 version requested. <a href="https://github.com/twitter/heron/issues/1245">#1245</a> added <code>extra-launch-classpath</code> arguments, which makes it easier and more convenient to submit a topology to YARN.</p>
 
 <blockquote>
-<p>The YARN scheduler needs Hadoop and YARN jars in the classpath. Heron currently does not allow
-customizing client classpath. Hadoop and YARN jars are version dependent and should not be
-bundled with the Heron distribution. So, this manual step is needed till this Heron issue
-(<a href="https://github.com/twitter/heron/issues/271">271</a>) is fixed.</p>
+<p><strong>Tips</strong></p>
+
+<p><strong><em>No matter which version of Heron you are using, there is something user should pay attention to</em></strong> if you want to submit a topology to YARN.</p>
+
+<p>For <code>localfs-state-manager</code></p>
+
+<ul>
+<li>The version of common-cli jar should be greater than or equal to 1.3.1.</li>
+</ul>
+
+<p>For <code>zookeeper-state-manager</code></p>
+
+<ul>
+<li>The version of common-cli jar should be greater than or equal to 1.3.1.</li>
+<li>The version of curator-framework jar should be greater than or equal to 2.10.0</li>
+<li>The version of curator-client jar should be greater than or equal to 2.10.0</li>
+</ul>
 </blockquote>
 
 <h3 id="configure-the-yarn-scheduler">Configure the YARN scheduler</h3>
@@ -71,7 +83,22 @@ deployment on a multi-node YARN cluster.</p>
 
 <p><strong>Command</strong></p>
 
+<p><strong>Under 0.14.2 version (including 0.14.2)</strong></p>
+
 <p><code>$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology</code></p>
+
+<p><strong>After 0.14.3 version released</strong></p>
+
+<p><code>$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology --extra-launch-classpath &lt;extra-classpath-value&gt;</code></p>
+
+<blockquote>
+<p><strong>Tips</strong></p>
+
+<ol>
+<li>More details for using the <code>--extra-launch-classpath</code> argument in 0.14.3 version. It supports both a single directory which including all <code>hadoop-lib-jars</code> and multiple directories separated by colon such as what <code>hadoop classpath</code> gives. <strong><em>The submit operation will fail if any path is invalid or if any file is missing.</em></strong></li>
+<li>if you want to submit a topology to a specific YARN queue, you can set the <code>heron.scheduler.yarn.queue</code> argument in <code>--config-property</code>. For instance, <code>--config-property heron.scheduler.yarn.queue=test</code>. This configuration could be found in the <a href="https://github.com/twitter/heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml">conf/yarn/scheduler</a> file too. <code>default</code> would be the YARN default queue as YARN provided.</li>
+</ol>
+</blockquote>
 
 <p><strong>Sample Output</strong></p>
 
@@ -106,7 +133,7 @@ application_1466548964728_0004	      AckingTopology	                YARN	     he
 
 <p><code>$ heron kill yarn AckingTopology</code></p>
 
-<p>###Log File location</p>
+<h3 id="log-file-location">Log File location</h3>
 
 <p>Assuming HDFS as the file system, Heron logs and REEF logs can be found in the following locations:</p>
 

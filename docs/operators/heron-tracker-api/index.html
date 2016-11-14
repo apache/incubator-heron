@@ -493,14 +493,12 @@ Note that these timeseries are associated with their instances.</li>
 <h4 id="operators">Operators</h4>
 
 <h5 id="ts">TS</h5>
-
-<pre><code>TS(componentName, instance, metricName)
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>TS(componentName, instance, metricName)
+</pre></div>
 
 <p>Example:</p>
-
-<pre><code>TS(component1, *, __emit-count/stream1)
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>TS(component1, *, __emit-count/stream1)
+</pre></div>
 
 <p>Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
 Accepts a list of 3 elements:</p>
@@ -517,11 +515,15 @@ a multivariate time series.</p>
 <hr />
 
 <h5 id="default">DEFAULT</h5>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DEFAULT(0, TS(component1, *, __emit-count/stream1))
+</pre></div>
 
-<pre><code>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
+<p>If the second operator returns more than one timeline, so will the
+DEFAULT operator.</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default))) &lt;--
+</pre></div>
 
-DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default)))     &lt;-- Second operator can be any operator
-</code></pre>
+<p>Second operator can be any operator</p>
 
 <p>Default Operator. This operator is responsible for filling missing values in the metrics timeline.
 Must have 2 arguments</p>
@@ -536,9 +538,8 @@ Must have 2 arguments</p>
 <hr />
 
 <h5 id="sum">SUM</h5>
-
-<pre><code>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+</pre></div>
 
 <p>Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
 each of which must be one of the following two types:</p>
@@ -554,9 +555,8 @@ Note that &ldquo;instance&rdquo; attribute is not there in the result.</p>
 <hr />
 
 <h5 id="max">MAX</h5>
-
-<pre><code>MAX(100, TS(component1, *, metric1))
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>MAX(100, TS(component1, *, metric1))
+</pre></div>
 
 <p>Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
 Each argument must be one of the following types:</p>
@@ -572,9 +572,8 @@ Note that &ldquo;instance&rdquo; attribute is not included in the result.</p>
 <hr />
 
 <h5 id="percentile">PERCENTILE</h5>
-
-<pre><code>PERCENTILE(99, TS(component1, *, metric1))
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>PERCENTILE(99, TS(component1, *, metric1))
+</pre></div>
 
 <p>Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
 This is a more general type of query similar to MAX. Note that <code>PERCENTILE(100, TS...)</code> is equivalent to <code>Max(TS...)</code>.
@@ -593,9 +592,8 @@ for each timestamp. Note that &ldquo;instance&rdquo; attribute is not there in t
 <hr />
 
 <h5 id="divide">DIVIDE</h5>
-
-<pre><code>DIVIDE(TS(component1, *, metrics1), 100)
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DIVIDE(TS(component1, *, metrics1), 100)
+</pre></div>
 
 <p>Divide Operator. Accepts two arguments, both can be univariate or multivariate.
 Each can be of one of the following types:</p>
@@ -634,9 +632,8 @@ Each can be of one of the following types:</p>
 <hr />
 
 <h5 id="multiply">MULTIPLY</h5>
-
-<pre><code>MULTIPLY(10, TS(component1, *, metrics1))
-</code></pre>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>MULTIPLY(10, TS(component1, *, metrics1))
+</pre></div>
 
 <p>Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
@@ -676,11 +673,10 @@ on the two corresponding time series.</li>
 <hr />
 
 <h5 id="subtract">SUBTRACT</h5>
-
-<pre><code>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
 
 SUBTRACT(TS(component1, instance1, metrics1), 100)
-</code></pre>
+</pre></div>
 
 <p>Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
@@ -720,11 +716,10 @@ on the two corresponding time series.</li>
 <hr />
 
 <h5 id="rate">RATE</h5>
-
-<pre><code>RATE(SUM(TS(component1, *, metrics1)))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>RATE(SUM(TS(component1, *, metrics1)))
 
 RATE(TS(component1, *, metrics2))
-</code></pre>
+</pre></div>
 
 <p>Rate Operator. This operator is used to find rate of change for all timeseries.
 Accepts a only a single argument, which must be an Operators which returns univariate or multivariate time series.

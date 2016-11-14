@@ -5,7 +5,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 <a href="https://github.com/twitter/heron/tree/master">github</a>.</p>
 
 <p>If you&rsquo;re looking for documentation about developing topologies for a Heron
-cluster, see <a href="../../developers/topologies">Building Topologies</a> instead.</p>
+cluster, see <a href="../../developers/java/topologies">Building Topologies</a> instead.</p>
 
 <h2 id="languages">Languages</h2>
 
@@ -19,7 +19,7 @@ cluster, see <a href="../../developers/topologies">Building Topologies</a> inste
 <li><p><strong>Java 8</strong> is used primarily for Heron&rsquo;s <a href="../../concepts/topologies">topology
 API</a>, and <a href="../../concepts/architecture#heron-instance">Heron Instance</a>.
 It is currently the only language in which topologies can be written. Instructions can be found
-in <a href="../../developers/topologies">Building Topologies</a>, while documentation for the Java
+in <a href="../../developers/java/topologies">Building Topologies</a>, while documentation for the Java
 API can be found <a href="/heron/api/com/twitter/heron/api/topology/package-summary.html">here</a>. Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.</p></li>
 
@@ -114,7 +114,7 @@ sink</strong>), see <a href="../custom-metrics-sink">Implementing a Custom Metri
 <p>Heron&rsquo;s API for writing topologies is written in Java. The code for this API can
 be found in <a href="https://github.com/twitter/heron/tree/master/heron/api"><code>heron/api</code></a>.</p>
 
-<p>Documentation for writing topologies can be found in <a href="../../developers/topologies">Building
+<p>Documentation for writing topologies can be found in <a href="../../developers/java/topologies">Building
 Topologies</a>, while API documentation can be found
 <a href="/heron/api/com/twitter/heron/api/topology/package-summary.html">here</a>.</p>
 
@@ -141,7 +141,7 @@ Java. Those examples can be found in
 for <a href="../../operators/heron-cli">managing topologies</a> and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 The Python code for <code>heron</code> can be found in
-<a href="https://github.com/twitter/heron/tree/master/heron/cli"><code>heron/cli</code></a>.</p>
+<a href="https://github.com/twitter/heron/tree/master/heron/tools/cli"><code>heron/tools/cli</code></a>.</p>
 
 <p>Sample configurations for different Heron schedulers</p>
 
@@ -153,19 +153,19 @@ The Python code for <code>heron</code> can be found in
 <h3 id="heron-tracker">Heron Tracker</h3>
 
 <p>The Python code for the <a href="../../operators/heron-tracker">Heron Tracker</a> can be
-found in <a href="https://github.com/twitter/heron/tree/master/heron/tracker"><code>heron/tracker</code></a>.</p>
+found in <a href="https://github.com/twitter/heron/tree/master/heron/tools/tracker"><code>heron/tools/tracker</code></a>.</p>
 
 <p>The Tracker is a web server written in Python. It relies on the
 <a href="http://www.tornadoweb.org/en/stable/">Tornado</a> framework. You can add new HTTP
 routes to the Tracker in
-<a href="https://github.com/twitter/heron/tree/master/heron/tracker/src/python/main.py"><code>main.py</code></a> and
+<a href="https://github.com/twitter/heron/tree/master/heron/tools/tracker/src/python/main.py"><code>main.py</code></a> and
 corresponding handlers in the
-<a href="https://github.com/twitter/heron/tree/master/heron/tracker/src/python/handlers"><code>handlers</code></a> directory.</p>
+<a href="https://github.com/twitter/heron/tree/master/heron/tools/tracker/src/python/handlers"><code>handlers</code></a> directory.</p>
 
 <h3 id="heron-ui">Heron UI</h3>
 
 <p>The Python code for the <a href="../../operators/heron-ui">Heron UI</a> can be found in
-<a href="https://github.com/twitter/heron/tree/master/heron/ui"><code>heron/ui</code></a>.</p>
+<a href="https://github.com/twitter/heron/tree/master/heron/tools/ui"><code>heron/tools/ui</code></a>.</p>
 
 <p>Like Heron Tracker, Heron UI is a web server written in Python that relies on
 the <a href="http://www.tornadoweb.org/en/stable/">Tornado</a> framework. You can add new

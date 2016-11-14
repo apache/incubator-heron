@@ -12,7 +12,7 @@ and import its library into your own topology project.</p>
 <li><p>Go to the <a href="https://github.com/twitter/heron/releases">releases page</a>
 for Heron and download the Heron API installation script for your platform.
 The name of the script for Mac OS X (<code>darwin</code>), for example, would be
-<code>heron-api-install-0.14.2-darwin.sh</code>.</p></li>
+<code>heron-api-install-0.14.5-darwin.sh</code>.</p></li>
 
 <li><p>Once you&rsquo;ve downloaded, run it with the <code>--user</code> flag set.</p></li>
 
@@ -28,13 +28,13 @@ the following lines in your project&rsquo;s <code>pom.xml</code> file.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;dependency&gt;</span>
   <span style="color: #f92672">&lt;groupId&gt;</span>com.twitter.heron<span style="color: #f92672">&lt;/groupId&gt;</span>
   <span style="color: #f92672">&lt;artifactId&gt;</span>heron-storm<span style="color: #f92672">&lt;/artifactId&gt;</span>
-  <span style="color: #f92672">&lt;version&gt;</span>0.14.2<span style="color: #f92672">&lt;/version&gt;</span>
+  <span style="color: #f92672">&lt;version&gt;</span>0.14.5<span style="color: #f92672">&lt;/version&gt;</span>
 <span style="color: #f92672">&lt;/dependency&gt;</span>
 </pre></div>
 
 <h3 id="writing-your-own-topology">Writing your own topology</h3>
 
-<p><a href="../java/spouts">Spouts</a> and <a href="../java/bolts">Bolts</a> discuss how to implement a
+<p><a href="../spouts">Spouts</a> and <a href="../bolts">Bolts</a> discuss how to implement a
 spouts and bolts, respectively.</p>
 
 <p>After defining the spouts and bolts, a topology can be composed using

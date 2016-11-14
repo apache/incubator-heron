@@ -21,7 +21,7 @@ or as a <a href="#building-a-full-release-package">release package</a>.</p>
 <p>You must have the following installed to compile Heron:</p>
 
 <ul>
-<li><a href="http://bazel.io/docs/install.html">Bazel</a> = 0.3.0. Later
+<li><a href="http://bazel.io/docs/install.html">Bazel</a> = 0.3.1. Later
 versions might work but have not been tested. See <a href="#installing-bazel">Installing Bazel</a> below.</li>
 <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">Java
 8</a>
@@ -49,12 +49,12 @@ $ <span style="color: #f8f8f2">echo</span> <span style="color: #f8f8f2">$CC</spa
 <h2 id="installing-bazel">Installing Bazel</h2>
 
 <p>Heron uses the <a href="http://bazel.io">Bazel</a> build tool. Bazel releases can be found
-<a href="https://github.com/bazelbuild/bazel/releases/tag/0.3.0">here</a>
+<a href="https://github.com/bazelbuild/bazel/releases/tag/0.3.1">here</a>
 and installation instructions can be found <a href="http://bazel.io/docs/install.html">here</a>.</p>
 
 <p>To ensure that Bazel has been installed, run <code>bazel version</code> and check the
 version (listed next to <code>Build label</code> in the script&rsquo;s output) to ensure that you
-have Bazel 0.3.0.</p>
+have Bazel 0.3.1.</p>
 
 <h2 id="configuring-bazel">Configuring Bazel</h2>
 
@@ -83,6 +83,12 @@ packages:</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin heron/...
 </pre></div>
 
+<p>Production release packages include additional performance optimizations
+not enabled by default. Enabling these optimizations increases build time.
+To enable production optimizations, include the <code>opt</code> flag:</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build -c opt --config<span style="color: #f92672">=</span>PLATFORM heron/...
+</pre></div>
+
 <h3 id="building-all-components">Building All Components</h3>
 
 <p>The Bazel build process can produce either executable install scripts or
@@ -94,7 +100,7 @@ $ bazel build --config<span style="color: #f92672">=</span>PLATFORM scripts/pack
 
 <p>Resulting artifacts can be found in subdirectories below the <code>bazel-bin</code>
 directory. The <code>heron-tracker</code> executable, for example, can be found at
-<code>bazel-bin/heron/tracker/src/python/heron-tracker</code>.</p>
+<code>bazel-bin/heron/tools/tracker/src/python/heron-tracker</code>.</p>
 
 <h3 id="building-specific-components">Building Specific Components</h3>
 
@@ -102,7 +108,7 @@ directory. The <code>heron-tracker</code> executable, for example, can be found 
 for a single Heron component (such as the <a href="../../../operators/heron-tracker">Heron
 Tracker</a>) by passing a target to the <code>bazel
 build</code> command. For example, the following command would build the <a href="../../../operators/heron-tracker">Heron Tracker</a>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin heron/tracker/src/python:heron-tracker
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin heron/tools/tracker/src/python:heron-tracker
 </pre></div>
 
 <h2 id="testing-heron">Testing Heron</h2>

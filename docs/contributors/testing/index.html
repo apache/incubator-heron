@@ -52,8 +52,7 @@ To run the functional integration tests on a Mac OS X, do the following:</p>
 in certain processes, such as Topology Master and Metrics Manager.
 To run the failure integration tests on a Mac OS X, do the following:</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin integration-test/src/...
-
-$ python integration-test/src/python/local_test_runner/main.py
+$ ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
 </pre></div></li>
 </ul>
 </article></section></div></div></div><script src="https://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
