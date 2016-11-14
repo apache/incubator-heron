@@ -31,7 +31,7 @@ distribute the resulting <code>heron</code> CLI to all machines used to manage t
 <h3 id="common-cli-args">Common CLI Args</h3>
 
 <p>All topology management commands (<code>submit</code>, <code>activate</code>, <code>deactivate</code>,
-<code>restart</code>, and <code>kill</code>) take the following required arguments:</p>
+<code>restart</code>, <code>update</code> and <code>kill</code>) take the following required arguments:</p>
 
 <ul>
 <li><p><code>cluster</code> &mdash; The name of the cluster where the command needs to be executed.</p></li>
@@ -52,7 +52,7 @@ argument will be simply <code>local</code>.</p>
 <h3 id="optional-cli-flags">Optional CLI Flags</h3>
 
 <p>CLI supports a common set of optional flags for all topology management commands
-(<code>submit</code>, <code>activate</code>, <code>deactivate</code>, <code>restart</code>, and <code>kill</code>):</p>
+(<code>submit</code>, <code>activate</code>, <code>deactivate</code>, <code>restart</code>, <code>update</code> and <code>kill</code>):</p>
 
 <ul>
 <li><p><code>--config-path</code> &mdash; Every heron cluster must provide a few configuration
@@ -79,7 +79,7 @@ Topologies can be submitted in either an activated (default) or deactivated stat
 (more on <a href="#activating-a-topology">activation</a> and <a href="#deactivating-a-topology">deactivation</a>
 below).</p>
 
-<p>Here&rsquo;s the basic syntax:</p>
+<p>Below is the basic syntax:</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> submit
 usage: heron submit <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span> topology-file-name topology-class-name <span style="color: #f92672">[</span>topology-args<span style="color: #f92672">]</span>
 
@@ -236,6 +236,40 @@ restarted if you want to restart only a specific container of the topology.</p><
 
 <h3 id="example-topology-restart-command">Example Topology Restart Command</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron restart local/ads/PROD my-topology
+</pre></div>
+
+<h2 id="updating-a-topology">Updating a Topology</h2>
+
+<p>You can update the parallelism of any of the components of a deployed
+topology using the <code>update</code> command.</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> update
+usage: heron update <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span> &lt;topology-name&gt; --component-parallelism &lt;name:value&gt;
+
+Required arguments:
+  cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span>  Cluster, role, and environment to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --component-parallelism COMPONENT_PARALLELISM
+                        Component name and the new parallelism value colon-
+                        delimited: <span style="color: #f92672">[</span>component_name<span style="color: #f92672">]</span>:<span style="color: #f92672">[</span>parallelism<span style="color: #f92672">]</span>
+  --config-path <span style="color: #f92672">(</span>a string<span style="color: #f8f8f2">;</span> path to cluster config<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;/Users/billg/.heron/conf&quot;</span><span style="color: #f92672">)</span>
+  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value<span style="color: #f8f8f2">;</span> a config key and its value<span style="color: #f8f8f2">;</span> default: <span style="color: #f92672">[])</span>
+  --verbose <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+</pre></div>
+
+<p>Arguments of the <code>update</code> command include <strong>cluster/[role]/[env]</strong> and
+<strong>topology-name</strong> as well as:</p>
+
+<ul>
+<li><strong>&ndash;component-parallelism</strong> &mdash; This argument can be included multiple
+times to change the parallelism of components in the deployed topology.</li>
+</ul>
+
+<h3 id="example-topology-update-command">Example Topology Update Command</h3>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron update local/ads/PROD my-topology <span style="color: #ae81ff">\</span>
+  --component-parallelism<span style="color: #f92672">=</span>my-spout:2 <span style="color: #ae81ff">\</span>
+  --component-parallelism<span style="color: #f92672">=</span>my-bolt:4
 </pre></div>
 
 <h2 id="killing-a-topology">Killing a Topology</h2>

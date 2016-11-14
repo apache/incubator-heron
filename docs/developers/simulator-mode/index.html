@@ -7,10 +7,10 @@ topologies.</p>
 testing topologies. Running topologies under simulator mode is similar to running topologies on a
 cluster.</p>
 
-<h1 id="develop-topology-with-simulator-mode">Develop topology with simulator mode</h1>
+<h1 id="develop-a-topology-using-simulator-mode">Develop a topology using simulator mode</h1>
 
-<p>To use simulator mode, simply use the <code>SimulatorMode</code> class, which is
-in <code>storm-compatibility-unshaded_deploy.jar</code>  (currently under <code>bazel-bin/heron/storm/src/java</code>).</p>
+<p>To run in simulator mode, use the <code>SimulatorMode</code> class, which is
+in <code>storm-compatibility-unshaded_deploy.jar</code>  (under <code>bazel-bin/heron/storm/src/java</code>).</p>
 
 <p>For example:</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.simulator.Simulator</span><span style="color: #f92672">;</span>
@@ -41,12 +41,12 @@ corresponding behaviors interactively.</p>
 <h1 id="debug-topology-using-intellij">Debug topology using IntelliJ</h1>
 
 <p>Bolts and Spouts run as separate threads in simulator. To add breakpoints inside a bolt/spout, the
-Suspend Policy of the breakpoint needs to be set as Thread. To change the Suspend Policy, right
+Suspend Policy of the breakpoint needs to be set to Thread. To change the Suspend Policy, right
 click on the breakpoint as shown in the following image:</p>
 
 <p><img src="/heron/img/intellij-set-breakpoint.jpg" alt="Set Breakpoint" /></p>
 
-<p>If it&rsquo;s not convenient to check the output and logs in IntelliJ console, save them to a local file
+<p>If it&rsquo;s not convenient to check the output and logs in the IntelliJ console, save them to a local file
 by choosing <code>Run -&gt; Edit Configurations....</code> as shown in the following image:</p>
 
 <p><img src="/heron/img/intellij-save-console.jpg" alt="Save Console" /></p>

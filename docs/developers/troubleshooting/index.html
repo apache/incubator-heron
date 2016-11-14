@@ -198,4 +198,37 @@ above.</p>
 <li>This should be handled in the same was as internal bolt - by increasing the
 parallelism or RAM for the component.</li>
 </ol>
+
+<h4 id="7-debugging-java-topologies">7. Debugging Java topologies.</h4>
+
+<p>The jar containing the code for building the topology, along with the spout and bolt
+code, is deployed in the containers. A Heron Instance is started in each container,
+with each Heron Instance responsible for running a bolt or a spout. One way to debug
+Java code is to write debug logs to the log files for tracking and debugging purposes.</p>
+
+<p>Logging is the preferred mode for debugging as it makes it easer to find issues in both
+the short and long term in the topology. If you want to perform step-by-step debugging
+of a JVM process, however, this can be achieved by enabling remote debugging for the Heron Instance.</p>
+
+<p>Follow these steps to enable remote debugging:</p>
+
+<ol>
+<li><p>Add the java options to enable debuggin on all the Heron Instances that will be started.
+This can be achieved by adding the options <code>-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n</code>. Here&rsquo;s an example:</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">conf</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setDebug</span><span style="color: #f92672">(</span><span style="color: #66d9ef">true</span><span style="color: #f92672">);</span>
+<span style="color: #f8f8f2">conf</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setMaxSpoutPending</span><span style="color: #f92672">(</span><span style="color: #ae81ff">10</span><span style="color: #f92672">);</span>
+<span style="color: #f8f8f2">conf</span><span style="color: #f92672">.</span><span style="color: #a6e22e">put</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">Config</span><span style="color: #f92672">.</span><span style="color: #a6e22e">TOPOLOGY_WORKER_CHILDOPTS</span><span style="color: #f92672">,</span> <span style="color: #e6db74">&quot;-XX:+HeapDumpOnOutOfMemoryError&quot;</span><span style="color: #f92672">);</span>
+<span style="color: #f8f8f2">conf</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setComponentJvmOptions</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;word&quot;</span><span style="color: #f92672">,</span>
+       <span style="color: #e6db74">&quot;-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n&quot;</span><span style="color: #f92672">);</span>
+<span style="color: #f8f8f2">conf</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setComponentJvmOptions</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;exclaim1&quot;</span><span style="color: #f92672">,</span>
+       <span style="color: #e6db74">&quot;-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=n&quot;</span><span style="color: #f92672">);</span>
+</pre></div></li>
+
+<li><p>Use the steps as given in the tutorial to setup remote debugging eith eclipse.
+<a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.user%2Ftasks%2Ftask-remotejava_launch_config.htm">set up Remote Debugging in Eclipse</a> .
+To setup remote debugging with intelij use <a href="https://www.jetbrains.com/help/idea/2016.2/run-debug-configuration-remote.html">remote debugging instructions</a> .</p></li>
+
+<li><p>Once the topology is activated start the debugger at <code>localhost:{port}</code> if in standalone
+local deployment or <code>{IP}/{hostname}:{port}</code> for multi container remote deployment. And you will be able to debug the code step by step.</p></li>
+</ol>
 </article></section></div></div></div><script src="https://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>

@@ -26,39 +26,44 @@ $ sudo apt-get upgrade -y
 <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CCX</span><span style="color: #f92672">=</span>/usr/bin/g++-4.8
 </pre></div>
 
-<h3 id="step-4-install-jdk-8">Step 4 &mdash; Install JDK 8</h3>
+<h3 id="step-4-install-jdk-8-and-set-java-home">Step 4 &mdash; Install JDK 8 and set JAVA_HOME</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ sudo add-apt-repository ppa:webupd8team/java
 $ sudo apt-get update -y
 $ sudo apt-get install oracle-java8-installer -y
+$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">JAVA_HOME</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;/usr/lib/jvm/java-8-oracle&quot;</span>
 </pre></div>
 
 <h4 id="{#HUGOSHORTCODE-3#">Step 5 - Install Bazel</h4>
 
 <p>#}</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 </pre></div>
 
-<p>Make sure to download the appropriate version of Bazel (currently 0.3.0).</p>
+<p>Make sure to download the appropriate version of Bazel (currently 0.3.1).</p>
 
-<h3 id="step-6-make-sure-the-bazel-executable-is-in-your-path">Step 6 &mdash; Make sure the Bazel executable is in your <code>PATH</code></h3>
+<h3 id="step-6-install-python-development-tools">Step 6 &mdash; Install python development tools</h3>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ sudo apt-get install  python-dev python-pip
+</pre></div>
+
+<h3 id="step-7-make-sure-the-bazel-executable-is-in-your-path">Step 7 &mdash; Make sure the Bazel executable is in your <code>PATH</code></h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">PATH</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;</span><span style="color: #f8f8f2">$PATH</span><span style="color: #e6db74">:</span><span style="color: #f8f8f2">$HOME</span><span style="color: #e6db74">/bin&quot;</span>
 </pre></div>
 
-<h3 id="step-7-fetch-the-latest-version-of-heron-s-source-code">Step 7 &mdash; Fetch the latest version of Heron&rsquo;s source code</h3>
+<h3 id="step-8-fetch-the-latest-version-of-heron-s-source-code">Step 8 &mdash; Fetch the latest version of Heron&rsquo;s source code</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd</span> heron
 </pre></div>
 
-<h3 id="step-8-configure-heron-for-building-with-bazel">Step 8 &mdash; Configure Heron for building with Bazel</h3>
+<h3 id="step-9-configure-heron-for-building-with-bazel">Step 9 &mdash; Configure Heron for building with Bazel</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ ./bazel_configure.py
 </pre></div>
 
-<h3 id="step-9-build-the-project">Step 9 &mdash; Build the project</h3>
+<h3 id="step-10-build-the-project">Step 10 &mdash; Build the project</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>ubuntu heron/...  
 </pre></div>
 
-<h3 id="step-10-build-the-packages">Step 10 &mdash; Build the packages</h3>
+<h3 id="step-11-build-the-packages">Step 11 &mdash; Build the packages</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>ubuntu scripts/packages:binpkgs  
 $ bazel build --config<span style="color: #f92672">=</span>ubuntu scripts/packages:tarpkgs
 </pre></div>
@@ -120,7 +125,7 @@ $ sudo make install
 $ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CCX</span><span style="color: #f92672">=</span>/usr/bin/g++
 </pre></div>
 
-<h3 id="step-4-install-jdk-8-1">Step 4 &mdash; Install JDK 8</h3>
+<h3 id="step-4-install-jdk-8">Step 4 &mdash; Install JDK 8</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ <span style="color: #f8f8f2">cd</span> /opt/
 $ sudo wget --no-cookies --no-check-certificate <span style="color: #ae81ff">\</span>
   --header <span style="color: #e6db74">&quot;Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie&quot;</span> <span style="color: #ae81ff">\</span>
@@ -150,14 +155,14 @@ $ sudo alternatives --set javac /opt/jdk1.8.0_91/bin/javac
 <h4 id="{#HUGOSHORTCODE-5#">Step 5 - Install Bazel</h4>
 
 <p>#}</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 </pre></div>
 
-<p>Make sure to download the appropriate version of Bazel (currently 0.3.0).</p>
+<p>Make sure to download the appropriate version of Bazel (currently 0.3.1).</p>
 
-<h3 id="step-6-download-jeron-and-compile-it">Step 6 &mdash; Download Jeron and compile it</h3>
+<h3 id="step-6-download-heron-and-compile-it">Step 6 &mdash; Download Heron and compile it</h3>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd</span> heron
 $ ./bazel_configure.py
 $ bazel build --config<span style="color: #f92672">=</span>centos heron/...

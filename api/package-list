@@ -27,6 +27,7 @@ com.twitter.heron.api.spout
 com.twitter.heron.api.topology
 com.twitter.heron.api.tuple
 com.twitter.heron.api.utils
+com.twitter.heron.classification
 com.twitter.heron.common.basics
 com.twitter.heron.common.config
 com.twitter.heron.common.network
@@ -103,6 +104,7 @@ com.twitter.heron.statemgr.zookeeper.curator
 com.twitter.heron.uploader
 com.twitter.heron.uploader.hdfs
 com.twitter.heron.uploader.localfs
+com.twitter.heron.uploader.packer
 com.twitter.heron.uploader.s3
 com.twitter.heron.uploader.scp
 org.apache.storm
@@ -111,6 +113,8 @@ org.apache.storm.generated
 org.apache.storm.grouping
 org.apache.storm.hooks
 org.apache.storm.hooks.info
+org.apache.storm.kafka
+org.apache.storm.kafka.trident
 org.apache.storm.metric.api
 org.apache.storm.serialization
 org.apache.storm.serialization.types
@@ -119,6 +123,7 @@ org.apache.storm.task
 org.apache.storm.testing
 org.apache.storm.topology
 org.apache.storm.topology.base
+org.apache.storm.trident.spout
 org.apache.storm.trident.state
 org.apache.storm.tuple
 org.apache.storm.utils

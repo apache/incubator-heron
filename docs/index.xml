@@ -147,22 +147,34 @@ containers are allocated for each topology.&lt;/li&gt;
 
 &lt;h3 id=&#34;configuring-the-heron-client-classpath&#34;&gt;Configuring the Heron client classpath&lt;/h3&gt;
 
-&lt;ol&gt;
-&lt;li&gt;Command &lt;code&gt;hadoop classpath&lt;/code&gt; provides a list of jars needed to submit a hadoop job. Copy all jars
-to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt;.
+&lt;p&gt;&lt;strong&gt;Under 0.14.2 version (including 0.14.2)&lt;/strong&gt;
+  1. Command &lt;code&gt;hadoop classpath&lt;/code&gt; provides a list of jars needed to submit a hadoop job. Copy all jars to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt;.
+   * Do not copy commons-cli jar if it is older than version 1.3.1.
+  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
+ -&lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt; too.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;Do not copy commons-cli jar if it is older than version 1.3.1.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
-&lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt; too.&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;After 0.14.3 version released&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;It is unnecessary to copy hadoop-classpath-jars to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt; like what 0.14.2 version requested. &lt;a href=&#34;https://github.com/twitter/heron/issues/1245&#34;&gt;#1245&lt;/a&gt; added &lt;code&gt;extra-launch-classpath&lt;/code&gt; arguments, which makes it easier and more convenient to submit a topology to YARN.&lt;/p&gt;
 
 &lt;blockquote&gt;
-&lt;p&gt;The YARN scheduler needs Hadoop and YARN jars in the classpath. Heron currently does not allow
-customizing client classpath. Hadoop and YARN jars are version dependent and should not be
-bundled with the Heron distribution. So, this manual step is needed till this Heron issue
-(&lt;a href=&#34;https://github.com/twitter/heron/issues/271&#34;&gt;271&lt;/a&gt;) is fixed.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Tips&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;No matter which version of Heron you are using, there is something user should pay attention to&lt;/em&gt;&lt;/strong&gt; if you want to submit a topology to YARN.&lt;/p&gt;
+
+&lt;p&gt;For &lt;code&gt;localfs-state-manager&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The version of common-cli jar should be greater than or equal to 1.3.1.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For &lt;code&gt;zookeeper-state-manager&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The version of common-cli jar should be greater than or equal to 1.3.1.&lt;/li&gt;
+&lt;li&gt;The version of curator-framework jar should be greater than or equal to 2.10.0&lt;/li&gt;
+&lt;li&gt;The version of curator-client jar should be greater than or equal to 2.10.0&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/blockquote&gt;
 
 &lt;h3 id=&#34;configure-the-yarn-scheduler&#34;&gt;Configure the YARN scheduler&lt;/h3&gt;
@@ -186,7 +198,22 @@ deployment on a multi-node YARN cluster.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Command&lt;/strong&gt;&lt;/p&gt;
 
+&lt;p&gt;&lt;strong&gt;Under 0.14.2 version (including 0.14.2)&lt;/strong&gt;&lt;/p&gt;
+
 &lt;p&gt;&lt;code&gt;$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;After 0.14.3 version released&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology --extra-launch-classpath &amp;lt;extra-classpath-value&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Tips&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;More details for using the &lt;code&gt;--extra-launch-classpath&lt;/code&gt; argument in 0.14.3 version. It supports both a single directory which including all &lt;code&gt;hadoop-lib-jars&lt;/code&gt; and multiple directories separated by colon such as what &lt;code&gt;hadoop classpath&lt;/code&gt; gives. &lt;strong&gt;&lt;em&gt;The submit operation will fail if any path is invalid or if any file is missing.&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;if you want to submit a topology to a specific YARN queue, you can set the &lt;code&gt;heron.scheduler.yarn.queue&lt;/code&gt; argument in &lt;code&gt;--config-property&lt;/code&gt;. For instance, &lt;code&gt;--config-property heron.scheduler.yarn.queue=test&lt;/code&gt;. This configuration could be found in the &lt;a href=&#34;https://github.com/twitter/heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml&#34;&gt;conf/yarn/scheduler&lt;/a&gt; file too. &lt;code&gt;default&lt;/code&gt; would be the YARN default queue as YARN provided.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;&lt;strong&gt;Sample Output&lt;/strong&gt;&lt;/p&gt;
 
@@ -221,7 +248,7 @@ application_1466548964728_0004	      AckingTopology	                YARN	     he
 
 &lt;p&gt;&lt;code&gt;$ heron kill yarn AckingTopology&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;###Log File location&lt;/p&gt;
+&lt;h3 id=&#34;log-file-location&#34;&gt;Log File location&lt;/h3&gt;
 
 &lt;p&gt;Assuming HDFS as the file system, Heron logs and REEF logs can be found in the following locations:&lt;/p&gt;
 
@@ -410,39 +437,44 @@ $ sudo apt-get upgrade -y
 &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CCX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/g++-4.8
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;step-4-install-jdk-8&#34;&gt;Step 4 &amp;mdash; Install JDK 8&lt;/h3&gt;
+&lt;h3 id=&#34;step-4-install-jdk-8-and-set-java-home&#34;&gt;Step 4 &amp;mdash; Install JDK 8 and set JAVA_HOME&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo add-apt-repository ppa:webupd8team/java
 $ sudo apt-get update -y
 $ sudo apt-get install oracle-java8-installer -y
+$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;JAVA_HOME&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;/usr/lib/jvm/java-8-oracle&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;{#HUGOSHORTCODE-3#&#34;&gt;Step 5 - Install Bazel&lt;/h4&gt;
 
 &lt;p&gt;#}&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Make sure to download the appropriate version of Bazel (currently 0.3.0).&lt;/p&gt;
+&lt;p&gt;Make sure to download the appropriate version of Bazel (currently 0.3.1).&lt;/p&gt;
 
-&lt;h3 id=&#34;step-6-make-sure-the-bazel-executable-is-in-your-path&#34;&gt;Step 6 &amp;mdash; Make sure the Bazel executable is in your &lt;code&gt;PATH&lt;/code&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;step-6-install-python-development-tools&#34;&gt;Step 6 &amp;mdash; Install python development tools&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install  python-dev python-pip
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-7-make-sure-the-bazel-executable-is-in-your-path&#34;&gt;Step 7 &amp;mdash; Make sure the Bazel executable is in your &lt;code&gt;PATH&lt;/code&gt;&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$PATH&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$HOME&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;/bin&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;step-7-fetch-the-latest-version-of-heron-s-source-code&#34;&gt;Step 7 &amp;mdash; Fetch the latest version of Heron&amp;rsquo;s source code&lt;/h3&gt;
+&lt;h3 id=&#34;step-8-fetch-the-latest-version-of-heron-s-source-code&#34;&gt;Step 8 &amp;mdash; Fetch the latest version of Heron&amp;rsquo;s source code&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ git clone https://github.com/twitter/heron.git &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; heron
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;step-8-configure-heron-for-building-with-bazel&#34;&gt;Step 8 &amp;mdash; Configure Heron for building with Bazel&lt;/h3&gt;
+&lt;h3 id=&#34;step-9-configure-heron-for-building-with-bazel&#34;&gt;Step 9 &amp;mdash; Configure Heron for building with Bazel&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./bazel_configure.py
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;step-9-build-the-project&#34;&gt;Step 9 &amp;mdash; Build the project&lt;/h3&gt;
+&lt;h3 id=&#34;step-10-build-the-project&#34;&gt;Step 10 &amp;mdash; Build the project&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;ubuntu heron/...  
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;step-10-build-the-packages&#34;&gt;Step 10 &amp;mdash; Build the packages&lt;/h3&gt;
+&lt;h3 id=&#34;step-11-build-the-packages&#34;&gt;Step 11 &amp;mdash; Build the packages&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;ubuntu scripts/packages:binpkgs  
 $ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;ubuntu scripts/packages:tarpkgs
 &lt;/pre&gt;&lt;/div&gt;
@@ -504,7 +536,7 @@ $ sudo make install
 $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CCX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/g++
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;step-4-install-jdk-8-1&#34;&gt;Step 4 &amp;mdash; Install JDK 8&lt;/h3&gt;
+&lt;h3 id=&#34;step-4-install-jdk-8&#34;&gt;Step 4 &amp;mdash; Install JDK 8&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; /opt/
 $ sudo wget --no-cookies --no-check-certificate &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
   --header &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
@@ -534,14 +566,14 @@ $ sudo alternatives --set javac /opt/jdk1.8.0_91/bin/javac
 &lt;h4 id=&#34;{#HUGOSHORTCODE-5#&#34;&gt;Step 5 - Install Bazel&lt;/h4&gt;
 
 &lt;p&gt;#}&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Make sure to download the appropriate version of Bazel (currently 0.3.0).&lt;/p&gt;
+&lt;p&gt;Make sure to download the appropriate version of Bazel (currently 0.3.1).&lt;/p&gt;
 
-&lt;h3 id=&#34;step-6-download-jeron-and-compile-it&#34;&gt;Step 6 &amp;mdash; Download Jeron and compile it&lt;/h3&gt;
+&lt;h3 id=&#34;step-6-download-heron-and-compile-it&#34;&gt;Step 6 &amp;mdash; Download Heron and compile it&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ git clone https://github.com/twitter/heron.git &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; heron
 $ ./bazel_configure.py
 $ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;centos heron/...
@@ -589,7 +621,7 @@ $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; &lt;span style=&#
 &lt;h4 id=&#34;{#HUGOSHORTCODE-1#&#34;&gt;Step 4 - Install Bazel&lt;/h4&gt;
 
 &lt;p&gt;#}&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-darwin-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 &lt;/pre&gt;&lt;/div&gt;
@@ -725,7 +757,7 @@ or as a &lt;a href=&#34;#building-a-full-release-package&#34;&gt;release package
 &lt;p&gt;You must have the following installed to compile Heron:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;Bazel&lt;/a&gt; = 0.3.0. Later
+&lt;li&gt;&lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;Bazel&lt;/a&gt; = 0.3.1. Later
 versions might work but have not been tested. See &lt;a href=&#34;#installing-bazel&#34;&gt;Installing Bazel&lt;/a&gt; below.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html&#34;&gt;Java
 8&lt;/a&gt;
@@ -753,12 +785,12 @@ $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; &lt;span style=&#
 &lt;h2 id=&#34;installing-bazel&#34;&gt;Installing Bazel&lt;/h2&gt;
 
 &lt;p&gt;Heron uses the &lt;a href=&#34;http://bazel.io&#34;&gt;Bazel&lt;/a&gt; build tool. Bazel releases can be found
-&lt;a href=&#34;https://github.com/bazelbuild/bazel/releases/tag/0.3.0&#34;&gt;here&lt;/a&gt;
+&lt;a href=&#34;https://github.com/bazelbuild/bazel/releases/tag/0.3.1&#34;&gt;here&lt;/a&gt;
 and installation instructions can be found &lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;To ensure that Bazel has been installed, run &lt;code&gt;bazel version&lt;/code&gt; and check the
 version (listed next to &lt;code&gt;Build label&lt;/code&gt; in the script&amp;rsquo;s output) to ensure that you
-have Bazel 0.3.0.&lt;/p&gt;
+have Bazel 0.3.1.&lt;/p&gt;
 
 &lt;h2 id=&#34;configuring-bazel&#34;&gt;Configuring Bazel&lt;/h2&gt;
 
@@ -787,6 +819,12 @@ packages:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/...
 &lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;Production release packages include additional performance optimizations
+not enabled by default. Enabling these optimizations increases build time.
+To enable production optimizations, include the &lt;code&gt;opt&lt;/code&gt; flag:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build -c opt --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;PLATFORM heron/...
+&lt;/pre&gt;&lt;/div&gt;
+
 &lt;h3 id=&#34;building-all-components&#34;&gt;Building All Components&lt;/h3&gt;
 
 &lt;p&gt;The Bazel build process can produce either executable install scripts or
@@ -798,7 +836,7 @@ $ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;P
 
 &lt;p&gt;Resulting artifacts can be found in subdirectories below the &lt;code&gt;bazel-bin&lt;/code&gt;
 directory. The &lt;code&gt;heron-tracker&lt;/code&gt; executable, for example, can be found at
-&lt;code&gt;bazel-bin/heron/tracker/src/python/heron-tracker&lt;/code&gt;.&lt;/p&gt;
+&lt;code&gt;bazel-bin/heron/tools/tracker/src/python/heron-tracker&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h3 id=&#34;building-specific-components&#34;&gt;Building Specific Components&lt;/h3&gt;
 
@@ -806,7 +844,7 @@ directory. The &lt;code&gt;heron-tracker&lt;/code&gt; executable, for example, c
 for a single Heron component (such as the &lt;a href=&#34;../../../operators/heron-tracker&#34;&gt;Heron
 Tracker&lt;/a&gt;) by passing a target to the &lt;code&gt;bazel
 build&lt;/code&gt; command. For example, the following command would build the &lt;a href=&#34;../../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/tracker/src/python:heron-tracker
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/tools/tracker/src/python:heron-tracker
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id=&#34;testing-heron&#34;&gt;Testing Heron&lt;/h2&gt;
@@ -983,7 +1021,7 @@ following:&lt;/p&gt;
 
 &lt;p&gt;#} or above.
 Here&amp;rsquo;s an example:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; chmod +x /tmp/bazel.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; /tmp/bazel.sh
 &lt;/pre&gt;&lt;/div&gt;
@@ -1466,7 +1504,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;If you&amp;rsquo;re looking for documentation about developing topologies for a Heron
-cluster, see &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt; instead.&lt;/p&gt;
+cluster, see &lt;a href=&#34;../../developers/java/topologies&#34;&gt;Building Topologies&lt;/a&gt; instead.&lt;/p&gt;
 
 &lt;h2 id=&#34;languages&#34;&gt;Languages&lt;/h2&gt;
 
@@ -1480,7 +1518,7 @@ cluster, see &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topolo
 &lt;li&gt;&lt;p&gt;&lt;strong&gt;Java 8&lt;/strong&gt; is used primarily for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/topologies&#34;&gt;topology
 API&lt;/a&gt;, and &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron Instance&lt;/a&gt;.
 It is currently the only language in which topologies can be written. Instructions can be found
-in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt;, while documentation for the Java
+in &lt;a href=&#34;../../developers/java/topologies&#34;&gt;Building Topologies&lt;/a&gt;, while documentation for the Java
 API can be found &lt;a href=&#34;/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;. Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.&lt;/p&gt;&lt;/li&gt;
 
@@ -1575,7 +1613,7 @@ sink&lt;/strong&gt;), see &lt;a href=&#34;../custom-metrics-sink&#34;&gt;Impleme
 &lt;p&gt;Heron&amp;rsquo;s API for writing topologies is written in Java. The code for this API can
 be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/api&#34;&gt;&lt;code&gt;heron/api&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;Documentation for writing topologies can be found in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building
+&lt;p&gt;Documentation for writing topologies can be found in &lt;a href=&#34;../../developers/java/topologies&#34;&gt;Building
 Topologies&lt;/a&gt;, while API documentation can be found
 &lt;a href=&#34;/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
@@ -1602,7 +1640,7 @@ Java. Those examples can be found in
 for &lt;a href=&#34;../../operators/heron-cli&#34;&gt;managing topologies&lt;/a&gt; and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 The Python code for &lt;code&gt;heron&lt;/code&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/cli&#34;&gt;&lt;code&gt;heron/cli&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tools/cli&#34;&gt;&lt;code&gt;heron/tools/cli&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Sample configurations for different Heron schedulers&lt;/p&gt;
 
@@ -1614,19 +1652,19 @@ The Python code for &lt;code&gt;heron&lt;/code&gt; can be found in
 &lt;h3 id=&#34;heron-tracker&#34;&gt;Heron Tracker&lt;/h3&gt;
 
 &lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt; can be
-found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker&#34;&gt;&lt;code&gt;heron/tracker&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tools/tracker&#34;&gt;&lt;code&gt;heron/tools/tracker&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;The Tracker is a web server written in Python. It relies on the
 &lt;a href=&#34;http://www.tornadoweb.org/en/stable/&#34;&gt;Tornado&lt;/a&gt; framework. You can add new HTTP
 routes to the Tracker in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; and
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tools/tracker/src/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; and
 corresponding handlers in the
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tools/tracker/src/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
 
 &lt;h3 id=&#34;heron-ui&#34;&gt;Heron UI&lt;/h3&gt;
 
 &lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron UI&lt;/a&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/ui&#34;&gt;&lt;code&gt;heron/ui&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tools/ui&#34;&gt;&lt;code&gt;heron/tools/ui&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Like Heron Tracker, Heron UI is a web server written in Python that relies on
 the &lt;a href=&#34;http://www.tornadoweb.org/en/stable/&#34;&gt;Tornado&lt;/a&gt; framework. You can add new
