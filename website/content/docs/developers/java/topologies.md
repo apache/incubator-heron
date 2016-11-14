@@ -37,7 +37,7 @@ the following lines in your project's `pom.xml` file.
 
 ### Writing your own topology
 
-[Spouts](../java/spouts) and [Bolts](../java/bolts) discuss how to implement a
+[Spouts](../spouts) and [Bolts](../bolts) discuss how to implement a
 spouts and bolts, respectively.
 
 After defining the spouts and bolts, a topology can be composed using
