@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -301,8 +302,10 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentDeltas = new HashMap<>();
     for (String component : changeRequests.keySet()) {
       if (!componentCounts.containsKey(component)) {
-        throw new IllegalArgumentException(
-            "Invalid component name in update request: " + component);
+        throw new IllegalArgumentException(String.format(
+            "Invalid component name in update request: %s. Valid components include: %s",
+            component, Arrays.toString(
+                componentCounts.keySet().toArray(new String[componentCounts.keySet().size()]))));
       }
       Integer newValue = changeRequests.get(component);
       Integer delta = newValue - componentCounts.get(component);
