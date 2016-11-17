@@ -149,7 +149,6 @@ public final class WordCountTopology {
         Integer val = countMap.get(key);
         countMap.put(key, ++val);
       }
-      collector.ack(tuple);
     }
 
     @Override
