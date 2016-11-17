@@ -183,6 +183,8 @@ public final class WordCountTopology {
     conf.setComponentRam("word", 2L * 1024 * 1024 * 1024);
     conf.setComponentRam("consumer", 3L * 1024 * 1024 * 1024);
     conf.setContainerCpuRequested(6);
+    // Enable Ack
+    conf.setEnableAcking(true);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
