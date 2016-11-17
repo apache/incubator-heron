@@ -121,7 +121,8 @@ public final class WordCountTopology {
     @Override
     public void nextTuple() {
       int nextInt = rnd.nextInt(ARRAY_LENGTH);
-      collector.emit(new Values(words[nextInt]), new Object());
+      // To enable acking, we need to emit tuple with MessageId, which is an object
+      collector.emit(new Values(words[nextInt]), "MESSAGE_ID");
     }
   }
 
