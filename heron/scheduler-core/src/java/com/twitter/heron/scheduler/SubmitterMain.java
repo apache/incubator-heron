@@ -412,7 +412,7 @@ public class SubmitterMain {
 
         isSuccessful = callLauncherRunner(runtime);
       }
-    } catch (TopologyAlreadyExistsException ex) {
+    } catch (TopologySubmissionException ex) {
       isSuccessful = false;
       System.out.println(ex.getMessage());
     } finally {
@@ -434,12 +434,12 @@ public class SubmitterMain {
   }
 
   protected void validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName)
-      throws TopologyAlreadyExistsException {
+      throws TopologySubmissionException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
-      throw new TopologyAlreadyExistsException("Topology already exists");
+      throw new TopologySubmissionException("Topology already exists");
     }
   }
 

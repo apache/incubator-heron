@@ -17,14 +17,14 @@ package com.twitter.heron.scheduler;
 /**
  * Thrown to indicate that an error occurred while creating a packing plan
  */
-public class TopologyAlreadyExistsException extends RuntimeException {
+public class TopologySubmissionException extends RuntimeException {
   private static final long serialVersionUID = -7876075906599747697L;
 
-  public TopologyAlreadyExistsException(String message) {
+  public TopologySubmissionException(String message) {
     super(message);
   }
 
-  public TopologyAlreadyExistsException(String message, Throwable cause) {
+  public TopologySubmissionException(String message, Throwable cause) {
     super(message, cause);
   }
 }
