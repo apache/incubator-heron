@@ -121,7 +121,7 @@ public final class WordCountTopology {
     @Override
     public void nextTuple() {
       int nextInt = rnd.nextInt(ARRAY_LENGTH);
-      collector.emit(new Values(words[nextInt]));
+      collector.emit(new Values(words[nextInt]), new Object());
     }
   }
 
