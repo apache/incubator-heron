@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.twitter.heron.packing;
+package com.twitter.heron.packing.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
+import com.twitter.heron.packing.ResourceExceededException;
+import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -234,8 +236,8 @@ public class PackingPlanBuilder {
    *
    * @return sorted array of container plans
    */
-  public static PackingPlan.ContainerPlan[] sortOnContainerId(
-      Set<PackingPlan.ContainerPlan> containers) {
+  @VisibleForTesting
+  static PackingPlan.ContainerPlan[] sortOnContainerId(Set<PackingPlan.ContainerPlan> containers) {
     ArrayList<Integer> containerIds = new ArrayList<>();
     PackingPlan.ContainerPlan[] currentContainers =
         new PackingPlan.ContainerPlan[containers.size()];

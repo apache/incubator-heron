@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.PackingPlanBuilder;
-import com.twitter.heron.packing.PackingUtils;
 import com.twitter.heron.packing.ResourceExceededException;
+import com.twitter.heron.packing.builder.PackingPlanBuilder;
+import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
