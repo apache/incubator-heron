@@ -16,6 +16,7 @@
 #ifndef MEM_POOL_H
 #define MEM_POOL_H
 
+#include <list>
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -68,7 +69,7 @@ class MemPool {
   template<typename M>
   M* acquire(M* m) {
     std::type_index type = typeid(M);
-    std::vector<B*>& pool = map_[type];
+    auto& pool = map_[type];
 
     if (pool.empty()) {
       return new M();
@@ -81,11 +82,18 @@ class MemPool {
   template<typename M>
   void release(M* ptr) {
     std::type_index type = typeid(M);
-    map_[type].push_back(static_cast<B*>(ptr));
+    auto& pool = map_[type];
+    // TODO(cwang): expose this limit via config?
+    if (pool.size() > 2048) {
+      auto first = pool.front();
+      pool.pop_front();
+      delete first;
+    }
+    pool.push_back(static_cast<B*>(ptr));
   }
 
  private:
-  std::unordered_map<std::type_index, std::vector<B*>> map_;
+  std::unordered_map<std::type_index, std::list<B*>> map_;
 };
 
 #endif
