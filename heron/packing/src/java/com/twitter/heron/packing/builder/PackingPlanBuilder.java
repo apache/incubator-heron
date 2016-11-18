@@ -15,9 +15,13 @@ package com.twitter.heron.packing.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -107,11 +111,74 @@ public class PackingPlanBuilder {
     return this;
   }
 
+  /**
+   * Add an instance to the first container possible ranked by score.
+   * @return containerId of the container the instance was added to
+   * @throws PackingException if the instance could not be added
+   */
+  public int addInstance(Scorer<Container> scorer,
+                         InstanceId instanceId) throws ResourceExceededException {
+    List<Scorer<Container>> scorers = new LinkedList<>();
+    scorers.add(scorer);
+    return addInstance(scorers, instanceId);
+  }
+
+  /**
+   * Add an instance to the first container possible ranked by score. If a scoring tie exists,
+   * uses the next scorer in the scorers list to break the tie.
+   * @return containerId of the container the instance was added to
+   * @throws PackingException if the instance could not be added
+   */
+  private int addInstance(List<Scorer<Container>> scorers, InstanceId instanceId)
+      throws ResourceExceededException {
+    initContainers();
+    for (Container container : sortContainers(scorers)) {
+      try {
+        addInstance(container.getContainerId(), instanceId);
+        return container.getContainerId();
+      } catch (ResourceExceededException e) {
+        // ignore since we'll continue trying
+      }
+    }
+    //Not enough containers.
+    throw new ResourceExceededException(String.format(
+        "Insufficient resources to add instance %s to any of the %d containers.",
+        instanceId, this.containers.size()));
+  }
+
   public boolean removeInstance(Integer containerId, String componentName) {
     initContainers();
     Optional<PackingPlan.InstancePlan> instancePlan =
         containers.get(containerId).removeAnyInstanceOfComponent(componentName);
     return instancePlan.isPresent();
+  }
+
+  /**
+   * Remove an instance from the first container possible ranked by score.
+   * @return containerId of the container the instance was removed from
+   * @throws PackingException if the instance could not be removed
+   */
+  public int removeInstance(Scorer<Container> scorer, String componentName) {
+    List<Scorer<Container>> scorers = new LinkedList<>();
+    scorers.add(scorer);
+    return removeInstance(scorers, componentName);
+  }
+
+  /**
+   * Remove an instance from the first container possible ranked by score. If a scoring tie exists,
+   * uses the next scorer in the scorers list to break the tie.
+   * @return containerId of the container the instance was removed from
+   * @throws PackingException if the instance could not be removed
+   */
+  public int removeInstance(List<Scorer<Container>> scorers, String componentName) {
+    initContainers();
+    for (Container container : sortContainers(scorers)) {
+      if (removeInstance(container.getContainerId(), componentName)) {
+        return container.getContainerId();
+      }
+    }
+    throw new PackingException("Cannot remove instance. No more instances of component "
+        + componentName + " exist in the containers.");
   }
 
   // build container plan sets by summing up instance resources
@@ -133,8 +200,8 @@ public class PackingPlanBuilder {
       if (this.existingPacking == null) {
         newContainerMap = new HashMap<>();
         for (int containerId = 1; containerId <= numContainers; containerId++) {
-          newContainerMap.put(containerId,
-              new Container(this.maxContainerResource, this.requestedContainerPadding));
+          newContainerMap.put(containerId, new Container(
+              containerId, this.maxContainerResource, this.requestedContainerPadding));
         }
       } else {
         newContainerMap = getContainers(
@@ -146,8 +213,9 @@ public class PackingPlanBuilder {
       SortedSet<Integer> sortedIds = new TreeSet<>(newContainerMap.keySet());
       int nextContainerId = sortedIds.last() + 1;
       for (int i = 0; i < numContainers - newContainerMap.size(); i++) {
-        newContainerMap.put(nextContainerId++, new Container(
+        newContainerMap.put(nextContainerId, new Container(nextContainerId,
             newContainerMap.get(sortedIds.first()).getCapacity(), this.requestedContainerPadding));
+        nextContainerId++;
       }
     }
 
@@ -238,18 +306,23 @@ public class PackingPlanBuilder {
    */
   @VisibleForTesting
   static PackingPlan.ContainerPlan[] sortOnContainerId(Set<PackingPlan.ContainerPlan> containers) {
-    ArrayList<Integer> containerIds = new ArrayList<>();
-    PackingPlan.ContainerPlan[] currentContainers =
-        new PackingPlan.ContainerPlan[containers.size()];
-    for (PackingPlan.ContainerPlan container : containers) {
-      containerIds.add(container.getId());
+    class ContainerIdScorer implements Scorer<PackingPlan.ContainerPlan> {
+      @Override
+      public boolean sortAscending() {
+        return true;
+      }
+
+      @Override
+      public double getScore(PackingPlan.ContainerPlan containerPlan) {
+        return containerPlan.getId();
+      }
     }
-    Collections.sort(containerIds);
-    for (PackingPlan.ContainerPlan container : containers) {
-      int position = containerIds.indexOf(container.getId());
-      currentContainers[position] = container;
-    }
-    return currentContainers;
+    List<Scorer<PackingPlan.ContainerPlan>> scorers = new LinkedList<>();
+    scorers.add(new ContainerIdScorer());
+
+    List<PackingPlan.ContainerPlan> sorted = new ArrayList<>(containers);
+    Collections.sort(sorted, new ChainedContainerComparator<>(scorers));
+    return sorted.toArray(new PackingPlan.ContainerPlan[sorted.size()]);
   }
 
   /**
@@ -269,12 +342,83 @@ public class PackingPlanBuilder {
 
     Resource capacity = currentPackingPlan.getMaxContainerResources();
     for (PackingPlan.ContainerPlan currentContainerPlan : currentContainerPlans) {
-      Container container = new Container(capacity, paddingPercentage);
+      Container container =
+          new Container(currentContainerPlan.getId(), capacity, paddingPercentage);
       for (PackingPlan.InstancePlan instancePlan : currentContainerPlan.getInstances()) {
         container.add(instancePlan);
       }
       containers.put(currentContainerPlan.getId(), container);
     }
     return containers;
+  }
+
+  @VisibleForTesting
+  List<Container> sortContainers(List<Scorer<Container>> scorers) {
+    List<Container> sorted = new ArrayList<>(this.containers.values());
+    Collections.sort(sorted, new ChainedContainerComparator<>(scorers));
+    return sorted;
+  }
+
+  private static class ChainedContainerComparator<T> implements Comparator<T> {
+    private final Comparator<T> comparator;
+    private final ChainedContainerComparator<T> tieBreaker;
+
+    ChainedContainerComparator(List<Scorer<T>> scorers) {
+      this((Queue<Scorer<T>>) new LinkedList<Scorer<T>>(scorers));
+    }
+
+    ChainedContainerComparator(Queue<Scorer<T>> scorers) {
+      if (scorers.isEmpty()) {
+        this.comparator = new EqualsComparator<T>();
+        this.tieBreaker = null;
+      } else {
+        this.comparator = new ContainerComparator<T>(scorers.remove());
+        this.tieBreaker = new ChainedContainerComparator<T>(scorers);
+      }
+    }
+
+    @Override
+    public int compare(T thisOne, T thatOne) {
+
+      int delta = comparator.compare(thisOne, thatOne);
+      if (delta != 0 || this.tieBreaker == null) {
+        return delta;
+      }
+      return tieBreaker.compare(thisOne, thatOne);
+    }
+  }
+
+  private static <T> Queue<Scorer<T>> toQueue(Scorer<T>[] scorers) {
+    Queue<Scorer<T>> queue = new LinkedList<>();
+    Collections.addAll(queue, scorers);
+    return queue;
+  }
+
+  private static class ContainerComparator<T> implements Comparator<T> {
+    private Scorer<T> scorer;
+
+    ContainerComparator(Scorer<T> scorer) {
+      this.scorer = scorer;
+    }
+
+    @Override
+    public int compare(T thisOne, T thatOne) {
+      int sign = 1;
+      if (!scorer.sortAscending()) {
+        sign = -1;
+      }
+      return sign * (getScore(thisOne) - getScore(thatOne));
+    }
+
+    private int getScore(T container) {
+      return (int) (1000 * scorer.getScore(container));
+    }
+  }
+
+  private static class EqualsComparator<T> implements Comparator<T> {
+    @Override
+    public int compare(T thisOne, T thatOne) {
+      return 0;
+    }
   }
 }

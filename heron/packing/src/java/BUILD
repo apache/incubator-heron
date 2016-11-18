@@ -42,6 +42,7 @@ java_library(
     srcs = glob(["**/packing/builder/*.java","**/packing/ResourceExceededException.java"]),
     deps = heron_java_proto_files() + [
         "@com_google_guava_guava//jar",
+        "//heron/api/src/java:classification",
         "//heron/spi/src/java:packing-spi-java",
         ":utils",
     ],
