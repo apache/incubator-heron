@@ -111,10 +111,11 @@ public class PackingPlanBuilder {
     return this;
   }
 
+  @SuppressWarnings("JavadocMethod")
   /**
    * Add an instance to the first container possible ranked by score.
    * @return containerId of the container the instance was added to
-   * @throws PackingException if the instance could not be added
+   * @throws com.twitter.heron.packing.ResourceExceededException if the instance could not be added
    */
   public int addInstance(Scorer<Container> scorer,
                          InstanceId instanceId) throws ResourceExceededException {
@@ -123,11 +124,12 @@ public class PackingPlanBuilder {
     return addInstance(scorers, instanceId);
   }
 
+  @SuppressWarnings("JavadocMethod")
   /**
    * Add an instance to the first container possible ranked by score. If a scoring tie exists,
    * uses the next scorer in the scorers list to break the tie.
    * @return containerId of the container the instance was added to
-   * @throws PackingException if the instance could not be added
+   * @throws com.twitter.heron.packing.ResourceExceededException if the instance could not be added
    */
   private int addInstance(List<Scorer<Container>> scorers, InstanceId instanceId)
       throws ResourceExceededException {
@@ -153,10 +155,11 @@ public class PackingPlanBuilder {
     return instancePlan.isPresent();
   }
 
+  @SuppressWarnings("JavadocMethod")
   /**
    * Remove an instance from the first container possible ranked by score.
    * @return containerId of the container the instance was removed from
-   * @throws PackingException if the instance could not be removed
+   * @throws com.twitter.heron.spi.packing.PackingException if the instance could not be removed
    */
   public int removeInstance(Scorer<Container> scorer, String componentName) {
     List<Scorer<Container>> scorers = new LinkedList<>();
@@ -164,11 +167,12 @@ public class PackingPlanBuilder {
     return removeInstance(scorers, componentName);
   }
 
+  @SuppressWarnings("JavadocMethod")
   /**
    * Remove an instance from the first container possible ranked by score. If a scoring tie exists,
    * uses the next scorer in the scorers list to break the tie.
    * @return containerId of the container the instance was removed from
-   * @throws PackingException if the instance could not be removed
+   * @throws com.twitter.heron.spi.packing.PackingException if the instance could not be removed
    */
   public int removeInstance(List<Scorer<Container>> scorers, String componentName) {
     initContainers();

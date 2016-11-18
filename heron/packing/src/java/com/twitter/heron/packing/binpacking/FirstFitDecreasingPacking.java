@@ -305,15 +305,14 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }
-    for (int containerId = 1; containerId <= numContainers; containerId++) {
-      try {
-        planBuilder.addInstance(containerId, instanceId);
-        return;
-      } catch (ResourceExceededException e) {
-        // ignore since we'll continue trying
-      }
+
+    IdBasedContainerScorer scorer = new IdBasedContainerScorer(1, this.numContainers);
+
+    try {
+      planBuilder.addInstance(scorer, instanceId);
+    } catch (ResourceExceededException e) {
+      planBuilder.updateNumContainers(++numContainers);
+      planBuilder.addInstance(numContainers, instanceId);
     }
-    planBuilder.updateNumContainers(++numContainers);
-    planBuilder.addInstance(numContainers, instanceId);
   }
 }
