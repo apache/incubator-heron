@@ -11,14 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-
-package com.twitter.heron.packing;
+package com.twitter.heron.packing.builder;
 
 import java.util.HashSet;
 
 import com.google.common.base.Optional;
 
+import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -29,9 +28,7 @@ import com.twitter.heron.spi.packing.Resource;
 class Container {
 
   private HashSet<PackingPlan.InstancePlan> instances;
-
   private Resource capacity;
-
   private int paddingPercentage;
 
   public HashSet<PackingPlan.InstancePlan> getInstances() {
@@ -59,6 +56,51 @@ class Container {
     this.paddingPercentage = paddingPercentage;
   }
 
+  /**
+   * Update the resources currently used by the container, when a new instance with specific
+   * resource requirements has been assigned to the container.
+   *
+   * @return true if the instance can be added to the container, false otherwise
+   */
+  boolean add(PackingPlan.InstancePlan instancePlan) {
+    if (this.hasSpace(instancePlan.getResource())) {
+      this.instances.add(instancePlan);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Remove an instance of a particular component from a container and update its
+   * corresponding resources.
+   *
+   * @return the corresponding instance plan if the instance is removed the container.
+   * Return void if an instance is not found
+   */
+  Optional<PackingPlan.InstancePlan> removeAnyInstanceOfComponent(String component) {
+    Optional<PackingPlan.InstancePlan> instancePlan = getAnyInstanceOfComponent(component);
+    if (instancePlan.isPresent()) {
+      PackingPlan.InstancePlan plan = instancePlan.get();
+      this.instances.remove(plan);
+      return instancePlan;
+    }
+    return Optional.absent();
+  }
+
+  /**
+   * Find whether any instance of a particular component is assigned to the container
+   *
+   * @return the instancePlan that corresponds to the instance if it is found, void otherwise
+   */
+  private Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String component) {
+    for (PackingPlan.InstancePlan instancePlan : this.instances) {
+      if (instancePlan.getComponentName().equals(component)) {
+        return Optional.of(instancePlan);
+      }
+    }
+    return Optional.absent();
+  }
 
   /**
    * Check whether the container can accommodate a new instance with specific resource requirements
@@ -94,51 +136,5 @@ class Container {
       usedDisk += resource.getDisk();
     }
     return new Resource(usedCpuCores, usedRam, usedDisk);
-  }
-
-  /**
-   * Update the resources currently used by the container, when a new instance with specific
-   * resource requirements has been assigned to the container.
-   *
-   * @return true if the instance can be added to the container, false otherwise
-   */
-  public boolean add(PackingPlan.InstancePlan instancePlan) {
-    if (this.hasSpace(instancePlan.getResource())) {
-      this.instances.add(instancePlan);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Remove an instance of a particular component from a container and update its
-   * corresponding resources.
-   *
-   * @return the corresponding instance plan if the instance is removed the container.
-   * Return void if an instance is not found
-   */
-  public Optional<PackingPlan.InstancePlan> removeAnyInstanceOfComponent(String component) {
-    Optional<PackingPlan.InstancePlan> instancePlan = getAnyInstanceOfComponent(component);
-    if (instancePlan.isPresent()) {
-      PackingPlan.InstancePlan plan = instancePlan.get();
-      this.instances.remove(plan);
-      return instancePlan;
-    }
-    return Optional.absent();
-  }
-
-  /**
-   * Find whether any instance of a particular component is assigned to the container
-   *
-   * @return the instancePlan that corresponds to the instance if it is found, void otherwise
-   */
-  private Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String component) {
-    for (PackingPlan.InstancePlan instancePlan : this.instances) {
-      if (instancePlan.getComponentName().equals(component)) {
-        return Optional.of(instancePlan);
-      }
-    }
-    return Optional.absent();
   }
 }

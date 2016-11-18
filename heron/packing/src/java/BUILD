@@ -7,11 +7,9 @@ packing_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/spi/src/java:packing-spi-java",
     "@com_google_guava_guava//jar",
+    ":builder",
+    ":utils",
 ]
-
-nullpacking_deps_files = \
-    heron_java_proto_files() + \
-    packing_deps_files
 
 roundrobin_deps_files = \
     heron_java_proto_files() + \
@@ -28,6 +26,26 @@ binpacking_deps_files = \
         "//heron/spi/src/java:statemgr-spi-java",
         "//heron/spi/src/java:utils-spi-java",
     ]
+
+java_library(
+    name='utils',
+    srcs = glob(["**/utils/*.java"]),
+    deps = heron_java_proto_files() + [
+        "//heron/spi/src/java:common-spi-java",
+        "//heron/spi/src/java:packing-spi-java",
+        "//heron/spi/src/java:utils-spi-java",
+    ],
+)
+
+java_library(
+    name='builder',
+    srcs = glob(["**/packing/builder/*.java","**/packing/ResourceExceededException.java"]),
+    deps = heron_java_proto_files() + [
+        "@com_google_guava_guava//jar",
+        "//heron/spi/src/java:packing-spi-java",
+        ":utils",
+    ],
+)
 
 java_library(
     name='roundrobin-packing',
