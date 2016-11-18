@@ -13,7 +13,6 @@
 # limitations under the License.
 ''' restart.py '''
 import logging
-import traceback
 from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.execute as execute

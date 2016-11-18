@@ -73,7 +73,7 @@ public class SubmitterMainTest {
     submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
   }
 
-  @Test(expected = TopologyAlreadyExistsException.class)
+  @Test(expected = TopologySubmissionException.class)
   public void testValidateSubmitWithException() throws Exception {
     Config config = mock(Config.class);
 
@@ -135,7 +135,7 @@ public class SubmitterMainTest {
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
 
     // Failed to validate the submission
-    doThrow(TopologyAlreadyExistsException.class).when(submitterMain)
+    doThrow(TopologySubmissionException.class).when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
 
     assertFalse(submitterMain.submitTopology());

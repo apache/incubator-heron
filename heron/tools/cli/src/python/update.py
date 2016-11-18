@@ -21,7 +21,6 @@ import heron.tools.common.src.python.utils.config as config
 import argparse
 import logging
 import re
-import traceback
 
 def create_parser(subparsers):
   """ Create the parse for the update command """
