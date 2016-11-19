@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.ResourceExceededException;
-import com.twitter.heron.packing.builder.IdBasedContainerScorer;
+import com.twitter.heron.packing.builder.ContainerIdScorer;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
@@ -318,10 +318,9 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private void flexibleRRpolicy(PackingPlanBuilder planBuilder,
                                 InstanceId instanceId) throws ResourceExceededException {
-    //If there is not enough space on containerId look at other containers in a RR fashion
+    // If there is not enough space on containerId look at other containers in a RR fashion
     // starting from containerId.
-    IdBasedContainerScorer scorer =
-        new IdBasedContainerScorer(this.containerId, this.numContainers);
+    ContainerIdScorer scorer = new ContainerIdScorer(this.containerId, this.numContainers);
     this.containerId = nextContainerId(planBuilder.addInstance(scorer, instanceId));
   }
 
@@ -346,8 +345,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private void removeRRInstance(PackingPlanBuilder packingPlanBuilder,
                                 String component) throws RuntimeException {
-    IdBasedContainerScorer scorer =
-        new IdBasedContainerScorer(this.containerId, this.numContainers);
+    ContainerIdScorer scorer = new ContainerIdScorer(this.containerId, this.numContainers);
     this.containerId = nextContainerId(packingPlanBuilder.removeInstance(scorer, component));
   }
 

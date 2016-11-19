@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.RamRequirement;
 import com.twitter.heron.packing.ResourceExceededException;
-import com.twitter.heron.packing.builder.IdBasedContainerScorer;
+import com.twitter.heron.packing.builder.ContainerIdScorer;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
@@ -285,7 +285,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     ArrayList<RamRequirement> ramRequirements =
         getSortedRAMInstances(componentsToScaleDown.keySet());
 
-    IdBasedContainerScorer scorer = new IdBasedContainerScorer(1, this.numContainers);
+    ContainerIdScorer scorer = new ContainerIdScorer();
 
     for (RamRequirement ramRequirement : ramRequirements) {
       String component = ramRequirement.getComponentName();
@@ -306,10 +306,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
       planBuilder.updateNumContainers(++numContainers);
     }
 
-    IdBasedContainerScorer scorer = new IdBasedContainerScorer(1, this.numContainers);
-
     try {
-      planBuilder.addInstance(scorer, instanceId);
+      planBuilder.addInstance(new ContainerIdScorer(), instanceId);
     } catch (ResourceExceededException e) {
       planBuilder.updateNumContainers(++numContainers);
       planBuilder.addInstance(numContainers, instanceId);

@@ -14,6 +14,7 @@
 package com.twitter.heron.packing.builder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -134,7 +135,7 @@ public class PackingPlanBuilder {
   private int addInstance(List<Scorer<Container>> scorers, InstanceId instanceId)
       throws ResourceExceededException {
     initContainers();
-    for (Container container : sortContainers(scorers)) {
+    for (Container container : sortContainers(scorers, this.containers.values())) {
       try {
         addInstance(container.getContainerId(), instanceId);
         return container.getContainerId();
@@ -176,7 +177,7 @@ public class PackingPlanBuilder {
    */
   public int removeInstance(List<Scorer<Container>> scorers, String componentName) {
     initContainers();
-    for (Container container : sortContainers(scorers)) {
+    for (Container container : sortContainers(scorers, this.containers.values())) {
       if (removeInstance(container.getContainerId(), componentName)) {
         return container.getContainerId();
       }
@@ -304,32 +305,6 @@ public class PackingPlanBuilder {
   }
 
   /**
-   * Sort the container plans based on the container Ids
-   *
-   * @return sorted array of container plans
-   */
-  @VisibleForTesting
-  static PackingPlan.ContainerPlan[] sortOnContainerId(Set<PackingPlan.ContainerPlan> containers) {
-    class ContainerIdScorer implements Scorer<PackingPlan.ContainerPlan> {
-      @Override
-      public boolean sortAscending() {
-        return true;
-      }
-
-      @Override
-      public double getScore(PackingPlan.ContainerPlan containerPlan) {
-        return containerPlan.getId();
-      }
-    }
-    List<Scorer<PackingPlan.ContainerPlan>> scorers = new LinkedList<>();
-    scorers.add(new ContainerIdScorer());
-
-    List<PackingPlan.ContainerPlan> sorted = new ArrayList<>(containers);
-    Collections.sort(sorted, new ChainedContainerComparator<>(scorers));
-    return sorted.toArray(new PackingPlan.ContainerPlan[sorted.size()]);
-  }
-
-  /**
    * Generates the containers that correspond to the current packing plan
    * along with their associated instances.
    *
@@ -340,12 +315,8 @@ public class PackingPlanBuilder {
                                                int paddingPercentage) {
     Map<Integer, Container> containers = new HashMap<>();
 
-    //sort containers based on containerIds;
-    PackingPlan.ContainerPlan[] currentContainerPlans =
-        sortOnContainerId(currentPackingPlan.getContainers());
-
     Resource capacity = currentPackingPlan.getMaxContainerResources();
-    for (PackingPlan.ContainerPlan currentContainerPlan : currentContainerPlans) {
+    for (PackingPlan.ContainerPlan currentContainerPlan : currentPackingPlan.getContainers()) {
       Container container =
           new Container(currentContainerPlan.getId(), capacity, paddingPercentage);
       for (PackingPlan.InstancePlan instancePlan : currentContainerPlan.getInstances()) {
@@ -357,8 +328,9 @@ public class PackingPlanBuilder {
   }
 
   @VisibleForTesting
-  List<Container> sortContainers(List<Scorer<Container>> scorers) {
-    List<Container> sorted = new ArrayList<>(this.containers.values());
+  static List<Container> sortContainers(List<Scorer<Container>> scorers,
+                                        Collection<Container> containers) {
+    List<Container> sorted = new ArrayList<>(containers);
     Collections.sort(sorted, new ChainedContainerComparator<>(scorers));
     return sorted;
   }
@@ -390,12 +362,6 @@ public class PackingPlanBuilder {
       }
       return tieBreaker.compare(thisOne, thatOne);
     }
-  }
-
-  private static <T> Queue<Scorer<T>> toQueue(Scorer<T>[] scorers) {
-    Queue<Scorer<T>> queue = new LinkedList<>();
-    Collections.addAll(queue, scorers);
-    return queue;
   }
 
   private static class ContainerComparator<T> implements Comparator<T> {
