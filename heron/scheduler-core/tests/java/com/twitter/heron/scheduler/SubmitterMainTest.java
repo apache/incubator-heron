@@ -33,8 +33,7 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -126,7 +125,13 @@ public class SubmitterMainTest {
     // Failed to instantiate
     final String CLASS_NOT_EXIST = "class_not_exist";
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(CLASS_NOT_EXIST);
-    assertFalse(submitterMain.submitTopology());
+
+    try {
+      submitterMain.submitTopology();
+      fail("submitTopology should throw exception");
+    } catch (TopologySubmissionException e) {
+      assertEquals("Failed to instantiate instances: class_not_exist", e.getMessage());
+    }
     verify(uploader, never()).close();
     verify(launcher, never()).close();
     verify(statemgr, never()).close();
@@ -135,10 +140,16 @@ public class SubmitterMainTest {
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
 
     // Failed to validate the submission
-    doThrow(TopologySubmissionException.class).when(submitterMain)
+    doThrow(new TopologySubmissionException(
+        String.format("Topology %s already exist", topology.getName()))).when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
 
-    assertFalse(submitterMain.submitTopology());
+    try {
+      submitterMain.submitTopology();
+      fail("submitTopology should throw exception");
+    } catch (TopologySubmissionException e) {
+      assertEquals(String.format("Topology %s already exist", topology.getName()), e.getMessage());
+    }
     // Resources should be closed even the submission failed
     verify(uploader, atLeastOnce()).close();
     verify(launcher, atLeastOnce()).close();
@@ -150,7 +161,12 @@ public class SubmitterMainTest {
 
     // Failed to upload package, return null
     doReturn(null).when(submitterMain).uploadPackage(eq(uploader));
-    assertFalse(submitterMain.submitTopology());
+    try {
+      submitterMain.submitTopology();
+      fail("submitTopology should throw exception");
+    } catch (TopologySubmissionException e) {
+      assertEquals(e.getMessage(), "Failed to upload package");
+    }
     // Should not invoke undo
     verify(uploader, never()).undo();
 
@@ -159,13 +175,25 @@ public class SubmitterMainTest {
     doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
 
     // Failed to callLauncherRunner
-    doReturn(false).when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
-    assertFalse(submitterMain.submitTopology());
+    doThrow(new TopologySubmissionException(
+        String.format("Failed to launch topology %s", topology.getName()))).when(submitterMain)
+        .callLauncherRunner(Mockito.any(Config.class), anyString());
+    try {
+      submitterMain.submitTopology();
+    } catch (TopologySubmissionException e) {
+      assertEquals(e.getMessage(),
+          String.format("Failed to launch topology %s", topology.getName()));
+    }
     // Should invoke undo
     verify(uploader).undo();
 
     // Happy path
-    doReturn(true).when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
-    assertTrue(submitterMain.submitTopology());
+    doNothing().when(submitterMain).callLauncherRunner(Mockito.any(Config.class),
+        anyString());
+    try {
+      submitterMain.submitTopology();
+    } catch (TopologySubmissionException e) {
+      fail("submitTopology should not throw any exception");
+    }
   }
 }

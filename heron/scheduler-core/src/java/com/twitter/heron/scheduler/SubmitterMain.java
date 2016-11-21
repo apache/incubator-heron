@@ -315,18 +315,17 @@ public class SubmitterMain {
                 topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
             .build());
 
-    LOG.fine("Static config loaded successfully ");
+    LOG.fine("Static config loaded successfully");
     LOG.fine(config.toString());
 
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
-    boolean isSuccessful = submitterMain.submitTopology();
-
-    // Log the result and exit
-    if (!isSuccessful) {
+    try {
+      submitterMain.submitTopology();
+    } catch (TopologySubmissionException e) {
+      System.out.println(e.getMessage());
       throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
-    } else {
-      LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
     }
+    LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
   }
 
   // holds all the config read
@@ -349,9 +348,8 @@ public class SubmitterMain {
    * 2. Valid whether it is legal to submit a topology
    * 3. Call LauncherRunner
    *
-   * @return true if the topology is submitted successfully
    */
-  public boolean submitTopology() {
+  public void submitTopology() throws TopologySubmissionException {
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
@@ -376,8 +374,8 @@ public class SubmitterMain {
       uploader = ReflectionUtils.newInstance(uploaderClass);
 
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
-      return false;
+      throw new TopologySubmissionException(
+          String.format("Failed to instantiate instances: %s", e.getMessage()));
     }
 
     boolean isSuccessful = false;
@@ -399,8 +397,7 @@ public class SubmitterMain {
       // Firstly, try to upload necessary packages
       packageURI = uploadPackage(uploader);
       if (packageURI == null) {
-        LOG.severe("Failed to upload package.");
-        return false;
+        throw new TopologySubmissionException("Failed to upload package");
       } else {
         // Secondly, try to submit a topology
         // build the runtime config
@@ -410,11 +407,11 @@ public class SubmitterMain {
             .put(Keys.launcherClassInstance(), launcher)
             .build();
 
-        isSuccessful = callLauncherRunner(runtime);
+        callLauncherRunner(runtime, topology.getName());
       }
     } catch (TopologySubmissionException ex) {
       isSuccessful = false;
-      System.out.println(ex.getMessage());
+      throw ex;
     } finally {
       // 3. Do post work basing on the result
       if (!isSuccessful) {
@@ -429,8 +426,6 @@ public class SubmitterMain {
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
-
-    return isSuccessful;
   }
 
   protected void validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName)
@@ -439,7 +434,8 @@ public class SubmitterMain {
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
-      throw new TopologySubmissionException("Topology already exists");
+      throw new TopologySubmissionException(
+          String.format("Topology '%s' already exists", topologyName));
     }
   }
 
@@ -453,16 +449,16 @@ public class SubmitterMain {
     return uploaderRet;
   }
 
-  protected boolean callLauncherRunner(Config runtime) {
+  protected void callLauncherRunner(Config runtime, String topologyName)
+      throws TopologySubmissionException {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     boolean result = launchRunner.call();
 
     // if failed, undo the uploaded package
     if (!result) {
-      LOG.severe("Failed to launch topology. Attempting to roll back upload.");
-      return false;
+      throw new TopologySubmissionException(
+          String.format("Failed to launch topology '%s'", topologyName));
     }
-    return true;
   }
 }
