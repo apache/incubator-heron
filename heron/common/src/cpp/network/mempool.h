@@ -52,7 +52,7 @@ class BaseMemPool {
 template<typename B>
 class MemPool {
  public:
-  MemPool() {
+  MemPool() : size_(0) {
   }
 
   // TODO(cwang): we have a memory leak here.
@@ -64,6 +64,10 @@ class MemPool {
       m.second.clear();
     }
     map_.clear();
+  }
+
+  void set_size(sp_int32 size) {
+    size_ = size;
   }
 
   template<typename M>
@@ -83,8 +87,7 @@ class MemPool {
   void release(M* ptr) {
     std::type_index type = typeid(M);
     auto& pool = map_[type];
-    // TODO(cwang): expose this limit via config?
-    if (pool.size() > 2048) {
+    if (pool.size() > size_) {
       auto first = pool.front();
       pool.pop_front();
       delete first;
@@ -93,6 +96,7 @@ class MemPool {
   }
 
  private:
+  sp_int32 size_;
   std::unordered_map<std::type_index, std::list<B*>> map_;
 };
 
