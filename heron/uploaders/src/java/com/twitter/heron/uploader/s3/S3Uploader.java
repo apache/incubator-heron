@@ -17,20 +17,23 @@ package com.twitter.heron.uploader.s3;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.amazonaws.AmazonClientException;
+
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.Protocol;
+import com.amazonaws.SdkClientException;
+
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -39,8 +42,9 @@ import com.twitter.heron.spi.uploader.IUploader;
 /**
  * Provides a basic uploader class for uploading topology packages to s3.
  * <p>
- * By default this uploader will write topology packages to s3://&lt;bucket&gt;/&lt;topologyName&gt;/topology.tar.gz. This is a known
- * location where you can then download the topology package to where it needs to go in order to run the topology.
+ * By default this uploader will write topology packages to s3://&lt;bucket&gt;/&lt;topologyName&gt;/topology.tar.gz
+ * trying to obtain credentials using the default credential provider chain. The package destination serves as known
+ * location which can be used to download the topology package in order to run the topology.
  * <p>
  * This class also handles the undo action by copying any existing topology.tar.gz package found in the folder to
  * previous_topology.tar.gz. In the event that the deploy fails and the undo action is triggered the previous_topology.tar.gz
@@ -51,14 +55,15 @@ import com.twitter.heron.spi.uploader.IUploader;
  * heron.class.uploader (required) com.twitter.heron.uploader.s3.S3Uploader
  * heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topology packages to be stored
  * heron.uploader.s3.path_prefix (optional) Optional prefix for the path to the topology packages
- * heron.uploader.s3.access_key (required) S3 access key that can be used to write to the bucket provided
- * heron.uploader.s3.secret_key (required) S3 access secret that can be used to write to the bucket provided
+ * heron.uploader.s3.access_key (optional) S3 access key that can be used to write to the bucket provided
+ * heron.uploader.s3.secret_key (optional) S3 access secret that can be used to write to the bucket provided
+ * heron.uploader.s3.aws_profile (optional) AWS profile to use
  */
 public class S3Uploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(S3Uploader.class.getName());
 
   private String bucket;
-  protected AmazonS3Client s3Client;
+  protected AmazonS3 s3Client;
   private String remoteFilePath;
 
   // The path prefix will be prepended to the path inside the provided bucket.
@@ -79,52 +84,68 @@ public class S3Uploader implements IUploader {
     bucket = S3Context.bucket(config);
     String accessKey = S3Context.accessKey(config);
     String accessSecret = S3Context.secretKey(config);
-    String uri = S3Context.uri(config);
+    String awsProfile = S3Context.awsProfile(config);
+    String proxy = S3Context.proxyUri(config);
+    String endpoint = S3Context.uri(config);
     String customRegion = S3Context.region(config);
+    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
 
     if (bucket == null || bucket.isEmpty()) {
       throw new RuntimeException("Missing heron.uploader.s3.bucket config value");
     }
 
-    if (accessKey == null || accessKey.isEmpty()) {
-      throw new RuntimeException("Missing heron.uploader.s3.access_key config value");
+    // If an accessKey is specified, use it. Otherwise check if an aws profile
+    // is specified. If neither was set just use the DefaultAWSCredentialsProviderChain
+    // by not specifying a CredentialsProvider.
+    if ((accessKey != null && !accessKey.isEmpty())
+            || (accessSecret != null && !accessSecret.isEmpty())) {
+      if (accessKey == null || accessKey.isEmpty()) {
+        throw new RuntimeException("Missing heron.uploader.s3.access_key config value");
+      }
+
+      if (accessSecret == null || accessSecret.isEmpty()) {
+        throw new RuntimeException("Missing heron.uploader.s3.secret_key config value");
+      }
+      builder.setCredentials(
+              new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, accessSecret))
+      );
+    } else if (awsProfile != null || !awsProfile.isEmpty()) {
+      builder.setCredentials(new ProfileCredentialsProvider(awsProfile));
     }
 
-    if (accessSecret == null || accessSecret.isEmpty()) {
-      throw new RuntimeException("Missing heron.uploader.s3.secret_key config value");
-    }
-
-    AWSCredentials credentials = new BasicAWSCredentials(accessKey, accessSecret);
-
-    if (uri != null && !uri.isEmpty()) {
-      URI uriObj;
+    if (proxy != null && !proxy.isEmpty()) {
+      URI proxyUri;
 
       try  {
-        uriObj = new URI(uri);
+        proxyUri = new URI(proxy);
       } catch (URISyntaxException e) {
         throw new RuntimeException("Invalid heron.uploader.s3.uri config value");
       }
+
       ClientConfiguration clientCfg = new ClientConfiguration();
+      clientCfg.withProtocol(Protocol.HTTPS)
+              .withProxyHost(proxyUri.getHost())
+              .withProxyPort(proxyUri.getPort());
 
-      clientCfg.setProxyHost(uriObj.getHost());
-      clientCfg.setProxyPort(uriObj.getPort());
-
-      s3Client = new AmazonS3Client(credentials, clientCfg);
-      s3Client.setEndpoint(uri);
-
-      if (customRegion != null) {
-        s3Client.setRegion(Region.getRegion(Regions.valueOf(customRegion)));
+      if (proxyUri.getUserInfo() != null && !proxyUri.getUserInfo().isEmpty()) {
+        String[] info = proxyUri.getUserInfo().split(":", 2);
+        clientCfg.setProxyUsername(info[0]);
+        if (info.length > 1) {
+          clientCfg.setProxyPassword(info[1]);
+        }
       }
 
-      final S3ClientOptions clientOptions = S3ClientOptions.builder()
-          .setPathStyleAccess(true)
-          .disableChunkedEncoding()
-          .setPayloadSigningEnabled(true)
-          .build();
+      builder.setClientConfiguration(clientCfg);
+    }
 
-      s3Client.setS3ClientOptions(clientOptions);
-    } else {
-      s3Client = new AmazonS3Client(credentials);
+    s3Client = builder.withRegion(customRegion)
+            .withPathStyleAccessEnabled(true)
+            .withChunkedEncodingDisabled(true)
+            .withPayloadSigningEnabled(true)
+            .build();
+
+    if (endpoint != null && !endpoint.isEmpty()) {
+      s3Client.setEndpoint(endpoint);
     }
 
     final String topologyName = Context.topologyName(config);
@@ -151,14 +172,14 @@ public class S3Uploader implements IUploader {
     // Attempt to write the topology package to s3
     try {
       s3Client.putObject(bucket, remoteFilePath, packageFileHandler);
-    } catch (AmazonClientException e) {
+    } catch (SdkClientException e) {
       LOG.log(Level.SEVERE, "Error writing topology package to " + bucket + " "
           + remoteFilePath, e);
       return null;
     }
 
     // Ask s3 for the url to the topology package we just uploaded
-    final String resourceUrl = s3Client.getResourceUrl(bucket, remoteFilePath);
+    final URL resourceUrl = s3Client.getUrl(bucket, remoteFilePath);
     LOG.log(Level.INFO, "Package URL: {0}", resourceUrl);
 
     // This will happen if the package does not actually exist in the place where we uploaded it to.
@@ -169,7 +190,7 @@ public class S3Uploader implements IUploader {
     }
 
     try {
-      return new URI(resourceUrl);
+      return resourceUrl.toURI();
     } catch (URISyntaxException e) {
       LOG.log(Level.SEVERE, e.getMessage());
       return null;
@@ -200,7 +221,7 @@ public class S3Uploader implements IUploader {
       try {
         // Restore the previous version of the topology
         s3Client.copyObject(bucket, previousVersionFilePath, bucket, remoteFilePath);
-      } catch (AmazonClientException e) {
+      } catch (SdkClientException e) {
         LOG.log(Level.SEVERE, "Error undoing deploying", e);
         return false;
       }
@@ -213,6 +234,8 @@ public class S3Uploader implements IUploader {
   public void close() {
     // Cleanup the backup file if it exists as its not needed anymore.
     // This will succeed whether the file exists or not.
-    s3Client.deleteObject(bucket, previousVersionFilePath);
+    if (bucket != null && previousVersionFilePath != null) {
+      s3Client.deleteObject(bucket, previousVersionFilePath);
+    }
   }
 }
