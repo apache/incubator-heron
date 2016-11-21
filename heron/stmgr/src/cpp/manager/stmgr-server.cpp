@@ -26,6 +26,7 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "metrics/metrics.h"
+#include "config/heron-internals-config-reader.h"
 
 namespace heron {
 namespace stmgr {
@@ -107,6 +108,10 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
+
+  sp_int32 pool_size =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSize();
+  set_pool_size(pool_size);
 }
 
 StMgrServer::~StMgrServer() {
