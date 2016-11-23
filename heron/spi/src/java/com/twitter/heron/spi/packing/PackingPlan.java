@@ -37,43 +37,25 @@ public class PackingPlan {
   }
 
   /**
-   * Computes the maximum of all the resources required by the containers in the packing plan
+   * Computes the maximum of all the resources required by the containers in the packing plan. If
+   * the PackingPlan has already been scheduled, the scheduled resources will be used over the
+   * required resources.
    *
-   * @return maximum Resources.
+   * @return maximum Resources found in all containers.
    */
-
   public Resource getMaxContainerResources() {
     double maxCpu = 0;
     long maxRam = 0;
     long maxDisk = 0;
     for (ContainerPlan containerPlan : getContainers()) {
-      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
-      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
-      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
+      Resource containerResource =
+          containerPlan.getScheduledResource().or(containerPlan.getRequiredResource());
+      maxCpu = Math.max(maxCpu, containerResource.getCpu());
+      maxRam = Math.max(maxRam, containerResource.getRam());
+      maxDisk = Math.max(maxDisk, containerResource.getDisk());
     }
 
-    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
-    return maxResource;
-  }
-
-  /**
-   * Computes the total resources required by the containers in the packing plan
-   *
-   * @return total Resources.
-   */
-
-  public Resource getTotalContainerResources() {
-    double cpu = 0;
-    long ram = 0;
-    long disk = 0;
-    for (ContainerPlan containerPlan : getContainers()) {
-      cpu += containerPlan.getRequiredResource().getCpu();
-      ram += containerPlan.getRequiredResource().getRam();
-      disk += containerPlan.getRequiredResource().getDisk();
-    }
-
-    Resource totalResource = new Resource(cpu, ram, disk);
-    return totalResource;
+    return new Resource(maxCpu, maxRam, maxDisk);
   }
 
   /**
@@ -88,8 +70,7 @@ public class PackingPlan {
       updatedContainers.add(container.cloneWithScheduledResource(maxResource));
     }
 
-    PackingPlan updatedPackingPlan = new PackingPlan(getId(), updatedContainers);
-    return updatedPackingPlan;
+    return new PackingPlan(getId(), updatedContainers);
   }
 
   public String getId() {

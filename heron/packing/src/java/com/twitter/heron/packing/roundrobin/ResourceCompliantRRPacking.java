@@ -82,7 +82,7 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  */
 public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
-  private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
+  static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
   private static final Logger LOG = Logger.getLogger(ResourceCompliantRRPacking.class.getName());
@@ -375,17 +375,20 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     boolean containersChecked = false;
     int currentContainer = this.containerId;
     while (!containersChecked) {
-      if (packingPlanBuilder.removeInstance(currentContainer, component)) {
+      try {
+        packingPlanBuilder.removeInstance(currentContainer, component);
         this.containerId = nextContainerId(currentContainer);
         return;
+      } catch (PackingException e) {
+        // ignore since we keep trying
       }
       currentContainer = nextContainerId(currentContainer);
       if (currentContainer == this.containerId) {
         containersChecked = true;
       }
     }
-    throw new PackingException("Cannot remove instance. No more instances of component "
-        + component + " exist in the containers.");
+    throw new PackingException("Cannot remove instance. No more instances of component '"
+        + component + "' exist in the containers.");
   }
 
   private enum PolicyType {

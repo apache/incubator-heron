@@ -319,13 +319,16 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    */
   private void removeFFDInstance(PackingPlanBuilder packingPlanBuilder, String component)
-      throws RuntimeException {
+      throws PackingException {
     for (int containerId = 1; containerId <= numContainers; containerId++) {
-      if (packingPlanBuilder.removeInstance(containerId, component)) {
+      try {
+        packingPlanBuilder.removeInstance(containerId, component);
         return;
+      } catch (PackingException e) {
+        // ignore since we keep trying
       }
     }
-    throw new PackingException("Cannot remove instance. No more instances of component "
-        + component + " exist in the containers.");
+    throw new PackingException("Cannot remove instance. No more instances of component '"
+        + component + "' exist in the containers.");
   }
 }
