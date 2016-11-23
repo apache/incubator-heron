@@ -49,7 +49,7 @@ heron.streammgr.cache.drain.size.mb: 100
 # For efficient acknowledgement
 heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 
-# For the size of the memory pool for each type of messages
+# The max size of the memory pool for all types of messages
 heron.streammgr.mempool.size.mb: 100
 
 # The reconnect interval to other stream managers in second for stream manager client
