@@ -14,7 +14,7 @@
 package com.twitter.heron.packing.builder;
 
 /**
- * Sorts containers ascending by container id. Id firstId and maxId as passed, starte with
+ * Sorts containers ascending by container id. Id firstId and maxId as passed, start with
  * container with id firstId and ends with id firstId - 1
  */
 public class ContainerIdScorer implements Scorer<Container> {

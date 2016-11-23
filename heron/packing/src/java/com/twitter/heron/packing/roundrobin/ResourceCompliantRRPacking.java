@@ -173,15 +173,18 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @return new packing plan
    */
+  @Override
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
     this.numContainers = currentPackingPlan.getContainers().size();
     resetToFirstContainer();
 
     int additionalContainers = computeNumAdditionalContainers(componentChanges, currentPackingPlan);
-    increaseNumContainers(additionalContainers);
-    LOG.info(String.format(
-        "Allocated %s additional containers for repack bring the number of containers to %s.",
-        additionalContainers, this.numContainers));
+    if (additionalContainers > 0) {
+      increaseNumContainers(additionalContainers);
+      LOG.info(String.format(
+          "Allocated %s additional containers for repack bring the number of containers to %s.",
+          additionalContainers, this.numContainers));
+    }
 
     while (true) {
       try {
@@ -197,8 +200,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         increaseNumContainers(1);
         resetToFirstContainer();
         LOG.info(String.format(
-            "Increasing the number of containers to %s and attempting packing again.",
-            this.numContainers));
+            "%s Increasing the number of containers to %s and attempting packing again.",
+            e.getMessage(), this.numContainers));
       }
     }
   }
