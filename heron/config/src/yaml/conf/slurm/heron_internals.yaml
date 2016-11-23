@@ -62,7 +62,7 @@ heron.streammgr.cache.drain.size.mb: 100
 heron.streammgr.xormgr.rotatingmap.nbuckets: 3 
 
 # For the size of the memory pool for each type of messages
-heron.streammgr.mempool.size: 3072
+heron.streammgr.mempool.size.mb: 100
 
 # The reconnect interval to other stream managers in secs for stream manager client
 heron.streammgr.client.reconnect.interval.sec: 1 

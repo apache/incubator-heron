@@ -208,8 +208,8 @@ class Server : public BaseServer {
   // Called when the connection is closed
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status);
 
-  void set_pool_size(sp_int32 size) {
-    _heron_message_pool.set_size(size);
+  void set_pool_limit(sp_int32 limit) {
+    _heron_message_pool.set_limit(limit);
   }
 
   template<typename M>

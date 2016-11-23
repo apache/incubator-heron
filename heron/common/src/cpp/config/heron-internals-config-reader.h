@@ -153,7 +153,7 @@ class HeronInternalsConfigReader : public YamlFileReader {
   sp_int32 GetHeronStreammgrCacheDrainSizeMb();
 
   // For the size of the memory pool for each type of messages
-  sp_int32 GetHeronStreammgrMempoolSize();
+  sp_int32 GetHeronStreammgrMempoolSizeMb();
 
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
