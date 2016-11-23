@@ -52,7 +52,7 @@ class BaseMemPool {
 template<typename B>
 class MemPool {
  public:
-  MemPool() : size_(0) {
+  MemPool() : size_(0), size_limit_(0) {
   }
 
   // TODO(cwang): we have a memory leak here.
@@ -66,8 +66,8 @@ class MemPool {
     map_.clear();
   }
 
-  void set_size(sp_int32 size) {
-    size_ = size;
+  void set_limit(sp_int32 limit) {
+    size_limit_ = limit;
   }
 
   template<typename M>
@@ -80,23 +80,32 @@ class MemPool {
     }
     B* t = pool.back();
     pool.pop_back();
+    size_ -= sizeof(M);
     return static_cast<M*>(t);
   }
 
   template<typename M>
   void release(M* ptr) {
+    if (size_limit_ == 0) {
+      delete ptr;
+      return;
+    }
+
     std::type_index type = typeid(M);
     auto& pool = map_[type];
-    if (pool.size() > size_) {
+    if (size_ > size_limit_) {
       auto first = pool.front();
       pool.pop_front();
+      size_ -= sizeof(*first);
       delete first;
     }
     pool.push_back(static_cast<B*>(ptr));
+    size_ += sizeof(M);
   }
 
  private:
   sp_int32 size_;
+  sp_int32 size_limit_;
   std::unordered_map<std::type_index, std::list<B*>> map_;
 };
 

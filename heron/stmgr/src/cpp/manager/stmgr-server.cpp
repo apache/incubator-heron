@@ -109,9 +109,9 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
 
-  sp_int32 pool_size =
-    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSize();
-  set_pool_size(pool_size);
+  sp_int32 pool_limit =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSizeMb();
+  set_pool_limit(pool_limit * 1024 * 1024);
 }
 
 StMgrServer::~StMgrServer() {
