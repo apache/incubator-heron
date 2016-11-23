@@ -96,7 +96,7 @@ class MemPool {
     if (size_ > size_limit_) {
       auto first = pool.front();
       pool.pop_front();
-      size_ -= sizeof(*first);
+      size_ -= sizeof(M);
       delete first;
     }
     pool.push_back(static_cast<B*>(ptr));
