@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.packing.builder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.common.basics.Pair;
@@ -31,13 +34,78 @@ import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.PackingTestUtils;
 
 import static org.junit.Assert.assertEquals;
 
 public class PackingPlanBuilderTest {
 
   private static final String TOPOLOGY_ID = "testTopologyId";
+
+  private List<Container> testContainers;
+
+  @Before
+  public void init() {
+    testContainers = new ArrayList<>();
+    testContainers.add(new Container(3, null, 5));
+    testContainers.add(new Container(6, null, 20));
+    testContainers.add(new Container(4, null, 20));
+  }
+
+  @Test
+  public void testScorerSortById() {
+    doScorerSortTest(new ContainerIdScorer(), new int[] {0, 2, 1});
+  }
+
+  @Test
+  public void testScorerSortBySpecificId() {
+    doScorerSortTest(new ContainerIdScorer(4, 6), new int[] {2, 1, 0});
+  }
+
+  @Test
+  public void testScorerSortByPadding() {
+    doScorerSortTest(new TestPaddingScorer(true), new int[] {0, 1, 2});
+  }
+
+  @Test
+  public void testScorerSortByPaddingReverse() {
+    doScorerSortTest(new TestPaddingScorer(false), new int[] {1, 2, 0});
+  }
+
+  @Test
+  public void testMultiScorerSort() {
+    List<Scorer<Container>> scorers = new ArrayList<>();
+    scorers.add(new TestPaddingScorer(true));
+    scorers.add(new ContainerIdScorer());
+    doScorerSortTest(scorers, new int[] {0, 2, 1});
+  }
+
+  @Test
+  public void testMultiScorerSortReverse() {
+    List<Scorer<Container>> scorers = new ArrayList<>();
+    scorers.add(new TestPaddingScorer(false));
+    scorers.add(new ContainerIdScorer());
+    doScorerSortTest(scorers, new int[] {2, 1, 0});
+  }
+
+  private void doScorerSortTest(Scorer<Container> scorer, int[] expectedOrder) {
+    List<Scorer<Container>> scorers = new ArrayList<>();
+    scorers.add(scorer);
+    doScorerSortTest(scorers, expectedOrder);
+  }
+
+  private void doScorerSortTest(List<Scorer<Container>> scorers, int[] expectedOrder) {
+    List<Container> sorted = PackingPlanBuilder.sortContainers(scorers, testContainers);
+
+    Assert.assertEquals(sorted.size(), testContainers.size());
+    Assert.assertEquals(expectedOrder.length, testContainers.size());
+
+    int i = 0;
+    for (int expectedIndex : expectedOrder) {
+      Assert.assertEquals(String.format(
+          "Expected item %s in the sorted collection to be item %s from the original collection",
+          i, expectedIndex), testContainers.get(expectedIndex), sorted.get(i++));
+    }
+  }
 
   /**
    * Tests the getContainers method.
@@ -64,34 +132,6 @@ public class PackingPlanBuilderTest {
       assertEquals(packingPlan.getMaxContainerResources(), foundContainer.getCapacity());
       assertEquals(2, foundContainer.getInstances().size());
     }
-  }
-
-  /**
-   * Tests the sorting of containers based on the container Id.
-   */
-  @Test
-  public void testContainerSortOnId() {
-
-    Integer[] containerIds = {5, 4, 1, 2, 3};
-    Integer[] instanceIds = {1, 2, 3};
-    Set<PackingPlan.ContainerPlan> containers = generateContainers(containerIds, instanceIds);
-
-    PackingPlan.ContainerPlan[] currentContainers =
-        PackingPlanBuilder.sortOnContainerId(containers);
-
-    assertEquals(containerIds.length, currentContainers.length);
-    for (int i = 0; i < currentContainers.length; i++) {
-      assertEquals((currentContainers[i]).getId(), i + 1);
-    }
-  }
-
-  private static Set<PackingPlan.ContainerPlan> generateContainers(Integer[] containerIds,
-                                                                   Integer[] instanceIds) {
-    Set<PackingPlan.ContainerPlan> containerPlan = new HashSet<>();
-    for (int containerId : containerIds) {
-      containerPlan.add(PackingTestUtils.testContainerPlan(containerId, instanceIds));
-    }
-    return containerPlan;
   }
 
   private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking)
@@ -245,5 +285,23 @@ public class PackingPlanBuilderTest {
     T[] result = Arrays.copyOf(first, first.length + second.length);
     System.arraycopy(second, 0, result, first.length, second.length);
     return result;
+  }
+
+  private static class TestPaddingScorer implements Scorer<Container> {
+    private boolean ascending;
+
+    TestPaddingScorer(boolean ascending) {
+      this.ascending = ascending;
+    }
+
+    @Override
+    public boolean sortAscending() {
+      return ascending;
+    }
+
+    @Override
+    public double getScore(Container container) {
+      return container.getPaddingPercentage();
+    }
   }
 }

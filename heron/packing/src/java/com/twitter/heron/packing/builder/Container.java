@@ -28,6 +28,7 @@ import com.twitter.heron.spi.packing.Resource;
  */
 class Container {
 
+  private int containerId;
   private HashSet<PackingPlan.InstancePlan> instances;
   private Resource capacity;
   private int paddingPercentage;
@@ -39,10 +40,15 @@ class Container {
    * @param capacity the capacity of the container in terms of cpu, ram and disk
    * @param paddingPercentage the padding percentage
    */
-  Container(Resource capacity, int paddingPercentage) {
+  Container(int containerId, Resource capacity, int paddingPercentage) {
+    this.containerId = containerId;
     this.capacity = capacity;
     this.instances = new HashSet<PackingPlan.InstancePlan>();
     this.paddingPercentage = paddingPercentage;
+  }
+
+  public int getContainerId() {
+    return containerId;
   }
 
   public HashSet<PackingPlan.InstancePlan> getInstances() {
