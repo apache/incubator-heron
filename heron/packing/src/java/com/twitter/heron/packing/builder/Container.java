@@ -17,6 +17,7 @@ import java.util.HashSet;
 
 import com.google.common.base.Optional;
 
+import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -31,18 +32,6 @@ class Container {
   private HashSet<PackingPlan.InstancePlan> instances;
   private Resource capacity;
   private int paddingPercentage;
-
-  public HashSet<PackingPlan.InstancePlan> getInstances() {
-    return instances;
-  }
-
-  public Resource getCapacity() {
-    return capacity;
-  }
-
-  public int getPaddingPercentage() {
-    return paddingPercentage;
-  }
 
   /**
    * Creates a container with a specific capacity which will maintain a specific percentage
@@ -62,19 +51,25 @@ class Container {
     return containerId;
   }
 
+  public HashSet<PackingPlan.InstancePlan> getInstances() {
+    return instances;
+  }
+
+  public Resource getCapacity() {
+    return capacity;
+  }
+
+  int getPaddingPercentage() {
+    return paddingPercentage;
+  }
+
   /**
    * Update the resources currently used by the container, when a new instance with specific
    * resource requirements has been assigned to the container.
-   *
-   * @return true if the instance can be added to the container, false otherwise
    */
-  boolean add(PackingPlan.InstancePlan instancePlan) {
-    if (this.hasSpace(instancePlan.getResource())) {
-      this.instances.add(instancePlan);
-      return true;
-    } else {
-      return false;
-    }
+  void add(PackingPlan.InstancePlan instancePlan) throws ResourceExceededException {
+    this.assertHasSpace(instancePlan.getResource());
+    this.instances.add(instancePlan);
   }
 
   /**
@@ -94,14 +89,49 @@ class Container {
     return Optional.absent();
   }
 
+  @Override
+  public String toString() {
+    return String.format("{containerId=%s, instances=%s, capacity=%s, paddingPercentage=%s}",
+        containerId, instances, capacity, paddingPercentage);
+  }
+
   /**
    * Find whether any instance of a particular component is assigned to the container
    *
-   * @return the instancePlan that corresponds to the instance if it is found, void otherwise
+   * @return an optional including the InstancePlan if found
    */
-  private Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String component) {
+  private Optional<PackingPlan.InstancePlan> getAnyInstanceOfComponent(String componentName) {
     for (PackingPlan.InstancePlan instancePlan : this.instances) {
-      if (instancePlan.getComponentName().equals(component)) {
+      if (instancePlan.getComponentName().equals(componentName)) {
+        return Optional.of(instancePlan);
+      }
+    }
+    return Optional.absent();
+  }
+
+  /**
+   * Return the instance of componentName with a matching componentIndex if it exists
+   *
+   * @return an optional including the InstancePlan if found
+   */
+  Optional<PackingPlan.InstancePlan> getInstance(String componentName, int componentIndex) {
+    for (PackingPlan.InstancePlan instancePlan : this.instances) {
+      if (instancePlan.getComponentName().equals(componentName)
+          && instancePlan.getComponentIndex() == componentIndex) {
+        return Optional.of(instancePlan);
+      }
+    }
+    return Optional.absent();
+  }
+
+  /**
+   * Return the instance of with a given taskId if it exists
+   *
+   * @return an optional including the InstancePlan if found
+   */
+  Optional<PackingPlan.InstancePlan> getInstance(int taskId) {
+    for (PackingPlan.InstancePlan instancePlan : this.instances) {
+      if (instancePlan.getTaskId() == taskId) {
         return Optional.of(instancePlan);
       }
     }
@@ -110,19 +140,31 @@ class Container {
 
   /**
    * Check whether the container can accommodate a new instance with specific resource requirements
-   *
-   * @return true if the container has space otherwise return false
    */
-  private boolean hasSpace(Resource resource) {
+  private void assertHasSpace(Resource resource) throws ResourceExceededException {
     Resource usedResources = this.getTotalUsedResources();
-    long newRam = usedResources.getRam() + resource.getRam();
-    double newCpu = usedResources.getCpu() + resource.getCpu();
-    long newDisk = usedResources.getDisk() + resource.getDisk();
-    boolean ramOk = PackingUtils.increaseBy(newRam, paddingPercentage) <= this.capacity.getRam();
-    boolean cpuOk =
-        Math.round(PackingUtils.increaseBy(newCpu, paddingPercentage)) <= this.capacity.getCpu();
-    boolean diskOk = PackingUtils.increaseBy(newDisk, paddingPercentage) <= this.capacity.getDisk();
-    return ramOk && cpuOk && diskOk;
+    long newRam =
+        PackingUtils.increaseBy(usedResources.getRam() + resource.getRam(), paddingPercentage);
+    double newCpu = Math.round(
+        PackingUtils.increaseBy(usedResources.getCpu() + resource.getCpu(), paddingPercentage));
+    long newDisk =
+        PackingUtils.increaseBy(usedResources.getDisk() + resource.getDisk(), paddingPercentage);
+
+    if (newRam > this.capacity.getRam()) {
+      throw new ResourceExceededException(String.format("Adding %d bytes of ram to existing %d "
+          + "bytes with %d percent padding would exceed capacity %d",
+          resource.getRam(), usedResources.getRam(), paddingPercentage, this.capacity.getRam()));
+    }
+    if (newCpu > this.capacity.getCpu()) {
+      throw new ResourceExceededException(String.format("Adding %s cores to existing %s "
+          + "cores with %d percent padding would exceed capacity %s",
+          resource.getCpu(), usedResources.getCpu(), paddingPercentage, this.capacity.getCpu()));
+    }
+    if (newDisk > this.capacity.getDisk()) {
+      throw new ResourceExceededException(String.format("Adding %d bytes of disk to existing %d "
+          + "bytes with %d percent padding would exceed capacity %d",
+          resource.getDisk(), usedResources.getDisk(), paddingPercentage, this.capacity.getDisk()));
+    }
   }
 
   /**

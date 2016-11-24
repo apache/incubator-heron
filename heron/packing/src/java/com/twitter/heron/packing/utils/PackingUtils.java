@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -33,51 +34,46 @@ public final class PackingUtils {
   }
 
   /**
-   * Check whether the Instance has enough RAM and whether it can fit within the container limits.
+   * Verifies the Instance has enough RAM and that it can fit within the container limits.
    *
    * @param instanceResources The resources allocated to the instance
-   * @return true if the instance is valid, false otherwise
+   * @throws PackingException if the instance is invalid
    */
-  private static boolean isValidInstance(Resource instanceResources,
-                                         long minInstanceRam,
-                                         Resource maxContainerResources,
-                                         int paddingPercentage) {
+  private static void assertIsValidInstance(Resource instanceResources,
+                                            long minInstanceRam,
+                                            Resource maxContainerResources,
+                                            int paddingPercentage) throws PackingException {
 
     if (instanceResources.getRam() < minInstanceRam) {
-      LOG.severe(String.format(
+      throw new PackingException(String.format(
           "Instance requires %d MB ram which is less than the minimum %d MB ram per instance",
-          instanceResources.getRam(), minInstanceRam / Constants.MB));
-      return false;
+          instanceResources.getRam() / Constants.MB, minInstanceRam / Constants.MB));
     }
 
     long instanceRam = PackingUtils.increaseBy(instanceResources.getRam(), paddingPercentage);
     if (instanceRam > maxContainerResources.getRam()) {
-      LOG.severe(String.format(
+      throw new PackingException(String.format(
           "This instance requires containers of at least %d MB ram. The current max container"
               + "size is %d MB",
           instanceRam, maxContainerResources.getRam()));
-      return false;
     }
 
     double instanceCpu = Math.round(PackingUtils.increaseBy(
         instanceResources.getCpu(), paddingPercentage));
     if (instanceCpu > maxContainerResources.getCpu()) {
-      LOG.severe(String.format(
+      throw new PackingException(String.format(
           "This instance requires containers with at least %s cpu cores. The current max container"
               + "size is %s cores",
           instanceCpu > maxContainerResources.getCpu(), maxContainerResources.getCpu()));
-      return false;
     }
 
     long instanceDisk = PackingUtils.increaseBy(instanceResources.getDisk(), paddingPercentage);
     if (instanceDisk > maxContainerResources.getDisk()) {
-      LOG.severe(String.format(
+      throw new PackingException(String.format(
           "This instance requires containers of at least %d MB disk. The current max container"
               + "size is %d MB",
           instanceDisk, maxContainerResources.getDisk()));
-      return false;
     }
-    return true;
   }
 
   public static Resource getResourceRequirement(String component,
@@ -89,12 +85,8 @@ public final class PackingUtils {
     if (componentRamMap.containsKey(component)) {
       instanceRam = componentRamMap.get(component);
     }
-    if (!isValidInstance(defaultInstanceResource.cloneWithRam(instanceRam),
-        MIN_RAM_PER_INSTANCE, maxContainerResource, paddingPercentage)) {
-      throw new RuntimeException("The topology configuration does not have "
-          + "valid resource requirements. Please make sure that the instance resource "
-          + "requirements do not exceed the maximum per-container resources.");
-    }
+    assertIsValidInstance(defaultInstanceResource.cloneWithRam(instanceRam),
+        MIN_RAM_PER_INSTANCE, maxContainerResource, paddingPercentage);
     return defaultInstanceResource.cloneWithRam(instanceRam);
   }
 
