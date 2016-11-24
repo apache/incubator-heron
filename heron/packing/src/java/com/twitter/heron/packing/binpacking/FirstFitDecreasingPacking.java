@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.RamRequirement;
 import com.twitter.heron.packing.ResourceExceededException;
+import com.twitter.heron.packing.builder.ContainerIdScorer;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
@@ -284,11 +285,13 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     ArrayList<RamRequirement> ramRequirements =
         getSortedRAMInstances(componentsToScaleDown.keySet());
 
+    ContainerIdScorer scorer = new ContainerIdScorer();
+
     for (RamRequirement ramRequirement : ramRequirements) {
       String component = ramRequirement.getComponentName();
       int numInstancesToRemove = -componentsToScaleDown.get(component);
       for (int j = 0; j < numInstancesToRemove; j++) {
-        removeFFDInstance(packingPlanBuilder, component);
+        packingPlanBuilder.removeInstance(scorer, component);
       }
     }
   }
@@ -302,30 +305,12 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }
-    for (int containerId = 1; containerId <= numContainers; containerId++) {
-      try {
-        planBuilder.addInstance(containerId, instanceId);
-        return;
-      } catch (ResourceExceededException e) {
-        // ignore since we'll continue trying
-      }
-    }
-    planBuilder.updateNumContainers(++numContainers);
-    planBuilder.addInstance(numContainers, instanceId);
-  }
 
-  /**
-   * Remove an instance of a particular component from the containers
-   *
-   */
-  private void removeFFDInstance(PackingPlanBuilder packingPlanBuilder, String component)
-      throws RuntimeException {
-    for (int containerId = 1; containerId <= numContainers; containerId++) {
-      if (packingPlanBuilder.removeInstance(containerId, component)) {
-        return;
-      }
+    try {
+      planBuilder.addInstance(new ContainerIdScorer(), instanceId);
+    } catch (ResourceExceededException e) {
+      planBuilder.updateNumContainers(++numContainers);
+      planBuilder.addInstance(numContainers, instanceId);
     }
-    throw new PackingException("Cannot remove instance. No more instances of component "
-        + component + " exist in the containers.");
   }
 }
