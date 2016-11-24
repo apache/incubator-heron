@@ -140,7 +140,7 @@ class HeronInternalsConfigVars {
   // The sized based threshold in MB for draining the tuple cache
   static const sp_string HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB;
 
-  // The max size of the memory pool for each type of messages
+  // The max size of the memory pool for all types of messages
   static const sp_string HERON_STREAMMGR_MEMPOOL_SIZE_MB;
 
   // For efficient acknowledgement
