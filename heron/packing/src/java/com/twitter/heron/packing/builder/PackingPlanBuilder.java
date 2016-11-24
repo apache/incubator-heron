@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -87,29 +85,56 @@ public class PackingPlanBuilder {
     return this;
   }
 
+  // Calling updateNumContainers will produce that many containers, starting with id 1. The build()
+  // method will prune out empty containers from the plan.
   public PackingPlanBuilder updateNumContainers(int count) {
     this.numContainers = count;
     return this;
   }
 
-  // add or remove instances
+  // adds an instance to a container with id containerId. If that container does not exist, it will
+  // be lazily initialized, which could result in more containers than those requested using the
+  // updateNumContainers method
   public PackingPlanBuilder addInstance(Integer containerId,
                                         InstanceId instanceId) throws ResourceExceededException {
-    initContainers();
+    initContainer(containerId);
+    assertNewInstance(instanceId);
 
     Resource instanceResource = PackingUtils.getResourceRequirement(
         instanceId.getComponentName(), this.componentRamMap, this.defaultInstanceResource,
         this.maxContainerResource, this.requestedContainerPadding);
 
-    if (!containers.get(containerId).add(
-        new PackingPlan.InstancePlan(instanceId, instanceResource))) {
+    try {
+      containers.get(containerId).add(new PackingPlan.InstancePlan(instanceId, instanceResource));
+    } catch (ResourceExceededException e) {
       throw new ResourceExceededException(String.format(
           "Insufficient container resources to add instance %s with resources %s to container %d.",
-          instanceId, instanceResource, containerId));
+          instanceId, instanceResource, containerId), e);
     }
 
     LOG.fine(String.format("Added to container %d instance %s", containerId, instanceId));
     return this;
+  }
+
+  private void assertNewInstance(InstanceId instanceId) throws PackingException {
+    for (Container container : containers.values()) {
+      Optional<PackingPlan.InstancePlan> matchingInstance =
+          container.getInstance(instanceId.getTaskId());
+      if (matchingInstance.isPresent()) {
+        throw new PackingException(String.format(
+            "Can not add instance %s due to taskId collision with instance %s",
+            instanceId, matchingInstance.get()));
+      }
+
+//      TODO: enable this after fixing https://github.com/twitter/heron/issues/1579
+//      matchingInstance =
+//          container.getInstance(instanceId.getComponentName(), instanceId.getComponentIndex());
+//      if (matchingInstance.isPresent()) {
+//        throw new PackingException(String.format(
+//            "Can not add instance %s due to componentIndex collision with instance %s",
+//            instanceId, matchingInstance.get()));
+//      }
+    }
   }
 
   @SuppressWarnings("JavadocMethod")
@@ -149,11 +174,18 @@ public class PackingPlanBuilder {
         instanceId, this.containers.size()));
   }
 
-  public boolean removeInstance(Integer containerId, String componentName) {
+  public void removeInstance(Integer containerId, String componentName) throws PackingException {
     initContainers();
-    Optional<PackingPlan.InstancePlan> instancePlan =
-        containers.get(containerId).removeAnyInstanceOfComponent(componentName);
-    return instancePlan.isPresent();
+    Container container = containers.get(containerId);
+
+    if (container == null) {
+      throw new PackingException(String.format("Failed to remove component '%s' because container "
+              + "with id %d does not exist.", componentName, containerId));
+    }
+    if (!container.removeAnyInstanceOfComponent(componentName).isPresent()) {
+      throw new PackingException(String.format("Failed to remove component '%s' because container "
+              + "with id %d does not include that component'", componentName, containerId));
+    }
   }
 
   @SuppressWarnings("JavadocMethod")
@@ -178,8 +210,11 @@ public class PackingPlanBuilder {
   public int removeInstance(List<Scorer<Container>> scorers, String componentName) {
     initContainers();
     for (Container container : sortContainers(scorers, this.containers.values())) {
-      if (removeInstance(container.getContainerId(), componentName)) {
+      try {
+        removeInstance(container.getContainerId(), componentName);
         return container.getContainerId();
+      } catch (PackingException e) {
+        // ignore since we keep trying
       }
     }
     throw new PackingException("Cannot remove instance. No more instances of component "
@@ -209,22 +244,40 @@ public class PackingPlanBuilder {
               containerId, this.maxContainerResource, this.requestedContainerPadding));
         }
       } else {
-        newContainerMap = getContainers(
-            this.existingPacking, this.requestedContainerPadding);
+        try {
+          newContainerMap = getContainers(this.existingPacking, this.requestedContainerPadding);
+        } catch (ResourceExceededException e) {
+          throw new PackingException(
+              "Could not initialize containers using existing packing plan", e);
+        }
       }
     }
 
     if (this.numContainers > newContainerMap.size()) {
-      SortedSet<Integer> sortedIds = new TreeSet<>(newContainerMap.keySet());
-      int nextContainerId = sortedIds.last() + 1;
+      List<Scorer<Container>> scorers = new ArrayList<>();
+      scorers.add(new ContainerIdScorer());
+      List<Container> sortedContainers = sortContainers(scorers, newContainerMap.values());
+
+      int nextContainerId = sortedContainers.get(sortedContainers.size() - 1).getContainerId() + 1;
+      Resource capacity =
+          newContainerMap.get(sortedContainers.get(0).getContainerId()).getCapacity();
+
       for (int i = 0; i < numContainers - newContainerMap.size(); i++) {
-        newContainerMap.put(nextContainerId, new Container(nextContainerId,
-            newContainerMap.get(sortedIds.first()).getCapacity(), this.requestedContainerPadding));
+        newContainerMap.put(nextContainerId,
+            new Container(nextContainerId, capacity, this.requestedContainerPadding));
         nextContainerId++;
       }
     }
 
     this.containers = newContainerMap;
+  }
+
+  private void initContainer(int containerId) {
+    initContainers();
+    if (this.containers.get(containerId) == null) {
+      this.containers.put(containerId, new Container(
+          containerId, this.maxContainerResource, this.requestedContainerPadding));
+    }
   }
 
   private void assertResourceSettings() {
@@ -312,7 +365,8 @@ public class PackingPlanBuilder {
    */
   @VisibleForTesting
   static Map<Integer, Container> getContainers(PackingPlan currentPackingPlan,
-                                               int paddingPercentage) {
+                                               int paddingPercentage)
+      throws ResourceExceededException {
     Map<Integer, Container> containers = new HashMap<>();
 
     Resource capacity = currentPackingPlan.getMaxContainerResources();
@@ -320,7 +374,13 @@ public class PackingPlanBuilder {
       Container container =
           new Container(currentContainerPlan.getId(), capacity, paddingPercentage);
       for (PackingPlan.InstancePlan instancePlan : currentContainerPlan.getInstances()) {
-        container.add(instancePlan);
+        try {
+          container.add(instancePlan);
+        } catch (ResourceExceededException e) {
+          throw new ResourceExceededException(String.format(
+              "Insufficient container resources to add instancePlan %s to container %s",
+              instancePlan, container), e);
+        }
       }
       containers.put(currentContainerPlan.getId(), container);
     }

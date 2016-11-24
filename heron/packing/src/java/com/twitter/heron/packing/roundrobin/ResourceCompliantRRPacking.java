@@ -83,7 +83,7 @@ import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  */
 public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
-  private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
+  static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
   private static final Logger LOG = Logger.getLogger(ResourceCompliantRRPacking.class.getName());

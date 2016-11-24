@@ -24,13 +24,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.AssertPacking;
+import com.twitter.heron.packing.PackingTestHelper;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -562,7 +565,7 @@ public class ResourceCompliantRRPackingTest {
    * Test the scenario where the scaling down is requested
    */
   @Test
-  public void testScaleDown() throws Exception {
+  public void testScaleDownx() throws Exception {
     int spoutScalingDown = -2;
     int boltScalingDown = -1;
 
@@ -578,6 +581,46 @@ public class ResourceCompliantRRPackingTest {
         BOLT_NAME, 2);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
         SPOUT_NAME, 2);
+  }
+
+  /**
+   * Test the scenario where the scaling down is requested
+   */
+  // TODO @Test
+  public void testScaleDownRemoveContainer() throws Exception {
+    String topologyId = topology.getId();
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 2, 0)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 2)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 3)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 6, 4))
+    };
+
+    // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
+    // reconstruct the PackingPlan, see https://github.com/twitter/heron/issues/1577
+    PackingPlan initialPackingPlan = PackingTestHelper.addToTestPackingPlan(
+        topologyId, null, initialComponentInstances,
+        ResourceCompliantRRPacking.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
+    AssertPacking.assertPackingPlan(topologyId, initialComponentInstances, initialPackingPlan);
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(BOLT_NAME, -2);
+
+    PackingPlan newPackingPlan =
+        getResourceCompliantRRPackingPlanRepack(topology, initialPackingPlan, componentChanges);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 2, 0)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 2))
+    };
+    AssertPacking.assertPackingPlan(topologyId, expectedComponentInstances, newPackingPlan);
   }
 
   /**
