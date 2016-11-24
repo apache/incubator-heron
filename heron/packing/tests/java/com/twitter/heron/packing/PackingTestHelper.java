@@ -31,8 +31,7 @@ public final class PackingTestHelper {
                                                   Pair<Integer, InstanceId>[] instances,
                                                   int containerPadding)
       throws ResourceExceededException {
-    return generateTestPackingPlan(
-        topologyName, null, instances, null, containerPadding);
+    return generateTestPackingPlan(topologyName, null, instances, null, containerPadding);
   }
 
   public static PackingPlan addToTestPackingPlan(String topologyName,

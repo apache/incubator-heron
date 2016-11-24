@@ -34,13 +34,14 @@ import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class PackingPlanBuilderTest {
 
   private static final String TOPOLOGY_ID = "testTopologyId";
 
   private List<Container> testContainers;
+
   @Before
   public void init() {
     testContainers = new ArrayList<>();

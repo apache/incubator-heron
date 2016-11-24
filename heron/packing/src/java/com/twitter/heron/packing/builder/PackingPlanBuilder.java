@@ -194,8 +194,7 @@ public class PackingPlanBuilder {
    * @return containerId of the container the instance was removed from
    * @throws com.twitter.heron.spi.packing.PackingException if the instance could not be removed
    */
-  public int removeInstance(Scorer<Container> scorer, String componentName)
-      throws PackingException {
+  public int removeInstance(Scorer<Container> scorer, String componentName) {
     List<Scorer<Container>> scorers = new LinkedList<>();
     scorers.add(scorer);
     return removeInstance(scorers, componentName);
@@ -215,11 +214,11 @@ public class PackingPlanBuilder {
         removeInstance(container.getContainerId(), componentName);
         return container.getContainerId();
       } catch (PackingException e) {
-         // ignore since we keep trying on all of them
+        // ignore since we keep trying
       }
     }
-    throw new PackingException("Cannot remove instance. No instances of component "
-        + componentName + " exist in any of the containers.");
+    throw new PackingException("Cannot remove instance. No more instances of component "
+        + componentName + " exist in the containers.");
   }
 
   // build container plan sets by summing up instance resources
