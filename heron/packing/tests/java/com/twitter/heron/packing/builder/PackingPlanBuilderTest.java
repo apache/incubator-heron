@@ -106,6 +106,69 @@ public class PackingPlanBuilderTest {
     }
   }
 
+  /**
+   * Tests the getContainers method.
+   */
+  @Test
+  public void testGetContainers() throws ResourceExceededException {
+
+    int paddingPercentage = 10;
+    Map<Integer, List<InstanceId>> packing = new HashMap<>();
+    packing.put(7, Arrays.asList(
+        new InstanceId("spout", 1, 0),
+        new InstanceId("bolt", 2, 0)));
+    packing.put(3, Arrays.asList(
+        new InstanceId("spout", 3, 0),
+        new InstanceId("bolt", 4, 0)));
+
+    PackingPlan packingPlan = generatePacking(packing);
+    Map<Integer, Container> containers =
+        PackingPlanBuilder.getContainers(packingPlan, paddingPercentage);
+    assertEquals(packing.size(), containers.size());
+    for (Integer containerId : packing.keySet()) {
+      Container foundContainer = containers.get(containerId);
+      assertEquals(paddingPercentage, foundContainer.getPaddingPercentage());
+      assertEquals(packingPlan.getMaxContainerResources(), foundContainer.getCapacity());
+      assertEquals(2, foundContainer.getInstances().size());
+    }
+  }
+
+  private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking)
+      throws RuntimeException {
+    Resource resource = new Resource(2.0, 6 * Constants.GB, 25 * Constants.GB);
+
+    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
+
+    for (int containerId : basePacking.keySet()) {
+      List<InstanceId> instanceList = basePacking.get(containerId);
+
+      Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
+
+      for (InstanceId instanceId : instanceList) {
+        String componentName = instanceId.getComponentName();
+        Resource instanceResource;
+        switch (componentName) {
+          case "bolt":
+            instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
+            break;
+          case "spout":
+            instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+            break;
+          default:
+            throw new RuntimeException(String.format("%s is not a valid component name",
+                componentName));
+        }
+        instancePlans.add(new PackingPlan.InstancePlan(instanceId, instanceResource));
+      }
+      PackingPlan.ContainerPlan containerPlan =
+          new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
+
+      containerPlans.add(containerPlan);
+    }
+
+    return new PackingPlan("", containerPlans);
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   private final Pair<Integer, InstanceId>[] testComponentInstances = new Pair[] {
       new Pair<>(1, new InstanceId("componentA", 0, 0)),
@@ -217,67 +280,10 @@ public class PackingPlanBuilderTest {
     return plan;
   }
 
-  /**
-   * Tests the getContainers method.
-   */
-  @Test
-  public void testGetContainers() throws ResourceExceededException {
-
-    int paddingPercentage = 10;
-    Map<Integer, List<InstanceId>> packing = new HashMap<>();
-    packing.put(7, Arrays.asList(
-        new InstanceId("spout", 1, 0),
-        new InstanceId("bolt", 2, 0)));
-    packing.put(3, Arrays.asList(
-        new InstanceId("spout", 3, 0),
-        new InstanceId("bolt", 4, 0)));
-
-    PackingPlan packingPlan = generatePacking(packing);
-    Map<Integer, Container> containers =
-        PackingPlanBuilder.getContainers(packingPlan, paddingPercentage);
-    assertEquals(packing.size(), containers.size());
-    for (Integer containerId : packing.keySet()) {
-      Container foundContainer = containers.get(containerId);
-      assertEquals(paddingPercentage, foundContainer.getPaddingPercentage());
-      assertEquals(packingPlan.getMaxContainerResources(), foundContainer.getCapacity());
-      assertEquals(2, foundContainer.getInstances().size());
-    }
-  }
-
-  private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking)
-      throws RuntimeException {
-    Resource resource = new Resource(2.0, 6 * Constants.GB, 25 * Constants.GB);
-
-    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
-
-    for (int containerId : basePacking.keySet()) {
-      List<InstanceId> instanceList = basePacking.get(containerId);
-
-      Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
-
-      for (InstanceId instanceId : instanceList) {
-        String componentName = instanceId.getComponentName();
-        Resource instanceResource;
-        switch (componentName) {
-          case "bolt":
-            instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
-            break;
-          case "spout":
-            instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
-            break;
-          default:
-            throw new RuntimeException(String.format("%s is not a valid component name",
-                componentName));
-        }
-        instancePlans.add(new PackingPlan.InstancePlan(instanceId, instanceResource));
-      }
-      PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
-
-      containerPlans.add(containerPlan);
-    }
-
-    return new PackingPlan("", containerPlans);
+  private static <T> T[] concat(T[] first, T[] second) {
+    T[] result = Arrays.copyOf(first, first.length + second.length);
+    System.arraycopy(second, 0, result, first.length, second.length);
+    return result;
   }
 
   private static class TestPaddingScorer implements Scorer<Container> {
@@ -296,11 +302,5 @@ public class PackingPlanBuilderTest {
     public double getScore(Container container) {
       return container.getPaddingPercentage();
     }
-  }
-
-  private static <T> T[] concat(T[] first, T[] second) {
-    T[] result = Arrays.copyOf(first, first.length + second.length);
-    System.arraycopy(second, 0, result, first.length, second.length);
-    return result;
   }
 }
