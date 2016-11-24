@@ -26,7 +26,7 @@ import com.twitter.heron.spi.packing.Resource;
  * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
-public class Container {
+class Container {
 
   private int containerId;
   private HashSet<PackingPlan.InstancePlan> instances;
