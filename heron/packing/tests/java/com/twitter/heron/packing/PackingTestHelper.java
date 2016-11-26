@@ -28,7 +28,7 @@ public final class PackingTestHelper {
   private PackingTestHelper() { }
 
   public static PackingPlan createTestPackingPlan(String topologyName,
-                                                  Pair<Integer, InstanceId>[] instances,
+                                                  Pair<Integer, String>[] instances,
                                                   int containerPadding)
       throws ResourceExceededException {
     return generateTestPackingPlan(topologyName, null, instances, null, containerPadding);
@@ -36,7 +36,7 @@ public final class PackingTestHelper {
 
   public static PackingPlan addToTestPackingPlan(String topologyName,
                                                  PackingPlan previousPackingPlan,
-                                                 Pair<Integer, InstanceId>[] instances,
+                                                 Pair<Integer, String>[] instances,
                                                  int containerPadding)
       throws ResourceExceededException {
     return generateTestPackingPlan(
@@ -58,7 +58,7 @@ public final class PackingTestHelper {
    */
   private static PackingPlan generateTestPackingPlan(String topologyName,
                                                      PackingPlan previousPackingPlan,
-                                                     Pair<Integer, InstanceId>[] addInstances,
+                                                     Pair<Integer, String>[] addInstances,
                                                      Pair<Integer, String>[] removeInstances,
                                                      int containerPadding)
       throws ResourceExceededException {
@@ -82,7 +82,7 @@ public final class PackingTestHelper {
     builder.setRequestedContainerPadding(containerPadding);
 
     if (addInstances != null) {
-      for (Pair<Integer, InstanceId> componentInstance : addInstances) {
+      for (Pair<Integer, String> componentInstance : addInstances) {
         builder.addInstance(componentInstance.first, componentInstance.second);
       }
     }
@@ -93,5 +93,18 @@ public final class PackingTestHelper {
       }
     }
     return builder.build();
+  }
+
+  public static Pair<Integer, String>[] toContainerIdComponentNames(
+      Pair<Integer, InstanceId>[] containerIdInstanceIds) {
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, String>[] containerIdComponentNames = new Pair[containerIdInstanceIds.length];
+    int i = 0;
+    for (Pair<Integer, InstanceId> containerIdInstanceId : containerIdInstanceIds) {
+      containerIdComponentNames[i++] = new Pair<>(
+          containerIdInstanceId.first, containerIdInstanceId.second.getComponentName());
+    }
+    return containerIdComponentNames;
   }
 }

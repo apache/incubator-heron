@@ -31,7 +31,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
-import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -214,7 +213,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder planBuilder)
       throws ResourceExceededException {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    assignInstancesToContainers(planBuilder, parallelismMap, 1);
+    assignInstancesToContainers(planBuilder, parallelismMap);
     return planBuilder;
   }
 
@@ -239,14 +238,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     }
 
     if (!componentsToScaleUp.isEmpty()) {
-      int maxInstanceIndex = 0;
-      for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-          maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
-        }
-      }
-
-      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp, maxInstanceIndex + 1);
+      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp);
     }
 
     return packingPlanBuilder;
@@ -257,18 +249,15 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @param planBuilder existing packing plan
    * @param parallelismMap component parallelism
-   * @param firstTaskIndex first taskId to use for the new instances
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
-      Map<String, Integer> parallelismMap, int firstTaskIndex) throws ResourceExceededException {
+      Map<String, Integer> parallelismMap) throws ResourceExceededException {
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap.keySet());
-    int globalTaskIndex = firstTaskIndex;
     for (RamRequirement ramRequirement : ramRequirements) {
-      String component = ramRequirement.getComponentName();
-      int numInstance = parallelismMap.get(component);
+      String componentName = ramRequirement.getComponentName();
+      int numInstance = parallelismMap.get(componentName);
       for (int j = 0; j < numInstance; j++) {
-        placeFFDInstance(planBuilder, new InstanceId(component, globalTaskIndex, j));
-        globalTaskIndex++;
+        placeFFDInstance(planBuilder, componentName);
       }
     }
   }
@@ -301,16 +290,16 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    */
   private void placeFFDInstance(PackingPlanBuilder planBuilder,
-                                InstanceId instanceId) throws ResourceExceededException {
+                                String componentName) throws ResourceExceededException {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }
 
     try {
-      planBuilder.addInstance(new ContainerIdScorer(), instanceId);
+      planBuilder.addInstance(new ContainerIdScorer(), componentName);
     } catch (ResourceExceededException e) {
       planBuilder.updateNumContainers(++numContainers);
-      planBuilder.addInstance(numContainers, instanceId);
+      planBuilder.addInstance(numContainers, componentName);
     }
   }
 }
