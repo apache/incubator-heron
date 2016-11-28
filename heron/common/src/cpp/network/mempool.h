@@ -16,7 +16,7 @@
 #ifndef MEM_POOL_H
 #define MEM_POOL_H
 
-#include <list>
+#include <deque>
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -106,7 +106,7 @@ class MemPool {
  private:
   sp_int32 size_;
   sp_int32 size_limit_;
-  std::unordered_map<std::type_index, std::list<B*>> map_;
+  std::unordered_map<std::type_index, std::deque<B*>> map_;
 };
 
 #endif
