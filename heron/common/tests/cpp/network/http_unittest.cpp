@@ -64,16 +64,14 @@ void TerminateServer(sp_uint32 port) {
 }
 
 void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {
-  // start the server thread
   int fds[2];
-
-  // choose an arbitrary number for ``sent'' as token
   int recv;
   if (::pipe(fds) < 0) {
     std::cerr << "Unable to open pipe" << std::endl;
     GTEST_FAIL();
   }
 
+  // start the server thread
   std::thread sthread(start_http_server, SERVER_PORT, nkeys, fds[1]);
 
   // block clients from reading from server using pipe
@@ -96,6 +94,9 @@ void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {
 
   // wait until the server is done
   sthread.join();
+
+  close(fds[0]);
+  close(fds[1]);
 }
 
 TEST(NetworkTest, test_http) { StartTest(1, 1000, 1); }
