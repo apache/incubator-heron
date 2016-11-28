@@ -60,8 +60,16 @@ public class ByteAmount {
     return this.asBytes() > other.asBytes();
   }
 
+  public boolean greaterOrEqual(ByteAmount other) {
+    return this.asBytes() >= other.asBytes();
+  }
+
   public boolean lessThan(ByteAmount other) {
     return this.asBytes() < other.asBytes();
+  }
+
+  public boolean lessOrEqual(ByteAmount other) {
+    return this.asBytes() <= other.asBytes();
   }
 
   public ByteAmount max(ByteAmount other) {
@@ -90,6 +98,14 @@ public class ByteAmount {
 
   @Override
   public String toString() {
-    return String.format("ByteAmount{bytes=%s, megabytes=%s}", asBytes(), asMegabytes());
+    String value;
+    if (asBytes() > Constants.GB) {
+      value = "gigabytes=" + asGigabytes();
+    } else if (asBytes() > Constants.MB) {
+      value = "megabytes=" + asMegabytes();
+    } else {
+      value = "bytes=" + asBytes();
+    }
+    return String.format("ByteAmount{%s}", value);
   }
 }

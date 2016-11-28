@@ -24,6 +24,11 @@ public class Resource {
   private ByteAmount ram;
   private ByteAmount disk;
 
+  @Deprecated
+  public Resource(double cpu, long ram, long disk) {
+    this(cpu, ByteAmount.fromBytes(ram), ByteAmount.fromBytes(disk));
+  }
+
   public Resource(double cpu, ByteAmount ram, ByteAmount disk) {
     this.cpu = cpu;
     this.ram = ram;
