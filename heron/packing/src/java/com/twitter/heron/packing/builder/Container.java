@@ -15,10 +15,12 @@ package com.twitter.heron.packing.builder;
 
 import java.util.HashSet;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.utils.PackingUtils;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -26,7 +28,7 @@ import com.twitter.heron.spi.packing.Resource;
  * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
-class Container {
+public class Container {
 
   private int containerId;
   private HashSet<PackingPlan.InstancePlan> instances;
@@ -68,7 +70,11 @@ class Container {
    * resource requirements has been assigned to the container.
    */
   void add(PackingPlan.InstancePlan instancePlan) throws ResourceExceededException {
-    this.assertHasSpace(instancePlan.getResource());
+    if (this.instances.contains(instancePlan)) {
+      throw new PackingException(String.format(
+          "Instance %s already exists in container %s", instancePlan, toString()));
+    }
+    assertHasSpace(instancePlan.getResource());
     this.instances.add(instancePlan);
   }
 
@@ -141,7 +147,8 @@ class Container {
   /**
    * Check whether the container can accommodate a new instance with specific resource requirements
    */
-  private void assertHasSpace(Resource resource) throws ResourceExceededException {
+  @VisibleForTesting
+  void assertHasSpace(Resource resource) throws ResourceExceededException {
     Resource usedResources = this.getTotalUsedResources();
     long newRam =
         PackingUtils.increaseBy(usedResources.getRam() + resource.getRam(), paddingPercentage);

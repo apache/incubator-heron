@@ -565,7 +565,7 @@ public class ResourceCompliantRRPackingTest {
    * Test the scenario where the scaling down is requested
    */
   @Test
-  public void testScaleDownx() throws Exception {
+  public void testScaleDown() throws Exception {
     int spoutScalingDown = -2;
     int boltScalingDown = -1;
 
@@ -574,7 +574,7 @@ public class ResourceCompliantRRPackingTest {
     componentChanges.put(BOLT_NAME, boltScalingDown); //leave 2 bolts
     int numContainersBeforeRepack = 2;
     PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(2, newPackingPlan.getContainers().size());
+    Assert.assertEquals(1, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingDown),
         newPackingPlan.getInstanceCount());
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
@@ -584,20 +584,24 @@ public class ResourceCompliantRRPackingTest {
   }
 
   /**
-   * Test the scenario where the scaling down is requested
+   * Test the scenario where scaling down removes instances from cotnainers that are most imbalanced
+   * (i.e., tending towards homogeneity) first. If there is a tie (e.g. AABB, AB), chooses from the
+   * container with the fewest instances, to favor ultimately removing  containers. If there is
+   * still a tie, favor removing from higher numbered containers
    */
-  // TODO @Test
+  @Test
   public void testScaleDownRemoveContainer() throws Exception {
     String topologyId = topology.getId();
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
         new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 2, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 1)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 2)),
-        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 3)),
-        new Pair<>(3, new InstanceId(BOLT_NAME, 6, 4))
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 4, 1)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 2)),
+        new Pair<>(4, new InstanceId(BOLT_NAME, 6, 3)),
+        new Pair<>(4, new InstanceId(BOLT_NAME, 7, 4))
     };
 
     // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
@@ -616,9 +620,10 @@ public class ResourceCompliantRRPackingTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
         new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 2, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 1)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 2))
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 4, 1)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 2)),
     };
     AssertPacking.assertPackingPlan(topologyId, expectedComponentInstances, newPackingPlan);
   }
