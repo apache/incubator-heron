@@ -22,6 +22,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 public class HdfsUploader implements IUploader {
@@ -65,24 +66,23 @@ public class HdfsUploader implements IUploader {
   }
 
   @Override
-  public URI uploadPackage() {
+  public URI uploadPackage() throws UploaderException {
     // first, check if the topology package exists
     if (!isLocalFileExists(topologyPackageLocation)) {
-      LOG.info("Topology file " + topologyPackageLocation + " does not exist.");
-      return null;
+      throw new UploaderException(
+        String.format("Topology file %s does not exist", topologyPackageLocation));
     }
 
     // if the dest directory does not exist, create it.
     if (!controller.exists(destTopologyDirectoryURI)) {
       LOG.info("The destination directory does not exist; creating it.");
       if (!controller.mkdirs(destTopologyDirectoryURI)) {
-        LOG.severe("Failed to create directory: " + destTopologyDirectoryURI);
-        return null;
+        throw new UploaderException(
+            String.format("Failed to create directory: %s", destTopologyDirectoryURI));
       }
     } else {
       // if the destination file exists, write a log message
       LOG.info("Target topology file " + packageURI.toString() + " exists, overwriting...");
-
     }
 
     // copy the topology package to target working directory
@@ -90,8 +90,8 @@ public class HdfsUploader implements IUploader {
         + " package to target hdfs " + packageURI.toString());
 
     if (!controller.copyFromLocalFile(topologyPackageLocation, packageURI.toString())) {
-      LOG.severe("Failed to upload the package to:" + packageURI.toString());
-      return null;
+      throw new UploaderException(
+          String.format("Failed to upload the package to: %s", packageURI.toString()));
     }
 
     return packageURI;

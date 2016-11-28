@@ -24,6 +24,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 /**
@@ -91,26 +92,28 @@ public class ScpUploader implements IUploader {
   }
 
   @Override
-  public URI uploadPackage() {
+  public URI uploadPackage() throws UploaderException {
     // first, check if the topology package exists
     boolean fileExists = isLocalFileExists(topologyPackageLocation);
     if (!fileExists) {
-      LOG.log(Level.SEVERE, "Topology file {0} does not exist.", topologyPackageLocation);
-      return null;
+      throw new UploaderException(
+          String.format("Topology file %s does not exist.", topologyPackageLocation));
     }
 
     // create the upload directory, if not exists
     if (!this.controller.mkdirsIfNotExists(destTopologyDirectory)) {
-      LOG.log(Level.SEVERE, "Failed to create directories required for uploading the topology {0}.",
-          destTopologyDirectory);
-      return null;
+      throw new UploaderException(
+          String.format(
+              "Failed to create directories required for uploading the topology %s",
+              destTopologyDirectory));
     }
 
     // now copy the file
     if (!this.controller.copyFromLocalFile(topologyPackageLocation, destTopologyFile)) {
-      LOG.log(Level.SEVERE, "Failed to upload the file from local file system to remote machine "
-          + "{0} -> {1}.", new String[]{topologyPackageLocation, destTopologyDirectory});
-      return null;
+      throw new UploaderException(
+          String.format(
+              "Failed to upload the file from local file system to remote machine: %s -> %s.",
+              topologyPackageLocation, destTopologyDirectory));
     }
 
     LOG.log(Level.INFO, "Package URL to download: {}", packageURI.toString());

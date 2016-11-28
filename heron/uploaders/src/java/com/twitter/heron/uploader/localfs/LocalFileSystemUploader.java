@@ -28,6 +28,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 public class LocalFileSystemUploader implements IUploader {
@@ -69,12 +70,12 @@ public class LocalFileSystemUploader implements IUploader {
    * been uploaded if successful, or {@code null} if failed.
    */
   @Override
-  public URI uploadPackage() {
+  public URI uploadPackage() throws UploaderException {
     // first, check if the topology package exists
     boolean fileExists = new File(topologyPackageLocation).isFile();
     if (!fileExists) {
-      LOG.info("Topology file " + topologyPackageLocation + " does not exist.");
-      return null;
+      throw new UploaderException(
+          String.format("Topology file %s does not exist.", topologyPackageLocation));
     }
 
     // get the directory containing the file
@@ -86,8 +87,8 @@ public class LocalFileSystemUploader implements IUploader {
     if (!parentDirectory.exists()) {
       LOG.fine("The working directory does not exist; creating it.");
       if (!parentDirectory.mkdirs()) {
-        LOG.severe("Failed to create directory: " + parentDirectory.getPath());
-        return null;
+        throw new UploaderException(
+            String.format("Failed to create directory: %s", parentDirectory.getPath()));
       }
     }
 
@@ -106,8 +107,8 @@ public class LocalFileSystemUploader implements IUploader {
       CopyOption[] options = new CopyOption[]{StandardCopyOption.REPLACE_EXISTING};
       Files.copy(source, filePath, options);
     } catch (IOException ex) {
-      LOG.info("Unable to copy: " + source.toString() + " " + ex);
-      return null;
+      throw new UploaderException(
+            String.format("Unable to copy: %s %s", source.toString(), ex));
     }
 
     return getUri(destTopologyFile);

@@ -39,6 +39,7 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -409,9 +410,9 @@ public class SubmitterMain {
 
         callLauncherRunner(runtime, topology.getName());
       }
-    } catch (TopologySubmissionException ex) {
+    } catch (TopologySubmissionException | UploaderException e) {
       isSuccessful = false;
-      throw ex;
+      throw e;
     } finally {
       // 3. Do post work basing on the result
       if (!isSuccessful) {
@@ -439,14 +440,12 @@ public class SubmitterMain {
     }
   }
 
-  protected URI uploadPackage(IUploader uploader) {
+  protected URI uploadPackage(IUploader uploader) throws UploaderException {
     // initialize the uploader
     uploader.initialize(config);
 
     // upload the topology package to the storage
-    URI uploaderRet = uploader.uploadPackage();
-
-    return uploaderRet;
+    return uploader.uploadPackage();
   }
 
   protected void callLauncherRunner(Config runtime, String topologyName)
