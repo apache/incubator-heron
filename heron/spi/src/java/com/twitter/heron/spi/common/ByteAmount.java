@@ -24,6 +24,18 @@ public class ByteAmount {
     this.bytes = bytes;
   }
 
+  public static ByteAmount fromBytes(long bytes) {
+    return new ByteAmount(bytes);
+  }
+
+  public static ByteAmount fromMegabytes(long megabytes) {
+    return new ByteAmount(megabytes * Constants.MB);
+  }
+
+  public static ByteAmount fromGigabytes(long gigabytes) {
+    return new ByteAmount(gigabytes * Constants.GB);
+  }
+
   public long asBytes() {
     return bytes;
   }
@@ -58,18 +70,6 @@ public class ByteAmount {
     } else {
       return other;
     }
-  }
-
-  public static ByteAmount fromBytes(long bytes) {
-    return new ByteAmount(bytes);
-  }
-
-  public static ByteAmount fromMegabytes(long megabytes) {
-    return new ByteAmount(megabytes * Constants.MB);
-  }
-
-  public static ByteAmount fromGigabytes(long gigabytes) {
-    return new ByteAmount(gigabytes * Constants.GB);
   }
 
   @Override
