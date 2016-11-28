@@ -52,9 +52,8 @@ public class PackingPlanBuilder {
   private int numContainers;
 
   private Map<Integer, Container> containers;
-  private TreeSet<Integer> taskIds;
-  private HashMap<String, TreeSet<Integer>> componentIndexes;
-
+  private TreeSet<Integer> taskIds; // globally unique ids assigned to instances
+  private HashMap<String, TreeSet<Integer>> componentIndexes; // componentName -> componentIndexes
 
   public PackingPlanBuilder(String topologyId) {
     this(topologyId, null);
@@ -406,6 +405,9 @@ public class PackingPlanBuilder {
     return sorted;
   }
 
+  /**
+   * Add instancePlan to container and update the componentIndexes and taskIds indexes
+   */
   private static void addToContainer(Container container,
                                      PackingPlan.InstancePlan instancePlan,
                                      Map<String, TreeSet<Integer>> componentIndexes,
