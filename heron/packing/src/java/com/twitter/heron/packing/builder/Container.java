@@ -15,7 +15,6 @@ package com.twitter.heron.packing.builder;
 
 import java.util.HashSet;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 import com.twitter.heron.packing.ResourceExceededException;
@@ -147,8 +146,7 @@ public class Container {
   /**
    * Check whether the container can accommodate a new instance with specific resource requirements
    */
-  @VisibleForTesting
-  void assertHasSpace(Resource resource) throws ResourceExceededException {
+  private void assertHasSpace(Resource resource) throws ResourceExceededException {
     Resource usedResources = this.getTotalUsedResources();
     long newRam =
         PackingUtils.increaseBy(usedResources.getRam() + resource.getRam(), paddingPercentage);
