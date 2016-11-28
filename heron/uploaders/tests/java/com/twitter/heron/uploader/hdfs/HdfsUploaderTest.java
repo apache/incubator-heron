@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 public class HdfsUploaderTest {
   private HdfsUploader uploader;
@@ -46,7 +47,12 @@ public class HdfsUploaderTest {
   public void testUploadPackage() throws Exception {
     // Local file not exist
     Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertEquals("Topology file null does not exist", e.getMessage());
+    }
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
 
@@ -54,7 +60,12 @@ public class HdfsUploaderTest {
     Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).exists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).mkdirs(Mockito.anyString());
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertEquals("Failed to create directory: null", e.getMessage());
+    }
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
 
@@ -62,7 +73,12 @@ public class HdfsUploaderTest {
     Mockito.doReturn(true).when(controller).mkdirs(Mockito.anyString());
     Mockito.doReturn(false).when(controller).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertTrue(e.getMessage().startsWith("Failed to upload the package to"));
+    }
     Mockito.verify(controller).copyFromLocalFile(Mockito.anyString(), Mockito.anyString());
 
     // Happy path
