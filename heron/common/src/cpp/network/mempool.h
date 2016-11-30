@@ -19,6 +19,7 @@
 #include <deque>
 #include <typeindex>
 #include <unordered_map>
+#include "basics/sptypes.h"
 
 template<typename T>
 class BaseMemPool {
