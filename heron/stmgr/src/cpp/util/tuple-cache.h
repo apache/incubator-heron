@@ -89,7 +89,7 @@ class TupleCache {
     }
 
    private:
-    BaseMemPool<proto::system::HeronTupleSet2> heron_tuple_set_pool_;
+    BaseMemPool<google::protobuf::Message> heron_tuple_set_pool_;
     std::deque<proto::system::HeronTupleSet2*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;

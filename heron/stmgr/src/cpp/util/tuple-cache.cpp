@@ -28,11 +28,6 @@
 namespace heron {
 namespace stmgr {
 
-template<>
-sp_int32 BaseMemPool<proto::system::HeronTupleSet2>::size_  = 0;
-template<>
-sp_int32 BaseMemPool<proto::system::HeronTupleSet2>::limit_ = 0;
-
 TupleCache::TupleCache(EventLoop* eventLoop, sp_uint32 _drain_threshold)
     : eventLoop_(eventLoop), drain_threshold_bytes_(_drain_threshold) {
   cache_drain_frequency_ms_ =
@@ -43,10 +38,6 @@ TupleCache::TupleCache(EventLoop* eventLoop, sp_uint32 _drain_threshold)
   total_size_ = 0;
   auto drain_cb = [this](EventLoop::Status status) { this->drain(status); };
   eventLoop_->registerTimer(std::move(drain_cb), true, cache_drain_frequency_ms_ * 1000);
-
-  sp_int32 pool_limit =
-      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSizeMb();
-  BaseMemPool<proto::system::HeronTupleSet2>::set_limit(pool_limit * 1024 * 1024);
 }
 
 TupleCache::~TupleCache() {

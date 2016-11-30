@@ -17,6 +17,8 @@
 #include "network/mempool.h"
 #include <google/protobuf/message.h>
 
+// All types of BaseMemPool should be derived from google::protobuf::Message
+// otherwise this would not work.
 template<>
 sp_int32 BaseMemPool<google::protobuf::Message>::size_  = 0;
 
