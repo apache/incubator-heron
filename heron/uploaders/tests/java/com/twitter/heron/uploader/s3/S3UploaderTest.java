@@ -129,7 +129,7 @@ public class S3UploaderTest {
     assertEquals(new URI("http://url"), uri);
   }
 
-  @Test
+  @Test(expected=UploaderException.class)
   @SuppressWarnings("unchecked")
   public void handlePutObjectExceptionOnUpload() throws Exception {
     String expectedRemotePath = "test-topology/topology.tar.gz";
@@ -138,13 +138,7 @@ public class S3UploaderTest {
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
     when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
         Mockito.any(File.class))).thenThrow(AmazonClientException.class);
-
-    try {
-      uploader.uploadPackage();
-      Assert.fail("uploadPackage should throw exception");
-    } catch (UploaderException e) {
-      Assert.assertTrue(e.getMessage().startsWith("Error writing topology package to bucket"));
-    }
+    uploader.uploadPackage();
   }
 
   @Test

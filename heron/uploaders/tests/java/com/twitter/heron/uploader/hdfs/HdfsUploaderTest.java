@@ -43,48 +43,42 @@ public class HdfsUploaderTest {
   public void after() throws Exception {
   }
 
-  @Test
-  public void testUploadPackage() throws Exception {
-    // Local file not exist
+  @Test(expected=UploaderException.class)
+  public void testUploadPackageLocalFileNotExist() throws Exception {
     Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
-    try {
-      uploader.uploadPackage();
-      Assert.fail("uploadPackage should throw exception");
-    } catch (UploaderException e) {
-      Assert.assertEquals("Topology file null does not exist", e.getMessage());
-    }
+    uploader.uploadPackage();
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    Mockito.anyString(), Mockito.anyString());
+  }
 
-    // Failed to create folder on hdfs
+  @Test(expected=UploaderException.class)
+  public void testUploadPackageFailToCreateFolderOnHDFS() throws Exception {
     Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).exists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).mkdirs(Mockito.anyString());
-    try {
-      uploader.uploadPackage();
-      Assert.fail("uploadPackage should throw exception");
-    } catch (UploaderException e) {
-      Assert.assertEquals("Failed to create directory: null", e.getMessage());
-    }
+    uploader.uploadPackage();
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
+  }
 
-    // Failed to copy file from local to hdfs
+  @Test(expected=UploaderException.class)
+  public void testUploadPackageFailToCopyFromLocalToHDFS() throws Exception {
+    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
     Mockito.doReturn(true).when(controller).mkdirs(Mockito.anyString());
     Mockito.doReturn(false).when(controller).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
-    try {
-      uploader.uploadPackage();
-      Assert.fail("uploadPackage should throw exception");
-    } catch (UploaderException e) {
-      Assert.assertTrue(e.getMessage().startsWith("Failed to upload the package to"));
-    }
+    uploader.uploadPackage();
     Mockito.verify(controller).copyFromLocalFile(Mockito.anyString(), Mockito.anyString());
+  }
 
+  @Test
+  public void testUploadPackage() {
     // Happy path
+    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
+    Mockito.doReturn(true).when(controller).mkdirs(Mockito.anyString());
     Mockito.doReturn(true).when(controller).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
-    Assert.assertNotNull(uploader.uploadPackage());
+    uploader.uploadPackage();
     Mockito.verify(controller, Mockito.atLeastOnce()).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
   }
