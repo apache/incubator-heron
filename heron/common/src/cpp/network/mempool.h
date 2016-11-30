@@ -17,96 +17,87 @@
 #define MEM_POOL_H
 
 #include <deque>
-#include <vector>
-#include <unordered_map>
 #include <typeindex>
+#include <unordered_map>
 
 template<typename T>
 class BaseMemPool {
  public:
-  template<class... Args>
-  T* acquire(Args&&... args) {
-    if (pool_.empty()) {
-      return new T(std::forward<Args>(args)...);
-    }
-    T* t = pool_.back();
-    pool_.pop_back();
-    return t;
+  static void set_limit(sp_int32 limit) {
+    if (limit_ == 0)
+      limit_ = limit;
   }
-  void release(T* t) {
-    pool_.push_back(t);
-  }
+
   BaseMemPool() {
   }
+
   ~BaseMemPool() {
-      for (auto& p : pool_) {
-        delete p;
-      }
-      pool_.clear();
+    for (auto& p : pool_) {
+      delete p;
+    }
+    pool_.clear();
   }
+
+  template<typename S>
+  S* acquire(S* unused) {
+    if (pool_.empty()) {
+      return new S();
+    }
+    S* t = static_cast<S*>(pool_.back());
+    pool_.pop_back();
+    size_ -= sizeof(S);
+    return t;
+  }
+
+  template<typename S>
+  void release(S* t) {
+    if (limit_ == 0) {
+      delete t;
+      return;
+    }
+    if (size_ > limit_) {
+      auto first = pool_.front();
+      pool_.pop_front();
+      size_ -= sizeof(S);
+      delete first;
+    }
+    pool_.push_back(t);
+    size_ += sizeof(S);
+  }
+
  private:
-  std::vector<T*> pool_;
+  static sp_int32 limit_;
+  static sp_int32 size_;
+  std::deque<T*> pool_;
 };
 
 
-template<typename B>
+template<typename ValueType>
 class MemPool {
  public:
-  MemPool() : size_(0), size_limit_(0) {
+  MemPool() {
   }
 
-  // TODO(cwang): we have a memory leak here.
   ~MemPool() {
-    for (auto& m : map_) {
-      for (auto& n : m.second) {
-        delete n;
-      }
-      m.second.clear();
-    }
     map_.clear();
   }
 
-  void set_limit(sp_int32 limit) {
-    size_limit_ = limit;
+  template<typename KeyType>
+  KeyType* acquire(KeyType* m) {
+    std::type_index type = typeid(KeyType);
+    auto& pool = map_[type];
+    return pool.acquire(m);
   }
 
-  template<typename M>
-  M* acquire(M* m) {
-    std::type_index type = typeid(M);
+  template<typename KeyType>
+  void release(KeyType* ptr) {
+    std::type_index type = typeid(KeyType);
     auto& pool = map_[type];
-
-    if (pool.empty()) {
-      return new M();
-    }
-    B* t = pool.back();
-    pool.pop_back();
-    size_ -= sizeof(M);
-    return static_cast<M*>(t);
-  }
-
-  template<typename M>
-  void release(M* ptr) {
-    if (size_limit_ == 0) {
-      delete ptr;
-      return;
-    }
-
-    std::type_index type = typeid(M);
-    auto& pool = map_[type];
-    if (size_ > size_limit_) {
-      auto first = pool.front();
-      pool.pop_front();
-      size_ -= sizeof(M);
-      delete first;
-    }
-    pool.push_back(static_cast<B*>(ptr));
-    size_ += sizeof(M);
+    pool.release(ptr);
   }
 
  private:
-  sp_int32 size_;
-  sp_int32 size_limit_;
-  std::unordered_map<std::type_index, std::deque<B*>> map_;
+  std::unordered_map<std::type_index, BaseMemPool<ValueType>> map_;
 };
 
 #endif

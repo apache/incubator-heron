@@ -174,10 +174,6 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  void set_pool_limit(sp_int32 limit) {
-    _heron_message_pool.set_limit(limit);
-  }
-
   template<typename M>
   void release(M* m) {
     _heron_message_pool.release(m);

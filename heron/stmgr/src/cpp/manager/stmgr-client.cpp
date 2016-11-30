@@ -75,7 +75,7 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
 
   sp_int32 pool_limit =
     config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSizeMb();
-  set_pool_limit(pool_limit * 1024 * 1024);
+  BaseMemPool<void>::set_limit(pool_limit * 1024 * 1024);
 }
 
 StMgrClient::~StMgrClient() {

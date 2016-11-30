@@ -74,7 +74,8 @@ class TupleCache {
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
 
     proto::system::HeronTupleSet2* acquire() {
-      return heron_tuple_set_pool_.acquire();
+      proto::system::HeronTupleSet2* unused = nullptr;
+      return heron_tuple_set_pool_.acquire(unused);
     }
 
     proto::system::HeronTupleSet2* acquire_clean_set() {
