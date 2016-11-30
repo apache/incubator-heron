@@ -39,6 +39,13 @@ java_library(
 )
 
 java_library(
+    name = "guava",
+    srcs = [ "Empty.java" ],
+    exports = [ "@com_google_guava_guava//jar" ],
+    deps = [ "@com_google_guava_guava//jar" ],
+)
+
+java_library(
     name = "jackson",
     srcs = [ "Empty.java" ],
     exports = [

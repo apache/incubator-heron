@@ -35,6 +35,8 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+import com.google.common.base.Strings;
+
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
@@ -90,36 +92,35 @@ public class S3Uploader implements IUploader {
     String customRegion = S3Context.region(config);
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
 
-    if (bucket == null || bucket.isEmpty()) {
+    if (Strings.isNullOrEmpty(bucket)) {
       throw new RuntimeException("Missing heron.uploader.s3.bucket config value");
     }
 
     // If an accessKey is specified, use it. Otherwise check if an aws profile
     // is specified. If neither was set just use the DefaultAWSCredentialsProviderChain
     // by not specifying a CredentialsProvider.
-    if ((accessKey != null && !accessKey.isEmpty())
-            || (accessSecret != null && !accessSecret.isEmpty())) {
-      if (accessKey == null || accessKey.isEmpty()) {
+    if (!Strings.isNullOrEmpty(accessKey) || !Strings.isNullOrEmpty(accessSecret)) {
+      if (Strings.isNullOrEmpty(accessKey)) {
         throw new RuntimeException("Missing heron.uploader.s3.access_key config value");
       }
 
-      if (accessSecret == null || accessSecret.isEmpty()) {
+      if (Strings.isNullOrEmpty(accessSecret)) {
         throw new RuntimeException("Missing heron.uploader.s3.secret_key config value");
       }
       builder.setCredentials(
               new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, accessSecret))
       );
-    } else if (awsProfile != null || !awsProfile.isEmpty()) {
+    } else if (!Strings.isNullOrEmpty(awsProfile)) {
       builder.setCredentials(new ProfileCredentialsProvider(awsProfile));
     }
 
-    if (proxy != null && !proxy.isEmpty()) {
+    if (!Strings.isNullOrEmpty(proxy)) {
       URI proxyUri;
 
       try  {
         proxyUri = new URI(proxy);
       } catch (URISyntaxException e) {
-        throw new RuntimeException("Invalid heron.uploader.s3.uri config value");
+        throw new RuntimeException("Invalid heron.uploader.s3.proxy_uri config value");
       }
 
       ClientConfiguration clientCfg = new ClientConfiguration();
@@ -127,7 +128,7 @@ public class S3Uploader implements IUploader {
               .withProxyHost(proxyUri.getHost())
               .withProxyPort(proxyUri.getPort());
 
-      if (proxyUri.getUserInfo() != null && !proxyUri.getUserInfo().isEmpty()) {
+      if (!Strings.isNullOrEmpty(proxyUri.getUserInfo())) {
         String[] info = proxyUri.getUserInfo().split(":", 2);
         clientCfg.setProxyUsername(info[0]);
         if (info.length > 1) {
@@ -144,7 +145,7 @@ public class S3Uploader implements IUploader {
             .withPayloadSigningEnabled(true)
             .build();
 
-    if (endpoint != null && !endpoint.isEmpty()) {
+    if (!Strings.isNullOrEmpty(endpoint)) {
       s3Client.setEndpoint(endpoint);
     }
 
@@ -192,7 +193,7 @@ public class S3Uploader implements IUploader {
     try {
       return resourceUrl.toURI();
     } catch (URISyntaxException e) {
-      LOG.log(Level.SEVERE, e.getMessage());
+      LOG.log(Level.SEVERE, "Could not convert URL " + resourceUrl + " to URI", e);
       return null;
     }
   }
@@ -234,7 +235,7 @@ public class S3Uploader implements IUploader {
   public void close() {
     // Cleanup the backup file if it exists as its not needed anymore.
     // This will succeed whether the file exists or not.
-    if (bucket != null && previousVersionFilePath != null) {
+    if (!Strings.isNullOrEmpty(previousVersionFilePath)) {
       s3Client.deleteObject(bucket, previousVersionFilePath);
     }
   }
