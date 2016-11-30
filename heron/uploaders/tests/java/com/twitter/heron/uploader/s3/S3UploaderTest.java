@@ -21,12 +21,14 @@ import java.util.Map;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -137,8 +139,12 @@ public class S3UploaderTest {
     when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
         Mockito.any(File.class))).thenThrow(AmazonClientException.class);
 
-    URI uri = uploader.uploadPackage();
-    assertEquals(null, uri);
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertTrue(e.getMessage().startsWith("Error writing topology package to bucket"));
+    }
   }
 
   @Test

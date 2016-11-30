@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 public class LocalFileSystemUploaderTest {
 
@@ -91,7 +92,12 @@ public class LocalFileSystemUploaderTest {
     uploader.initialize(newconfig);
 
     // Assert that the file does not exist
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertTrue(e.getMessage().endsWith("does not exist."));
+    }
   }
 
   @Test

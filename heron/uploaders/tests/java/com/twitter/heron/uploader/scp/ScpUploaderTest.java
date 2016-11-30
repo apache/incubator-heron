@@ -23,6 +23,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 public class ScpUploaderTest {
   private Config config;
@@ -70,14 +71,26 @@ public class ScpUploaderTest {
 
     // Local file not exist
     Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertEquals(e.getMessage(), "Topology file null does not exist.");
+    }
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
 
     // Failed to create folder on remote
     Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).mkdirsIfNotExists(Mockito.anyString());
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertEquals(
+          e.getMessage(),
+          "Failed to create directories required for uploading the topology null");
+    }
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
 
@@ -85,7 +98,14 @@ public class ScpUploaderTest {
     Mockito.doReturn(true).when(controller).mkdirsIfNotExists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).copyFromLocalFile(
         Mockito.anyString(), Mockito.anyString());
-    Assert.assertNull(uploader.uploadPackage());
+    try {
+      uploader.uploadPackage();
+      Assert.fail("uploadPackage should throw exception");
+    } catch (UploaderException e) {
+      Assert.assertEquals(
+          e.getMessage(),
+          "Failed to upload the file from local file system to remote machine: null -> null.");
+    }
     Mockito.verify(controller).copyFromLocalFile(Mockito.anyString(), Mockito.anyString());
 
     // Happy path
