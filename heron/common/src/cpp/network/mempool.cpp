@@ -15,9 +15,10 @@
  */
 
 #include "network/mempool.h"
+#include <google/protobuf/message.h>
 
 template<>
-sp_int32 BaseMemPool<void>::size_  = 0;
+sp_int32 BaseMemPool<google::protobuf::Message>::size_  = 0;
 
 template<>
-sp_int32 BaseMemPool<void>::limit_ = 0;
+sp_int32 BaseMemPool<google::protobuf::Message>::limit_ = 0;

@@ -72,10 +72,6 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
 
   stmgr_client_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__client_" + other_stmgr_id_, stmgr_client_metrics_);
-
-  sp_int32 pool_limit =
-    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSizeMb();
-  BaseMemPool<void>::set_limit(pool_limit * 1024 * 1024);
 }
 
 StMgrClient::~StMgrClient() {
