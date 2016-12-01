@@ -52,8 +52,15 @@ public class ScorerTest {
 
   @Test
   public void testHomogeneityScorer() {
-    assertScores(new double[] {.5, 1.0 / 3, 1}, false, new HomogeneityScorer("A"), testContainers);
-    assertScores(new double[] {.5, 2.0 / 3, 0}, false, new HomogeneityScorer("B"), testContainers);
+    assertScores(
+        new double[] {.5, 1.0 / 3, 1}, false, new HomogeneityScorer("A", false), testContainers);
+    assertScores(
+        new double[] {.5, 2.0 / 3, 0}, false, new HomogeneityScorer("B", false), testContainers);
+  }
+
+  @Test
+  public void testHomogeneityScorerBinary() {
+    assertScores(new double[] {0, 0, 1}, false, new HomogeneityScorer("A", true), testContainers);
   }
 
   @Test

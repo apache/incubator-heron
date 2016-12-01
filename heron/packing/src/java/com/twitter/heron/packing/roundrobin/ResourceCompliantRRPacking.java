@@ -354,9 +354,10 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   private void removeRRInstance(PackingPlanBuilder packingPlanBuilder,
                                 String componentName) throws RuntimeException {
     List<Scorer<Container>> scorers = new ArrayList<>();
-    scorers.add(new HomogeneityScorer(componentName));
-    scorers.add(new InstanceCountScorer());
-    scorers.add(new ContainerIdScorer(false));
+    scorers.add(new HomogeneityScorer(componentName, true));  // all-same-component containers first
+    scorers.add(new InstanceCountScorer());                   // then fewest instances
+    scorers.add(new HomogeneityScorer(componentName, false)); // then least homogeneous
+    scorers.add(new ContainerIdScorer(false));                // then highest container id
 
     this.containerId = nextContainerId(packingPlanBuilder.removeInstance(scorers, componentName));
   }

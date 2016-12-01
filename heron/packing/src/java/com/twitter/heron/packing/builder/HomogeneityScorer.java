@@ -22,9 +22,11 @@ import com.twitter.heron.spi.packing.PackingPlan;
  */
 public class HomogeneityScorer implements Scorer<Container> {
   private String componentName;
+  private boolean binaryMode;
 
-  public HomogeneityScorer(String componentName) {
+  public HomogeneityScorer(String componentName, boolean binaryMode) {
     this.componentName = componentName;
+    this.binaryMode = binaryMode;
   }
 
   @Override
@@ -46,6 +48,14 @@ public class HomogeneityScorer implements Scorer<Container> {
         totalComponentInstances++;
       }
     }
-    return (double) totalComponentInstances / totalInstances;
+    if (binaryMode) {
+      if (totalComponentInstances == totalInstances) {
+        return 1;
+      } else {
+        return 0;
+      }
+    } else {
+      return (double) totalComponentInstances / totalInstances;
+    }
   }
 }
