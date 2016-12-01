@@ -16,7 +16,10 @@ package com.twitter.heron.spi.common;
 /**
  * Class that encapsulates number of bytes, with helpers to handle units properly.
  */
-public class ByteAmount {
+public class ByteAmount implements Comparable<ByteAmount> {
+  private static final long GB = 1024L * 1024 * 1024;
+  private static final long MB = 1024L * 1024;
+
   public static final ByteAmount ZERO = ByteAmount.fromBytes(0);
   private final long bytes;
 
@@ -29,23 +32,15 @@ public class ByteAmount {
   }
 
   public static ByteAmount fromMegabytes(long megabytes) {
-    return new ByteAmount(megabytes * Constants.MB);
+    return new ByteAmount(megabytes * MB);
   }
 
   public static ByteAmount fromGigabytes(long gigabytes) {
-    return new ByteAmount(gigabytes * Constants.GB);
+    return new ByteAmount(gigabytes * GB);
   }
 
   public long asBytes() {
     return bytes;
-  }
-
-  public long asMegabytes() {
-    return bytes / Constants.MB;
-  }
-
-  public long asGigabytes() {
-    return bytes / Constants.GB;
   }
 
   public boolean isZero() {
@@ -54,6 +49,22 @@ public class ByteAmount {
 
   public ByteAmount minus(ByteAmount other) {
     return ByteAmount.fromBytes(this.asBytes() - other.asBytes());
+  }
+
+  public ByteAmount plus(ByteAmount other) {
+    return ByteAmount.fromBytes(this.asBytes() + other.asBytes());
+  }
+
+  public ByteAmount multiply(int factor) {
+    return ByteAmount.fromBytes(this.asBytes() * factor);
+  }
+
+  public ByteAmount increaseBy(int percentage) {
+    return ByteAmount.fromBytes(asBytes() * (1 + (percentage / 100)));
+  }
+
+  public ByteAmount increaseBy(double percentage) {
+    return ByteAmount.fromBytes(Math.round(asBytes() * (1 + (percentage / 100))));
   }
 
   public boolean greaterThan(ByteAmount other) {
@@ -81,6 +92,11 @@ public class ByteAmount {
   }
 
   @Override
+  public int compareTo(ByteAmount other) {
+    return Long.compare(asBytes(), other.asBytes());
+  }
+
+  @Override
   public boolean equals(Object other) {
     if (this == other) return true;
     if (other == null || getClass() != other.getClass()) {
@@ -99,12 +115,12 @@ public class ByteAmount {
   @Override
   public String toString() {
     String value;
-    if (asBytes() > Constants.GB) {
-      value = "gigabytes=" + asGigabytes();
-    } else if (asBytes() > Constants.MB) {
-      value = "megabytes=" + asMegabytes();
+    if (bytes > GB) {
+      value = "gigabytes=" + bytes / GB;
+    } else if (bytes > MB) {
+      value = "megabytes=" + bytes / MB;
     } else {
-      value = "bytes=" + asBytes();
+      value = "bytes=" + bytes;
     }
     return String.format("ByteAmount{%s}", value);
   }
