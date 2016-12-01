@@ -324,6 +324,10 @@ public class SubmitterMain {
       submitterMain.submitTopology();
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
+      /*
+      
+
+       */
       System.out.println(e.getMessage());
       throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
     }
@@ -377,11 +381,10 @@ public class SubmitterMain {
 
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       throw new TopologySubmissionException(
-          String.format("Failed to instantiate instances: %s", e.getMessage()));
+          String.format("Failed to instantiate instances: %s", e.getMessage()), e);
     }
 
     boolean isSuccessful = false;
-    URI packageURI = null;
     // Put it in a try block so that we can always clean resources
     try {
       // initialize the state manager
@@ -397,20 +400,17 @@ public class SubmitterMain {
       LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
       // Firstly, try to upload necessary packages
-      packageURI = uploadPackage(uploader);
-      if (packageURI == null) {
-        throw new TopologySubmissionException("Failed to upload package");
-      } else {
-        // Secondly, try to submit a topology
-        // build the runtime config
-        Config runtime = Config.newBuilder()
-            .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
-            .put(Keys.topologyPackageUri(), packageURI)
-            .put(Keys.launcherClassInstance(), launcher)
-            .build();
+      URI packageURI = uploadPackage(uploader);
 
-        callLauncherRunner(runtime, topology.getName());
-      }
+      // Secondly, try to submit a topology
+      // build the runtime config
+      Config runtime = Config.newBuilder()
+          .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
+          .put(Keys.topologyPackageUri(), packageURI)
+          .put(Keys.launcherClassInstance(), launcher)
+          .build();
+
+      callLauncherRunner(runtime, topology.getName());
     } catch (TopologySubmissionException | UploaderException | IllegalArgumentException e) {
       isSuccessful = false;
       throw e;
