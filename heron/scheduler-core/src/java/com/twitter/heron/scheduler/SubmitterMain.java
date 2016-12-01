@@ -322,7 +322,8 @@ public class SubmitterMain {
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
     try {
       submitterMain.submitTopology();
-    } catch (TopologySubmissionException e) {
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
       System.out.println(e.getMessage());
       throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
     }
@@ -410,7 +411,7 @@ public class SubmitterMain {
 
         callLauncherRunner(runtime, topology.getName());
       }
-    } catch (TopologySubmissionException | UploaderException e) {
+    } catch (TopologySubmissionException | UploaderException | IllegalArgumentException e) {
       isSuccessful = false;
       throw e;
     } finally {
