@@ -59,8 +59,8 @@ public class ByteAmount implements Comparable<ByteAmount> {
     return ByteAmount.fromBytes(this.asBytes() * factor);
   }
 
-  public ByteAmount increaseBy(int percentage) {
-    return ByteAmount.fromBytes(asBytes() * (1 + (percentage / 100)));
+  public ByteAmount divide(int factor) {
+    return ByteAmount.fromBytes(this.asBytes() / factor);
   }
 
   public ByteAmount increaseBy(double percentage) {
