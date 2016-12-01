@@ -19,6 +19,9 @@ import com.twitter.heron.spi.packing.PackingPlan;
  * Scores based on how homogeneous a container is relative to a given component, from highest to
  * lowest. So a container with all the same components (e.g., AAAA) will get the highest score for
  * A, while a container with a mix of many components (e.g. ABCD) will get a low score.
+ *
+ * If run in binary mode, score is a 1 if all instances on the container are of componentName,
+ * and 0 otherwise
  */
 public class HomogeneityScorer implements Scorer<Container> {
   private String componentName;
