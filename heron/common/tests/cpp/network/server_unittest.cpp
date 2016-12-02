@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#include "network/server_unittest.h"
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include "network/server_unittest.h"
 #include "network/unittests.pb.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -45,7 +46,7 @@ void TestServer::HandleConnectionClose(Connection* _conn,
 
   clients_.erase(_conn);
 
-  std::vector<Connection*>::iterator it = std::remove(vclients_.begin(), vclients_.end(), _conn);
+  auto it = std::remove(vclients_.begin(), vclients_.end(), _conn);
 
   vclients_.erase(it, vclients_.end());
 }
