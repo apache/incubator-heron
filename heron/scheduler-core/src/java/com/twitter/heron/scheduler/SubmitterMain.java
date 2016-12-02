@@ -325,7 +325,7 @@ public class SubmitterMain {
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       /*
-      
+
 
        */
       System.out.println(e.getMessage());
@@ -384,7 +384,6 @@ public class SubmitterMain {
           String.format("Failed to instantiate instances: %s", e.getMessage()), e);
     }
 
-    boolean isSuccessful = false;
     // Put it in a try block so that we can always clean resources
     try {
       // initialize the state manager
@@ -411,19 +410,12 @@ public class SubmitterMain {
           .build();
 
       callLauncherRunner(runtime, topology.getName());
-    } catch (TopologySubmissionException | UploaderException | IllegalArgumentException e) {
-      isSuccessful = false;
+    } catch (UploaderException e) {
+      uploader.undo();
+      throw e;
+    } catch (TopologySubmissionException | IllegalArgumentException e) {
       throw e;
     } finally {
-      // 3. Do post work basing on the result
-      if (!isSuccessful) {
-        // Undo the upload if failed to submit && the upload is successful
-        if (packageURI != null) {
-          uploader.undo();
-        }
-      }
-
-      // 4. Close the resources
       SysUtils.closeIgnoringExceptions(uploader);
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
