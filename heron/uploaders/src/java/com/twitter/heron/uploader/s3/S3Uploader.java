@@ -100,6 +100,12 @@ public class S3Uploader implements IUploader {
     // is specified. If neither was set just use the DefaultAWSCredentialsProviderChain
     // by not specifying a CredentialsProvider.
     if (!Strings.isNullOrEmpty(accessKey) || !Strings.isNullOrEmpty(accessSecret)) {
+
+      if (!Strings.isNullOrEmpty(awsProfile)) {
+        throw new RuntimeException("Please provide access_key/secret_key "
+            + "or aws_profile, not both.");
+      }
+
       if (Strings.isNullOrEmpty(accessKey)) {
         throw new RuntimeException("Missing heron.uploader.s3.access_key config value");
       }
@@ -120,7 +126,7 @@ public class S3Uploader implements IUploader {
       try  {
         proxyUri = new URI(proxy);
       } catch (URISyntaxException e) {
-        throw new RuntimeException("Invalid heron.uploader.s3.proxy_uri config value");
+        throw new RuntimeException("Invalid heron.uploader.s3.proxy_uri config value: " + proxy, e);
       }
 
       ClientConfiguration clientCfg = new ClientConfiguration();
@@ -223,7 +229,7 @@ public class S3Uploader implements IUploader {
         // Restore the previous version of the topology
         s3Client.copyObject(bucket, previousVersionFilePath, bucket, remoteFilePath);
       } catch (SdkClientException e) {
-        LOG.log(Level.SEVERE, "Error undoing deploying", e);
+        LOG.log(Level.SEVERE, "Reverting to previous topology version failed", e);
         return false;
       }
     }

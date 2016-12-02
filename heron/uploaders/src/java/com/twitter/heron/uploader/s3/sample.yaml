@@ -25,8 +25,8 @@ heron.uploader.s3.bucket:     heron-topologies-company-com
 # However you have the option to directly specify aws credentials:
 # heron.uploader.s3.access_key: access_key
 # heron.uploader.s3.secret_key: secret_access_key
-# If you have multiple AWS profiles in your credentials file (~/.aws/credentials)
-# you can also specify the aws profile:
+# Alternatively to directly specifying aws credentials, you can specify the aws profile
+# in case you have multiple AWS profiles in your credentials file (~/.aws/credentials):
 # heron.uploader.s3.aws_profile: profile_name
 
 
