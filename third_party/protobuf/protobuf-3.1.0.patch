@@ -1,0 +1,29 @@
+diff -Nrup protobuf-3.1.0.orig/src/google/protobuf/io/zero_copy_stream_impl_lite.h protobuf-3.1.0/src/google/protobuf/io/zero_copy_stream_impl_lite.h
+--- protobuf-3.1.0.orig/src/google/protobuf/io/zero_copy_stream_impl_lite.h	2016-12-02 13:57:02.000000000 -0800
++++ protobuf-3.1.0/src/google/protobuf/io/zero_copy_stream_impl_lite.h	2016-12-02 13:57:25.000000000 -0800
+@@ -381,13 +381,9 @@ class LIBPROTOBUF_EXPORT CopyingOutputSt
+ // return value is valid until the next time the string is resized.  We
+ // trust the caller to treat the return value as an array of length s->size().
+ inline char* mutable_string_data(string* s) {
+-#ifdef LANG_CXX11
+   // This should be simpler & faster than string_as_array() because the latter
+   // is guaranteed to return NULL when *s is empty, so it has to check for that.
+   return &(*s)[0];
+-#else
+-  return string_as_array(s);
+-#endif
+ }
+ 
+ // as_string_data(s) is equivalent to
+@@ -396,11 +392,7 @@ inline char* mutable_string_data(string*
+ // code can avoid that check.
+ inline std::pair<char*, bool> as_string_data(string* s) {
+   char *p = mutable_string_data(s);
+-#ifdef LANG_CXX11
+   return std::make_pair(p, true);
+-#else
+-  return make_pair(p, p != NULL);
+-#endif
+ }
+ 
+ }  // namespace io

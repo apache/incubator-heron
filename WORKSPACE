@@ -228,7 +228,7 @@ maven_jar(
 
 maven_jar(
   name = "com_google_protobuf_protobuf_java",
-  artifact = "com.google.protobuf:protobuf-java:2.5.0",
+  artifact = "com.google.protobuf:protobuf-java:3.1.0",
 )
 
 maven_jar(

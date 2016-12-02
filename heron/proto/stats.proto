@@ -1,3 +1,4 @@
+syntax = "proto2";
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";

@@ -1,3 +1,4 @@
+syntax = "proto2";
 package heron.proto.tmaster;
 
 option java_package = "com.twitter.heron.proto.tmaster";
@@ -5,7 +6,6 @@ option java_outer_classname = "TopologyMaster";
 
 import "common.proto";
 import "stats.proto";
-import "topology.proto";
 import "physical_plan.proto";
 
 message TMasterLocation {
