@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -41,8 +42,8 @@ public final class AssertPacking {
    */
   public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
                                       String boltName, String spoutName,
-                                      long expectedBoltRam, long expectedSpoutRam,
-                                      Long notExpectedContainerRam) {
+                                      ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam,
+                                      ByteAmount notExpectedContainerRam) {
     boolean boltFound = false;
     boolean spoutFound = false;
     List<Integer> expectedInstanceIndecies = new ArrayList<>();
@@ -52,7 +53,7 @@ public final class AssertPacking {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
         assertNotEquals(
-            notExpectedContainerRam, (Long) containerPlan.getRequiredResource().getRam());
+            notExpectedContainerRam, containerPlan.getRequiredResource().getRam());
       }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         expectedInstanceIndecies.add(expectedInstanceIndex++);
@@ -97,12 +98,12 @@ public final class AssertPacking {
    * maximum value.
    */
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
-                                        long maxRamforResources) {
+                                        ByteAmount maxRamforResources) {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      assertTrue(String.format("Container with id %d requires more RAM (%d) than"
-              + " the maximum RAM allowed (%d)", containerPlan.getId(),
+      assertTrue(String.format("Container with id %d requires more RAM (%s) than"
+              + " the maximum RAM allowed (%s)", containerPlan.getId(),
           containerPlan.getRequiredResource().getRam(), maxRamforResources),
-          containerPlan.getRequiredResource().getRam() <= maxRamforResources);
+          containerPlan.getRequiredResource().getRam().lessOrEqual(maxRamforResources));
     }
   }
 

@@ -24,11 +24,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.packing.PackingTestHelper;
 import com.twitter.heron.packing.ResourceExceededException;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -135,7 +135,8 @@ public class PackingPlanBuilderTest {
 
   private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking)
       throws RuntimeException {
-    Resource resource = new Resource(2.0, 6 * Constants.GB, 25 * Constants.GB);
+    Resource resource
+        = new Resource(2.0, ByteAmount.fromGigabytes(6), ByteAmount.fromGigabytes(25));
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
@@ -149,10 +150,12 @@ public class PackingPlanBuilderTest {
         Resource instanceResource;
         switch (componentName) {
           case "bolt":
-            instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
+            instanceResource
+                = new Resource(1.0, ByteAmount.fromGigabytes(2), ByteAmount.fromGigabytes(10));
             break;
           case "spout":
-            instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+            instanceResource
+                = new Resource(1.0, ByteAmount.fromGigabytes(3), ByteAmount.fromGigabytes(10));
             break;
           default:
             throw new RuntimeException(String.format("%s is not a valid component name",

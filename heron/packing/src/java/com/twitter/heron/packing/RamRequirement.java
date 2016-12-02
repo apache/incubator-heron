@@ -14,15 +14,17 @@
 
 package com.twitter.heron.packing;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 /**
  * Helper class that captures the RAM requirements of each component
  */
 public class RamRequirement implements Comparable<RamRequirement> {
 
   private String componentName;
-  private long ramRequirement;
+  private ByteAmount ramRequirement;
 
-  public RamRequirement(String componentName, long ram) {
+  public RamRequirement(String componentName, ByteAmount ram) {
     this.componentName = componentName;
     this.ramRequirement = ram;
   }
@@ -33,7 +35,7 @@ public class RamRequirement implements Comparable<RamRequirement> {
 
   @Override
   public int compareTo(RamRequirement other) {
-    return Long.compare(this.ramRequirement, other.ramRequirement);
+    return this.ramRequirement.compareTo(other.ramRequirement);
   }
 
   @Override
@@ -48,11 +50,11 @@ public class RamRequirement implements Comparable<RamRequirement> {
     RamRequirement c = (RamRequirement) o;
 
     // Compare the ramRequirement values and return accordingly
-    return Long.compare(ramRequirement, c.ramRequirement) == 0;
+    return ramRequirement.equals(c.ramRequirement);
   }
 
   @Override
   public int hashCode() {
-    return (int) (ramRequirement ^ (ramRequirement >>> 32));
+    return ramRequirement.hashCode();
   }
 }

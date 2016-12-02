@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
@@ -124,10 +125,10 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
     double defaultCpu = this.defaultInstanceResources.getCpu()
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultRam = this.defaultInstanceResources.getRam()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultDisk = this.defaultInstanceResources.getDisk()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+    ByteAmount defaultRam = this.defaultInstanceResources.getRam()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
+    ByteAmount defaultDisk = this.defaultInstanceResources.getDisk()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
     int paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
         TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
 
@@ -135,9 +136,9 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
             (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
-            PackingUtils.increaseBy(defaultRam, paddingPercentage)),
+            defaultRam.increaseBy(paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
-            PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
+            defaultDisk.increaseBy(paddingPercentage)));
 
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
         .setMaxContainerResource(maxContainerResources)

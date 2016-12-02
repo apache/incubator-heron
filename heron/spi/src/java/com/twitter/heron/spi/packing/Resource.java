@@ -14,7 +14,7 @@
 
 package com.twitter.heron.spi.packing;
 
-import com.twitter.heron.spi.common.ByteAmount;
+import com.twitter.heron.common.basics.ByteAmount;
 
 /**
  * Definition of Resources. Used to form packing structure output.
@@ -23,11 +23,6 @@ public class Resource {
   private double cpu;
   private ByteAmount ram;
   private ByteAmount disk;
-
-  @Deprecated
-  public Resource(double cpu, long ram, long disk) {
-    this(cpu, ByteAmount.fromBytes(ram), ByteAmount.fromBytes(disk));
-  }
 
   public Resource(double cpu, ByteAmount ram, ByteAmount disk) {
     this.cpu = cpu;
@@ -104,6 +99,6 @@ public class Resource {
 
   @Override
   public String toString() {
-    return String.format("{cpu: %f, ram: %d, disk: %d}", getCpu(), getRam(), getDisk());
+    return String.format("{cpu: %f, ram: %s, disk: %s}", getCpu(), getRam(), getDisk());
   }
 }

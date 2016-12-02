@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.RamRequirement;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
@@ -123,18 +124,18 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     double defaultCpu = this.defaultInstanceResources.getCpu()
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultRam = this.defaultInstanceResources.getRam()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultDisk = this.defaultInstanceResources.getDisk()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+    ByteAmount defaultRam = this.defaultInstanceResources.getRam()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
+    ByteAmount defaultDisk = this.defaultInstanceResources.getDisk()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
 
     this.maxContainerResources = new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_CPU_HINT,
             (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-            PackingUtils.increaseBy(defaultRam, paddingPercentage)),
+            defaultRam.increaseBy(paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_DISK_HINT,
-            PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
+            defaultDisk.increaseBy(paddingPercentage)));
   }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
@@ -193,7 +194,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private ArrayList<RamRequirement> getSortedRAMInstances(Set<String> componentNames) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     for (String componentName : componentNames) {
       Resource requiredResource = PackingUtils.getResourceRequirement(
