@@ -63,7 +63,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   heron_env['HERON_OPTIONS'] = opts.get_heron_config()
 
   # print the verbose message
-  Log.debug("Invoking class using command:\n``%s''", ' '.join(all_args))
+  Log.debug("Invoking class using command: ``%s''", ' '.join(all_args))
   Log.debug('Heron options: {%s}', str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
