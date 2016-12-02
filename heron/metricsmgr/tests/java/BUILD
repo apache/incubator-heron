@@ -24,6 +24,7 @@ java_tests(
         "com.twitter.heron.metricsmgr.executor.SinkExecutorTest",
         "com.twitter.heron.metricsmgr.sink.tmaster.TMasterSinkTest",
         "com.twitter.heron.metricsmgr.sink.FileSinkTest",
+        "com.twitter.heron.metricsmgr.sink.WebSinkTest",
     ],
     runtime_deps = [
         ":metricsmgr-tests",
