@@ -327,9 +327,8 @@ public class SubmitterMain {
       submitterMain.submitTopology();
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      /*
-
-
+      /* Since only stderr is used (by logging), we use stdout here to
+         propagate error message back to Python's executor.py (invoke site).
        */
       System.out.println(e.getMessage());
       throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
