@@ -23,10 +23,12 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherException;
 import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
@@ -115,16 +117,12 @@ public class LaunchRunner implements Callable<Boolean> {
   }
 
   @Override
-  public Boolean call() {
+  public Boolean call() throws LauncherException, PackingException {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
     PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
-    if (packedPlan == null) {
-      LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
-      return false;
-    }
 
     // initialize the launcher
     launcher.initialize(config, runtime);
@@ -134,17 +132,16 @@ public class LaunchRunner implements Callable<Boolean> {
     // Set topology def first since we determine whether a topology is running
     // by checking the existence of topology def
     // store the trimmed topology definition into the state manager
+    // TODO(rli): log-and-false anti-pattern is too nested on this path. will not refactor
     result = statemgr.setTopology(trimTopology(topology), topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to set topology definition");
-      return false;
+      throw new LauncherException("Failed to set topology definition", topologyName);
     }
 
     result = statemgr.setPackingPlan(createPackingPlan(packedPlan), topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to set packing plan");
       statemgr.deleteTopology(topologyName);
-      return false;
+      throw new LauncherException("Failed to set packing plan", topologyName);
     }
 
     // store the execution state into the state manager
@@ -152,10 +149,9 @@ public class LaunchRunner implements Callable<Boolean> {
 
     result = statemgr.setExecutionState(executionState, topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to set execution state");
       statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
-      return false;
+      throw new LauncherException("Failed to set execution state", topologyName);
     }
 
     // launch the topology, clear the state if it fails
@@ -163,11 +159,9 @@ public class LaunchRunner implements Callable<Boolean> {
       statemgr.deleteExecutionState(topologyName);
       statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
-      LOG.log(Level.SEVERE, "Failed to launch topology");
-      return false;
+      throw new LauncherException("Failed to launch topology", topologyName);
     }
 
     return true;
   }
-
 }

@@ -35,13 +35,16 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.LauncherUtils;
+import com.twitter.heron.spi.utils.LauncherException;
 import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -409,11 +412,11 @@ public class SubmitterMain {
           .put(Keys.launcherClassInstance(), launcher)
           .build();
 
-      callLauncherRunner(runtime, topology.getName());
-    } catch (UploaderException e) {
+      callLauncherRunner(runtime);
+    } catch (LauncherException | PackingException e) {
       uploader.undo();
       throw e;
-    } catch (TopologySubmissionException | IllegalArgumentException e) {
+    } catch (TopologySubmissionException | IllegalArgumentException | UploaderException e) {
       throw e;
     } finally {
       SysUtils.closeIgnoringExceptions(uploader);
@@ -425,6 +428,7 @@ public class SubmitterMain {
   protected void validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName)
       throws TopologySubmissionException {
     // Check whether the topology has already been running
+    // TODO(rli): anti-pattern is too nested on this path to be refactored
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
@@ -441,16 +445,10 @@ public class SubmitterMain {
     return uploader.uploadPackage();
   }
 
-  protected void callLauncherRunner(Config runtime, String topologyName)
-      throws TopologySubmissionException {
+  protected void callLauncherRunner(Config runtime)
+      throws LauncherException, PackingException {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
-    boolean result = launchRunner.call();
-
-    // if failed, undo the uploaded package
-    if (!result) {
-      throw new TopologySubmissionException(
-          String.format("Failed to launch topology '%s'", topologyName));
-    }
+    launchRunner.call();
   }
 }

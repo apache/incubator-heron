@@ -16,9 +16,11 @@ package com.twitter.heron.scheduler;
 
 import java.net.URI;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -27,10 +29,12 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 import static org.junit.Assert.*;
@@ -57,45 +61,22 @@ public class SubmitterMainTest {
   private static final String PACKING_CLASS = "PACKING_CLASS";
   private static final String UPLOADER_CLASS = "UPLOADER_CLASS";
 
-  @Test
-  public void testValidateSubmit() throws Exception {
-    Config config = mock(Config.class);
+  private IStateManager statemgr;
+  private ILauncher launcher;
+  private IPacking packing;
+  private IUploader uploader;
 
-    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
-    SubmitterMain submitterMain = new SubmitterMain(config, topology);
+  private Config config;
 
-    // Topology is not running
-    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(null);
-    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
-    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(false);
-    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
-  }
+  private TopologyAPI.Topology topology;
 
-  @Test(expected = TopologySubmissionException.class)
-  public void testValidateSubmitWithException() throws Exception {
-    Config config = mock(Config.class);
-
-    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
-    SubmitterMain submitterMain = new SubmitterMain(config, topology);
-
-    // Topology is running
-    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
-    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
-  }
-
-  /**
-   * Unit test submitTopology method
-   * @throws Exception
-   */
-  @Test
-  public void testSubmitTopology() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     // Mock objects to be verified
-    IStateManager statemgr = mock(IStateManager.class);
-    ILauncher launcher = mock(ILauncher.class);
-    IPacking packing = mock(IPacking.class);
-    IUploader uploader = mock(IUploader.class);
+    statemgr = mock(IStateManager.class);
+    launcher = mock(ILauncher.class);
+    packing = mock(IPacking.class);
+    uploader = mock(IUploader.class);
 
     // Mock ReflectionUtils stuff
     PowerMockito.spy(ReflectionUtils.class);
@@ -108,7 +89,7 @@ public class SubmitterMainTest {
     PowerMockito.doReturn(uploader)
         .when(ReflectionUtils.class, "newInstance", UPLOADER_CLASS);
 
-    Config config = mock(Config.class);
+    config = mock(Config.class);
     when(config.getStringValue(ConfigKeys.get(STATE_MANAGER_CLASS)))
         .thenReturn(STATE_MANAGER_CLASS);
     when(config.getStringValue(ConfigKeys.get(LAUNCHER_CLASS)))
@@ -118,82 +99,95 @@ public class SubmitterMainTest {
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS)))
         .thenReturn(UPLOADER_CLASS);
 
-    // Instances to test
-    TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
-    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    topology = TopologyAPI.Topology.getDefaultInstance();
+  }
 
-    // Failed to instantiate
+  @Test
+  public void testValidateSubmit() throws Exception {
+    SubmitterMain submitterMain = new SubmitterMain(config, topology);
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    // Topology is not running
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(null);
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(false);
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
+  }
+
+  @Test(expected = TopologySubmissionException.class)
+  public void testValidateSubmitAlreadyRunning() throws Exception {
+    SubmitterMain submitterMain = new SubmitterMain(config, topology);
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    // Topology is running
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
+  }
+
+  @Test(expected = TopologySubmissionException.class)
+  public void testSubmitTopologyAlreadyRunning() throws Exception {
+    // Topology is running
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    doThrow(new TopologySubmissionException("")).when(submitterMain)
+        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
+    try {
+      submitterMain.submitTopology();
+    } finally {
+      verify(uploader, atLeastOnce()).close();
+      verify(launcher, atLeastOnce()).close();
+      verify(statemgr, atLeastOnce()).close();
+    }
+  }
+
+  @Test(expected = TopologySubmissionException.class)
+  public void testSubmitTopologyClassNotExist() throws Exception {
     final String CLASS_NOT_EXIST = "class_not_exist";
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(CLASS_NOT_EXIST);
-
-    try {
-      submitterMain.submitTopology();
-      fail("submitTopology should throw exception");
-    } catch (TopologySubmissionException e) {
-      assertEquals("Failed to instantiate instances: class_not_exist", e.getMessage());
-    }
-    verify(uploader, never()).close();
-    verify(launcher, never()).close();
-    verify(statemgr, never()).close();
-
-    // OK to instantiate all resources
-    when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
-
-    // Failed to validate the submission
-    doThrow(new TopologySubmissionException(
-        String.format("Topology %s already exist", topology.getName()))).when(submitterMain)
-        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
-
-    try {
-      submitterMain.submitTopology();
-      fail("submitTopology should throw exception");
-    } catch (TopologySubmissionException e) {
-      assertEquals(String.format("Topology %s already exist", topology.getName()), e.getMessage());
-    }
-    // Resources should be closed even the submission failed
-    verify(uploader, atLeastOnce()).close();
-    verify(launcher, atLeastOnce()).close();
-    verify(statemgr, atLeastOnce()).close();
-
-    // validated the submission
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
-
-    // Failed to upload package, return null
-    doReturn(null).when(submitterMain).uploadPackage(eq(uploader));
     try {
       submitterMain.submitTopology();
-      fail("submitTopology should throw exception");
-    } catch (TopologySubmissionException e) {
-      assertEquals(e.getMessage(), "Failed to upload package");
+    } finally {
+      verify(uploader, never()).close();
+      verify(launcher, never()).close();
+      verify(statemgr, never()).close();
+      when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
     }
-    // Should not invoke undo
-    verify(uploader, never()).undo();
+  }
 
-    // OK to upload package
+  @Test(expected = UploaderException.class)
+  public void testSubmitTopologyUploaderException() throws Exception {
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    doNothing().when(submitterMain)
+        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
+    doThrow(new UploaderException("")).when(submitterMain).uploadPackage(eq(uploader));
+    try {
+      submitterMain.submitTopology();
+    } finally {
+      verify(uploader, never()).undo();
+      verify(uploader).close();
+      verify(launcher).close();
+      verify(statemgr).close();
+    }
+  }
+
+  @Test(expected = PackingException.class)
+  public void testSubmitTopologyLauncherException() throws Exception {
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    doNothing().when(submitterMain)
+        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
     final URI packageURI = new URI("mock://uri:924/x#ke");
-    doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
+      doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
+    doThrow(new PackingException("")).when(submitterMain)
+        .callLauncherRunner(Mockito.any(Config.class));
+    submitterMain.submitTopology();
+  }
 
-    // Failed to callLauncherRunner
-    doThrow(new TopologySubmissionException(
-        String.format("Failed to launch topology %s", topology.getName()))).when(submitterMain)
-        .callLauncherRunner(Mockito.any(Config.class), anyString());
-    try {
-      submitterMain.submitTopology();
-    } catch (TopologySubmissionException e) {
-      assertEquals(e.getMessage(),
-          String.format("Failed to launch topology %s", topology.getName()));
-    }
-    // Should invoke undo
-    verify(uploader).undo();
-
-    // Happy path
-    doNothing().when(submitterMain).callLauncherRunner(Mockito.any(Config.class),
-        anyString());
-    try {
-      submitterMain.submitTopology();
-    } catch (TopologySubmissionException e) {
-      fail("submitTopology should not throw any exception");
-    }
+  @Test
+  public void testSubmitTopologySuccessful() throws Exception {
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    doNothing().when(submitterMain)
+        .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
+    doNothing().when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
+    submitterMain.submitTopology();
   }
 }
