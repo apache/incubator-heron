@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.packing.PackingTestHelper;
@@ -31,7 +32,6 @@ import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.InstanceId;
@@ -106,8 +106,8 @@ public class ResourceCompliantRRPackingTest {
    */
   private static PackingPlan doScalingTest(TopologyAPI.Topology topology,
                                            Map<String, Integer> componentChanges,
-                                           long boltRam,
-                                           int boltParallelism, long spoutRam,
+                                           ByteAmount boltRam,
+                                           int boltParallelism, ByteAmount spoutRam,
                                            int spoutParallelism,
                                            int numContainersBeforeRepack,
                                            int totalInstancesExpected) {
@@ -170,7 +170,7 @@ public class ResourceCompliantRRPackingTest {
   @Test(expected = RuntimeException.class)
   public void testCheckFailure() throws Exception {
     // Explicit set insufficient ram for container
-    long containerRam = -1L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
 
     topologyConfig.setContainerRamRequested(containerRam);
     TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,
@@ -219,8 +219,8 @@ public class ResourceCompliantRRPackingTest {
     // Set up the topology and its config
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     // Explicit set resources for container
-    long containerRam = 10L * Constants.GB;
-    long containerDisk = 20L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     float containerCpu = 30;
 
     topologyConfig.setContainerRamRequested(containerRam);
@@ -240,12 +240,14 @@ public class ResourceCompliantRRPackingTest {
               * instanceDefaultResources.getCpu(), DEFAULT_CONTAINER_PADDING)),
           (long) containerPlan.getRequiredResource().getCpu());
 
-      Assert.assertEquals(PackingUtils.increaseBy(totalInstances
-              * instanceDefaultResources.getRam(), DEFAULT_CONTAINER_PADDING),
+      Assert.assertEquals(instanceDefaultResources.getRam()
+              .multiply(totalInstances)
+              .increaseBy(DEFAULT_CONTAINER_PADDING),
           containerPlan.getRequiredResource().getRam());
 
-      Assert.assertEquals(PackingUtils.increaseBy(totalInstances
-              * instanceDefaultResources.getDisk(), DEFAULT_CONTAINER_PADDING),
+      Assert.assertEquals(instanceDefaultResources.getDisk()
+                    .multiply(totalInstances)
+                    .increaseBy(DEFAULT_CONTAINER_PADDING),
           containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
@@ -267,8 +269,8 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 2;
 
     // Explicit set resources for container
-    long containerRam = 10L * Constants.GB;
-    long containerDisk = 20L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     float containerCpu = 30;
 
     topologyConfig.setContainerRamRequested(containerRam);
@@ -300,10 +302,10 @@ public class ResourceCompliantRRPackingTest {
 
     // Explicit set resources for container
     // the value should be ignored, since we set the complete component ram map
-    long containerRam = Long.MAX_VALUE;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(Long.MAX_VALUE);
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -327,11 +329,11 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 2;
 
     // Explicit set resources for container
-    long containerRam = 10L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -359,7 +361,7 @@ public class ResourceCompliantRRPackingTest {
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
-    long containerRam = 2L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(2);
 
     topologyConfig.setContainerRamRequested(containerRam);
 
@@ -383,11 +385,11 @@ public class ResourceCompliantRRPackingTest {
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
-    long containerRam = 3L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(3);
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -452,13 +454,15 @@ public class ResourceCompliantRRPackingTest {
           containerPlan.getInstances().size() * instanceDefaultResources.getCpu(),
           DEFAULT_CONTAINER_PADDING)), (long) containerPlan.getRequiredResource().getCpu());
 
-      Assert.assertEquals(PackingUtils.increaseBy(
-          containerPlan.getInstances().size() * instanceDefaultResources.getRam(),
-          DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getRam());
+      Assert.assertEquals(instanceDefaultResources.getRam()
+              .multiply(containerPlan.getInstances().size())
+              .increaseBy(DEFAULT_CONTAINER_PADDING),
+          containerPlan.getRequiredResource().getRam());
 
-      Assert.assertEquals(PackingUtils.increaseBy(
-          containerPlan.getInstances().size() * instanceDefaultResources.getDisk(),
-          DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getDisk());
+      Assert.assertEquals(instanceDefaultResources.getDisk()
+              .multiply(containerPlan.getInstances().size())
+              .increaseBy(DEFAULT_CONTAINER_PADDING),
+          containerPlan.getRequiredResource().getDisk());
     }
   }
 
@@ -470,8 +474,8 @@ public class ResourceCompliantRRPackingTest {
     int paddingPercentage = 50;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set component ram map
-    long boltRam = 4L * Constants.GB;
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(4);
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
     topologyConfig.setContainerRamRequested(maxContainerRam);
 
@@ -496,17 +500,17 @@ public class ResourceCompliantRRPackingTest {
     for (PackingPlan.ContainerPlan containerPlan : newPackingPlan.getContainers()) {
       //Each container either contains a single bolt or 1 bolt and 2 spouts or 1 bolt and 1 spout
       if (containerPlan.getInstances().size() == 1) {
-        Assert.assertEquals(PackingUtils.increaseBy(boltRam, paddingPercentage),
+        Assert.assertEquals(boltRam.increaseBy(paddingPercentage),
             containerPlan.getRequiredResource().getRam());
       }
       if (containerPlan.getInstances().size() == 2) {
-        long resourceRam = boltRam + instanceDefaultResources.getRam();
-        Assert.assertEquals(PackingUtils.increaseBy(resourceRam, paddingPercentage),
+        Assert.assertEquals(boltRam.plus(instanceDefaultResources.getRam())
+                .increaseBy(paddingPercentage),
             containerPlan.getRequiredResource().getRam());
       }
       if (containerPlan.getInstances().size() == 3) {
-        long resourceRam = boltRam + 2 * instanceDefaultResources.getRam();
-        Assert.assertEquals(PackingUtils.increaseBy(resourceRam, paddingPercentage),
+        Assert.assertEquals(boltRam.plus(instanceDefaultResources.getRam().multiply(2))
+                .increaseBy(paddingPercentage),
             containerPlan.getRequiredResource().getRam());
       }
     }
@@ -519,9 +523,9 @@ public class ResourceCompliantRRPackingTest {
   public void testPartialRamMapScaling() throws Exception {
 
     // Explicit set resources for container
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     // Explicit set component ram map
-    long boltRam = 4L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(4);
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
 
@@ -684,7 +688,7 @@ public class ResourceCompliantRRPackingTest {
     // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
     // reconstruct the PackingPlan, see https://github.com/twitter/heron/issues/1577
     PackingPlan initialPackingPlan = PackingTestHelper.addToTestPackingPlan(
-        topologyId, null, initialComponentInstances,
+        topologyId, null, PackingTestHelper.toContainerIdComponentNames(initialComponentInstances),
         ResourceCompliantRRPacking.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
     AssertPacking.assertPackingPlan(topologyId, initialComponentInstances, initialPackingPlan);
 
@@ -752,9 +756,9 @@ public class ResourceCompliantRRPackingTest {
     int numContainers = 1;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set resources for container
-    long maxContainerRam = 12L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
     // Explicit set component ram map
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topologyConfig.setNumStmgrs(numContainers);
@@ -796,9 +800,9 @@ public class ResourceCompliantRRPackingTest {
 
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set resources for container
-    long maxContainerRam = 12L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
     // Explicit set component ram map
-    long spoutRam = 4L * Constants.GB;
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(4);
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topologyConfig.setNumStmgrs(numContainers);

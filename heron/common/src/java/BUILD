@@ -1,5 +1,5 @@
-licenses(["notice"])
 
+licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/heron_deps", "heron_java_proto_files")

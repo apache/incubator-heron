@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
@@ -278,24 +279,24 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
   }
 
-  public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes));
+  public static void setContainerDiskRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes.asBytes()));
   }
 
-  public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes));
+  public static void setContainerRamRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes.asBytes()));
   }
 
   public static void setContainerMaxCpuHint(Map<String, Object> conf, float ncpus) {
     conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
   }
 
-  public static void setContainerMaxDiskHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes));
+  public static void setContainerMaxDiskHint(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes.asBytes()));
   }
 
-  public static void setContainerMaxRamHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes));
+  public static void setContainerMaxRamHint(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes.asBytes()));
   }
 
   public static void setContainerPaddingPercentage(Map<String, Object> conf, int percentage) {
@@ -314,13 +315,14 @@ public class Config extends HashMap<String, Object> {
     return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
   }
 
-  public static void setComponentRam(Map<String, Object> conf, String component, long ramInBytes) {
+  public static void setComponentRam(Map<String, Object> conf,
+                                     String component, ByteAmount ramInBytes) {
     if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
       String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
-      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes.asBytes());
       conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     } else {
-      String newEntry = String.format("%s:%d", component, ramInBytes);
+      String newEntry = String.format("%s:%d", component, ramInBytes.asBytes());
       conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     }
   }
@@ -407,11 +409,11 @@ public class Config extends HashMap<String, Object> {
     setContainerCpuRequested(this, ncpus);
   }
 
-  public void setContainerDiskRequested(long nbytes) {
+  public void setContainerDiskRequested(ByteAmount nbytes) {
     setContainerDiskRequested(this, nbytes);
   }
 
-  public void setContainerRamRequested(long nbytes) {
+  public void setContainerRamRequested(ByteAmount nbytes) {
     setContainerRamRequested(this, nbytes);
   }
 
@@ -419,11 +421,11 @@ public class Config extends HashMap<String, Object> {
     setContainerMaxCpuHint(this, ncpus);
   }
 
-  public void setContainerMaxDiskHint(long nbytes) {
+  public void setContainerMaxDiskHint(ByteAmount nbytes) {
     setContainerMaxDiskHint(this, nbytes);
   }
 
-  public void setContainerMaxRamHint(long nbytes) {
+  public void setContainerMaxRamHint(ByteAmount nbytes) {
     setContainerMaxRamHint(this, nbytes);
   }
 
@@ -435,7 +437,7 @@ public class Config extends HashMap<String, Object> {
     setComponentRamMap(this, ramMap);
   }
 
-  public void setComponentRam(String component, long ramInBytes) {
+  public void setComponentRam(String component, ByteAmount ramInBytes) {
     setComponentRam(this, component, ramInBytes);
   }
 

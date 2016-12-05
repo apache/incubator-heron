@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
@@ -32,7 +33,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
-import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -129,10 +129,10 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
     double defaultCpu = this.defaultInstanceResources.getCpu()
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultRam = this.defaultInstanceResources.getRam()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultDisk = this.defaultInstanceResources.getDisk()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+    ByteAmount defaultRam = this.defaultInstanceResources.getRam()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
+    ByteAmount defaultDisk = this.defaultInstanceResources.getDisk()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
     int paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
         TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
 
@@ -140,9 +140,9 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
             (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
-            PackingUtils.increaseBy(defaultRam, paddingPercentage)),
+            defaultRam.increaseBy(paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
-            PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
+            defaultDisk.increaseBy(paddingPercentage)));
 
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
         .setMaxContainerResource(maxContainerResources)
@@ -195,8 +195,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       try {
         PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
         planBuilder.updateNumContainers(numContainers);
-        planBuilder = getResourceCompliantRRAllocation(
-            planBuilder, currentPackingPlan, componentChanges);
+        planBuilder = getResourceCompliantRRAllocation(planBuilder, componentChanges);
 
         return planBuilder.build();
 
@@ -244,7 +243,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
           + " containers allocated to host " + totalInstance + " instances.");
     }
 
-    assignInstancesToContainers(planBuilder, parallelismMap, 1, PolicyType.STRICT);
+    assignInstancesToContainers(planBuilder, parallelismMap, PolicyType.STRICT);
     return planBuilder;
   }
 
@@ -254,8 +253,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
   private PackingPlanBuilder getResourceCompliantRRAllocation(
-      PackingPlanBuilder planBuilder, PackingPlan currentPackingPlan,
-      Map<String, Integer> componentChanges) throws ResourceExceededException {
+      PackingPlanBuilder planBuilder, Map<String, Integer> componentChanges)
+      throws ResourceExceededException {
 
     Map<String, Integer> componentsToScaleDown =
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
@@ -269,14 +268,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
     if (!componentsToScaleUp.isEmpty()) {
       resetToFirstContainer();
-      int maxInstanceIndex = 0;
-      for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-          maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
-        }
-      }
-      assignInstancesToContainers(
-          planBuilder, componentsToScaleUp, maxInstanceIndex + 1, PolicyType.FLEXIBLE);
+      assignInstancesToContainers(planBuilder, componentsToScaleUp, PolicyType.FLEXIBLE);
     }
     return planBuilder;
   }
@@ -286,19 +278,14 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    *
    * @param planBuilder packing plan builder
    * @param parallelismMap component parallelism
-   * @param firstTaskIndex first taskId to use for the new instances
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
                                            Map<String, Integer> parallelismMap,
-                                           int firstTaskIndex,
                                            PolicyType policyType) throws ResourceExceededException {
-    int globalTaskIndex = firstTaskIndex;
     for (String componentName : parallelismMap.keySet()) {
       int numInstance = parallelismMap.get(componentName);
       for (int i = 0; i < numInstance; ++i) {
-        InstanceId instanceId = new InstanceId(componentName, globalTaskIndex, i);
-        policyType.assignInstance(planBuilder, instanceId, this);
-        globalTaskIndex++;
+        policyType.assignInstance(planBuilder, componentName, this);
       }
     }
   }
@@ -307,12 +294,12 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * Attempts to place the instance the current containerId.
    *
    * @param planBuilder packing plan builder
-   * @param instanceId the instance that needs to be placed in the container
+   * @param componentName the componet name of the instance that needs to be placed in the container
    * @throws ResourceExceededException if there is no room on the current container for the instance
    */
   private void strictRRpolicy(PackingPlanBuilder planBuilder,
-                              InstanceId instanceId) throws ResourceExceededException {
-    planBuilder.addInstance(this.containerId, instanceId);
+                              String componentName) throws ResourceExceededException {
+    planBuilder.addInstance(this.containerId, componentName);
     this.containerId = nextContainerId(this.containerId);
   }
 
@@ -321,15 +308,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * containerId and cycling through the container set until it can be placed.
    *
    * @param planBuilder packing plan builder
-   * @param instanceId the instance that needs to be placed in the container
+   * @param componentName the component name of the instance that needs to be placed in the container
    * @throws ResourceExceededException if there is no room on any container to place the instance
    */
   private void flexibleRRpolicy(PackingPlanBuilder planBuilder,
-                                InstanceId instanceId) throws ResourceExceededException {
+                                String componentName) throws ResourceExceededException {
     // If there is not enough space on containerId look at other containers in a RR fashion
     // starting from containerId.
     ContainerIdScorer scorer = new ContainerIdScorer(this.containerId, this.numContainers);
-    this.containerId = nextContainerId(planBuilder.addInstance(scorer, instanceId));
+    this.containerId = nextContainerId(planBuilder.addInstance(scorer, componentName));
   }
 
   /**
@@ -366,15 +353,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     STRICT, FLEXIBLE;
 
     private void assignInstance(PackingPlanBuilder planBuilder,
-                                InstanceId instanceId,
+                                String componentName,
                                 ResourceCompliantRRPacking packing)
         throws ResourceExceededException, RuntimeException {
       switch (this) {
         case STRICT:
-          packing.strictRRpolicy(planBuilder, instanceId);
+          packing.strictRRpolicy(planBuilder, componentName);
           break;
         case FLEXIBLE:
-          packing.flexibleRRpolicy(planBuilder, instanceId);
+          packing.flexibleRRpolicy(planBuilder, componentName);
           break;
         default:
           throw new RuntimeException("Not valid policy type");

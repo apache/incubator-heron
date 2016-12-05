@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.RamRequirement;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
@@ -31,7 +32,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
-import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -123,18 +123,18 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
     double defaultCpu = this.defaultInstanceResources.getCpu()
         * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultRam = this.defaultInstanceResources.getRam()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    long defaultDisk = this.defaultInstanceResources.getDisk()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
+    ByteAmount defaultRam = this.defaultInstanceResources.getRam()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
+    ByteAmount defaultDisk = this.defaultInstanceResources.getDisk()
+        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
 
     this.maxContainerResources = new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_CPU_HINT,
             (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-            PackingUtils.increaseBy(defaultRam, paddingPercentage)),
+            defaultRam.increaseBy(paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_DISK_HINT,
-            PackingUtils.increaseBy(defaultDisk, paddingPercentage)));
+            defaultDisk.increaseBy(paddingPercentage)));
   }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
@@ -193,7 +193,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private ArrayList<RamRequirement> getSortedRAMInstances(Set<String> componentNames) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     for (String componentName : componentNames) {
       Resource requiredResource = PackingUtils.getResourceRequirement(
@@ -214,7 +214,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder planBuilder)
       throws ResourceExceededException {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    assignInstancesToContainers(planBuilder, parallelismMap, 1);
+    assignInstancesToContainers(planBuilder, parallelismMap);
     return planBuilder;
   }
 
@@ -239,14 +239,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     }
 
     if (!componentsToScaleUp.isEmpty()) {
-      int maxInstanceIndex = 0;
-      for (PackingPlan.ContainerPlan containerPlan : currentPackingPlan.getContainers()) {
-        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-          maxInstanceIndex = Math.max(maxInstanceIndex, instancePlan.getTaskId());
-        }
-      }
-
-      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp, maxInstanceIndex + 1);
+      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp);
     }
 
     return packingPlanBuilder;
@@ -257,18 +250,15 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    * @param planBuilder existing packing plan
    * @param parallelismMap component parallelism
-   * @param firstTaskIndex first taskId to use for the new instances
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
-      Map<String, Integer> parallelismMap, int firstTaskIndex) throws ResourceExceededException {
+      Map<String, Integer> parallelismMap) throws ResourceExceededException {
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap.keySet());
-    int globalTaskIndex = firstTaskIndex;
     for (RamRequirement ramRequirement : ramRequirements) {
-      String component = ramRequirement.getComponentName();
-      int numInstance = parallelismMap.get(component);
+      String componentName = ramRequirement.getComponentName();
+      int numInstance = parallelismMap.get(componentName);
       for (int j = 0; j < numInstance; j++) {
-        placeFFDInstance(planBuilder, new InstanceId(component, globalTaskIndex, j));
-        globalTaskIndex++;
+        placeFFDInstance(planBuilder, componentName);
       }
     }
   }
@@ -301,16 +291,16 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    */
   private void placeFFDInstance(PackingPlanBuilder planBuilder,
-                                InstanceId instanceId) throws ResourceExceededException {
+                                String componentName) throws ResourceExceededException {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }
 
     try {
-      planBuilder.addInstance(new ContainerIdScorer(), instanceId);
+      planBuilder.addInstance(new ContainerIdScorer(), componentName);
     } catch (ResourceExceededException e) {
       planBuilder.updateNumContainers(++numContainers);
-      planBuilder.addInstance(numContainers, instanceId);
+      planBuilder.addInstance(numContainers, componentName);
     }
   }
 }

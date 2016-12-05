@@ -14,6 +14,8 @@
 
 package com.twitter.heron.spi.common;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 public class Context {
 
   protected Context() {
@@ -175,20 +177,20 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_PACKAGE_TYPE"));
   }
 
-  public static Long stmgrRam(Config cfg) {
-    return cfg.getLongValue(ConfigKeys.get("STMGR_RAM"));
+  public static ByteAmount stmgrRam(Config cfg) {
+    return cfg.getByteAmountValue(ConfigKeys.get("STMGR_RAM"));
   }
 
-  public static Long instanceRam(Config cfg) {
-    return cfg.getLongValue(ConfigKeys.get("INSTANCE_RAM"));
+  public static ByteAmount instanceRam(Config cfg) {
+    return cfg.getByteAmountValue(ConfigKeys.get("INSTANCE_RAM"));
   }
 
   public static Double instanceCpu(Config cfg) {
     return cfg.getDoubleValue(ConfigKeys.get("INSTANCE_CPU"));
   }
 
-  public static Long instanceDisk(Config cfg) {
-    return cfg.getLongValue(ConfigKeys.get("INSTANCE_DISK"));
+  public static ByteAmount instanceDisk(Config cfg) {
+    return cfg.getByteAmountValue(ConfigKeys.get("INSTANCE_DISK"));
   }
 
   public static String heronHome(Config cfg) {

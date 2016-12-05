@@ -11,16 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package com.twitter.heron.spi.common;
-
-import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 public class ConfigDefaultsTest {
-  private static final Logger LOG = Logger.getLogger(ConfigDefaultsTest.class.getName());
 
   @Test
   public void testHeronEnviron() throws Exception {
@@ -149,22 +147,9 @@ public class ConfigDefaultsTest {
 
   @Test
   public void testResources() throws Exception {
-    Assert.assertEquals(
-        Long.valueOf(Constants.GB),
-        ConfigDefaults.getLong("STMGR_RAM")
-    );
-    Assert.assertEquals(
-        Double.valueOf(1.0),
-        ConfigDefaults.getDouble("INSTANCE_CPU"),
-        0.001
-    );
-    Assert.assertEquals(
-        Long.valueOf(Constants.GB),
-        ConfigDefaults.getLong("INSTANCE_RAM")
-    );
-    Assert.assertEquals(
-        Long.valueOf(Constants.GB),
-        ConfigDefaults.getLong("INSTANCE_DISK")
-    );
+    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount("STMGR_RAM"));
+    Assert.assertEquals(1.0, ConfigDefaults.getDouble("INSTANCE_CPU"), 0.001);
+    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount("INSTANCE_RAM"));
+    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount("INSTANCE_DISK"));
   }
 }
