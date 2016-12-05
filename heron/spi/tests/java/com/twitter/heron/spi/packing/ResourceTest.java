@@ -17,32 +17,37 @@ package com.twitter.heron.spi.packing;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 public class ResourceTest {
+  private static final ByteAmount ZERO = ByteAmount.ZERO;
+  private static final ByteAmount ONE = ByteAmount.fromBytes(1);
+  private static final ByteAmount TWO = ByteAmount.fromBytes(2);
 
   @Test
   public void testSubtract() {
-    Resource firstResource = new Resource(2, 2, 2);
-    Resource secondResource = new Resource(1, 1, 0);
+    Resource firstResource = new Resource(2, TWO, TWO);
+    Resource secondResource = new Resource(1, ONE, ZERO);
     Resource additionalResource = firstResource.subtractAbsolute(secondResource);
     Assert.assertEquals(1, (long) additionalResource.getCpu());
-    Assert.assertEquals(1, additionalResource.getRam());
-    Assert.assertEquals(2, additionalResource.getDisk());
+    Assert.assertEquals(ONE, additionalResource.getRam());
+    Assert.assertEquals(TWO, additionalResource.getDisk());
   }
 
   @Test
   public void testSubtractNegative() {
-    Resource firstResource = new Resource(2, 2, 2);
-    Resource secondResource = new Resource(4, 3, 1);
+    Resource firstResource = new Resource(2, TWO, TWO);
+    Resource secondResource = new Resource(4, ByteAmount.fromBytes(3), ONE);
     Resource additionalResource = firstResource.subtractAbsolute(secondResource);
     Assert.assertEquals(0, (long) additionalResource.getCpu());
-    Assert.assertEquals(0, additionalResource.getRam());
-    Assert.assertEquals(1, additionalResource.getDisk());
+    Assert.assertEquals(ZERO, additionalResource.getRam());
+    Assert.assertEquals(ONE, additionalResource.getDisk());
   }
 
   @Test
   public void testDivideBy() {
-    Resource firstResource = new Resource(12, 13, 15);
-    Resource secondResource = new Resource(2, 2, 2);
+    Resource firstResource = new Resource(12, ByteAmount.fromBytes(13), ByteAmount.fromBytes(15));
+    Resource secondResource = new Resource(2, TWO, TWO);
     double result = firstResource.divideBy(secondResource);
     Assert.assertEquals(8, (long) result);
   }

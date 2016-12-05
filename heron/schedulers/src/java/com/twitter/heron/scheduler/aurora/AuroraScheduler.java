@@ -196,8 +196,10 @@ public class AuroraScheduler implements IScheduler, IScalable {
         Context.pythonInstanceSandboxBinary(config));
 
     auroraProperties.put("CPUS_PER_CONTAINER", Double.toString(containerResource.getCpu()));
-    auroraProperties.put("DISK_PER_CONTAINER", Long.toString(containerResource.getDisk()));
-    auroraProperties.put("RAM_PER_CONTAINER", Long.toString(containerResource.getRam()));
+    auroraProperties.put("DISK_PER_CONTAINER",
+        Long.toString(containerResource.getDisk().asBytes()));
+    auroraProperties.put("RAM_PER_CONTAINER",
+        Long.toString(containerResource.getRam().asBytes()));
 
     auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
 

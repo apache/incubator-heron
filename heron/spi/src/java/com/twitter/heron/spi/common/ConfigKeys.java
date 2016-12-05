@@ -20,14 +20,16 @@ import java.util.logging.Logger;
 public final class ConfigKeys {
   private static final Logger LOG = Logger.getLogger(ConfigKeys.class.getName());
 
+  // name of the resource file that holds the config keys
+  private static final String KEYS_YAML = "com/twitter/heron/spi/common/keys.yaml";
+
   // holds the mapping of keys to their corresponding key strings
   protected static Map<String, Object> keys;
 
   // load the resource for config keys
   static {
     try {
-      keys = Resource.load(
-          "com.twitter.heron.spi.common.Keys", Constants.KEYS_YAML);
+      keys = Resource.load("com.twitter.heron.spi.common.Keys", KEYS_YAML);
     } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the config Keys class " + e);
       throw new RuntimeException("Failed to load ConfigKeys class");
