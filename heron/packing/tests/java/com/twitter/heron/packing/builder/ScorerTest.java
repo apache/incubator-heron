@@ -16,8 +16,8 @@ package com.twitter.heron.packing.builder;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.ResourceExceededException;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
@@ -32,7 +32,8 @@ public class ScorerTest {
 
   @Before
   public void init() throws ResourceExceededException {
-    Resource containerCapacity = new Resource(1000, 100000 * Constants.MB, 100000 * Constants.MB);
+    Resource containerCapacity
+        = new Resource(1000, ByteAmount.fromGigabytes(100), ByteAmount.fromGigabytes(100));
     testContainers = new Container[] {
         new Container(1, containerCapacity, 0),
         new Container(3, containerCapacity, 0),
