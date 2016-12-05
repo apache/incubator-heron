@@ -108,10 +108,10 @@ public class LocalFileSystemUploader implements IUploader {
     try {
       CopyOption[] options = new CopyOption[]{StandardCopyOption.REPLACE_EXISTING};
       Files.copy(source, filePath, options);
-    } catch (IOException ex) {
+    } catch (IOException e) {
       throw new UploaderException(
             String.format("Unable to copy topology file from '%s' to '%s'",
-                source.toString(), filePath), ex);
+                source.toString(), filePath), e);
     }
 
     return getUri(destTopologyFile);

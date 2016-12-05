@@ -154,7 +154,7 @@ public class S3Uploader implements IUploader {
       s3Client.putObject(bucket, remoteFilePath, packageFileHandler);
     } catch (AmazonClientException e) {
       throw new UploaderException(
-          String.format("Error writing topology package to %s %s", bucket, remoteFilePath));
+          String.format("Error writing topology package to %s %s", bucket, remoteFilePath), e);
     }
 
     // Ask s3 for the url to the topology package we just uploaded
@@ -170,7 +170,8 @@ public class S3Uploader implements IUploader {
     try {
       return new URI(resourceUrl);
     } catch (URISyntaxException e) {
-      throw new UploaderException(e.getMessage());
+      throw new UploaderException(
+          String.format("Invalid URL syntax '%s'", resourceUrl), e);
     }
   }
 
