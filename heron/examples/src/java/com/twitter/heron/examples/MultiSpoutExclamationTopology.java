@@ -16,6 +16,8 @@ package com.twitter.heron.examples;
 
 import java.util.Map;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -53,10 +55,10 @@ public final class MultiSpoutExclamationTopology {
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word0", 500 * 1024 * 1024);
-    conf.setComponentRam("word1", 500 * 1024 * 1024);
-    conf.setComponentRam("word2", 500 * 1024 * 1024);
-    conf.setComponentRam("exclaim1", 1024 * 1024 * 1024);
+    conf.setComponentRam("word0", ByteAmount.fromMegabytes(500));
+    conf.setComponentRam("word1", ByteAmount.fromMegabytes(500));
+    conf.setComponentRam("word2", ByteAmount.fromMegabytes(500));
+    conf.setComponentRam("exclaim1", ByteAmount.fromGigabytes(1));
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(1);
