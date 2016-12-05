@@ -318,7 +318,7 @@ public class HeronMasterDriverTest {
     Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
     workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromGigabytes(3)));
 
-    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, ByteAmount.fromMegabytes(3));
+    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, ByteAmount.fromGigabytes(3));
     Optional<HeronMasterDriver.HeronWorker> result =
         spyDriver.findLargestFittingWorker(mockEvaluator, workers, false);
     Assert.assertFalse(result.isPresent());
