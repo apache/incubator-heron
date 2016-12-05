@@ -119,7 +119,7 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     cmd = [topology_pex]
     if args is not None:
       cmd.extend(args)
-    Log.debug('$> %s', ' '.join(cmd))
+    Log.debug("Invoking class using command: ``%s''", ' '.join(cmd))
     Log.debug('Heron options: %s', str(heron_env['HERON_OPTIONS']))
 
     # invoke the command with subprocess and print error message, if any

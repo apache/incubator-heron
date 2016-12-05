@@ -75,7 +75,7 @@ public class LocalFileSystemUploader implements IUploader {
     boolean fileExists = new File(topologyPackageLocation).isFile();
     if (!fileExists) {
       throw new UploaderException(
-          String.format("Topology file %s does not exist.", topologyPackageLocation));
+          String.format("Topology package does not exist at '%s'", topologyPackageLocation));
     }
 
     // get the directory containing the file
@@ -85,22 +85,24 @@ public class LocalFileSystemUploader implements IUploader {
 
     // if the dest directory does not exist, create it.
     if (!parentDirectory.exists()) {
-      LOG.fine("The working directory does not exist; creating it.");
+      LOG.fine("The working directory does not exist. Creating it now.");
       if (!parentDirectory.mkdirs()) {
         throw new UploaderException(
-            String.format("Failed to create directory: %s", parentDirectory.getPath()));
+            String.format("Failed to create directory for topology package at %s",
+                parentDirectory.getPath()));
       }
     }
 
     // if the dest file exists, write a log message
     fileExists = new File(filePath.toString()).isFile();
     if (fileExists) {
-      LOG.fine("Target topology file " + filePath.toString() + " exists, overwriting...");
+      LOG.fine(String.format("Target topology package already exists at '%s'. Overwriting it now",
+          filePath.toString()));
     }
 
     // copy the topology package to target working directory
-    LOG.fine("Copying topology " + topologyPackageLocation
-        + " package to target working directory " + filePath.toString());
+    LOG.fine(String.format("Copying topology package at '%s' to target working directory '%s'",
+        topologyPackageLocation, filePath.toString()));
 
     Path source = Paths.get(topologyPackageLocation);
     try {
@@ -108,7 +110,8 @@ public class LocalFileSystemUploader implements IUploader {
       Files.copy(source, filePath, options);
     } catch (IOException ex) {
       throw new UploaderException(
-            String.format("Unable to copy: %s %s", source.toString(), ex));
+            String.format("Unable to copy topology file from '%s' to '%s'",
+                source.toString(), filePath), ex);
     }
 
     return getUri(destTopologyFile);
