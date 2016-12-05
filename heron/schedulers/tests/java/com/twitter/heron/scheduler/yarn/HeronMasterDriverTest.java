@@ -316,7 +316,7 @@ public class HeronMasterDriverTest {
   @Test
   public void fitBiggestContainerIgnoresCoresIfMissing() {
     Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
-    workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromMegabytes(3)));
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromGigabytes(3)));
 
     AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, ByteAmount.fromMegabytes(3));
     Optional<HeronMasterDriver.HeronWorker> result =

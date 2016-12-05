@@ -41,7 +41,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
 
   /**
    * Creates a ByteAmount value in megabytes. If the megabytes value
-   * is >= Long.MAX_VALUE / 1024 / 1024, the byte representation is capped at Long.MAX_VALUE.
+   * is $lt;= Long.MAX_VALUE / 1024 / 1024, the byte representation is capped at Long.MAX_VALUE.
    *
    * @param megabytes value in megabytes to represent
    * @return a ByteAmount object repressing the number of MBs passed
@@ -56,7 +56,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
 
   /**
    * Creates a ByteAmount value in gigabytes. If the gigabytes value
-   * is >= Long.MAX_VALUE / 1024 / 1024 / 1024, the byte representation is capped at Long.MAX_VALUE.
+   * is &gt;= Long.MAX_VALUE / 1024 / 1024 / 1024, the byte representation is capped at Long.MAX_VALUE.
    *
    * @param gigabytes value in gigabytes to represent
    * @return a ByteAmount object repressing the number of GBs passed
@@ -80,9 +80,10 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   /**
    * Converts the number of bytes to megabytes, rounding if there is a remainder. Because of loss
    * of precision due to rounding, it's strongly advised to only use this method when it is certain
-   * that megabytes were using during the construction of the object via fromMegabytes. Only In that
-   * scenario is there a guarantee that precision will not be lost when calling this method.
-   * @return returns the ByteValue in MBs or 0 if the value is < (1024 * 1024) / 2
+   * that the only operations performed on the object were multiplication or addition and
+   * subtraction of other megabytes. If division or increaseBy were used this method could round up
+   * or down, potentially yielding unexpected results.
+   * @return returns the ByteValue in MBs or 0 if the value is &lt; (1024 * 1024) / 2
    */
   public long asMegabytes() {
     return Math.round((double) bytes / MB);
@@ -91,9 +92,10 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   /**
    * Converts the number of bytes to gigabytes, rounding if there is a remainder. Because of loss
    * of precision due to rounding, it's strongly advised to only use this method when it is certain
-   * that gigabytes were using during the construction of the object via fromGigabytes. Only In that
-   * scenario is there a guarantee that precision will not be lost when calling this method.
-   * @return returns the ByteValue in GBs or 0 if the value is < (1024 * 1024 * 1024) / 2
+   * that the only operations performed on the object were multiplication or addition and
+   * subtraction of other gigabytes. If division or increaseBy were used this method could round up
+   * or down, potentially yielding unexpected results.
+   * @return returns the ByteValue in GBs or 0 if the value is &lt; (1024 * 1024 * 1024) / 2
    */
   public long asGigabytes() {
     return Math.round((double) bytes / GB);
@@ -110,7 +112,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   /**
    * Subtracts other from this.
    * @param other ByteValue to subtract
-   * @return this ByteValue minus other ByteValue
+   * @return a new ByteValue of this minus other ByteValue
    * @throws IllegalArgumentException if subtraction would overshoot Long.MIN_VALUE
    */
   public ByteAmount minus(ByteAmount other) {
@@ -124,7 +126,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   /**
    * Adds other to this.
    * @param other ByteValue to add
-   * @return this ByteValue plus other ByteValue
+   * @return a new ByteValue of this plus other ByteValue
    * @throws IllegalArgumentException if addition would exceed Long.MAX_VALUE
    */
   public ByteAmount plus(ByteAmount other) {
@@ -138,7 +140,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   /**
    * Multiplies by factor
    * @param factor value to multiply by
-   * @return this ByteValue multiplied by factor
+   * @return a new ByteValue of this ByteValue multiplied by factor
    * @throws IllegalArgumentException if multiplication would exceed Long.MAX_VALUE
    */
   public ByteAmount multiply(int factor) {
@@ -154,7 +156,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * caution when dividing and be aware that because of precision lose due to round-off, dividing by
    * X and multiplying back by X might not return the initial value.
    * @param factor value to divide by
-   * @return this ByteValue divided by factor
+   * @return a new ByteValue of this ByteValue divided by factor
    */
   public ByteAmount divide(int factor) {
     if (factor == 0) {
@@ -167,13 +169,13 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * Increases by a percentage, rounding any remainder. Be aware that because of rounding, increases
    * will be approximate to the nearest byte.
    * @param percentage value to increase by
-   * @return this ByteValue increased by percentage
+   * @return a new ByteValue of this ByteValue increased by percentage
    * @throws IllegalArgumentException if increase would exceed Long.MAX_VALUE
    */
   public ByteAmount increaseBy(int percentage) {
     if (percentage < 0) {
       throw new IllegalArgumentException(String.format(
-          "Increasing negative percent (%d) not supported", this, percentage));
+          "Increasing by negative percent (%d) not supported", percentage));
     }
 
     double factor = 1.0 + ((double) percentage / 100);
