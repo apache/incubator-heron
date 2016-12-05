@@ -15,6 +15,7 @@ java_library(
 
 java_tests(
     test_classes = [
+        "com.twitter.heron.common.basics.ByteAmountTest",
         "com.twitter.heron.common.basics.CommunicatorTest",
         "com.twitter.heron.common.basics.SysUtilsTest",
         "com.twitter.heron.common.basics.WakeableLooperTest",

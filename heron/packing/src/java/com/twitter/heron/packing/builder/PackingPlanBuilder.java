@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.InstanceId;
@@ -47,7 +49,7 @@ public class PackingPlanBuilder {
   private final PackingPlan existingPacking;
   private Resource defaultInstanceResource;
   private Resource maxContainerResource;
-  private Map<String, Long> componentRamMap;
+  private Map<String, ByteAmount> componentRamMap;
   private int requestedContainerPadding;
   private int numContainers;
 
@@ -78,7 +80,7 @@ public class PackingPlanBuilder {
     return this;
   }
 
-  public PackingPlanBuilder setRequestedComponentRam(Map<String, Long> ramMap) {
+  public PackingPlanBuilder setRequestedComponentRam(Map<String, ByteAmount> ramMap) {
     this.componentRamMap = ramMap;
     return this;
   }
@@ -308,10 +310,10 @@ public class PackingPlanBuilder {
    */
   private static Set<PackingPlan.ContainerPlan> buildContainerPlans(
       Map<Integer, Container> containerInstances,
-      Map<String, Long> ramMap,
+      Map<String, ByteAmount> ramMap,
       Resource instanceDefaults,
-      double paddingPercentage) {
-    Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
+      int paddingPercentage) {
+    Set<PackingPlan.ContainerPlan> containerPlans = new LinkedHashSet<>();
 
     for (Integer containerId : containerInstances.keySet()) {
       Container container = containerInstances.get(containerId);
@@ -319,8 +321,8 @@ public class PackingPlanBuilder {
         continue;
       }
 
-      long containerRam = 0;
-      long containerDiskInBytes = 0;
+      ByteAmount containerRam = ByteAmount.ZERO;
+      ByteAmount containerDiskInBytes = ByteAmount.ZERO;
       double containerCpu = 0;
 
       // Calculate the resource required for single instance
@@ -329,18 +331,18 @@ public class PackingPlanBuilder {
       for (PackingPlan.InstancePlan instancePlan : container.getInstances()) {
         InstanceId instanceId = new InstanceId(instancePlan.getComponentName(),
             instancePlan.getTaskId(), instancePlan.getComponentIndex());
-        long instanceRam;
+        ByteAmount instanceRam;
         if (ramMap.containsKey(instanceId.getComponentName())) {
           instanceRam = ramMap.get(instanceId.getComponentName());
         } else {
           instanceRam = instanceDefaults.getRam();
         }
-        containerRam += instanceRam;
+        containerRam = containerRam.plus(instanceRam);
 
         // Currently not yet support disk or cpu config for different components,
         // so just use the default value.
-        long instanceDisk = instanceDefaults.getDisk();
-        containerDiskInBytes += instanceDisk;
+        ByteAmount instanceDisk = instanceDefaults.getDisk();
+        containerDiskInBytes = containerDiskInBytes.plus(instanceDisk);
 
         double instanceCpu = instanceDefaults.getCpu();
         containerCpu += instanceCpu;
@@ -351,8 +353,8 @@ public class PackingPlanBuilder {
       }
 
       containerCpu += (paddingPercentage * containerCpu) / 100;
-      containerRam += (paddingPercentage * containerRam) / 100;
-      containerDiskInBytes += (paddingPercentage * containerDiskInBytes) / 100;
+      containerRam = containerRam.increaseBy(paddingPercentage);
+      containerDiskInBytes = containerDiskInBytes.increaseBy(paddingPercentage);
 
       Resource resource =
           new Resource(Math.round(containerCpu), containerRam, containerDiskInBytes);

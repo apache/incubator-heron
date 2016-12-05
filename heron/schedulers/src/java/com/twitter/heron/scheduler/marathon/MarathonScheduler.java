@@ -26,7 +26,6 @@ import com.google.common.base.Joiner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -120,8 +119,8 @@ public class MarathonScheduler implements IScheduler {
       instance.put(MarathonConstants.ID, Integer.toString(i));
       instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
-      instance.put(MarathonConstants.MEMORY, containerResource.getRam() / Constants.MB);
-      instance.put(MarathonConstants.DISK, containerResource.getDisk() / Constants.MB);
+      instance.put(MarathonConstants.MEMORY, containerResource.getRam().asMegabytes());
+      instance.put(MarathonConstants.DISK, containerResource.getDisk().asMegabytes());
       instance.set(MarathonConstants.PORT_DEFINITIONS, getPorts(mapper));
       instance.put(MarathonConstants.INSTANCES, 1);
       instance.set(MarathonConstants.LABELS, getLabels(mapper));

@@ -106,9 +106,9 @@ public class PackingUtilsTest {
         componentChanges, defaultInstanceResources, PackingUtils.ScalingDirection.DOWN);
     Assert.assertEquals((long) (boltScalingDown * defaultInstanceResources.getCpu()),
         (long) scaledownResource.getCpu());
-    Assert.assertEquals(boltScalingDown * defaultInstanceResources.getRam(),
+    Assert.assertEquals(defaultInstanceResources.getRam().multiply(boltScalingDown),
         scaledownResource.getRam());
-    Assert.assertEquals(boltScalingDown * defaultInstanceResources.getDisk(),
+    Assert.assertEquals(defaultInstanceResources.getDisk().multiply(boltScalingDown),
         scaledownResource.getDisk());
   }
 
@@ -137,9 +137,9 @@ public class PackingUtilsTest {
         componentChanges, defaultInstanceResources, PackingUtils.ScalingDirection.UP);
     Assert.assertEquals((long) (boltScalingUp * defaultInstanceResources.getCpu()),
         (long) scaleupResource.getCpu());
-    Assert.assertEquals(boltScalingUp * defaultInstanceResources.getRam(),
+    Assert.assertEquals(defaultInstanceResources.getRam().multiply(boltScalingUp),
         scaleupResource.getRam());
-    Assert.assertEquals(boltScalingUp * defaultInstanceResources.getDisk(),
+    Assert.assertEquals(defaultInstanceResources.getDisk().multiply(boltScalingUp),
         scaleupResource.getDisk());
   }
 }

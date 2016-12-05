@@ -76,6 +76,17 @@ public final class TypeUtils {
     }
   }
 
+  public static ByteAmount getByteAmount(Object o) {
+    if (o != null && o instanceof ByteAmount) {
+      return (ByteAmount) o;
+    }
+    try {
+      return ByteAmount.fromBytes(getLong(o));
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Don't know how to convert " + o + " to ByteAmount", e);
+    }
+  }
+
   public static Boolean getBoolean(Object o) {
     if (o instanceof Boolean) {
       return (Boolean) o;
