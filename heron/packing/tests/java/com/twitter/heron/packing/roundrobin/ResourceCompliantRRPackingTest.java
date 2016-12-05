@@ -586,7 +586,7 @@ public class ResourceCompliantRRPackingTest {
   /**
    * Test the scenario where the scaling down is requested
    */
-  // TODO @Test
+  // TODO @Test https://github.com/twitter/heron/issues/1560
   public void testScaleDownRemoveContainer() throws Exception {
     String topologyId = topology.getId();
 
@@ -603,7 +603,7 @@ public class ResourceCompliantRRPackingTest {
     // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
     // reconstruct the PackingPlan, see https://github.com/twitter/heron/issues/1577
     PackingPlan initialPackingPlan = PackingTestHelper.addToTestPackingPlan(
-        topologyId, null, initialComponentInstances,
+        topologyId, null, PackingTestHelper.toContainerIdComponentNames(initialComponentInstances),
         ResourceCompliantRRPacking.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
     AssertPacking.assertPackingPlan(topologyId, initialComponentInstances, initialPackingPlan);
 
