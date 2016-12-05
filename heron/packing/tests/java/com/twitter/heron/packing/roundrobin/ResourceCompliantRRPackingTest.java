@@ -167,7 +167,7 @@ public class ResourceCompliantRRPackingTest {
   @Test(expected = RuntimeException.class)
   public void testCheckFailure() throws Exception {
     // Explicit set insufficient ram for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(-1);
+    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
 
     topologyConfig.setContainerRamRequested(containerRam);
     TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,

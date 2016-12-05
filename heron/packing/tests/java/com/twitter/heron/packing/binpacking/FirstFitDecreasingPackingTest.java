@@ -153,7 +153,7 @@ public class FirstFitDecreasingPackingTest {
     int numContainers = 2;
 
     // Explicit set insufficient ram for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(-1);
+    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
 
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     topologyConfig.setContainerMaxRamHint(containerRam);
