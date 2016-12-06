@@ -331,12 +331,12 @@ public class SubmitterMain {
       System.out.println(e.getMessage());
       /* Meaning of exit status code:
          - status code = 0:
-           SubmitterMain exits without error
+           program exits without error
          - 0 < status code < 100:
-           SubmitterMain fails to execute before program execution. For example,
+           program fails to execute before program execution. For example,
            JVM cannot find or load main class
          - status code >= 100:
-           SubmitterMain fails to launch after program execution. For example,
+           program fails to launch after program execution. For example,
            topology definition file fails to be loaded */
       // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava

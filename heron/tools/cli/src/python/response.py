@@ -27,6 +27,15 @@ class Response(object):
     self.err_msg = err_msg
     self.extra_msg = extra_msg
 
+  # Meaning of exit status code:
+  #  - status code = 0:
+  #    program exits without error
+  #  - 0 < status code < 100:
+  #    program fails to execute before program execution. For example,
+  #    JVM cannot find or load main class
+  #  - status code >= 100:
+  #    program fails to launch after program execution. For example,
+  #    topology definition file fails to be loaded
   @staticmethod
   def status_type(status_code):
     if status_code == 0:
@@ -40,6 +49,7 @@ class Response(object):
   def render(self):
     pass
 
+# Response from the action of loading topology definition file
 class TopologyDefLoadResponse(Response):
   def __init__(self, status=1, defn_file=None, succ_msg=None, err_msg=None, extra_msg=None):
     super(TopologyDefLoadResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
@@ -54,6 +64,7 @@ class TopologyDefLoadResponse(Response):
       if self.extra_msg:
         Log.debug(self.extra_msg)
 
+# Response from shelled-out process
 # pylint: disable=abstract-method
 class InvocationResponse(Response):
   def __init__(self, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
@@ -61,6 +72,7 @@ class InvocationResponse(Response):
     self.main_class = main_class
     self.topo_type = topo_type
 
+# Response from shelled-out process that creates topology definition file
 class TopologyDefCreationResponse(InvocationResponse):
   def __init__(self, topology_file, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
     super(TopologyDefCreationResponse, self).__init__(
@@ -73,6 +85,7 @@ class TopologyDefCreationResponse(InvocationResponse):
                 self.topo_type, self.topology_file, self.main_class)
       Log.error(self.extra_msg)
 
+# Response from shelled-out process that launches topology
 class TopologyLaunchResponse(InvocationResponse):
   def __init__(self, main_class, topo_type, topo_name, status, succ_msg, err_msg, extra_msg):
     super(TopologyLaunchResponse, self).__init__(

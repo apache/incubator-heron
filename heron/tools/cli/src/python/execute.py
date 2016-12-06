@@ -68,6 +68,8 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
 
   # invoke the command with subprocess and print error message, if any
   proc = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  # stdout message has the information Java program sends back
+  # stderr message has extra information, such as debugging message
   msg, extra_msg = proc.communicate()
   if msg:
     msg = msg[:-1]
