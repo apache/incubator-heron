@@ -21,11 +21,11 @@ class Status:
   Ok, NonUserError, UserError = range(3)
 
 class Response(object):
-  def __init__(self, status, succ_msg=None, err_msg=None, debug_msg=None):
+  def __init__(self, status, succ_msg=None, err_msg=None, extra_msg=None):
     self.status = self.status_type(status)
     self.succ_msg = succ_msg
     self.err_msg = err_msg
-    self.debug_msg = debug_msg
+    self.extra_msg = extra_msg
 
   @staticmethod
   def status_type(status_code):
@@ -41,8 +41,8 @@ class Response(object):
     pass
 
 class TopologyDefLoadResponse(Response):
-  def __init__(self, status=1, defn_file=None, succ_msg=None, err_msg=None, debug_msg=None):
-    super(TopologyDefCreationResponse, self).__init__(status, succ_msg, err_msg, debug_msg)
+  def __init__(self, status=1, defn_file=None, succ_msg=None, err_msg=None, extra_msg=None):
+    super(TopologyDefCreationResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
     self.defn_file = defn_file
 
   def render(self):
@@ -51,30 +51,30 @@ class TopologyDefLoadResponse(Response):
         Log.error(self.err_msg)
       else:
         Log.error("Unable to load topology definition file: %s", self.defn_file)
-      if self.debug_msg: Log.debug(self.debug_msg)
+      if self.extra_msg: Log.debug(self.extra_msg)
 
 class InvocationResponse(Response):
-  def __init__(self, main_class, topo_type, status, succ_msg, err_msg, debug_msg):
-    super(InvocationResponse, self).__init__(status, succ_msg, err_msg, debug_msg)
+  def __init__(self, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
+    super(InvocationResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
     self.main_class = main_class
     self.topo_type = topo_type
 
 class TopologyDefCreationResponse(InvocationResponse):
-  def __init__(self, topology_file, main_class, topo_type, status, succ_msg, err_msg, debug_msg):
+  def __init__(self, topology_file, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
     super(TopologyDefCreationResponse, self).__init__(
-      main_class, topo_type, status, succ_msg, err_msg, debug_msg)
+      main_class, topo_type, status, succ_msg, err_msg, extra_msg)
     self.topology_file = topology_file
 
   def render(self):
     if self.status != Status.Ok:
       Log.error("Unable to create %s topology definition file '%s' by invoking'%s'",
         self.topo_type, self.topology_file, self.main_class)
-      Log.error(self.debug_msg)
+      Log.error(self.extra_msg)
 
 class TopologyLaunchResponse(InvocationResponse):
-  def __init__(self, main_class, topo_type, topo_name, status, succ_msg, err_msg, debug_msg):
+  def __init__(self, main_class, topo_type, topo_name, status, succ_msg, err_msg, extra_msg):
     super(TopologyLaunchResponse, self).__init__(
-      main_class, topo_type, status, succ_msg, err_msg, debug_msg)
+      main_class, topo_type, status, succ_msg, err_msg, extra_msg)
     self.topo_name = topo_name
 
   def render(self):
@@ -83,10 +83,10 @@ class TopologyLaunchResponse(InvocationResponse):
     else:
       Log.error("Failed to launch %s topology '%s'", self.topo_type, self.topo_name)
       if self.status == Status.NonUserError:
-        Log.error(self.debug_msg)
+        Log.error(self.extra_msg)
       else:
         Log.error(self.err_msg)
-        Log.debug(self.debug_msg)
+        Log.debug(self.extra_msg)
 
 def render(resp):
   if isinstance(resp, list):
