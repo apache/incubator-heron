@@ -182,7 +182,7 @@ cc_library(
         "empty.cc",
         "lib/libprotoc.a",
     ],
-    deps = [":protobuf-cxx", ":gtest-cxx" ],
+    deps = [":protobuf-cxx", ":gtest-cxx", ":gmock-cxx"],
     linkstatic = 1,
 )
 
