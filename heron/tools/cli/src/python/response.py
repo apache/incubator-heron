@@ -18,9 +18,11 @@ from heron.common.src.python.utils.log import Log
 
 # # pylint: disable=no-init
 class Status(object):
+  """Status code enum"""
   Ok, NonUserError, UserError = range(3)
 
 class Response(object):
+  """Response class that captures result of executing an action"""
   def __init__(self, status, succ_msg=None, err_msg=None, extra_msg=None):
     self.status = self.status_type(status)
     self.succ_msg = succ_msg
@@ -51,6 +53,7 @@ class Response(object):
 
 # Response from the action of loading topology definition file
 class TopologyDefLoadResponse(Response):
+  """Response class that captures result of loading topology definition"""
   def __init__(self, status=1, defn_file=None, succ_msg=None, err_msg=None, extra_msg=None):
     super(TopologyDefLoadResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
     self.defn_file = defn_file
@@ -67,6 +70,7 @@ class TopologyDefLoadResponse(Response):
 # Response from shelled-out process
 # pylint: disable=abstract-method
 class InvocationResponse(Response):
+  """Response class that captures result of a shelled-out program"""
   def __init__(self, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
     super(InvocationResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
     self.main_class = main_class
@@ -74,6 +78,7 @@ class InvocationResponse(Response):
 
 # Response from shelled-out process that creates topology definition file
 class TopologyDefCreationResponse(InvocationResponse):
+  """Response class that captures result of the program that creates topology definition file"""
   def __init__(self, topology_file, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
     super(TopologyDefCreationResponse, self).__init__(
         main_class, topo_type, status, succ_msg, err_msg, extra_msg)
@@ -87,6 +92,7 @@ class TopologyDefCreationResponse(InvocationResponse):
 
 # Response from shelled-out process that launches topology
 class TopologyLaunchResponse(InvocationResponse):
+  """Response class that captures result of the program that launches topology"""
   def __init__(self, main_class, topo_type, topo_name, status, succ_msg, err_msg, extra_msg):
     super(TopologyLaunchResponse, self).__init__(
         main_class, topo_type, status, succ_msg, err_msg, extra_msg)
