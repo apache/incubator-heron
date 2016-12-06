@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -176,7 +175,7 @@ public class SubmitterMainTest {
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
     final URI packageURI = new URI("mock://uri:924/x#ke");
-      doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
+    doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
     doThrow(new PackingException("")).when(submitterMain)
         .callLauncherRunner(Mockito.any(Config.class));
     submitterMain.submitTopology();

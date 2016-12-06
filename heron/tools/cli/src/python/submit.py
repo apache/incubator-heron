@@ -62,7 +62,7 @@ def create_parser(subparsers):
 
 ################################################################################
 def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topology_name,
-  topology_type):
+                      topology_type):
   '''
   Launch a topology given topology jar, its definition file and configurations
   :param cl_args:
@@ -116,7 +116,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       java_defines=[])
 
   return response.TopologyLaunchResponse(
-    main_class, topology_type, topology_name, retcode, None, msg, extra_msg)
+      main_class, topology_type, topology_name, retcode, None, msg, extra_msg)
 
 
 ################################################################################
@@ -133,7 +133,7 @@ def launch_topologies(cl_args, topology_file, topology_type, tmp_dir):
 
   if len(defn_files) == 0:
     return response.TopologyDefLoadResponse(
-      err_msg="No topologies found under %s" % tmp_dir)
+        err_msg="No topologies found under %s" % tmp_dir)
 
   responses = []
   for defn_file in defn_files:
@@ -148,8 +148,8 @@ def launch_topologies(cl_args, topology_file, topology_type, tmp_dir):
 
     # launch the topology
     Log.info("Launching topology: \'%s\'", topology_defn.name)
-    resp = launch_a_topology(cl_args, tmp_dir, topology_file,
-      defn_file, topology_defn.name, topology_type)
+    resp = launch_a_topology(
+        cl_args, tmp_dir, topology_file, defn_file, topology_defn.name, topology_type)
     responses.append(resp)
   return responses
 
@@ -175,7 +175,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
 
   main_class = cl_args['topology-class-name']
-  msg, extra_msg, retcode = execute.heron_class(
+  _, extra_msg, retcode = execute.heron_class(
       class_name=main_class,
       lib_jars=config.get_heron_libs(jars.topology_jars()),
       extra_jars=[topology_file],
@@ -184,7 +184,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   if retcode != 0:
     return response.TopologyDefCreationResponse(
-      topology_file, main_class, 'java', retcode, None, None, extra_msg)
+        topology_file, main_class, 'java', retcode, None, None, extra_msg)
 
   responses = launch_topologies(cl_args, topology_file, 'java', tmp_dir)
   shutil.rmtree(tmp_dir)
@@ -225,7 +225,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   if retcode != 0:
     return response.TopologyDefCreationResponse(
-      topology_file, main_class, 'java', retcode, None, msg, extra_msg)
+        topology_file, main_class, 'java', retcode, None, msg, extra_msg)
 
   responses = launch_topologies(cl_args, topology_file, 'java', tmp_dir)
   shutil.rmtree(tmp_dir)
@@ -242,10 +242,10 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
   msg, extra_msg, retcode = execute.heron_pex(
-    topology_file, topology_class_name, tuple(unknown_args))
+      topology_file, topology_class_name, tuple(unknown_args))
   if retcode != 0:
     return response.TopologyDefLoadResponse(
-      status=retcode, defn_file=topology_file, err_msg=msg, extra_msg=extra_msg)
+        status=retcode, defn_file=topology_file, err_msg=msg, extra_msg=extra_msg)
   responses = launch_topologies(cl_args, topology_file, 'python', tmp_dir)
   shutil.rmtree(tmp_dir)
 

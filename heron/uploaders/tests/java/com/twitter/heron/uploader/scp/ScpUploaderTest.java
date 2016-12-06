@@ -64,7 +64,7 @@ public class ScpUploaderTest {
   }
 
   // Local file not exist
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testUploadPackageLocalFileDoesNotExist() throws Exception {
     ScpUploader uploader = Mockito.spy(new ScpUploader());
     ScpController controller = Mockito.mock(ScpController.class);
@@ -77,7 +77,7 @@ public class ScpUploaderTest {
   }
 
   // Failed to create folder on remote
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCreateRemoteFolder() throws Exception {
     ScpUploader uploader = Mockito.spy(new ScpUploader());
     ScpController controller = Mockito.mock(ScpController.class);
@@ -91,7 +91,7 @@ public class ScpUploaderTest {
   }
 
   // Failed to copy file from local to remote
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCopyFromLocalToRemote() throws Exception {
     ScpUploader uploader = Mockito.spy(new ScpUploader());
     ScpController controller = Mockito.mock(ScpController.class);

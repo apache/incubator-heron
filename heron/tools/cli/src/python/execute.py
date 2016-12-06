@@ -69,16 +69,11 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # invoke the command with subprocess and print error message, if any
   proc = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   msg, extra_msg = proc.communicate()
-  if msg: msg = msg[:-1]
-  if extra_msg: extra_msg = extra_msg[:-1]
+  if msg:
+    msg = msg[:-1]
+  if extra_msg:
+    extra_msg = extra_msg[:-1]
   return msg, extra_msg, proc.returncode
-  '''
-  Log.debug('Dumping stderr from process:\n%s', stderr[:-1])
-  if retcode != 0 and stdout:
-    Log.error(stdout[:-1])
-  return proc.returncode
-  '''
-
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   '''

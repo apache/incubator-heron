@@ -21,7 +21,6 @@ import java.util.Map;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -129,7 +128,7 @@ public class S3UploaderTest {
     assertEquals(new URI("http://url"), uri);
   }
 
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   @SuppressWarnings("unchecked")
   public void handlePutObjectExceptionOnUpload() throws Exception {
     String expectedRemotePath = "test-topology/topology.tar.gz";

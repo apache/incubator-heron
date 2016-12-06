@@ -77,7 +77,7 @@ public class LocalFileSystemUploaderTest {
     Assert.assertTrue(new File(destFile).isFile());
   }
 
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testSourceNotExists() throws Exception {
 
     // identify the location of the test topology tar file

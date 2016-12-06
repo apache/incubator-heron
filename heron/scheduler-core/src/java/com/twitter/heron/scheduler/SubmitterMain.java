@@ -41,10 +41,9 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
-import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.LauncherException;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -330,8 +329,8 @@ public class SubmitterMain {
       /* Since only stderr is used (by logging), we use stdout here to
          propagate error message back to Python's executor.py (invoke site). */
       System.out.println(e.getMessage());
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(101);
-      //throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
     }
     LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
   }

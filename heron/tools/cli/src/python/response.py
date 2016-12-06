@@ -13,11 +13,11 @@
 # limitations under the License.
 '''response.py'''
 import abc
-from collections import namedtuple
 
 from heron.common.src.python.utils.log import Log
 
-class Status:
+# # pylint: disable=no-init
+class Status(object):
   Ok, NonUserError, UserError = range(3)
 
 class Response(object):
@@ -42,7 +42,7 @@ class Response(object):
 
 class TopologyDefLoadResponse(Response):
   def __init__(self, status=1, defn_file=None, succ_msg=None, err_msg=None, extra_msg=None):
-    super(TopologyDefCreationResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
+    super(TopologyDefLoadResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
     self.defn_file = defn_file
 
   def render(self):
@@ -51,8 +51,10 @@ class TopologyDefLoadResponse(Response):
         Log.error(self.err_msg)
       else:
         Log.error("Unable to load topology definition file: %s", self.defn_file)
-      if self.extra_msg: Log.debug(self.extra_msg)
+      if self.extra_msg:
+        Log.debug(self.extra_msg)
 
+# pylint: disable=abstract-method
 class InvocationResponse(Response):
   def __init__(self, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
     super(InvocationResponse, self).__init__(status, succ_msg, err_msg, extra_msg)
@@ -62,19 +64,19 @@ class InvocationResponse(Response):
 class TopologyDefCreationResponse(InvocationResponse):
   def __init__(self, topology_file, main_class, topo_type, status, succ_msg, err_msg, extra_msg):
     super(TopologyDefCreationResponse, self).__init__(
-      main_class, topo_type, status, succ_msg, err_msg, extra_msg)
+        main_class, topo_type, status, succ_msg, err_msg, extra_msg)
     self.topology_file = topology_file
 
   def render(self):
     if self.status != Status.Ok:
       Log.error("Unable to create %s topology definition file '%s' by invoking'%s'",
-        self.topo_type, self.topology_file, self.main_class)
+                self.topo_type, self.topology_file, self.main_class)
       Log.error(self.extra_msg)
 
 class TopologyLaunchResponse(InvocationResponse):
   def __init__(self, main_class, topo_type, topo_name, status, succ_msg, err_msg, extra_msg):
     super(TopologyLaunchResponse, self).__init__(
-      main_class, topo_type, status, succ_msg, err_msg, extra_msg)
+        main_class, topo_type, status, succ_msg, err_msg, extra_msg)
     self.topo_name = topo_name
 
   def render(self):

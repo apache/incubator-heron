@@ -43,15 +43,15 @@ public class HdfsUploaderTest {
   public void after() throws Exception {
   }
 
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testUploadPackageLocalFileNotExist() throws Exception {
     Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
     uploader.uploadPackage();
     Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
-    Mockito.anyString(), Mockito.anyString());
+        Mockito.anyString(), Mockito.anyString());
   }
 
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCreateFolderOnHDFS() throws Exception {
     Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
     Mockito.doReturn(false).when(controller).exists(Mockito.anyString());
@@ -61,7 +61,7 @@ public class HdfsUploaderTest {
         Mockito.anyString(), Mockito.anyString());
   }
 
-  @Test(expected=UploaderException.class)
+  @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCopyFromLocalToHDFS() throws Exception {
     Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
     Mockito.doReturn(true).when(controller).mkdirs(Mockito.anyString());
