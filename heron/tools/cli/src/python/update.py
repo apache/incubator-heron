@@ -21,7 +21,6 @@ import heron.tools.common.src.python.utils.config as config
 import argparse
 import logging
 import re
-import traceback
 
 def create_parser(subparsers):
   """ Create the parse for the update command """
@@ -62,38 +61,36 @@ def create_parser(subparsers):
 def run(command, parser, cl_args, unknown_args):
   """ run the update command """
   topology_name = cl_args['topology-name']
-  try:
-    new_args = [
-        "--cluster", cl_args['cluster'],
-        "--role", cl_args['role'],
-        "--environment", cl_args['environ'],
-        "--heron_home", config.get_heron_dir(),
-        "--config_path", cl_args['config_path'],
-        "--override_config_file", cl_args['override_config_file'],
-        "--release_file", config.get_heron_release_file(),
-        "--topology_name", topology_name,
-        "--command", command,
-        "--component_parallelism", ','.join(cl_args['component_parallelism']),
-    ]
+  new_args = [
+      "--cluster", cl_args['cluster'],
+      "--role", cl_args['role'],
+      "--environment", cl_args['environ'],
+      "--heron_home", config.get_heron_dir(),
+      "--config_path", cl_args['config_path'],
+      "--override_config_file", cl_args['override_config_file'],
+      "--release_file", config.get_heron_release_file(),
+      "--topology_name", topology_name,
+      "--command", command,
+      "--component_parallelism", ','.join(cl_args['component_parallelism']),
+  ]
 
-    if Log.getEffectiveLevel() == logging.DEBUG:
-      new_args.append("--verbose")
+  if Log.getEffectiveLevel() == logging.DEBUG:
+    new_args.append("--verbose")
 
-    lib_jars = config.get_heron_libs(
-        jars.scheduler_jars() + jars.statemgr_jars() + jars.packing_jars()
-    )
+  lib_jars = config.get_heron_libs(
+      jars.scheduler_jars() + jars.statemgr_jars() + jars.packing_jars()
+  )
 
-    # invoke the runtime manager to kill the topology
-    execute.heron_class(
-        'com.twitter.heron.scheduler.RuntimeManagerMain',
-        lib_jars,
-        extra_jars=[],
-        args=new_args
-    )
+  # invoke the runtime manager to kill the topology
+  retcode = execute.heron_class(
+      'com.twitter.heron.scheduler.RuntimeManagerMain',
+      lib_jars,
+      extra_jars=[],
+      args=new_args)
 
-  except Exception as ex:
-    Log.error('Failed to update topology \'%s\': %s', topology_name, traceback.format_exc(ex))
+  if retcode != 0:
+    Log.error('Failed to update topology \'%s\'', topology_name)
     return False
-
-  Log.info('Successfully updated topology \'%s\'' % topology_name)
-  return True
+  else:
+    Log.info('Successfully updated topology \'%s\'', topology_name)
+    return True

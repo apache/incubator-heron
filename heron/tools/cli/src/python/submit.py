@@ -17,7 +17,6 @@ import logging
 import os
 import shutil
 import tempfile
-import traceback
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -26,6 +25,7 @@ import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
+import heron.tools.cli.src.python.response as response
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.common.src.python.utils.classpath as classpath
 
@@ -61,7 +61,8 @@ def create_parser(subparsers):
 
 
 ################################################################################
-def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
+def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topology_name,
+                      topology_type):
   '''
   Launch a topology given topology jar, its definition file and configurations
   :param cl_args:
@@ -106,17 +107,20 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
-  execute.heron_class(
-      class_name='com.twitter.heron.scheduler.SubmitterMain',
+  main_class = 'com.twitter.heron.scheduler.SubmitterMain'
+  msg, extra_msg, retcode = execute.heron_class(
+      class_name=main_class,
       lib_jars=lib_jars,
       extra_jars=extra_jars,
       args=args,
-      java_defines=[]
-  )
+      java_defines=[])
+
+  return response.TopologyLaunchResponse(
+      main_class, topology_type, topology_name, retcode, None, msg, extra_msg)
 
 
 ################################################################################
-def launch_topologies(cl_args, topology_file, tmp_dir):
+def launch_topologies(cl_args, topology_file, topology_type, tmp_dir):
   '''
   Launch topologies
   :param cl_args:
@@ -128,39 +132,32 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   defn_files = glob.glob(tmp_dir + '/*.defn')
 
   if len(defn_files) == 0:
-    raise Exception("No topologies found")
+    return response.TopologyDefLoadResponse(
+        err_msg="No topologies found under %s" % tmp_dir)
 
-  try:
-    for defn_file in defn_files:
+  responses = []
+  for defn_file in defn_files:
+    # load the topology definition from the file
+    topology_defn = topology_pb2.Topology()
+    try:
+      handle = open(defn_file, "rb")
+      topology_defn.ParseFromString(handle.read())
+      handle.close()
+    except Exception as e:
+      return response.TopologyDefLoadResponse(defn_file=defn_file, extra_msg=str(e))
 
-      # load the topology definition from the file
-      topology_defn = topology_pb2.Topology()
-      try:
-        handle = open(defn_file, "rb")
-        topology_defn.ParseFromString(handle.read())
-        handle.close()
-
-      except:
-        raise Exception("Could not open and parse topology defn file %s" % defn_file)
-
-      # launch the topology
-      try:
-        Log.info("Launching topology \'%s\'" % topology_defn.name)
-        launch_a_topology(cl_args, tmp_dir, topology_file, defn_file)
-        Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
-
-      except Exception as ex:
-        Log.exception('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
-        raise
-
-  except:
-    raise
+    # launch the topology
+    Log.info("Launching topology: \'%s\'", topology_defn.name)
+    resp = launch_a_topology(
+        cl_args, tmp_dir, topology_file, defn_file, topology_defn.name, topology_type)
+    responses.append(resp)
+  return responses
 
 
 ################################################################################
 def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
-   We use the packer to make a package for the jar and dump it
+  We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
   with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
@@ -176,27 +173,23 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
-  try:
-    execute.heron_class(
-        class_name=cl_args['topology-class-name'],
-        lib_jars=config.get_heron_libs(jars.topology_jars()),
-        extra_jars=[topology_file],
-        args=tuple(unknown_args),
-        java_defines=cl_args['topology_main_jvm_property'])
 
-  except Exception as ex:
-    Log.debug(traceback.format_exc(ex))
-    Log.error("Unable to execute topology main class")
-    return False
+  main_class = cl_args['topology-class-name']
+  _, extra_msg, retcode = execute.heron_class(
+      class_name=main_class,
+      lib_jars=config.get_heron_libs(jars.topology_jars()),
+      extra_jars=[topology_file],
+      args=tuple(unknown_args),
+      java_defines=cl_args['topology_main_jvm_property'])
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
-  except Exception as ex:
-    return False
-  finally:
-    shutil.rmtree(tmp_dir)
+  if retcode != 0:
+    return response.TopologyDefCreationResponse(
+        topology_file, main_class, 'java', retcode, None, None, extra_msg)
 
-  return True
+  responses = launch_topologies(cl_args, topology_file, 'java', tmp_dir)
+  shutil.rmtree(tmp_dir)
+
+  return responses
 
 
 ################################################################################
@@ -222,23 +215,22 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
   java_defines = cl_args['topology_main_jvm_property']
-  execute.heron_tar(
-      cl_args['topology-class-name'],
+  main_class = cl_args['topology-class-name']
+  msg, extra_msg, retcode = execute.heron_tar(
+      main_class,
       topology_file,
       tuple(unknown_args),
       tmp_dir,
       java_defines)
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
+  if retcode != 0:
+    return response.TopologyDefCreationResponse(
+        topology_file, main_class, 'java', retcode, None, msg, extra_msg)
 
-  except Exception:
-    return False
+  responses = launch_topologies(cl_args, topology_file, 'java', tmp_dir)
+  shutil.rmtree(tmp_dir)
 
-  finally:
-    shutil.rmtree(tmp_dir)
-
-  return True
+  return responses
 
 ################################################################################
 #  Execute the pex file to create topology definition file by running
@@ -249,22 +241,15 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
-  try:
-    execute.heron_pex(topology_file, topology_class_name, tuple(unknown_args))
-  except Exception as ex:
-    Log.error("Error when loading a topology: %s" % str(ex))
-    return False
+  msg, extra_msg, retcode = execute.heron_pex(
+      topology_file, topology_class_name, tuple(unknown_args))
+  if retcode != 0:
+    return response.TopologyDefLoadResponse(
+        status=retcode, defn_file=topology_file, err_msg=msg, extra_msg=extra_msg)
+  responses = launch_topologies(cl_args, topology_file, 'python', tmp_dir)
+  shutil.rmtree(tmp_dir)
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
-
-  except Exception as ex:
-    return False
-
-  finally:
-    shutil.rmtree(tmp_dir)
-
-  return True
+  return responses
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -287,7 +272,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar|pex file %s does not exist" % topology_file)
+    Log.error("Topology jar|tar|pex file %s does not exist", topology_file)
     return False
 
   # check if it is a valid file type
@@ -320,12 +305,18 @@ def run(command, parser, cl_args, unknown_args):
 
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
-    return submit_fatjar(cl_args, unknown_args, tmp_dir)
+    resp = submit_fatjar(cl_args, unknown_args, tmp_dir)
+    response.render(resp)
+    return True
 
   elif tar_type:
-    return submit_tar(cl_args, unknown_args, tmp_dir)
+    resp = submit_tar(cl_args, unknown_args, tmp_dir)
+    response.render(resp)
+    return True
 
   elif pex_type:
-    return submit_pex(cl_args, unknown_args, tmp_dir)
+    resp = submit_pex(cl_args, unknown_args, tmp_dir)
+    response.render(resp)
+    return True
 
   return False
