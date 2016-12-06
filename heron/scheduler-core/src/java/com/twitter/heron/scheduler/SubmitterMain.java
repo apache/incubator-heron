@@ -329,8 +329,18 @@ public class SubmitterMain {
       /* Since only stderr is used (by logging), we use stdout here to
          propagate error message back to Python's executor.py (invoke site). */
       System.out.println(e.getMessage());
+      /* Meaning of exit status code:
+         - status code = 0:
+           SubmitterMain exits without error
+         - 0 < status code < 100:
+           SubmitterMain fails to execute before program execution. For example,
+           JVM cannot find or load main class
+         - status code >= 100:
+           SubmitterMain fails to launch after program execution. For example,
+           topology definition file fails to be loaded */
+      // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
-      System.exit(101);
+      System.exit(100);
     }
     LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
   }
