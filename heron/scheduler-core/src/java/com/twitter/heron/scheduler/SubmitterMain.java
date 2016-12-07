@@ -37,11 +37,11 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.LauncherException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
-import com.twitter.heron.spi.utils.LauncherException;
 import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -328,6 +328,7 @@ public class SubmitterMain {
     } catch (Exception e) {
       /* Since only stderr is used (by logging), we use stdout here to
          propagate error message back to Python's executor.py (invoke site). */
+      LOG.log(Level.SEVERE, "Exception happens when submitting topology", e);
       System.out.println(e.getMessage());
       /* Meaning of exit status code:
          - status code = 0:

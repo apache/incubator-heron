@@ -85,7 +85,8 @@ public class LocalFileSystemUploader implements IUploader {
 
     // if the dest directory does not exist, create it.
     if (!parentDirectory.exists()) {
-      LOG.fine("The working directory does not exist. Creating it now.");
+      LOG.fine(String.format(
+          "Working directory does not exist. Creating it now at %s", parentDirectory.getPath()));
       if (!parentDirectory.mkdirs()) {
         throw new UploaderException(
             String.format("Failed to create directory for topology package at %s",
@@ -111,7 +112,7 @@ public class LocalFileSystemUploader implements IUploader {
     } catch (IOException e) {
       throw new UploaderException(
             String.format("Unable to copy topology file from '%s' to '%s'",
-                source.toString(), filePath), e);
+                source, filePath), e);
     }
 
     return getUri(destTopologyFile);

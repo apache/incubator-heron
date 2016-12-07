@@ -54,7 +54,8 @@ public class LauncherUtils {
       // create an instance of the packing class
       packing = ReflectionUtils.newInstance(packingClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      throw new PackingException("Failed to instantiate packing instance", e);
+      throw new PackingException(String.format(
+          "Failed to instantiate packing instance using packing class %s", packingClass), e);
     }
 
     try {
