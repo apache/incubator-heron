@@ -422,9 +422,9 @@ public class SubmitterMain {
 
       callLauncherRunner(runtime);
     } catch (LauncherException | PackingException e) {
+      // we undo uploading of topology package only if launcher fails to
+      // launch topology, which will throw LauncherException or PackingException
       uploader.undo();
-      throw e;
-    } catch (TopologySubmissionException | IllegalArgumentException | UploaderException e) {
       throw e;
     } finally {
       SysUtils.closeIgnoringExceptions(uploader);
