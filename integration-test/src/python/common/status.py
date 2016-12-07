@@ -15,12 +15,13 @@
 
 """Classes to represent the success or failure of an integration test"""
 import logging
+import traceback
 
 class TestFailure(Exception):
   def __init__(self, message, error=None):
     Exception.__init__(self, message, error)
     if error:
-      logging.error("%s :: %s", message, str(error))
+      logging.error("%s :: %s", message, traceback.format_exc(error))
     else:
       logging.error(message)
 

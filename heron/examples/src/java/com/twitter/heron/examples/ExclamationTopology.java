@@ -16,6 +16,8 @@ package com.twitter.heron.examples;
 
 import java.util.Map;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -48,9 +50,9 @@ public final class ExclamationTopology {
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 3L * 1024 * 1024 * 1024);
-    conf.setComponentRam("exclaim1", 3L * 1024 * 1024 * 1024);
-    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
+    conf.setComponentRam("word", ByteAmount.fromGigabytes(3));
+    conf.setComponentRam("exclaim1", ByteAmount.fromGigabytes(3));
+    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(5));
     conf.setContainerCpuRequested(5);
 
     if (args != null && args.length > 0) {

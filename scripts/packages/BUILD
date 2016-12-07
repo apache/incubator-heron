@@ -281,7 +281,7 @@ sh_binary(
 genrule(
     name = "generate-package-info",
     outs = generated_release_files,
-    cmd = "$(location :package-info-generator) $$(find . -name '*status*.txt') >$@",
+    cmd = "$(location :package-info-generator) $$(find -L . -name '*status*.txt') >$@",
     stamp = 1,
     tools = [":package-info-generator"],
 )

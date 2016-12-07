@@ -21,6 +21,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 public class ClusterConfigTest {
   private static final Logger LOG = Logger.getLogger(ClusterConfigTest.class.getName());
 
@@ -104,17 +106,17 @@ public class ClusterConfigTest {
     );
 
     Assert.assertEquals(
-        Long.valueOf(128 * Constants.MB),
+        ByteAmount.fromMegabytes(128),
         Context.instanceRam(props)
     );
 
     Assert.assertEquals(
-        Long.valueOf(256 * Constants.MB),
+        ByteAmount.fromMegabytes(256),
         Context.instanceDisk(props)
     );
 
     Assert.assertEquals(
-        Long.valueOf(512 * Constants.MB),
+        ByteAmount.fromMegabytes(512),
         Context.stmgrRam(props)
     );
   }

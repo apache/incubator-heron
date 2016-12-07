@@ -24,11 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.AssertPacking;
-import com.twitter.heron.packing.PackingUtils;
+import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -99,8 +99,8 @@ public class FirstFitDecreasingPackingTest {
    */
   private static PackingPlan doScalingTest(TopologyAPI.Topology topology,
                                            Map<String, Integer> componentChanges,
-                                           long boltRam,
-                                           int boltParallelism, long spoutRam,
+                                           ByteAmount boltRam,
+                                           int boltParallelism, ByteAmount spoutRam,
                                            int spoutParallelism,
                                            int numContainersBeforeRepack,
                                            int totalInstancesExpected) {
@@ -153,7 +153,7 @@ public class FirstFitDecreasingPackingTest {
     int numContainers = 2;
 
     // Explicit set insufficient ram for container
-    long containerRam = -1L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
 
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     topologyConfig.setContainerMaxRamHint(containerRam);
@@ -172,9 +172,8 @@ public class FirstFitDecreasingPackingTest {
 
     Assert.assertEquals(2, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
-    long defaultRam = PackingUtils.increaseBy(
-        defaultNumInstancesperContainer * instanceDefaultResources.getRam(),
-        DEFAULT_CONTAINER_PADDING);
+    ByteAmount defaultRam = instanceDefaultResources.getRam()
+        .multiply(defaultNumInstancesperContainer).increaseBy(DEFAULT_CONTAINER_PADDING);
 
     AssertPacking.assertContainerRam(packingPlan.getContainers(), defaultRam);
     AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, 3);
@@ -196,8 +195,8 @@ public class FirstFitDecreasingPackingTest {
 
     Assert.assertEquals(2, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
-    long defaultRam = PackingUtils.increaseBy(
-        defaultNumInstancesperContainer * instanceDefaultResources.getRam(), padding);
+    ByteAmount defaultRam = instanceDefaultResources.getRam()
+        .multiply(defaultNumInstancesperContainer).increaseBy(padding);
     AssertPacking.assertContainerRam(packingPlan.getContainers(),
         defaultRam);
     AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, 3);
@@ -210,8 +209,8 @@ public class FirstFitDecreasingPackingTest {
   @Test
   public void testContainerRequestedResources() throws Exception {
     // Explicit set resources for container
-    long containerRam = 10L * Constants.GB;
-    long containerDisk = 20L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     float containerCpu = 30;
 
     topologyConfig.setContainerMaxRamHint(containerRam);
@@ -236,13 +235,14 @@ public class FirstFitDecreasingPackingTest {
           totalInstances * instanceDefaultResources.getCpu(), DEFAULT_CONTAINER_PADDING)),
           (long) containerPlan.getRequiredResource().getCpu());
 
-      Assert.assertEquals(PackingUtils.increaseBy(
-          totalInstances * instanceDefaultResources.getRam(),
-          DEFAULT_CONTAINER_PADDING),
+      Assert.assertEquals(instanceDefaultResources.getRam()
+              .multiply(totalInstances)
+              .increaseBy(DEFAULT_CONTAINER_PADDING),
           containerPlan.getRequiredResource().getRam());
 
-      Assert.assertEquals(PackingUtils.increaseBy(
-          totalInstances * instanceDefaultResources.getDisk(), DEFAULT_CONTAINER_PADDING),
+      Assert.assertEquals(instanceDefaultResources.getDisk()
+              .multiply(totalInstances)
+              .increaseBy(DEFAULT_CONTAINER_PADDING),
           containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
@@ -264,13 +264,13 @@ public class FirstFitDecreasingPackingTest {
   public void testCompleteRamMapRequested() throws Exception {
     // Explicit set max resources for container
     // the value should be ignored, since we set the complete component ram map
-    long maxContainerRam = 15L * Constants.GB;
-    long maxContainerDisk = 20L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(15);
+    ByteAmount maxContainerDisk = ByteAmount.fromGigabytes(20);
     float maxContainerCpu = 30;
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setContainerMaxDiskHint(maxContainerDisk);
@@ -298,11 +298,11 @@ public class FirstFitDecreasingPackingTest {
    */
   @Test
   public void testCompleteRamMapRequested2() throws Exception {
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -330,10 +330,10 @@ public class FirstFitDecreasingPackingTest {
   @Test
   public void testPartialRamMap() throws Exception {
     // Explicit set resources for container
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
 
     // Explicit set component ram map
-    long boltRam = 4L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(4);
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -361,10 +361,10 @@ public class FirstFitDecreasingPackingTest {
   public void testPartialRamMapWithPadding() throws Exception {
     topologyConfig.setContainerPaddingPercentage(0);
     // Explicit set resources for container
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
 
     // Explicit set component ram map
-    long boltRam = 4L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(4);
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -390,11 +390,11 @@ public class FirstFitDecreasingPackingTest {
    */
   @Test(expected = RuntimeException.class)
   public void testInvalidRamInstance() throws Exception {
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     int defaultNumInstancesperContainer = 4;
 
     // Explicit set component ram map
-    long boltRam = 0L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.ZERO;
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -407,7 +407,7 @@ public class FirstFitDecreasingPackingTest {
     AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
     AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
     AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
-        defaultNumInstancesperContainer * instanceDefaultResources.getRam());
+        instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
   }
 
   /**
@@ -434,13 +434,15 @@ public class FirstFitDecreasingPackingTest {
           defaultNumInstancesperContainer * instanceDefaultResources.getCpu(),
           DEFAULT_CONTAINER_PADDING)), (long) containerPlan.getRequiredResource().getCpu());
 
-      Assert.assertEquals(PackingUtils.increaseBy(
-          defaultNumInstancesperContainer * instanceDefaultResources.getRam(),
-          DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getRam());
+      Assert.assertEquals(instanceDefaultResources.getRam()
+          .multiply(defaultNumInstancesperContainer)
+          .increaseBy(DEFAULT_CONTAINER_PADDING),
+          containerPlan.getRequiredResource().getRam());
 
-      Assert.assertEquals(PackingUtils.increaseBy(
-          defaultNumInstancesperContainer * instanceDefaultResources.getDisk(),
-          DEFAULT_CONTAINER_PADDING), containerPlan.getRequiredResource().getDisk());
+      Assert.assertEquals(instanceDefaultResources.getDisk()
+          .multiply(defaultNumInstancesperContainer)
+          .increaseBy(DEFAULT_CONTAINER_PADDING),
+          containerPlan.getRequiredResource().getDisk());
     }
   }
 
@@ -452,8 +454,8 @@ public class FirstFitDecreasingPackingTest {
     int paddingPercentage = 50;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set component ram map
-    long boltRam = 4L * Constants.GB;
-    long maxContainerRam = 10L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(4);
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
 
@@ -479,12 +481,12 @@ public class FirstFitDecreasingPackingTest {
     for (PackingPlan.ContainerPlan containerPlan : newPackingPlan.getContainers()) {
       //Each container either contains a single bolt or 1 bolt and 2 spouts
       if (containerPlan.getInstances().size() == 1) {
-        Assert.assertEquals(PackingUtils.increaseBy(boltRam, paddingPercentage),
+        Assert.assertEquals(boltRam.increaseBy(paddingPercentage),
             containerPlan.getRequiredResource().getRam());
       }
       if (containerPlan.getInstances().size() == 3) {
-        long resourceRam = boltRam + 2 * instanceDefaultResources.getRam();
-        Assert.assertEquals(PackingUtils.increaseBy(resourceRam, paddingPercentage),
+        ByteAmount resourceRam = boltRam.plus(instanceDefaultResources.getRam().multiply(2));
+        Assert.assertEquals(resourceRam.increaseBy(paddingPercentage),
             containerPlan.getRequiredResource().getRam());
       }
     }
@@ -496,10 +498,8 @@ public class FirstFitDecreasingPackingTest {
   @Test
   public void testPartialRamMapScaling() throws Exception {
 
-    // Explicit set resources for container
-    long maxContainerRam = 10L * Constants.GB;
-    // Explicit set component ram map
-    long boltRam = 4L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(4);
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
 
@@ -619,10 +619,8 @@ public class FirstFitDecreasingPackingTest {
   public void scaleDownAndUpWithExtraPadding() throws Exception {
     int paddingPercentage = 50;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
-    // Explicit set resources for container
-    long maxContainerRam = 12L * Constants.GB;
-    // Explicit set component ram map
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
 
@@ -660,10 +658,8 @@ public class FirstFitDecreasingPackingTest {
   public void scaleDownAndUpNoPadding() throws Exception {
     int paddingPercentage = 0;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
-    // Explicit set resources for container
-    long maxContainerRam = 12L * Constants.GB;
-    // Explicit set component ram map
-    long spoutRam = 4L * Constants.GB;
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(4);
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
 

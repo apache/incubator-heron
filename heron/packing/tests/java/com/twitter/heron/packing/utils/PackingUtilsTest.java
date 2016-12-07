@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.twitter.heron.packing;
+package com.twitter.heron.packing.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,9 +106,9 @@ public class PackingUtilsTest {
         componentChanges, defaultInstanceResources, PackingUtils.ScalingDirection.DOWN);
     Assert.assertEquals((long) (boltScalingDown * defaultInstanceResources.getCpu()),
         (long) scaledownResource.getCpu());
-    Assert.assertEquals(boltScalingDown * defaultInstanceResources.getRam(),
+    Assert.assertEquals(defaultInstanceResources.getRam().multiply(boltScalingDown),
         scaledownResource.getRam());
-    Assert.assertEquals(boltScalingDown * defaultInstanceResources.getDisk(),
+    Assert.assertEquals(defaultInstanceResources.getDisk().multiply(boltScalingDown),
         scaledownResource.getDisk());
   }
 
@@ -137,9 +137,9 @@ public class PackingUtilsTest {
         componentChanges, defaultInstanceResources, PackingUtils.ScalingDirection.UP);
     Assert.assertEquals((long) (boltScalingUp * defaultInstanceResources.getCpu()),
         (long) scaleupResource.getCpu());
-    Assert.assertEquals(boltScalingUp * defaultInstanceResources.getRam(),
+    Assert.assertEquals(defaultInstanceResources.getRam().multiply(boltScalingUp),
         scaleupResource.getRam());
-    Assert.assertEquals(boltScalingUp * defaultInstanceResources.getDisk(),
+    Assert.assertEquals(defaultInstanceResources.getDisk().multiply(boltScalingUp),
         scaleupResource.getDisk());
   }
 }

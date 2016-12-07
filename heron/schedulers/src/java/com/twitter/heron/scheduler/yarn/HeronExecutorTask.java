@@ -105,6 +105,11 @@ public class HeronExecutorTask implements Task {
     HeronReefUtils.extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
     HeronReefUtils.extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
+    startExecutor();
+    return null;
+  }
+
+  public void startExecutor() {
     LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
     String[] executorCmd = getExecutorCommand();
 
@@ -131,7 +136,6 @@ public class HeronExecutorTask implements Task {
       LOG.log(Level.INFO, "Destroy heron executor-id: {0}", heronExecutorId);
       regularExecutor.destroy();
     }
-    return null;
   }
 
   HashMap<String, String> getEnvironment(String cwdPath) {
