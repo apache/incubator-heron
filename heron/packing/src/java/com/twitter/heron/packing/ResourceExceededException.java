@@ -22,4 +22,8 @@ public class ResourceExceededException extends Exception {
   public ResourceExceededException(String message) {
     super(message);
   }
+
+  public ResourceExceededException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

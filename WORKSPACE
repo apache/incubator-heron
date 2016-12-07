@@ -1,7 +1,7 @@
 # versions shared across artifacts that should be upgraded together
-aws_version = "1.11.14"
+aws_version = "1.11.58"
 curator_version = "2.9.0"
-jackson_version = "2.6.3"
+jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
@@ -49,6 +49,11 @@ maven_jar(
 maven_jar(
   name = "commons_beanutils_commons_beanutils",
   artifact = "commons-beanutils:commons-beanutils:1.9.2",
+)
+
+maven_jar(
+  name = "commons_codec",
+  artifact = "commons-codec:commons-codec:1.9",
 )
 
 maven_jar(

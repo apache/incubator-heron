@@ -31,6 +31,7 @@ aurora_deps_files = [
 yarn_deps_files = [
     "//heron/packing/src/java:roundrobin-packing",
     "//heron/schedulers/src/java:yarn-scheduler-java",
+    "//heron/scheduler-core/src/java:scheduler-java",
     "@org_apache_reef_reef_common//jar",
     "@org_apache_reef_tang//jar",
     "@org_apache_reef_wake//jar",
@@ -88,7 +89,6 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.yarn.YarnSchedulerTest",
     "com.twitter.heron.scheduler.yarn.HeronMasterDriverTest",
-    "com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest",
     "com.twitter.heron.scheduler.yarn.HeronExecutorTaskTest",
     "com.twitter.heron.scheduler.yarn.YarnLauncherTest",
   ],

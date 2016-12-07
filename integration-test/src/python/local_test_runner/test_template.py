@@ -268,9 +268,9 @@ class TestTemplate(object):
           return packing_plan
         elif retries_left == 0:
           raise status.TestFailure(
-              #pylint: disable=too-many-format-args
-              "Got pplan from tracker for test %s but the number of instances found (%d) was " +\
-              "less than min expected (%s)." % (self.testname, instances_found, min_instances))
+              "Got packing plan from tracker for test %s but the number of " % self.testname +
+              "instances found (%d) was less than min expected (%s)." %
+              (instances_found, min_instances))
 
       if retries_left > 0:
         _sleep("before trying again to fetch pplan for test %s (attempt %s/%s)" %

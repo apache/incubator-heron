@@ -17,6 +17,10 @@ package com.twitter.heron.scheduler.yarn;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.google.common.base.Optional;
 
@@ -26,31 +30,45 @@ import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.evaluator.FailedEvaluator;
 import org.apache.reef.evaluator.context.parameters.ContextIdentifier;
+import org.apache.reef.runtime.common.files.REEFFileNames;
 import org.apache.reef.tang.Configuration;
 import org.apache.reef.tang.types.NamedParameterNode;
+import org.apache.reef.wake.time.event.StartTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
-import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.scheduler.SchedulerMain;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(PowerMockRunner.class)
 public class HeronMasterDriverTest {
   private EvaluatorRequestor mockRequestor;
   private HeronMasterDriver driver;
@@ -60,7 +78,7 @@ public class HeronMasterDriverTest {
   public void createMocks() throws IOException {
     mockRequestor = mock(EvaluatorRequestor.class);
     driver = new HeronMasterDriver(mockRequestor,
-        null,
+        new REEFFileNames(),
         "yarn",
         "heron",
         "testTopology",
@@ -70,25 +88,18 @@ public class HeronMasterDriverTest {
         "core",
         0,
         false);
-    spyDriver = Mockito.spy(driver);
+    spyDriver = spy(driver);
     doReturn("").when(spyDriver).getComponentRamMap();
   }
 
   @Test
   public void requestContainerForWorkerSubmitsValidRequest() {
-    EvaluatorRequest request = spyDriver.createEvaluatorRequest(5, 786);
-    doReturn(request).when(spyDriver).createEvaluatorRequest(5, 786);
-    HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(3, 5, 786);
+    ByteAmount memory = ByteAmount.fromMegabytes(786);
+    EvaluatorRequest request = spyDriver.createEvaluatorRequest(5, memory);
+    doReturn(request).when(spyDriver).createEvaluatorRequest(5, memory);
+    HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(3, 5, memory);
     spyDriver.requestContainerForWorker(3, worker);
     verify(mockRequestor, times(1)).submit(request);
-  }
-
-  @Test
-  public void scheduleTMasterContainerRequestsContainerForTM() throws Exception {
-    spyDriver.scheduleTMasterContainer();
-    verify(spyDriver, times(1)).requestContainerForWorker(eq(0), anyHeronWorker());
-    verify(spyDriver, times(1)).createEvaluatorRequest(1, HeronMasterDriver.TM_MEM_SIZE_MB);
-    verify(mockRequestor, times(1)).submit(any(EvaluatorRequest.class));
   }
 
   @Test
@@ -110,14 +121,22 @@ public class HeronMasterDriverTest {
   }
 
   @Test
-  public void onKillClosesContainers() throws Exception {
+  public void onKillClosesContainersKillsTMaster() throws Exception {
+    HeronMasterDriver.TMaster mockTMaster = mock(HeronMasterDriver.TMaster.class);
+    when(spyDriver.buildTMaster(any(ExecutorService.class))).thenReturn(mockTMaster);
+
     int numContainers = 3;
     AllocatedEvaluator[] mockEvaluators = createApplicationWithContainers(numContainers);
+    spyDriver.launchTMaster();
+
     spyDriver.killTopology();
+
     for (int id = 0; id < numContainers; id++) {
       Mockito.verify(mockEvaluators[id]).close();
       assertFalse(spyDriver.lookupByEvaluatorId("e" + id).isPresent());
     }
+
+    verify(mockTMaster, times(1)).killTMaster();
   }
 
   /**
@@ -137,9 +156,6 @@ public class HeronMasterDriverTest {
     }
   }
 
-  /**
-   * Tests if a specific worker can be killed and restarted
-   */
   @Test
   public void restartWorkerRestartsSpecificWorker() throws Exception {
     int numContainers = 3;
@@ -263,10 +279,10 @@ public class HeronMasterDriverTest {
   @Test
   public void findLargestFittingWorkerReturnsLargestWorker() {
     Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
-    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
-    workers.add(new HeronMasterDriver.HeronWorker(2, 7, 7 * 1024));
-    workers.add(new HeronMasterDriver.HeronWorker(3, 5, 5 * 1024));
-    workers.add(new HeronMasterDriver.HeronWorker(4, 1, 1 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromGigabytes(3)));
+    workers.add(new HeronMasterDriver.HeronWorker(2, 7, ByteAmount.fromGigabytes(7)));
+    workers.add(new HeronMasterDriver.HeronWorker(3, 5, ByteAmount.fromGigabytes(5)));
+    workers.add(new HeronMasterDriver.HeronWorker(4, 1, ByteAmount.fromGigabytes(1)));
 
     // enough memory and cores to fit largest container, 2
     verifyFittingContainer(workers, 7 * 1024 + 100, 7, 2);
@@ -300,9 +316,9 @@ public class HeronMasterDriverTest {
   @Test
   public void fitBiggestContainerIgnoresCoresIfMissing() {
     Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
-    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromGigabytes(3)));
 
-    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, 3 * 1024);
+    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, ByteAmount.fromGigabytes(3));
     Optional<HeronMasterDriver.HeronWorker> result =
         spyDriver.findLargestFittingWorker(mockEvaluator, workers, false);
     Assert.assertFalse(result.isPresent());
@@ -332,17 +348,94 @@ public class HeronMasterDriverTest {
 
   @Test
   public void onNextAllocatedEvaluatorDiscardsExtraWorker() throws Exception {
-    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, 123);
+    AllocatedEvaluator mockEvaluator
+        = createMockEvaluator("test", 1, ByteAmount.fromMegabytes(123));
     assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
     spyDriver.new ContainerAllocationHandler().onNext(mockEvaluator);
     assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
     verify(mockEvaluator, never()).submitContext(any(Configuration.class));
   }
 
+  @Test
+  public void tMasterLaunchLaunchesExecutorForTMaster() throws Exception {
+    ExecutorService executorService = mock(ExecutorService.class);
+    HeronMasterDriver.TMaster tMaster = spyDriver.buildTMaster(executorService);
+    doReturn(mock(Future.class)).when(executorService).submit(tMaster);
+    tMaster.launch();
+    verify(executorService, times(1)).submit(tMaster);
+  }
+
+  @Test
+  public void tMasterKillTerminatesTMaster() throws Exception {
+    ExecutorService mockExecutorService = mock(ExecutorService.class);
+    HeronMasterDriver.TMaster tMaster = spyDriver.buildTMaster(mockExecutorService);
+
+    Future<?> mockFuture = mock(Future.class);
+    doReturn(mockFuture).when(mockExecutorService).submit(tMaster);
+
+    tMaster.launch();
+    tMaster.killTMaster();
+
+    verify(mockFuture, times(1)).cancel(true);
+    verify(mockExecutorService, times(1)).shutdownNow();
+  }
+
+  @Test
+  public void tMasterLaunchRestartsTMasterOnFailure() throws Exception {
+    HeronMasterDriver.TMaster tMaster =
+        spy(spyDriver.buildTMaster(Executors.newSingleThreadExecutor()));
+
+    HeronExecutorTask mockTask = mock(HeronExecutorTask.class);
+    final CountDownLatch testLatch = new CountDownLatch(1);
+    doAnswer(new Answer<Object>() {
+      @Override
+      public Object answer(InvocationOnMock invocation) throws Throwable {
+        testLatch.await();
+        return null;
+      }
+    }).when(mockTask).startExecutor();
+    doReturn(mockTask).when(tMaster).getTMasterExecutorTask();
+
+    tMaster.launch();
+
+    verify(mockTask, timeout(1000).times(1)).startExecutor();
+    testLatch.countDown();
+    //retries if tmaster ends for some reason
+    verify(mockTask, timeout(1000).times(3)).startExecutor();
+  }
+
+  @Test
+  @PrepareForTest({HeronReefUtils.class, SchedulerMain.class})
+  public void onNextStartTimeStartsSchedulerTMaster() throws Exception {
+    PowerMockito.spy(HeronReefUtils.class);
+    PowerMockito.doNothing().when(HeronReefUtils.class,
+        "extractPackageInSandbox",
+        anyString(),
+        anyString(),
+        anyString());
+
+    SchedulerMain mockScheduler = mock(SchedulerMain.class);
+    PowerMockito.spy(SchedulerMain.class);
+    PowerMockito.doReturn(mockScheduler).when(SchedulerMain.class,
+        "createInstance",
+        anyString(),
+        anyString(),
+        anyString(),
+        anyString(),
+        anyString(),
+        eq(0),
+        eq(false));
+
+    spyDriver.new HeronSchedulerLauncher().onNext(new StartTime(System.currentTimeMillis()));
+
+    verify(mockScheduler, times(1)).runScheduler();
+  }
+
   private AllocatedEvaluator[] createApplicationWithContainers(int numContainers) {
     AllocatedEvaluator[] mockEvaluators = new AllocatedEvaluator[numContainers];
     for (int id = 0; id < numContainers; id++) {
-      mockEvaluators[id] = simulateContainerAllocation("e" + id, 1, 123, id);
+      mockEvaluators[id]
+          = simulateContainerAllocation("e" + id, 1, ByteAmount.fromMegabytes(123), id);
     }
     for (int id = 0; id < numContainers; id++) {
       assertEquals(Integer.valueOf(id), spyDriver.lookupByEvaluatorId("e" + id).get());
@@ -354,7 +447,7 @@ public class HeronMasterDriverTest {
 
   private AllocatedEvaluator simulateContainerAllocation(String evaluatorId,
                                                          int cores,
-                                                         int ram,
+                                                         ByteAmount ram,
                                                          int workerId) {
     AllocatedEvaluator evaluator = createMockEvaluator(evaluatorId, cores, ram);
     HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(workerId, cores, ram);
@@ -370,9 +463,9 @@ public class HeronMasterDriverTest {
     return evaluator;
   }
 
-  private AllocatedEvaluator createMockEvaluator(String evaluatorId, int cores, int mem) {
+  private AllocatedEvaluator createMockEvaluator(String evaluatorId, int cores, ByteAmount mem) {
     EvaluatorDescriptor descriptor = mock(EvaluatorDescriptor.class);
-    when(descriptor.getMemory()).thenReturn(mem);
+    when(descriptor.getMemory()).thenReturn(((Long) mem.asMegabytes()).intValue());
     when(descriptor.getNumberOfCores()).thenReturn(cores);
     AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
     when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(descriptor);
@@ -380,8 +473,8 @@ public class HeronMasterDriverTest {
     return mockEvaluator;
   }
 
-  private int getRam(PackingPlan.ContainerPlan container1) {
-    return (int) (container1.getRequiredResource().getRam() / Constants.MB);
+  private ByteAmount getRam(PackingPlan.ContainerPlan container) {
+    return container.getRequiredResource().getRam();
   }
 
   private int getCpu(PackingPlan.ContainerPlan container) {
