@@ -20,15 +20,11 @@ public class LauncherException extends RuntimeException {
 
   private static final long serialVersionUID = 8518462128140884098L;
 
-  private final String topologyName;
-
-  public LauncherException(String message, String topologyName) {
+  public LauncherException(String message) {
     super(message);
-    this.topologyName = topologyName;
   }
 
-  public LauncherException(String message, String topologyName, Throwable cause) {
+  public LauncherException(String message, Throwable cause) {
     super(message, cause);
-    this.topologyName = topologyName;
   }
 }

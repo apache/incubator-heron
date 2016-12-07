@@ -138,13 +138,15 @@ public class LaunchRunner {
     // TODO(rli): log-and-false anti-pattern is too nested on this path. will not refactor
     result = statemgr.setTopology(trimTopology(topology), topologyName);
     if (result == null || !result) {
-      throw new LauncherException("Failed to set topology definition", topologyName);
+      throw new LauncherException(String.format(
+          "Failed to set topology definition for topology '%s'", topologyName));
     }
 
     result = statemgr.setPackingPlan(createPackingPlan(packedPlan), topologyName);
     if (result == null || !result) {
       statemgr.deleteTopology(topologyName);
-      throw new LauncherException("Failed to set packing plan", topologyName);
+      throw new LauncherException(String.format(
+          "Failed to set packing plan for topology '%s'", topologyName));
     }
 
     // store the execution state into the state manager
@@ -154,7 +156,8 @@ public class LaunchRunner {
     if (result == null || !result) {
       statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
-      throw new LauncherException("Failed to set execution state", topologyName);
+      throw new LauncherException(String.format(
+          "Failed to set execution state for topology '%s'", topologyName));
     }
 
     // launch the topology, clear the state if it fails
@@ -162,7 +165,8 @@ public class LaunchRunner {
       statemgr.deleteExecutionState(topologyName);
       statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
-      throw new LauncherException("Failed to launch topology", topologyName);
+      throw new LauncherException(String.format(
+          "Failed to launch topology '%s'", topologyName));
     }
   }
 }
