@@ -16,6 +16,7 @@
 package com.twitter.heron.slamgr;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,8 @@ public class MetricCache {
     metrics_sinks_yaml_ = metrics_sinks_yaml;
     tmetrics_info_ = new SLAMetrics(metrics_sinks_yaml);
     start_time_ = (int) new Date().getTime();
+
+    metrics_ = new HashMap<>();
   }
 
   public void AddMetric(PublishMetrics _metrics) {
@@ -155,6 +158,8 @@ public class MetricCache {
     TimeBucket(int bucket_interval) {
       start_time_ = (int) new Date().getTime() / 1000;
       end_time_ = start_time_ + bucket_interval;
+
+      data_ = new LinkedList<>();
     }
 
     boolean overlaps(long start_time, long end_time) {
@@ -198,6 +203,7 @@ public class MetricCache {
       all_time_nitems_ = 0;
       bucket_interval_ = bucket_interval;
 
+      data_ = new LinkedList<>();
       for (int i = 0; i < nbuckets; ++i) {
         data_.offerLast(new TimeBucket(bucket_interval_));
       }
@@ -324,6 +330,8 @@ public class MetricCache {
       instance_id_ = instance_id;
       nbuckets_ = nbuckets;
       bucket_interval_ = bucket_interval;
+
+      metrics_ = new HashMap<>();
     }
 
     // Clear old metrics associated with this instance.
@@ -382,6 +390,8 @@ public class MetricCache {
       component_name_ = component_name;
       nbuckets_ = nbuckets;
       bucket_interval_ = bucket_interval;
+
+      metrics_ = new HashMap<>();
     }
 
     // Remove old metrics and exception associated with this spout/bolt component.
