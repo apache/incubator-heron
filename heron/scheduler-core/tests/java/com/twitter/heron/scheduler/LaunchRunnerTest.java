@@ -280,7 +280,7 @@ public class LaunchRunnerTest {
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
 
-    assertTrue(launchRunner.call());
+    launchRunner.call();
 
     // Verify set && clean
     verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));

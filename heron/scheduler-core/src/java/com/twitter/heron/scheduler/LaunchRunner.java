@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler;
 
-import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -34,7 +33,7 @@ import com.twitter.heron.spi.utils.Runtime;
 /**
  * Runs Launcher and launch topology. Also Uploads launch state to state manager.
  */
-public class LaunchRunner implements Callable<Boolean> {
+public class LaunchRunner {
   private static final Logger LOG = Logger.getLogger(LaunchRunner.class.getName());
 
   private Config config;
@@ -115,8 +114,13 @@ public class LaunchRunner implements Callable<Boolean> {
     return serializer.toProto(packingPlan);
   }
 
-  @Override
-  public Boolean call() throws LauncherException, PackingException {
+  /**
+   * Call launcher to launch topology
+   *
+   * @throws LauncherException
+   * @throws PackingException
+   */
+  public void call() throws LauncherException, PackingException {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
@@ -160,7 +164,5 @@ public class LaunchRunner implements Callable<Boolean> {
       statemgr.deleteTopology(topologyName);
       throw new LauncherException("Failed to launch topology", topologyName);
     }
-
-    return true;
   }
 }
