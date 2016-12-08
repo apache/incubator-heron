@@ -393,7 +393,7 @@ public class SubmitterMain {
     try {
       launcher = ReflectionUtils.newInstance(launcherClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      throw new TopologySubmissionException(
+      throw new LauncherException(
           String.format("Failed to instantiate launcher class '%s'", launcherClass), e);
     }
 
@@ -401,7 +401,7 @@ public class SubmitterMain {
     try {
       uploader = ReflectionUtils.newInstance(uploaderClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      throw new TopologySubmissionException(
+      throw new UploaderException(
           String.format("Failed to instantiate uploader class '%s'", uploaderClass), e);
     }
 
