@@ -123,4 +123,17 @@ public final class FileUtils {
   public static String getBaseName(String file) {
     return new File(file).getName();
   }
+
+  public static String getPkgType(String topologyBinaryFile) {
+    String pkgType;
+    String basename = FileUtils.getBaseName(topologyBinaryFile);
+    if (FileUtils.isOriginalPackagePex(basename)) {
+      pkgType = "pex";
+    } else if (FileUtils.isOriginalPackageJar(basename)) {
+      pkgType = "jar";
+    } else {
+      pkgType = "tar";
+    }
+    return pkgType;
+  }
 }
