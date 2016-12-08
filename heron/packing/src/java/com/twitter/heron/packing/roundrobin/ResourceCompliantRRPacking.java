@@ -343,7 +343,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     List<Scorer<Container>> scorers = new ArrayList<>();
     scorers.add(new HomogeneityScorer(componentName, true));  // all-same-component containers first
     scorers.add(new InstanceCountScorer());                   // then fewest instances
-    scorers.add(new HomogeneityScorer(componentName, false)); // then least homogeneous
+    scorers.add(new HomogeneityScorer(componentName, false)); // then most homogeneous
     scorers.add(new ContainerIdScorer(false));                // then highest container id
 
     this.containerId = nextContainerId(packingPlanBuilder.removeInstance(scorers, componentName));
