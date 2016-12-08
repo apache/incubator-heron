@@ -47,14 +47,12 @@ def create_parser(subparsers, action, help_arg):
 
 
 ################################################################################
-# pylint: disable=unused-argument
-def run(command, parser, cl_args, unknown_args, action):
+# pylint: disable=dangerous-default-value
+def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
   '''
   helper function to take action on topologies
   :param command:
-  :param parser:
   :param cl_args:
-  :param unknown_args:
   :param action:        description of action taken
   :return:
   '''
@@ -71,11 +69,13 @@ def run(command, parser, cl_args, unknown_args, action):
       "--topology_name", topology_name,
       "--command", command,
   ]
+  new_args += extra_args
+
+  lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
+  lib_jars += extra_lib_jars
 
   if Log.getEffectiveLevel() == logging.DEBUG:
     new_args.append("--verbose")
-
-  lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
   # invoke the runtime manager to kill the topology
   resp = execute.heron_class(
@@ -87,4 +87,9 @@ def run(command, parser, cl_args, unknown_args, action):
 
   response.render(resp)
 
-  return resp.status == response.Status.Ok
+  if resp.status != response.Status.Ok:
+    Log.error("Failed to %s %s", action, topology_name)
+    return False
+  else:
+    Log.error("Successfully %s %s", action, topology_name)
+    return True
