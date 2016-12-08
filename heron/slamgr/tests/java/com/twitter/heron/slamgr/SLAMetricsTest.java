@@ -64,6 +64,6 @@ public class SLAMetricsTest {
   @Test
   public void testIsSLAMetric() {
     Assert.assertTrue(slam.IsSLAMetric("__time_spent_back_pressure_by_compid"));
-    Assert.assertFalse(slam.IsSLAMetric("__time_spent_back_pressure_by_compid_1"));
+    Assert.assertFalse(slam.IsSLAMetric("1__time_spent_back_pressure_by_compid"));
   }
 }

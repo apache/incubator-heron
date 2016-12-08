@@ -83,9 +83,9 @@ public class InstanceMetrics {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("instance: " + instance_id_).append(", nbuckets_: " + nbuckets_)
-        .append(", interval: " + bucket_interval_).append(", data:");
+        .append(", interval: " + bucket_interval_).append(", data:\n");
     for (String k : metrics_.keySet()) {
-      sb.append("{" + k + ":").append(metrics_.get(k)).append("}");
+      sb.append("{" + k + " ::> \n").append(metrics_.get(k)).append("}");
     }
     return sb.toString();
   }

@@ -100,4 +100,14 @@ public class ComponentMetrics {
     }
     return metrics_instance_.get(instance_id);
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("component name: ").append(component_name_).append("; nbuckets: ").append(nbuckets_).append("; bucket_interval: ").append(bucket_interval_).append("; metrics_instance:");
+    for (String k : metrics_instance_.keySet()) {
+      sb.append("\n ").append(k).append(" ~> ").append(metrics_instance_.get(k).toString());
+    }
+    return sb.toString();
+  }
 }

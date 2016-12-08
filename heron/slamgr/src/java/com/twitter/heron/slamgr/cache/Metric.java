@@ -154,13 +154,13 @@ public class Metric {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("name: " + name_).append(", type: " + metric_type_)
+    sb.append("m_name: " + name_).append(", type: " + metric_type_)
         .append(", interval: " + bucket_interval_).append(", nitems: " + all_time_nitems_)
         .append(", cumulative: " + all_time_cumulative_).append(", data");
     for (TimeBucket tb : data_) {
-      sb.append(" => "+tb.toString() );
+      sb.append("\n => " + tb.toString());
     }
-    sb.append(" $");
+    sb.append(" $\n");
     return sb.toString();
   }
 }

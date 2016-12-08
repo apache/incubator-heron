@@ -14,16 +14,42 @@
 package com.twitter.heron.slamgr.cache;
 
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.slamgr.SLAMetrics;
 
 public class ComponentMetricsTest {
+  private static String debugFilePath = "/tmp/" + ComponentMetricsTest.class.getSimpleName() + ".debug.txt";
+
+  private Path file = null;
+  private List<String> lines = null;
+
+  @Before
+  public void before() {
+    file = Paths.get(debugFilePath);
+    lines = new ArrayList<>();
+  }
+
+  @After
+  public void after() throws IOException {
+    Files.write(file, lines, Charset.forName("UTF-8"));
+  }
+
   @Test
   public void test() {
-    ComponentMetrics cm = new ComponentMetrics("component_name", 10 , 60);
+    ComponentMetrics cm = new ComponentMetrics("c_name", 10, 60);
 
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "1");
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "2");
@@ -34,6 +60,8 @@ public class ComponentMetricsTest {
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "4");
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "5");
     cm.AddMetricForInstance("i2", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "6");
+
+    lines.add(cm.toString());
 
     // build request
     TopologyMaster.MetricRequest.Builder request_builder = TopologyMaster.MetricRequest.newBuilder();

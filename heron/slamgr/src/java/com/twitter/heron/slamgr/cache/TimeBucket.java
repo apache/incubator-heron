@@ -15,7 +15,6 @@ package com.twitter.heron.slamgr.cache;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedList;
 
 public // Timeseries of metrics.
@@ -29,7 +28,7 @@ class TimeBucket {
 
   // in seconds
   TimeBucket(int bucket_interval) {
-    start_time_ = (int)Instant.now().getEpochSecond();
+    start_time_ = (int) Instant.now().getEpochSecond();
     end_time_ = start_time_ + bucket_interval;
 
     data_ = new LinkedList<>();
