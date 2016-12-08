@@ -70,15 +70,11 @@ def render(resp):
     for r in resp:
       render(r)
   elif isinstance(resp, Response):
-    # If status code is Ok, we log.info success message(stdout)
-    # and log.debug detailed message(stderr)
     if resp.status == Status.Ok:
       if resp.msg:
         Log.info(resp.msg)
       if resp.detailed_msg:
         Log.debug(resp.detailed_msg)
-    # If status code is HeronError, we log.error error message(exception message in stdout),
-    # and log.debug detailed message (stderr)
     elif resp.status == Status.HeronError:
       if resp.msg:
         Log.error(resp.msg)
@@ -89,6 +85,6 @@ def render(resp):
     elif resp.status == Status.InvocationError:
       Log.error(resp.detailed_msg)
     else:
-      raise RuntimeError("Unknown status type")
+      raise RuntimeError("Unknown status type of value %d", resp.status)
   else:
-    raise RuntimeError("Unknown response instance")
+    raise RuntimeError("Unknown response instance: %s", str(resp.__class__))
