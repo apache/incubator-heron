@@ -60,16 +60,7 @@ public class SubmitterMain {
   protected static Config topologyConfigs(
       String topologyPackage, String topologyBinaryFile, String topologyDefnFile,
       TopologyAPI.Topology topology) {
-
-    String pkgType;
-    String basename = FileUtils.getBaseName(topologyBinaryFile);
-    if (FileUtils.isOriginalPackagePex(basename)) {
-      pkgType = "pex";
-    } else if (FileUtils.isOriginalPackageJar(basename)) {
-      pkgType = "jar";
-    } else {
-      pkgType = "tar";
-    }
+    String pkgType = FileUtils.getPkgType(topologyBinaryFile);
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
