@@ -174,8 +174,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        pack(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
 
     Assert.assertEquals(1, packingPlanExplicitRamMap.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
@@ -204,8 +203,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        pack(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
 
     Assert.assertEquals(2, packingPlanExplicitRamMap.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
