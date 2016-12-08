@@ -14,11 +14,6 @@
 '''response.py'''
 from heron.common.src.python.utils.log import Log
 
-# pylint: disable=no-init
-class Status(object):
-  """Status code enum"""
-  Ok, HeronError, InvocationError = range(3)
-
 # Meaning of exit status code:
 #  - status code = 0:
 #    program exits without error
@@ -28,6 +23,17 @@ class Status(object):
 #  - status code >= 100:
 #    program fails to launch after program execution. For example,
 #    topology definition file fails to be loaded
+#
+
+# If you need to add new class of status code, please assign it value larger than
+# value of the last class of status code
+# pylint: disable=no-init
+class Status(object):
+  """Status code enum"""
+  Ok = 0
+  InvocationError = 1
+  HeronError = 100
+
 def status_type(status_code):
   if status_code == 0:
     return Status.Ok

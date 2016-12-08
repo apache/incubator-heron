@@ -20,11 +20,11 @@ import tempfile
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
+from heron.tools.cli.src.python.response import Response, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
-import heron.tools.cli.src.python.response as response
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.common.src.python.utils.classpath as classpath
 
@@ -130,7 +130,7 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   defn_files = glob.glob(tmp_dir + '/*.defn')
 
   if len(defn_files) == 0:
-    return response.Response(100, "No topologies found under %s" % tmp_dir)
+    return Response(Status.HeronError, "No topologies found under %s" % tmp_dir)
 
   responses = []
   for defn_file in defn_files:
@@ -142,7 +142,7 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
       handle.close()
     except Exception as e:
       msg = "Cannot load topology definition '%s'" % defn_file
-      return response.Response(100, msg, str(e))
+      return Response(Status.HeronError, msg, str(e))
 
     # launch the topology
     Log.info("Launching topology: \'%s\'", topology_defn.name)

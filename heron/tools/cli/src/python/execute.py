@@ -20,10 +20,10 @@ import tempfile
 import traceback
 
 from heron.common.src.python.utils.log import Log
+from heron.tools.cli.src.python.response import Response, Status
 import heron.common.src.python.pex_loader as pex_loader
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.cli.src.python.jars as jars
-import heron.tools.cli.src.python.response as response
 import heron.tools.common.src.python.utils.config as config
 
 ################################################################################
@@ -76,7 +76,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
     msg = msg[:-1]
   if detailed_msg:
     detailed_msg = detailed_msg[:-1]
-  return response.Response(proc.returncode, msg, detailed_msg)
+  return Response(proc.returncode, msg, detailed_msg)
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   '''
@@ -129,9 +129,9 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     retcode = proc.returncode
     if retcode != 0:
       err_str = "Topology class %s failed to be loaded from the given pex" % topology_class_name
-      return response.Response(retcode, err_str, None)
+      return Response(retcode, err_str, None)
     else:
-      return response.Response(retcode)
+      return Response(retcode)
   else:
     try:
       # loading topology from Topology's subclass (no main method)
@@ -144,8 +144,8 @@ def heron_pex(topology_pex, topology_class_name, args=None):
       pex_loader.load_pex(topology_pex)
       topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
       topology_class.write()
-      return response.Response(0)
+      return Response(Status.Ok)
     except Exception as ex:
       Log.debug(traceback.format_exc())
       err_str = "Topology %s failed to be loaded from the given pex" % topology_class_name
-      return response.Response(100, err_str, str(ex))
+      return Response(Status.HeronError, err_str, str(ex))
