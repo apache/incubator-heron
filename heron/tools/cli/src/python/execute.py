@@ -72,9 +72,9 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # stderr message has extra information, such as debugging message
   msg, detailed_msg = proc.communicate()
   # remove trailing newlines
-  if msg:
+  if msg and msg[-1] == '\n':
     msg = msg[:-1]
-  if detailed_msg:
+  if detailed_msg and msg[-1] == '\n':
     detailed_msg = detailed_msg[:-1]
   return Response(proc.returncode, msg, detailed_msg)
 
