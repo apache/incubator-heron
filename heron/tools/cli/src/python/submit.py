@@ -20,7 +20,7 @@ import tempfile
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
-from heron.tools.cli.src.python.response import Response, Status
+from heron.tools.cli.src.python.response import Response, Status, render
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
@@ -124,7 +124,7 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   :param cl_args:
   :param topology_file:
   :param tmp_dir:
-  :return: list(response.Responses)
+  :return: list(Responses)
   '''
   # the submitter would have written the .defn file to the tmp_dir
   defn_files = glob.glob(tmp_dir + '/*.defn')
@@ -180,7 +180,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
       args=tuple(unknown_args),
       java_defines=cl_args['topology_main_jvm_property'])
 
-  if resp.status != response.Status.Ok:
+  if resp.status != Status.Ok:
     err_context = "Failed to create topology definition \
       file when executing class '%s' of file '%s'" % (main_class, topology_file)
     resp.add_context(err_context)
@@ -223,7 +223,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
       tmp_dir,
       java_defines)
 
-  if resp.status != response.Status.Ok:
+  if resp.status != Status.Ok:
     err_context = "Failed to create topology definition \
       file when executing class '%s' of file '%s'" % (main_class, topology_file)
     resp.add_context(err_context)
@@ -245,7 +245,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   topology_class_name = cl_args['topology-class-name']
   resp = execute.heron_pex(
       topology_file, topology_class_name, tuple(unknown_args))
-  if resp.status != response.Status.Ok:
+  if resp.status != Status.Ok:
     err_context = "Failed to create topology definition \
       file when executing class '%s' of file '%s'" % (topology_class_name, topology_file)
     resp.add_context(err_context)
@@ -311,17 +311,17 @@ def run(command, parser, cl_args, unknown_args):
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
     resp = submit_fatjar(cl_args, unknown_args, tmp_dir)
-    response.render(resp)
+    render(resp)
     return True
 
   elif tar_type:
     resp = submit_tar(cl_args, unknown_args, tmp_dir)
-    response.render(resp)
+    render(resp)
     return True
 
   elif pex_type:
     resp = submit_pex(cl_args, unknown_args, tmp_dir)
-    response.render(resp)
+    render(resp)
     return True
 
   return False

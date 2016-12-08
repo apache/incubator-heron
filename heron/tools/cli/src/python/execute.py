@@ -126,6 +126,8 @@ def heron_pex(topology_pex, topology_class_name, args=None):
 
     # invoke the command with subprocess and print error message, if any
     proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # todo(rli): improve python topology submission workflow
+    proc.communicate()
     retcode = proc.returncode
     if retcode != 0:
       err_str = "Topology class %s failed to be loaded from the given pex" % topology_class_name

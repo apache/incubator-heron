@@ -60,10 +60,10 @@ class Response(object):
     :return: None
     """
     if self.status != Status.Ok:
-      self.msg = "%s : %s" % (err_context, self.msg) if self.msg else err_context
+      self.msg = "%s: %s" % (err_context, self.msg) if self.msg else err_context
     else:
       if succ_context is not None:
-        self.msg = "%s : %s" % (succ_context, self.msg) if self.msg else succ_context
+        self.msg = "%s: %s" % (succ_context, self.msg) if self.msg else succ_context
 
 def render(resp):
   if isinstance(resp, list):
@@ -86,7 +86,7 @@ def render(resp):
         Log.debug(resp.detailed_msg)
     # If status code is InvocationError, invocation of shelled-out program fails. The error
     # message will be in stderr, so we log.error detailed message(stderr) only
-    elif resp.status == Status.InvocationError
+    elif resp.status == Status.InvocationError:
       Log.error(resp.detailed_msg)
     else:
       raise RuntimeError("Unknown status type")
