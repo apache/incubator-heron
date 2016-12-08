@@ -14,16 +14,42 @@
 package com.twitter.heron.slamgr.cache;
 
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.slamgr.SLAMetrics;
 
 public class MetricTest {
+  private static String debugFilePath = "/tmp/" + MetricTest.class.getSimpleName() + ".debug.txt";
+
+  private Path file = null;
+  private List<String> lines = null;
+
+  @Before
+  public void before() {
+    file = Paths.get(debugFilePath);
+    lines = new ArrayList<>();
+  }
+
+  @After
+  public void after() throws IOException {
+    Files.write(file, lines, Charset.forName("UTF-8"));
+  }
+
   @Test
   public void testMetric() {
-    Metric m = new Metric("__emit-count", SLAMetrics.MetricAggregationType.SUM, 180 * 60, 60);
+    Metric m = new Metric("__emit-count", SLAMetrics.MetricAggregationType.SUM, 10 , 60);
 
     m.AddValueToMetric("1");
     m.AddValueToMetric("2");
@@ -35,18 +61,21 @@ public class MetricTest {
     m.AddValueToMetric("5");
     m.AddValueToMetric("6");
 
+    lines.add(m.toString());
+
     //
     TopologyMaster.MetricResponse.IndividualMetric im = m.GetMetrics(false, 0, -1);
 
     Assert.assertEquals(im.getName(), "__emit-count");
-    Assert.assertEquals(im.getValue(), "21");
+    Assert.assertEquals(im.getValue(), "21.0");
 
     // minutely
-    TopologyMaster.MetricResponse.IndividualMetric im2 = m.GetMetrics(true, 0, -1);
+    TopologyMaster.MetricResponse.IndividualMetric im2 = m.GetMetrics(true, 0, Integer.MAX_VALUE);
 
-    Assert.assertEquals(im2.getIntervalValuesCount(), 2);
-    Assert.assertEquals(im2.getIntervalValues(0).getValue(), "15");
-    Assert.assertEquals(im2.getIntervalValues(1).getValue(), "6");
+    Assert.assertEquals(im2.getIntervalValuesCount(), 10);
+    Assert.assertEquals(im2.getIntervalValues(0).getValue(), "15.0");
+    Assert.assertEquals(im2.getIntervalValues(1).getValue(), "6.0");
+    Assert.assertEquals(im2.getIntervalValues(2).getValue(), "0.0");
   }
 
 }

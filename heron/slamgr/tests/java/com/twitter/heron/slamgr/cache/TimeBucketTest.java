@@ -14,7 +14,15 @@
 package com.twitter.heron.slamgr.cache;
 
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -22,28 +30,37 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TimeBucketTest {
+  private static String debugFilePath = "/tmp/" + TimeBucketTest.class.getSimpleName() + ".debug.txt";
+
+  private Path file = null;
+  private List<String> lines = null;
 
   @Before
   public void before() {
-
+    file = Paths.get(debugFilePath);
+    lines = new ArrayList<>();
   }
 
   @After
-  public void after() {
-
+  public void after() throws IOException {
+    Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
   @Test
   public void test() {
-    int now = (int) new Date().getTime() / 1000;
+    int now = (int) Instant.now().getEpochSecond();
     TimeBucket tb = new TimeBucket(10);
 
     tb.data_.offerFirst("1");
     tb.data_.offerFirst("2");
     tb.data_.offerFirst("3");
 
+    lines.add(tb.toString());
+
+    // assertion
     Assert.assertEquals(tb.count(), 3);
     Assert.assertEquals(tb.overlaps(now - 1, now + 10 + 1), true);
-    Assert.assertEquals(tb.aggregate(), 1.0 + 2 + 3);
+    Assert.assertEquals(String.valueOf(tb.aggregate()), "6.0");
+
   }
 }

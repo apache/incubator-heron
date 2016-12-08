@@ -78,4 +78,15 @@ public class InstanceMetrics {
     }
     return metrics_.get(name);
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("instance: " + instance_id_).append(", nbuckets_: " + nbuckets_)
+        .append(", interval: " + bucket_interval_).append(", data:");
+    for (String k : metrics_.keySet()) {
+      sb.append("{" + k + ":").append(metrics_.get(k)).append("}");
+    }
+    return sb.toString();
+  }
 }

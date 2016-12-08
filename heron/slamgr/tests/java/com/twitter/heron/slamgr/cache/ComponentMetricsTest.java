@@ -23,7 +23,7 @@ import com.twitter.heron.slamgr.SLAMetrics;
 public class ComponentMetricsTest {
   @Test
   public void test() {
-    ComponentMetrics cm = new ComponentMetrics("component_name", 180 * 60, 60);
+    ComponentMetrics cm = new ComponentMetrics("component_name", 10 , 60);
 
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "1");
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", SLAMetrics.MetricAggregationType.LAST, "2");
@@ -37,6 +37,7 @@ public class ComponentMetricsTest {
 
     // build request
     TopologyMaster.MetricRequest.Builder request_builder = TopologyMaster.MetricRequest.newBuilder();
+    request_builder.setComponentName("c1"); // bypass
     request_builder.addMetric("__jvm-gc-collection-time-ms");
     request_builder.addInstanceId("i1");
 
@@ -44,19 +45,21 @@ public class ComponentMetricsTest {
     cm.GetMetrics(request_builder.build(), 0, -1, response_builder);
 
     // assertion
-    Assert.assertEquals(response_builder.getMetricCount(), 2);
-    Assert.assertEquals(response_builder.getMetric(0).getMetric(0).getValue(), "15");
+    Assert.assertEquals(response_builder.getMetricCount(), 1);
+    Assert.assertEquals(response_builder.getMetric(0).getMetric(0).getValue(), "5.0");
 
     // build request 2
     TopologyMaster.MetricRequest.Builder request_builder2 = TopologyMaster.MetricRequest.newBuilder();
+    request_builder2.setComponentName("c2"); // bypass
     request_builder2.addMetric("__jvm-gc-collection-time-ms");
+    request_builder2.addInstanceId("i2");
 
     TopologyMaster.MetricResponse.Builder response_builder2 = TopologyMaster.MetricResponse.newBuilder();
     cm.GetMetrics(request_builder2.build(), 0, -1, response_builder2);
 
     // assertion
     Assert.assertEquals(response_builder2.getMetricCount(), 1);
-    Assert.assertEquals(response_builder2.getMetric(0).getMetric(0).getValue(), "15");
+    Assert.assertEquals(response_builder2.getMetric(0).getMetric(0).getValue(), "6.0");
 
   }
 }

@@ -84,7 +84,7 @@ public class Metric {
           TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.Builder val_builder =
               TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.newBuilder();
 
-          TopologyMaster.MetricInterval mi = val_builder.getIntervalBuilder()
+          TopologyMaster.MetricInterval mi = TopologyMaster.MetricInterval.newBuilder()
               .setStart(bucket.start_time_).setEnd(bucket.end_time_).build();
           val_builder.setInterval(mi);
 
@@ -149,5 +149,18 @@ public class Metric {
     }
 
     return response_builder.build();
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("name: " + name_).append(", type: " + metric_type_)
+        .append(", interval: " + bucket_interval_).append(", nitems: " + all_time_nitems_)
+        .append(", cumulative: " + all_time_cumulative_).append(", data");
+    for (TimeBucket tb : data_) {
+      sb.append(" => "+tb.toString() );
+    }
+    sb.append(" $");
+    return sb.toString();
   }
 }
