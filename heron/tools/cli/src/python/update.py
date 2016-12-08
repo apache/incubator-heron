@@ -16,6 +16,7 @@ from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
+import heron.tools.cli.src.python.response as response
 import heron.tools.common.src.python.utils.config as config
 
 import argparse
@@ -82,15 +83,11 @@ def run(command, parser, cl_args, unknown_args):
   )
 
   # invoke the runtime manager to kill the topology
-  retcode = execute.heron_class(
+  resp = execute.heron_class(
       'com.twitter.heron.scheduler.RuntimeManagerMain',
       lib_jars,
       extra_jars=[],
       args=new_args)
 
-  if retcode != 0:
-    Log.error('Failed to update topology \'%s\'', topology_name)
-    return False
-  else:
-    Log.info('Successfully updated topology \'%s\'', topology_name)
-    return True
+  response.render(resp)
+  return resp.status == response.Status.Ok
