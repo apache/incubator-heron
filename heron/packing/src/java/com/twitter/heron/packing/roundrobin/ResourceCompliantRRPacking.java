@@ -14,6 +14,7 @@
 
 package com.twitter.heron.packing.roundrobin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -21,8 +22,12 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.ResourceExceededException;
+import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
+import com.twitter.heron.packing.builder.HomogeneityScorer;
+import com.twitter.heron.packing.builder.InstanceCountScorer;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
+import com.twitter.heron.packing.builder.Scorer;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -334,9 +339,14 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * Remove an instance of a particular component from the containers
    */
   private void removeRRInstance(PackingPlanBuilder packingPlanBuilder,
-                                String component) throws RuntimeException {
-    ContainerIdScorer scorer = new ContainerIdScorer(this.containerId, this.numContainers);
-    this.containerId = nextContainerId(packingPlanBuilder.removeInstance(scorer, component));
+                                String componentName) throws RuntimeException {
+    List<Scorer<Container>> scorers = new ArrayList<>();
+    scorers.add(new HomogeneityScorer(componentName, true));  // all-same-component containers first
+    scorers.add(new InstanceCountScorer());                   // then fewest instances
+    scorers.add(new HomogeneityScorer(componentName, false)); // then most homogeneous
+    scorers.add(new ContainerIdScorer(false));                // then highest container id
+
+    this.containerId = nextContainerId(packingPlanBuilder.removeInstance(scorers, componentName));
   }
 
   private enum PolicyType {

@@ -89,10 +89,9 @@ public final class PackingTestUtils {
     return new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
   }
 
-  private static PackingPlan.InstancePlan testInstancePlan(
+  public static PackingPlan.InstancePlan testInstancePlan(
       String componentName, int instanceIndex) {
     Resource resource = new Resource(1.5, ByteAmount.fromGigabytes(2), ByteAmount.fromBytes(3));
     return new PackingPlan.InstancePlan(new InstanceId(componentName, instanceIndex, 1), resource);
   }
-
 }
