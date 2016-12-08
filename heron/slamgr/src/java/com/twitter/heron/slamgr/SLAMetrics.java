@@ -27,27 +27,8 @@ public class SLAMetrics {
   // map from metric prefix to its aggregation form
   private Map<String, MetricAggregationType> metrics_prefixes_;
 
-  SLAMetrics(String sinks_filename) {
-    // read config file and fill in 'Map<String, String> metrics'
-
-    // mock config for prototype
-    Map<String, String> metric = new HashMap<>();
-    metric.put("__emit-count", "SUM");
-    metric.put("__execute-count", "SUM");
-    metric.put("__fail-count", "SUM");
-    metric.put("__ack-count", "SUM");
-    metric.put("__complete-latency", "AVG");
-    metric.put("__execute-latency", "AVG");
-    metric.put("__process-latency", "AVG");
-    metric.put("__jvm-uptime-secs", "LAST");
-    metric.put("__jvm-process-cpu-load", "LAST");
-    metric.put("__jvm-memory-used-mb", "LAST");
-    metric.put("__jvm-memory-mb-total", "LAST");
-    metric.put("__jvm-gc-collection-time-ms", "LAST");
-    metric.put("__server/__time_spent_back_pressure_initiated", "SUM");
-    metric.put("__time_spent_back_pressure_by_compid", "SUM");
-
-    InitSLAMetrics(metric);
+  public SLAMetrics(String sinks_filename) {
+    // read config file
   }
 
 
@@ -57,7 +38,7 @@ public class SLAMetrics {
     }
   }
 
-  public boolean IsTMasterMetric(String _name) {
+  public boolean IsSLAMetric(String _name) {
     for (String k : metrics_prefixes_.keySet()) {
       if (_name.indexOf(k) == 0) return true;
     }
@@ -87,7 +68,7 @@ public class SLAMetrics {
   }
 
   // metric types associated with int value
-  enum MetricAggregationType {
+  public enum MetricAggregationType {
     UNKNOWN(-1),
     SUM(0),
     AVG(1),
