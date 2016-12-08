@@ -28,6 +28,7 @@ public class SLAMetrics {
   private Map<String, MetricAggregationType> metrics_prefixes_;
 
   public SLAMetrics(String sinks_filename) {
+    metrics_prefixes_ = new HashMap<>();
     // read config file
   }
 

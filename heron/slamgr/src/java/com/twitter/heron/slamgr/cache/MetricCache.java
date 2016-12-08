@@ -15,7 +15,7 @@
 
 package com.twitter.heron.slamgr.cache;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -45,9 +45,9 @@ public class MetricCache {
     max_interval_ = _max_interval;
     metrics_sinks_yaml_ = metrics_sinks_yaml;
     tmetrics_info_ = new SLAMetrics(metrics_sinks_yaml);
-    start_time_ = (int) new Date().getTime();
+    start_time_ = (int) Instant.now().getEpochSecond();
 
-    interval_ = 60; // from heron_internals.yaml
+    interval_ = 5; // 60 from heron_internals.yaml; 5 for debug
     nintervals_ = max_interval_ / interval_;
 
     metrics_component_ = new HashMap<>();
@@ -101,7 +101,7 @@ public class MetricCache {
     } else {
       long start_time, end_time;
       if (_request.hasInterval()) {
-        end_time = new Date().getTime();
+        end_time = Instant.now().getEpochSecond();
         if (_request.getInterval() <= 0) {
           start_time = 0;
         } else {
@@ -111,6 +111,7 @@ public class MetricCache {
         start_time = _request.getExplicitInterval().getStart();
         end_time = _request.getExplicitInterval().getEnd();
       }
+      System.err.println("start_time: " + start_time + "; end_time: " + end_time);
       metrics_component_.get(_request.getComponentName())
           .GetMetrics(_request, start_time, end_time, response_builder);
       response_builder.setInterval(end_time - start_time);
@@ -125,5 +126,12 @@ public class MetricCache {
     }
   }
 
-
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (String k : metrics_component_.keySet()) {
+      sb.append("\n").append(k).append(" #> ").append(metrics_component_.get(k).toString());
+    }
+    return sb.toString();
+  }
 }

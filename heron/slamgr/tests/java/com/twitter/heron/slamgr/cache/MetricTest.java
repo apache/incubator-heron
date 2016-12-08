@@ -49,7 +49,8 @@ public class MetricTest {
 
   @Test
   public void testMetric() {
-    Metric m = new Metric("__emit-count", SLAMetrics.MetricAggregationType.SUM, 10 , 60);
+    lines.add("testMetric");
+    Metric m = new Metric("__emit-count", SLAMetrics.MetricAggregationType.SUM, 10, 60);
 
     m.AddValueToMetric("1");
     m.AddValueToMetric("2");
@@ -68,6 +69,25 @@ public class MetricTest {
 
     Assert.assertEquals(im.getName(), "__emit-count");
     Assert.assertEquals(im.getValue(), "21.0");
+  }
+
+
+  @Test
+  public void testMetricMinutely() {
+    lines.add("testMetricMinutely");
+    Metric m = new Metric("__emit-count", SLAMetrics.MetricAggregationType.SUM, 10, 60);
+
+    m.AddValueToMetric("1");
+    m.AddValueToMetric("2");
+    m.AddValueToMetric("3");
+
+    m.Purge();
+
+    m.AddValueToMetric("4");
+    m.AddValueToMetric("5");
+    m.AddValueToMetric("6");
+
+    lines.add(m.toString());
 
     // minutely
     TopologyMaster.MetricResponse.IndividualMetric im2 = m.GetMetrics(true, 0, Integer.MAX_VALUE);

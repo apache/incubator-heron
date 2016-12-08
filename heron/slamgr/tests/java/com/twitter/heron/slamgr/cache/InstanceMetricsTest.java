@@ -106,7 +106,6 @@ public class InstanceMetricsTest {
     // assertion
     Assert.assertEquals(response_builder3.getMetricCount(), 1);
     Assert.assertEquals(response_builder3.getMetric(0).getInstanceId(), "i1");
-//        getMetricCount(), 1);
     Assert.assertEquals(response_builder3.getMetric(0).getMetric(0).getName(), "__emit-count");
     Assert.assertEquals(response_builder3.getMetric(0).getMetric(0).getIntervalValuesCount(), 10);
     Assert.assertEquals(response_builder3.getMetric(0).getMetric(0).getIntervalValues(0).getValue(), "15.0");

@@ -15,7 +15,15 @@
 
 package com.twitter.heron.slamgr.cache;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -26,13 +34,17 @@ import org.junit.Test;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 public class MetricCacheTest {
-
-
+  private static String debugFilePath = "/tmp/" + MetricCacheTest.class.getSimpleName() + ".debug.txt";
   MetricCache mc = null;
+  private Path file = null;
+  private List<String> lines = null;
 
   @Before
   public void before() throws Exception {
-    mc = new MetricCache(180 * 60, "");
+    file = Paths.get(debugFilePath);
+    lines = new ArrayList<>();
+
+    mc = new MetricCache(15, "");
 
     // mock config for prototype
     Map<String, String> metric = new HashMap<>();
@@ -55,18 +67,21 @@ public class MetricCacheTest {
   }
 
   @After
-  public void after() throws Exception {
+  public void after() throws IOException {
+    Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
   @Test
-  public void testAddMetric() {
+  public void testMetricCache() {
+    long ts = Instant.now().getEpochSecond();
+
     TopologyMaster.PublishMetrics.Builder _metrics_builder = TopologyMaster.PublishMetrics.newBuilder();
 
-    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().
+    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("1").build());
-    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().
+    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("2").build());
-    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().
+    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("3").build());
 
     mc.AddMetric(_metrics_builder.build());
@@ -75,22 +90,30 @@ public class MetricCacheTest {
 
     TopologyMaster.PublishMetrics.Builder _metrics_builder2 = TopologyMaster.PublishMetrics.newBuilder();
 
-    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().
+    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("4").build());
-    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().
+    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("5").build());
-    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().
+    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("6").build());
 
-    mc.AddMetric(_metrics_builder.build());
+    mc.AddMetric(_metrics_builder2.build());
+
+    lines.add(mc.toString());
 
     // builder
     TopologyMaster.MetricRequest.Builder request_builder = TopologyMaster.MetricRequest.newBuilder();
+    request_builder.setExplicitInterval(TopologyMaster.MetricInterval.newBuilder().setStart(ts - 10).setEnd(ts + 10).build());
+    request_builder.setMinutely(true);
 
     TopologyMaster.MetricResponse res = mc.GetMetrics(request_builder.setComponentName("c1").addInstanceId("i1").addMetric("__emit-count").build());
 
     // assertion
     Assert.assertEquals(res.getMetricCount(), 1);
-    Assert.assertEquals(res.getMetric(0).getMetric(0).getValue(), "21");
+    Assert.assertEquals(res.getMetric(0).getInstanceId(), "i1");
+    Assert.assertEquals(res.getMetric(0).getMetricCount(), 1);
+    Assert.assertEquals(res.getMetric(0).getMetric(0).getName(), "__emit-count");
+    Assert.assertEquals(res.getMetric(0).getMetric(0).getIntervalValuesCount(), 3);
+    Assert.assertEquals(res.getMetric(0).getMetric(0).getIntervalValues(1).getValue(), "6.0");
   }
 }
