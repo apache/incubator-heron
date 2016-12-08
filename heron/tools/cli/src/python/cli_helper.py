@@ -91,5 +91,5 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
     Log.error("Failed to %s %s", action, topology_name)
     return False
   else:
-    Log.error("Successfully %s %s", action, topology_name)
+    Log.info("Successfully %s %s", action, topology_name)
     return True

@@ -73,14 +73,8 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   msg, detailed_msg = proc.communicate()
   # remove trailing newlines
   if msg:
-    Log.info('printing out msg')
-    Log.info(msg)
-    Log.info('---')
     msg = msg[:-1]
   if detailed_msg:
-    Log.info('printing out detailed msg')
-    Log.info(detailed_msg)
-    Log.info('---')
     detailed_msg = detailed_msg[:-1]
   return response.Response(proc.returncode, msg, detailed_msg)
 
