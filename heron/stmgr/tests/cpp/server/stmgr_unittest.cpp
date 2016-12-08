@@ -1521,7 +1521,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   // Note: Here we sleep longer compared to the previous test as we need
   // to tmasterClient could take upto 1 second (specified in test_heron_internals.yaml)
   // to retry connecting to tmaster.
-  sleep(3);
+  while (regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port() == common.stmgr_baseport_ + 1)
+    sleep(1);
 
   // Ensure that Stmgr connected to the new tmaster and has received new physical plan
   CHECK_EQ(regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port(), common.stmgr_baseport_ + 2);
