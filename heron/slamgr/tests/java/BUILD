@@ -55,11 +55,12 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.slamgr.detector.BackPressureDetectorTest",
-       "com.twitter.heron.slamgr.resolver.BackPressureResolverTest",
-       "com.twitter.heron.slamgr.resolver.FailedTuplesResolverTest",
-       "com.twitter.heron.slamgr.detector.FailedTuplesDetectorTest",
-       "com.twitter.heron.slamgr.policy.FailedTuplesPolicyTest",
+       "com.twitter.heron.slamgr.SLAMetricsTest",
+       "com.twitter.heron.slamgr.cache.TimeBucketTest",
+       "com.twitter.heron.slamgr.cache.MetricTest",
+       "com.twitter.heron.slamgr.cache.InstanceMetricsTest",
+       "com.twitter.heron.slamgr.cache.ComponentMetricsTest",
+       "com.twitter.heron.slamgr.cache.MetricCacheTest",
      ],
      runtime_deps = [ ":slamgr-tests" ],
      size = "small",

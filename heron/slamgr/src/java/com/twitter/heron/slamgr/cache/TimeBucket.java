@@ -13,6 +13,8 @@
 //  limitations under the License
 package com.twitter.heron.slamgr.cache;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -27,7 +29,7 @@ class TimeBucket {
 
   // in seconds
   TimeBucket(int bucket_interval) {
-    start_time_ = (int) new Date().getTime() / 1000;
+    start_time_ = (int)Instant.now().getEpochSecond();
     end_time_ = start_time_ + bucket_interval;
 
     data_ = new LinkedList<>();
@@ -51,5 +53,13 @@ class TimeBucket {
 
   long count() {
     return data_.size();
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("start_time: " + start_time_ + "; ").append("end_time: " + end_time_ + "; ")
+        .append("data: ").append(Arrays.toString(data_.toArray()));
+    return sb.toString();
   }
 }
