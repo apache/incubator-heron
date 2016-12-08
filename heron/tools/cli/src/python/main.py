@@ -29,6 +29,7 @@ import heron.tools.cli.src.python.help as cli_help
 import heron.tools.cli.src.python.activate as activate
 import heron.tools.cli.src.python.deactivate as deactivate
 import heron.tools.cli.src.python.kill as kill
+import heron.tools.cli.src.python.response as response
 import heron.tools.cli.src.python.restart as restart
 import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
@@ -232,7 +233,8 @@ def main():
   Log.debug(command_line_args)
 
   start = time.time()
-  retcode = run(command, parser, command_line_args, unknown_args)
+  resp = run(command, parser, command_line_args, unknown_args)
+  response.render(resp)
   end = time.time()
 
   if command not in ('help', 'version'):

@@ -85,11 +85,7 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
       args=new_args
   )
 
-  response.render(resp)
-
-  if resp.status != response.Status.Ok:
-    Log.error("Failed to %s %s", action, topology_name)
-    return False
-  else:
-    Log.info("Successfully %s %s", action, topology_name)
-    return True
+  err_msg = "Failed to %s %s" % (action, topology_name)
+  succ_msg = "Successfully %s %s" % (action, topology_name)
+  resp.add_context(err_msg, succ_msg)
+  return resp

@@ -277,23 +277,25 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar|pex file %s does not exist", topology_file)
-    return False
+    err_msg = "Topology jar|tar|pex file %s does not exist" % topology_file
+    return Response(Status.InvocationError, detailed_msg=err_msg)
 
   # check if it is a valid file type
   jar_type = topology_file.endswith(".jar")
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
   pex_type = topology_file.endswith(".pex")
   if not jar_type and not tar_type and not pex_type:
-    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar or .pex file")
-    return False
+    ext_name = os.path.splitext(topology_file)
+    err_msg = "Unknown file type %s. Please use .tar or .tar.gz or .jar or .pex file" % ext_name
+    return Response(Status.InvocationError, detailed_msg=err_msg)
 
   # check if extra launch classpath is provided and if it is validate
   if cl_args['extra_launch_classpath']:
     valid_classpath = classpath.valid_java_classpath(cl_args['extra_launch_classpath'])
     if not valid_classpath:
-      Log.error("One of jar or directory in extra launch classpath does not exist")
-      return False
+      err_msg = "One of jar or directory in extra launch classpath does not exist: %s" % \
+        cl_args['extra_launch_classpath']
+      return Response(Status.InvocationError, detailed_msg=err_msg)
 
   # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
@@ -310,18 +312,11 @@ def run(command, parser, cl_args, unknown_args):
 
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
-    resp = submit_fatjar(cl_args, unknown_args, tmp_dir)
-    render(resp)
-    return True
+    return submit_fatjar(cl_args, unknown_args, tmp_dir)
 
   elif tar_type:
-    resp = submit_tar(cl_args, unknown_args, tmp_dir)
-    render(resp)
-    return True
+    return submit_tar(cl_args, unknown_args, tmp_dir)
 
-  elif pex_type:
-    resp = submit_pex(cl_args, unknown_args, tmp_dir)
-    render(resp)
-    return True
+  else:
+    return submit_pex(cl_args, unknown_args, tmp_dir)
 
-  return False
