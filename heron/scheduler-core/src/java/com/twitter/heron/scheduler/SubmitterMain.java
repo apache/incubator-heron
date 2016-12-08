@@ -381,19 +381,28 @@ public class SubmitterMain {
     String uploaderClass = Context.uploaderClass(config);
     IUploader uploader;
 
+    // create an instance of state manager
     try {
-      // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
-
-      // create an instance of launcher
-      launcher = ReflectionUtils.newInstance(launcherClass);
-
-      // create an instance of uploader
-      uploader = ReflectionUtils.newInstance(uploaderClass);
-
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       throw new TopologySubmissionException(
-          String.format("Failed to instantiate instances: %s", e.getMessage()), e);
+          String.format("Failed to instantiate state manager class '%s'", statemgrClass), e);
+    }
+
+    // create an instance of launcher
+    try {
+      launcher = ReflectionUtils.newInstance(launcherClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      throw new TopologySubmissionException(
+          String.format("Failed to instantiate launcher class '%s'", launcherClass), e);
+    }
+
+    // create an instance of uploader
+    try {
+      uploader = ReflectionUtils.newInstance(uploaderClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      throw new TopologySubmissionException(
+          String.format("Failed to instantiate uploader class '%s'", uploaderClass), e);
     }
 
     // Put it in a try block so that we can always clean resources
