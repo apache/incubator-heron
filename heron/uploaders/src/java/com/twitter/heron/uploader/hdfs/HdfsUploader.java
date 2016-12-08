@@ -76,7 +76,9 @@ public class HdfsUploader implements IUploader {
 
     // if the dest directory does not exist, create it.
     if (!controller.exists(destTopologyDirectoryURI)) {
-      LOG.info("The destination directory does not exist. Creating it now.");
+      LOG.info(String.format(
+          "The destination directory does not exist. Creating it now at URI '%s'",
+          destTopologyDirectoryURI));
       if (!controller.mkdirs(destTopologyDirectoryURI)) {
         throw new UploaderException(
             String.format("Failed to create directory for topology package at URI '%s'",
