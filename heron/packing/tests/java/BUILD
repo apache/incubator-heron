@@ -107,3 +107,12 @@ java_test(
     size = "small",
 )
 
+java_test(
+    name = "ScorerTest",
+    srcs = glob(
+        ["**/ScorerTest.java"]
+    ),
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:builder"],
+    size = "small",
+)

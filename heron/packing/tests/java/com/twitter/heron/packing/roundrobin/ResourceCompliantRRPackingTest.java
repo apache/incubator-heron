@@ -28,6 +28,7 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.packing.PackingTestHelper;
+import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -41,7 +42,9 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class ResourceCompliantRRPackingTest {
 
-  private static final String BOLT_NAME = "bolt";
+  private static final String A  = "A";
+  private static final String B = "B";
+  private static final String BOLT_NAME  = "bolt";
   private static final String SPOUT_NAME = "spout";
   private static final int DEFAULT_CONTAINER_PADDING = 10;
 
@@ -569,7 +572,7 @@ public class ResourceCompliantRRPackingTest {
    * Test the scenario where the scaling down is requested
    */
   @Test
-  public void testScaleDownx() throws Exception {
+  public void testScaleDown() throws Exception {
     int spoutScalingDown = -2;
     int boltScalingDown = -1;
 
@@ -578,7 +581,7 @@ public class ResourceCompliantRRPackingTest {
     componentChanges.put(BOLT_NAME, boltScalingDown); //leave 2 bolts
     int numContainersBeforeRepack = 2;
     PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(2, newPackingPlan.getContainers().size());
+    Assert.assertEquals(1, newPackingPlan.getContainers().size());
     Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingDown),
         newPackingPlan.getInstanceCount());
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
@@ -588,21 +591,99 @@ public class ResourceCompliantRRPackingTest {
   }
 
   /**
-   * Test the scenario where the scaling down is requested
+   * Test the scenario where scaling down removes instances from containers that are most imbalanced
+   * (i.e., tending towards homogeneity) first. If there is a tie (e.g. AABB, AB), chooses from the
+   * container with the fewest instances, to favor ultimately removing  containers. If there is
+   * still a tie, favor removing from higher numbered containers
    */
-  // TODO @Test https://github.com/twitter/heron/issues/1560
-  public void testScaleDownRemoveContainer() throws Exception {
-    String topologyId = topology.getId();
-
+  @Test
+  public void testScaleDownOneComponentRemoveContainer() throws Exception {
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 2, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 1)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 2)),
-        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 3)),
-        new Pair<>(3, new InstanceId(BOLT_NAME, 6, 4))
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(3, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(B, 5, 2)),
+        new Pair<>(4, new InstanceId(B, 6, 3)),
+        new Pair<>(4, new InstanceId(B, 7, 4))
     };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(B, -2);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(3, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(B, 5, 2)),
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  @Test
+  public void testScaleDownTwoComponentsRemoveContainer() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(1, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(A, 5, 2)),
+        new Pair<>(3, new InstanceId(A, 6, 3)),
+        new Pair<>(3, new InstanceId(B, 7, 2)),
+        new Pair<>(3, new InstanceId(B, 8, 3))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(A, -2);
+    componentChanges.put(B, -2);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(1, new InstanceId(B, 4, 1)),
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  @Test
+  public void testScaleDownHomogenousFirst() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(3, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(B, 5, 2)),
+        new Pair<>(3, new InstanceId(B, 6, 3)),
+        new Pair<>(3, new InstanceId(B, 7, 4))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(B, -4);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0))
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  private void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
+                               Map<String, Integer> componentChanges,
+                               Pair<Integer, InstanceId>[] expectedComponentInstances)
+      throws ResourceExceededException {
+    String topologyId = topology.getId();
 
     // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
     // reconstruct the PackingPlan, see https://github.com/twitter/heron/issues/1577
@@ -611,19 +692,9 @@ public class ResourceCompliantRRPackingTest {
         ResourceCompliantRRPacking.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
     AssertPacking.assertPackingPlan(topologyId, initialComponentInstances, initialPackingPlan);
 
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(BOLT_NAME, -2);
-
     PackingPlan newPackingPlan =
         getResourceCompliantRRPackingPlanRepack(topology, initialPackingPlan, componentChanges);
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 2, 0)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 1)),
-        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 2))
-    };
     AssertPacking.assertPackingPlan(topologyId, expectedComponentInstances, newPackingPlan);
   }
 
