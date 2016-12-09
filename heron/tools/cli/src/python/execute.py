@@ -76,6 +76,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
     msg = msg[:-1]
   if detailed_msg and detailed_msg[-1] == '\n':
     detailed_msg = detailed_msg[:-1]
+  Log.debug("shelled-out program's return code: %d", proc.returncode)
   return Response(proc.returncode, msg, detailed_msg)
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):

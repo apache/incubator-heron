@@ -241,7 +241,7 @@ def main():
     sys.stdout.flush()
     Log.info('Elapsed time: %.3fs.', (end - start))
 
-  return response.isAllSuccessful(resp)
+  return 0 if response.isAllSuccessful(resp) else 1
 
 
 if __name__ == "__main__":
