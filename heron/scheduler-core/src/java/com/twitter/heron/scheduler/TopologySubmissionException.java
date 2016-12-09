@@ -15,7 +15,7 @@
 package com.twitter.heron.scheduler;
 
 /**
- * Thrown to indicate that an error occurred while creating a packing plan
+ * Thrown to indicate that an error occurred while submitting topology
  */
 public class TopologySubmissionException extends RuntimeException {
   private static final long serialVersionUID = -7876075906599747697L;
