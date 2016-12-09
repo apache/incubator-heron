@@ -136,7 +136,7 @@ public class SubmitterMainTest {
     }
   }
 
-  @Test(expected = TopologySubmissionException.class)
+  @Test(expected = UploaderException.class)
   public void testSubmitTopologyClassNotExist() throws Exception {
     final String CLASS_NOT_EXIST = "class_not_exist";
     when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(CLASS_NOT_EXIST);
