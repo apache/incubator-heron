@@ -328,7 +328,7 @@ public class SubmitterMain {
     } catch (Exception e) {
       /* Since only stderr is used (by logging), we use stdout here to
          propagate error message back to Python's executor.py (invoke site). */
-      LOG.log(Level.SEVERE, "Exception when submitting topology", e);
+      LOG.log(Level.FINE, "Exception when submitting topology", e);
       System.out.println(e.getMessage());
       /* Meaning of exit status code:
          - status code = 0:
