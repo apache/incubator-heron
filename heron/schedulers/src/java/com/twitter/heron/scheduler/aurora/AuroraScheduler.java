@@ -14,7 +14,7 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -154,7 +154,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
    */
   protected String formatJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
+        javaOpts.getBytes(StandardCharsets.UTF_8));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
