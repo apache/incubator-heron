@@ -133,7 +133,7 @@ cc_library(
         "include/libxml2/libxml/tree.h",
     ],
     includes = [
-        "include",
+        "include/libxml2",
     ],
     linkstatic = 1,
 )
