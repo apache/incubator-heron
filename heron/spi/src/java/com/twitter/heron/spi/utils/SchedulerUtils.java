@@ -14,7 +14,7 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -321,7 +321,7 @@ public final class SchedulerUtils {
    */
   public static String encodeJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
+        javaOpts.getBytes(StandardCharsets.UTF_8));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
@@ -342,7 +342,7 @@ public final class SchedulerUtils {
             replace("&equals;", "=");
 
     return new String(
-        DatatypeConverter.parseBase64Binary(javaOptsBase64), Charset.forName("UTF-8"));
+        DatatypeConverter.parseBase64Binary(javaOptsBase64), StandardCharsets.UTF_8);
   }
 
   /**
