@@ -58,18 +58,31 @@ public class ScpUploader implements IUploader {
 
   // Utils method
   protected ScpController getScpController() {
-    String scpCommand = ScpContext.scpCommand(config);
-    String sshCommand = ScpContext.sshCommand(config);
-    if (scpCommand == null) {
-      throw new RuntimeException("Missing heron.uploader.scp.command.options config value");
+    String scpOptions = ScpContext.scpOptions(config);
+    String scpConnection = ScpContext.scpConnection(config);
+    String sshOptions = ScpContext.sshOptions(config);
+    String sshConnection = ScpContext.sshConnection(config);
+
+    if (scpOptions == null) {
+      throw new RuntimeException("Missing "
+          + ScpContext.HERON_UPLOADER_SCP_OPTIONS + " config value");
+    }
+    if (scpConnection == null) {
+      throw new RuntimeException("Missing "
+          + ScpContext.HERON_UPLOADER_SCP_CONNECTION + " config value");
     }
 
-    if (sshCommand == null) {
-      throw new RuntimeException("Missing heron.uploader.ssh.command.options config value");
+    if (sshOptions == null) {
+      throw new RuntimeException("Missing "
+          + ScpContext.HERON_UPLOADER_SSH_OPTIONS + " config value");
+    }
+    if (sshConnection == null) {
+      throw new RuntimeException("Missing "
+          + ScpContext.HERON_UPLOADER_SSH_CONNECTION + " config value");
     }
 
     return new ScpController(
-        scpCommand, sshCommand, Context.verbose(config));
+        scpOptions, scpConnection, sshOptions, sshConnection, Context.verbose(config));
   }
 
   @Override
