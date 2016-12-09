@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
@@ -60,7 +61,7 @@ public class SubmitterMain {
   protected static Config topologyConfigs(
       String topologyPackage, String topologyBinaryFile, String topologyDefnFile,
       TopologyAPI.Topology topology) {
-    String pkgType = FileUtils.getPkgType(topologyBinaryFile);
+    PackageType packageType = FileUtils.getPackageType(topologyBinaryFile);
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
@@ -68,7 +69,7 @@ public class SubmitterMain {
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
         .put(Keys.topologyPackageFile(), topologyPackage)
         .put(Keys.topologyBinaryFile(), topologyBinaryFile)
-        .put(Keys.topologyPackageType(), pkgType)
+        .put(Keys.topologyPackageType(), packageType)
         .build();
     return config;
   }

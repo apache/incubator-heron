@@ -15,6 +15,7 @@
 package com.twitter.heron.spi.common;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.PackageType;
 
 public class Context {
 
@@ -173,8 +174,8 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"));
   }
 
-  public static String topologyPackageType(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_PACKAGE_TYPE"));
+  public static PackageType topologyPackageType(Config cfg) {
+    return cfg.getPackageType(ConfigKeys.get("TOPOLOGY_PACKAGE_TYPE"));
   }
 
   public static ByteAmount stmgrRam(Config cfg) {

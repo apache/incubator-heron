@@ -120,20 +120,25 @@ public final class FileUtils {
     return packageFilename.endsWith(".pex");
   }
 
+  public static boolean isOriginalPackageTar(String packageFilename) {
+    return packageFilename.endsWith(".tar");
+  }
+
   public static String getBaseName(String file) {
     return new File(file).getName();
   }
 
-  public static String getPkgType(String topologyBinaryFile) {
-    String pkgType;
+  public static PackageType getPackageType(String topologyBinaryFile) {
     String basename = FileUtils.getBaseName(topologyBinaryFile);
     if (FileUtils.isOriginalPackagePex(basename)) {
-      pkgType = "pex";
+      return PackageType.PEX;
     } else if (FileUtils.isOriginalPackageJar(basename)) {
-      pkgType = "jar";
+      return PackageType.JAR;
+    } else if (FileUtils.isOriginalPackageTar(basename)) {
+      return PackageType.TAR;
     } else {
-      pkgType = "tar";
+      throw new RuntimeException(String.format("Unknown package type of file: %s",
+          topologyBinaryFile));
     }
-    return pkgType;
   }
 }
