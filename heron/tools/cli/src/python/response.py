@@ -88,3 +88,12 @@ def render(resp):
       raise RuntimeError("Unknown status type of value %d", resp.status)
   else:
     raise RuntimeError("Unknown response instance: %s", str(resp.__class__))
+
+# check if all responses are successful
+def isAllSuccessful(resps):
+  if isinstance(resps, list):
+    return all([resp.status == Status.Ok for resp in resps])
+  elif isinstance(resps, Response):
+    return resps.status == Status.Ok
+  else:
+    raise RuntimeError("Unknown response instance: %s", str(resps.__class__))

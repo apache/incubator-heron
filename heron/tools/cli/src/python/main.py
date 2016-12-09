@@ -116,8 +116,8 @@ def run(command, parser, command_args, unknown_args):
   if command in runners:
     return runners[command].run(command, parser, command_args, unknown_args)
   else:
-    Log.error('Unknown subcommand: %s', command)
-    return 1
+    detailed_msg = 'Unknown subcommand: %s' % command
+    return response.Response(response.Status.InvocationError, detailed_msg=detailed_msg)
 
 def cleanup(files):
   '''
@@ -241,7 +241,7 @@ def main():
     sys.stdout.flush()
     Log.info('Elapsed time: %.3fs.', (end - start))
 
-  return 0 if retcode else 1
+  return response.isAllSuccessful(resp)
 
 
 if __name__ == "__main__":

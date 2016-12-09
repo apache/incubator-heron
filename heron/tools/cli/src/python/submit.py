@@ -20,7 +20,7 @@ import tempfile
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
-from heron.tools.cli.src.python.response import Response, Status, render
+from heron.tools.cli.src.python.response import Response, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
@@ -277,7 +277,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    err_msg = "Topology jar|tar|pex file %s does not exist" % topology_file
+    err_msg = "Topology jar|tar|pex file '%s' does not exist" % topology_file
     return Response(Status.InvocationError, detailed_msg=err_msg)
 
   # check if it is a valid file type
@@ -286,7 +286,7 @@ def run(command, parser, cl_args, unknown_args):
   pex_type = topology_file.endswith(".pex")
   if not jar_type and not tar_type and not pex_type:
     ext_name = os.path.splitext(topology_file)
-    err_msg = "Unknown file type %s. Please use .tar or .tar.gz or .jar or .pex file" % ext_name
+    err_msg = "Unknown file type '%s'. Please use .tar or .tar.gz or .jar or .pex file" % ext_name
     return Response(Status.InvocationError, detailed_msg=err_msg)
 
   # check if extra launch classpath is provided and if it is validate

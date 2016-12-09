@@ -74,7 +74,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # remove trailing newlines
   if msg and msg[-1] == '\n':
     msg = msg[:-1]
-  if detailed_msg and msg[-1] == '\n':
+  if detailed_msg and detailed_msg[-1] == '\n':
     detailed_msg = detailed_msg[:-1]
   return Response(proc.returncode, msg, detailed_msg)
 

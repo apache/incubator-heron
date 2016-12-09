@@ -17,7 +17,6 @@ import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
-import heron.tools.cli.src.python.response as response
 
 from heron.common.src.python.utils.log import Log
 
