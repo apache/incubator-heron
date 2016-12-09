@@ -19,10 +19,14 @@ for the Heron cluster. You'll need to specify the following for each cluster:
 
 * `heron.class.uploader` --- Indicate the uploader class to be loaded. You should set this to
 com.twitter.heron.uploader.scp.ScpUploader
-* `heron.uploader.scp.command.options` --- Part of the SCP command where you specify the username,
-host and key options. i.e "-i ~/.ssh/id_rsa user@localhost"
-* `heron.uploader.ssh.command.options` --- Part of the SCP command where you specify the username,
-host and key options. i.e "-i ~/.ssh/id_rsa user@localhost"
+* `heron.uploader.scp.command.options` --- Part of the SCP command where you specify custom options.
+i.e "-i ~/.ssh/id_rsa"
+* `heron.uploader.scp.command.connection` --- The user name and host pair to be used by the SCP command.
+i.e "user@host"
+* `heron.uploader.ssh.command.options` --- Part of the SSH command where you specify custom options.
+i.e "-i ~/.ssh/id_rsa"
+* `heron.uploader.ssh.command.connection` --- The user name and host pair to be used by the SSH command.
+i.e "user@host"
 * `heron.uploader.scp.dir.path` --- The directory to be used to uploading the package.
 
 ### Example SCP Uploader Configuration
@@ -32,18 +36,29 @@ Below is an example configuration (in `uploader.yaml`) for a SCP uploader:
 ```yaml
 # uploader class for transferring the topology jar/tar files to storage
 heron.class.uploader:         com.twitter.heron.uploader.scp.ScpUploader
-# This is the scp command options that will be used by the uploader, this has to be customized to
-# reflect the user name, hostname and ssh keys if required.
-heron.uploader.scp.command.options:   "-i ~/.ssh/id_rsa user@host"
-# The ssh command options that will be used to connect to the uploading host to execute
+# This is the scp command options that will be used by the uploader, this can be used to
+# specify custom options such as the location of ssh keys.
+heron.uploader.scp.command.options:   "-i ~/.ssh/id_rsa"
+# The scp connection string sets the remote user name and host used by the uploader.
+heron.uploader.scp.command.connection:   "user@host"
+
+# The ssh command options that will be used when connecting to the uploading host to execute
 # command such as delete files, make directories.
-heron.uploader.ssh.command.options:   "-i ~/.ssh/id_rsa user@host"
+heron.uploader.ssh.command.options:   "-i ~/.ssh/id_rsa"
+# The ssh connection string sets the remote user name and host used by the uploader.
+heron.uploader.ssh.command.connection:   "user@host"
+
 # the directory where the file will be uploaded, make sure the user has the necessary permissions
 # to upload the file here.
 heron.uploader.scp.dir.path:   ${HOME}/heron/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}
 ```
 
-Below is an example `scp` command configuration in the `heron.aurora` file.
+The uploader will use SSH to create the entire directory structure specified in `heron.uploader.scp.dir.path` 
+by running `mkdir -p` before using SCP to upload the topology package.
+
+
+Below is an example `scp` command configuration in the `heron.aurora` file. The cmdline is run by every node
+in the cluster to **download** the topology package.
 
 ```bash
 fetch_user_package = Process(
