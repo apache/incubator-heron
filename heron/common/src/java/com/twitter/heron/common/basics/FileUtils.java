@@ -112,28 +112,8 @@ public final class FileUtils {
     return isDirectoryExists(file) && new File(file).list().length > 0;
   }
 
-  public static boolean isOriginalPackageJar(String packageFilename) {
-    return packageFilename.endsWith(".jar");
-  }
-
-  public static boolean isOriginalPackagePex(String packageFilename) {
-    return packageFilename.endsWith(".pex");
-  }
-
   public static String getBaseName(String file) {
     return new File(file).getName();
   }
 
-  public static String getPkgType(String topologyBinaryFile) {
-    String pkgType;
-    String basename = FileUtils.getBaseName(topologyBinaryFile);
-    if (FileUtils.isOriginalPackagePex(basename)) {
-      pkgType = "pex";
-    } else if (FileUtils.isOriginalPackageJar(basename)) {
-      pkgType = "jar";
-    } else {
-      pkgType = "tar";
-    }
-    return pkgType;
-  }
 }
