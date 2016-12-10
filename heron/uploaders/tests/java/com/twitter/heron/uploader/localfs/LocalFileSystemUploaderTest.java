@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 
@@ -47,7 +48,7 @@ public class LocalFileSystemUploaderTest {
         .put(Keys.cluster(), "cluster")
         .put(Keys.role(), "role")
         .put(Keys.topologyName(), "topology")
-        .put(Keys.topologyPackageType(), "tar")
+        .put(Keys.topologyPackageType(), PackageType.TAR)
         .put(LocalFileSystemKeys.fileSystemDirectory(), fileSystemDirectory)
         .build();
   }
