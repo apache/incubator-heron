@@ -112,33 +112,8 @@ public final class FileUtils {
     return isDirectoryExists(file) && new File(file).list().length > 0;
   }
 
-  public static boolean isOriginalPackageJar(String packageFilename) {
-    return packageFilename.endsWith(".jar");
-  }
-
-  public static boolean isOriginalPackagePex(String packageFilename) {
-    return packageFilename.endsWith(".pex");
-  }
-
-  public static boolean isOriginalPackageTar(String packageFilename) {
-    return packageFilename.endsWith(".tar");
-  }
-
   public static String getBaseName(String file) {
     return new File(file).getName();
   }
 
-  public static PackageType getPackageType(String topologyBinaryFile) {
-    String basename = FileUtils.getBaseName(topologyBinaryFile);
-    if (FileUtils.isOriginalPackagePex(basename)) {
-      return PackageType.PEX;
-    } else if (FileUtils.isOriginalPackageJar(basename)) {
-      return PackageType.JAR;
-    } else if (FileUtils.isOriginalPackageTar(basename)) {
-      return PackageType.TAR;
-    } else {
-      throw new RuntimeException(String.format("Unknown package type of file: %s",
-          topologyBinaryFile));
-    }
-  }
 }

@@ -17,7 +17,6 @@ package com.twitter.heron.spi.utils;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -44,7 +43,7 @@ public final class SchedulerConfig {
    */
   protected static Config topologyConfigs(String topologyBinaryFile,
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
-    PackageType packageType = FileUtils.getPackageType(topologyBinaryFile);
+    PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())

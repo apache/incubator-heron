@@ -22,14 +22,29 @@ public enum PackageType {
   JAR,
   TAR;
 
-  @Override
-  public String toString() {
-    switch (this) {
-      case PEX: return "pex";
-      case JAR: return "jar";
-      case TAR: return "tar";
-      default: throw new RuntimeException(
-          String.format("Unknown topology package type: %s", this.toString()));
+  private static boolean isOriginalPackageJar(String packageFilename) {
+    return packageFilename.endsWith(".jar");
+  }
+
+  private static boolean isOriginalPackagePex(String packageFilename) {
+    return packageFilename.endsWith(".pex");
+  }
+
+  private static boolean isOriginalPackageTar(String packageFilename) {
+    return packageFilename.endsWith(".tar");
+  }
+
+  public static PackageType getPackageType(String topologyBinaryFile) {
+    String basename = FileUtils.getBaseName(topologyBinaryFile);
+    if (isOriginalPackagePex(basename)) {
+      return PackageType.PEX;
+    } else if (isOriginalPackageJar(basename)) {
+      return PackageType.JAR;
+    } else if (isOriginalPackageTar(basename)) {
+      return PackageType.TAR;
+    } else {
+      throw new RuntimeException(String.format("Unknown package type of file: %s",
+          topologyBinaryFile));
     }
   }
 
