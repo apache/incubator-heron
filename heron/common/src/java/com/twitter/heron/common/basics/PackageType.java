@@ -24,8 +24,8 @@ public enum PackageType {
   JAR,
   TAR;
 
-  public static PackageType getPackageType(String topologyBinaryFile) {
-    String extension = Files.getFileExtension(topologyBinaryFile);
+  public static PackageType getPackageType(String packageFile) {
+    String extension = Files.getFileExtension(packageFile);
     return PackageType.valueOf(extension.toUpperCase());
   }
 
