@@ -36,7 +36,7 @@ public class PackageTypeTest {
     Assert.assertEquals(PackageType.getPackageType(pexFile), PackageType.PEX);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testUnknownPackageType() {
     String txtFile = "a.txt";
     PackageType.getPackageType(txtFile);
