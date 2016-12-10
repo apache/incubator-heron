@@ -28,7 +28,7 @@ namespace Hdfs {
 namespace Internal {
 
 class WritableUtils {
-public:
+ public:
     WritableUtils(char * b, size_t l);
 
     int32_t ReadInt32();
@@ -49,7 +49,7 @@ public:
 
     size_t WriteText(const std::string & str);
 
-private:
+ private:
     int decodeWritableUtilsSize(int value);
 
     void writeByte(int val);
@@ -58,12 +58,13 @@ private:
 
     int32_t ReadBigEndian32();
 
-private:
+ private:
     char * buffer;
     size_t len;
     size_t current;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
+
 #endif /* _HDFS_LIBHDFS_3_UTIL_WritableUtils_H_ */

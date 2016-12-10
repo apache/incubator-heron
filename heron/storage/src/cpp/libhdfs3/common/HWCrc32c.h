@@ -22,7 +22,7 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_HWCHECKSUM_H_
 #define _HDFS_LIBHDFS3_COMMON_HWCHECKSUM_H_
 
-#include "Checksum.h"
+#include "common/Checksum.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -31,7 +31,7 @@ namespace Internal {
  * Calculate CRC with hardware support.
  */
 class HWCrc32c: public Checksum {
-public:
+ public:
     /**
      * Constructor.
      */
@@ -67,14 +67,14 @@ public:
      */
     static bool available();
 
-private:
+ private:
     void updateInt64(const char * b, int len);
 
-private:
+ private:
     uint32_t crc;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_HWCHECKSUM_H_ */

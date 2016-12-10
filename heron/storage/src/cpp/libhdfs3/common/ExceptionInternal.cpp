@@ -19,15 +19,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform.h"
-
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "Thread.h"
+#include "common/ExceptionInternal.h"
 
 #include <cstring>
 #include <cassert>
+#include <string>
 #include <sstream>
+
+#include "common/Thread.h"
 
 namespace Hdfs {
 
@@ -176,6 +175,6 @@ const char * GetExceptionMessage(const exception_ptr e, std::string & buffer) {
     return buffer.c_str();
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 

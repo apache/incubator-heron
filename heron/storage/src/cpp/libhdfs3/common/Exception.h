@@ -28,237 +28,237 @@
 namespace Hdfs {
 
 class HdfsException: public std::runtime_error {
-public:
+ public:
     HdfsException(const std::string & arg, const char * file, int line,
                   const char * stack);
 
-    ~HdfsException() throw () {
+    ~HdfsException() throw() {
     }
 
     virtual const char * msg() const {
         return detail.c_str();
     }
 
-protected:
+ protected:
     std::string detail;
 };
 
 class HdfsIOException: public HdfsException {
-public:
+ public:
     HdfsIOException(const std::string & arg, const char * file, int line,
                     const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsIOException() throw () {
+    ~HdfsIOException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class HdfsNetworkException: public HdfsIOException {
-public:
+ public:
     HdfsNetworkException(const std::string & arg, const char * file, int line,
                          const char * stack) :
         HdfsIOException(arg, file, line, stack) {
     }
 
-    ~HdfsNetworkException() throw () {
+    ~HdfsNetworkException() throw() {
     }
 };
 
 class HdfsNetworkConnectException: public HdfsNetworkException {
-public:
+ public:
     HdfsNetworkConnectException(const std::string & arg, const char * file, int line,
                                 const char * stack) :
         HdfsNetworkException(arg, file, line, stack) {
     }
 
-    ~HdfsNetworkConnectException() throw () {
+    ~HdfsNetworkConnectException() throw() {
     }
 };
 
 class AccessControlException: public HdfsException {
-public:
+ public:
     AccessControlException(const std::string & arg, const char * file, int line,
                            const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~AccessControlException() throw () {
+    ~AccessControlException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class AlreadyBeingCreatedException: public HdfsException {
-public:
+ public:
     AlreadyBeingCreatedException(const std::string & arg, const char * file,
                                  int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~AlreadyBeingCreatedException() throw () {
+    ~AlreadyBeingCreatedException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class ChecksumException: public HdfsException {
-public:
+ public:
     ChecksumException(const std::string & arg, const char * file, int line,
                       const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~ChecksumException() throw () {
+    ~ChecksumException() throw() {
     }
 };
 
 class DSQuotaExceededException: public HdfsException {
-public:
+ public:
     DSQuotaExceededException(const std::string & arg, const char * file,
                              int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~DSQuotaExceededException() throw () {
+    ~DSQuotaExceededException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class FileAlreadyExistsException: public HdfsException {
-public:
+ public:
     FileAlreadyExistsException(const std::string & arg, const char * file,
                                int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~FileAlreadyExistsException() throw () {
+    ~FileAlreadyExistsException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class FileNotFoundException: public HdfsException {
-public:
+ public:
     FileNotFoundException(const std::string & arg, const char * file, int line,
                           const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~FileNotFoundException() throw () {
+    ~FileNotFoundException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class HdfsBadBoolFoumat: public HdfsException {
-public:
+ public:
     HdfsBadBoolFoumat(const std::string & arg, const char * file, int line,
                       const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsBadBoolFoumat() throw () {
+    ~HdfsBadBoolFoumat() throw() {
     }
 };
 
 class HdfsBadConfigFoumat: public HdfsException {
-public:
+ public:
     HdfsBadConfigFoumat(const std::string & arg, const char * file, int line,
                         const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsBadConfigFoumat() throw () {
+    ~HdfsBadConfigFoumat() throw() {
     }
 };
 
 class HdfsBadNumFoumat: public HdfsException {
-public:
+ public:
     HdfsBadNumFoumat(const std::string & arg, const char * file, int line,
                      const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsBadNumFoumat() throw () {
+    ~HdfsBadNumFoumat() throw() {
     }
 };
 
 class HdfsCanceled: public HdfsException {
-public:
+ public:
     HdfsCanceled(const std::string & arg, const char * file, int line,
                  const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsCanceled() throw () {
+    ~HdfsCanceled() throw() {
     }
 };
 
 class HdfsFileSystemClosed: public HdfsException {
-public:
+ public:
     HdfsFileSystemClosed(const std::string & arg, const char * file, int line,
                          const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsFileSystemClosed() throw () {
+    ~HdfsFileSystemClosed() throw() {
     }
 };
 
 class HdfsConfigInvalid: public HdfsException {
-public:
+ public:
     HdfsConfigInvalid(const std::string & arg, const char * file, int line,
                       const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsConfigInvalid() throw () {
+    ~HdfsConfigInvalid() throw() {
     }
 };
 
 class HdfsConfigNotFound: public HdfsException {
-public:
+ public:
     HdfsConfigNotFound(const std::string & arg, const char * file, int line,
                        const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsConfigNotFound() throw () {
+    ~HdfsConfigNotFound() throw() {
     }
 };
 
 class HdfsEndOfStream: public HdfsIOException {
-public:
+ public:
     HdfsEndOfStream(const std::string & arg, const char * file, int line,
                     const char * stack) :
         HdfsIOException(arg, file, line, stack) {
     }
 
-    ~HdfsEndOfStream() throw () {
+    ~HdfsEndOfStream() throw() {
     }
 };
 
 class HdfsInvalidBlockToken: public HdfsException {
-public:
+ public:
     HdfsInvalidBlockToken(const std::string & arg, const char * file, int line,
                           const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsInvalidBlockToken() throw () {
+    ~HdfsInvalidBlockToken() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
@@ -267,13 +267,13 @@ public:
  * This exception will be caught and attempt will be performed to recover in HA case.
  */
 class HdfsFailoverException: public HdfsException {
-public:
+ public:
     HdfsFailoverException(const std::string & arg, const char * file, int line,
                           const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsFailoverException() throw () {
+    ~HdfsFailoverException() throw() {
     }
 };
 
@@ -281,13 +281,13 @@ public:
  * Fatal error during the rpc call. It may wrap other exceptions.
  */
 class HdfsRpcException: public HdfsIOException {
-public:
+ public:
     HdfsRpcException(const std::string & arg, const char * file, int line,
                      const char * stack) :
         HdfsIOException(arg, file, line, stack) {
     }
 
-    ~HdfsRpcException() throw () {
+    ~HdfsRpcException() throw() {
     }
 };
 
@@ -296,13 +296,13 @@ public:
  * It should be used internally and parsed for details.
  */
 class HdfsRpcServerException: public HdfsIOException {
-public:
+ public:
     HdfsRpcServerException(const std::string & arg, const char * file, int line,
                            const char * stack) :
         HdfsIOException(arg, file, line, stack) {
     }
 
-    ~HdfsRpcServerException() throw () {
+    ~HdfsRpcServerException() throw() {
     }
 
     const std::string & getErrClass() const {
@@ -321,38 +321,38 @@ public:
         this->errMsg = errMsg;
     }
 
-private:
+ private:
     std::string errClass;
     std::string errMsg;
 };
 
 class HdfsTimeoutException: public HdfsException {
-public:
+ public:
     HdfsTimeoutException(const std::string & arg, const char * file, int line,
                          const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~HdfsTimeoutException() throw () {
+    ~HdfsTimeoutException() throw() {
     }
 };
 
 class InvalidParameter: public HdfsException {
-public:
+ public:
     InvalidParameter(const std::string & arg, const char * file, int line,
                      const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~InvalidParameter() throw () {
+    ~InvalidParameter() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class HadoopIllegalArgumentException : public InvalidParameter {
-public:
+ public:
     HadoopIllegalArgumentException(const std::string& arg, const char* file,
                                    int line, const char* stack)
         : InvalidParameter(arg, file, line, stack) {
@@ -361,158 +361,158 @@ public:
     ~HadoopIllegalArgumentException() throw() {
     }
 
-public:
+ public:
     static const char* ReflexName;
 };
 
 class InvalidPath: public HdfsException {
-public:
+ public:
     InvalidPath(const std::string & arg, const char * file, int line,
                 const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~InvalidPath() throw () {
+    ~InvalidPath() throw() {
     }
 };
 
 class NotReplicatedYetException: public HdfsException {
-public:
+ public:
     NotReplicatedYetException(const std::string & arg, const char * file,
                               int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~NotReplicatedYetException() throw () {
+    ~NotReplicatedYetException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class NSQuotaExceededException: public HdfsException {
-public:
+ public:
     NSQuotaExceededException(const std::string & arg, const char * file,
                              int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~NSQuotaExceededException() throw () {
+    ~NSQuotaExceededException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class ParentNotDirectoryException: public HdfsException {
-public:
+ public:
     ParentNotDirectoryException(const std::string & arg, const char * file,
                                 int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~ParentNotDirectoryException() throw () {
+    ~ParentNotDirectoryException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class ReplicaNotFoundException: public HdfsException {
-public:
+ public:
     ReplicaNotFoundException(const std::string & arg, const char * file,
                              int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~ReplicaNotFoundException() throw () {
+    ~ReplicaNotFoundException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class SafeModeException: public HdfsException {
-public:
+ public:
     SafeModeException(const std::string & arg, const char * file, int line,
                       const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~SafeModeException() throw () {
+    ~SafeModeException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class UnresolvedLinkException: public HdfsException {
-public:
+ public:
     UnresolvedLinkException(const std::string & arg, const char * file,
                             int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~UnresolvedLinkException() throw () {
+    ~UnresolvedLinkException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class UnsupportedOperationException: public HdfsException {
-public:
+ public:
     UnsupportedOperationException(const std::string & arg, const char * file,
                                   int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~UnsupportedOperationException() throw () {
+    ~UnsupportedOperationException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class SaslException: public HdfsException {
-public:
+ public:
     SaslException(const std::string & arg, const char * file, int line,
                   const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~SaslException() throw () {
+    ~SaslException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class NameNodeStandbyException: public HdfsException {
-public:
+ public:
     NameNodeStandbyException(const std::string & arg, const char * file,
                              int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~NameNodeStandbyException() throw () {
+    ~NameNodeStandbyException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
 class RpcNoSuchMethodException: public HdfsException {
-public:
+ public:
     RpcNoSuchMethodException(const std::string & arg, const char * file,
                              int line, const char * stack) :
         HdfsException(arg, file, line, stack) {
     }
 
-    ~RpcNoSuchMethodException() throw () {
+    ~RpcNoSuchMethodException() throw() {
     }
 
-public:
+ public:
     static const char * ReflexName;
 };
 
@@ -523,13 +523,13 @@ class RecoveryInProgressException : public HdfsException {
       : HdfsException(arg, file, line, stack) {
   }
 
-  ~RecoveryInProgressException() throw () {
+  ~RecoveryInProgressException() throw() {
   }
 
  public:
   static const char * ReflexName;
 };
 
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_EXCEPTION_H_ */

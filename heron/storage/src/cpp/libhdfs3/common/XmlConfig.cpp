@@ -19,21 +19,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "XmlConfig.h"
-#include "Hash.h"
 
-#include <cassert>
+#include "common/XmlConfig.h"
+
 #include <errno.h>
-#include <fstream>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <limits>
 #include <string.h>
 #include <unistd.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
-using namespace Hdfs::Internal;
+#include <cassert>
+#include <fstream>
+#include <limits>
+#include <map>
+#include <string>
+#include <vector>
+
+using Hdfs::Internal::StringHasher;
+using Hdfs::Internal::CombineHasher;;
+using Hdfs::Internal::GetSystemErrorInfo;
 
 namespace Hdfs {
 
@@ -41,7 +45,7 @@ typedef std::map<std::string, std::string>::const_iterator Iterator;
 typedef std::map<std::string, std::string> Map;
 
 static int32_t StrToInt32(const char * str) {
-    long retval;
+    int32_t retval;
     char * end = NULL;
     errno = 0;
     retval = strtol(str, &end, 0);
@@ -59,7 +63,7 @@ static int32_t StrToInt32(const char * str) {
 }
 
 static int64_t StrToInt64(const char * str) {
-    long long retval;
+    int64_t retval;
     char * end = NULL;
     errno = 0;
     retval = strtoll(str, &end, 0);
@@ -387,5 +391,5 @@ size_t Config::hash_value() const {
     return CombineHasher(&values[0], values.size());
 }
 
-}
+}  // namespace Hdfs
 

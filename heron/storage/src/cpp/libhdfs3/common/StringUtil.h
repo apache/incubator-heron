@@ -77,7 +77,6 @@ static inline bool StringReplace(std::string& str, const std::string& from,
 
 static inline bool StringReplaceAll(std::string& str, const std::string& from,
                               const std::string& to) {
-
     if (from.empty()) {
         return false;
     }
@@ -93,6 +92,7 @@ static inline bool StringReplaceAll(std::string& str, const std::string& from,
 
     return retval;
 }
-}
-}
+
+}  // namespace Internal
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_COMMON_STRINGUTIL_H_ */

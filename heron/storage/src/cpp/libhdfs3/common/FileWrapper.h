@@ -22,7 +22,7 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_FILEWRAPPER_H_
 #define _HDFS_LIBHDFS3_COMMON_FILEWRAPPER_H_
 
-#include <string>
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <string>
@@ -32,7 +32,7 @@ namespace Hdfs {
 namespace Internal {
 
 class FileWrapper {
-public:
+ public:
     virtual ~FileWrapper() {
     }
 
@@ -45,7 +45,7 @@ public:
 };
 
 class CFileWrapper: public FileWrapper {
-public:
+ public:
     CFileWrapper();
     ~CFileWrapper();
     bool open(int fd, bool delegate);
@@ -55,13 +55,13 @@ public:
     void copy(char * buffer, int32_t size);
     void seek(int64_t offset);
 
-private:
+ private:
     FILE * file;
     std::string path;
 };
 
 class MappedFileWrapper: public FileWrapper {
-public:
+ public:
     MappedFileWrapper();
     ~MappedFileWrapper();
     bool open(int fd, bool delegate);
@@ -71,10 +71,10 @@ public:
     void copy(char * buffer, int32_t size);
     void seek(int64_t offset);
 
-private:
+ private:
     bool openInternal(int fd, bool delegate, size_t size);
 
-private:
+ private:
     bool delegate;
     const char * begin;
     const char * position;
@@ -83,7 +83,7 @@ private:
     std::string path;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_FILEWRAPPER_H_ */

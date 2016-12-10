@@ -19,21 +19,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform.h"
 
-#include "Logger.h"
+#include "common/Logger.h"
+
+#include <sys/time.h>
+#include <unistd.h>
 
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include <sys/time.h>
-#include <unistd.h>
 #include <vector>
 
-#include "DateTime.h"
-#include "Thread.h"
+#include "common/DateTime.h"
+#include "common/Thread.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -85,15 +85,17 @@ void Logger::printf(LogSeverity s, const char * fmt, ...) {
         memset(&tval, 0, sizeof(tval));
         gettimeofday(&tval, NULL);
         localtime_r(&tval.tv_sec, &tm_time);
-        //determine buffer size
+        // determine buffer size
         va_start(ap, fmt);
         int size = vsnprintf(&buffer[0], buffer.size(), fmt, ap);
         va_end(ap);
-        //100 is enough for prefix
+        // 100 is enough for prefix
         buffer.resize(size + 100);
-        size = snprintf(&buffer[0], buffer.size(), "%04d-%02d-%02d %02d:%02d:%02d.%06ld, %s, %s ", tm_time.tm_year + 1900,
-                        1 + tm_time.tm_mon, tm_time.tm_mday, tm_time.tm_hour,
-                        tm_time.tm_min, tm_time.tm_sec, static_cast<long>(tval.tv_usec), ProcessId, SeverityName[s]);
+        size = snprintf(&buffer[0], buffer.size(), "%04d-%02d-%02d %02d:%02d:%02d.%06lld, %s, %s ",
+                        tm_time.tm_year + 1900, 1 + tm_time.tm_mon, tm_time.tm_mday,
+                        tm_time.tm_hour,
+                        tm_time.tm_min, tm_time.tm_sec, static_cast<int64_t>(tval.tv_usec),
+                        ProcessId, SeverityName[s]);
         va_start(ap, fmt);
         size += vsnprintf(&buffer[size], buffer.size() - size, fmt, ap);
         va_end(ap);
@@ -107,6 +109,6 @@ void Logger::printf(LogSeverity s, const char * fmt, ...) {
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 

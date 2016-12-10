@@ -19,12 +19,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <algorithm>
 #include <string>
 #include <limits>
+#include <vector>
 
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileWrapper.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/FileWrapper.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -101,10 +104,10 @@ void CFileWrapper::seek(int64_t offset) {
     bool seek_set = true;
 
     do {
-        batch = todo < std::numeric_limits<long>::max()
+        batch = todo < std::numeric_limits<int64_t>::max()
                     ? todo
-                    : std::numeric_limits<long>::max();
-        off_t rc = fseek(file, static_cast<long>(batch),
+                    : std::numeric_limits<int64_t>::max();
+        off_t rc = fseek(file, static_cast<int64_t>(batch),
                          seek_set ? SEEK_SET : SEEK_CUR);
         seek_set = false;
 
@@ -117,5 +120,5 @@ void CFileWrapper::seek(int64_t offset) {
     } while (todo > 0);
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

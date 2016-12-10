@@ -22,18 +22,20 @@
 #ifndef _HDFS_LIBHDFS3_EXCEPTION_EXCEPTIONINTERNAL_H_
 #define _HDFS_LIBHDFS3_EXCEPTION_EXCEPTIONINTERNAL_H_
 
-#include "platform.h"
-
+#include <unistd.h>
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <unistd.h>
 #include <string>
 #include <sstream>
+#include <exception>
+#include <stdexcept>
 
-#include "Function.h"
-#include "StackPrinter.h"
+#include "common/platform.h"
+#include "common/Exception.h"
+#include "common/Function.h"
+#include "common/StackPrinter.h"
 
 #define STACK_DEPTH 64
 
@@ -50,9 +52,6 @@ inline static const char * SkipPathPrefix(const char * path) {
     assert(i > 0 && i < len);
     return path + i + 1;
 }
-
-#include <exception>
-#include <stdexcept>
 
 namespace Hdfs {
 using std::rethrow_exception;
@@ -71,12 +70,12 @@ namespace Internal {
 template<typename THROWABLE>
 ATTRIBUTE_NORETURN ATTRIBUTE_NOINLINE
 void ThrowException(bool nested, const char * f, int l,
-                    const char * exceptionName, const char * fmt, ...) __attribute__((format(printf, 5, 6)));
+         const char * exceptionName, const char * fmt, ...) __attribute__((format(printf, 5, 6)));
 
 template<typename THROWABLE>
 ATTRIBUTE_NORETURN ATTRIBUTE_NOINLINE
 void ThrowException(bool nested, const char * f, int l,
-                    const char * exceptionName, const char * fmt, ...) {
+          const char * exceptionName, const char * fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     std::string buffer;
@@ -115,7 +114,7 @@ extern function<bool(void)> ChecnOperationCanceledCallback;
 
 class HdfsException;
 
-}
+}  // namespace Hdfs
 
 namespace Hdfs {
 namespace Internal {
@@ -154,13 +153,15 @@ const char * GetExceptionMessage(const exception_ptr e, std::string & buffer);
  */
 const char * GetSystemErrorInfo(int eno);
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #define THROW(throwable, fmt, ...) \
-    Hdfs::Internal::ThrowException<throwable>(false, __FILE__, __LINE__, #throwable, fmt, ##__VA_ARGS__);
+    Hdfs::Internal::ThrowException<throwable>(false, __FILE__, __LINE__, #throwable, \
+                                              fmt, ##__VA_ARGS__);
 
 #define NESTED_THROW(throwable, fmt, ...) \
-    Hdfs::Internal::ThrowException<throwable>(true, __FILE__, __LINE__, #throwable, fmt, ##__VA_ARGS__);
+    Hdfs::Internal::ThrowException<throwable>(true, __FILE__, __LINE__, #throwable, \
+                                              fmt, ##__VA_ARGS__);
 
 #endif /* _HDFS_LIBHDFS3_EXCEPTION_EXCEPTIONINTERNAL_H_ */

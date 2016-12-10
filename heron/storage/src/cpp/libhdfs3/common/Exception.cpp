@@ -19,8 +19,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
 
+#include "common/Exception.h"
+
+#include <string>
 #include <sstream>
 
 namespace Hdfs {
@@ -70,7 +72,8 @@ const char * HdfsInvalidBlockToken::ReflexName =
 
 const char * SaslException::ReflexName = "javax.security.sasl.SaslException";
 
-const char * RpcNoSuchMethodException::ReflexName = "org.apache.hadoop.ipc.RpcNoSuchMethodException";
+const char * RpcNoSuchMethodException::ReflexName =
+    "org.apache.hadoop.ipc.RpcNoSuchMethodException";
 
 const char * InvalidParameter::ReflexName = "java.lang.IllegalArgumentException";
 
@@ -87,4 +90,5 @@ HdfsException::HdfsException(const std::string & arg, const char * file,
     ss << file << ": " << line << ": " << arg << std::endl << stack;
     detail = ss.str();
 }
-}
+
+}  // namespace Hdfs

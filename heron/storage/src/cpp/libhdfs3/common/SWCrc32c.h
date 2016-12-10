@@ -22,14 +22,14 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_SWCRC32C_H_
 #define _HDFS_LIBHDFS3_COMMON_SWCRC32C_H_
 
-#include "platform.h"
-#include "Checksum.h"
+#include "common/platform.h"
+#include "common/Checksum.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class SWCrc32c: public Checksum {
-public:
+ public:
     SWCrc32c() :
         crc(0xFFFFFFFF) {
     }
@@ -47,11 +47,11 @@ public:
     ~SWCrc32c() {
     }
 
-private:
+ private:
     uint32_t crc;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_SWCRC32C_H_ */

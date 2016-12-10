@@ -22,16 +22,14 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_FUNCTION_H_
 #define _HDFS_LIBHDFS3_COMMON_FUNCTION_H_
 
-#include "platform.h"
 #include <functional>
+#include "common/platform.h"
 
 namespace Hdfs {
 
 using std::function;
 using std::bind;
 using std::reference_wrapper;
-using namespace std::placeholders;
-
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_FUNCTION_H_ */

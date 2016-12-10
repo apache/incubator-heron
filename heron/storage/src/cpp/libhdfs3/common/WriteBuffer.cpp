@@ -19,11 +19,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "WriteBuffer.h"
+#include "common/WriteBuffer.h"
 
 #include <google/protobuf/io/coded_stream.h>
 
-using namespace google::protobuf::io;
 using google::protobuf::uint8;
 
 namespace Hdfs {
@@ -40,7 +39,7 @@ WriteBuffer::~WriteBuffer() {
 
 void WriteBuffer::writeVarint32(int32_t value, size_t pos) {
     char buffer[5];
-    uint8 * end = CodedOutputStream::WriteVarint32ToArray(value,
+    uint8 * end = google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(value,
                   reinterpret_cast<uint8 *>(buffer));
     write(buffer, reinterpret_cast<char *>(end) - buffer, pos);
 }
@@ -70,5 +69,5 @@ void WriteBuffer::write(const void * bytes, size_t s, size_t pos) {
     memcpy(p, bytes, s);
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

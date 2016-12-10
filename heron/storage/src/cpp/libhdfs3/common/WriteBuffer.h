@@ -22,13 +22,13 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_WRITEBUFFER_H_
 #define _HDFS_LIBHDFS3_COMMON_WRITEBUFFER_H_
 
+#include <stdint.h>
+#include <arpa/inet.h>
+
 #include <cassert>
 #include <cstddef>
 #include <cstring>
-#include <stdint.h>
 #include <vector>
-
-#include <arpa/inet.h>
 
 namespace Hdfs {
 namespace Internal {
@@ -37,7 +37,7 @@ namespace Internal {
  * a data buffer used to read and write.
  */
 class WriteBuffer {
-public:
+ public:
     /**
      * Construct a empty buffer.
      * @throw nothrow
@@ -228,12 +228,12 @@ public:
         size = s;
     }
 
-private:
-    size_t size; //current write position.
+ private:
+    size_t size;  // current write position.
     std::vector<char> buffer;
-
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
+
 #endif /* _HDFS_LIBHDFS3_COMMON_WRITEBUFFER_H_ */

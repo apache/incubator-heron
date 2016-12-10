@@ -22,10 +22,10 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_HASH_H_
 #define _HDFS_LIBHDFS3_COMMON_HASH_H_
 
-#include "platform.h"
 #include <string>
 #include <vector>
 #include <functional>
+#include "common/platform.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -55,18 +55,18 @@ extern std::hash<size_t> SizeHasher;
  */
 extern std::hash<std::string> StringHasher;
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #define HDFS_HASH_DEFINE(TYPE) \
-    namespace std{ \
+    namespace std { \
     template<> \
     struct hash<TYPE> { \
         std::size_t operator()(const TYPE & key) const { \
             return key.hash_value(); \
         } \
     }; \
-    }
+    }  // namespace std
 
 
 namespace Hdfs {
@@ -89,7 +89,7 @@ static inline size_t CombineHasher(const size_t * vec, size_t size) {
     return value;
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_HASH_H_ */

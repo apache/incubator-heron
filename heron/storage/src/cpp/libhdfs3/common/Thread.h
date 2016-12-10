@@ -22,13 +22,11 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_THREAD_H_
 #define _HDFS_LIBHDFS3_COMMON_THREAD_H_
 
-#include "platform.h"
-
 #include <signal.h>
-
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "common/platform.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -41,10 +39,9 @@ using std::condition_variable;
 using std::defer_lock_t;
 using std::once_flag;
 using std::call_once;
-using namespace std::this_thread;
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 namespace Hdfs {
 namespace Internal {
@@ -60,8 +57,8 @@ sigset_t ThreadBlockSignal();
  */
 void ThreadUnBlockSignal(sigset_t sigs);
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #define CREATE_THREAD(retval, fun) \
     do { \
@@ -73,6 +70,6 @@ void ThreadUnBlockSignal(sigset_t sigs);
             Hdfs::Internal::ThreadUnBlockSignal(sigs); \
             throw; \
         } \
-    } while(0)
+    } while (0)
 
 #endif /* _HDFS_LIBHDFS3_COMMON_THREAD_H_ */

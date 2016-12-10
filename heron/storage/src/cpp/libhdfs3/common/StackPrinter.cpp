@@ -19,14 +19,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform.h"
+#include "common/StackPrinter.h"
 
-#include "StackPrinter.h"
-
-#include <cassert>
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <execinfo.h>
+
+#include <cassert>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -37,7 +36,7 @@ namespace Internal {
 static void ATTRIBUTE_NOINLINE GetStack(int skip, int maxDepth,
                                         std::vector<void *> & stack) {
     std::ostringstream ss;
-    ++skip; //current frame.
+    ++skip;  // current frame.
     stack.resize(maxDepth + skip);
     int size;
     size = backtrace(&stack[0], maxDepth + skip);
@@ -292,7 +291,7 @@ FindSymbol(uint64_t pc, const int fd, char * out, int out_size,
             uint64_t end_address = start_address + symbol.st_size;
 
             if (symbol.st_value != 0 &&  // Skip null value symbols.
-                    symbol.st_shndx != 0 &&// Skip undefined symbols.
+                    symbol.st_shndx != 0 &&  // Skip undefined symbols.
                     start_address <= pc && pc < end_address) {
                 ssize_t len1 = ReadFromOffset(fd, out, out_size,
                                               strtab->sh_offset + symbol.st_name);
@@ -383,7 +382,7 @@ struct FileDescriptor {
         return fd_;
     }
 
-private:
+ private:
     explicit FileDescriptor(const FileDescriptor &);
     void operator=(const FileDescriptor &);
 };
@@ -394,7 +393,7 @@ private:
 // a 5k array member) and uses async-unsafe functions such as sscanf()
 // and snprintf().
 class LineReader {
-public:
+ public:
     explicit LineReader(int fd, char * buf, int buf_len) : fd_(fd),
         buf_(buf), buf_len_(buf_len), bol_(buf), eol_(buf), eod_(buf) {
     }
@@ -416,7 +415,7 @@ public:
             bol_ = buf_;
         } else {
             bol_ = eol_ + 1;  // Advance to the next line in the buffer.
-            assert(bol_ <= eod_);// "bol_" can point to "eod_".
+            assert(bol_ <= eod_);  // "bol_" can point to "eod_".
 
             if (!HasCompleteLine()) {
                 const int incomplete_line_length = eod_ - bol_;
@@ -459,7 +458,7 @@ public:
         return eol_;
     }
 
-private:
+ private:
     explicit LineReader(const LineReader &);
     void operator=(const LineReader &);
 
@@ -480,7 +479,7 @@ private:
     const int buf_len_;
     char * bol_;
     char * eol_;
-    const char * eod_; // End of data in "buf_".
+    const char * eod_;  // End of data in "buf_".
 };
 }  // namespace
 
@@ -524,7 +523,7 @@ OpenObjectFileContainingPcAndGetStartAddress(uint64_t pc,
 
     // Iterate over maps and look for the map containing the pc.  Then
     // look into the symbol tables inside.
-    char buf[1024];// Big enough for line of sane /proc/self/maps
+    char buf[1024];  // Big enough for line of sane /proc/self/maps
     LineReader reader(wrapped_maps_fd.get(), buf, sizeof(buf));
 
     while (true) {
@@ -578,7 +577,7 @@ OpenObjectFileContainingPcAndGetStartAddress(uint64_t pc,
 
         // Check flags.  We are only interested in "r-x" maps.
         if (memcmp(flags_start, "r-x", 3) != 0) {  // Not a "r-x" map.
-            continue;// We skip this map.
+            continue;  // We skip this map.
         }
 
         ++cursor;  // Skip ' '.
@@ -670,6 +669,6 @@ const std::string PrintStack(int skip, int maxDepth) {
     return ss.str();
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 

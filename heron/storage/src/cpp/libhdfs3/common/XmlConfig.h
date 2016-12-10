@@ -27,13 +27,17 @@
 #include <sstream>
 #include <map>
 
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Hash.h"
+
 namespace Hdfs {
 
 /**
  * A configure file parser.
  */
 class Config {
-public:
+ public:
     /**
      * Construct a empty Config instance.
      */
@@ -45,7 +49,7 @@ public:
      * @param path The path of configure file.
      * @throw HdfsBadConfigFoumat
      */
-    Config(const char * path);
+    explicit Config(const char * path);
 
     /**
      * Parse the configure file.
@@ -176,11 +180,11 @@ public:
      */
     size_t hash_value() const;
 
-private:
+ private:
     std::string path;
     std::map<std::string, std::string> kv;
 };
 
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_XMLCONFIG_H_ */

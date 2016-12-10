@@ -22,7 +22,7 @@
 
 #include <unistd.h>
 
-#include "Thread.h"
+#include "common/Thread.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -44,5 +44,5 @@ void ThreadUnBlockSignal(sigset_t sigs) {
     pthread_sigmask(SIG_SETMASK, &sigs, 0);
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

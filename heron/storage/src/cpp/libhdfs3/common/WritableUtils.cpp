@@ -19,13 +19,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <arpa/inet.h>
 #include <stdexcept>
 #include <limits>
 #include <cstring>
 #include <string>
-#include <arpa/inet.h>
 
-#include "WritableUtils.h"
+#include "common/WritableUtils.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -56,7 +57,7 @@ int64_t WritableUtils::ReadInt64() {
         return value;
     }
 
-    long i = 0;
+    int64_t i = 0;
 
     for (int idx = 0; idx < len - 1; idx++) {
         unsigned char b = readByte();
@@ -94,18 +95,18 @@ size_t WritableUtils::WriteInt64(int64_t value) {
     size_t retval = 1;
 
     if (value >= -112 && value <= 127) {
-        writeByte((int) value);
+        writeByte(static_cast<int>(value));
         return retval;
     }
 
     int len = -112;
 
     if (value < 0) {
-        value ^= -1L; // take one's complement'
+        value ^= -1L;  // take one's complement'
         len = -120;
     }
 
-    long tmp = value;
+    int64_t tmp = value;
 
     while (tmp != 0) {
         tmp = tmp >> 8;
@@ -113,14 +114,14 @@ size_t WritableUtils::WriteInt64(int64_t value) {
     }
 
     ++retval;
-    writeByte((int) len);
+    writeByte(static_cast<int>(len));
     len = (len < -120) ? -(len + 120) : -(len + 112);
 
     for (int idx = len; idx != 0; idx--) {
         int shiftbits = (idx - 1) * 8;
-        long mask = 0xFFL << shiftbits;
+        int64_t mask = 0xFFL << shiftbits;
         ++retval;
-        writeByte((int)((value & mask) >> shiftbits));
+        writeByte(static_cast<int>((value & mask) >> shiftbits));
     }
 
     return retval;
@@ -181,8 +182,8 @@ int32_t WritableUtils::ReadBigEndian32() {
         buf[i] = readByte();
     }
 
-    return ntohl(*(uint32_t *) buf);
+    return ntohl(*reinterpret_cast<uint32_t *>(buf));
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

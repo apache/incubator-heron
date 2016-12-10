@@ -19,8 +19,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Hash.h"
+#include "common/Hash.h"
 
+#include <string>
 #include <functional>
 
 namespace Hdfs {
@@ -51,5 +52,5 @@ std::hash<size_t> SizeHasher;
  */
 std::hash<std::string> StringHasher;
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

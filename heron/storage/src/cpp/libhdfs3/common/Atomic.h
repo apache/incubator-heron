@@ -22,15 +22,16 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_ATOMIC_H_
 #define _HDFS_LIBHDFS3_COMMON_ATOMIC_H_
 
-#include "platform.h"
 #include <atomic>
+#include "common/platform.h"
 
 namespace Hdfs {
 namespace Internal {
 
 using std::atomic;
 
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_ATOMIC_H_ */
 

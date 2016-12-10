@@ -22,13 +22,15 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "HWCrc32c.h"
+#include "common/HWCrc32c.h"
 
-#if ((defined(__X86__) || defined(__i386__) || defined(i386) || defined(_M_IX86) || defined(__386__) || defined(__x86_64__) || defined(_M_X64)))
+#if ((defined(__X86__) || defined(__i386__) || defined(i386) || defined(_M_IX86) || \
+      defined(__386__) || defined(__x86_64__) || defined(_M_X64)))
 #include <cpuid.h>
 #endif
 
-#if ((defined(__X86__) || defined(__i386__) || defined(i386) || defined(_M_IX86) || defined(__386__) || defined(__x86_64__) || defined(_M_X64)))
+#if ((defined(__X86__) || defined(__i386__) || defined(i386) || defined(_M_IX86) || \
+      defined(__386__) || defined(__x86_64__) || defined(_M_X64)))
 #if !defined(__SSE4_2__)
 
 namespace Hdfs {
@@ -56,8 +58,8 @@ static inline uint32_t _mm_crc32_u8(uint32_t crc, uint8_t value) {
     return crc;
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #else
 
@@ -69,7 +71,8 @@ namespace Hdfs {
 namespace Internal {
 
 bool HWCrc32c::available() {
-#if ((defined(__X86__) || defined(__i386__) || defined(i386) || defined(_M_IX86) || defined(__386__) || defined(__x86_64__) || defined(_M_X64)))
+#if ((defined(__X86__) || defined(__i386__) || defined(i386) || defined(_M_IX86) || \
+    defined(__386__) || defined(__x86_64__) || defined(_M_X64)))
     uint32_t eax, ebx, ecx = 0, edx;
     /*
      * get the CPU features (level 1). ecx will have the SSE4.2 bit.
@@ -153,7 +156,7 @@ void HWCrc32c::updateInt64(const char * b, int len) {
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_HWCHECKSUM_H_ */

@@ -52,7 +52,7 @@ static inline char * WriteBigEndian32ToArray(int32_t value, char * buffer) {
     return buffer + sizeof(int32_t);
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_BIGENDIAN_H_ */

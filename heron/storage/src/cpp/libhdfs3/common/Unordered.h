@@ -22,10 +22,9 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_UNORDEREDMAP_H_
 #define _HDFS_LIBHDFS3_COMMON_UNORDEREDMAP_H_
 
-#include "platform.h"
-
 #include <unordered_map>
 #include <unordered_set>
+#include "common/platform.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -33,7 +32,7 @@ namespace Internal {
 using std::unordered_map;
 using std::unordered_set;
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_UNORDEREDMAP_H_ */

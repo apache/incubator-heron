@@ -25,14 +25,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <algorithm>
 #include <limits>
 #include <string>
 #include <sstream>
-#include <limits>
+#include <vector>
 
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileWrapper.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/FileWrapper.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -144,5 +145,5 @@ void MappedFileWrapper::seek(int64_t offset) {
     position = begin + offset;
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

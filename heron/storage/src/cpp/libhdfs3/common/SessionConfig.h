@@ -22,30 +22,30 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_SESSIONCONFIG_H_
 #define _HDFS_LIBHDFS3_COMMON_SESSIONCONFIG_H_
 
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "Function.h"
-#include "Logger.h"
-#include "XmlConfig.h"
-
 #include <cassert>
+#include <string>
 #include <vector>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Function.h"
+#include "common/Logger.h"
+#include "common/XmlConfig.h"
 
 namespace Hdfs {
 namespace Internal {
 
 template<typename T>
 struct ConfigDefault {
-    T * variable; //variable this configure item should be bound to.
-    const char * key; //configure key.
-    T value; //default value.
-    function<void(const char *, T const &)> check;   //the function to validate the value.
+    T * variable;  // variable this configure item should be bound to.
+    const char * key;  // configure key.
+    T value;  // default value.
+    function<void(const char *, T const &)> check;  // the function to validate the value.
 };
 
 class SessionConfig {
-public:
-
-    SessionConfig(const Config & conf);
+ public:
+    explicit SessionConfig(const Config & conf);
 
     /*
      * rpc configure
@@ -301,7 +301,7 @@ public:
       return socketCacheCapacity;
     }
 
-public:
+ public:
     /*
      * rpc configure
      */
@@ -352,17 +352,16 @@ public:
     bool addDatanode;
     int32_t chunkSize;
     int32_t packetSize;
-    int32_t blockWriteRetry; //retry on block not replicated yet.
+    int32_t blockWriteRetry;  // retry on block not replicated yet.
     int32_t outputConnTimeout;
     int32_t outputReadTimeout;
     int32_t outputWriteTimeout;
     int32_t packetPoolSize;
     int32_t heartBeatInterval;
     int32_t closeFileTimeout;
-
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_SESSIONCONFIG_H_ */

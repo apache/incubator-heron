@@ -22,24 +22,21 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_DATETIME_H_
 #define _HDFS_LIBHDFS3_COMMON_DATETIME_H_
 
-#include "platform.h"
-
 #include <ctime>
 #include <cassert>
 #include <chrono>
+#include "common/platform.h"
 
 namespace Hdfs {
 namespace Internal {
 
-using namespace std::chrono;
-
 template<typename TimeStamp>
 static int64_t ToMilliSeconds(TimeStamp const & s, TimeStamp const & e) {
     assert(e >= s);
-    return duration_cast<milliseconds>(e - s).count();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count();
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_DATETIME_H_ */

@@ -22,28 +22,28 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_LRUMAP_H_
 #define _HDFS_LIBHDFS3_COMMON_LRUMAP_H_
 
-#include "Unordered.h"
-#include "Thread.h"
-
 #include <list>
+#include <utility>
+#include "common/Unordered.h"
+#include "common/Thread.h"
 
 namespace Hdfs {
 namespace Internal {
 
 template <typename K, typename V>
 class LruMap {
-public:
+ public:
     typedef K KeyType;
     typedef V ValueType;
     typedef std::pair<K, V> ItmeType;
     typedef std::list<ItmeType> ListType;
     typedef unordered_map<K, typename ListType::iterator> MapType;
 
-public:
+ public:
     LruMap() : count(0), maxSize(1000) {
     }
 
-    LruMap(size_t size) : count(0), maxSize(size) {
+    explicit LruMap(size_t size) : count(0), maxSize(size) {
     }
 
     ~LruMap() {
@@ -109,7 +109,7 @@ public:
         return count;
     }
 
-private:
+ private:
     bool findAndEraseInternal(const KeyType& key, ValueType* value,
                               bool erase) {
         typename MapType::iterator it = map.find(key);
@@ -132,13 +132,15 @@ private:
         return false;
     }
 
-private:
+ private:
     size_t count;
     size_t maxSize;
     ListType list;
     MapType map;
     mutex mut;
 };
-}
-}
+
+}  // namespace Internal
+}  // namespace Hdfs
+
 #endif /* _HDFS_LIBHDFS3_COMMON_LRU_H_ */

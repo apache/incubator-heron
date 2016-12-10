@@ -24,6 +24,8 @@
 
 #define DEFAULT_LOG_LEVEL INFO
 
+#include "common/platform.h"
+
 namespace Hdfs {
 namespace Internal {
 
@@ -36,7 +38,7 @@ enum LogSeverity {
 class Logger;
 
 class Logger {
-public:
+ public:
     Logger();
 
     ~Logger();
@@ -47,15 +49,15 @@ public:
 
     void printf(LogSeverity s, const char * fmt, ...) __attribute__((format(printf, 3, 4)));
 
-private:
+ private:
     int fd;
     LogSeverity severity;
 };
 
 extern Logger RootLogger;
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #define LOG(s, fmt, ...) \
     Hdfs::Internal::RootLogger.printf(s, fmt, ##__VA_ARGS__)

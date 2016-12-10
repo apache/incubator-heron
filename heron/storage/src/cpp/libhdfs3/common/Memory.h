@@ -22,15 +22,15 @@
 #ifndef _HDFS_LIBHDFS3_COMMON_MEMORY_H_
 #define _HDFS_LIBHDFS3_COMMON_MEMORY_H_
 
-#include "platform.h"
-
 #include <memory>
+#include "common/platform.h"
 
 namespace Hdfs {
 namespace Internal {
 
 using std::shared_ptr;
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
+
 #endif /* _HDFS_LIBHDFS3_COMMON_MEMORY_H_ */

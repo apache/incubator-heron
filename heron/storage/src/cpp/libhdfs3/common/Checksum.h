@@ -35,7 +35,7 @@ namespace Internal {
  * An abstract base CRC class.
  */
 class Checksum {
-public:
+ public:
     /**
      * @return Returns the current checksum value.
      */
@@ -60,7 +60,7 @@ public:
     }
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_COMMON_CHECKSUM_H_ */

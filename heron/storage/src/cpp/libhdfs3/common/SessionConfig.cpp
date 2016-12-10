@@ -19,14 +19,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "Function.h"
-#include "SessionConfig.h"
 
+#include "common/SessionConfig.h"
+
+#include <string>
 #include <sstream>
 
 #define ARRAYSIZE(A) (sizeof(A) / sizeof(A[0]))
+
+using std::placeholders::_1;
+using std::placeholders::_2;
 
 namespace Hdfs {
 namespace Internal {
@@ -45,12 +47,13 @@ static void CheckRangeGE(const char * key, T const & value, T const & target) {
 template<typename T>
 static void CheckMultipleOf(const char * key, const T & value, int unit) {
     if (value <= 0 || value % unit != 0) {
-        THROW(HdfsConfigInvalid, "%s should be larger than 0 and be the multiple of %d.", key, unit);
+        THROW(HdfsConfigInvalid, "%s should be larger than 0 and be the multiple of %d.",
+            key, unit);
     }
 }
 
 SessionConfig::SessionConfig(const Config & conf) {
-    ConfigDefault<bool> boolValues [] = {
+    ConfigDefault<bool> boolValues[] = {
         {
             &rpcTcpNoDelay, "rpc.client.connect.tcpnodelay", true
         }, {
@@ -67,7 +70,7 @@ SessionConfig::SessionConfig(const Config & conf) {
     };
     ConfigDefault<int32_t> i32Values[] = {
         {
-            &rpcMaxIdleTime, "rpc.client.max.idle", 10 * 1000, bind(CheckRangeGE<int32_t>, _1, _2, 1)
+            &rpcMaxIdleTime, "rpc.client.max.idle", 10 * 1000, bind(CheckRangeGE<int32_t>, _1, _2, 1)  // NOLINT(whitespace/line_length)
         }, {
             &rpcPingTimeout, "rpc.client.ping.interval", 10 * 1000
         }, {
@@ -79,7 +82,7 @@ SessionConfig::SessionConfig(const Config & conf) {
         }, {
             &rpcSocketLingerTimeout, "rpc.client.socekt.linger.timeout", -1
         }, {
-            &rpcMaxRetryOnConnect, "rpc.client.connect.retry", 10, bind(CheckRangeGE<int32_t>, _1, _2, 1)
+            &rpcMaxRetryOnConnect, "rpc.client.connect.retry", 10, bind(CheckRangeGE<int32_t>, _1, _2, 1)  // NOLINT(whitespace/line_length)
         }, {
             &rpcTimeout, "rpc.client.timeout", 3600 * 1000
         }, {
@@ -91,13 +94,13 @@ SessionConfig::SessionConfig(const Config & conf) {
         }, {
             &inputWriteTimeout, "input.write.timeout", 3600 * 1000
         }, {
-            &localReadBufferSize, "input.localread.default.buffersize", 1 * 1024 * 1024, bind(CheckRangeGE<int32_t>, _1, _2, 1)
+            &localReadBufferSize, "input.localread.default.buffersize", 1 * 1024 * 1024, bind(CheckRangeGE<int32_t>, _1, _2, 1)  // NOLINT(whitespace/line_length)
         }, {
             &prefetchSize, "dfs.prefetchsize", 10, bind(CheckRangeGE<int32_t>, _1, _2, 1)
         }, {
-            &maxGetBlockInfoRetry, "input.read.getblockinfo.retry", 3, bind(CheckRangeGE<int32_t>, _1, _2, 1)
+            &maxGetBlockInfoRetry, "input.read.getblockinfo.retry", 3, bind(CheckRangeGE<int32_t>, _1, _2, 1)  // NOLINT(whitespace/line_length)
         }, {
-            &maxLocalBlockInfoCacheSize, "input.localread.blockinfo.cachesize", 1000, bind(CheckRangeGE<int32_t>, _1, _2, 1)
+            &maxLocalBlockInfoCacheSize, "input.localread.blockinfo.cachesize", 1000, bind(CheckRangeGE<int32_t>, _1, _2, 1)  // NOLINT(whitespace/line_length)
         }, {
             &maxReadBlockRetry, "input.read.max.retry", 60, bind(CheckRangeGE<int32_t>, _1, _2, 1)
         }, {
@@ -105,7 +108,7 @@ SessionConfig::SessionConfig(const Config & conf) {
         }, {
             &packetSize, "output.default.packetsize", 64 * 1024
         }, {
-            &blockWriteRetry, "output.default.write.retry", 10, bind(CheckRangeGE<int32_t>, _1, _2, 1)
+            &blockWriteRetry, "output.default.write.retry", 10, bind(CheckRangeGE<int32_t>, _1, _2, 1)  // NOLINT(whitespace/line_length)
         }, {
             &outputConnTimeout, "output.connect.timeout", 600 * 1000
         }, {
@@ -119,21 +122,21 @@ SessionConfig::SessionConfig(const Config & conf) {
         }, {
             &heartBeatInterval, "output.heeartbeat.interval", 10 * 1000
         }, {
-            &rpcMaxHARetry, "dfs.client.failover.max.attempts", 15, bind(CheckRangeGE<int32_t>, _1, _2, 0)
+            &rpcMaxHARetry, "dfs.client.failover.max.attempts", 15, bind(CheckRangeGE<int32_t>, _1, _2, 0)  // NOLINT(whitespace/line_length)
         }, {
-            &maxFileDescriptorCacheSize, "dfs.client.read.shortcircuit.streams.cache.size", 256, bind(CheckRangeGE<int32_t>, _1, _2, 0)
+            &maxFileDescriptorCacheSize, "dfs.client.read.shortcircuit.streams.cache.size", 256, bind(CheckRangeGE<int32_t>, _1, _2, 0)  // NOLINT(whitespace/line_length)
         }, {
-            &socketCacheExpiry, "dfs.client.socketcache.expiryMsec", 3000, bind(CheckRangeGE<int32_t>, _1, _2, 0)
+            &socketCacheExpiry, "dfs.client.socketcache.expiryMsec", 3000, bind(CheckRangeGE<int32_t>, _1, _2, 0)  // NOLINT(whitespace/line_length)
         }, {
-            &socketCacheCapacity, "dfs.client.socketcache.capacity", 16, bind(CheckRangeGE<int32_t>, _1, _2, 0)
+            &socketCacheCapacity, "dfs.client.socketcache.capacity", 16, bind(CheckRangeGE<int32_t>, _1, _2, 0)  // NOLINT(whitespace/line_length)
         }
     };
-    ConfigDefault<int64_t> i64Values [] = {
+    ConfigDefault<int64_t> i64Values[] = {
         {
-            &defaultBlockSize, "dfs.default.blocksize", 64 * 1024 * 1024, bind(CheckMultipleOf<int64_t>, _1, _2, 512)
+            &defaultBlockSize, "dfs.default.blocksize", 64 * 1024 * 1024, bind(CheckMultipleOf<int64_t>, _1, _2, 512)  // NOLINT(whitespace/line_length)
         }
     };
-    ConfigDefault<std::string> strValues [] = {
+    ConfigDefault<std::string> strValues[] = {
         {&defaultUri, "dfs.default.uri", "hdfs://localhost:8020" },
         {&rpcAuthMethod, "hadoop.security.authentication", "simple" },
         {&kerberosCachePath, "hadoop.security.kerberos.ticket.cache.path", "" },
@@ -178,5 +181,5 @@ SessionConfig::SessionConfig(const Config & conf) {
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
