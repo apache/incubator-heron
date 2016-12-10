@@ -212,7 +212,7 @@ public final class SchedulerUtils {
     commands.add(Context.systemConfigSandboxFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    commands.add(Context.topologyPackageType(config).toString());
+    commands.add(Context.topologyPackageType(config).name().toLowerCase());
     commands.add(Context.topologyBinaryFile(config));
     commands.add(Context.javaSandboxHome(config));
     commands.add(shellPort);

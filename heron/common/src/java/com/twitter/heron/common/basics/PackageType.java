@@ -14,6 +14,8 @@
 
 package com.twitter.heron.common.basics;
 
+import com.google.common.io.Files;
+
 /***
  * This enum defines commands topology package type
  */
@@ -22,30 +24,9 @@ public enum PackageType {
   JAR,
   TAR;
 
-  private static boolean isOriginalPackageJar(String packageFilename) {
-    return packageFilename.endsWith(".jar");
-  }
-
-  private static boolean isOriginalPackagePex(String packageFilename) {
-    return packageFilename.endsWith(".pex");
-  }
-
-  private static boolean isOriginalPackageTar(String packageFilename) {
-    return packageFilename.endsWith(".tar");
-  }
-
   public static PackageType getPackageType(String topologyBinaryFile) {
-    String basename = FileUtils.getBaseName(topologyBinaryFile);
-    if (isOriginalPackagePex(basename)) {
-      return PackageType.PEX;
-    } else if (isOriginalPackageJar(basename)) {
-      return PackageType.JAR;
-    } else if (isOriginalPackageTar(basename)) {
-      return PackageType.TAR;
-    } else {
-      throw new RuntimeException(String.format("Unknown package type of file: %s",
-          topologyBinaryFile));
-    }
+    String extension = Files.getFileExtension(topologyBinaryFile);
+    return PackageType.valueOf(extension.toUpperCase());
   }
 
 }
