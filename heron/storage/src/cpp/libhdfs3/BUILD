@@ -1,0 +1,80 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "common-cxx",
+    srcs = [
+        "common/CFileWrapper.cpp",
+        "common/Exception.cpp",
+        "common/ExceptionInternal.cpp",
+        "common/HWCrc32c.cpp",
+        "common/Hash.cpp",
+        "common/Logger.cpp",
+        "common/MappedFileWrapper.cpp",
+        "common/SWCrc32c.cpp",
+        "common/SessionConfig.cpp",
+        "common/StackPrinter.cpp",
+        "common/Thread.cpp",
+        "common/WritableUtils.cpp",
+        "common/WriteBuffer.cpp",
+        "common/XmlConfig.cpp",
+    ],
+    hdrs = [
+        "common/Atomic.h",
+        "common/BigEndian.h",
+        "common/Checksum.h",
+        "common/DateTime.h",
+        "common/Exception.h",
+        "common/ExceptionInternal.h",
+        "common/FileWrapper.h",
+        "common/Function.h",
+        "common/HWCrc32c.h",
+        "common/Hash.h",
+        "common/Logger.h",
+        "common/LruMap.h",
+        "common/Memory.h",
+        "common/SWCrc32c.h",
+        "common/SessionConfig.h",
+        "common/StackPrinter.h",
+        "common/StringUtil.h",
+        "common/Thread.h",
+        "common/Unordered.h",
+        "common/WritableUtils.h",
+        "common/WriteBuffer.h",
+        "common/XmlConfig.h",
+        "common/platform.h",
+    ],
+    copts = [
+        "-Ithird_party",
+        "-Iheron/storage/src/cpp/libhdfs3",
+    ],
+    deps = [
+        "//config:config-cxx",
+        "//third_party/libxml2:libxml2-cxx",
+        "//third_party/protobuf:protobuf-cxx",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "network-cxx",
+    srcs = [
+        "network/BufferedSocketReader.cpp",
+        "network/DomainSocket.cpp",
+        "network/TcpSocket.cpp",
+    ],
+    hdrs = [
+        "network/BufferedSocketReader.h",
+        "network/DomainSocket.h",
+        "network/Socket.h",
+        "network/Syscall.h",
+        "network/TcpSocket.h",
+    ],
+    copts = [
+        "-Ithird_party",
+        "-Iheron/storage/src/cpp/libhdfs3",
+    ],
+    deps = [
+        ":common-cxx",
+    ],
+    linkstatic = 1,
+)

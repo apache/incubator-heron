@@ -217,18 +217,11 @@ cc_library(
         "empty.cc",
     ],
     hdrs = [
-        "messages.h",
-
-        "common.pb.h",
-        "execution_state.pb.h",
-        "metrics.pb.h",
-        "physical_plan.pb.h",
-        "scheduler.pb.h",
-        "stats.pb.h",
-        "stmgr.pb.h",
-        "tmaster.pb.h",
-        "topology.pb.h",
-        "tuple.pb.h",
+        "ProtobufRpcEngine.pb.h",
+        "hdfs.pb.h",
+        "ClientNamenodeProtocol.pb.h",
+	"datatransfer.pb.h",
+        "Security.pb.h",
     ],
     deps = [
         ":proto_metrics_cc",

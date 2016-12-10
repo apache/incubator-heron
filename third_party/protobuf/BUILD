@@ -122,6 +122,7 @@ cc_library(
     hdrs = [
         "include/google/protobuf/stubs/common.h",
         "include/google/protobuf/stubs/once.h",
+        "include/google/protobuf/service.h",
 
         "include/google/protobuf/descriptor.h",
         "include/google/protobuf/extension_set.h",
