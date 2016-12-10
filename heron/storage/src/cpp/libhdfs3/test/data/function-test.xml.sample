@@ -1,0 +1,107 @@
+<configuration>
+
+	<property>
+		<name>dfs.default.uri</name>
+		<value>hdfs://localhost:8020</value>
+	</property>
+
+	<property>
+		<name>hadoop.security.authentication</name>
+		<value>simple</value>
+	</property>
+
+	<property>
+		<name>dfs.nameservices</name>
+		<value>phdcluster</value>
+	</property>
+
+	<property>
+		<name>dfs.default.replica</name>
+		<value>3</value>
+	</property>
+
+	<property>
+		<name>dfs.client.log.severity</name>
+		<value>INFO</value>
+	</property>
+
+	<property>
+		<name>dfs.client.read.shortcircuit</name>
+		<value>true</value>
+	</property>
+
+	<property>
+		<name>input.localread.blockinfo.cachesize</name>
+		<value>10</value>
+	</property>
+
+	<property>
+		<name>dfs.client.read.shortcircuit.streams.cache.size</name>
+		<value>10</value>
+	</property>
+
+	<property>
+		<name>dfs.client.use.legacy.blockreader.local</name>
+		<value>false</value>
+	</property>
+
+	<property>
+		<name>output.replace-datanode-on-failure</name>
+		<value>false</value>
+	</property>
+
+    <property>
+		<name>input.localread.mappedfile</name>
+		<value>true</value>
+    </property>
+
+	<property>
+		<name>dfs.domain.socket.path</name>
+		<value>/var/lib/hadoop-hdfs/hdfs_domain__PORT</value>
+	</property>
+
+	<property>
+		<name>dfs.ha.namenodes.phdcluster</name>
+		<value>nn1,nn2</value>
+	</property>
+	
+	<property>
+		<name>dfs.namenode.rpc-address.phdcluster.nn1</name>
+		<value>mdw:8020</value>
+	</property>
+	
+	<property>
+		<name>dfs.namenode.rpc-address.phdcluster.nn2</name>
+		<value>smdw:8020</value>
+	</property>
+
+	<property>
+		<name>dfs.namenode.http-address.phdcluster.nn1</name>
+		<value>mdw:50070</value>
+	</property>
+	
+	<property>
+		<name>dfs.namenode.http-address.phdcluster.nn2</name>
+		<value>smdw:50070</value>
+	</property>
+	
+	<property>
+		<name>rpc.socekt.linger.timeout</name>
+		<value>20</value>
+	</property>
+	
+	<property>
+		<name>rpc.max.idle</name>
+		<value>100</value>
+	</property>
+	
+	<property>
+		<name>test.get.conf</name>
+		<value>success</value>
+	</property>
+
+	<property>
+		<name>test.get.confint32</name>
+		<value>10</value>
+	</property>
+</configuration>

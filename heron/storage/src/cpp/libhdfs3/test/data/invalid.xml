@@ -1,0 +1,6 @@
+<configuration>
+
+	<property>
+		<name>hadoop.hdfs.configuration.version</name>
+		<value>1</value>
+		<description>version of this configuration file</description>
