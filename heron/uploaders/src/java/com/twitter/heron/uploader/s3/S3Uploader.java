@@ -40,6 +40,7 @@ import com.google.common.base.Strings;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 /**
  * Provides a basic uploader class for uploading topology packages to s3.
@@ -170,7 +171,7 @@ public class S3Uploader implements IUploader {
   }
 
   @Override
-  public URI uploadPackage() {
+  public URI uploadPackage() throws UploaderException {
     // Backup any existing files incase we need to undo this action
     if (s3Client.doesObjectExist(bucket, remoteFilePath)) {
       s3Client.copyObject(bucket, remoteFilePath, bucket, previousVersionFilePath);
@@ -180,9 +181,8 @@ public class S3Uploader implements IUploader {
     try {
       s3Client.putObject(bucket, remoteFilePath, packageFileHandler);
     } catch (SdkClientException e) {
-      LOG.log(Level.SEVERE, "Error writing topology package to " + bucket + " "
-          + remoteFilePath, e);
-      return null;
+      throw new UploaderException(
+          String.format("Error writing topology package to %s %s", bucket, remoteFilePath), e);
     }
 
     // Ask s3 for the url to the topology package we just uploaded
@@ -191,16 +191,15 @@ public class S3Uploader implements IUploader {
 
     // This will happen if the package does not actually exist in the place where we uploaded it to.
     if (resourceUrl == null) {
-      LOG.log(Level.SEVERE, "Resource not found for bucket " + bucket + " and path "
-          + remoteFilePath);
-      return null;
+      throw new UploaderException(
+          String.format("Resource not found for bucket %s and path %s", bucket, remoteFilePath));
     }
 
     try {
       return resourceUrl.toURI();
     } catch (URISyntaxException e) {
-      LOG.log(Level.SEVERE, "Could not convert URL " + resourceUrl + " to URI", e);
-      return null;
+      throw new UploaderException(
+          String.format("Could not convert URL %s to URI", resourceUrl, e));
     }
   }
 

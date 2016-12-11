@@ -357,7 +357,7 @@ public class RuntimeManagerMain {
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
-      LOG.severe("No such topology exists");
+      LOG.severe(String.format("Topology '%s' does not exist", topologyName));
       return false;
     }
 

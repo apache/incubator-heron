@@ -45,7 +45,7 @@ public interface IUploader extends AutoCloseable {
    * @return destination URI of where the topology package has
    * been uploaded if successful, or {@code null} if failed.
    */
-  URI uploadPackage();
+  URI uploadPackage() throws UploaderException;
 
   /**
    * If subsequent stages fail, undo will be called to free resources used by
