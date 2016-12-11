@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 public class LocalFileSystemUploaderTest {
 
@@ -77,7 +78,7 @@ public class LocalFileSystemUploaderTest {
     Assert.assertTrue(new File(destFile).isFile());
   }
 
-  @Test
+  @Test(expected = UploaderException.class)
   public void testSourceNotExists() throws Exception {
 
     // identify the location of the test topology tar file
@@ -90,9 +91,7 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newconfig);
-
-    // Assert that the file does not exist
-    Assert.assertNull(uploader.uploadPackage());
+    uploader.uploadPackage();
   }
 
   @Test
