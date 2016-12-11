@@ -7,7 +7,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 [github]({{% githubMaster %}}).
 
 If you're looking for documentation about developing topologies for a Heron
-cluster, see [Building Topologies](../../developers/topologies) instead.
+cluster, see [Building Topologies](../../developers/java/topologies) instead.
 
 ## Languages
 
@@ -20,7 +20,7 @@ The primary programming languages for Heron are C++, Java, and Python.
 * **Java 8** is used primarily for Heron's [topology
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found
-in [Building Topologies](../../developers/topologies), while documentation for the Java
+in [Building Topologies](../../developers/java/topologies), while documentation for the Java
 API can be found [here](/api/com/twitter/heron/api/topology/package-summary.html). Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.
 
@@ -113,7 +113,7 @@ Heron's API for writing topologies is written in Java. The code for this API can
 be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
-Topologies](../../developers/topologies), while API documentation can be found
+Topologies](../../developers/java/topologies), while API documentation can be found
 [here](/api/com/twitter/heron/api/topology/package-summary.html).
 
 ### Simulator
