@@ -127,19 +127,21 @@ public class UpdateTopologyManager implements Closeable {
     PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
 
     Preconditions.checkArgument(proposedPackingPlan.getContainers().size() > 0,
-        String.format("ERROR: proposed packing plan must have at least 1 container %s", proposedPackingPlan));
+        String.format("ERROR: " +
+            "proposed packing plan must have at least 1 container %s", proposedPackingPlan));
 
     ContainerDelta containerDelta = new ContainerDelta(
         existingPackingPlan.getContainers(), proposedPackingPlan.getContainers());
     int newContainerCount = containerDelta.getContainersToAdd().size();
     int removableContainerCount = containerDelta.getContainersToRemove().size();
 
-    String message = String.format("ERROR: Topology change requires %s new containers and removing %s "
+    String message = String.format("ERROR: "
+            + "Topology change requires %s new containers and removing %s "
             + "existing containers, but the scheduler does not support scaling, aborting. "
             + "Existing packing plan: %s, proposed packing plan: %s",
         newContainerCount, removableContainerCount, existingPackingPlan, proposedPackingPlan);
-    Preconditions.checkState(newContainerCount + removableContainerCount == 0 || scalableScheduler.isPresent(),
-        message);
+    Preconditions.checkState(newContainerCount + removableContainerCount == 0 ||
+        scalableScheduler.isPresent(), message);
 
     TopologyAPI.Topology topology = stateManager.getTopology(topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
@@ -195,7 +197,8 @@ public class UpdateTopologyManager implements Closeable {
     Preconditions.checkState(TMasterUtils.transitionTopologyState(
         topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
         TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig),
-        String.format("ERROR: Failed to deactivate topology %s. Aborting update request", topology.getName()));
+        String.format("ERROR: " +
+            "Failed to deactivate topology %s. Aborting update request", topology.getName()));
 
     if (deactivateSleepSeconds > 0) {
       logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
@@ -283,8 +286,8 @@ public class UpdateTopologyManager implements Closeable {
         cancel();
 
         if (removableContainerCount < 1) {
-          Preconditions.checkState(reactivated,
-              String.format("ERROR: Topology reactivation failed for topology %s after topology update", topologyName));
+          Preconditions.checkState(reactivated, String.format("ERROR: " +
+              "Topology reactivation failed for topology %s after topology update", topologyName));
         } else {
           Preconditions.checkState(reactivated,
               String.format("ERROR: Topology reactivation failed for topology %s after topology "
