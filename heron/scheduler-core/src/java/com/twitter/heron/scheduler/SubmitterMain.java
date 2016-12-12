@@ -277,8 +277,6 @@ public class SubmitterMain {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-
-
     Boolean verbose = false;
     Level logLevel = Level.INFO;
     if (cmd.hasOption("v")) {
