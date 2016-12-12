@@ -138,6 +138,11 @@ public class RuntimeManagerMain {
         .argName("container id")
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("dry run")
+        .longOpt("dry_run")
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -154,6 +159,7 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(dryRun);
     options.addOption(verbose);
 
     return options;
@@ -203,6 +209,12 @@ public class RuntimeManagerMain {
 
     // init log
     LoggingHelper.loggerInit(logLevel, false);
+
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+      LOG.log(Level.FINE, "dry-run mode enabled");
+    }
 
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
