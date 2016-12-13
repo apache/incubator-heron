@@ -3,7 +3,7 @@ load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 
-slamgr_deps_files = [
+metricscachemgr_deps_files = [
     "//heron/spi/src/java:common-spi-java",
 #    "//heron/spi/src/java:slamgr-spi-java",
     "//heron/api/src/java:api-java",
@@ -23,7 +23,7 @@ slamgr_deps_files = [
 #    "@org_glassfish_jersey_core_jersey_common//jar",
 #    "@org_glassfish_jersey_media_jersey_media_json_jackson//jar",
     "//heron/proto:proto_topology_java",
-    "//heron/slamgr/src/java:slamgr-java",
+    "//heron/metricscachemgr/src/java:metricscachemgr-java",
     "//heron/spi/src/java:packing-spi-java",
     "//heron/proto:proto_packing_plan_java",
     "//heron/spi/src/java:statemgr-spi-java",
@@ -40,9 +40,9 @@ test_deps_files = [
 
 
 java_library(
-    name = "slamgr-tests",
+    name = "metricscachemgr-tests",
     srcs = glob(["**/*.java"]),
-    deps = slamgr_deps_files +\
+    deps = metricscachemgr_deps_files +\
            test_deps_files
            + [
                "//heron/statemgrs/src/java:null-statemgr-java",
@@ -55,13 +55,13 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.slamgr.SLAMetricsTest",
-       "com.twitter.heron.slamgr.metriccache.TimeBucketTest",
-       "com.twitter.heron.slamgr.metriccache.MetricTest",
-       "com.twitter.heron.slamgr.metriccache.InstanceMetricsTest",
-       "com.twitter.heron.slamgr.metriccache.ComponentMetricsTest",
-       "com.twitter.heron.slamgr.metriccache.MetricCacheTest",
+       "com.twitter.heron.metricscachemgr.SLAMetricsTest",
+       "com.twitter.heron.metricscachemgr.metriccache.TimeBucketTest",
+       "com.twitter.heron.metricscachemgr.metriccache.MetricTest",
+       "com.twitter.heron.metricscachemgr.metriccache.InstanceMetricsTest",
+       "com.twitter.heron.metricscachemgr.metriccache.ComponentMetricsTest",
+       "com.twitter.heron.metricscachemgr.metriccache.MetricCacheTest",
      ],
-     runtime_deps = [ ":slamgr-tests" ],
+     runtime_deps = [ ":metricscachemgr-tests" ],
      size = "small",
 )

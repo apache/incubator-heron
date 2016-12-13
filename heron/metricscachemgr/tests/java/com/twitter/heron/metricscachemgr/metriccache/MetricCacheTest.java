@@ -13,7 +13,7 @@
 //  limitations under the License
 
 
-package com.twitter.heron.slamgr.metriccache;
+package com.twitter.heron.metricscachemgr.metriccache;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

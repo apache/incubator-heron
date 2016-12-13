@@ -13,7 +13,7 @@
 //  limitations under the License
 
 
-package com.twitter.heron.slamgr.metriccache;
+package com.twitter.heron.metricscachemgr.metriccache;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster.MetricDatum;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricRequest;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse;
 import com.twitter.heron.proto.tmaster.TopologyMaster.PublishMetrics;
-import com.twitter.heron.slamgr.SLAMetrics;
+import com.twitter.heron.metricscachemgr.SLAMetrics;
 
 
 public class MetricCache {

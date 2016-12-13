@@ -2,7 +2,7 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-slamgr_deps_files = [
+metricscachemgr_deps_files = [
            "//heron/spi/src/java:common-spi-java",
           # "//heron/spi/src/java:slamgr-spi-java",
            "//heron/api/src/java:api-java",
@@ -40,22 +40,22 @@ slamgr_deps_files = [
 ]
 
 java_library(
-    name = "slamgr-java",
+    name = "metricscachemgr-java",
     srcs = glob(
         ["**/*.java"],
          ),
-    deps = slamgr_deps_files,
+    deps = metricscachemgr_deps_files,
 )
 
 java_binary(
-    name = "slamgr-unshaded",
+    name = "metricscachemgr-unshaded",
     srcs = glob(["**/*.java"]),
-    deps = slamgr_deps_files,
+    deps = metricscachemgr_deps_files,
 )
 
 genrule(
-    name = "heron-slamgr",
-    srcs = [":slamgr-unshaded_deploy.jar"],
-    outs = ["heron-slamgr.jar"],
+    name = "heron-metricscachemgr",
+    srcs = [":metricscachemgr-unshaded_deploy.jar"],
+    outs = ["heron-metricscachemgr.jar"],
     cmd  = "cp $< $@",
 )
