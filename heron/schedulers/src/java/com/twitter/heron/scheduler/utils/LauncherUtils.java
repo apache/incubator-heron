@@ -61,7 +61,7 @@ public class LauncherUtils {
     }
 
     try {
-      TopologyAPI.Topology topology = com.twitter.heron.scheduler.utils.Runtime.topology(runtime);
+      TopologyAPI.Topology topology = Runtime.topology(runtime);
       packing.initialize(config, topology);
       return packing.pack();
     } finally {

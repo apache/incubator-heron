@@ -39,7 +39,7 @@ import com.twitter.heron.spi.utils.ShellUtils;
 import static org.mockito.Mockito.eq;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FileUtils.class, ShellUtils.class, com.twitter.heron.scheduler.utils.SchedulerUtils.class})
+@PrepareForTest({FileUtils.class, ShellUtils.class, SchedulerUtils.class})
 public class SchedulerUtilsTest {
   private static final String WORKING_DIR = "home";
   private static final String CORE_RELEASE_URI = "mock://uri:121/only#swan";
@@ -55,12 +55,12 @@ public class SchedulerUtilsTest {
     Common.Status okStatus = Common.Status.newBuilder().
         setStatus(Common.StatusCode.OK)
         .build();
-    Assert.assertEquals(okStatus, com.twitter.heron.scheduler.utils.SchedulerUtils.constructSchedulerResponse(true).getStatus());
+    Assert.assertEquals(okStatus, SchedulerUtils.constructSchedulerResponse(true).getStatus());
 
     Common.Status notOKStatus = Common.Status.newBuilder()
         .setStatus(Common.StatusCode.NOTOK)
         .build();
-    Assert.assertEquals(notOKStatus, com.twitter.heron.scheduler.utils.SchedulerUtils.constructSchedulerResponse(false).getStatus());
+    Assert.assertEquals(notOKStatus, SchedulerUtils.constructSchedulerResponse(false).getStatus());
   }
 
   /**
@@ -75,8 +75,7 @@ public class SchedulerUtilsTest {
     PowerMockito.
         when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, false)).
         thenReturn(false);
-    Assert.assertFalse(
-        com.twitter.heron.scheduler.utils.SchedulerUtils.curlAndExtractPackage(
+    Assert.assertFalse(SchedulerUtils.curlAndExtractPackage(
             WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, IS_DELETE_PACKAGE, IS_VERBOSE));
 
     // Ok to curl package
@@ -87,8 +86,7 @@ public class SchedulerUtilsTest {
     PowerMockito.
         when(ShellUtils.extractPackage(TOPOLOGY_DEST, WORKING_DIR, IS_VERBOSE, false)).
         thenReturn(false);
-    Assert.assertFalse(
-        com.twitter.heron.scheduler.utils.SchedulerUtils.curlAndExtractPackage(
+    Assert.assertFalse(SchedulerUtils.curlAndExtractPackage(
             WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, IS_DELETE_PACKAGE, IS_VERBOSE));
 
     // Ok to curl and extract the package (inheritIO is off)
@@ -101,7 +99,7 @@ public class SchedulerUtilsTest {
 
     // Not required to delete the package
     boolean isToDeletePackage = false;
-    Assert.assertTrue(com.twitter.heron.scheduler.utils.SchedulerUtils.curlAndExtractPackage(
+    Assert.assertTrue(SchedulerUtils.curlAndExtractPackage(
         WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, isToDeletePackage, IS_VERBOSE));
     // deleteFile should not be invoked
     PowerMockito.verifyStatic(Mockito.never());
@@ -110,7 +108,7 @@ public class SchedulerUtilsTest {
     // the whole process should success even if failed to delete the package
     PowerMockito.when(FileUtils.deleteFile(Mockito.anyString())).thenReturn(false);
 
-    Assert.assertTrue(com.twitter.heron.scheduler.utils.SchedulerUtils.curlAndExtractPackage(
+    Assert.assertTrue(SchedulerUtils.curlAndExtractPackage(
         WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, true, IS_VERBOSE));
     // deleteFile should be invoked once
     PowerMockito.verifyStatic(Mockito.times(1));
@@ -130,38 +128,32 @@ public class SchedulerUtilsTest {
 
     // Failed to create dir
     PowerMockito.when(FileUtils.createDirectory(Mockito.anyString())).thenReturn(false);
-    Assert.assertFalse(com.twitter.heron.scheduler.utils.SchedulerUtils.
-        setupWorkingDirectory(
+    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
 
     // OK to create dir
     PowerMockito.when(FileUtils.createDirectory(Mockito.anyString())).thenReturn(true);
 
-    PowerMockito.spy(com.twitter.heron.scheduler.utils.SchedulerUtils.class);
+    PowerMockito.spy(SchedulerUtils.class);
     // OK to curl and extract core-release-package
-    PowerMockito.doReturn(true).when(
-        com.twitter.heron.scheduler.utils.SchedulerUtils.class, "curlAndExtractPackage",
+    PowerMockito.doReturn(true).when(SchedulerUtils.class, "curlAndExtractPackage",
         Mockito.eq(WORKING_DIR), Mockito.eq(CORE_RELEASE_URI),
         Mockito.eq(CORE_RELEASE_DEST), Mockito.eq(true), Mockito.eq(isVerbose));
 
     // Failed to curl and extract topology-package
-    PowerMockito.doReturn(false).when(
-        com.twitter.heron.scheduler.utils.SchedulerUtils.class, "curlAndExtractPackage",
+    PowerMockito.doReturn(false).when(SchedulerUtils.class, "curlAndExtractPackage",
         Mockito.eq(WORKING_DIR), Mockito.eq(TOPOLOGY_URI),
         Mockito.eq(TOPOLOGY_DEST), Mockito.anyBoolean(), Mockito.anyBoolean());
-    Assert.assertFalse(com.twitter.heron.scheduler.utils.SchedulerUtils.
-        setupWorkingDirectory(
+    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
 
     // OK to curl and extract topology-package
-    PowerMockito.doReturn(true).when(
-        com.twitter.heron.scheduler.utils.SchedulerUtils.class, "curlAndExtractPackage",
+    PowerMockito.doReturn(true).when(SchedulerUtils.class, "curlAndExtractPackage",
         Mockito.eq(WORKING_DIR), Mockito.eq(TOPOLOGY_URI),
         Mockito.eq(TOPOLOGY_DEST), Mockito.anyBoolean(), Mockito.anyBoolean());
-    Assert.assertTrue(com.twitter.heron.scheduler.utils.SchedulerUtils.
-        setupWorkingDirectory(
+    Assert.assertTrue(SchedulerUtils.setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
   }
@@ -175,7 +167,7 @@ public class SchedulerUtilsTest {
         {"--cluster", null, "--role", null,
             "--environment", null, "--topology_name", null,
             "--topology_bin", null, "--http_port", "1"};
-    Assert.assertArrayEquals(expectedArgs, com.twitter.heron.scheduler.utils.SchedulerUtils.schedulerCommandArgs(
+    Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
         Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
   }
 
@@ -189,7 +181,7 @@ public class SchedulerUtilsTest {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(PackingTestUtils.testContainerPlan(1, 0, 1, 2));
     PackingPlan packing = new PackingPlan("id", containers);
-    com.twitter.heron.scheduler.utils.SchedulerUtils.persistUpdatedPackingPlan(TOPOLOGY_NAME, packing, adaptor);
+    SchedulerUtils.persistUpdatedPackingPlan(TOPOLOGY_NAME, packing, adaptor);
     Mockito.verify(adaptor)
         .updatePackingPlan(Mockito.any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
   }

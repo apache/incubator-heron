@@ -55,7 +55,7 @@ public class LauncherUtilsTest {
     Mockito.when(mockConfig.getStringValue(Keys.packingClass())).thenReturn(PACKING_CLASS);
     Mockito.when(mockConfig.get(Keys.topologyDefinition())).thenReturn(mockTopology);
 
-    PackingPlan resultPacking = com.twitter.heron.scheduler.utils.LauncherUtils.getInstance().createPackingPlan(mockConfig,
+    PackingPlan resultPacking = LauncherUtils.getInstance().createPackingPlan(mockConfig,
         mockConfig);
     Assert.assertEquals(mockPackingPlan, resultPacking);
     Mockito.verify(mockPacking).initialize(Mockito.any(Config.class), Mockito.eq(mockTopology));
@@ -66,7 +66,7 @@ public class LauncherUtilsTest {
   @Test
   public void constructsRuntimeWithPackingProperly() {
     Config runtime = Config.newBuilder().put("key-23", "value-34").build();
-    Assert.assertNull(com.twitter.heron.scheduler.utils.Runtime.componentRamMap(runtime));
+    Assert.assertNull(Runtime.componentRamMap(runtime));
 
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
@@ -76,11 +76,11 @@ public class LauncherUtilsTest {
     Mockito.when(mockPacking.getComponentRamDistribution()).thenReturn("ramMap");
     Mockito.when(mockPacking.getContainers()).thenReturn(containers);
 
-    Config newRuntime = com.twitter.heron.scheduler.utils.LauncherUtils.getInstance()
+    Config newRuntime = LauncherUtils.getInstance()
         .createConfigWithPackingDetails(runtime, mockPacking);
-    Assert.assertNull(com.twitter.heron.scheduler.utils.Runtime.componentRamMap(runtime));
-    Assert.assertEquals("ramMap", com.twitter.heron.scheduler.utils.Runtime.componentRamMap(newRuntime));
-    Assert.assertEquals(3, com.twitter.heron.scheduler.utils.Runtime.numContainers(newRuntime).longValue());
+    Assert.assertNull(Runtime.componentRamMap(runtime));
+    Assert.assertEquals("ramMap", Runtime.componentRamMap(newRuntime));
+    Assert.assertEquals(3, Runtime.numContainers(newRuntime).longValue());
     Assert.assertEquals("value-34", newRuntime.getStringValue("key-23"));
   }
 
@@ -95,11 +95,11 @@ public class LauncherUtilsTest {
     PowerMockito.spy(TopologyUtils.class);
     PowerMockito.doReturn(456).when(TopologyUtils.class, "getNumContainers", mockTopology);
 
-    Config runtime = com.twitter.heron.scheduler.utils.LauncherUtils.getInstance().getPrimaryRuntime(mockTopology, mockStMgr);
-    Assert.assertEquals("testTopologyId", com.twitter.heron.scheduler.utils.Runtime.topologyId(runtime));
-    Assert.assertEquals("testTopologyName", com.twitter.heron.scheduler.utils.Runtime.topologyName(runtime));
-    Assert.assertEquals(mockTopology, com.twitter.heron.scheduler.utils.Runtime.topology(runtime));
-    Assert.assertEquals(mockStMgr, com.twitter.heron.scheduler.utils.Runtime.schedulerStateManagerAdaptor(runtime));
-    Assert.assertEquals(456 + 1, com.twitter.heron.scheduler.utils.Runtime.numContainers(runtime).longValue());
+    Config runtime = LauncherUtils.getInstance().getPrimaryRuntime(mockTopology, mockStMgr);
+    Assert.assertEquals("testTopologyId", Runtime.topologyId(runtime));
+    Assert.assertEquals("testTopologyName", Runtime.topologyName(runtime));
+    Assert.assertEquals(mockTopology, Runtime.topology(runtime));
+    Assert.assertEquals(mockStMgr, Runtime.schedulerStateManagerAdaptor(runtime));
+    Assert.assertEquals(456 + 1, Runtime.numContainers(runtime).longValue());
   }
 }
