@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +27,8 @@ import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link LauncherUtils} contains helper methods used by the server and client side launch
@@ -59,7 +61,7 @@ public class LauncherUtils {
     }
 
     try {
-      TopologyAPI.Topology topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+      TopologyAPI.Topology topology = com.twitter.heron.scheduler.utils.Runtime.topology(runtime);
       packing.initialize(config, topology);
       return packing.pack();
     } finally {

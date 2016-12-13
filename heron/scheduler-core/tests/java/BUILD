@@ -23,7 +23,8 @@ spi_deps_files = [
 scheduler_deps_files = \
   common_deps_files + \
   heron_java_proto_files() + \
-  spi_deps_files
+  spi_deps_files + \
+  ["//heron/schedulers/src/java:utils-schedulers-java"]
 
 java_library(
   name = "scheduler-core-tests",

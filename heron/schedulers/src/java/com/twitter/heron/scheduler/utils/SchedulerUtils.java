@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,6 +34,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ShellUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
@@ -186,7 +188,7 @@ public final class SchedulerUtils {
    */
   public static String[] executorCommandArgs(
       Config config, Config runtime, List<String> freePorts) {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
+    TopologyAPI.Topology topology = com.twitter.heron.scheduler.utils.Runtime.topology(runtime);
 
     String masterPort = freePorts.get(0);
     String tmasterControllerPort = freePorts.get(1);
@@ -210,7 +212,7 @@ public final class SchedulerUtils {
     commands.add(tmasterControllerPort);
     commands.add(tmasterStatsPort);
     commands.add(Context.systemConfigSandboxFile(config));
-    commands.add(Runtime.componentRamMap(runtime));
+    commands.add(com.twitter.heron.scheduler.utils.Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config).name().toLowerCase());
     commands.add(Context.topologyBinaryFile(config));
@@ -268,7 +270,7 @@ public final class SchedulerUtils {
 
     // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
     Scheduler.SchedulerLocation.Builder builder = Scheduler.SchedulerLocation.newBuilder()
-        .setTopologyName(Runtime.topologyName(runtime))
+        .setTopologyName(com.twitter.heron.scheduler.utils.Runtime.topologyName(runtime))
         .setHttpEndpoint(schedulerEndpoint);
 
     // Set the job link in SchedulerLocation if any
@@ -281,9 +283,9 @@ public final class SchedulerUtils {
     Scheduler.SchedulerLocation location = builder.build();
 
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    SchedulerStateManagerAdaptor statemgr = com.twitter.heron.scheduler.utils.Runtime.schedulerStateManagerAdaptor(runtime);
     Boolean result =
-        statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+        statemgr.setSchedulerLocation(location, com.twitter.heron.scheduler.utils.Runtime.topologyName(runtime));
 
     if (result == null || !result) {
       LOG.severe("Failed to set Scheduler location");

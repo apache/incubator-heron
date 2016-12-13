@@ -18,10 +18,15 @@ spi_deps_files = [
     "//heron/spi/src/java:utils-spi-java",
 ]
 
+schedulers_deps_files = [
+    "//heron/schedulers/src/java:utils-schedulers-java",
+]
+
 scheduler_deps_files = \
     common_deps_files + \
     heron_java_proto_files() + \
-    spi_deps_files
+    spi_deps_files + \
+    schedulers_deps_files
 
 java_library(
     name = 'scheduler-java',

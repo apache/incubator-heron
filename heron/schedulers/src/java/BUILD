@@ -22,6 +22,7 @@ api_deps_files = [
 
 scheduler_deps_files = \
     ["//heron/scheduler-core/src/java:scheduler-java"] + \
+    ["//heron/schedulers/src/java:utils-schedulers-java"] + \
     heron_java_proto_files() + \
     common_deps_files + \
     spi_deps_files + \
@@ -196,4 +197,26 @@ genrule(
     srcs = [":marathon-scheduler-unshaded_deploy.jar"],
     outs = ["heron-marathon-scheduler.jar"],
     cmd  = "cp $< $@",
+)
+
+utils_deps_files = \
+    heron_java_proto_files() + [
+        "//heron/spi/src/java:common-spi-java",
+        "//heron/spi/src/java:statemgr-spi-java",
+        "//heron/spi/src/java:scheduler-spi-java",
+        "//heron/spi/src/java:packing-spi-java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
+        "//heron/spi/src/java:utils-spi-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:config-java",
+        "//heron/api/src/java:api-java",
+        "@com_google_guava_guava//jar",
+    ]
+
+java_library(
+    name='utils-schedulers-java',
+    srcs = glob([
+        "com/twitter/heron/scheduler/utils/**/*.java",
+    ]),
+    deps = utils_deps_files,
 )
