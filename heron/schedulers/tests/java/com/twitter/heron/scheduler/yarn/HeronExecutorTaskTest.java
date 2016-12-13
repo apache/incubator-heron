@@ -116,7 +116,7 @@ public class HeronExecutorTaskTest {
         "env",
         "package",
         "core",
-        "jar",
+        "topology.jar",
         "componentRamMap",
         false);
     return Mockito.spy(task);

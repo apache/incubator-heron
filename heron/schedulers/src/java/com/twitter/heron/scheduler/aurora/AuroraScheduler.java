@@ -186,7 +186,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put("COMPONENT_RAMMAP", Runtime.componentRamMap(runtime));
     auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));
+    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE",
+        Context.topologyPackageType(config).name().toLowerCase());
     auroraProperties.put("TOPOLOGY_BINARY_FILE",
         FileUtils.getBaseName(Context.topologyBinaryFile(config)));
     auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));

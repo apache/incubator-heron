@@ -20,112 +20,29 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.AssertPacking;
-import com.twitter.heron.packing.PackingTestHelper;
-import com.twitter.heron.packing.ResourceExceededException;
+import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;
-import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyTests;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
-public class ResourceCompliantRRPackingTest {
+public class ResourceCompliantRRPackingTest extends CommonPackingTests {
 
-  private static final String A  = "A";
-  private static final String B = "B";
-  private static final String BOLT_NAME  = "bolt";
-  private static final String SPOUT_NAME = "spout";
-  private static final int DEFAULT_CONTAINER_PADDING = 10;
-
-  private int spoutParallelism;
-  private int boltParallelism;
-  private Integer totalInstances;
-  private com.twitter.heron.api.Config topologyConfig;
-  private TopologyAPI.Topology topology;
-  private Resource instanceDefaultResources;
-
-  private static TopologyAPI.Topology getTopology(
-      int spoutParallelism, int boltParallelism,
-      com.twitter.heron.api.Config topologyConfig) {
-    return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
-        spoutParallelism, boltParallelism);
+  @Override
+  protected IPacking getPackingImpl() {
+    return new ResourceCompliantRRPacking();
   }
 
-  private static PackingPlan getResourceCompliantRRPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-
-    ResourceCompliantRRPacking packing = new ResourceCompliantRRPacking();
-    packing.initialize(config, topology);
-    return packing.pack();
-  }
-
-  private static PackingPlan getResourceCompliantRRPackingPlanRepack(
-      TopologyAPI.Topology topology,
-      PackingPlan currentPackingPlan,
-      Map<String, Integer> componentChanges) {
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-
-    ResourceCompliantRRPacking packing = new ResourceCompliantRRPacking();
-    packing.initialize(config, topology);
-    return packing.repack(currentPackingPlan, componentChanges);
-  }
-
-  /**
-   * Performs a scaling test for a specific topology. It first
-   * computes an initial packing plan as a basis for scaling.
-   * Given specific component parallelism changes, a new packing plan is produced.
-   *
-   * @param topology Input topology
-   * @param componentChanges parallelism changes for scale up/down
-   * @param boltRam ram allocated to bolts
-   * @param boltParallelism bolt parallelism
-   * @param spoutRam ram allocated to spouts
-   * @param spoutParallelism spout parallelism
-   * @param numContainersBeforeRepack number of containers that the initial packing plan should use
-   * @param totalInstancesExpected number of instances expected before scaling
-   * @return the new packing plan
-   */
-  private static PackingPlan doScalingTest(TopologyAPI.Topology topology,
-                                           Map<String, Integer> componentChanges,
-                                           ByteAmount boltRam,
-                                           int boltParallelism, ByteAmount spoutRam,
-                                           int spoutParallelism,
-                                           int numContainersBeforeRepack,
-                                           int totalInstancesExpected) {
-    PackingPlan packingPlan = getResourceCompliantRRPackingPlan(topology);
-
-    Assert.assertEquals(numContainersBeforeRepack, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstancesExpected, (int) packingPlan.getInstanceCount());
-    AssertPacking.assertContainers(packingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, null);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, boltParallelism);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, spoutParallelism);
-
-    PackingPlan newPackingPlan =
-        getResourceCompliantRRPackingPlanRepack(topology, packingPlan, componentChanges);
-    AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
-        packingPlan.getMaxContainerResources().getRam());
-
-    return newPackingPlan;
+  @Override
+  protected IRepacking getRepackingImpl() {
+    return new ResourceCompliantRRPacking();
   }
 
   private int countComponent(String component, Set<PackingPlan.InstancePlan> instances) {
@@ -138,35 +55,6 @@ public class ResourceCompliantRRPackingTest {
     return count;
   }
 
-  private PackingPlan doDefaultScalingTest(Map<String, Integer> componentChanges,
-                                           int numContainersBeforeRepack) {
-    return doScalingTest(topology, componentChanges,
-        instanceDefaultResources.getRam(), boltParallelism,
-        instanceDefaultResources.getRam(), spoutParallelism,
-        numContainersBeforeRepack, totalInstances);
-  }
-
-  @Before
-  public void setUp() {
-    this.spoutParallelism = 4;
-    this.boltParallelism = 3;
-    this.totalInstances = this.spoutParallelism + this.boltParallelism;
-    int numContainers = 2;
-    // Set up the topology and its config
-    this.topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
-    this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-    this.instanceDefaultResources = new Resource(
-        Context.instanceCpu(config), Context.instanceRam(config), Context.instanceDisk(config));
-  }
-
-
   @Test(expected = RuntimeException.class)
   public void testCheckFailure() throws Exception {
     // Explicit set insufficient ram for container
@@ -176,7 +64,7 @@ public class ResourceCompliantRRPackingTest {
     TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,
         topologyConfig);
 
-    getResourceCompliantRRPackingPlan(newTopology);
+    pack(newTopology);
   }
 
   /**
@@ -185,8 +73,7 @@ public class ResourceCompliantRRPackingTest {
   @Test
   public void testDefaultResources() throws Exception {
     int numContainers = 2;
-    PackingPlan packingPlanNoExplicitResourcesConfig =
-        getResourceCompliantRRPackingPlan(topology);
+    PackingPlan packingPlanNoExplicitResourcesConfig = pack(topology);
 
     Assert.assertEquals(numContainers, packingPlanNoExplicitResourcesConfig.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanNoExplicitResourcesConfig.getInstanceCount());
@@ -203,7 +90,7 @@ public class ResourceCompliantRRPackingTest {
     TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,
         topologyConfig);
 
-    PackingPlan packingPlan = getResourceCompliantRRPackingPlan(newTopology);
+    PackingPlan packingPlan = pack(newTopology);
 
     Assert.assertEquals(numContainers, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
@@ -228,8 +115,7 @@ public class ResourceCompliantRRPackingTest {
     topologyConfig.setContainerCpuRequested(containerCpu);
     TopologyAPI.Topology topologyExplicitResourcesConfig =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig =
-        getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(numContainers, packingPlanExplicitResourcesConfig.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
@@ -278,8 +164,7 @@ public class ResourceCompliantRRPackingTest {
     topologyConfig.setContainerCpuRequested(containerCpu);
     TopologyAPI.Topology topologyExplicitResourcesConfig =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig =
-        getResourceCompliantRRPackingPlan(topologyExplicitResourcesConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(numContainers, packingPlanExplicitResourcesConfig.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
@@ -312,8 +197,7 @@ public class ResourceCompliantRRPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
     Assert.assertEquals(numContainers, packingPlanExplicitRamMap.getContainers().size());
 
@@ -341,8 +225,7 @@ public class ResourceCompliantRRPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
     Assert.assertEquals(numContainers, packingPlanExplicitRamMap.getContainers().size());
 
@@ -367,11 +250,9 @@ public class ResourceCompliantRRPackingTest {
 
     TopologyAPI.Topology newTopology =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan =
-        getResourceCompliantRRPackingPlan(newTopology);
+    PackingPlan packingPlan = pack(newTopology);
     Assert.assertEquals(7, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
-
   }
 
   /**
@@ -397,8 +278,7 @@ public class ResourceCompliantRRPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan =
-        getResourceCompliantRRPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlan = pack(topologyExplicitRamMap);
     Assert.assertEquals(7, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
   }
@@ -420,7 +300,7 @@ public class ResourceCompliantRRPackingTest {
     int numInstance = TopologyUtils.getTotalInstance(newTopology);
     // Two components
     Assert.assertEquals(2 * componentParallelism, numInstance);
-    PackingPlan output = getResourceCompliantRRPackingPlan(newTopology);
+    PackingPlan output = pack(newTopology);
     Assert.assertEquals(numContainers, output.getContainers().size());
     Assert.assertEquals((Integer) numInstance, output.getInstanceCount());
 
@@ -556,18 +436,6 @@ public class ResourceCompliantRRPackingTest {
     doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testScaleDownInvalidScaleFactor() throws Exception {
-
-    //try to remove more spout instances than possible
-    int spoutScalingDown = -5;
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, spoutScalingDown);
-
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-  }
-
   /**
    * Test the scenario where the scaling down is requested
    */
@@ -588,114 +456,6 @@ public class ResourceCompliantRRPackingTest {
         BOLT_NAME, 2);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
         SPOUT_NAME, 2);
-  }
-
-  /**
-   * Test the scenario where scaling down removes instances from containers that are most imbalanced
-   * (i.e., tending towards homogeneity) first. If there is a tie (e.g. AABB, AB), chooses from the
-   * container with the fewest instances, to favor ultimately removing  containers. If there is
-   * still a tie, favor removing from higher numbered containers
-   */
-  @Test
-  public void testScaleDownOneComponentRemoveContainer() throws Exception {
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(3, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(B, 5, 2)),
-        new Pair<>(4, new InstanceId(B, 6, 3)),
-        new Pair<>(4, new InstanceId(B, 7, 4))
-    };
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(B, -2);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(3, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(B, 5, 2)),
-    };
-
-    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
-  }
-
-  @Test
-  public void testScaleDownTwoComponentsRemoveContainer() throws Exception {
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(1, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(A, 5, 2)),
-        new Pair<>(3, new InstanceId(A, 6, 3)),
-        new Pair<>(3, new InstanceId(B, 7, 2)),
-        new Pair<>(3, new InstanceId(B, 8, 3))
-    };
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(A, -2);
-    componentChanges.put(B, -2);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(1, new InstanceId(B, 4, 1)),
-    };
-
-    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
-  }
-
-  @Test
-  public void testScaleDownHomogenousFirst() throws Exception {
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(3, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(B, 5, 2)),
-        new Pair<>(3, new InstanceId(B, 6, 3)),
-        new Pair<>(3, new InstanceId(B, 7, 4))
-    };
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(B, -4);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0))
-    };
-
-    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
-  }
-
-  private void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
-                               Map<String, Integer> componentChanges,
-                               Pair<Integer, InstanceId>[] expectedComponentInstances)
-      throws ResourceExceededException {
-    String topologyId = topology.getId();
-
-    // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
-    // reconstruct the PackingPlan, see https://github.com/twitter/heron/issues/1577
-    PackingPlan initialPackingPlan = PackingTestHelper.addToTestPackingPlan(
-        topologyId, null, PackingTestHelper.toContainerIdComponentNames(initialComponentInstances),
-        ResourceCompliantRRPacking.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
-    AssertPacking.assertPackingPlan(topologyId, initialComponentInstances, initialPackingPlan);
-
-    PackingPlan newPackingPlan =
-        getResourceCompliantRRPackingPlanRepack(topology, initialPackingPlan, componentChanges);
-
-    AssertPacking.assertPackingPlan(topologyId, expectedComponentInstances, newPackingPlan);
   }
 
   /**
@@ -722,28 +482,6 @@ public class ResourceCompliantRRPackingTest {
         BOLT_NAME, 0);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
         SPOUT_NAME, 1);
-  }
-
-  /**
-   * Test the scenario where scaling down and up is simultaneously requested
-   */
-  @Test
-  public void scaleDownAndUp() throws Exception {
-    int spoutScalingDown = -4;
-    int boltScalingUp = 6;
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, spoutScalingDown); // 0 spouts
-    componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(3, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingUp),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, 9);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, 0);
   }
 
   /**

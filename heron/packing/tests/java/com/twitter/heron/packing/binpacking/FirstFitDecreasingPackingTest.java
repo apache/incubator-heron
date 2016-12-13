@@ -20,132 +20,28 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.AssertPacking;
+import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;
-import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyTests;
 
-public class FirstFitDecreasingPackingTest {
-  private static final String BOLT_NAME = "bolt";
-  private static final String SPOUT_NAME = "spout";
-  private static final int DEFAULT_CONTAINER_PADDING = 10;
+public class FirstFitDecreasingPackingTest extends CommonPackingTests {
 
-  private int spoutParallelism;
-  private int boltParallelism;
-  private Integer totalInstances;
-  private com.twitter.heron.api.Config topologyConfig;
-  private TopologyAPI.Topology topology;
-  private Resource instanceDefaultResources;
-
-  private static TopologyAPI.Topology getTopology(
-      int spoutParallelism, int boltParallelism,
-      com.twitter.heron.api.Config topologyConfig) {
-    return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
-        spoutParallelism, boltParallelism);
+  @Override
+  protected IPacking getPackingImpl() {
+    return new FirstFitDecreasingPacking();
   }
 
-  private static PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-
-    FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
-
-    packing.initialize(config, topology);
-    return packing.pack();
-  }
-
-  private static PackingPlan getFirstFitDecreasingPackingPlanRepack(
-      TopologyAPI.Topology topology,
-      PackingPlan currentPackingPlan,
-      Map<String, Integer> componentChanges) {
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-
-    FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
-    packing.initialize(config, topology);
-    return packing.repack(currentPackingPlan, componentChanges);
-  }
-
-  /**
-   * Performs a scaling test for a specific topology. It first
-   * computes an initial packing plan as a basis for scaling.
-   * Given specific component parallelism changes, a new packing plan is produced.
-   *
-   * @param topology Input topology
-   * @param componentChanges parallelism changes for scale up/down
-   * @param boltRam ram allocated to bolts
-   * @param boltParallelism bolt parallelism
-   * @param spoutRam ram allocated to spouts
-   * @param spoutParallelism spout parallelism
-   * @param numContainersBeforeRepack number of containers that the initial packing plan should use
-   * @param totalInstancesExpected number of instances expected before scaling
-   * @return the new packing plan
-   */
-  private static PackingPlan doScalingTest(TopologyAPI.Topology topology,
-                                           Map<String, Integer> componentChanges,
-                                           ByteAmount boltRam,
-                                           int boltParallelism, ByteAmount spoutRam,
-                                           int spoutParallelism,
-                                           int numContainersBeforeRepack,
-                                           int totalInstancesExpected) {
-    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
-
-    Assert.assertEquals(numContainersBeforeRepack, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstancesExpected, (int) packingPlan.getInstanceCount());
-    AssertPacking.assertContainers(packingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, null);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, boltParallelism);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, spoutParallelism);
-
-    PackingPlan newPackingPlan =
-        getFirstFitDecreasingPackingPlanRepack(topology, packingPlan, componentChanges);
-    AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
-        packingPlan.getMaxContainerResources().getRam());
-
-    return newPackingPlan;
-  }
-
-  private PackingPlan doDefaultScalingTest(Map<String, Integer> componentChanges,
-                                           int numContainersBeforeRepack) {
-    return doScalingTest(topology, componentChanges,
-        instanceDefaultResources.getRam(), boltParallelism,
-        instanceDefaultResources.getRam(), spoutParallelism,
-        numContainersBeforeRepack, totalInstances);
-  }
-
-  @Before
-  public void setUp() {
-    this.spoutParallelism = 4;
-    this.boltParallelism = 3;
-    this.totalInstances = this.spoutParallelism + this.boltParallelism;
-
-    // Set up the topology and its config
-    this.topologyConfig = new com.twitter.heron.api.Config();
-    this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
-    this.instanceDefaultResources = new Resource(
-        Context.instanceCpu(config), Context.instanceRam(config), Context.instanceDisk(config));
+  @Override
+  protected IRepacking getRepackingImpl() {
+    return new FirstFitDecreasingPacking();
   }
 
   @Test(expected = RuntimeException.class)
@@ -158,8 +54,7 @@ public class FirstFitDecreasingPackingTest {
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     topologyConfig.setContainerMaxRamHint(containerRam);
 
-    getFirstFitDecreasingPackingPlan(
-        getTopology(spoutParallelism, boltParallelism, topologyConfig));
+    pack(getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
   /**
@@ -168,7 +63,7 @@ public class FirstFitDecreasingPackingTest {
   @Test
   public void testDefaultContainerSize() throws Exception {
     int defaultNumInstancesperContainer = 4;
-    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(topology);
+    PackingPlan packingPlan = pack(topology);
 
     Assert.assertEquals(2, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
@@ -191,7 +86,7 @@ public class FirstFitDecreasingPackingTest {
     topologyConfig.setContainerPaddingPercentage(padding);
     TopologyAPI.Topology newTopology =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan = getFirstFitDecreasingPackingPlan(newTopology);
+    PackingPlan packingPlan = pack(newTopology);
 
     Assert.assertEquals(2, packingPlan.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
@@ -219,8 +114,7 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topologyExplicitResourcesConfig =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig =
-        getFirstFitDecreasingPackingPlan(topologyExplicitResourcesConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
 
     Assert.assertEquals(1, packingPlanExplicitResourcesConfig.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
@@ -280,8 +174,7 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
 
     Assert.assertEquals(1, packingPlanExplicitRamMap.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
@@ -310,8 +203,7 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
 
     Assert.assertEquals(2, packingPlanExplicitRamMap.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
@@ -340,8 +232,7 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
 
     Assert.assertEquals(2, packingPlanExplicitRamMap.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
@@ -371,8 +262,7 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
 
     Assert.assertEquals(2, packingPlanExplicitRamMap.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
@@ -401,8 +291,7 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topologyExplicitRamMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap =
-        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
     AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
     AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
@@ -530,19 +419,6 @@ public class FirstFitDecreasingPackingTest {
     doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testScaleDownInvalidScaleFactor() throws Exception {
-
-    //try to remove more spout instances than possible
-    int spoutScalingDown = -5;
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, spoutScalingDown);
-
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-  }
-
-
   /**
    * Test the scenario where the scaling down is requested
    */
@@ -586,29 +462,6 @@ public class FirstFitDecreasingPackingTest {
         newPackingPlan.getInstanceCount());
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(), BOLT_NAME, 3);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(), SPOUT_NAME, 0);
-  }
-
-  /**
-   * Test the scenario where scaling down and up is simultaneously requested
-   */
-  @Test
-  public void scaleDownAndUp() throws Exception {
-    int spoutScalingDown = -4;
-    int boltScalingUp = 6;
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, spoutScalingDown); // 0 spouts
-    componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-
-    Assert.assertEquals(3, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingUp),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, 9);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, 0);
   }
 
   /**

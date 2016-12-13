@@ -18,6 +18,7 @@ localfs_deps_files = \
     common_deps_files + \
     spi_deps_files + [
         "//heron/uploaders/src/java:localfs-uploader-java",
+        "//heron/common/src/java:basics-java",
     ]
 
 hdfs_deps_files = \

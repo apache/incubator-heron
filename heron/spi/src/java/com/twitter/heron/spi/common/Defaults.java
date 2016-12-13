@@ -15,6 +15,7 @@
 package com.twitter.heron.spi.common;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.PackageType;
 
 public class Defaults {
 
@@ -133,8 +134,8 @@ public class Defaults {
     return ConfigDefaults.get("TOPOLOGY_PACKAGE_FILE");
   }
 
-  public static String topologyPackageType() {
-    return ConfigDefaults.get("TOPOLOGY_PACKAGE_TYPE");
+  public static PackageType topologyPackageType() {
+    return ConfigDefaults.getPackageType("TOPOLOGY_PACKAGE_TYPE");
   }
 
   public static ByteAmount stmgrRam() {
