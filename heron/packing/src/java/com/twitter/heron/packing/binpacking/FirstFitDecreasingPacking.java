@@ -25,8 +25,12 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.RamRequirement;
 import com.twitter.heron.packing.ResourceExceededException;
+import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
+import com.twitter.heron.packing.builder.HomogeneityScorer;
+import com.twitter.heron.packing.builder.InstanceCountScorer;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
+import com.twitter.heron.packing.builder.Scorer;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -275,13 +279,21 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     ArrayList<RamRequirement> ramRequirements =
         getSortedRAMInstances(componentsToScaleDown.keySet());
 
-    ContainerIdScorer scorer = new ContainerIdScorer();
+    InstanceCountScorer instanceCountScorer = new InstanceCountScorer();
+    ContainerIdScorer containerIdScorer = new ContainerIdScorer(false);
 
     for (RamRequirement ramRequirement : ramRequirements) {
-      String component = ramRequirement.getComponentName();
-      int numInstancesToRemove = -componentsToScaleDown.get(component);
+      String componentName = ramRequirement.getComponentName();
+      int numInstancesToRemove = -componentsToScaleDown.get(componentName);
+      List<Scorer<Container>> scorers = new ArrayList<>();
+
+      scorers.add(new HomogeneityScorer(componentName, true));  // all-same-component containers
+      scorers.add(instanceCountScorer);                         // then fewest instances
+      scorers.add(new HomogeneityScorer(componentName, false)); // then most homogeneous
+      scorers.add(containerIdScorer);                           // then highest container id
+
       for (int j = 0; j < numInstancesToRemove; j++) {
-        packingPlanBuilder.removeInstance(scorer, component);
+        packingPlanBuilder.removeInstance(scorers, componentName);
       }
     }
   }
