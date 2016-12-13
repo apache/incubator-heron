@@ -13,7 +13,7 @@
 //  limitations under the License
 
 
-package com.twitter.heron.slamgr;
+package com.twitter.heron.metricscachemgr;
 
 import java.util.HashMap;
 import java.util.Map;

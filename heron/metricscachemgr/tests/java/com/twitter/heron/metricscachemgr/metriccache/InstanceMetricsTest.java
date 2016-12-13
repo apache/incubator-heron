@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License
-package com.twitter.heron.slamgr.metriccache;
+package com.twitter.heron.metricscachemgr.metriccache;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.slamgr.SLAMetrics;
+import com.twitter.heron.metricscachemgr.SLAMetrics;
 
 public class InstanceMetricsTest {
   private static String debugFilePath = "/tmp/" + InstanceMetricsTest.class.getSimpleName() + ".debug.txt";
