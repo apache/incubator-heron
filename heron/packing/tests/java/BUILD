@@ -46,9 +46,10 @@ java_library(
     ),
     deps = [
         "//heron/common/src/java:basics-java",
+        "//heron/packing/src/java:binpacking-packing",
         "//heron/packing/src/java:builder",
         "//heron/packing/src/java:roundrobin-packing",
-        "//heron/packing/src/java:binpacking-packing",
+        "//heron/packing/src/java:utils",
         "//heron/spi/src/java:packing-spi-java",
         "//third_party/java:junit4",
         "//heron/api/src/java:api-java",

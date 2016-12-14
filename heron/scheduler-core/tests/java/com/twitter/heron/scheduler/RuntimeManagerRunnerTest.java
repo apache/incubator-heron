@@ -28,13 +28,13 @@ import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
-import com.twitter.heron.spi.utils.Runtime;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;

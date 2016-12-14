@@ -18,13 +18,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.LauncherUtils;
-import com.twitter.heron.spi.utils.Runtime;
 
 public class SchedulerClientFactory {
   private static final Logger LOG = Logger.getLogger(SchedulerClientFactory.class.getName());
