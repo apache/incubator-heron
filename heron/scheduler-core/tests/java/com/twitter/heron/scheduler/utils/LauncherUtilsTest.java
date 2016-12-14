@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +31,8 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ReflectionUtils.class, TopologyUtils.class, TopologyAPI.Topology.class})

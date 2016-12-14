@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,6 +33,8 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.PackingTestUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 import static org.mockito.Mockito.eq;
 
@@ -73,8 +75,7 @@ public class SchedulerUtilsTest {
     PowerMockito.
         when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, false)).
         thenReturn(false);
-    Assert.assertFalse(
-        SchedulerUtils.curlAndExtractPackage(
+    Assert.assertFalse(SchedulerUtils.curlAndExtractPackage(
             WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, IS_DELETE_PACKAGE, IS_VERBOSE));
 
     // Ok to curl package
@@ -85,8 +86,7 @@ public class SchedulerUtilsTest {
     PowerMockito.
         when(ShellUtils.extractPackage(TOPOLOGY_DEST, WORKING_DIR, IS_VERBOSE, false)).
         thenReturn(false);
-    Assert.assertFalse(
-        SchedulerUtils.curlAndExtractPackage(
+    Assert.assertFalse(SchedulerUtils.curlAndExtractPackage(
             WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, IS_DELETE_PACKAGE, IS_VERBOSE));
 
     // Ok to curl and extract the package (inheritIO is off)
@@ -128,8 +128,7 @@ public class SchedulerUtilsTest {
 
     // Failed to create dir
     PowerMockito.when(FileUtils.createDirectory(Mockito.anyString())).thenReturn(false);
-    Assert.assertFalse(SchedulerUtils.
-        setupWorkingDirectory(
+    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
 
@@ -138,28 +137,23 @@ public class SchedulerUtilsTest {
 
     PowerMockito.spy(SchedulerUtils.class);
     // OK to curl and extract core-release-package
-    PowerMockito.doReturn(true).when(
-        SchedulerUtils.class, "curlAndExtractPackage",
+    PowerMockito.doReturn(true).when(SchedulerUtils.class, "curlAndExtractPackage",
         Mockito.eq(WORKING_DIR), Mockito.eq(CORE_RELEASE_URI),
         Mockito.eq(CORE_RELEASE_DEST), Mockito.eq(true), Mockito.eq(isVerbose));
 
     // Failed to curl and extract topology-package
-    PowerMockito.doReturn(false).when(
-        SchedulerUtils.class, "curlAndExtractPackage",
+    PowerMockito.doReturn(false).when(SchedulerUtils.class, "curlAndExtractPackage",
         Mockito.eq(WORKING_DIR), Mockito.eq(TOPOLOGY_URI),
         Mockito.eq(TOPOLOGY_DEST), Mockito.anyBoolean(), Mockito.anyBoolean());
-    Assert.assertFalse(SchedulerUtils.
-        setupWorkingDirectory(
+    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
 
     // OK to curl and extract topology-package
-    PowerMockito.doReturn(true).when(
-        SchedulerUtils.class, "curlAndExtractPackage",
+    PowerMockito.doReturn(true).when(SchedulerUtils.class, "curlAndExtractPackage",
         Mockito.eq(WORKING_DIR), Mockito.eq(TOPOLOGY_URI),
         Mockito.eq(TOPOLOGY_DEST), Mockito.anyBoolean(), Mockito.anyBoolean());
-    Assert.assertTrue(SchedulerUtils.
-        setupWorkingDirectory(
+    Assert.assertTrue(SchedulerUtils.setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
   }
