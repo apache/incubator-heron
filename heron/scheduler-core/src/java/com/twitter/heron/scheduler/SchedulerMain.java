@@ -37,7 +37,7 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
-import com.twitter.heron.scheduler.utils.SchedulerConfig;
+import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
@@ -252,7 +252,7 @@ public class SchedulerMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     // build the config by expanding all the variables
-    Config schedulerConfig = SchedulerConfig.loadConfig(
+    Config schedulerConfig = SchedulerConfigUtils.loadConfig(
         cluster,
         role,
         env,

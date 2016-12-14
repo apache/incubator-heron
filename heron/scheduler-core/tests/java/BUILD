@@ -23,8 +23,7 @@ spi_deps_files = [
 scheduler_deps_files = \
   common_deps_files + \
   heron_java_proto_files() + \
-  spi_deps_files + \
-  ["//heron/schedulers/src/java:utils-schedulers-java"]
+  spi_deps_files
 
 java_library(
   name = "scheduler-core-tests",
@@ -48,6 +47,8 @@ java_tests(
     "com.twitter.heron.scheduler.client.LibrarySchedulerClientTest",
     "com.twitter.heron.scheduler.client.HttpServiceSchedulerClientTest",
     "com.twitter.heron.scheduler.client.SchedulerClientFactoryTest",
+    "com.twitter.heron.scheduler.utils.LauncherUtilsTest",
+    "com.twitter.heron.scheduler.utils.SchedulerUtilsTest",
   ],
   runtime_deps = [ ":scheduler-core-tests" ],
   size = "small",

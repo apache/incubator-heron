@@ -6,6 +6,7 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
+    "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:junit4",
     "//third_party/java:mockito",
 ]
@@ -20,7 +21,6 @@ spi_deps_files = [
 ]
 
 scheduler_deps_files = \
-    ["//heron/schedulers/src/java:utils-schedulers-java"] + \
     heron_java_proto_files() + \
     common_deps_files + \
     spi_deps_files
@@ -32,7 +32,6 @@ aurora_deps_files = [
 yarn_deps_files = [
     "//heron/packing/src/java:roundrobin-packing",
     "//heron/schedulers/src/java:yarn-scheduler-java",
-    "//heron/scheduler-core/src/java:scheduler-java",
     "@org_apache_reef_reef_common//jar",
     "@org_apache_reef_tang//jar",
     "@org_apache_reef_wake//jar",
