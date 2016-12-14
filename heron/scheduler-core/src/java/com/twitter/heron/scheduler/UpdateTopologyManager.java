@@ -44,6 +44,7 @@ import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TMasterException;
 import com.twitter.heron.spi.utils.TMasterUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -182,7 +183,7 @@ public class UpdateTopologyManager implements Closeable {
   @VisibleForTesting
   void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
                           final TopologyAPI.Topology topology)
-      throws InterruptedException {
+      throws InterruptedException, TMasterException {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
@@ -191,10 +192,10 @@ public class UpdateTopologyManager implements Closeable {
     logInfo("Deactivating topology %s before handling update request", topology.getName());
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    assertTrue(TMasterUtils.transitionTopologyState(
+
+    TMasterUtils.transitionTopologyState(
             topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
-            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig),
-        "Failed to deactivate topology %s. Aborting update request", topology.getName());
+            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
 
     if (deactivateSleepSeconds > 0) {
       logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
@@ -275,21 +276,24 @@ public class UpdateTopologyManager implements Closeable {
             + "Reactivating topology after scaling event", topologyName);
         NetworkUtils.TunnelConfig tunnelConfig =
             NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-        boolean reactivated = TMasterUtils.transitionTopologyState(
-            topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
-            TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
-
-        cancel();
-
-        if (removableContainerCount < 1) {
-          assertTrue(reactivated,
-              "Topology reactivation failed for topology %s after topology update", topologyName);
-        } else {
-          assertTrue(reactivated, "Topology reactivation failed for topology %s after topology "
+        try {
+          TMasterUtils.transitionTopologyState(
+              topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
+              TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
+        } catch (TMasterException e) {
+          if (removableContainerCount < 1) {
+            throw new TopologyRuntimeManagementException(String.format(
+                "Topology reactivation failed for topology %s after topology update",
+                topologyName), e);
+          } else {
+            throw new TopologyRuntimeManagementException(String.format(
+                "Topology reactivation failed for topology %s after topology "
                   + "update but before releasing %d no longer used containers",
-              topologyName, removableContainerCount);
+                topologyName, removableContainerCount), e);
+          }
+        } finally {
+          cancel();
         }
-        return;
       }
 
       if (System.currentTimeMillis() > this.timeoutTime) {

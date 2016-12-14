@@ -114,49 +114,51 @@ public final class TMasterUtils {
    */
   private static TopologyAPI.TopologyState getRuntimeTopologyState(
       String topologyName,
-      SchedulerStateManagerAdaptor statemgr) {
+      SchedulerStateManagerAdaptor statemgr) throws TMasterException {
     PhysicalPlans.PhysicalPlan plan = statemgr.getPhysicalPlan(topologyName);
 
     if (plan == null) {
-      LOG.log(Level.SEVERE, "Failed to get physical plan for topology {0}", topologyName);
-      return null;
+      String errMsg = String.format("Failed to get physical plan for topology '%s'", topologyName);
+      throw new TMasterException(errMsg);
     }
 
     return plan.getTopology().getState();
   }
 
-  public static boolean transitionTopologyState(String topologyName,
+  public static void transitionTopologyState(String topologyName,
                                                 TMasterCommand topologyStateControlCommand,
                                                 SchedulerStateManagerAdaptor statemgr,
                                                 TopologyAPI.TopologyState startState,
                                                 TopologyAPI.TopologyState expectedState,
-                                                NetworkUtils.TunnelConfig tunnelConfig) {
+                                                NetworkUtils.TunnelConfig tunnelConfig)
+  throws TMasterException {
     TopologyAPI.TopologyState state = TMasterUtils.getRuntimeTopologyState(topologyName, statemgr);
     if (state == null) {
-      LOG.severe("Topology still not initialized.");
-      return false;
+      throw new TMasterException(String.format(
+          "Topology '%s' is not initialized yet", topologyName));
     }
 
     if (state == expectedState) {
-      LOG.log(Level.SEVERE, "Topology {0} command received topology {1} but already in {2} state",
-          new Object[] {topologyStateControlCommand, topologyName, state});
-      return true;
+      String errMsg = String.format(
+          "Topology {0} command received topology {1} but already in {2} state",
+          topologyStateControlCommand, topologyName, state);
+      throw new TMasterException(errMsg);
     }
 
     if (state != startState) {
-      LOG.log(Level.SEVERE, "Topology not in {0} state", startState);
-      return false;
+      String errMsg = String.format(
+          "Topology '%s' is not in state '%s'", topologyName, startState);
+      throw new TMasterException(errMsg);
     }
 
     if (!TMasterUtils.sendToTMaster(
         topologyStateControlCommand.name().toLowerCase(), topologyName, statemgr, tunnelConfig)) {
-      LOG.log(Level.SEVERE, "Failed to {0} topology: {1} ",
-          new Object[]{topologyStateControlCommand, topologyName});
-      return false;
+      String errMsg = String.format(
+          "Failed to %s topology '%s'", topologyStateControlCommand, topologyName);
+      throw new TMasterException(errMsg);
     }
 
     LOG.log(Level.INFO,
         "Topology command {0} completed successfully.", topologyStateControlCommand);
-    return true;
   }
 }
