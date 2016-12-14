@@ -311,7 +311,6 @@ public class RuntimeManagerMain {
    * 2. Valid whether the runtime management is legal
    * 3. Complete the runtime management for a specific command
    *
-   * @return
    */
   public void manageTopology()
       throws TopologyRuntimeManagementException, TMasterException, PackingException {
