@@ -56,7 +56,7 @@ public class SchedulerClientFactory {
           statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
 
       if (schedulerLocation == null) {
-        throw new SchedulerException("Failed to get scheduler location");
+        throw new SchedulerException("Failed to get scheduler location from state manager");
       }
 
       LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());

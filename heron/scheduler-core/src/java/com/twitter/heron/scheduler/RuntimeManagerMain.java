@@ -322,9 +322,9 @@ public class RuntimeManagerMain {
     try {
       statemgr = ReflectionUtils.newInstance(statemgrClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      String errMsg = String.format("Failed to instantiate state manager class '%s'",
-          statemgrClass);
-      throw new TopologyRuntimeManagementException(errMsg, e);
+      throw new TopologyRuntimeManagementException(String.format(
+          "Failed to instantiate state manager class '%s'",
+          statemgrClass), e);
     }
 
     // Put it in a try block so that we can always clean resources
@@ -367,15 +367,15 @@ public class RuntimeManagerMain {
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
-      String errMsg = String.format("Topology '%s' does not exist", topologyName);
-      throw new TopologyRuntimeManagementException(errMsg);
+      throw new TopologyRuntimeManagementException(
+          String.format("Topology '%s' does not exist", topologyName));
     }
 
     // Check whether cluster/role/environ matched
     ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
     if (executionState == null) {
-      String errMsg = String.format("Failed to get execution state for topology %s", topologyName);
-      throw new TopologyRuntimeManagementException(errMsg);
+      throw new TopologyRuntimeManagementException(
+          String.format("Failed to get execution state for topology %s", topologyName));
     }
 
     String stateCluster = executionState.getCluster();
@@ -389,10 +389,9 @@ public class RuntimeManagerMain {
         || !stateEnv.equals(configEnv)) {
       String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
       String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
-      String errMsg = String.format(
+      throw new TopologyRuntimeManagementException(String.format(
           "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
-          topologyName, currentState, configState);
-      throw new TopologyRuntimeManagementException(errMsg);
+          topologyName, currentState, configState));
     }
   }
 

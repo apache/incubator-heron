@@ -117,9 +117,8 @@ public class LauncherUtils {
       // create an instance of scheduler
       scheduler = ReflectionUtils.newInstance(schedulerClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      String errMsg = String.format("Failed to instantiate scheduler using class '%s'",
-          schedulerClass);
-      throw new SchedulerException(errMsg);
+      throw new SchedulerException(String.format("Failed to instantiate scheduler using class '%s'",
+          schedulerClass));
     }
 
     scheduler.initialize(config, runtime);

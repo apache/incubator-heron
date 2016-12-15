@@ -126,9 +126,8 @@ public class RuntimeManagerRunner {
       SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
       Boolean result = stateManager.deleteTMasterLocation(topologyName);
       if (result == null || !result) {
-        String errMsg =
-            "Failed to clear TMaster location. Check whether TMaster set it correctly.";
-        throw new TopologyRuntimeManagementException(errMsg);
+        throw new TopologyRuntimeManagementException(
+            "Failed to clear TMaster location. Check whether TMaster set it correctly.");
       }
     }
 
@@ -149,8 +148,8 @@ public class RuntimeManagerRunner {
         .setTopologyName(topologyName).build();
 
     if (!schedulerClient.killTopology(killTopologyRequest)) {
-      String errMsg = String.format("Failed to kill topology '%s' with scheduler", topologyName);
-      throw new TopologyRuntimeManagementException(errMsg);
+      throw new TopologyRuntimeManagementException(
+          String.format("Failed to kill topology '%s' with scheduler", topologyName));
     }
 
     // clean up the state of the topology in state manager
@@ -174,9 +173,9 @@ public class RuntimeManagerRunner {
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
 
     if (!changeDetected(currentPlan, changeRequests)) {
-      String errMsg = String.format("The component parallelism request (%s) is the same as the "
-          + "current topology parallelism. Not taking action.", newParallelism);
-      throw new TopologyRuntimeManagementException(errMsg);
+      throw new TopologyRuntimeManagementException(
+          String.format("The component parallelism request (%s) is the same as the "
+          + "current topology parallelism. Not taking action.", newParallelism));
     }
 
     PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
@@ -190,10 +189,9 @@ public class RuntimeManagerRunner {
 
     LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-      String errMsg = String.format(
+      throw new TopologyRuntimeManagementException(String.format(
           "Failed to update topology with Scheduler, updateTopologyRequest="
-          + updateTopologyRequest);
-      throw new TopologyRuntimeManagementException(errMsg);
+          + updateTopologyRequest));
     }
 
     // Clean the connection when we are done.
