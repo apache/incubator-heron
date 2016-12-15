@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -28,7 +28,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  */
 public final class PackingUtils {
   private static final Logger LOG = Logger.getLogger(PackingUtils.class.getName());
-  private static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
+  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
 
   private PackingUtils() {
   }
@@ -40,21 +40,21 @@ public final class PackingUtils {
    * @throws PackingException if the instance is invalid
    */
   private static void assertIsValidInstance(Resource instanceResources,
-                                            long minInstanceRam,
+                                            ByteAmount minInstanceRam,
                                             Resource maxContainerResources,
                                             int paddingPercentage) throws PackingException {
 
-    if (instanceResources.getRam() < minInstanceRam) {
+    if (instanceResources.getRam().lessThan(minInstanceRam)) {
       throw new PackingException(String.format(
-          "Instance requires %d MB ram which is less than the minimum %d MB ram per instance",
-          instanceResources.getRam() / Constants.MB, minInstanceRam / Constants.MB));
+          "Instance requires ram %s which is less than the minimum ram per instance of %s",
+          instanceResources.getRam(), minInstanceRam));
     }
 
-    long instanceRam = PackingUtils.increaseBy(instanceResources.getRam(), paddingPercentage);
-    if (instanceRam > maxContainerResources.getRam()) {
+    ByteAmount instanceRam = instanceResources.getRam().increaseBy(paddingPercentage);
+    if (instanceRam.greaterThan(maxContainerResources.getRam())) {
       throw new PackingException(String.format(
-          "This instance requires containers of at least %d MB ram. The current max container"
-              + "size is %d MB",
+          "This instance requires containers of at least %s ram. The current max container "
+              + "size is %s",
           instanceRam, maxContainerResources.getRam()));
     }
 
@@ -67,21 +67,21 @@ public final class PackingUtils {
           instanceCpu > maxContainerResources.getCpu(), maxContainerResources.getCpu()));
     }
 
-    long instanceDisk = PackingUtils.increaseBy(instanceResources.getDisk(), paddingPercentage);
-    if (instanceDisk > maxContainerResources.getDisk()) {
+    ByteAmount instanceDisk = instanceResources.getDisk().increaseBy(paddingPercentage);
+    if (instanceDisk.greaterThan(maxContainerResources.getDisk())) {
       throw new PackingException(String.format(
-          "This instance requires containers of at least %d MB disk. The current max container"
-              + "size is %d MB",
+          "This instance requires containers of at least %s disk. The current max container"
+              + "size is %s",
           instanceDisk, maxContainerResources.getDisk()));
     }
   }
 
   public static Resource getResourceRequirement(String component,
-                                                Map<String, Long> componentRamMap,
+                                                Map<String, ByteAmount> componentRamMap,
                                                 Resource defaultInstanceResource,
                                                 Resource maxContainerResource,
                                                 int paddingPercentage) {
-    long instanceRam = defaultInstanceResource.getRam();
+    ByteAmount instanceRam = defaultInstanceResource.getRam();
     if (componentRamMap.containsKey(component)) {
       instanceRam = componentRamMap.get(component);
     }
@@ -125,19 +125,19 @@ public final class PackingUtils {
                                                     Resource defaultInstanceResources,
                                                     ScalingDirection scalingDirection) {
     double cpu = 0;
-    long ram = 0;
-    long disk = 0;
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
+    ByteAmount ram = ByteAmount.ZERO;
+    ByteAmount disk = ByteAmount.ZERO;
+    Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
     Map<String, Integer> componentsToScale = PackingUtils.getComponentsToScale(
         componentChanges, scalingDirection);
     for (String component : componentsToScale.keySet()) {
       int parallelismChange = Math.abs(componentChanges.get(component));
       cpu += parallelismChange * defaultInstanceResources.getCpu();
-      disk += parallelismChange * defaultInstanceResources.getDisk();
+      disk = disk.plus(defaultInstanceResources.getDisk().multiply(parallelismChange));
       if (ramMap.containsKey(component)) {
-        ram += parallelismChange * ramMap.get(component);
+        ram = ram.plus(ramMap.get(component).multiply(parallelismChange));
       } else {
-        ram += parallelismChange * defaultInstanceResources.getRam();
+        ram = ram.plus(defaultInstanceResources.getRam().multiply(parallelismChange));
       }
     }
     return new Resource(cpu, ram, disk);

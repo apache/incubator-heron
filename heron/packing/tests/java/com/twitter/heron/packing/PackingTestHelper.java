@@ -13,9 +13,9 @@
 // limitations under the License.
 package com.twitter.heron.packing;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.builder.PackingPlanBuilder;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -28,7 +28,7 @@ public final class PackingTestHelper {
   private PackingTestHelper() { }
 
   public static PackingPlan createTestPackingPlan(String topologyName,
-                                                  Pair<Integer, InstanceId>[] instances,
+                                                  Pair<Integer, String>[] instances,
                                                   int containerPadding)
       throws ResourceExceededException {
     return generateTestPackingPlan(topologyName, null, instances, null, containerPadding);
@@ -36,7 +36,7 @@ public final class PackingTestHelper {
 
   public static PackingPlan addToTestPackingPlan(String topologyName,
                                                  PackingPlan previousPackingPlan,
-                                                 Pair<Integer, InstanceId>[] instances,
+                                                 Pair<Integer, String>[] instances,
                                                  int containerPadding)
       throws ResourceExceededException {
     return generateTestPackingPlan(
@@ -58,7 +58,7 @@ public final class PackingTestHelper {
    */
   private static PackingPlan generateTestPackingPlan(String topologyName,
                                                      PackingPlan previousPackingPlan,
-                                                     Pair<Integer, InstanceId>[] addInstances,
+                                                     Pair<Integer, String>[] addInstances,
                                                      Pair<Integer, String>[] removeInstances,
                                                      int containerPadding)
       throws ResourceExceededException {
@@ -74,15 +74,18 @@ public final class PackingTestHelper {
     // use basic default resource to allow all instances to fit on a single container, if that's
     // what the tester desired. We can extend this to permit passing custom resource requirements
     // as needed.
-    builder.setDefaultInstanceResource(new Resource(1, 192 * Constants.MB, 1 * Constants.MB));
+    builder.setDefaultInstanceResource(
+        new Resource(1, ByteAmount.fromMegabytes(192), ByteAmount.fromMegabytes(1)));
     builder.setMaxContainerResource(new Resource(
-        instanceCount, 192 * Constants.MB * instanceCount, instanceCount * Constants.MB));
+        instanceCount,
+        ByteAmount.fromMegabytes(192).multiply(instanceCount),
+        ByteAmount.fromMegabytes(instanceCount)));
 
     // This setting is important, see https://github.com/twitter/heron/issues/1577
     builder.setRequestedContainerPadding(containerPadding);
 
     if (addInstances != null) {
-      for (Pair<Integer, InstanceId> componentInstance : addInstances) {
+      for (Pair<Integer, String> componentInstance : addInstances) {
         builder.addInstance(componentInstance.first, componentInstance.second);
       }
     }
@@ -93,5 +96,18 @@ public final class PackingTestHelper {
       }
     }
     return builder.build();
+  }
+
+  public static Pair<Integer, String>[] toContainerIdComponentNames(
+      Pair<Integer, InstanceId>[] containerIdInstanceIds) {
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, String>[] containerIdComponentNames = new Pair[containerIdInstanceIds.length];
+    int i = 0;
+    for (Pair<Integer, InstanceId> containerIdInstanceId : containerIdInstanceIds) {
+      containerIdComponentNames[i++] = new Pair<>(
+          containerIdInstanceId.first, containerIdInstanceId.second.getComponentName());
+    }
+    return containerIdComponentNames;
   }
 }

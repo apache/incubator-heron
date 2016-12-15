@@ -31,6 +31,7 @@ java_library(
     name='utils',
     srcs = glob(["**/utils/*.java"]),
     deps = heron_java_proto_files() + [
+        "//heron/common/src/java:basics-java",
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:packing-spi-java",
         "//heron/spi/src/java:utils-spi-java",
@@ -43,6 +44,7 @@ java_library(
     deps = heron_java_proto_files() + [
         "@com_google_guava_guava//jar",
         "//heron/api/src/java:classification",
+        "//heron/common/src/java:basics-java",
         "//heron/spi/src/java:packing-spi-java",
         ":utils",
     ],

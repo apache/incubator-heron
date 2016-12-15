@@ -17,8 +17,10 @@ import java.util.HashSet;
 
 import com.google.common.base.Optional;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.utils.PackingUtils;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -26,7 +28,7 @@ import com.twitter.heron.spi.packing.Resource;
  * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
  * requirements. Each container has limited ram, CpuCores and disk resources.
  */
-class Container {
+public class Container {
 
   private int containerId;
   private HashSet<PackingPlan.InstancePlan> instances;
@@ -68,7 +70,11 @@ class Container {
    * resource requirements has been assigned to the container.
    */
   void add(PackingPlan.InstancePlan instancePlan) throws ResourceExceededException {
-    this.assertHasSpace(instancePlan.getResource());
+    if (this.instances.contains(instancePlan)) {
+      throw new PackingException(String.format(
+          "Instance %s already exists in container %s", instancePlan, toString()));
+    }
+    assertHasSpace(instancePlan.getResource());
     this.instances.add(instancePlan);
   }
 
@@ -143,16 +149,16 @@ class Container {
    */
   private void assertHasSpace(Resource resource) throws ResourceExceededException {
     Resource usedResources = this.getTotalUsedResources();
-    long newRam =
-        PackingUtils.increaseBy(usedResources.getRam() + resource.getRam(), paddingPercentage);
+    ByteAmount newRam =
+        usedResources.getRam().plus(resource.getRam()).increaseBy(paddingPercentage);
     double newCpu = Math.round(
         PackingUtils.increaseBy(usedResources.getCpu() + resource.getCpu(), paddingPercentage));
-    long newDisk =
-        PackingUtils.increaseBy(usedResources.getDisk() + resource.getDisk(), paddingPercentage);
+    ByteAmount newDisk =
+        usedResources.getDisk().plus(resource.getDisk()).increaseBy(paddingPercentage);
 
-    if (newRam > this.capacity.getRam()) {
-      throw new ResourceExceededException(String.format("Adding %d bytes of ram to existing %d "
-          + "bytes with %d percent padding would exceed capacity %d",
+    if (newRam.greaterThan(this.capacity.getRam())) {
+      throw new ResourceExceededException(String.format("Adding %s bytes of ram to existing %s "
+          + "bytes with %d percent padding would exceed capacity %s",
           resource.getRam(), usedResources.getRam(), paddingPercentage, this.capacity.getRam()));
     }
     if (newCpu > this.capacity.getCpu()) {
@@ -160,9 +166,9 @@ class Container {
           + "cores with %d percent padding would exceed capacity %s",
           resource.getCpu(), usedResources.getCpu(), paddingPercentage, this.capacity.getCpu()));
     }
-    if (newDisk > this.capacity.getDisk()) {
-      throw new ResourceExceededException(String.format("Adding %d bytes of disk to existing %d "
-          + "bytes with %d percent padding would exceed capacity %d",
+    if (newDisk.greaterThan(this.capacity.getDisk())) {
+      throw new ResourceExceededException(String.format("Adding %s bytes of disk to existing %s "
+          + "bytes with %s percent padding would exceed capacity %s",
           resource.getDisk(), usedResources.getDisk(), paddingPercentage, this.capacity.getDisk()));
     }
   }
@@ -174,14 +180,14 @@ class Container {
    * @return a Resource object that describes the used cpu, ram and disk in the container.
    */
   private Resource getTotalUsedResources() {
-    long usedRam = 0;
+    ByteAmount usedRam = ByteAmount.ZERO;
     double usedCpuCores = 0;
-    long usedDisk = 0;
+    ByteAmount usedDisk = ByteAmount.ZERO;
     for (PackingPlan.InstancePlan instancePlan : this.instances) {
       Resource resource = instancePlan.getResource();
-      usedRam += resource.getRam();
+      usedRam = usedRam.plus(resource.getRam());
       usedCpuCores += resource.getCpu();
-      usedDisk += resource.getDisk();
+      usedDisk = usedDisk.plus(resource.getDisk());
     }
     return new Resource(usedCpuCores, usedRam, usedDisk);
   }

@@ -36,15 +36,16 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.LauncherException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.LauncherUtils;
-import com.twitter.heron.spi.utils.Runtime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -192,7 +193,7 @@ public class LaunchRunnerTest {
     assertNotNull(executionState.getReleaseState().getReleaseUsername());
   }
 
-  @Test
+  @Test(expected = LauncherException.class)
   public void testSetExecutionStateFail() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
@@ -205,12 +206,14 @@ public class LaunchRunnerTest {
         any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME))).
         thenReturn(false);
 
-    assertFalse(launchRunner.call());
-
-    verify(launcher, never()).launch(any(PackingPlan.class));
+    try {
+      launchRunner.call();
+    } finally {
+      verify(launcher, never()).launch(any(PackingPlan.class));
+    }
   }
 
-  @Test
+  @Test(expected = LauncherException.class)
   public void testSetTopologyFail() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
@@ -222,12 +225,14 @@ public class LaunchRunnerTest {
     when(statemgr.setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME)))
         .thenReturn(false);
 
-    assertFalse(launchRunner.call());
-
-    verify(launcher, never()).launch(any(PackingPlan.class));
+    try {
+      launchRunner.call();
+    } finally {
+      verify(launcher, never()).launch(any(PackingPlan.class));
+    }
   }
 
-  @Test
+  @Test(expected = LauncherException.class)
   public void testLaunchFail() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
@@ -245,14 +250,16 @@ public class LaunchRunnerTest {
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     when(launcher.launch(any(PackingPlan.class))).thenReturn(false);
 
-    assertFalse(launchRunner.call());
-
-    // Verify set && clean
-    verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));
-    verify(statemgr).setExecutionState(
-        any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME));
-    verify(statemgr).deleteExecutionState(eq(TOPOLOGY_NAME));
-    verify(statemgr).deleteTopology(eq(TOPOLOGY_NAME));
+    try {
+      launchRunner.call();
+    } finally {
+      // Verify set && clean
+      verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));
+      verify(statemgr).setExecutionState(
+          any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME));
+      verify(statemgr).deleteExecutionState(eq(TOPOLOGY_NAME));
+      verify(statemgr).deleteTopology(eq(TOPOLOGY_NAME));
+    }
   }
 
   @Test
@@ -273,7 +280,7 @@ public class LaunchRunnerTest {
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
 
-    assertTrue(launchRunner.call());
+    launchRunner.call();
 
     // Verify set && clean
     verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));
