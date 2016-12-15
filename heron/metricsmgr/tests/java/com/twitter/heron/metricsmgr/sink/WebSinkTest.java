@@ -47,7 +47,11 @@ public class WebSinkTest {
     }
 
     public Map<String, Object> getMetrics() {
-      return super.metrics;
+      return super.metricsCache.asMap();
+    }
+
+    public void syncCache() {
+      super.metricsCache.cleanUp();
     }
   }
 
@@ -80,7 +84,7 @@ public class WebSinkTest {
    * Testing exception when illegal port is specified
    */
   @Test(expected = IllegalArgumentException.class)
-  public void testIllegalPort() throws IOException {
+  public void testIllegalPort() {
     Map<String, Object> conf = new HashMap<>(defaultConf);
     conf.put("port", "fdfsaf");
     WebTestSink sink = new WebTestSink();
@@ -91,7 +95,7 @@ public class WebSinkTest {
    * Testing exception when no port is specified
    */
   @Test(expected = IllegalArgumentException.class)
-  public void testNoPort() throws IOException {
+  public void testNoPort() {
     Map<String, Object> conf = new HashMap<>(defaultConf);
     conf.remove("port");
     WebTestSink sink = new WebTestSink();
@@ -101,7 +105,8 @@ public class WebSinkTest {
   /**
    * Testing port and path setting
    */
-  public void testPortAndPath() throws IOException {
+  @Test
+  public void testPortAndPath() {
     Map<String, Object> conf = new HashMap<>(defaultConf);
     WebTestSink sink = new WebTestSink();
     sink.init(conf, context);
@@ -113,7 +118,7 @@ public class WebSinkTest {
    * Testing flat map with metrics
    */
   @Test
-  public void testFlatMetrics() throws IOException {
+  public void testFlatMetrics() {
     Map<String, Object> conf = new HashMap<>(defaultConf);
     WebTestSink sink = new WebTestSink();
     sink.init(conf, context);
@@ -122,7 +127,7 @@ public class WebSinkTest {
     }
 
     Map<String, Object> results = sink.getMetrics();
-    Assert.assertTrue(results.size() == 4);
+    Assert.assertEquals(4, results.size());
     Assert.assertEquals(results.get("/stuff/record_1/metric_1"), 1.0d);
     Assert.assertEquals(results.get("/stuff/record_1/metric_2"), 2.0d);
     Assert.assertEquals(results.get("/record_2/metric_1"), 1.0d);
@@ -133,7 +138,7 @@ public class WebSinkTest {
    * Testing flat map with metrics, prefixed with topology name
    */
   @Test
-  public void testIncludeTopologyName() throws IOException {
+  public void testIncludeTopologyName() {
     Map<String, Object> conf = new HashMap<>(defaultConf);
     conf.put("include-topology-name", "true");
     WebTestSink sink = new WebTestSink();
@@ -143,7 +148,7 @@ public class WebSinkTest {
     }
 
     Map<String, Object> results = sink.getMetrics();
-    Assert.assertTrue(results.size() == 4);
+    Assert.assertEquals(4, results.size());
     Assert.assertEquals(results.get("testTopology/stuff/record_1/metric_1"), 1.0d);
     Assert.assertEquals(results.get("testTopology/stuff/record_1/metric_2"), 2.0d);
     Assert.assertEquals(results.get("testTopology/record_2/metric_1"), 1.0d);
@@ -154,7 +159,7 @@ public class WebSinkTest {
    * Testing grouped map with metrics
    */
   @Test
-  public void testGroupedMetrics() throws IOException {
+  public void testGroupedMetrics() {
     Map<String, Object> conf = new HashMap<>(defaultConf);
     conf.put("flat-metrics", "false");
     WebTestSink sink = new WebTestSink();
@@ -164,7 +169,7 @@ public class WebSinkTest {
     }
 
     Map<String, Object> results = sink.getMetrics();
-    Assert.assertTrue(results.size() == 2);
+    Assert.assertEquals(2, results.size());
     @SuppressWarnings("unchecked")
     Map<String, Object> record1 = (Map<String, Object>) results.get("/stuff/record_1");
     @SuppressWarnings("unchecked")
@@ -175,4 +180,44 @@ public class WebSinkTest {
     Assert.assertEquals(record2.get("metric_1"), 1.0d);
     Assert.assertEquals(record2.get("metric_2"), 2.0d);
   }
+
+  /**
+   * Testinging max metics size, and oldest keys get expired
+   */
+  @Test
+  public void testMaxMetrics() {
+    Map<String, Object> conf = new HashMap<>(defaultConf);
+    conf.put("metrics-cache-max-size", "2");
+    WebTestSink sink = new WebTestSink();
+    sink.init(conf, context);
+    for (MetricsRecord r : records) {
+      sink.processRecord(r);
+    }
+
+    Map<String, Object> results = sink.getMetrics();
+    Assert.assertEquals(2, results.size());
+    Assert.assertEquals(results.get("/record_2/metric_1"), 1.0d);
+    Assert.assertEquals(results.get("/record_2/metric_2"), 2.0d);
+  }
+
+  /**
+   * Testinging TTL
+   */
+  @Test
+  public void testTTLMetrics() throws InterruptedException {
+    Map<String, Object> conf = new HashMap<>(defaultConf);
+    conf.put("metrics-cache-ttl-sec", "1");
+    WebTestSink sink = new WebTestSink();
+    sink.init(conf, context);
+    for (MetricsRecord r : records) {
+      sink.processRecord(r);
+    }
+
+    Thread.sleep(1100);
+    sink.syncCache();
+
+    Map<String, Object> results = sink.getMetrics();
+    Assert.assertEquals(0, results.size());
+  }
+
 }
