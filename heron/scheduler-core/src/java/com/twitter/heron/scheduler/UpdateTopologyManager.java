@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -125,8 +126,8 @@ public class UpdateTopologyManager implements Closeable {
     PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
     PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
 
-    assertTrue(proposedPackingPlan.getContainers().size() > 0,
-        "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
+    Preconditions.checkArgument(proposedPackingPlan.getContainers().size() > 0, String.format(
+        "proposed packing plan must have at least 1 container %s", proposedPackingPlan));
 
     ContainerDelta containerDelta = new ContainerDelta(
         existingPackingPlan.getContainers(), proposedPackingPlan.getContainers());
@@ -137,8 +138,8 @@ public class UpdateTopologyManager implements Closeable {
             + "existing containers, but the scheduler does not support scaling, aborting. "
             + "Existing packing plan: %s, proposed packing plan: %s",
         newContainerCount, removableContainerCount, existingPackingPlan, proposedPackingPlan);
-    assertTrue(newContainerCount + removableContainerCount == 0 || scalableScheduler.isPresent(),
-        message);
+    Preconditions.checkState(newContainerCount + removableContainerCount == 0
+        || scalableScheduler.isPresent(), message);
 
     TopologyAPI.Topology topology = stateManager.getTopology(topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
@@ -191,10 +192,11 @@ public class UpdateTopologyManager implements Closeable {
     logInfo("Deactivating topology %s before handling update request", topology.getName());
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    assertTrue(TMasterUtils.transitionTopologyState(
-            topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
-            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig),
-        "Failed to deactivate topology %s. Aborting update request", topology.getName());
+    Preconditions.checkState(TMasterUtils.transitionTopologyState(
+        topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
+        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig),
+        String.format("Failed to deactivate topology %s. Aborting update request",
+            topology.getName()));
 
     if (deactivateSleepSeconds > 0) {
       logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
@@ -282,12 +284,12 @@ public class UpdateTopologyManager implements Closeable {
         cancel();
 
         if (removableContainerCount < 1) {
-          assertTrue(reactivated,
-              "Topology reactivation failed for topology %s after topology update", topologyName);
+          Preconditions.checkState(reactivated, String.format("Topology reactivation failed for "
+              + "topology %s after topology update", topologyName));
         } else {
-          assertTrue(reactivated, "Topology reactivation failed for topology %s after topology "
-                  + "update but before releasing %d no longer used containers",
-              topologyName, removableContainerCount);
+          Preconditions.checkState(reactivated, String.format("Topology reactivation failed for "
+              + "topology %s after topology update but before releasing %d no longer used "
+              + "containers", topologyName, removableContainerCount));
         }
         return;
       }
@@ -444,12 +446,6 @@ public class UpdateTopologyManager implements Closeable {
       currentContainerMap.add(container.getId());
     }
     return currentContainerMap;
-  }
-
-  private static void assertTrue(boolean condition, String message, Object... values) {
-    if (!condition) {
-      throw new RuntimeException("ERROR: " + String.format(message, values));
-    }
   }
 
   private static void logInfo(String format, Object... values) {
