@@ -131,7 +131,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    */
   public ByteAmount plus(ByteAmount other) {
     Preconditions.checkArgument(Long.MAX_VALUE - asBytes() >= other.asBytes(), String.format(
-        "Subtracting %s from %s would overshoot Long.MIN_LONG", other, this));
+        "Adding %s to %s would exceed Long.MAX_LONG", other, this));
     return ByteAmount.fromBytes(asBytes() + other.asBytes());
   }
 
@@ -143,7 +143,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    */
   public ByteAmount multiply(int factor) {
     Preconditions.checkArgument(asBytes() <= Long.MAX_VALUE / factor, String.format(
-        "Subtracting %s from %s would overshoot Long.MIN_LONG", this, factor));
+        "Multiplying %s by %d would exceed Long.MAX_LONG", this, factor));
     return ByteAmount.fromBytes(asBytes() * factor);
   }
 
@@ -171,10 +171,8 @@ public final class ByteAmount implements Comparable<ByteAmount> {
         "Increasing by negative percent (%d) not supported", percentage));
     double factor = 1.0 + ((double) percentage / 100);
     long max = Math.round(Long.MAX_VALUE / factor);
-    if (asBytes() > max) {
-      throw new IllegalArgumentException(String.format(
-          "Increasing %s by %d percent would exceed Long.MAX_LONG", this, percentage));
-    }
+    Preconditions.checkArgument(asBytes() <= max, String.format(
+        "Increasing %s by %d percent would exceed Long.MAX_LONG", this, percentage));
     return ByteAmount.fromBytes(Math.round((double) asBytes() * factor));
   }
 
