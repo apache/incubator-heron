@@ -190,6 +190,8 @@ void StMgr::StartStmgrServer() {
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_interface_list(config::HeronInternalsConfigReader::Instance()
+                                    ->GetHeronStreammgrNetworkOptionsInterfaces());
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
                             this, metrics_manager_client_);
 
