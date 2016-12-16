@@ -149,7 +149,6 @@ public class WebSink implements IMetricsSink {
       });
       httpServer.start();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Could not create HttpServer on port " + port, e);
       throw new RuntimeException("Failed to create Http server on port " + port, e);
     }
   }
