@@ -54,7 +54,7 @@ public final class TMasterUtils {
     LOG.fine("Fetching TMaster location for topology: " + topologyName);
 
     TopologyMaster.TMasterLocation location = stateManager.getTMasterLocation(topologyName);
-    Preconditions.checkNotNull(location, "Failed to fetch TMaster Location for topology: "
+    Preconditions.checkNotNull(location, "Failed to fetch TMaster location for topology: "
         + topologyName);
 
     LOG.fine("Fetched TMaster location for topology: " + topologyName);
@@ -67,7 +67,7 @@ public final class TMasterUtils {
       LOG.fine("HTTP URL for TMaster: " + endpoint);
       sendGetRequest(endpoint, command, tunnelConfig);
     } catch (MalformedURLException e) {
-      throw new RuntimeException("Invalid URL for Tmaster endpoint: " + url, e);
+      throw new TMasterException("Invalid URL for TMaster endpoint: " + url, e);
     }
   }
 
