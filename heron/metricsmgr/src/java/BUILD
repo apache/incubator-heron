@@ -19,9 +19,9 @@ java_library(
         "//third_party/java:guava", # only used in WebSink
         "//third_party/java:jackson",
         "//third_party/java:logging", # slf4j is only used for thrift in scribe-sink
-        "@org_yaml_snakeyaml//jar",
         "@com_google_protobuf_protobuf_java//jar",
         "@org_apache_thrift_libthrift//jar",
+        "@org_yaml_snakeyaml//jar",
     ],
 )
 
