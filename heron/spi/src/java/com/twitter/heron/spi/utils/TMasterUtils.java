@@ -22,7 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -54,8 +53,10 @@ public final class TMasterUtils {
     LOG.fine("Fetching TMaster location for topology: " + topologyName);
 
     TopologyMaster.TMasterLocation location = stateManager.getTMasterLocation(topologyName);
-    Preconditions.checkNotNull(location, "Failed to fetch TMaster location for topology: "
+    if (location == null) {
+      throw new TMasterException("Failed to fetch TMaster location for topology: "
         + topologyName);
+    }
 
     LOG.fine("Fetched TMaster location for topology: " + topologyName);
 
@@ -77,8 +78,10 @@ public final class TMasterUtils {
     // create a URL connection
     HttpURLConnection connection =
         NetworkUtils.getProxiedHttpConnectionIfNeeded(endpoint, tunnelConfig);
-    Preconditions.checkNotNull(connection,
-        String.format("Failed to get a HTTP connection to TMaster: %s", endpoint));
+    if (connection == null) {
+      throw new TMasterException(String.format(
+          "Failed to get a HTTP connection to TMaster: %s", endpoint));
+    }
     LOG.fine("Successfully opened HTTP connection to TMaster");
 
     // now sent the http request
@@ -111,8 +114,10 @@ public final class TMasterUtils {
       SchedulerStateManagerAdaptor statemgr) throws TMasterException {
     PhysicalPlans.PhysicalPlan plan = statemgr.getPhysicalPlan(topologyName);
 
-    Preconditions.checkNotNull(plan, String.format(
+    if (plan == null) {
+      throw new TMasterException(String.format(
         "Failed to get physical plan for topology '%s'", topologyName));
+    }
 
     return plan.getTopology().getState();
   }
