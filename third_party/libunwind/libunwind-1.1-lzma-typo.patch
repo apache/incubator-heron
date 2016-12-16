@@ -1,0 +1,11 @@
+--- configure.ac~	2012-10-06 04:54:38.000000000 +0000
++++ configure.ac	2013-04-19 23:56:22.099117395 +0000
+@@ -240,7 +240,7 @@
+ AC_MSG_RESULT([$enable_minidebuginfo])
+ if test x$enable_minidebuginfo != xno; then
+    AC_CHECK_LIB([lzma], [lzma_mf_is_supported],
+-   [AC_SUBST([LIBLZMA], [-lzma])
++   [AC_SUBST([LIBLZMA], [-llzma])
+     AC_DEFINE([HAVE_LZMA], [1], [Define if you have liblzma])
+     enable_minidebuginfo=yes],
+    [if test x$enable_minidebuginfo = xyes; then
