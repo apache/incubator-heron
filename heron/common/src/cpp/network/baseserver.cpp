@@ -70,9 +70,11 @@ sp_int32 BaseServer::Start_Base() {
   socklen_t sockaddr_len = 0;
   if (options_.get_sin_family() == AF_INET) {
     bzero(reinterpret_cast<char*>(&in_addr), sizeof(in_addr));
+    if (SockUtils::FindBindAddress(options_.get_interface_list(), AF_INET, &in_addr)) {
+      in_addr.sin_addr.s_addr = INADDR_ANY;
+    }
     in_addr.sin_family = options_.get_sin_family();
     in_addr.sin_port = htons(options_.get_port());
-    in_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr = (struct sockaddr*)&in_addr;
     sockaddr_len = sizeof(in_addr);
   } else {

@@ -55,6 +55,10 @@ class SockUtils {
 
   //! Set reasonable default values for a socket
   static sp_int32 setSocketDefaults(sp_int32 fd);
+
+  // fill the socket address with address information from the interface list. If the interface
+  // cannot be found, return 1 otherwise return 0
+  static sp_int32 FindBindAddress(sp_string interfaceList, int family, struct sockaddr_in *addr);
 };
 
 #endif

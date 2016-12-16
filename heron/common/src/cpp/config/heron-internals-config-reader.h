@@ -164,6 +164,10 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The maximum packet size in MB of stream manager's network options
   sp_int32 GetHeronStreammgrNetworkOptionsMaximumPacketMb();
 
+  // List of interface names to bind to, we will bind to the first interface found,
+  // if none found, bind to any
+  sp_string GetHeronStreammgrNetworkOptionsInterfaces();
+
   // The interval in seconds to send heartbeat
   sp_int32 GetHeronStreammgrTmasterHeartbeatIntervalSec();
 

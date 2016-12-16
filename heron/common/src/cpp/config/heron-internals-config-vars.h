@@ -152,6 +152,9 @@ class HeronInternalsConfigVars {
   // The maximum packet size in MB of stream manager's network options
   static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
 
+  // The interfaces to bind to as a comma separated list
+  static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_INTERFACES;
+
   // The interval in seconds to send heartbeat
   static const sp_string HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC;
 

@@ -18,6 +18,9 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <ifaddrs.h>
+#include <vector>
+#include <string>
 #include "glog/logging.h"
 #include "config/heron-config.h"
 #include "basics/sprcodes.h"
@@ -178,3 +181,39 @@ sp_int32 SockUtils::setSocketDefaults(sp_int32 fd) {
 
   return SP_OK;
 }
+
+sp_int32 SockUtils::FindBindAddress(sp_string interfaceList,
+                                    int family, struct sockaddr_in *addr)  {
+  struct ifaddrs *ifaddr, *ifa;
+
+  if (getifaddrs(&ifaddr) == -1) {
+    PLOG(ERROR) << "Could not get the address information: " << strerror(errno);
+    return 1;
+  }
+
+  std::vector<std::string> interfaces;
+  std::stringstream ss;
+  ss.str(interfaceList);
+  std::string item;
+  while (std::getline(ss, item, ',')) {
+    interfaces.push_back(item);
+  }
+
+  for (std::vector<std::string>::iterator it = interfaces.begin() ; it != interfaces.end(); ++it) {
+    /* Walk through linked list, maintaining head pointer so we can free list later */
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+      if (ifa->ifa_addr == NULL) {
+        continue;
+      }
+      if (ifa->ifa_addr->sa_family == family && strcmp(ifa->ifa_name, (*it).c_str())) {
+        memcpy(addr, ifa->ifa_addr, sizeof(struct sockaddr_in));
+        freeifaddrs(ifaddr);
+        return 0;
+      }
+    }
+  }
+
+  freeifaddrs(ifaddr);
+  return 1;
+}
+
