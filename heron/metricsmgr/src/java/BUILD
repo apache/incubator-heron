@@ -16,7 +16,7 @@ java_library(
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/metricsmgr/src/thrift:thrift_scribe_java",
-        "//third_party/java:guava",
+        "//third_party/java:guava", # only used in WebSink
         "//third_party/java:jackson",
         "//third_party/java:logging", # slf4j is only used for thrift in scribe-sink
         "@org_yaml_snakeyaml//jar",
