@@ -115,14 +115,25 @@ class BaseServer {
   // Internal helper function to initialize things
   void Init(EventLoop* eventLoop, const NetworkOptions& options);
 
+  sp_int32 StartListen(sp_int32 _fd, struct sockaddr* _serv_addr, socklen_t _sockaddr_len,
+                       VCallback<EventLoop::Status> _on_new_connection_callback);
+
   // Internal method to be called when a write event happens on listen_fd_
-  void OnNewConnection(EventLoop::Status status);
+  void OnNewConnection(EventLoop::Status status, sp_int32 listen_fd_);
+
+  // callback for connections on loopback
+  void OnLocalNewConnection(EventLoop::Status _status);
+
+  void OnNewConnection(EventLoop::Status _status);
 
   // When a Connection closes, this is invoked by the Connection
   void OnConnectionClose(BaseConnection* connection, NetworkErrorCode status);
 
   // When EventLoop invokes upon a timer
   void OnTimer(VCallback<> cb, EventLoop::Status status);
+
+  // utility function for creating socket fd and setting options
+  sp_int32 CreateSocket();
 
   // Internal functions which do most of the api related activities in the
   // main thread
@@ -131,6 +142,9 @@ class BaseServer {
 
   // The socket that we are listening on
   sp_int32 listen_fd_;
+
+  // in case we are listening on different ips, we need to listen on localhost
+  sp_int32 listen_local_fd_;
 
   // When we create a Connection structure, we use the following options
   ConnectionOptions connection_options_;
@@ -141,6 +155,7 @@ class BaseServer {
   // Placeholders for various callbacks that we pass to the Connection.
   // They are kept here so that they can be cleaned up in the end
   VCallback<EventLoop::Status> on_new_connection_callback_;
+  VCallback<EventLoop::Status> on_new_local_connection_callback_;
 };
 
 #endif  // BASESERVER_H_

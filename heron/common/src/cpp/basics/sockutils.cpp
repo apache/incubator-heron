@@ -224,7 +224,7 @@ sp_int32 SockUtils::FindHostName(sp_string interfaceList, char *hostname,
   if (!FindBindAddress(interfaceList, AF_INET, &addr)) {
     addr.sin_family = AF_INET;
     addr.sin_port = 0;
-    if (getnameinfo((struct sockaddr *)&addr, sizeof addr, hostname, hostname_size,
+    if (!getnameinfo((struct sockaddr *)&addr, sizeof addr, hostname, hostname_size,
                  NULL, 0, NI_NOFQDN)) {
       return 0;
     }

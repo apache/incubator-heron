@@ -70,9 +70,10 @@ void BaseClient::Start_Base() {
       local_addr.sin_family = AF_INET;
       // Any local port will do
       local_addr.sin_port = 0;
+      LOG(INFO) << "Binding to ip address: " << inet_ntoa(local_addr.sin_addr);
       errno = 0;
       if (bind(endpoint->get_fd(), (struct sockaddr *)&local_addr, sizeof(local_addr))) {
-        LOG(WARNING) << "Failed to bind to the local interface: " << errno;
+         LOG(WARNING) << "Failed to bind to the interface: " << errno;
       }
     }
 
