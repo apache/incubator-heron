@@ -51,7 +51,13 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
 
   char hostname[1024];
-  CHECK_EQ(gethostname(hostname, 1023), 0);
+  sp_string if_list = config::HeronInternalsConfigReader::Instance()
+                                    ->GetHeronStreammgrNetworkOptionsInterfaces();
+  // now check weather we have a socket address
+  if (SockUtils::FindHostName(if_list, hostname, 1023)) {
+    CHECK_EQ(gethostname(hostname, 1023), 0);
+  }
+  LOG(INFO) << "Setting stmgr hostname to: " << hostname;
   stmgr_host_ = hostname;
   InstallResponseHandler(new proto::tmaster::StMgrRegisterRequest(),
                          &TMasterClient::HandleRegisterResponse);

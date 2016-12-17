@@ -59,6 +59,9 @@ class SockUtils {
   // fill the socket address with address information from the interface list. If the interface
   // cannot be found, return 1 otherwise return 0
   static sp_int32 FindBindAddress(sp_string interfaceList, int family, struct sockaddr_in *addr);
+
+  // find the host name
+  static sp_int32 FindHostName(sp_string interfaceList, char *hostname, sp_int32 hostname_size);
 };
 
 #endif

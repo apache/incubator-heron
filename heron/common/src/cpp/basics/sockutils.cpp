@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <ifaddrs.h>
+#include <netdb.h>
 #include <vector>
 #include <string>
 #include "glog/logging.h"
@@ -186,7 +187,7 @@ sp_int32 SockUtils::FindBindAddress(sp_string interfaceList,
                                     int family, struct sockaddr_in *addr)  {
   struct ifaddrs *ifaddr, *ifa;
 
-  if (getifaddrs(&ifaddr) == -1) {
+  if (getifaddrs(&ifaddr) < 0) {
     PLOG(ERROR) << "Could not get the address information: " << strerror(errno);
     return 1;
   }
@@ -205,7 +206,7 @@ sp_int32 SockUtils::FindBindAddress(sp_string interfaceList,
       if (ifa->ifa_addr == NULL) {
         continue;
       }
-      if (ifa->ifa_addr->sa_family == family && strcmp(ifa->ifa_name, (*it).c_str())) {
+      if (ifa->ifa_addr->sa_family == family && !strcmp(ifa->ifa_name, (*it).c_str())) {
         memcpy(addr, ifa->ifa_addr, sizeof(struct sockaddr_in));
         freeifaddrs(ifaddr);
         return 0;
@@ -217,3 +218,16 @@ sp_int32 SockUtils::FindBindAddress(sp_string interfaceList,
   return 1;
 }
 
+sp_int32 SockUtils::FindHostName(sp_string interfaceList, char *hostname,
+                                    sp_int32 hostname_size) {
+  struct sockaddr_in addr;
+  if (!FindBindAddress(interfaceList, AF_INET, &addr)) {
+    addr.sin_family = AF_INET;
+    addr.sin_port = 0;
+    if (getnameinfo((struct sockaddr *)&addr, sizeof addr, hostname, hostname_size,
+                 NULL, 0, NI_NOFQDN)) {
+      return 0;
+    }
+  }
+  return 1;
+}
