@@ -63,7 +63,7 @@ sp_int32 BaseServer::Start_Base() {
     } else {
       char *ip = inet_ntoa(in_addr.sin_addr);
       char local_ip[16] = "127.0.0.1";
-      LOG(INFO) << "Binding to ip address: " << ip;
+      LOG(INFO) << "Binding to ip address: " << ip << ":" << options_.get_port();
 
       listen_local_fd_ = CreateSocket();
       if (strcmp(ip, local_ip)) {
@@ -78,7 +78,7 @@ sp_int32 BaseServer::Start_Base() {
         in_addr_lo.sin_port = htons(options_.get_port());
         serv_addr_lo = (struct sockaddr*)&in_addr_lo;
         sockaddr_len_lo = sizeof(in_addr_lo);
-        LOG(INFO) << "Binding to loopback address: " << local_ip;
+        LOG(INFO) << "Binding to loopback address: " << local_ip << ":" << options_.get_port();
         if (StartListen(listen_local_fd_, serv_addr_lo, sockaddr_len_lo,
                         on_new_local_connection_callback_)) {
           LOG(ERROR) << "Failed to listen on loopback";
