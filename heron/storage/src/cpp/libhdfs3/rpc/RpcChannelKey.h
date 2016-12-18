@@ -22,23 +22,23 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCCHANNELKEY_H_
 #define _HDFS_LIBHDFS3_RPC_RPCCHANNELKEY_H_
 
-#include "client/Token.h"
-#include "Hash.h"
-#include "RpcAuth.h"
-#include "RpcConfig.h"
-#include "RpcProtocolInfo.h"
-#include "RpcServerInfo.h"
-#include <Memory.h>
+#include "common/Token.h"
+#include "common/Hash.h"
+#include "rpc/RpcAuth.h"
+#include "rpc/RpcConfig.h"
+#include "rpc/RpcProtocolInfo.h"
+#include "rpc/RpcServerInfo.h"
+#include "common/Memory.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class RpcChannelKey {
-public:
+ public:
     RpcChannelKey(const RpcAuth & a, const RpcProtocolInfo & p,
                   const RpcServerInfo & s, const RpcConfig & c);
 
-public:
+ public:
     size_t hash_value() const;
 
     const RpcAuth & getAuth() const {
@@ -73,7 +73,7 @@ public:
         return token != NULL;
     }
 
-private:
+ private:
     const RpcAuth auth;
     const RpcConfig conf;
     const RpcProtocolInfo protocol;
@@ -81,8 +81,8 @@ private:
     shared_ptr<Token> token;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::RpcChannelKey);
 

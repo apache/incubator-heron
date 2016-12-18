@@ -21,15 +21,15 @@
  */
 #include <google/protobuf/io/coded_stream.h>
 
-#include "RpcContentWrapper.h"
+#include "rpc/RpcContentWrapper.h"
 
-using namespace ::google::protobuf;
-using namespace ::google::protobuf::io;
+// using namespace ::google::protobuf;
+// using namespace ::google::protobuf::io;
 
 namespace Hdfs {
 namespace Internal {
 
-RpcContentWrapper::RpcContentWrapper(Message * header, Message * msg) :
+RpcContentWrapper::RpcContentWrapper(::google::protobuf::Message * header, ::google::protobuf::Message * msg) :  // NOLINT(whitespace/line_length)
     header(header), msg(msg) {
 }
 
@@ -37,9 +37,9 @@ int RpcContentWrapper::getLength() {
     int headerLen, msgLen = 0;
     headerLen = header->ByteSize();
     msgLen = msg == NULL ? 0 : msg->ByteSize();
-    return headerLen + CodedOutputStream::VarintSize32(headerLen)
+    return headerLen + ::google::protobuf::io::CodedOutputStream::VarintSize32(headerLen)
            + (msg == NULL ?
-              0 : msgLen + CodedOutputStream::VarintSize32(msgLen));
+              0 : msgLen + ::google::protobuf::io::CodedOutputStream::VarintSize32(msgLen));
 }
 
 void RpcContentWrapper::writeTo(WriteBuffer & buffer) {
@@ -54,6 +54,6 @@ void RpcContentWrapper::writeTo(WriteBuffer & buffer) {
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 

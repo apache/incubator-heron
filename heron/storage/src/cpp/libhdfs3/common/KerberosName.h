@@ -25,15 +25,15 @@
 #include <string>
 #include <sstream>
 
-#include "Hash.h"
+#include "common/Hash.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class KerberosName {
-public:
+ public:
     KerberosName();
-    KerberosName(const std::string & principal);
+    explicit KerberosName(const std::string & principal);
 
     std::string getPrincipal() const {
         std::stringstream ss;
@@ -81,17 +81,17 @@ public:
         return name == other.name && host == other.host && realm == other.realm;
     }
 
-private:
+ private:
     void parse(const std::string & principal);
 
-private:
+ private:
     std::string name;
     std::string host;
     std::string realm;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::KerberosName);
 

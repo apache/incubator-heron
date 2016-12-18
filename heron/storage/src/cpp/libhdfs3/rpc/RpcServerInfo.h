@@ -22,17 +22,15 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCSERVERINFO_H_
 #define _HDFS_LIBHDFS3_RPC_RPCSERVERINFO_H_
 
-#include "Hash.h"
-
 #include <string>
 #include <sstream>
+#include "common/Hash.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class RpcServerInfo {
-public:
-
+ public:
     RpcServerInfo(const std::string & tokenService, const std::string & h, const std::string & p) :
         host(h), port(p), tokenService(tokenService) {
     }
@@ -48,7 +46,7 @@ public:
     size_t hash_value() const;
 
     bool operator ==(const RpcServerInfo & other) const {
-        return this->host == other.host && this->port == other.port && tokenService == other.tokenService;
+        return this->host == other.host && this->port == other.port && tokenService == other.tokenService;  // NOLINT(whitespace/line_length)
     }
 
     const std::string & getTokenService() const {
@@ -67,15 +65,14 @@ public:
         this->tokenService = tokenService;
     }
 
-private:
+ private:
     std::string host;
     std::string port;
     std::string tokenService;
-
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::RpcServerInfo);
 

@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RpcServerInfo.h"
+#include "rpc/RpcServerInfo.h"
 
 #include <string>
 
@@ -31,5 +31,5 @@ size_t RpcServerInfo::hash_value() const {
     return CombineHasher(values, sizeof(values) / sizeof(values[0]));
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

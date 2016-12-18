@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RpcChannelKey.h"
+#include "rpc/RpcChannelKey.h"
 
 #include <vector>
 
@@ -45,5 +45,5 @@ size_t RpcChannelKey::hash_value() const {
     return CombineHasher(values, sizeof(values) / sizeof(values[0]));
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

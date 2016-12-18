@@ -22,17 +22,17 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCAUTH_H_
 #define _HDFS_LIBHDFS3_RPC_RPCAUTH_H_
 
-#include "client/UserInfo.h"
-#include "Hash.h"
-
 #include <string>
+
+#include "common/UserInfo.h"
+#include "common/Hash.h"
 
 namespace Hdfs {
 namespace Internal {
 
 enum AuthMethod {
-    SIMPLE = 80, KERBEROS = 81, //"GSSAPI"
-    TOKEN = 82, //"DIGEST-MD5"
+    SIMPLE = 80, KERBEROS = 81,  // "GSSAPI"
+    TOKEN = 82,  // "DIGEST-MD5"
     UNKNOWN = 255
 };
 
@@ -41,7 +41,7 @@ enum AuthProtocol {
 };
 
 class RpcAuth {
-public:
+ public:
     RpcAuth() :
         method(SIMPLE) {
     }
@@ -84,16 +84,16 @@ public:
         return method == other.method && user == other.user;
     }
 
-public:
+ public:
     static AuthMethod ParseMethod(const std::string & str);
 
-private:
+ private:
     AuthMethod method;
     UserInfo user;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::RpcAuth);
 

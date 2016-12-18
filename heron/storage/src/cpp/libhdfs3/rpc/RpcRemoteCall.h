@@ -22,13 +22,16 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCREMOTECALL_
 #define _HDFS_LIBHDFS3_RPC_RPCREMOTECALL_
 
-#include "DateTime.h"
-#include "ExceptionInternal.h"
-#include "Memory.h"
-#include "RpcCall.h"
-#include "RpcProtocolInfo.h"
-#include "Thread.h"
-#include "WriteBuffer.h"
+#include <string>
+#include <vector>
+
+#include "common/DateTime.h"
+#include "common/ExceptionInternal.h"
+#include "common/Memory.h"
+#include "rpc/RpcCall.h"
+#include "rpc/RpcProtocolInfo.h"
+#include "common/Thread.h"
+#include "common/WriteBuffer.h"
 
 #define INVALID_RETRY_COUNT -1
 
@@ -39,7 +42,7 @@ class RpcRemoteCall;
 typedef shared_ptr<RpcRemoteCall> RpcRemoteCallPtr;
 
 class RpcRemoteCall {
-public:
+ public:
     RpcRemoteCall(const RpcCall & c, int32_t id, const std::string & clientId) :
         complete(false), identity(id), call(c), clientId(clientId) {
     }
@@ -64,7 +67,7 @@ public:
         unique_lock<mutex> lock(mut);
 
         if (!complete) {
-            cond.wait_for(lock, milliseconds(500));
+            cond.wait_for(lock, std::chrono::milliseconds(500));
         }
     }
 
@@ -93,10 +96,10 @@ public:
         return complete;
     }
 
-public:
+ public:
     static std::vector<char> GetPingRequest(const std::string & clientid);
 
-private:
+ private:
     bool complete;
     condition_variable cond;
     const int32_t identity;
@@ -106,7 +109,7 @@ private:
     std::string clientId;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_RPC_RPCREMOTECALL_ */

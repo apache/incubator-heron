@@ -19,19 +19,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Memory.h"
-#include "ProtobufRpcEngine.pb.h"
-#include "RpcCall.h"
-#include "RpcContentWrapper.h"
-#include "RpcHeader.pb.h"
-#include "RpcRemoteCall.h"
-#include "WriteBuffer.h"
+#include "rpc/RpcRemoteCall.h"
 
 #include <google/protobuf/io/coded_stream.h>
+#include <string>
+#include <vector>
+
+#include "common/Memory.h"
+#include "proto/ProtobufRpcEngine.pb.h"
+#include "rpc/RpcCall.h"
+#include "rpc/RpcContentWrapper.h"
+#include "proto/RpcHeader.pb.h"
+#include "common/WriteBuffer.h"
 
 #define PING_CALL_ID -4
 
-using namespace google::protobuf::io;
+// using namespace google::protobuf::io;
 
 namespace Hdfs {
 namespace Internal {
@@ -50,7 +53,7 @@ void RpcRemoteCall::serialize(const RpcProtocolInfo & protocol,
     requestHeader.set_clientprotocolversion(protocol.getVersion());
     RpcContentWrapper wrapper(&requestHeader, call.getRequest());
     int rpcHeaderLen = rpcHeader.ByteSize();
-    int size = CodedOutputStream::VarintSize32(rpcHeaderLen) + rpcHeaderLen + wrapper.getLength();
+    int size = ::google::protobuf::io::CodedOutputStream::VarintSize32(rpcHeaderLen) + rpcHeaderLen + wrapper.getLength();  // NOLINT(whitespace/line_length)
     buffer.writeBigEndian(size);
     buffer.writeVarint32(rpcHeaderLen);
     rpcHeader.SerializeToArray(buffer.alloc(rpcHeaderLen), rpcHeaderLen);
@@ -67,15 +70,15 @@ std::vector<char> RpcRemoteCall::GetPingRequest(const std::string & clientid) {
     pingHeader.set_rpckind(RpcKindProto::RPC_PROTOCOL_BUFFER);
     pingHeader.set_rpcop(RpcRequestHeaderProto_OperationProto_RPC_FINAL_PACKET);
     int rpcHeaderLen = pingHeader.ByteSize();
-    int size = CodedOutputStream::VarintSize32(rpcHeaderLen) + rpcHeaderLen;
+    int size = ::google::protobuf::io::CodedOutputStream::VarintSize32(rpcHeaderLen) + rpcHeaderLen;
     buffer.writeBigEndian(size);
     buffer.writeVarint32(rpcHeaderLen);
-    pingHeader.SerializeWithCachedSizesToArray(reinterpret_cast<unsigned char *>(buffer.alloc(pingHeader.ByteSize())));
+    pingHeader.SerializeWithCachedSizesToArray(reinterpret_cast<unsigned char *>(buffer.alloc(pingHeader.ByteSize())));  // NOLINT(whitespace/line_length)
     retval.resize(buffer.getDataSize(0));
     memcpy(&retval[0], buffer.getBuffer(0), retval.size());
     return retval;
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 

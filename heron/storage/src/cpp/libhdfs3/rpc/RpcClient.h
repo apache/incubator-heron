@@ -22,18 +22,20 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCCLIENT_H_
 #define _HDFS_LIBHDFS3_RPC_RPCCLIENT_H_
 
-#include "Memory.h"
-#include "RpcAuth.h"
-#include "RpcCall.h"
-#include "RpcChannel.h"
-#include "RpcChannelKey.h"
-#include "RpcConfig.h"
-#include "RpcProtocolInfo.h"
-#include "RpcServerInfo.h"
-#include "Thread.h"
-#include "Unordered.h"
-
+#include <limits>
+#include <string>
 #include <vector>
+
+#include "common/Memory.h"
+#include "rpc/RpcAuth.h"
+#include "rpc/RpcCall.h"
+#include "rpc/RpcChannel.h"
+#include "rpc/RpcChannelKey.h"
+#include "rpc/RpcConfig.h"
+#include "rpc/RpcProtocolInfo.h"
+#include "rpc/RpcServerInfo.h"
+#include "common/Thread.h"
+#include "common/Unordered.h"
 
 #ifdef MOCK
 #include "TestRpcChannelStub.h"
@@ -43,7 +45,7 @@ namespace Hdfs {
 namespace Internal {
 
 class RpcClient {
-public:
+ public:
     /**
      * Destroy an RpcClient instance.
      */
@@ -72,17 +74,17 @@ public:
 
     virtual int32_t getCallId() = 0;
 
-public:
+ public:
     static RpcClient & getClient();
     static void createSinglten();
 
-private:
+ private:
     static once_flag once;
     static shared_ptr<RpcClient> client;
 };
 
 class RpcClientImpl: public RpcClient {
-public:
+ public:
     /**
      * Construct a RpcClient.
      */
@@ -128,13 +130,13 @@ public:
         return count;
     }
 
-private:
+ private:
     shared_ptr<RpcChannel> createChannelInternal(
         const RpcChannelKey & key);
 
     void clean();
 
-private:
+ private:
     atomic<bool> cleaning;
     atomic<bool> running;
     condition_variable cond;
@@ -145,7 +147,8 @@ private:
     unordered_map<RpcChannelKey, shared_ptr<RpcChannel> > allChannels;
 
 #ifdef MOCK
-private:
+
+ private:
     /*
      * for test
      */
@@ -153,7 +156,7 @@ private:
 #endif
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_RPC_RPCCLIENT_H_ */

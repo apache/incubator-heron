@@ -19,14 +19,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "Logger.h"
-#include "Memory.h"
-#include "RpcClient.h"
-#include "Thread.h"
+#include "rpc/RpcClient.h"
 
 #include <uuid/uuid.h>
+#include <string>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Logger.h"
+#include "common/Memory.h"
+#include "common/Thread.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -73,7 +75,7 @@ void RpcClientImpl::clean() {
         while (running) {
             try {
                 unique_lock<mutex> lock(mut);
-                cond.wait_for(lock, seconds(1));
+                cond.wait_for(lock, std::chrono::seconds(1));
 
                 if (!running || allChannels.empty()) {
                     break;
@@ -125,7 +127,7 @@ bool RpcClientImpl::isRunning() {
 }
 
 RpcChannel & RpcClientImpl::getChannel(const RpcAuth & auth,
-                                       const RpcProtocolInfo & protocol, const RpcServerInfo & server,
+                                       const RpcProtocolInfo & protocol, const RpcServerInfo & server,  // NOLINT(whitespace/line_length)
                                        const RpcConfig & conf) {
     shared_ptr<RpcChannel> rc;
     RpcChannelKey key(auth, protocol, server, conf);
@@ -188,5 +190,5 @@ shared_ptr<RpcChannel> RpcClientImpl::createChannelInternal(
     return channel;
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

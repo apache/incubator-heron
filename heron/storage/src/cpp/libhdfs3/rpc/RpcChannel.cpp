@@ -19,28 +19,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "IpcConnectionContext.pb.h"
-#include "Logger.h"
-#include "RpcChannel.h"
-#include "RpcClient.h"
-#include "RpcContentWrapper.h"
-#include "RpcHeader.pb.h"
-#include "RpcHeader.pb.h"
-#include "server/RpcHelper.h"
-#include "Thread.h"
-#include "WriteBuffer.h"
+#include "rpc/RpcChannel.h"
 
 #include <google/protobuf/io/coded_stream.h>
+#include <string>
+#include <vector>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "proto/IpcConnectionContext.pb.h"
+#include "common/Logger.h"
+#include "rpc/RpcClient.h"
+#include "rpc/RpcContentWrapper.h"
+#include "proto/RpcHeader.pb.h"
+#include "common/Thread.h"
+#include "common/WriteBuffer.h"
 
 #define RPC_HEADER_MAGIC "hrpc"
 #define RPC_HEADER_VERSION 9
 #define SERIALIZATION_TYPE_PROTOBUF 0
 #define CONNECTION_CONTEXT_CALL_ID -3
 
-using namespace ::google::protobuf;
-using namespace google::protobuf::io;
+// using namespace ::google::protobuf;
+// using namespace google::protobuf::io;
 
 namespace Hdfs {
 namespace Internal {
@@ -84,7 +85,7 @@ void RpcChannelImpl::close(bool immediate) {
     }
 }
 
-void RpcChannelImpl::sendSaslMessage(RpcSaslProto * msg, Message * resp) {
+void RpcChannelImpl::sendSaslMessage(RpcSaslProto * msg, ::google::protobuf::Message * resp) {
     int totalLen;
     WriteBuffer buffer;
     RpcRequestHeaderProto rpcHeader;
@@ -106,7 +107,7 @@ void RpcChannelImpl::sendSaslMessage(RpcSaslProto * msg, Message * resp) {
 
 
 const RpcSaslProto_SaslAuth * RpcChannelImpl::createSaslClient(
-    const RepeatedPtrField<RpcSaslProto_SaslAuth> * auths) {
+    const ::google::protobuf::RepeatedPtrField<RpcSaslProto_SaslAuth> * auths) {
     const RpcSaslProto_SaslAuth * auth = NULL;
     Token token;
 
@@ -271,7 +272,7 @@ void RpcChannelImpl::connect() {
                     auth = setupSaslConnection();
 
                     if (auth.getProtocol() == AuthProtocol::SASL) {
-                        //success
+                        // success
                         break;
                     }
 
@@ -321,7 +322,7 @@ void RpcChannelImpl::connect() {
 
         sock->close();
         CheckOperationCanceled();
-        sleep_for(seconds(sleep));
+        std::this_thread::sleep_for(std::chrono::seconds(sleep));
     }
 
     rethrow_exception(lastError);
@@ -479,8 +480,8 @@ void RpcChannelImpl::invoke(const RpcCall & call) {
         if (lastError == exception_ptr()) {
             try {
                 THROW(Hdfs::HdfsRpcException,
-                      "Failed to invoke RPC call \"%s\", RPC channel to \"%s:%s\" is to be closed since RpcClient is closing",
-                      call.getName(), key.getServer().getHost().c_str(), key.getServer().getPort().c_str());
+                      "Failed to invoke RPC call \"%s\", RPC channel to \"%s:%s\" is to be closed since RpcClient is closing",  // NOLINT(whitespace/line_length)
+                      call.getName(), key.getServer().getHost().c_str(), key.getServer().getPort().c_str());  // NOLINT(whitespace/line_length)
             } catch (...) {
                 lastError = current_exception();
             }
@@ -557,10 +558,10 @@ void RpcChannelImpl::checkOneResponse() {
 
         if (timeout > 0 && ToMilliSeconds(start, steady_clock::now()) >= timeout) {
             try {
-                THROW(Hdfs::HdfsTimeoutException, "Timeout when wait for response from RPC channel \"%s:%s\"",
+                THROW(Hdfs::HdfsTimeoutException, "Timeout when wait for response from RPC channel \"%s:%s\"",  // NOLINT(whitespace/line_length)
                       key.getServer().getHost().c_str(), key.getServer().getPort().c_str());
             } catch (...) {
-                NESTED_THROW(Hdfs::HdfsRpcException, "Timeout when wait for response from RPC channel \"%s:%s\"",
+                NESTED_THROW(Hdfs::HdfsRpcException, "Timeout when wait for response from RPC channel \"%s:%s\"",  // NOLINT(whitespace/line_length)
                              key.getServer().getHost().c_str(), key.getServer().getPort().c_str());
             }
         }
@@ -568,12 +569,12 @@ void RpcChannelImpl::checkOneResponse() {
 }
 
 void RpcChannelImpl::sendPing() {
-    static const std::vector<char> pingRequest = RpcRemoteCall::GetPingRequest(client.getClientId());
+    static const std::vector<char> pingRequest = RpcRemoteCall::GetPingRequest(client.getClientId());  // NOLINT(whitespace/line_length)
 
     if (available) {
         LOG(INFO,
             "RPC channel to \"%s:%s\" got no response or idle for %d milliseconds, sending ping.",
-            key.getServer().getHost().c_str(), key.getServer().getPort().c_str(), key.getConf().getPingTimeout());
+            key.getServer().getHost().c_str(), key.getServer().getPort().c_str(), key.getConf().getPingTimeout());  // NOLINT(whitespace/line_length)
         sock->writeFully(&pingRequest[0], pingRequest.size(), key.getConf().getWriteTimeout());
         lastActivity = steady_clock::now();
     }
@@ -592,13 +593,13 @@ bool RpcChannelImpl::checkIdle() {
         int ping = key.getConf().getPingTimeout();
 
         try {
-            //close the connection if idle timeout
+            // close the connection if idle timeout
             if (ToMilliSeconds(lastIdle, steady_clock::now()) >= idle) {
                 sock->close();
                 return true;
             }
 
-            //send ping
+            // send ping
             if (ping > 0 && ToMilliSeconds(lastActivity, steady_clock::now()) >= ping) {
                 sendPing();
             }
@@ -622,7 +623,7 @@ void RpcChannelImpl::waitForExit() {
     assert(!client.isRunning());
 
     while (refs != 0) {
-        sleep_for(milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     assert(pendingCalls.empty());
@@ -644,7 +645,7 @@ void RpcChannelImpl::sendConnectionHeader(const RpcAuth &auth) {
     WriteBuffer buffer;
     buffer.write(RPC_HEADER_MAGIC, strlen(RPC_HEADER_MAGIC));
     buffer.write(static_cast<char>(RPC_HEADER_VERSION));
-    buffer.write(static_cast<char>(0));  //for future feature
+    buffer.write(static_cast<char>(0));  // for future feature
     buffer.write(static_cast<char>(auth.getProtocol()));
     sock->writeFully(buffer.getBuffer(0), buffer.getDataSize(0),
                      key.getConf().getWriteTimeout());
@@ -693,8 +694,8 @@ RpcRemoteCallPtr RpcChannelImpl::getPendingCall(int32_t id) {
 
     if (it == pendingCalls.end()) {
         THROW(HdfsRpcException,
-              "RPC channel to \"%s:%s\" got protocol mismatch: RPC channel cannot find pending call: id = %d.",
-              key.getServer().getHost().c_str(), key.getServer().getPort().c_str(), static_cast<int>(id));
+              "RPC channel to \"%s:%s\" got protocol mismatch: RPC channel cannot find pending call: id = %d.",  // NOLINT(whitespace/line_length)
+              key.getServer().getHost().c_str(), key.getServer().getPort().c_str(), static_cast<int>(id));  // NOLINT(whitespace/line_length)
     }
 
     RpcRemoteCallPtr rc = it->second;
@@ -730,7 +731,7 @@ static exception_ptr HandlerRpcResponseException(exception_ptr e) {
     try {
         rethrow_exception(e);
     } catch (const HdfsRpcServerException & e) {
-        UnWrapper < NameNodeStandbyException, RpcNoSuchMethodException, UnsupportedOperationException,
+        UnWrapper < NameNodeStandbyException, RpcNoSuchMethodException, UnsupportedOperationException,  // NOLINT(whitespace/line_length)
                   AccessControlException, SafeModeException, SaslException > unwrapper(e);
 
         try {
@@ -770,7 +771,7 @@ void RpcChannelImpl::readOneResponse(bool writeLock) {
 
     if (!curRespHeader.ParseFromArray(&buffer[0], headerSize)) {
         THROW(HdfsRpcException,
-              "RPC channel to \"%s:%s\" got protocol mismatch: RPC channel cannot parse response header.",
+              "RPC channel to \"%s:%s\" got protocol mismatch: RPC channel cannot parse response header.",  // NOLINT(whitespace/line_length)
               key.getServer().getHost().c_str(), key.getServer().getPort().c_str())
     }
 
@@ -797,11 +798,11 @@ void RpcChannelImpl::readOneResponse(bool writeLock) {
             in->readFully(&buffer[0], bodySize, readTimeout);
         }
 
-        Message * response = rc->getCall().getResponse();
+        ::google::protobuf::Message * response = rc->getCall().getResponse();
 
         if (!response->ParseFromArray(&buffer[0], bodySize)) {
             THROW(HdfsRpcException,
-                  "RPC channel to \"%s:%s\" got protocol mismatch: rpc channel cannot parse response.",
+                  "RPC channel to \"%s:%s\" got protocol mismatch: rpc channel cannot parse response.",  // NOLINT(whitespace/line_length)
                   key.getServer().getHost().c_str(), key.getServer().getPort().c_str())
         }
 
@@ -849,5 +850,5 @@ void RpcChannelImpl::readOneResponse(bool writeLock) {
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

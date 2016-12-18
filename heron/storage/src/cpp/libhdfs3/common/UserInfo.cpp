@@ -43,7 +43,7 @@ UserInfo UserInfo::LocalUser() {
 
     if ((bufsize = sysconf(_SC_GETPW_R_SIZE_MAX)) == -1) {
         THROW(InvalidParameter,
-              "Invalid input: \"sysconf\" function failed to get the configure with key \"_SC_GETPW_R_SIZE_MAX\".");
+              "Invalid input: \"sysconf\" function failed to get the configure with key \"_SC_GETPW_R_SIZE_MAX\".");  // NOLINT(whitespace/line_length)
     }
 
     std::vector<char> buffer(bufsize);
@@ -71,5 +71,5 @@ size_t UserInfo::hash_value() const {
     return CombineHasher(values, sizeof(values) / sizeof(values[0]));
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

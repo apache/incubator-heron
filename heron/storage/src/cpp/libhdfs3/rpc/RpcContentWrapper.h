@@ -24,25 +24,25 @@
 
 #include <google/protobuf/message.h>
 
-#include "WriteBuffer.h"
+#include "common/WriteBuffer.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class RpcContentWrapper {
-public:
+ public:
     RpcContentWrapper(::google::protobuf::Message * header,
                       ::google::protobuf::Message * msg);
 
     int getLength();
     void writeTo(WriteBuffer & buffer);
 
-public:
+ public:
     ::google::protobuf::Message * header;
     ::google::protobuf::Message * msg;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_RPC_RPCCONTENTWRAPPER_H_ */

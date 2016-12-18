@@ -22,15 +22,14 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCPROTOCOLINFO_H_
 #define _HDFS_LIBHDFS3_RPC_RPCPROTOCOLINFO_H_
 
-#include "Hash.h"
-
 #include <string>
+#include "common/Hash.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class RpcProtocolInfo {
-public:
+ public:
     RpcProtocolInfo(int v, const std::string & p, const std::string & tokenKind) :
         version(v), protocol(p), tokenKind(tokenKind) {
     }
@@ -38,7 +37,7 @@ public:
     size_t hash_value() const;
 
     bool operator ==(const RpcProtocolInfo & other) const {
-        return version == other.version && protocol == other.protocol && tokenKind == other.tokenKind;
+        return version == other.version && protocol == other.protocol && tokenKind == other.tokenKind;  // NOLINT(whitespace/line_length)
     }
 
     const std::string & getProtocol() const {
@@ -65,15 +64,14 @@ public:
         this->tokenKind = tokenKind;
     }
 
-private:
+ private:
     int version;
     std::string protocol;
     std::string tokenKind;
-
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::RpcProtocolInfo);
 

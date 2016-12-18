@@ -22,13 +22,15 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCCALL_H_
 #define _HDFS_LIBHDFS3_RPC_RPCCALL_H_
 
+#include <string>
+
 #include "google/protobuf/message.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class RpcCall {
-public:
+ public:
     RpcCall(bool idemp, std::string n, google::protobuf::Message * req,
             google::protobuf::Message * resp) :
         idempotent(idemp), name(n), request(req), response(resp) {
@@ -66,13 +68,13 @@ public:
         this->response = response;
     }
 
-private:
+ private:
     bool idempotent;
     std::string name;
     google::protobuf::Message * request;
     google::protobuf::Message * response;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_RPC_RPCCALL_H_ */

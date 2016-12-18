@@ -19,10 +19,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "RpcAuth.h"
 
-#include "Exception.h"
-#include "ExceptionInternal.h"
+#include <string>
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -45,5 +47,5 @@ size_t RpcAuth::hash_value() const {
     return CombineHasher(values, sizeof(values) / sizeof(values[0]));
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

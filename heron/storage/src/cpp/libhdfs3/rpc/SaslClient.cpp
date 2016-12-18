@@ -19,12 +19,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "rpc/SaslClient.h"
+
 #include <algorithm>
 #include <cctype>
+#include <string>
 
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "SaslClient.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
 
 #define SASL_SUCCESS 0
 
@@ -155,6 +157,6 @@ bool SaslClient::isComplete() {
     return complete;
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 

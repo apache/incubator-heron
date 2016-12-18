@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RpcProtocolInfo.h"
+#include "rpc/RpcProtocolInfo.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -29,5 +29,5 @@ size_t RpcProtocolInfo::hash_value() const {
     return CombineHasher(values, sizeof(values) / sizeof(values[0]));
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

@@ -24,18 +24,18 @@
 
 #include <map>
 #include <string>
+#include <utility>
 
-#include "Hash.h"
-#include "KerberosName.h"
-#include "Token.h"
-
-#include "Logger.h"
+#include "common/Hash.h"
+#include "common/KerberosName.h"
+#include "common/Token.h"
+#include "common/Logger.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class UserInfo {
-public:
+ public:
     UserInfo() {
     }
 
@@ -85,17 +85,17 @@ public:
 
     size_t hash_value() const;
 
-public:
+ public:
     static UserInfo LocalUser();
 
-private:
+ private:
     KerberosName effectiveUser;
     std::map<std::pair<std::string, std::string>, Token> tokens;
     std::string realUser;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::UserInfo);
 

@@ -22,30 +22,33 @@
 #ifndef _HDFS_LIBHDFS3_RPC_RPCCHANNEL_H_
 #define _HDFS_LIBHDFS3_RPC_RPCCHANNEL_H_
 
-#include "Atomic.h"
-#include "DateTime.h"
-#include "ExceptionInternal.h"
-#include "IpcConnectionContext.pb.h"
-#include "Memory.h"
+#include <google/protobuf/message.h>
+#include <string>
+
+#include "common/Atomic.h"
+#include "common/DateTime.h"
+#include "common/ExceptionInternal.h"
+#include "proto/IpcConnectionContext.pb.h"
+#include "common/Memory.h"
 #include "network/BufferedSocketReader.h"
 #include "network/TcpSocket.h"
-#include "RpcCall.h"
-#include "RpcChannelKey.h"
-#include "RpcHeader.pb.h"
-#include "RpcRemoteCall.h"
-#include "SaslClient.h"
-#include "Thread.h"
-#include "Unordered.h"
-
-#include <google/protobuf/message.h>
+#include "rpc/RpcCall.h"
+#include "rpc/RpcChannelKey.h"
+#include "proto/RpcHeader.pb.h"
+#include "rpc/RpcRemoteCall.h"
+#include "rpc/SaslClient.h"
+#include "common/RpcHelper.h"
+#include "common/Thread.h"
+#include "common/Unordered.h"
 
 namespace Hdfs {
 namespace Internal {
 
+using std::chrono::steady_clock;
 class RpcClient;
 
 class RpcChannel {
-public:
+ public:
     /**
      * Destroy a channel
      */
@@ -89,7 +92,7 @@ public:
  * RpcChannel represent a rpc connect to the server.
  */
 class RpcChannelImpl: public RpcChannel {
-public:
+ public:
     /**
      * Construct a RpcChannelImpl instance.
      * @param k The key of this channel.
@@ -135,7 +138,7 @@ public:
         ++refs;
     }
 
-private:
+ private:
     /**
      * Setup the RPC connection.
      * @pre Already hold write lock.
@@ -164,7 +167,7 @@ private:
     /**
      * Build rpc connect context.
      */
-    void buildConnectionContext(IpcConnectionContextProto & connectionContext, const RpcAuth & auth);
+    void buildConnectionContext(IpcConnectionContextProto & connectionContext, const RpcAuth & auth);  // NOLINT(whitespace/line_length)
 
     /**
      * Send ping packet to server.
@@ -238,7 +241,7 @@ private:
 
     RpcAuth setupSaslConnection();
 
-private:
+ private:
     /**
      * Construct a RpcChannelImpl instance for test.
      * @param key The key of this channel.
@@ -249,7 +252,7 @@ private:
     RpcChannelImpl(const RpcChannelKey & key, Socket * sock,
                    BufferedSocketReader * in, RpcClient & client);
 
-private:
+ private:
     atomic<int> refs;
     bool available;
     mutex readMut;
@@ -259,12 +262,12 @@ private:
     shared_ptr<BufferedSocketReader> in;
     shared_ptr<SaslClient> saslClient;
     shared_ptr<Socket> sock;
-    steady_clock::time_point lastActivity; // ping is a kind of activity, lastActivity will be updated after ping
-    steady_clock::time_point lastIdle; // ping cannot change idle state. If there is still pending calls, lastIdle is always "NOW".
+    steady_clock::time_point lastActivity;  // ping is a kind of activity, lastActivity will be updated after ping  // NOLINT(whitespace/line_length)
+    steady_clock::time_point lastIdle;  // ping cannot change idle state. If there is still pending calls, lastIdle is always "NOW".  // NOLINT(whitespace/line_length)
     unordered_map<int32_t, RpcRemoteCallPtr> pendingCalls;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_RPC_RPCCHANNEL_H_ */

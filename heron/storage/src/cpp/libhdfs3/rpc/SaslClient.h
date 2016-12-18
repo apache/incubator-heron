@@ -24,10 +24,12 @@
 
 #include <gsasl.h>
 
-#include "client/Token.h"
+#include <string>
+
+#include "common/Token.h"
 #include "network/Socket.h"
-#include "RpcAuth.h"
-#include "RpcHeader.pb.h"
+#include "rpc/RpcAuth.h"
+#include "proto/RpcHeader.pb.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -35,7 +37,7 @@ namespace Internal {
 #define SWITCH_TO_SIMPLE_AUTH -88
 
 class SaslClient {
-public:
+ public:
     SaslClient(const RpcSaslProto_SaslAuth & auth, const Token & token,
                const std::string & principal);
 
@@ -45,18 +47,18 @@ public:
 
     bool isComplete();
 
-private:
+ private:
     void initKerberos(const RpcSaslProto_SaslAuth & auth,
                       const std::string & principal);
     void initDigestMd5(const RpcSaslProto_SaslAuth & auth, const Token & token);
 
-private:
+ private:
     Gsasl * ctx;
     Gsasl_session * session;
     bool complete;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_RPC_SASLCLIENT_H_ */
