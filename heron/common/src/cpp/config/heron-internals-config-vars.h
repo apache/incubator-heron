@@ -153,7 +153,7 @@ class HeronInternalsConfigVars {
   static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
 
   // The interfaces to bind to as a comma separated list
-  static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_INTERFACES;
+  static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_BIND_INTERFACE;
 
   // The interval in seconds to send heartbeat
   static const sp_string HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC;

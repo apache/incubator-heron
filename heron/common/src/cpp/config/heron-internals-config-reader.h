@@ -166,7 +166,7 @@ class HeronInternalsConfigReader : public YamlFileReader {
 
   // List of interface names to bind to, we will bind to the first interface found,
   // if none found, bind to any
-  sp_string GetHeronStreammgrNetworkOptionsInterfaces();
+  sp_string GetHeronStreammgrNetworkOptionsBindInterface();
 
   // The interval in seconds to send heartbeat
   sp_int32 GetHeronStreammgrTmasterHeartbeatIntervalSec();

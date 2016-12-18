@@ -115,7 +115,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
                                   ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
                               1024 * 1024);
   options.set_interface_list(config::HeronInternalsConfigReader::Instance()
-                                  ->GetHeronStreammgrNetworkOptionsInterfaces());
+                                  ->GetHeronStreammgrNetworkOptionsBindInterface());
   options.set_socket_family(PF_INET);
   StMgrClient* client = new StMgrClient(eventLoop_, options, topology_name_, topology_id_,
                                         stmgr_id_, _other_stmgr_id, this, metrics_manager_client_);

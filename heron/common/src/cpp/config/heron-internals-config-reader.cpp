@@ -62,7 +62,7 @@ void HeronInternalsConfigReader::Create(const sp_string& _defaults_file) {
 }
 
 void HeronInternalsConfigReader::OnConfigFileLoad() {
-  AddIfMissing(HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_INTERFACES, "");
+  AddIfMissing(HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_BIND_INTERFACE, "");
 }
 
 sp_string HeronInternalsConfigReader::GetHeronLoggingDirectory() {
@@ -218,8 +218,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrNetworkOptionsMaximumPacke
       .as<int>();
 }
 
-sp_string HeronInternalsConfigReader::GetHeronStreammgrNetworkOptionsInterfaces() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_INTERFACES]
+sp_string HeronInternalsConfigReader::GetHeronStreammgrNetworkOptionsBindInterface() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_BIND_INTERFACE]
         .as<std::string>();
 }
 

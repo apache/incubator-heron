@@ -52,7 +52,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
 
   char hostname[1024];
   sp_string if_list = config::HeronInternalsConfigReader::Instance()
-                                    ->GetHeronStreammgrNetworkOptionsInterfaces();
+                                    ->GetHeronStreammgrNetworkOptionsBindInterface();
   // now check weather we have a socket address
   if (SockUtils::FindHostName(if_list, hostname, 1024)) {
     CHECK_EQ(gethostname(hostname, 1024), 0);

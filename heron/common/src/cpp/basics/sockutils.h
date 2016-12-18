@@ -56,12 +56,12 @@ class SockUtils {
   //! Set reasonable default values for a socket
   static sp_int32 setSocketDefaults(sp_int32 fd);
 
-  // fill the socket address with address information from the interface list. If the interface
+  // fill the socket address with address information from the interface name. If the interface
   // cannot be found, return 1 otherwise return 0
-  static sp_int32 FindBindAddress(sp_string interfaceList, int family, struct sockaddr_in *addr);
+  static sp_int32 FindBindAddress(sp_string interface, int family, struct sockaddr_in *addr);
 
-  // find the host name
-  static sp_int32 FindHostName(sp_string interfaceList, char *hostname, sp_int32 hostname_size);
+  // find the host name for a given interface, if no hostname return the ip as a string
+  static sp_int32 FindHostName(sp_string interface, char *hostname, sp_int32 hostname_size);
 };
 
 #endif

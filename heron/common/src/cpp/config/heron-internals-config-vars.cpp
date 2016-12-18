@@ -96,8 +96,8 @@ const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMAST
     "heron.streammgr.client.reconnect.tmaster.interval.sec";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB =
     "heron.streammgr.network.options.maximum.packet.mb";
-const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_INTERFACES =
-    "heron.streammgr.network.options.interfaces";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_BIND_INTERFACE =
+    "heron.streammgr.network.options.bind.interface";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC =
     "heron.streammgr.tmaster.heartbeat.interval.sec";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CONNECTION_READ_BATCH_SIZE_MB =
