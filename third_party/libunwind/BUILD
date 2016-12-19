@@ -7,7 +7,7 @@ package_version = "1.1"
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
-typo_patch = "libunwind-1.1-lzma-typo.patch"
+lzma_patch = "libunwind-1.1-lzma-link.patch"
 config_patch = "libunwind-1.1-config.patch"
 cache_patch = "libunwind-1.1-cache.patch"
 
@@ -31,7 +31,7 @@ genrule(
     name = "libunwind-srcs",
     srcs = [
         package_file,
-        typo_patch,
+        lzma_patch,
         config_patch,
         cache_patch
     ],
@@ -43,7 +43,7 @@ genrule(
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
-        "patch -d " + package_dir + " -p1 < " + typo_patch,
+        "patch -d " + package_dir + " -p1 < " + lzma_patch,
         "patch -d " + package_dir + " -p0 < " + config_patch,
         "patch -d " + package_dir + " -p0 < " + cache_patch,
         "cd " + package_dir,
