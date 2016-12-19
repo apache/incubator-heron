@@ -26,7 +26,7 @@ diff -Nrup libunwind-1.1.orig/configure.ac libunwind-1.1/configure.ac
  LIBUNWIND___THREAD
 diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
 --- libunwind-1.1.orig/src/Makefile.am	2016-12-19 13:56:15.765087009 -0800
-+++ libunwind-1.1/src/Makefile.am	2016-12-19 14:54:33.153816699 -0800
++++ libunwind-1.1/src/Makefile.am	2016-12-19 14:59:45.888909789 -0800
 @@ -1,6 +1,7 @@
  SOVERSION=8:1:0		# See comments at end of file.
  SETJMP_SO_VERSION=0:0:0
@@ -96,7 +96,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_x86_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_x86_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_x86_la_LIBADD += libunwind-elf32.la
-+ libunwind_x64_la_LIBADD += $(LIBLZMA)
++ libunwind_x86_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_x86_la_LIBADD += libunwind.la -lc
  endif
