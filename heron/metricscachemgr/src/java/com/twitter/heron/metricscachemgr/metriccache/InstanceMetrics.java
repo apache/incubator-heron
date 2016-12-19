@@ -17,8 +17,8 @@ package com.twitter.heron.metricscachemgr.metriccache;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.metricscachemgr.SLAMetrics;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 // Most granualar metrics/exception store level. This store exception and metrics
 // associated with an instance.

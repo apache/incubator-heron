@@ -55,7 +55,7 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.metricscachemgr.SLAMetricsTest",
+       "com.twitter.heron.metricscachemgr.ColletorMetricsTest",
        "com.twitter.heron.metricscachemgr.metriccache.TimeBucketTest",
        "com.twitter.heron.metricscachemgr.metriccache.MetricTest",
        "com.twitter.heron.metricscachemgr.metriccache.InstanceMetricsTest",

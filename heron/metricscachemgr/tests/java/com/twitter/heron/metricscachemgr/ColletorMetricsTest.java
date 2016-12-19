@@ -21,14 +21,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-// test SLAMetrics
-public class SLAMetricsTest {
+// test CollectorMetrics
+public class ColletorMetricsTest {
 
-  SLAMetrics slam = null;
+  CollectorMetrics cm = null;
 
   @Before
   public void before() throws Exception {
-    slam = new SLAMetrics("");
+    cm = new CollectorMetrics("");
 
     // mock config for prototype
     Map<String, String> metric = new HashMap<>();
@@ -47,7 +47,7 @@ public class SLAMetricsTest {
     metric.put("__server/__time_spent_back_pressure_initiated", "SUM");
     metric.put("__time_spent_back_pressure_by_compid", "SUM");
 
-    slam.InitSLAMetrics(metric);
+    cm.InitCollectorMetrics(metric);
   }
 
   @After
@@ -57,13 +57,13 @@ public class SLAMetricsTest {
 
   @Test
   public void testGetAggregationType() {
-    Assert.assertEquals(slam.GetAggregationType("__jvm-uptime-secs"), SLAMetrics.MetricAggregationType.LAST);
-    Assert.assertEquals(slam.GetAggregationType("__fail-count"), SLAMetrics.MetricAggregationType.SUM);
+    Assert.assertEquals(cm.GetAggregationType("__jvm-uptime-secs"), SLAMetrics.MetricAggregationType.LAST);
+    Assert.assertEquals(cm.GetAggregationType("__fail-count"), SLAMetrics.MetricAggregationType.SUM);
   }
 
   @Test
-  public void testIsSLAMetric() {
-    Assert.assertTrue(slam.IsSLAMetric("__time_spent_back_pressure_by_compid"));
-    Assert.assertFalse(slam.IsSLAMetric("1__time_spent_back_pressure_by_compid"));
+  public void testIsCollectorMetric() {
+    Assert.assertTrue(cm.IsSLAMetric("__time_spent_back_pressure_by_compid"));
+    Assert.assertFalse(cm.IsSLAMetric("1__time_spent_back_pressure_by_compid"));
   }
 }

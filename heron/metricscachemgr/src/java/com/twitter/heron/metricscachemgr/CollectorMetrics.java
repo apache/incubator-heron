@@ -20,26 +20,36 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//Defines all the metrics that needs to be sent to SLA process
-public class SLAMetrics {
-  private static final Logger LOG = Logger.getLogger(SLAMetrics.class.getName());
+import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 
+//Defines all the metrics that needs to be sent to MetricColletor process
+public class CollectorMetrics {
+  public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
+  public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
+  private static final Logger LOG = Logger.getLogger(SLAMetrics.class.getName());
   // map from metric prefix to its aggregation form
   private Map<String, MetricAggregationType> metrics_prefixes_;
 
-  public SLAMetrics(String sinks_filename) {
+  public CollectorMetrics(String sinks_filename) {
     metrics_prefixes_ = new HashMap<>();
+
     // read config file
+    MetricsSinksConfig sink_config = new MetricsSinksConfig(sinks_filename);
+    Map<String, String> metric_types =
+        (Map<String, String>) sink_config
+            .getConfigForSink(METRICS_SINKS_TMASTER_SINK)
+            .get(METRICS_SINKS_TMASTER_METRICS);
+    InitCollectorMetrics(metric_types);
   }
 
 
-  public void InitSLAMetrics(Map<String, String> metrics) {
+  public void InitCollectorMetrics(Map<String, String> metrics) {
     for (Map.Entry<String, String> e : metrics.entrySet()) {
       metrics_prefixes_.put(e.getKey(), TranslateFromString(e.getValue()));
     }
   }
 
-  public boolean IsSLAMetric(String _name) {
+  public boolean IsCollectorMetric(String _name) {
     for (String k : metrics_prefixes_.keySet()) {
       if (_name.indexOf(k) == 0) return true;
     }
@@ -69,33 +79,33 @@ public class SLAMetrics {
   }
 
   // metric types associated with int value
-  public enum MetricAggregationType {
-    UNKNOWN(-1),
-    SUM(0),
-    AVG(1),
-    LAST(2);  // We only care about the last value
-
-    private static Map<Integer, MetricAggregationType> map = new HashMap<>();
-
-    static {
-      for (MetricAggregationType mat : MetricAggregationType.values()) {
-        map.put(mat.type, mat);
-      }
-    }
-
-    private int type;
-
-    private MetricAggregationType(final int _type) {
-      type = _type;
-    }
-
-    public static MetricAggregationType valueOf(int _type) {
-      return map.get(_type);
-    }
-
-    public int intValue() {
-      return type;
-    }
-  }
+//  public enum MetricAggregationType {
+//    UNKNOWN(-1),
+//    SUM(0),
+//    AVG(1),
+//    LAST(2);  // We only care about the last value
+//
+//    private static Map<Integer, MetricAggregationType> map = new HashMap<>();
+//
+//    static {
+//      for (MetricAggregationType mat : MetricAggregationType.values()) {
+//        map.put(mat.type, mat);
+//      }
+//    }
+//
+//    private int type;
+//
+//    private MetricAggregationType(final int _type) {
+//      type = _type;
+//    }
+//
+//    public static MetricAggregationType valueOf(int _type) {
+//      return map.get(_type);
+//    }
+//
+//    public int intValue() {
+//      return type;
+//    }
+//  }
 
 }
