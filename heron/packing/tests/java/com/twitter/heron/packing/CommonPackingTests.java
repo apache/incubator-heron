@@ -60,10 +60,12 @@ public abstract class CommonPackingTests {
     this.spoutParallelism = 4;
     this.boltParallelism = 3;
     this.totalInstances = this.spoutParallelism + this.boltParallelism;
-    int numContainers = 2;
-    // Set up the topology and its config
+
+    // Set up the topology and its config. Tests can safely modify the config by reference after the
+    // topology is created, but those changes will not be reflected in the underlying protobuf
+    // object Config and Topology objects. This is typically fine for packing tests since they don't
+    // access the protobuf values.
     this.topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     Config config = Config.newBuilder()

@@ -154,6 +154,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     float containerCpu = 30;
 
+    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setContainerDiskRequested(containerDisk);
     topologyConfig.setContainerCpuRequested(containerCpu);
