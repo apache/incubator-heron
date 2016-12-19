@@ -21,12 +21,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.metricscachemgr.SLAMetrics;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricDatum;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricRequest;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse;
 import com.twitter.heron.proto.tmaster.TopologyMaster.PublishMetrics;
-import com.twitter.heron.metricscachemgr.SLAMetrics;
 
 
 public class MetricCache {

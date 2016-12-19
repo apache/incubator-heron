@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.metricscachemgr.SLAMetrics;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.metricscachemgr.SLAMetrics;
 
 // Component level metrics. A component metrics is a map storing metrics for each of its
 // instance as 'InstanceMetrics'.

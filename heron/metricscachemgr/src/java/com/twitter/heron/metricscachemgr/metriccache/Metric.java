@@ -17,8 +17,8 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.metricscachemgr.SLAMetrics;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 // Data structure to store metrics. A metric is a Time series of data.
 public class Metric {

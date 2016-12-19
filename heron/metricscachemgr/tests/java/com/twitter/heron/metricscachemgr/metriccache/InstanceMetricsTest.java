@@ -26,8 +26,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.metricscachemgr.SLAMetrics;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 public class InstanceMetricsTest {
   private static String debugFilePath = "/tmp/" + InstanceMetricsTest.class.getSimpleName() + ".debug.txt";
