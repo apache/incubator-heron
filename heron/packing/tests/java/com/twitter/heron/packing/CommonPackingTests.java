@@ -30,6 +30,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -280,7 +281,7 @@ public abstract class CommonPackingTests {
         SPOUT_NAME, 0);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = PackingException.class)
   public void testScaleDownInvalidScaleFactor() throws Exception {
 
     //try to remove more spout instances than possible
@@ -290,5 +291,37 @@ public abstract class CommonPackingTests {
 
     int numContainersBeforeRepack = 2;
     doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+  }
+
+  @Test(expected = PackingException.class)
+  public void testScaleDownInvalidComponent() throws Exception {
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
+    int numContainersBeforeRepack = 2;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+  }
+
+  /**
+   * Test invalid ram for instance
+   */
+  @Test(expected = PackingException.class)
+  public void testInvalidRamInstance() throws Exception {
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
+    int defaultNumInstancesperContainer = 4;
+
+    // Explicit set component ram map
+    ByteAmount boltRam = ByteAmount.ZERO;
+
+    topologyConfig.setContainerMaxRamHint(maxContainerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
+    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
   }
 }

@@ -29,6 +29,7 @@ import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -55,16 +56,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     return count;
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testCheckFailure() throws Exception {
-    // Explicit set insufficient ram for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
-
-    topologyConfig.setContainerRamRequested(containerRam);
-    TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,
-        topologyConfig);
-
-    pack(newTopology);
+  @Test(expected = PackingException.class)
+  public void testFailureInsufficientContainerRamRequested() throws Exception {
+    topologyConfig.setContainerRamRequested(ByteAmount.ZERO);
+    pack(getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
   /**
@@ -426,14 +421,6 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
         newPackingPlan.getInstanceCount());
     AssertPacking.assertContainers(newPackingPlan.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testScaleDownInvalidComponent() throws Exception {
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
   }
 
   /**
