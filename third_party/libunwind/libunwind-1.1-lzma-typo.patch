@@ -26,7 +26,7 @@ diff -Nrup libunwind-1.1.orig/configure.ac libunwind-1.1/configure.ac
  LIBUNWIND___THREAD
 diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
 --- libunwind-1.1.orig/src/Makefile.am	2016-12-19 13:56:15.765087009 -0800
-+++ libunwind-1.1/src/Makefile.am	2016-12-19 14:14:55.115717263 -0800
++++ libunwind-1.1/src/Makefile.am	2016-12-19 14:54:33.153816699 -0800
 @@ -1,6 +1,7 @@
  SOVERSION=8:1:0		# See comments at end of file.
  SETJMP_SO_VERSION=0:0:0
@@ -80,7 +80,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_ia64_la_LIBADD = libunwind-elf64.la
  if !REMOTE_ONLY
   libunwind_ia64_la_LIBADD += libunwind.la -lc
-+ libunwind_aarch64_la_LIBADD += $(LIBLZMA)
++ libunwind_ia64_la_LIBADD += $(LIBLZMA)
  endif
   libunwind_setjmp_la_SOURCES += ia64/setjmp.S  ia64/sigsetjmp.S  \
  				ia64/longjmp.S ia64/siglongjmp.S
@@ -88,7 +88,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_hppa_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_hppa_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_hppa_la_LIBADD += libunwind-elf32.la
-+ libunwind_arm_la_LIBADD += $(LIBLZMA)
++ libunwind_hppa_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_hppa_la_LIBADD += libunwind.la -lc
  endif
@@ -96,7 +96,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_x86_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_x86_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_x86_la_LIBADD += libunwind-elf32.la
-+ libunwind_ia64_la_LIBADD += $(LIBLZMA)
++ libunwind_x64_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_x86_la_LIBADD += libunwind.la -lc
  endif
@@ -104,7 +104,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_x86_64_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_x86_64_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_x86_64_la_LIBADD += libunwind-elf64.la
-+ libunwind_hppa_la_LIBADD += $(LIBLZMA)
++ libunwind_x86_64_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_x86_64_la_LIBADD += libunwind.la -lc
  endif
@@ -112,7 +112,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_ppc32_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_ppc32_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_ppc32_la_LIBADD += libunwind-elf32.la
-+ libunwind_mips_la_LIBADD += $(LIBLZMA)
++ libunwind_ppc32_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_ppc32_la_LIBADD += libunwind.la -lc
  endif
@@ -120,7 +120,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_ppc64_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_ppc64_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_ppc64_la_LIBADD += libunwind-elf64.la
-+ libunwind_x86_la_LIBADD += $(LIBLZMA)
++ libunwind_ppc64_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_ppc64_la_LIBADD += libunwind.la -lc
  endif
@@ -128,7 +128,7 @@ diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
   libunwind_sh_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
   libunwind_sh_la_LIBADD = libunwind-dwarf-generic.la
   libunwind_sh_la_LIBADD += libunwind-elf32.la
-+ libunwind_x86_64_la_LIBADD += $(LIBLZMA)
++ libunwind_sh_la_LIBADD += $(LIBLZMA)
  if !REMOTE_ONLY
   libunwind_sh_la_LIBADD += libunwind.la -lc
  endif
