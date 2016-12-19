@@ -142,36 +142,9 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     }
   }
 
-  /**
-   * Test the scenario where container level resource config are set
-   */
   @Test
-  public void testContainerRequestedResourcesTwoContainers() throws Exception {
-    int numContainers = 2;
-
-    // Explicit set resources for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
-    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
-    float containerCpu = 30;
-
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
-    topologyConfig.setContainerRamRequested(containerRam);
-    topologyConfig.setContainerDiskRequested(containerDisk);
-    topologyConfig.setContainerCpuRequested(containerCpu);
-    TopologyAPI.Topology topologyExplicitResourcesConfig =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
-
-    Assert.assertEquals(numContainers, packingPlanExplicitResourcesConfig.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
-
-    // Ram for bolt/spout should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        Assert.assertEquals(instanceDefaultResources.getRam(), instancePlan.getResource().getRam());
-      }
-    }
+  public void testContainersRequestedExceedsInstanceCount() throws Exception {
+    doTestContainerCountRequested(8, 7); // each of the 7 instances will get their own container
   }
 
   /**

@@ -269,6 +269,11 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
         maxContainerRam);
   }
 
+  @Test
+  public void testContainersRequestedExceedsInstanceCount() throws Exception {
+    doTestContainerCountRequested(8, 2); // instances will fit into 2 containers
+  }
+
   /**
    * Test the scenario where the max container size is the default
    * and scaling is requested.

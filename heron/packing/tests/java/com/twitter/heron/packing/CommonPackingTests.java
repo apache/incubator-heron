@@ -326,4 +326,38 @@ public abstract class CommonPackingTests {
     AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
         instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
   }
+
+  @Test
+  public void testTwoContainersRequested() throws Exception {
+    doTestContainerCountRequested(2, 2);
+  }
+
+  /**
+   * Test the scenario where container level resource config are set
+   */
+  protected void doTestContainerCountRequested(int requestedContainers,
+                                            int expectedContainer) throws Exception {
+
+    // Explicit set resources for container
+    topologyConfig.setContainerRamRequested(ByteAmount.fromGigabytes(10));
+    topologyConfig.setContainerDiskRequested(ByteAmount.fromGigabytes(20));
+    topologyConfig.setContainerCpuRequested(30);
+    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, requestedContainers);
+
+    TopologyAPI.Topology topologyExplicitResourcesConfig =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
+
+    Assert.assertEquals(expectedContainer,
+        packingPlanExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
+
+    // Ram for bolt/spout should be the value in component ram map
+    for (PackingPlan.ContainerPlan containerPlan
+        : packingPlanExplicitResourcesConfig.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        Assert.assertEquals(instanceDefaultResources, instancePlan.getResource());
+      }
+    }
+  }
 }
