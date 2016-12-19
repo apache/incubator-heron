@@ -47,7 +47,7 @@ genrule(
         "patch -d " + package_dir + " -p0 < " + config_patch,
         "patch -d " + package_dir + " -p0 < " + cache_patch,
         "cd " + package_dir,
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
+        "./configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-minidebuginfo",
         "make install",
         "rm -rf $$TMP_DIR",
     ]),
