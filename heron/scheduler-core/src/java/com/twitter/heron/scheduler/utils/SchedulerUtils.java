@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,6 +34,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ShellUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;

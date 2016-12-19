@@ -32,6 +32,8 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -39,8 +41,6 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyTests;
 import com.twitter.heron.spi.utils.TopologyUtils;
 

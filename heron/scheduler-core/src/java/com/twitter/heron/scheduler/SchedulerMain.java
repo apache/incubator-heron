@@ -35,6 +35,11 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
@@ -43,12 +48,7 @@ import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerConfig;
-import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -252,7 +252,7 @@ public class SchedulerMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     // build the config by expanding all the variables
-    Config schedulerConfig = SchedulerConfig.loadConfig(
+    Config schedulerConfig = SchedulerConfigUtils.loadConfig(
         cluster,
         role,
         env,
