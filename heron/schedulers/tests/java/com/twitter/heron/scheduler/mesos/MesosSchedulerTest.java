@@ -31,12 +31,12 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.mesos.framework.BaseContainer;
 import com.twitter.heron.scheduler.mesos.framework.MesosFramework;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 
 public class MesosSchedulerTest {

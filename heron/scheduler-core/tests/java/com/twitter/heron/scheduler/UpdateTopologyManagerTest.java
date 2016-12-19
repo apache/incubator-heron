@@ -154,7 +154,7 @@ public class UpdateTopologyManagerTest {
         spyUpdateManager(mockStateMgr, mockScheduler, testTopology);
 
     PowerMockito.spy(TMasterUtils.class);
-    PowerMockito.doReturn(true).when(TMasterUtils.class, "sendToTMaster",
+    PowerMockito.doNothing().when(TMasterUtils.class, "sendToTMaster",
         any(String.class), eq(TOPOLOGY_NAME),
         eq(mockStateMgr), any(NetworkUtils.TunnelConfig.class));
 

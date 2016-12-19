@@ -22,10 +22,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.LauncherUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(LauncherUtils.class)

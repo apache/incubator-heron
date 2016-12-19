@@ -52,6 +52,8 @@ class Response(object):
     self.status = status_type(status_code)
     self.msg = msg
     self.detailed_msg = detailed_msg
+    self.err_context = None
+    self.succ_context = None
 
   def add_context(self, err_context, succ_context=None):
     """ Prepend msg to add some context information
@@ -59,31 +61,29 @@ class Response(object):
     :param pmsg: context info
     :return: None
     """
-    if self.status != Status.Ok:
-      self.msg = "%s: %s" % (err_context, self.msg) if self.msg else err_context
-    else:
-      if succ_context is not None:
-        self.msg = "%s: %s" % (succ_context, self.msg) if self.msg else succ_context
+    self.err_context = err_context
+    self.succ_context = succ_context
 
 def render(resp):
+  def do_log(log, msg):
+    if msg:
+      log(msg)
   if isinstance(resp, list):
     for r in resp:
       render(r)
   elif isinstance(resp, Response):
     if resp.status == Status.Ok:
-      if resp.msg:
-        Log.info(resp.msg)
-      if resp.detailed_msg:
-        Log.debug(resp.detailed_msg)
+      do_log(Log.info, resp.succ_context)
+      do_log(Log.info, resp.msg)
+      do_log(Log.debug, resp.detailed_msg)
     elif resp.status == Status.HeronError:
-      if resp.msg:
-        Log.error(resp.msg)
-      if resp.detailed_msg:
-        Log.debug(resp.detailed_msg)
+      do_log(Log.error, resp.err_context)
+      do_log(Log.error, resp.msg)
+      do_log(Log.debug, resp.detailed_msg)
     # If status code is InvocationError, invocation of shelled-out program fails. The error
     # message will be in stderr, so we log.error detailed message(stderr) only
     elif resp.status == Status.InvocationError:
-      Log.error(resp.detailed_msg)
+      do_log(Log.error, resp.detailed_msg)
     else:
       raise RuntimeError("Unknown status type of value %d", resp.status)
   else:
