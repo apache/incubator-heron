@@ -1,16 +1,16 @@
-//  Copyright 2016 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 
 package com.twitter.heron.metricscachemgr.metriccache;
@@ -22,9 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -34,8 +32,11 @@ import org.junit.Test;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 public class MetricCacheTest {
-  private static String debugFilePath = "/tmp/" + MetricCacheTest.class.getSimpleName() + ".debug.txt";
-  MetricCache mc = null;
+  public static final String CONFIG_PATH =
+      "/Users/huijunw/workspace/heron/heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
+  private static String debugFilePath =
+      "/tmp/" + MetricCacheTest.class.getSimpleName() + ".debug.txt";
+  private MetricCache mc = null;
   private Path file = null;
   private List<String> lines = null;
 
@@ -44,26 +45,7 @@ public class MetricCacheTest {
     file = Paths.get(debugFilePath);
     lines = new ArrayList<>();
 
-    mc = new MetricCache(15, "");
-
-    // mock config for prototype
-    Map<String, String> metric = new HashMap<>();
-    metric.put("__emit-count", "SUM");
-    metric.put("__execute-count", "SUM");
-    metric.put("__fail-count", "SUM");
-    metric.put("__ack-count", "SUM");
-    metric.put("__complete-latency", "AVG");
-    metric.put("__execute-latency", "AVG");
-    metric.put("__process-latency", "AVG");
-    metric.put("__jvm-uptime-secs", "LAST");
-    metric.put("__jvm-process-cpu-load", "LAST");
-    metric.put("__jvm-memory-used-mb", "LAST");
-    metric.put("__jvm-memory-mb-total", "LAST");
-    metric.put("__jvm-gc-collection-time-ms", "LAST");
-    metric.put("__server/__time_spent_back_pressure_initiated", "SUM");
-    metric.put("__time_spent_back_pressure_by_compid", "SUM");
-
-    mc.getSLAMetrics().InitSLAMetrics(metric);
+    mc = new MetricCache(15, CONFIG_PATH);
   }
 
   @After
@@ -75,38 +57,42 @@ public class MetricCacheTest {
   public void testMetricCache() {
     long ts = Instant.now().getEpochSecond();
 
-    TopologyMaster.PublishMetrics.Builder _metrics_builder = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyMaster.PublishMetrics.Builder metricsBuilder =
+        TopologyMaster.PublishMetrics.newBuilder();
 
-    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
+    metricsBuilder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("1").build());
-    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
+    metricsBuilder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("2").build());
-    _metrics_builder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
+    metricsBuilder.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("3").build());
 
-    mc.AddMetric(_metrics_builder.build());
+    mc.AddMetric(metricsBuilder.build());
 
     mc.Purge();
 
-    TopologyMaster.PublishMetrics.Builder _metrics_builder2 = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyMaster.PublishMetrics.Builder metricsBuilder2 =
+        TopologyMaster.PublishMetrics.newBuilder();
 
-    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
+    metricsBuilder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("4").build());
-    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
+    metricsBuilder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("5").build());
-    _metrics_builder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
+    metricsBuilder2.addMetrics(TopologyMaster.MetricDatum.newBuilder().setTimestamp(ts).
         setComponentName("c1").setInstanceId("i1").setName("__emit-count").setValue("6").build());
 
-    mc.AddMetric(_metrics_builder2.build());
+    mc.AddMetric(metricsBuilder2.build());
 
     lines.add(mc.toString());
 
     // builder
-    TopologyMaster.MetricRequest.Builder request_builder = TopologyMaster.MetricRequest.newBuilder();
-    request_builder.setExplicitInterval(TopologyMaster.MetricInterval.newBuilder().setStart(ts - 10).setEnd(ts + 10).build());
-    request_builder.setMinutely(true);
+    TopologyMaster.MetricRequest.Builder requestBuilder = TopologyMaster.MetricRequest.newBuilder();
+    requestBuilder.setExplicitInterval(
+        TopologyMaster.MetricInterval.newBuilder().setStart(ts - 10).setEnd(ts + 10).build());
+    requestBuilder.setMinutely(true);
 
-    TopologyMaster.MetricResponse res = mc.GetMetrics(request_builder.setComponentName("c1").addInstanceId("i1").addMetric("__emit-count").build());
+    TopologyMaster.MetricResponse res = mc.GetMetrics(requestBuilder
+        .setComponentName("c1").addInstanceId("i1").addMetric("__emit-count").build());
 
     // assertion
     Assert.assertEquals(res.getMetricCount(), 1);

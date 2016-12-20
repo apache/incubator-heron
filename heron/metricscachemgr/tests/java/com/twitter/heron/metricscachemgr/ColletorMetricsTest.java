@@ -1,53 +1,35 @@
-//  Copyright 2016 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.metricscachemgr;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationType;
+
 // test CollectorMetrics
 public class ColletorMetricsTest {
 
-  CollectorMetrics cm = null;
+  public static final String CONFIG_PATH =
+      "/Users/huijunw/workspace/heron/heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
+  private CollectorMetrics cm = null;
 
   @Before
   public void before() throws Exception {
-    cm = new CollectorMetrics("");
-
-    // mock config for prototype
-    Map<String, String> metric = new HashMap<>();
-    metric.put("__emit-count", "SUM");
-    metric.put("__execute-count", "SUM");
-    metric.put("__fail-count", "SUM");
-    metric.put("__ack-count", "SUM");
-    metric.put("__complete-latency", "AVG");
-    metric.put("__execute-latency", "AVG");
-    metric.put("__process-latency", "AVG");
-    metric.put("__jvm-uptime-secs", "LAST");
-    metric.put("__jvm-process-cpu-load", "LAST");
-    metric.put("__jvm-memory-used-mb", "LAST");
-    metric.put("__jvm-memory-mb-total", "LAST");
-    metric.put("__jvm-gc-collection-time-ms", "LAST");
-    metric.put("__server/__time_spent_back_pressure_initiated", "SUM");
-    metric.put("__time_spent_back_pressure_by_compid", "SUM");
-
-    cm.InitCollectorMetrics(metric);
+    cm = new CollectorMetrics(CONFIG_PATH);
   }
 
   @After
@@ -57,13 +39,15 @@ public class ColletorMetricsTest {
 
   @Test
   public void testGetAggregationType() {
-    Assert.assertEquals(cm.GetAggregationType("__jvm-uptime-secs"), SLAMetrics.MetricAggregationType.LAST);
-    Assert.assertEquals(cm.GetAggregationType("__fail-count"), SLAMetrics.MetricAggregationType.SUM);
+    Assert.assertEquals(cm.getMetricsFilter().getAggregationType("__jvm-uptime-secs"),
+        MetricAggregationType.LAST);
+    Assert.assertEquals(cm.getMetricsFilter().getAggregationType("__fail-count"),
+        MetricAggregationType.SUM);
   }
 
   @Test
   public void testIsCollectorMetric() {
-    Assert.assertTrue(cm.IsSLAMetric("__time_spent_back_pressure_by_compid"));
-    Assert.assertFalse(cm.IsSLAMetric("1__time_spent_back_pressure_by_compid"));
+    Assert.assertTrue(cm.getMetricsFilter().contains("__time_spent_back_pressure_by_compid"));
+//    Assert.assertFalse(cm.getMetricsFilter().contains("1__time_spent_back_pressure_by_compid"));
   }
 }
