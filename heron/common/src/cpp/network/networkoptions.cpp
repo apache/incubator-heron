@@ -24,7 +24,7 @@ NetworkOptions::NetworkOptions() {
   max_packet_size_ = 1024;
   socket_family_ = PF_INET;
   sin_path_ = "";
-  interface_list_ = "";
+  interface_ = "";
 }
 
 NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
@@ -66,6 +66,6 @@ void NetworkOptions::set_sin_path(const std::string& _sin_path) { sin_path_ = _s
 
 const std::string& NetworkOptions::get_sin_path() const { return sin_path_; }
 
-std::string NetworkOptions::get_interface_list() const { return interface_list_; }
+std::string NetworkOptions::get_interface() const { return interface_; }
 
-void NetworkOptions::set_interface_list(const std::string& _list) { interface_list_ = _list; }
+void NetworkOptions::set_interface(const std::string& _list) { interface_ = _list; }

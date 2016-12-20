@@ -189,7 +189,7 @@ sp_int32 SockUtils::FindBindAddress(sp_string interface,
 
   if (getifaddrs(&ifaddr) < 0) {
     PLOG(ERROR) << "Could not get the address information: " << strerror(errno);
-    return 1;
+    return SP_NOTOK;
   }
 
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
@@ -199,7 +199,7 @@ sp_int32 SockUtils::FindBindAddress(sp_string interface,
     if (ifa->ifa_addr->sa_family == family && !strcmp(ifa->ifa_name, interface.c_str())) {
       memcpy(addr, ifa->ifa_addr, sizeof(struct sockaddr_in));
       freeifaddrs(ifaddr);
-      return 0;
+      return SP_OK;
     }
   }
 
@@ -215,8 +215,8 @@ sp_int32 SockUtils::FindHostName(sp_string interface, char *hostname,
     addr.sin_port = 0;
     if (!getnameinfo((struct sockaddr *)&addr, sizeof addr, hostname, hostname_size,
                  NULL, 0, NI_NOFQDN)) {
-      return 0;
+      return SP_OK;
     }
   }
-  return 1;
+  return SP_NOTOK;
 }

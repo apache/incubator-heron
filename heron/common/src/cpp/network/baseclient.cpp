@@ -66,7 +66,7 @@ void BaseClient::Start_Base() {
   if (options_.get_socket_family() == PF_INET) {
     // find the local address to bind to
     struct sockaddr_in local_addr;
-    if (!SockUtils::FindBindAddress(options_.get_interface_list(), AF_INET, &local_addr)) {
+    if (!SockUtils::FindBindAddress(options_.get_interface(), AF_INET, &local_addr)) {
       local_addr.sin_family = AF_INET;
       // Any local port will do
       local_addr.sin_port = 0;

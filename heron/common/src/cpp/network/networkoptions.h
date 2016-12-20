@@ -61,10 +61,10 @@ class NetworkOptions {
   const std::string& get_sin_path() const;
 
   // get the list of interfaces to bind to
-  sp_string get_interface_list() const;
+  sp_string get_interface() const;
 
   // set the interface list to bind to
-  void set_interface_list(const std::string& _list);
+  void set_interface(const std::string& _list);
 
  private:
   // The host that we shd bind on
@@ -84,7 +84,7 @@ class NetworkOptions {
   std::string sin_path_;
 
   // list of local interfaces to bind to
-  sp_string interface_list_;
+  sp_string interface_;
 };
 
 #endif  // NETWORKOPTIONS_H_

@@ -57,7 +57,7 @@ sp_int32 BaseServer::Start_Base() {
   socklen_t sockaddr_len = 0;
   if (options_.get_sin_family() == AF_INET) {
     bzero(reinterpret_cast<char*>(&in_addr), sizeof(in_addr));
-    if (SockUtils::FindBindAddress(options_.get_interface_list(), AF_INET, &in_addr)) {
+    if (SockUtils::FindBindAddress(options_.get_interface(), AF_INET, &in_addr)) {
       in_addr.sin_addr.s_addr = INADDR_ANY;
       LOG(INFO) << "Binding to all the ips";
     } else {

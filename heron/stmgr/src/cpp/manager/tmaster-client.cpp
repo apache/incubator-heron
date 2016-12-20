@@ -51,10 +51,10 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
 
   char hostname[1024];
-  sp_string if_list = config::HeronInternalsConfigReader::Instance()
+  sp_string if_name = config::HeronInternalsConfigReader::Instance()
                                     ->GetHeronStreammgrNetworkOptionsBindInterface();
-  // now check weather we have a socket address
-  if (SockUtils::FindHostName(if_list, hostname, 1024)) {
+  // now check weather we have a host name
+  if (SockUtils::FindHostName(if_name, hostname, 1024)) {
     CHECK_EQ(gethostname(hostname, 1024), 0);
   }
   LOG(INFO) << "Setting stmgr hostname to: " << hostname;
