@@ -17,7 +17,6 @@ build --jobs 25
 # Link with the appropriate libs
 build --linkopt -lm
 build --linkopt -lpthread
-build --linkopt -lunwind
 build --linkopt -lrt
 build --experimental_action_listener=tools/cpp:compile_cpp
 build --experimental_action_listener=tools/java:compile_java

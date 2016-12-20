@@ -1,0 +1,165 @@
+diff -Nrup libunwind-1.1.orig/configure.ac libunwind-1.1/configure.ac
+--- libunwind-1.1.orig/configure.ac	2016-12-19 13:56:15.758086918 -0800
++++ libunwind-1.1/configure.ac	2016-12-19 13:56:34.731335116 -0800
+@@ -234,19 +234,21 @@ if test x$enable_msabi_support = xyes; t
+ fi
+ AC_MSG_RESULT([$enable_msabi_support])
+ 
++LIBLZMA=
+ AC_MSG_CHECKING([whether to support LZMA-compressed symbol tables])
+ AC_ARG_ENABLE(minidebuginfo,
+ AS_HELP_STRING([--enable-minidebuginfo], [Enables support for LZMA-compressed symbol tables]),, [enable_minidebuginfo=auto])
+ AC_MSG_RESULT([$enable_minidebuginfo])
+ if test x$enable_minidebuginfo != xno; then
+    AC_CHECK_LIB([lzma], [lzma_mf_is_supported],
+-   [AC_SUBST([LIBLZMA], [-lzma])
++   [LIBLZMA=-llzma
+     AC_DEFINE([HAVE_LZMA], [1], [Define if you have liblzma])
+     enable_minidebuginfo=yes],
+    [if test x$enable_minidebuginfo = xyes; then
+       AC_MSG_FAILURE([liblzma not found])
+     fi])
+ fi
++AC_SUBST([LIBLZMA])
+ AM_CONDITIONAL(HAVE_LZMA, test x$enable_minidebuginfo = xyes)
+ 
+ LIBUNWIND___THREAD
+diff -Nrup libunwind-1.1.orig/src/Makefile.am libunwind-1.1/src/Makefile.am
+--- libunwind-1.1.orig/src/Makefile.am	2016-12-19 13:56:15.765087009 -0800
++++ libunwind-1.1/src/Makefile.am	2016-12-19 14:59:45.888909789 -0800
+@@ -1,6 +1,7 @@
+ SOVERSION=8:1:0		# See comments at end of file.
+ SETJMP_SO_VERSION=0:0:0
+ COREDUMP_SO_VERSION=0:0:0
++PTRACE_SO_VERSION=0:0:0
+ #
+ # Don't link with start-files since we don't use any constructors/destructors:
+ #
+@@ -9,9 +10,11 @@ COMMON_SO_LDFLAGS =	-XCClinker -nostartf
+ lib_LIBRARIES =
+ lib_LTLIBRARIES =
+ if !REMOTE_ONLY
+-lib_LTLIBRARIES += libunwind.la libunwind-ptrace.la
++lib_LTLIBRARIES += libunwind.la
++# libunwind-ptrace.la and libunwind-coredump.la  need to come last, after the libunwind-$(arch).la
++#lib_LTLIBRARIES += libunwind-ptrace.la
+ if BUILD_COREDUMP
+-lib_LTLIBRARIES += libunwind-coredump.la
++#lib_LTLIBRARIES += libunwind-coredump.la
+ endif
+ endif
+ 
+@@ -40,6 +43,9 @@ libunwind_ptrace_la_SOURCES =						  \
+ 	ptrace/_UPT_put_unwind_info.c ptrace/_UPT_get_proc_name.c	  \
+ 	ptrace/_UPT_reg_offset.c ptrace/_UPT_resume.c
+ noinst_HEADERS += ptrace/_UPT_internal.h
++libunwind_ptrace_la_LDFLAGS = $(COMMON_SO_LDFLAGS) \
++				-version-info $(PTRACE_SO_VERSION)
++libunwind_ptrace_la_LIBADD = libunwind-$(arch).la libunwind.la $(LIBLZMA)
+ 
+ ### libunwind-coredump:
+ libunwind_coredump_la_SOURCES = \
+@@ -58,6 +64,7 @@ libunwind_coredump_la_SOURCES = \
+ 	coredump/_UPT_resume.c
+ libunwind_coredump_la_LDFLAGS = $(COMMON_SO_LDFLAGS) \
+ 				-version-info $(COREDUMP_SO_VERSION)
++libunwind_coredump_la_LIBADD = libunwind-$(arch).la libunwind.la $(LIBLZMA)
+ noinst_HEADERS += coredump/_UCD_internal.h
+ 
+ ### libunwind-setjmp:
+@@ -76,7 +83,7 @@ endif
+ 
+ libunwind_setjmp_la_LIBADD		= $(LIBUNWIND_ELF)	\
+ 					  libunwind-$(arch).la	\
+-					  libunwind.la -lc
++					  libunwind.la $(LIBLZMA) -lc
+ libunwind_setjmp_la_SOURCES		= setjmp/longjmp.c	\
+ 					  setjmp/siglongjmp.c
+ noinst_HEADERS				+= setjmp/setjmp_i.h
+@@ -448,6 +455,7 @@ Lcursor_i.h: mk_Lcursor_i.s
+  libunwind_ia64_la_LIBADD = libunwind-elf64.la
+ if !REMOTE_ONLY
+  libunwind_ia64_la_LIBADD += libunwind.la -lc
++ libunwind_ia64_la_LIBADD += $(LIBLZMA)
+ endif
+  libunwind_setjmp_la_SOURCES += ia64/setjmp.S  ia64/sigsetjmp.S  \
+ 				ia64/longjmp.S ia64/siglongjmp.S
+@@ -459,6 +467,7 @@ if ARCH_HPPA
+  libunwind_hppa_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
+  libunwind_hppa_la_LIBADD = libunwind-dwarf-generic.la
+  libunwind_hppa_la_LIBADD += libunwind-elf32.la
++ libunwind_hppa_la_LIBADD += $(LIBLZMA)
+ if !REMOTE_ONLY
+  libunwind_hppa_la_LIBADD += libunwind.la -lc
+ endif
+@@ -483,6 +492,7 @@ if ARCH_X86
+  libunwind_x86_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
+  libunwind_x86_la_LIBADD = libunwind-dwarf-generic.la
+  libunwind_x86_la_LIBADD += libunwind-elf32.la
++ libunwind_x86_la_LIBADD += $(LIBLZMA)
+ if !REMOTE_ONLY
+  libunwind_x86_la_LIBADD += libunwind.la -lc
+ endif
+@@ -495,6 +505,7 @@ if ARCH_X86_64
+  libunwind_x86_64_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
+  libunwind_x86_64_la_LIBADD = libunwind-dwarf-generic.la
+  libunwind_x86_64_la_LIBADD += libunwind-elf64.la
++ libunwind_x86_64_la_LIBADD += $(LIBLZMA)
+ if !REMOTE_ONLY
+  libunwind_x86_64_la_LIBADD += libunwind.la -lc
+ endif
+@@ -507,6 +518,7 @@ if ARCH_PPC32
+  libunwind_ppc32_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
+  libunwind_ppc32_la_LIBADD = libunwind-dwarf-generic.la
+  libunwind_ppc32_la_LIBADD += libunwind-elf32.la
++ libunwind_ppc32_la_LIBADD += $(LIBLZMA)
+ if !REMOTE_ONLY
+  libunwind_ppc32_la_LIBADD += libunwind.la -lc
+ endif
+@@ -519,6 +531,7 @@ if ARCH_PPC64
+  libunwind_ppc64_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
+  libunwind_ppc64_la_LIBADD = libunwind-dwarf-generic.la
+  libunwind_ppc64_la_LIBADD += libunwind-elf64.la
++ libunwind_ppc64_la_LIBADD += $(LIBLZMA)
+ if !REMOTE_ONLY
+  libunwind_ppc64_la_LIBADD += libunwind.la -lc
+ endif
+@@ -531,6 +544,7 @@ if ARCH_SH
+  libunwind_sh_la_LDFLAGS = $(COMMON_SO_LDFLAGS) -version-info $(SOVERSION)
+  libunwind_sh_la_LIBADD = libunwind-dwarf-generic.la
+  libunwind_sh_la_LIBADD += libunwind-elf32.la
++ libunwind_sh_la_LIBADD += $(LIBLZMA)
+ if !REMOTE_ONLY
+  libunwind_sh_la_LIBADD += libunwind.la -lc
+ endif
+@@ -559,13 +573,19 @@ endif
+ libunwind_la_LDFLAGS =	$(COMMON_SO_LDFLAGS) -XCClinker -nostdlib \
+ 			$(LDFLAGS_STATIC_LIBCXA) -version-info $(SOVERSION)
+ libunwind_la_LIBADD  += -lc $(LIBCRTS)
+-if HAVE_LZMA
+- libunwind_la_LIBADD += -llzma
+-endif
++libunwind_la_LIBADD += $(LIBLZMA)
+ 
+ AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/tdep-$(arch) -I.
+ AM_CCASFLAGS = $(AM_CPPFLAGS)
+ noinst_HEADERS += unwind/unwind-internal.h
++ 
++# these need to come last, after the libunwind-$(arch).la
++if !REMOTE_ONLY
++lib_LTLIBRARIES += libunwind-ptrace.la
++if BUILD_COREDUMP
++lib_LTLIBRARIES += libunwind-coredump.la
++endif
++endif
+ 
+ EXTRA_DIST =	$(libunwind_la_SOURCES_arm)			\
+ 		$(libunwind_la_SOURCES_hppa)			\
+diff -Nrup libunwind-1.1.orig/src/unwind/libunwind.pc.in libunwind-1.1/src/unwind/libunwind.pc.in
+--- libunwind-1.1.orig/src/unwind/libunwind.pc.in	2016-12-19 13:56:15.775087140 -0800
++++ libunwind-1.1/src/unwind/libunwind.pc.in	2016-12-19 13:56:34.732335129 -0800
+@@ -7,3 +7,4 @@ Name: libunwind
+ Description: libunwind base library
+ Version: @VERSION@
+ Libs: -L${libdir} -lunwind
++Libs.private: @LIBLZMA@
