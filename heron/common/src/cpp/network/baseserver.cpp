@@ -36,6 +36,7 @@ void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   listen_fd_ = -1;
+  listen_local_fd_ = -1;
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
   on_new_connection_callback_ = [this](EventLoop::Status status)
                                              { this->OnNewConnection(status); };
@@ -49,7 +50,10 @@ sp_int32 BaseServer::Start_Base() {
   // open a socket
   errno = 0;
   listen_fd_ = CreateSocket();
-
+  if (listen_fd_ < 0) {
+    LOG(ERROR) << "Failed to create listening socket";
+    return -1;
+  }
   // Set the address
   struct sockaddr_in in_addr;
   struct sockaddr_un unix_addr;
@@ -66,6 +70,11 @@ sp_int32 BaseServer::Start_Base() {
       LOG(INFO) << "Binding to ip address: " << ip << ":" << options_.get_port();
 
       listen_local_fd_ = CreateSocket();
+      if (listen_local_fd_ < 0) {
+        LOG(ERROR) << "Failed to create local listening socket";
+        return -1;
+      }
+      // in case we are listening on a specific interface, listen on the loopback address
       if (strcmp(ip, local_ip)) {
         // listen for loopback address
         struct sockaddr_in in_addr_lo;
