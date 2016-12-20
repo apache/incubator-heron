@@ -51,6 +51,9 @@ cc_library(
         "//third_party/jansson:jansson-cxx",
         "//third_party/kashmir:kashmir-cxx",
         "//third_party/protobuf:protobuf-cxx",
-    ],
+    ] + select({
+        "//tools/platform:darwin": [], 
+        "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
+    }),
     linkstatic = 1,
 )
