@@ -206,7 +206,7 @@ pex_library(
         ":proto_stmgr_py",
     ],
     reqs = [
-        "protobuf==3.1.0",
+        "protobuf==3.0.0",
         "setuptools==18.0.1",
     ],
 )

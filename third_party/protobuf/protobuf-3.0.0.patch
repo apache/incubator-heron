@@ -1,35 +1,6 @@
-diff -Nrup protobuf-3.1.0.orig/src/google/protobuf/io/zero_copy_stream_impl_lite.h protobuf-3.1.0/src/google/protobuf/io/zero_copy_stream_impl_lite.h
---- protobuf-3.1.0.orig/src/google/protobuf/io/zero_copy_stream_impl_lite.h	2016-12-02 13:57:02.000000000 -0800
-+++ protobuf-3.1.0/src/google/protobuf/io/zero_copy_stream_impl_lite.h	2016-12-02 13:57:25.000000000 -0800
-@@ -381,13 +381,9 @@ class LIBPROTOBUF_EXPORT CopyingOutputSt
- // return value is valid until the next time the string is resized.  We
- // trust the caller to treat the return value as an array of length s->size().
- inline char* mutable_string_data(string* s) {
--#ifdef LANG_CXX11
-   // This should be simpler & faster than string_as_array() because the latter
-   // is guaranteed to return NULL when *s is empty, so it has to check for that.
-   return &(*s)[0];
--#else
--  return string_as_array(s);
--#endif
- }
- 
- // as_string_data(s) is equivalent to
-@@ -396,11 +392,7 @@ inline char* mutable_string_data(string*
- // code can avoid that check.
- inline std::pair<char*, bool> as_string_data(string* s) {
-   char *p = mutable_string_data(s);
--#ifdef LANG_CXX11
-   return std::make_pair(p, true);
--#else
--  return make_pair(p, p != NULL);
--#endif
- }
- 
- }  // namespace io
-diff -Nrup protobuf-3.1.0.orig/configure.ac protobuf-3.1.0/configure.ac
---- protobuf-3.1.0.orig/configure.ac	2016-12-06 14:37:37.000000000 -0800
-+++ protobuf-3.1.0/configure.ac	2016-12-06 14:38:00.000000000 -0800
+diff -Nrup protobuf-3.0.0.origin/configure.ac protobuf-3.0.0/configure.ac
+--- protobuf-3.0.0.origin/configure.ac	2016-12-20 10:19:42.000000000 -0800
++++ protobuf-3.0.0/configure.ac	2016-12-20 10:20:37.000000000 -0800
 @@ -64,7 +64,6 @@ AC_LANG([C++])
  ACX_USE_SYSTEM_EXTENSIONS
  m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
@@ -54,16 +25,16 @@ diff -Nrup protobuf-3.1.0.orig/configure.ac protobuf-3.1.0/configure.ac
  # HACK:  Make gmock's configure script pick up our copy of CFLAGS and CXXFLAGS,
  #   since the flags added by ACX_CHECK_SUNCC must be used when compiling gmock
  #   too.
-diff -Nrup protobuf-3.1.0.orig/conformance/Makefile.am protobuf-3.1.0/conformance/Makefile.am
---- protobuf-3.1.0.orig/conformance/Makefile.am	2016-12-06 14:37:37.000000000 -0800
-+++ protobuf-3.1.0/conformance/Makefile.am	2016-12-06 14:41:01.000000000 -0800
+diff -Nrup protobuf-3.0.0.origin/conformance/Makefile.am protobuf-3.0.0/conformance/Makefile.am
+--- protobuf-3.0.0.origin/conformance/Makefile.am	2016-12-20 10:19:42.000000000 -0800
++++ protobuf-3.0.0/conformance/Makefile.am	2016-12-20 10:23:30.000000000 -0800
 @@ -18,8 +18,6 @@ protoc_outputs =                        
  
  other_language_protoc_outputs =                                \
    conformance_pb2.py                                           \
 -  Conformance.pbobjc.h                                         \
 -  Conformance.pbobjc.m                                         \
-   conformance_pb.rb                                            \
+   conformance.rb                                               \
    com/google/protobuf/Any.java                                 \
    com/google/protobuf/AnyOrBuilder.java                        \
 @@ -168,24 +166,6 @@ conformance_cpp_CPPFLAGS = -I$(top_srcdi
@@ -91,20 +62,19 @@ diff -Nrup protobuf-3.1.0.orig/conformance/Makefile.am protobuf-3.1.0/conformanc
  if USE_EXTERNAL_PROTOC
  
  # Some implementations include pre-generated versions of well-known types.
-@@ -272,10 +252,3 @@ test_python: protoc_middleman conformanc
- 
+@@ -273,9 +253,3 @@ test_python: protoc_middleman conformanc
  test_python_cpp: protoc_middleman conformance-test-runner
- 	./conformance-test-runner --enforce_recommended --failure_list failure_list_python_cpp.txt ./conformance_python.py
--
+ 	./conformance-test-runner --failure_list failure_list_python_cpp.txt ./conformance_python.py
+ 
 -if OBJC_CONFORMANCE_TEST
 -
 -test_objc: protoc_middleman conformance-test-runner conformance-objc
--	./conformance-test-runner --enforce_recommended --failure_list failure_list_objc.txt ./conformance-objc
+-	./conformance-test-runner --failure_list failure_list_objc.txt ./conformance-objc
 -
 -endif
-diff -Nrup protobuf-3.1.0.orig/conformance/conformance_objc.m protobuf-3.1.0/conformance/conformance_objc.m
---- protobuf-3.1.0.orig/conformance/conformance_objc.m	2016-12-06 14:37:37.000000000 -0800
-+++ protobuf-3.1.0/conformance/conformance_objc.m	1969-12-31 16:00:00.000000000 -0800
+diff -Nrup protobuf-3.0.0.origin/conformance/conformance_objc.m protobuf-3.0.0/conformance/conformance_objc.m
+--- protobuf-3.0.0.origin/conformance/conformance_objc.m	2016-12-20 10:19:42.000000000 -0800
++++ protobuf-3.0.0/conformance/conformance_objc.m	1969-12-31 16:00:00.000000000 -0800
 @@ -1,179 +0,0 @@
 -// Protocol Buffers - Google's data interchange format
 -// Copyright 2015 Google Inc.  All rights reserved.
@@ -285,3 +255,32 @@ diff -Nrup protobuf-3.1.0.orig/conformance/conformance_objc.m protobuf-3.1.0/con
 -  }
 -  return 0;
 -}
+diff -Nrup protobuf-3.0.0.origin/src/google/protobuf/io/zero_copy_stream_impl_lite.h protobuf-3.0.0/src/google/protobuf/io/zero_copy_stream_impl_lite.h
+--- protobuf-3.0.0.origin/src/google/protobuf/io/zero_copy_stream_impl_lite.h	2016-12-20 10:19:42.000000000 -0800
++++ protobuf-3.0.0/src/google/protobuf/io/zero_copy_stream_impl_lite.h	2016-12-20 10:20:37.000000000 -0800
+@@ -381,13 +381,9 @@ class LIBPROTOBUF_EXPORT CopyingOutputSt
+ // return value is valid until the next time the string is resized.  We
+ // trust the caller to treat the return value as an array of length s->size().
+ inline char* mutable_string_data(string* s) {
+-#ifdef LANG_CXX11
+   // This should be simpler & faster than string_as_array() because the latter
+   // is guaranteed to return NULL when *s is empty, so it has to check for that.
+   return &(*s)[0];
+-#else
+-  return string_as_array(s);
+-#endif
+ }
+ 
+ // as_string_data(s) is equivalent to
+@@ -396,11 +392,7 @@ inline char* mutable_string_data(string*
+ // code can avoid that check.
+ inline std::pair<char*, bool> as_string_data(string* s) {
+   char *p = mutable_string_data(s);
+-#ifdef LANG_CXX11
+   return std::make_pair(p, true);
+-#else
+-  return make_pair(p, p != NULL);
+-#endif
+ }
+ 
+ }  // namespace io

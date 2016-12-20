@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 package_name = "protobuf"
-package_version = "3.1.0"
+package_version = "3.0.0"
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
@@ -22,7 +22,6 @@ genrule(
 
         "include/google/protobuf/arena.h",
         "include/google/protobuf/arenastring.h",
-        "include/google/protobuf/has_bits.h",
         "include/google/protobuf/stubs/atomic_sequence_num.h",
         "include/google/protobuf/stubs/fastmem.h",
         "include/google/protobuf/stubs/port.h",
@@ -146,7 +145,6 @@ cc_library(
     hdrs = [
         "include/google/protobuf/arena.h",
         "include/google/protobuf/arenastring.h",
-        "include/google/protobuf/has_bits.h",
         "include/google/protobuf/stubs/atomic_sequence_num.h",
         "include/google/protobuf/stubs/common.h",
         "include/google/protobuf/stubs/fastmem.h",
