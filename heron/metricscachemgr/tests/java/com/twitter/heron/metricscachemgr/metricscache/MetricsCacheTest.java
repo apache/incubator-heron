@@ -13,7 +13,7 @@
 // limitations under the License.
 
 
-package com.twitter.heron.metricscachemgr.metriccache;
+package com.twitter.heron.metricscachemgr.metricscache;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -31,12 +31,12 @@ import org.junit.Test;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
-public class MetricCacheTest {
+public class MetricsCacheTest {
   public static final String CONFIG_PATH =
       "../../../../../../../../../heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
   private static String debugFilePath =
-      "/tmp/" + MetricCacheTest.class.getSimpleName() + ".debug.txt";
-  private MetricCache mc = null;
+      "/tmp/" + MetricsCacheTest.class.getSimpleName() + ".debug.txt";
+  private MetricsCache mc = null;
   private Path file = null;
   private List<String> lines = null;
 
@@ -46,7 +46,7 @@ public class MetricCacheTest {
     lines = new ArrayList<>();
 
     lines.add(Paths.get(".").toAbsolutePath().normalize().toString());
-    mc = new MetricCache(15, CONFIG_PATH);
+    mc = new MetricsCache(15, CONFIG_PATH);
   }
 
   @After
