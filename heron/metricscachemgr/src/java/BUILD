@@ -12,6 +12,7 @@ metricscachemgr_deps_files = [
            "//heron/proto:proto_metrics_java",
            "//heron/proto:proto_tmaster_java",
            "//heron/metricsmgr/src/thrift:thrift_scribe_java",
+           "//heron/metricsmgr/src/java:metricsmgr-java",
            "//third_party/java:jackson",
            "@org_yaml_snakeyaml//jar",
            "@com_google_protobuf_protobuf_java//jar",

@@ -1,163 +1,174 @@
-//  Copyright 2016 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.metricscachemgr.metriccache;
 
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.metricscachemgr.SLAMetrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationType;
 
 // Data structure to store metrics. A metric is a Time series of data.
 public class Metric {
   private static final Logger LOG = Logger.getLogger(Metric.class.getName());
 
-  private String name_;
-  // Time series. data_ will be ordered by their time of arrival.
-  private LinkedList<TimeBucket> data_;
+  private String name;
+  // Time series. data will be ordered by their time of arrival.
+  private LinkedList<TimeBucket> data;
   // Type of metric. This can be SUM or AVG. It specify how to aggregate these metrics for
   // display.
-  private SLAMetrics.MetricAggregationType metric_type_;
-  private double all_time_cumulative_;
-  private long all_time_nitems_;
-  private int bucket_interval_;
+  private MetricAggregationType metricType;
+  private double allTimeCumulative;
+  private long allTimeNitems;
+  private int bucketInterval;
 
-  public Metric(String name, SLAMetrics.MetricAggregationType type,
-                int nbuckets, int bucket_interval) {
-    name_ = name;
-    metric_type_ = type;
-    all_time_cumulative_ = 0;
-    all_time_nitems_ = 0;
-    bucket_interval_ = bucket_interval;
+  public Metric(String name, MetricAggregationType type,
+                int nbuckets, int bucketInterval) {
+    this.name = name;
+    metricType = type;
+    allTimeCumulative = 0;
+    allTimeNitems = 0;
+    this.bucketInterval = bucketInterval;
 
-    data_ = new LinkedList<>();
+    data = new LinkedList<>();
     for (int i = 0; i < nbuckets; ++i) {
-      data_.offerLast(new TimeBucket(bucket_interval_));
+      data.offerLast(new TimeBucket(bucketInterval));
     }
   }
 
   public void Purge() {
-    data_.pollLast();
-    data_.offerFirst(new TimeBucket(bucket_interval_));
+    data.pollLast();
+    data.offerFirst(new TimeBucket(bucketInterval));
   }
 
-  // Add a new value to the end of 'data_' extending the time series.
-  public void AddValueToMetric(String _value) {
-    if (metric_type_ == SLAMetrics.MetricAggregationType.LAST) {
+  // Add a new value to the end of 'data' extending the time series.
+  public void AddValueToMetric(String value) {
+    if (metricType == MetricAggregationType.LAST) {
       // Just keep one value per time bucket
-      data_.peekFirst().data_.clear();
-      data_.peekFirst().data_.offerFirst(_value);
+      data.peekFirst().data.clear();
+      data.peekFirst().data.offerFirst(value);
       // Do this for the cumulative as well
-      all_time_cumulative_ = Double.parseDouble(_value);
-      all_time_nitems_ = 1;
+      allTimeCumulative = Double.parseDouble(value);
+      allTimeNitems = 1;
     } else {
-      data_.peekFirst().data_.offerFirst(_value);
-      all_time_cumulative_ += Double.parseDouble(_value);
-      all_time_nitems_++;
+      data.peekFirst().data.offerFirst(value);
+      allTimeCumulative += Double.parseDouble(value);
+      allTimeNitems++;
     }
   }
 
-  // Return  past '_nbuckets' value for this metric.
+  /**
+   * Return  past '_nbuckets' value for this metric.
+   *
+   * @param minutely boolean-true will return metrics series in details
+   * @param startTime in seconds
+   * @param endTime in seconds
+   * @return individual metric
+   */
   public TopologyMaster.MetricResponse.IndividualMetric GetMetrics(boolean minutely,
-                                                                   long start_time, long end_time) {
-    TopologyMaster.MetricResponse.IndividualMetric.Builder response_builder
+                                                                   long startTime, long endTime) {
+    TopologyMaster.MetricResponse.IndividualMetric.Builder responseBuilder
         = TopologyMaster.MetricResponse.IndividualMetric.newBuilder();
-    response_builder.setName(name_);
+    responseBuilder.setName(name);
 
     if (minutely) {
       // we need minutely data
-      for (TimeBucket bucket : data_) {
+      for (TimeBucket bucket : data) {
         // Does this time bucket have overlap with needed range
-        if (bucket.overlaps(start_time, end_time)) {
-          TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.Builder val_builder =
+        if (bucket.overlaps(startTime, endTime)) {
+          TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.Builder valBuilder =
               TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.newBuilder();
 
           TopologyMaster.MetricInterval mi = TopologyMaster.MetricInterval.newBuilder()
-              .setStart(bucket.start_time_).setEnd(bucket.end_time_).build();
-          val_builder.setInterval(mi);
+              .setStart(bucket.startTime).setEnd(bucket.endTime).build();
+          valBuilder.setInterval(mi);
 
           double result = bucket.aggregate();
-          if (metric_type_ == SLAMetrics.MetricAggregationType.SUM) {
-            val_builder.setValue(String.valueOf(result));
-          } else if (metric_type_ == SLAMetrics.MetricAggregationType.AVG) {
+          if (metricType == MetricAggregationType.SUM) {
+            valBuilder.setValue(String.valueOf(result));
+          } else if (metricType == MetricAggregationType.AVG) {
             double avg = result / bucket.count();
-            val_builder.setValue(String.valueOf(avg));
-          } else if (metric_type_ == SLAMetrics.MetricAggregationType.LAST) {
-            val_builder.setValue(String.valueOf(result));
+            valBuilder.setValue(String.valueOf(avg));
+          } else if (metricType == MetricAggregationType.LAST) {
+            valBuilder.setValue(String.valueOf(result));
           } else {
-            LOG.log(Level.SEVERE, "Unknown metric type " + metric_type_);
+            LOG.log(Level.SEVERE, "Unknown metric type " + metricType);
           }
 
-          response_builder.addIntervalValues(val_builder.build());
+          responseBuilder.addIntervalValues(valBuilder.build());
         }
         // The timebuckets are reverse chronologically arranged
-        if (start_time > bucket.end_time_) break;
+        if (startTime > bucket.endTime) {
+          break;
+        }
       }
     } else {
       // We don't need minutely data
       double result = 0;
-      if (start_time <= 0) {
+      if (startTime <= 0) {
         // We want cumulative metrics
-        if (metric_type_ == SLAMetrics.MetricAggregationType.SUM) {
-          result = all_time_cumulative_;
-        } else if (metric_type_ == SLAMetrics.MetricAggregationType.AVG) {
-          result = all_time_cumulative_ / all_time_nitems_;
-        } else if (metric_type_ == SLAMetrics.MetricAggregationType.LAST) {
-          result = all_time_cumulative_;
+        if (metricType == MetricAggregationType.SUM) {
+          result = allTimeCumulative;
+        } else if (metricType == MetricAggregationType.AVG) {
+          result = allTimeCumulative / allTimeNitems;
+        } else if (metricType == MetricAggregationType.LAST) {
+          result = allTimeCumulative;
         } else {
-          LOG.log(Level.SEVERE, "Unknown metric type " + metric_type_);
+          LOG.log(Level.SEVERE, "Unknown metric type " + metricType);
         }
       } else {
         // we want only for a specific interval
-        long total_items = 0;
-        double total_count = 0;
-        for (TimeBucket bucket : data_) {
+        long totalItems = 0;
+        double totalCount = 0;
+        for (TimeBucket bucket : data) {
           // Does this time bucket have overlap with needed range
-          if (bucket.overlaps(start_time, end_time)) {
-            total_count += bucket.aggregate();
-            total_items += bucket.count();
-            if (metric_type_ == SLAMetrics.MetricAggregationType.LAST) {
+          if (bucket.overlaps(startTime, endTime)) {
+            totalCount += bucket.aggregate();
+            totalItems += bucket.count();
+            if (metricType == MetricAggregationType.LAST) {
               break;
             }
           }
           // The timebuckets are reverse chronologically arranged
-          if (start_time > bucket.end_time_) break;
+          if (startTime > bucket.endTime) {
+            break;
+          }
         }
-        if (metric_type_ == SLAMetrics.MetricAggregationType.SUM) {
-          result = total_count;
-        } else if (metric_type_ == SLAMetrics.MetricAggregationType.AVG) {
-          result = total_count / total_items;
-        } else if (metric_type_ == SLAMetrics.MetricAggregationType.LAST) {
-          result = total_count;
+        if (metricType == MetricAggregationType.SUM) {
+          result = totalCount;
+        } else if (metricType == MetricAggregationType.AVG) {
+          result = totalCount / totalItems;
+        } else if (metricType == MetricAggregationType.LAST) {
+          result = totalCount;
         } else {
-          LOG.log(Level.SEVERE, "Unknown metric type " + metric_type_);
+          LOG.log(Level.SEVERE, "Unknown metric type " + metricType);
         }
       }
-      response_builder.setValue(String.valueOf(result));
+      responseBuilder.setValue(String.valueOf(result));
     }
 
-    return response_builder.build();
+    return responseBuilder.build();
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("m_name: " + name_).append(", type: " + metric_type_)
-        .append(", interval: " + bucket_interval_).append(", nitems: " + all_time_nitems_)
-        .append(", cumulative: " + all_time_cumulative_).append(", data");
-    for (TimeBucket tb : data_) {
+    sb.append("m_name: " + name).append(", type: " + metricType)
+        .append(", interval: " + bucketInterval).append(", nitems: " + allTimeNitems)
+        .append(", cumulative: " + allTimeCumulative).append(", data");
+    for (TimeBucket tb : data) {
       sb.append("\n => " + tb.toString());
     }
     sb.append(" $\n");
