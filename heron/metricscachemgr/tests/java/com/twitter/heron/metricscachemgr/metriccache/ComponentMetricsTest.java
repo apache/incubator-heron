@@ -48,10 +48,7 @@ public class ComponentMetricsTest {
     Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
-  @Test
-  public void test() {
-    ComponentMetrics cm = new ComponentMetrics("c_name", 10, 60);
-
+  private void prepareTestData(ComponentMetrics cm) {
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", MetricAggregationType.LAST, "1");
     cm.AddMetricForInstance("i1", "__jvm-gc-collection-time-ms", MetricAggregationType.LAST, "2");
     cm.AddMetricForInstance("i2", "__jvm-gc-collection-time-ms", MetricAggregationType.LAST, "3");
@@ -63,6 +60,13 @@ public class ComponentMetricsTest {
     cm.AddMetricForInstance("i2", "__jvm-gc-collection-time-ms", MetricAggregationType.LAST, "6");
 
     lines.add(cm.toString());
+  }
+
+  @Test
+  public void test1() {
+    lines.add("test1");
+    ComponentMetrics cm = new ComponentMetrics("c_name", 10, 60);
+    prepareTestData(cm);
 
     // build request
     TopologyMaster.MetricRequest.Builder requestBuilder =
@@ -78,6 +82,15 @@ public class ComponentMetricsTest {
     // assertion
     Assert.assertEquals(responseBuilder.getMetricCount(), 1);
     Assert.assertEquals(responseBuilder.getMetric(0).getMetric(0).getValue(), "5.0");
+
+  }
+
+
+  @Test
+  public void test2() {
+    lines.add("test2");
+    ComponentMetrics cm = new ComponentMetrics("c_name", 10, 60);
+    prepareTestData(cm);
 
     // build request 2
     TopologyMaster.MetricRequest.Builder requestBuilder2 =

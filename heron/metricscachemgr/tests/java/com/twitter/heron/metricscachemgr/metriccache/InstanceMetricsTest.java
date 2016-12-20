@@ -47,10 +47,7 @@ public class InstanceMetricsTest {
     Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
-  @Test
-  public void test() {
-    InstanceMetrics im = new InstanceMetrics("i1", 10, 60);
-
+  private void prepareTestData(InstanceMetrics im) {
     im.AddMetricWithName("__emit-count", MetricAggregationType.SUM, "1");
     im.AddMetricWithName("__emit-count", MetricAggregationType.SUM, "2");
     im.AddMetricWithName("__emit-count", MetricAggregationType.SUM, "3");
@@ -70,6 +67,13 @@ public class InstanceMetricsTest {
     im.AddMetricWithName("__jvm-uptime-secs", MetricAggregationType.LAST, "15");
 
     lines.add(im.toString());
+  }
+
+  @Test
+  public void test1() {
+    lines.add("test1");
+    InstanceMetrics im = new InstanceMetrics("i1", 10, 60);
+    prepareTestData(im);
 
     // build request
     TopologyMaster.MetricRequest.Builder requestBuilder = TopologyMaster.MetricRequest.newBuilder();
@@ -83,6 +87,13 @@ public class InstanceMetricsTest {
     // assertion
     Assert.assertEquals(responseBuilder.getMetricCount(), 1);
     Assert.assertEquals(responseBuilder.getMetric(0).getMetric(0).getValue(), "21.0");
+  }
+
+  @Test
+  public void test2() {
+    lines.add("test2");
+    InstanceMetrics im = new InstanceMetrics("i1", 10, 60);
+    prepareTestData(im);
 
     // build request 2
     TopologyMaster.MetricRequest.Builder requestBuilder2 =
@@ -97,6 +108,13 @@ public class InstanceMetricsTest {
     // assertion
     Assert.assertEquals(responseBuilder2.getMetricCount(), 1);
     Assert.assertEquals(responseBuilder2.getMetric(0).getMetric(0).getValue(), "15.0");
+  }
+
+  @Test
+  public void test3() {
+    lines.add("test3");
+    InstanceMetrics im = new InstanceMetrics("i1", 10, 60);
+    prepareTestData(im);
 
     // build request 3
     TopologyMaster.MetricRequest.Builder requestBuilder3 =
