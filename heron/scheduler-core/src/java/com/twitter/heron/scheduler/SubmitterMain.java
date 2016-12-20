@@ -26,11 +26,16 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.scheduler.utils.DryRunRender;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.RawDryRunRender;
+import com.twitter.heron.scheduler.utils.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.utils.TableDryRunRender;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -120,11 +125,13 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
+                                             String dryRun,
                                              Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.dryRun(), dryRun)
         .put(Keys.verbose(), verbose)
         .build();
 
@@ -219,6 +226,13 @@ public class SubmitterMain {
         .required()
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("dry run")
+        .longOpt("dry_run")
+        .hasArg()
+        .required(false)
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -234,6 +248,7 @@ public class SubmitterMain {
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
+    options.addOption(dryRun);
     options.addOption(verbose);
 
     return options;
@@ -295,6 +310,13 @@ public class SubmitterMain {
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
+    // Dry run config
+    String dryRun = null;
+    if (cmd.hasOption("u")) {
+      dryRun = cmd.getOptionValue("dry_run");
+      LOG.fine(String.format("Running dry-run mode using format %s", dryRun));
+    }
+
     // first load the defaults, then the config from files to override it
     // next add config parameters from the command line
     // load the topology configs
@@ -304,7 +326,7 @@ public class SubmitterMain {
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath, releaseFile))
             .putAll(overrideConfigs(overrideConfigFile))
-            .putAll(commandLineConfigs(cluster, role, environ, verbose))
+            .putAll(commandLineConfigs(cluster, role, environ, dryRun, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
             .build());
@@ -313,23 +335,30 @@ public class SubmitterMain {
     LOG.fine(config.toString());
 
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
+    /* Meaning of exit status code:
+       - status code = 0:
+         program exits without error
+       - 0 < status code < 100:
+         program fails to execute before program execution. For example,
+         JVM cannot find or load main class
+       - 100 <= status code < 200:
+         program fails to launch after program execution. For example,
+         topology definition file fails to be loaded
+       - status code >= 200
+         program sends out dry-run response */
     try {
       submitterMain.submitTopology();
+    } catch (SubmitDryRunResponse response) {
+      System.out.println(submitterMain.renderDryRunResponse(dryRun, response));
+      // Exit with status code 200 to indicate dry-run response is sent out
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(200);
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       /* Since only stderr is used (by logging), we use stdout here to
          propagate error message back to Python's executor.py (invoke site). */
       LOG.log(Level.FINE, "Exception when submitting topology", e);
       System.out.println(e.getMessage());
-      /* Meaning of exit status code:
-         - status code = 0:
-           program exits without error
-         - 0 < status code < 100:
-           program fails to execute before program execution. For example,
-           JVM cannot find or load main class
-         - status code >= 100:
-           program fails to launch after program execution. For example,
-           topology definition file fails to be loaded */
       // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(100);
@@ -455,9 +484,22 @@ public class SubmitterMain {
   }
 
   protected void callLauncherRunner(Config runtime)
-      throws LauncherException, PackingException {
+      throws LauncherException, PackingException, SubmitDryRunResponse {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     launchRunner.call();
+  }
+
+  protected String renderDryRunResponse(String format, SubmitDryRunResponse resp) {
+    DryRunRender render;
+    switch (format) {
+      case "raw" : render = new RawDryRunRender();
+        break;
+      case "table" : render = new TableDryRunRender();
+        break;
+      default: throw new IllegalArgumentException(
+          String.format("Unexpected rendering format: %s", format));
+    }
+    return render.render(resp);
   }
 }

@@ -54,8 +54,16 @@ public class Resource {
     return disk;
   }
 
+  public Resource cloneWithCpu(double newCpu) {
+    return new Resource(newCpu, this.getRam(), this.getDisk());
+  }
+
   public Resource cloneWithRam(ByteAmount newRam) {
     return new Resource(this.getCpu(), newRam, this.getDisk());
+  }
+
+  public Resource cloneWithDisk(ByteAmount newDisk) {
+    return new Resource(this.getCpu(), this.getRam(), newDisk);
   }
 
   /**
@@ -69,6 +77,16 @@ public class Resource {
     ByteAmount diskDifference = this.getDisk().minus(other.getDisk());
     ByteAmount extraDisk = ByteAmount.ZERO.max(diskDifference);
     return new Resource(extraCpu, extraRam, extraDisk);
+  }
+
+   /**
+   * Adds a given resource from the current resource.
+   */
+  public Resource plus(Resource other) {
+    double totalCpu = this.getCpu() + other.getCpu();
+    ByteAmount totalRam = this.getRam().plus(other.getRam());
+    ByteAmount totalDisk = this.getDisk().plus(other.getDisk());
+    return new Resource(totalCpu, totalRam, totalDisk);
   }
 
   /**

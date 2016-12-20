@@ -20,10 +20,11 @@ from heron.common.src.python.utils.log import Log
 #  - 0 < status code < 100:
 #    program fails to execute before program execution. For example,
 #    JVM cannot find or load main class
-#  - status code >= 100:
+#  - 100 <= status code < 200:
 #    program fails to launch after program execution. For example,
 #    topology definition file fails to be loaded
-#
+#  - status code >= 200:
+#    program sends out dry-run response
 
 # If you need to add new class of status code, please assign it value larger than
 # value of the last class of status code
@@ -33,14 +34,17 @@ class Status(object):
   Ok = 0
   InvocationError = 1
   HeronError = 100
+  DryRun = 200
 
 def status_type(status_code):
   if status_code == 0:
     return Status.Ok
   elif status_code < 100:
     return Status.InvocationError
-  else:
+  elif status_code >= 100 and status_code < 200:
     return Status.HeronError
+  else:
+    return Status.DryRun
 
 class Response(object):
   """Response class that captures result of executing an action
@@ -84,6 +88,11 @@ def render(resp):
     # message will be in stderr, so we log.error detailed message(stderr) only
     elif resp.status == Status.InvocationError:
       do_log(Log.error, resp.detailed_msg)
+    elif resp.status == Status.DryRun:
+      do_log(Log.info, "Dry-run successful")
+      # No need to prefix [INFO] here. We want to display dry-run response in a clean way
+      print resp.msg
+      do_log(Log.debug, resp.detailed_msg)
     else:
       raise RuntimeError("Unknown status type of value %d", resp.status)
   else:

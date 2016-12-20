@@ -28,6 +28,7 @@ UPLOADER_YAML:                       heron.config.file.uploader.yaml
 CLUSTER:                             heron.config.cluster
 ROLE:                                heron.config.role
 ENVIRON:                             heron.config.environ
+DRY_RUN:                             heron.config.dry_run
 VERBOSE:                             heron.config.verbose
 CONFIG_PATH:                         heron.config.path
 CONFIG_PROPERTY:                     heron.config.property

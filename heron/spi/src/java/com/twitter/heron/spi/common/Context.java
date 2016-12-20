@@ -34,6 +34,10 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("ENVIRON"));
   }
 
+  public static String dryRun(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("DRY_RUN"));
+  }
+
   public static Boolean verbose(Config cfg) {
     return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"), true);
   }

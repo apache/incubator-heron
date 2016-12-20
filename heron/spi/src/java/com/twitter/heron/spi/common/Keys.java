@@ -33,6 +33,10 @@ public class Keys {
     return ConfigKeys.get("ENVIRON");
   }
 
+  public static String dryRun() {
+    return ConfigKeys.get("DRY_RUN");
+  }
+
   public static String verbose() {
     return ConfigKeys.get("VERBOSE");
   }

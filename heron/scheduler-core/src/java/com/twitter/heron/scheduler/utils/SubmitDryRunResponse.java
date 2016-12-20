@@ -19,15 +19,28 @@ import com.twitter.heron.spi.packing.PackingPlan;
  * Dry-run response, which extends RuntimeException because it is easy
  * to propagate up
  */
-public class DryRunResponse extends RuntimeException {
+public class SubmitDryRunResponse extends RuntimeException {
   private static final long serialVersionUID = 999911708859944856L;
 
   private final String topologyName;
-  private final PackingPlan packingPlan;
+  private final PackingPlan plan;
+  private final String packingClass;
 
-  public DryRunResponse(String topologyName, PackingPlan packingPlan) {
+  public SubmitDryRunResponse(String topologyName, PackingPlan packingPlan, String packingClass) {
     this.topologyName = topologyName;
-    this.packingPlan = packingPlan;
+    this.plan = packingPlan;
+    this.packingClass = packingClass;
   }
 
+  public String getTopologyName() {
+    return topologyName;
+  }
+
+  public PackingPlan getPackingPlan() {
+    return plan;
+  }
+
+  public String getPackingClass() {
+    return packingClass;
+  }
 }

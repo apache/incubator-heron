@@ -21,6 +21,7 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SubmitDryRunResponse;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingException;
@@ -119,14 +120,18 @@ public class LaunchRunner {
    *
    * @throws LauncherException
    * @throws PackingException
+   * @throws SubmitDryRunResponse
    */
-  public void call() throws LauncherException, PackingException {
+  public void call() throws LauncherException, PackingException, SubmitDryRunResponse {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
     PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
 
+    if (Context.dryRun(config) != null) {
+      throw new SubmitDryRunResponse(topologyName, packedPlan, Context.packingClass(config));
+    }
     // initialize the launcher
     launcher.initialize(config, runtime);
 

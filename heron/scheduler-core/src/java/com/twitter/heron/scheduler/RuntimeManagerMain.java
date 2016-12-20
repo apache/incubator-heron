@@ -31,6 +31,10 @@ import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
+import com.twitter.heron.scheduler.utils.DryRunRender;
+import com.twitter.heron.scheduler.utils.RawDryRunRender;
+import com.twitter.heron.scheduler.utils.TableDryRunRender;
+import com.twitter.heron.scheduler.utils.UpdateDryRunResponse;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
@@ -141,6 +145,13 @@ public class RuntimeManagerMain {
         .argName("container id")
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("dry run")
+        .longOpt("dry_run")
+        .hasArg()
+        .required(false)
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -157,6 +168,7 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(dryRun);
     options.addOption(verbose);
 
     return options;
@@ -225,6 +237,12 @@ public class RuntimeManagerMain {
       containerId = cmd.getOptionValue("container_id");
     }
 
+    String dryRunFormat = null;
+    if (cmd.hasOption("u")) {
+      dryRunFormat = cmd.getOptionValue("dry_run");
+      LOG.fine(String.format("Running dry-run mode using format %s", dryRunFormat));
+    }
+
     Command command = Command.makeCommand(commandOption);
 
     // first load the defaults, then the config from files to override it
@@ -237,6 +255,7 @@ public class RuntimeManagerMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.dryRun(), dryRunFormat)
         .put(Keys.verbose(), verbose)
         .put(Keys.topologyContainerId(), containerId);
 
@@ -268,6 +287,12 @@ public class RuntimeManagerMain {
     RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, command);
     try {
       runtimeManagerMain.manageTopology();
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (UpdateDryRunResponse response) {
+      System.out.println(runtimeManagerMain.renderDryRunResponse(dryRunFormat, response));
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      // Exit with status code 200 to indicate dry-run response is sent out
+      System.exit(200);
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       /* Since only stderr is used (by logging), we use stdout here to
@@ -408,5 +433,18 @@ public class RuntimeManagerMain {
   protected ISchedulerClient getSchedulerClient(Config runtime)
       throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
+  }
+
+  protected String renderDryRunResponse(String format, UpdateDryRunResponse resp) {
+    DryRunRender render;
+    switch (format) {
+      case "raw" : render = new RawDryRunRender();
+        break;
+      case "table" : render = new TableDryRunRender();
+        break;
+      default: throw new IllegalArgumentException(
+          String.format("Unexpected rendering format: %s", format));
+    }
+    return render.render(resp);
   }
 }
