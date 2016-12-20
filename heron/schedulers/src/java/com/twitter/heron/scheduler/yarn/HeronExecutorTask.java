@@ -33,6 +33,8 @@ import org.apache.reef.wake.EventHandler;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMap;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
@@ -45,8 +47,6 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackag
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.utils.SchedulerConfig;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -147,7 +147,7 @@ public class HeronExecutorTask implements Task {
   String[] getExecutorCommand() {
     String topologyDefFile = getTopologyDefnFile();
     Topology topology = getTopology(topologyDefFile);
-    Config config = SchedulerConfig.loadConfig(cluster,
+    Config config = SchedulerConfigUtils.loadConfig(cluster,
         role,
         env,
         topologyJar,

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -26,14 +27,15 @@ import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -44,28 +46,43 @@ public class RuntimeManagerMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String TOPOLOGY_ID = "topologyId";
   private static final Command MOCK_COMMAND = Command.KILL;
+  private static final String CLUSTER = "cluster";
+  private static final String ROLE = "role";
+  private static final String ENVIRON = "env";
+  private Config config;
 
-  @Test
-  public void testValidateRuntimeManage() throws Exception {
-    final String CLUSTER = "cluster";
-    final String ROLE = "role";
-    final String ENVIRON = "env";
-    Config config = mock(Config.class);
+  @Before
+  public void setUp() throws Exception {
+    config = mock(Config.class);
     when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
     when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
+  }
 
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testValidateRuntimeManageTopologyNotRunning() throws Exception {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, MOCK_COMMAND);
-
-    // Topology is not running
     when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(false);
-    assertFalse(runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME));
-    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(null);
-    assertFalse(runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME));
+    runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME);
+  }
+
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testValidateRuntimeManageNoExecState() {
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, MOCK_COMMAND);
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(null);
+    runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME);
+  }
+
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testValidateRuntimeManageWrongState() {
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, MOCK_COMMAND);
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
 
     // Topology is running
-    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
     ExecutionEnvironment.ExecutionState.Builder stateBuilder =
         ExecutionEnvironment.ExecutionState.newBuilder().
             setTopologyName(TOPOLOGY_NAME).
@@ -73,27 +90,37 @@ public class RuntimeManagerMainTest {
             setCluster(CLUSTER).
             setEnviron(ENVIRON);
 
-    // cluster/role/environ not matched
     final String WRONG_ROLE = "wrong";
     ExecutionEnvironment.ExecutionState wrongState = stateBuilder.setRole(WRONG_ROLE).build();
-    when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(null);
-    assertFalse(runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME));
+    // cluster/role/environ not matched
     when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(wrongState);
-    assertFalse(runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME));
+    runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME);
+  }
 
+  @Test
+  public void testValidateRuntimeManageOk() throws TopologyRuntimeManagementException {
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, MOCK_COMMAND);
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    ExecutionEnvironment.ExecutionState.Builder stateBuilder =
+        ExecutionEnvironment.ExecutionState.newBuilder().
+            setTopologyName(TOPOLOGY_NAME).
+            setTopologyId(TOPOLOGY_ID).
+            setCluster(CLUSTER).
+            setEnviron(ENVIRON);
     // Matched
     ExecutionEnvironment.ExecutionState correctState = stateBuilder.setRole(ROLE).build();
     when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(correctState);
-    assertTrue(runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME));
+    runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME);
   }
 
   /**
    * Test manageTopology()
    */
-  @Test
   @PrepareForTest(ReflectionUtils.class)
-  public void testManageTopology() throws Exception {
-    Config config = mock(Config.class);
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testManageTopologyNoClass() throws Exception {
+    config = mock(Config.class);
     when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
@@ -102,8 +129,16 @@ public class RuntimeManagerMainTest {
     final String CLASS_NOT_EXIST = "class_not_exist";
     when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS")))
         .thenReturn(CLASS_NOT_EXIST);
-    assertFalse(runtimeManagerMain.manageTopology());
+    runtimeManagerMain.manageTopology();
+  }
 
+  @PrepareForTest(ReflectionUtils.class)
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testManageTopologyFailValidate() throws Exception {
+    config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+
+    RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
     // Valid state manager class
     Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
         thenReturn(IStateManager.class.getName());
@@ -112,29 +147,84 @@ public class RuntimeManagerMainTest {
         .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
 
     // Failed to valid
-    doReturn(false).when(runtimeManagerMain)
+    doThrow(new TopologyRuntimeManagementException("")).when(runtimeManagerMain)
         .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
-    assertFalse(runtimeManagerMain.manageTopology());
+    runtimeManagerMain.manageTopology();
+  }
+
+  @PrepareForTest(ReflectionUtils.class)
+  @Test(expected = SchedulerException.class)
+  public void testManageTopologyFailGetSchdulerClient() throws Exception {
+    config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+
+    RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
+    // Valid state manager class
+    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+        thenReturn(IStateManager.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
 
     // Legal request
-    doReturn(true).when(runtimeManagerMain)
+    doNothing().when(runtimeManagerMain)
         .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
 
     // Failed to get ISchedulerClient
-    doReturn(null).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
-    assertFalse(runtimeManagerMain.manageTopology());
+    doThrow(new SchedulerException("")).when(runtimeManagerMain).
+        getSchedulerClient(any(Config.class));
+    runtimeManagerMain.manageTopology();
+  }
 
+  @PrepareForTest(ReflectionUtils.class)
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testManageTopologyFailCall() throws Exception {
+    config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+
+    RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
+    // Valid state manager class
+    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+        thenReturn(IStateManager.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
+
+    // Legal request
+    doNothing().when(runtimeManagerMain)
+        .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
     // Successfully get ISchedulerClient
     ISchedulerClient client = mock(ISchedulerClient.class);
     doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
 
     // Failed to callRuntimeManagerRunner
-    doReturn(false).when(runtimeManagerMain)
+    doThrow(new TopologyRuntimeManagementException("")).when(runtimeManagerMain)
         .callRuntimeManagerRunner(any(Config.class), eq(client));
-    assertFalse(runtimeManagerMain.manageTopology());
+    runtimeManagerMain.manageTopology();
+  }
 
+  @PrepareForTest(ReflectionUtils.class)
+  @Test
+  public void testManageTopologyOk() throws Exception {
+    config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+
+    RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
+    // Valid state manager class
+    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+        thenReturn(IStateManager.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
+
+    // Legal request
+    doNothing().when(runtimeManagerMain)
+        .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
+    // Successfully get ISchedulerClient
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
     // Happy path
-    doReturn(true).when(runtimeManagerMain).callRuntimeManagerRunner(any(Config.class), eq(client));
-    assertTrue(runtimeManagerMain.manageTopology());
+    doNothing().when(runtimeManagerMain).callRuntimeManagerRunner(any(Config.class), eq(client));
+    runtimeManagerMain.manageTopology();
   }
 }

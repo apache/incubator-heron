@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -26,7 +25,10 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link LauncherUtils} contains helper methods used by the server and client side launch
@@ -59,7 +61,7 @@ public class LauncherUtils {
     }
 
     try {
-      TopologyAPI.Topology topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+      TopologyAPI.Topology topology = Runtime.topology(runtime);
       packing.initialize(config, topology);
       return packing.pack();
     } finally {
@@ -107,15 +109,16 @@ public class LauncherUtils {
    *
    * @return initialized scheduler instances
    */
-  public IScheduler getSchedulerInstance(Config config, Config runtime) {
+  public IScheduler getSchedulerInstance(Config config, Config runtime)
+      throws SchedulerException {
     String schedulerClass = Context.schedulerClass(config);
     IScheduler scheduler;
     try {
       // create an instance of scheduler
       scheduler = ReflectionUtils.newInstance(schedulerClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate scheduler", e);
-      return null;
+      throw new SchedulerException(String.format("Failed to instantiate scheduler using class '%s'",
+          schedulerClass));
     }
 
     scheduler.initialize(config, runtime);
