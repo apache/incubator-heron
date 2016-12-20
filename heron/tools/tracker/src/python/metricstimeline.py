@@ -34,8 +34,8 @@ def getMetricsTimeline(tmaster,
     "timeline": {
       <metricname>: {
         <instance>: {
-          <startTime> : <numeric value>,
-          <startTime> : <numeric value>,
+          <start_time> : <numeric value>,
+          <start_time> : <numeric value>,
           ...
         }
         ...
