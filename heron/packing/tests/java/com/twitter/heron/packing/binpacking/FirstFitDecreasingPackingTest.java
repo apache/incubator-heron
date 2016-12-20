@@ -29,6 +29,7 @@ import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -44,16 +45,9 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
     return new FirstFitDecreasingPacking();
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testCheckFailure() throws Exception {
-    int numContainers = 2;
-
-    // Explicit set insufficient ram for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
-
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
-    topologyConfig.setContainerMaxRamHint(containerRam);
-
+  @Test (expected = PackingException.class)
+  public void testFailureInsufficientContainerRamHint() throws Exception {
+    topologyConfig.setContainerMaxRamHint(ByteAmount.ZERO);
     pack(getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
@@ -275,28 +269,9 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
         maxContainerRam);
   }
 
-  /**
-   * Test invalid ram for instance
-   */
-  @Test(expected = RuntimeException.class)
-  public void testInvalidRamInstance() throws Exception {
-    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
-    int defaultNumInstancesperContainer = 4;
-
-    // Explicit set component ram map
-    ByteAmount boltRam = ByteAmount.ZERO;
-
-    topologyConfig.setContainerMaxRamHint(maxContainerRam);
-    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
-
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
-    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
-    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
-    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
-    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
-        instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
+  @Test
+  public void testContainersRequestedExceedsInstanceCount() throws Exception {
+    doTestContainerCountRequested(8, 2); // instances will fit into 2 containers
   }
 
   /**
@@ -409,14 +384,6 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
         newPackingPlan.getInstanceCount());
     AssertPacking.assertContainers(newPackingPlan.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testScaleDownInvalidComponent() throws Exception {
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
   }
 
   /**

@@ -29,6 +29,7 @@ import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -55,16 +56,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     return count;
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testCheckFailure() throws Exception {
-    // Explicit set insufficient ram for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
-
-    topologyConfig.setContainerRamRequested(containerRam);
-    TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,
-        topologyConfig);
-
-    pack(newTopology);
+  @Test(expected = PackingException.class)
+  public void testFailureInsufficientContainerRamRequested() throws Exception {
+    topologyConfig.setContainerRamRequested(ByteAmount.ZERO);
+    pack(getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
   /**
@@ -147,35 +142,9 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     }
   }
 
-  /**
-   * Test the scenario where container level resource config are set
-   */
   @Test
-  public void testContainerRequestedResourcesTwoContainers() throws Exception {
-    int numContainers = 2;
-
-    // Explicit set resources for container
-    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
-    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
-    float containerCpu = 30;
-
-    topologyConfig.setContainerRamRequested(containerRam);
-    topologyConfig.setContainerDiskRequested(containerDisk);
-    topologyConfig.setContainerCpuRequested(containerCpu);
-    TopologyAPI.Topology topologyExplicitResourcesConfig =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
-
-    Assert.assertEquals(numContainers, packingPlanExplicitResourcesConfig.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
-
-    // Ram for bolt/spout should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        Assert.assertEquals(instanceDefaultResources.getRam(), instancePlan.getResource().getRam());
-      }
-    }
+  public void testContainersRequestedExceedsInstanceCount() throws Exception {
+    doTestContainerCountRequested(8, 7); // each of the 7 instances will get their own container
   }
 
   /**
@@ -426,14 +395,6 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
         newPackingPlan.getInstanceCount());
     AssertPacking.assertContainers(newPackingPlan.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testScaleDownInvalidComponent() throws Exception {
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
   }
 
   /**
