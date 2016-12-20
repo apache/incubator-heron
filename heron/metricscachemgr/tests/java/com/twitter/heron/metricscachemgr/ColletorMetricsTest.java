@@ -24,7 +24,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationT
 public class ColletorMetricsTest {
 
   public static final String CONFIG_PATH =
-      "/Users/huijunw/workspace/heron/heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
+      "../../../../../../../../../heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
   private CollectorMetrics cm = null;
 
   @Before
