@@ -47,11 +47,7 @@ public class MetricTest {
     Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
-  @Test
-  public void testMetric() {
-    lines.add("testMetric");
-    Metric m = new Metric("__emit-count", MetricAggregationType.SUM, 10, 60);
-
+  private void prepareData(Metric m) {
     m.AddValueToMetric("1");
     m.AddValueToMetric("2");
     m.AddValueToMetric("3");
@@ -63,6 +59,13 @@ public class MetricTest {
     m.AddValueToMetric("6");
 
     lines.add(m.toString());
+  }
+
+  @Test
+  public void testMetric() {
+    lines.add("testMetric");
+    Metric m = new Metric("__emit-count", MetricAggregationType.SUM, 10, 60);
+    prepareData(m);
 
     //
     TopologyMaster.MetricResponse.IndividualMetric im = m.GetMetrics(false, 0, -1);
@@ -76,18 +79,7 @@ public class MetricTest {
   public void testMetricMinutely() {
     lines.add("testMetricMinutely");
     Metric m = new Metric("__emit-count", MetricAggregationType.SUM, 10, 60);
-
-    m.AddValueToMetric("1");
-    m.AddValueToMetric("2");
-    m.AddValueToMetric("3");
-
-    m.Purge();
-
-    m.AddValueToMetric("4");
-    m.AddValueToMetric("5");
-    m.AddValueToMetric("6");
-
-    lines.add(m.toString());
+    prepareData(m);
 
     // minutely
     TopologyMaster.MetricResponse.IndividualMetric im2 = m.GetMetrics(true, 0, Integer.MAX_VALUE);

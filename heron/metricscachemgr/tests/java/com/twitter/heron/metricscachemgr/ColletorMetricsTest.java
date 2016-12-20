@@ -48,6 +48,6 @@ public class ColletorMetricsTest {
   @Test
   public void testIsCollectorMetric() {
     Assert.assertTrue(cm.getMetricsFilter().contains("__time_spent_back_pressure_by_compid"));
-//    Assert.assertFalse(cm.getMetricsFilter().contains("1__time_spent_back_pressure_by_compid"));
+    Assert.assertFalse(cm.getMetricsFilter().contains("__time_spent_back_x_pressure_by_compid"));
   }
 }
