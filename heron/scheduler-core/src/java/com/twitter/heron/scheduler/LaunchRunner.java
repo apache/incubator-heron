@@ -29,6 +29,7 @@ import com.twitter.heron.spi.scheduler.LauncherException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Runs Launcher and launch topology. Also Uploads launch state to state manager.
@@ -126,6 +127,15 @@ public class LaunchRunner {
     String topologyName = Context.topologyName(config);
 
     PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
+
+    int numContainers = TopologyUtils.getNumContainers(topology);
+    int numContainerPlans = packedPlan.getContainers().size();
+    if (numContainers != packedPlan.getContainers().size()) {
+      int instanceCount = packedPlan.getInstanceCount();
+      throw new LauncherException(String.format("Can not launch topology. The configured number of "
+          + "containers (%d) differs from the number of container plans (%d) for topology of %d "
+          + "instances", numContainers, numContainerPlans, instanceCount));
+    }
 
     // initialize the launcher
     launcher.initialize(config, runtime);

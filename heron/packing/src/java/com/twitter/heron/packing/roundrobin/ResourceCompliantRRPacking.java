@@ -236,11 +236,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       PackingPlanBuilder planBuilder) throws ResourceExceededException {
 
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    int totalInstance = TopologyUtils.getTotalInstance(topology);
+    int totalInstances = TopologyUtils.getTotalInstance(topology);
 
-    if (numContainers > totalInstance) {
-      throw new PackingException("More containers allocated than instances. " + numContainers
-          + " containers allocated to host " + totalInstance + " instances.");
+    if (numContainers > totalInstances) {
+      LOG.warning(String.format(
+          "More containers requested (%s) than total instances (%s). Reducing containers to %s",
+          numContainers, totalInstances, totalInstances));
+      numContainers = totalInstances;
+      planBuilder.updateNumContainers(numContainers);
+
     }
 
     assignInstancesToContainers(planBuilder, parallelismMap, PolicyType.STRICT);
