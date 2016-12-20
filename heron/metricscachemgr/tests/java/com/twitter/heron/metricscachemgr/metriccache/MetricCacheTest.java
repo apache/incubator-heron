@@ -33,7 +33,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 public class MetricCacheTest {
   public static final String CONFIG_PATH =
-      "/Users/huijunw/workspace/heron/heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
+      "../../../../../../../../../heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
   private static String debugFilePath =
       "/tmp/" + MetricCacheTest.class.getSimpleName() + ".debug.txt";
   private MetricCache mc = null;
@@ -45,6 +45,7 @@ public class MetricCacheTest {
     file = Paths.get(debugFilePath);
     lines = new ArrayList<>();
 
+    lines.add(Paths.get(".").toAbsolutePath().normalize().toString());
     mc = new MetricCache(15, CONFIG_PATH);
   }
 

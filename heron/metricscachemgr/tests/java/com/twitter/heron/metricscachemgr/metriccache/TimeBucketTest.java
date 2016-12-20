@@ -46,16 +46,18 @@ public class TimeBucketTest {
     Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
-  @Test
-  public void testCount() {
-    int now = (int) Instant.now().getEpochSecond();
-    TimeBucket tb = new TimeBucket(10);
-
+  private void prepareTestData(TimeBucket tb) {
     tb.data.offerFirst("1");
     tb.data.offerFirst("2");
     tb.data.offerFirst("3");
 
     lines.add(tb.toString());
+  }
+
+  @Test
+  public void testCount() {
+    TimeBucket tb = new TimeBucket(10);
+    prepareTestData(tb);
 
     // assertion
     Assert.assertEquals(tb.count(), 3);
@@ -65,12 +67,7 @@ public class TimeBucketTest {
   public void testOverlaps() {
     int now = (int) Instant.now().getEpochSecond();
     TimeBucket tb = new TimeBucket(10);
-
-    tb.data.offerFirst("1");
-    tb.data.offerFirst("2");
-    tb.data.offerFirst("3");
-
-    lines.add(tb.toString());
+    prepareTestData(tb);
 
     // assertion
     Assert.assertEquals(tb.overlaps(now - 1, now + 10 + 1), true);
@@ -78,14 +75,8 @@ public class TimeBucketTest {
 
   @Test
   public void testAggregate() {
-    int now = (int) Instant.now().getEpochSecond();
     TimeBucket tb = new TimeBucket(10);
-
-    tb.data.offerFirst("1");
-    tb.data.offerFirst("2");
-    tb.data.offerFirst("3");
-
-    lines.add(tb.toString());
+    prepareTestData(tb);
 
     // assertion
     Assert.assertEquals(String.valueOf(tb.aggregate()), "6.0");
