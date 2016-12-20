@@ -55,9 +55,8 @@ public class TableDryRunRender extends DryRunRender {
     }
     StringBuilder metaFormatterBuilder = new StringBuilder();
     String metaCellFormatter = "%%%ds";
-    for (String t: title) {
-      metaFormatterBuilder.append(String.format("| %s ", metaCellFormatter));
-    }
+    metaFormatterBuilder.append(Strings.repeat(String.format("| %s ", metaCellFormatter),
+        title.size()));
     metaFormatterBuilder.append("|");
     return String.format(metaFormatterBuilder.toString(), (Object[]) width);
   }
