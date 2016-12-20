@@ -13,7 +13,7 @@
 // limitations under the License.
 
 
-package com.twitter.heron.metricscachemgr.metriccache;
+package com.twitter.heron.metricscachemgr.metricscache;
 
 import java.io.FileNotFoundException;
 import java.time.Instant;
@@ -30,8 +30,8 @@ import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse;
 import com.twitter.heron.proto.tmaster.TopologyMaster.PublishMetrics;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationType;
 
-public class MetricCache {
-  private static final Logger LOG = Logger.getLogger(MetricCache.class.getName());
+public class MetricsCache {
+  private static final Logger LOG = Logger.getLogger(MetricsCache.class.getName());
 
   // map of component name to its metrics
   private Map<String, ComponentMetrics> metricsComponent;
@@ -42,7 +42,7 @@ public class MetricCache {
   private CollectorMetrics tmetricsInfo;
 //  private int startTime;
 
-  MetricCache(int maxInterval, String metricsSinksYaml) throws FileNotFoundException {
+  MetricsCache(int maxInterval, String metricsSinksYaml) throws FileNotFoundException {
     this.maxInterval = maxInterval;
     this.metricsSinksYaml = metricsSinksYaml;
     tmetricsInfo = new CollectorMetrics(metricsSinksYaml);
