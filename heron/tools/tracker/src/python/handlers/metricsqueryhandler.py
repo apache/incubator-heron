@@ -76,8 +76,8 @@ class MetricsQueryHandler(BaseHandler):
       "timeline": [{
         "instance": <instance>,
         "data": {
-          <startTime> : <numeric value>,
-          <startTime> : <numeric value>,
+          <start_time> : <numeric value>,
+          <start_time> : <numeric value>,
           ...
         }
       }, {
