@@ -36,6 +36,11 @@ class TController;
 class StatsInterface;
 class TMasterServer;
 class TMetricsCollector;
+class StatefulCoordinator;
+
+typedef std::map<std::string, StMgrState*> StMgrMap;
+typedef StMgrMap::iterator StMgrMapIter;
+typedef StMgrMap::const_iterator StMgrMapConstIter;
 
 class TMaster {
  public:
@@ -69,6 +74,9 @@ class TMaster {
   // Providing an accessor is bug prone.
   // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
+
+  // Timer function to start the stateful checkpoint process
+  void SendCheckpointMarker();
 
  private:
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
@@ -112,8 +120,6 @@ class TMaster {
   void UpdateProcessMetrics(EventLoop::Status);
 
   // map of active stmgr id to stmgr state
-  typedef std::map<std::string, StMgrState*> StMgrMap;
-  typedef StMgrMap::iterator StMgrMapIter;
   StMgrMap stmgrs_;
 
   // map of connection to stmgr id
@@ -170,6 +176,9 @@ class TMaster {
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;
+
+  // Stateful coordinator
+  StatefulCoordinator* stateful_coordinator_;
 
   // Copy of the EventLoop
   EventLoop* eventLoop_;

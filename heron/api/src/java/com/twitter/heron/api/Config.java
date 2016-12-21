@@ -150,6 +150,21 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_STATEFUL = "topology.component.stateful";
   /**
+   * What's the checkpoint interval for stateful topologies in seconds
+   */
+  public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL =
+                             "topology.stateful.chekpoint.interval";
+  /**
+   * What's the provider for state? i.e. one where state is stored
+   */
+  public static final String TOPOLOGY_STATEFUL_PROVIDER_TYPE =
+                             "topology.stateful.provider.type";
+  /**
+   * What's the config for state provider?
+   */
+  public static final String TOPOLOGY_STATEFUL_PROVIDER_CONFIG =
+                             "topology.stateful.provider.config";
+  /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
   public static final String TOPOLOGY_NAME = "topology.name";
@@ -213,6 +228,9 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_COMPONENT_STATEFUL);
+    apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL);
+    apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_TYPE);
+    apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CONFIG);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);

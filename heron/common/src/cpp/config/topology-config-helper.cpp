@@ -200,5 +200,39 @@ sp_int64 TopologyConfigHelper::GetContainerRamRequested(const proto::api::Topolo
       (total_parallelism / nstmgrs) + (total_parallelism % nstmgrs);
   return max_components_per_container * 1073741824l;
 }
+
+sp_int64 TopologyConfigHelper::GetStatefulCheckpointInterval(
+                               const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL) {
+      return atol(cfg.kvs(i).value().c_str());
+    }
+  }
+  // There was no value specified. The default is 0.
+  return 0;
+}
+
+sp_string TopologyConfigHelper::GetStatefulProviderType(const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_PROVIDER_TYPE) {
+      return cfg.kvs(i).value();
+    }
+  }
+  // There was no value specified. The default is empty.
+  return "";
+}
+
+sp_string TopologyConfigHelper::GetStatefulProviderConfig(const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_PROVIDER_CONFIG) {
+      return cfg.kvs(i).value();
+    }
+  }
+  // There was no value specified. The default is empty.
+  return "";
+}
 }  // namespace config
 }  // namespace heron
