@@ -28,6 +28,7 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 
@@ -48,9 +49,10 @@ public class MetricsCacheManager {
   private final MetricsSinksConfig config;
   private final String topologyName;
   private final String metricsmgrId;
-  private final long mainThreadId;
   // map from metric prefix to its aggregation form
   private MetricsFilter metricsfilter = null;
+
+  private MetricsCache metricsCache;
 
   /**
    * constructor
@@ -65,8 +67,10 @@ public class MetricsCacheManager {
     this.config = config;
     this.metricsCacheManagerServerLoop = new NIOLooper();
 
-
-    this.mainThreadId = Thread.currentThread().getId();
+    metricsCache = new MetricsCache(
+        systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60,
+        systemConfig.getTmasterMetricsCollectorPurgeIntervalSec(),
+        config);
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
@@ -79,7 +83,7 @@ public class MetricsCacheManager {
 
     // Construct the MetricsManagerServer
     metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,
-        serverHost, serverPort, serverSocketOptions);
+        serverHost, serverPort, serverSocketOptions, metricsCache);
   }
 
   private static String getLocalHostName() {

@@ -22,40 +22,58 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.metricscachemgr.CollectorMetrics;
+import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricDatum;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricRequest;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse;
 import com.twitter.heron.proto.tmaster.TopologyMaster.PublishMetrics;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationType;
 
 public class MetricsCache {
+  public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
+  public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
   private static final Logger LOG = Logger.getLogger(MetricsCache.class.getName());
-
   // map of component name to its metrics
   private Map<String, ComponentMetrics> metricsComponent;
   private int maxInterval;
   private int nintervals;
   private int interval;
-  private String metricsSinksYaml;
-  private CollectorMetrics tmetricsInfo;
-//  private int startTime;
+  //  private int startTime;
+  private MetricsFilter metricsfilter = null;
 
-  MetricsCache(int maxInterval, String metricsSinksYaml) throws FileNotFoundException {
+  @SuppressWarnings("unchecked")
+  public MetricsCache(int maxInterval, int interval, MetricsSinksConfig sinksConfig)
+      throws FileNotFoundException {
     this.maxInterval = maxInterval;
-    this.metricsSinksYaml = metricsSinksYaml;
-    tmetricsInfo = new CollectorMetrics(metricsSinksYaml);
+    this.interval = interval;
 //    startTime = (int) Instant.now().getEpochSecond();
 
-    interval = 5; // 60 from heron_internals.yaml; 5 for debug
+    metricsfilter = new MetricsFilter();
+    Map<String, Object> sinksTmaster = sinksConfig.getConfigForSink(METRICS_SINKS_TMASTER_SINK);
+    Map<String, String> metricsType =
+        (Map<String, String>) sinksTmaster.get(METRICS_SINKS_TMASTER_METRICS);
+    for (Map.Entry<String, String> e : metricsType.entrySet()) {
+      metricsfilter.setMetricToType(e.getKey(), TranslateFromString(e.getValue()));
+    }
+
     nintervals = maxInterval / interval;
 
     metricsComponent = new HashMap<>();
   }
 
-  public CollectorMetrics getSLAMetrics() {
-    return tmetricsInfo;
+  private MetricAggregationType TranslateFromString(String type) {
+    if ("SUM".equals(type)) {
+      return MetricAggregationType.SUM;
+    } else if ("AVG".equals(type)) {
+      return MetricAggregationType.AVG;
+    } else if ("LAST".equals(type)) {
+      return MetricAggregationType.LAST;
+    } else {
+      LOG.log(Level.SEVERE, "Unknown metrics type in metrics sinks " + type);
+      return MetricAggregationType.UNKNOWN;
+    }
   }
 
   public void AddMetric(PublishMetrics metrics) {
@@ -68,7 +86,7 @@ public class MetricsCache {
   void AddMetricsForComponent(String componentName, MetricDatum metricsData) {
     ComponentMetrics componentmetrics = GetOrCreateComponentMetrics(componentName);
     String name = metricsData.getName();
-    MetricAggregationType type = tmetricsInfo.getMetricsFilter().getAggregationType(name);
+    MetricAggregationType type = metricsfilter.getAggregationType(name);
     componentmetrics.AddMetricForInstance(metricsData.getInstanceId(), name, type,
         metricsData.getValue());
   }

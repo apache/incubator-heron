@@ -29,6 +29,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 public class MetricsCacheTest {
@@ -46,7 +47,7 @@ public class MetricsCacheTest {
     lines = new ArrayList<>();
 
     lines.add(Paths.get(".").toAbsolutePath().normalize().toString());
-    mc = new MetricsCache(15, CONFIG_PATH);
+    mc = new MetricsCache(15, 5, new MetricsSinksConfig(CONFIG_PATH));
   }
 
   @After
