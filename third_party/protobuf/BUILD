@@ -88,7 +88,7 @@ genrule(
         'cd $$TMP_DIR',
         'tar xfz ' + package_file,
         'patch -d ' + package_dir + ' -p1 < ' + package_patch,
-        'cd " + package_dir,
+        'cd ' + package_dir,
         './configure --prefix=$$INSTALL_DIR --enable-shared=no',
         'make install',
         'rm -rf $$TMP_DIR',
