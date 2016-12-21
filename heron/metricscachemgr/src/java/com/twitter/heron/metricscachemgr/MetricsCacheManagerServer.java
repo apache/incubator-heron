@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
-import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.network.HeronServer;
 import com.twitter.heron.common.network.HeronSocketOptions;
@@ -38,8 +37,6 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
  */
 public class MetricsCacheManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(MetricsManagerServer.class.getName());
-  // Internal MultiCountMetric Counters
-  private final MultiCountMetric serverMetricsCounters;
 
   /**
    * Constructor
@@ -48,16 +45,8 @@ public class MetricsCacheManagerServer extends HeronServer {
    * @param host the host of remote endpoint to communicate with
    * @param port the port of remote endpoint to communicate with
    */
-  public MetricsCacheManagerServer(NIOLooper s, String host,
-                                   int port, HeronSocketOptions options,
-                                   MultiCountMetric serverMetricsCounters) {
+  public MetricsCacheManagerServer(NIOLooper s, String host, int port, HeronSocketOptions options) {
     super(s, host, port, options);
-
-    if (serverMetricsCounters == null) {
-      throw new IllegalArgumentException("Server Metrics Counters is needed.");
-    }
-    this.serverMetricsCounters = serverMetricsCounters;
-
   }
 
   // We also allow directly send Metrics Message internally to invoke IMetricsSink
