@@ -317,6 +317,18 @@ public class SystemConfig {
   public static final String METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES
       = "heron.metricsmgr.network.options.socket.send.buffer.size.bytes";
 
+  /**
+   * The maximum interval in minutes of metrics to be kept in tmaster
+   */
+  public static final String TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN
+      = "heron.tmaster.metrics.collector.maximum.interval.min";
+
+  /**
+   * The interval for tmaster to purge metrics from socket
+   */
+  public static final String TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC
+      = "heron.tmaster.metrics.collector.purge.interval.sec";
+
   private Map<String, Object> config = new HashMap<>();
 
   public SystemConfig() {
@@ -550,6 +562,17 @@ public class SystemConfig {
     Object value = this.config.get(
         SystemConfig.HERON_METRICS_MAX_EXCEPTIONS_PER_MESSAGE_COUNT);
     return value == null ? Integer.MAX_VALUE : TypeUtils.getInteger(value);
+  }
+
+  public int getTmasterMetricsCollectorMaximumIntervalMin() {
+    return TypeUtils.
+        getInteger(this.config.get(
+            SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN));
+  }
+  public int getTmasterMetricsCollectorPurgeIntervalSec() {
+    return TypeUtils.
+        getInteger(this.config.get(
+            SystemConfig.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC));
   }
 
   public Object put(String key, Object value) {

@@ -5,6 +5,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 metricscachemgr_deps_files = [
     "//heron/spi/src/java:common-spi-java",
+    "//heron/metricsmgr/src/java:metricsmgr-java",
 #    "//heron/spi/src/java:slamgr-spi-java",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:common-java",
@@ -55,7 +56,6 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.metricscachemgr.ColletorMetricsTest",
        "com.twitter.heron.metricscachemgr.metricscache.TimeBucketTest",
        "com.twitter.heron.metricscachemgr.metricscache.MetricTest",
        "com.twitter.heron.metricscachemgr.metricscache.InstanceMetricsTest",

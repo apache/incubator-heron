@@ -26,6 +26,7 @@ import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.network.HeronServer;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.REQID;
+import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.metricsmgr.MetricsManagerServer;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
@@ -38,6 +39,8 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 public class MetricsCacheManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(MetricsManagerServer.class.getName());
 
+  private MetricsCache metricsCache = null;
+
   /**
    * Constructor
    *
@@ -45,15 +48,11 @@ public class MetricsCacheManagerServer extends HeronServer {
    * @param host the host of remote endpoint to communicate with
    * @param port the port of remote endpoint to communicate with
    */
-  public MetricsCacheManagerServer(NIOLooper s, String host, int port, HeronSocketOptions options) {
+  public MetricsCacheManagerServer(NIOLooper s, String host, int port, HeronSocketOptions options,
+                                   MetricsCache cache) {
     super(s, host, port, options);
-  }
 
-  // We also allow directly send Metrics Message internally to invoke IMetricsSink
-  // This method is thread-safe, since we would push Messages into a Concurrent Queue.
-  public void onInternalMessage(Metrics.MetricPublisher request,
-                                Metrics.MetricPublisherPublishMessage message) {
-    handlePublisherPublishMessage(request, message);
+    metricsCache = cache;
   }
 
   private void handlePublisherPublishMessage(Metrics.MetricPublisher request,
@@ -107,7 +106,8 @@ public class MetricsCacheManagerServer extends HeronServer {
 
   @Override
   public void onConnect(SocketChannel channel) {
-
+    LOG.info("Metrics Cache Manager got a new connection from host:port "
+        + channel.socket().getRemoteSocketAddress());
   }
 
   @Override
