@@ -8,26 +8,41 @@ package_version = "0.3.4"
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
 
-COMMON_EXECUTE = [
-    "export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind",
-    "export INSTALL_DIR=$$(pwd)/$(@D)",
-    "export TMP_DIR=$$(mktemp -d -t glog.XXXXX)",
-    "mkdir -p $$TMP_DIR",
-    "cp -R $(SRCS) $$TMP_DIR",
-    "cd $$TMP_DIR",
-    "tar xfz " + package_file,
-    "cd " + package_dir,
+include_files = [
+    "include/glog/log_severity.h",
+    "include/glog/logging.h",
+    "include/glog/raw_logging.h",
+    "include/glog/stl_logging.h",
+    "include/glog/vlog_is_on.h",
 ]
 
-DARWIN_EXECUTE = "\n".join(COMMON_EXECUTE + [
-    "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
-    "make install",
-    "rm -rf $$TMP_DIR",
+lib_files = [
+    "lib/libglog.a",
+]
+
+common_script = [
+    'export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind',
+    'export INSTALL_DIR=$$(pwd)/$(@D)',
+    'export TMP_DIR=$$(mktemp -d -t glog.XXXXX)',
+    'mkdir -p $$TMP_DIR',
+    'cp -R $(SRCS) $$TMP_DIR',
+    'cd $$TMP_DIR',
+    'tar xfz ' + package_file,
+    'cd ' + package_dir,
+]
+
+mac_script = "\n".join(common_script + [
+    './configure --prefix=$$INSTALL_DIR --enable-shared=no',
+    'make install',
+    'rm -rf $$TMP_DIR',
 ])
 
-LINUX_EXECUTE = "\n".join(COMMON_EXECUTE + [
-     './configure --prefix=$$INSTALL_DIR --enable-shared=no LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib" CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS=-L$$UNWIND_DIR/lib',
-     'make install LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib" CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS=-L$$UNWIND_DIR/lib',
+linux_script = "\n".join(common_script + [
+     'export VAR_LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib"',
+     'export VAR_INCL="=-I$$UNWIND_DIR/include"',
+     'export VAR_LD="-L$$UNWIND_DIR/lib"',
+     './configure --prefix=$$INSTALL_DIR --enable-shared=no LIBS=$$VAR_LIBS CPPFLAGS=$$VAR_INCL LDFLAGS=$$VAR_LD',
+     'make install LIBS=$$VAR_LIBS CPPFLAGS=$$VAR_INCL LDFLAGS=$$VAR_LD',
      'rm -rf $$TMP_DIR',
 ])
 
@@ -40,36 +55,20 @@ genrule(
             "//third_party/libunwind:libunwind-files",
          ]
     }),
-    outs = [
-        "include/glog/log_severity.h",
-        "include/glog/logging.h",
-        "include/glog/raw_logging.h",
-        "include/glog/stl_logging.h",
-        "include/glog/vlog_is_on.h",
-        "lib/libglog.a",
-    ],
+    outs = include_files + lib_files,
     cmd = select({
-        "//tools/platform:darwin": DARWIN_EXECUTE,
-        "//conditions:default": LINUX_EXECUTE,
+        "//tools/platform:darwin": mac_script,
+        "//conditions:default": linux_script,
     }),
 )
 
 cc_library(
     name = "glog-cxx",
-    srcs = [
-        "empty.cc",
-        "lib/libglog.a",
-        "include/glog/log_severity.h",
-        "include/glog/raw_logging.h",
-        "include/glog/stl_logging.h",
-        "include/glog/vlog_is_on.h",
-    ],
+    srcs = ["empty.cc"] + lib_files,
     deps = [
       "//third_party/gflags:gflags-cxx",
     ],
-    hdrs = [
-        "include/glog/logging.h",
-    ],
+    hdrs = include_files,
     includes = [
         "include",
     ],
@@ -81,4 +80,9 @@ filegroup(
     srcs = [
         ":glog-cxx",
     ]
+)
+
+filegroup(
+    name = "glog-files",
+    srcs = include_files + lib_files
 )
