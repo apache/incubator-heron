@@ -146,6 +146,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
+   * Is this component stateful? The format of this flag is boolean
+   */
+  public static final String TOPOLOGY_COMPONENT_STATEFUL = "topology.component.stateful";
+  /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
   public static final String TOPOLOGY_NAME = "topology.name";
@@ -208,6 +212,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
+    apiVars.add(TOPOLOGY_COMPONENT_STATEFUL);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);
