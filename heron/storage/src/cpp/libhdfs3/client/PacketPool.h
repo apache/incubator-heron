@@ -21,7 +21,8 @@
  */
 #ifndef _HDFS_LIBHDFS3_CLIENT_PACKETPOOL_H_
 #define _HDFS_LIBHDFS3_CLIENT_PACKETPOOL_H_
-#include "Memory.h"
+
+#include "common/Memory.h"
 
 #include <deque>
 
@@ -59,7 +60,7 @@ private:
     std::deque<shared_ptr<Packet> > packets;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_PACKETPOOL_H_ */

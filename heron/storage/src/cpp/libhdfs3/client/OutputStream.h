@@ -22,7 +22,7 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAM_H_
 #define _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAM_H_
 
-#include "FileSystem.h"
+#include "client/FileSystem.h"
 
 namespace Hdfs {
 
@@ -121,6 +121,6 @@ private:
 
 };
 
-}
+}  // namespace Hdfs 
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAM_H_ */

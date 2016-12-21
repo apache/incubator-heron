@@ -22,21 +22,23 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_PIPELINE_H_
 #define _HDFS_LIBHDFS3_CLIENT_PIPELINE_H_
 
-#include "FileSystemInter.h"
-#include "Memory.h"
-#include "network/BufferedSocketReader.h"
-#include "network/TcpSocket.h"
-#include "Packet.h"
-#include "PacketPool.h"
-#include "PipelineAck.h"
+#include <vector>
+#include <deque>
+
+#include "common/Memory.h"
+#include "common/SessionConfig.h"
+#include "common/Thread.h"
+
 #include "server/DatanodeInfo.h"
 #include "server/LocatedBlock.h"
 #include "server/Namenode.h"
-#include "SessionConfig.h"
-#include "Thread.h"
+#include "client/FileSystemInter.h"
+#include "client/Packet.h"
+#include "client/PacketPool.h"
+#include "client/PipelineAck.h"
 
-#include <vector>
-#include <deque>
+#include "network/BufferedSocketReader.h"
+#include "network/TcpSocket.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -191,7 +193,7 @@ private:
 
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_PIPELINE_H_ */

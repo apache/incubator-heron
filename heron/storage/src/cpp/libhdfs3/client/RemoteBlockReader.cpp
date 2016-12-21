@@ -19,17 +19,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "BigEndian.h"
-#include "DataTransferProtocolSender.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "HWCrc32c.h"
-#include "RemoteBlockReader.h"
-#include "SWCrc32c.h"
-#include "WriteBuffer.h"
+
+#include "client/RemoteBlockReader.h"
 
 #include <inttypes.h>
 #include <vector>
+
+#include "common/BigEndian.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/HWCrc32c.h"
+#include "common/SWCrc32c.h"
+#include "common/WriteBuffer.h"
+
+#include "client/DataTransferProtocolSender.h"
 
 namespace Hdfs {
 namespace Internal {

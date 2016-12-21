@@ -22,17 +22,20 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_REMOTEBLOCKREADER_H_
 #define _HDFS_LIBHDFS3_CLIENT_REMOTEBLOCKREADER_H_
 
-#include "BlockReader.h"
-#include "Checksum.h"
-#include "DataTransferProtocol.h"
-#include "Memory.h"
-#include "network/BufferedSocketReader.h"
-#include "network/TcpSocket.h"
-#include "PacketHeader.h"
-#include "PeerCache.h"
+#include "common/Checksum.h"
+#include "common/Memory.h"
+#include "common/SessionConfig.h"
+
 #include "server/DatanodeInfo.h"
 #include "server/LocatedBlocks.h"
-#include "SessionConfig.h"
+
+#include "client/BlockReader.h"
+#include "client/DataTransferProtocol.h"
+#include "client/PacketHeader.h"
+#include "client/PeerCache.h"
+
+#include "network/BufferedSocketReader.h"
+#include "network/TcpSocket.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -100,6 +103,7 @@ private:
     std::vector<char> buffer;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
+
 #endif /* _HDFS_LIBHDFS3_CLIENT_REMOTEBLOCKREADER_H_ */

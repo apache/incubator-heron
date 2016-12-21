@@ -22,7 +22,7 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_PIPELINEACK_H_
 #define _HDFS_LIBHDFS3_CLIENT_PIPELINEACK_H_
 
-#include "datatransfer.pb.h"
+#include "proto/datatransfer.pb.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -80,7 +80,7 @@ private:
     bool invalid;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_PIPELINEACK_H_ */

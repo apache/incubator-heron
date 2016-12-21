@@ -22,24 +22,26 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_FILESYSTEMIMPL_H_
 #define _HDFS_LIBHDFS3_CLIENT_FILESYSTEMIMPL_H_
 
-#include "BlockLocation.h"
-#include "DirectoryIterator.h"
-#include "FileStatus.h"
-#include "FileSystemInter.h"
-#include "FileSystemKey.h"
-#include "FileSystemStats.h"
-#include "Permission.h"
+#include <string>
+#include <vector>
+
+#include "common/FileStatus.h"
+#include "common/Permission.h"
+#include "common/SessionConfig.h"
+#include "common/Unordered.h"
+#include "common/UserInfo.h"
+#include "common/XmlConfig.h"
+
 #include "server/Namenode.h"
-#include "SessionConfig.h"
-#include "Unordered.h"
-#include "UserInfo.h"
-#include "XmlConfig.h"
+#include "client/BlockLocation.h"
+#include "client/DirectoryIterator.h"
+#include "client/FileSystemInter.h"
+#include "client/FileSystemKey.h"
+#include "client/FileSystemStats.h"
+
 #ifdef MOCK
 #include "NamenodeStub.h"
 #endif
-
-#include <string>
-#include <vector>
 
 namespace Hdfs {
 namespace Internal {
@@ -495,7 +497,7 @@ private:
 #endif
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_FILESYSTEMIMPL_H_ */

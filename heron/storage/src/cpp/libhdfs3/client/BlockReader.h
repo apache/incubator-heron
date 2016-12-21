@@ -54,7 +54,7 @@ public:
     virtual void skip(int64_t len) = 0;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_BLOCKREADER_H_ */

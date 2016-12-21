@@ -86,6 +86,6 @@ private:
     std::vector<std::string> topologyPaths; // Full path name in network topology
 };
 
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_BLOCKLOCATION_H_ */

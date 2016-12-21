@@ -19,22 +19,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Atomic.h"
-#include "DateTime.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystemInter.h"
-#include "HWCrc32c.h"
-#include "LeaseRenewer.h"
-#include "Logger.h"
-#include "OutputStream.h"
-#include "OutputStreamImpl.h"
-#include "Packet.h"
-#include "PacketHeader.h"
-#include "SWCrc32c.h"
 
-#include <cassert>
+#include "client/OutputStreamImpl.h"
+
 #include <inttypes.h>
+#include <cassert>
+
+#include "common/Atomic.h"
+#include "common/DateTime.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/HWCrc32c.h"
+#include "common/Logger.h"
+#include "common/SWCrc32c.h"
+
+#include "client/FileSystemInter.h"
+#include "client/OutputStream.h"
+#include "client/LeaseRenewer.h"
+#include "client/Packet.h"
+#include "client/PacketHeader.h"
 
 namespace Hdfs {
 namespace Internal {

@@ -22,19 +22,19 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_FILESYSTEM_H_
 #define _HDFS_LIBHDFS3_CLIENT_FILESYSTEM_H_
 
-#include "BlockLocation.h"
-#include "DirectoryIterator.h"
-#include "FileStatus.h"
-#include "FileSystemStats.h"
-#include "Permission.h"
-#include "XmlConfig.h"
-
 #include <vector>
+
+#include "common/FileStatus.h"
+#include "common/Permission.h"
+#include "common/XmlConfig.h"
+#include "client/BlockLocation.h"
+#include "client/DirectoryIterator.h"
+#include "client/FileSystemStats.h"
 
 namespace Hdfs {
 namespace Internal {
 struct FileSystemWrapper;
-}
+}  // namespace Internal
 
 class FileSystem {
 public:
@@ -284,5 +284,5 @@ private:
     friend class OutputStream;
 };
 
-}
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_CLIENT_FILESYSTEM_H_ */

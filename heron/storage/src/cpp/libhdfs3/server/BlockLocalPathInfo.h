@@ -22,13 +22,14 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_BLOCKLOCALPATHINFO_H_
 #define _HDFS_LIBHDFS3_SERVER_BLOCKLOCALPATHINFO_H_
 
-#include "ExtendedBlock.h"
+#include <string>
+#include "server/ExtendedBlock.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class BlockLocalPathInfo {
-public:
+ public:
     const ExtendedBlock & getBlock() const {
         return block;
     }
@@ -53,13 +54,13 @@ public:
         this->localMetaPath = localMetaPath;
     }
 
-private:
+ private:
     ExtendedBlock block;
     std::string localBlockPath;
     std::string localMetaPath;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_BLOCKLOCALPATHINFO_H_ */

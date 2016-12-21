@@ -19,19 +19,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "Logger.h"
-#include "NamenodeImpl.h"
-#include "NamenodeProxy.h"
-#include "StringUtil.h"
 
-#include <string>
+#include "server/NamenodeProxy.h"
 
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/file.h>
+
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Logger.h"
+#include "common/StringUtil.h"
+
+#include "server/NamenodeImpl.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -141,7 +146,7 @@ static void SetInitNamenodeIndex(const std::string & id, uint32_t index) {
     }
 }
 
-NamenodeProxy::NamenodeProxy(const std::vector<NamenodeInfo> & namenodeInfos, const std::string & tokenService,
+NamenodeProxy::NamenodeProxy(const std::vector<NamenodeInfo> & namenodeInfos, const std::string & tokenService,  // NOLINT(whitespace/line_length)
                              const SessionConfig & c, const RpcAuth & a) :
     clusterid(tokenService), currentNamenode(0) {
     if (namenodeInfos.size() == 1) {
@@ -156,7 +161,7 @@ NamenodeProxy::NamenodeProxy(const std::vector<NamenodeInfo> & namenodeInfos, co
         std::vector<std::string> nninfo = StringSplit(namenodeInfos[i].getRpcAddr(), ":");
 
         if (nninfo.size() != 2) {
-            THROW(InvalidParameter, "Cannot create namenode proxy, %s does not contain host or port",
+            THROW(InvalidParameter, "Cannot create namenode proxy, %s does not contain host or port",  // NOLINT(whitespace/line_length)
                   namenodeInfos[i].getRpcAddr().c_str());
         }
 
@@ -188,7 +193,7 @@ void NamenodeProxy::failoverToNextNamenode(uint32_t oldValue) {
     lock_guard<mutex> lock(mut);
 
     if (oldValue != currentNamenode) {
-        //already failover in another thread.
+        // already failover in another thread.
         return;
     }
 
@@ -204,7 +209,7 @@ static void HandleHdfsFailoverException(const HdfsFailoverException & e) {
         NESTED_THROW(Hdfs::HdfsRpcException, "%s", e.what());
     }
 
-    //should not reach here
+    // should not reach here
     abort();
 }
 
@@ -242,7 +247,7 @@ void NamenodeProxy::getBlockLocations(const std::string & src, int64_t offset,
 
 void NamenodeProxy::create(const std::string & src, const Permission & masked,
                            const std::string & clientName, int flag, bool createParent,
-                           short replication, int64_t blockSize) {
+                           int16_t replication, int64_t blockSize) {
     NAMENODE_HA_RETRY_BEGIN();
     namenode->create(src, masked, clientName, flag, createParent, replication, blockSize);
     NAMENODE_HA_RETRY_END();
@@ -257,7 +262,7 @@ NamenodeProxy::append(const std::string& src, const std::string& clientName) {
     return std::pair<shared_ptr<LocatedBlock>, shared_ptr<FileStatus> >();
 }
 
-bool NamenodeProxy::setReplication(const std::string & src, short replication) {
+bool NamenodeProxy::setReplication(const std::string & src, int16_t replication) {
     NAMENODE_HA_RETRY_BEGIN();
     return namenode->setReplication(src, replication);
     NAMENODE_HA_RETRY_END();
@@ -524,5 +529,5 @@ void NamenodeProxy::close() {
     namenodes.clear();
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

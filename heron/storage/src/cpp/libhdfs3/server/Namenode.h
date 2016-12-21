@@ -22,28 +22,32 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_NAMENODE_H_
 #define _HDFS_LIBHDFS3_SERVER_NAMENODE_H_
 
-#include "client/FileStatus.h"
-#include "client/Permission.h"
-#include "DatanodeInfo.h"
-#include "Exception.h"
-#include "ExtendedBlock.h"
-#include "LocatedBlock.h"
-#include "LocatedBlocks.h"
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "common/Exception.h"
+#include "common/FileStatus.h"
+#include "common/Permission.h"
+#include "common/SessionConfig.h"
+
+#include "server/DatanodeInfo.h"
+#include "server/ExtendedBlock.h"
+#include "server/LocatedBlock.h"
+#include "server/LocatedBlocks.h"
+
 #include "rpc/RpcAuth.h"
 #include "rpc/RpcCall.h"
 #include "rpc/RpcClient.h"
 #include "rpc/RpcConfig.h"
 #include "rpc/RpcProtocolInfo.h"
 #include "rpc/RpcServerInfo.h"
-#include "SessionConfig.h"
-
-#include <vector>
 
 namespace Hdfs {
 namespace Internal {
 
 class Namenode {
-public:
+ public:
     /**
      * Destroy the namenode.
      */
@@ -74,11 +78,12 @@ public:
      * @throw UnresolvedLinkException If <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
+    // Idempotent
     virtual void getBlockLocations(const std::string & src, int64_t offset,
-                                   int64_t length, LocatedBlocks & lbs) /* throw (AccessControlException,
-             FileNotFoundException, UnresolvedLinkException,
-             HdfsIOException) */ = 0;
+                                   int64_t length, LocatedBlocks & lbs) = 0;
+        // throw (AccessControlException,
+        //   FileNotFoundException, UnresolvedLinkException,
+        //   HdfsIOException);
 
     /**
      * Create a new file entry in the namespace.
@@ -125,11 +130,12 @@ public:
      */
     virtual void create(const std::string & src, const Permission & masked,
                         const std::string & clientName, int flag, bool createParent,
-                        short replication, int64_t blockSize) /* throw (AccessControlException,
-             AlreadyBeingCreatedException, DSQuotaExceededException,
-             FileAlreadyExistsException, FileNotFoundException,
-             NSQuotaExceededException, ParentNotDirectoryException,
-             SafeModeException, UnresolvedLinkException, HdfsIOException) */ = 0;
+                        int16_t replication, int64_t blockSize) = 0;
+        // throw (AccessControlException,
+        //    AlreadyBeingCreatedException, DSQuotaExceededException,
+        //    FileAlreadyExistsException, FileNotFoundException,
+        //    NSQuotaExceededException, ParentNotDirectoryException,
+        //    SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Append to the end of the file.
@@ -157,10 +163,10 @@ public:
      * @throw UnsupportedOperationException if append is not supported
      */
     virtual std::pair<shared_ptr<LocatedBlock>, shared_ptr<FileStatus>> append(
-        const std::string& src, const std::string& clientName)
-        /* throw (AccessControlException,
-             DSQuotaExceededException, FileNotFoundException,
-             SafeModeException, UnresolvedLinkException, HdfsIOException) */ = 0;
+        const std::string& src, const std::string& clientName) = 0;
+        // throw (AccessControlException,
+        //   DSQuotaExceededException, FileNotFoundException,
+        //   SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Set replication for an existing file.
@@ -184,11 +190,11 @@ public:
      * @throw UnresolvedLinkException if <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    virtual bool setReplication(const std::string & src, short replication)
-    /* throw (AccessControlException, DSQuotaExceededException,
-     FileNotFoundException, SafeModeException, UnresolvedLinkException,
-     HdfsIOException) */ = 0;
+    // Idempotent
+    virtual bool setReplication(const std::string & src, int16_t replication) = 0;
+        // throw (AccessControlException, DSQuotaExceededException,
+        //   FileNotFoundException, SafeModeException, UnresolvedLinkException,
+        //   HdfsIOException) = 0;
 
     /**
      * Set permissions for an existing file/directory.
@@ -199,11 +205,11 @@ public:
      * @throw UnresolvedLinkException If <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    virtual void setPermission(const std::string & src,
-                               const Permission & permission) /* throw (AccessControlException,
-             FileNotFoundException, SafeModeException,
-             UnresolvedLinkException, HdfsIOException) */ = 0;
+    // Idempotent
+    virtual void setPermission(const std::string & src, const Permission & permission) = 0;
+        // throw (AccessControlException,
+        //    FileNotFoundException, SafeModeException,
+        //    UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Set Owner of a path (i.e. a file or a directory).
@@ -218,11 +224,12 @@ public:
      * @throw UnresolvedLinkException If <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
+    // Idempotent
     virtual void setOwner(const std::string & src, const std::string & username,
-                          const std::string & groupname) /* throw (AccessControlException,
-             FileNotFoundException, SafeModeException,
-             UnresolvedLinkException, HdfsIOException) */ = 0;
+                          const std::string & groupname) = 0;
+        // throw (AccessControlException,
+        //    FileNotFoundException, SafeModeException,
+        //    UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * The client can give up on a block by calling abandonBlock().
@@ -236,9 +243,10 @@ public:
      * @throw HdfsIOException If an I/O error occurred
      */
     virtual void abandonBlock(const ExtendedBlock & b, const std::string & src,
-                              const std::string & holder) /* throw (AccessControlException,
-             FileNotFoundException, UnresolvedLinkException,
-             HdfsIOException) */ = 0;
+                              const std::string & holder) = 0;
+        // throw (AccessControlException,
+        //    FileNotFoundException, UnresolvedLinkException,
+        //    HdfsIOException) = 0;
 
     /**
      * A client that wants to write an additional block to the
@@ -272,10 +280,10 @@ public:
      */
     virtual shared_ptr<LocatedBlock> addBlock(const std::string & src,
             const std::string & clientName, const ExtendedBlock * previous,
-            const std::vector<DatanodeInfo> & excludeNodes)
-    /* throw (AccessControlException, FileNotFoundException,
-     NotReplicatedYetException, SafeModeException,
-     UnresolvedLinkException, HdfsIOException) */ = 0;
+            const std::vector<DatanodeInfo> & excludeNodes) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //    NotReplicatedYetException, SafeModeException,
+        //    UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Get a datanode for an existing pipeline.
@@ -296,15 +304,15 @@ public:
      * @throw UnresolvedLinkException If <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
+    // Idempotent
     virtual shared_ptr<LocatedBlock> getAdditionalDatanode(const std::string & src,
             const ExtendedBlock & blk,
             const std::vector<DatanodeInfo> & existings,
             const std::vector<std::string> & storageIDs,
             const std::vector<DatanodeInfo> & excludes, int numAdditionalNodes,
-            const std::string & clientName)
-    /* throw (AccessControlException, FileNotFoundException,
-     SafeModeException, UnresolvedLinkException, HdfsIOException) */ = 0;
+            const std::string & clientName) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //    SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * The client is done writing data to the given filename, and would
@@ -329,18 +337,18 @@ public:
      * @throw HdfsIOException If an I/O error occurred
      */
     virtual bool complete(const std::string & src,
-                          const std::string & clientName, const ExtendedBlock * last)
-    /* throw (AccessControlException, FileNotFoundException,
-     SafeModeException, UnresolvedLinkException, HdfsIOException) */ = 0;
+                          const std::string & clientName, const ExtendedBlock * last) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //     SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * The client wants to report corrupted blocks (blocks with specified
      * locations on datanodes).
      * @param blocks Array of located blocks to report
      */
-    //Idempotent
-    /*    virtual void reportBadBlocks(const std::vector<LocatedBlock> & blocks)
-         throw (HdfsIOException)  = 0;*/
+    // Idempotent
+    // virtual void reportBadBlocks(const std::vector<LocatedBlock> & blocks) = 0;
+        // throw (HdfsIOException) = 0;
 
     /**
      * Rename an item in the file system namespace.
@@ -351,8 +359,8 @@ public:
      *
      * @throw HdfsIOException an I/O error occurred
      */
-    virtual bool rename(const std::string & src, const std::string & dst)
-    /* throw (UnresolvedLinkException, HdfsIOException) */ = 0;
+    virtual bool rename(const std::string & src, const std::string & dst) = 0;
+        // throw (UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Moves blocks from srcs to trg and delete srcs
@@ -363,9 +371,9 @@ public:
      * @throw UnresolvedLinkException if <code>trg</code> or <code>srcs</code>
      *           contains a symlink
      */
-    /*    virtual void concat(const std::string & trg,
-                            const std::vector<std::string> & srcs)  throw (HdfsIOException,
-                 UnresolvedLinkException)  = 0;*/
+    // virtual void concat(const std::string & trg,
+    //                     const std::vector<std::string> & srcs)
+        // throw (HdfsIOException, UnresolvedLinkException)  = 0;
 
     /**
      * Truncate a file to the indicated length
@@ -382,8 +390,8 @@ public:
      *           contains a symlink
      */
     virtual bool truncate(const std::string & src, int64_t size,
-                          const std::string & clientName)
-    /* throw (HdfsIOException, UnresolvedLinkException) */ = 0;
+                          const std::string & clientName) = 0;
+        // throw (HdfsIOException, UnresolvedLinkException) = 0;
 
     /**
      * Get the lease of the indicated file.
@@ -395,8 +403,8 @@ public:
      *           contains a symlink
      */
     virtual void getLease(const std::string & src,
-                          const std::string & clientName) /* throw (HdfsIOException,
-             UnresolvedLinkException) */ = 0;
+                          const std::string & clientName) = 0;
+        // throw (HdfsIOException, UnresolvedLinkException) = 0;
 
     /**
      * Release the lease of the indicated file.
@@ -408,8 +416,8 @@ public:
      *           contains a symlink
      */
     virtual void releaseLease(const std::string & src,
-                              const std::string & clientName) /* throw (HdfsIOException,
-             UnresolvedLinkException) */ = 0;
+                              const std::string & clientName) = 0;
+        // throw (HdfsIOException, UnresolvedLinkException) = 0;
 
     /**
      * Rename src to dst.
@@ -445,11 +453,11 @@ public:
      *           <code>dst</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    /*virtual void rename2(const std::string & src, const std::string & dst)
-     throw (AccessControlException, DSQuotaExceededException,
-     FileAlreadyExistsException, FileNotFoundException,
-     NSQuotaExceededException, ParentNotDirectoryException,
-     SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;*/
+    // virtual void rename2(const std::string & src, const std::string & dst)
+        // throw (AccessControlException, DSQuotaExceededException,
+        //    FileAlreadyExistsException, FileNotFoundException,
+        //    NSQuotaExceededException, ParentNotDirectoryException,
+        //    SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Delete the given file or directory from the file system.
@@ -468,9 +476,9 @@ public:
      * @throw UnresolvedLinkException If <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    virtual bool deleteFile(const std::string & src, bool recursive)
-    /* throw (AccessControlException, FileNotFoundException,
-     SafeModeException, UnresolvedLinkException, HdfsIOException) */ = 0;
+    virtual bool deleteFile(const std::string & src, bool recursive) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //    SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Create a directory (or hierarchy of directories) with the given
@@ -496,12 +504,13 @@ public:
      * RunTimeExceptions:
      * @throw InvalidPathException If <code>src</code> is invalid
      */
-    //Idempotent
+    // Idempotent
     virtual bool mkdirs(const std::string & src, const Permission & masked,
-                        bool createParent) /* throw (AccessControlException,
-             FileAlreadyExistsException, FileNotFoundException,
-             NSQuotaExceededException, ParentNotDirectoryException,
-             SafeModeException, UnresolvedLinkException, HdfsIOException) */ = 0;
+                        bool createParent) = 0;
+        // throw (AccessControlException,
+        //    FileAlreadyExistsException, FileNotFoundException,
+        //    NSQuotaExceededException, ParentNotDirectoryException,
+        //    SafeModeException, UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Get a partial listing of the indicated directory
@@ -518,12 +527,13 @@ public:
      * @throw UnresolvedLinkException If <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
+    // Idempotent
     virtual bool getListing(const std::string & src,
                             const std::string & startAfter, bool needLocation,
-                            std::vector<FileStatus> & dl) /* throw (AccessControlException,
-             FileNotFoundException, UnresolvedLinkException,
-             HdfsIOException) */ = 0;
+                            std::vector<FileStatus> & dl) = 0;
+        // throw (AccessControlException,
+        //     FileNotFoundException, UnresolvedLinkException,
+        //     HdfsIOException) = 0;
 
     /**
      * Client programs can cause stateful changes in the NameNode
@@ -544,9 +554,9 @@ public:
      * @throw AccessControlException permission denied
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    virtual void renewLease(const std::string & clientName)
-    /* throw (AccessControlException, HdfsIOException) */ = 0;
+    // Idempotent
+    virtual void renewLease(const std::string & clientName) = 0;
+        // throw (AccessControlException, HdfsIOException) = 0;
 
     /**
      * Start lease recovery.
@@ -557,11 +567,9 @@ public:
      * @param true if the file is already closed
      * @throw HdfsIOException
      */
-    //Idempotent
-    /*
-        virtual bool recoverLease(const std::string & src,
-                                  const std::string & clientName)  throw (HdfsIOException)  = 0;
-    */
+    // Idempotent
+    // virtual bool recoverLease(const std::string & src,
+    //                           const std::string & clientName)  throw (HdfsIOException) = 0;
 
     /**
      * Get a set of statistics about the filesystem.
@@ -577,8 +585,9 @@ public:
      * Use  constants like {//link #GET_STATS_CAPACITY_IDX} in place of
      * actual numbers to index into the array.
      */
-    //Idempotent
-    virtual std::vector<int64_t> getFsStats() /* throw (HdfsIOException) */ = 0;
+    // Idempotent
+    virtual std::vector<int64_t> getFsStats() = 0;
+       // throw (HdfsIOException) = 0;
 
     /**
      * Dumps namenode data structures into specified file. If the file
@@ -586,8 +595,8 @@ public:
      *
      * @throw HdfsIOException
      */
-    /*    virtual void metaSave(
-            const std::string & filename)  throw (HdfsIOException)  = 0;*/
+    // virtual void metaSave(
+    //        const std::string & filename)  throw (HdfsIOException)  = 0;
 
     /**
      * Get the file info for a specific file or directory.
@@ -601,10 +610,10 @@ public:
      * @throw UnresolvedLinkException if the path contains a symlink.
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    virtual FileStatus getFileInfo(const std::string & src, bool *exist)
-    /* throw (AccessControlException, FileNotFoundException,
-     UnresolvedLinkException, HdfsIOException) */ = 0;
+    // Idempotent
+    virtual FileStatus getFileInfo(const std::string & src, bool *exist) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //    UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Get the file info for a specific file or directory. If the path
@@ -618,10 +627,10 @@ public:
      * @throw UnresolvedLinkException if <code>src</code> contains a symlink
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    /*    virtual FileStatus getFileLinkInfo(const std::string & src)
-         throw (AccessControlException, UnresolvedLinkException,
-         HdfsIOException)  = 0;*/
+    // Idempotent
+    // virtual FileStatus getFileLinkInfo(const std::string & src)
+        // throw (AccessControlException, UnresolvedLinkException,
+        //      HdfsIOException)  = 0;
 
     /**
      * Get {//link ContentSummary} rooted at the specified directory.
@@ -632,10 +641,10 @@ public:
      * @throw UnresolvedLinkException if <code>path</code> contains a symlink.
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    /*    virtual ContentSummary getContentSummary(const std::string & path)
-         throw (AccessControlException, FileNotFoundException,
-         UnresolvedLinkException, HdfsIOException)  = 0;*/
+    // Idempotent
+    // virtual ContentSummary getContentSummary(const std::string & path)
+        //  throw (AccessControlException, FileNotFoundException,
+        //      UnresolvedLinkException, HdfsIOException)  = 0;
 
     /**
      * Set the quota for a directory.
@@ -658,13 +667,12 @@ public:
      * @throw UnresolvedLinkException if the <code>path</code> contains a symlink.
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    /*
-        virtual void setQuota(const std::string & path, int64_t namespaceQuota,
-                              int64_t diskspaceQuota)  throw (AccessControlException,
-                 FileNotFoundException, UnresolvedLinkException,
-                 HdfsIOException)  = 0;
-    */
+    // Idempotent
+    // virtual void setQuota(const std::string & path, int64_t namespaceQuota,
+    //                       int64_t diskspaceQuota)
+        // throw (AccessControlException,
+        //    FileNotFoundException, UnresolvedLinkException,
+        //    HdfsIOException)  = 0;
 
     /**
      * Write all metadata for this file into persistent storage.
@@ -677,10 +685,10 @@ public:
      * @throw UnresolvedLinkException if <code>src</code> contains a symlink.
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    virtual void fsync(const std::string & src, const std::string & client)
-    /* throw (AccessControlException, FileNotFoundException,
-     UnresolvedLinkException, HdfsIOException) */ = 0;
+    // Idempotent
+    virtual void fsync(const std::string & src, const std::string & client) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //   UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Sets the modification and access time of the file to the specified time.
@@ -697,10 +705,10 @@ public:
      * @throw UnresolvedLinkException if <code>src</code> contains a symlink.
      * @throw HdfsIOException If an I/O error occurred
      */
-    //Idempotent
-    virtual void setTimes(const std::string & src, int64_t mtime, int64_t atime)
-    /* throw (AccessControlException, FileNotFoundException,
-     UnresolvedLinkException, HdfsIOException) */ = 0;
+    // Idempotent
+    virtual void setTimes(const std::string & src, int64_t mtime, int64_t atime) = 0;
+        // throw (AccessControlException, FileNotFoundException,
+        //    UnresolvedLinkException, HdfsIOException) = 0;
 
     /**
      * Create symlink to a file or directory.
@@ -720,12 +728,13 @@ public:
      * @throw UnresolvedLinkException if <code>link</target> contains a symlink.
      * @throw HdfsIOException If an I/O error occurred
      */
-    /*    virtual void createSymlink(const std::string & target,
-                                   const std::string & link, const Permission & dirPerm,
-                                   bool createParent)  throw (AccessControlException,
-                 FileAlreadyExistsException, FileNotFoundException,
-                 ParentNotDirectoryException, SafeModeException,
-                 UnresolvedLinkException, HdfsIOException)  = 0;*/
+    // virtual void createSymlink(const std::string & target,
+    //                            const std::string & link, const Permission & dirPerm,
+    //                            bool createParent)
+        // throw (AccessControlException,
+        //    FileAlreadyExistsException, FileNotFoundException,
+        //    ParentNotDirectoryException, SafeModeException,
+        //    UnresolvedLinkException, HdfsIOException)  = 0;
 
     /**
      * Return the target of the given symlink. If there is an intermediate
@@ -739,10 +748,10 @@ public:
      * @throw HdfsIOException If the given path does not refer to a symlink
      *           or an I/O error occurred
      */
-    //Idempotent
-    /*    virtual std::string getLinkTarget(const std::string & path)
-         throw (AccessControlException, FileNotFoundException,
-         HdfsIOException)  = 0;*/
+    // Idempotent
+    // virtual std::string getLinkTarget(const std::string & path)
+        // throw (AccessControlException, FileNotFoundException,
+        //     HdfsIOException)  = 0;
 
     /**
      * Get a new generation stamp together with an access token for
@@ -757,10 +766,10 @@ public:
      * @param lb output the returned block.
      * @throw HdfsIOException if any error occurs
      */
-    //Idempotent
+    // Idempotent
     virtual shared_ptr<LocatedBlock> updateBlockForPipeline(const ExtendedBlock & block,
-            const std::string & clientName)
-    /* throw (HdfsIOException) */ = 0;
+            const std::string & clientName) = 0;
+        // throw (HdfsIOException) = 0;
 
     /**
      * Update a pipeline for a block under construction
@@ -774,7 +783,8 @@ public:
     virtual void updatePipeline(const std::string & clientName,
                                 const ExtendedBlock & oldBlock, const ExtendedBlock & newBlock,
                                 const std::vector<DatanodeInfo> & newNodes,
-                                const std::vector<std::string> & storageIDs) /* throw (HdfsIOException) */ = 0;
+                                const std::vector<std::string> & storageIDs) = 0;
+        // throw (HdfsIOException) = 0;
 
     /**
       * Get a valid Delegation Token.
@@ -783,8 +793,8 @@ public:
       * @return Token<DelegationTokenIdentifier>
       * @throws IOException
       */
-    virtual Token getDelegationToken(const std::string & renewer)
-    /* throws IOException*/ = 0;
+    virtual Token getDelegationToken(const std::string & renewer) = 0;
+        // throws IOException = 0;
 
     /**
      * Renew an existing delegation token.
@@ -793,8 +803,8 @@ public:
      * @return the new expiration time
      * @throws IOException
      */
-    virtual int64_t renewDelegationToken(const Token & token)
-    /*throws IOException*/ = 0;
+    virtual int64_t renewDelegationToken(const Token & token) = 0;
+        // throws IOException = 0;
 
     /**
      * Cancel an existing delegation token.
@@ -802,16 +812,16 @@ public:
      * @param token delegation token
      * @throws IOException
      */
-    virtual void cancelDelegationToken(const Token & token)
-    /*throws IOException*/ = 0;
+    virtual void cancelDelegationToken(const Token & token) = 0;
+        // throws IOException = 0;
 
     /**
      * close the namenode connection.
      */
-    virtual void close() {};
+    virtual void close() {}
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_NAMENODE_H_ */

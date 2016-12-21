@@ -22,15 +22,15 @@
 #ifndef _HDFS_LIBHDFS_SERVER_NAMENODEINFO_H_
 #define _HDFS_LIBHDFS_SERVER_NAMENODEINFO_H_
 
-#include "XmlConfig.h"
-
 #include <string>
 #include <vector>
+
+#include "common/XmlConfig.h"
 
 namespace Hdfs {
 
 class NamenodeInfo {
-public:
+ public:
     NamenodeInfo();
 
     const std::string & getHttpAddr() const {
@@ -49,13 +49,13 @@ public:
         rpc_addr = rpcAddr;
     }
 
-    static std::vector<NamenodeInfo> GetHANamenodeInfo(const std::string & service, const Config & conf);
+    static std::vector<NamenodeInfo> GetHANamenodeInfo(const std::string & service, const Config & conf);  // NOLINT(whitespace/line_length)
 
-private:
+ private:
     std::string rpc_addr;
     std::string http_addr;
 };
 
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS_SERVER_NAMENODEINFO_H_ */

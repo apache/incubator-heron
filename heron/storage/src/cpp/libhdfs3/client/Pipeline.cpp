@@ -19,17 +19,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DateTime.h"
-#include "Pipeline.h"
-#include "Logger.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "OutputStreamInter.h"
-#include "FileSystemInter.h"
-#include "DataTransferProtocolSender.h"
-#include "datatransfer.pb.h"
+
+#include "client/Pipeline.h"
 
 #include <inttypes.h>
+
+#include "common/DateTime.h"
+#include "common/Logger.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+
+#include "client/OutputStreamInter.h"
+#include "client/FileSystemInter.h"
+#include "client/DataTransferProtocolSender.h"
+#include "proto/datatransfer.pb.h"
 
 namespace Hdfs {
 namespace Internal {

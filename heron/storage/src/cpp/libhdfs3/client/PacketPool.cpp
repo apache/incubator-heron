@@ -19,9 +19,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Logger.h"
-#include "Packet.h"
-#include "PacketPool.h"
+
+#include "client/PacketPool.h"
+
+#include "common/Logger.h"
+#include "client/Packet.h"
 
 namespace Hdfs {
 namespace Internal {

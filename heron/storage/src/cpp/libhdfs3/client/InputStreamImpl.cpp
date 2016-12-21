@@ -19,24 +19,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystemInter.h"
-#include "InputStreamImpl.h"
-#include "InputStreamInter.h"
-#include "LocalBlockReader.h"
-#include "Logger.h"
-#include "RemoteBlockReader.h"
-#include "server/Datanode.h"
-#include "Thread.h"
 
-#include <algorithm>
+#include "client/InputStreamImpl.h"
+
 #include <ifaddrs.h>
 #include <inttypes.h>
-#include <iostream>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <algorithm>
+#include <iostream>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Logger.h"
+#include "common/Thread.h"
+
+#include "server/Datanode.h"
+#include "client/FileSystemInter.h"
+#include "client/InputStreamInter.h"
+#include "client/LocalBlockReader.h"
+#include "client/RemoteBlockReader.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -235,7 +239,7 @@ void InputStreamImpl::updateBlockInfos() {
                                 last->toString().c_str(), path.c_str());
 
                             try {
-                                sleep_for(milliseconds(4000));
+                                sleep_for(std::chrono::milliseconds(4000));
                             } catch (...) {
                             }
 
@@ -620,7 +624,7 @@ int32_t InputStreamImpl::readInternal(char * buf, int32_t size) {
                 --updateMetadataOnFailure;
 
                 try {
-                    sleep_for(seconds(1));
+                    sleep_for(std::chrono::seconds(1));
                 } catch (...) {
                 }
 

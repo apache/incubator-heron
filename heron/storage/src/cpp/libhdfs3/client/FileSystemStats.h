@@ -79,5 +79,5 @@ private:
 
 };
 
-}
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_CLIENT_FSSTATS_H_ */

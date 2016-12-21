@@ -22,19 +22,21 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAMIMPL_H_
 #define _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAMIMPL_H_
 
-#include "Atomic.h"
-#include "Checksum.h"
-#include "DateTime.h"
-#include "ExceptionInternal.h"
-#include "FileSystem.h"
-#include "Memory.h"
-#include "OutputStreamInter.h"
-#include "PacketPool.h"
-#include "Permission.h"
-#include "Pipeline.h"
+#include "common/Atomic.h"
+#include "common/Checksum.h"
+#include "common/DateTime.h"
+#include "common/ExceptionInternal.h"
+#include "common/Memory.h"
+#include "common/Permission.h"
+#include "common/SessionConfig.h"
+#include "common/Thread.h"
+
 #include "server/LocatedBlock.h"
-#include "SessionConfig.h"
-#include "Thread.h"
+#include "client/FileSystem.h"
+#include "client/OutputStreamInter.h"
+#include "client/PacketPool.h"
+#include "client/Pipeline.h"
+
 #ifdef MOCK
 #include "PipelineStub.h"
 #endif
@@ -161,7 +163,7 @@ private:
 #endif
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAMIMPL_H_ */

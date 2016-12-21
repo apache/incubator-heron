@@ -22,14 +22,15 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_LOCALBLOCKREADER_H_
 #define _HDFS_LIBHDFS3_CLIENT_LOCALBLOCKREADER_H_
 
-#include "BlockReader.h"
-#include "Checksum.h"
-#include "FileWrapper.h"
-#include "Memory.h"
-#include "ReadShortCircuitInfo.h"
-#include "SessionConfig.h"
-
 #include <vector>
+
+#include "common/Checksum.h"
+#include "common/FileWrapper.h"
+#include "common/Memory.h"
+
+#include "common/SessionConfig.h"
+#include "client/BlockReader.h"
+#include "client/ReadShortCircuitInfo.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -93,7 +94,7 @@ private:
     std::vector<char> metaBuffer;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_LOCALBLOCKREADER_H_ */

@@ -22,21 +22,22 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_INPUTSTREAMIMPL_H_
 #define _HDFS_LIBHDFS3_CLIENT_INPUTSTREAMIMPL_H_
 
-#include "platform.h"
+#include "common/platform.h"
+#include "common/Hash.h"
+#include "common/ExceptionInternal.h"
+#include "common/Memory.h"
+#include "common/SessionConfig.h"
+#include "common/Unordered.h"
 
-#include "BlockReader.h"
-#include "ExceptionInternal.h"
-#include "FileSystem.h"
-#include "Hash.h"
-#include "InputStreamInter.h"
-#include "Memory.h"
-#include "PeerCache.h"
-#include "rpc/RpcAuth.h"
 #include "server/Datanode.h"
 #include "server/LocatedBlock.h"
 #include "server/LocatedBlocks.h"
-#include "SessionConfig.h"
-#include "Unordered.h"
+
+#include "client/BlockReader.h"
+#include "client/FileSystem.h"
+#include "client/InputStreamInter.h"
+#include "client/PeerCache.h"
+#include "rpc/RpcAuth.h"
 
 #ifdef MOCK
 #include "TestDatanodeStub.h"
@@ -148,7 +149,7 @@ private:
 #endif
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_INPUTSTREAMIMPL_H_ */

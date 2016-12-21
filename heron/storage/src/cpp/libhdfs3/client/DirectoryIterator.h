@@ -22,13 +22,13 @@
 #ifndef _HDFS_LIBHFDS3_CLIENT_DIRECTORY_ITERATOR_H_
 #define _HDFS_LIBHFDS3_CLIENT_DIRECTORY_ITERATOR_H_
 
-#include "FileStatus.h"
 #include <vector>
+#include "common/FileStatus.h"
 
 namespace Hdfs {
 namespace Internal {
 class FileSystemImpl;
-}
+}  // namespace Internal
 
 class DirectoryIterator {
 public:
@@ -52,6 +52,6 @@ private:
     std::vector<FileStatus> lists;
 };
 
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHFDS3_CLIENT_DIRECTORY_ITERATOR_H_ */

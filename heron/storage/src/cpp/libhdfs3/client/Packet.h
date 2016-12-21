@@ -120,6 +120,6 @@ private:
     std::vector<char> buffer;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_CLIENT_PACKET_H_ */

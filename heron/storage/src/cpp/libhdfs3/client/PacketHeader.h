@@ -22,7 +22,7 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_PACKETHEADER_H_
 #define _HDFS_LIBHDFS3_CLIENT_PACKETHEADER_H_
 
-#include "datatransfer.pb.h"
+#include "proto/datatransfer.pb.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -56,7 +56,7 @@ private:
     PacketHeaderProto proto;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_PACKETHEADER_H_ */

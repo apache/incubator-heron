@@ -22,8 +22,8 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_TOKENINTERNAL_H_
 #define _HDFS_LIBHDFS3_CLIENT_TOKENINTERNAL_H_
 
-#include "Hash.h"
-#include "Token.h"
+#include "common/Hash.h"
+#include "common/Token.h"
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::Token);
 

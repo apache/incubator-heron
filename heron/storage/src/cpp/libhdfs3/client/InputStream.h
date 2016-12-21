@@ -22,12 +22,12 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_INPUTSTREAM_H_
 #define _HDFS_LIBHDFS3_CLIENT_INPUTSTREAM_H_
 
-#include "FileSystem.h"
+#include "client/FileSystem.h"
 
 namespace Hdfs {
 namespace Internal {
 class InputStreamInter;
-}
+}  // namespace Internal
 
 /**
  * A input stream used read data from hdfs.
@@ -88,6 +88,6 @@ private:
     Internal::InputStreamInter * impl;
 };
 
-}
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_INPUTSTREAM_H_ */

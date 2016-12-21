@@ -24,9 +24,9 @@
 
 #include <map>
 
-#include "Atomic.h"
-#include "Memory.h"
-#include "Thread.h"
+#include "common/Atomic.h"
+#include "common/Memory.h"
+#include "common/Thread.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -71,6 +71,6 @@ private:
     thread worker;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_CLIENT_LEASE_RENEW_H_ */

@@ -19,9 +19,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <inttypes.h>
 
 #include "client/PeerCache.h"
+
+#include <inttypes.h>
 
 namespace Hdfs {
 namespace Internal {
@@ -51,7 +52,7 @@ shared_ptr<Socket> PeerCache::getConnection(const DatanodeInfo& datanode) {
     LOG(DEBUG1, "PeerCache miss for datanode %s uuid(%s).",
         datanode.formatAddress().c_str(), datanode.getDatanodeId().c_str());
     return shared_ptr<Socket>();
-  } else if ((elipsed = ToMilliSeconds(value.second, steady_clock::now())) >
+  } else if ((elipsed = ToMilliSeconds(value.second, std::chrono::steady_clock::now())) >
              expireTimeInterval) {
     LOG(DEBUG1, "PeerCache expire for datanode %s uuid(%s).",
         datanode.formatAddress().c_str(), datanode.getDatanodeId().c_str());
@@ -67,7 +68,7 @@ shared_ptr<Socket> PeerCache::getConnection(const DatanodeInfo& datanode) {
 void PeerCache::addConnection(shared_ptr<Socket> peer,
                               const DatanodeInfo& datanode) {
   std::string key = buildKey(datanode);
-  value_type value(peer, steady_clock::now());
+  value_type value(peer, std::chrono::steady_clock::now());
   Map.insert(key, value);
   LOG(DEBUG1, "PeerCache add for datanode %s uuid(%s).",
       datanode.formatAddress().c_str(), datanode.getDatanodeId().c_str());

@@ -22,10 +22,10 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_FILESYSTEMKEY_H_
 #define _HDFS_LIBHDFS3_CLIENT_FILESYSTEMKEY_H_
 
-#include "Hash.h"
-#include "UserInfo.h"
-
 #include <string>
+
+#include "common/Hash.h"
+#include "common/UserInfo.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -93,8 +93,8 @@ private:
     UserInfo user;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(Hdfs::Internal::FileSystemKey);
 

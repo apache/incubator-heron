@@ -22,74 +22,28 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_RPCHELPER_H_
 #define _HDFS_LIBHDFS3_SERVER_RPCHELPER_H_
 
-#include "client/FileStatus.h"
-#include "client/Permission.h"
-#include "ClientDatanodeProtocol.pb.h"
-#include "ClientNamenodeProtocol.pb.h"
-#include "DatanodeInfo.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "ExtendedBlock.h"
-#include "LocatedBlock.h"
-#include "LocatedBlocks.h"
-#include "StackPrinter.h"
-
 #include <algorithm>
 #include <cassert>
+#include <functional>
+#include <string>
+#include <vector>
 
-using namespace google::protobuf;
+#include "common/FileStatus.h"
+#include "common/Permission.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/StackPrinter.h"
+
+#include "proto/ClientDatanodeProtocol.pb.h"
+#include "proto/ClientNamenodeProtocol.pb.h"
+
+#include "server/DatanodeInfo.h"
+#include "server/ExtendedBlock.h"
+#include "server/LocatedBlock.h"
+#include "server/LocatedBlocks.h"
 
 namespace Hdfs {
 namespace Internal {
-
-class Nothing {
-};
-
-template < typename T1 = Nothing, typename T2 = Nothing, typename T3 = Nothing,
-         typename T4 = Nothing, typename T5 = Nothing, typename T6 = Nothing,
-         typename T7 = Nothing, typename T8 = Nothing, typename T9 = Nothing,
-         typename T10 = Nothing, typename T11 = Nothing  >
-class UnWrapper: public UnWrapper<T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Nothing> {
-private:
-    typedef UnWrapper<T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Nothing> BaseType;
-
-public:
-    UnWrapper(const HdfsRpcServerException & e) :
-        BaseType(e), e(e) {
-    }
-
-    void ATTRIBUTE_NORETURN ATTRIBUTE_NOINLINE unwrap(const char * file,
-            int line) {
-        if (e.getErrClass() == T1::ReflexName) {
-#ifdef NEED_BOOST
-            boost::throw_exception(T1(e.getErrMsg(), SkipPathPrefix(file), line, PrintStack(1, STACK_DEPTH).c_str()));
-#else
-            throw T1(e.getErrMsg(), SkipPathPrefix(file), line, PrintStack(1, STACK_DEPTH).c_str());
-#endif
-        } else {
-            BaseType::unwrap(file, line);
-        }
-    }
-private:
-    const HdfsRpcServerException & e;
-};
-
-template<>
-class UnWrapper < Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing,
-        Nothing, Nothing, Nothing, Nothing > {
-public:
-    UnWrapper(const HdfsRpcServerException & e) :
-        e(e) {
-    }
-    void ATTRIBUTE_NORETURN ATTRIBUTE_NOINLINE unwrap(const char * file,
-            int line) {
-        THROW(HdfsIOException,
-              "Unexpected exception: when unwrap the rpc remote exception \"%s\", %s in %s: %d",
-              e.getErrClass().c_str(), e.getErrMsg().c_str(), file, line);
-    }
-private:
-    const HdfsRpcServerException & e;
-};
 
 static inline void Convert(ExtendedBlock & eb,
                            const ExtendedBlockProto & proto) {
@@ -187,7 +141,7 @@ static inline void Convert(const std::string & src, FileStatus & fs,
 static inline void Convert(const std::string & src,
                            std::vector<FileStatus> & dl,
                            const DirectoryListingProto & proto) {
-    RepeatedPtrField<HdfsFileStatusProto> ptrproto = proto.partiallisting();
+    ::google::protobuf::RepeatedPtrField<HdfsFileStatusProto> ptrproto = proto.partiallisting();
 
     for (int i = 0; i < ptrproto.size(); i++) {
         FileStatus fileStatus;
@@ -235,7 +189,7 @@ static inline void Build(const DatanodeInfo & dn, DatanodeIDProto * proto) {
 }
 
 static inline void Build(const std::vector<DatanodeInfo> & dns,
-                         RepeatedPtrField<DatanodeInfoProto> * proto) {
+                         ::google::protobuf::RepeatedPtrField<DatanodeInfoProto> * proto) {
     for (size_t i = 0; i < dns.size(); ++i) {
         DatanodeInfoProto * p = proto->Add();
         Build(dns[i], p->mutable_id());
@@ -258,7 +212,7 @@ static inline void Build(LocatedBlock & b, LocatedBlockProto * proto) {
 }
 
 /*static inline void Build(const std::vector<LocatedBlock> & blocks,
-                         RepeatedPtrField<LocatedBlockProto> * proto) {
+                         ::google::protobuf::RepeatedPtrField<LocatedBlockProto> * proto) {
     for (size_t i = 0; i < blocks.size(); ++i) {
         LocatedBlockProto * p = proto->Add();
         p->set_corrupt(blocks[i].isCorrupt());
@@ -268,20 +222,20 @@ static inline void Build(LocatedBlock & b, LocatedBlockProto * proto) {
 }*/
 
 static inline void Build(const std::vector<std::string> & srcs,
-                         RepeatedPtrField<std::string> * proto) {
+                         ::google::protobuf::RepeatedPtrField<std::string> * proto) {
     for (size_t i = 0; i < srcs.size(); ++i) {
         proto->Add()->assign(srcs[i]);
     }
 }
 
 static inline void Build(const std::vector<DatanodeInfo> & dns,
-                         RepeatedPtrField<DatanodeIDProto> * proto) {
+                         ::google::protobuf::RepeatedPtrField<DatanodeIDProto> * proto) {
     for (size_t i = 0; i < dns.size(); ++i) {
         Build(dns[i], proto->Add());
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_RPCHELPER_H_ */

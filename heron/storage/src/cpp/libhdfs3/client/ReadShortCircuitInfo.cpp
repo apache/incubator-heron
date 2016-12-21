@@ -19,20 +19,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "client/DataTransferProtocolSender.h"
-#include "ReadShortCircuitInfo.h"
-#include "server/Datanode.h"
-#include "datatransfer.pb.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "network/DomainSocket.h"
-#include "SWCrc32c.h"
-#include "HWCrc32c.h"
-#include "StringUtil.h"
+
+#include "client/ReadShortCircuitInfo.h"
 
 #include <inttypes.h>
 #include <sstream>
 #include <vector>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/SWCrc32c.h"
+#include "common/HWCrc32c.h"
+#include "common/StringUtil.h"
+
+#include "client/DataTransferProtocolSender.h"
+#include "server/Datanode.h"
+
+#include "proto/datatransfer.pb.h"
+#include "network/DomainSocket.h"
 
 namespace Hdfs {
 namespace Internal {

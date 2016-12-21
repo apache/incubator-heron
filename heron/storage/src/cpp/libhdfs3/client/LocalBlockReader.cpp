@@ -19,16 +19,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "BigEndian.h"
-#include "datatransfer.pb.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "HWCrc32c.h"
-#include "LocalBlockReader.h"
-#include "SWCrc32c.h"
+#include "client/LocalBlockReader.h"
 
 #include <inttypes.h>
 #include <limits>
+
+#include "proto/datatransfer.pb.h"
+#include "common/BigEndian.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/HWCrc32c.h"
+#include "common/SWCrc32c.h"
 
 #define BMVERSION 1
 #define BMVERSION_SIZE 2

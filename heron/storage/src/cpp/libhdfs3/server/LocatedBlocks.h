@@ -22,16 +22,17 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_LOCATEDBLOCKS_H_
 #define _HDFS_LIBHDFS3_SERVER_LOCATEDBLOCKS_H_
 
-#include "LocatedBlock.h"
-#include "Memory.h"
-
 #include <cassert>
+#include <vector>
+
+#include "common/Memory.h"
+#include "server/LocatedBlock.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class LocatedBlocks {
-public:
+ public:
     virtual ~LocatedBlocks() {}
 
     virtual int64_t getFileLength() const = 0;
@@ -59,7 +60,7 @@ public:
  * Collection of blocks with their locations and the file length.
  */
 class LocatedBlocksImpl : public LocatedBlocks {
-public:
+ public:
     int64_t getFileLength() const {
         return fileLength;
     }
@@ -99,15 +100,15 @@ public:
         return blocks;
     }
 
-private:
+ private:
     bool lastBlockComplete;
     bool underConstruction;
     int64_t fileLength;
     shared_ptr<LocatedBlock> lastBlock;
     std::vector<LocatedBlock> blocks;
-
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
+
 #endif /* _HDFS_LIBHDFS3_SERVER_LOCATEDBLOCKS_H_ */

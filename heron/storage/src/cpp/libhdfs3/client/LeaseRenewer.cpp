@@ -19,12 +19,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DateTime.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystemInter.h"
-#include "LeaseRenewer.h"
-#include "Logger.h"
+
+#include "client/LeaseRenewer.h"
+
+#include "common/DateTime.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Logger.h"
+
+#include "client/FileSystemInter.h"
 
 #define DEFAULT_LEASE_RENEW_INTERVAL (60 * 1000)
 
@@ -101,7 +104,7 @@ void LeaseRenewerImpl::renewer() {
     while (!stop) {
         try {
             unique_lock < mutex > lock(mut);
-            cond.wait_for(lock, milliseconds(interval));
+            cond.wait_for(lock, std::chrono::milliseconds(interval));
 
             if (stop || maps.empty()) {
                 break;

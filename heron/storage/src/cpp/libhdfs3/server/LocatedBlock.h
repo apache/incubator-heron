@@ -22,11 +22,12 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_LOCATEDBLOCK_H_
 #define _HDFS_LIBHDFS3_SERVER_LOCATEDBLOCK_H_
 
-#include "client/Token.h"
-#include "DatanodeInfo.h"
-#include "ExtendedBlock.h"
-
+#include <string>
 #include <vector>
+
+#include "common/Token.h"
+#include "server/DatanodeInfo.h"
+#include "server/ExtendedBlock.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -37,12 +38,12 @@ namespace Internal {
  * block, whether it is corrupt, security token, etc).
  */
 class LocatedBlock: public ExtendedBlock {
-public:
+ public:
     LocatedBlock() :
         offset(0), corrupt(false) {
     }
 
-    LocatedBlock(int64_t position) :
+    explicit LocatedBlock(int64_t position) :
         offset(position), corrupt(false) {
     }
 
@@ -98,7 +99,7 @@ public:
         this->storageIDs = sid;
     }
 
-private:
+ private:
     int64_t offset;
     bool corrupt;
     std::vector<DatanodeInfo> locs;
@@ -106,7 +107,7 @@ private:
     Token token;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_LOCATEDBLOCK_H_ */

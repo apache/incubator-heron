@@ -19,27 +19,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DirectoryIterator.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystem.h"
-#include "FileSystemImpl.h"
-#include "FileSystemKey.h"
-#include "Hash.h"
-#include "SessionConfig.h"
-#include "Thread.h"
-#include "Token.h"
-#include "Unordered.h"
-#include "WritableUtils.h"
+
+#include "client/FileSystem.h"
 
 #include <algorithm>
 #include <string>
 #include <krb5/krb5.h>
 
-using namespace Hdfs::Internal;
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Hash.h"
+#include "common/SessionConfig.h"
+#include "common/Thread.h"
+#include "common/Token.h"
+#include "common/Unordered.h"
+#include "common/WritableUtils.h"
+
+#include "client/DirectoryIterator.h"
+#include "client/FileSystemImpl.h"
+#include "client/FileSystemKey.h"
+
+// using namespace Hdfs::Internal;
 
 namespace Hdfs {
-
 namespace Internal {
 
 static std::string ExtractPrincipalFromTicketCache(

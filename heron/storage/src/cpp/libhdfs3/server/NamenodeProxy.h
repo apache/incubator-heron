@@ -22,33 +22,37 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_NAMENODEPROXY_H_
 #define _HDFS_LIBHDFS3_SERVER_NAMENODEPROXY_H_
 
-#include "Memory.h"
-#include "Namenode.h"
-#include "NamenodeInfo.h"
-#include "Thread.h"
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "common/Memory.h"
+#include "common/Thread.h"
+
+#include "server/Namenode.h"
+#include "server/NamenodeInfo.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class NamenodeProxy: public Namenode {
-public:
+ public:
     NamenodeProxy(const std::vector<NamenodeInfo> & namenodeInfos, const std::string & tokenService,
                   const SessionConfig & c, const RpcAuth & a);
     ~NamenodeProxy();
 
-public:
-
+ public:
     void getBlockLocations(const std::string & src, int64_t offset,
                            int64_t length, LocatedBlocks & lbs);
 
     void create(const std::string & src, const Permission & masked,
                 const std::string & clientName, int flag, bool createParent,
-                short replication, int64_t blockSize);
+                int16_t replication, int64_t blockSize);
 
     std::pair<shared_ptr<LocatedBlock>, shared_ptr<FileStatus> > append(
         const std::string& src, const std::string& clientName);
 
-    bool setReplication(const std::string & src, short replication);
+    bool setReplication(const std::string & src, int16_t replication);
 
     void setPermission(const std::string & src, const Permission & permission);
 
@@ -59,7 +63,7 @@ public:
                       const std::string & holder);
 
     shared_ptr<LocatedBlock> addBlock(const std::string & src,
-                                      const std::string & clientName, const ExtendedBlock * previous,
+                                      const std::string & clientName, const ExtendedBlock * previous,  // NOLINT(whitespace/line_length)
                                       const std::vector<DatanodeInfo> & excludeNodes);
 
     shared_ptr<LocatedBlock> getAdditionalDatanode(const std::string & src,
@@ -139,11 +143,11 @@ public:
 
     void close();
 
-private:
+ private:
     shared_ptr<Namenode> getActiveNamenode(uint32_t & oldValue);
     void failoverToNextNamenode(uint32_t oldValue);
 
-private:
+ private:
     bool enableNamenodeHA;
     int maxNamenodeHARetry;
     mutex mut;
@@ -152,7 +156,7 @@ private:
     uint32_t currentNamenode;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_NAMENODEPROXY_H_ */

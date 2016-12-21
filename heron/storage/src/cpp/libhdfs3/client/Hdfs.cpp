@@ -19,25 +19,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform.h"
 
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystem.h"
-#include "hdfs.h"
-#include "InputStream.h"
-#include "Logger.h"
-#include "Logger.h"
-#include "Memory.h"
-#include "OutputStream.h"
-#include "server/NamenodeInfo.h"
-#include "SessionConfig.h"
-#include "Thread.h"
-#include "XmlConfig.h"
+#include "common/platform.h"
 
+#include <libxml/uri.h>
 #include <vector>
 #include <string>
-#include <libxml/uri.h>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/Logger.h"
+#include "common/Memory.h"
+#include "common/SessionConfig.h"
+#include "common/Thread.h"
+#include "common/XmlConfig.h"
+
+#include "server/NamenodeInfo.h"
+#include "client/FileSystem.h"
+#include "client/hdfs.h"
+#include "client/InputStream.h"
+#include "client/OutputStream.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,6 +92,7 @@ using Hdfs::Config;
 using Hdfs::Internal::shared_ptr;
 using Hdfs::NamenodeInfo;
 using Hdfs::FileNotFoundException;
+using Hdfs::Permission;
 
 struct HdfsFileInternalWrapper {
 public:
@@ -662,7 +664,7 @@ hdfsFile hdfsOpenFile(hdfsFS fs, const char * path, int flags, int bufferSize,
 
             file->setInput(false);
             os = new OutputStream;
-            os->open(fs->getFilesystem(), path, internalFlags, 0777, false, replication,
+            os->open(fs->getFilesystem(), path, internalFlags, Permission(0777), false, replication,
                      blocksize);
             file->setStream(os);
         } else {
@@ -961,7 +963,7 @@ int hdfsCreateDirectory(hdfsFS fs, const char * path) {
     PARAMETER_ASSERT(fs && path && strlen(path) > 0, -1, EINVAL);
 
     try {
-        return fs->getFilesystem().mkdirs(path, 0755) ? 0 : -1;
+        return fs->getFilesystem().mkdirs(path, Permission(0755)) ? 0 : -1;
     } catch (const std::bad_alloc & e) {
         SetErrorMessage("Out of memory");
         errno = ENOMEM;
@@ -1196,7 +1198,7 @@ int hdfsChmod(hdfsFS fs, const char * path, short mode) {
     PARAMETER_ASSERT(fs && path && strlen(path) > 0, -1, EINVAL);
 
     try {
-        fs->getFilesystem().setPermission(path, mode);
+        fs->getFilesystem().setPermission(path, Permission(mode));
         return 0;
     } catch (const std::bad_alloc & e) {
         SetErrorMessage("Out of memory");

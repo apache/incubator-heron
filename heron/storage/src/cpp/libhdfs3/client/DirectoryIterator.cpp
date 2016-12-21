@@ -19,11 +19,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DirectoryIterator.h"
-#include "FileStatus.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystemImpl.h"
+#include "client/DirectoryIterator.h"
+
+#include "common/FileStatus.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "client/FileSystemImpl.h"
 
 namespace Hdfs {
 

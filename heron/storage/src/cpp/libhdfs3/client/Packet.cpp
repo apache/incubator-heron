@@ -19,11 +19,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "BigEndian.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "Packet.h"
-#include "PacketHeader.h"
+
+#include "client/Packet.h"
+
+#include "common/BigEndian.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "client/PacketHeader.h"
 
 namespace Hdfs {
 namespace Internal {

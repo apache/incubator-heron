@@ -19,28 +19,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Atomic.h"
-#include "BlockLocation.h"
-#include "DirectoryIterator.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileStatus.h"
-#include "FileSystemImpl.h"
-#include "FileSystemStats.h"
-#include "InputStream.h"
-#include "LeaseRenewer.h"
-#include "Logger.h"
-#include "OutputStream.h"
-#include "OutputStreamImpl.h"
+
+#include "client/FileSystemImpl.h"
+
+#include <libxml/uri.h>
+#include <strings.h>
+#include <inttypes.h>
+#include <cstring>
+
+#include "common/Atomic.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/FileStatus.h"
+#include "common/Logger.h"
+#include "common/StringUtil.h"
+
 #include "server/LocatedBlocks.h"
 #include "server/NamenodeInfo.h"
 #include "server/NamenodeProxy.h"
-#include "StringUtil.h"
 
-#include <cstring>
-#include <inttypes.h>
-#include <libxml/uri.h>
-#include <strings.h>
+#include "client/BlockLocation.h"
+#include "client/DirectoryIterator.h"
+#include "client/FileSystemStats.h"
+#include "client/InputStream.h"
+#include "client/LeaseRenewer.h"
+#include "client/OutputStream.h"
+#include "client/OutputStreamImpl.h"
 
 namespace Hdfs {
 namespace Internal {

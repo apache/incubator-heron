@@ -19,14 +19,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "NamenodeInfo.h"
-#include "StringUtil.h"
-#include "XmlConfig.h"
 
+#include "server/NamenodeInfo.h"
 #include <string>
 #include <vector>
 
-using namespace Hdfs::Internal;
+#include "common/StringUtil.h"
+#include "common/XmlConfig.h"
+
+// using namespace Hdfs::Internal;
 
 namespace Hdfs {
 
@@ -41,22 +42,21 @@ const char * DFS_NAMENODE_HTTP_ADDRESS_KEY = "dfs.namenode.http-address";
 std::vector<NamenodeInfo> NamenodeInfo::GetHANamenodeInfo(
     const std::string & service, const Config & conf) {
     std::vector<NamenodeInfo> retval;
-    std::string strNameNodes = StringTrim(
+    std::string strNameNodes = Internal::StringTrim(
                                    conf.getString(std::string(DFS_NAMENODE_HA) + "." + service));
-    std::vector<std::string> nns = StringSplit(strNameNodes, ",");
+    std::vector<std::string> nns = Internal::StringSplit(strNameNodes, ",");
     retval.resize(nns.size());
 
     for (size_t i = 0; i < nns.size(); ++i) {
-        std::string dfsRpcAddress = StringTrim(
-                                        std::string(DFS_NAMENODE_RPC_ADDRESS_KEY) + "." + service + "."
-                                        + StringTrim(nns[i]));
-        std::string dfsHttpAddress = StringTrim(
-                                         std::string(DFS_NAMENODE_HTTP_ADDRESS_KEY) + "." + service + "."
-                                         + StringTrim(nns[i]));
-        retval[i].setRpcAddr(StringTrim(conf.getString(dfsRpcAddress, "")));
-        retval[i].setHttpAddr(StringTrim(conf.getString(dfsHttpAddress, "")));
+        std::string dfsRpcAddress = Internal::StringTrim(
+            std::string(DFS_NAMENODE_RPC_ADDRESS_KEY) + "." + service + "." + Internal::StringTrim(nns[i]));  // NOLINT(whitespace/line_length)
+        std::string dfsHttpAddress = Internal::StringTrim(
+            std::string(DFS_NAMENODE_HTTP_ADDRESS_KEY) + "." + service + "." + Internal::StringTrim(nns[i]));  // NOLINT(whitespace/line_length)
+        retval[i].setRpcAddr(Internal::StringTrim(conf.getString(dfsRpcAddress, "")));
+        retval[i].setHttpAddr(Internal::StringTrim(conf.getString(dfsHttpAddress, "")));
     }
 
     return retval;
 }
-}
+
+}  // namespace Hdfs

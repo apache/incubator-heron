@@ -19,14 +19,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "LocatedBlock.h"
-#include "LocatedBlocks.h"
+#include "server/LocatedBlocks.h"
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <iostream>
+#include <vector>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "server/LocatedBlock.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -70,5 +73,5 @@ const LocatedBlock * LocatedBlocksImpl::findBlock(int64_t position) {
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

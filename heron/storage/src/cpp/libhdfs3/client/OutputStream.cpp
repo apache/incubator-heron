@@ -19,13 +19,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Atomic.h"
-#include "FileSystemImpl.h"
-#include "Memory.h"
-#include "OutputStream.h"
-#include "OutputStreamImpl.h"
 
-using namespace Hdfs::Internal;
+#include "client/OutputStream.h"
+
+#include "common/Atomic.h"
+#include "common/Memory.h"
+
+#include "client/FileSystemImpl.h"
+#include "client/OutputStreamImpl.h"
+
+// using namespace Hdfs::Internal;
 
 namespace Hdfs {
 

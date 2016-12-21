@@ -25,18 +25,19 @@
 #include <string>
 #include <vector>
 
-#include "BlockLocation.h"
-#include "DirectoryIterator.h"
-#include "FileStatus.h"
-#include "FileSystemKey.h"
-#include "FileSystemStats.h"
-#include "PeerCache.h"
-#include "Permission.h"
+#include "common/FileStatus.h"
+#include "common/Permission.h"
+#include "common/SessionConfig.h"
+#include "common/Unordered.h"
+#include "common/UserInfo.h"
+#include "common/XmlConfig.h"
+
 #include "server/LocatedBlocks.h"
-#include "SessionConfig.h"
-#include "Unordered.h"
-#include "UserInfo.h"
-#include "XmlConfig.h"
+#include "client/BlockLocation.h"
+#include "client/DirectoryIterator.h"
+#include "client/FileSystemKey.h"
+#include "client/FileSystemStats.h"
+#include "client/PeerCache.h"
 
 namespace Hdfs {
 
@@ -483,6 +484,6 @@ public:
     virtual PeerCache& getPeerCache() = 0;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_CLIENT_FILESYSTEMINTER_H_ */

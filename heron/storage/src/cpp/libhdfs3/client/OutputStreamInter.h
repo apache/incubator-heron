@@ -22,10 +22,11 @@
 #ifndef _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAMINTER_H_
 #define _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAMINTER_H_
 
-#include "ExceptionInternal.h"
-#include "FileSystemInter.h"
-#include "Memory.h"
-#include "Permission.h"
+#include "common/ExceptionInternal.h"
+#include "common/Memory.h"
+#include "common/Permission.h"
+
+#include "client/FileSystemInter.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -86,7 +87,7 @@ public:
     virtual void setError(const exception_ptr & error) = 0;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_OUTPUTSTREAMINTER_H_ */

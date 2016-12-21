@@ -19,17 +19,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ClientDatanodeProtocol.pb.h"
-#include "Datanode.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "RpcHelper.h"
+#include "server/Datanode.h"
+
+#include <string>
+
+#include "proto/ClientDatanodeProtocol.pb.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/RpcHelper.h"
+
+#include "server/RpcHelper.h"
 
 #define DATANODE_VERSION 1
 #define DATANODE_PROTOCOL "org.apache.hadoop.hdfs.protocol.ClientDatanodeProtocol"
 #define BLOCK_TOKEN_KIND "HDFS_BLOCK_TOKEN"
 
-using namespace google::protobuf;
+// using namespace google::protobuf;
 
 namespace Hdfs {
 namespace Internal {
@@ -47,7 +52,7 @@ void DatanodeImpl::invoke(const RpcCall & call, bool reuse) {
     try {
         channel.invoke(call);
     } catch (const HdfsFailoverException & e) {
-        //Datanode do not have HA configuration.
+        // Datanode do not have HA configuration.
         channel.close(true);
         Hdfs::rethrow_if_nested(e);
         assert(false && "HdfsFailoverException should be always a wrapper of other exception");
@@ -91,5 +96,5 @@ void DatanodeImpl::getBlockLocalPathInfo(const ExtendedBlock & block,
     }
 }
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs

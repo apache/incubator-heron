@@ -93,6 +93,6 @@ public:
     virtual std::string toString() = 0;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 #endif /* _HDFS_LIBHDFS3_CLIENT_INPUTSTREAMINTER_H_ */

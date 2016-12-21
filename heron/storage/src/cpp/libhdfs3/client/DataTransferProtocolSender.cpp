@@ -19,21 +19,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "client/Token.h"
-#include "datatransfer.pb.h"
-#include "DataTransferProtocolSender.h"
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "hdfs.pb.h"
-#include "Security.pb.h"
-#include "WriteBuffer.h"
 
-using namespace google::protobuf;
+#include "client/DataTransferProtocolSender.h"
+
+#include "common/Token.h"
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
+#include "common/WriteBuffer.h"
+
+#include "proto/datatransfer.pb.h"
+#include "proto/hdfs.pb.h"
+#include "proto/Security.pb.h"
 
 namespace Hdfs {
 namespace Internal {
 
-static inline void Send(Socket & sock, DataTransferOp op, Message * msg,
+static inline void Send(Socket & sock, DataTransferOp op, ::google::protobuf::Message * msg,
                         int writeTimeout) {
     WriteBuffer buffer;
     buffer.writeBigEndian(static_cast<int16_t>(DATA_TRANSFER_VERSION));
@@ -84,7 +85,7 @@ static inline void BuildNodeInfo(const DatanodeInfo & node,
 }
 
 static inline void BuildNodesInfo(const std::vector<DatanodeInfo> & nodes,
-                                  RepeatedPtrField<DatanodeInfoProto> * infos) {
+                                  ::google::protobuf::RepeatedPtrField<DatanodeInfoProto> * infos) {
     for (std::size_t i = 0; i < nodes.size(); ++i) {
         BuildNodeInfo(nodes[i], infos->Add());
     }

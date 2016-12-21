@@ -19,13 +19,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Exception.h"
-#include "ExceptionInternal.h"
-#include "FileSystemKey.h"
 
-#include <algorithm>
+#include "client/FileSystemKey.h"
+
 #include <libxml/uri.h>
+#include <algorithm>
 #include <sstream>
+
+#include "common/Exception.h"
+#include "common/ExceptionInternal.h"
 
 namespace Hdfs {
 namespace Internal {

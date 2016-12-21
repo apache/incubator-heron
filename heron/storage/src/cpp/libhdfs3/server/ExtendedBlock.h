@@ -22,9 +22,10 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_EXTENDEDBLOCK_H_
 #define _HDFS_LIBHDFS3_SERVER_EXTENDEDBLOCK_H_
 
-#include "Hash.h"
 #include <string>
 #include <sstream>
+
+#include "common/Hash.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -33,7 +34,7 @@ namespace Internal {
  * Identifies a Block uniquely across the block pools
  */
 class ExtendedBlock {
-public:
+ public:
     ExtendedBlock() :
         blockId(0), generationStamp(0), numBytes(0) {
     }
@@ -83,15 +84,15 @@ public:
         return CombineHasher(values, sizeof(values) / sizeof(values[0]));
     }
 
-private:
+ private:
     int64_t blockId;
     int64_t generationStamp;
     int64_t numBytes;
     std::string poolId;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::ExtendedBlock);
 

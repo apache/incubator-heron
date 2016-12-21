@@ -29,8 +29,9 @@
 #include "common/LruMap.h"
 #include "common/Memory.h"
 #include "common/SessionConfig.h"
-#include "network/Socket.h"
+
 #include "server/DatanodeInfo.h"
+#include "network/Socket.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -43,7 +44,7 @@ class PeerCache {
 
   void addConnection(shared_ptr<Socket> peer, const DatanodeInfo& datanode);
 
-  typedef std::pair<shared_ptr<Socket>, steady_clock::time_point> value_type;
+  typedef std::pair<shared_ptr<Socket>, std::chrono::steady_clock::time_point> value_type;
 
  private:
   std::string buildKey(const DatanodeInfo& datanode);
@@ -53,7 +54,8 @@ class PeerCache {
   int64_t expireTimeInterval;  // milliseconds
   static LruMap<std::string, value_type> Map;
 };
-}
-}
+
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_CLIENT_PEERCACHE_H_ */

@@ -22,7 +22,7 @@
 #ifndef _HDFS_LIBHDFS_3_CLIENT_DATATRANSFERPROTOCOL_H_
 #define _HDFS_LIBHDFS_3_CLIENT_DATATRANSFERPROTOCOL_H_
 
-#include "client/Token.h"
+#include "common/Token.h"
 #include "server/DatanodeInfo.h"
 #include "server/ExtendedBlock.h"
 
@@ -111,7 +111,7 @@ public:
                                         uint32_t maxVersion) = 0;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS_3_CLIENT_DATATRANSFERPROTOCOL_H_ */

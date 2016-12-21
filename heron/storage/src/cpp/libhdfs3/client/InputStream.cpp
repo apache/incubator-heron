@@ -19,13 +19,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "FileSystemImpl.h"
-#include "FileSystemInter.h"
-#include "InputStream.h"
-#include "InputStreamImpl.h"
-#include "InputStreamInter.h"
 
-using namespace Hdfs::Internal;
+#include "client/InputStream.h"
+
+#include "client/FileSystemImpl.h"
+#include "client/FileSystemInter.h"
+#include "client/InputStreamImpl.h"
+#include "client/InputStreamInter.h"
+
+// using namespace Hdfs::Internal;
 
 namespace Hdfs {
 

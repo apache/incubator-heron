@@ -34,7 +34,7 @@ namespace Internal {
  * network location that is communicated to clients.
  */
 class DatanodeInfo {
-public:
+ public:
     const std::string & getHostName() const {
         return hostName;
     }
@@ -114,7 +114,7 @@ public:
         return ss.str();
     }
 
-private:
+ private:
     uint32_t xferPort;
     uint32_t infoPort;
     uint32_t ipcPort;
@@ -124,7 +124,7 @@ private:
     std::string location;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_DATANODEINFO_H_ */

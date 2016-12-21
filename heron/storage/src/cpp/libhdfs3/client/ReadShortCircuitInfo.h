@@ -22,18 +22,19 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_READSHORTCIRCUITINFO_H_
 #define _HDFS_LIBHDFS3_SERVER_READSHORTCIRCUITINFO_H_
 
-#include "FileWrapper.h"
-#include "Hash.h"
-#include "LruMap.h"
-#include "Memory.h"
-#include "network/Socket.h"
-#include "rpc/RpcAuth.h"
+#include "common/FileWrapper.h"
+#include "common/Hash.h"
+#include "common/LruMap.h"
+#include "common/Memory.h"
+#include "common/SessionConfig.h"
+#include "common/Thread.h"
+#include "common/Token.h"
+
 #include "server/BlockLocalPathInfo.h"
 #include "server/DatanodeInfo.h"
 #include "server/ExtendedBlock.h"
-#include "SessionConfig.h"
-#include "Thread.h"
-#include "Token.h"
+#include "network/Socket.h"
+#include "rpc/RpcAuth.h"
 
 namespace Hdfs {
 namespace Internal {
@@ -179,8 +180,9 @@ class ReadShortCircuitInfoBuilder {
   static ReadShortCircuitFDCacheType ReadShortCircuitFDCache;
   static BlockLocalPathInfoCacheType BlockLocalPathInfoCache;
 };
-}
-}
+
+}  // namespace Internal
+}  // namespace Hdfs
 
 HDFS_HASH_DEFINE(::Hdfs::Internal::ReadShortCircuitInfoKey);
 

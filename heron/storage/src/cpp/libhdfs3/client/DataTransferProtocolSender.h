@@ -22,8 +22,8 @@
 #ifndef _HDFS_LIBHDFS_3_CLIENT_DATATRANSFERPROTOCOLSENDER_H_
 #define _HDFS_LIBHDFS_3_CLIENT_DATATRANSFERPROTOCOLSENDER_H_
 
-#include "DataTransferProtocol.h"
 #include "network/Socket.h"
+#include "client/DataTransferProtocol.h"
 
 /**
  * Version 28:
@@ -131,7 +131,7 @@ private:
     std::string datanode;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS_3_CLIENT_DATATRANSFERPROTOCOLSENDER_H_ */

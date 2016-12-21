@@ -22,22 +22,26 @@
 #ifndef _HDFS_LIBHDFS3_SERVER_DATANODE_H_
 #define _HDFS_LIBHDFS3_SERVER_DATANODE_H_
 
-#include "BlockLocalPathInfo.h"
-#include "client/Token.h"
-#include "ExtendedBlock.h"
+#include <string>
+
+#include "common/SessionConfig.h"
+#include "common/Token.h"
+
+#include "server/BlockLocalPathInfo.h"
+#include "server/ExtendedBlock.h"
+
 #include "rpc/RpcAuth.h"
 #include "rpc/RpcCall.h"
 #include "rpc/RpcClient.h"
 #include "rpc/RpcConfig.h"
 #include "rpc/RpcProtocolInfo.h"
 #include "rpc/RpcServerInfo.h"
-#include "SessionConfig.h"
 
 namespace Hdfs {
 namespace Internal {
 
 class Datanode {
-public:
+ public:
     virtual ~Datanode() {
     }
 
@@ -48,7 +52,7 @@ public:
      * @throw ReplicaNotFoundException
      * @throw HdfsIOException
      */
-    //Idempotent
+    //  Idempotent
     virtual int64_t getReplicaVisibleLength(const ExtendedBlock & b)
     /*throw (ReplicaNotFoundException, HdfsIOException)*/ = 0;
 
@@ -71,14 +75,14 @@ public:
      * @param info Output the BlockLocalPathInfo of block.
      * @throw HdfsIOException
      */
-    //Idempotent
+    //  Idempotent
     virtual void getBlockLocalPathInfo(const ExtendedBlock & block,
                                        const Token & token, BlockLocalPathInfo & info)
     /*throw (HdfsIOException)*/ = 0;
 };
 
 class DatanodeImpl: public Datanode {
-public:
+ public:
     DatanodeImpl(const std::string & host, uint32_t port, const SessionConfig & c,
                  const RpcAuth & a);
 
@@ -87,10 +91,10 @@ public:
     virtual void getBlockLocalPathInfo(const ExtendedBlock & block,
                                        const Token & token, BlockLocalPathInfo & info);
 
-private:
+ private:
     void invoke(const RpcCall & call, bool reuse);
 
-private:
+ private:
     RpcAuth auth;
     RpcClient & client;
     RpcConfig conf;
@@ -98,7 +102,7 @@ private:
     RpcServerInfo server;
 };
 
-}
-}
+}  // namespace Internal
+}  // namespace Hdfs
 
 #endif /* _HDFS_LIBHDFS3_SERVER_DATANODE_H_ */
