@@ -16,33 +16,126 @@
 package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.metric.MultiCountMetric;
+import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.metricsmgr.MetricsManager;
+import com.twitter.heron.common.utils.metrics.JVMMetrics;
+import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
+import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
  * main entry for metrics cache manager
  */
 public class MetricsCacheManager {
+  public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
+  public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
   private static final Logger LOG = Logger.getLogger(MetricsCacheManager.class.getName());
-
   // Pre-defined value
   private static final String METRICS_CACHE_HOST = "127.0.0.1";
   private static final String METRICS_CACHE_COMPONENT_NAME = "__metricscachemgr__";
-
-  public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
-  public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
-
+  private static final int METRICS_CACHE_INSTANCE_ID = -1;
+  private final MetricsCacheManagerServer metricsCacheManagerServer;
+  // The looper drives MetricsManagerServer
+  private final NIOLooper metricsCacheManagerServerLoop;
+  private final MetricsSinksConfig config;
+  private final JVMMetrics jvmMetrics;
+  // MetricsCollector used to collect internal metrics of Metrics Manager
+  private final MetricsCollector metricsCollector;
+  // Communicator to be bind with MetricsCollector to collect metrics
+  private final Communicator<Metrics.MetricPublisherPublishMessage> metricsQueue;
+  private final Metrics.MetricPublisher metricsManagerPublisher;
+  private final int heronMetricsExportIntervalSec;
+  private final String topologyName;
+  private final String metricsmgrId;
+  private final long mainThreadId;
   // map from metric prefix to its aggregation form
   private MetricsFilter metricsfilter = null;
+
+  /**
+   * constructor
+   */
+  public MetricsCacheManager(String topologyName,
+                             String serverHost, int serverPort,
+                             String metricsCacheMgrId,
+                             SystemConfig systemConfig, MetricsSinksConfig config)
+      throws IOException {
+    this.topologyName = topologyName;
+    this.metricsmgrId = metricsCacheMgrId;
+    this.config = config;
+    this.metricsCacheManagerServerLoop = new NIOLooper();
+
+    // Init the Internal Metrics Export related stuff
+    this.metricsManagerPublisher =
+        Metrics.MetricPublisher.newBuilder().
+            setHostname(getLocalHostName()).setPort(serverPort).
+            setComponentName(METRICS_CACHE_COMPONENT_NAME).
+            setInstanceId(metricsCacheMgrId).
+            setInstanceIndex(METRICS_CACHE_INSTANCE_ID).build();
+    this.jvmMetrics = new JVMMetrics();
+    this.metricsQueue =
+        new Communicator<Metrics.MetricPublisherPublishMessage>(null,
+            this.metricsCacheManagerServerLoop);
+    this.metricsCollector = new MetricsCollector(metricsCacheManagerServerLoop, metricsQueue);
+    this.heronMetricsExportIntervalSec = systemConfig.getHeronMetricsExportIntervalSec();
+
+    this.mainThreadId = Thread.currentThread().getId();
+
+    // Init the ErrorReportHandler
+    ErrorReportLoggingHandler.init(
+        metricsCacheMgrId, metricsCollector, heronMetricsExportIntervalSec,
+        systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
+
+    // Set up the internal Metrics Export routine
+    setupInternalMetricsExport();
+
+    // Set up JVM metrics
+    // TODO -- change the config name
+    setupJVMMetrics(systemConfig.getInstanceMetricsSystemSampleIntervalSec());
+
+    // Init the HeronSocketOptions
+    HeronSocketOptions serverSocketOptions =
+        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSizeBytes(),
+            systemConfig.getMetricsMgrNetworkWriteBatchTimeMs(),
+            systemConfig.getMetricsMgrNetworkReadBatchSizeBytes(),
+            systemConfig.getMetricsMgrNetworkReadBatchTimeMs(),
+            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes(),
+            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes());
+
+    // Set the MultiCountMetric for MetricsManagerServer
+    MultiCountMetric serverCounters = new MultiCountMetric();
+    metricsCollector.registerMetric(
+        METRICS_CACHE_COMPONENT_NAME, serverCounters, heronMetricsExportIntervalSec);
+
+    // Construct the MetricsManagerServer
+    metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,
+        serverHost, serverPort, serverSocketOptions, serverCounters);
+
+  }
+
+  private static String getLocalHostName() {
+    String hostName;
+    try {
+      hostName = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      LOG.severe("Unknown host.");
+      hostName = METRICS_CACHE_HOST;
+    }
+
+    return hostName;
+  }
 
   public static void main(String[] args) throws IOException {
     if (args.length != 6) {
@@ -52,7 +145,7 @@ public class MetricsCacheManager {
               + "<metrics_sinks_config_filename>");
     }
 
-    String metricsmgrId = args[0];
+    String metricsCacheMgrId = args[0];
     int metricsPort = Integer.parseInt(args[1]);
     String topologyName = args[2];
     String topologyId = args[3];
@@ -71,14 +164,14 @@ public class MetricsCacheManager {
     // Log to file and TMaster
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
-        LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
+        LoggingHelper.getFileHandler(metricsCacheMgrId, loggingDir, true,
             systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
-    LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with "
-            + "Metrics Manager Id %s, Merics Manager Port: %d.",
-        topologyName, topologyId, metricsmgrId, metricsPort));
+    LOG.info(String.format("Starting Metrics Cache for topology %s with topologyId %s with "
+            + "Metrics Cache Id %s, Merics Cache Port: %d.",
+        topologyName, topologyId, metricsCacheMgrId, metricsPort));
 
     LOG.info("System Config: " + systemConfig);
 
@@ -87,10 +180,45 @@ public class MetricsCacheManager {
 
     LOG.info("Sinks Config:" + sinksConfig.toString());
 
-    MetricsManager metricsManager = new MetricsManager(
-        topologyName, METRICS_CACHE_HOST, metricsPort, metricsmgrId, systemConfig, sinksConfig);
-    metricsManager.start();
+    MetricsCacheManager metricsCacheManager = new MetricsCacheManager(topologyName,
+        METRICS_CACHE_HOST, metricsPort, metricsCacheMgrId, systemConfig, sinksConfig);
+    metricsCacheManager.start();
 
     LOG.info("Loops terminated. Metrics Manager exits.");
+  }
+
+  private void setupInternalMetricsExport() {
+    Runnable gatherInternalMetrics = new Runnable() {
+      @Override
+      public void run() {
+        while (!metricsQueue.isEmpty()) {
+          Metrics.MetricPublisherPublishMessage message = metricsQueue.poll();
+          metricsCacheManagerServer.onInternalMessage(metricsManagerPublisher, message);
+        }
+
+        // It schedules itself in future
+        metricsCacheManagerServerLoop.registerTimerEventInSeconds(heronMetricsExportIntervalSec,
+            this);
+      }
+    };
+
+    metricsCacheManagerServerLoop.registerTimerEventInSeconds(heronMetricsExportIntervalSec,
+        gatherInternalMetrics);
+  }
+
+  private void setupJVMMetrics(int systemMetricsSampleIntervalSec) {
+    this.jvmMetrics.registerMetrics(metricsCollector);
+
+    // Attach sample Runnable to gatewayMetricsCollector
+    this.metricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
+        systemMetricsSampleIntervalSec);
+  }
+
+  public void start() {
+    // The MetricsCacheServer would run in the main thread
+    // We do it in the final step since it would await the main thread
+    LOG.info("Starting Metrics Cache Server");
+    metricsCacheManagerServer.start();
+    metricsCacheManagerServerLoop.loop();
   }
 }
