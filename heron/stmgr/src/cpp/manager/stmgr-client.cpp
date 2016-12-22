@@ -124,6 +124,7 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
   if (quit_) {
     delete this;
   } else {
+    client_manager_->HandleDeadStMgrConnection(other_stmgr_id_);
     LOG(INFO) << "Will try to reconnect again after 1 seconds" << std::endl;
     AddTimer([this]() { this->OnReConnectTimer(); },
              reconnect_other_streammgrs_interval_sec_ * 1000 * 1000);

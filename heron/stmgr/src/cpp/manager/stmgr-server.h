@@ -69,6 +69,8 @@ class StMgrServer : public Server {
 
   bool DidAnnounceBackPressure() { return !remote_ends_who_caused_back_pressure_.empty(); }
 
+  void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
+
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
@@ -89,6 +91,8 @@ class StMgrServer : public Server {
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
                                      proto::stmgr::RegisterInstanceRequest* _request);
   void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
+  void HandleInstanceStateCheckpointMessage(Connection* _conn,
+                                            proto::stmgr::InstanceStateCheckpoint* _message);
 
   // Backpressure message from and to other stream managers
   void HandleStartBackPressureMessage(Connection* _conn,
@@ -122,6 +126,7 @@ class StMgrServer : public Server {
     ~InstanceData() { delete instance_; }
 
     void set_local_spout() { local_spout_ = true; }
+    bool is_local_spout() { return local_spout_; }
     void set_connection(Connection* _conn) { conn_ = _conn; }
 
     proto::system::Instance* instance_;
