@@ -158,5 +158,9 @@ void StMgrClientMgr::SendStopBackPressureToOtherStMgrs() {
   }
 }
 
+void StMgrClientMgr::HandleDeadStMgrConnection(const sp_string& _dead_stmgr) {
+  stream_manager_->HandleDeadStMgrConnection(_dead_stmgr);
+}
+
 }  // namespace stmgr
 }  // namespace heron

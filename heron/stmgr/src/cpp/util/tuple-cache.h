@@ -51,6 +51,9 @@ class TupleCache {
     get(_task_id)->release(set);
   }
 
+  // Clear all data wrt a particular task_id
+  void clear(sp_int32 _task_id);
+
  private:
   void drain(EventLoop::Status);
   void drain_impl();

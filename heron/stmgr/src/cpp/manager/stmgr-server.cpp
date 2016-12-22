@@ -97,6 +97,7 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   // instance related handlers
   InstallRequestHandler(&StMgrServer::HandleRegisterInstanceRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleSetMessage);
+  InstallMessageHandler(&StMgrServer::HandleInstanceStateCheckpointMessage);
 
   stmgr_server_metrics_ = new heron::common::MultiCountMetric();
   back_pressure_metric_aggr_ = new heron::common::TimeSpentMetric();
@@ -217,6 +218,7 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
               << " closed connection";
     instance_info_[task_id]->set_connection(NULL);
     active_instances_.erase(_conn);
+    stmgr_->HandleDeadInstanceConnection(task_id);
   }
 }
 
@@ -605,6 +607,41 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
     }
     back_pressure_metric_aggr_->Stop();
   }
+}
+
+void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
+  for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+    if (iter->second->is_local_spout()) {
+      if (iter->second->conn_) {
+        proto::stmgr::InitiateStatefulCheckpoint* message =
+                                 new proto::stmgr::InitiateStatefulCheckpoint();
+        message->set_checkpoint_id(_checkpoint_tag);
+        SendMessage(iter->second->conn_, message);
+      }
+    }
+  }
+}
+
+void StMgrServer::HandleInstanceStateCheckpointMessage(Connection* _conn,
+                               proto::stmgr::InstanceStateCheckpoint* _message) {
+  ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
+  if (iter == active_instances_.end()) {
+    LOG(ERROR) << "Hmm.. Got InstaceStateCheckpoint Message from an unknown connection";
+    delete _message;
+    return;
+  }
+  sp_int32 task_id = iter->second;
+  TaskIdInstanceDataMap::iterator it = instance_info_.find(task_id);
+  if (it == instance_info_.end()) {
+    LOG(ERROR) << "Hmm.. Got InstaceStateCheckpoint Message from unknown task_id "
+               << task_id;
+    delete _message;
+    return;
+  }
+  proto::stmgr::SaveStateCheckpoint* message = new proto::stmgr::SaveStateCheckpoint();
+  message->mutable_instance()->CopyFrom(*(it->second.instance_));
+  message->mutable_checkpoint()->CopyFrom(*_message);
+  checkpoint_manager_client_->SaveStateCheckpoint(message);
 }
 
 }  // namespace stmgr
