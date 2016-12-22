@@ -161,7 +161,7 @@ class StMgr {
   sp_string zkroot_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
-  sp_int32 checkpointmgr_port_;
+  sp_int32 checkpoint_manager_port_;
 
   proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks_;

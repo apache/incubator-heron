@@ -33,7 +33,7 @@ namespace stmgr {
 
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
-                             VCallback<proto::system::PhysicalPlan*> _pplan_watch)
+                             VCallback<proto::system::PhysicalPlan*> _pplan_watch,
                              VCallback<sp_string> _stateful_checkpoint_watch)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
@@ -41,7 +41,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
       shell_port_(_shell_port),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
-      stateful_checkpoint_watch_(std::move(_checkpoint_watch)),
+      stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
       reconnect_timer_id(0),
       heartbeat_timer_id(0) {
   reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
@@ -179,7 +179,8 @@ void TMasterClient::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMess
   delete _message;
 }
 
-void TMasterClient::HandleStatefulCheckpointMessage(proto::tmaster::StatefulCheckpointStart* _message) {
+void TMasterClient::HandleStatefulCheckpointMessage(
+                                        proto::tmaster::StatefulCheckpointStart* _message) {
   LOG(INFO) << "Got a new checkpoint message from tmaster with id "
             << _message->checkpoint_id();
   stateful_checkpoint_watch_(_message->checkpoint_id());

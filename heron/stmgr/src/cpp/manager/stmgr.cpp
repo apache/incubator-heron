@@ -21,6 +21,7 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <utility>
@@ -76,7 +77,7 @@ StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
       shell_port_(_shell_port),
-      checkpointmgr_port_(_checkpointmgr_port) {}
+      checkpoint_manager_port_(_checkpoint_manager_port) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -104,7 +105,7 @@ void StMgr::Init() {
       0);  // fire only once
 
   is_stateful_ =
-    heron::config::TopologyConfigHelper::GetStatefulCheckpointInterval(*hydrated_topology) > 0;
+    heron::config::TopologyConfigHelper::GetStatefulCheckpointInterval(*hydrated_topology_) > 0;
 
   // Create and start StmgrServer
   StartStmgrServer();
@@ -200,7 +201,7 @@ void StMgr::StartStmgrServer() {
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
-                            this, metrics_manager_client_);
+                            this, metrics_manager_client_, checkpoint_manager_client_);
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
@@ -228,11 +229,11 @@ void StMgr::CreateCheckpointMgrClient() {
   LOG(INFO) << "Creating CheckpointMgr Client at " << IpUtils::getHostName() << ":"
             << checkpoint_manager_port_ << std::endl;
   NetworkOptions client_options;
-  client_options.set_host(IpUtils::getHostName()
+  client_options.set_host(IpUtils::getHostName());
   client_options.set_port(checkpoint_manager_port_);
   client_options.set_socket_family(PF_INET);
   client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
-  checkpoint_manager_client_ = new CheckpointMgrClient(eventLoop_, master_options);
+  checkpoint_manager_client_ = new common::CheckpointMgrClient(eventLoop_, client_options);
 }
 
 void StMgr::CreateTupleCache() {
@@ -707,7 +708,7 @@ void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {
   // task_ids this stmgr processes
   if (is_stateful_) {
     std::set<sp_int32> task_ids;
-    config::PhysicalPlanHelper::GetTasks(*hydrated_topology, _stmgr_id, task_ids);
+    config::PhysicalPlanHelper::GetTasks(*pplan_, _stmgr_id, task_ids);
     for (std::set<sp_int32>::iterator iter = task_ids.begin(); iter != task_ids.end(); ++iter) {
       tuple_cache_->clear(*iter);
     }
