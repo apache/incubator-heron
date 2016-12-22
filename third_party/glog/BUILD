@@ -38,12 +38,11 @@ mac_script = "\n".join(common_script + [
 ])
 
 linux_script = "\n".join(common_script + [
-     'export VAR_LIBS="LIBS=\"-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib\""',
-     'export VAR_INCL="CPPFLAGS=-I$$UNWIND_DIR/include"',
-     'export VAR_LD="LDFLAGS-L$$UNWIND_DIR/lib"',
-     'export EXTRA_VARS="$$VAR_LIBS $$VAR_INCL $$VAR_LD"',
-     './configure --prefix=$$INSTALL_DIR --enable-shared=no $$EXTRA_VARS',
-     'make install $$EXTRA_VARS',
+     'export VAR_LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib"',
+     'export VAR_INCL="-I$$UNWIND_DIR/include"',
+     'export VAR_LD="-L$$UNWIND_DIR/lib"',
+     './configure --prefix=$$INSTALL_DIR --enable-shared=no LIBS="$$VAR_LIBS" CPPFLAGS="$$VAR_INCL" LDFLAGS="$$VAR_LD"',
+     'make install LIBS="$$VAR_LIBS" CPPFLAGS="$$VAR_INCL" LDFLAGS="$$VAR_LD"',
      'rm -rf $$TMP_DIR',
 ])
 
