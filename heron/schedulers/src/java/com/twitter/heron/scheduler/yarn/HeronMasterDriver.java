@@ -53,6 +53,7 @@ import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
 import org.apache.reef.wake.time.event.StartTime;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.scheduler.SchedulerMain;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
@@ -169,11 +170,6 @@ public class HeronMasterDriver {
     return (int) Math.ceil(resource.getCpu());
   }
 
-  private static int getMemInMBForExecutor(Resource resource) {
-    Long ram = resource.getRam() / MB;
-    return ram.intValue();
-  }
-
   /**
    * Container allocation is asynchronous. Requests all containers in the input packing plan
    * serially to ensure allocated resources match the required resources.
@@ -218,12 +214,13 @@ public class HeronMasterDriver {
   Optional<HeronWorker> findLargestFittingWorker(AllocatedEvaluator evaluator,
                                                  Collection<HeronWorker> pendingWorkers,
                                                  boolean ignoreCpu) {
-    int allocatedRam = evaluator.getEvaluatorDescriptor().getMemory();
+    ByteAmount allocatedRam
+        = ByteAmount.fromMegabytes(evaluator.getEvaluatorDescriptor().getMemory());
     int allocatedCores = evaluator.getEvaluatorDescriptor().getNumberOfCores();
 
     HeronWorker biggestFittingWorker = null;
     for (HeronWorker worker : pendingWorkers) {
-      if (worker.mem > allocatedRam) {
+      if (worker.mem.greaterThan(allocatedRam)) {
         continue;
       }
 
@@ -234,7 +231,8 @@ public class HeronMasterDriver {
       }
 
       if (biggestFittingWorker != null) {
-        if (worker.mem < biggestFittingWorker.mem || worker.cores < biggestFittingWorker.cores) {
+        if (worker.mem.lessThan(biggestFittingWorker.mem)
+            || worker.cores < biggestFittingWorker.cores) {
           continue;
         }
       }
@@ -322,18 +320,18 @@ public class HeronMasterDriver {
   @VisibleForTesting
   void requestContainerForWorker(int id, final HeronWorker worker) {
     int cpu = worker.cores;
-    int mem = worker.mem;
+    ByteAmount mem = worker.mem;
     EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
-    LOG.info(String.format("Requesting container for worker: %d, mem: %d, cpu: %d", id, mem, cpu));
+    LOG.info(String.format("Requesting container for worker: %d, mem: %s, cpu: %d", id, mem, cpu));
     requestor.submit(evaluatorRequest);
   }
 
   @VisibleForTesting
-  EvaluatorRequest createEvaluatorRequest(int cpu, int mem) {
+  EvaluatorRequest createEvaluatorRequest(int cpu, ByteAmount mem) {
     return EvaluatorRequest
         .newBuilder()
         .setNumber(1)
-        .setMemory(mem)
+        .setMemory(((Long) mem.asMegabytes()).intValue())
         .setNumberOfCores(cpu)
         .build();
   }
@@ -409,12 +407,12 @@ public class HeronMasterDriver {
   static final class HeronWorker {
     private int workerId;
     private int cores;
-    private int mem;
+    private ByteAmount mem;
 
     private AllocatedEvaluator evaluator;
     private ActiveContext context;
 
-    HeronWorker(int id, int cores, int mem) {
+    HeronWorker(int id, int cores, ByteAmount mem) {
       this.workerId = id;
       this.cores = cores;
       this.mem = mem;
@@ -423,7 +421,7 @@ public class HeronMasterDriver {
     HeronWorker(int id, Resource resource) {
       this.workerId = id;
       this.cores = getCpuForExecutor(resource);
-      this.mem = getMemInMBForExecutor(resource);
+      this.mem = resource.getRam();
     }
 
     public int getWorkerId() {
@@ -622,7 +620,7 @@ public class HeronMasterDriver {
         }
 
         worker = result.get();
-        LOG.info(String.format("Worker:%d, cores:%d, mem:%d fits in the allocated container",
+        LOG.info(String.format("Worker:%d, cores:%d, mem:%s fits in the allocated container",
             worker.workerId, worker.cores, worker.mem));
         workersAwaitingAllocation.remove(worker);
         multiKeyWorkerMap.assignEvaluatorToWorker(worker, evaluator);

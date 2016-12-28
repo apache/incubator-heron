@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.common.basics.ByteAmount;
 
 public class TopologyUtilsTest {
   @Test
@@ -66,7 +66,7 @@ public class TopologyUtilsTest {
     bolts.put("bolt", componentParallelism);
 
     // sort the component ram map
-    Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
+    Map<String, ByteAmount> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
     // Component ram map is not set, the ramMap size should be 0
     Assert.assertEquals(0, ramMap.size());
@@ -80,16 +80,16 @@ public class TopologyUtilsTest {
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
-    long boltRam = 1 * Constants.GB;
-    long spoutRam = 2 * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
     topologyConfig.setComponentRam("spout", spoutRam);
     topologyConfig.setComponentRam("bolt", boltRam);
 
     // sort the component ram map
-    Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
+    Map<String, ByteAmount> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, ramMap.keySet().toArray());
-    Assert.assertArrayEquals(new Long[]{boltRam, spoutRam}, ramMap.values().toArray());
+    Assert.assertArrayEquals(new ByteAmount[]{boltRam, spoutRam}, ramMap.values().toArray());
   }
 
   @Test
@@ -100,15 +100,15 @@ public class TopologyUtilsTest {
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
-    long spoutRam = 2 * Constants.GB;
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
     topologyConfig.setComponentRam("spout", spoutRam);
 
     // sort the component ram map
-    Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
+    Map<String, ByteAmount> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
     // Component ram map sets only spout's ram
     Assert.assertArrayEquals(new String[]{"spout"}, ramMap.keySet().toArray());
-    Assert.assertArrayEquals(new Long[]{spoutRam}, ramMap.values().toArray());
+    Assert.assertArrayEquals(new ByteAmount[]{spoutRam}, ramMap.values().toArray());
 
   }
 

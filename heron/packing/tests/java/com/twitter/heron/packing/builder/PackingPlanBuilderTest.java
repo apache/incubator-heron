@@ -20,15 +20,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.packing.PackingTestHelper;
 import com.twitter.heron.packing.ResourceExceededException;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -122,8 +123,9 @@ public class PackingPlanBuilderTest {
         new InstanceId("bolt", 4, 0)));
 
     PackingPlan packingPlan = generatePacking(packing);
-    Map<Integer, Container> containers =
-        PackingPlanBuilder.getContainers(packingPlan, paddingPercentage);
+    Map<Integer, Container> containers = PackingPlanBuilder.getContainers(
+        packingPlan, paddingPercentage,
+        new HashMap<String, TreeSet<Integer>>(), new TreeSet<Integer>());
     assertEquals(packing.size(), containers.size());
     for (Integer containerId : packing.keySet()) {
       Container foundContainer = containers.get(containerId);
@@ -135,7 +137,8 @@ public class PackingPlanBuilderTest {
 
   private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking)
       throws RuntimeException {
-    Resource resource = new Resource(2.0, 6 * Constants.GB, 25 * Constants.GB);
+    Resource resource
+        = new Resource(2.0, ByteAmount.fromGigabytes(6), ByteAmount.fromGigabytes(25));
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
@@ -149,10 +152,12 @@ public class PackingPlanBuilderTest {
         Resource instanceResource;
         switch (componentName) {
           case "bolt":
-            instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
+            instanceResource
+                = new Resource(1.0, ByteAmount.fromGigabytes(2), ByteAmount.fromGigabytes(10));
             break;
           case "spout":
-            instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+            instanceResource
+                = new Resource(1.0, ByteAmount.fromGigabytes(3), ByteAmount.fromGigabytes(10));
             break;
           default:
             throw new RuntimeException(String.format("%s is not a valid component name",
@@ -170,70 +175,50 @@ public class PackingPlanBuilderTest {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private final Pair<Integer, InstanceId>[] testComponentInstances = new Pair[] {
-      new Pair<>(1, new InstanceId("componentA", 0, 0)),
-      new Pair<>(3, new InstanceId("componentA", 1, 1)),
-      new Pair<>(3, new InstanceId("componentB", 2, 0))
+  private final Pair<Integer, InstanceId>[] testContainerInstances = new Pair[] {
+      new Pair<>(1, new InstanceId("componentA", 1, 0)),
+      new Pair<>(3, new InstanceId("componentA", 2, 1)),
+      new Pair<>(3, new InstanceId("componentB", 3, 0))
   };
+  private final Pair<Integer, String>[] testContainerComponentNames =
+      PackingTestHelper.toContainerIdComponentNames(testContainerInstances);
 
   @Test
   public void testBuildPackingPlan() throws ResourceExceededException {
-    doCreatePackingPlanTest(testComponentInstances);
+    doCreatePackingPlanTest(testContainerInstances);
   }
 
   @Test
   public void testAddToPackingPlan() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
+    PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] added = new Pair[] {
-        new Pair<>(1, new InstanceId("componentB", 3, 1)),
-        new Pair<>(4, new InstanceId("componentA", 4, 2))
+        new Pair<>(1, new InstanceId("componentB", 4, 1)),
+        new Pair<>(4, new InstanceId("componentA", 5, 2))
     };
-    PackingPlan updatedPlan =
-        PackingTestHelper.addToTestPackingPlan(TOPOLOGY_ID, plan, added, 0);
+    PackingPlan updatedPlan = PackingTestHelper.addToTestPackingPlan(
+        TOPOLOGY_ID, plan, PackingTestHelper.toContainerIdComponentNames(added), 0);
 
-    Pair<Integer, InstanceId>[] expected = concat(testComponentInstances, added);
+    Pair<Integer, InstanceId>[] expected = concat(testContainerInstances, added);
     AssertPacking.assertPackingPlan(TOPOLOGY_ID, expected, updatedPlan);
   }
 
   @Test(expected = ResourceExceededException.class)
   public void testExceededCapacityAddingToPackingPlan() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
+    PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] added = new Pair[] {
-        new Pair<>(3, new InstanceId("componentB", 3, 1))
+        new Pair<>(3, new InstanceId("componentB", 4, 1))
     };
-    PackingTestHelper.addToTestPackingPlan(TOPOLOGY_ID, plan, added, 0);
-  }
-
-  @Test(expected = PackingException.class)
-  public void testDuplicateTaskIdAddingToPackingPlan() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] added = new Pair[] {
-        new Pair<>(1, new InstanceId("componentB", 2, 1))
-    };
-    PackingTestHelper.addToTestPackingPlan(TOPOLOGY_ID, plan, added, 0);
-  }
-
-  // TODO: enable this after fixing https://github.com/twitter/heron/issues/1579
-  //@Test(expected = PackingException.class)
-  public void testDuplicateComponentIndex() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] added = new Pair[] {
-        new Pair<>(1, new InstanceId("componentA", 3, 0))
-    };
-    PackingTestHelper.addToTestPackingPlan(TOPOLOGY_ID, plan, added, 0);
+    PackingTestHelper.addToTestPackingPlan(
+        TOPOLOGY_ID, plan, PackingTestHelper.toContainerIdComponentNames(added), 0);
   }
 
   @Test
   public void testRemoveFromPackingPlan() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
+    PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, String>[] removed = new Pair[] {
@@ -245,14 +230,14 @@ public class PackingPlanBuilderTest {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] expected = new Pair[] {
-        new Pair<>(3, new InstanceId("componentB", 2, 0))
+        new Pair<>(3, new InstanceId("componentB", 3, 0))
     };
     AssertPacking.assertPackingPlan(TOPOLOGY_ID, expected, updatedPlan);
   }
 
   @Test(expected = PackingException.class)
   public void testInvalidContainerRemoveFromPackingPlan() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
+    PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, String>[] removed = new Pair[] {
@@ -263,7 +248,7 @@ public class PackingPlanBuilderTest {
 
   @Test(expected = PackingException.class)
   public void testInvalidComponentRemoveFromPackingPlan() throws ResourceExceededException {
-    PackingPlan plan = doCreatePackingPlanTest(testComponentInstances);
+    PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, String>[] removed = new Pair[] {
@@ -274,8 +259,8 @@ public class PackingPlanBuilderTest {
 
   private static PackingPlan doCreatePackingPlanTest(
       Pair<Integer, InstanceId>[] instances) throws ResourceExceededException {
-    PackingPlan plan =
-        PackingTestHelper.createTestPackingPlan(TOPOLOGY_ID, instances, 0);
+    PackingPlan plan = PackingTestHelper.createTestPackingPlan(
+        TOPOLOGY_ID, PackingTestHelper.toContainerIdComponentNames(instances), 0);
     AssertPacking.assertPackingPlan(TOPOLOGY_ID, instances, plan);
     return plan;
   }

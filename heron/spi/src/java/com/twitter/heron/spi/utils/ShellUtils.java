@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public final class ShellUtils {
   static String inputstreamToString(InputStream is) {
     char[] buffer = new char[2048];
     StringBuilder builder = new StringBuilder();
-    try (Reader reader = new InputStreamReader(is, "UTF-8")) {
+    try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
       while (true) {
         int readSize = reader.read(buffer, 0, buffer.length);
         if (0 > readSize) {

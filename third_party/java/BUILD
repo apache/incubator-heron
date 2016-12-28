@@ -13,6 +13,7 @@ java_library(
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
         "//third_party/java:joda_time",
+        "@commons_codec//jar",
         "@commons_logging_commons_logging//jar",
         "@org_apache_httpcomponents_http_client//jar",
         "@org_apache_httpcomponents_http_core//jar",
@@ -35,6 +36,13 @@ java_library(
         "@commons_logging_commons_logging//jar",
         "@com_google_guava_guava//jar",
     ]
+)
+
+java_library(
+    name = "guava",
+    srcs = [ "Empty.java" ],
+    exports = [ "@com_google_guava_guava//jar" ],
+    deps = [ "@com_google_guava_guava//jar" ],
 )
 
 java_library(

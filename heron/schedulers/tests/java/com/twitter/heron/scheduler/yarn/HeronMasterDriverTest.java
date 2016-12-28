@@ -45,9 +45,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.scheduler.SchedulerMain;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
@@ -94,9 +94,10 @@ public class HeronMasterDriverTest {
 
   @Test
   public void requestContainerForWorkerSubmitsValidRequest() {
-    EvaluatorRequest request = spyDriver.createEvaluatorRequest(5, 786);
-    doReturn(request).when(spyDriver).createEvaluatorRequest(5, 786);
-    HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(3, 5, 786);
+    ByteAmount memory = ByteAmount.fromMegabytes(786);
+    EvaluatorRequest request = spyDriver.createEvaluatorRequest(5, memory);
+    doReturn(request).when(spyDriver).createEvaluatorRequest(5, memory);
+    HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(3, 5, memory);
     spyDriver.requestContainerForWorker(3, worker);
     verify(mockRequestor, times(1)).submit(request);
   }
@@ -278,10 +279,10 @@ public class HeronMasterDriverTest {
   @Test
   public void findLargestFittingWorkerReturnsLargestWorker() {
     Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
-    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
-    workers.add(new HeronMasterDriver.HeronWorker(2, 7, 7 * 1024));
-    workers.add(new HeronMasterDriver.HeronWorker(3, 5, 5 * 1024));
-    workers.add(new HeronMasterDriver.HeronWorker(4, 1, 1 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromGigabytes(3)));
+    workers.add(new HeronMasterDriver.HeronWorker(2, 7, ByteAmount.fromGigabytes(7)));
+    workers.add(new HeronMasterDriver.HeronWorker(3, 5, ByteAmount.fromGigabytes(5)));
+    workers.add(new HeronMasterDriver.HeronWorker(4, 1, ByteAmount.fromGigabytes(1)));
 
     // enough memory and cores to fit largest container, 2
     verifyFittingContainer(workers, 7 * 1024 + 100, 7, 2);
@@ -315,9 +316,9 @@ public class HeronMasterDriverTest {
   @Test
   public void fitBiggestContainerIgnoresCoresIfMissing() {
     Set<HeronMasterDriver.HeronWorker> workers = new HashSet<>();
-    workers.add(new HeronMasterDriver.HeronWorker(1, 3, 3 * 1024));
+    workers.add(new HeronMasterDriver.HeronWorker(1, 3, ByteAmount.fromGigabytes(3)));
 
-    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, 3 * 1024);
+    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, ByteAmount.fromGigabytes(3));
     Optional<HeronMasterDriver.HeronWorker> result =
         spyDriver.findLargestFittingWorker(mockEvaluator, workers, false);
     Assert.assertFalse(result.isPresent());
@@ -347,7 +348,8 @@ public class HeronMasterDriverTest {
 
   @Test
   public void onNextAllocatedEvaluatorDiscardsExtraWorker() throws Exception {
-    AllocatedEvaluator mockEvaluator = createMockEvaluator("test", 1, 123);
+    AllocatedEvaluator mockEvaluator
+        = createMockEvaluator("test", 1, ByteAmount.fromMegabytes(123));
     assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
     spyDriver.new ContainerAllocationHandler().onNext(mockEvaluator);
     assertFalse(spyDriver.lookupByEvaluatorId("test").isPresent());
@@ -432,7 +434,8 @@ public class HeronMasterDriverTest {
   private AllocatedEvaluator[] createApplicationWithContainers(int numContainers) {
     AllocatedEvaluator[] mockEvaluators = new AllocatedEvaluator[numContainers];
     for (int id = 0; id < numContainers; id++) {
-      mockEvaluators[id] = simulateContainerAllocation("e" + id, 1, 123, id);
+      mockEvaluators[id]
+          = simulateContainerAllocation("e" + id, 1, ByteAmount.fromMegabytes(123), id);
     }
     for (int id = 0; id < numContainers; id++) {
       assertEquals(Integer.valueOf(id), spyDriver.lookupByEvaluatorId("e" + id).get());
@@ -444,7 +447,7 @@ public class HeronMasterDriverTest {
 
   private AllocatedEvaluator simulateContainerAllocation(String evaluatorId,
                                                          int cores,
-                                                         int ram,
+                                                         ByteAmount ram,
                                                          int workerId) {
     AllocatedEvaluator evaluator = createMockEvaluator(evaluatorId, cores, ram);
     HeronMasterDriver.HeronWorker worker = new HeronMasterDriver.HeronWorker(workerId, cores, ram);
@@ -460,9 +463,9 @@ public class HeronMasterDriverTest {
     return evaluator;
   }
 
-  private AllocatedEvaluator createMockEvaluator(String evaluatorId, int cores, int mem) {
+  private AllocatedEvaluator createMockEvaluator(String evaluatorId, int cores, ByteAmount mem) {
     EvaluatorDescriptor descriptor = mock(EvaluatorDescriptor.class);
-    when(descriptor.getMemory()).thenReturn(mem);
+    when(descriptor.getMemory()).thenReturn(((Long) mem.asMegabytes()).intValue());
     when(descriptor.getNumberOfCores()).thenReturn(cores);
     AllocatedEvaluator mockEvaluator = mock(AllocatedEvaluator.class);
     when(mockEvaluator.getEvaluatorDescriptor()).thenReturn(descriptor);
@@ -470,8 +473,8 @@ public class HeronMasterDriverTest {
     return mockEvaluator;
   }
 
-  private int getRam(PackingPlan.ContainerPlan container1) {
-    return (int) (container1.getRequiredResource().getRam() / Constants.MB);
+  private ByteAmount getRam(PackingPlan.ContainerPlan container) {
+    return container.getRequiredResource().getRam();
   }
 
   private int getCpu(PackingPlan.ContainerPlan container) {

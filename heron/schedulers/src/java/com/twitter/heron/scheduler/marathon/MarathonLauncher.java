@@ -14,11 +14,11 @@
 
 package com.twitter.heron.scheduler.marathon;
 
+import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.LauncherUtils;
 
 /**
  * Submit topology to Marathon.

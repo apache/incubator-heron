@@ -31,6 +31,8 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 public final class SentenceWordCountTopology {
   private SentenceWordCountTopology() {
 
@@ -171,10 +173,10 @@ public final class SentenceWordCountTopology {
     builder.setBolt("count", new WordCount(), 2).fieldsGrouping("split", new Fields("word"));
 
     Config conf = new Config();
-    conf.setComponentRam("split", 2L * 1024 * 1024 * 1024);
-    conf.setComponentRam("count", 3L * 1024 * 1024 * 1024);
+    conf.setComponentRam("split", ByteAmount.fromGigabytes(2));
+    conf.setComponentRam("count", ByteAmount.fromGigabytes(3));
     conf.setNumWorkers(1);
-    conf.setContainerDiskRequested(5L * 1024 * 1024 * 1024);
+    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(5));
     conf.setContainerCpuRequested(8);
 
     StormSubmitter.submitTopology(name, conf, builder.createTopology());

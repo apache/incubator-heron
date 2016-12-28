@@ -18,18 +18,30 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
 public class ScpContext extends Context {
-  public static final String HERON_UPLOADER_SCP_COMMAND = "heron.uploader.scp.command.options";
-  public static final String HERON_UPLOADER_SSH_COMMAND = "heron.uploader.ssh.command.options";
+  public static final String HERON_UPLOADER_SCP_OPTIONS = "heron.uploader.scp.command.options";
+  public static final String HERON_UPLOADER_SCP_CONNECTION =
+      "heron.uploader.scp.command.connection";
+  public static final String HERON_UPLOADER_SSH_OPTIONS = "heron.uploader.ssh.command.options";
+  public static final String HERON_UPLOADER_SSH_CONNECTION =
+      "heron.uploader.ssh.command.connection";
   public static final String HERON_UPLOADER_SCP_DIR_PATH = "heron.uploader.scp.dir.path";
   public static final String HERON_UPLOADER_SCP_DIR_PATH_DEFAULT =
       "${HOME}/heron/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}";
 
-  public static String scpCommand(Config config) {
-    return config.getStringValue(HERON_UPLOADER_SCP_COMMAND);
+  public static String scpOptions(Config config) {
+    return config.getStringValue(HERON_UPLOADER_SCP_OPTIONS);
   }
 
-  public static String sshCommand(Config config) {
-    return config.getStringValue(HERON_UPLOADER_SSH_COMMAND);
+  public static String scpConnection(Config config) {
+    return config.getStringValue(HERON_UPLOADER_SCP_CONNECTION);
+  }
+
+  public static String sshOptions(Config config) {
+    return config.getStringValue(HERON_UPLOADER_SSH_OPTIONS);
+  }
+
+  public static String sshConnection(Config config) {
+    return config.getStringValue(HERON_UPLOADER_SSH_CONNECTION);
   }
 
   public static String uploadDirPath(Config config) {

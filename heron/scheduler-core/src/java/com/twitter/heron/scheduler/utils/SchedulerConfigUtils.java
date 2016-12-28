@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -26,10 +26,10 @@ import com.twitter.heron.spi.common.Keys;
 /**
  * For loading scheduler config
  */
-public final class SchedulerConfig {
-  private static final Logger LOG = Logger.getLogger(SchedulerConfig.class.getName());
+public final class SchedulerConfigUtils {
+  private static final Logger LOG = Logger.getLogger(SchedulerConfigUtils.class.getName());
 
-  private SchedulerConfig() {
+  private SchedulerConfigUtils() {
 
   }
 
@@ -41,24 +41,16 @@ public final class SchedulerConfig {
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
-  protected static Config topologyConfigs(String topologyBinaryFile,
+  private static Config topologyConfigs(String topologyBinaryFile,
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
-    String basename = FileUtils.getBaseName(topologyBinaryFile);
-    String pkgType;
-    if (FileUtils.isOriginalPackagePex(basename)) {
-      pkgType = "pex";
-    } else if (FileUtils.isOriginalPackageJar(basename)) {
-      pkgType = "jar";
-    } else {
-      pkgType = "tar";
-    }
+    PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
         .put(Keys.topologyBinaryFile(), topologyBinaryFile)
-        .put(Keys.topologyPackageType(), pkgType)
+        .put(Keys.topologyPackageType(), packageType)
         .build();
 
     return config;
@@ -69,7 +61,7 @@ public final class SchedulerConfig {
    * <p>
    * return config, the defaults config
    */
-  protected static Config sandboxConfigs() {
+  private static Config sandboxConfigs() {
     Config config = Config.newBuilder()
         .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadSandboxConfig())
@@ -85,7 +77,7 @@ public final class SchedulerConfig {
    * @param environ, user provided environment/tag
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster, String role,
+  private static Config commandLineConfigs(String cluster, String role,
                                              String environ, Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)

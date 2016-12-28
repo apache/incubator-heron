@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,15 +37,18 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.LauncherException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.LauncherUtils;
-import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -118,11 +122,16 @@ public class LaunchRunnerTest {
   }
 
   private static Config createRunnerRuntime() throws Exception {
+    return createRunnerRuntime(new com.twitter.heron.api.Config());
+  }
+
+  private static Config createRunnerRuntime(
+      com.twitter.heron.api.Config topologyConfig) throws Exception {
     Config runtime = spy(Config.newBuilder().build());
     ILauncher launcher = mock(ILauncher.class);
     IPacking packing = mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
+    TopologyAPI.Topology topology = createTopology(topologyConfig);
 
     doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
     doReturn(adaptor).when(runtime).get(Keys.schedulerStateManagerAdaptor());
@@ -130,9 +139,12 @@ public class LaunchRunnerTest {
 
     PackingPlan packingPlan = mock(PackingPlan.class);
     when(packingPlan.getContainers()).thenReturn(
-        new HashSet<PackingPlan.ContainerPlan>());
+        new HashSet<ContainerPlan>());
     when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
     when(packingPlan.getId()).thenReturn("packing_plan_id");
+    Set<ContainerPlan> containerPlans = new HashSet<>();
+    containerPlans.add(PackingTestUtils.testContainerPlan(1)); // just need it to be of size 1
+    when(packingPlan.getContainers()).thenReturn(containerPlans);
     when(packing.pack()).thenReturn(packingPlan);
 
     LauncherUtils mockLauncherUtils = mock(LauncherUtils.class);
@@ -142,6 +154,18 @@ public class LaunchRunnerTest {
     PowerMockito.doReturn(mockLauncherUtils).when(LauncherUtils.class, "getInstance");
 
     return runtime;
+  }
+
+  private static SchedulerStateManagerAdaptor createTestSchedulerStateManager(Config runtime) {
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    when(statemgr.setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    when(statemgr.setPackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    when(statemgr.setExecutionState(
+        any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    return statemgr;
   }
 
   @Before
@@ -192,7 +216,7 @@ public class LaunchRunnerTest {
     assertNotNull(executionState.getReleaseState().getReleaseUsername());
   }
 
-  @Test
+  @Test(expected = LauncherException.class)
   public void testSetExecutionStateFail() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
@@ -205,12 +229,14 @@ public class LaunchRunnerTest {
         any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME))).
         thenReturn(false);
 
-    assertFalse(launchRunner.call());
-
-    verify(launcher, never()).launch(any(PackingPlan.class));
+    try {
+      launchRunner.call();
+    } finally {
+      verify(launcher, never()).launch(any(PackingPlan.class));
+    }
   }
 
-  @Test
+  @Test(expected = LauncherException.class)
   public void testSetTopologyFail() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
@@ -222,58 +248,58 @@ public class LaunchRunnerTest {
     when(statemgr.setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME)))
         .thenReturn(false);
 
-    assertFalse(launchRunner.call());
-
-    verify(launcher, never()).launch(any(PackingPlan.class));
+    try {
+      launchRunner.call();
+    } finally {
+      verify(launcher, never()).launch(any(PackingPlan.class));
+    }
   }
 
-  @Test
-  public void testLaunchFail() throws Exception {
+  @Test(expected = LauncherException.class)
+  public void testLaunchFailCleanUp() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
-
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    when(statemgr.setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME))).
-        thenReturn(true);
-    when(statemgr.setPackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME))).
-        thenReturn(true);
-    when(statemgr.setExecutionState(
-        any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME))).
-        thenReturn(true);
+    SchedulerStateManagerAdaptor statemgr = createTestSchedulerStateManager(runtime);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     when(launcher.launch(any(PackingPlan.class))).thenReturn(false);
 
-    assertFalse(launchRunner.call());
-
-    // Verify set && clean
-    verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));
-    verify(statemgr).setExecutionState(
-        any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME));
-    verify(statemgr).deleteExecutionState(eq(TOPOLOGY_NAME));
-    verify(statemgr).deleteTopology(eq(TOPOLOGY_NAME));
+    try {
+      launchRunner.call();
+    } finally {
+      // Verify set && clean
+      verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));
+      verify(statemgr).setExecutionState(
+          any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME));
+      verify(statemgr).deleteExecutionState(eq(TOPOLOGY_NAME));
+      verify(statemgr).deleteTopology(eq(TOPOLOGY_NAME));
+    }
   }
 
   @Test
   public void testCallSuccess() throws Exception {
-    Config runtime = createRunnerRuntime();
+    doTestLaunch(new com.twitter.heron.api.Config());
+  }
+
+  @Test(expected = LauncherException.class)
+  public void testFailureNumContainers() throws Exception {
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    topologyConfig.setNumStmgrs(2); // fails because packing plan has only 1 container plan
+
+    doTestLaunch(topologyConfig);
+  }
+
+  private void doTestLaunch(com.twitter.heron.api.Config topologyConfig) throws Exception {
+    Config runtime = createRunnerRuntime(topologyConfig);
     Config config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    when(launcher.launch(any(PackingPlan.class))).thenReturn(true);
-
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    when(statemgr.setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME))).
-        thenReturn(true);
-    when(statemgr.setPackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME))).
-        thenReturn(true);
-    when(statemgr.setExecutionState(
-        any(ExecutionEnvironment.ExecutionState.class), eq(TOPOLOGY_NAME))).
-        thenReturn(true);
+    SchedulerStateManagerAdaptor statemgr = createTestSchedulerStateManager(runtime);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
+    when(launcher.launch(any(PackingPlan.class))).thenReturn(true);
 
-    assertTrue(launchRunner.call());
+    launchRunner.call();
 
     // Verify set && clean
     verify(statemgr).setTopology(any(TopologyAPI.Topology.class), eq(TOPOLOGY_NAME));
