@@ -30,7 +30,7 @@ class TMasterClient : public Client {
  public:
   TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
                 sp_int32 _stmgr_port, sp_int32 _shell_port,
-                VCallback<proto::system::PhysicalPlan*> _pplan_watch);
+                VCallback<proto::system::PhysicalPlan*> _pplan_watch,
                 VCallback<sp_string> _stateful_checkpoint_watch);
   virtual ~TMasterClient();
 
