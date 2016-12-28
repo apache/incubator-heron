@@ -45,6 +45,7 @@ class Topology(object):
     self.environ = None
     self.tmaster = None
     self.scheduler_location = None
+    self.state = None
 
     # A map from UUIDs to the callback
     # functions.
@@ -116,9 +117,12 @@ class Topology(object):
     if not physical_plan:
       self.physical_plan = None
       self.id = None
+      self.state = None
     else:
       self.physical_plan = physical_plan
       self.id = physical_plan.topology.id
+      self.state = physical_plan.topology.state
+      Log.info("\n\ntopology: " + str(self.id) + " state: " + str(self.state) + "\n\n")
     self.trigger_watches()
 
   # pylint: disable=no-self-use
@@ -209,3 +213,19 @@ class Topology(object):
       stmgrs = list(self.physical_plan.stmgrs)
       return map(lambda s: s.host_name, stmgrs)
     return []
+
+  def get_state(self):
+    """
+    Get the current state of this topology.
+    The state values are from the topology.proto
+    RUNNING = 1, PAUSED = 2, KILLED = 3
+    if the state is None "Unknown" is returned.
+    """
+    if self.state == 1:
+      return "Running"
+    elif self.state == 2:
+      return "Paused"
+    elif self.state == 3:
+      return "Killed"
+    else:
+      return "Unknown"

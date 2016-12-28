@@ -11,7 +11,7 @@ var TopologyItem = React.createClass({
 
     var topology = this.props.topology;
     var displaycluster = topology.cluster.toUpperCase();
-    var displaye = topology.environ.toUpperCase();
+    var displayenv = topology.environ.toUpperCase();
     var display_time = "-";
     if (topology.submission_time !== "-") {
       display_time = moment(topology.submission_time * 1000).fromNow();
@@ -33,8 +33,9 @@ var TopologyItem = React.createClass({
     return (
        <tr className={state_class}>
          <td className="col-md-3 break-all"><a className="toponame" href={'/topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
+         <td className="col-md-1 topostatus">{topology.status}</td>
          <td className="col-md-1 topocluster">{displaycluster}</td>
-         <td className="col-md-1 topoenviron">{displaye}</td>
+         <td className="col-md-1 topoenviron">{displayenv}</td>
          <td className="col-md-1 toporunrole break-all">{topology.role}</td>
          <td className="col-md-1 toporeleaseversion">{topology.release_version}</td>
          <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
@@ -74,7 +75,8 @@ var TopologyTable = React.createClass({
                 has_tmaster_location: estate.has_tmaster_location,
                 release_version: estate.release_version,
                 submission_time: estate.submission_time,
-                submission_user: estate.submission_user
+                submission_user: estate.submission_user,
+                status: estate.status
               });
             }
           }
@@ -154,6 +156,9 @@ var TopologyTable = React.createClass({
             <thead>
               <th onClick={sortBy("name")} className={sortClass("name")}>
                 Name
+              </th>
+              <th onClick={sortBy("status")} className={sortClass("status")}>
+                Status
               </th>
               <th onClick={sortBy("cluster")} className={sortClass("cluster")}>
                 Cluster

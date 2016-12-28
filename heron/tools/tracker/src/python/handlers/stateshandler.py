@@ -83,9 +83,12 @@ class StatesHandler(BaseHandler):
       if environ not in ret[cluster]:
         ret[cluster][environ] = {}
       try:
+        topology_state = dict()
+        topology_state["status"] = topology.get_state()
         topology_info = self.tracker.getTopologyInfo(topology.name, cluster, role, environ)
         if topology_info and "execution_state" in topology_info:
-          ret[cluster][environ][topology.name] = topology_info["execution_state"]
+          topology_state.update(topology_info["execution_state"])
+          ret[cluster][environ][topology.name] = topology_state
       except Exception:
         # Do nothing
         pass
