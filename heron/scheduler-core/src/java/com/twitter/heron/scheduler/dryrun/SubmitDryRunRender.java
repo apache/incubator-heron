@@ -1,31 +1,35 @@
-// Copyright 2016 Twitter. All rights reserved.
+//  Copyright 2016 Twitter. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-package com.twitter.heron.scheduler.utils;
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License
+package com.twitter.heron.scheduler.dryrun;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.base.Strings;
-
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
-/**
- * Table dry-run render
- */
-public class TableDryRunRender extends DryRunRender {
+public class SubmitDryRunRender extends DryRunRender {
+
+  private final SubmitDryRunResponse response;
+
+  public SubmitDryRunRender(SubmitDryRunResponse response) {
+    this.response = response;
+  }
 
   private List<String> title = Arrays.asList(
       "component", "cpu", "disk (GB)", "ram (GB)", "parallelism");
@@ -83,23 +87,7 @@ public class TableDryRunRender extends DryRunRender {
 
   @Override
   public String render(SubmitDryRunResponse resp) {
-    Map<String, Resource> componentsResource =
-        this.componentsResource(resp.getPackingPlan());
-    Map<String, Integer> componentsParallelism =
-        this.componentsParallelism(resp.getPackingPlan());
-    List<List<String>> rows = new ArrayList<>();
-    for (Map.Entry<String, Resource> entry: componentsResource.entrySet()) {
-      String componentName = entry.getKey();
-      Resource resource = entry.getValue();
-      int totalCpu = (int) resource.getCpu();
-      long totalRam = resource.getRam().asGigabytes();
-      long totalDisk = resource.getDisk().asGigabytes();
-      int containerNum = componentsParallelism.get(componentName);
-      rows.add(Arrays.asList(
-          componentName, String.valueOf(totalCpu), String.valueOf(totalDisk),
-          String.valueOf(totalRam), String.valueOf(containerNum)));
-    }
-    return createTable(rows);
+
   }
 
   /**
@@ -108,6 +96,7 @@ public class TableDryRunRender extends DryRunRender {
    * @param newAmount new amount
    * @return formatted change
    */
+  /*
   private String formatChange(long oldAmount, long newAmount) {
     long delta = newAmount - oldAmount;
     double percentage = (double) delta / (double) oldAmount;
@@ -120,9 +109,9 @@ public class TableDryRunRender extends DryRunRender {
       }
       return String.format("%d (%s%.2f%%)", newAmount, sign, percentage * 100.0);
     }
-  }
+  } */
 
-  @Override
+  /*
   public String render(UpdateDryRunResponse resp) {
     Map<String, Resource> newComponentsResource =
         componentsResource(resp.getPackingPlan());
@@ -153,5 +142,31 @@ public class TableDryRunRender extends DryRunRender {
           formatChange(oldContainerNum, newContainerNum)));
     }
     return createTable(rows);
+  } */
+
+
+  public String renderTable() {
+    Map<String, Resource> componentsResource =
+        this.componentsResource(response.getPackingPlan());
+    Map<String, Integer> componentsParallelism =
+        this.componentsParallelism(response.getPackingPlan());
+    List<List<String>> rows = new ArrayList<>();
+    for (Map.Entry<String, Resource> entry: componentsResource.entrySet()) {
+      String componentName = entry.getKey();
+      Resource resource = entry.getValue();
+      int totalCpu = (int) resource.getCpu();
+      long totalRam = resource.getRam().asGigabytes();
+      long totalDisk = resource.getDisk().asGigabytes();
+      int containerNum = componentsParallelism.get(componentName);
+      rows.add(Arrays.asList(
+          componentName, String.valueOf(totalCpu), String.valueOf(totalDisk),
+          String.valueOf(totalRam), String.valueOf(containerNum)));
+    }
+    return createTable(rows);
   }
+
+  public String renderRaw() {
+    return "";
+  }
+
 }

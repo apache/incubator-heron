@@ -21,7 +21,7 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
-import com.twitter.heron.scheduler.utils.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingException;
