@@ -42,6 +42,7 @@
 #include "util/xor-manager.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
+#include "manager/ckptmgr-client.h"
 
 namespace heron {
 namespace stmgr {
@@ -58,7 +59,7 @@ StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_
              const sp_string& _topology_id, proto::api::Topology* _hydrated_topology,
              const sp_string& _stmgr_id, const std::vector<sp_string>& _instances,
              const sp_string& _zkhostport, const sp_string& _zkroot, sp_int32 _metricsmgr_port,
-             sp_int32 _shell_port, sp_int32 _checkpoint_manager_port)
+             sp_int32 _shell_port, sp_int32 _checkpoint_manager_port, const sp_string& _ckptmgr_id)
     : pplan_(NULL),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -77,7 +78,8 @@ StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
       shell_port_(_shell_port),
-      checkpoint_manager_port_(_checkpoint_manager_port) {}
+      checkpoint_manager_port_(_checkpoint_manager_port),
+      ckptmgr_id_(_ckptmgr_id) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -233,7 +235,9 @@ void StMgr::CreateCheckpointMgrClient() {
   client_options.set_port(checkpoint_manager_port_);
   client_options.set_socket_family(PF_INET);
   client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
-  checkpoint_manager_client_ = new common::CheckpointMgrClient(eventLoop_, client_options);
+  //checkpoint_manager_client_ = new common::CheckpointMgrClient(eventLoop_, client_options);
+  checkpoint_manager_client_ = new ckptmgr::CkptMgrClient(eventLoop, client_options, topology_name_,
+                                                 topology_id_, ckptmgr_id_, stmgr_id_)
 }
 
 void StMgr::CreateTupleCache() {

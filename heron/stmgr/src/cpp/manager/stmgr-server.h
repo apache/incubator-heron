@@ -36,6 +36,12 @@ class CheckpointMgrClient;
 }
 
 namespace heron {
+namespace ckpymgr {
+class CkptMgrClient;
+}
+}
+
+namespace heron {
 namespace stmgr {
 
 class StMgr;
@@ -46,7 +52,8 @@ class StMgrServer : public Server {
               const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
               heron::common::MetricsMgrSt* _metrics_manager_client,
-              heron::common::CheckpointMgrClient* _checkpoint_manager_client);
+              CkptMgrClient* _checkpoint_manager_client);
+              //heron::common::CheckpointMgrClient* _checkpoint_manager_client);
   virtual ~StMgrServer();
 
   void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);

@@ -82,7 +82,8 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _stmgr_id,
                          const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
                          heron::common::MetricsMgrSt* _metrics_manager_client,
-                         heron::common::CheckpointMgrClient* _checkpoint_manager_client)
+                         ckptmgr::CkptMgrClient* _checkpoint_manager_client)
+                         //heron::common::CheckpointMgrClient* _checkpoint_manager_client)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
