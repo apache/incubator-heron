@@ -29,6 +29,7 @@ import stat
 import threading
 import time
 import yaml
+import socket
 
 from functools import partial
 
@@ -147,6 +148,7 @@ class HeronExecutor(object):
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('&equals;', '='))
     self.classpath = parsed_args.classpath
+    self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
     self.master_port = parsed_args.master_port
     self.tmaster_controller_port = parsed_args.tmaster_controller_port
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
@@ -330,6 +332,7 @@ class HeronExecutor(object):
     retval = {}
     tmaster_cmd = [
         self.tmaster_binary,
+        self.master_host,
         self.master_port,
         self.tmaster_controller_port,
         self.tmaster_stats_port,
@@ -461,6 +464,7 @@ class HeronExecutor(object):
         self.zkroot,
         self.stmgr_ids[self.shard],
         ','.join(map(lambda x: x[0], instance_info)),
+        self.master_host,
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
