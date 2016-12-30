@@ -24,8 +24,8 @@ import java.util.logging.Logger;
 
 import org.apache.mesos.Protos;
 
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * A structure to group container info and mesos info,

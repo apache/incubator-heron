@@ -45,8 +45,11 @@ java_library(
         ["com/twitter/heron/packing/*.java"]
     ),
     deps = [
-        "//heron/packing/src/java:roundrobin-packing",
+        "//heron/common/src/java:basics-java",
         "//heron/packing/src/java:binpacking-packing",
+        "//heron/packing/src/java:builder",
+        "//heron/packing/src/java:roundrobin-packing",
+        "//heron/packing/src/java:utils",
         "//heron/spi/src/java:packing-spi-java",
         "//third_party/java:junit4",
         "//heron/api/src/java:api-java",
@@ -70,7 +73,8 @@ java_test(
     srcs = glob(
        ["**/roundrobin/ResourceCompliantRRPackingTest.java"]
     ),
-    deps = roundrobin_deps_files,
+    deps = roundrobin_deps_files +
+           ["//heron/packing/src/java:utils"],
     size = "small",
 )
 
@@ -79,7 +83,8 @@ java_test(
     srcs = glob(
         ["**/binpacking/FirstFitDecreasingPackingTest.java"]
     ),
-    deps = binpacking_deps_files,
+    deps = binpacking_deps_files +
+           ["//heron/packing/src/java:utils"],
     size = "small",
 )
 
@@ -88,7 +93,8 @@ java_test(
     srcs = glob(
         ["**/PackingUtilsTest.java"]
     ),
-    deps = packing_utils_deps_files,
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:utils"],
     size = "small",
 )
 
@@ -97,7 +103,17 @@ java_test(
     srcs = glob(
         ["**/PackingPlanBuilderTest.java"]
     ),
-    deps = packing_utils_deps_files,
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:builder"],
     size = "small",
 )
 
+java_test(
+    name = "ScorerTest",
+    srcs = glob(
+        ["**/ScorerTest.java"]
+    ),
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:builder"],
+    size = "small",
+)

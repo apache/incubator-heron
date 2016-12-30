@@ -37,9 +37,12 @@ import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.PackingException;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.TMasterException;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -263,13 +266,28 @@ public class RuntimeManagerMain {
 
     // Create a new instance of RuntimeManagerMain
     RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, command);
-    boolean isSuccessful = runtimeManagerMain.manageTopology();
-
-    // Log the result and exit
-    if (!isSuccessful) {
-      throw new RuntimeException(String.format("Failed to %s topology %s", command, topologyName));
-    } else {
-      LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+    try {
+      runtimeManagerMain.manageTopology();
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      /* Since only stderr is used (by logging), we use stdout here to
+         propagate error message back to Python's executor.py (invoke site). */
+            /* Since only stderr is used (by logging), we use stdout here to
+         propagate error message back to Python's executor.py (invoke site). */
+      LOG.log(Level.FINE, "Exception when submitting topology", e);
+      System.out.println(e.getMessage());
+      /* Meaning of exit status code:
+         - status code = 0:
+           program exits without error
+         - 0 < status code < 100:
+           program fails to execute before program execution. For example,
+           JVM cannot find or load main class
+         - status code >= 100:
+           program fails to launch after program execution. For example,
+           topology definition file fails to be loaded */
+      // Exit with status code 100 to indicate that error has happened on user-land
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(100);
     }
   }
 
@@ -293,9 +311,9 @@ public class RuntimeManagerMain {
    * 2. Valid whether the runtime management is legal
    * 3. Complete the runtime management for a specific command
    *
-   * @return true if run runtimeManager successfully
    */
-  public boolean manageTopology() {
+  public void manageTopology()
+      throws TopologyRuntimeManagementException, TMasterException, PackingException {
     String topologyName = Context.topologyName(config);
     // 1. Do prepare work
     // create an instance of state manager
@@ -304,11 +322,10 @@ public class RuntimeManagerMain {
     try {
       statemgr = ReflectionUtils.newInstance(statemgrClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
-      return false;
+      throw new TopologyRuntimeManagementException(String.format(
+          "Failed to instantiate state manager class '%s'",
+          statemgrClass), e);
     }
-
-    boolean isSuccessful = false;
 
     // Put it in a try block so that we can always clean resources
     try {
@@ -318,28 +335,22 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateRuntimeManage(adaptor, topologyName);
+      validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
-      if (isValid) {
-        // invoke the appropriate command to manage the topology
-        LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
+      // invoke the appropriate command to manage the topology
+      LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-        // build the runtime config
-        Config runtime = Config.newBuilder()
-            .put(Keys.topologyName(), Context.topologyName(config))
-            .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-            .build();
+      // build the runtime config
+      Config runtime = Config.newBuilder()
+          .put(Keys.topologyName(), Context.topologyName(config))
+          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+          .build();
 
-        // Create a ISchedulerClient basing on the config
-        ISchedulerClient schedulerClient = getSchedulerClient(runtime);
-        if (schedulerClient == null) {
-          LOG.severe("Failed to initialize scheduler client");
-          return false;
-        }
+      // Create a ISchedulerClient basing on the config
+      ISchedulerClient schedulerClient = getSchedulerClient(runtime);
 
-        isSuccessful = callRuntimeManagerRunner(runtime, schedulerClient);
-      }
+      callRuntimeManagerRunner(runtime, schedulerClient);
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
@@ -347,43 +358,55 @@ public class RuntimeManagerMain {
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(statemgr);
     }
-    return isSuccessful;
   }
 
-  protected boolean validateRuntimeManage(
+  protected void validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
-      String topologyName) {
+      String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
-      LOG.severe("No such topology exists");
-      return false;
+      throw new TopologyRuntimeManagementException(
+          String.format("Topology '%s' does not exist", topologyName));
     }
 
     // Check whether cluster/role/environ matched
     ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
-    if (executionState == null
-        || !executionState.getCluster().equals(Context.cluster(config))
-        || !executionState.getRole().equals(Context.role(config))
-        || !executionState.getEnviron().equals(Context.environ(config))) {
-      LOG.severe("cluster/role/environ not matched");
-      return false;
+    if (executionState == null) {
+      throw new TopologyRuntimeManagementException(
+          String.format("Failed to get execution state for topology %s", topologyName));
     }
 
-    return true;
+    String stateCluster = executionState.getCluster();
+    String stateRole = executionState.getRole();
+    String stateEnv = executionState.getEnviron();
+    String configCluster = Context.cluster(config);
+    String configRole = Context.role(config);
+    String configEnv = Context.environ(config);
+    if (!stateCluster.equals(configCluster)
+        || !stateRole.equals(configRole)
+        || !stateEnv.equals(configEnv)) {
+      String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
+      String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
+      throw new TopologyRuntimeManagementException(String.format(
+          "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
+          topologyName, currentState, configState));
+    }
   }
 
-  protected boolean callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient) {
+  protected void callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient)
+    throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
 
     // invoke the appropriate handlers based on command
-    return runtimeManagerRunner.call();
+    runtimeManagerRunner.call();
   }
 
-  protected ISchedulerClient getSchedulerClient(Config runtime) {
+  protected ISchedulerClient getSchedulerClient(Config runtime)
+      throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
   }
 }

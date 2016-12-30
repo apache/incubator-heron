@@ -6,6 +6,7 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
+    "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:junit4",
     "//third_party/java:mockito",
 ]
@@ -88,7 +89,6 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.yarn.YarnSchedulerTest",
     "com.twitter.heron.scheduler.yarn.HeronMasterDriverTest",
-    "com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest",
     "com.twitter.heron.scheduler.yarn.HeronExecutorTaskTest",
     "com.twitter.heron.scheduler.yarn.YarnLauncherTest",
   ],

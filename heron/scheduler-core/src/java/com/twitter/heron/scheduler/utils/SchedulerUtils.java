@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.scheduler.utils;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -34,6 +34,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ShellUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
@@ -212,7 +214,7 @@ public final class SchedulerUtils {
     commands.add(Context.systemConfigSandboxFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    commands.add(Context.topologyPackageType(config));
+    commands.add(Context.topologyPackageType(config).name().toLowerCase());
     commands.add(Context.topologyBinaryFile(config));
     commands.add(Context.javaSandboxHome(config));
     commands.add(shellPort);
@@ -321,7 +323,7 @@ public final class SchedulerUtils {
    */
   public static String encodeJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
+        javaOpts.getBytes(StandardCharsets.UTF_8));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
@@ -342,7 +344,7 @@ public final class SchedulerUtils {
             replace("&equals;", "=");
 
     return new String(
-        DatatypeConverter.parseBase64Binary(javaOptsBase64), Charset.forName("UTF-8"));
+        DatatypeConverter.parseBase64Binary(javaOptsBase64), StandardCharsets.UTF_8);
   }
 
   /**

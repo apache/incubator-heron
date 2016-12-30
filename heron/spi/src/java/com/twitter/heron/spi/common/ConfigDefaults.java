@@ -17,10 +17,15 @@ package com.twitter.heron.spi.common;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.TypeUtils;
 
 public final class ConfigDefaults {
   private static final Logger LOG = Logger.getLogger(ConfigDefaults.class.getName());
+
+  // name of the resource file that holds the default values for config keys
+  private static final String DEFAULTS_YAML = "com/twitter/heron/spi/common/defaults.yaml";
 
   // holds the mapping between the config keys and their default values
   protected static Map<String, Object> defaults;
@@ -28,9 +33,7 @@ public final class ConfigDefaults {
   // load the resource for default config key values
   static {
     try {
-      defaults = Resource.load(
-          "com.twitter.heron.spi.common.Defaults",
-          Constants.DEFAULTS_YAML);
+      defaults = Resource.load("com.twitter.heron.spi.common.Defaults", DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the defaults class " + e);
       throw new RuntimeException("Failed to load the ConfigDefaults class");
@@ -52,6 +55,14 @@ public final class ConfigDefaults {
 
   public static Long getLong(String key) {
     return TypeUtils.getLong(defaults.get(key));
+  }
+
+  public static ByteAmount getByteAmount(String key) {
+    return ByteAmount.fromBytes(getLong(key));
+  }
+
+  public static PackageType getPackageType(String key) {
+    return (PackageType) defaults.get(key);
   }
 
   public static Double getDouble(String key) {
