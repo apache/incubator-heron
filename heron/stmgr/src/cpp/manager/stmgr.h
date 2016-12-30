@@ -48,8 +48,9 @@ class TupleCache;
 
 class StMgr {
  public:
-  StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-        const sp_string& _topology_id, proto::api::Topology* _topology, const sp_string& _stmgr_id,
+  StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
+        const sp_string& _topology_name, const sp_string& _topology_id,
+        proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
         const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port);
   virtual ~StMgr();
@@ -117,6 +118,7 @@ class StMgr {
   sp_string topology_name_;
   sp_string topology_id_;
   sp_string stmgr_id_;
+  sp_string stmgr_host_;
   sp_int32 stmgr_port_;
   std::vector<sp_string> instances_;
   // Getting data from other streammgrs

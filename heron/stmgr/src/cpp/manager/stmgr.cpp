@@ -52,15 +52,16 @@ const sp_string METRIC_MEM_USED = "__mem_used_bytes";
 const sp_int64 PROCESS_METRICS_FREQUENCY = 10 * 1000 * 1000;
 const sp_int64 TMASTER_RETRY_FREQUENCY = 10 * 1000 * 1000;  // in micro seconds
 
-StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-             const sp_string& _topology_id, proto::api::Topology* _hydrated_topology,
-             const sp_string& _stmgr_id, const std::vector<sp_string>& _instances,
-             const sp_string& _zkhostport, const sp_string& _zkroot, sp_int32 _metricsmgr_port,
-             sp_int32 _shell_port)
+StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
+             const sp_string& _topology_name, const sp_string& _topology_id,
+             proto::api::Topology* _hydrated_topology, const sp_string& _stmgr_id,
+             const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
+             const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port)
     : pplan_(NULL),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
+      stmgr_host_(_myhost),
       stmgr_port_(_myport),
       instances_(_instances),
       server_(NULL),
@@ -83,7 +84,7 @@ void StMgr::Init() {
 
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
-      IpUtils::getHostName(), stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
+      stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
       metrics_export_interval_sec, eventLoop_);
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
@@ -208,8 +209,8 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
 
-  tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_port_,
-                                      shell_port_, std::move(pplan_watch));
+  tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_host_,
+                                      stmgr_port_, shell_port_, std::move(pplan_watch));
 }
 
 void StMgr::CreateTupleCache() {
