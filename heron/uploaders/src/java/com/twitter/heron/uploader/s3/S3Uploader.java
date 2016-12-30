@@ -213,6 +213,10 @@ public class S3Uploader implements IUploader {
   public void close() {
     // Cleanup the backup file if it exists as its not needed anymore.
     // This will succeed whether the file exists or not.
-    s3Client.deleteObject(bucket, previousVersionFilePath);
+    if (previousVersionFilePath != null) {
+      s3Client.deleteObject(bucket, previousVersionFilePath);
+    } else {
+      LOG.log(Level.INFO, "Skipping cleanup of backup file. Previous version does not exist");
+    }
   }
 }
