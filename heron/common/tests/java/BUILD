@@ -15,10 +15,12 @@ java_library(
 
 java_tests(
     test_classes = [
+        "com.twitter.heron.common.basics.ByteAmountTest",
         "com.twitter.heron.common.basics.CommunicatorTest",
         "com.twitter.heron.common.basics.SysUtilsTest",
         "com.twitter.heron.common.basics.WakeableLooperTest",
         "com.twitter.heron.common.basics.FileUtilsTest",
+        "com.twitter.heron.common.basics.PackageTypeTest",
         "com.twitter.heron.common.network.EchoTest",
         "com.twitter.heron.common.network.HeronServerTest",
         "com.twitter.heron.common.config.ConfigReaderTest",

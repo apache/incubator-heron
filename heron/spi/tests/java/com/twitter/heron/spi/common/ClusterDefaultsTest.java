@@ -14,23 +14,15 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.logging.Logger;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class ClusterDefaultsTest {
-  private static final Logger LOG = Logger.getLogger(ClusterDefaultsTest.class.getName());
-
-  private Config home;
-  private Config sandbox;
   private Config props;
 
   @Before
   public void initialize() {
-    home = ClusterDefaults.getDefaultHome();
-    sandbox = ClusterDefaults.getSandboxHome();
     props = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaultMiscellaneous())
         .putAll(ClusterDefaults.getDefaultJars())

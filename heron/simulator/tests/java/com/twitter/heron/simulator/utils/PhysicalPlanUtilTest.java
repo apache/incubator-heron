@@ -39,6 +39,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
 
@@ -110,8 +111,8 @@ public class PhysicalPlanUtilTest implements Serializable {
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 500 * 1024 * 1024);
-    conf.setComponentRam("exclaim", 1024 * 1024 * 1024);
+    conf.setComponentRam("word", ByteAmount.fromMegabytes(500));
+    conf.setComponentRam("exclaim",  ByteAmount.fromGigabytes(1));
     conf.setMessageTimeoutSecs(1);
 
     return topologyBuilder.createTopology().

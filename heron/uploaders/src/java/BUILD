@@ -11,6 +11,7 @@ uploader_spi_files = [
 s3_deps_files = \
     uploader_spi_files + [
         "//third_party/java:aws-java-sdk",
+        "//third_party/java:guava",
     ]
 
 java_library(

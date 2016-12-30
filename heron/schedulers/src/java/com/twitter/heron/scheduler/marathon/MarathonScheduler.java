@@ -26,15 +26,14 @@ import com.google.common.base.Joiner;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 
 public class MarathonScheduler implements IScheduler {
@@ -130,9 +129,9 @@ public class MarathonScheduler implements IScheduler {
       instance.put(MarathonConstants.ID, Integer.toString(i));
       instance.put(MarathonConstants.COMMAND, getExecutorCommand(marathonConfig, i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
-      instance.put(MarathonConstants.MEMORY, containerResource.getRam() / Constants.MB);
-      instance.put(MarathonConstants.DISK, containerResource.getDisk() / Constants.MB);
       instance.set(MarathonConstants.CONTAINER, getContainer(mapper));
+      instance.put(MarathonConstants.MEMORY, containerResource.getRam().asMegabytes());
+      instance.put(MarathonConstants.DISK, containerResource.getDisk().asMegabytes());
       instance.put(MarathonConstants.INSTANCES, 1);
       instance.set(MarathonConstants.LABELS, getLabels(mapper));
       instance.set(MarathonConstants.FETCH, getFetchList(mapper));

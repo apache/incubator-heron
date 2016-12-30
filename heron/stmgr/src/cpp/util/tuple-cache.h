@@ -23,6 +23,7 @@
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "network/network.h"
+#include "network/mempool.h"
 
 namespace heron {
 namespace stmgr {
@@ -72,16 +73,8 @@ class TupleCache {
     void drain(sp_int32 _task_id,
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
 
-    std::vector<proto::system::HeronTupleSet2*> heron_tuple_set_pool_;
-
     proto::system::HeronTupleSet2* acquire() {
-      if (heron_tuple_set_pool_.empty()) {
-        return new proto::system::HeronTupleSet2();
-      }
-
-      proto::system::HeronTupleSet2* set = heron_tuple_set_pool_.back();
-      heron_tuple_set_pool_.pop_back();
-      return set;
+      return heron_tuple_set_pool_.acquire();
     }
 
     proto::system::HeronTupleSet2* acquire_clean_set() {
@@ -91,10 +84,11 @@ class TupleCache {
     }
 
     void release(proto::system::HeronTupleSet2* set) {
-      heron_tuple_set_pool_.push_back(set);
+      heron_tuple_set_pool_.release(set);
     }
 
    private:
+    BaseMemPool<proto::system::HeronTupleSet2> heron_tuple_set_pool_;
     std::deque<proto::system::HeronTupleSet2*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;

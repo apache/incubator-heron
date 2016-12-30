@@ -16,6 +16,7 @@ package com.twitter.heron.spi.packing;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.system.PackingPlans;
 
 /**
@@ -57,7 +58,9 @@ public class PackingPlanProtoDeserializer {
   private Resource convert(PackingPlans.Resource resource) {
     Resource result = null;
     if (resource != null && resource.isInitialized()) {
-      result = new Resource(resource.getCpu(), resource.getRam(), resource.getDisk());
+      result = new Resource(resource.getCpu(),
+          ByteAmount.fromBytes(resource.getRam()),
+          ByteAmount.fromBytes(resource.getDisk()));
     }
     return result;
   }
