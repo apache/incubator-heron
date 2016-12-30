@@ -14,15 +14,17 @@
 
 package com.twitter.heron.spi.packing;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 /**
  * Definition of Resources. Used to form packing structure output.
  */
 public class Resource {
   private double cpu;
-  private long ram;
-  private long disk;
+  private ByteAmount ram;
+  private ByteAmount disk;
 
-  public Resource(double cpu, long ram, long disk) {
+  public Resource(double cpu, ByteAmount ram, ByteAmount disk) {
     this.cpu = cpu;
     this.ram = ram;
     this.disk = disk;
@@ -33,8 +35,8 @@ public class Resource {
     if (obj instanceof Resource) {
       Resource r = (Resource) obj;
       return (this.getCpu() == r.getCpu())
-          && (this.getRam() == r.getRam())
-          && (this.getDisk() == r.getDisk());
+          && (this.getRam().equals(r.getRam()))
+          && (this.getDisk().equals(r.getDisk()));
     } else {
       return false;
     }
@@ -44,15 +46,15 @@ public class Resource {
     return cpu;
   }
 
-  public long getRam() {
+  public ByteAmount getRam() {
     return ram;
   }
 
-  public long getDisk() {
+  public ByteAmount getDisk() {
     return disk;
   }
 
-  public Resource cloneWithRam(long newRam) {
+  public Resource cloneWithRam(ByteAmount newRam) {
     return new Resource(this.getCpu(), newRam, this.getDisk());
   }
 
@@ -62,10 +64,10 @@ public class Resource {
   public Resource subtractAbsolute(Resource other) {
     double cpuDifference = this.getCpu() - other.getCpu();
     double extraCpu = Math.max(0, cpuDifference);
-    long ramDifference = this.getRam() - other.getRam();
-    long extraRam = Math.max(0, ramDifference);
-    long diskDifference = this.getDisk() - other.getDisk();
-    long extraDisk = Math.max(0, diskDifference);
+    ByteAmount ramDifference = this.getRam().minus(other.getRam());
+    ByteAmount extraRam = ByteAmount.ZERO.max(ramDifference);
+    ByteAmount diskDifference = this.getDisk().minus(other.getDisk());
+    ByteAmount extraDisk = ByteAmount.ZERO.max(diskDifference);
     return new Resource(extraCpu, extraRam, extraDisk);
   }
 
@@ -74,25 +76,29 @@ public class Resource {
    * It returns the maximum of the three results.
    */
   public double divideBy(Resource other) throws RuntimeException {
-    if (other.getCpu() == 0 || other.getRam() == 0 || other.getDisk() == 0) {
+    if (other.getCpu() == 0 || other.getRam().isZero() || other.getDisk().isZero()) {
       throw new RuntimeException("Division by 0.");
     } else {
       double cpuFactor = Math.ceil(this.getCpu() / other.getCpu());
-      double ramFactor = Math.ceil((double) this.getRam() / other.getRam());
-      double diskFactor = Math.ceil((double) this.getDisk() / other.getDisk());
+      double ramFactor = Math.ceil((double) this.getRam().asBytes() / other.getRam().asBytes());
+      double diskFactor = Math.ceil((double) this.getDisk().asBytes() / other.getDisk().asBytes());
       return Math.max(cpuFactor, Math.max(ramFactor, diskFactor));
     }
   }
 
   @Override
   public int hashCode() {
-    return (Long.valueOf(getRam()).hashCode() << 2)
-        & (Long.valueOf(getDisk()).hashCode() << 1)
-        & (Double.valueOf(getCpu()).hashCode());
+    int result;
+    long temp;
+    temp = Double.doubleToLongBits(cpu);
+    result = (int) (temp ^ (temp >>> 32));
+    result = 31 * result + ram.hashCode();
+    result = 31 * result + disk.hashCode();
+    return result;
   }
 
   @Override
   public String toString() {
-    return String.format("{cpu: %f, ram: %d, disk: %d}", getCpu(), getRam(), getDisk());
+    return String.format("{cpu: %f, ram: %s, disk: %s}", getCpu(), getRam(), getDisk());
   }
 }

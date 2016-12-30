@@ -22,7 +22,7 @@ activated slaves.
 ### State Manager
 By default, Heron uses Local File System State Manager on Mesos to manage states. Modify
 `$HOME/.heron/conf/mesos/statemgr.yaml` to use ZooKeeper. For more details see [Setting up
-ZooKeeper](../statemanagers/zookeeper).
+ZooKeeper](../../statemanagers/zookeeper).
 
 ### Scheduler
 Heron needs to know where to load the lib to interact with Mesos. Change the config

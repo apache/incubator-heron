@@ -20,7 +20,7 @@ params:
   author: Twitter, Inc.
   description: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   versions:
-    heron: 0.14.3
+    heron: 0.14.5
     bazel: 0.3.1
   assets:
     favicon:

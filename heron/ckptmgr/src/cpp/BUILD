@@ -1,5 +1,15 @@
 package(default_visibility = ["//visibility:public"])
 
+cc_library(
+    name = "common-cxx",
+    srcs = glob(["common/*.cpp"]),
+    hdrs = glob(["common/*.h"]),
+    copts = [
+        "-Ithird_party",
+        "-Iheron/ckptmgr/src/cpp",
+    ],
+    linkstatic = 1,
+)
 
 cc_library(
     name = "manager-cxx",
@@ -51,3 +61,4 @@ cc_binary(
     ],
     linkstatic = 1,
 )
+

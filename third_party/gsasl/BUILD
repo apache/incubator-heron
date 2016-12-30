@@ -8,17 +8,22 @@ package_version = "1.8.0"
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
 
+include_files = [
+    "include/gsasl-compat.h",
+    "include/gsasl-mech.h",
+    "include/gsasl.h",
+]
+
+lib_files = [
+    "lib/libgsasl.a",
+]
+
 genrule(
     name = "gsasl-srcs",
     srcs = [
         package_file,
     ],
-    outs = [
-        "include/gsasl-compat.h",
-        "include/gsasl-mech.h",
-        "include/gsasl.h",
-        "lib/libgsasl.a",
-    ],
+    outs = include_files + lib_files,
     cmd = "\n".join([
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t gsasl.XXXXX)",
@@ -35,15 +40,8 @@ genrule(
 
 cc_library(
     name = "gsasl-cxx",
-    srcs = [
-        "empty.cc",
-        "include/gsasl-compat.h",
-        "include/gsasl-mech.h",
-        "lib/libgsasl.a",
-    ],
-    hdrs = [
-        "include/gsasl.h",
-    ],
+    srcs = ["empty.cc"] + lib_files,
+    hdrs = include_files,
     includes = [
         "include",
     ],
@@ -55,4 +53,9 @@ filegroup(
     srcs = [
         ":gsasl-cxx",
     ]
+)
+
+filegroup(
+    name = "gsasl-files",
+    srcs = include_files + lib_files,
 )

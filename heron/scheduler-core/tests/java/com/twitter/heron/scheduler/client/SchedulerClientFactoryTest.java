@@ -27,6 +27,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
@@ -34,8 +35,8 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 public class SchedulerClientFactoryTest {
   private static final String TOPOLOGY_NAME = "shiwei_0924_jiayou";
 
-  @Test
-  public void testGetServiceSchedulerClient() throws Exception {
+  @Test(expected = SchedulerException.class)
+  public void testGetServiceSchedulerClientFail() throws Exception {
     // Instantiate mock objects
     Config config = Mockito.mock(Config.class);
     Config runtime = Mockito.mock(Config.class);
@@ -51,8 +52,27 @@ public class SchedulerClientFactoryTest {
 
     // Failed to getSchedulerLocation
     Mockito.when(statemgr.getSchedulerLocation(Mockito.eq(TOPOLOGY_NAME))).thenReturn(null);
-    Assert.assertNull(new SchedulerClientFactory(config, runtime).getSchedulerClient());
-    Mockito.verify(statemgr).getSchedulerLocation(Mockito.eq(TOPOLOGY_NAME));
+    try {
+      new SchedulerClientFactory(config, runtime).getSchedulerClient();
+    } finally {
+      Mockito.verify(statemgr).getSchedulerLocation(Mockito.eq(TOPOLOGY_NAME));
+    }
+  }
+
+  @Test
+  public void testGetServiceSchedulerClientOk() {
+    // Instantiate mock objects
+    Config config = Mockito.mock(Config.class);
+    Config runtime = Mockito.mock(Config.class);
+    SchedulerStateManagerAdaptor statemgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
+
+    // Get a ServiceSchedulerClient
+    Mockito.when(config.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"), true))
+        .thenReturn(true);
+
+    // Mock the runtime object
+    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(statemgr);
+    Mockito.when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
 
     // Get a schedulerLocation successfully
     Mockito.when(statemgr.getSchedulerLocation(Mockito.eq(TOPOLOGY_NAME))).
@@ -77,7 +97,21 @@ public class SchedulerClientFactoryTest {
     // Get a LibrarySchedulerClient
     Mockito.when(config.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"))).thenReturn(false);
     Assert.assertNotNull(new SchedulerClientFactory(config, runtime).getSchedulerClient());
+  }
 
+  @Test(expected = SchedulerException.class)
+  @PrepareForTest(ReflectionUtils.class)
+  public void testGetLibrarySchedulerClientNotExist() throws Exception {
+    // Instantiate mock objects
+    Config config = Mockito.mock(Config.class);
+    Config runtime = Mockito.mock(Config.class);
+
+    // Return a MockScheduler
+    Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS")))
+        .thenReturn(IScheduler.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IScheduler.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IScheduler.class.getName()));
     // Return some scheduler class not exist
     final String SCHEDULER_CLASS_NOT_EXIST = "class_not_exist";
     Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).

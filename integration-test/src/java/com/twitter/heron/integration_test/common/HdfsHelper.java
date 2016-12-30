@@ -15,6 +15,7 @@ package com.twitter.heron.integration_test.common;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -40,6 +41,6 @@ public final class HdfsHelper {
     Path pt = new Path(path);
     Configuration conf = new Configuration();
     FileSystem fileSystem = FileSystem.get(conf);
-    return new InputStreamReader(fileSystem.open(pt), "UTF-8");
+    return new InputStreamReader(fileSystem.open(pt), StandardCharsets.UTF_8);
   }
 }

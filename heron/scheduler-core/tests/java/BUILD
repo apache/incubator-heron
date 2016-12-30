@@ -47,6 +47,8 @@ java_tests(
     "com.twitter.heron.scheduler.client.LibrarySchedulerClientTest",
     "com.twitter.heron.scheduler.client.HttpServiceSchedulerClientTest",
     "com.twitter.heron.scheduler.client.SchedulerClientFactoryTest",
+    "com.twitter.heron.scheduler.utils.LauncherUtilsTest",
+    "com.twitter.heron.scheduler.utils.SchedulerUtilsTest",
   ],
   runtime_deps = [ ":scheduler-core-tests" ],
   size = "small",

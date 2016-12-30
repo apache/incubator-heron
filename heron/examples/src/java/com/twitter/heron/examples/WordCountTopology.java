@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
@@ -178,8 +180,8 @@ public final class WordCountTopology {
     /*
     Set config here
     */
-    conf.setComponentRam("word", 2L * 1024 * 1024 * 1024);
-    conf.setComponentRam("consumer", 3L * 1024 * 1024 * 1024);
+    conf.setComponentRam("word", ByteAmount.fromGigabytes(2));
+    conf.setComponentRam("consumer", ByteAmount.fromGigabytes(3));
     conf.setContainerCpuRequested(6);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());

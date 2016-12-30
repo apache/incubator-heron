@@ -19,6 +19,7 @@ cc_library(
         "networkoptions.cpp",
         "packet.cpp",
         "server.cpp",
+        "piper.cpp",
 
         "regevent.h",
         "asyncdns.h",
@@ -37,6 +38,7 @@ cc_library(
         "event_loop_impl.h",
         "server.h",
         "mempool.h",
+        "piper.h",
     ],
     hdrs = [
         "network.h",

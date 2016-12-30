@@ -112,15 +112,8 @@ public final class FileUtils {
     return isDirectoryExists(file) && new File(file).list().length > 0;
   }
 
-  public static boolean isOriginalPackageJar(String packageFilename) {
-    return packageFilename.endsWith(".jar");
-  }
-
-  public static boolean isOriginalPackagePex(String packageFilename) {
-    return packageFilename.endsWith(".pex");
-  }
-
   public static String getBaseName(String file) {
     return new File(file).getName();
   }
+
 }
