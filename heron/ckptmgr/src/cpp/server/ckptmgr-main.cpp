@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "ckptmanager/ckptmgr.h"
+#include "manager/ckptmgr.h"
 #include "basics/basics.h"
 #include "network/network.h"
 #include "proto/messages.h"

@@ -1,7 +1,7 @@
 
-#include "ckptmanager/ckptmgr.h"
+#include "manager/ckptmgr.h"
 #include <iostream>
-#include "ckptmanager/ckptmgr-server.h"
+#include "manager/ckptmgr-server.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"

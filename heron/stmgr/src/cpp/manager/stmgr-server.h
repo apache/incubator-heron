@@ -24,7 +24,7 @@
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
-#include "ckptclient/ckptmgr-client.h"
+#include "client/ckptmgr-client.h"
 
 namespace heron {
 namespace common {

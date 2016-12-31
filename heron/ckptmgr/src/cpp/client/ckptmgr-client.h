@@ -10,7 +10,7 @@
 namespace heron {
 namespace ckptmgr {
 
-class - : public Client {
+class CkptMgrClient : public Client {
   public:
     CkptMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
                   const sp_string& _topology_name, const sp_string& _topology_id,

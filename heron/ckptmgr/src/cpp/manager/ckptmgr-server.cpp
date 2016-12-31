@@ -1,5 +1,5 @@
 
-#include "ckptmanager/ckptmgr-server.h"
+#include "manager/ckptmgr-server.h"
 #include <iostream>
 
 namespace heron {

@@ -14,10 +14,10 @@ cc_library(
 cc_library(
     name = "client-cxx",
     srcs = [
-        "ckptclient/ckptmgr-client.cpp",
+        "client/ckptmgr-client.cpp",
     ],
     hdrs = [
-        "ckptclient/ckptmgr-client.h",
+        "client/ckptmgr-client.h",
     ],
     copts = [
         "-Iheron",
@@ -37,12 +37,12 @@ cc_library(
 cc_library(
     name = "manager-cxx",
     srcs = [
-        "ckptmanager/ckptmgr-server.cpp",
-        "ckptmanager/ckptmgr.cpp",
+        "manager/ckptmgr-server.cpp",
+        "manager/ckptmgr.cpp",
     ],
     hdrs = [
-        "ckptmanager/ckptmgr-server.h",
-        "ckptmanager/ckptmgr.h",
+        "manager/ckptmgr-server.h",
+        "manager/ckptmgr.h",
     ],
     copts = [
         "-Iheron",
