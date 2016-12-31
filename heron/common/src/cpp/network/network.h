@@ -39,5 +39,6 @@
 #include "network/httputils.h"
 #include "network/httpclient.h"
 #include "network/httpserver.h"
+#include "network/piper.h"
 
 #endif  // __SP_NETWORK_H
