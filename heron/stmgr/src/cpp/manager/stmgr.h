@@ -39,7 +39,7 @@ class MultiAssignableMetric;
 
 namespace heron {
 namespace ckptmgr {
-  class CkptMgrClient;
+class CkptMgrClient;
 }
 }
 

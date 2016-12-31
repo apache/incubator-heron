@@ -28,28 +28,28 @@ namespace ckptmgr {
 class CkptMgrServer;
 
 class CkptMgr {
-  public:
-    CkptMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-            const sp_string& _topology_id, const sp_string& _ckptmgr_id);
-    virtual ~CkptMgr();
+ public:
+  CkptMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
+          const sp_string& _topology_id, const sp_string& _ckptmgr_id);
+  virtual ~CkptMgr();
 
-    void Init();
+  void Init();
 
-    // TODO: add methods
+  // TODO(nlu): add methods
 
-  private:
-    void StartCkptmgrServer();
+ private:
+  void StartCkptmgrServer();
 
-    sp_string topology_name_;
-    sp_string topology_id_;
-    sp_string ckptmgr_id_;
-    sp_int32 ckptmgr_port_;
-    CkptMgrServer* server_;
+  sp_string topology_name_;
+  sp_string topology_id_;
+  sp_string ckptmgr_id_;
+  sp_int32 ckptmgr_port_;
+  CkptMgrServer* server_;
 
-    EventLoop* eventLoop_;
+  EventLoop* eventLoop_;
 };
 
-} // namespace ckptmgr
-} // namespace heron
+}  // namespace ckptmgr
+}  // namespace heron
 
-#endif // SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_H_
+#endif  // SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_H_

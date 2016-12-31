@@ -40,7 +40,8 @@ CkptMgrClient::CkptMgrClient(EventLoop* eventloop, const NetworkOptions& _option
   reconnect_cpktmgr_interval_sec_ =
     config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
 
-  InstallResponseHandler(new proto::ckptmgr::RegisterStMgrRequest(), &CkptMgrClient::HandleStMgrRegisterResponse);
+  InstallResponseHandler(new proto::ckptmgr::RegisterStMgrRequest(),
+                         &CkptMgrClient::HandleStMgrRegisterResponse);
 }
 
 CkptMgrClient::~CkptMgrClient() {
@@ -70,7 +71,7 @@ void CkptMgrClient::HandleConnect(NetworkErrorCode _status) {
     if (quit_) {
       LOG(ERROR) << "Quitting";
       delete this;
-      return ;
+      return;
     } else {
       LOG(INFO) << "Retrying again..." << std::endl;
       AddTimer([this]() { this->OnReconnectTimer(); },
@@ -98,8 +99,9 @@ void CkptMgrClient::HandleClose(NetworkErrorCode _code) {
   }
 }
 
-void CkptMgrClient::HandleStMgrRegisterResponse(void*, proto::ckptmgr::RegisterStMgrResponse* _response,
-                                        NetworkErrorCode _status) {
+void CkptMgrClient::HandleStMgrRegisterResponse(void*,
+                                                proto::ckptmgr::RegisterStMgrResponse* _response,
+                                                NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOk network code " << _status << " for register response from ckptmgr "
                << ckptmgr_id_ << "running at " << get_clientoptions().get_host() << ":"
@@ -130,7 +132,7 @@ void CkptMgrClient::SendRegisterRequest() {
   request->set_topology_id(topology_id_);
   request->set_stmgr(stmgr_id_);
   SendRequest(request, NULL);
-  return ;
+  return;
 }
 
 
@@ -141,4 +143,5 @@ void CkptMgrClient::SaveStateCheckpoint(proto::ckptmgr::SaveStateCheckpoint* _me
 }
 
 }  // namespace ckptmgr
-}  // namespace heorn
+}  // namespace heron
+
