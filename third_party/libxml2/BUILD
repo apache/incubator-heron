@@ -71,7 +71,7 @@ genrule(
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "cd " + package_dir,
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no --without-python",
+        "./configure --prefix=$$INSTALL_DIR --enable-shared=no --without-python --without-lzma",
         "make install",
         "rm -rf $$TMP_DIR",
     ]),
