@@ -26,7 +26,6 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "metrics/metrics.h"
-#include "stateful/checkpointmgr-client.h"
 
 namespace heron {
 namespace stmgr {
@@ -82,8 +81,7 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _stmgr_id,
                          const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
                          heron::common::MetricsMgrSt* _metrics_manager_client,
-                         ckptmgr::CkptMgrClient* _checkpoint_manager_client)
-                         //heron::common::CheckpointMgrClient* _checkpoint_manager_client)
+                         heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -617,7 +615,7 @@ void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (iter->second->is_local_spout()) {
       if (iter->second->conn_) {
-        proto::stmgr::InitiateStatefulCheckpoint message;
+        proto::ckptmgr::InitiateStatefulCheckpoint message;
         message.set_checkpoint_id(_checkpoint_tag);
         SendMessage(iter->second->conn_, message);
       }
@@ -626,7 +624,7 @@ void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
 }
 
 void StMgrServer::HandleInstanceStateCheckpointMessage(Connection* _conn,
-                               proto::stmgr::InstanceStateCheckpoint* _message) {
+                               proto::ckptmgr::InstanceStateCheckpoint* _message) {
   ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Hmm.. Got InstaceStateCheckpoint Message from an unknown connection";
@@ -641,7 +639,7 @@ void StMgrServer::HandleInstanceStateCheckpointMessage(Connection* _conn,
     delete _message;
     return;
   }
-  proto::stmgr::SaveStateCheckpoint* message = new proto::stmgr::SaveStateCheckpoint();
+  proto::ckptmgr::SaveStateCheckpoint* message = new proto::ckptmgr::SaveStateCheckpoint();
   message->mutable_instance()->CopyFrom(*(it->second->instance_));
   message->mutable_checkpoint()->CopyFrom(*_message);
   checkpoint_manager_client_->SaveStateCheckpoint(message);

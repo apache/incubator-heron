@@ -1,9 +1,9 @@
-#ifndef SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_SERVER_H_
-#define SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_SERVER_H_
+#ifndef SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_SERVER_H_
+#define SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_SERVER_H_
 
 #include "basics/basics.h"
-#include "manager/ckptmgr.h"
-#include "manager/ckptmgr-server.h"
+#include "ckptmanager/ckptmgr.h"
+#include "ckptmanager/ckptmgr-server.h"
 #include "network/network.h"
 #include "proto/messages.h"
 
@@ -25,12 +25,8 @@ class CkptMgrServer : public Server {
 
   private:
 
-    void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                   proto::stmgr::StrMgrHelloRequest* _request);
-//    void HandleCkptStoreRequest(REQID _id, Connection* _conn,
-//                                proto::ckptmgr::CkptStoreRequest* _request);
-//    void HandleCkptFetchRequest(REQID _id, Connection* _conn,
-//                                proto::ckptmgr::CkptFetchRequest* _request);
+    void HandleStMgrRegisterRequest(REQID _id, Connection* _conn,
+                                   proto::ckptmgr::RegisterStMgrRequest* _request);
 
     sp_string topology_name_;
     sp_string topology_id_;
@@ -42,4 +38,4 @@ class CkptMgrServer : public Server {
 } // namespace ckptmgr
 } // namespace heron
 
-#endif
+#endif // SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_SERVER_H_

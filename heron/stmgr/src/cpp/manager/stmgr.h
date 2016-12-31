@@ -138,7 +138,7 @@ class StMgr {
   // Pushing data to other streammanagers
   StMgrClientMgr* clientmgr_;
   TMasterClient* tmaster_client_;
-  ckptmgr::CkptMgrClient* checkpoint_manager_client_;
+
   sp_string ckptmgr_id_;
   EventLoop* eventLoop_;
 
@@ -159,7 +159,7 @@ class StMgr {
   heron::common::MetricsMgrSt* metrics_manager_client_;
 
   // Checkpoint Manager
-  //heron::common::CheckpointMgrClient* checkpoint_manager_client_;
+  heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
 
   // Process related metrics
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;

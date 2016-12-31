@@ -1,7 +1,6 @@
 
-
-#ifndef SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_CLIENT_H_
-#define SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_CLIENT_H_
+#ifndef SRC_CPP_SVCS_CKPTMGR_SRC_CKPTCLIENT_CLIENT_H_
+#define SRC_CPP_SVCS_CKPTMGR_SRC_CKPTCLIENT_CLIENT_H_
 
 #include "basics/basics.h"
 #include "network/network.h"
@@ -20,21 +19,20 @@ class CkptMgrClient : public Client {
 
     void Quit();
 
-    // TODO: add actual requests
-    //void StoreCheckPoint(CheckPoint cp);
-    //CheckPoint FetchCheckPoint();
+    // TODO: add requests methods
+    void SaveStateCheckpoint(proto::ckptmgr::SaveStateCheckpoint* _message);
 
   protected:
     virtual void HandleConnect(NetworkErrorCode status);
     virtual void HandleClose(NetworkErrorCode status);
 
   private:
-    void HandleHelloResponse(void *, proto::stmgr::StrMgrHelloResponse *_response, NetworkErrorCode);
-    void SendHelloRequest();
+    void HandleStMgrRegisterResponse(void *, proto::ckptmgr::RegisterStMgrResponse *_response, NetworkErrorCode);
+    void SendRegisterRequest();
 
     void OnReconnectTimer();
 
-    // TODO: add actual response handler methods
+    // TODO: add response handler methods
 
     sp_string topology_name_;
     sp_string topology_id_;
@@ -49,4 +47,4 @@ class CkptMgrClient : public Client {
 } // namespace ckptmgr
 } // namespace heron
 
-#endif  // SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_CLIENT_H_
+#endif  // SRC_CPP_SVCS_CKPTMGR_SRC_CKPTCLIENT_CLIENT_H_

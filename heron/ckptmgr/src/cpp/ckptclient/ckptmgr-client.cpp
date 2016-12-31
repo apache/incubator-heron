@@ -1,5 +1,5 @@
 
-#include "manager/ckptmgr-client.h"
+#include "ckptclient/ckptmgr-client.h"
 #include <iostream>
 #include <string>
 #include "basics/basics.h"
@@ -25,7 +25,7 @@ CkptMgrClient::CkptMgrClient(EventLoop* eventloop, const NetworkOptions& _option
   reconnect_cpktmgr_interval_sec_ =
     config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
 
-  InstallResponseHandler(new proto::stmgr::StrMgrHelloRequest(), &CkptMgrClient::HandleHelloResponse);
+  InstallResponseHandler(new proto::ckptmgr::RegisterStMgrRequest(), &CkptMgrClient::HandleStMgrRegisterResponse);
 }
 
 CkptMgrClient::~CkptMgrClient() {
@@ -46,7 +46,7 @@ void CkptMgrClient::HandleConnect(NetworkErrorCode _status) {
     if (quit_) {
       Stop();
     } else {
-      SendHelloRequest();
+      SendRegisterRequest();
     }
   } else {
     LOG(WARNING) << "Could not connect to cpktmgr" << " running at "
@@ -83,7 +83,7 @@ void CkptMgrClient::HandleClose(NetworkErrorCode _code) {
   }
 }
 
-void CkptMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* _response,
+void CkptMgrClient::HandleStMgrRegisterResponse(void*, proto::ckptmgr::RegisterStMgrResponse* _response,
                                         NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOk network code " << _status << " for register response from ckptmgr "
@@ -109,8 +109,8 @@ void CkptMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse
 
 void CkptMgrClient::OnReconnectTimer() { Start(); }
 
-void CkptMgrClient::SendHelloRequest() {
-  auto request = new proto::stmgr::StrMgrHelloRequest();
+void CkptMgrClient::SendRegisterRequest() {
+  auto request = new proto::ckptmgr::RegisterStMgrRequest();
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
   request->set_stmgr(stmgr_id_);
@@ -118,6 +118,12 @@ void CkptMgrClient::SendHelloRequest() {
   return ;
 }
 
+
+void CkptMgrClient::SaveStateCheckpoint(proto::ckptmgr::SaveStateCheckpoint* _message) {
+  SendMessage(*_message);
+
+  delete _message;
+}
 
 }  // namespace ckptmgr
 }  // namespace heorn

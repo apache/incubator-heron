@@ -42,7 +42,7 @@
 #include "util/xor-manager.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
-#include "manager/ckptmgr-client.h"
+#include "ckptclient/ckptmgr-client.h"
 
 namespace heron {
 namespace stmgr {
@@ -235,9 +235,8 @@ void StMgr::CreateCheckpointMgrClient() {
   client_options.set_port(checkpoint_manager_port_);
   client_options.set_socket_family(PF_INET);
   client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
-  //checkpoint_manager_client_ = new common::CheckpointMgrClient(eventLoop_, client_options);
-  checkpoint_manager_client_ = new ckptmgr::CkptMgrClient(eventLoop, client_options, topology_name_,
-                                                 topology_id_, ckptmgr_id_, stmgr_id_)
+  checkpoint_manager_client_ = new ckptmgr::CkptMgrClient(eventLoop_, client_options, topology_name_,
+                                                 topology_id_, ckptmgr_id_, stmgr_id_);
 }
 
 void StMgr::CreateTupleCache() {

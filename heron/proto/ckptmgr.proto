@@ -1,0 +1,43 @@
+package heron.proto.ckptmgr;
+option java_package = "com.twitter.heron.proto.ckptmgr";
+option java_outer_classname = "CheckpointManager";
+
+import "common.proto";
+import "physical_plan.proto";
+
+// This is the message that a stmgr sends
+// when it wants to establish the connection
+// with checkpoint manager
+message RegisterStMgrRequest{
+  required string topology_name = 1;
+  required string topology_id = 2;
+  required string stmgr = 3;
+}
+
+// This is the message that checkpoint manager
+// sends when it receives the register request
+// from stmgr
+message RegisterStMgrResponse {
+  required heron.proto.system.Status status = 1;
+}
+
+// This is the message that the instance sends
+// when it wants stmgr to store its state
+message InstanceStateCheckpoint {
+  required string checkpoint_id = 1;
+  required bytes state = 2;
+}
+
+// This is the message that the stmgr sends to its
+// local spouts to begin initiating checkpoint
+message InitiateStatefulCheckpoint {
+  required string checkpoint_id = 1;
+}
+
+// This is the message that StMgr sends to Checkpoint Mgr
+// to store instance checkpoint data
+message SaveStateCheckpoint {
+  // Information about the instance whose state this is
+  required heron.proto.system.Instance instance = 1;
+  required InstanceStateCheckpoint checkpoint = 2;
+}

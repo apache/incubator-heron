@@ -1,9 +1,9 @@
 
-#ifndef SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_H_
-#define SRC_CPP_SVCS_CKPTMGR_SRC_MANAGER_CKPTMGR_H_
+#ifndef SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_H_
+#define SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_H_
 
 #include "basics/basics.h"
-#include "manager/ckptmgr-server.h"
+#include "ckptmanager/ckptmgr-server.h"
 #include "network/network.h"
 #include "proto/messages.h"
 
@@ -37,4 +37,4 @@ class CkptMgr {
 } // namespace ckptmgr
 } // namespace heron
 
-#endif
+#endif // SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_H_

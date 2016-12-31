@@ -12,16 +12,37 @@ cc_library(
 )
 
 cc_library(
-    name = "manager-cxx",
+    name = "client-cxx",
     srcs = [
-        "manager/ckptmgr-client.cpp",
-        "manager/ckptmgr-server.cpp",
-        "manager/ckptmgr.cpp",
+        "ckptclient/ckptmgr-client.cpp",
     ],
     hdrs = [
-        "manager/ckptmgr-client.h",
-        "manager/ckptmgr-server.h",
-        "manager/ckptmgr.h",
+        "ckptclient/ckptmgr-client.h",
+    ],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/ckptmgr/src/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp"
+    ],
+    deps = [
+        "//heron/proto:proto-cxx",
+        "//heron/common/src/cpp/config:config-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "manager-cxx",
+    srcs = [
+        "ckptmanager/ckptmgr-server.cpp",
+        "ckptmanager/ckptmgr.cpp",
+    ],
+    hdrs = [
+        "ckptmanager/ckptmgr-server.h",
+        "ckptmanager/ckptmgr.h",
     ],
     copts = [
         "-Iheron",
@@ -34,7 +55,6 @@ cc_library(
         "//config:config-cxx",
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
-        "//heron/common/src/cpp/config:config-cxx",
         "//third_party/yaml-cpp:yaml-cxx",
     ],
     linkstatic = 1,

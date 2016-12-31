@@ -1,5 +1,5 @@
 
-#include "manager/ckptmgr-server.h"
+#include "ckptmanager/ckptmgr-server.h"
 #include <iostream>
 
 namespace heron {
@@ -16,7 +16,7 @@ CkptMgrServer::CkptMgrServer(EventLoop* eventloop, const NetworkOptions& _option
       stmgr_conn_(NULL) {
 
     // handlers
-    InstallRequestHandler(&CkptMgrServer::HandleStMgrHelloRequest);
+    InstallRequestHandler(&CkptMgrServer::HandleStMgrRegisterRequest);
 }
 
 CkptMgrServer::~CkptMgrServer() {
@@ -34,8 +34,8 @@ void CkptMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
             << _conn->getPort();
 }
 
-void CkptMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                            proto::stmgr::StrMgrHelloRequest* _request) {
+void CkptMgrServer::HandleStMgrRegisterRequest(REQID _id, Connection* _conn,
+                                            proto::ckptmgr::RegisterStMgrRequest* _request) {
   LOG(INFO) << "Got a hello message from stmgr " << _request->stmgr() << " on connection" << _conn;
   proto::stmgr::StrMgrHelloResponse response;
   // Some basic checks
@@ -62,5 +62,5 @@ void CkptMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
 }
 
 
-}
+} // namespace ckptmgr
 } // namespace heron
