@@ -77,5 +77,6 @@ void CkptMgrServer::HandleStMgrRegisterRequest(REQID _id, Connection* _conn,
 }
 
 
-} // namespace ckptmgr
-} // namespace heron
+}  // namespace ckptmgr
+}  // namespace heron
+

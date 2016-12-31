@@ -15,6 +15,7 @@
  */
 
 #include <iostream>
+#include <string>
 #include "manager/ckptmgr.h"
 #include "basics/basics.h"
 #include "network/network.h"
