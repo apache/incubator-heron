@@ -81,6 +81,7 @@ cc_library(
     ],
     copts = [
         "-Iheron",
+        "-Iheron/ckptmgr/src/cpp",
         "-Iheron/common/src/cpp",
         "-Iheron/statemgrs/src/cpp",
         "-Iheron/stmgr/src/cpp",
@@ -96,6 +97,7 @@ cc_library(
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
         "//heron/common/src/cpp/stateful:checkpointmgr-cxx",
+        "//heron/ckptmgr/src/cpp:client-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//third_party/yaml-cpp:yaml-cxx",
     ],

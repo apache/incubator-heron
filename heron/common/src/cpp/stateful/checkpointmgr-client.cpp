@@ -51,7 +51,7 @@ void CheckpointMgrClient::HandleClose(NetworkErrorCode) {
 
 void CheckpointMgrClient::ReConnect() { Start(); }
 
-void CheckpointMgrClient::SaveStateCheckpoint(proto::stmgr::SaveStateCheckpoint* _message) {
+void CheckpointMgrClient::SaveStateCheckpoint(proto::ckptmgr::SaveStateCheckpoint* _message) {
   SendMessage(*_message);
 
   delete _message;

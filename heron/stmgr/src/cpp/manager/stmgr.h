@@ -38,6 +38,13 @@ class MultiAssignableMetric;
 }
 
 namespace heron {
+namespace ckptmgr {
+  class CkptMgrClient;
+}
+}
+
+
+namespace heron {
 namespace stmgr {
 
 class StMgrServer;
@@ -53,7 +60,7 @@ class StMgr {
         const sp_string& _topology_id, proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
         const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
-        sp_int32 _checkpoint_manager_port);
+        sp_int32 _checkpoint_manager_port, const sp_string& _ckptmgr_id);
   virtual ~StMgr();
 
   // All kinds of initialization like starting servers and clients
@@ -131,6 +138,8 @@ class StMgr {
   // Pushing data to other streammanagers
   StMgrClientMgr* clientmgr_;
   TMasterClient* tmaster_client_;
+
+  sp_string ckptmgr_id_;
   EventLoop* eventLoop_;
 
   // Map of task_id to stmgr_id
@@ -150,7 +159,7 @@ class StMgr {
   heron::common::MetricsMgrSt* metrics_manager_client_;
 
   // Checkpoint Manager
-  heron::common::CheckpointMgrClient* checkpoint_manager_client_;
+  heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
 
   // Process related metrics
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;

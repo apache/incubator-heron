@@ -24,7 +24,7 @@
 
 namespace heron {
 namespace proto {
-namespace stmgr {
+namespace ckptmgr {
 class SaveStateCheckpoint;
 }
 }
@@ -38,7 +38,7 @@ class CheckpointMgrClient : public Client {
   CheckpointMgrClient(EventLoop* eventLoop, const NetworkOptions& options);
   ~CheckpointMgrClient();
 
-  void SaveStateCheckpoint(proto::stmgr::SaveStateCheckpoint* _message);
+  void SaveStateCheckpoint(proto::ckptmgr::SaveStateCheckpoint* _message);
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);

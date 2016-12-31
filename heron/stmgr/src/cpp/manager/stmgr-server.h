@@ -24,6 +24,7 @@
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
+#include "client/ckptmgr-client.h"
 
 namespace heron {
 namespace common {
@@ -32,6 +33,12 @@ class MultiCountMetric;
 class TimeSpentMetric;
 class AssignableMetric;
 class CheckpointMgrClient;
+}
+}
+
+namespace heron {
+namespace ckptmgr {
+class CkptMgrClient;
 }
 }
 
@@ -46,7 +53,7 @@ class StMgrServer : public Server {
               const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
               heron::common::MetricsMgrSt* _metrics_manager_client,
-              heron::common::CheckpointMgrClient* _checkpoint_manager_client);
+              heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client);
   virtual ~StMgrServer();
 
   void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
@@ -94,8 +101,7 @@ class StMgrServer : public Server {
                                      proto::stmgr::RegisterInstanceRequest* _request);
   void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
   void HandleInstanceStateCheckpointMessage(Connection* _conn,
-                                            proto::stmgr::InstanceStateCheckpoint* _message);
-
+                                            proto::ckptmgr::InstanceStateCheckpoint* _message);
   // Backpressure message from and to other stream managers
   void HandleStartBackPressureMessage(Connection* _conn,
                                       proto::stmgr::StartBackPressureMessage* _message);
@@ -171,9 +177,11 @@ class StMgrServer : public Server {
   std::vector<sp_string> expected_instances_;
   StMgr* stmgr_;
 
+  // checkpoint manager client
+  heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
+
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
-  heron::common::CheckpointMgrClient* checkpoint_manager_client_;
   heron::common::MultiCountMetric* stmgr_server_metrics_;
   heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
