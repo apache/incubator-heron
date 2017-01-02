@@ -15,25 +15,26 @@ package com.twitter.heron.scheduler.dryrun;
 
 import java.util.Map;
 
-import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 public class UpdateDryRunResponse extends SubmitDryRunResponse {
   private static final long serialVersionUID = 18244716698543219L;
 
-  private final PackingPlan oldPlan;
+  private final PackingPlan oldPackingPlan;
   private final Map<String, Integer> changeRequests;
 
-  public UpdateDryRunResponse(String topologyName, PackingPlan oldPlan,
-                              PackingPlan newPlan, Map<String, Integer> changeRequests,
-                              String packingClass) {
-    super(topologyName, newPlan, packingClass);
-    this.oldPlan = oldPlan;
+  public UpdateDryRunResponse(TopologyAPI.Topology topology, Config config,
+                              PackingPlan newPackingPlan, PackingPlan oldPackingPlan,
+                              Map<String, Integer> changeRequests) {
+    super(topology, config, newPackingPlan);
+    this.oldPackingPlan = oldPackingPlan;
     this.changeRequests = changeRequests;
   }
 
   public PackingPlan getOldPackingPlan() {
-    return oldPlan;
+    return oldPackingPlan;
   }
 
   public Map<String, Integer> getChangeRequests() {

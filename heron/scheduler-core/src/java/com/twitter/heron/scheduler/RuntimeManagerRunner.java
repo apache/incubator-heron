@@ -187,8 +187,7 @@ public class RuntimeManagerRunner {
       PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
       PackingPlan oldPlan = deserializer.fromProto(currentPlan);
       PackingPlan newPlan = deserializer.fromProto(proposedPlan);
-      throw new UpdateDryRunResponse(
-          topologyName, oldPlan, newPlan, changeRequests, Context.repackingClass(config));
+      throw new UpdateDryRunResponse(topology, config, newPlan, oldPlan, changeRequests);
     }
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =

@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.base.Strings;
+
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
@@ -30,120 +32,6 @@ public class SubmitDryRunRender extends DryRunRender {
   public SubmitDryRunRender(SubmitDryRunResponse response) {
     this.response = response;
   }
-
-  private List<String> title = Arrays.asList(
-      "component", "cpu", "disk (GB)", "ram (GB)", "parallelism");
-
-  private StringBuilder addRow(StringBuilder builder, String row) {
-    builder.append(row);
-    builder.append('\n');
-    return builder;
-  }
-
-  /**
-   * generate formatter for each row based on rows. Width of a column is the
-   * max width of all cells on that column
-   *
-   * @param rows Each row in table
-   * @return formatter for row
-   */
-  private String generateRowFormatter(List<List<String>> rows) {
-    Integer[] width = new Integer[title.size()];
-    for (int i = 0; i < title.size(); i++) {
-      width[i] = title.get(i).length();
-    }
-    for (List<String> row: rows) {
-      for (int i = 0; i < row.size(); i++) {
-        width[i] = Math.max(width[i], row.get(i).length());
-      }
-    }
-    StringBuilder metaFormatterBuilder = new StringBuilder();
-    String metaCellFormatter = "%%%ds";
-    metaFormatterBuilder.append(Strings.repeat(String.format("| %s ", metaCellFormatter),
-        title.size()));
-    metaFormatterBuilder.append("|");
-    return String.format(metaFormatterBuilder.toString(), (Object[]) width);
-  }
-
-  /**
-   * Seal rows to create table
-   * @param rows Each row in table
-   * @return Formatted table
-   */
-  private String createTable(List<List<String>> rows) {
-    String rowFormatter = generateRowFormatter(rows);
-    String titleRow = String.format(
-        rowFormatter, (Object[]) title.toArray(new String[title.size()]));
-    StringBuilder builder = new StringBuilder();
-    addRow(builder, Strings.repeat("=", titleRow.length()));
-    addRow(builder, titleRow);
-    addRow(builder, Strings.repeat("-", titleRow.length()));
-    for (List<String> row: rows) {
-      addRow(builder, String.format(rowFormatter, (Object[]) row.toArray(new String[row.size()])));
-    }
-    addRow(builder, Strings.repeat("=", titleRow.length()));
-    return builder.toString();
-  }
-
-  @Override
-  public String render(SubmitDryRunResponse resp) {
-
-  }
-
-  /**
-   * Format amount associated with percentage change
-   * @param oldAmount old amount
-   * @param newAmount new amount
-   * @return formatted change
-   */
-  /*
-  private String formatChange(long oldAmount, long newAmount) {
-    long delta = newAmount - oldAmount;
-    double percentage = (double) delta / (double) oldAmount;
-    if (percentage == 0.0) {
-      return String.valueOf(newAmount);
-    } else {
-      String sign = "";
-      if (percentage > 0.0) {
-        sign = "+";
-      }
-      return String.format("%d (%s%.2f%%)", newAmount, sign, percentage * 100.0);
-    }
-  } */
-
-  /*
-  public String render(UpdateDryRunResponse resp) {
-    Map<String, Resource> newComponentsResource =
-        componentsResource(resp.getPackingPlan());
-    Map<String, Resource> oldComponentsResource =
-        componentsResource(resp.getOldPackingPlan());
-    Map<String, Integer> newComponentsContainersNum =
-        componentsParallelism(resp.getPackingPlan());
-    Map<String, Integer> oldComponentsContainersNum =
-        componentsParallelism(resp.getOldPackingPlan());
-    List<List<String>> rows = new ArrayList<>();
-    for (Map.Entry<String, Resource> entry: newComponentsResource.entrySet()) {
-      String componentName = entry.getKey();
-      Resource newResource = entry.getValue();
-      Resource oldResource = oldComponentsResource.get(componentName);
-      int newContainerNum = newComponentsContainersNum.get(componentName);
-      int oldContainerNum = oldComponentsContainersNum.get(componentName);
-      int newTotalCpu = (int) newResource.getCpu();
-      int oldTotalCpu = (int) oldResource.getCpu();
-      long newTotalRam = newResource.getRam().asGigabytes();
-      long oldTotalRam = oldResource.getRam().asGigabytes();
-      long newTotalDisk = newResource.getDisk().asGigabytes();
-      long oldTotalDisk = oldResource.getDisk().asGigabytes();
-      rows.add(Arrays.asList(
-          componentName,
-          formatChange(oldTotalCpu, newTotalCpu),
-          formatChange(oldTotalDisk, newTotalDisk),
-          formatChange(oldTotalRam, newTotalRam),
-          formatChange(oldContainerNum, newContainerNum)));
-    }
-    return createTable(rows);
-  } */
-
 
   public String renderTable() {
     Map<String, Resource> componentsResource =
@@ -166,7 +54,25 @@ public class SubmitDryRunRender extends DryRunRender {
   }
 
   public String renderRaw() {
-    return "";
+    StringBuilder builder = new StringBuilder();
+    String topologyName = response.getTopology().getName();
+    String packingClassName = Context.packingClass(response.getConfig());
+    builder.append("Packing class: " + packingClassName + "\n");
+    builder.append("Topology: " + topologyName + "\n");
+    builder.append("Packing plan:\n");
+    builder.append(response.getPackingPlan().toString());
+    return builder.toString();
   }
+
+  /*
+  @Override
+  public String render(UpdateDryRunResponse response) {
+    StringBuilder builder = new StringBuilder();
+    builder.append(common(response));
+    builder.append('\n');
+    builder.append("Old packing plan:\n");
+    builder.append(response.getOldPackingPlan().toString());
+    return builder.toString();
+  } */
 
 }

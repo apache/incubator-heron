@@ -32,9 +32,8 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
 import com.twitter.heron.scheduler.dryrun.DryRunRender;
-import com.twitter.heron.scheduler.dryrun.RawDryRunRender;
-import com.twitter.heron.scheduler.dryrun.TableDryRunRender;
 import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunRender;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
@@ -436,15 +435,12 @@ public class RuntimeManagerMain {
   }
 
   protected String renderDryRunResponse(String format, UpdateDryRunResponse resp) {
-    DryRunRender render;
+    UpdateDryRunRender render = new UpdateDryRunRender(resp);
     switch (format) {
-      case "raw" : render = new RawDryRunRender();
-        break;
-      case "table" : render = new TableDryRunRender();
-        break;
+      case "raw" : return render.renderRaw();
+      case "table" : return render.renderTable();
       default: throw new IllegalArgumentException(
           String.format("Unexpected rendering format: %s", format));
     }
-    return render.render(resp);
   }
 }

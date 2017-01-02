@@ -13,6 +13,8 @@
 //  limitations under the License
 package com.twitter.heron.scheduler.dryrun;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
@@ -22,25 +24,26 @@ import com.twitter.heron.spi.packing.PackingPlan;
 public class SubmitDryRunResponse extends RuntimeException {
   private static final long serialVersionUID = 999911708859944856L;
 
-  private final String topologyName;
-  private final PackingPlan plan;
-  private final String packingClass;
+  private final TopologyAPI.Topology topology;
+  private final Config config;
+  private final PackingPlan packingPlan;
 
-  public SubmitDryRunResponse(String topologyName, PackingPlan packingPlan, String packingClass) {
-    this.topologyName = topologyName;
-    this.plan = packingPlan;
-    this.packingClass = packingClass;
+  public SubmitDryRunResponse(TopologyAPI.Topology topology, Config config,
+                              PackingPlan packingPlan) {
+    this.topology = topology;
+    this.config = config;
+    this.packingPlan = packingPlan;
   }
 
-  public String getTopologyName() {
-    return topologyName;
+  public TopologyAPI.Topology getTopology() {
+    return topology;
+  }
+
+  public Config getConfig() {
+    return config;
   }
 
   public PackingPlan getPackingPlan() {
-    return plan;
-  }
-
-  public String getPackingClass() {
-    return packingClass;
+    return packingPlan;
   }
 }

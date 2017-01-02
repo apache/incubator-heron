@@ -13,11 +13,65 @@
 //  limitations under the License
 package com.twitter.heron.scheduler.dryrun;
 
-public class UpdateDryRunRender {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.packing.Resource;
+
+public class UpdateDryRunRender extends DryRunRender {
 
   private final UpdateDryRunResponse response;
 
   public UpdateDryRunRender(UpdateDryRunResponse response) {
     this.response = response;
+  }
+
+  public String renderTable() {
+    Map<String, Resource> newComponentsResource =
+        componentsResource(response.getPackingPlan());
+    Map<String, Resource> oldComponentsResource =
+        componentsResource(response.getOldPackingPlan());
+    Map<String, Integer> newComponentsContainersNum =
+        componentsParallelism(response.getPackingPlan());
+    Map<String, Integer> oldComponentsContainersNum =
+        componentsParallelism(response.getOldPackingPlan());
+    List<List<String>> rows = new ArrayList<>();
+    for (Map.Entry<String, Resource> entry: newComponentsResource.entrySet()) {
+      String componentName = entry.getKey();
+      Resource newResource = entry.getValue();
+      Resource oldResource = oldComponentsResource.get(componentName);
+      int newContainerNum = newComponentsContainersNum.get(componentName);
+      int oldContainerNum = oldComponentsContainersNum.get(componentName);
+      int newTotalCpu = (int) newResource.getCpu();
+      int oldTotalCpu = (int) oldResource.getCpu();
+      long newTotalRam = newResource.getRam().asGigabytes();
+      long oldTotalRam = oldResource.getRam().asGigabytes();
+      long newTotalDisk = newResource.getDisk().asGigabytes();
+      long oldTotalDisk = oldResource.getDisk().asGigabytes();
+      rows.add(Arrays.asList(
+          componentName,
+          formatChange(oldTotalCpu, newTotalCpu),
+          formatChange(oldTotalDisk, newTotalDisk),
+          formatChange(oldTotalRam, newTotalRam),
+          formatChange(oldContainerNum, newContainerNum)));
+    }
+    return createTable(rows);
+  }
+
+  public String renderRaw() {
+    StringBuilder builder = new StringBuilder();
+
+    String topologyName = response.getTopology().getName();
+    String packingClassName = Context.packingClass(response.getConfig());
+    builder.append("Packing class: " + packingClassName + "\n");
+    builder.append("Topology: " + topologyName + "\n");
+    builder.append("Packing plan:\n");
+    builder.append(response.getPackingPlan().toString() + "\n");
+    builder.append("Old packing plan:\n");
+    builder.append(response.getOldPackingPlan().toString() + "\n");
+    return "";
   }
 }

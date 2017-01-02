@@ -37,7 +37,7 @@ def add_verbose(parser):
   parser.add_argument(
       '--verbose',
       default=False,
-      help='Verbose mode. Cause program to print debugging message about its progress')
+      help='Verbose mode. Increases logging level to show debug messages')
   return parser
 
 

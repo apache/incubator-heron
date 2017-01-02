@@ -98,12 +98,32 @@ public abstract class DryRunRender {
     return String.format(metaFormatterBuilder.toString(), (Object[]) width);
   }
 
+  /**
+   * Format amount associated with percentage change
+   * @param oldAmount old amount
+   * @param newAmount new amount
+   * @return formatted change
+   */
+  protected String formatChange(long oldAmount, long newAmount) {
+    long delta = newAmount - oldAmount;
+    double percentage = (double) delta / (double) oldAmount;
+    if (percentage == 0.0) {
+      return String.valueOf(newAmount);
+    } else {
+      String sign = "";
+      if (percentage > 0.0) {
+        sign = "+";
+      }
+      return String.format("%d (%s%.2f%%)", newAmount, sign, percentage * 100.0);
+    }
+  }
+
    /**
    * Seal rows to create table
    * @param rows Each row in table
    * @return Formatted table
    */
-  private String createTable(List<List<String>> rows) {
+  public String createTable(List<List<String>> rows) {
     String rowFormatter = generateRowFormatter(rows);
     String titleRow = String.format(
         rowFormatter, (Object[]) title.toArray(new String[title.size()]));
@@ -117,8 +137,5 @@ public abstract class DryRunRender {
     addRow(builder, Strings.repeat("=", titleRow.length()));
     return builder.toString();
   }
-
-  public abstract String renderTable();
-  public abstract String renderRaw();
 
 }

@@ -130,7 +130,7 @@ public class LaunchRunner {
     PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
 
     if (Context.dryRun(config) != null) {
-      throw new SubmitDryRunResponse(topologyName, packedPlan, Context.packingClass(config));
+      throw new SubmitDryRunResponse(topology, config, packedPlan);
     }
     // initialize the launcher
     launcher.initialize(config, runtime);

@@ -41,10 +41,10 @@ def status_type(status_code):
     return Status.Ok
   elif status_code < 100:
     return Status.InvocationError
-  elif status_code >= 100 and status_code < 200:
-    return Status.HeronError
-  else:
+  elif status_code == 200:
     return Status.DryRun
+  else:
+    return Status.HeronError
 
 class Response(object):
   """Response class that captures result of executing an action
