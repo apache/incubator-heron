@@ -325,6 +325,43 @@ class HeronExecutor(object):
 
     return metricsmgr_cmd
 
+  def _get_metrics_cache_cmd(self):
+    ''' get the command to start the metrics manager processes '''
+    metricscachemgr_main_class = 'com.twitter.heron.metricscachemgr.MetricsCacheManager'
+
+    metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
+                        # We could not rely on the default -Xmx setting, which could be very big,
+                        # for instance, the default -Xmx in Twitter mesos machine is around 18GB
+                        '-Xmx1024M',
+                        '-XX:+PrintCommandLineFlags',
+                        '-verbosegc',
+                        '-XX:+PrintGCDetails',
+                        '-XX:+PrintGCTimeStamps',
+                        '-XX:+PrintGCDateStamps',
+                        '-XX:+PrintGCCause',
+                        '-XX:+UseGCLogFileRotation',
+                        '-XX:NumberOfGCLogFiles=5',
+                        '-XX:GCLogFileSize=100M',
+                        '-XX:+PrintPromotionFailure',
+                        '-XX:+PrintTenuringDistribution',
+                        '-XX:+PrintHeapAtGC',
+                        '-XX:+HeapDumpOnOutOfMemoryError',
+                        '-XX:+UseConcMarkSweepGC',
+                        '-XX:+PrintCommandLineFlags',
+                        '-Xloggc:log-files/gc.metricsmgr.log',
+                        '-Djava.net.preferIPv4Stack=true',
+                        '-cp',
+                        self.metricsmgr_classpath,
+                        metricscachemgr_main_class,
+                        0,
+                        self.metricsmgr_port,
+                        self.topology_name,
+                        self.topology_id,
+                        self.heron_internals_config_file,
+                        self.metrics_sinks_config_file]
+
+    return metricsmgr_cmd
+
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
     retval = {}
@@ -342,6 +379,8 @@ class HeronExecutor(object):
         self.metrics_sinks_config_file,
         self.metricsmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
+
+    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
