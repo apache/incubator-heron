@@ -42,25 +42,5 @@ import com.twitter.heron.api.topology.TopologyContext;
  * also means that an implementor must ensure that nextTuple is non-blocking: otherwise
  * the method could await acks and fails that are pending to be processed.</p>
  */
-public interface IStatefulSpout extends IStatefulComponent {
-  /**
-   * Called when a task for this component is initialized within a worker on the cluster.
-   * It provides the spout with the environment in which the spout executes.
-   * <p>
-   * <p>This includes the:</p>
-   *
-   * @param conf The Heron configuration for this spout. This is the configuration provided to the topology merged in with cluster configuration on this machine.
-   * @param context This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
-   * @param collector The collector is used to emit tuples from this spout. Tuples can be emitted at any time, including the open and close methods. The collector is thread-safe and should be saved as an instance variable of this spout object.
-   */
-  void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
-
-  /**
-   * Called when an ISpout is going to be shutdown. There is no guarentee that close
-   * will be called, because the supervisor kill -9's worker processes on the cluster.
-   * <p>
-   * <p>The one context where close is guaranteed to be called is a topology is
-   * killed when running Heron in simulator.</p>
-   */
-  void close();
+public interface IStatefulSpout extends IStatefulComponent, ISpout {
 }
