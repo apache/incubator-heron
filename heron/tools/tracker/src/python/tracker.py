@@ -430,7 +430,7 @@ class Tracker(object):
     if not topology.scheduler_location:
       has_scheduler_location = False
 
-    top = {
+    topologyInfo = {
         "name": topology.name,
         "id": topology.id,
         "logical_plan": None,
@@ -444,14 +444,15 @@ class Tracker(object):
     executionState["has_physical_plan"] = has_physical_plan
     executionState["has_tmaster_location"] = has_tmaster_location
     executionState["has_scheduler_location"] = has_scheduler_location
+    executionState["status"] = topology.get_status()
 
-    top["execution_state"] = executionState
-    top["logical_plan"] = self.extract_logical_plan(topology)
-    top["physical_plan"] = self.extract_physical_plan(topology)
-    top["tmaster_location"] = self.extract_tmaster(topology)
-    top["scheduler_location"] = self.extract_scheduler_location(topology)
+    topologyInfo["execution_state"] = executionState
+    topologyInfo["logical_plan"] = self.extract_logical_plan(topology)
+    topologyInfo["physical_plan"] = self.extract_physical_plan(topology)
+    topologyInfo["tmaster_location"] = self.extract_tmaster(topology)
+    topologyInfo["scheduler_location"] = self.extract_scheduler_location(topology)
 
-    self.topologyInfos[(topology.name, topology.state_manager_name)] = top
+    self.topologyInfos[(topology.name, topology.state_manager_name)] = topologyInfo
 
   def getTopologyInfo(self, topologyName, cluster, role, environ):
     """
