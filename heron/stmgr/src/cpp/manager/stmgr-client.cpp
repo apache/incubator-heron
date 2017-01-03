@@ -200,7 +200,8 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StartBackPressureMessage* message = acquire(message);
+  proto::stmgr::StartBackPressureMessage* message = nullptr;
+  message = acquire(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
@@ -214,7 +215,8 @@ void StMgrClient::SendStopBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StopBackPressureMessage* message = acquire(message);
+  proto::stmgr::StopBackPressureMessage* message = nullptr;
+  message = acquire(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);

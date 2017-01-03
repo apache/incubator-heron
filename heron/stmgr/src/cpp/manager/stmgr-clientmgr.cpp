@@ -127,7 +127,8 @@ void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& 
   CHECK(iter != clients_.end());
 
   // Acquire the message
-  proto::stmgr::TupleStreamMessage2* out = clients_[_stmgr_id]->acquire(out);
+  proto::stmgr::TupleStreamMessage2* out = nullptr;
+  out = clients_[_stmgr_id]->acquire(out);
   out->set_task_id(_task_id);
   _msg.SerializePartialToString(out->mutable_set());
 

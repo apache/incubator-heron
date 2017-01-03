@@ -108,7 +108,7 @@ class TopologyPlanHandler(base.BaseHandler):
     '''
 
     # fetch the execution of the topology asynchronously
-    estate = yield access.get_execution_state(cluster, environ, topology)
+    execution_state = yield access.get_execution_state(cluster, environ, topology)
 
     # fetch scheduler location of the topology
     scheduler_location = yield access.get_scheduler_location(cluster, environ, topology)
@@ -116,7 +116,7 @@ class TopologyPlanHandler(base.BaseHandler):
     job_page_link = scheduler_location["job_page_link"]
 
     # convert the topology launch time to display format
-    launched_at = datetime.utcfromtimestamp(estate['submission_time'])
+    launched_at = datetime.utcfromtimestamp(execution_state['submission_time'])
     launched_time = launched_at.strftime('%Y-%m-%d %H:%M:%S UTC')
 
     # pylint: disable=no-member
@@ -124,7 +124,7 @@ class TopologyPlanHandler(base.BaseHandler):
         cluster=cluster,
         environ=environ,
         topology=topology,
-        estate=estate,
+        execution_state=execution_state,
         launched=launched_time,
         status="running" if random.randint(0, 1) else "errors",
         active="topologies",
