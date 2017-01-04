@@ -14,11 +14,7 @@
 
 package com.twitter.heron.api.bolt;
 
-import java.util.Map;
-
 import com.twitter.heron.api.topology.IStatefulComponent;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
 
 /**
  * An IBolt represents a component that takes tuples as input and produces tuples

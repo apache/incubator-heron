@@ -14,10 +14,7 @@
 
 package com.twitter.heron.api.spout;
 
-import java.util.Map;
-
 import com.twitter.heron.api.topology.IStatefulComponent;
-import com.twitter.heron.api.topology.TopologyContext;
 
 /**
  * ISpout is the core interface for implementing spouts. A Spout is responsible
