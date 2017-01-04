@@ -19,6 +19,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "basics/basics.h"
 #include "config/operational-config-vars.h"
 #include "config/topology-config-vars.h"
@@ -233,6 +234,15 @@ sp_string TopologyConfigHelper::GetStatefulProviderConfig(const proto::api::Topo
   }
   // There was no value specified. The default is empty.
   return "";
+}
+
+std::vector<sp_string> TopologyConfigHelper::GetSpoutComponentNames(
+  const proto::api::Topology& _topology) {
+  std::vector<sp_string> retval;
+  for (int i = 0; i < _topology.spouts_size(); ++i) {
+    retval.push_back(_topology.spouts(i).comp().name());
+  }
+  return retval;
 }
 }  // namespace config
 }  // namespace heron

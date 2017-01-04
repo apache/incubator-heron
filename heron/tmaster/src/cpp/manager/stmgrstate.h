@@ -21,6 +21,7 @@
 #include <vector>
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
+#include "proto/ckptmgr.pb.h"
 #include "basics/basics.h"
 
 namespace heron {
@@ -55,7 +56,7 @@ class StMgrState {
   void NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
   // Send stateful checkpoint message to the stmgr
-  void StatefulNewCheckpoint(const proto::tmaster::StatefulCheckpointStart& _request);
+  void StatefulNewCheckpoint(const proto::ckptmgr::StatefulCheckpoint& _request);
 
   bool TimedOut() const;
 

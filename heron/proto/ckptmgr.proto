@@ -5,6 +5,16 @@ option java_outer_classname = "CheckpointManager";
 import "common.proto";
 import "physical_plan.proto";
 
+// Message sent to stmgrs to send it to local components
+// of the name.
+// This is sent by the tmaster with spout component names
+// This is also sent by other stmgrs(including local loopback)
+// with downstream component names
+message StatefulCheckpoint {
+  required string checkpoint_id = 1;
+  required string component_name = 2;
+}
+
 // This is the message that a stmgr sends
 // when it wants to establish the connection
 // with checkpoint manager

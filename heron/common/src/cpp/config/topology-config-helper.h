@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "basics/basics.h"
 #include "proto/messages.h"
 
@@ -83,6 +84,9 @@ class TopologyConfigHelper {
 
   // Gets the state provider config for stateful topologies
   static sp_string GetStatefulProviderConfig(const proto::api::Topology& _topology);
+
+  // Gets the list of all spout component names
+  static std::vector<sp_string> GetSpoutComponentNames(const proto::api::Topology& _topology);
 };
 }  // namespace config
 }  // namespace heron

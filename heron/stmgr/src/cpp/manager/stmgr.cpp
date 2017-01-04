@@ -220,7 +220,9 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
   auto stateful_checkpoint_watch =
-       [this](sp_string checkpoint_tag) { this->InitiateStatefulCheckpoint(checkpoint_tag); };
+       [this](sp_string checkpoint_tag, sp_string component_name) {
+    this->InitiateStatefulCheckpoint(checkpoint_tag, component_name);
+  };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_port_,
                                       shell_port_, std::move(pplan_watch),
@@ -720,8 +722,8 @@ void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {
 }
 
 // Initiate the process of stateful checkpointing
-void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
-  server_->InitiateStatefulCheckpoint(_checkpoint_tag);
+void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag, sp_string _component_name) {
+  server_->InitiateStatefulCheckpoint(_checkpoint_tag, _component_name);
 }
 
 }  // namespace stmgr

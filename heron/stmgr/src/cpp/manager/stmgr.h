@@ -87,7 +87,7 @@ class StMgr {
   bool DidAnnounceBackPressure();
   void HandleDeadInstanceConnection(sp_int32 _task_id);
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
-  void InitiateStatefulCheckpoint(sp_string checkpoint_tag);
+  void InitiateStatefulCheckpoint(sp_string checkpoint_tag, sp_string component_name);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);

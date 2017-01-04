@@ -138,8 +138,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
     this->UpdateProcessMetrics(status);
   }, true, PROCESS_METRICS_FREQUENCY), 0);
 
-  // Instantiate the stateful coordinator
-  stateful_coordinator_ = new StatefulCoordinator(start_time_);
+  stateful_coordinator_ = NULL;
 }
 
 void TMaster::EstablishTMaster(EventLoop::Status) {
@@ -244,6 +243,8 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   sp_int64 stateful_checkpoint_interval =
              config::TopologyConfigHelper::GetStatefulCheckpointInterval(*topology_);
   if (stateful_checkpoint_interval > 0) {
+    // Instantiate the stateful coordinator
+    stateful_coordinator_ = new StatefulCoordinator(start_time_, topology_);
     LOG(INFO) << "Starting timer to checkpoint state every "
               << stateful_checkpoint_interval << " seconds";
     CHECK_GT(eventLoop_->registerTimer(

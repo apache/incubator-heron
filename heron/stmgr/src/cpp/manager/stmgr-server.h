@@ -78,7 +78,8 @@ class StMgrServer : public Server {
 
   bool DidAnnounceBackPressure() { return !remote_ends_who_caused_back_pressure_.empty(); }
 
-  void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
+  void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag,
+                                  const sp_string& _component_name);
 
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
