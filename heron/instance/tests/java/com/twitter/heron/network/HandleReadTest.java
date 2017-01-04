@@ -66,11 +66,11 @@ public class HandleReadTest {
   private static int serverPort;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private Communicator<Message> inStreamQueue;
 
   private Communicator<InstanceControlMsg> inControlQueue;
 
@@ -112,9 +112,9 @@ public class HandleReadTest {
 
     nioLooper = new NIOLooper();
     slaveLooper = new SlaveLooper();
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(nioLooper, slaveLooper);
+    inStreamQueue = new Communicator<>(nioLooper, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, nioLooper);
+    outStreamQueue = new Communicator<>(slaveLooper, nioLooper);
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inControlQueue = new Communicator<InstanceControlMsg>(nioLooper, slaveLooper);
 
@@ -200,7 +200,7 @@ public class HandleReadTest {
       nioLooper.exitLoop();
 
       Assert.assertEquals(1, inStreamQueue.size());
-      HeronTuples.HeronTupleSet msg = inStreamQueue.poll();
+      HeronTuples.HeronTupleSet msg = (HeronTuples.HeronTupleSet) inStreamQueue.poll();
 
       HeronTuples.HeronTupleSet heronTupleSet = msg;
 

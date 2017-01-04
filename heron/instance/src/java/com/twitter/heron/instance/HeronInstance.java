@@ -37,7 +37,6 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 

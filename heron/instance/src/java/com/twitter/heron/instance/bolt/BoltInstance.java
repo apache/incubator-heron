@@ -68,6 +68,9 @@ public class BoltInstance implements IInstance {
 
   private final SystemConfig systemConfig;
 
+  /**
+   * Construct to create a new BoltInstance
+   */
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,

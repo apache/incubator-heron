@@ -24,6 +24,8 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.google.protobuf.Message;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -47,7 +49,6 @@ import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
 
@@ -64,11 +65,11 @@ public class HandleWriteTest {
   private static int serverPort;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private Communicator<Message> inStreamQueue;
 
   private Communicator<InstanceControlMsg> inControlQueue;
 
@@ -110,9 +111,9 @@ public class HandleWriteTest {
 
     nioLooper = new NIOLooper();
     slaveLooper = new SlaveLooper();
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(nioLooper, slaveLooper);
+    inStreamQueue = new Communicator<>(nioLooper, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, nioLooper);
+    outStreamQueue = new Communicator<>(slaveLooper, nioLooper);
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inControlQueue = new Communicator<InstanceControlMsg>(nioLooper, slaveLooper);
 
