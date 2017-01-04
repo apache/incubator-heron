@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
@@ -131,42 +133,47 @@ public class StreamExecutor implements Runnable {
 
       int items = executor.getStreamOutQueue().size();
       for (int i = 0; i < items; i++) {
-        HeronTuples.HeronTupleSet tupleSet = executor.getStreamOutQueue().poll();
-        if (tupleSet == null) {
-          // No stream from this queue
-          break;
-        }
+        Message message = executor.getStreamOutQueue().poll();
+        if (message instanceof HeronTuples.HeronTupleSet) {
+          HeronTuples.HeronTupleSet tupleSet = (HeronTuples.HeronTupleSet) message;
+          if (tupleSet == null) {
+            // No stream from this queue
+            break;
+          }
 
-        if (tupleSet.hasData()) {
-          HeronTuples.HeronDataTupleSet d = tupleSet.getData();
-          TopologyAPI.StreamId streamId = d.getStream();
-          StreamConsumers consumers = streamIdStreamConsumersMap.get(streamId);
-          if (consumers != null) {
-            for (HeronTuples.HeronDataTuple tuple : d.getTuplesList()) {
-              List<Integer> outTasks = consumers.getListToSend(tuple);
+          if (tupleSet.hasData()) {
+            HeronTuples.HeronDataTupleSet d = tupleSet.getData();
+            TopologyAPI.StreamId streamId = d.getStream();
+            StreamConsumers consumers = streamIdStreamConsumersMap.get(streamId);
+            if (consumers != null) {
+              for (HeronTuples.HeronDataTuple tuple : d.getTuplesList()) {
+                List<Integer> outTasks = consumers.getListToSend(tuple);
 
-              outTasks.addAll(tuple.getDestTaskIdsList());
+                outTasks.addAll(tuple.getDestTaskIdsList());
 
-              if (outTasks.isEmpty()) {
-                LOG.severe("Nobody to sent the tuple to");
+                if (outTasks.isEmpty()) {
+                  LOG.severe("Nobody to sent the tuple to");
+                }
+
+                copyDataOutBound(taskId, isLocalSpout, streamId, tuple, outTasks);
               }
-
-              copyDataOutBound(taskId, isLocalSpout, streamId, tuple, outTasks);
+            } else {
+              LOG.severe("Nobody consumes stream: " + streamId);
             }
-          } else {
-            LOG.severe("Nobody consumes stream: " + streamId);
-          }
-        }
-
-        if (tupleSet.hasControl()) {
-          HeronTuples.HeronControlTupleSet c = tupleSet.getControl();
-          for (HeronTuples.AckTuple ack : c.getAcksList()) {
-            copyControlOutBound(ack, true);
           }
 
-          for (HeronTuples.AckTuple fail : c.getFailsList()) {
-            copyControlOutBound(fail, false);
+          if (tupleSet.hasControl()) {
+            HeronTuples.HeronControlTupleSet c = tupleSet.getControl();
+            for (HeronTuples.AckTuple ack : c.getAcksList()) {
+              copyControlOutBound(ack, true);
+            }
+
+            for (HeronTuples.AckTuple fail : c.getFailsList()) {
+              copyControlOutBound(fail, false);
+            }
           }
+        } else {
+          LOG.severe("Unsupported message type: " + message.getClass().getName());
         }
       }
     }

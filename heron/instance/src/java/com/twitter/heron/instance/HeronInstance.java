@@ -25,6 +25,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
@@ -52,11 +54,11 @@ public class HeronInstance {
   private final SlaveLooper slaveLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
 
   // This queue is used to pass Control Message from Gateway to Slave
   // TODO:- currently it would just pass the PhysicalPlanHelper
@@ -93,8 +95,8 @@ public class HeronInstance {
     slaveLooper.addTasksOnExit(new SlaveExitTask());
 
     // For stream
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(gatewayLooper, slaveLooper);
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, gatewayLooper);
+    inStreamQueue = new Communicator<Message>(gatewayLooper, slaveLooper);
+    outStreamQueue = new Communicator<Message>(slaveLooper, gatewayLooper);
     inControlQueue = new Communicator<InstanceControlMsg>(gatewayLooper, slaveLooper);
 
     // Now for metrics
