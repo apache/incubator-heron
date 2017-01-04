@@ -31,6 +31,7 @@ import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -55,9 +56,9 @@ public class StreamManagerClient extends HeronClient {
   private final PhysicalPlans.Instance instance;
 
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
 
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   private final Communicator<InstanceControlMsg> inControlQueue;
 
@@ -70,8 +71,8 @@ public class StreamManagerClient extends HeronClient {
   public StreamManagerClient(NIOLooper s, String streamManagerHost, int streamManagerPort,
                              String topologyName, String topologyId,
                              PhysicalPlans.Instance instance,
-                             Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
-                             Communicator<HeronTuples.HeronTupleSet> outStreamQueue,
+                             Communicator<Message> inStreamQueue,
+                             Communicator<Message> outStreamQueue,
                              Communicator<InstanceControlMsg> inControlQueue,
                              HeronSocketOptions options,
                              GatewayMetrics gatewayMetrics) {
@@ -108,6 +109,9 @@ public class StreamManagerClient extends HeronClient {
     registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
     registerOnMessage(StreamManager.TupleMessage.newBuilder());
     registerOnMessage(HeronTuples.HeronTupleSet2.newBuilder());
+
+    // Following messages are for stateful processing
+    registerOnMessage(CheckpointManager.InstanceStateCheckpoint.newBuilder());
   }
 
 
@@ -189,6 +193,8 @@ public class StreamManagerClient extends HeronClient {
       handleNewTuples((StreamManager.TupleMessage) message);
     } else if (message instanceof HeronTuples.HeronTupleSet2) {
       handleNewTuples2((HeronTuples.HeronTupleSet2) message);
+    } else if (message instanceof CheckpointManager.InstanceStateCheckpoint) {
+      handleInstanceStateCheckpoint((CheckpointManager.InstanceStateCheckpoint) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -209,10 +215,9 @@ public class StreamManagerClient extends HeronClient {
     // Collect all tuples in queue
     int size = outStreamQueue.size();
     for (int i = 0; i < size; i++) {
-      HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
-      StreamManager.TupleMessage msg = StreamManager.TupleMessage.newBuilder()
-          .setSet(tupleSet).build();
-      sendMessage(msg);
+      Message streamMessage = outStreamQueue.poll();
+
+      sendMessage(streamMessage);
     }
   }
 
@@ -222,11 +227,11 @@ public class StreamManagerClient extends HeronClient {
         // In order to avoid packets back up in Client side,
         // We would poll message from queue and send them only when there are no outstanding packets
         while (!outStreamQueue.isEmpty()) {
-          HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
+          Message streamMessage = outStreamQueue.poll();
 
           gatewayMetrics.updateSentPacketsCount(1);
-          gatewayMetrics.updateSentPacketsSize(tupleSet.getSerializedSize());
-          sendMessage(tupleSet);
+          gatewayMetrics.updateSentPacketsSize(streamMessage.getSerializedSize());
+          sendMessage(streamMessage);
         }
       }
 
@@ -251,6 +256,13 @@ public class StreamManagerClient extends HeronClient {
     } else {
       LOG.info("Stop reading due to not yet connected to Stream Manager.");
     }
+  }
+
+  private void handleInstanceStateCheckpoint(
+      CheckpointManager.InstanceStateCheckpoint checkpoint) {
+    // We just simply put the CheckpointManager.InstanceStateCheckpoint into in stream queue
+    // to keep the order
+    inStreamQueue.offer(checkpoint);
   }
 
   private void handleRegisterResponse(StreamManager.RegisterInstanceResponse response) {

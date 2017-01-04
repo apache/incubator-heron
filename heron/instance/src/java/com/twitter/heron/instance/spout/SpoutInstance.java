@@ -18,12 +18,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
+import com.twitter.heron.api.spout.IStatefulSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.state.HashMapState;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
@@ -37,6 +43,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class SpoutInstance implements IInstance {
@@ -46,10 +53,15 @@ public class SpoutInstance implements IInstance {
   protected final SpoutOutputCollectorImpl collector;
   protected final SpoutMetrics spoutMetrics;
   // The spout will read Control tuples from streamInQueue
-  private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
+  private final Communicator<Message> streamInQueue;
 
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
+
+  private final boolean isStatefulComponent;
+  // This instance should be able to pick up previous one.
+  // TODO(mfu): Currently we hardcode it as a HashMapState
+  private final State instanceState = new HashMapState();
 
   private final SlaveLooper looper;
 
@@ -66,8 +78,8 @@ public class SpoutInstance implements IInstance {
    * Construct a SpoutInstance basing on given arguments
    */
   public SpoutInstance(PhysicalPlanHelper helper,
-                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
-                       Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                       Communicator<Message> streamInQueue,
+                       Communicator<Message> streamOutQueue,
                        SlaveLooper looper) {
     this.helper = helper;
     this.looper = looper;
@@ -81,8 +93,12 @@ public class SpoutInstance implements IInstance {
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
 
+    this.isStatefulComponent =
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_COMPONENT_STATEFUL));
+
     LOG.info("Enable Ack: " + this.ackEnabled);
     LOG.info("EnableMessageTimeouts: " + this.enableMessageTimeouts);
+    LOG.info("Is stateful component: " + this.isStatefulComponent);
 
     if (helper.getMySpout() == null) {
       throw new RuntimeException("HeronSpoutInstance has no spout in physical plan");
@@ -107,6 +123,12 @@ public class SpoutInstance implements IInstance {
       throw new RuntimeException("Neither java_object nor java_class_name set for spout");
     }
 
+    // Safe check
+    // TODO(mfu): Allow stateful spout with non-stateful-component config or not?
+    if (this.isStatefulComponent && !(spout instanceof IStatefulSpout)) {
+      throw new RuntimeException("Stateful config does not match component type");
+    }
+
     IPluggableSerializer serializer = SerializeDeSerializeHelper.getSerializer(config);
     collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
   }
@@ -117,6 +139,19 @@ public class SpoutInstance implements IInstance {
       ((IUpdatable) spout).update(physicalPlanHelper.getTopologyContext());
     }
     collector.updatePhysicalPlanHelper(physicalPlanHelper);
+  }
+
+  @Override
+  public void persistState(String checkpointId) {
+    // Do a check point
+    if (spout instanceof IStatefulComponent) {
+      LOG.info("Starting checkpoint");
+      ((IStatefulComponent) spout).preSave();
+
+      collector.sendOutState(instanceState, checkpointId);
+    } else {
+      LOG.severe("Non stateful component gets a checkpoint request");
+    }
   }
 
   @Override
@@ -136,6 +171,12 @@ public class SpoutInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
+
+    // Init the state for the spout
+    // TODO(mfu): Pick up previous state: instanceState.putAll(...);
+    if (this.isStatefulComponent) {
+      ((IStatefulComponent) spout).initState(instanceState);
+    }
 
     // Tasks happen in every time looper is waken up
     addSpoutsTasks();
@@ -338,31 +379,41 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+  public void readTuplesAndExecute(Communicator<Message> inQueue) {
     // Read data from in Queues
     long startOfCycle = System.nanoTime();
     long spoutAckBatchTime = systemConfig.getInstanceAckBatchTimeMs()
         * Constants.MILLISECONDS_TO_NANOSECONDS;
 
     while (!inQueue.isEmpty()) {
-      HeronTuples.HeronTupleSet tuples = inQueue.poll();
-      // For spout, it should read only control tuples(ack&fail)
-      if (tuples.hasData()) {
-        throw new RuntimeException("Spout cannot get incoming data tuples from other components");
-      }
+      Message msg = inQueue.poll();
 
-      if (tuples.hasControl()) {
-        for (HeronTuples.AckTuple aT : tuples.getControl().getAcksList()) {
-          handleAckTuple(aT, true);
-        }
-        for (HeronTuples.AckTuple aT : tuples.getControl().getFailsList()) {
-          handleAckTuple(aT, false);
+      if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
+        if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
+          persistState(((CheckpointManager.InstanceStateCheckpoint) msg).getCheckpointId());
         }
       }
 
-      // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - spoutAckBatchTime > 0) {
-        break;
+      if (msg instanceof HeronTuples.HeronTupleSet) {
+        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
+        // For spout, it should read only control tuples(ack&fail)
+        if (tuples.hasData()) {
+          throw new RuntimeException("Spout cannot get incoming data tuples from other components");
+        }
+
+        if (tuples.hasControl()) {
+          for (HeronTuples.AckTuple aT : tuples.getControl().getAcksList()) {
+            handleAckTuple(aT, true);
+          }
+          for (HeronTuples.AckTuple aT : tuples.getControl().getFailsList()) {
+            handleAckTuple(aT, false);
+          }
+        }
+
+        // To avoid spending too much time
+        if (System.nanoTime() - startOfCycle - spoutAckBatchTime > 0) {
+          break;
+        }
       }
     }
   }

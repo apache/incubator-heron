@@ -23,10 +23,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
@@ -67,7 +69,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
 
   public BoltOutputCollectorImpl(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
-                                 Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                 Communicator<Message> streamOutQueue,
                                  BoltMetrics boltMetrics) {
 
     if (helper.getMyBolt() == null) {
@@ -144,6 +146,10 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
   // Flush the tuples to next stage
   public void sendOutTuples() {
     outputter.sendOutTuples();
+  }
+
+  public void sendOutState(State state, String checkpointId) {
+    outputter.sendOutState(state, checkpointId);
   }
 
   // Clean the internal state of BoltOutputCollectorImpl

@@ -162,6 +162,7 @@ java_library(
         ":proto_tmaster_java",
         ":proto_tuple_java",
         ":proto_stmgr_java",
+        ":proto_ckptmgr_java",
         ":proto_networktests_java",
         "@com_google_protobuf_protobuf_java//jar",
     ],
