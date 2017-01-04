@@ -29,7 +29,6 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 
 /**

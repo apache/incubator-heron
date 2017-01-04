@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.google.protobuf.Message;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,8 +54,8 @@ public class CustomGroupingTest {
   private WakeableLooper testLooper;
   private SlaveLooper slaveLooper;
   private PhysicalPlans.PhysicalPlan physicalPlan;
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private Communicator<Message> outStreamQueue;
+  private Communicator<Message> inStreamQueue;
   private Communicator<InstanceControlMsg> inControlQueue;
   private ExecutorService threadsPool;
   private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
@@ -70,9 +72,9 @@ public class CustomGroupingTest {
 
     testLooper = new SlaveLooper();
     slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper);
+    outStreamQueue = new Communicator<Message>(slaveLooper, testLooper);
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper);
+    inStreamQueue = new Communicator<Message>(testLooper, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
 
@@ -131,7 +133,7 @@ public class CustomGroupingTest {
       public void run() {
         for (int i = 0; i < Constants.RETRY_TIMES; i++) {
           if (outStreamQueue.size() != 0) {
-            HeronTuples.HeronTupleSet set = outStreamQueue.poll();
+            HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) outStreamQueue.poll();
 
             Assert.assertTrue(set.isInitialized());
             Assert.assertFalse(set.hasControl());
