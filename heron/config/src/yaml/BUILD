@@ -76,3 +76,8 @@ filegroup(
     name = "conf-local-uploader",
     srcs = ["conf/local/uploader.yaml"],
 )
+
+filegroup(
+    name = "conf-local-stateful",
+    srcs = ["conf/local/stateful.yaml"]
+)

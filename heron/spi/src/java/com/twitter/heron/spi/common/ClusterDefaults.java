@@ -76,6 +76,7 @@ public final class ClusterDefaults {
 
     cb.put(Keys.executorSandboxBinary(), Defaults.executorSandboxBinary());
     cb.put(Keys.stmgrSandboxBinary(), Defaults.stmgrSandboxBinary());
+    cb.put(Keys.ckptmgrSandboxBinary(), Defaults.ckptmgrSandboxBinary());
     cb.put(Keys.tmasterSandboxBinary(), Defaults.tmasterSandboxBinary());
     cb.put(Keys.shellSandboxBinary(), Defaults.shellSandboxBinary());
     cb.put(Keys.pythonInstanceSandboxBinary(), Defaults.pythonInstanceSandboxBinary());
@@ -137,6 +138,7 @@ public final class ClusterDefaults {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.verbose(), Defaults.verbose());
+    cb.put(Keys.stateful(), Defaults.stateful());
     cb.put(Keys.schedulerService(), Defaults.schedulerService());
     return cb.build();
   }

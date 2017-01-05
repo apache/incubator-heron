@@ -56,7 +56,7 @@ void CkptMgrClient::Quit() {
 
 void CkptMgrClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
-    LOG(INFO) << "Connected to ckptmgr " << ckptmgr_id_ << " running at"
+    LOG(INFO) << "Connected to ckptmgr " << ckptmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
               << std::endl;
     if (quit_) {
@@ -82,7 +82,7 @@ void CkptMgrClient::HandleConnect(NetworkErrorCode _status) {
 
 void CkptMgrClient::HandleClose(NetworkErrorCode _code) {
   if (_code == OK) {
-    LOG(INFO) << "We closed our server connection with cpktmgr " << ckptmgr_id_ << "running at "
+    LOG(INFO) << "We closed our server connection with cpktmgr " << ckptmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
               << std::endl;
   } else {
@@ -117,7 +117,7 @@ void CkptMgrClient::HandleStMgrRegisterResponse(void*,
                << get_clientoptions().get_port();
     Stop();
   } else {
-    LOG(INFO) << "Hello request got response OK from ckptmgr" << ckptmgr_id_
+    LOG(INFO) << "Register request got response OK from ckptmgr " << ckptmgr_id_
               << " running at " << get_clientoptions().get_host() << ":"
               << get_clientoptions().get_port();
   }

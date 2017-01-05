@@ -52,6 +52,11 @@ REPACKING_CLASS:                     heron.class.repacking.algorithm
 STATE_MANAGER_CLASS:                 heron.class.state.manager
 
 ################################################################################
+# keys for stateful processing
+################################################################################
+IS_STATEFUL:                         heron.is.stateful
+
+################################################################################
 # keys for scheduler config
 ################################################################################
 SCHEDULER_IS_SERVICE:                heron.scheduler.is.service
@@ -171,6 +176,7 @@ SANDBOX_TMASTER_BINARY:              heron.binaries.sandbox.tmaster
 SANDBOX_SHELL_BINARY:                heron.binaries.sandbox.shell
 SANDBOX_PYTHON_INSTANCE_BINARY:      heron.binaries.sandbox.python.instance
 SANDBOX_SCHEDULER_JAR:               heron.jars.sandbox.scheduler
+SANDBOX_CKPTMGR_BINARY:              heron.binaries.sandbox.ckptmgr
 
 ################################################################################
 # keys for config provided files and directories

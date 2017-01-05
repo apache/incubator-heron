@@ -51,15 +51,15 @@ void CkptMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 
 void CkptMgrServer::HandleStMgrRegisterRequest(REQID _id, Connection* _conn,
                                             proto::ckptmgr::RegisterStMgrRequest* _request) {
-  LOG(INFO) << "Got a hello message from stmgr " << _request->stmgr() << " on connection" << _conn;
-  proto::stmgr::StrMgrHelloResponse response;
+  LOG(INFO) << "Got a register message from " << _request->stmgr() << " on connection" << _conn;
+  proto::ckptmgr::RegisterStMgrResponse response;
   // Some basic checks
   if (_request->topology_name() != topology_name_) {
-    LOG(ERROR) << "The hello message was  from a different topology " << _request->topology_name()
+    LOG(ERROR) << "The register message was from a different topology " << _request->topology_name()
                << std::endl;
     response.mutable_status()->set_status(proto::system::NOTOK);
   } else if (_request->topology_id() != topology_id_) {
-    LOG(ERROR) << "The hello message was from a different topology id" << _request->topology_id()
+    LOG(ERROR) << "The register message was from a different topology id" << _request->topology_id()
                << std::endl;
     response.mutable_status()->set_status(proto::system::NOTOK);
   } else if (stmgr_conn_ != NULL) {

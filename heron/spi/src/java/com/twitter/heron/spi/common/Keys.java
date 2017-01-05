@@ -37,6 +37,10 @@ public class Keys {
     return ConfigKeys.get("VERBOSE");
   }
 
+  public static String stateful() {
+    return ConfigKeys.get("IS_STATEFUL");
+  }
+
   public static String configPath() {
     return ConfigKeys.get("CONFIG_PATH");
   }
@@ -343,6 +347,10 @@ public class Keys {
 
   public static String stmgrSandboxBinary() {
     return ConfigKeys.get("SANDBOX_STMGR_BINARY");
+  }
+
+  public static String ckptmgrSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_CKPTMGR_BINARY");
   }
 
   public static String tmasterSandboxBinary() {
