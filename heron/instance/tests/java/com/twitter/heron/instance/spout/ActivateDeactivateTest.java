@@ -18,6 +18,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.protobuf.Message;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,7 +33,6 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.Slave;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.resource.Constants;
@@ -45,11 +46,11 @@ public class ActivateDeactivateTest {
   private PhysicalPlans.PhysicalPlan physicalPlan;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private Communicator<Message> inStreamQueue;
   private Communicator<InstanceControlMsg> inControlQueue;
   private ExecutorService threadsPool;
   private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
@@ -60,9 +61,9 @@ public class ActivateDeactivateTest {
     UnitTestHelper.addSystemConfigToSingleton();
 
     slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, null);
+    outStreamQueue = new Communicator<>(slaveLooper, null);
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(null, slaveLooper);
+    inStreamQueue = new Communicator<>(null, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     slaveMetricsOut = new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, null);
     slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);

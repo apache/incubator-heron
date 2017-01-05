@@ -19,6 +19,7 @@
 
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
+#include "proto/topology.pb.h"
 #include "manager/tmaster.h"
 #include "basics/basics.h"
 
@@ -27,7 +28,8 @@ namespace tmaster {
 
 class StatefulCoordinator {
  public:
-  explicit StatefulCoordinator(std::chrono::high_resolution_clock::time_point _tmaster_start_time);
+  explicit StatefulCoordinator(std::chrono::high_resolution_clock::time_point _tmaster_start_time,
+                               proto::api::Topology* _topology);
   virtual ~StatefulCoordinator();
 
   void DoCheckpoint(const StMgrMap& _stmgrs);
@@ -36,6 +38,7 @@ class StatefulCoordinator {
   sp_string GenerateCheckpointId();
 
   std::chrono::high_resolution_clock::time_point tmaster_start_time_;
+  proto::api::Topology* topology_;
 };
 }  // namespace tmaster
 }  // namespace heron

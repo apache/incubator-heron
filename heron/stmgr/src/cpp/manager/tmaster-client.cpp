@@ -34,7 +34,7 @@ namespace stmgr {
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
                              VCallback<proto::system::PhysicalPlan*> _pplan_watch,
-                             VCallback<sp_string> _stateful_checkpoint_watch)
+                             VCallback<sp_string, sp_string> _stateful_checkpoint_watch)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_port_(_stmgr_port),
@@ -180,10 +180,10 @@ void TMasterClient::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMess
 }
 
 void TMasterClient::HandleStatefulCheckpointMessage(
-                                        proto::tmaster::StatefulCheckpointStart* _message) {
+                                        proto::ckptmgr::StatefulCheckpoint* _message) {
   LOG(INFO) << "Got a new checkpoint message from tmaster with id "
             << _message->checkpoint_id();
-  stateful_checkpoint_watch_(_message->checkpoint_id());
+  stateful_checkpoint_watch_(_message->checkpoint_id(), _message->component_name());
   delete _message;
 }
 
