@@ -20,6 +20,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include "basics/sptypes.h"
+#include "glog/logging.h"
 
 template<typename T>
 class BaseMemPool {
@@ -41,6 +42,7 @@ class BaseMemPool {
 
   template<typename S>
   S* acquire(S* unused) {
+    LOG(INFO) << "acquire: size = " << size_;
     if (pool_.empty()) {
       return new S();
     }
@@ -52,6 +54,7 @@ class BaseMemPool {
 
   template<typename S>
   void release(S* t) {
+    LOG(INFO) << "release: size = " << size_;
     if (limit_ == 0) {
       delete t;
       return;
