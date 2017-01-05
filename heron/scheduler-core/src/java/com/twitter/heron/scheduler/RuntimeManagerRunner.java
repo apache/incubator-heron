@@ -183,7 +183,7 @@ public class RuntimeManagerRunner {
     PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
         topology);
 
-    if (Context.dryRun(config) != null) {
+    if (Context.dryRun(config)) {
       PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
       PackingPlan oldPlan = deserializer.fromProto(currentPlan);
       PackingPlan newPlan = deserializer.fromProto(proposedPlan);

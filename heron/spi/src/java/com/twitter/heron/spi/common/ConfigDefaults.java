@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.TypeUtils;
 
@@ -63,6 +64,10 @@ public final class ConfigDefaults {
 
   public static PackageType getPackageType(String key) {
     return (PackageType) defaults.get(key);
+  }
+
+  public static DryRunFormatType getDryRunFormatType(String key) {
+    return (DryRunFormatType) defaults.get(key);
   }
 
   public static Double getDouble(String key) {

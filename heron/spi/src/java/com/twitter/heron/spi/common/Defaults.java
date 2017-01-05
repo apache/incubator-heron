@@ -15,6 +15,7 @@
 package com.twitter.heron.spi.common;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 
 public class Defaults {
@@ -136,6 +137,10 @@ public class Defaults {
 
   public static PackageType topologyPackageType() {
     return ConfigDefaults.getPackageType("TOPOLOGY_PACKAGE_TYPE");
+  }
+
+  public static DryRunFormatType dryRunFormatType() {
+    return ConfigDefaults.getDryRunFormatType("DRYRUN_FORMAT_TYPE");
   }
 
   public static ByteAmount stmgrRam() {

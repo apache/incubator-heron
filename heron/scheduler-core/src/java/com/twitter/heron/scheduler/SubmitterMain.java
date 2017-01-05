@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
@@ -123,13 +124,15 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
-                                             String dryRun,
+                                             Boolean dryRun,
+                                             DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
         .put(Keys.dryRun(), dryRun)
+        .put(Keys.dryRunFormat(), dryRunFormat)
         .put(Keys.verbose(), verbose)
         .build();
 
@@ -225,8 +228,14 @@ public class SubmitterMain {
         .build();
 
     Option dryRun = Option.builder("u")
-        .desc("dry run")
+        .desc("dry-run")
         .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
         .hasArg()
         .required(false)
         .build();
@@ -247,6 +256,7 @@ public class SubmitterMain {
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
     options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -308,11 +318,17 @@ public class SubmitterMain {
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
-    // Dry run config
-    String dryRun = null;
+    Boolean dryRun = false;
     if (cmd.hasOption("u")) {
-      dryRun = cmd.getOptionValue("dry_run");
-      LOG.fine(String.format("Running dry-run mode using format %s", dryRun));
+      dryRun = true;
+    }
+
+    // Default dry run type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (cmd.hasOption("f")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
     }
 
     // first load the defaults, then the config from files to override it
@@ -324,7 +340,7 @@ public class SubmitterMain {
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath, releaseFile))
             .putAll(overrideConfigs(overrideConfigFile))
-            .putAll(commandLineConfigs(cluster, role, environ, dryRun, verbose))
+            .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
             .build());
@@ -347,7 +363,7 @@ public class SubmitterMain {
     try {
       submitterMain.submitTopology();
     } catch (SubmitDryRunResponse response) {
-      System.out.println(submitterMain.renderDryRunResponse(dryRun, response));
+      System.out.println(submitterMain.renderDryRunResponse(response));
       // Exit with status code 200 to indicate dry-run response is sent out
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(200);
@@ -488,15 +504,14 @@ public class SubmitterMain {
     launchRunner.call();
   }
 
-  protected String renderDryRunResponse(String format, SubmitDryRunResponse resp) {
+  protected String renderDryRunResponse(SubmitDryRunResponse resp) {
     SubmitDryRunRender render = new SubmitDryRunRender(resp);
-    switch (format) {
-      case "raw" :
-        return render.renderRaw();
-      case "table":
-        return render.renderTable();
+    DryRunFormatType formatType = Context.dryRunFormatType(config);
+    switch (formatType) {
+      case RAW : return render.renderRaw();
+      case TABLE: return render.renderTable();
       default: throw new IllegalArgumentException(
-          String.format("Unexpected rendering format: %s", format));
+          String.format("Unexpected rendering format: %s", formatType));
     }
   }
 }

@@ -37,6 +37,10 @@ public class Keys {
     return ConfigKeys.get("DRY_RUN");
   }
 
+  public static String dryRunFormat() {
+    return ConfigKeys.get("DRY_RUN_FORMAT_TYPE");
+  }
+
   public static String verbose() {
     return ConfigKeys.get("VERBOSE");
   }

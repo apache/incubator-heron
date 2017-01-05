@@ -27,6 +27,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
@@ -145,8 +146,14 @@ public class RuntimeManagerMain {
         .build();
 
     Option dryRun = Option.builder("u")
-        .desc("dry run")
+        .desc("dry-run")
         .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
         .hasArg()
         .required(false)
         .build();
@@ -168,6 +175,7 @@ public class RuntimeManagerMain {
     options.addOption(containerId);
     options.addOption(componentParallelism);
     options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -236,10 +244,19 @@ public class RuntimeManagerMain {
       containerId = cmd.getOptionValue("container_id");
     }
 
-    String dryRunFormat = null;
+    Boolean dryRun = false;
     if (cmd.hasOption("u")) {
-      dryRunFormat = cmd.getOptionValue("dry_run");
-      LOG.fine(String.format("Running dry-run mode using format %s", dryRunFormat));
+      dryRun = true;
+    }
+
+    LOG.fine(String.format("DRY RUN: %s", dryRun));
+
+    // Default dry run type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (cmd.hasOption("f")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
     }
 
     Command command = Command.makeCommand(commandOption);
@@ -254,7 +271,8 @@ public class RuntimeManagerMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
-        .put(Keys.dryRun(), dryRunFormat)
+        .put(Keys.dryRun(), dryRun)
+        .put(Keys.dryRunFormat(), dryRunFormat)
         .put(Keys.verbose(), verbose)
         .put(Keys.topologyContainerId(), containerId);
 
@@ -288,7 +306,7 @@ public class RuntimeManagerMain {
       runtimeManagerMain.manageTopology();
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (UpdateDryRunResponse response) {
-      System.out.println(runtimeManagerMain.renderDryRunResponse(dryRunFormat, response));
+      System.out.println(runtimeManagerMain.renderDryRunResponse(response));
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       // Exit with status code 200 to indicate dry-run response is sent out
       System.exit(200);
@@ -434,13 +452,14 @@ public class RuntimeManagerMain {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
   }
 
-  protected String renderDryRunResponse(String format, UpdateDryRunResponse resp) {
+  protected String renderDryRunResponse(UpdateDryRunResponse resp) {
     UpdateDryRunRender render = new UpdateDryRunRender(resp);
-    switch (format) {
-      case "raw" : return render.renderRaw();
-      case "table" : return render.renderTable();
+    DryRunFormatType formatType = Context.dryRunFormatType(config);
+    switch (formatType) {
+      case RAW : return render.renderRaw();
+      case TABLE: return render.renderTable();
       default: throw new IllegalArgumentException(
-          String.format("Unexpected rendering format: %s", format));
+          String.format("Unexpected rendering format: %s", formatType));
     }
   }
 }

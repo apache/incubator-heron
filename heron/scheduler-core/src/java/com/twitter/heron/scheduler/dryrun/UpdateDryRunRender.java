@@ -63,7 +63,6 @@ public class UpdateDryRunRender extends DryRunRender {
 
   public String renderRaw() {
     StringBuilder builder = new StringBuilder();
-
     String topologyName = response.getTopology().getName();
     String packingClassName = Context.packingClass(response.getConfig());
     builder.append("Packing class: " + packingClassName + "\n");

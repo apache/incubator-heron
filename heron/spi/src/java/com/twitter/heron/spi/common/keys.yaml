@@ -29,6 +29,7 @@ CLUSTER:                             heron.config.cluster
 ROLE:                                heron.config.role
 ENVIRON:                             heron.config.environ
 DRY_RUN:                             heron.config.dry_run
+DRY_RUN_FORMAT_TYPE:                 heron.config.dry_run_format_type
 VERBOSE:                             heron.config.verbose
 CONFIG_PATH:                         heron.config.path
 CONFIG_PROPERTY:                     heron.config.property

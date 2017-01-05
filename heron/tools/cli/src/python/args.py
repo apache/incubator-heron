@@ -166,6 +166,7 @@ def add_dry_run(parser):
   '''
   resp_formats = ['raw', 'table', 'json']
   available_options = ', '.join(['%s' % opt for opt in resp_formats])
+
   def dry_run_resp_format(value):
     if value not in resp_formats:
       raise argparse.ArgumentTypeError(
@@ -174,12 +175,19 @@ def add_dry_run(parser):
     return value
 
   parser.add_argument(
-      '--dry-run',
-      metavar='FORMAT',
-      nargs='?',
-      const='table',
-      default=argparse.SUPPRESS,
+    '--dry-run',
+    metavar='DRY_RUN',
+    nargs='?',
+    default=False,
+    const=True,
+    help='Enable dry-run mode')
+
+  parser.add_argument(
+      '--dry-run-format',
+      metavar='DRY_RUN_FORMAT',
+      default='table',
       type=dry_run_resp_format,
       help='Dry-run to display resource packing plan. Available options: %s. Default option: table'\
            % available_options)
+
   return parser
