@@ -36,6 +36,8 @@ class StatefulHelper {
   void Reconstruct(const proto::system::PhysicalPlan& _pplan);
   virtual ~StatefulHelper();
 
+  std::set<sp_int32> get_receivers(sp_int32 _task_id);
+
  private:
   void add(std::map<sp_int32, std::set<sp_int32>>& _set,
            sp_int32 _key, std::set<sp_int32>& _values);

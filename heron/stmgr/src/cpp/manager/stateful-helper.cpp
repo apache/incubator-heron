@@ -88,5 +88,13 @@ void StatefulHelper::add(std::map<sp_int32, std::set<sp_int32>>& _map,
     _map[_key].insert(_values.begin(), _values.end());
   }
 }
+
+std::set<sp_int32> StatefulHelper::get_receivers(sp_int32 _task_id) {
+  if (to_send_list_.find(_task_id) == to_send_list_.end()) {
+    return std::set<sp_int32>();
+  } else {
+    return to_send_list_[_task_id];
+  }
+}
 }  // namespace stmgr
 }  // namespace heron

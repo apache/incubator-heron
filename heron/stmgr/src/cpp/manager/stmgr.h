@@ -88,7 +88,18 @@ class StMgr {
   bool DidAnnounceBackPressure();
   void HandleDeadInstanceConnection(sp_int32 _task_id);
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
+
+  // Send InitiateStatefulCheckpoint to local spouts
   void InitiateStatefulCheckpoint(sp_string checkpoint_tag);
+
+  // Send checkpoint message to downstream components
+  // for this task_id
+  void SendDownstreamCheckpoint(sp_int32 _task_id, const sp_string& _checkpoint_id);
+
+  // Handle checkpoint message coming from upstream to _task_id
+  void HandleDownStreamStatefulCheckpoint(sp_int32 _origin_task_id,
+                                          sp_int32 _destination_task_id,
+                                          const sp_string& _checkpoint_id);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);

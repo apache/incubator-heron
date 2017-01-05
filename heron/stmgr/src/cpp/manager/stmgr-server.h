@@ -95,6 +95,8 @@ class StMgrServer : public Server {
   void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
                                proto::stmgr::StrMgrHelloRequest* _request);
   void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage2* _message);
+  void HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
+                                        proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,

@@ -732,5 +732,23 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
   server_->InitiateStatefulCheckpoint(_checkpoint_tag);
 }
 
+// Send checkpoint message to downstream components of this task_id
+void StMgr::SendDownstreamCheckpoint(sp_int32 _task_id, const sp_string& _checkpoint_id) {
+  std::set<sp_int32> downstream_tasks = stateful_helper_->get_receivers(_task_id);
+  for (auto downstream_task : downstream_tasks) {
+    sp_string stmgr = task_id_to_stmgr_[downstream_task];
+    if (stmgr == stmgr_id_) {
+      HandleDownStreamStatefulCheckpoint(_task_id, downstream_task, _checkpoint_id);
+    } else {
+      clientmgr_->SendDownstreamStatefulCheckpoint(stmgr, _task_id,
+                                                   downstream_task, _checkpoint_id);
+    }
+  }
+}
+
+void StMgr::HandleDownStreamStatefulCheckpoint(sp_int32, sp_int32,
+                                               const sp_string&) {
+}
+
 }  // namespace stmgr
 }  // namespace heron

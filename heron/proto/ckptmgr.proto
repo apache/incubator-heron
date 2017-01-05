@@ -46,3 +46,11 @@ message SaveStateCheckpoint {
   required heron.proto.system.Instance instance = 1;
   required InstanceStateCheckpoint checkpoint = 2;
 }
+
+// This is the message that stmgr sends to other stmgr
+// to send it to downstream task
+message DownstreamStatefulCheckpoint {
+  required int32 origin_task_id = 1; 
+  required int32 destination_task_id = 2; 
+  required string checkpoint_id = 3;
+}
