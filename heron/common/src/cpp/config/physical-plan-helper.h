@@ -55,6 +55,11 @@ class PhysicalPlanHelper {
   static void GetTasks(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
                        std::set<sp_int32>& _return);
 
+  // Return the list of all task_ids that belong to this component
+  static void GetComponentTasks(const proto::system::PhysicalPlan& _pplan,
+                                const sp_string& _component,
+                                std::set<sp_int32>& _return);
+
   static void LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 };
 }  // namespace config

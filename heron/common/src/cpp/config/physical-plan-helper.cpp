@@ -70,6 +70,17 @@ void PhysicalPlanHelper::GetTasks(const proto::system::PhysicalPlan& _pplan,
   return;
 }
 
+void PhysicalPlanHelper::GetComponentTasks(const proto::system::PhysicalPlan& _pplan,
+                                           const sp_string& _component,
+                                           std::set<sp_int32>& _return) {
+  for (int i = 0; i < _pplan.instances_size(); ++i) {
+    const proto::system::Instance& instance = _pplan.instances(i);
+    if (instance.info().component_name() == _component) {
+      _return.insert(instance.info().task_id());
+    }
+  }
+}
+
 void PhysicalPlanHelper::LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   LOG(INFO) << "Printing Physical Plan" << std::endl;
   LOG(INFO) << "Topology Name: " << _pplan.topology().name();
