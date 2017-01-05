@@ -31,10 +31,12 @@ CkptMgr::CkptMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topol
     : topology_name_(_topology_name),
       topology_id_(_topology_id),
       ckptmgr_id_(_ckptmgr_id),
-      eventLoop_(eventLoop),
-      server_(NULL) {}
+      ckptmgr_port_(_myport),
+      server_(NULL),
+      eventLoop_(eventLoop) {}
 
 void CkptMgr::Init() {
+  LOG(INFO) << "Init Ckptmgr" << std::endl;
   StartCkptmgrServer();
 }
 

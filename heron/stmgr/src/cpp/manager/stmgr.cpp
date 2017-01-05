@@ -244,6 +244,7 @@ void StMgr::CreateCheckpointMgrClient() {
   checkpoint_manager_client_ = new ckptmgr::CkptMgrClient(eventLoop_, client_options,
                                                           topology_name_, topology_id_,
                                                           ckptmgr_id_, stmgr_id_);
+  checkpoint_manager_client_->Start();
 }
 
 void StMgr::CreateTupleCache() {

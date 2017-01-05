@@ -35,6 +35,8 @@ int main(int argc, char* argv[]) {
   sp_int32 my_port = atoi(argv[4]);
   EventLoopImpl ss;
 
+  heron::common::Initialize(argv[0], ckptmgr_id.c_str());
+
   heron::ckptmgr::CkptMgr mgr(&ss, my_port, topology_name, topology_id, ckptmgr_id);
 
   mgr.Init();
