@@ -53,6 +53,7 @@ class TMasterClient;
 class StreamConsumers;
 class XorManager;
 class TupleCache;
+class StatefulHelper;
 
 class StMgr {
  public:
@@ -87,7 +88,7 @@ class StMgr {
   bool DidAnnounceBackPressure();
   void HandleDeadInstanceConnection(sp_int32 _task_id);
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
-  void InitiateStatefulCheckpoint(sp_string checkpoint_tag, sp_string component_name);
+  void InitiateStatefulCheckpoint(sp_string checkpoint_tag);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
@@ -149,6 +150,8 @@ class StMgr {
   XorManager* xor_mgrs_;
   // Tuple Cache to optimize message building
   TupleCache* tuple_cache_;
+  // Stateful Helper
+  StatefulHelper* stateful_helper_;
 
   // This is the topology structure
   // that contains the full component objects

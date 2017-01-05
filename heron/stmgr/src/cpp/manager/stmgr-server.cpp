@@ -611,15 +611,12 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
   }
 }
 
-void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag,
-                                             const sp_string& _component_name) {
+void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
-    if (iter->second->instance_->info().component_name() == _component_name) {
-      if (iter->second->conn_) {
-        proto::ckptmgr::InitiateStatefulCheckpoint message;
-        message.set_checkpoint_id(_checkpoint_tag);
-        SendMessage(iter->second->conn_, message);
-      }
+    if (iter->second->conn_) {
+      proto::ckptmgr::InitiateStatefulCheckpoint message;
+      message.set_checkpoint_id(_checkpoint_tag);
+      SendMessage(iter->second->conn_, message);
     }
   }
 }

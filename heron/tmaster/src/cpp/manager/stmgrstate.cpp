@@ -89,7 +89,7 @@ void StMgrState::heartbeat(sp_int64, proto::system::StMgrStats* _stats) {
   last_stats_ = _stats;
 }
 
-void StMgrState::StatefulNewCheckpoint(const proto::ckptmgr::StatefulCheckpoint& _request) {
+void StMgrState::StatefulNewCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request) {
   LOG(INFO) << "Sending a new stateful checkpoint request to stmgr " << stmgr_->id();
   server_->SendMessage(connection_, _request);
 }

@@ -28,6 +28,7 @@
 #include "manager/stmgr-clientmgr.h"
 #include "manager/stmgr-server.h"
 #include "manager/stream-consumers.h"
+#include "manager/stateful-helper.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -137,6 +138,8 @@ void StMgr::Init() {
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
 
   tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
+
+  stateful_helper_ = new StatefulHelper();
 }
 
 StMgr::~StMgr() {
@@ -155,6 +158,7 @@ StMgr::~StMgr() {
   delete checkpoint_manager_client_;
 
   delete tuple_set_from_other_stmgr_;
+  delete stateful_helper_;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
@@ -220,8 +224,8 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
   auto stateful_checkpoint_watch =
-       [this](sp_string checkpoint_tag, sp_string component_name) {
-    this->InitiateStatefulCheckpoint(checkpoint_tag, component_name);
+       [this](sp_string checkpoint_tag) {
+    this->InitiateStatefulCheckpoint(checkpoint_tag);
   };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_port_,
@@ -410,6 +414,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
 
   delete pplan_;
   pplan_ = _pplan;
+  stateful_helper_->Reconstruct(*pplan_);
   clientmgr_->NewPhysicalPlan(pplan_);
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
@@ -722,8 +727,8 @@ void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {
 }
 
 // Initiate the process of stateful checkpointing
-void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag, sp_string _component_name) {
-  server_->InitiateStatefulCheckpoint(_checkpoint_tag, _component_name);
+void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
+  server_->InitiateStatefulCheckpoint(_checkpoint_tag);
 }
 
 }  // namespace stmgr

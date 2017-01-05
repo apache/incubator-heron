@@ -244,7 +244,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
              config::TopologyConfigHelper::GetStatefulCheckpointInterval(*topology_);
   if (stateful_checkpoint_interval > 0) {
     // Instantiate the stateful coordinator
-    stateful_coordinator_ = new StatefulCoordinator(start_time_, topology_);
+    stateful_coordinator_ = new StatefulCoordinator(start_time_);
     LOG(INFO) << "Starting timer to checkpoint state every "
               << stateful_checkpoint_interval << " seconds";
     CHECK_GT(eventLoop_->registerTimer(

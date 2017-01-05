@@ -30,10 +30,8 @@ namespace heron {
 namespace tmaster {
 
 StatefulCoordinator::StatefulCoordinator(
-  std::chrono::high_resolution_clock::time_point _tmaster_start_time,
-  proto::api::Topology* _topology)
-  : tmaster_start_time_(_tmaster_start_time),
-    topology_(_topology) {
+  std::chrono::high_resolution_clock::time_point _tmaster_start_time)
+  : tmaster_start_time_(_tmaster_start_time) {
   // nothing really
 }
 
@@ -54,15 +52,11 @@ void StatefulCoordinator::DoCheckpoint(const StMgrMap& _stmgrs) {
   // Send the checkpoint message to all active stmgrs
   LOG(INFO) << "Sending checkpoint tag " << checkpoint_id
             << " to all strmgrs";
-  std::vector<sp_string> spouts = config::TopologyConfigHelper::GetSpoutComponentNames(*topology_);
-  for (size_t i = 0; i < spouts.size(); ++i) {
-    StMgrMapConstIter iter;
-    for (iter = _stmgrs.begin(); iter != _stmgrs.end(); ++iter) {
-      proto::ckptmgr::StatefulCheckpoint request;
-      request.set_checkpoint_id(checkpoint_id);
-      request.set_component_name(spouts[i]);
-      iter->second->StatefulNewCheckpoint(request);
-    }
+  StMgrMapConstIter iter;
+  for (iter = _stmgrs.begin(); iter != _stmgrs.end(); ++iter) {
+    proto::ckptmgr::StartStatefulCheckpoint request;
+    request.set_checkpoint_id(checkpoint_id);
+    iter->second->StatefulNewCheckpoint(request);
   }
 }
 

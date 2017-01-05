@@ -56,7 +56,7 @@ class StMgrState {
   void NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
   // Send stateful checkpoint message to the stmgr
-  void StatefulNewCheckpoint(const proto::ckptmgr::StatefulCheckpoint& _request);
+  void StatefulNewCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request);
 
   bool TimedOut() const;
 
