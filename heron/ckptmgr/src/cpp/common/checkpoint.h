@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-#if !defined(CKPT_H)
-#define CKPT_H
+#if !defined(CHECKPOINT_H)
+#define CHECKPOINT_H
 
 #include <string>
+#include "proto/messages.h"
+#include "basics/basics.h"
 
 namespace heron {
 namespace state {
 
 class Checkpoint {
  public:
+  Checkpoint(const std::string& topology,
+             ::heron::proto::ckptmgr::SaveStateCheckpoint* _checkpoint);
+
   Checkpoint(const std::string& topology, const std::string& ckptid,
              const std::string& component, const std::string& instance)
       : topology_(topology), ckptid_(ckptid), component_(component), instance_(instance) {}
@@ -31,28 +36,30 @@ class Checkpoint {
   virtual ~Checkpoint() {}
 
   // get the topology name
-  std::string getTopology() { return topology_; }
+  std::string getTopology() const { return topology_; }
 
   // get the checkpoint id
-  std::string getCkptId() { return ckptid_; }
+  std::string getCkptId() const { return ckptid_; }
 
   // get the component id
-  std::string getComponent() { return component_; }
+  std::string getComponent() const { return component_; }
 
   // get the instance id
-  std::string getInstance() { return instance_; }
+  std::string getInstance() const { return instance_; }
 
-  // store the checkpoint
-  virtual void store(void* bytes) = 0;
+  // get the checkpoint bytes
+  ::heron::proto::ckptmgr::SaveStateCheckpoint* bytes() const { return savebytes_; }
 
-  // retrieve the checkpoint
-  virtual void retrieve(void* bytes) = 0;
+  // get the total number of bytes to be saved
+  sp_int32 nbytes() const { return nbytes_; }
 
  private:
-  std::string      topology_;    // topology name
-  std::string      ckptid_;      // checkpoint id
-  std::string      component_;   // component id
-  std::string      instance_;    // instance id
+  std::string  topology_;    // topology name
+  std::string  ckptid_;      // checkpoint id
+  std::string  component_;   // component id
+  std::string  instance_;    // instance id
+  sp_int32     nbytes_;      // number of bytes
+  ::heron::proto::ckptmgr::SaveStateCheckpoint*  savebytes_;
 };
 
 }  // namespace state

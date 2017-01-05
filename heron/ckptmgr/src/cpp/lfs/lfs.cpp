@@ -21,24 +21,117 @@
 namespace heron {
 namespace state {
 
-int
-LFS::open(const char* path, int flags) {
-  return ::open(path, flags);
+std::string LFS::ckptDirectory(const Checkpoint& _ckpt) {
+  std::string directory(base_dir_ + "/");
+  directory.append(_ckpt.getTopology()).append("/");
+  directory.append(_ckpt.getCkptId()).append("/");
+  directory.append(_ckpt.getComponent());
+  return directory;
 }
 
-int
-LFS::write(int fd, const void* buf, size_t nbytes) {
-  return ::write(fd, buf, nbytes);
+std::string LFS::ckptFile(const Checkpoint& _ckpt) {
+  std::string directory(ckptDirectory(_ckpt) + "/");
+  return directory.append(_ckpt.getInstance());
 }
 
-int
-LFS::read(int fd, void* buf, size_t nbytes) {
-  return ::read(fd, buf, nbytes);
+std::string LFS::tempCkptFile(const Checkpoint& _ckpt) {
+  std::string directory(ckptDirectory(_ckpt) + "/");
+  return directory.append("_").append(_ckpt.getInstance());
 }
 
-int
-LFS::close(int fd) {
-  return ::close(fd);
+std::string LFS::logMessageFragment(const Checkpoint& _ckpt) {
+  std::string message(_ckpt.getTopology() + " ");
+  message.append(_ckpt.getCkptId()).append(" ");
+  message.append(_ckpt.getComponent()).append(" ");
+  message.append(_ckpt.getInstance()).append(" ");
+  return message;
+}
+
+int LFS::createCkptDirectory(const Checkpoint& _ckpt) {
+  std::string directory = ckptDirectory(_ckpt);
+  if (FileUtils::makePath(directory) != SP_OK) {
+    LOG(ERROR) << "Unable to create directory " << directory;
+    return SP_NOTOK;
+  }
+  return SP_OK;
+}
+
+int LFS::createTmpCkptFile(const Checkpoint& _ckpt) {
+  auto code = ::open(tempCkptFile(_ckpt).c_str(), O_CREAT);
+  if (code != 0) {
+    PLOG(ERROR) << "Unable to create temporary checkpoint file " << tempCkptFile(_ckpt);
+    return SP_NOTOK;
+  }
+  return code;
+}
+
+int LFS::writeTmpCkptFile(int fd, const Checkpoint& _ckpt) {
+  size_t count = 0;
+  size_t len = _ckpt.nbytes();
+  void* buf = static_cast<void*>(_ckpt.bytes());
+
+  while (count < _ckpt.nbytes()) {
+    int i = ::write(fd, count + reinterpret_cast<char *>(buf), len - count);
+    if (i != 0) {
+      PLOG(ERROR) << "Unable to write to temporary checkpoint file " << tempCkptFile(_ckpt);
+      return SP_NOTOK;
+    }
+    count += i;
+  }
+  return SP_OK;
+}
+
+int LFS::closeTmpCkptFile(int fd, const Checkpoint& _ckpt) {
+  auto code = ::close(fd);
+  if (code != 0) {
+    PLOG(ERROR) << "Unable to close temporary checkpoint file " << tempCkptFile(_ckpt);
+    return SP_NOTOK;
+  }
+  return SP_OK;
+}
+
+int LFS::moveTmpCkptFile(const Checkpoint& _ckpt) {
+  auto code = ::rename(tempCkptFile(_ckpt).c_str(), ckptFile(_ckpt).c_str());
+  if (code != 0) {
+    PLOG(ERROR) << "Unable to move temporary checkpoint file " << tempCkptFile(_ckpt);
+    return SP_NOTOK;
+  }
+  return SP_OK;
+}
+
+int LFS::store(const Checkpoint& _ckpt) {
+  if (createCkptDirectory(_ckpt) == SP_NOTOK) {
+    LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
+    return SP_NOTOK;
+  }
+
+  auto fd = createTmpCkptFile(_ckpt);
+  if (fd == SP_NOTOK) {
+    LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
+    return SP_NOTOK;
+  }
+
+  if (writeTmpCkptFile(fd, _ckpt) == SP_NOTOK) {
+    LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
+    return SP_NOTOK;
+  }
+
+  if (closeTmpCkptFile(fd, _ckpt) == SP_NOTOK) {
+    LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
+    return SP_NOTOK;
+  }
+
+  if (moveTmpCkptFile(_ckpt) == SP_NOTOK) {
+    LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
+    return SP_NOTOK;
+  }
+
+  return SP_OK;
+}
+
+// retrieve the checkpoint
+int LFS::restore(Checkpoint& _ckpt) {
+  return SP_OK;
 }
 
 }  // namespace state

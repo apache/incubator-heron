@@ -14,35 +14,28 @@
  * limitations under the License.
  */
 
-#if !defined(FS_CKPT_H)
-#define FS_CKPT_H
+#if !defined(STORAGE_H)
+#define STORAGE_H
 
 #include <string>
-#include "common/ckpt.h"
 
 namespace heron {
 namespace state {
 
-class FSCheckpoint : public Checkpoint {
+class Storage {
  public:
-  FSCheckpoint(const std::string& topology, const std::string& ckptid,
-               const std::string& component, const std::string& instance,
-               const std::string& base_dir)
-      : Checkpoint(topology, ckptid, component, instance), base_dir_(base_dir) {}
+  Storage() {}
 
-  virtual ~FSCheckpoint() {}
+  virtual ~Storage() {}
 
-  // get the name of the base directory
-  std::string getBaseDir() { return base_dir_; }
+  // store the checkpoint
+  virtual int store(const Checkpoint& _ckpt) = 0;
 
-  // get the checkpoint file name
-  std::string getFile();
-
- private:
-  std::string  base_dir_;
+  // retrieve the checkpoint
+  virtual int restore(Checkpoint& _ckpt) = 0;
 };
 
 }  // namespace state
 }  // namespace heron
 
-#endif  // fsckpt.h
+#endif  // ckpt.h

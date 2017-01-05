@@ -139,7 +139,6 @@ class StMgr {
   StMgrClientMgr* clientmgr_;
   TMasterClient* tmaster_client_;
 
-  sp_string ckptmgr_id_;
   EventLoop* eventLoop_;
 
   // Map of task_id to stmgr_id
@@ -171,6 +170,7 @@ class StMgr {
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
   sp_int32 checkpoint_manager_port_;
+  sp_string ckptmgr_id_;
 
   proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks_;

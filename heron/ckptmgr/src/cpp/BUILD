@@ -5,8 +5,33 @@ cc_library(
     srcs = glob(["common/*.cpp"]),
     hdrs = glob(["common/*.h"]),
     copts = [
-        "-Ithird_party",
+        "-Iheron",
+        "-I$(GENDIR)/heron",
+        "-Iheron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/src/cpp",
         "-Iheron/ckptmgr/src/cpp",
+    ],
+    deps = [
+        "//third_party/glog:glog-cxx",
+        "//heron/proto:proto-cxx",
+        "//heron/common/src/cpp/basics:basics-cxx",
+    ],
+    linkstatic = 1,
+)
+
+cc_library(
+    name = "lfs-cxx",
+    srcs = glob(["lfs/*.cpp"]),
+    hdrs = glob(["lfs/*.h"]),
+    copts = [
+        "-Iheron",
+        "-I$(GENDIR)/heron",
+        "-Iheron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/src/cpp",
+        "-Iheron/ckptmgr/src/cpp",
+    ],
+    deps = [
+        ":common-cxx",
     ],
     linkstatic = 1,
 )

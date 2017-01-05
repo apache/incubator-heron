@@ -14,37 +14,22 @@
  * limitations under the License.
  */
 
-#if !defined(FILE_SYSTEM_H)
-#define FILE_SYSTEM_H
-
-#include <unistd.h>
+#include "common/checkpoint.h"
 #include <string>
+#include "proto/messages.h"
 
 namespace heron {
 namespace state {
 
-class FS {
- public:
-  // constructor
-  FS() {}
-
-  // destructor
-  virtual ~FS() {}
-
-  // open the file
-  virtual int open(const char* path, int flags) = 0;
-
-  // write data into the file
-  virtual int write(int fd, const void* buf, size_t nbyte) = 0;
-
-  // read data from the file
-  virtual int read(int fd, void* buf, size_t nbyte) = 0;
-
-  // close the file opened
-  virtual int close(int fd) = 0;
-};
+Checkpoint::Checkpoint(const std::string& _topology,
+                       ::heron::proto::ckptmgr::SaveStateCheckpoint* _checkpoint) {
+  topology_ = _topology;
+  ckptid_ = _checkpoint->checkpoint().checkpoint_id();
+  component_ = _checkpoint->instance().info().component_name();
+  instance_ = _checkpoint->instance().instance_id();
+  savebytes_ = _checkpoint;
+  nbytes_ = _checkpoint->ByteSize();
+}
 
 }  // namespace state
 }  // namespace heron
-
-#endif  // fs.h

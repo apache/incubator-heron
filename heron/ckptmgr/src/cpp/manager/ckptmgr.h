@@ -44,9 +44,9 @@ class CkptMgr {
   sp_string topology_id_;
   sp_string ckptmgr_id_;
   sp_int32 ckptmgr_port_;
-  CkptMgrServer* server_;
 
   EventLoop* eventLoop_;
+  CkptMgrServer* server_;
 };
 
 }  // namespace ckptmgr

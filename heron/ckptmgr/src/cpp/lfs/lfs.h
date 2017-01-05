@@ -20,30 +20,57 @@
 #include <unistd.h>
 #include <string>
 
-#include "common/fs.h"
+#include "common/checkpoint.h"
+#include "common/storage.h"
 
 namespace heron {
 namespace state {
 
-class LFS : public FS {
+class LFS : public Storage {
  public:
   // constructor
-  LFS() {}
+  explicit LFS(const std::string& _base_dir) : base_dir_(_base_dir) {}
 
   // destructor
   virtual ~LFS() {}
 
-  // open the file
-  virtual int open(const char* path, int flags);
+  // store the checkpoint
+  virtual int store(const Checkpoint& _ckpt);
 
-  // write data into the file
-  virtual int write(int fd, const void* buf, size_t nbyte);
+  // retrieve the checkpoint
+  virtual int restore(Checkpoint& _ckpt);
 
-  // read data from the file
-  virtual int read(int fd, void* buf, size_t nbyte);
+ private:
+  // get the name of the checkpoint directory
+  std::string ckptDirectory(const Checkpoint& _ckpt);
 
-  // close the file opened
-  virtual int close(int fd);
+  // get the name of the checkpoint file
+  std::string ckptFile(const Checkpoint& _ckpt);
+
+  // get the name of the temporary checkpoint file
+  std::string tempCkptFile(const Checkpoint& _ckpt);
+
+  // create the checkpoint directory
+  int createCkptDirectory(const Checkpoint& _ckpt);
+
+  // create the temporary checkpoint file
+  int createTmpCkptFile(const Checkpoint& _ckpt);
+
+  // write to temporary checkpoint file
+  int writeTmpCkptFile(int fd, const Checkpoint& _ckpt);
+
+  // close the temporary checkpoint file
+  int closeTmpCkptFile(int fd, const Checkpoint& _ckpt);
+
+  // move the temporary checkpoint file
+  int moveTmpCkptFile(const Checkpoint& _ckpt);
+
+ private:
+  // generate the log message prefix/suffix for printing
+  std::string logMessageFragment(const Checkpoint& _ckpt);
+
+ private:
+  std::string   base_dir_;
 };
 
 }  // namespace state
