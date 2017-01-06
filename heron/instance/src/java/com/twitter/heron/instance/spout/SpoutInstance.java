@@ -163,6 +163,12 @@ public class SpoutInstance implements IInstance {
 
     spoutMetrics.registerMetrics(topologyContext);
 
+    // Init the state for the spout
+    // TODO(mfu): Pick up previous state: instanceState.putAll(...);
+    if (this.isStatefulComponent) {
+      ((IStatefulComponent) spout).initState(instanceState);
+    }
+
     spout.open(
         topologyContext.getTopologyConfig(), topologyContext, new SpoutOutputCollector(collector));
 
@@ -171,12 +177,6 @@ public class SpoutInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
-
-    // Init the state for the spout
-    // TODO(mfu): Pick up previous state: instanceState.putAll(...);
-    if (this.isStatefulComponent) {
-      ((IStatefulComponent) spout).initState(instanceState);
-    }
 
     // Tasks happen in every time looper is waken up
     addSpoutsTasks();

@@ -153,6 +153,12 @@ public class BoltInstance implements IInstance {
 
     boltMetrics.registerMetrics(topologyContext);
 
+    // Init the state for the spout
+    // TODO(mfu): Pick up previous state: instanceState.putAll(...);
+    if (this.isStatefulComponent) {
+      ((IStatefulComponent) bolt).initState(instanceState);
+    }
+
     // Delegate
     bolt.prepare(
         topologyContext.getTopologyConfig(), topologyContext, new OutputCollector(collector));
@@ -162,12 +168,6 @@ public class BoltInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
-
-    // Init the state for the spout
-    // TODO(mfu): Pick up previous state: instanceState.putAll(...);
-    if (this.isStatefulComponent) {
-      ((IStatefulComponent) bolt).initState(instanceState);
-    }
 
     addBoltTasks();
   }

@@ -23,19 +23,20 @@ import com.twitter.heron.api.state.State;
 public interface IStatefulComponent extends IComponent {
 
   /**
-     * This method is invoked by the framework with the previously
-     * saved state of the component. This is invoked after prepare but before
-     * the component starts processing tuples.
-     *
-     * @param state the previously saved state of the component.
-     */
+   * Initializes the state of the function or operator to that of a previous checkpoint.
+   * This method is invoked when a component is executed as part of a recovery run.
+   * <p>
+   * Note that initialState() is called before open() or prepare().
+   *
+   * @param state the previously saved state of the component.
+   */
   void initState(State state);
 
   /**
-     * This is a hook for the component to perform some actions just before the
-     * framework saves its state.
+   * This is a hook for the component to perform some actions just before the
+   * framework saves its state.
    *
    * @param checkpointId the ID of the checkpoint
-     */
+   */
   void preSave(String checkpointId);
 }
