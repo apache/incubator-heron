@@ -39,5 +39,5 @@ import com.twitter.heron.api.topology.IStatefulComponent;
  * also means that an implementor must ensure that nextTuple is non-blocking: otherwise
  * the method could await acks and fails that are pending to be processed.</p>
  */
-public interface IStatefulSpout extends IStatefulComponent, ISpout {
+public interface IStatefulSpout extends IStatefulComponent, IRichSpout {
 }
