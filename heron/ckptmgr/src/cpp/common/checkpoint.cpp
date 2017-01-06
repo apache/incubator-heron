@@ -19,7 +19,7 @@
 #include "proto/messages.h"
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 Checkpoint::Checkpoint(const std::string& _topology,
                        ::heron::proto::ckptmgr::SaveStateCheckpoint* _checkpoint) {
@@ -41,5 +41,5 @@ Checkpoint::Checkpoint(const std::string& _topology,
   nbytes_ = 0;
 }
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron

@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 class CheckpointTest : public ::testing::Test {
  public:
@@ -87,7 +87,7 @@ TEST_F(CheckpointTest, constructor2) {
   EXPECT_EQ(rckpt.nbytes(), 0);
 }
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron
 
 int main(int argc, char **argv) {

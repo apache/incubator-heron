@@ -12,9 +12,9 @@ cc_library(
         "-Iheron/ckptmgr/src/cpp",
     ],
     deps = [
-        "//third_party/glog:glog-cxx",
         "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/basics:basics-cxx",
+        "//heron/common/src/cpp/config:config-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
     ],
     linkstatic = 1,
 )
@@ -52,9 +52,7 @@ cc_library(
         "-I$(GENDIR)/heron/common/src/cpp"
     ],
     deps = [
-        "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/config:config-cxx",
-        "//heron/common/src/cpp/network:network-cxx",
+        ":common-cxx",
     ],
     linkstatic = 1,
 )
@@ -77,10 +75,7 @@ cc_library(
         "-I$(GENDIR)/heron/common/src/cpp"
     ],
     deps = [
-        "//config:config-cxx",
-        "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/yaml-cpp:yaml-cxx",
+        ":common-cxx",
     ],
     linkstatic = 1,
 )
@@ -99,10 +94,6 @@ cc_binary(
     ],
     deps = [
         ":manager-cxx",
-        "//config:config-cxx",
-        "//heron/proto:proto-cxx",
-        "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/yaml-cpp:yaml-cxx",
     ],
     linkstatic = 1,
 )

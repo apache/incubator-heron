@@ -24,7 +24,7 @@
 #include "common/storage.h"
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 class LFS : public Storage {
  public:
@@ -64,7 +64,7 @@ class LFS : public Storage {
   std::string   base_dir_;
 };
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron
 
 #endif  // lfs.h

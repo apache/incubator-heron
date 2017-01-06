@@ -18,11 +18,11 @@
 #define CHECKPOINT_H
 
 #include <string>
-#include "proto/messages.h"
 #include "basics/basics.h"
+#include "proto/messages.h"
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 class Checkpoint {
  public:
@@ -71,7 +71,7 @@ class Checkpoint {
   ::heron::proto::ckptmgr::SaveStateCheckpoint*  savebytes_;
 };
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron
 
-#endif  // ckpt.h
+#endif  // checkpoint.h

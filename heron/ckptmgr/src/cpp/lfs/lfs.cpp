@@ -21,7 +21,7 @@
 #include <string>
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 std::string LFS::ckptDirectory(const Checkpoint& _ckpt) {
   std::string directory(base_dir_ + "/");
@@ -130,5 +130,5 @@ int LFS::restore(Checkpoint& _ckpt) {
   return SP_OK;
 }
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron

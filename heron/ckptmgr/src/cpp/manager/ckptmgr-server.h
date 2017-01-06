@@ -46,7 +46,7 @@ class CkptMgrServer : public Server {
 
   // Handler for storing the checkpoint
   void HandleSaveStateCheckpoint(Connection* _conn,
-                                 proto::ckptmgr::SaveStateCheckpoint* _checkpoint);
+                                 heron::proto::ckptmgr::SaveStateCheckpoint* _message);
 
   sp_string topology_name_;
   sp_string topology_id_;

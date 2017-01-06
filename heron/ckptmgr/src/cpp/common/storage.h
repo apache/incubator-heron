@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#if !defined(STORAGE_H)
-#define STORAGE_H
+#if !defined(CHECKPOINT_STORAGE_H)
+#define CHECKPOINT_STORAGE_H
 
 #include <string>
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 class Storage {
  public:
@@ -35,7 +35,7 @@ class Storage {
   virtual int restore(Checkpoint& _ckpt) = 0;
 };
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron
 
 #endif  // ckpt.h
