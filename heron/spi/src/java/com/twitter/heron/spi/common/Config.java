@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.PackageType;
@@ -27,6 +28,8 @@ import com.twitter.heron.common.basics.TypeUtils;
  * Config is an Immutable Map of &lt;String, Object&gt;
  */
 public class Config {
+  private static final Logger LOG = Logger.getLogger(Config.class.getName());
+
   private final Map<String, Object> cfgMap = new HashMap<>();
 
   protected Config(Builder build) {
@@ -42,6 +45,7 @@ public class Config {
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
       if (value instanceof String) {
+        LOG.info(key + " <-key expand value-> " + value);
         String expandedValue = Misc.substitute(config, (String) value);
         cb.put(key, expandedValue);
       } else {

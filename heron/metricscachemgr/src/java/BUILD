@@ -8,6 +8,7 @@ metricscachemgr_deps_files = [
            "//heron/api/src/java:api-java",
            "//heron/common/src/java:common-java",
            "//heron/spi/src/java:metricsmgr-spi-java",
+           "//heron/statemgrs/src/java:localfs-statemgr-java",
            "//heron/proto:proto_common_java",
            "//heron/proto:proto_metrics_java",
            "//heron/proto:proto_tmaster_java",
@@ -52,6 +53,13 @@ java_binary(
     name = "metricscachemgr-unshaded",
     srcs = glob(["**/*.java"]),
     deps = metricscachemgr_deps_files,
+)
+
+java_binary(
+    name = "metricscache-queryclient-unshaded",
+    srcs = glob(["**/*.java"]),
+    deps = metricscachemgr_deps_files,
+    main_class="com.twitter.heron.metricscachemgr.SimpleMetricsQueryClient"
 )
 
 genrule(

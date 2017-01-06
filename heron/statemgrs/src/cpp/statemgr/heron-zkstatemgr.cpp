@@ -86,6 +86,16 @@ void HeronZKStateMgr::SetTMasterLocationWatch(const std::string& topology_name,
   SetTMasterLocationWatchInternal();
 }
 
+void HeronZKStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_name,
+                                              VCallback<> watcher) {
+  CHECK(watcher);
+  CHECK(!topology_name.empty());
+
+  metricscache_location_watcher_info_ = new TMasterLocationWatchInfo(
+                              std::move(watcher), topology_name);
+  SetMetricsCacheLocationWatchInternal();
+}
+
 void HeronZKStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                                          VCallback<proto::system::StatusCode> cb) {
   // Just try to create an ephimeral node
@@ -97,6 +107,17 @@ void HeronZKStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& 
   zkclient_->CreateNode(path, value, true, std::move(wCb));
 }
 
+void HeronZKStateMgr::SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
+                                         VCallback<proto::system::StatusCode> cb) {
+  // Just try to create an ephimeral node
+  std::string path = GetMetricsCacheLocationPath(_location.topology_name());
+  std::string value;
+  _location.SerializeToString(&value);
+
+  auto wCb = [cb, this](sp_int32 rc) { this->SetMetricsCacheLocationDone(std::move(cb), rc); };
+  zkclient_->CreateNode(path, value, true, std::move(wCb));
+}
+
 void HeronZKStateMgr::GetTMasterLocation(const std::string& _topology_name,
                                          proto::tmaster::TMasterLocation* _return,
                                          VCallback<proto::system::StatusCode> cb) {
@@ -105,6 +126,19 @@ void HeronZKStateMgr::GetTMasterLocation(const std::string& _topology_name,
 
   auto wCb = [contents, _return, cb, this](sp_int32 rc) {
     this->GetTMasterLocationDone(contents, _return, std::move(cb), rc);
+  };
+
+  zkclient_->Get(path, contents, std::move(wCb));
+}
+
+void HeronZKStateMgr::GetMetricsCacheLocation(const std::string& _topology_name,
+                                         proto::tmaster::MetricsCacheLocation* _return,
+                                         VCallback<proto::system::StatusCode> cb) {
+  std::string path = GetMetricsCacheLocationPath(_topology_name);
+  std::string* contents = new std::string();
+
+  auto wCb = [contents, _return, cb, this](sp_int32 rc) {
+    this->GetMetricsCacheLocationDone(contents, _return, std::move(cb), rc);
   };
 
   zkclient_->Get(path, contents, std::move(wCb));

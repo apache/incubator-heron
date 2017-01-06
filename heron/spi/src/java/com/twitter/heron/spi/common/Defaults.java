@@ -294,6 +294,10 @@ public class Defaults {
     return ConfigDefaults.get("SANDBOX_METRICSMGR_CLASSPATH");
   }
 
+  public static String metricsCacheManagerSandboxClassPath() {
+    return ConfigDefaults.get("SANDBOX_METRICSCACHEMGR_CLASSPATH");
+  }
+
   public static String packingSandboxClassPath() {
     return ConfigDefaults.get("SANDBOX_PACKING_CLASSPATH");
   }

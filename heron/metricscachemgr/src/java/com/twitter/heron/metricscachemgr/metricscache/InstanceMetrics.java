@@ -16,6 +16,7 @@ package com.twitter.heron.metricscachemgr.metricscache;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationType;
@@ -23,6 +24,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationT
 // Most granualar metrics/exception store level. This store exception and metrics
 // associated with an instance.
 public class InstanceMetrics {
+  private static final Logger LOG = Logger.getLogger(InstanceMetrics.class.getName());
   private String instanceId;
   private int nbuckets;
   private int bucketInterval;
@@ -50,6 +52,7 @@ public class InstanceMetrics {
   public void AddMetricWithName(String name, MetricAggregationType type,
                                 String value) {
     Metric metricData = GetOrCreateMetric(name, type);
+    LOG.info("AddMetricWithName name " + name + "; type " + type + "; value " + value);
     metricData.AddValueToMetric(value);
   }
 

@@ -77,8 +77,10 @@ public class MetricsCache {
   }
 
   public void AddMetric(PublishMetrics metrics) {
+    LOG.info("AddMetric count " + metrics.getMetricsCount());
     for (int i = 0; i < metrics.getMetricsCount(); ++i) {
       String componentName = metrics.getMetrics(i).getComponentName();
+      LOG.info("AddMetric componentName " + componentName);
       AddMetricsForComponent(componentName, metrics.getMetrics(i));
     }
   }
@@ -87,6 +89,7 @@ public class MetricsCache {
     ComponentMetrics componentmetrics = GetOrCreateComponentMetrics(componentName);
     String name = metricsData.getName();
     MetricAggregationType type = metricsfilter.getAggregationType(name);
+    LOG.info("AddMetricsForComponent name " + name + "; type " + type);
     componentmetrics.AddMetricForInstance(metricsData.getInstanceId(), name, type,
         metricsData.getValue());
   }
@@ -101,7 +104,7 @@ public class MetricsCache {
 
   // Returns a new response to fetch metrics. The request gets propagated to Component's and
   // Instance's get metrics. Doesn't own Response.
-  MetricResponse GetMetrics(MetricRequest request) {
+  public MetricResponse GetMetrics(MetricRequest request) {
     MetricResponse.Builder responseBuilder = MetricResponse.newBuilder();
 
     if (!metricsComponent.containsKey(request.getComponentName())) {
@@ -132,7 +135,7 @@ public class MetricsCache {
         startTime = request.getExplicitInterval().getStart();
         endTime = request.getExplicitInterval().getEnd();
       }
-      System.err.println("startTime: " + startTime + "; endTime: " + endTime);
+      LOG.info("GetMetrics startTime: " + startTime + "; endTime: " + endTime);
       metricsComponent.get(request.getComponentName())
           .GetMetrics(request, startTime, endTime, responseBuilder);
       responseBuilder.setInterval(endTime - startTime);
