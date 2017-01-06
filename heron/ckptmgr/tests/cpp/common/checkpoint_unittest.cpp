@@ -64,7 +64,7 @@ class CheckpointTest : public ::testing::Test {
   }
 };
 
-TEST_F(CheckpointTest, constructor) {
+TEST_F(CheckpointTest, constructor1) {
   auto save_message = createSaveMessage();
   Checkpoint sckpt("topology-1", save_message);
 
@@ -73,7 +73,9 @@ TEST_F(CheckpointTest, constructor) {
   EXPECT_EQ(sckpt.getComponent(), "component_name-1");
   EXPECT_EQ(sckpt.getInstance(), "instance-1");
   EXPECT_EQ(sckpt.checkpoint(), save_message);
+}
 
+TEST_F(CheckpointTest, constructor2) {
   auto restore_message = createRestoreMessage();
   Checkpoint rckpt("topology-2", restore_message);
 
