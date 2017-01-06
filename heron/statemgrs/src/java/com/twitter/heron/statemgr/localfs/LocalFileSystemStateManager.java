@@ -105,6 +105,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   // Make utils class protected for easy unit testing
   protected ListenableFuture<Boolean> setData(String path, byte[] data, boolean overwrite) {
     final SettableFuture<Boolean> future = SettableFuture.create();
+    LOG.info("setData: writeToFile " + path);
     boolean ret = FileUtils.writeToFile(path, data, overwrite);
     future.set(ret);
 
@@ -184,6 +185,16 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // This is because when running in simulator we control when a tmaster dies and
     // comes up deterministically.
     return setData(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location, String topologyName) {
+    // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+    // This is because when running in simulator we control when a tmaster dies and
+    // comes up deterministically.
+    LOG.info("setMetricsCacheLocation: ");
+    return setData(StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override

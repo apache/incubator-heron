@@ -322,6 +322,10 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_PYTHON_INSTANCE_BINARY"));
   }
 
+  public static final String metricsCacheManagerSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_METRICSCACHEMGR_CLASSPATH"));
+  }
+
   public static String schedulerSandboxJar(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_SCHEDULER_JAR"));
   }

@@ -26,7 +26,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter.MetricAggregationT
 // Component level metrics. A component metrics is a map storing metrics for each of its
 // instance as 'InstanceMetrics'.
 public class ComponentMetrics {
-  private static final Logger LOG = Logger.getLogger(Metric.class.getName());
+  private static final Logger LOG = Logger.getLogger(ComponentMetrics.class.getName());
 
   private String componentName;
   private int nbuckets;
@@ -55,6 +55,8 @@ public class ComponentMetrics {
   public void AddMetricForInstance(String instanceId, String name,
                                    MetricAggregationType type, String value) {
     InstanceMetrics instanceMetrics = GetOrCreateInstanceMetrics(instanceId);
+    LOG.info("AddMetricForInstance " + instanceId
+        + "; name " + name + "; type " + type + "; value " + value);
     instanceMetrics.AddMetricWithName(name, type, value);
   }
 

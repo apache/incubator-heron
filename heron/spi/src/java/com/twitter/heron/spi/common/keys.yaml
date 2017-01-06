@@ -181,6 +181,7 @@ SANDBOX_SCHEDULER_JAR:               heron.jars.sandbox.scheduler
 ################################################################################
 SANDBOX_INSTANCE_CLASSPATH:          heron.classpath.sandbox.instance
 SANDBOX_METRICSMGR_CLASSPATH:        heron.classpath.sandbox.metrics.manager
+SANDBOX_METRICSCACHEMGR_CLASSPATH:        heron.classpath.sandbox.metricscache.manager
 SANDBOX_PACKING_CLASSPATH:           heron.classpath.sandbox.packing
 SANDBOX_SCHEDULER_CLASSPATH:         heron.classpath.sandbox.scheduler
 SANDBOX_STATEMGR_CLASSPATH:          heron.classpath.sandbox.statemgr

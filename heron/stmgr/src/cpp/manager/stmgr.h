@@ -79,7 +79,10 @@ class StMgr {
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
+  void OnMetricsCacheLocationFetch(
+         proto::tmaster::MetricsCacheLocation* _tmaster, proto::system::StatusCode);
   void FetchTMasterLocation();
+  void FetchMetricsCacheLocation();
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
   void CheckTMasterLocation(EventLoop::Status);
   void UpdateProcessMetrics(EventLoop::Status);
@@ -111,6 +114,7 @@ class StMgr {
   void HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation);
   // Broadcast the tmaster location changes to other components. (MM for now)
   void BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLocation);
+  void BroadcastMetricsCacheLocation(proto::tmaster::MetricsCacheLocation* tmasterLocation);
 
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;

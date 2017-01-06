@@ -369,6 +369,10 @@ public class Keys {
     return ConfigKeys.get("SANDBOX_METRICSMGR_CLASSPATH");
   }
 
+  public static String metricsCacheManagerSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_METRICSCACHEMGR_CLASSPATH");
+  }
+
   public static String packingSandboxClassPath() {
     return ConfigKeys.get("SANDBOX_PACKING_CLASSPATH");
   }

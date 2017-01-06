@@ -15,10 +15,12 @@
 package com.twitter.heron.spi.common;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.common.config.ConfigReader;
 
 public final class ClusterConfig {
+  private static final Logger LOG = Logger.getLogger(ClusterConfig.class.getName());
 
   private ClusterConfig() {
   }
@@ -156,6 +158,8 @@ public final class ClusterConfig {
   }
 
   public static Config loadConfig(String heronHome, String configPath, String releaseFile) {
+    LOG.info("heronHome " + heronHome);
+    LOG.info("configPath " + configPath);
     Config homeConfig = loadBasicConfig(heronHome, configPath);
     Config sandboxConfig = loadBasicSandboxConfig();
 

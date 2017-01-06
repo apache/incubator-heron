@@ -15,9 +15,6 @@
 package com.twitter.heron.metricscachemgr;
 
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -28,10 +25,7 @@ import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.REQID;
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.metricsmgr.MetricsManagerServer;
-import com.twitter.heron.proto.system.Metrics;
-import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 /**
  * server to accept metrics from a particular sink in metrics manager
@@ -55,73 +49,43 @@ public class MetricsCacheManagerServer extends HeronServer {
     metricsCache = cache;
   }
 
-  private void handlePublisherPublishMessage(Metrics.MetricPublisher request,
-                                             Metrics.MetricPublisherPublishMessage message) {
-    if (message.getMetricsCount() <= 0 && message.getExceptionsCount() <= 0) {
-      LOG.log(Level.SEVERE,
-          "Publish message has no metrics nor exceptions for message from hostname: {0},"
-              + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
-          new Object[]{request.getHostname(), request.getComponentName(), request.getPort(),
-              request.getInstanceId(), request.getInstanceIndex()});
-      return;
-    }
-
-    // Convert the message to MetricsRecord
-    String source = String.format("%s:%d/%s/%s",
-        request.getHostname(), request.getPort(),
-        request.getComponentName(), request.getInstanceId());
-
-    List<MetricsInfo> metricsInfos = new ArrayList<MetricsInfo>(message.getMetricsCount());
-    for (Metrics.MetricDatum metricDatum : message.getMetricsList()) {
-      MetricsInfo info = new MetricsInfo(metricDatum.getName(), metricDatum.getValue());
-      metricsInfos.add(info);
-    }
-
-    List<ExceptionInfo> exceptionInfos = new ArrayList<ExceptionInfo>(message.getExceptionsCount());
-    for (Metrics.ExceptionData exceptionData : message.getExceptionsList()) {
-      ExceptionInfo exceptionInfo =
-          new ExceptionInfo(exceptionData.getStacktrace(),
-              exceptionData.getLasttime(),
-              exceptionData.getFirsttime(),
-              exceptionData.getCount(),
-              exceptionData.getLogging());
-      exceptionInfos.add(exceptionInfo);
-    }
-
-    LOG.info(String.format("%d MetricsInfo and %d ExceptionInfo to push",
-        metricsInfos.size(), exceptionInfos.size()));
-
-    // Update the metrics
-//    serverMetricsCounters.scope(SERVER_METRICS_RECEIVED).incrBy(metricsInfos.size());
-//    serverMetricsCounters.scope(SERVER_EXCEPTIONS_RECEIVED).incrBy(exceptionInfos.size());
-
-
-    MetricsRecord record = new MetricsRecord(source, metricsInfos, exceptionInfos);
-
-    // Push MetricsRecord to Communicator, which would wake up SlaveLooper bind with IMetricsSink
-//    for (Communicator<MetricsRecord> c : metricsSinkCommunicators) {
-//      c.offer(record);
-//    }
-  }
-
   @Override
   public void onConnect(SocketChannel channel) {
-    LOG.info("Metrics Cache Manager got a new connection from host:port "
+    LOG.info("MetricsCacheManagerServer onConnect from host:port "
         + channel.socket().getRemoteSocketAddress());
   }
 
   @Override
   public void onRequest(REQID rid, SocketChannel channel, Message request) {
+    LOG.info("MetricsCacheManagerServer onRequest from host:port "
+        + channel.socket().getRemoteSocketAddress());
 
+    if (request instanceof TopologyMaster.MetricRequest) {
+      TopologyMaster.MetricResponse resp =
+          metricsCache.GetMetrics((TopologyMaster.MetricRequest) request);
+      LOG.info("query finished, to send response");
+      sendResponse(rid, channel, resp);
+      LOG.info("queued response size " + resp.getSerializedSize());
+    } else {
+      LOG.severe("Unknown kind of request received");
+    }
   }
 
   @Override
   public void onMessage(SocketChannel channel, Message message) {
+    LOG.info("MetricsCacheManagerServer onMessage from host:port "
+        + channel.socket().getRemoteSocketAddress());
 
+    if (message instanceof TopologyMaster.PublishMetrics) {
+      metricsCache.AddMetric((TopologyMaster.PublishMetrics) message);
+    } else {
+      LOG.severe("Unknown kind of message received");
+    }
   }
 
   @Override
   public void onClose(SocketChannel channel) {
-
+    LOG.info("MetricsCacheManagerServer onClose from host:port "
+        + channel.socket().getRemoteSocketAddress());
   }
 }

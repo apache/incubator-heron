@@ -59,11 +59,13 @@ public class Metric {
       // Just keep one value per time bucket
       data.peekFirst().data.clear();
       data.peekFirst().data.offerFirst(value);
+      LOG.info("AddValueToMetric clear+offerFirst");
       // Do this for the cumulative as well
       allTimeCumulative = Double.parseDouble(value);
       allTimeNitems = 1;
     } else {
       data.peekFirst().data.offerFirst(value);
+      LOG.info("AddValueToMetric offerFirst");
       allTimeCumulative += Double.parseDouble(value);
       allTimeNitems++;
     }

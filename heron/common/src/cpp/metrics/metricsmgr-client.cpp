@@ -94,6 +94,13 @@ void MetricsMgrClient::HandleRegisterResponse(
   } else {
     LOG(INFO) << "Do not have a TMasterLocation yet";
   }
+  // Check if we need to send metricscache location
+  if (metricscache_location_) {
+    LOG(INFO) << "Sending MetricsCache Location to metricsmgr";
+    InternalSendMetricsCacheLocation();
+  } else {
+    LOG(INFO) << "Do not have a MetricsCacheLocation yet";
+  }
 }
 
 void MetricsMgrClient::SendTMasterLocation(const proto::tmaster::TMasterLocation& location) {
@@ -110,6 +117,21 @@ void MetricsMgrClient::SendTMasterLocation(const proto::tmaster::TMasterLocation
   }
 }
 
+void MetricsMgrClient::SendMetricsCacheLocation(
+    const proto::tmaster::MetricsCacheLocation& location) {
+  if (metricscache_location_) {
+    delete metricscache_location_;
+  }
+  metricscache_location_ = new proto::tmaster::MetricsCacheLocation(location);
+  if (registered_) {
+    LOG(INFO) << "Sending MetricsCache Location to metricsmgr";
+    InternalSendMetricsCacheLocation();
+  } else {
+    LOG(INFO) << "We have not yet registered to metricsmgr."
+              << " Holding off sending MetricsCacheLocation";
+  }
+}
+
 void MetricsMgrClient::SendMetrics(proto::system::MetricPublisherPublishMessage* _message) {
   SendMessage(*_message);
 
@@ -121,9 +143,26 @@ void MetricsMgrClient::InternalSendTMasterLocation() {
   proto::system::TMasterLocationRefreshMessage* m =
       new proto::system::TMasterLocationRefreshMessage();
   m->mutable_tmaster()->CopyFrom(*tmaster_location_);
+  LOG(INFO) << "InternalSendTMasterLocation "
+            << tmaster_location_->controller_port()
+            << " port " << options_.get_port();
   SendMessage(*m);
 
   delete m;
 }
+
+void MetricsMgrClient::InternalSendMetricsCacheLocation() {
+  CHECK(metricscache_location_);
+  proto::system::MetricsCacheLocationRefreshMessage* m =
+      new proto::system::MetricsCacheLocationRefreshMessage();
+  m->mutable_metricscache()->CopyFrom(*metricscache_location_);
+  LOG(INFO) << "InternalSendMetricsCacheLocation "
+            << metricscache_location_->controller_port()
+            << " port " << options_.get_port();
+  SendMessage(*m);
+
+  delete m;
+}
+
 }  // namespace common
 }  // namespace heron

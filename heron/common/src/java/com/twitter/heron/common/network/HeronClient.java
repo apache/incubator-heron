@@ -200,6 +200,8 @@ public abstract class HeronClient implements ISelectHandler {
     }
 
     OutgoingPacket opk = new OutgoingPacket(rid, request);
+    System.out.println("socketChannelHelper " + socketChannelHelper);
+    System.out.println("OutgoingPacket " + opk);
     socketChannelHelper.sendPacket(opk);
   }
 

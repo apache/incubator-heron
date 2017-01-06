@@ -99,6 +99,7 @@ SANDBOX_SCHEDULER_JAR:            ${HERON_SANDBOX_LIB}/scheduler/heron-scheduler
 ################################################################################
 SANDBOX_INSTANCE_CLASSPATH:   ${HERON_SANDBOX_LIB}/instance/*
 SANDBOX_METRICSMGR_CLASSPATH: ${HERON_SANDBOX_LIB}/metricsmgr/*
+SANDBOX_METRICSCACHEMGR_CLASSPATH: ${HERON_SANDBOX_LIB}/metricscachemgr/*
 SANDBOX_PACKING_CLASSPATH:    ${HERON_SANDBOX_LIB}/packing/*
 SANDBOX_SCHEDULER_CLASSPATH:  ${HERON_SANDBOX_LIB}/scheduler/*
 SANDBOX_STATEMGR_CLASSPATH:   ${HERON_SANDBOX_LIB}/statemgr/*

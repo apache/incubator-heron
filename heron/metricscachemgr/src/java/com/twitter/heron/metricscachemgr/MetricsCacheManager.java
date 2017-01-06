@@ -17,20 +17,33 @@ package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.ClusterConfig;
+import com.twitter.heron.spi.common.ClusterDefaults;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Defaults;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
+import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.utils.ReflectionUtils;
+
+//import com.twitter.heron.spi.common.ConfigDefaults;
+
+//import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 
 /**
  * main entry for metrics cache manager
@@ -40,37 +53,47 @@ public class MetricsCacheManager {
   public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
   private static final Logger LOG = Logger.getLogger(MetricsCacheManager.class.getName());
   // Pre-defined value
-  private static final String METRICS_CACHE_HOST = "127.0.0.1";
+  private static final String METRICS_CACHE_HOST = "0.0.0.0";
   private static final String METRICS_CACHE_COMPONENT_NAME = "__metricscachemgr__";
   private static final int METRICS_CACHE_INSTANCE_ID = -1;
+
   private final MetricsCacheManagerServer metricsCacheManagerServer;
   // The looper drives MetricsManagerServer
   private final NIOLooper metricsCacheManagerServerLoop;
-  private final MetricsSinksConfig config;
+
   private final String topologyName;
   private final String metricsmgrId;
+
+  private final MetricsSinksConfig msConfig;
+
   // map from metric prefix to its aggregation form
   private MetricsFilter metricsfilter = null;
 
   private MetricsCache metricsCache;
+  private Config config;                        // holds all the config read
+  private TopologyMaster.MetricsCacheLocation metricscacheLocation;
 
   /**
    * constructor
    */
   public MetricsCacheManager(String topologyName,
-                             String serverHost, int serverPort,
+                             String serverHost, int masterPort, int statsPort,
                              String metricsCacheMgrId,
-                             SystemConfig systemConfig, MetricsSinksConfig config)
+                             SystemConfig systemConfig, MetricsSinksConfig msconfig,
+                             Config configExpand,
+                             TopologyMaster.MetricsCacheLocation metricscacheLocation)
       throws IOException {
     this.topologyName = topologyName;
     this.metricsmgrId = metricsCacheMgrId;
-    this.config = config;
+    this.msConfig = msconfig;
+    this.config = configExpand;
     this.metricsCacheManagerServerLoop = new NIOLooper();
+    this.metricscacheLocation = metricscacheLocation;
 
     metricsCache = new MetricsCache(
         systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60,
         systemConfig.getTmasterMetricsCollectorPurgeIntervalSec(),
-        config);
+        msconfig);
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
@@ -83,36 +106,37 @@ public class MetricsCacheManager {
 
     // Construct the MetricsManagerServer
     metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,
-        serverHost, serverPort, serverSocketOptions, metricsCache);
+        serverHost, masterPort, serverSocketOptions, metricsCache);
+
+    metricsCacheManagerServer.registerOnMessage(TopologyMaster.PublishMetrics.newBuilder());
+    metricsCacheManagerServer.registerOnRequest(TopologyMaster.MetricRequest.newBuilder());
+    metricsCacheManagerServer.registerOnRequest(TopologyMaster.ExceptionLogRequest.newBuilder());
   }
 
-  private static String getLocalHostName() {
-    String hostName;
-    try {
-      hostName = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e) {
-      LOG.severe("Unknown host.");
-      hostName = METRICS_CACHE_HOST;
-    }
-
-    return hostName;
-  }
-
-  public static void main(String[] args) throws IOException {
-    if (args.length != 6) {
+  public static void main(String[] args) throws Exception {
+    if (args.length != 10) {
       throw new RuntimeException(
           "Invalid arguments; Usage: java com.twitter.heron.metricscachemgr.MetricsCacheManager "
-              + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
-              + "<metrics_sinks_config_filename>");
+              + "<id> <master-port> <stats-port> <topname> <topid> "
+              + "<heron_internals_config_filename> <metrics_sinks_config_filename> "
+              + "<cluster> <role> <environ>");
     }
 
     String metricsCacheMgrId = args[0];
-    int metricsPort = Integer.parseInt(args[1]);
-    String topologyName = args[2];
-    String topologyId = args[3];
-    String systemConfigFilename = args[4];
-    String metricsSinksConfigFilename = args[5];
+    int masterPort = Integer.parseInt(args[1]);
+    int statsPort = Integer.parseInt(args[2]);
+    String topologyName = args[3];
+    String topologyId = args[4];
+    String systemConfigFilename = args[5];
+    String metricsSinksConfigFilename = args[6];
+    String cluster = args[7];
+    String role = args[8];
+    String environ = args[9];
+//    String heronHome = args[10];
+//    String heronConfigPath = args[11];
+//    String heronReleaseFile = args[12];
 
+    //-----------------
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
     // Add the SystemConfig into SingletonRegistry
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
@@ -130,29 +154,89 @@ public class MetricsCacheManager {
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
-    LOG.info(String.format("Starting Metrics Cache for topology %s with topologyId %s with "
-            + "Metrics Cache Id %s, Merics Cache Port: %d.",
-        topologyName, topologyId, metricsCacheMgrId, metricsPort));
+    LOG.info(String.format("Starting MetricsCache for topology %s with topologyId %s with "
+            + "MetricsCache Id %s, MericsCache Port: %d.",
+        topologyName, topologyId, metricsCacheMgrId, masterPort));
 
     LOG.info("System Config: " + systemConfig);
 
-    // Populate the config
+    //-----------------
+    // Populate the msConfig
     MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename);
 
-    LOG.info("Sinks Config:" + sinksConfig.toString());
+    LOG.info("Sinks Config: " + sinksConfig.toString());
 
-    MetricsCacheManager metricsCacheManager = new MetricsCacheManager(topologyName,
-        METRICS_CACHE_HOST, metricsPort, metricsCacheMgrId, systemConfig, sinksConfig);
+    //----------------
+    Config.Builder config = Config.newBuilder()
+        .putAll(ClusterDefaults.getDefaults())
+        .putAll(ClusterDefaults.getSandboxDefaults())
+        .putAll(ClusterConfig.loadConfig(Defaults.heronSandboxHome(),
+            Defaults.heronSandboxConf(), "./release.yaml"))
+        .put(Keys.cluster(), cluster)
+        .put(Keys.role(), role)
+        .put(Keys.environ(), environ)
+        .put(Keys.topologyName(), topologyName)
+        .put(Keys.topologyId(), topologyId);
+    LOG.info("Config: " + config.build().toString());
+
+    Config configExpand = Config.expand(config.build());
+    LOG.info("Config: " + config.toString());
+
+    //-----------------
+    TopologyMaster.MetricsCacheLocation metricscacheLocation =
+        TopologyMaster.MetricsCacheLocation.newBuilder()
+            .setTopologyName(topologyName)
+            .setTopologyId(topologyId)
+            .setHost(InetAddress.getLocalHost().getHostName())
+            .setControllerPort(-1) // not used for metricscache
+            .setMasterPort(masterPort)
+            .setStatsPort(statsPort)
+            .build();
+
+    MetricsCacheManager metricsCacheManager = new MetricsCacheManager(
+        topologyName, METRICS_CACHE_HOST, masterPort, statsPort, metricsCacheMgrId,
+        systemConfig, sinksConfig, configExpand, metricscacheLocation);
     metricsCacheManager.start();
 
-    LOG.info("Loops terminated. Metrics Cache Manager exits.");
+    LOG.info("Loops terminated. MetricsCache Manager exits.");
   }
 
-  public void start() {
-    // The MetricsCacheServer would run in the main thread
-    // We do it in the final step since it would await the main thread
-    LOG.info("Starting Metrics Cache Server");
-    metricsCacheManagerServer.start();
-    metricsCacheManagerServerLoop.loop();
+  public void start() throws Exception {
+    // 1. Do prepare work
+    // create an instance of state manager
+    String statemgrClass = Context.stateManagerClass(config);
+    LOG.info("Context.stateManagerClass " + statemgrClass);
+    IStateManager statemgr;
+    try {
+      statemgr = ReflectionUtils.newInstance(statemgrClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      throw new Exception(String.format(
+          "Failed to instantiate state manager class '%s'",
+          statemgrClass), e);
+    }
+
+    // Put it in a try block so that we can always clean resources
+    try {
+      // initialize the statemgr
+      statemgr.initialize(config);
+
+      statemgr.setMetricsCacheLocation(metricscacheLocation, topologyName);
+      LOG.info("metricscacheLocation " + metricscacheLocation.toString());
+      LOG.info("topologyName " + topologyName.toString());
+
+      // The MetricsCacheServer would run in the main thread
+      // We do it in the final step since it would await the main thread
+      LOG.info("Starting Metrics Cache Server");
+      metricsCacheManagerServer.start();
+      metricsCacheManagerServerLoop.loop();
+    } finally {
+      // 3. Do post work basing on the result
+      // Currently nothing to do here
+
+      // 4. Close the resources
+      SysUtils.closeIgnoringExceptions(statemgr);
+    }
+
+
   }
 }

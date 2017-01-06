@@ -330,6 +330,14 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location,
+      String topologyName) {
+    return createNode(
+        StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setExecutionState(
       ExecutionEnvironment.ExecutionState executionState,
       String topologyName) {
