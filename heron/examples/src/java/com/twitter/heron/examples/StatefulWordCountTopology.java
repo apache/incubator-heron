@@ -95,6 +95,7 @@ public final class StatefulWordCountTopology {
 
     @SuppressWarnings("rawtypes")
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+      System.out.println("Preparing...");
       collector = outputCollector;
       countMap = new HashMap<String, Integer>();
 
@@ -123,11 +124,15 @@ public final class StatefulWordCountTopology {
 
     @Override
     public void initState(State state) {
+      System.out.println("Initializing state...");
       countState = state;
     }
 
     @Override
     public void preSave(String checkpointId) {
+      System.out.println("Saving state...");
+      System.out.println("Current word count result: ");
+      System.out.println(countMap.toString());
       for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
         countState.put(entry.getKey(), entry.getValue());
       }
