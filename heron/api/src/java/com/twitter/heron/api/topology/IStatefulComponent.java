@@ -34,6 +34,8 @@ public interface IStatefulComponent extends IComponent {
   /**
      * This is a hook for the component to perform some actions just before the
      * framework saves its state.
+   *
+   * @param checkpointId the ID os the checkpoint
      */
-  void preSave();
+  void preSave(String checkpointId);
 }

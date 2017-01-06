@@ -146,7 +146,7 @@ public class SpoutInstance implements IInstance {
     // Do a check point
     if (spout instanceof IStatefulComponent) {
       LOG.info("Starting checkpoint");
-      ((IStatefulComponent) spout).preSave();
+      ((IStatefulComponent) spout).preSave(checkpointId);
 
       collector.sendOutState(instanceState, checkpointId);
     } else {
