@@ -36,5 +36,5 @@ import com.twitter.heron.api.topology.IStatefulComponent;
  * <p>When defining bolts in Java, you should use the IRichBolt interface which adds
  * necessary methods for using the Java TopologyBuilder API.</p>
  */
-public interface IStatefulBolt extends IStatefulComponent, IBolt {
+public interface IStatefulBolt extends IStatefulComponent, IRichBolt {
 }
