@@ -39,6 +39,10 @@ public class Context {
     return cfg.getBooleanValue(ConfigKeys.get("DRY_RUN"), false);
   }
 
+  public static DryRunFormatType dryRunFormatType(Config cfg) {
+    return cfg.getDryRunFormatType (ConfigKeys.get("DRY_RUN_FORMAT_TYPE"));
+  }
+
   public static Boolean verbose(Config cfg) {
     return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"), true);
   }
@@ -181,10 +185,6 @@ public class Context {
 
   public static PackageType topologyPackageType(Config cfg) {
     return cfg.getPackageType(ConfigKeys.get("TOPOLOGY_PACKAGE_TYPE"));
-  }
-
-  public static DryRunFormatType dryRunFormatType(Config cfg) {
-    return cfg.getDryRunFormatType (ConfigKeys.get("DRY_RUN_FORMAT_TYPE"));
   }
 
   public static ByteAmount stmgrRam(Config cfg) {

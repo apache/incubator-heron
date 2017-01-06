@@ -119,12 +119,12 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       extra_jars=extra_jars,
       args=args,
       java_defines=[])
-  if "dry_run" in cl_args:
-    err_context = "Failed to get dry-run info of topology'%s'" % topology_name
-    succ_context = "Successfully get dry-run info of topology '%s'" % topology_name
-  else:
-    err_context = "Failed to launch topology '%s'" % topology_name
-    succ_context = "Successfully launched topology '%s'" % topology_name
+  err_context = "Failed to launch topology '%s'" % topology_name
+  if cl_args["dry_run"]:
+    err_context += " in dry-run mode"
+  succ_context = "Successfully launched topology '%s'" % topology_name
+  if cl_args["dry_run"]:
+    succ_context += " in dry-run mode"
   resp.add_context(err_context, succ_context)
   return resp
 

@@ -26,8 +26,8 @@ from heron.common.src.python.utils.log import Log
 #  - status code >= 200:
 #    program sends out dry-run response
 
-# If you need to add new class of status code, please assign it value larger than
-# value of the last class of status code
+# Definition corresponds to definition in com.twitter.heron.scheduler.AbstractMain
+
 # pylint: disable=no-init
 class Status(object):
   """Status code enum"""

@@ -71,6 +71,6 @@ public class UpdateDryRunRender extends DryRunRender {
     builder.append(response.getPackingPlan().toString() + "\n");
     builder.append("Old packing plan:\n");
     builder.append(response.getOldPackingPlan().toString() + "\n");
-    return "";
+    return builder.toString();
   }
 }
