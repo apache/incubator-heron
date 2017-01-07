@@ -18,6 +18,7 @@
 #include <iostream>
 #include <set>
 #include <vector>
+#include "manager/stateful-helper.h"
 #include "manager/stmgr.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -81,7 +82,7 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _stmgr_id,
                          const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
                          heron::common::MetricsMgrSt* _metrics_manager_client,
-                         heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client)
+                         StatefulHelper* _stateful_helper)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -89,7 +90,7 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
       expected_instances_(_expected_instances),
       stmgr_(_stmgr),
       metrics_manager_client_(_metrics_manager_client),
-      checkpoint_manager_client_(_checkpoint_manager_client) {
+      stateful_helper_(_stateful_helper) {
   // stmgr related handlers
   InstallRequestHandler(&StMgrServer::HandleStMgrHelloRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleStreamMessage);
@@ -261,10 +262,10 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection" << std::endl;
+    release(_message);
   } else {
-    stmgr_->HandleStreamManagerData(iter->second, *_message);
+    stmgr_->HandleStreamManagerData(iter->second, _message);
   }
-  release(_message);
 }
 
 void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
@@ -640,22 +641,19 @@ void StMgrServer::HandleInstanceStateCheckpointMessage(Connection* _conn,
   }
 
   // send the checkpoint message to all downstream task ids
-  stmgr_->SendDownstreamCheckpoint(task_id, _message->checkpoint_id());
-
-  // save the checkpoint
-  proto::ckptmgr::SaveStateCheckpoint* message = new proto::ckptmgr::SaveStateCheckpoint();
-  message->mutable_instance()->CopyFrom(*(it->second->instance_));
-  message->mutable_checkpoint()->CopyFrom(*_message);
-  checkpoint_manager_client_->SaveStateCheckpoint(message);
+  stmgr_->HandleInstanceStateCheckpointMessage(task_id, _message, it->second->instance_);
+  delete _message;
 }
 
 void StMgrServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
                                proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
-  stmgr_->HandleDownStreamStatefulCheckpoint(_message->origin_task_id(),
-                                             _message->destination_task_id(),
-                                             _message->checkpoint_id());
+  stmgr_->HandleDownStreamStatefulCheckpoint(_message);
   delete _message;
 }
 
+void StMgrServer::HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
+                                         const sp_string& _checkpoint_id) {
+  // So received a checkpoint marker from an upstream task
+}
 }  // namespace stmgr
 }  // namespace heron

@@ -75,6 +75,13 @@ void TupleCache::add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple
   return l->add_emit_tuple(_tuple, &total_size_);
 }
 
+void TupleCache::add_checkpoint_tuple(sp_int32 _task_id,
+                            proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  if (total_size_ >= drain_threshold_bytes_) drain_impl(true);
+  TupleList* l = get(_task_id);
+  return l->add_checkpoint_tuple(_message, &total_size_);
+}
+
 TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
   TupleList* l = NULL;
   std::map<sp_int32, TupleList*>::iterator iter = cache_.find(_task_id);
@@ -192,12 +199,32 @@ void TupleCache::TupleList::add_emit_tuple(const proto::system::AckTuple& _tuple
   current_->mutable_control()->add_emits()->CopyFrom(_tuple);
 }
 
+void TupleCache::TupleList::add_checkpoint_tuple(
+                 proto::ckptmgr::DownstreamStatefulCheckpoint* _message,
+                 sp_uint64* _total_size) {
+  if (current_) {
+    tuples_.push_front(current_);
+    current_ = NULL;
+    current_size_ = 0;
+  }
+  sp_int64 tuple_size = _message.ByteSize();
+  *_total_size += tuple_size;
+  tuples_.push_front(_message);
+}
+
 void TupleCache::TupleList::drain(
-    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer) {
+    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer,
+    std::function<void(sp_int32, proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer) {
   sp_int32 drained = 0;
   // we have to drain from back
   while (!tuples_.empty()) {
-    _drainer(_task_id, tuples_.back());  // Drain cleans up the structure
+    proto::system::HeronTupleSet2* t = dynamic_cast<proto::system::HeronTupleSet2*>(tuples_.back());
+    if (t) {
+      _drainer(_task_id, t);  // Drain cleans up the structure
+    } else {
+      _checkpoint_drainer(_task_id,
+           dynamic_cast<proto::ckptmgr::DownstreamStatefulCheckpoint*>(tuples_.back()));
+    }
     tuples_.pop_back();
     drained++;
   }

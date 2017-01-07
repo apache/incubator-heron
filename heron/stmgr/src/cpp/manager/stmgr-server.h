@@ -32,7 +32,6 @@ class MetricsMgrSt;
 class MultiCountMetric;
 class TimeSpentMetric;
 class AssignableMetric;
-class CheckpointMgrClient;
 }
 }
 
@@ -46,6 +45,7 @@ namespace heron {
 namespace stmgr {
 
 class StMgr;
+class StatefulHelper;
 
 class StMgrServer : public Server {
  public:
@@ -53,7 +53,7 @@ class StMgrServer : public Server {
               const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
               heron::common::MetricsMgrSt* _metrics_manager_client,
-              heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client);
+              StatefulHelper* _stateful_helper);
   virtual ~StMgrServer();
 
   void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
@@ -61,6 +61,8 @@ class StMgrServer : public Server {
                        sp_int32 _byte_size,
                        const sp_string _type_name,
                        const char* _message);
+  void HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
+                              const sp_string& _checkpoint_id);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
@@ -187,6 +189,9 @@ class StMgrServer : public Server {
 
   // checkpoint manager client
   heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
+
+  // Stateful helper
+  StatefulHeler* stateful_helper_;
 
   bool spouts_under_back_pressure_;
 };

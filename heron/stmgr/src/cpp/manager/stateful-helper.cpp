@@ -89,11 +89,19 @@ void StatefulHelper::add(std::map<sp_int32, std::set<sp_int32>>& _map,
   }
 }
 
-std::set<sp_int32> StatefulHelper::get_receivers(sp_int32 _task_id) {
+std::set<sp_int32> StatefulHelper::get_downstreamers(sp_int32 _task_id) {
   if (to_send_list_.find(_task_id) == to_send_list_.end()) {
     return std::set<sp_int32>();
   } else {
     return to_send_list_[_task_id];
+  }
+}
+
+std::set<sp_int32> StatefulHelper::get_upstreamers(sp_int32 _task_id) {
+  if (from_recv_list_.find(_task_id) == from_recv_list_.end()) {
+    return std::set<sp_int32>();
+  } else {
+    return from_recv_list_[_task_id];
   }
 }
 }  // namespace stmgr
