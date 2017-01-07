@@ -16,6 +16,7 @@
 #ifndef MEM_POOL_H
 #define MEM_POOL_H
 
+#include <google/protobuf/message.h>
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -87,6 +88,8 @@ class MemPool {
  private:
   std::unordered_map<std::type_index, std::vector<B*>> map_;
 };
+
+extern MemPool<google::protobuf::Message>* __global_protobuf_pool__;
 
 #endif
 

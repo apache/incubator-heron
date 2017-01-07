@@ -174,17 +174,14 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  // TODO(mfu):
-  MemPool<google::protobuf::Message> _heron_message_pool;
-
   template<typename M>
   void release(M* m) {
-    _heron_message_pool.release(m);
+    __global_protobuf_pool__->release(m);
   }
 
   template<typename M>
   M* acquire(M* m) {
-    return _heron_message_pool.acquire(m);
+    return __global_protobuf_pool__->acquire(m);
   }
 
  protected:
@@ -269,7 +266,7 @@ class Client : public BaseClient {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
 
-    M* m = _heron_message_pool.acquire(m);
+    M* m = __global_protobuf_pool__->acquire(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
