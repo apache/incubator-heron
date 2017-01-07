@@ -137,7 +137,7 @@ public final class TMasterUtils {
 
     if (state == expectedState) {
       throw new TMasterException(String.format(
-          "Topology %s command received topology %s but already in %s state",
+          "Topology {0} command received topology {1} but already in {2} state",
           topologyStateControlCommand, topologyName, state));
     }
 

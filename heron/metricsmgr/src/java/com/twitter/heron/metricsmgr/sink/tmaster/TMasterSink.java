@@ -114,7 +114,6 @@ public class TMasterSink implements IMetricsSink {
   @Override
   @SuppressWarnings("unchecked")
   public void init(Map<String, Object> conf, SinkContext context) {
-    LOG.info("tmaster sink init");
     sinkConfig.putAll(conf);
 
     sinkContext = context;
@@ -185,7 +184,6 @@ public class TMasterSink implements IMetricsSink {
 
   @Override
   public void processRecord(MetricsRecord record) {
-    LOG.info("tmaster sink processRecord");
     // Format it into TopologyMaster.PublishMetrics
 
     // The format of source is "host:port/componentName/instanceId"

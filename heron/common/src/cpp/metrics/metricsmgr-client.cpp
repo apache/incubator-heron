@@ -143,9 +143,6 @@ void MetricsMgrClient::InternalSendTMasterLocation() {
   proto::system::TMasterLocationRefreshMessage* m =
       new proto::system::TMasterLocationRefreshMessage();
   m->mutable_tmaster()->CopyFrom(*tmaster_location_);
-  LOG(INFO) << "InternalSendTMasterLocation "
-            << tmaster_location_->controller_port()
-            << " port " << options_.get_port();
   SendMessage(*m);
 
   delete m;
@@ -156,9 +153,6 @@ void MetricsMgrClient::InternalSendMetricsCacheLocation() {
   proto::system::MetricsCacheLocationRefreshMessage* m =
       new proto::system::MetricsCacheLocationRefreshMessage();
   m->mutable_metricscache()->CopyFrom(*metricscache_location_);
-  LOG(INFO) << "InternalSendMetricsCacheLocation "
-            << metricscache_location_->controller_port()
-            << " port " << options_.get_port();
   SendMessage(*m);
 
   delete m;

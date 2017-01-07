@@ -226,11 +226,9 @@ public final class Misc {
    * @return String string that gives the file system path
    */
   protected static String combinePaths(List<String> paths) {
-    LOG.info("[0]combinePaths " + paths.get(0));
     File file = new File(paths.get(0));
 
     for (int i = 1; i < paths.size(); i++) {
-      LOG.info("[" + i + "]combinePaths " + paths.get(i));
       file = new File(file, paths.get(i));
     }
 
