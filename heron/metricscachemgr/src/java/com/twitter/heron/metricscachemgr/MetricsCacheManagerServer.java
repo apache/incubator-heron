@@ -61,6 +61,7 @@ public class MetricsCacheManagerServer extends HeronServer {
         + channel.socket().getRemoteSocketAddress());
 
     if (request instanceof TopologyMaster.MetricRequest) {
+      LOG.info("received request " + (TopologyMaster.MetricRequest) request);
       TopologyMaster.MetricResponse resp =
           metricsCache.GetMetrics((TopologyMaster.MetricRequest) request);
       LOG.info("query finished, to send response");
@@ -77,7 +78,9 @@ public class MetricsCacheManagerServer extends HeronServer {
         + channel.socket().getRemoteSocketAddress());
 
     if (message instanceof TopologyMaster.PublishMetrics) {
+      LOG.info("received message " + (TopologyMaster.PublishMetrics) message);
       metricsCache.AddMetric((TopologyMaster.PublishMetrics) message);
+//      LOG.info("after processing message " + metricsCache);
     } else {
       LOG.severe("Unknown kind of message received");
     }

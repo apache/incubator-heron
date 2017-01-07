@@ -15,7 +15,9 @@
 package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
@@ -32,24 +34,27 @@ import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
  * example: query metricscache
  */
 public class SimpleMetricsQueryClient extends HeronClient {
+  private static final Logger LOG = Logger.getLogger(SimpleMetricsQueryClient.class.getName());
   /**
    * Constructor
    */
   private String topo;
   private String component;
+  private String[] metrcs;
 
   public SimpleMetricsQueryClient(NIOLooper s, String host, int port, HeronSocketOptions options,
-                                  String topo, String component) {
+                                  String topo, String component, String[] metrics) {
     super(s, host, port, options);
     this.topo = topo;
     this.component = component;
+    this.metrcs = metrics;
   }
 
   public static void main(String[] args)
       throws ExecutionException, InterruptedException, IOException {
-    if (args.length < 2) {
+    if (args.length < 3) {
       System.out.println(
-          "Usage: java MetricsQueryExample <topology_name> <component_name>");
+          "Usage: java MetricsQueryExample <topology_name> <component_name> <metrics_name>");
     } else {
       System.out.println("topology: " + args[0] + "; component: " + args[1]);
     }
@@ -69,7 +74,7 @@ public class SimpleMetricsQueryClient extends HeronClient {
         location.getHost(), location.getMasterPort(), new HeronSocketOptions(
         32768, 16, 32768,
         16, 6553600, 8738000),
-        args[0], args[1]);
+        args[0], args[1], Arrays.copyOfRange(args, 2, args.length));
     client.start();
     looper.loop();
   }
@@ -83,7 +88,10 @@ public class SimpleMetricsQueryClient extends HeronClient {
   public void onConnect(StatusCode status) {
     System.out.println("onConnect");
     Message request = TopologyMaster.MetricRequest.newBuilder()
-        .setComponentName(component).setMinutely(true).setInterval(-1)
+        .setComponentName(component)
+//        .setMinutely(true)
+        .setInterval(-1)
+        .addAllMetric(Arrays.asList(metrcs))
         .build();
     Message.Builder responseBuilder = TopologyMaster.MetricResponse.newBuilder();
     sendRequest(request, responseBuilder);
@@ -94,8 +102,36 @@ public class SimpleMetricsQueryClient extends HeronClient {
     System.out.println("onResponse");
     if (status.equals(StatusCode.OK)) {
       if (response instanceof TopologyMaster.MetricResponse) {
-        System.out.println("response size " + response.getSerializedSize());
-        System.out.println("response content " + (TopologyMaster.MetricResponse) response);
+        TopologyMaster.MetricResponse resp = (TopologyMaster.MetricResponse) response;
+        System.out.println("response size " + resp.getSerializedSize());
+        System.out.println("response " + resp);
+        //-------------
+//        StringBuilder sb = new StringBuilder();
+//        int metricCount = resp.getMetricCount();
+//        sb.append("\nMetricResponse: TaskMetric count " + metricCount);
+//        for (int i = 0; i < metricCount; i++) {
+//          TopologyMaster.MetricResponse.TaskMetric tm = resp.getMetric(i);
+//          String instanceId = tm.getInstanceId();
+//          int indivisualMetricsCount = tm.getMetricCount();
+//          sb.append("\n TaskMetric: instance_id " + instanceId
+//              + "; IndividualMetric count " + indivisualMetricsCount);
+//          for (int j = 0; j < indivisualMetricsCount; j++) {
+//            TopologyMaster.MetricResponse.IndividualMetric im = tm.getMetric(j);
+//            String name = im.getName();
+//            String value = im.getValue();
+//            int internalValueCount = im.getIntervalValuesCount();
+//            sb.append("\n  IndividualMetric: name " + name + "; value " + value
+//                + "; IntervalValue count " + internalValueCount);
+//            for (int k = 0; k < internalValueCount; k++) {
+//              TopologyMaster.MetricResponse.IndividualMetric.IntervalValue iv =
+//                  im.getIntervalValues(k);
+//              String ivValue = iv.getValue();
+//              TopologyMaster.MetricInterval mi = iv.getInterval();
+//              sb.append("\n   IntervalValue: " + mi + "; " + ivValue);
+//            }
+//          }
+//        }
+//        System.out.println(sb.toString());
       } else {
         System.out.println("unknown response" + response);
       }
