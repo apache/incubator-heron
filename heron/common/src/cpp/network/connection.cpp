@@ -83,6 +83,8 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCo
   mOutstandingPackets.push_back(std::make_pair(packet, std::move(cb)));
   mNumOutstandingPackets++;
   mNumOutstandingBytes += packet->GetTotalPacketSize();
+  LOG(INFO) << "Pushing Outstanding packets: " << mOutstandingPackets.size() << " total bytes: "
+            << mNumOutstandingBytes;
 
   if (mOnConnectionBufferChange) {
     mOnConnectionBufferChange(this);
@@ -162,6 +164,8 @@ void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten
         mSentPackets.push_back(pr);
         mOutstandingPackets.pop_front();
         mNumOutstandingPackets--;
+        LOG(INFO) << "Poping Outstanding packets: " << mOutstandingPackets.size()
+                  << " total bytes: " << mNumOutstandingBytes;
       } else {
         pr.first->position_ += mIOVector[i].iov_len;
       }
@@ -227,6 +231,7 @@ sp_int32 Connection::writeIntoEndPoint(sp_int32 fd) {
 }
 
 void Connection::handleDataWritten() {
+  LOG(INFO) << "Freeing SentPackets: " << mSentPackets.size();
   while (!mSentPackets.empty()) {
     auto pr = mSentPackets.front();
     if (pr.second) {
