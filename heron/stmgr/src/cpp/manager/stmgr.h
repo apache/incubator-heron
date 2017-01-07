@@ -125,8 +125,7 @@ class StMgr {
                         const proto::api::StreamId& _streamid,
                         proto::system::HeronDataTuple* _tuple,
                         const std::vector<sp_int32>& _out_tasks);
-  void CopyControlOutBound(sp_int32 _src_task_id,
-                           const proto::system::AckTuple& _control, bool _is_fail);
+  void CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail);
 
   sp_int32 ExtractTopologyTimeout(const proto::api::Topology& _topology);
 
