@@ -63,7 +63,6 @@ public class SlaveLooper extends WakeableLooper {
     if (!lock.isToProceed) {
       synchronized (lock.proceedLock) {
         lock.isToProceed = true;
-        lock.proceedLock.notify();
       }
     }
   }
