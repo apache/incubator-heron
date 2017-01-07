@@ -6,6 +6,7 @@ java_binary(
     deps = [
         "//heron/common/src/java:basics-java",
         "//heron/storm/src/java:storm-compatibility-java",
+        "//heron/api/src/java:api-java",
     ],
     create_executable = 0,
 )

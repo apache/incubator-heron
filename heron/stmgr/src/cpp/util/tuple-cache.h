@@ -53,10 +53,6 @@ class TupleCache {
   void add_checkpoint_tuple(sp_int32 _task_id,
                             proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
-  void release(sp_int32 _task_id, proto::system::HeronTupleSet2* set) {
-    get(_task_id)->release(set);
-  }
-
   // Clear all data wrt a particular task_id
   void clear(sp_int32 _task_id);
 
@@ -87,7 +83,8 @@ class TupleCache {
                proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer,
 
     proto::system::HeronTupleSet2* acquire() {
-      return heron_tuple_set_pool_.acquire();
+      proto::system::HeronTupleSet2* retval = NULL;
+      return __global_protobuf_pool__->acquire(retval);
     }
 
     proto::system::HeronTupleSet2* acquire_clean_set() {
@@ -96,13 +93,8 @@ class TupleCache {
      return set;
     }
 
-    void release(proto::system::HeronTupleSet2* set) {
-      heron_tuple_set_pool_.release(set);
-    }
-
    private:
-    BaseMemPool<proto::system::HeronTupleSet2> heron_tuple_set_pool_;
-    std::deque<google::protobuf::Message*> tuples_;
+    std::deque<proto::system::HeronTupleSet2*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;
     sp_int32 last_drained_count_;

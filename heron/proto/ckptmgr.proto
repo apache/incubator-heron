@@ -47,6 +47,13 @@ message SaveStateCheckpoint {
   required InstanceStateCheckpoint checkpoint = 2;
 }
 
+// This is the message that StMgr sends to Checkpoint Mgr
+// to restore instance checkpoint data
+message RestoreStateCheckpoint {
+  required heron.proto.system.Instance instance = 1;
+  required string checkpoint_id = 2;
+}
+
 // This is the message that stmgr sends to other stmgr
 // to send it to downstream task
 message DownstreamStatefulCheckpoint {

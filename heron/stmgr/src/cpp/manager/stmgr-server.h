@@ -56,11 +56,10 @@ class StMgrServer : public Server {
               StatefulHelper* _stateful_helper);
   virtual ~StMgrServer();
 
-  void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
-  void SendToInstance2(sp_int32 _task_id,
-                       sp_int32 _byte_size,
-                       const sp_string _type_name,
-                       const char* _message);
+  // We own the _message
+  void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
+  // We own the _message
+  void SendToInstance2(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
   void HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
                               const sp_string& _checkpoint_id);
 
@@ -194,6 +193,8 @@ class StMgrServer : public Server {
   StatefulHeler* stateful_helper_;
 
   bool spouts_under_back_pressure_;
+
+  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };
 
 }  // namespace stmgr

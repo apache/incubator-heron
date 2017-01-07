@@ -76,6 +76,23 @@ void CkptMgrServer::HandleStMgrRegisterRequest(REQID _id, Connection* _conn,
   delete _request;
 }
 
+void CkptMgrServer::HandleSaveStateCheckpoint(Connection* _conn,
+                                        heron::proto::ckptmgr::SaveStateCheckpoint* _message) {
+  Checkpoint checkpoint(topology_name_, _message);
+  LOG(INFO) << "Got a save checkpoint for " << checkpoint.getCkptId() << " "
+            << checkpoint.getComponent() << " " << checkpoint.getInstance() << " "
+            << " on connection" << _conn;
+
+  auto ret = ckptmgr_->storage()->store(checkpoint);
+  if (ret != SP_OK) {
+    LOG(ERROR) << "Checkpoint failed for " << checkpoint.getCkptId() << " "
+            << checkpoint.getComponent() << " " << checkpoint.getInstance();
+    return;
+  }
+
+  LOG(INFO) << "Checkpoint successful for " << checkpoint.getCkptId() << " "
+            << checkpoint.getComponent() << " " << checkpoint.getInstance();
+}
 
 }  // namespace ckptmgr
 }  // namespace heron

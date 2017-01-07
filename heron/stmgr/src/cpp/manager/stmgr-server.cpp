@@ -368,9 +368,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
 }
 
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
-                                  sp_int32 _byte_size,
-                                  const sp_string _type_name,
-                                  const char* _message) {
+                                  proto::stmgr::TupleStreamMessage2* _message) {
   bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
@@ -381,12 +379,14 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
 
   if (drop) {
   } else {
-    SendMessage(iter->second->conn_, _byte_size, _type_name, _message);
+    SendMessage(iter->second->conn_, _message->set().size(),
+                heron_tuple_set_2_, _message->set().c_str());
   }
+  release(_message);
 }
 
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
-                                  const proto::system::HeronTupleSet2& _message) {
+                                  proto::system::HeronTupleSet2* _message) {
   bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
@@ -395,21 +395,22 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
     drop = true;
   }
   if (drop) {
-    if (_message.has_control()) {
+    if (_message->has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.control().acks_size());
+          ->incr_by(_message->control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.control().fails_size());
+          ->incr_by(_message->control().fails_size());
     }
   } else {
-    if (_message.has_control()) {
+    if (_message->has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.control().acks_size());
+          ->incr_by(_message->control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.control().fails_size());
+          ->incr_by(_message->control().fails_size());
     }
-    SendMessage(iter->second->conn_, _message);
+    SendMessage(iter->second->conn_, *_message);
   }
+  release(_message);
 }
 
 void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {

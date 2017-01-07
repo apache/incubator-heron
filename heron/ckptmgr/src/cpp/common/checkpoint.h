@@ -18,22 +18,24 @@
 #define CHECKPOINT_H
 
 #include <string>
-#include "proto/messages.h"
 #include "basics/basics.h"
+#include "proto/messages.h"
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 class Checkpoint {
  public:
   Checkpoint(const std::string& topology,
              ::heron::proto::ckptmgr::SaveStateCheckpoint* _checkpoint);
 
-  Checkpoint(const std::string& topology, const std::string& ckptid,
-             const std::string& component, const std::string& instance)
-      : topology_(topology), ckptid_(ckptid), component_(component), instance_(instance) {}
+  Checkpoint(const std::string& topology,
+             ::heron::proto::ckptmgr::RestoreStateCheckpoint* _checkpoint);
 
-  virtual ~Checkpoint() {}
+  virtual ~Checkpoint() {
+    if (savebytes_ != nullptr)
+      delete savebytes_;
+  }
 
   // get the topology name
   std::string getTopology() const { return topology_; }
@@ -47,11 +49,18 @@ class Checkpoint {
   // get the instance id
   std::string getInstance() const { return instance_; }
 
-  // get the checkpoint bytes
-  ::heron::proto::ckptmgr::SaveStateCheckpoint* bytes() const { return savebytes_; }
+  // get the checkpoint bytes for storing
+  ::heron::proto::ckptmgr::SaveStateCheckpoint* checkpoint() const { return savebytes_; }
 
   // get the total number of bytes to be saved
   sp_int32 nbytes() const { return nbytes_; }
+
+  // set the bytes, used for restoring the checkpoint
+  void set_checkpoint(::heron::proto::ckptmgr::SaveStateCheckpoint* _bytes) {
+    CHECK(savebytes_ == nullptr);
+    savebytes_ = _bytes;
+    nbytes_ = _bytes->ByteSize();
+  }
 
  private:
   std::string  topology_;    // topology name
@@ -62,7 +71,7 @@ class Checkpoint {
   ::heron::proto::ckptmgr::SaveStateCheckpoint*  savebytes_;
 };
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron
 
-#endif  // ckpt.h
+#endif  // checkpoint.h

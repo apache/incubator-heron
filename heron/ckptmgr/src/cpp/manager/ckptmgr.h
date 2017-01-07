@@ -18,9 +18,11 @@
 #define SRC_CPP_SVCS_CKPTMGR_SRC_CKPTMANAGER_CKPTMGR_H_
 
 #include "basics/basics.h"
-#include "manager/ckptmgr-server.h"
 #include "network/network.h"
 #include "proto/messages.h"
+#include "common/checkpoint.h"
+#include "common/storage.h"
+#include "manager/ckptmgr-server.h"
 
 namespace heron {
 namespace ckptmgr {
@@ -37,6 +39,11 @@ class CkptMgr {
 
   // TODO(nlu): add methods
 
+  // get the storage
+  Storage* storage() {
+    return storage_;
+  }
+
  private:
   void StartCkptmgrServer();
 
@@ -47,6 +54,8 @@ class CkptMgr {
 
   CkptMgrServer* server_;
   EventLoop* eventLoop_;
+
+  Storage* storage_;
 };
 
 }  // namespace ckptmgr

@@ -24,7 +24,7 @@
 #include "common/storage.h"
 
 namespace heron {
-namespace state {
+namespace ckptmgr {
 
 class LFS : public Storage {
  public:
@@ -53,15 +53,6 @@ class LFS : public Storage {
   // create the checkpoint directory
   int createCkptDirectory(const Checkpoint& _ckpt);
 
-  // create the temporary checkpoint file
-  int createTmpCkptFile(const Checkpoint& _ckpt);
-
-  // write to temporary checkpoint file
-  int writeTmpCkptFile(int fd, const Checkpoint& _ckpt);
-
-  // close the temporary checkpoint file
-  int closeTmpCkptFile(int fd, const Checkpoint& _ckpt);
-
   // move the temporary checkpoint file
   int moveTmpCkptFile(const Checkpoint& _ckpt);
 
@@ -73,7 +64,7 @@ class LFS : public Storage {
   std::string   base_dir_;
 };
 
-}  // namespace state
+}  // namespace ckptmgr
 }  // namespace heron
 
 #endif  // lfs.h

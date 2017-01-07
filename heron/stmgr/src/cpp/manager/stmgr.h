@@ -70,7 +70,7 @@ class StMgr {
   // Called by tmaster client when a new physical plan is available
   void NewPhysicalPlan(proto::system::PhysicalPlan* pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
-                               const proto::stmgr::TupleStreamMessage2& _message);
+                               proto::stmgr::TupleStreamMessage2* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::system::HeronTupleSet* _message);
   void HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
@@ -139,6 +139,13 @@ class StMgr {
   // Broadcast the tmaster location changes to other components. (MM for now)
   void BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLocation);
 
+  template<typename T> T* acquire(T* t) {
+    return __global_protobuf_pool__->acquire(t);
+  }
+  template<typename T> void release(T* t) {
+    __global_protobuf_pool__->release(t);
+  }
+
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;
@@ -188,15 +195,10 @@ class StMgr {
   sp_int32 checkpoint_manager_port_;
   sp_string ckptmgr_id_;
 
-  proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks_;
 
   bool is_acking_enabled;
   bool is_stateful_;
-
-  proto::system::HeronTupleSet2* tuple_set_from_other_stmgr_;
-
-  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };
 
 }  // namespace stmgr

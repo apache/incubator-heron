@@ -14,28 +14,11 @@
  * limitations under the License.
  */
 
-#if !defined(CHECKPOINT_STORAGE_H)
-#define CHECKPOINT_STORAGE_H
+////////////////////////////////////////////////////////////////////////////////
+// Just defines the static member of Mempool class
+////////////////////////////////////////////////////////////////////////////////
+#include "network/mempool.h"
+#include "basics/basics.h"
 
-#include <string>
-
-namespace heron {
-namespace ckptmgr {
-
-class Storage {
- public:
-  Storage() {}
-
-  virtual ~Storage() {}
-
-  // store the checkpoint
-  virtual int store(const Checkpoint& _ckpt) = 0;
-
-  // retrieve the checkpoint
-  virtual int restore(Checkpoint& _ckpt) = 0;
-};
-
-}  // namespace ckptmgr
-}  // namespace heron
-
-#endif  // ckpt.h
+MemPool<google::protobuf::Message>* __global_protobuf_pool__ =
+                                   new MemPool<google::protobuf::Message>();
