@@ -105,7 +105,6 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   // Make utils class protected for easy unit testing
   protected ListenableFuture<Boolean> setData(String path, byte[] data, boolean overwrite) {
     final SettableFuture<Boolean> future = SettableFuture.create();
-    LOG.info("setData: writeToFile " + path);
     boolean ret = FileUtils.writeToFile(path, data, overwrite);
     future.set(ret);
 

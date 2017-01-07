@@ -199,7 +199,7 @@ public class S3Uploader implements IUploader {
       return resourceUrl.toURI();
     } catch (URISyntaxException e) {
       throw new UploaderException(
-          String.format("Could not convert URL %s to URI", resourceUrl));
+          String.format("Could not convert URL %s to URI", resourceUrl, e));
     }
   }
 
