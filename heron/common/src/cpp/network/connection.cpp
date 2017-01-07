@@ -29,7 +29,7 @@ const sp_int32 __SYSTEM_NETWORK_DEFAULT_WRITE_BATCH_SIZE__ = 1048576;  // 1M
 
 // How many times should we wait to see a buffer full while enqueueing data
 // before declaring start of back pressure
-const sp_uint8 __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__ = 3;
+const sp_uint8 __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__ = 1;
 
 // TODO(vikasr): Should read from config file rather than hard coding.
 // This is the high water mark on the num of bytes that can be left outstanding on a connection
@@ -83,6 +83,8 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCo
   mOutstandingPackets.push_back(std::make_pair(packet, std::move(cb)));
   mNumOutstandingPackets++;
   mNumOutstandingBytes += packet->GetTotalPacketSize();
+  LOG(INFO) << "Pushing Outstanding packets: " << mOutstandingPackets.size() << " total bytes: "
+            << mNumOutstandingBytes;
 
   if (mOnConnectionBufferChange) {
     mOnConnectionBufferChange(this);
@@ -162,6 +164,8 @@ void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten
         mSentPackets.push_back(pr);
         mOutstandingPackets.pop_front();
         mNumOutstandingPackets--;
+        LOG(INFO) << "Poping Outstanding packets: " << mOutstandingPackets.size()
+                  << " total bytes: " << mNumOutstandingBytes;
       } else {
         pr.first->position_ += mIOVector[i].iov_len;
       }
@@ -227,6 +231,7 @@ sp_int32 Connection::writeIntoEndPoint(sp_int32 fd) {
 }
 
 void Connection::handleDataWritten() {
+  LOG(INFO) << "Freeing SentPackets: " << mSentPackets.size();
   while (!mSentPackets.empty()) {
     auto pr = mSentPackets.front();
     if (pr.second) {
