@@ -56,11 +56,10 @@ class StMgrServer : public Server {
               heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client);
   virtual ~StMgrServer();
 
-  void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
-  void SendToInstance2(sp_int32 _task_id,
-                       sp_int32 _byte_size,
-                       const sp_string _type_name,
-                       const char* _message);
+  // We own the _message
+  void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
+  // We own the _message
+  void SendToInstance2(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
@@ -189,6 +188,8 @@ class StMgrServer : public Server {
   heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
 
   bool spouts_under_back_pressure_;
+
+  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };
 
 }  // namespace stmgr

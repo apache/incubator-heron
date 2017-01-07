@@ -137,8 +137,6 @@ void StMgr::Init() {
   is_acking_enabled =
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
 
-  tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
-
   stateful_helper_ = new StatefulHelper();
 }
 
@@ -157,7 +155,6 @@ StMgr::~StMgr() {
   delete metrics_manager_client_;
   delete checkpoint_manager_client_;
 
-  delete tuple_set_from_other_stmgr_;
   delete stateful_helper_;
 }
 
@@ -504,34 +501,37 @@ void StMgr::PopulateXorManagers(
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
 void StMgr::HandleStreamManagerData(const sp_string&,
-                                    const proto::stmgr::TupleStreamMessage2& _message) {
+                                    proto::stmgr::TupleStreamMessage2* _message) {
   // We received message from another stream manager
-  sp_int32 _task_id = _message.task_id();
+  sp_int32 _task_id = _message->task_id();
 
   // We have a shortcut for non-acking case
   if (!is_acking_enabled) {
-    server_->SendToInstance2(_task_id, _message.set().size(),
-                             heron_tuple_set_2_, _message.set().c_str());
+    server_->SendToInstance2(_task_id, _message);
   } else {
-    tuple_set_from_other_stmgr_->ParsePartialFromString(_message.set());
-
-    SendInBound(_task_id, tuple_set_from_other_stmgr_);
+    proto::system::HeronTupleSet2* tuple_set = NULL;
+    tuple_set = acquire(tuple_set);
+    tuple_set->ParsePartialFromString(_message->set());
+    SendInBound(_task_id, tuple_set);
+    release(_message);
   }
 }
 
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   if (_message->has_data()) {
-    server_->SendToInstance2(_task_id, *_message);
+    server_->SendToInstance2(_task_id, _message);
   }
   if (_message->has_control()) {
     // We got a bunch of acks/fails
     ProcessAcksAndFails(_task_id, _message->control());
+    release(_message);
   }
 }
 
 void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
-  current_control_tuple_set_.Clear();
+  proto::system::HeronTupleSet2* current_control_tuple_set = NULL;
+  current_control_tuple_set = acquire(current_control_tuple_set);
 
   // First go over emits. This makes sure that new emits makes
   // a tuples stay alive before we process its acks
@@ -551,7 +551,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       if (xor_mgrs_->anchor(_task_id, ack_tuple.roots(j).key(), ack_tuple.ackedtuple())) {
         // This tuple tree is all over
         proto::system::AckTuple* a;
-        a = current_control_tuple_set_.mutable_control()->add_acks();
+        a = current_control_tuple_set->mutable_control()->add_acks();
         proto::system::RootId* r = a->add_roots();
         r->set_key(ack_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -569,7 +569,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       if (xor_mgrs_->remove(_task_id, fail_tuple.roots(j).key())) {
         // This tuple tree is failed
         proto::system::AckTuple* f;
-        f = current_control_tuple_set_.mutable_control()->add_fails();
+        f = current_control_tuple_set->mutable_control()->add_fails();
         proto::system::RootId* r = f->add_roots();
         r->set_key(fail_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -579,8 +579,10 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
   }
 
   // Check if we need to send this out
-  if (current_control_tuple_set_.has_control()) {
-    server_->SendToInstance2(_task_id, current_control_tuple_set_);
+  if (current_control_tuple_set->has_control()) {
+    server_->SendToInstance2(_task_id, current_control_tuple_set);
+  } else {
+    release(current_control_tuple_set);
   }
 }
 
@@ -640,9 +642,8 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
     SendInBound(_task_id, _tuple);
   } else {
     clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
+    release(_tuple);
   }
-
-  tuple_cache_->release(_task_id, _tuple);
 }
 
 void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail) {
