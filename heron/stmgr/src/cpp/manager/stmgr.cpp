@@ -740,11 +740,11 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
 // We need to propagate it to all downstream tasks
 // We also need to send the checkpoint to ckptmgr
 void StMgr::HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
-		                                 proto::ckptmgr::InstanceStateCheckpoint* _message,
-		                                 proto::system::Instance* _instance) {
+                                 proto::ckptmgr::InstanceStateCheckpoint* _message,
+                                 proto::system::Instance* _instance) {
   std::set<sp_int32> downstream_receivers = stateful_helper_->get_downstreamers(_task_id);
   for (auto downstream_receiver : downstream_receivers) {
-    proto::ckptmgr::DownstreamStatefulCheckpoint* message = 
+    proto::ckptmgr::DownstreamStatefulCheckpoint* message =
       new proto::ckptmgr::DownstreamStatefulCheckpoint();
     message->set_origin_task_id(_task_id);
     message->set_destination_task_id(downstream_receiver);

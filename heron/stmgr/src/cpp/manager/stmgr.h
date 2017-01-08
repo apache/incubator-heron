@@ -74,7 +74,8 @@ class StMgr {
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::system::HeronTupleSet* _message);
   void HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
-		                            const sp_string& _checkpoint_id);
+                                  proto::ckptmgr::InstanceStateCheckpoint* _message,
+                                  proto::system::Instance* _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   // Send checkpoint message to this task_id
   void DrainDownstreamCheckpoint(sp_int32 _task_id,

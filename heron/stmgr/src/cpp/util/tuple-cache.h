@@ -39,6 +39,7 @@ class TupleCache {
   void RegisterDrainer(void (T::*method)(sp_int32, proto::system::HeronTupleSet2*), T* _t) {
     drainer_ = std::bind(method, _t, std::placeholders::_1, std::placeholders::_2);
   }
+  template <class T>
   void RegisterCheckpointDrainer(void (T::*method)(sp_int32,
              proto::ckptmgr::DownstreamStatefulCheckpoint*), T* _t) {
     checkpoint_drainer_ = std::bind(method, _t, std::placeholders::_1, std::placeholders::_2);
@@ -80,7 +81,7 @@ class TupleCache {
     void drain(sp_int32 _task_id,
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer,
                std::function<void(sp_int32,
-               proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer,
+               proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer);
 
     proto::system::HeronTupleSet2* acquire() {
       proto::system::HeronTupleSet2* retval = NULL;
@@ -94,7 +95,7 @@ class TupleCache {
     }
 
    private:
-    std::deque<proto::system::HeronTupleSet2*> tuples_;
+    std::deque<google::protobuf::Message*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;
     sp_int32 last_drained_count_;

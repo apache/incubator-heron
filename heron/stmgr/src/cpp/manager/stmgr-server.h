@@ -36,16 +36,11 @@ class AssignableMetric;
 }
 
 namespace heron {
-namespace ckptmgr {
-class CkptMgrClient;
-}
-}
-
-namespace heron {
 namespace stmgr {
 
 class StMgr;
 class StatefulHelper;
+class CheckpointGateway;
 
 class StMgrServer : public Server {
  public:
@@ -188,11 +183,8 @@ class StMgrServer : public Server {
   heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
-  // checkpoint manager client
-  heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
-
   // Stateful helper
-  StatefulHeler* stateful_helper_;
+  StatefulHelper* stateful_helper_;
 
   // Checkpoint Gateway
   CheckpointGateway* stateful_gateway_;

@@ -228,7 +228,7 @@ void StMgrClient::SendStopBackPressureMessage() {
 
 void StMgrClient::SendDownstreamStatefulCheckpoint(
                   proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
-  SendMessage(*message);
+  SendMessage(*_message);
   delete _message;
 }
 

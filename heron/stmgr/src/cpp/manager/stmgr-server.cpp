@@ -19,6 +19,7 @@
 #include <set>
 #include <vector>
 #include "manager/stateful-helper.h"
+#include "manager/checkpoint-gateway.h"
 #include "manager/stmgr.h"
 #include "proto/messages.h"
 #include "basics/basics.h"

@@ -77,7 +77,7 @@ void TupleCache::add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple
 
 void TupleCache::add_checkpoint_tuple(sp_int32 _task_id,
                             proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
-  if (total_size_ >= drain_threshold_bytes_) drain_impl(true);
+  if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
   return l->add_checkpoint_tuple(_message, &total_size_);
 }
@@ -107,7 +107,7 @@ void TupleCache::drain(EventLoop::Status) { drain_impl(); }
 void TupleCache::drain_impl() {
   std::map<sp_int32, TupleList*>::iterator iter;
   for (iter = cache_.begin(); iter != cache_.end(); ++iter) {
-    iter->second->drain(iter->first, drainer_);
+    iter->second->drain(iter->first, drainer_, checkpoint_drainer_);
   }
   total_size_ = 0;
 }
@@ -207,14 +207,15 @@ void TupleCache::TupleList::add_checkpoint_tuple(
     current_ = NULL;
     current_size_ = 0;
   }
-  sp_int64 tuple_size = _message.ByteSize();
+  sp_int64 tuple_size = _message->ByteSize();
   *_total_size += tuple_size;
   tuples_.push_front(_message);
 }
 
 void TupleCache::TupleList::drain(
     sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer,
-    std::function<void(sp_int32, proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer) {
+    std::function<void(sp_int32, proto::ckptmgr::DownstreamStatefulCheckpoint*)>
+    _checkpoint_drainer) {
   sp_int32 drained = 0;
   // we have to drain from back
   while (!tuples_.empty()) {
