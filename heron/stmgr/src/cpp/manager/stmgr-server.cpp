@@ -112,6 +112,9 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
+  stateful_gateway_ = new CheckpointGateway(, stateful_helper_,
+                          std::bind(&StMgrServer::DrainToInstance1, this, std::placeholders::_1),
+                          std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1));
 }
 
 StMgrServer::~StMgrServer() {
@@ -154,6 +157,8 @@ StMgrServer::~StMgrServer() {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     delete iter->second;
   }
+
+  delete stateful_gateway_;
 }
 
 void StMgrServer::GetInstanceInfo(std::vector<proto::system::Instance*>& _return) {
@@ -369,6 +374,11 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
 
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
                                   proto::stmgr::TupleStreamMessage2* _message) {
+  stateful_gateway_->SendToInstance(_task_id, _message);
+}
+
+void StMgrServer::DrainToInstance2(sp_int32 _task_id,
+                                  proto::stmgr::TupleStreamMessage2* _message) {
   bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
@@ -387,6 +397,11 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
 
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
+  stateful_gateway_->SendToInstance(_task_id, _message);
+}
+
+void StMgrServer::DrainToInstance1(sp_int32 _task_id,
+                                   proto::system::HeronTupleSet2* _message) {
   bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
@@ -655,6 +670,7 @@ void StMgrServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
 void StMgrServer::HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
                                          const sp_string& _checkpoint_id) {
   // So received a checkpoint marker from an upstream task
+  stateful_gateway_->HandleUpstreamMarker(_src_task_id, _destination_task_id, _checkpoint_id);
 }
 }  // namespace stmgr
 }  // namespace heron

@@ -255,7 +255,7 @@ void StMgr::CreateTupleCache() {
   tuple_cache_ = new TupleCache(eventLoop_, drain_threshold_bytes_);
 
   tuple_cache_->RegisterDrainer(&StMgr::DrainInstanceData, this);
-  tuple_cache_->RegisterCheckpointDrainer(&StMgr::SendDownstreamCheckpoint, this);
+  tuple_cache_->RegisterCheckpointDrainer(&StMgr::DrainDownstreamCheckpoint, this);
 }
 
 void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation) {
@@ -760,8 +760,8 @@ void StMgr::HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
 }
 
 // Send checkpoint message to this task_id
-void StMgr::SendDownstreamCheckpoint(sp_int32 _task_id,
-                                     proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+void StMgr::DrainDownstreamCheckpoint(sp_int32 _task_id,
+                                      proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
   sp_string stmgr = task_id_to_stmgr_[_task_id];
   if (stmgr == stmgr_id_) {
     HandleDownStreamStatefulCheckpoint(_message);

@@ -76,6 +76,10 @@ class StMgr {
   void HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
 		                            const sp_string& _checkpoint_id);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
+  // Send checkpoint message to this task_id
+  void DrainDownstreamCheckpoint(sp_int32 _task_id,
+                                proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
   // Forward the call to the StmgrServer
@@ -93,10 +97,6 @@ class StMgr {
 
   // Send InitiateStatefulCheckpoint to local spouts
   void InitiateStatefulCheckpoint(sp_string checkpoint_tag);
-
-  // Send checkpoint message to this task_id
-  void SendDownstreamCheckpoint(sp_int32 _task_id,
-                                proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
   // Handle checkpoint message coming from upstream to _task_id
   void HandleDownStreamStatefulCheckpoint(
