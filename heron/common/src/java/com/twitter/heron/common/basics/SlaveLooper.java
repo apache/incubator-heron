@@ -78,7 +78,7 @@ public class SlaveLooper extends WakeableLooper {
     private Object proceedLock;
     private volatile boolean isToProceed;
 
-    // Is anyone waiting on proceedLock
+    // Are we doing a wait() on proceedLock.
     private volatile boolean isWaiting;
 
     RunnableLock() {
