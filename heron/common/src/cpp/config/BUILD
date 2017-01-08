@@ -33,6 +33,8 @@ cc_library(
         "topology-config-vars.h",
     ],
     hdrs = [ 
+        "config-map.h",
+        "parameters.h",
         "metrics-sinks-reader.h",
         "yaml-file-reader.h",
     ],
