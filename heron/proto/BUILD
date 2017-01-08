@@ -230,6 +230,9 @@ cc_library(
         "topology.pb.h",
         "tuple.pb.h",
     ],
+    includes = [
+      ".",
+    ],
     deps = [
         ":proto_metrics_cc",
         ":proto_stmgr_cc",

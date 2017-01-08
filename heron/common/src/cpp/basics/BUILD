@@ -39,10 +39,8 @@ cc_library(
     hdrs = [ 
         "basics.h",
     ],
-    copts = [
-        "-Ithird_party",
-        "-Iheron/common/src/cpp",
-        "-I.",
+    includes = [
+        "..",
     ],
     deps = [
         "//config:config-cxx",
