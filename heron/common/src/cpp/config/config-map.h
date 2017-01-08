@@ -15,7 +15,7 @@
 #ifndef CONFIG_MAP_H
 #define CONFIG_MAP_H
 
-#include "config/parameters.h"
+#include "basics/basics.h"
 
 namespace heron {
 namespace config {
@@ -23,28 +23,28 @@ namespace config {
 /**
  * Config is a container for key, value map 
  */
-class Config : public Parameters {
+class Config : public heron::common::Parameters {
  public:
   Config() { }
   virtual ~Config() { }
 
-  Config(const Config& _config) : Parameters(_config) {
+  Config(const Config& _config) : heron::common::Parameters(_config) {
   }
 
   Config& operator = (const Config& _config) {
-    Parameters::operator = (_config);
+    heron::common::Parameters::operator = (_config);
     return *this;
   }
 
-  class Builder : public Parameters::Builder {
+  class Builder : public heron::common::Parameters::Builder {
    public:
     Builder() { }
 
-    Builder(const Builder& _builder) : Parameters::Builder(_builder) {
+    Builder(const Builder& _builder) : heron::common::Parameters::Builder(_builder) {
     }
 
     Builder& operator = (const Builder& _builder) {
-      Parameters::Builder::operator = (_builder);
+      heron::common::Parameters::Builder::operator = (_builder);
       return *this;
     }
 
@@ -53,7 +53,7 @@ class Config : public Parameters {
     }
   };
 
-  explicit Config(const Builder& builder) : Parameters(builder) {
+  explicit Config(const Builder& builder) : heron::common::Parameters(builder) {
   }
 };
 

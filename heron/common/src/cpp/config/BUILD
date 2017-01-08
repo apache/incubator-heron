@@ -34,7 +34,6 @@ cc_library(
     ],
     hdrs = [ 
         "config-map.h",
-        "parameters.h",
         "metrics-sinks-reader.h",
         "yaml-file-reader.h",
     ],

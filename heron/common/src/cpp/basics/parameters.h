@@ -21,7 +21,7 @@
 #include <string>
 
 namespace heron {
-namespace config {
+namespace common {
 
 /**
  * Parameters is a container if you want to pass several parameters to a 
@@ -206,7 +206,7 @@ class Parameters {
   std::unordered_map<std::string, std::string> map_;
 };
 
-}  // namespace config
+}  // namespace common
 }  // namespace heron
 
 #endif
