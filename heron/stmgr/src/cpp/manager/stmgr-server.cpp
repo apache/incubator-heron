@@ -27,6 +27,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 #include "config/helper.h"
+#include "config/heron-internals-config-reader.h"
 #include "metrics/metrics.h"
 
 namespace heron {
@@ -113,9 +114,12 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
-  stateful_gateway_ = new CheckpointGateway(, stateful_helper_,
-                          std::bind(&StMgrServer::DrainToInstance1, this, std::placeholders::_1),
-                          std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1));
+  sp_uint64 drain_threshold_bytes =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCheckpointDrainSizeMb() *
+    1024 * 1024;
+  stateful_gateway_ = new CheckpointGateway(drain_threshold_bytes, stateful_helper_,
+    std::bind(&StMgrServer::DrainToInstance1, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 StMgrServer::~StMgrServer() {

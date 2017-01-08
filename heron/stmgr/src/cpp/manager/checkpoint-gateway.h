@@ -35,8 +35,8 @@ class CheckpointGateway {
  public:
   explicit CheckpointGateway(sp_uint64 _drain_threshold,
                     StatefulHelper* _stateful_helper,
-                    std::function<void(proto::system::HeronTupleSet2*)> drainer1,
-                    std::function<void(proto::stmgr::TupleStreamMessage2*)> drainer2);
+                    std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1,
+                    std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> drainer2);
   virtual ~CheckpointGateway();
   void SendToInstance(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void SendToInstance(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
@@ -72,8 +72,8 @@ class CheckpointGateway {
   sp_uint64 current_size_;
   StatefulHelper* stateful_helper_;
   std::map<sp_int32, CheckpointInfo*> pending_tuples_;
-  std::function<void(proto::system::HeronTupleSet2*)> drainer1_;
-  std::function<void(proto::stmgr::TupleStreamMessage2*)> drainer2_;
+  std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1_;
+  std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> drainer2_;
 };
 
 }  // namespace stmgr

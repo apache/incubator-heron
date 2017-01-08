@@ -17,7 +17,7 @@
 #include "manager/checkpoint-gateway.h"
 #include <functional>
 #include <iostream>
-#include <list>
+#include <deque>
 #include <map>
 #include <set>
 #include <vector>
@@ -32,9 +32,9 @@ namespace heron {
 namespace stmgr {
 
 CheckpointGateway::CheckpointGateway(sp_uint64 _drain_threshold,
-                                     StatefulHelper* _stateful_helper,
-                                     std::function<void(proto::system::HeronTupleSet2*)> _drainer1,
-                                     std::function<void(proto::stmgr::TupleStreamMessage2*)> _drainer2) {
+             StatefulHelper* _stateful_helper,
+             std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer1,
+             std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> _drainer2) {
   drain_threshold_ = _drain_threshold;
   current_size_ = 0;
   stateful_helper_ = _stateful_helper;
@@ -59,7 +59,7 @@ void CheckpointGateway::SendToInstance(sp_int32 _task_id,
   if (!_message) {
     current_size_ += size;
   } else {
-    drainer1_(_message);
+    drainer1_(_task_id, _message);
   }
 }
 
@@ -74,7 +74,7 @@ void CheckpointGateway::SendToInstance(sp_int32 _task_id,
   if (!_message) {
     current_size_ += size;
   } else {
-    drainer2_(_message);
+    drainer2_(_task_id, _message);
   }
 }
 
@@ -85,9 +85,9 @@ void CheckpointGateway::HandleUpstreamMarker(sp_int32 _src_task_id, sp_int32 _de
   std::deque<Tuple> tuples = info->HandleUpstreamMarker(_src_task_id, _checkpoint_id, &size);
   for (auto tupl : tuples) {
     if (tupl.first) {
-      drainer1_(tupl.first);
+      drainer1_(_destination_task_id, tupl.first);
     } else {
-      drainer2_(tupl.second);
+      drainer2_(_destination_task_id, tupl.second);
     }
   }
   current_size_ -= size;
@@ -98,9 +98,9 @@ void CheckpointGateway::ForceDrain() {
     std::deque<Tuple> tuples = kv.second->ForceDrain();
     for (auto tupl : tuples) {
       if (tupl.first) {
-        drainer1_(tupl.first);
+        drainer1_(kv.first, tupl.first);
       } else {
-        drainer2_(tupl.second);
+        drainer2_(kv.first, tupl.second);
       }
     }
   }
@@ -179,7 +179,7 @@ CheckpointGateway::CheckpointInfo::HandleUpstreamMarker(sp_int32 _src_task_id,
   }
 }
 
-std::deque<CheckpointGateway::Tuple> 
+std::deque<CheckpointGateway::Tuple>
 CheckpointGateway::CheckpointInfo::ForceDrain() {
   checkpoint_id_ = "";
   current_size_ = 0;
