@@ -225,8 +225,8 @@ public class BoltInstance implements IInstance {
     while (!inQueue.isEmpty()) {
       Message msg = inQueue.poll();
 
-      if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
-        persistState(((CheckpointManager.InstanceStateCheckpoint) msg).getCheckpointId());
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        persistState(((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId());
       }
 
       if (msg instanceof HeronTuples.HeronTupleSet) {

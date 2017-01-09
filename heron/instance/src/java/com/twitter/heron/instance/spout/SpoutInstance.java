@@ -400,8 +400,8 @@ public class SpoutInstance implements IInstance {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
-        if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
-          persistState(((CheckpointManager.InstanceStateCheckpoint) msg).getCheckpointId());
+        if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+          persistState(((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId());
         }
       }
 

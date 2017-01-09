@@ -111,7 +111,7 @@ public class StreamManagerClient extends HeronClient {
     registerOnMessage(HeronTuples.HeronTupleSet2.newBuilder());
 
     // Following messages are for stateful processing
-    registerOnMessage(CheckpointManager.InstanceStateCheckpoint.newBuilder());
+    registerOnMessage(CheckpointManager.InitiateStatefulCheckpoint.newBuilder());
   }
 
 
@@ -193,8 +193,8 @@ public class StreamManagerClient extends HeronClient {
       handleNewTuples((StreamManager.TupleMessage) message);
     } else if (message instanceof HeronTuples.HeronTupleSet2) {
       handleNewTuples2((HeronTuples.HeronTupleSet2) message);
-    } else if (message instanceof CheckpointManager.InstanceStateCheckpoint) {
-      handleInstanceStateCheckpoint((CheckpointManager.InstanceStateCheckpoint) message);
+    } else if (message instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+      handleCheckpointRequest((CheckpointManager.InitiateStatefulCheckpoint) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -258,12 +258,12 @@ public class StreamManagerClient extends HeronClient {
     }
   }
 
-  private void handleInstanceStateCheckpoint(
-      CheckpointManager.InstanceStateCheckpoint checkpoint) {
+  private void handleCheckpointRequest(
+      CheckpointManager.InitiateStatefulCheckpoint checkpointRequest) {
     // We just simply put the CheckpointManager.InstanceStateCheckpoint into in stream queue
     // to keep the order
-    LOG.info("Handling instance checkpoint request: " + checkpoint);
-    inStreamQueue.offer(checkpoint);
+    LOG.info("Handling instance checkpoint request: " + checkpointRequest);
+    inStreamQueue.offer(checkpointRequest);
     LOG.info("Pushed to the instance");
   }
 
