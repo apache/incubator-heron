@@ -226,16 +226,10 @@ void StMgrClient::SendStopBackPressureMessage() {
   release(message);
 }
 
-void StMgrClient::SendDownstreamStatefulCheckpoint(sp_int32 _origin_task_id,
-                                                   sp_int32 _destination_task_id,
-                                                   const sp_string& _checkpoint_id) {
-  proto::ckptmgr::DownstreamStatefulCheckpoint* message = nullptr;
-  message = acquire(message);
-  message->set_origin_task_id(_origin_task_id);
-  message->set_destination_task_id(_destination_task_id);
-  message->set_checkpoint_id(_checkpoint_id);
-  SendMessage(*message);
-  release(message);
+void StMgrClient::SendDownstreamStatefulCheckpoint(
+                  proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  SendMessage(*_message);
+  delete _message;
 }
 
 }  // namespace stmgr

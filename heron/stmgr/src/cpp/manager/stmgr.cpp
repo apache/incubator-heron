@@ -110,8 +110,12 @@ void StMgr::Init() {
   is_stateful_ =
     heron::config::TopologyConfigHelper::GetStatefulCheckpointInterval(*hydrated_topology_) > 0;
 
+  // Start the stateful helper.
+  stateful_helper_ = new StatefulHelper();
+
   // Create and start StmgrServer
   StartStmgrServer();
+
   // Create and Register Tuple cache
   CreateTupleCache();
 
@@ -136,8 +140,6 @@ void StMgr::Init() {
 
   is_acking_enabled =
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
-
-  stateful_helper_ = new StatefulHelper();
 }
 
 StMgr::~StMgr() {
@@ -204,7 +206,7 @@ void StMgr::StartStmgrServer() {
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
-                            this, metrics_manager_client_, checkpoint_manager_client_);
+                            this, metrics_manager_client_, stateful_helper_);
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
@@ -253,6 +255,7 @@ void StMgr::CreateTupleCache() {
   tuple_cache_ = new TupleCache(eventLoop_, drain_threshold_bytes_);
 
   tuple_cache_->RegisterDrainer(&StMgr::DrainInstanceData, this);
+  tuple_cache_->RegisterCheckpointDrainer(&StMgr::DrainDownstreamCheckpoint, this);
 }
 
 void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation) {
@@ -733,22 +736,46 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
   server_->InitiateStatefulCheckpoint(_checkpoint_tag);
 }
 
-// Send checkpoint message to downstream components of this task_id
-void StMgr::SendDownstreamCheckpoint(sp_int32 _task_id, const sp_string& _checkpoint_id) {
-  std::set<sp_int32> downstream_tasks = stateful_helper_->get_receivers(_task_id);
-  for (auto downstream_task : downstream_tasks) {
-    sp_string stmgr = task_id_to_stmgr_[downstream_task];
-    if (stmgr == stmgr_id_) {
-      HandleDownStreamStatefulCheckpoint(_task_id, downstream_task, _checkpoint_id);
-    } else {
-      clientmgr_->SendDownstreamStatefulCheckpoint(stmgr, _task_id,
-                                                   downstream_task, _checkpoint_id);
-    }
+// We just recieved a InstanceStateCheckpoint message from one of our instances
+// We need to propagate it to all downstream tasks
+// We also need to send the checkpoint to ckptmgr
+void StMgr::HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
+                                 proto::ckptmgr::InstanceStateCheckpoint* _message,
+                                 proto::system::Instance* _instance) {
+  std::set<sp_int32> downstream_receivers = stateful_helper_->get_downstreamers(_task_id);
+  for (auto downstream_receiver : downstream_receivers) {
+    proto::ckptmgr::DownstreamStatefulCheckpoint* message =
+      new proto::ckptmgr::DownstreamStatefulCheckpoint();
+    message->set_origin_task_id(_task_id);
+    message->set_destination_task_id(downstream_receiver);
+    message->set_checkpoint_id(_message->checkpoint_id());
+    tuple_cache_->add_checkpoint_tuple(downstream_receiver, message);
+  }
+
+  // save the checkpoint
+  proto::ckptmgr::SaveStateCheckpoint* message = new proto::ckptmgr::SaveStateCheckpoint();
+  message->mutable_instance()->CopyFrom(*_instance);
+  message->mutable_checkpoint()->CopyFrom(*_message);
+  checkpoint_manager_client_->SaveStateCheckpoint(message);
+}
+
+// Send checkpoint message to this task_id
+void StMgr::DrainDownstreamCheckpoint(sp_int32 _task_id,
+                                      proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  sp_string stmgr = task_id_to_stmgr_[_task_id];
+  if (stmgr == stmgr_id_) {
+    HandleDownStreamStatefulCheckpoint(_message);
+    delete _message;
+  } else {
+    clientmgr_->SendDownstreamStatefulCheckpoint(stmgr, _message);
   }
 }
 
-void StMgr::HandleDownStreamStatefulCheckpoint(sp_int32, sp_int32,
-                                               const sp_string&) {
+void StMgr::HandleDownStreamStatefulCheckpoint(
+            proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  server_->HandleCheckpointMarker(_message->origin_task_id(),
+                                  _message->destination_task_id(),
+                                  _message->checkpoint_id());
 }
 
 }  // namespace stmgr

@@ -32,13 +32,6 @@ class MetricsMgrSt;
 class MultiCountMetric;
 class TimeSpentMetric;
 class AssignableMetric;
-class CheckpointMgrClient;
-}
-}
-
-namespace heron {
-namespace ckptmgr {
-class CkptMgrClient;
 }
 }
 
@@ -46,6 +39,8 @@ namespace heron {
 namespace stmgr {
 
 class StMgr;
+class StatefulHelper;
+class CheckpointGateway;
 
 class StMgrServer : public Server {
  public:
@@ -53,13 +48,15 @@ class StMgrServer : public Server {
               const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
               heron::common::MetricsMgrSt* _metrics_manager_client,
-              heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client);
+              StatefulHelper* _stateful_helper);
   virtual ~StMgrServer();
 
   // We own the _message
   void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   // We own the _message
   void SendToInstance2(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
+  void HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
+                              const sp_string& _checkpoint_id);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
@@ -84,6 +81,8 @@ class StMgrServer : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
  private:
+  void DrainToInstance1(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
+  void DrainToInstance2(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
@@ -184,8 +183,11 @@ class StMgrServer : public Server {
   heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
-  // checkpoint manager client
-  heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
+  // Stateful helper
+  StatefulHelper* stateful_helper_;
+
+  // Checkpoint Gateway
+  CheckpointGateway* stateful_gateway_;
 
   bool spouts_under_back_pressure_;
 

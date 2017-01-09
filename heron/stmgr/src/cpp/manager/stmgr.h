@@ -73,7 +73,14 @@ class StMgr {
                                proto::stmgr::TupleStreamMessage2* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::system::HeronTupleSet* _message);
+  void HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
+                                  proto::ckptmgr::InstanceStateCheckpoint* _message,
+                                  proto::system::Instance* _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
+  // Send checkpoint message to this task_id
+  void DrainDownstreamCheckpoint(sp_int32 _task_id,
+                                proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
   // Forward the call to the StmgrServer
@@ -92,14 +99,9 @@ class StMgr {
   // Send InitiateStatefulCheckpoint to local spouts
   void InitiateStatefulCheckpoint(sp_string checkpoint_tag);
 
-  // Send checkpoint message to downstream components
-  // for this task_id
-  void SendDownstreamCheckpoint(sp_int32 _task_id, const sp_string& _checkpoint_id);
-
   // Handle checkpoint message coming from upstream to _task_id
-  void HandleDownStreamStatefulCheckpoint(sp_int32 _origin_task_id,
-                                          sp_int32 _destination_task_id,
-                                          const sp_string& _checkpoint_id);
+  void HandleDownStreamStatefulCheckpoint(
+                                proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
