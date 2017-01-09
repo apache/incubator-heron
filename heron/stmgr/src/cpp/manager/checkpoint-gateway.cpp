@@ -80,6 +80,8 @@ void CheckpointGateway::SendToInstance(sp_int32 _task_id,
 
 void CheckpointGateway::HandleUpstreamMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
                                              const sp_string& _checkpoint_id) {
+  LOG(INFO) << "Got checkpoint marker for triplet "
+            << _checkpoint_id << " " << _src_task_id << " " << _destination_task_id;
   CheckpointInfo* info = get_info(_destination_task_id);
   sp_uint64 size = 0;
   std::deque<Tuple> tuples = info->HandleUpstreamMarker(_src_task_id, _checkpoint_id, &size);
