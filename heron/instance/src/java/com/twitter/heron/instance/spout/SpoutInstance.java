@@ -399,10 +399,9 @@ public class SpoutInstance implements IInstance {
     while (!inQueue.isEmpty()) {
       Message msg = inQueue.poll();
 
-      if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
-        if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
-          persistState(((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId());
-        }
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        LOG.info("Persisting state for checkpoint.");
+        persistState(((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId());
       }
 
       if (msg instanceof HeronTuples.HeronTupleSet) {
