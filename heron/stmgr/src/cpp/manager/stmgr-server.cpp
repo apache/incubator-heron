@@ -637,6 +637,10 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
 void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (iter->second->is_local_spout() && iter->second->conn_) {
+      LOG(INFO) << "Propagating Initiate Stateful Checkpoint for "
+                << _checkpoint_tag << " to local spout "
+                << iter->second->instance_->component_name()
+                << " with task_id " << iter->second->instance_->task_id();
       proto::ckptmgr::InitiateStatefulCheckpoint message;
       message.set_checkpoint_id(_checkpoint_tag);
       SendMessage(iter->second->conn_, message);
