@@ -18,20 +18,19 @@
 #include <vector>
 #include "gtest/gtest.h"
 #include "basics/basics.h"
-#include "config/parameters.h"
 
 TEST(ParamsTest, builder) {
-  heron::config::Parameters::Builder builder;
+  heron::common::Parameters::Builder builder;
   builder.putstr("x", "y");
 
-  heron::config::Parameters params = builder.build();
+  heron::common::Parameters params = builder.build();
   EXPECT_EQ(params.getstr("x"), "y");
 }
 
 TEST(ParamsTest, boolean) {
   bool a = true;
   bool b = false;
-  auto params = heron::config::Parameters::Builder()
+  auto params = heron::common::Parameters::Builder()
       .putbool("a", a)
       .putbool("b", b)
       .build();
@@ -41,25 +40,25 @@ TEST(ParamsTest, boolean) {
 
 TEST(ParamsTest, integer64) {
   int64_t a = 123456789012345;
-  auto params = heron::config::Parameters::Builder().putint64("a", a).build();
+  auto params = heron::common::Parameters::Builder().putint64("a", a).build();
   EXPECT_EQ(params.getint64("a"), a);
 }
 
 TEST(ParamsTest, integer32) {
   int32_t a = 1234567890;
-  auto params = heron::config::Parameters::Builder().putint32("a", a).build();
+  auto params = heron::common::Parameters::Builder().putint32("a", a).build();
   EXPECT_EQ(params.getint32("a"), a);
 }
 
 TEST(ParamsTest, doublevalue) {
   double a = 1234567890.123450;
-  auto params = heron::config::Parameters::Builder().putdouble("a", a).build();
+  auto params = heron::common::Parameters::Builder().putdouble("a", a).build();
   EXPECT_DOUBLE_EQ(params.getdouble("a"), a);
 }
 
 TEST(ParamsTest, pointer) {
   int32_t a = 34;
-  auto params = heron::config::Parameters::Builder().putptr("a", &a).build();
+  auto params = heron::common::Parameters::Builder().putptr("a", &a).build();
 
   EXPECT_EQ(params.getptr("a"), &a);
 
