@@ -137,11 +137,11 @@ public class BoltInstance implements IInstance {
     if (bolt instanceof IStatefulComponent) {
       LOG.info("Starting checkpoint");
       ((IStatefulComponent) bolt).preSave(checkpointId);
-
-      collector.sendOutState(instanceState, checkpointId);
     } else {
-      LOG.severe("Non stateful component gets a checkpoint request");
+      LOG.info("Non stateful component gets a checkpoint request. Send empty state");
     }
+
+    collector.sendOutState(instanceState, checkpointId);
   }
 
   @Override

@@ -262,7 +262,9 @@ public class StreamManagerClient extends HeronClient {
       CheckpointManager.InstanceStateCheckpoint checkpoint) {
     // We just simply put the CheckpointManager.InstanceStateCheckpoint into in stream queue
     // to keep the order
+    LOG.info("Handling instance checkpoint request: " + checkpoint);
     inStreamQueue.offer(checkpoint);
+    LOG.info("Pushed to the instance");
   }
 
   private void handleRegisterResponse(StreamManager.RegisterInstanceResponse response) {
