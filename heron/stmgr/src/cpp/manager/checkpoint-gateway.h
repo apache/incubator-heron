@@ -20,6 +20,7 @@
 #include <map>
 #include <set>
 #include <deque>
+#include <tuple>
 #include <utility>
 #include <typeinfo>   // operator typeid
 #include "proto/messages.h"
@@ -34,9 +35,10 @@ class StatefulHelper;
 class CheckpointGateway {
  public:
   explicit CheckpointGateway(sp_uint64 _drain_threshold,
-                    StatefulHelper* _stateful_helper,
-                    std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1,
-                    std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> drainer2);
+        StatefulHelper* _stateful_helper,
+        std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1,
+        std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> drainer2,
+        std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> drainer3);
   virtual ~CheckpointGateway();
   void SendToInstance(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void SendToInstance(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
@@ -44,7 +46,9 @@ class CheckpointGateway {
                             const sp_string& _checkpoint_id);
 
  private:
-  typedef std::pair<proto::system::HeronTupleSet2*, proto::stmgr::TupleStreamMessage2*>
+  typedef std::tuple<proto::system::HeronTupleSet2*,
+                     proto::stmgr::TupleStreamMessage2*,
+                     proto::ckptmgr::InitiateStatefulCheckpoint*>
           Tuple;
   class CheckpointInfo {
    public:
@@ -66,6 +70,7 @@ class CheckpointGateway {
     sp_uint64 current_size_;
   };
   void ForceDrain();
+  void DrainTuple(sp_int32 _dest, Tuple& _tuple);
   CheckpointInfo* get_info(sp_int32 _task_id);
   // The maximum buffering that we can do before we discard the marker
   sp_uint64 drain_threshold_;
@@ -74,6 +79,7 @@ class CheckpointGateway {
   std::map<sp_int32, CheckpointInfo*> pending_tuples_;
   std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1_;
   std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> drainer2_;
+  std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> drainer3_;
 };
 
 }  // namespace stmgr

@@ -119,7 +119,8 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
     1024 * 1024;
   stateful_gateway_ = new CheckpointGateway(drain_threshold_bytes, stateful_helper_,
     std::bind(&StMgrServer::DrainToInstance1, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1, std::placeholders::_2));
+    std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&StMgrServer::DrainToInstance3, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 StMgrServer::~StMgrServer() {
@@ -431,6 +432,18 @@ void StMgrServer::DrainToInstance1(sp_int32 _task_id,
     SendMessage(iter->second->conn_, *_message);
   }
   release(_message);
+}
+
+void StMgrServer::DrainToInstance3(sp_int32 _task_id,
+                                   proto::ckptmgr::InitiateStatefulCheckpoint* _message) {
+  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
+               << std::endl;
+  } else {
+    SendMessage(iter->second->conn_, *_message);
+  }
+  delete _message;
 }
 
 void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
