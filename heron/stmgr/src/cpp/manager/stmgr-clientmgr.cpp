@@ -139,14 +139,10 @@ void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& 
 }
 
 void StMgrClientMgr::SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
-                                                      sp_int32 _origin_task_id,
-                                                      sp_int32 _destination_task_id,
-                                                      const sp_string& _checkpoint_id) {
+                           proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
   auto iter = clients_.find(_stmgr_id);
   CHECK(iter != clients_.end());
-  iter->second->SendDownstreamStatefulCheckpoint(_origin_task_id,
-                                                 _destination_task_id,
-                                                 _checkpoint_id);
+  iter->second->SendDownstreamStatefulCheckpoint(_message);
 }
 
 void StMgrClientMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {

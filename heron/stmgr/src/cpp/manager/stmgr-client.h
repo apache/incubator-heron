@@ -46,9 +46,7 @@ class StMgrClient : public Client {
   void SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
   void SendStartBackPressureMessage();
   void SendStopBackPressureMessage();
-  void SendDownstreamStatefulCheckpoint(sp_int32 _origin_task_id,
-                                        sp_int32 _destination_task_id,
-                                        const sp_string& _checkpoint_id);
+  void SendDownstreamStatefulCheckpoint(proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);

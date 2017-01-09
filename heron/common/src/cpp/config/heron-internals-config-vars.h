@@ -140,6 +140,9 @@ class HeronInternalsConfigVars {
   // The sized based threshold in MB for draining the tuple cache
   static const sp_string HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB;
 
+  // The sized based threshold in MB for draining the checkpoint buffering for stateful topologies
+  static const sp_string HERON_STREAMMGR_CHECKPOINT_DRAIN_SIZE_MB;
+
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
 
