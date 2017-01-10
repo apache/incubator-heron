@@ -176,4 +176,95 @@ public class Metric {
     sb.append(" $\n");
     return sb.toString();
   }
+
+  /**
+   * Return  past '_nbuckets' value for this metric.
+   *
+   * @param minutely boolean-true will return metrics series in details
+   * @param startTime in seconds
+   * @param endTime in seconds
+   * @return individual metric
+   */
+  public void GetMetrics(boolean minutely, long startTime, long endTime,
+                         MetricsCacheQueryUtils.IndividualMetric responseBuilder) {
+
+    responseBuilder.name = name;
+
+    if (minutely) {
+      // we need minutely data
+      for (TimeBucket bucket : data) {
+        // Does this time bucket have overlap with needed range
+        if (bucket.overlaps(startTime, endTime)) {
+          MetricsCacheQueryUtils.IntervalValue valBuilder =
+              new MetricsCacheQueryUtils.IntervalValue();
+
+          MetricsCacheQueryUtils.MetricInterval mi = new MetricsCacheQueryUtils.MetricInterval();
+          mi.start = bucket.startTime;
+          mi.end = bucket.endTime;
+          valBuilder.interval = mi;
+
+          double result = bucket.aggregate();
+          if (metricType == MetricAggregationType.SUM) {
+            valBuilder.value = String.valueOf(result);
+          } else if (metricType == MetricAggregationType.AVG) {
+            double avg = result / bucket.count();
+            valBuilder.value = String.valueOf(avg);
+          } else if (metricType == MetricAggregationType.LAST) {
+            valBuilder.value = String.valueOf(result);
+          } else {
+            LOG.log(Level.SEVERE, "Unknown metric type " + metricType);
+          }
+
+          responseBuilder.intervalValues.add(valBuilder);
+        }
+        // The timebuckets are reverse chronologically arranged
+        if (startTime > bucket.endTime) {
+          break;
+        }
+      }
+    } else {
+      // We don't need minutely data
+      double result = 0;
+      if (startTime <= 0) {
+        // We want cumulative metrics
+        if (metricType == MetricAggregationType.SUM) {
+          result = allTimeCumulative;
+        } else if (metricType == MetricAggregationType.AVG) {
+          result = allTimeCumulative / allTimeNitems;
+        } else if (metricType == MetricAggregationType.LAST) {
+          result = allTimeCumulative;
+        } else {
+          LOG.log(Level.SEVERE, "Unknown metric type " + metricType);
+        }
+      } else {
+        // we want only for a specific interval
+        long totalItems = 0;
+        double totalCount = 0;
+        for (TimeBucket bucket : data) {
+          // Does this time bucket have overlap with needed range
+          if (bucket.overlaps(startTime, endTime)) {
+            totalCount += bucket.aggregate();
+            totalItems += bucket.count();
+            if (metricType == MetricAggregationType.LAST) {
+              break;
+            }
+          }
+          // The timebuckets are reverse chronologically arranged
+          if (startTime > bucket.endTime) {
+            break;
+          }
+        }
+        if (metricType == MetricAggregationType.SUM) {
+          result = totalCount;
+        } else if (metricType == MetricAggregationType.AVG) {
+          result = totalCount / totalItems;
+        } else if (metricType == MetricAggregationType.LAST) {
+          result = totalCount;
+        } else {
+          LOG.log(Level.SEVERE, "Unknown metric type " + metricType);
+        }
+      }
+      responseBuilder.value = String.valueOf(result);
+    }
+  }
 }
