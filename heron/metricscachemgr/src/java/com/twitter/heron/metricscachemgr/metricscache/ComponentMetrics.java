@@ -116,7 +116,8 @@ public class ComponentMetrics {
     return sb.toString();
   }
 
-  public void GetMetrics(MetricsCacheQueryUtils.MetricCacheRequest request, long startTime, long endTime,
+  public void GetMetrics(MetricsCacheQueryUtils.MetricCacheRequest request,
+                         long startTime, long endTime,
                          MetricsCacheQueryUtils.MetricCacheResponse response) {
     if (request.instanceId.isEmpty()) {
       // This means that all instances need to be returned

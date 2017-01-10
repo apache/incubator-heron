@@ -94,7 +94,8 @@ public class InstanceMetrics {
     return sb.toString();
   }
 
-  public void GetMetrics(MetricsCacheQueryUtils.MetricCacheRequest request, long startTime, long endTime,
+  public void GetMetrics(MetricsCacheQueryUtils.MetricCacheRequest request,
+                         long startTime, long endTime,
                          MetricsCacheQueryUtils.MetricCacheResponse response) {
     MetricsCacheQueryUtils.TaskMetric tm =
         new MetricsCacheQueryUtils.TaskMetric();
@@ -110,5 +111,6 @@ public class InstanceMetrics {
     }
 
     response.metric.add(tm);
+    response.status.status = 1;
   }
 }

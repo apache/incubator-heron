@@ -183,7 +183,6 @@ public class Metric {
    * @param minutely boolean-true will return metrics series in details
    * @param startTime in seconds
    * @param endTime in seconds
-   * @return individual metric
    */
   public void GetMetrics(boolean minutely, long startTime, long endTime,
                          MetricsCacheQueryUtils.IndividualMetric responseBuilder) {

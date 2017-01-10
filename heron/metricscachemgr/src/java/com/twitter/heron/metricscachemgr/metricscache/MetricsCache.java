@@ -105,7 +105,7 @@ public class MetricsCache {
   // Returns a new response to fetch metrics. The request gets propagated to Component's and
   // Instance's get metrics. Doesn't own Response.
   // (huijun) this function is deprecated
-  public MetricResponse GetMetrics2(MetricRequest request) {
+  public MetricResponse GetMetrics(MetricRequest request) {
     MetricResponse.Builder responseBuilder = MetricResponse.newBuilder();
 
     if (!metricsComponent.containsKey(request.getComponentName())) {
@@ -166,10 +166,21 @@ public class MetricsCache {
    * @param request query in protobuf format, re-used TMaster definition
    * @return query result, re-used TMaster definition
    */
-  public MetricResponse GetMetrics(MetricRequest request) {
-    MetricsCacheQueryUtils.MetricCacheResponse response =
-        GetMetrics(MetricsCacheQueryUtils.Convert(request));
-    return MetricsCacheQueryUtils.Convert(response);
+  public MetricResponse GetMetrics2(MetricRequest request) {
+    if (!request.hasInterval() && !request.hasExplicitInterval()) {
+      MetricResponse.Builder responseBuilder = MetricResponse.newBuilder();
+      LOG.log(Level.SEVERE,
+          "GetMetrics request does not have either interval" + " nor explicit interval");
+      responseBuilder.setStatus(responseBuilder.getStatusBuilder()
+          .setStatus(Common.StatusCode.NOTOK)
+          .setMessage("No interval or explicit interval set")
+          .build());
+      return responseBuilder.build();
+    } else {
+      MetricsCacheQueryUtils.MetricCacheResponse response =
+          GetMetrics(MetricsCacheQueryUtils.Convert(request));
+      return MetricsCacheQueryUtils.Convert(response);
+    }
   }
 
   /**
@@ -182,8 +193,17 @@ public class MetricsCache {
       MetricsCacheQueryUtils.MetricCacheRequest request) {
     MetricsCacheQueryUtils.MetricCacheResponse response =
         new MetricsCacheQueryUtils.MetricCacheResponse();
-    metricsComponent.get(request.componentName)
-        .GetMetrics(request, request.interval.start, request.interval.end, response);
+    if (!metricsComponent.containsKey(request.componentName)) {
+      LOG.log(Level.WARNING,
+          "Metrics for component `" + request.componentName + "` are not available");
+      response.status.status = 2;
+      response.status.message =
+          "Metrics not available for component `" + request.componentName + "`";
+    } else {
+      LOG.info("query start " + request.interval.start + " end " + request.interval.end);
+      metricsComponent.get(request.componentName)
+          .GetMetrics(request, request.interval.start, request.interval.end, response);
+    }
     return response;
   }
 
