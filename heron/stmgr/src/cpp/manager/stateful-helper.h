@@ -17,7 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STATEFUL_HELPER_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STATEFUL_HELPER_H_
 
-#include <list>
+#include <ostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -50,7 +50,11 @@ class StatefulHelper {
   // from which this task should get the checkpoint marker message
   // before it can save its state
   std::map<sp_int32, std::set<sp_int32>> from_recv_list_;
+
+  friend std::ostream& operator<<(std::ostream& os, const StatefulHelper& obj);
 };
+
+std::ostream& operator<<(std::ostream& os, const StatefulHelper& obj);
 
 }  // namespace stmgr
 }  // namespace heron
