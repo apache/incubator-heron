@@ -119,7 +119,8 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
     1024 * 1024;
   stateful_gateway_ = new CheckpointGateway(drain_threshold_bytes, stateful_helper_,
     std::bind(&StMgrServer::DrainToInstance1, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1, std::placeholders::_2));
+    std::bind(&StMgrServer::DrainToInstance2, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&StMgrServer::DrainToInstance3, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 StMgrServer::~StMgrServer() {
@@ -433,6 +434,20 @@ void StMgrServer::DrainToInstance1(sp_int32 _task_id,
   release(_message);
 }
 
+void StMgrServer::DrainToInstance3(sp_int32 _task_id,
+                                   proto::ckptmgr::InitiateStatefulCheckpoint* _message) {
+  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
+               << std::endl;
+  } else {
+    LOG(INFO) << "Sending Initiate Checkpoint Message to local task "
+              << _task_id;
+    SendMessage(iter->second->conn_, *_message);
+  }
+  delete _message;
+}
+
 void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   // TODO(vikasr) We do not handle any changes to our local assignment
   ComputeLocalSpouts(_pplan);
@@ -637,6 +652,10 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
 void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (iter->second->is_local_spout() && iter->second->conn_) {
+      LOG(INFO) << "Propagating Initiate Stateful Checkpoint for "
+                << _checkpoint_tag << " to local spout "
+                << iter->second->instance_->info().component_name()
+                << " with task_id " << iter->second->instance_->info().task_id();
       proto::ckptmgr::InitiateStatefulCheckpoint message;
       message.set_checkpoint_id(_checkpoint_tag);
       SendMessage(iter->second->conn_, message);

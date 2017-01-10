@@ -742,8 +742,13 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
 void StMgr::HandleInstanceStateCheckpointMessage(sp_int32 _task_id,
                                  proto::ckptmgr::InstanceStateCheckpoint* _message,
                                  proto::system::Instance* _instance) {
+  LOG(INFO) << "Got a checkpoint state message from " << _task_id
+            << " for checkpoint " << _message->checkpoint_id();
   std::set<sp_int32> downstream_receivers = stateful_helper_->get_downstreamers(_task_id);
   for (auto downstream_receiver : downstream_receivers) {
+    LOG(INFO) << "Adding a DownstreamCheckpointMessage triplet "
+              << _message->checkpoint_id() << " "
+              << _task_id << " " << downstream_receiver;
     proto::ckptmgr::DownstreamStatefulCheckpoint* message =
       new proto::ckptmgr::DownstreamStatefulCheckpoint();
     message->set_origin_task_id(_task_id);

@@ -83,6 +83,7 @@ class StMgrServer : public Server {
  private:
   void DrainToInstance1(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void DrainToInstance2(sp_int32 _task_id, proto::stmgr::TupleStreamMessage2* _message);
+  void DrainToInstance3(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);

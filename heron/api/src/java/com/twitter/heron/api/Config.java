@@ -154,7 +154,7 @@ public class Config extends HashMap<String, Object> {
    * What's the checkpoint interval for stateful topologies in seconds
    */
   public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL =
-                             "topology.stateful.chekpoint.interval";
+                             "topology.stateful.checkpoint.interval";
   /**
    * What's the provider for state? i.e. one where state is stored
    */

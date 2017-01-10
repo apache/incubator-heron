@@ -32,6 +32,7 @@ CkptMgrServer::CkptMgrServer(EventLoop* eventloop, const NetworkOptions& _option
 
     // handlers
     InstallRequestHandler(&CkptMgrServer::HandleStMgrRegisterRequest);
+    InstallMessageHandler(&CkptMgrServer::HandleSaveStateCheckpoint);
 }
 
 CkptMgrServer::~CkptMgrServer() {

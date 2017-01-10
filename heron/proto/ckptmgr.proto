@@ -34,7 +34,7 @@ message InstanceStateCheckpoint {
 }
 
 // This is the message that the stmgr sends to its
-// local spouts to begin initiating checkpoint
+// local tasks to begin initiating checkpoint
 message InitiateStatefulCheckpoint {
   required string checkpoint_id = 1;
 }

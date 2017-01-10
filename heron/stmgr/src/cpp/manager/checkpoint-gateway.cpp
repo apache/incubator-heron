@@ -34,12 +34,14 @@ namespace stmgr {
 CheckpointGateway::CheckpointGateway(sp_uint64 _drain_threshold,
              StatefulHelper* _stateful_helper,
              std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer1,
-             std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> _drainer2) {
+             std::function<void(sp_int32, proto::stmgr::TupleStreamMessage2*)> _drainer2,
+             std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> _drainer3) {
   drain_threshold_ = _drain_threshold;
   current_size_ = 0;
   stateful_helper_ = _stateful_helper;
   drainer1_ = _drainer1;
   drainer2_ = _drainer2;
+  drainer3_ = _drainer3;
 }
 
 CheckpointGateway::~CheckpointGateway() {
@@ -80,28 +82,32 @@ void CheckpointGateway::SendToInstance(sp_int32 _task_id,
 
 void CheckpointGateway::HandleUpstreamMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
                                              const sp_string& _checkpoint_id) {
+  LOG(INFO) << "Got checkpoint marker for triplet "
+            << _checkpoint_id << " " << _src_task_id << " " << _destination_task_id;
   CheckpointInfo* info = get_info(_destination_task_id);
   sp_uint64 size = 0;
   std::deque<Tuple> tuples = info->HandleUpstreamMarker(_src_task_id, _checkpoint_id, &size);
   for (auto tupl : tuples) {
-    if (tupl.first) {
-      drainer1_(_destination_task_id, tupl.first);
-    } else {
-      drainer2_(_destination_task_id, tupl.second);
-    }
+    DrainTuple(_destination_task_id, tupl);
   }
   current_size_ -= size;
+}
+
+void CheckpointGateway::DrainTuple(sp_int32 _dest, Tuple& _tuple) {
+  if (std::get<0>(_tuple)) {
+    drainer1_(_dest, std::get<0>(_tuple));
+  } else if (std::get<1>(_tuple)) {
+    drainer2_(_dest, std::get<1>(_tuple));
+  } else {
+    drainer3_(_dest, std::get<2>(_tuple));
+  }
 }
 
 void CheckpointGateway::ForceDrain() {
   for (auto kv : pending_tuples_) {
     std::deque<Tuple> tuples = kv.second->ForceDrain();
     for (auto tupl : tuples) {
-      if (tupl.first) {
-        drainer1_(kv.first, tupl.first);
-      } else {
-        drainer2_(kv.first, tupl.second);
-      }
+      DrainTuple(kv.first, tupl);
     }
   }
   current_size_ = 0;
@@ -139,7 +145,8 @@ CheckpointGateway::CheckpointInfo::SendToInstance(proto::system::HeronTupleSet2*
   if (checkpoint_id_.empty()) {
     return _tuple;
   } else {
-    add(std::make_pair(_tuple, (proto::stmgr::TupleStreamMessage2*)NULL), _size);
+    add(std::make_tuple(_tuple, (proto::stmgr::TupleStreamMessage2*)NULL,
+                       (proto::ckptmgr::InitiateStatefulCheckpoint*)NULL), _size);
     return NULL;
   }
 }
@@ -150,7 +157,8 @@ CheckpointGateway::CheckpointInfo::SendToInstance(proto::stmgr::TupleStreamMessa
   if (checkpoint_id_.empty()) {
     return _tuple;
   } else {
-    add(std::make_pair((proto::system::HeronTupleSet2*)NULL, _tuple), _size);
+    add(std::make_tuple((proto::system::HeronTupleSet2*)NULL, _tuple,
+                       (proto::ckptmgr::InitiateStatefulCheckpoint*)NULL), _size);
     return NULL;
   }
 }
@@ -172,6 +180,12 @@ CheckpointGateway::CheckpointInfo::HandleUpstreamMarker(sp_int32 _src_task_id,
   if (pending_upstream_dependencies_.empty()) {
     LOG(INFO) << "All checkpoint markers received for checkpoint "
                  << _checkpoint_id;
+    // We need to add Initiate Checkpoint message
+    auto message = new proto::ckptmgr::InitiateStatefulCheckpoint();
+    message->set_checkpoint_id(_checkpoint_id);
+    add(std::make_tuple((proto::system::HeronTupleSet2*)NULL,
+                       (proto::stmgr::TupleStreamMessage2*)NULL, message),
+                       message->GetCachedSize());
     return ForceDrain();
   } else {
     std::deque<Tuple> dummy;

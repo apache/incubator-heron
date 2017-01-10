@@ -147,11 +147,11 @@ public class SpoutInstance implements IInstance {
     if (spout instanceof IStatefulComponent) {
       LOG.info("Starting checkpoint");
       ((IStatefulComponent) spout).preSave(checkpointId);
-
-      collector.sendOutState(instanceState, checkpointId);
     } else {
-      LOG.severe("Non stateful component gets a checkpoint request");
+      LOG.info("Non stateful component gets a checkpoint request. Send empty state");
     }
+
+    collector.sendOutState(instanceState, checkpointId);
   }
 
   @Override
@@ -232,14 +232,25 @@ public class SpoutInstance implements IInstance {
           spoutMetrics.updateOutQueueFullCount();
         }
 
-        if (ackEnabled) {
+        if (!streamInQueue.isEmpty()) {
           readTuplesAndExecute(streamInQueue);
-
-          // Update the pending-to-be-acked tuples counts
-          spoutMetrics.updatePendingTuplesCount(collector.numInFlight());
         } else {
-          doImmediateAcks();
+          if (ackEnabled) {
+            // Update the pending-to-be-acked tuples counts
+            spoutMetrics.updatePendingTuplesCount(collector.numInFlight());
+          } else {
+            doImmediateAcks();
+          }
         }
+
+//        if (ackEnabled) {
+//          readTuplesAndExecute(streamInQueue);
+//
+//          // Update the pending-to-be-acked tuples counts
+//          spoutMetrics.updatePendingTuplesCount(collector.numInFlight());
+//        } else {
+//          doImmediateAcks();
+//        }
 
         // If we have more work to do
         if (isContinueWork()) {
@@ -388,10 +399,9 @@ public class SpoutInstance implements IInstance {
     while (!inQueue.isEmpty()) {
       Message msg = inQueue.poll();
 
-      if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
-        if (msg instanceof CheckpointManager.InstanceStateCheckpoint) {
-          persistState(((CheckpointManager.InstanceStateCheckpoint) msg).getCheckpointId());
-        }
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        LOG.info("Persisting state for checkpoint.");
+        persistState(((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId());
       }
 
       if (msg instanceof HeronTuples.HeronTupleSet) {

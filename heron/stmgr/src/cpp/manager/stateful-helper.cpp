@@ -59,7 +59,7 @@ void StatefulHelper::Reconstruct(const proto::system::PhysicalPlan& _pplan) {
   for (size_t i = 0; i < _pplan.topology().bolts_size(); ++i) {
     std::set<sp_int32> bolt_tasks;
     config::PhysicalPlanHelper::GetComponentTasks(_pplan,
-                                _pplan.topology().spouts(i).comp().name(),
+                                _pplan.topology().bolts(i).comp().name(),
                                 bolt_tasks);
 
     for (auto input_stream : _pplan.topology().bolts(i).inputs()) {
