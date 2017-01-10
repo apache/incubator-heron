@@ -169,7 +169,16 @@ CheckpointGateway::CheckpointInfo::HandleUpstreamMarker(sp_int32 _src_task_id,
                                                         sp_uint64* _size) {
   if (_checkpoint_id == checkpoint_id_) {
     pending_upstream_dependencies_.erase(_src_task_id);
-  } else if (checkpoint_id_.empty() || _checkpoint_id > checkpoint_id_) {
+  } else if (checkpoint_id_.empty()) {
+    LOG(INFO) << "Seeing the checkpoint marker " << _checkpoint_id
+              << " for the first time";
+    checkpoint_id_ = _checkpoint_id;
+    pending_upstream_dependencies_.erase(_src_task_id);
+  } else if (_checkpoint_id > checkpoint_id_) {
+    LOG(INFO) << "Seeing the checkpoint marker " << _checkpoint_id
+              << " while we were already amidst " << checkpoint_id_
+              << " ..resetting";
+    checkpoint_id_ = _checkpoint_id;
     pending_upstream_dependencies_ = all_upstream_dependencies_;
     pending_upstream_dependencies_.erase(_src_task_id);
   } else {
