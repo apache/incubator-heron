@@ -68,6 +68,10 @@ public class SimpleMetricsQueryClient extends HeronClient {
 
     TopologyMaster.MetricsCacheLocation location =
         stateManager.getMetricsCacheLocation(null, args[0]).get();
+    if (!location.isInitialized()) {
+      System.out.println("MetricsCacheMgr is not ready");
+      return;
+    }
 
     NIOLooper looper = new NIOLooper();
     HeronClient client = new SimpleMetricsQueryClient(looper,
@@ -87,14 +91,19 @@ public class SimpleMetricsQueryClient extends HeronClient {
   @Override
   public void onConnect(StatusCode status) {
     System.out.println("onConnect");
-    Message request = TopologyMaster.MetricRequest.newBuilder()
-        .setComponentName(component)
+    if (status.equals(StatusCode.OK)) {
+      Message request = TopologyMaster.MetricRequest.newBuilder()
+          .setComponentName(component)
 //        .setMinutely(true)
-        .setInterval(-1)
-        .addAllMetric(Arrays.asList(metrcs))
-        .build();
-    Message.Builder responseBuilder = TopologyMaster.MetricResponse.newBuilder();
-    sendRequest(request, responseBuilder);
+          .setInterval(-1)
+          .addAllMetric(Arrays.asList(metrcs))
+          .build();
+      Message.Builder responseBuilder = TopologyMaster.MetricResponse.newBuilder();
+      sendRequest(request, responseBuilder);
+    } else {
+      System.out.println("StateMgr connection failed. Cannot locate the MetricsCacheMgr");
+      getNIOLooper().exitLoop();
+    }
   }
 
   @Override
