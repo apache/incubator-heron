@@ -43,10 +43,13 @@ public class SlaveLooper extends WakeableLooper {
         // or no wakeUp() is called during the thread's run, will the thread wait().
         if (nextTimeoutIntervalMs > 0) {
           try {
+            lock.isWaiting = true;
             // The wait will take the timeout in unit of milli-seconds
             lock.proceedLock.wait(nextTimeoutIntervalMs);
           } catch (InterruptedException e) {
             e.printStackTrace();
+          } finally {
+            lock.isWaiting = false;
           }
         } else {
           // break the loop if timeout happens
@@ -63,7 +66,9 @@ public class SlaveLooper extends WakeableLooper {
     if (!lock.isToProceed) {
       synchronized (lock.proceedLock) {
         lock.isToProceed = true;
-        lock.proceedLock.notify();
+        if (lock.isWaiting) {
+          lock.proceedLock.notify();
+        }
       }
     }
   }
@@ -73,9 +78,13 @@ public class SlaveLooper extends WakeableLooper {
     private Object proceedLock;
     private volatile boolean isToProceed;
 
+    // Are we doing a wait() on proceedLock.
+    private volatile boolean isWaiting;
+
     RunnableLock() {
       this.proceedLock = new Object();
       isToProceed = false;
+      isWaiting = false;
     }
   }
 }
