@@ -34,6 +34,8 @@ public class SubmitDryRunRender extends DryRunRender {
   }
 
   public String renderTable() {
+    return "";
+    /*
     Map<String, Resource> componentsResource =
         this.componentsResource(response.getPackingPlan());
     Map<String, Integer> componentsParallelism =
@@ -50,7 +52,7 @@ public class SubmitDryRunRender extends DryRunRender {
           componentName, String.valueOf(totalCpu), String.valueOf(totalDisk),
           String.valueOf(totalRam), String.valueOf(containerNum)));
     }
-    return createTable(rows);
+    return createTable(rows); */
   }
 
   public String renderRaw() {
@@ -63,16 +65,5 @@ public class SubmitDryRunRender extends DryRunRender {
     builder.append(response.getPackingPlan().toString());
     return builder.toString();
   }
-
-  /*
-  @Override
-  public String render(UpdateDryRunResponse response) {
-    StringBuilder builder = new StringBuilder();
-    builder.append(common(response));
-    builder.append('\n');
-    builder.append("Old packing plan:\n");
-    builder.append(response.getOldPackingPlan().toString());
-    return builder.toString();
-  } */
 
 }

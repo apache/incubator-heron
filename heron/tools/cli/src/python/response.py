@@ -23,7 +23,7 @@ from heron.common.src.python.utils.log import Log
 #  - 100 <= status code < 200:
 #    program fails to launch after program execution. For example,
 #    topology definition file fails to be loaded
-#  - status code >= 200:
+#  - status code == 200:
 #    program sends out dry-run response
 
 # Definition corresponds to definition in com.twitter.heron.scheduler.AbstractMain

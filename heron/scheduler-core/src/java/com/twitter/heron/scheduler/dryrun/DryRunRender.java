@@ -31,14 +31,12 @@ import com.twitter.heron.spi.packing.Resource;
  */
 public abstract class DryRunRender {
 
-  private List<String> title = Arrays.asList(
+  protected List<String> title = Arrays.asList(
       "component", "cpu", "disk (GB)", "ram (GB)", "parallelism");
 
-  private StringBuilder addRow(StringBuilder builder, String row) {
-    builder.append(row);
-    builder.append('\n');
-    return builder;
-  }
+  protected List<String> title2 = Arrays.asList(
+      "component", "status", "task ID", "cpu", "ram (GB)", "disk (GB)"
+  );
 
   protected Map<String, Resource> componentsResource(PackingPlan packingPlan) {
     Map<String, Resource> componentsResource = new HashMap<>();
@@ -72,70 +70,4 @@ public abstract class DryRunRender {
     }
     return componentsParallelism;
   }
-
-  /**
-   * generate formatter for each row based on rows. Width of a column is the
-   * max width of all cells on that column
-   *
-   * @param rows Each row in table
-   * @return formatter for row
-   */
-  private String generateRowFormatter(List<List<String>> rows) {
-    Integer[] width = new Integer[title.size()];
-    for (int i = 0; i < title.size(); i++) {
-      width[i] = title.get(i).length();
-    }
-    for (List<String> row: rows) {
-      for (int i = 0; i < row.size(); i++) {
-        width[i] = Math.max(width[i], row.get(i).length());
-      }
-    }
-    StringBuilder metaFormatterBuilder = new StringBuilder();
-    String metaCellFormatter = "%%%ds";
-    metaFormatterBuilder.append(Strings.repeat(String.format("| %s ", metaCellFormatter),
-        title.size()));
-    metaFormatterBuilder.append("|");
-    return String.format(metaFormatterBuilder.toString(), (Object[]) width);
-  }
-
-  /**
-   * Format amount associated with percentage change
-   * @param oldAmount old amount
-   * @param newAmount new amount
-   * @return formatted change
-   */
-  protected String formatChange(long oldAmount, long newAmount) {
-    long delta = newAmount - oldAmount;
-    double percentage = (double) delta / (double) oldAmount;
-    if (percentage == 0.0) {
-      return String.valueOf(newAmount);
-    } else {
-      String sign = "";
-      if (percentage > 0.0) {
-        sign = "+";
-      }
-      return String.format("%d (%s%.2f%%)", newAmount, sign, percentage * 100.0);
-    }
-  }
-
-   /**
-   * Seal rows to create table
-   * @param rows Each row in table
-   * @return Formatted table
-   */
-  public String createTable(List<List<String>> rows) {
-    String rowFormatter = generateRowFormatter(rows);
-    String titleRow = String.format(
-        rowFormatter, (Object[]) title.toArray(new String[title.size()]));
-    StringBuilder builder = new StringBuilder();
-    addRow(builder, Strings.repeat("=", titleRow.length()));
-    addRow(builder, titleRow);
-    addRow(builder, Strings.repeat("-", titleRow.length()));
-    for (List<String> row: rows) {
-      addRow(builder, String.format(rowFormatter, (Object[]) row.toArray(new String[row.size()])));
-    }
-    addRow(builder, Strings.repeat("=", titleRow.length()));
-    return builder.toString();
-  }
-
 }

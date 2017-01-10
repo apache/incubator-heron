@@ -30,6 +30,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunRender;
@@ -198,7 +199,85 @@ public abstract class AbstractMain {
     return config;
   }
 
-  protected static final int RESP_CODE_SUCC = 0;
-  protected static final int RESP_CODE_FAIL = 100;
-  protected static final int RESP_CODE_DRYRUN = 200;
+  private void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp(this.getClass().getSimpleName(), options);
+  }
+
+  private static final int EXIT_CODE_FAIL = 100;
+  private static final int EXIT_CODE_DRYRUN = 200;
+
+  protected abstract Options constructOptions();
+  protected abstract CommandLineParser builderCommandLineParser();
+
+  protected abstract Config buildConfig(CommandLine cmd);
+
+  protected abstract void run(Config config, CommandLine cmd);
+
+  protected abstract String renderDryRunResponse(RuntimeException response);
+
+  protected void doMain(String[] args) throws Exception {
+    Options options = constructOptions();
+    Options helpOptions = constructHelpOptions();
+    CommandLineParser parser = new DefaultParser();
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+
+    if (cmd.hasOption("h")) {
+      usage(options);
+      return;
+    }
+
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      usage(options);
+      throw new RuntimeException("Error parsing command line options: ", e);
+    }
+
+    Boolean verbose = false;
+    Level logLevel = Level.INFO;
+    if (cmd.hasOption("v")) {
+      logLevel = Level.ALL;
+      verbose = true;
+    }
+
+    // init log
+    LoggingHelper.loggerInit(logLevel, false);
+
+    // build config
+    Config config = buildConfig(cmd);
+
+    // run
+    /* Meaning of exit status code:
+       - status code = 0:
+         program exits without error
+       - 0 < status code < 100:
+         program fails to execute before program execution. For example,
+         JVM cannot find or load main class
+       - 100 <= status code < 200:
+         program fails to launch after program execution. For example,
+         topology definition file fails to be loaded
+       - status code >= 200
+         program sends out dry-run response */
+    try {
+      run(config, cmd);
+    } catch (SubmitDryRunResponse response) {
+      System.out.println(renderDryRunResponse(response));
+      // Exit with status code 200 to indicate dry-run response is sent out
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(EXIT_CODE_DRYRUN);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      /* Since only stderr is used (by logging), we use stdout here to
+       propagate error message back to Python's executor.py (invoke site). */
+      /* TODO: better word */
+      LOG.log(Level.FINE, "Exception when executing main function", e);
+      System.out.println(e.getMessage());
+      // Exit with status code 100 to indicate that error has happened on user-land
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(EXIT_CODE_FAIL);
+    }
+  }
 }

@@ -249,8 +249,6 @@ public class RuntimeManagerMain {
       dryRun = true;
     }
 
-    LOG.fine(String.format("DRY RUN: %s", dryRun));
-
     // Default dry run type
     DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
     if (cmd.hasOption("t")) {
@@ -300,33 +298,34 @@ public class RuntimeManagerMain {
     LOG.fine("Static config loaded successfully ");
     LOG.fine(config.toString());
 
+    /* Meaning of exit status code:
+      - status code = 0:
+        program exits without error
+      - 0 < status code < 100:
+        program fails to execute before program execution. For example,
+        JVM cannot find or load main class
+      - 100 <= status code < 200:
+        program fails to launch after program execution. For example,
+        topology definition file fails to be loaded
+      - status code == 200
+        program sends out dry-run response */
+    /* Since only stderr is used (by logging), we use stdout here to
+       propagate any message back to Python's executor.py (invoke site). */
     // Create a new instance of RuntimeManagerMain
     RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, command);
     try {
       runtimeManagerMain.manageTopology();
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (UpdateDryRunResponse response) {
+      LOG.log(Level.FINE, "Sending out dry-run response");
       System.out.println(runtimeManagerMain.renderDryRunResponse(response));
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       // Exit with status code 200 to indicate dry-run response is sent out
       System.exit(200);
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      /* Since only stderr is used (by logging), we use stdout here to
-         propagate error message back to Python's executor.py (invoke site). */
-            /* Since only stderr is used (by logging), we use stdout here to
-         propagate error message back to Python's executor.py (invoke site). */
       LOG.log(Level.FINE, "Exception when submitting topology", e);
       System.out.println(e.getMessage());
-      /* Meaning of exit status code:
-         - status code = 0:
-           program exits without error
-         - 0 < status code < 100:
-           program fails to execute before program execution. For example,
-           JVM cannot find or load main class
-         - status code >= 100:
-           program fails to launch after program execution. For example,
-           topology definition file fails to be loaded */
       // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(100);
