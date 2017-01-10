@@ -64,6 +64,9 @@ class FileUtils {
 
   //! get the current working directory
   static sp_int32 getCwd(std::string& path);
+
+  //! get the user home directory
+  static std::string getHomeDirectory();
 };
 
 #endif

@@ -18,6 +18,12 @@
 #include <dirent.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <pwd.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -208,4 +214,28 @@ sp_int32 FileUtils::getCwd(std::string& path) {
 
   path = maxpath;
   return SP_OK;
+}
+
+std::string FileUtils::getHomeDirectory() {
+  const char *homedir = ::getenv("HOME");
+  if (homedir != nullptr) {
+    return std::string(homedir);
+  }
+
+  auto bufsize = ::sysconf(_SC_GETPW_R_SIZE_MAX);
+  if (bufsize == -1)
+    bufsize = 16384;
+
+  char* buffer = new char[bufsize];
+  struct passwd pwd, *result = NULL;
+
+  auto code = ::getpwuid_r(::getuid(), &pwd, buffer, bufsize, &result);
+  if (code != 0 || !result) {
+    PLOG(ERROR) << "Unable to get home directory ";
+    return std::string();
+  }
+
+  std::string directory(pwd.pw_dir);
+  delete [] buffer;
+  return directory;
 }
