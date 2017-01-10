@@ -22,7 +22,6 @@
 #include "proto/messages.h"
 #include "common/checkpoint.h"
 #include "common/storage.h"
-#include "manager/ckptmgr-server.h"
 
 namespace heron {
 namespace ckptmgr {
@@ -32,7 +31,8 @@ class CkptMgrServer;
 class CkptMgr {
  public:
   CkptMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-          const sp_string& _topology_id, const sp_string& _ckptmgr_id);
+          const sp_string& _topology_id, const sp_string& _ckptmgr_id,
+          Storage* _storage);
   virtual ~CkptMgr();
 
   void Init();
@@ -52,10 +52,10 @@ class CkptMgr {
   sp_string ckptmgr_id_;
   sp_int32 ckptmgr_port_;
 
+  Storage* storage_;
+
   CkptMgrServer* server_;
   EventLoop* eventLoop_;
-
-  Storage* storage_;
 };
 
 }  // namespace ckptmgr
