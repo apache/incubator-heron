@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "client/ckptmgr-client.h"
+#include "manager/ckptmgr-client.h"
 #include <iostream>
 #include <string>
 #include "basics/basics.h"

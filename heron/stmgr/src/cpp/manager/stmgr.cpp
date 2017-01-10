@@ -43,7 +43,7 @@
 #include "util/xor-manager.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
-#include "client/ckptmgr-client.h"
+#include "manager/ckptmgr-client.h"
 
 namespace heron {
 namespace stmgr {
