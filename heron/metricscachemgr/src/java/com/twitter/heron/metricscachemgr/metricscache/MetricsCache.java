@@ -104,7 +104,8 @@ public class MetricsCache {
 
   // Returns a new response to fetch metrics. The request gets propagated to Component's and
   // Instance's get metrics. Doesn't own Response.
-  public MetricResponse GetMetrics(MetricRequest request) {
+  // (huijun) this function is deprecated
+  public MetricResponse GetMetrics2(MetricRequest request) {
     MetricResponse.Builder responseBuilder = MetricResponse.newBuilder();
 
     if (!metricsComponent.containsKey(request.getComponentName())) {
@@ -158,4 +159,32 @@ public class MetricsCache {
     }
     return sb.toString();
   }
+
+  /**
+   * main query interface for query from OUTside SLA process
+   *
+   * @param request query in protobuf format, re-used TMaster definition
+   * @return query result, re-used TMaster definition
+   */
+  public MetricResponse GetMetrics(MetricRequest request) {
+    MetricsCacheQueryUtils.MetricCacheResponse response =
+        GetMetrics(MetricsCacheQueryUtils.Convert(request));
+    return MetricsCacheQueryUtils.Convert(response);
+  }
+
+  /**
+   * main query interface for query from INside SLA process
+   *
+   * @param request query
+   * @return query result
+   */
+  public MetricsCacheQueryUtils.MetricCacheResponse GetMetrics(
+      MetricsCacheQueryUtils.MetricCacheRequest request) {
+    MetricsCacheQueryUtils.MetricCacheResponse response =
+        new MetricsCacheQueryUtils.MetricCacheResponse();
+    metricsComponent.get(request.componentName)
+        .GetMetrics(request, request.interval.start, request.interval.end, response);
+    return response;
+  }
+
 }

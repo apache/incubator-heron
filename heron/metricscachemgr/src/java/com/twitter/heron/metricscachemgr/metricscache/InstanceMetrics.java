@@ -93,4 +93,22 @@ public class InstanceMetrics {
     }
     return sb.toString();
   }
+
+  public void GetMetrics(MetricsCacheQueryUtils.MetricCacheRequest request, long startTime, long endTime,
+                         MetricsCacheQueryUtils.MetricCacheResponse response) {
+    MetricsCacheQueryUtils.TaskMetric tm =
+        new MetricsCacheQueryUtils.TaskMetric();
+
+    tm.instanceId = instanceId;
+    for (int i = 0; i < request.metric.size(); ++i) {
+      String id = request.metric.get(i);
+      if (metrics.containsKey(id)) {
+        MetricsCacheQueryUtils.IndividualMetric im = new MetricsCacheQueryUtils.IndividualMetric();
+        metrics.get(id).GetMetrics(request.minutely, startTime, endTime, im);
+        tm.metric.add(im);
+      }
+    }
+
+    response.metric.add(tm);
+  }
 }

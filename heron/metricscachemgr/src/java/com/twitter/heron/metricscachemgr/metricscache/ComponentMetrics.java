@@ -115,4 +115,32 @@ public class ComponentMetrics {
     }
     return sb.toString();
   }
+
+  public void GetMetrics(MetricsCacheQueryUtils.MetricCacheRequest request, long startTime, long endTime,
+                         MetricsCacheQueryUtils.MetricCacheResponse response) {
+    if (request.instanceId.isEmpty()) {
+      // This means that all instances need to be returned
+      for (InstanceMetrics im : metricsInstance.values()) {
+        im.GetMetrics(request, startTime, endTime, response);
+        if (response.status.status != 1) {
+          return;
+        }
+      }
+    } else {
+      for (int i = 0; i < request.instanceId.size(); ++i) {
+        String id = request.instanceId.get(i);
+        if (!metricsInstance.containsKey(id)) {
+          LOG.log(Level.SEVERE, "GetMetrics request received for unknown instanceId " + id);
+          response.status.status = 2;
+          return;
+        } else {
+          metricsInstance.get(id).GetMetrics(request, startTime, endTime, response);
+          if (response.status.status != 1) {
+            return;
+          }
+        }
+      }
+    }
+    response.status.status = 1;
+  }
 }
