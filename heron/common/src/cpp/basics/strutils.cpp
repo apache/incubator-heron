@@ -15,17 +15,17 @@
  */
 
 #include "basics/strutils.h"
+#include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <string>
 #include <sstream>
 #include <vector>
 
 std::vector<std::string>
-StrUtils::split(
-  const std::string&         input,
-  const std::string&         delim) {
-  size_t                    start_pos = 0, pos = 0;
-  std::string               atoken;
+StrUtils::split(const std::string& input, const std::string& delim) {
+  size_t start_pos = 0, pos = 0;
+  std::string atoken;
   std::vector<std::string>  tokens;
 
   while ((pos = input.find(delim, start_pos)) != std::string::npos) {
@@ -40,4 +40,16 @@ StrUtils::split(
   }
 
   return tokens;
+}
+
+
+std::string
+StrUtils::trim(const std::string &s) {
+  auto wsfront = std::find_if_not(s.begin(), s.end(), [](int c){
+    return std::isspace(c);
+  });
+  auto wsback = std::find_if_not(s.rbegin(), s.rend(), [](int c){
+    return std::isspace(c);
+  }).base();
+  return (wsback <= wsfront ? std::string() : std::string(wsfront, wsback));
 }

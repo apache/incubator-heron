@@ -93,6 +93,7 @@ cc_binary(
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
     deps = [
+        ":lfs-cxx",
         ":manager-cxx",
     ],
     linkstatic = 1,

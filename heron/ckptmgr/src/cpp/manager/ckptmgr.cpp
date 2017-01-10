@@ -27,11 +27,12 @@ namespace heron {
 namespace ckptmgr {
 
 CkptMgr::CkptMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-                 const sp_string& _topology_id, const sp_string& _ckptmgr_id)
+                 const sp_string& _topology_id, const sp_string& _ckptmgr_id, Storage* _storage)
     : topology_name_(_topology_name),
       topology_id_(_topology_id),
       ckptmgr_id_(_ckptmgr_id),
       ckptmgr_port_(_myport),
+      storage_(_storage),
       server_(NULL),
       eventLoop_(eventLoop) {}
 

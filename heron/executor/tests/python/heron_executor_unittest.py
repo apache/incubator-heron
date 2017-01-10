@@ -22,18 +22,21 @@ from heron.proto.packing_plan_pb2 import PackingPlan
 # pylint: disable=unused-argument
 # pylint: disable=missing-docstring
 
-def get_test_heron_internal_yaml():
-  """Get the path to test_heron_internal.yaml
+def get_test_heron_yaml():
+  """Get the path to test yaml config files:
+        test_heron_internal.yaml
+        test_heron_stateful.yaml
 
   For example, __file__ would be
   /tmp/_bazel_heron/randgen_dir/heron/heron/executor/tests/python/heron_executor_unittest.py
   """
   heron_dir = '/'.join(__file__.split('/')[:-5])
-  yaml_path = os.path.join(heron_dir, 'heron/config/src/yaml/conf/test/test_heron_internals.yaml')
+  yaml_path = (os.path.join(heron_dir, 'heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
+               os.path.join(heron_dir, 'heron/config/src/yaml/conf/test/test_heron_stateful.yaml'))
 
   return yaml_path
 
-INTERNAL_CONF_PATH = get_test_heron_internal_yaml()
+INTERNAL_CONF_PATH, STATEFUL_CONF_PATH = get_test_heron_yaml()
 
 class MockPOpen(object):
   """fake subprocess.Popen object that we can use to mock processes and pids"""
@@ -121,10 +124,12 @@ class HeronExecutorTest(unittest.TestCase):
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_1 = [
+      ProcessInfo(MockPOpen(), 'ckptmgr-1',
+                  'ckptmgr_binary topname topid ckptmgr-1 ckptmgr_port %s' % STATEFUL_CONF_PATH),
       ProcessInfo(MockPOpen(), 'stmgr-1',
                   'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
                   'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port '
-                  'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
+                  'metricsmgr_port shell-port %s ckptmgr_port ckptmgr-1' % INTERNAL_CONF_PATH),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
                   get_expected_instance_command('exclaim1', 1, 1)),
@@ -136,13 +141,15 @@ class HeronExecutorTest(unittest.TestCase):
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_7 = [
-      ProcessInfo(MockPOpen(), 'container_7_word_11', get_expected_instance_command('word', 11, 7)),
       ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
                   get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'stmgr-7',
-                'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
-                'container_7_word_11,container_7_exclaim1_210 master_port '
-                'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
+                  'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
+                  'container_7_word_11,container_7_exclaim1_210 master_port '
+                  'metricsmgr_port shell-port %s ckptmgr_port ckptmgr-7' % INTERNAL_CONF_PATH),
+      ProcessInfo(MockPOpen(), 'ckptmgr-7',
+                  'ckptmgr_binary topname topid ckptmgr-7 ckptmgr_port %s' % STATEFUL_CONF_PATH),
+      ProcessInfo(MockPOpen(), 'container_7_word_11', get_expected_instance_command('word', 11, 7)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', shell_command_expected),
   ]
@@ -176,8 +183,9 @@ class HeronExecutorTest(unittest.TestCase):
     %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
-    scheduler_classpath scheduler_port python_instance_binary
-    """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
+    scheduler_classpath scheduler_port python_instance_binary is_stateful
+    ckptmgr_binary ckptmgr_port %s
+    """ % (shard_id, INTERNAL_CONF_PATH, STATEFUL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):
     self.executor_0.update_packing_plan(self.packing_plan_expected)
@@ -241,7 +249,8 @@ class HeronExecutorTest(unittest.TestCase):
 
     self.assertEquals(['container_1_exclaim1_2', 'stmgr-1'], sorted(commands_to_kill.keys()))
     self.assertEquals(
-        ['container_1_exclaim1_1', 'container_1_word_3', 'heron-shell-1', 'metricsmgr-1'],
+        ['ckptmgr-1', 'container_1_exclaim1_1',
+         'container_1_word_3', 'heron-shell-1', 'metricsmgr-1'],
         sorted(commands_to_keep.keys()))
     self.assertEquals(['container_1_word_2', 'stmgr-1'], sorted(commands_to_start.keys()))
 

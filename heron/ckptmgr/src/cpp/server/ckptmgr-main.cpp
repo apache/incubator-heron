@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
+
 #include <iostream>
 #include <string>
-#include "manager/ckptmgr.h"
+
 #include "basics/basics.h"
 #include "network/network.h"
 #include "proto/messages.h"
+#include "lfs/lfs.h"
+#include "manager/ckptmgr.h"
 
 int main(int argc, char* argv[]) {
   if (argc != 5) {
@@ -37,7 +41,16 @@ int main(int argc, char* argv[]) {
 
   heron::common::Initialize(argv[0], ckptmgr_id.c_str());
 
-  heron::ckptmgr::CkptMgr mgr(&ss, my_port, topology_name, topology_id, ckptmgr_id);
+  std::string home_dir(::getenv("HOME"));
+  home_dir.append("/").append(".herondata");
+  home_dir.append("/").append("topologies");
+  home_dir.append("/").append("local");
+  home_dir.append("/").append(::getenv("USER"));
+  home_dir.append("/").append(topology_name);
+  home_dir.append("/").append("state");
+
+  heron::ckptmgr::Storage* storage = new heron::ckptmgr::LFS(home_dir);
+  heron::ckptmgr::CkptMgr mgr(&ss, my_port, topology_name, topology_id, ckptmgr_id, storage);
 
   mgr.Init();
   ss.loop();
