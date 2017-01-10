@@ -37,27 +37,6 @@ cc_library(
 )
 
 cc_library(
-    name = "client-cxx",
-    srcs = [
-        "client/ckptmgr-client.cpp",
-    ],
-    hdrs = [
-        "client/ckptmgr-client.h",
-    ],
-    copts = [
-        "-Iheron",
-        "-Iheron/common/src/cpp",
-        "-Iheron/ckptmgr/src/cpp",
-        "-I$(GENDIR)/heron",
-        "-I$(GENDIR)/heron/common/src/cpp"
-    ],
-    deps = [
-        ":common-cxx",
-    ],
-    linkstatic = 1,
-)
-
-cc_library(
     name = "manager-cxx",
     srcs = [
         "manager/ckptmgr-server.cpp",
