@@ -58,6 +58,48 @@ int LFS::createCkptDirectory(const Checkpoint& _ckpt) {
   return SP_OK;
 }
 
+int LFS::createTmpCkptFile(const Checkpoint& _ckpt) {
+  auto code = ::open(tempCkptFile(_ckpt).c_str(), O_CREAT | O_WRONLY);
+  if (code != 0) {
+    PLOG(ERROR) << "Unable to create temporary checkpoint file " << tempCkptFile(_ckpt);
+    return SP_NOTOK;
+  }
+  return code;
+}
+
+int LFS::writeTmpCkptFile(int fd, const Checkpoint& _ckpt) {
+  size_t count = 0;
+  size_t len = _ckpt.nbytes();
+  void* buf = static_cast<void*>(_ckpt.checkpoint());
+
+  while (count < _ckpt.nbytes()) {
+    int i = ::write(fd, count + reinterpret_cast<char *>(buf), len - count);
+    if (i != 0) {
+      PLOG(ERROR) << "Unable to write to temporary checkpoint file " << tempCkptFile(_ckpt);
+      return SP_NOTOK;
+    }
+    count += i;
+  }
+  return SP_OK;
+}
+
+int LFS::closeTmpCkptFile(int fd, const Checkpoint& _ckpt) {
+  // force flush the file contents to persistent store
+  auto code = ::fsync(fd);
+  if (code != 0) {
+    PLOG(ERROR) << "Unable to sync temporary checkpoint file " << tempCkptFile(_ckpt);
+    return SP_NOTOK;
+  }
+
+  // close the file descriptor
+  code = ::close(fd);
+  if (code != 0) {
+    PLOG(ERROR) << "Unable to close temporary checkpoint file " << tempCkptFile(_ckpt);
+    return SP_NOTOK;
+  }
+  return SP_OK;
+}
+
 int LFS::moveTmpCkptFile(const Checkpoint& _ckpt) {
   auto code = ::rename(tempCkptFile(_ckpt).c_str(), ckptFile(_ckpt).c_str());
   if (code != 0) {
@@ -74,23 +116,21 @@ int LFS::store(const Checkpoint& _ckpt) {
     return SP_NOTOK;
   }
 
-  // open the temporary checkpoint file
-  std::ofstream ofile(tempCkptFile(_ckpt), std::ofstream::out | std::ofstream::binary);
-  if (!ofile.is_open()) {
-    PLOG(ERROR) << "Unable to create temporary checkpoint file " << tempCkptFile(_ckpt);
+  // create and open the temporary checkpoint file
+  auto fd = createTmpCkptFile(_ckpt);
+  if (fd == SP_NOTOK) {
     LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
     return SP_NOTOK;
   }
 
   // write the protobuf into the temporary checkpoint file
-  if (!_ckpt.checkpoint()->SerializeToOstream(&ofile)) {
+  if (writeTmpCkptFile(fd, _ckpt) == SP_NOTOK) {
     LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
     return SP_NOTOK;
   }
 
   // close the temporary checkpoint file
-  ofile.close();
-  if (ofile.fail()) {
+  if (closeTmpCkptFile(fd, _ckpt) == SP_NOTOK) {
     LOG(ERROR) << "Checkpoint failed for " << logMessageFragment(_ckpt);
     return SP_NOTOK;
   }
