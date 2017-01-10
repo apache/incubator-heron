@@ -441,6 +441,8 @@ void StMgrServer::DrainToInstance3(sp_int32 _task_id,
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
                << std::endl;
   } else {
+    LOG(INFO) << "Sending Initiate Checkpoint Message to local task "
+              << _task_id;
     SendMessage(iter->second->conn_, *_message);
   }
   delete _message;
