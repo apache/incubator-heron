@@ -147,11 +147,16 @@ containers are allocated for each topology.&lt;/li&gt;
 
 &lt;h3 id=&#34;configuring-the-heron-client-classpath&#34;&gt;Configuring the Heron client classpath&lt;/h3&gt;
 
-&lt;p&gt;&lt;strong&gt;Under 0.14.2 version (including 0.14.2)&lt;/strong&gt;
-  1. Command &lt;code&gt;hadoop classpath&lt;/code&gt; provides a list of jars needed to submit a hadoop job. Copy all jars to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt;.
-   * Do not copy commons-cli jar if it is older than version 1.3.1.
-  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
- -&lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt; too.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Under 0.14.2 version (including 0.14.2)&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Command &lt;code&gt;hadoop classpath&lt;/code&gt; provides a list of jars needed to submit a hadoop job. Copy all jars to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt;.
+
+&lt;ul&gt;
+&lt;li&gt;Do not copy commons-cli jar if it is older than version 1.3.1.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Create a jar containing core-site.xml and yarn-site.xml. Add this jar to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt; too.&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;p&gt;&lt;strong&gt;After 0.14.3 version released&lt;/strong&gt;&lt;/p&gt;
 
@@ -216,31 +221,29 @@ deployment on a multi-node YARN cluster.&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;&lt;strong&gt;Sample Output&lt;/strong&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;INFO: Launching topology &#39;AckingTopology&#39;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;INFO: Launching topology &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;AckingTopology&amp;#39;&lt;/span&gt;
 ...
 ...
 Powered by
      ___________  ______  ______  _______
     /  ______  / /  ___/ /  ___/ /  ____/
    /     _____/ /  /__  /  /__  /  /___
-  /  /\  \     /  ___/ /  ___/ /  ____/
- /  /  \  \   /  /__  /  /__  /  /
-/__/    \__\ /_____/ /_____/ /__/
+  /  /&lt;span style=&#34;color: #ae81ff&#34;&gt;\ &lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\ &lt;/span&gt;    /  ___/ /  ___/ /  ____/
+ /  /  &lt;span style=&#34;color: #ae81ff&#34;&gt;\ &lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\ &lt;/span&gt;  /  /__  /  /__  /  /
+/__/    &lt;span style=&#34;color: #ae81ff&#34;&gt;\_&lt;/span&gt;_&lt;span style=&#34;color: #ae81ff&#34;&gt;\ &lt;/span&gt;/_____/ /_____/ /__/
 
 ...
 ...
 com.twitter.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTopology is running, jobId AckingTopology.
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Verification&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Visit the YARN http console or execute command &lt;code&gt;yarn application -list&lt;/code&gt; on a yarn client host.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;Total number of applications &lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;application-types: &lt;span style=&#34;color: #f92672&#34;&gt;[]&lt;/span&gt; and states: &lt;span style=&#34;color: #f92672&#34;&gt;[&lt;/span&gt;SUBMITTED, ACCEPTED, RUNNING&lt;span style=&#34;color: #f92672&#34;&gt;])&lt;/span&gt;:1
                 Application-Id	    Application-Name	    Application-Type	      User	     Queue	             State	       Final-State	       Progress	                       Tracking-URL
 application_1466548964728_0004	      AckingTopology	                YARN	     heron	   default	           RUNNING	         UNDEFINED	             0%	                                N/A
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h3 id=&#34;topology-termination&#34;&gt;Topology termination&lt;/h3&gt;
 

@@ -67,7 +67,9 @@ com.twitter.heron.metricsmgr.sink.tmaster
 com.twitter.heron.network
 com.twitter.heron.packing
 com.twitter.heron.packing.binpacking
+com.twitter.heron.packing.builder
 com.twitter.heron.packing.roundrobin
+com.twitter.heron.packing.utils
 com.twitter.heron.proto.scheduler
 com.twitter.heron.proto.stmgr
 com.twitter.heron.proto.system
@@ -83,6 +85,7 @@ com.twitter.heron.scheduler.mesos
 com.twitter.heron.scheduler.mesos.framework
 com.twitter.heron.scheduler.server
 com.twitter.heron.scheduler.slurm
+com.twitter.heron.scheduler.utils
 com.twitter.heron.scheduler.yarn
 com.twitter.heron.simulator
 com.twitter.heron.simulator.executors
