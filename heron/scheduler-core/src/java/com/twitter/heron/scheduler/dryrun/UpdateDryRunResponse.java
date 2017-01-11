@@ -19,7 +19,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 
-public class UpdateDryRunResponse extends SubmitDryRunResponse {
+public class UpdateDryRunResponse extends DryRunResponse {
   private static final long serialVersionUID = 18244716698543219L;
 
   private final PackingPlan oldPackingPlan;

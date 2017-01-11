@@ -30,6 +30,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.scheduler.dryrun.DryRunResponse;
 import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
@@ -138,12 +139,47 @@ public abstract class AbstractMain {
         .required()
         .build();
 
-    Option topologyName = Option.builder("n")
-        .desc("Name of the topology")
-        .longOpt("topology_name")
+    Option configFile = Option.builder("p")
+        .desc("Path of the config files")
+        .longOpt("config_path")
         .hasArgs()
-        .argName("topology name")
+        .argName("config path")
         .required()
+        .build();
+
+    Option configOverrides = Option.builder("o")
+        .desc("Command line override config path")
+        .longOpt("override_config_file")
+        .hasArgs()
+        .argName("override config file")
+        .build();
+
+    Option heronHome = Option.builder("d")
+        .desc("Directory where heron is installed")
+        .longOpt("heron_home")
+        .hasArgs()
+        .argName("heron home dir")
+        .required()
+        .build();
+
+    Option releaseFile = Option.builder("b")
+        .desc("Release file name")
+        .longOpt("release_file")
+        .hasArgs()
+        .argName("release information")
+        .build();
+
+    Option dryRun = Option.builder("u")
+        .desc("dry-run")
+        .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
+        .hasArg()
+        .required(false)
         .build();
 
     Option verbose = Option.builder("v")
@@ -154,7 +190,12 @@ public abstract class AbstractMain {
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
-    options.addOption(topologyName);
+    options.addOption(configFile);
+    options.addOption(configOverrides);
+    options.addOption(releaseFile);
+    options.addOption(heronHome);
+    options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -208,13 +249,14 @@ public abstract class AbstractMain {
   private static final int EXIT_CODE_DRYRUN = 200;
 
   protected abstract Options constructOptions();
+
   protected abstract CommandLineParser builderCommandLineParser();
 
   protected abstract Config buildConfig(CommandLine cmd);
 
-  protected abstract void run(Config config, CommandLine cmd);
+  protected abstract void run(Config config);
 
-  protected abstract String renderDryRunResponse(RuntimeException response);
+  protected abstract String renderDryRunResponse(DryRunResponse response);
 
   protected void doMain(String[] args) throws Exception {
     Options options = constructOptions();
@@ -236,11 +278,10 @@ public abstract class AbstractMain {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    Boolean verbose = false;
+    // Set logging level
     Level logLevel = Level.INFO;
     if (cmd.hasOption("v")) {
       logLevel = Level.ALL;
-      verbose = true;
     }
 
     // init log
@@ -262,7 +303,7 @@ public abstract class AbstractMain {
        - status code >= 200
          program sends out dry-run response */
     try {
-      run(config, cmd);
+      run(config);
     } catch (SubmitDryRunResponse response) {
       System.out.println(renderDryRunResponse(response));
       // Exit with status code 200 to indicate dry-run response is sent out

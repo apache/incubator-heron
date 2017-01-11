@@ -1,4 +1,4 @@
-//  Copyright 2016 Twitter. All rights reserved.
+//  Copyright 2017 Twitter. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -11,22 +11,35 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License
-package com.twitter.heron.scheduler.dryrun;
 
+package com.twitter.heron.scheduler.dryrun;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
- * Dry-run response, which extends RuntimeException because it is easy
- * to propagate up
+ * Created by rli on 1/11/17.
  */
-public class SubmitDryRunResponse extends DryRunResponse {
-  private static final long serialVersionUID = 999911708859944856L;
+public abstract class DryRunResponse extends RuntimeException {
+  private final TopologyAPI.Topology topology;
+  private final Config config;
+  private final PackingPlan packingPlan;
 
+  public DryRunResponse(TopologyAPI.Topology topology, Config config, PackingPlan packingPlan) {
+    this.topology = topology;
+    this.config = config;
+    this.packingPlan = packingPlan;
+  }
 
-  public SubmitDryRunResponse(TopologyAPI.Topology topology, Config config,
-                              PackingPlan packingPlan) {
-    super(topology, config, packingPlan);
+  public TopologyAPI.Topology getTopology() {
+    return topology;
+  }
+
+  public Config getConfig() {
+    return config;
+  }
+
+  public PackingPlan getPackingPlan() {
+    return packingPlan;
   }
 }
