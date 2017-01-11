@@ -114,12 +114,6 @@ public class BoltInstance implements IInstance {
       throw new RuntimeException("Neither java_object nor java_class_name set for bolt");
     }
 
-    // Safe check
-    // TODO(mfu): Allow stateful spout with non-stateful-component config or not?
-    if (this.isStatefulComponent && !(bolt instanceof IStatefulComponent)) {
-      throw new RuntimeException("Stateful config does not match component type");
-    }
-
     collector = new BoltOutputCollectorImpl(serializer, helper, streamOutQueue, boltMetrics);
   }
 
@@ -133,6 +127,10 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
+    if (!isStatefulComponent) {
+      throw new RuntimeException("Should not save state in a non-stateful topology");
+    }
+
     // Do a check point
     if (bolt instanceof IStatefulComponent) {
       LOG.info("Starting checkpoint");
@@ -155,7 +153,7 @@ public class BoltInstance implements IInstance {
 
     // Init the state for the spout
     // TODO(mfu): Pick up previous state: instanceState.putAll(...);
-    if (this.isStatefulComponent) {
+    if (this.isStatefulComponent && bolt instanceof IStatefulComponent) {
       ((IStatefulComponent) bolt).initState(instanceState);
     }
 

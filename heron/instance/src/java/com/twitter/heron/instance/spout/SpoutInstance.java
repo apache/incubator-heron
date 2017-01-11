@@ -25,7 +25,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
-import com.twitter.heron.api.spout.IStatefulSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.state.HashMapState;
 import com.twitter.heron.api.state.State;
@@ -123,12 +122,6 @@ public class SpoutInstance implements IInstance {
       throw new RuntimeException("Neither java_object nor java_class_name set for spout");
     }
 
-    // Safe check
-    // TODO(mfu): Allow stateful spout with non-stateful-component config or not?
-    if (this.isStatefulComponent && !(spout instanceof IStatefulSpout)) {
-      throw new RuntimeException("Stateful config does not match component type");
-    }
-
     IPluggableSerializer serializer = SerializeDeSerializeHelper.getSerializer(config);
     collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
   }
@@ -143,6 +136,10 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
+    if (!isStatefulComponent) {
+      throw new RuntimeException("Should not save state in a non-stateful topology");
+    }
+
     // Do a check point
     if (spout instanceof IStatefulComponent) {
       LOG.info("Starting checkpoint");
@@ -165,7 +162,7 @@ public class SpoutInstance implements IInstance {
 
     // Init the state for the spout
     // TODO(mfu): Pick up previous state: instanceState.putAll(...);
-    if (this.isStatefulComponent) {
+    if (this.isStatefulComponent && spout instanceof IStatefulComponent) {
       ((IStatefulComponent) spout).initState(instanceState);
     }
 
