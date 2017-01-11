@@ -244,31 +244,5 @@ std::vector<sp_string> TopologyConfigHelper::GetSpoutComponentNames(
   }
   return retval;
 }
-
-sp_string TopologyConfigHelper::GetProducerComponentName(const proto::api::Topology& _topology,
-                                                         const proto::api::StreamId& _stream) {
-  for (int i = 0; i < _topology.spouts_size(); ++i) {
-    const proto::api::Spout& spout = _topology.spouts(i);
-    for (int j = 0; j < spout.outputs_size(); ++i) {
-      const proto::api::StreamId& stream = spout.outputs(j).stream();
-      if (stream.id() == _stream.id() &&
-          stream.component_name() == _stream.component_name()) {
-        return spout.comp().name();
-      }
-    }
-  }
-  for (int i = 0; i < _topology.bolts_size(); ++i) {
-    const proto::api::Bolt& bolt = _topology.bolts(i);
-    for (int j = 0; j < bolt.outputs_size(); ++i) {
-      const proto::api::StreamId& stream = bolt.outputs(j).stream();
-      if (stream.id() == _stream.id() &&
-          stream.component_name() == _stream.component_name()) {
-        return bolt.comp().name();
-      }
-    }
-  }
-
-  return "";
-}
 }  // namespace config
 }  // namespace heron

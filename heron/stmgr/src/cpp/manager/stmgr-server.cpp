@@ -651,8 +651,6 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
 
 void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
-    LOG(INFO) << iter->second->is_local_spout() << " "
-              << iter->second->conn_;
     if (iter->second->is_local_spout() && iter->second->conn_) {
       LOG(INFO) << "Propagating Initiate Stateful Checkpoint for "
                 << _checkpoint_tag << " to local spout "

@@ -87,10 +87,6 @@ class TopologyConfigHelper {
 
   // Gets the list of all spout component names
   static std::vector<sp_string> GetSpoutComponentNames(const proto::api::Topology& _topology);
-
-  // Gets the component name which produces the stream
-  static sp_string GetProducerComponentName(const proto::api::Topology& _topology,
-                                const proto::api::StreamId& _stream);
 };
 }  // namespace config
 }  // namespace heron

@@ -63,9 +63,7 @@ void StatefulHelper::Reconstruct(const proto::system::PhysicalPlan& _pplan) {
                                 bolt_tasks);
 
     for (auto input_stream : _pplan.topology().bolts(i).inputs()) {
-      sp_string producer_comp =
-        config::TopologyConfigHelper::GetProducerComponentName(_pplan.topology(),
-                                                               input_stream.stream());
+      sp_string producer_comp = input_stream.stream().component_name();
       std::set<sp_int32> tasks;
       config::PhysicalPlanHelper::GetComponentTasks(_pplan, producer_comp, tasks);
       // each of the bolt task needs to recv from all the producer tasks
