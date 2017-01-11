@@ -83,7 +83,7 @@ public final class StatefulTopology {
     public void open(Map<String, Object> conf,
                      TopologyContext context, SpoutOutputCollector spoutOutputCollector) {
       collector = spoutOutputCollector;
-      sentences = new String[]{"A A A", " B B B", "C C C", "D D D", "E E E"};
+      sentences = new String[]{"A A A", "B B B", "C C C", "D D D", "E E E"};
       emitted = 0;
     }
 
