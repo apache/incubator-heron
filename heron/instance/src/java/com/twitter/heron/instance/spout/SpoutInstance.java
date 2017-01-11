@@ -94,7 +94,7 @@ public class SpoutInstance implements IInstance {
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
 
     this.isStatefulComponent =
-        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_COMPONENT_STATEFUL));
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL));
 
     LOG.info("Enable Ack: " + this.ackEnabled);
     LOG.info("EnableMessageTimeouts: " + this.enableMessageTimeouts);

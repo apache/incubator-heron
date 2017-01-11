@@ -87,7 +87,7 @@ public class BoltInstance implements IInstance {
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     this.isStatefulComponent =
-        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_COMPONENT_STATEFUL));
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL));
 
     LOG.info("Is stateful component: " + this.isStatefulComponent);
 

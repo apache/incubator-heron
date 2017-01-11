@@ -166,7 +166,7 @@ public final class StatefulWordCountTopology {
     conf.setContainerCpuRequested(6);
 
     // For stateful processing
-    conf.put(Config.TOPOLOGY_COMPONENT_STATEFUL, true);
+    conf.put(Config.TOPOLOGY_STATEFUL, true);
     conf.put(Config.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL, 30);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());

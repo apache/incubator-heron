@@ -21,7 +21,6 @@ import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BasicBoltExecutor;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
-import com.twitter.heron.api.bolt.IStatefulBolt;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
 
@@ -122,21 +121,6 @@ public class TopologyBuilder {
   }
 
   /**
-   * Define a new statefule bolt in this topology with the specified amount of parallelism.
-   *
-   * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
-   * @param bolt the bolt
-   * @param parallelismHint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somewhere around the cluster.
-   * @return use the returned object to declare the inputs to this component
-   */
-  public BoltDeclarer setStatefulBolt(String id, IStatefulBolt bolt, Number parallelismHint) {
-    validateComponentName(id);
-    BoltDeclarer b = new BoltDeclarer(id, bolt, parallelismHint);
-    bolts.put(id, b);
-    return b;
-  }
-
-  /**
    * Define a new bolt in this topology. This defines a basic bolt, which is a
    * simpler to use but more restricted kind of bolt. Basic bolts are intended
    * for non-aggregation processing and automate the anchoring/acking process to
@@ -163,44 +147,6 @@ public class TopologyBuilder {
    */
   public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelismHint) {
     return setBolt(id, new BasicBoltExecutor(bolt), parallelismHint);
-  }
-
-  /**
-     * Define a new bolt in this topology. This defines a stateful bolt, that requires its
-     * state (of computation) to be saved. When this bolt is initialized, the {@link IStatefulBolt#initState(State)} method
-     * is invoked after {@link IStatefulBolt#prepare(Map, TopologyContext, OutputCollector)} but before {@link IStatefulBolt#execute(Tuple)}
-     * with its previously saved state.
-     * <p>
-     * The framework provides at-least once guarantee for the state updates. Bolts (both stateful and non-stateful) in a stateful topology
-     * are expected to anchor the tuples while emitting and ack the input tuples once its processed.
-     * </p>
-     * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
-     * @param bolt the stateful bolt
-     * @return use the returned object to declare the inputs to this component
-     * @throws IllegalArgumentException if {@code parallelism_hint} is not positive
-     */
-  public BoltDeclarer setBolt(String id, IStatefulBolt bolt) throws IllegalArgumentException {
-    return setBolt(id, bolt, null);
-  }
-
-    /**
-     * Define a new bolt in this topology. This defines a stateful bolt, that requires its
-     * state (of computation) to be saved. When this bolt is initialized, the {@link IStatefulBolt#initState(State)} method
-     * is invoked after {@link IStatefulBolt#prepare(Map, TopologyContext, OutputCollector)} but before {@link IStatefulBolt#execute(Tuple)}
-     * with its previously saved state.
-     * <p>
-     * The framework provides at-least once guarantee for the state updates. Bolts (both stateful and non-stateful) in a stateful topology
-     * are expected to anchor the tuples while emitting and ack the input tuples once its processed.
-     * </p>
-     * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
-     * @param bolt the stateful bolt
-     * @param parallelismHint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somwehere around the cluster.
-     * @return use the returned object to declare the inputs to this component
-     * @throws IllegalArgumentException if {@code parallelism_hint} is not positive
-     */
-  public BoltDeclarer setBolt(String id, IStatefulBolt bolt,
-                              Number parallelismHint) throws IllegalArgumentException {
-    return setStatefulBolt(id, bolt, parallelismHint);
   }
 
   /**

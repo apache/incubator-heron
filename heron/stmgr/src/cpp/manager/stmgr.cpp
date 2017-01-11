@@ -107,8 +107,7 @@ void StMgr::Init() {
               1000 * 1000),
       0);  // fire only once
 
-  is_stateful_ =
-    heron::config::TopologyConfigHelper::GetStatefulCheckpointInterval(*hydrated_topology_) > 0;
+  is_stateful_ = heron::config::TopologyConfigHelper::IsTopologyStateful(*hydrated_topology_);
 
   // Start the stateful helper.
   stateful_helper_ = new StatefulHelper();

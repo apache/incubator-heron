@@ -18,19 +18,12 @@ import java.util.Map;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
-import com.twitter.heron.api.spout.IStatefulSpout;
 
 public class SpoutDeclarer extends BaseComponentDeclarer<SpoutDeclarer> {
   private OutputFieldsGetter output;
 
   public SpoutDeclarer(String name, IRichSpout spout, Number taskParallelism) {
-    super(name, spout, false, taskParallelism);
-    output = new OutputFieldsGetter();
-    spout.declareOutputFields(output);
-  }
-
-  public SpoutDeclarer(String name, IStatefulSpout spout, Number taskParallelism) {
-    super(name, spout, true, taskParallelism);
+    super(name, spout, taskParallelism);
     output = new OutputFieldsGetter();
     spout.declareOutputFields(output);
   }

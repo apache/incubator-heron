@@ -39,6 +39,7 @@ const sp_string TopologyConfigVars::TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS =
 const sp_string TopologyConfigVars::TOPOLOGY_ENABLE_ACKING = "topology.acking";
 const sp_string TopologyConfigVars::TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
 const sp_string TopologyConfigVars::TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
+const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL = "topology.stateful";
 const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL =
                                     "topology.stateful.checkpoint.interval";
 const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_PROVIDER_TYPE =

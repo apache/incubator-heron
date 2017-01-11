@@ -29,16 +29,13 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
   private IComponent component;
   private Map<String, Object> componentConfiguration;
 
-  public BaseComponentDeclarer(String name, IComponent comp,
-                               boolean statefulComponent, Number taskParallelism) {
+  public BaseComponentDeclarer(String name, IComponent comp, Number taskParallelism) {
     this.name = name;
     this.component = comp;
     this.componentConfiguration = comp.getComponentConfiguration();
     if (this.componentConfiguration == null) {
       this.componentConfiguration = new HashMap<>();
     }
-    this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_STATEFUL,
-        Boolean.toString(statefulComponent));
     if (taskParallelism != null) {
       this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
           taskParallelism.toString());

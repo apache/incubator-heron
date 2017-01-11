@@ -240,17 +240,19 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   LOG(INFO) << "Topology Read and Validated\n";
 
   // In case we are a stateful topology we need to start our checkpointing timer
-  sp_int64 stateful_checkpoint_interval =
-             config::TopologyConfigHelper::GetStatefulCheckpointInterval(*topology_);
-  if (stateful_checkpoint_interval > 0) {
-    // Instantiate the stateful coordinator
-    stateful_coordinator_ = new StatefulCoordinator(start_time_);
-    LOG(INFO) << "Starting timer to checkpoint state every "
-              << stateful_checkpoint_interval << " seconds";
-    CHECK_GT(eventLoop_->registerTimer(
-                 [this](EventLoop::Status) { this->SendCheckpointMarker(); }, true,
-                 stateful_checkpoint_interval * 1000 * 1000),
-             0);
+  if (config::TopologyConfigHelper::IsTopologyStateful(*topology_)) {
+    sp_int64 stateful_checkpoint_interval =
+               config::TopologyConfigHelper::GetStatefulCheckpointInterval(*topology_);
+    if (stateful_checkpoint_interval > 0) {
+      // Instantiate the stateful coordinator
+      stateful_coordinator_ = new StatefulCoordinator(start_time_);
+      LOG(INFO) << "Starting timer to checkpoint state every "
+                << stateful_checkpoint_interval << " seconds";
+      CHECK_GT(eventLoop_->registerTimer(
+                   [this](EventLoop::Status) { this->SendCheckpointMarker(); }, true,
+                   stateful_checkpoint_interval * 1000 * 1000),
+               0);
+    }
   }
 
   // Now see if there is already a pplan
