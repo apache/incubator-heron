@@ -18,7 +18,7 @@
 #include <vector>
 #include "gtest/gtest.h"
 #include "basics/basics.h"
-#include "config/config-map.h"
+#include "config/config.h"
 
 TEST(ConfigTest, builder) {
   heron::config::Config::Builder builder;
@@ -57,14 +57,25 @@ TEST(ConfigTest, doublevalue) {
   EXPECT_DOUBLE_EQ(config.getdouble("a"), a);
 }
 
-TEST(ConfigTest, pointer) {
-  int32_t a = 34;
-  auto config = heron::config::Config::Builder().putptr("a", &a).build();
+TEST(ConfigTest, expand) {
+  heron::config::Config::Builder builder;
+  builder.putstr(heron::config::CommonConfigVars::CLUSTER, "cluster1");
+  builder.putstr(heron::config::CommonConfigVars::ROLE, "role1");
+  builder.putstr(heron::config::CommonConfigVars::ENVIRON, "environ1");
+  builder.putstr(heron::config::CommonConfigVars::TOPOLOGY_NAME, "topology1");
+  builder.putstr("base_dir", ".herondata/${CLUSTER}/${ROLE}/${TOPOLOGY}");
+  builder.putstr("another_dir", "/${CLUSTER}/${ROLE}/${TOPOLOGY}");
+  builder.putstr("common_dir", "${CLUSTER}");
+  builder.putstr("a", "a");
+  builder.putint64("b", 123456);
 
-  EXPECT_EQ(config.getptr("a"), &a);
+  heron::config::Config config = builder.build().expand();
 
-  int32_t b = *reinterpret_cast<int *>(config.getptr("a"));
-  EXPECT_EQ(a, b);
+  EXPECT_EQ(config.getstr("base_dir"), ".herondata/cluster1/role1/topology1");
+  EXPECT_EQ(config.getstr("another_dir"), "/cluster1/role1/topology1");
+  EXPECT_EQ(config.getstr("common_dir"), "cluster1");
+  EXPECT_EQ(config.getstr("a"), "a");
+  EXPECT_EQ(config.getint64("b"), 123456);
 }
 
 int main(int argc, char **argv) {

@@ -202,6 +202,10 @@ class Parameters {
     this->map_.insert(builder.map_.begin(), builder.map_.end());
   }
 
+  std::unordered_map<std::string, std::string> getmap() {
+    return map_;
+  }
+
  private:
   std::unordered_map<std::string, std::string> map_;
 };

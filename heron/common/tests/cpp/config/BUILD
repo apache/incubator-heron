@@ -11,6 +11,8 @@ cc_test(
     ],
     copts = [
         "-I.",
+        "-Iheron",
+        "-I$(GENDIR)/heron",
         "-Iheron/common/src/cpp",
     ],
     size = "small",
