@@ -90,19 +90,17 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCo
     mOnConnectionBufferChange(this);
   }
 
-  if (!hasCausedBackPressure()) {
-    // Are we above the threshold?
-    if (mNumOutstandingBytes >= systemHWMOutstandingBytes) {
-      // Have we been above the threshold enough number of times?
-      if (++mNumEnqueuesWithBufferFull > __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__) {
-        mNumEnqueuesWithBufferFull = 0;
-        if (mOnConnectionBufferFull) {
-          mOnConnectionBufferFull(this);
-        }
-      }
-    } else {
+  // Are we above the threshold?
+  if (mNumOutstandingBytes >= systemHWMOutstandingBytes) {
+    // Have we been above the threshold enough number of times?
+    if (++mNumEnqueuesWithBufferFull > __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__) {
       mNumEnqueuesWithBufferFull = 0;
+      if (mOnConnectionBufferFull) {
+        mOnConnectionBufferFull(this);
+      }
     }
+  } else {
+    mNumEnqueuesWithBufferFull = 0;
   }
   return 0;
 }
