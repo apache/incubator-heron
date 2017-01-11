@@ -52,7 +52,8 @@ class CheckpointGateway {
           Tuple;
   class CheckpointInfo {
    public:
-    explicit CheckpointInfo(const std::set<sp_int32>& _all_upstream_dependencies);
+    explicit CheckpointInfo(sp_int32 _this_task_id,
+                            const std::set<sp_int32>& _all_upstream_dependencies);
     ~CheckpointInfo();
     proto::system::HeronTupleSet2*  SendToInstance(proto::system::HeronTupleSet2* _tuple,
                                                    sp_uint64 _size);
@@ -68,6 +69,7 @@ class CheckpointGateway {
     std::set<sp_int32> pending_upstream_dependencies_;
     std::deque<Tuple> pending_tuples_;
     sp_uint64 current_size_;
+    sp_int32 this_task_id_;
   };
   void ForceDrain();
   void DrainTuple(sp_int32 _dest, Tuple& _tuple);

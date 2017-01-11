@@ -119,7 +119,7 @@ CheckpointGateway::get_info(sp_int32 _task_id) {
   iter = pending_tuples_.find(_task_id);
   if (iter == pending_tuples_.end()) {
     CheckpointInfo* info =
-         new CheckpointInfo(stateful_helper_->get_upstreamers(_task_id));
+         new CheckpointInfo(_task_id, stateful_helper_->get_upstreamers(_task_id));
     pending_tuples_[_task_id] = info;
     return info;
   } else {
@@ -127,12 +127,13 @@ CheckpointGateway::get_info(sp_int32 _task_id) {
   }
 }
 
-CheckpointGateway::CheckpointInfo::CheckpointInfo(
+CheckpointGateway::CheckpointInfo::CheckpointInfo(sp_int32 _this_task_id,
                const std::set<sp_int32>& _all_upstream_dependencies) {
   checkpoint_id_ = "";
   all_upstream_dependencies_ = _all_upstream_dependencies;
   pending_upstream_dependencies_ = all_upstream_dependencies_;
   current_size_ = 0;
+  this_task_id_ = _this_task_id;
 }
 
 CheckpointGateway::CheckpointInfo::~CheckpointInfo() {
@@ -170,24 +171,28 @@ CheckpointGateway::CheckpointInfo::HandleUpstreamMarker(sp_int32 _src_task_id,
   if (_checkpoint_id == checkpoint_id_) {
     pending_upstream_dependencies_.erase(_src_task_id);
   } else if (checkpoint_id_.empty()) {
-    LOG(INFO) << "Seeing the checkpoint marker " << _checkpoint_id
+    LOG(INFO) << "TaskId: " << this_task_id_
+              << " Seeing the checkpoint marker " << _checkpoint_id
               << " for the first time";
     checkpoint_id_ = _checkpoint_id;
     pending_upstream_dependencies_.erase(_src_task_id);
   } else if (_checkpoint_id > checkpoint_id_) {
-    LOG(INFO) << "Seeing the checkpoint marker " << _checkpoint_id
+    LOG(INFO) << "TaskId: " << this_task_id_
+              << " Seeing the checkpoint marker " << _checkpoint_id
               << " while we were already amidst " << checkpoint_id_
               << " ..resetting";
     checkpoint_id_ = _checkpoint_id;
     pending_upstream_dependencies_ = all_upstream_dependencies_;
     pending_upstream_dependencies_.erase(_src_task_id);
   } else {
-    LOG(WARNING) << "Discarding older checkpoint_id message "
+    LOG(WARNING) << "TaskId: " << this_task_id_
+                 << " Discarding older checkpoint_id message "
                  << _checkpoint_id << " from upstream task "
                  << _src_task_id;
   }
   if (pending_upstream_dependencies_.empty()) {
-    LOG(INFO) << "All checkpoint markers received for checkpoint "
+    LOG(INFO) << "TaskId: " << this_task_id_
+              << " All checkpoint markers received for checkpoint "
                  << _checkpoint_id;
     // We need to add Initiate Checkpoint message
     auto message = new proto::ckptmgr::InitiateStatefulCheckpoint();
