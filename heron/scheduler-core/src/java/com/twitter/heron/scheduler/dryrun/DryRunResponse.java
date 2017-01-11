@@ -21,6 +21,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
  * Created by rli on 1/11/17.
  */
 public abstract class DryRunResponse extends RuntimeException {
+
+  private static final long serialVersionUID = 4875372144841447L;
   private final TopologyAPI.Topology topology;
   private final Config config;
   private final PackingPlan packingPlan;
