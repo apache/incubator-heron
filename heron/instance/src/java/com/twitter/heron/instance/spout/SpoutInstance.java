@@ -57,7 +57,7 @@ public class SpoutInstance implements IInstance {
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
 
-  private final boolean isStatefulComponent;
+  private final boolean isTopologyStateful;
   // This instance should be able to pick up previous one.
   // TODO(mfu): Currently we hardcode it as a HashMapState
   private final State instanceState = new HashMapState();
@@ -92,12 +92,12 @@ public class SpoutInstance implements IInstance {
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
 
-    this.isStatefulComponent =
+    this.isTopologyStateful =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL));
 
     LOG.info("Enable Ack: " + this.ackEnabled);
     LOG.info("EnableMessageTimeouts: " + this.enableMessageTimeouts);
-    LOG.info("Is stateful component: " + this.isStatefulComponent);
+    LOG.info("Is stateful component: " + this.isTopologyStateful);
 
     if (helper.getMySpout() == null) {
       throw new RuntimeException("HeronSpoutInstance has no spout in physical plan");
@@ -136,7 +136,7 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
-    if (!isStatefulComponent) {
+    if (!isTopologyStateful) {
       throw new RuntimeException("Should not save state in a non-stateful topology");
     }
 
@@ -162,7 +162,7 @@ public class SpoutInstance implements IInstance {
 
     // Init the state for the spout
     // TODO(mfu): Pick up previous state: instanceState.putAll(...);
-    if (this.isStatefulComponent && spout instanceof IStatefulComponent) {
+    if (this.isTopologyStateful && spout instanceof IStatefulComponent) {
       ((IStatefulComponent) spout).initState(instanceState);
     }
 
