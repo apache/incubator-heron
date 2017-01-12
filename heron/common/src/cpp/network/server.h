@@ -210,12 +210,12 @@ class Server : public BaseServer {
 
   template<typename M>
   void release(M* m) {
-    __global_protobuf_pool__->release(m);
+    __global_protobuf_pool_release__(m);
   }
 
   template<typename M>
   M* acquire(M* m) {
-    return __global_protobuf_pool__->acquire(m);
+    return __global_protobuf_pool_acquire__(m);
   }
 
  private:
@@ -250,7 +250,7 @@ class Server : public BaseServer {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
     M* m = nullptr;
-    m = __global_protobuf_pool__->acquire(m);
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
