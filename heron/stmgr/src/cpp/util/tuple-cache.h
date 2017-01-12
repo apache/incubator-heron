@@ -85,7 +85,7 @@ class TupleCache {
 
     proto::system::HeronTupleSet2* acquire() {
       proto::system::HeronTupleSet2* retval = NULL;
-      return __global_protobuf_pool__->acquire(retval);
+      return __global_protobuf_pool_acquire__(retval);
     }
 
     proto::system::HeronTupleSet2* acquire_clean_set() {

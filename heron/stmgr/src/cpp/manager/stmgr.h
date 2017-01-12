@@ -104,6 +104,8 @@ class StMgr {
                                 proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
  private:
+ private:
+ private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
   void FetchTMasterLocation();
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
@@ -140,10 +142,10 @@ class StMgr {
   void BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLocation);
 
   template<typename T> T* acquire(T* t) {
-    return __global_protobuf_pool__->acquire(t);
+    return __global_protobuf_pool_acquire__(t);
   }
   template<typename T> void release(T* t) {
-    __global_protobuf_pool__->release(t);
+    __global_protobuf_pool_release__(t);
   }
 
   heron::common::HeronStateMgr* state_mgr_;
