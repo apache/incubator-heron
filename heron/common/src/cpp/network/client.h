@@ -174,16 +174,6 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  template<typename M>
-  void release(M* m) {
-    __global_protobuf_pool_release__(m);
-  }
-
-  template<typename M>
-  M* acquire(M* m) {
-    return __global_protobuf_pool_acquire__(m);
-  }
-
  protected:
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
@@ -270,7 +260,7 @@ class Client : public BaseClient {
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
+      __global_protobuf_pool_release__(m);
       return;
     }
     CHECK(m->IsInitialized());
@@ -287,7 +277,7 @@ class Client : public BaseClient {
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
+      __global_protobuf_pool_release__(m);
       return;
     }
     CHECK(m->IsInitialized());

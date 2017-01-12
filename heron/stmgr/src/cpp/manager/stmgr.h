@@ -139,13 +139,6 @@ class StMgr {
   // Broadcast the tmaster location changes to other components. (MM for now)
   void BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLocation);
 
-  template<typename T> T* acquire(T* t) {
-    return __global_protobuf_pool_acquire__(t);
-  }
-  template<typename T> void release(T* t) {
-    __global_protobuf_pool_release__(t);
-  }
-
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;

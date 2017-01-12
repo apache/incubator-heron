@@ -208,16 +208,6 @@ class Server : public BaseServer {
   // Called when the connection is closed
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status);
 
-  template<typename M>
-  void release(M* m) {
-    __global_protobuf_pool_release__(m);
-  }
-
-  template<typename M>
-  M* acquire(M* m) {
-    return __global_protobuf_pool_acquire__(m);
-  }
-
  private:
   // When a new packet arrives on the connection, this is invoked by the Connection
   void OnNewPacket(Connection* connection, IncomingPacket* packet);
@@ -234,7 +224,7 @@ class Server : public BaseServer {
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
+      __global_protobuf_pool_release__(m);
       CloseConnection(_conn);
       return;
     }
@@ -255,7 +245,7 @@ class Server : public BaseServer {
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
+      __global_protobuf_pool_release__(m);
       CloseConnection(_conn);
       return;
     }
