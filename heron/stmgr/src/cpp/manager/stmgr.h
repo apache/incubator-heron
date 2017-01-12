@@ -104,8 +104,6 @@ class StMgr {
                                 proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
  private:
- private:
- private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
   void FetchTMasterLocation();
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
