@@ -43,8 +43,9 @@ class StreamConsumers {
   void GetListToSend(const proto::system::HeronDataTuple& _tuple, std::vector<sp_int32>& _return);
 
   inline bool isShuffleGrouping() {
-    if (consumers_.size() == 1 &&
-        typeid(ShuffleGrouping) == typeid(*(consumers_.front()))) {
+    ShuffleGrouping* grouping = dynamic_cast<ShuffleGrouping *>(consumers_.front());
+
+    if (consumers_.size() == 1 && grouping != nullptr) {
       return true;
     }
     return false;

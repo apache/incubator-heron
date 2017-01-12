@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.common;
+package com.twitter.heron.common.basics;
 
-public final class Constants {
+import com.google.common.io.Files;
 
-  // name of the resource file that holds the config keys
-  public static final String KEYS_YAML = "com/twitter/heron/spi/common/keys.yaml";
+/***
+ * This enum defines commands topology package type
+ */
+public enum PackageType {
+  PEX,
+  JAR,
+  TAR;
 
-  // name of the resource file that holds the default values for config keys
-  public static final String DEFAULTS_YAML = "com/twitter/heron/spi/common/defaults.yaml";
-
-  public static final long GB = 1024L * 1024 * 1024;
-  public static final long MB = 1024L * 1024;
-
-  private Constants() {
+  public static PackageType getPackageType(String packageFile) {
+    String extension = Files.getFileExtension(packageFile);
+    return PackageType.valueOf(extension.toUpperCase());
   }
+
 }

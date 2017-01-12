@@ -14,7 +14,7 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +32,8 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
@@ -39,8 +41,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class AuroraScheduler implements IScheduler, IScalable {
@@ -154,7 +154,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
    */
   protected String formatJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
+        javaOpts.getBytes(StandardCharsets.UTF_8));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
@@ -186,7 +186,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put("COMPONENT_RAMMAP", Runtime.componentRamMap(runtime));
     auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));
+    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE",
+        Context.topologyPackageType(config).name().toLowerCase());
     auroraProperties.put("TOPOLOGY_BINARY_FILE",
         FileUtils.getBaseName(Context.topologyBinaryFile(config)));
     auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
@@ -196,8 +197,10 @@ public class AuroraScheduler implements IScheduler, IScalable {
         Context.pythonInstanceSandboxBinary(config));
 
     auroraProperties.put("CPUS_PER_CONTAINER", Double.toString(containerResource.getCpu()));
-    auroraProperties.put("DISK_PER_CONTAINER", Long.toString(containerResource.getDisk()));
-    auroraProperties.put("RAM_PER_CONTAINER", Long.toString(containerResource.getRam()));
+    auroraProperties.put("DISK_PER_CONTAINER",
+        Long.toString(containerResource.getDisk().asBytes()));
+    auroraProperties.put("RAM_PER_CONTAINER",
+        Long.toString(containerResource.getRam().asBytes()));
 
     auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
 

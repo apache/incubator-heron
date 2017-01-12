@@ -25,10 +25,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(NetworkUtils.class)

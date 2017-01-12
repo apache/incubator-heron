@@ -17,6 +17,7 @@ package com.twitter.heron.spi.packing;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,12 +25,13 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class PackingPlanTest {
   private static PackingPlan generatePacking(Map<Integer, List<InstanceId>> basePacking) {
-    Resource resource = new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
+    Resource resource
+        = new Resource(1.0, ByteAmount.fromGigabytes(1), ByteAmount.fromGigabytes(10));
 
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
 
@@ -42,9 +44,11 @@ public class PackingPlanTest {
         String componentName = instanceId.getComponentName();
         Resource instanceResource;
         if ("bolt".equals(componentName)) {
-          instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
+          instanceResource
+              = new Resource(1.0, ByteAmount.fromGigabytes(2), ByteAmount.fromGigabytes(10));
         } else {
-          instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+          instanceResource
+              = new Resource(1.0, ByteAmount.fromGigabytes(3), ByteAmount.fromGigabytes(10));
         }
         instancePlans.add(new PackingPlan.InstancePlan(instanceId, instanceResource));
       }
@@ -100,11 +104,11 @@ public class PackingPlanTest {
     Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
         > smallContainer.getRequiredResource().getCpu());
     Assert.assertTrue(largeContainer.getRequiredResource().getRam()
-        > smallContainer.getRequiredResource().getRam());
+        .greaterThan(smallContainer.getRequiredResource().getRam()));
     Assert.assertFalse(largeContainer.getScheduledResource().isPresent());
     Assert.assertFalse(smallContainer.getScheduledResource().isPresent());
 
-    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    Set<PackingPlan.ContainerPlan> containers = new LinkedHashSet<>();
     containers.add(largeContainer);
     containers.add(smallContainer);
 
@@ -120,7 +124,7 @@ public class PackingPlanTest {
     Assert.assertTrue(largeContainer.getRequiredResource().getCpu()
         > smallContainer.getRequiredResource().getCpu());
     Assert.assertTrue(largeContainer.getRequiredResource().getRam()
-        > smallContainer.getRequiredResource().getRam());
+        .greaterThan(smallContainer.getRequiredResource().getRam()));
     Assert.assertTrue(largeContainer.getScheduledResource().isPresent());
     Assert.assertTrue(smallContainer.getScheduledResource().isPresent());
     Assert.assertEquals(largeContainer.getScheduledResource().get().getCpu(),

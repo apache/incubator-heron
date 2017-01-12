@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
@@ -73,6 +75,15 @@ public class Config {
   public Boolean getBooleanValue(String key, boolean defaultValue) {
     Boolean value = getBooleanValue(key);
     return value != null ? value : defaultValue;
+  }
+
+  public ByteAmount getByteAmountValue(String key) {
+    Object value = get(key);
+    return TypeUtils.getByteAmount(value);
+  }
+
+  public PackageType getPackageType(String key) {
+    return (PackageType) get(key);
   }
 
   public Long getLongValue(String key) {

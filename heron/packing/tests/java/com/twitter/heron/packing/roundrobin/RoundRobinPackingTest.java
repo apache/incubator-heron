@@ -21,10 +21,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -67,7 +67,7 @@ public class RoundRobinPackingTest {
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set insufficient ram for container
-    long containerRam = -1L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(0);
 
     topologyConfig.setContainerRamRequested(containerRam);
 
@@ -111,8 +111,8 @@ public class RoundRobinPackingTest {
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     // Explicit set resources for container
-    long containerRam = 10L * Constants.GB;
-    long containerDisk = 20L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     float containerCpu = 30;
 
     topologyConfig.setContainerRamRequested(containerRam);
@@ -130,11 +130,10 @@ public class RoundRobinPackingTest {
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
       Assert.assertEquals(containerCpu, containerPlan.getRequiredResource().getCpu(), DELTA);
-
-      Assert.assertEquals((double) containerRam,
-          (double) containerPlan.getRequiredResource().getRam(),
-          containerPlan.getInstances().size());
-
+      Assert.assertTrue(String.format(// due to round-off when using divide()
+          "expected: %s but was: %s", containerRam, containerPlan.getRequiredResource().getRam()),
+          Math.abs(
+              containerRam.minus(containerPlan.getRequiredResource().getRam()).asBytes()) <= 1);
       Assert.assertEquals(containerDisk, containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
@@ -146,8 +145,8 @@ public class RoundRobinPackingTest {
 
       Assert.assertEquals(1, resources.size());
       int instancesCount = containerPlan.getInstances().size();
-      Assert.assertEquals(
-          (containerRam - RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) / instancesCount,
+      Assert.assertEquals(containerRam
+          .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
           resources.iterator().next().getRam());
     }
   }
@@ -168,11 +167,11 @@ public class RoundRobinPackingTest {
 
     // Explicit set resources for container
     // the value should be ignored, since we set the complete component ram map
-    long containerRam = Long.MAX_VALUE;
+    ByteAmount containerRam = ByteAmount.fromBytes(Long.MAX_VALUE);
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
-    long spoutRam = 2L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -203,10 +202,10 @@ public class RoundRobinPackingTest {
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
-    long containerRam = 10L * Constants.GB;
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
 
     // Explicit set component ram map
-    long boltRam = 1L * Constants.GB;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -236,9 +235,10 @@ public class RoundRobinPackingTest {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {
           Assert.assertEquals(
-              (containerRam
-                  - boltCount * boltRam
-                  - RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) / spoutCount,
+              containerRam
+                  .minus(boltRam.multiply(boltCount))
+                  .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER)
+                  .divide(spoutCount),
               instancePlan.getResource().getRam());
         }
       }

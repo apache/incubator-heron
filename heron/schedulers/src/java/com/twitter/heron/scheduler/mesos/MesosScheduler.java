@@ -29,19 +29,19 @@ import org.apache.mesos.MesosSchedulerDriver;
 import org.apache.mesos.Protos;
 import org.apache.mesos.SchedulerDriver;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.mesos.framework.BaseContainer;
 import com.twitter.heron.scheduler.mesos.framework.MesosFramework;
 import com.twitter.heron.scheduler.mesos.framework.TaskUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * Schedule a topology to a mesos cluster
@@ -257,18 +257,18 @@ public class MesosScheduler implements IScheduler {
         updatedPackingPlan.getContainers().iterator().next().getRequiredResource();
 
     double cpu = 0;
-    double disk = 0;
-    double mem = 0;
+    ByteAmount disk = ByteAmount.ZERO;
+    ByteAmount mem = ByteAmount.ZERO;
     for (PackingPlan.ContainerPlan cp : packing.getContainers()) {
       Resource containerResource = cp.getRequiredResource();
       cpu = Math.max(cpu, containerResource.getCpu());
-      disk = Math.max(disk, containerResource.getDisk());
-      mem = Math.max(mem, containerResource.getRam());
+      disk = disk.max(containerResource.getDisk());
+      mem = mem.max(containerResource.getRam());
     }
     container.cpu = maxResourceContainer.getCpu();
     // Convert them from bytes to MB
-    container.diskInMB = maxResourceContainer.getDisk() / Constants.MB;
-    container.memInMB = maxResourceContainer.getRam() / Constants.MB;
+    container.diskInMB = maxResourceContainer.getDisk().asMegabytes();
+    container.memInMB = maxResourceContainer.getRam().asMegabytes();
     container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
   }
 }

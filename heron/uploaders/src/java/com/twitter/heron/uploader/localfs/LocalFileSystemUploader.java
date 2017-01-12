@@ -28,6 +28,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 public class LocalFileSystemUploader implements IUploader {
@@ -69,12 +70,12 @@ public class LocalFileSystemUploader implements IUploader {
    * been uploaded if successful, or {@code null} if failed.
    */
   @Override
-  public URI uploadPackage() {
+  public URI uploadPackage() throws UploaderException {
     // first, check if the topology package exists
     boolean fileExists = new File(topologyPackageLocation).isFile();
     if (!fileExists) {
-      LOG.info("Topology file " + topologyPackageLocation + " does not exist.");
-      return null;
+      throw new UploaderException(
+          String.format("Topology package does not exist at '%s'", topologyPackageLocation));
     }
 
     // get the directory containing the file
@@ -84,30 +85,34 @@ public class LocalFileSystemUploader implements IUploader {
 
     // if the dest directory does not exist, create it.
     if (!parentDirectory.exists()) {
-      LOG.fine("The working directory does not exist; creating it.");
+      LOG.fine(String.format(
+          "Working directory does not exist. Creating it now at %s", parentDirectory.getPath()));
       if (!parentDirectory.mkdirs()) {
-        LOG.severe("Failed to create directory: " + parentDirectory.getPath());
-        return null;
+        throw new UploaderException(
+            String.format("Failed to create directory for topology package at %s",
+                parentDirectory.getPath()));
       }
     }
 
     // if the dest file exists, write a log message
     fileExists = new File(filePath.toString()).isFile();
     if (fileExists) {
-      LOG.fine("Target topology file " + filePath.toString() + " exists, overwriting...");
+      LOG.fine(String.format("Target topology package already exists at '%s'. Overwriting it now",
+          filePath.toString()));
     }
 
     // copy the topology package to target working directory
-    LOG.fine("Copying topology " + topologyPackageLocation
-        + " package to target working directory " + filePath.toString());
+    LOG.fine(String.format("Copying topology package at '%s' to target working directory '%s'",
+        topologyPackageLocation, filePath.toString()));
 
     Path source = Paths.get(topologyPackageLocation);
     try {
       CopyOption[] options = new CopyOption[]{StandardCopyOption.REPLACE_EXISTING};
       Files.copy(source, filePath, options);
-    } catch (IOException ex) {
-      LOG.info("Unable to copy: " + source.toString() + " " + ex);
-      return null;
+    } catch (IOException e) {
+      throw new UploaderException(
+            String.format("Unable to copy topology file from '%s' to '%s'",
+                source, filePath), e);
     }
 
     return getUri(destTopologyFile);

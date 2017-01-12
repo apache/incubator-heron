@@ -15,16 +15,20 @@ package com.twitter.heron.packing;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -41,8 +45,8 @@ public final class AssertPacking {
    */
   public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
                                       String boltName, String spoutName,
-                                      long expectedBoltRam, long expectedSpoutRam,
-                                      Long notExpectedContainerRam) {
+                                      ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam,
+                                      ByteAmount notExpectedContainerRam) {
     boolean boltFound = false;
     boolean spoutFound = false;
     List<Integer> expectedInstanceIndecies = new ArrayList<>();
@@ -52,7 +56,7 @@ public final class AssertPacking {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
         assertNotEquals(
-            notExpectedContainerRam, (Long) containerPlan.getRequiredResource().getRam());
+            notExpectedContainerRam, containerPlan.getRequiredResource().getRam());
       }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         expectedInstanceIndecies.add(expectedInstanceIndex++);
@@ -97,12 +101,12 @@ public final class AssertPacking {
    * maximum value.
    */
   public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
-                                        long maxRamforResources) {
+                                        ByteAmount maxRamforResources) {
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      assertTrue(String.format("Container with id %d requires more RAM (%d) than"
-              + " the maximum RAM allowed (%d)", containerPlan.getId(),
+      assertTrue(String.format("Container with id %d requires more RAM (%s) than"
+              + " the maximum RAM allowed (%s)", containerPlan.getId(),
           containerPlan.getRequiredResource().getRam(), maxRamforResources),
-          containerPlan.getRequiredResource().getRam() <= maxRamforResources);
+          containerPlan.getRequiredResource().getRam().lessOrEqual(maxRamforResources));
     }
   }
 
@@ -138,6 +142,35 @@ public final class AssertPacking {
       }
       assertTrue(String.format("Container (%s) did not include expected instance with taskId %d",
           containerPlan, instanceId.getTaskId()), instanceFound);
+    }
+
+    Map<Integer, PackingPlan.InstancePlan> taskIds = new HashMap<>();
+    Map<String, Set<PackingPlan.InstancePlan>> componentInstances = new HashMap<>();
+    for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+
+        // check for taskId collisions
+        PackingPlan.InstancePlan collisionInstance =  taskIds.get(instancePlan.getTaskId());
+        assertNull(String.format("Task id collision between instance %s and %s",
+            instancePlan, collisionInstance), collisionInstance);
+        taskIds.put(instancePlan.getTaskId(), instancePlan);
+
+        // check for componentIndex collisions
+        Set<PackingPlan.InstancePlan> instances =
+            componentInstances.get(instancePlan.getComponentName());
+        if (instances != null) {
+          for (PackingPlan.InstancePlan instance : instances) {
+            assertTrue(String.format(
+                "Component index collision between instance %s and %s", instance, instancePlan),
+                instance.getComponentIndex() != instancePlan.getComponentIndex());
+          }
+        }
+        if (componentInstances.get(instancePlan.getComponentName()) == null) {
+          componentInstances.put(instancePlan.getComponentName(),
+              new HashSet<PackingPlan.InstancePlan>());
+        }
+        componentInstances.get(instancePlan.getComponentName()).add(instancePlan);
+      }
     }
     assertEquals(expectedContainerIds.size(), plan.getContainers().size());
   }

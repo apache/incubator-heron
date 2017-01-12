@@ -15,12 +15,14 @@
 package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+
+import com.twitter.heron.common.basics.ByteAmount;
 
 public class PackingPlan {
   private final String id;
@@ -45,14 +47,14 @@ public class PackingPlan {
    */
   public Resource getMaxContainerResources() {
     double maxCpu = 0;
-    long maxRam = 0;
-    long maxDisk = 0;
+    ByteAmount maxRam = ByteAmount.ZERO;
+    ByteAmount maxDisk = ByteAmount.ZERO;
     for (ContainerPlan containerPlan : getContainers()) {
       Resource containerResource =
           containerPlan.getScheduledResource().or(containerPlan.getRequiredResource());
       maxCpu = Math.max(maxCpu, containerResource.getCpu());
-      maxRam = Math.max(maxRam, containerResource.getRam());
-      maxDisk = Math.max(maxDisk, containerResource.getDisk());
+      maxRam = maxRam.max(containerResource.getRam());
+      maxDisk = maxDisk.max(containerResource.getDisk());
     }
 
     return new Resource(maxCpu, maxRam, maxDisk);
@@ -65,7 +67,7 @@ public class PackingPlan {
    */
   public PackingPlan cloneWithHomogeneousScheduledResource() {
     Resource maxResource = getMaxContainerResources();
-    Set<ContainerPlan> updatedContainers = new HashSet<>();
+    Set<ContainerPlan> updatedContainers = new LinkedHashSet<>();
     for (ContainerPlan container : getContainers()) {
       updatedContainers.add(container.cloneWithScheduledResource(maxResource));
     }
@@ -117,7 +119,7 @@ public class PackingPlan {
    * @return String describing component ram distribution
    */
   public String getComponentRamDistribution() {
-    Map<String, Long> ramMap = new HashMap<>();
+    Map<String, ByteAmount> ramMap = new HashMap<>();
     // The implementation assumes instances for the same component require same ram
     for (ContainerPlan containerPlan : this.getContainers()) {
       for (InstancePlan instancePlan : containerPlan.getInstances()) {
@@ -128,7 +130,7 @@ public class PackingPlan {
     // Convert it into a formatted String
     StringBuilder ramMapBuilder = new StringBuilder();
     for (String component : ramMap.keySet()) {
-      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component)));
+      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component).asBytes()));
     }
 
     // Remove the duplicated "," at the end
