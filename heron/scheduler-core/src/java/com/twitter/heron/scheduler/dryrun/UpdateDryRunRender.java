@@ -13,31 +13,25 @@
 //  limitations under the License
 package com.twitter.heron.scheduler.dryrun;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.*;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.scheduler.dryrun.FormatterUtils.*;
 
-public class UpdateDryRunRender extends DryRunRender {
+public class UpdateDryRunRender implements DryRunRender {
 
   private final UpdateDryRunResponse response;
-  private final Map<Integer, ContainersDiffView> diffViews;
+  private final PackingPlan oldPlan;
+  private final PackingPlan newPlan;
 
   private class ContainersDiffView {
     private final Optional<ContainerPlan> oldPlan;
@@ -75,159 +69,121 @@ public class UpdateDryRunRender extends DryRunRender {
     return diffView;
   }
 
-  public UpdateDryRunRender(UpdateDryRunResponse response) {
-    this.response = response;
-    PackingPlan oldPlan = response.getOldPackingPlan();
-    PackingPlan newPlan = response.getPackingPlan();
-    this.diffViews = getContainerDiffViews(oldPlan, newPlan);
-  }
-
-  private Row rowOfInstancePlan(InstancePlan plan, TextColor color, TextStyle style) {
-    String taskId = String.valueOf(plan.getTaskId());
-    String cpu = String.valueOf(plan.getResource().getCpu());
-    String ram = String.valueOf(plan.getResource().getRam().asGigabytes());
-    String disk = String.valueOf(plan.getResource().getDisk().asGigabytes());
-    List<String> cells = Arrays.asList(
-          plan.getComponentName(), taskId, cpu, ram, disk);
-    Row row = new Row(cells);
-    row.setStyle(style);
-    row.setColor(color);
-    return row;
-  }
-
-  private String renderOneContainer(List<Row> rows) {
-    List<String> titleNames = Arrays.asList(
-        "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
-    Row title = new Row(titleNames);
-    title.setStyle(TextStyle.BOLD);
-    return new Table(title, rows).createTable();
-  }
-
   private enum ContainerChange {
     UNAFFECTED,
-    ENLARGED,
-    REDUCED,
     MODIFIED,
-    REMOVED,
-    NEW;
+    NEW,
+    REMOVED;
   }
 
-  private String renderResourceUsage(Resource resource) {
-    double cpu = resource.getCpu();
-    ByteAmount ram = resource.getRam();
-    ByteAmount disk = resource.getDisk();
-    return String.format("CPU: %s, RAM: %sGB, Disk: %sGB",
-        cpu, ram.asGigabytes(), disk.asGigabytes());
+  public UpdateDryRunRender(UpdateDryRunResponse response) {
+    this.response = response;
+    this.oldPlan = response.getOldPackingPlan();
+    this.newPlan = response.getPackingPlan();
   }
 
-  private String renderResourceUsageChange(Resource oldResource, Resource newResource) {
-    double oldCpu = oldResource.getCpu();
-    double newCpu = newResource.getCpu();
-    Optional<Cell> cpuUsageChange = FormatterUtils.percentageChange(oldCpu, newCpu);
-    long oldRam = oldResource.getRam().asGigabytes();
-    long newRam = newResource.getRam().asGigabytes();
-    Optional<Cell> ramUsageChange = FormatterUtils.percentageChange(oldRam, newRam);
-    long oldDisk = oldResource.getDisk().asGigabytes();
-    long newDisk = newResource.getDisk().asGigabytes();
-    Optional<Cell> diskUsageChange = FormatterUtils.percentageChange(oldDisk, newDisk);
-    String cpuUsage = String.format("CPU: %s", newCpu);
-    if (cpuUsageChange.isPresent()) {
-      cpuUsage += String.format(" (%s)", cpuUsageChange.get().toString());
-    }
-    String ramUsage = String.format("RAM: %sGB", newRam);
-    if (ramUsageChange.isPresent()) {
-      ramUsage += String.format(" (%s)", ramUsageChange.get().toString());
-    }
-    String diskUsage = String.format("Disk: %sGB", newDisk);
-    if (diskUsageChange.isPresent()) {
-      diskUsage += String.format(" (%s)", diskUsageChange.get().toString());
-    }
-    return String.join(", ", cpuUsage, ramUsage, diskUsage);
-  }
+  private class TableRenderer {
 
-  private String renderOneContainerTable(int containerId, ContainersDiffView diffView) {
-    StringBuilder builder = new StringBuilder();
-    Optional<ContainerPlan> oldPlan = diffView.getOldPlan();
-    Optional<ContainerPlan> newPlan = diffView.getNewPlan();
-    String header = new Cell(
-      String.format("Container %s: ", containerId), TextStyle.BOLD).toString();
-    builder.append(header);
-    // Container exists in both old and new packing plan
-    if(oldPlan.isPresent() && newPlan.isPresent()) {
-      ContainerPlan newContainerPlan = newPlan.get();
-      ContainerPlan oldContainerPlan = oldPlan.get();
-      // Container plan did not change
-      if (newContainerPlan.equals(oldContainerPlan)) {
-        builder.append(ContainerChange.UNAFFECTED + "\n");
-        String resourceUsage = renderResourceUsage(newContainerPlan.getRequiredResource());
+    private final PackingPlan oldPlan;
+    private final PackingPlan newPlan;
+
+    public TableRenderer(PackingPlan oldPlan, PackingPlan newPlan) {
+      this.oldPlan = oldPlan;
+      this.newPlan = newPlan;
+    }
+
+    private String renderContainerDiffView(int containerId, ContainersDiffView diffView) {
+      StringBuilder builder = new StringBuilder();
+      Optional<ContainerPlan> oldPlan = diffView.getOldPlan();
+      Optional<ContainerPlan> newPlan = diffView.getNewPlan();
+      String header = new Cell(
+        String.format("Container %d: ", containerId), TextStyle.BOLD).toString();
+      builder.append(header);
+      // Container exists in both old and new packing plan
+      if(oldPlan.isPresent() && newPlan.isPresent()) {
+        ContainerPlan newContainerPlan = newPlan.get();
+        ContainerPlan oldContainerPlan = oldPlan.get();
+        // Container plan did not change
+        if (newContainerPlan.equals(oldContainerPlan)) {
+          builder.append(ContainerChange.UNAFFECTED + "\n");
+          String resourceUsage = FormatterUtils.renderResourceUsage(
+              newContainerPlan.getRequiredResource());
+          List<Row> rows = new ArrayList<>();
+          for(InstancePlan plan: newContainerPlan.getInstances()) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.DEFAULT, TextStyle.DEFAULT));
+          }
+          String containerTable = FormatterUtils.renderOneContainer(rows);
+          builder.append(resourceUsage + "\n");
+          builder.append(containerTable + "\n");
+        } else {
+          // Container plan has changed
+          String resourceUsage = FormatterUtils.renderResourceUsageChange(
+              oldContainerPlan.getRequiredResource(), newContainerPlan.getRequiredResource());
+          Set<InstancePlan> oldInstancePlans = oldContainerPlan.getInstances();
+          Set<InstancePlan> newInstancePlans = newContainerPlan.getInstances();
+          Set<InstancePlan> unchangedPlans =
+              Sets.intersection(oldInstancePlans, newInstancePlans).immutableCopy();
+          Set<InstancePlan> newPlans =
+              Sets.difference(newInstancePlans, oldInstancePlans);
+          Set<InstancePlan> removedPlans =
+              Sets.difference(oldInstancePlans, newInstancePlans);
+          List<Row> rows = new ArrayList<>();
+          for(InstancePlan plan: unchangedPlans) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.DEFAULT, TextStyle.DEFAULT));
+          }
+          for(InstancePlan plan: newPlans) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.GREEN, TextStyle.DEFAULT));
+          }
+          for(InstancePlan plan: removedPlans) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.RED, TextStyle.STRIKETHROUGH));
+          }
+          builder.append(new Cell(ContainerChange.MODIFIED.toString()).toString() + "\n");
+          builder.append(resourceUsage + "\n");
+          String containerTable = FormatterUtils.renderOneContainer(rows);
+          builder.append(containerTable + "\n");
+        }
+      } else if (oldPlan.isPresent()) {
+        // Container has been removed
+        ContainerPlan oldContainerPlan = oldPlan.get();
+        List<Row> rows = new ArrayList<>();
+        for(InstancePlan plan: oldContainerPlan.getInstances()) {
+          rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.RED, TextStyle.STRIKETHROUGH));
+        }
+        builder.append(new Cell(ContainerChange.REMOVED.toString(), TextColor.RED).toString() + "\n");
+        builder.append(FormatterUtils.renderResourceUsage(
+            oldContainerPlan.getRequiredResource()) + "\n");
+        builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
+      } else if (newPlan.isPresent()) {
+        // New container has been added
+        ContainerPlan newContainerPlan = newPlan.get();
         List<Row> rows = new ArrayList<>();
         for(InstancePlan plan: newContainerPlan.getInstances()) {
-          rows.add(rowOfInstancePlan(plan, TextColor.DEFAULT, TextStyle.DEFAULT));
+          rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.GREEN, TextStyle.DEFAULT));
         }
-        String containerTable = renderOneContainer(rows);
-        builder.append(resourceUsage + "\n");
-        builder.append(containerTable + "\n");
+        builder.append(new Cell(ContainerChange.NEW.toString(), TextColor.GREEN).toString() + "\n");
+        builder.append(FormatterUtils.renderResourceUsage(
+            newContainerPlan.getRequiredResource()) + "\n");
+        builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
       } else {
-        // Container plan has changed
-        String resourceUsage = renderResourceUsageChange(
-            oldContainerPlan.getRequiredResource(), newContainerPlan.getRequiredResource());
-        Set<InstancePlan> oldInstancePlans = oldContainerPlan.getInstances();
-        Set<InstancePlan> newInstancePlans = newContainerPlan.getInstances();
-        Set<InstancePlan> unchangedPlans =
-            Sets.intersection(oldInstancePlans, newInstancePlans).immutableCopy();
-        Set<InstancePlan> newPlans =
-            Sets.difference(newInstancePlans, oldInstancePlans);
-        Set<InstancePlan> removedPlans =
-            Sets.difference(oldInstancePlans, newInstancePlans);
-        List<Row> rows = new ArrayList<>();
-        for(InstancePlan plan: unchangedPlans) {
-          rows.add(rowOfInstancePlan(plan, TextColor.DEFAULT, TextStyle.DEFAULT));
-        }
-        for(InstancePlan plan: newPlans) {
-          rows.add(rowOfInstancePlan(plan, TextColor.GREEN, TextStyle.DEFAULT));
-        }
-        for(InstancePlan plan: removedPlans) {
-          rows.add(rowOfInstancePlan(plan, TextColor.RED, TextStyle.STRIKETHROUGH));
-        }
-        builder.append(new Cell(ContainerChange.MODIFIED.toString()).toString() + "\n");
-        builder.append(resourceUsage + "\n");
-        String containerTable = renderOneContainer(rows);
-        builder.append(containerTable + "\n");
+        throw new RuntimeException(
+            "Unexpected error: either new container plan or old container plan has to exist");
       }
-    } else if (oldPlan.isPresent()) {
-      // Container has been removed
-      ContainerPlan oldContainerPlan = oldPlan.get();
-      List<Row> rows = new ArrayList<>();
-      for(InstancePlan plan: oldContainerPlan.getInstances()) {
-        rows.add(rowOfInstancePlan(plan, TextColor.RED, TextStyle.STRIKETHROUGH));
-      }
-      builder.append(new Cell(ContainerChange.REMOVED.toString(), TextColor.RED).toString() + "\n");
-      builder.append(renderResourceUsage(oldContainerPlan.getRequiredResource()) + "\n");
-      builder.append(renderOneContainer(rows) + "\n");
-    } else if (newPlan.isPresent()) {
-      // New container has been added
-      ContainerPlan newContainerPlan = newPlan.get();
-      List<Row> rows = new ArrayList<>();
-      for(InstancePlan plan: newContainerPlan.getInstances()) {
-        rows.add(rowOfInstancePlan(plan, TextColor.GREEN, TextStyle.DEFAULT));
-      }
-      builder.append(new Cell(ContainerChange.NEW.toString(), TextColor.GREEN).toString() + "\n");
-      builder.append(renderResourceUsage(newContainerPlan.getRequiredResource()) + "\n");
-      builder.append(renderOneContainer(rows) + "\n");
-    } else {
-      throw new RuntimeException(
-          "Unexpected error: either new container plan or old container plan has to exist");
+      return builder.toString();
     }
-    return builder.toString();
+
+    public String render() {
+      Map<Integer, ContainersDiffView> diffViews = getContainerDiffViews(oldPlan, newPlan);
+      StringBuilder builder = new StringBuilder();
+      for(Integer containerId: diffViews.keySet()) {
+        ContainersDiffView view = diffViews.get(containerId);
+        builder.append(renderContainerDiffView(containerId, view));
+      }
+      return builder.toString();
+    }
   }
 
   public String renderTable() {
-    StringBuilder builder = new StringBuilder();
-    for(Integer containerId: diffViews.keySet()) {
-      ContainersDiffView view = diffViews.get(containerId);
-      builder.append(renderOneContainerTable(containerId, view));
-    }
-    return builder.toString();
+    return new TableRenderer(oldPlan, newPlan).render();
   }
 
   public String renderRaw() {

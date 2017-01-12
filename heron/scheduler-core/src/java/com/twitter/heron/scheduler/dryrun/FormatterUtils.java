@@ -14,10 +14,15 @@
 package com.twitter.heron.scheduler.dryrun;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 
 /**
  * Formatter utilities
@@ -46,17 +51,31 @@ public class FormatterUtils {
   public enum TextColor {
     DEFAULT,
     RED,
-    GREEN;
+    GREEN
   }
 
   public enum TextStyle {
     DEFAULT,
     BOLD,
-    STRIKETHROUGH;
+    STRIKETHROUGH
   }
 
+  /**
+   * Poor man's tabulate implementation
+   *
+   * Each tabulates consists of a list of rows. Each row consists of a list of cells.
+   *
+   */
+
+  /**
+   * Cell is the smallest unit in a tabulate. More generally, it is a class
+   * that represents a piece of text with style and color added.
+   */
   public static class Cell {
+    // Text in the cell
     private final String text;
+
+    // Length of the text. It is used to calculate the proper widht of a column
     private final int length;
     private String formatter;
     private TextColor color;
@@ -111,6 +130,8 @@ public class FormatterUtils {
           builder.append(ANSI_BOLD);
           builder.append(formattedText);
           break;
+        /* Adding strike-through effect to a string is different. One needs to append unicode of
+           long strikethrough overlay to each single character in a string of characters. */
         case STRIKETHROUGH:
           for (int i = 0; i < formattedText.length(); i++) {
             builder.append(formattedText.charAt(i));
@@ -131,6 +152,7 @@ public class FormatterUtils {
         case DEFAULT:
           break;
       }
+      // Only append ANSI reset escape code if text style or text color is added
       if (style != TextStyle.DEFAULT || color != TextColor.DEFAULT) {
         builder.append(ANSI_RESET);
       }
@@ -138,6 +160,16 @@ public class FormatterUtils {
     }
   }
 
+  /**
+   * Row, which consists a list of cells.
+   *
+   *   ----------------------
+   *   | xxxx | yyyy | zzzz | <- a list of cells
+   *   ----------------------
+   *                 ^
+   *                 |------- separator: "|"
+   *
+   */
   public static class Row {
     private List<Cell> row;
     private static final String separator = "|";
@@ -149,18 +181,30 @@ public class FormatterUtils {
       }
     }
 
+    /**
+     * Set color for a list of cells in a row
+     * @param color: color of each cell in the row
+     */
     public void setColor(TextColor color) {
       for(Cell cell: row) {
         cell.setColor(color);
       }
     }
 
+    /**
+     * Set style for a list of cells in a row
+     * @param style: style of each cell in the row
+     */
     public void setStyle(TextStyle style) {
       for(Cell cell: row) {
         cell.setStyle(style);
       }
     }
 
+    /**
+     * Set formatter for each cell in the row
+     * @param formatters
+     */
     public void setFormatters(List<String> formatters) {
       for(int i = 0; i < formatters.size(); i++) {
         row.get(i).setFormatter(formatters.get(i));
@@ -190,6 +234,18 @@ public class FormatterUtils {
     }
   }
 
+
+  /**
+   * Table, which consists of a title and a list of rows below the title
+   *
+   *
+   *     ============================
+   *     | title1 | title2 | title3 | <------- title
+   *     ============================
+   *     | xxxxxx | yyy    | zzzzzz | <-|
+   *     ----------------------------   |----- rows
+   *     | gggg   | uuuuu  | ooo    | <-|
+   */
   public static class Table {
     private Row title;
     private List<Row> rows;
@@ -205,6 +261,16 @@ public class FormatterUtils {
       return builder;
     }
 
+    /**
+     * Calculate proper width for each column.
+     *
+     * Notice that if a cell contains text "foo" in red and bold style, the internal
+     * representation will be "\u001B[31m\u001B[1mfoo\u001B[0m". However during the
+     * calculation, ANSI escape codes/Unicode overlay should not be counted because they only
+     * serve as visual effect and do not take extra space on terminal.
+     *
+     * @return a list of integers specifying proper length of each column
+     */
     private List<Integer> calculateColumnsMax() {
       List<Integer> width = new ArrayList<>();
       for (int i = 0; i < title.size(); i++) {
@@ -218,8 +284,8 @@ public class FormatterUtils {
       return width;
     }
     /**
-     * generate formatter for each row based on rows. Width of a column is the
-     * max width of all cells on that column
+     * Generate formatter for each row based on rows. Width of a column is the
+     * max width of all cells on that column.
      *
      * Explanation of the {@code metaCellFormatter}:
      *
@@ -229,7 +295,7 @@ public class FormatterUtils {
      *  @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html">
      *    Formatter</a>
      *
-     * @return formatter for row
+     * @return formatter for rows
      */
     private List<String> generateRowFormatter() {
       List<String> formatters = new ArrayList<>();
@@ -243,6 +309,13 @@ public class FormatterUtils {
 
     /**
      * Generate length of table frame
+     *
+     * Definition of table frame:
+     *
+     *     =============================== <- table frame
+     *     | xxxxx | yyyyy | zzzzz | sss |
+     *     ===============================
+     *     | ..... | ..... | ..... | ... |
      *
      * The constant 3 comes from two spaces surrounding the text
      * and one separator after the text.
@@ -299,14 +372,8 @@ public class FormatterUtils {
     }
   }
 
-  /*
-   * Format new amount associated with change in percentage
-   * For example, with {@code oldAmount = 2} and {@code newAmount = 1}
-   * the result string is " 1 (-50.00%)"
-   * @param oldAmount old amount
-   * @param newAmount new amount
-   * @return formatted change
-   */
+
+  /******************************** Auxiliary functions ********************************/
 
   /**
    * Format new amount associated with change in percentage
@@ -316,7 +383,7 @@ public class FormatterUtils {
    * @param newAmount new resource usage
    * @return formatted chagne in percentage if oldAmount and newAmount differ
    */
-  protected static Optional<Cell> percentageChange(double oldAmount, double newAmount) {
+  public static Optional<Cell> percentageChange(double oldAmount, double newAmount) {
     double delta = newAmount - oldAmount;
     double percentage = delta / oldAmount * 100.0;
     if (percentage == 0.0) {
@@ -335,5 +402,60 @@ public class FormatterUtils {
       }
       return Optional.of(cell);
     }
+  }
+
+  public static Row rowOfInstancePlan(PackingPlan.InstancePlan plan,
+                                      TextColor color, TextStyle style) {
+    String taskId = String.valueOf(plan.getTaskId());
+    String cpu = String.valueOf(plan.getResource().getCpu());
+    String ram = String.valueOf(plan.getResource().getRam().asGigabytes());
+    String disk = String.valueOf(plan.getResource().getDisk().asGigabytes());
+    List<String> cells = Arrays.asList(
+          plan.getComponentName(), taskId, cpu, ram, disk);
+    Row row = new Row(cells);
+    row.setStyle(style);
+    row.setColor(color);
+    return row;
+  }
+
+  public static String renderOneContainer(List<Row> rows) {
+    List<String> titleNames = Arrays.asList(
+       "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
+    Row title = new Row(titleNames);
+    title.setStyle(TextStyle.BOLD);
+    return new Table(title, rows).createTable();
+  }
+
+  public static String renderResourceUsage(Resource resource) {
+    double cpu = resource.getCpu();
+    ByteAmount ram = resource.getRam();
+    ByteAmount disk = resource.getDisk();
+    return String.format("CPU: %s, RAM: %sGB, Disk: %sGB",
+      cpu, ram.asGigabytes(), disk.asGigabytes());
+  }
+
+  public static String renderResourceUsageChange(Resource oldResource, Resource newResource) {
+    double oldCpu = oldResource.getCpu();
+    double newCpu = newResource.getCpu();
+    Optional<Cell> cpuUsageChange = FormatterUtils.percentageChange(oldCpu, newCpu);
+    long oldRam = oldResource.getRam().asGigabytes();
+    long newRam = newResource.getRam().asGigabytes();
+    Optional<Cell> ramUsageChange = FormatterUtils.percentageChange(oldRam, newRam);
+    long oldDisk = oldResource.getDisk().asGigabytes();
+    long newDisk = newResource.getDisk().asGigabytes();
+    Optional<Cell> diskUsageChange = FormatterUtils.percentageChange(oldDisk, newDisk);
+    String cpuUsage = String.format("CPU: %s", newCpu);
+    if (cpuUsageChange.isPresent()) {
+      cpuUsage += String.format(" (%s)", cpuUsageChange.get().toString());
+    }
+    String ramUsage = String.format("RAM: %sGB", newRam);
+    if (ramUsageChange.isPresent()) {
+      ramUsage += String.format(" (%s)", ramUsageChange.get().toString());
+    }
+    String diskUsage = String.format("Disk: %sGB", newDisk);
+    if (diskUsageChange.isPresent()) {
+      diskUsage += String.format(" (%s)", diskUsageChange.get().toString());
+    }
+    return String.join(", ", cpuUsage, ramUsage, diskUsage);
   }
 }

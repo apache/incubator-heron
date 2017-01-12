@@ -14,45 +14,56 @@
 package com.twitter.heron.scheduler.dryrun;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
-
-import com.google.common.base.Strings;
 
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.packing.PackingPlan.*;
+import com.twitter.heron.scheduler.dryrun.FormatterUtils.*;
 
-public class SubmitDryRunRender extends DryRunRender {
+public class SubmitDryRunRender implements DryRunRender {
 
   private final SubmitDryRunResponse response;
+  private final PackingPlan plan;
 
   public SubmitDryRunRender(SubmitDryRunResponse response) {
     this.response = response;
+    this.plan = response.getPackingPlan();
+  }
+
+  private class TableRender {
+    private final PackingPlan plan;
+
+    public TableRender(PackingPlan plan) {
+      this.plan = plan;
+    }
+
+    public String render() {
+      StringBuilder builder = new StringBuilder();
+      Map<Integer, ContainerPlan> containersMap = plan.getContainersMap();
+      for(Integer containerId: containersMap.keySet()) {
+        StringBuilder containerBuilder = new StringBuilder();
+        String header =
+            new Cell(String.format("Container %d", containerId), TextStyle.BOLD).toString();
+        containerBuilder.append(header);
+        builder.append(header + "\n");
+        ContainerPlan plan = containersMap.get(containerId);
+        builder.append(FormatterUtils.renderResourceUsage(plan.getRequiredResource()) + "\n");
+        List<Row> rows = new ArrayList<>();
+        for(InstancePlan instancePlan: plan.getInstances()) {
+          rows.add(FormatterUtils.rowOfInstancePlan(instancePlan,
+              TextColor.DEFAULT, TextStyle.DEFAULT));
+        }
+        String containerTable = FormatterUtils.renderOneContainer(rows);
+        builder.append(containerTable + "\n");
+      }
+      return builder.toString();
+    }
   }
 
   public String renderTable() {
-    return "";
-    /*
-    Map<String, Resource> componentsResource =
-        this.componentsResource(response.getPackingPlan());
-    Map<String, Integer> componentsParallelism =
-        this.componentsParallelism(response.getPackingPlan());
-    List<List<String>> rows = new ArrayList<>();
-    for (Map.Entry<String, Resource> entry: componentsResource.entrySet()) {
-      String componentName = entry.getKey();
-      Resource resource = entry.getValue();
-      int totalCpu = (int) resource.getCpu();
-      long totalRam = resource.getRam().asGigabytes();
-      long totalDisk = resource.getDisk().asGigabytes();
-      int containerNum = componentsParallelism.get(componentName);
-      rows.add(Arrays.asList(
-          componentName, String.valueOf(totalCpu), String.valueOf(totalDisk),
-          String.valueOf(totalRam), String.valueOf(containerNum)));
-    }
-    return createTable(rows); */
+    return new TableRender(plan).render();
   }
 
   public String renderRaw() {
@@ -65,5 +76,4 @@ public class SubmitDryRunRender extends DryRunRender {
     builder.append(response.getPackingPlan().toString());
     return builder.toString();
   }
-
 }

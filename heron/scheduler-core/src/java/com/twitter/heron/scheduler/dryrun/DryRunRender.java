@@ -13,61 +13,20 @@
 //  limitations under the License
 package com.twitter.heron.scheduler.dryrun;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.common.base.Strings;
-
-import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
-
 /**
  * Interface of class that renders dry-run response
  */
-public abstract class DryRunRender {
+public interface DryRunRender {
 
-  protected List<String> title = Arrays.asList(
-      "component", "cpu", "disk (GB)", "ram (GB)", "parallelism");
+  /**
+   * Render dry-run response in table
+   * @return
+   */
+  String renderTable();
 
-  protected List<String> title2 = Arrays.asList(
-      "component", "status", "task ID", "cpu", "ram (GB)", "disk (GB)"
-  );
-
-  protected Map<String, Resource> componentsResource(PackingPlan packingPlan) {
-    Map<String, Resource> componentsResource = new HashMap<>();
-    for (PackingPlan.ContainerPlan containerPlan: packingPlan.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan: containerPlan.getInstances()) {
-        Resource resource = instancePlan.getResource();
-        String componentName = instancePlan.getComponentName();
-        Resource totalResource = componentsResource.get(componentName);
-        if (totalResource == null) {
-          componentsResource.put(componentName, resource);
-        } else {
-          componentsResource.replace(componentName, resource.plus(totalResource));
-        }
-      }
-    }
-    return componentsResource;
-  }
-
-  protected Map<String, Integer> componentsParallelism(PackingPlan packingPlan) {
-    Map<String, Integer> componentsParallelism = new HashMap<>();
-    for (PackingPlan.ContainerPlan containerPlan: packingPlan.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan: containerPlan.getInstances()) {
-        String componentName = instancePlan.getComponentName();
-        Integer parallelism = componentsParallelism.get(componentName);
-        if (parallelism == null) {
-          componentsParallelism.put(componentName, 1);
-        } else {
-          componentsParallelism.replace(componentName, 1 + parallelism);
-        }
-      }
-    }
-    return componentsParallelism;
-  }
+  /**
+   * Render dry-run response in a raw format
+   * @return
+   */
+  String renderRaw();
 }
