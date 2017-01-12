@@ -229,11 +229,12 @@ class Server : public BaseServer {
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
+    M* m = NULL;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      release(m);
       CloseConnection(_conn);
       return;
     }

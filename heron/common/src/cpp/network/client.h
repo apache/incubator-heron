@@ -244,7 +244,7 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = new M();
+        m = __global_protobuf_pool_acquire__(m);
         context_map_.erase(rid);
         _ipkt->UnPackProtocolBuffer(m);
       } else {
@@ -282,11 +282,12 @@ class Client : public BaseClient {
 
   template <typename T, typename M>
   void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
-    M* m = new M();
+    M* m = NULL;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      release(m);
       return;
     }
     CHECK(m->IsInitialized());
