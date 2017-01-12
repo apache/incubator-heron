@@ -21,6 +21,7 @@ SCHEDULER_YAML:                      heron.config.file.scheduler.yaml
 STATEMGR_YAML:                       heron.config.file.statemgr.yaml
 SYSTEM_YAML:                         heron.config.file.system.yaml
 UPLOADER_YAML:                       heron.config.file.uploader.yaml
+STATEFUL_YAML:                       heron.config.file.stateful.yaml
 
 ################################################################################
 # keys for config provided in the command line
@@ -166,6 +167,7 @@ SANDBOX_STATEMGR_YAML:               heron.config.sandbox.file.statemgr.yaml
 SANDBOX_SYSTEM_YAML:                 heron.config.sandbox.file.system.yaml
 SANDBOX_UPLOADER_YAML:               heron.config.sandbox.file.uploader.yaml
 SANDBOX_OVERRIDE_YAML:               heron.config.sandbox.file.override.yaml
+SANDBOX_STATEFUL_YAML:               heron.config.sandbox.file.stateful.yaml
 
 ################################################################################
 # keys for sandbox config provided user binaries
