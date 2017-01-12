@@ -178,7 +178,7 @@ void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg
 }
 
 void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
-  release(_message);
+  __global_protobuf_pool_release__(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 
@@ -201,14 +201,14 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID rand = generator.generate();
   // generator.generate(rand);
   proto::stmgr::StartBackPressureMessage* message = nullptr;
-  message = acquire(message);
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
 
-  release(message);
+  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendStopBackPressureMessage() {
@@ -216,14 +216,14 @@ void StMgrClient::SendStopBackPressureMessage() {
   REQID rand = generator.generate();
   // generator.generate(rand);
   proto::stmgr::StopBackPressureMessage* message = nullptr;
-  message = acquire(message);
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
 
-  release(message);
+  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendDownstreamStatefulCheckpoint(
