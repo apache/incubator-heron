@@ -17,7 +17,6 @@
 #define MEM_POOL_H
 
 #include <google/protobuf/message.h>
-#include <mutex>
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
