@@ -83,13 +83,9 @@ class TupleCache {
                std::function<void(sp_int32,
                proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer);
 
-    proto::system::HeronTupleSet2* acquire() {
-      proto::system::HeronTupleSet2* retval = NULL;
-      return __global_protobuf_pool__->acquire(retval);
-    }
-
     proto::system::HeronTupleSet2* acquire_clean_set() {
-     proto::system::HeronTupleSet2* set = acquire();
+     proto::system::HeronTupleSet2* set = NULL;
+     set = __global_protobuf_pool_acquire__(set);
      set->Clear();
      return set;
     }

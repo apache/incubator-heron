@@ -89,7 +89,8 @@ class MemPool {
   std::unordered_map<std::type_index, std::vector<B*>> map_;
 };
 
-extern MemPool<google::protobuf::Message>* __global_protobuf_pool__;
+template<typename T> extern T* __global_protobuf_pool_acquire__(T* m);
+template<typename T> extern void __global_protobuf_pool_release__(T* m);
 
 #endif
 
