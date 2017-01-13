@@ -46,6 +46,9 @@ heron.streammgr.cache.drain.frequency.ms: 10
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100
 
+# The sized based threshold in MB for buffering checkpoint tuples
+heron.streammgr.checkpoint.drain.size.mb: 100
+
 # For efficient acknowledgement
 heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 
