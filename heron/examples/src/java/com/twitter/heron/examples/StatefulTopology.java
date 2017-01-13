@@ -17,6 +17,7 @@ package com.twitter.heron.examples;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
@@ -37,9 +38,19 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.utils.Utils;
 
 /**
  * This is a complicated stateful topology with multiple stages, stream splitting and joining.
+ * The TestSentenceSpout would produce fixed amount of tuples and then do nothing.
+ * So the spout would have a deterministic and finite input, and we could compare the actual result
+ * with expected result for correctness verification.
+ * During nextTuple(), the spout would randomly throw exceptions,
+ * when # of emitted tuples is a multiple of EXCEPTION_THROWING_INTERVAL_COUNT
+ * - 1. 100% throw exception when emitted tuples equal to EXCEPTION_THROWING_INTERVAL_COUNT
+ * so it is guaranteed the instance would restart at least once.
+ * - 2. EXCEPTION_PROBABILITY to throw exception otherwise
+ * The state in CountBolt should be deterministic if exactly once failure recovery is guaranteed.
  * <p>
  * The DAG looks like this:
  * <p>
@@ -69,6 +80,13 @@ public final class StatefulTopology {
     private static final long serialVersionUID = 7975718575107010220L;
     private SpoutOutputCollector collector;
     private String[] sentences;
+
+    private static final int EMIT_INTERVAL_MS = 1;
+    private static final long TOTAL_COUNT_TO_EMIT = 200 * 1000;
+    private static final long EXCEPTION_THROWING_INTERVAL_COUNT = TOTAL_COUNT_TO_EMIT / 10;
+    private static final double EXCEPTION_PROBABILITY = 0.2;
+    private static final String KEY_EMITTED = "tuples_emitted";
+    // This value will be restored from the spoutState
     private long emitted;
 
     private State spoutState;
@@ -84,27 +102,53 @@ public final class StatefulTopology {
                      TopologyContext context, SpoutOutputCollector spoutOutputCollector) {
       collector = spoutOutputCollector;
       sentences = new String[]{"A A A", "B B B", "C C C", "D D D", "E E E"};
-      emitted = 0;
     }
 
     @Override
     public void nextTuple() {
+      // The spout would emit only finite # of tuples
+      if (emitted >= TOTAL_COUNT_TO_EMIT) {
+        System.out.println("Done the emit. Sleep for a while...");
+        Utils.sleep(2000);
+        return;
+      }
+
+      // Randomly throw exceptions when # of emitted tuples is a multiple of
+      // EXCEPTION_THROWING_INTERVAL_COUNT
+      // 1. 100% throw exception when emitted tuples equal to EXCEPTION_THROWING_INTERVAL_COUNT
+      // so it is guaranteed to have at least one exception
+      // 2. EXCEPTION_PROBABILITY to throw exception otherwise
+      if (emitted % EXCEPTION_THROWING_INTERVAL_COUNT == 0) {
+        if (emitted == EXCEPTION_THROWING_INTERVAL_COUNT
+            || new Random().nextDouble() < EXCEPTION_PROBABILITY) {
+          throw new RuntimeException("Intentional exception for failure recovery testing.");
+        }
+      }
+
       int index = (int) (emitted++ % this.sentences.length);
       final String sentence = this.sentences[index];
       collector.emit(new Values(sentence));
+
+      // Sleep a while for rate control
+      Utils.sleep(EMIT_INTERVAL_MS);
     }
 
     @Override
     public void initState(State state) {
       System.out.println("Initializing state...");
       spoutState = state;
+
+      // Restore the value of emitted
+      emitted = spoutState.containsKey(KEY_EMITTED) ?
+          (long) spoutState.get(KEY_EMITTED) : 0;
+      System.out.println("Recover from last state.. Have emitted tuples: " + emitted);
     }
 
     @Override
     public void preSave(String checkpointId) {
       System.out.println("Saving state...");
       System.out.println("Current sentence emitted count: " + emitted);
-      spoutState.put("emitted", emitted);
+      spoutState.put(KEY_EMITTED, emitted);
     }
   }
 
