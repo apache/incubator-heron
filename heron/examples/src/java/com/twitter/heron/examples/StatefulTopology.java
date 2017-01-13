@@ -139,8 +139,8 @@ public final class StatefulTopology {
       spoutState = state;
 
       // Restore the value of emitted
-      emitted = spoutState.containsKey(KEY_EMITTED) ?
-          (long) spoutState.get(KEY_EMITTED) : 0;
+      emitted = spoutState.containsKey(KEY_EMITTED)
+          ? (long) spoutState.get(KEY_EMITTED) : 0;
       System.out.println("Recover from last state.. Have emitted tuples: " + emitted);
     }
 
