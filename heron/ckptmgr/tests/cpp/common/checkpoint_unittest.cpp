@@ -48,8 +48,8 @@ class CheckpointTest : public ::testing::Test {
     return protomsg;
   }
 
-  heron::proto::ckptmgr::RestoreStateCheckpoint* createRestoreMessage() {
-    auto protomsg = new heron::proto::ckptmgr::RestoreStateCheckpoint;
+  heron::proto::ckptmgr::RestoreStateCheckpointRequest* createRestoreMessage() {
+    auto protomsg = new heron::proto::ckptmgr::RestoreStateCheckpointRequest;
     auto instance = protomsg->mutable_instance();
     instance->mutable_instance_id()->assign("instance-2");
     instance->mutable_stmgr_id()->assign("stmgr-2");
