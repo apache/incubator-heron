@@ -185,10 +185,7 @@ void Client::OnNewPacket(IncomingPacket* _ipkt) {
                << conn->getIPAddress() << ":" << conn->getPort();
   }
 
-  if (requestHandlers.count(typname) > 0) {
-    // this is a request
-    requestHandlers[typname](_ipkt);
-  } else if (messageHandlers.count(typname) > 0) {
+  if (messageHandlers.count(typname) > 0) {
     // This is a message
     // We just ignore the reqid
     REQID rid;
