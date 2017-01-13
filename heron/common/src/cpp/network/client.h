@@ -164,9 +164,6 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  // TODO(mfu):
-  MemPool<google::protobuf::Message> _heron_message_pool;
-
   template<typename M>
   void release(M* m) {
     _heron_message_pool.release(m);
@@ -178,6 +175,7 @@ class Client : public BaseClient {
   }
 
  protected:
+  MemPool<google::protobuf::Message> _heron_message_pool;
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
   // successful in connecting to hte client. Requests can now be sent to
