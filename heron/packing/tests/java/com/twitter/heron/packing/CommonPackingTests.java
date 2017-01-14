@@ -30,6 +30,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -59,10 +60,12 @@ public abstract class CommonPackingTests {
     this.spoutParallelism = 4;
     this.boltParallelism = 3;
     this.totalInstances = this.spoutParallelism + this.boltParallelism;
-    int numContainers = 2;
-    // Set up the topology and its config
+
+    // Set up the topology and its config. Tests can safely modify the config by reference after the
+    // topology is created, but those changes will not be reflected in the underlying protobuf
+    // object Config and Topology objects. This is typically fine for packing tests since they don't
+    // access the protobuf values.
     this.topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
     this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     Config config = Config.newBuilder()
@@ -280,7 +283,7 @@ public abstract class CommonPackingTests {
         SPOUT_NAME, 0);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = PackingException.class)
   public void testScaleDownInvalidScaleFactor() throws Exception {
 
     //try to remove more spout instances than possible
@@ -290,5 +293,71 @@ public abstract class CommonPackingTests {
 
     int numContainersBeforeRepack = 2;
     doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+  }
+
+  @Test(expected = PackingException.class)
+  public void testScaleDownInvalidComponent() throws Exception {
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
+    int numContainersBeforeRepack = 2;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+  }
+
+  /**
+   * Test invalid ram for instance
+   */
+  @Test(expected = PackingException.class)
+  public void testInvalidRamInstance() throws Exception {
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
+    int defaultNumInstancesperContainer = 4;
+
+    // Explicit set component ram map
+    ByteAmount boltRam = ByteAmount.ZERO;
+
+    topologyConfig.setContainerMaxRamHint(maxContainerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
+    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
+  }
+
+  @Test
+  public void testTwoContainersRequested() throws Exception {
+    doTestContainerCountRequested(2, 2);
+  }
+
+  /**
+   * Test the scenario where container level resource config are set
+   */
+  protected void doTestContainerCountRequested(int requestedContainers,
+                                            int expectedContainer) throws Exception {
+
+    // Explicit set resources for container
+    topologyConfig.setContainerRamRequested(ByteAmount.fromGigabytes(10));
+    topologyConfig.setContainerDiskRequested(ByteAmount.fromGigabytes(20));
+    topologyConfig.setContainerCpuRequested(30);
+    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, requestedContainers);
+
+    TopologyAPI.Topology topologyExplicitResourcesConfig =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
+
+    Assert.assertEquals(expectedContainer,
+        packingPlanExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
+
+    // Ram for bolt/spout should be the value in component ram map
+    for (PackingPlan.ContainerPlan containerPlan
+        : packingPlanExplicitResourcesConfig.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        Assert.assertEquals(instanceDefaultResources, instancePlan.getResource());
+      }
+    }
   }
 }

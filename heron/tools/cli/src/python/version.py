@@ -44,4 +44,4 @@ def run(command, parser, args, unknown_args):
   :return:
   '''
   config.print_build_info()
-  return [Response(Status.Ok)]
+  return Response(Status.Ok)

@@ -79,3 +79,16 @@ tmaster-sink:
 #   graphite_port: 2004 # The port of graphite to be exported metrics to
 #   metrics_prefix: "heron" # The prefix of every metrics
 #   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server
+
+### Config for web-sink
+### The web-sink publishes metrics as json on http://host:port/path
+# web-sink:
+#   class: "com.twitter.heron.metricsmgr.sink.WebSink"
+#   port: 8080 # The port on which to run (either port or port-file are mandatory)
+#   # port-file: metrics.port # Alternatively supply a file which contains the port (text file containing single integer)
+#   path: /metrics.json # The path on which to publish the metrics (mandatory)
+#   flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
+#   # setting flat-metrics to "false" will group metrics by metric source (default ture)
+#   include-topology-name: false # Include topology name in metric name (default false)
+#   metrics-cache-max-size: 1000000 # Max number of metrics cached and published (default 1000000)
+#   metrics-cache-ttl-sec: 600 # Time in seconds after which a metric that was collected will stopped being published (default 600)

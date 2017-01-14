@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' help.py '''
+from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.response import Response, Status
 import heron.tools.common.src.python.utils.config as config
 
@@ -54,14 +55,13 @@ def run(command, parser, args, unknown_args):
   # if no command is provided, just print main help
   if command_help == 'help':
     parser.print_help()
-    return [Response(Status.Ok)]
+    return Response(Status.Ok)
 
   # get the subparser for the specific command
   subparser = config.get_subparser(parser, command_help)
   if subparser:
     print subparser.format_help()
-    return [Response(Status.Ok)]
+    return Response(Status.Ok)
   else:
-    resp = Response(Status.InvocationError)
-    resp.add_context("Unknown subcommand '%s'" % command_help)
-    return [resp]
+    Log.error("Unknown subcommand \'%s\'", command_help)
+    return Response(Status.InvocationError)

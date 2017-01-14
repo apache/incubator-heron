@@ -107,6 +107,7 @@
     <table class="table">
       <thead>
         <th>Topology name</th>
+        <th>Status</th>
         <th>DC</th>
         <th>Role</th>
         <th>Environment</th>
@@ -118,15 +119,16 @@
       <tbody>
         <tr>
           <td>{{topology}}</td>
+          <td>{{execution_state['status']}}</td>
           <td>{{cluster}}</td>
-          <td>{{estate['role']}}</td>
+          <td>{{execution_state['role']}}</td>
           <td>{{environ}}</td>
           <td>{{launched}}</td>
-          <td>{{estate['submission_user']}}</td>
+          <td>{{execution_state['submission_user']}}</td>
           <td>
             <a class="btn btn-primary btn-xs" href="/topologies/{{cluster}}/{{environ}}/{{topology}}/config" target="_blank">Config</a>
             <a id="jobPageLink" class="btn btn-primary btn-xs" href={{job_page_link}} target="_blank">Job</a>
-            <a id="vizLink" class="btn btn-primary btn-xs" href="{{estate['viz']}}" target="_blank">Viz</a>
+            <a id="vizLink" class="btn btn-primary btn-xs" href="{{execution_state['viz']}}" target="_blank">Viz</a>
           </td>
         </tr>
       </tbody>
@@ -179,7 +181,7 @@
     }
 
     // hide viz link if it is not there
-    if ("{{estate['viz']}}" === "") {
+    if ("{{execution_state['viz']}}" === "") {
       document.getElementById("vizLink").style.display = "none";
     }
 
