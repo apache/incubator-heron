@@ -19,15 +19,23 @@ message StartStatefulCheckpoint {
 
 // Message sent by tmaster to stmgr asking them to reset their instances
 // to this checkpoint
-message ResetTopologyState {
+message RestoreTopologyState {
   required string checkpoint_id = 1;
 }
 
 // Message sent by stmgr to tmaster asking it to reset the topology
 // to some valid checkpoint. This is sent either if stmgr dies
 // and comes back up or if an instance dies.
-message ResetTopologyStateRequest {
+message RestoreTopologyStateRequest {
   required string reason = 1;
+}
+
+// Message sent by stmgr to tmaster informing it about
+// the fact that we stored a checkpoint belonging
+// to the instance
+message TopologyStateStored {
+  required string checkpoint_id = 1;
+  required heron.proto.system.Instance instance = 2;
 }
 
 // stmgr -> ckptmgr messages
@@ -54,6 +62,13 @@ message SaveStateCheckpoint {
   // Information about the instance whose state this is
   required heron.proto.system.Instance instance = 1;
   required InstanceStateCheckpoint checkpoint = 2;
+}
+
+// After successfully saving state, this is what
+// Checkpoint Mgr sends back as response
+message SavedStateCheckpoint {
+  required heron.proto.system.Instance instance = 2;
+  required string checkpoint_id = 3;
 }
 
 // This is the message that StMgr sends to Checkpoint Mgr
@@ -87,8 +102,8 @@ message InstanceStateCheckpoint {
 }
 
 // This is the message that stmgr sends to its instace
-// asking them to reset their state
-message ResetInstanceState {
+// asking them to restore their state
+message RestoreInstanceState {
   required InstanceStateCheckpoint state = 1;
 }
 
