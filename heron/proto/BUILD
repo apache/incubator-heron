@@ -102,6 +102,7 @@ proto_library(
         ":proto_physical_plan",
         ":proto_stats",
         ":proto_topology",
+        ":proto_ckptmgr",
     ],
 )
 

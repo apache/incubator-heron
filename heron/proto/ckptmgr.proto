@@ -26,7 +26,7 @@ message RestoreTopologyState {
 // Message sent by stmgr to tmaster asking it to reset the topology
 // to some valid checkpoint. This is sent either if stmgr dies
 // and comes back up or if an instance dies.
-message RestoreTopologyStateRequest {
+message RestoreTopologyStateMessage {
   required string reason = 1;
 }
 

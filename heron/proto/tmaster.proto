@@ -7,6 +7,7 @@ import "common.proto";
 import "stats.proto";
 import "topology.proto";
 import "physical_plan.proto";
+import "ckptmgr.proto";
 
 message TMasterLocation {
   required string topology_name = 1;
@@ -24,6 +25,7 @@ message TMasterLocation {
   // The port that is a http endpoint
   // to publish stats about the topology
   optional int32 stats_port = 6;
+  optional heron.proto.ckptmgr.StatefulMostRecentCheckpoint checkpoint = 7;
 }
 
 //
