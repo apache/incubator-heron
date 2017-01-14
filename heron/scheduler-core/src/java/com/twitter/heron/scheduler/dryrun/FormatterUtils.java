@@ -1,16 +1,16 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
 import java.util.ArrayList;
@@ -27,7 +27,10 @@ import com.twitter.heron.spi.packing.Resource;
 /**
  * Formatter utilities
  */
-public class FormatterUtils {
+public final class FormatterUtils {
+
+  private FormatterUtils() {
+  }
 
   /**
    * Simple and self-contained support of using ANSI escape codes.
@@ -141,6 +144,8 @@ public class FormatterUtils {
         case DEFAULT:
           builder.append(formattedText);
           break;
+        default:
+          throw new RuntimeException("Unknown text style: " + style);
       }
       switch (color) {
         case RED:
@@ -151,6 +156,8 @@ public class FormatterUtils {
           break;
         case DEFAULT:
           break;
+        default:
+          throw new RuntimeException("Unknown text color: " + color);
       }
       // Only append ANSI reset escape code if text style or text color is added
       if (style != TextStyle.DEFAULT || color != TextColor.DEFAULT) {
@@ -172,31 +179,31 @@ public class FormatterUtils {
    */
   public static class Row {
     private List<Cell> row;
-    private static final String separator = "|";
+    private static final String SEPARATOR = "|";
 
     public Row(List<String> row) {
       this.row = new ArrayList<>();
-      for(String text: row) {
+      for (String text: row) {
         this.row.add(new Cell(text));
       }
     }
 
     /**
      * Set color for a list of cells in a row
-     * @param color: color of each cell in the row
+     * @param color
      */
     public void setColor(TextColor color) {
-      for(Cell cell: row) {
+      for (Cell cell: row) {
         cell.setColor(color);
       }
     }
 
     /**
      * Set style for a list of cells in a row
-     * @param style: style of each cell in the row
+     * @param style
      */
     public void setStyle(TextStyle style) {
-      for(Cell cell: row) {
+      for (Cell cell: row) {
         cell.setStyle(style);
       }
     }
@@ -206,7 +213,7 @@ public class FormatterUtils {
      * @param formatters
      */
     public void setFormatters(List<String> formatters) {
-      for(int i = 0; i < formatters.size(); i++) {
+      for (int i = 0; i < formatters.size(); i++) {
         row.get(i).setFormatter(formatters.get(i));
       }
     }
@@ -226,11 +233,11 @@ public class FormatterUtils {
 
     public String toString() {
       List<String> renderedCells = new ArrayList<>();
-      for(Cell c: row) {
+      for (Cell c: row) {
         renderedCells.add(c.toString());
       }
       return String.format("%s %s %s",
-          separator, String.join(" " +  separator + " ", renderedCells), separator);
+          SEPARATOR, String.join(" " +  SEPARATOR + " ", renderedCells), SEPARATOR);
     }
   }
 
@@ -301,7 +308,7 @@ public class FormatterUtils {
       List<String> formatters = new ArrayList<>();
       List<Integer> columnsMax = calculateColumnsMax();
       String metaCellFormatter = "%%%ds";
-      for(Integer width: columnsMax) {
+      for (Integer width: columnsMax) {
         formatters.add(String.format(metaCellFormatter, width));
       }
       return formatters;
@@ -334,7 +341,7 @@ public class FormatterUtils {
      */
     private int caculateFrameLength() {
       int total = 0;
-      for(Integer width: calculateColumnsMax()) {
+      for (Integer width: calculateColumnsMax()) {
         total += width + 3;
       }
       return total + 1;
@@ -349,7 +356,7 @@ public class FormatterUtils {
       List<String> formatters = generateRowFormatter();
       // Set formatter for each row
       title.setFormatters(formatters);
-      for(Row row: rows) {
+      for (Row row: rows) {
         row.setFormatters(formatters);
       }
       // Calculate length for frames
@@ -363,7 +370,7 @@ public class FormatterUtils {
       // Add one single line to separate title and content
       addRow(builder, Strings.repeat("-", frameLength));
       // Add each row
-      for(Row row: rows) {
+      for (Row row: rows) {
         addRow(builder, row.toString());
       }
       // Add lower frame
@@ -395,7 +402,7 @@ public class FormatterUtils {
       }
       Cell cell = new Cell(String.format("%s%.2f%%", sign, percentage));
       // set color to red if percentage drops, to green if percentage increases
-      if (sign == "") {
+      if ("".equals(sign)) {
         cell.setColor(TextColor.RED);
       } else {
         cell.setColor(TextColor.GREEN);
@@ -420,7 +427,7 @@ public class FormatterUtils {
 
   public static String renderOneContainer(List<Row> rows) {
     List<String> titleNames = Arrays.asList(
-       "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
+        "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
     Row title = new Row(titleNames);
     title.setStyle(TextStyle.BOLD);
     return new Table(title, rows).createTable();

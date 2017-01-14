@@ -1,32 +1,29 @@
-//  Copyright 2016 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.PackingPlan.*;
-import com.twitter.heron.scheduler.dryrun.FormatterUtils.*;
 
 public class UpdateDryRunRender implements DryRunRender {
 
@@ -35,36 +32,37 @@ public class UpdateDryRunRender implements DryRunRender {
   private final PackingPlan newPlan;
 
   private class ContainersDiffView {
-    private final Optional<ContainerPlan> oldPlan;
-    private final Optional<ContainerPlan> newPlan;
+    private final Optional<PackingPlan.ContainerPlan> oldPlan;
+    private final Optional<PackingPlan.ContainerPlan> newPlan;
 
-    public ContainersDiffView(Optional<ContainerPlan> oldPlan,
-                              Optional<ContainerPlan> newPlan) {
+    ContainersDiffView(Optional<PackingPlan.ContainerPlan> oldPlan,
+                              Optional<PackingPlan.ContainerPlan> newPlan) {
       this.oldPlan = oldPlan;
       this.newPlan = newPlan;
     }
 
-    public Optional<ContainerPlan> getOldPlan() {
+    public Optional<PackingPlan.ContainerPlan> getOldPlan() {
       return oldPlan;
     }
 
-    public Optional<ContainerPlan> getNewPlan() {
+    public Optional<PackingPlan.ContainerPlan> getNewPlan() {
       return newPlan;
     }
   }
 
-  private Map<Integer, ContainersDiffView> getContainerDiffViews(PackingPlan oldPlan,
-                                                                 PackingPlan newPlan) {
+  private Map<Integer, ContainersDiffView> getContainerDiffViews(PackingPlan oldPackingPlan,
+                                                                 PackingPlan newPackingPlan) {
     Map<Integer, ContainersDiffView> diffView = new HashMap<>();
-    for(PackingPlan.ContainerPlan plan: oldPlan.getContainers()) {
+    for (PackingPlan.ContainerPlan plan: oldPackingPlan.getContainers()) {
       int id = plan.getId();
-      diffView.put(id, new ContainersDiffView(oldPlan.getContainer(id), newPlan.getContainer(id)));
+      diffView.put(id, new ContainersDiffView(oldPackingPlan.getContainer(id),
+          newPackingPlan.getContainer(id)));
     }
-    for(PackingPlan.ContainerPlan plan: newPlan.getContainers()) {
+    for (PackingPlan.ContainerPlan plan: newPackingPlan.getContainers()) {
       int id = plan.getId();
-      if(!diffView.containsKey(id)) {
-        diffView.put(id, new ContainersDiffView(oldPlan.getContainer(id),
-            newPlan.getContainer(id)));
+      if (!diffView.containsKey(id)) {
+        diffView.put(id, new ContainersDiffView(oldPackingPlan.getContainer(id),
+            newPackingPlan.getContainer(id)));
       }
     }
     return diffView;
@@ -74,7 +72,7 @@ public class UpdateDryRunRender implements DryRunRender {
     UNAFFECTED,
     MODIFIED,
     NEW,
-    REMOVED;
+    REMOVED
   }
 
   public UpdateDryRunRender(UpdateDryRunResponse response) {
@@ -88,30 +86,32 @@ public class UpdateDryRunRender implements DryRunRender {
     private final PackingPlan oldPlan;
     private final PackingPlan newPlan;
 
-    public TableRenderer(PackingPlan oldPlan, PackingPlan newPlan) {
+    TableRenderer(PackingPlan oldPlan, PackingPlan newPlan) {
       this.oldPlan = oldPlan;
       this.newPlan = newPlan;
     }
 
     private String renderContainerDiffView(int containerId, ContainersDiffView diffView) {
       StringBuilder builder = new StringBuilder();
-      Optional<ContainerPlan> oldPlan = diffView.getOldPlan();
-      Optional<ContainerPlan> newPlan = diffView.getNewPlan();
-      String header = new Cell(
-        String.format("Container %d: ", containerId), TextStyle.BOLD).toString();
+      Optional<PackingPlan.ContainerPlan> oldPackingPlan = diffView.getOldPlan();
+      Optional<PackingPlan.ContainerPlan> newPackingPlan = diffView.getNewPlan();
+      String header = new FormatterUtils.Cell(
+          String.format("Container %d: ", containerId), FormatterUtils.TextStyle.BOLD).toString();
       builder.append(header);
       // Container exists in both old and new packing plan
-      if(oldPlan.isPresent() && newPlan.isPresent()) {
-        ContainerPlan newContainerPlan = newPlan.get();
-        ContainerPlan oldContainerPlan = oldPlan.get();
+      if (oldPackingPlan.isPresent() && newPackingPlan.isPresent()) {
+        PackingPlan.ContainerPlan newContainerPlan = newPackingPlan.get();
+        PackingPlan.ContainerPlan oldContainerPlan = oldPackingPlan.get();
         // Container plan did not change
         if (newContainerPlan.equals(oldContainerPlan)) {
           builder.append(ContainerChange.UNAFFECTED + "\n");
           String resourceUsage = FormatterUtils.renderResourceUsage(
               newContainerPlan.getRequiredResource());
-          List<Row> rows = new ArrayList<>();
-          for(InstancePlan plan: newContainerPlan.getInstances()) {
-            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.DEFAULT, TextStyle.DEFAULT));
+          List<FormatterUtils.Row> rows = new ArrayList<>();
+          for (PackingPlan.InstancePlan plan: newContainerPlan.getInstances()) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan,
+                FormatterUtils.TextColor.DEFAULT,
+                FormatterUtils.TextStyle.DEFAULT));
           }
           String containerTable = FormatterUtils.renderOneContainer(rows);
           builder.append(resourceUsage + "\n");
@@ -120,48 +120,59 @@ public class UpdateDryRunRender implements DryRunRender {
           // Container plan has changed
           String resourceUsage = FormatterUtils.renderResourceUsageChange(
               oldContainerPlan.getRequiredResource(), newContainerPlan.getRequiredResource());
-          Set<InstancePlan> oldInstancePlans = oldContainerPlan.getInstances();
-          Set<InstancePlan> newInstancePlans = newContainerPlan.getInstances();
-          Set<InstancePlan> unchangedPlans =
+          Set<PackingPlan.InstancePlan> oldInstancePlans = oldContainerPlan.getInstances();
+          Set<PackingPlan.InstancePlan> newInstancePlans = newContainerPlan.getInstances();
+          Set<PackingPlan.InstancePlan> unchangedPlans =
               Sets.intersection(oldInstancePlans, newInstancePlans).immutableCopy();
-          Set<InstancePlan> newPlans =
+          Set<PackingPlan.InstancePlan> newPlans =
               Sets.difference(newInstancePlans, oldInstancePlans);
-          Set<InstancePlan> removedPlans =
+          Set<PackingPlan.InstancePlan> removedPlans =
               Sets.difference(oldInstancePlans, newInstancePlans);
-          List<Row> rows = new ArrayList<>();
-          for(InstancePlan plan: unchangedPlans) {
-            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.DEFAULT, TextStyle.DEFAULT));
+          List<FormatterUtils.Row> rows = new ArrayList<>();
+          for (PackingPlan.InstancePlan plan: unchangedPlans) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan,
+                FormatterUtils.TextColor.DEFAULT,
+                FormatterUtils.TextStyle.DEFAULT));
           }
-          for(InstancePlan plan: newPlans) {
-            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.GREEN, TextStyle.DEFAULT));
+          for (PackingPlan.InstancePlan plan: newPlans) {
+            rows.add(FormatterUtils.rowOfInstancePlan(plan,
+                FormatterUtils.TextColor.GREEN,
+                FormatterUtils.TextStyle.DEFAULT));
           }
-          for(InstancePlan plan: removedPlans) {
-            rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.RED, TextStyle.STRIKETHROUGH));
+          for (PackingPlan.InstancePlan plan: removedPlans) {
+            rows.add(FormatterUtils.rowOfInstancePlan(
+                plan, FormatterUtils.TextColor.RED, FormatterUtils.TextStyle.STRIKETHROUGH));
           }
-          builder.append(new Cell(ContainerChange.MODIFIED.toString()).toString() + "\n");
+          builder.append(new FormatterUtils.Cell(
+              ContainerChange.MODIFIED.toString()).toString() + "\n");
           builder.append(resourceUsage + "\n");
           String containerTable = FormatterUtils.renderOneContainer(rows);
           builder.append(containerTable + "\n");
         }
-      } else if (oldPlan.isPresent()) {
+      } else if (oldPackingPlan.isPresent()) {
         // Container has been removed
-        ContainerPlan oldContainerPlan = oldPlan.get();
-        List<Row> rows = new ArrayList<>();
-        for(InstancePlan plan: oldContainerPlan.getInstances()) {
-          rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.RED, TextStyle.STRIKETHROUGH));
+        PackingPlan.ContainerPlan oldContainerPlan = oldPackingPlan.get();
+        List<FormatterUtils.Row> rows = new ArrayList<>();
+        for (PackingPlan.InstancePlan plan: oldContainerPlan.getInstances()) {
+          rows.add(FormatterUtils.rowOfInstancePlan(
+              plan, FormatterUtils.TextColor.RED, FormatterUtils.TextStyle.STRIKETHROUGH));
         }
-        builder.append(new Cell(ContainerChange.REMOVED.toString(), TextColor.RED).toString() + "\n");
+        builder.append(new FormatterUtils.Cell(ContainerChange.REMOVED.toString(),
+            FormatterUtils.TextColor.RED).toString() + "\n");
         builder.append(FormatterUtils.renderResourceUsage(
             oldContainerPlan.getRequiredResource()) + "\n");
         builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
-      } else if (newPlan.isPresent()) {
+      } else if (newPackingPlan.isPresent()) {
         // New container has been added
-        ContainerPlan newContainerPlan = newPlan.get();
-        List<Row> rows = new ArrayList<>();
-        for(InstancePlan plan: newContainerPlan.getInstances()) {
-          rows.add(FormatterUtils.rowOfInstancePlan(plan, TextColor.GREEN, TextStyle.DEFAULT));
+        PackingPlan.ContainerPlan newContainerPlan = newPackingPlan.get();
+        List<FormatterUtils.Row> rows = new ArrayList<>();
+        for (PackingPlan.InstancePlan plan: newContainerPlan.getInstances()) {
+          rows.add(FormatterUtils.rowOfInstancePlan(plan,
+              FormatterUtils.TextColor.GREEN,
+              FormatterUtils.TextStyle.DEFAULT));
         }
-        builder.append(new Cell(ContainerChange.NEW.toString(), TextColor.GREEN).toString() + "\n");
+        builder.append(new FormatterUtils.Cell(ContainerChange.NEW.toString(),
+            FormatterUtils.TextColor.GREEN).toString() + "\n");
         builder.append(FormatterUtils.renderResourceUsage(
             newContainerPlan.getRequiredResource()) + "\n");
         builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
@@ -175,7 +186,7 @@ public class UpdateDryRunRender implements DryRunRender {
     public String render() {
       Map<Integer, ContainersDiffView> diffViews = getContainerDiffViews(oldPlan, newPlan);
       StringBuilder builder = new StringBuilder();
-      for(Integer containerId: diffViews.keySet()) {
+      for (Integer containerId: diffViews.keySet()) {
         ContainersDiffView view = diffViews.get(containerId);
         builder.append(renderContainerDiffView(containerId, view));
       }

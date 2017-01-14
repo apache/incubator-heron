@@ -1,16 +1,16 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
 import java.io.File;
@@ -23,7 +23,6 @@ import java.util.Set;
 
 import com.google.common.io.Files;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,17 +30,19 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
+// SUPPRESS CHECKSTYLE AvoidStarImport
 import com.twitter.heron.spi.packing.PackingPlan.*;
 import com.twitter.heron.spi.packing.Resource;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TopologyAPI.Topology.class})
+@PrepareForTest(TopologyAPI.Topology.class)
 public class UpdateDryRunRenderTest {
 
   private PackingPlan originalPlan;
@@ -132,7 +133,7 @@ public class UpdateDryRunRenderTest {
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
     Config config = PowerMockito.mock(Config.class);
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
-        topology, config, newPlanA, originalPlan, new HashMap<String,Integer>());
+        topology, config, newPlanA, originalPlan, new HashMap<String, Integer>());
     String table = new UpdateDryRunRender(resp).renderTable();
     String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);
     assertEquals(exampleTable, table);
@@ -147,7 +148,7 @@ public class UpdateDryRunRenderTest {
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
     Config config = PowerMockito.mock(Config.class);
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
-        topology, config, newPlanB, originalPlan, new HashMap<String,Integer>());
+        topology, config, newPlanB, originalPlan, new HashMap<String, Integer>());
     String table = new UpdateDryRunRender(resp).renderTable();
     String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);
     assertEquals(exampleTable, table);

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' help.py '''
-from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.response import Response, Status
 import heron.tools.common.src.python.utils.config as config
 

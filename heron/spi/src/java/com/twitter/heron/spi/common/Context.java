@@ -40,7 +40,7 @@ public class Context {
   }
 
   public static DryRunFormatType dryRunFormatType(Config cfg) {
-    return cfg.getDryRunFormatType (ConfigKeys.get("DRY_RUN_FORMAT_TYPE"));
+    return cfg.getDryRunFormatType(ConfigKeys.get("DRY_RUN_FORMAT_TYPE"));
   }
 
   public static Boolean verbose(Config cfg) {

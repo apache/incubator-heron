@@ -32,9 +32,9 @@ import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.scheduler.utils.LauncherUtils;
-import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunRender;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -451,7 +451,7 @@ public class SubmitterMain {
           .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor)).build();
 
       // Bypass validation and upload if in dry-run mode
-      if(Context.dryRun(config)) {
+      if (Context.dryRun(config)) {
         callLauncherRunner(runtime);
       } else {
         validateSubmit(adaptor, topology.getName());
