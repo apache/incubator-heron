@@ -47,9 +47,12 @@ java_tests(
     "com.twitter.heron.scheduler.client.LibrarySchedulerClientTest",
     "com.twitter.heron.scheduler.client.HttpServiceSchedulerClientTest",
     "com.twitter.heron.scheduler.client.SchedulerClientFactoryTest",
+    "com.twitter.heron.scheduler.dryrun.SubmitDryRunRenderTest",
+    "com.twitter.heron.scheduler.dryrun.UpdateDryRunRenderTest",
     "com.twitter.heron.scheduler.utils.LauncherUtilsTest",
     "com.twitter.heron.scheduler.utils.SchedulerUtilsTest",
   ],
+  data = glob(["**/*.txt"]),
   runtime_deps = [ ":scheduler-core-tests" ],
   size = "small",
 )

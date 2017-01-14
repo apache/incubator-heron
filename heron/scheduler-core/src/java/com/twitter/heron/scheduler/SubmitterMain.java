@@ -447,24 +447,33 @@ public class SubmitterMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      validateSubmit(adaptor, topology.getName());
-
-      // 2. Try to submit topology if valid
-      // invoke method to submit the topology
-      LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
-
-      // Firstly, try to upload necessary packages
-      URI packageURI = uploadPackage(uploader);
-
-      // Secondly, try to submit a topology
-      // build the runtime config
       Config runtime = Config.newBuilder()
-          .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
-          .put(Keys.topologyPackageUri(), packageURI)
-          .put(Keys.launcherClassInstance(), launcher)
-          .build();
+          .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor)).build();
 
-      callLauncherRunner(runtime);
+      // Bypass validation and upload if in dry-run mode
+      if(Context.dryRun(config)) {
+        callLauncherRunner(runtime);
+      } else {
+        validateSubmit(adaptor, topology.getName());
+
+        // 2. Try to submit topology if valid
+        // invoke method to submit the topology
+        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
+
+        // Firstly, try to upload necessary packages
+        URI packageURI = uploadPackage(uploader);
+
+        // Secondly, try to submit a topology
+        // build the runtime config
+        Config runtimeAll = Config.newBuilder()
+            .putAll(runtime)
+            .put(Keys.topologyPackageUri(), packageURI)
+            .put(Keys.launcherClassInstance(), launcher)
+            .build();
+        callLauncherRunner(runtimeAll);
+      }
+
+
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException
