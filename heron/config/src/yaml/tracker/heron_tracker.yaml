@@ -1,0 +1,41 @@
+# Configs for heron-tracker
+
+## Contains the sources where the states are stored.
+# Each source has these attributes:
+# 1. type - type of state manager (zookeeper or file, etc.)
+# 2. name - name to be used for this source
+# 3. hostport - only used to connect to zk, must be of the form 'host:port'
+# 4. rootpath - where all the states are stored
+# 5. tunnelhost - if ssh tunneling needs to be established to connect to it
+statemgrs:
+  -
+    type: "file"
+    name: "local"
+    rootpath: "~/.herondata/repository/state/local"
+    tunnelhost: "localhost"
+#
+# To use 'localzk', launch a zookeeper server locally
+# and create the following path:
+#   *. /heron/topologies
+#
+#  -
+#    type: "zookeeper"
+#    name: "localzk"
+#    hostport: "localhost:2181"
+#    rootpath: "/heron"
+#    tunnelhost: "localhost"
+
+# The URL that points to a topology's metrics dashboard.
+# This value can use following parameters to create a valid
+# URL based on the topology. All parameters are self-explanatory.
+# These are found in the execution state of the topology.
+#
+#   ${CLUSTER}
+#   ${ENVIRON}
+#   ${TOPOLOGY}
+#   ${ROLE}
+#   ${USER}
+#
+# This is a sample, and should be changed to point to corresponding dashboard.
+#
+# viz.url.format: "http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"

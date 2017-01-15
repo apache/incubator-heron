@@ -1,0 +1,11 @@
+.git
+docker
+
+*.pyc
+
+# Bazel generated files #
+#########################
+bazel-*
+scripts/compile/env_exec.sh
+.DS_Store
+.*.swp

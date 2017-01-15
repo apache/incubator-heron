@@ -1,0 +1,5 @@
+header.hn-docs-header.page-header
+  h1 {{.Title}}
+  .hn-docs-description {{.Description}}
+article.hn-docs-content
+  {{.Content}}

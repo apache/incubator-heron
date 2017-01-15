@@ -1,0 +1,2 @@
+# key to specify the local file system directory for the uploader
+FILE_SYSTEM_DIRECTORY:          heron.uploader.localfs.file.system.directory

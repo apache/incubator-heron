@@ -1,0 +1,24 @@
+diff -rupN protobuf-2.5.0/src/google/protobuf/extension_set.h protobuf25/src/google/protobuf/extension_set.h
+--- protobuf-2.5.0/src/google/protobuf/extension_set.h	2013-02-26 09:56:42.000000000 -0800
++++ protobuf25/src/google/protobuf/extension_set.h	2015-08-03 09:20:52.000000000 -0700
+@@ -794,7 +794,7 @@ class MessageTypeTraits {
+                                   MutableType message, ExtensionSet* set) {
+     set->SetAllocatedMessage(number, field_type, NULL, message);
+   }
+-  static inline MutableType Release(int number, FieldType field_type,
++  static inline MutableType Release(int number, FieldType,
+                                     ExtensionSet* set) {
+     return static_cast<Type*>(set->ReleaseMessage(
+         number, Type::default_instance()));
+diff -rupN protobuf-2.5.0/src/google/protobuf/stubs/common.h protobuf25/src/google/protobuf/stubs/common.h
+--- protobuf-2.5.0/src/google/protobuf/stubs/common.h	2013-02-26 09:56:38.000000000 -0800
++++ protobuf25/src/google/protobuf/stubs/common.h	2015-08-03 09:20:28.000000000 -0700
+@@ -720,7 +720,7 @@ class LIBPROTOBUF_EXPORT LogFinisher {
+ 
+ namespace internal {
+ template<typename T>
+-T* CheckNotNull(const char *file, int line, const char *name, T* val) {
++T* CheckNotNull(const char *, int, const char *name, T* val) {
+   if (val == NULL) {
+     GOOGLE_LOG(FATAL) << name;
+   }

@@ -1,0 +1,5 @@
+testerrs = 0x00100000 "Test Errors" {
+TEST_ERROR1          It is the first error!
+TEST_ERROR2          It is the second error!
+TEST_ERROR3          It is the third error!
+}

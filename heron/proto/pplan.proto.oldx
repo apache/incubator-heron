@@ -1,0 +1,91 @@
+package heron.proto.system;
+
+option java_package = "com.twitter.heron.proto.system";
+option java_outer_classname = "PhysicalPlans";
+
+enum CompType {
+  SPOUT = 1;
+  BOLT = 2;
+}
+
+enum GroupType {
+  RANDOM = 1;
+  SHUFFLE = 2;
+  FIELDS = 3;
+  REPLICATE = 4; 
+  NONE = 5;
+  SELF = 6;
+}
+
+message Schema {
+  repeated string keys = 1;
+}
+
+message Manager {
+  required string id = 1;
+  required string name = 2;
+  required int32  dport = 3;
+  required int32  cport = 4;
+  required string epoint = 5;
+}
+
+message Group {
+  required string id = 1;
+  required string host_id = 2;
+}
+
+message Stream {
+  required string       id = 1;
+  required GroupType    gtype = 2; 
+}
+
+message Grouping {
+  required Stream       stream = 1;
+  repeated Group        groups = 2;  
+}
+
+message Input {
+  required Stream       stream = 1;
+  required string       group_id = 2;
+}
+
+message Output {
+  required string       stream_id = 1;
+  required Schema       schema = 2;
+}
+
+message Worker {
+  required string id = 1;
+  required string host_id = 2;
+  required CompType comp_type = 3;
+  required string instance_id = 4;
+}
+  
+message Component {
+  required string id = 1;
+  required string class_name = 2;
+}
+
+message SpoutInstance {
+  required string id = 1;
+  required Component comp_id = 2;
+  repeated Output ostreams = 3;
+  repeated string params = 4;
+}
+
+message BoltInstance {
+  required string id = 1;
+  required Component comp_id = 2;
+  repeated Input istreams = 3;
+  repeated Output ostreams = 4;
+  repeated string params = 5;
+}
+
+message PhysicalPlan {
+  repeated Manager mgrs = 1;
+  repeated Stream streams = 2;
+  repeated Grouping groupings = 3;
+  repeated Worker workers = 4;
+  repeated SpoutInstance spouts = 5;
+  repeated BoltInstance bolts = 6;
+}

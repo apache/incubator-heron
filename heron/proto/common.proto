@@ -1,0 +1,33 @@
+package heron.proto.system;
+
+option java_package = "com.twitter.heron.proto.system";
+option java_outer_classname = "Common";
+
+enum StatusCode {
+  OK = 1;
+  NOTOK = 2; //generic not ok message
+
+  // These are messages that are seen by the external applications
+  INVALID_TOPOLOGY_NAME = 100;
+  TOPOLOGY_ALREADY_ACTIVE = 101;
+  TOPOLOGY_ALREADY_DEACTIVE = 102;
+  NOT_YET_IMPLEMENTED = 103;
+
+  // Internal errors start at 1000
+  INVALID_STMGR = 1000;
+  STMGR_DIDNT_REGISTER = 1001;
+  DUPLICATE_STRMGR = 1002;
+
+  // State specific errors
+  PATH_DOES_NOT_EXIST = 2000;
+  PATH_ALREADY_EXISTS = 2001;
+  TMASTERLOCATION_ALREADY_EXISTS = 2002;
+  STATE_CORRUPTED = 2003;
+  STATE_READ_ERROR = 2004;
+  STATE_WRITE_ERROR = 2005;
+}
+
+message Status {
+  required StatusCode status = 1;
+  optional string message = 2;
+}

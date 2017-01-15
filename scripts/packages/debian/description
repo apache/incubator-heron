@@ -1,0 +1,3 @@
+Heron is a realtime streaming analytics platform developed by Twitter. It is a direct 
+successor of Apache Storm, built to be backwards compatible with Storm's 
+topology API but with a wide array of architectural improvements. 

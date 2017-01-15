@@ -1,0 +1,125 @@
+sections:
+  - name: Getting Started
+    sublinks:
+      - name: Local (Single Node)
+        url: /docs/getting-started
+      - name: Upgrade Storm Topologies
+        url: /docs/upgrade-storm-to-heron
+      - name: Troubleshooting Guide
+        url: /docs/getting-started-troubleshooting
+  - name: Heron Concepts
+    sublinks:
+      - name: Heron Design Goals
+        url: /docs/concepts/design-goals
+      - name: Heron Topology
+        url: /docs/concepts/topologies
+      - name: Heron Architecture
+        url: /docs/concepts/architecture
+  - name: Deployment
+    sublinks:
+      - name: Overview
+        url: /docs/operators/deployment
+      - name: Configuration
+        url: /docs/operators/deployment/configuration
+  - name: State Managers
+    sublinks:
+      - name: Zookeeper
+        url: /docs/operators/deployment/statemanagers/zookeeper
+      - name: Local FS
+        url: /docs/operators/deployment/statemanagers/localfs
+  - name: Uploaders
+    sublinks:
+      - name: Local FS
+        url: /docs/operators/deployment/uploaders/localfs
+      - name: HDFS
+        url: /docs/operators/deployment/uploaders/hdfs
+      - name: Amazon S3
+        url: /docs/operators/deployment/uploaders/s3
+  - name: Schedulers
+    sublinks:
+      - name: Aurora Cluster
+        url: /docs/operators/deployment/schedulers/aurora
+      - name: Local Cluster
+        url: /docs/operators/deployment/schedulers/local
+#      - name: Mesos Cluster
+#        url: /docs/operators/deployment/schedulers/mesos
+      - name: Slurm Cluster
+        url: /docs/operators/deployment/schedulers/slurm
+      - name: YARN Cluster
+        url: /docs/operators/deployment/schedulers/yarn
+  - name: Cluster Configuration
+    sublinks:
+      - name: Overview
+        url: /docs/operators/configuration/config-intro
+      - name: System-Level
+        url: /docs/operators/configuration/system
+      - name: Heron Instance
+        url: /docs/operators/configuration/instance
+      - name: Metrics Manager
+        url: /docs/operators/configuration/metrics-manager
+      - name: Stream Manager
+        url: /docs/operators/configuration/stmgr
+      - name: Topology Master
+        url: /docs/operators/configuration/tmaster
+  - name: Observability
+    sublinks:
+      - name: Graphite
+        url: /docs/operators/observability/graphite
+  - name: User Manuals
+    sublinks:
+      - name: Heron Client
+        url: /docs/operators/heron-cli
+      - name: Heron Tracker REST API
+        url: /docs/operators/heron-tracker-api
+      - name: Heron Tracker Runbook
+        url: /docs/operators/heron-tracker
+      - name: Heron UI Runbook
+        url: /docs/operators/heron-ui
+  - name: Topology Writers
+    sublinks:
+      - name: Writing Topologies
+        url: /docs/developers/topologies
+      - name: Heron Data Model
+        url: /docs/developers/data-model
+      - name: Tuple Serialization
+        url: /docs/developers/serialization
+      - name: Heron UI Guide
+        url: /docs/developers/ui-guide
+      - name: Tuning Guide
+        url: /docs/developers/tuning
+      - name: Simulator Mode
+        url: /docs/developers/simulator-mode
+      - name: Troubleshooting Guide
+        url: /docs/developers/troubleshooting
+      - name: Javadoc
+        url: /api
+  - name: Heron Developers
+    sublinks:
+      - name: Compiling
+        url: /docs/developers/compiling/compiling
+      - name: Compiling on Linux
+        url: /docs/developers/compiling/linux
+      - name: Compiling on Mac OS X
+        url: /docs/developers/compiling/mac
+      - name: Compiling With Docker
+        url: /docs/developers/compiling/docker
+      - name: Running Tests
+        url: /docs/contributors/testing
+      - name: Code Organization
+        url: /docs/contributors/codebase
+  - name: Extending Heron
+    sublinks:
+      - name: Custom Scheduler
+        url: /docs/contributors/custom-scheduler
+      - name: Custom Metrics Sink
+        url: /docs/contributors/custom-metrics-sink
+  - name: Heron Resources
+    sublinks:
+      - name: Heron Resources
+        url: /docs/resources
+  - name: Contributors
+    sublinks:
+      - name: Community
+        url: /docs/contributors/community
+      - name: Governance
+        url: /docs/contributors/governance

@@ -1,0 +1,104 @@
+package heron.proto.api;
+
+option java_package = "com.twitter.heron.api.generated";
+option java_outer_classname = "TopologyAPI";
+
+// This file defines the logic plan of a topology, including
+// components definition, stream schema and others.
+// 1. Heron usbmitter pushes the message Topology to state manager at node: topologies/{topology_name}
+// 2. When TMaster first time starts, it reads Topology from state manager at node topologies/{topology_name},
+// 3. TMaster constructs and distribute PhysicalPlan basing on Topology and StrMgrHelloRequest.
+//    It also pushes the PhysicalPlan to state manager at node: pplans/{topology_name}
+//
+// Note:
+// 1. message PhysicalPlan also contains a copy of message Topolgoy. We distinguish them:
+//    - topologies/{topology_name} consist of the topology logic plan first submitted by user,
+//      it shall only be used to construct the PhysicalPlan when TMaster first time starts
+//    - pplans/{topology_name} reflects the dynamic state of the topology. Initially, it shall be the same
+//      as what user has submitted.
+//    Any runtime changes on Topology in are made to Topology inside the node pplans/{topology_name}.
+//    For instance, change of TopologyState in runtime will be made in the Topology inside the node pplans/{topology_name}.
+
+enum Grouping {
+  SHUFFLE = 1;
+  FIELDS = 2;
+  ALL = 3;
+  LOWEST = 4;
+  NONE = 5;
+  DIRECT = 6;
+  CUSTOM = 7;
+}
+
+enum Type {
+  OBJECT = 1; // generic type
+}
+
+message StreamSchema {
+  message KeyType {
+    required string key = 1;
+    required Type type = 2;
+  }
+  repeated KeyType keys = 1;
+}
+
+message StreamId {
+  required string id = 1;
+  required string component_name = 2; // the guy who produced it
+}
+
+message OutputStream {
+  required StreamId stream = 1;
+  required StreamSchema schema = 2;
+}
+
+message InputStream {
+  required StreamId stream = 1;
+  required Grouping gtype = 2;
+  optional StreamSchema grouping_fields = 3;
+  optional bytes custom_grouping_java_object = 4;
+}
+
+message Config {
+  message KeyValue {
+    required string key = 1;
+    // Only one of the below are set
+    optional string value = 2;
+    optional bytes java_serialized_value = 3;
+  }
+  repeated KeyValue kvs = 1;
+}
+
+message Component {
+  // The name of the component. Like Tail-FlatMap
+  required string name = 1;
+  // Only one of the below two are set
+  optional string java_class_name = 2;
+  optional bytes java_object = 4;
+  required Config config = 3;
+}
+
+message Spout {
+  required Component comp = 1;
+  repeated OutputStream outputs = 2;
+}
+
+message Bolt {
+  required Component comp = 1;
+  repeated InputStream inputs = 2;
+  repeated OutputStream outputs = 3;
+}
+
+enum TopologyState {
+  RUNNING = 1;
+  PAUSED = 2;
+  KILLED = 3;
+}
+
+message Topology {
+  required string id = 1;
+  required string name = 2;
+  repeated Spout spouts = 3;
+  repeated Bolt bolts = 4;
+  required TopologyState state = 5;
+  optional Config topology_config = 6;
+}

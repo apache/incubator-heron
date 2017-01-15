@@ -1,0 +1,44 @@
+package heron.proto.system;
+
+option java_package = "com.twitter.heron.proto.system";
+option java_outer_classname = "HeronTuples";
+
+import "topology.proto";
+
+message RootId {
+  required int32 taskid = 1;
+  required sfixed64 key = 2;
+}
+
+message AckTuple {
+  repeated RootId roots = 1;
+  required sfixed64 ackedtuple = 2;
+}
+
+message HeronDataTuple {
+  required sfixed64 key = 1;
+  repeated RootId roots = 2;               // What are the roots
+  repeated bytes values = 3;               // The actual payload
+  // If present, this set of tuples must be sent
+  // to these destination global task ids as well
+  // Only valid for data tuples from instance to stmgr
+  repeated int32 dest_task_ids = 4;
+}
+
+message HeronDataTupleSet {
+  required heron.proto.api.StreamId stream = 1;
+  repeated HeronDataTuple tuples = 2;
+}
+
+// Note:- only one of the acks/fails are set
+message HeronControlTupleSet {
+  repeated AckTuple acks = 1;
+  repeated AckTuple fails = 2;
+  repeated AckTuple emits = 3;
+}
+  
+// Note:- Only one of data/acks/fails are set in any message
+message HeronTupleSet {
+  optional HeronDataTupleSet data = 1;
+  optional HeronControlTupleSet control = 2;
+}

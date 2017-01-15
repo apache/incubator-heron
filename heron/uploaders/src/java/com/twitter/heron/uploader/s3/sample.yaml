@@ -1,0 +1,15 @@
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:         com.twitter.heron.uploader.s3.S3Uploader
+
+# S3 bucket to put the jar file into
+heron.uploader.s3.bucket:     heron-topologies-company-com
+
+# By default the path prefix will be empty and the full path would be s3://#{bucket}/#{topology_name}/topology.tar.gz
+# This allows you to prepend a prefix to the path to specify a sub-folder in which cased the full path would be:
+# s3://#{bucket}/#{prefix}/#{topology_name}/topology.tar.gz
+# heron.uploader.s3.path_prefix: path/prefix
+
+# Credentials that have write access to the bucket specified above
+heron.uploader.s3.access_key: access_key
+heron.uploader.s3.secret_key: secret_access_key
+

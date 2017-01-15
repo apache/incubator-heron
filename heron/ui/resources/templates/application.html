@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="not-showing-stats no-colors">
+  <head>
+    <meta charset="utf-8">
+    <title>Heron Admin</title>
+    <meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport">
+    <script src="/static/js/html5-trunk.js"></script>
+    <link href="/static/icomoon/style.css" rel="stylesheet">
+
+    <!-- bootstrap css -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+
+    <!-- custom css -->
+    <link href="/static/css/main.css" rel="stylesheet">
+
+    <link href="/static/css/visstyle.css" rel="stylesheet">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/react.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/JSXTransformer.js"></script>
+    <script src="/static/js/moment.min.2.8.3.js"></script>
+    <script src="/static/js/underscore-min.1.6.0.js"></script>
+
+    <!-- Scripts -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-ui-1.8.23.custom.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.1.1/list.min.js"></script>
+
+    <script type="text/jsx" src="{{ static_url('js/common.js') }}" ></script>
+
+    <style type="text/css">
+      .logo-img{
+      width: 90px;
+      margin: 15px 0 15px 0;
+      font-size: 16px;
+      color: #f86665;
+      font-weight: 200;
+      float: left;
+      text-align: center;
+      cursor: pointer;
+      }
+      .logo {
+      width: 80px;
+      max-height: 30px;
+      margin: 15px 0 15px 0;
+      font-size: 16px;
+      color: #f86665;
+      font-weight: 200;
+      float: left;
+      text-align: center;
+      cursor: pointer;
+      }
+      .logo span {
+      color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Main navigation start -->
+    <nav id="global-nav">
+      <div class="logo-img">
+        <img src="/static/img/logo54x54.png" alt="Heron">
+      </div>
+      <!-- <div class="logo">H<span>eron</span></div> -->
+      {% module Template("nav.html", active=active, className=function) %}
+    </nav>
+    <!-- Main navigation end -->
+
+    <!-- Main Container start -->
+    <div class="main-container">
+
+    <!-- Header start -->
+    <header>
+      <!-- page title -->
+      <div id="page-title" />
+    </header>
+    <!-- Header end -->
+      <!-- Dashboard wrapper start -->
+      <div class="dashboard-wrapper">
+        {% block content %}{% end %}
+      </div>
+      <!-- Dashboard wrapper end -->
+    </div>
+    <!-- Main Container end -->
+  </body>
+</html>

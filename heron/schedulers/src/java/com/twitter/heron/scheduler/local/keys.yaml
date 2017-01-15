@@ -1,0 +1,2 @@
+# config key for specifying the working directory of a topology
+WORKING_DIRECTORY:        heron.scheduler.local.working.directory

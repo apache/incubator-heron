@@ -1,0 +1,330 @@
+#page-title {
+  background: #fff;
+  position: absolute;
+  top: 15px;
+  left: 90px;
+  height: 35px;
+  border-radius: 5px 5px 0 0;
+}
+
+.reset {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  z-index: 100;
+}
+
+.all-topo-view.no-colors .reset {
+  display: none;
+}
+
+.not-showing-stats .only-when-showing-stats {
+  display: none;
+}
+
+#page-title p {
+  font-size: 14px;
+  color: black;
+  margin: 8px;
+  padding: 5px;
+}
+
+.axis path {
+  fill: none;
+}
+
+.x.axis line {
+  stroke: #ddd;
+}
+.x.axis path {
+  stroke: none;
+}
+
+.row h5 {
+  color: grey;
+  margin: 20px 20px 0px 20px;
+  padding: 5px;
+  text-align: left;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.popover {
+  font-weight: normal;
+  line-height: 1.3;
+}
+
+.d3-tip {
+  line-height: 1.2;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  font-family: Arial, sans-serif;
+  color: #eee;
+  border-radius: 2px;
+  pointer-events: none;
+  font-size: 12px;
+  text-align: left;
+  z-index: 99;
+  word-break: break-all;
+}
+
+.d3-tip strong {
+  color: #fff;
+}
+
+.d3-tip.text-center {
+  text-align: center;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+a:active, a:focus {
+  text-decoration: none;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  text-align: left;
+  display: inline;
+  font-size: 15px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Northward tooltips */
+.d3-tip.n:after {
+  content: "\25BC";
+  margin: -3px 0 0 0;
+  font-size: 14px;
+  top: 100%;
+  left: 0;
+  text-align: center;
+}
+
+.d3-tip.s:after {
+  content: "\25B2";
+  margin: 0 0 1px 0;
+  top: -12px;
+  left: 0;
+  text-align: center;
+}
+
+.d3-tip {
+  max-width: 400px;
+}
+
+path.regular, rect.regular {
+    opacity: 1;
+}
+
+path.fade, rect.fade {
+    opacity: 0.2;
+}
+
+circle.regular {
+    opacity: 1;
+}
+
+circle.fade {
+    opacity: 0.3;
+}
+
+text.regular {
+  display: block;
+}
+
+text.fade {
+  display: none;
+}
+
+circle.background {
+  opacity: 1;
+}
+
+.aurora {
+  stroke: #888;
+  stroke-width: 1px;
+  fill: #f0f5fa;
+}
+
+.instance {
+  stroke: #888;
+  stroke-width: 1px;
+  fill: #f0f5fa;
+}
+
+#color-key path {
+  stroke: none;
+}
+
+#color-key {
+  height: 70px;
+}
+
+.space-above {
+  margin-top: 3em;
+}
+
+.stat-rollup-table {
+  margin: 0 auto;
+}
+
+.stat-rollup-table td {
+  padding-left: 1em;
+  height: 30px;
+}
+
+.stat-rollup-table a {
+  text-decoration: none;
+}
+
+.status-circle {
+  padding: 2px 3px;
+  color: #f0f5fa;
+  fill: currentColor;
+  stroke-width: 0.5px;
+  stroke: #aaa;
+  margin: 0;
+  padding: 0;
+  vertical-align: text-bottom;
+}
+
+a:hover .status-circle {
+  stroke: #000;
+}
+
+.toplevel-stat {
+  fill: #f0f5fa;
+  stroke: #888;
+  stroke-width: 1px;
+}
+
+.topotable {
+display: inline-table;
+}
+
+tr.highlighted {
+  background-color: red;
+}
+
+.topotable>thead>tr>th, .topotable>tbody>tr>th, .topotable>tfoot>tr>th, .topotable>thead>tr>td, .topotable>tbody>tr>td, .topotable>tfoot>tr>td {
+font-size: 14px;
+padding: 8px;
+line-height: 1.42857143;
+vertical-align: top;
+border-top: 1px solid #dddddd;
+}
+
+.break-all {
+word-break: break-all;
+}
+
+.no-break {
+white-space: nowrap
+}
+
+.strong {
+  font-weight: bold;
+}
+
+.topotable .topobutton {
+padding: 2px;
+}
+
+.topotable .topobutton a {
+margin-left: 8px;
+visibility: hidden;
+}
+
+.topotable tr:hover .topobutton a {
+visibility: visible;
+}
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.action-button-group {
+position: absolute;
+right: 10px;
+top: 2px;
+}
+
+.sort.asc {
+background-color: lightgrey;
+}
+
+.sort.desc {
+background-color: lightgrey;
+}
+
+/* Sort arrows */
+.sort:after {
+width: 0;
+height: 0;
+border-left: 5px solid transparent;
+border-right: 5px solid transparent;
+border-bottom: 5px solid transparent;
+border-top: 5px solid transparent;
+content:"";
+position: relative;
+top:-10px;
+right:-5px;
+}
+
+.sort.asc:after {
+width: 0;
+height: 0;
+border-left: 5px solid transparent;
+border-right: 5px solid transparent;
+border-bottom: 5px solid transparent;
+border-top: 5px solid black;
+content:"";
+position: relative;
+top:10px;
+right:-5px;
+}
+
+.sort.desc:after {
+width: 0;
+height: 0;
+border-left: 5px solid transparent;
+border-right: 5px solid transparent;
+border-bottom: 5px solid black;
+border-top: 5px solid transparent;
+content:"";
+position: relative;
+top:-10px;
+right:-5px;
+}
+
+.search-result {
+color: grey;
+font-size: 14px;
+line-height: 30px;
+}
+
+/* When the topology is dead */
+.dead {
+color: red;
+}
+
+/* When the topology is weird state */
+.weird {
+color: orange;
+}
+
+/* When the topology is starting */
+.starting {
+color: green;
+}

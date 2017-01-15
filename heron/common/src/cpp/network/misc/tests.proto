@@ -1,0 +1,11 @@
+message EchoServerRequest {
+  required string echo_request = 1;
+}
+
+message EchoServerResponse {
+  required string echo_response = 1;
+}
+
+message TestMessage {
+  repeated string message = 1;
+}

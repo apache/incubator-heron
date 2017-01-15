@@ -1,0 +1,13 @@
+footer.footer.hn-footer role=contentinfo
+  .container
+    .row
+      .col-lg-12
+        ul.hn-footer-links
+          li
+            a href=docs/contributors/governance/ Governance
+          li
+            a href=docs/contributors/roadmap/ Roadmap
+          li
+            a href=docs/contributors/support/ Support
+
+        p {{.Now.Year}} Twitter

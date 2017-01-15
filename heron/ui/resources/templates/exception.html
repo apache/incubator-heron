@@ -1,0 +1,33 @@
+{% extends "application.html" %}
+{% block content %}
+
+<div>
+  <div class="row">
+  </div>
+
+  <!-- Row start -->
+  <div class="row">
+      <div id="display-exceptions"></div>
+  </div>
+  <!-- Row end -->
+</div>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+<script type="text/jsx" src="/static/js/exceptions.js"></script>
+
+<script type="application/javascript">
+  window.onload = function() {
+    d3.select("#page-title")
+      .append("p")
+        .html('{{topology}}');
+  }
+</script>
+
+<script type="text/jsx">
+  /** @jsx React.DOM */
+  React.renderComponent(
+    <InstanceExceptionLogs cluster="{{cluster}}" environ="{{environ}}" topology="{{topology}}" comp_name="{{comp_name}}" instance="{{instance}}"/>,
+    document.getElementById("display-exceptions")
+  );
+</script>
+{% end %}

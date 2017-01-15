@@ -1,0 +1,247 @@
+{% extends "application.html" %}
+
+{% block content %}
+
+<div class="plans">
+  <button type="button" class="reset close"><span aria-hidden="true">Reset View</span></button>
+  <div class="row">
+    <div class="col-md-6 text-center">
+      <h4 class="space-above">Logical Topology</h4>
+    </div>
+    <div class="col-md-6 text-center">
+      <h4 class="space-above">
+        <span id="container-count"></span> Containers and
+        <span id="instance-count"></span> Instances</h4>
+    </div>
+  </div>
+  <div class="row graphics text-center">
+    <div class="col-md-6 vcenter">
+      <div id="logical-plan"></div>
+    </div><!-- Can't have spaces in here - see http://stackoverflow.com/questions/20547819/vertical-align-with-bootstrap-3
+    --><div class="col-md-6 vcenter">
+      <div id="physical-plan"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 text-center col-md-offset-6">
+      <div id="color-key" class="text-center"></div>
+    </div>
+  </div>
+
+  <div class="row space-above">
+    <div class="col-md-6">
+      <div class="container">
+        <div class="text-center">
+          <span class="h5">Aggregate topology metrics</span>
+          <span
+            class="glyphicon glyphicon-question-sign bs-popover text-muted"
+            aria-hidden="true"
+            data-toggle="popover"
+            data-placement="top"
+            title="Aggregate Topology Metrics"
+            data-html="true"
+            data-content="
+              <p>Colors in this table show the worst value for any instance in the topology for each metric/time range.</p>
+              <p><strong class='status-circle' style='color: #1a9850'>&#11044;</strong> green metrics are healthy</p>
+              <p><strong class='status-circle' style='color: #fdae61'>&#11044;</strong> orange metrics are elevated</p>
+              <p><strong class='status-circle' style='color: #d73027'>&#11044;</strong> red indicates there may be a problem.</p>
+              Click on a circle to color instances by their value for that metric."></span>
+        </div>
+        <p class="text-muted text-center">
+          <em>Click to color instances by metric over a time period</em>
+        </p>
+        <table class="stat-rollup-table">
+          <tbody class="stats">
+          </tbody>
+          <tbody>
+            <td class="text-right">
+              Role
+              <span
+                class="glyphicon glyphicon-question-sign bs-popover text-muted"
+                aria-hidden="true"
+                data-toggle="popover"
+                data-placement="top"
+                title="Role"
+                data-content="Color instances by their role from the logical plan.  This is the default behavior on page load."></span>
+            </td>
+            <td colspan="4">
+              <a href="#" id="reset-colors" class="strong">Color instances by role</a>
+            </td>
+          </tbody>
+        </table>
+        <div class="text-center">
+          <div class="btn-group color-choice">
+            <button type="button" class="btn btn-xs btn-default active" data-color="default">Default Colors</button>
+            <button type="button" class="btn btn-xs btn-default" data-color="leonid">Colorblind Friendly</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="text-center">
+        <span class="h5" id="trendline-title"></span>
+        <span
+          class="glyphicon glyphicon-question-sign bs-popover text-muted"
+          aria-hidden="true"
+          data-toggle="popover"
+          data-placement="top"
+          title="Metric Trendlines"
+          data-html="true"
+          data-content="
+            <p>Trendline of topology metrics over the past hour.  Shows the entire topology by default.</p>
+            <p>Click on a logical component of the topology to stats for just instances of that component.</p>
+            <p>Click on an instance to get metrics, logs, and exceptions for that instance.</p>
+            <p><em>When the entire topology or a single logical component is selected, values
+              show are the <strong>maximum</strong> across all instances.</em></p>
+            "></span>
+      </div>
+      <div id="stat-trendlines" class="container">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row space-above">
+  <div class="col-md-12">
+    <table class="table">
+      <thead>
+        <th>Topology name</th>
+        <th>DC</th>
+        <th>Role</th>
+        <th>Environment</th>
+        <th>Launched at</th>
+        <th>Launched by</th>
+        <th>Links</th>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>{{topology}}</td>
+          <td>{{cluster}}</td>
+          <td>{{estate['role']}}</td>
+          <td>{{environ}}</td>
+          <td>{{launched}}</td>
+          <td>{{estate['submission_user']}}</td>
+          <td>
+            <a class="btn btn-primary btn-xs" href="/topologies/{{cluster}}/{{environ}}/{{topology}}/config" target="_blank">Config</a>
+            <a id="jobPageLink" class="btn btn-primary btn-xs" href={{job_page_link}} target="_blank">Job</a>
+            <a id="vizLink" class="btn btn-primary btn-xs" href="{{estate['viz']}}" target="_blank">Viz</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<div class="row">
+  <div class="col-md-12">
+    <div id="display-counters"></div>
+  </div>
+</div>
+
+<hr>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.3/d3-tip.min.js"></script>
+<script src="/static/js/stat-trendlines.js"></script>
+<script src="/static/js/plan-controller.js"></script>
+<script src="/static/js/physical-plan.js"></script>
+<script src="/static/js/logical-plan.js"></script>
+<script src="/static/js/plan-stats.js"></script>
+<script src="/static/js/colors.js"></script>
+<script type="text/jsx" src="{{ static_url('js/topologies.js') }}" ></script>
+<script type="application/javascript">
+
+  // colors used shading nodes in logical and physical plan
+  var colors = [
+    "#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd",
+    "#8c564b","#e377c2","#17becf","#bcbd22","#aec7e8",
+    "#ffbb78","#98df8a","#ff9896","#c5b0d5","#c49c94",
+    "#f7b6d2","#9edae5","#dbdb8d"
+  ].map(function (d) {
+    // desaturate by 20% and lighten by 50%
+    var hsl = d3.hsl(d);
+    hsl.s *= 0.8;
+    hsl.l = (1 + hsl.l) / 2;
+    return hsl.toString();
+  });
+
+  var linestyle = {color:'#888', width:'4px'};
+
+  window.onload = function() {
+
+    // hide Job link if it is not there
+    if ("{{job_page_link}}" === "") {
+      document.getElementById("jobPageLink").style.display = "none";
+    }
+
+    // hide viz link if it is not there
+    if ("{{estate['viz']}}" === "") {
+      document.getElementById("vizLink").style.display = "none";
+    }
+
+    // display the topology name as the title
+    d3.select("#page-title")
+      .append("p")
+      .html('{{topology}}');
+
+    var logicalPlan, physicalPlan;
+
+    d3.json("/topologies/{{cluster}}/{{environ}}/{{topology}}/logicalplan.json",
+      function(data) {
+        // if there are any errors display using dialog box
+        if (data.status != "success") {
+          console.log("Loading json failed!");
+          return;
+        }
+
+        logicalPlan = data.result;
+        if (physicalPlan) { startRendering(); }
+      }
+    );
+
+    d3.json("/topologies/{{cluster}}/{{environ}}/{{topology}}/physicalplan.json",
+      function(data) {
+        // if there are any errors display using dialog box
+        if (data.status != "success" ) {
+          console.log("Loading json failed!");
+          return;
+        }
+
+        physicalPlan = data;
+        if (logicalPlan) { startRendering(); }
+      }
+    );
+
+    function render(planController) {
+      drawLogicalPlan(planController, logicalPlan, "#logical-plan", $("#logical-plan").width(), 400,
+          "{{cluster}}", "{{environ}}", "{{topology}}");
+      planController.planResized();
+      drawPhysicalPlan(planController, physicalPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{cluster}}",
+          "{{environ}}", "{{topology}}");
+      planController.planResized();
+    }
+
+    function startRendering() {
+      var planController = new PlanController("{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
+      $(window).on('resize', _.debounce(function () {
+        render(planController);
+      }, 100));
+      render(planController);
+      drawStatsTable(planController, "{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
+      planController.planDrawn();
+    }
+  };
+</script>
+<script type="text/jsx">
+  /** @jsx React.DOM */
+    React.renderComponent(
+      <AllMetrics cluster="{{cluster}}" environ="{{environ}}" topology="{{topology}}"/>,
+      document.getElementById('display-counters')
+    );
+</script>
+
+{% end %}

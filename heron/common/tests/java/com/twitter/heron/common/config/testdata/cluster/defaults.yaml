@@ -1,0 +1,3 @@
+role: role1
+user: user1
+heron.launcher.class: com.twitter.heron.scheduler.local.LocalLauncher

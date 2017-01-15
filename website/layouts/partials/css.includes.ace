@@ -1,0 +1,3 @@
+{{range .Site.Params.assets.css}}
+link rel=stylesheet href={{.}}
+{{end}}
