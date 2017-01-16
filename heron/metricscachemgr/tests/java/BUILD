@@ -56,11 +56,11 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.metricscachemgr.metricscache.TimeBucketTest",
-       "com.twitter.heron.metricscachemgr.metricscache.MetricTest",
-       "com.twitter.heron.metricscachemgr.metricscache.InstanceMetricsTest",
-       "com.twitter.heron.metricscachemgr.metricscache.ComponentMetricsTest",
-       "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheTest",
+#       "com.twitter.heron.metricscachemgr.metricscache.TimeBucketTest",
+#       "com.twitter.heron.metricscachemgr.metricscache.MetricTest",
+#       "com.twitter.heron.metricscachemgr.metricscache.InstanceMetricsTest",
+#       "com.twitter.heron.metricscachemgr.metricscache.ComponentMetricsTest",
+#       "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheTest",
      ],
      runtime_deps = [ ":metricscachemgr-tests" ],
      size = "small",
