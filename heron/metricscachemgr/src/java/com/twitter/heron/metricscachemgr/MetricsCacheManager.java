@@ -49,8 +49,6 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
  * main entry for metrics cache manager
  */
 public class MetricsCacheManager {
-  public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
-  public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
   private static final Logger LOG = Logger.getLogger(MetricsCacheManager.class.getName());
   // Pre-defined value
   private static final String METRICS_CACHE_HOST = "0.0.0.0";
@@ -90,10 +88,7 @@ public class MetricsCacheManager {
     this.metricsCacheManagerServerLoop = new NIOLooper();
     this.metricscacheLocation = metricscacheLocation;
 
-    metricsCache = new MetricsCache(
-        systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60,
-        systemConfig.getTmasterMetricsCollectorPurgeIntervalSec(),
-        msconfig);
+    metricsCache = new MetricsCache(systemConfig, msconfig);
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
