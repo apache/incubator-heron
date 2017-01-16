@@ -1,20 +1,19 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,15 +24,15 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import com.twitter.heron.metricscachemgr.metricscache.store.ExceptionDatapoint;
-import com.twitter.heron.metricscachemgr.metricscache.store.MetricDatapoint;
+import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoint;
+import com.twitter.heron.metricscachemgr.metricscache.datapoint.MetricDatapoint;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
  * different from tmaster:
- * 1. free buckets for instances that are gone during scaling process
- * 2. time bucket by metric timestamp rather than metric message arriving time
+ * 1. order bucket by metric timestamp rather than metric message arriving time
+ * 2. free buckets for instances that are gone during scaling process
  * 3. lock for multiple threads
  * same as tmaster:
  * 1. support same protobuf message/request format
@@ -59,35 +58,38 @@ public class CacheCore {
   // bucket_id is Long from idxComponentInstance Integer and idxMetricName Integer combined
   private TreeMap<Long, Map<Long, LinkedList<MetricDatapoint>>> cacheMetric;
 
-  // metric clock: rotate bucket
-  private int maxInterval;
-  private int interval;
+  // metric clock: rotate bucket, in milliseconds
+  private long maxInterval;
+  private long interval;
   // exception limit
-  private int maxExceptionCount;
+  private long maxExceptionCount;
 
   /**
    * constructor
    *
-   * @param maxInterval metric: cache how long time?
-   * @param interval metric: purge how often?
+   * @param maxInterval metric: cache how long time? in seconds
+   * @param interval metric: purge how often? in seconds
    * @param maxException exception: cache how many?
    */
-  public CacheCore(int maxInterval, int interval, int maxException) {
-    this.maxInterval = maxInterval;
-    this.interval = interval;
+  public CacheCore(long maxInterval, long interval, long maxException) {
+    this.maxInterval = maxInterval * 1000;
+    this.interval = interval * 1000;
     this.maxExceptionCount = maxException;
     // cache
     cacheException = new HashMap<>();
     cacheMetric = new TreeMap<>();
-    long now = Instant.now().getEpochSecond();
+    long now = System.currentTimeMillis();
     for (long i = now - maxInterval; i < now; i += interval) {
-      cacheMetric.put(i, new HashMap<>());
+      cacheMetric.put(i, new HashMap<Long, LinkedList<MetricDatapoint>>());
     }
+    // index
+    idxComponentInstance = new HashMap<>();
+    idxMetricName = new HashMap<>();
   }
 
   private void AssureComponentInstance(String componentName, String instanceId) {
     if (!idxComponentInstance.containsKey(componentName)) {
-      idxComponentInstance.put(componentName, new HashMap<>());
+      idxComponentInstance.put(componentName, new HashMap<String, Integer>());
     }
     Map<String, Integer> map = idxComponentInstance.get(componentName);
     if (!map.containsKey(instanceId)) {
@@ -96,15 +98,19 @@ public class CacheCore {
   }
 
   public boolean existComponentInstance(String componentName, String instanceId) {
-    if (componentName!=null
+    if (componentName != null
         && !idxComponentInstance.containsKey(componentName)) {
       return false;
     }
     if (instanceId != null
-        &&        !idxComponentInstance.get(componentName).containsKey(instanceId)) {
+        && !idxComponentInstance.get(componentName).containsKey(instanceId)) {
       return false;
     }
     return true;
+  }
+
+  public boolean existMetric(String name) {
+    return idxMetricName.containsKey(name);
   }
 
   private void AssureMetricName(String name) {
@@ -127,31 +133,37 @@ public class CacheCore {
     }
   }
 
-  // bucket id is Long: high bits = index component instance; low bits = index metric name
-  private long makeBucketId(int idxComponentInstance, int idxMetricName) {
-    long ret = idxComponentInstance;
-    ret = ret << 32;
-    ret |= idxMetricName;
-    return ret;
+  /**
+   * make bucket id
+   *
+   * @param hi index of [component-instance]
+   * @param lo index of metric name
+   * @return bucket id
+   */
+  private long makeBucketId(int hi, int lo) {
+    return (((long) hi) << 32) | (lo & 0xffffffffL);
   }
 
   private void AddMetric(TopologyMaster.MetricDatum metricDatum) {
     String componentName = metricDatum.getComponentName();
     String instanceId = metricDatum.getInstanceId();
     String metricName = metricDatum.getName();
+    LOG.info(componentName + " " + instanceId + " " + metricName);
     AssureComponentInstance(componentName, instanceId);
     AssureMetricName(metricName);
     // calc bucket idx
     int idx1 = idxComponentInstance.get(componentName).get(instanceId);
     int idx2 = idxMetricName.get(metricName);
     long bucketId = makeBucketId(idx1, idx2);
+    LOG.info(Long.toHexString(bucketId) + " = "
+        + Integer.toHexString(idx1) + " " + Integer.toHexString(idx2));
     // fetch the bucket
     Map.Entry<Long, Map<Long, LinkedList<MetricDatapoint>>> entry =
         cacheMetric.floorEntry(metricDatum.getTimestamp());
     if (entry != null) {
       Map<Long, LinkedList<MetricDatapoint>> locator = entry.getValue();
       if (!locator.containsKey(bucketId)) {
-        locator.put(bucketId, new LinkedList<>());
+        locator.put(bucketId, new LinkedList<MetricDatapoint>());
       }
       LinkedList<MetricDatapoint> bucket = locator.get(bucketId);
       // store the metric
@@ -159,6 +171,7 @@ public class CacheCore {
       datum.timestamp = metricDatum.getTimestamp();
       datum.value = metricDatum.getValue();
       bucket.offerFirst(datum);
+      LOG.info("AddMetric " + datum);
     } else {
       LOG.warning("too old metric: " + metricDatum);
     }
@@ -171,6 +184,9 @@ public class CacheCore {
     // get exception idx
     int idx = idxComponentInstance.get(componentName).get(instanceId);
     // fetch the bucket
+    if (!cacheException.containsKey(idx)) {
+      cacheException.put(idx, new LinkedList<ExceptionDatapoint>());
+    }
     LinkedList<ExceptionDatapoint> bucket = cacheException.get(idx);
     // store the exception
     ExceptionDatapoint e = new ExceptionDatapoint();
@@ -207,6 +223,7 @@ public class CacheCore {
    */
   public MetricsCacheQueryUtils.MetricResponse GetMetrics(
       MetricsCacheQueryUtils.MetricRequest request, MetricsFilter metricNameType) {
+    LOG.info(request.toString());
     synchronized (CacheCore.class) {
       MetricsCacheQueryUtils.MetricResponse response =
           new MetricsCacheQueryUtils.MetricResponse();
@@ -229,6 +246,9 @@ public class CacheCore {
       }
 
       for (String metricName : metricNameFilter) {
+        if (!existMetric(metricName)) {
+          continue;
+        }
         MetricsFilter.MetricAggregationType type = metricNameType.getAggregationType(metricName);
         for (String componentName : componentNameFilter) {
           // candidate instance ids
@@ -240,10 +260,13 @@ public class CacheCore {
           }
 
           for (String instanceId : instanceIdFilter) {
+            LOG.info(componentName + "; " + instanceId + "; " + metricName + "; " + type);
             // get bucket_id
             int idx1 = idxComponentInstance.get(componentName).get(instanceId);
             int idx2 = idxMetricName.get(metricName);
             long bucketId = makeBucketId(idx1, idx2);
+            LOG.info(Long.toHexString(bucketId) + " = "
+                + Integer.toHexString(idx1) + " " + Integer.toHexString(idx2));
 
             // make metric list in response
             MetricsCacheQueryUtils.MetricDatum metricDatum =
@@ -282,81 +305,95 @@ public class CacheCore {
   private void GetRawMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
                              long startTime, long endTime, long bucketId,
                              MetricsFilter.MetricAggregationType type) {
+    LOG.info("GetRawMetrics " + startTime + " " + endTime);
     Long startKey = cacheMetric.floorKey(startTime);
-    for (Long key = startKey != null ? startKey : cacheMetric.firstKey()
-         ; key != null && key <= endTime
-        ; key = cacheMetric.higherKey(key)) {
+    for (Long key = startKey != null ? startKey : cacheMetric.firstKey();
+         key != null && key <= endTime;
+         key = cacheMetric.higherKey(key)) {
       LinkedList<MetricDatapoint> bucket = cacheMetric.get(key).get(bucketId);
 
-      for (MetricDatapoint datapoint : bucket) {
-        if (startTime <= datapoint.timestamp && datapoint.timestamp <= endTime) {
-          // per data point
-          MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
-              new MetricsCacheQueryUtils.MetricTimeRangeValue();
-          rangeValue.startTime = datapoint.timestamp;
-          rangeValue.endTime = datapoint.timestamp;
-          rangeValue.value = datapoint.value;
-          metricValue.add(rangeValue);
-        }
-      } // end bucket
+      if (bucket != null) {
+        for (MetricDatapoint datapoint : bucket) {
+          if (startTime <= datapoint.timestamp && datapoint.timestamp <= endTime) {
+            // per data point
+            MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
+                new MetricsCacheQueryUtils.MetricTimeRangeValue();
+            rangeValue.startTime = datapoint.timestamp;
+            rangeValue.endTime = datapoint.timestamp;
+            rangeValue.value = datapoint.value;
+            metricValue.add(rangeValue);
+          }
+        } // end bucket
+      }
 
     } // end tree
   }
 
   // we assume the metric value is Double: compatible with tmaster
+  @SuppressWarnings("fallthrough")
   private void GetMinuteMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
                                 long startTime, long endTime, long bucketId,
                                 MetricsFilter.MetricAggregationType type) {
+    LOG.info("GetMinuteMetrics " + startTime + " " + endTime);
     Long startKey = cacheMetric.floorKey(startTime);
-    for (Long key = startKey != null ? startKey : cacheMetric.firstKey()
-         ; key != null && key <= endTime
-        ; key = cacheMetric.higherKey(key)) {
+    for (Long key = startKey != null ? startKey : cacheMetric.firstKey();
+         key != null && key <= endTime;
+         key = cacheMetric.higherKey(key)) {
       LinkedList<MetricDatapoint> bucket = cacheMetric.get(key).get(bucketId);
-      // per bucket
-      long countAvg = 0;
 
-      MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
-          new MetricsCacheQueryUtils.MetricTimeRangeValue();
-      rangeValue.startTime = Long.MAX_VALUE;
-      rangeValue.endTime = 0;
+      if (bucket != null) {
+        // per bucket
+        long countAvg = 0;
 
-      double result = 0;
-      for (MetricDatapoint timestampDatum : bucket) {
-        if (startTime <= timestampDatum.timestamp && timestampDatum.timestamp <= endTime) {
-          switch (type) {
-            case AVG:
-              countAvg++;
-            case SUM:
-              result += Double.parseDouble(timestampDatum.value);
-              break;
-            case LAST:
-              if (rangeValue.endTime < timestampDatum.timestamp) {
-                rangeValue.value = timestampDatum.value;
-              }
-              break;
-            case UNKNOWN:
-            default:
-              LOG.warning("Unknown metric type " + type);
-              return;
+        MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
+            new MetricsCacheQueryUtils.MetricTimeRangeValue();
+        rangeValue.startTime = Long.MAX_VALUE;
+        rangeValue.endTime = 0;
+
+        double result = 0;
+        for (MetricDatapoint datapoint : bucket) {
+          if (startTime <= datapoint.timestamp && datapoint.timestamp <= endTime) {
+            switch (type) {
+              case AVG:
+                countAvg++;
+              case SUM:
+                result += Double.parseDouble(datapoint.value);
+                break;
+              case LAST:
+                if (rangeValue.endTime < datapoint.timestamp) {
+                  rangeValue.value = datapoint.value;
+                }
+                break;
+              case UNKNOWN:
+              default:
+                LOG.warning("Unknown metric type " + type);
+                return;
+            }
+            rangeValue.startTime = Math.min(rangeValue.startTime, datapoint.timestamp);
+            rangeValue.endTime = Math.max(rangeValue.endTime, datapoint.timestamp);
           }
-          rangeValue.startTime = Math.min(rangeValue.startTime, timestampDatum.timestamp);
-          rangeValue.endTime = Math.max(rangeValue.endTime, timestampDatum.timestamp);
-        }
-      } // end bucket
+        } // end bucket
 
-      if (type.equals(MetricsFilter.MetricAggregationType.AVG)) {
-        rangeValue.value = String.valueOf(result / countAvg);
-      } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
-        rangeValue.value = String.valueOf(result);
+        if (type.equals(MetricsFilter.MetricAggregationType.AVG)) {
+          rangeValue.value = String.valueOf(result / countAvg);
+        } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
+          rangeValue.value = String.valueOf(result);
+        }
+        if (rangeValue.value != null) {
+          metricValue.add(rangeValue);
+        }
+        LOG.info(rangeValue.toString());
       }
-      metricValue.add(rangeValue);
+
     } // end tree
   }
 
   // we assume the metric value is Double: compatible with tmaster
+  @SuppressWarnings("fallthrough")
   private void GetAggregatedMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
                                     long startTime, long endTime, long bucketId,
                                     MetricsFilter.MetricAggregationType type) {
+    LOG.info("GetAggregatedMetrics " + startTime + " " + endTime);
     // per request
     long countAvg = 0;
 
@@ -367,33 +404,35 @@ public class CacheCore {
 
     double result = 0;
     Long startKey = cacheMetric.floorKey(startTime);
-    for (Long key = startKey != null ? startKey : cacheMetric.firstKey()
-         ; key != null && key <= endTime
-        ; key = cacheMetric.higherKey(key)) {
+    for (Long key = startKey != null ? startKey : cacheMetric.firstKey();
+         key != null && key <= endTime;
+         key = cacheMetric.higherKey(key)) {
       LinkedList<MetricDatapoint> bucket = cacheMetric.get(key).get(bucketId);
 
-      for (MetricDatapoint timestampDatum : bucket) {
-        if (startTime <= timestampDatum.timestamp && timestampDatum.timestamp <= endTime) {
-          switch (type) {
-            case AVG:
-              countAvg++;
-            case SUM:
-              result += Double.parseDouble(timestampDatum.value);
-              break;
-            case LAST:
-              if (rangeValue.endTime < timestampDatum.timestamp) {
-                rangeValue.value = timestampDatum.value;
-              }
-              break;
-            case UNKNOWN:
-            default:
-              LOG.warning("Unknown metric type " + type);
-              return;
+      if (bucket != null) {
+        for (MetricDatapoint datapoint : bucket) {
+          if (startTime <= datapoint.timestamp && datapoint.timestamp <= endTime) {
+            switch (type) {
+              case AVG:
+                countAvg++;
+              case SUM:
+                result += Double.parseDouble(datapoint.value);
+                break;
+              case LAST:
+                if (rangeValue.endTime < datapoint.timestamp) {
+                  rangeValue.value = datapoint.value;
+                }
+                break;
+              case UNKNOWN:
+              default:
+                LOG.warning("Unknown metric type " + type);
+                return;
+            }
+            rangeValue.startTime = Math.min(rangeValue.startTime, datapoint.timestamp);
+            rangeValue.endTime = Math.max(rangeValue.endTime, datapoint.timestamp);
           }
-          rangeValue.startTime = Math.min(rangeValue.startTime, timestampDatum.timestamp);
-          rangeValue.endTime = Math.max(rangeValue.endTime, timestampDatum.timestamp);
-        }
-      } // end bucket
+        } // end bucket
+      }
 
     } // end tree
 
@@ -402,7 +441,10 @@ public class CacheCore {
     } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
       rangeValue.value = String.valueOf(result);
     }
-    metricValue.add(rangeValue);
+    if (rangeValue.value != null) {
+      metricValue.add(rangeValue);
+    }
+    LOG.info(rangeValue.toString());
   }
 
   /**
@@ -427,7 +469,8 @@ public class CacheCore {
   }
 
   public void Purge() {
-    long now = Instant.now().getEpochSecond();
+    long now = System.currentTimeMillis();
+    LOG.info("Purge " + now);
     synchronized (CacheCore.class) {
       // remove old
       for (Long firstKey = cacheMetric.firstKey();
@@ -436,7 +479,7 @@ public class CacheCore {
         cacheMetric.remove(firstKey);
       }
       // add new
-      cacheMetric.put(now, new HashMap<>());
+      cacheMetric.put(now, new HashMap<Long, LinkedList<MetricDatapoint>>());
     }
   }
 
