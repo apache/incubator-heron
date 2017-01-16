@@ -1,16 +1,17 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.metricscachemgr.metricscache;
 
 import java.util.Map;
@@ -24,7 +25,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
- * compatible with tmaster
+ * compatible with tmaster interface
  * see heron/tmaster/src/cpp/manager/tmetrics-collector.h
  */
 public class MetricsCache {
@@ -47,15 +48,16 @@ public class MetricsCache {
     // metadata
     metricNameType = new MetricsFilter();
     Map<String, Object> sinksTmaster = sinksConfig.getConfigForSink(METRICS_SINKS_TMASTER_SINK);
+    @SuppressWarnings("unchecked")
     Map<String, String> metricsType =
         (Map<String, String>) sinksTmaster.get(METRICS_SINKS_TMASTER_METRICS);
     for (Map.Entry<String, String> e : metricsType.entrySet()) {
       metricNameType.setMetricToType(e.getKey(), TranslateFromString(e.getValue()));
     }
     //
-    int maxInterval = systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60;
-    int interval = systemConfig.getTmasterMetricsCollectorPurgeIntervalSec();
-    int maxException = systemConfig.getTmasterMetricsCollectorMaximumException();
+    long maxInterval = systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60;
+    long interval = systemConfig.getTmasterMetricsCollectorPurgeIntervalSec();
+    long maxException = systemConfig.getTmasterMetricsCollectorMaximumException();
 
     cache = new CacheCore(maxInterval, interval, maxException);
 
@@ -75,10 +77,43 @@ public class MetricsCache {
     }
   }
 
+  /**
+   * sink publishes metrics and exceptions to this interface
+   *
+   * @param metrics message from sinks
+   */
   public void AddMetric(TopologyMaster.PublishMetrics metrics) {
     cache.AddMetricException(metrics);
   }
 
+  /**
+   * for inside SLA process component query
+   *
+   * @param request query statement
+   * @return metric list
+   */
+  public MetricsCacheQueryUtils.MetricResponse GetMetrics(
+      MetricsCacheQueryUtils.MetricRequest request) {
+    return cache.GetMetrics(request, metricNameType);
+  }
+
+  /**
+   * for inside SLA process component query
+   *
+   * @param request query statement
+   * @return exception list
+   */
+  public MetricsCacheQueryUtils.ExceptionResponse GetExceptions(
+      MetricsCacheQueryUtils.ExceptionRequest request) {
+    return cache.GetExceptions(request);
+  }
+
+  /**
+   * compatible with tmaster interface
+   *
+   * @param request query request defined in protobuf
+   * @return query result defined in protobuf
+   */
   public TopologyMaster.ExceptionLogResponse GetExceptions(
       TopologyMaster.ExceptionLogRequest request) {
     MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.Convert(request);
@@ -86,10 +121,18 @@ public class MetricsCache {
     TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.Convert(response1);
     return response;
   }
+
   private MetricsCacheQueryUtils.ExceptionResponse SummarizeException(
       MetricsCacheQueryUtils.ExceptionResponse response1) {
     return null;
   }
+
+  /**
+   * compatible with tmaster interface
+   *
+   * @param request query statement defined in protobuf
+   * @return query result defined in protobuf
+   */
   public TopologyMaster.ExceptionLogResponse GetExceptionsSummary(
       TopologyMaster.ExceptionLogRequest request) {
     MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.Convert(request);
@@ -99,6 +142,12 @@ public class MetricsCache {
     return response;
   }
 
+  /**
+   * compatible with tmaster interface
+   *
+   * @param request query statement defined in protobuf
+   * @return query result defined in protobuf
+   */
   public TopologyMaster.MetricResponse GetMetrics(TopologyMaster.MetricRequest request) {
     String componentName = request.getComponentName();
     if (!cache.existComponentInstance(componentName, null)) {
@@ -132,7 +181,7 @@ public class MetricsCache {
     // query
     MetricsCacheQueryUtils.MetricRequest request1 = MetricsCacheQueryUtils.Convert(request);
     MetricsCacheQueryUtils.MetricResponse response1 = cache.GetMetrics(request1, metricNameType);
-    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.Convert(response1);
+    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.Convert(response1, request1);
     return response;
   }
 }

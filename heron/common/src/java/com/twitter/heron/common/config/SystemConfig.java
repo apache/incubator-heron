@@ -321,7 +321,7 @@ public class SystemConfig {
    *The maximum exception count be kept in tmaster
    */
   public static final String TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION
-   = "heron.tmaster.metrics.collector.maximum.exception";
+      = "heron.tmaster.metrics.collector.maximum.exception";
 
   /**
    * The maximum interval in minutes of metrics to be kept in tmaster
@@ -570,21 +570,21 @@ public class SystemConfig {
     return value == null ? Integer.MAX_VALUE : TypeUtils.getInteger(value);
   }
 
-  public int getTmasterMetricsCollectorMaximumException() {
+  public long getTmasterMetricsCollectorMaximumException() {
     return TypeUtils.
-        getInteger(this.config.get(
+        getLong(this.config.get(
             SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION));
   }
 
-  public int getTmasterMetricsCollectorMaximumIntervalMin() {
+  public long getTmasterMetricsCollectorMaximumIntervalMin() {
     return TypeUtils.
-        getInteger(this.config.get(
+        getLong(this.config.get(
             SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN));
   }
 
-  public int getTmasterMetricsCollectorPurgeIntervalSec() {
+  public long getTmasterMetricsCollectorPurgeIntervalSec() {
     return TypeUtils.
-        getInteger(this.config.get(
+        getLong(this.config.get(
             SystemConfig.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC));
   }
 

@@ -59,7 +59,7 @@ java_binary(
     name = "metricscache-queryclient-unshaded",
     srcs = glob(["**/*.java"]),
     deps = metricscachemgr_deps_files,
-    main_class="com.twitter.heron.metricscachemgr.SimpleMetricsQueryClient"
+    main_class="com.twitter.heron.metricscachemgr.ExampleMetricsQuery"
 )
 
 genrule(
