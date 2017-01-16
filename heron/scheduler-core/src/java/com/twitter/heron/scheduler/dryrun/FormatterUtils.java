@@ -170,12 +170,13 @@ public final class FormatterUtils {
   /**
    * Row, which consists a list of cells.
    *
+   * <pre>
    *   ----------------------
-   *   | xxxx | yyyy | zzzz | <- a list of cells
+   *   | xxxx | yyyy | zzzz | &lt;- a list of cells
    *   ----------------------
    *                 ^
    *                 |------- separator: "|"
-   *
+   * </pre>
    */
   public static class Row {
     private List<Cell> row;
@@ -245,13 +246,14 @@ public final class FormatterUtils {
   /**
    * Table, which consists of a title and a list of rows below the title
    *
-   *
+   * <pre>
    *     ============================
-   *     | title1 | title2 | title3 | <------- title
+   *     | title1 | title2 | title3 | &lt;----- title
    *     ============================
-   *     | xxxxxx | yyy    | zzzzzz | <-|
+   *     | xxxxxx | yyy    | zzzzzz | &lt;-|
    *     ----------------------------   |----- rows
-   *     | gggg   | uuuuu  | ooo    | <-|
+   *     | gggg   | uuuuu  | ooo    | &lt;-|
+   * </pre>
    */
   public static class Table {
     private Row title;
@@ -319,7 +321,7 @@ public final class FormatterUtils {
      *
      * Definition of table frame:
      *
-     *     =============================== <- table frame
+     *     =============================== &lt;- table frame
      *     | xxxxx | yyyyy | zzzzz | sss |
      *     ===============================
      *     | ..... | ..... | ..... | ... |
@@ -330,7 +332,7 @@ public final class FormatterUtils {
      *     space
      *      |
      *     ---------
-     *     | xxxxx | <- one separator
+     *     | xxxxx | &lt;- one separator
      *     ---------
      *            |
      *           space
