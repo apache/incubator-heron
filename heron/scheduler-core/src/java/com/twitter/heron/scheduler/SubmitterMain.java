@@ -26,7 +26,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
@@ -323,7 +322,7 @@ public class SubmitterMain {
       dryRun = true;
     }
 
-    // Default dry run type
+    // Default dry-run output format type
     DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
     if (cmd.hasOption("f")) {
       String format = cmd.getOptionValue("dry_run_format");

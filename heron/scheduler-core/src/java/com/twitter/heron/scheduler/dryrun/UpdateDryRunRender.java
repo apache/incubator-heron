@@ -22,8 +22,11 @@ import java.util.Set;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
+// SUPPRESS CHECKSTYLE AvoidStarImport
+import com.twitter.heron.scheduler.dryrun.FormatterUtils.*;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
+
 
 public class UpdateDryRunRender implements DryRunRender {
 
@@ -95,8 +98,8 @@ public class UpdateDryRunRender implements DryRunRender {
       StringBuilder builder = new StringBuilder();
       Optional<PackingPlan.ContainerPlan> oldPackingPlan = diffView.getOldPlan();
       Optional<PackingPlan.ContainerPlan> newPackingPlan = diffView.getNewPlan();
-      String header = new FormatterUtils.Cell(
-          String.format("Container %d: ", containerId), FormatterUtils.TextStyle.BOLD).toString();
+      String header = new Cell(
+          String.format("Container %d: ", containerId), TextStyle.BOLD).toString();
       builder.append(header);
       // Container exists in both old and new packing plan
       if (oldPackingPlan.isPresent() && newPackingPlan.isPresent()) {
@@ -107,11 +110,11 @@ public class UpdateDryRunRender implements DryRunRender {
           builder.append(ContainerChange.UNAFFECTED + "\n");
           String resourceUsage = FormatterUtils.renderResourceUsage(
               newContainerPlan.getRequiredResource());
-          List<FormatterUtils.Row> rows = new ArrayList<>();
+          List<Row> rows = new ArrayList<>();
           for (PackingPlan.InstancePlan plan: newContainerPlan.getInstances()) {
             rows.add(FormatterUtils.rowOfInstancePlan(plan,
-                FormatterUtils.TextColor.DEFAULT,
-                FormatterUtils.TextStyle.DEFAULT));
+                TextColor.DEFAULT,
+                TextStyle.DEFAULT));
           }
           String containerTable = FormatterUtils.renderOneContainer(rows);
           builder.append(resourceUsage + "\n");
@@ -128,22 +131,22 @@ public class UpdateDryRunRender implements DryRunRender {
               Sets.difference(newInstancePlans, oldInstancePlans);
           Set<PackingPlan.InstancePlan> removedPlans =
               Sets.difference(oldInstancePlans, newInstancePlans);
-          List<FormatterUtils.Row> rows = new ArrayList<>();
+          List<Row> rows = new ArrayList<>();
           for (PackingPlan.InstancePlan plan: unchangedPlans) {
             rows.add(FormatterUtils.rowOfInstancePlan(plan,
-                FormatterUtils.TextColor.DEFAULT,
-                FormatterUtils.TextStyle.DEFAULT));
+                TextColor.DEFAULT,
+                TextStyle.DEFAULT));
           }
           for (PackingPlan.InstancePlan plan: newPlans) {
             rows.add(FormatterUtils.rowOfInstancePlan(plan,
-                FormatterUtils.TextColor.GREEN,
-                FormatterUtils.TextStyle.DEFAULT));
+                TextColor.GREEN,
+                TextStyle.DEFAULT));
           }
           for (PackingPlan.InstancePlan plan: removedPlans) {
             rows.add(FormatterUtils.rowOfInstancePlan(
-                plan, FormatterUtils.TextColor.RED, FormatterUtils.TextStyle.STRIKETHROUGH));
+                plan, TextColor.RED, TextStyle.STRIKETHROUGH));
           }
-          builder.append(new FormatterUtils.Cell(
+          builder.append(new Cell(
               ContainerChange.MODIFIED.toString()).toString() + "\n");
           builder.append(resourceUsage + "\n");
           String containerTable = FormatterUtils.renderOneContainer(rows);
@@ -152,27 +155,27 @@ public class UpdateDryRunRender implements DryRunRender {
       } else if (oldPackingPlan.isPresent()) {
         // Container has been removed
         PackingPlan.ContainerPlan oldContainerPlan = oldPackingPlan.get();
-        List<FormatterUtils.Row> rows = new ArrayList<>();
+        List<Row> rows = new ArrayList<>();
         for (PackingPlan.InstancePlan plan: oldContainerPlan.getInstances()) {
           rows.add(FormatterUtils.rowOfInstancePlan(
-              plan, FormatterUtils.TextColor.RED, FormatterUtils.TextStyle.STRIKETHROUGH));
+              plan, TextColor.RED, TextStyle.STRIKETHROUGH));
         }
-        builder.append(new FormatterUtils.Cell(ContainerChange.REMOVED.toString(),
-            FormatterUtils.TextColor.RED).toString() + "\n");
+        builder.append(new Cell(ContainerChange.REMOVED.toString(),
+            TextColor.RED).toString() + "\n");
         builder.append(FormatterUtils.renderResourceUsage(
             oldContainerPlan.getRequiredResource()) + "\n");
         builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
       } else if (newPackingPlan.isPresent()) {
         // New container has been added
         PackingPlan.ContainerPlan newContainerPlan = newPackingPlan.get();
-        List<FormatterUtils.Row> rows = new ArrayList<>();
+        List<Row> rows = new ArrayList<>();
         for (PackingPlan.InstancePlan plan: newContainerPlan.getInstances()) {
           rows.add(FormatterUtils.rowOfInstancePlan(plan,
-              FormatterUtils.TextColor.GREEN,
-              FormatterUtils.TextStyle.DEFAULT));
+              TextColor.GREEN,
+              TextStyle.DEFAULT));
         }
-        builder.append(new FormatterUtils.Cell(ContainerChange.NEW.toString(),
-            FormatterUtils.TextColor.GREEN).toString() + "\n");
+        builder.append(new Cell(ContainerChange.NEW.toString(),
+            TextColor.GREEN).toString() + "\n");
         builder.append(FormatterUtils.renderResourceUsage(
             newContainerPlan.getRequiredResource()) + "\n");
         builder.append(FormatterUtils.renderOneContainer(rows) + "\n");

@@ -248,7 +248,7 @@ public class RuntimeManagerMain {
       dryRun = true;
     }
 
-    // Default dry run type
+    // Default dry-run output format type
     DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
     if (cmd.hasOption("t")) {
       String format = cmd.getOptionValue("dry_run_format");

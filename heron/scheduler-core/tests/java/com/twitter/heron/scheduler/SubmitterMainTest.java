@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.junit.Before;
@@ -34,7 +33,6 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
