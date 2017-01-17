@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.junit.Before;
@@ -25,11 +26,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
@@ -180,8 +185,31 @@ public class SubmitterMainTest {
     submitterMain.submitTopology();
   }
 
+  @Test(expected = SubmitDryRunResponse.class)
+  public void testSubmitTopologyDryRun() throws Exception {
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    PowerMockito.whenNew(SchedulerStateManagerAdaptor.class).withAnyArguments().
+        thenReturn(adaptor);
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    PowerMockito.mockStatic(Context.class);
+    PowerMockito.when(Context.dryRun(config)).thenReturn(true);
+    doThrow(new SubmitDryRunResponse(topology, config, mock(PackingPlan.class))).
+        when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
+    try {
+      submitterMain.submitTopology();
+    } finally {
+      /* under dry-run mode, the program should not
+         1. upload topology package
+         2. validate that topology is not running
+       */
+      verify(uploader, never()).uploadPackage();
+      verify(adaptor, never()).isTopologyRunning(anyString());
+    }
+  }
+
   @Test
   public void testSubmitTopologySuccessful() throws Exception {
+    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"))).thenReturn(false);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());

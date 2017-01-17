@@ -14,6 +14,8 @@
 
 package com.twitter.heron.scheduler;
 
+import java.util.HashMap;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,11 +24,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -200,6 +205,35 @@ public class RuntimeManagerMainTest {
     // Failed to callRuntimeManagerRunner
     doThrow(new TopologyRuntimeManagementException("")).when(runtimeManagerMain)
         .callRuntimeManagerRunner(any(Config.class), eq(client));
+    runtimeManagerMain.manageTopology();
+  }
+
+  @PrepareForTest(ReflectionUtils.class)
+  @Test(expected = UpdateDryRunResponse.class)
+  public void testManageTopologyDryRun() throws Exception {
+    config = mock(Config.class);
+    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+
+    RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
+    // Valid state manager class
+    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+        thenReturn(IStateManager.class.getName());
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
+
+    // Legal request
+    UpdateDryRunResponse mockResponse = new UpdateDryRunResponse(
+        TopologyAPI.Topology.getDefaultInstance(), config, mock(PackingPlan.class),
+        mock(PackingPlan.class), new HashMap<String, Integer>());
+    doNothing().when(runtimeManagerMain)
+        .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
+    // Successfully get ISchedulerClient
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
+    // Happy path
+    doThrow(mockResponse).when(runtimeManagerMain).
+        callRuntimeManagerRunner(any(Config.class), eq(client));
     runtimeManagerMain.manageTopology();
   }
 

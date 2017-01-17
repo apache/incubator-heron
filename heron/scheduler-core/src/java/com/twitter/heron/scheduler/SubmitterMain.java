@@ -447,6 +447,7 @@ public class SubmitterMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
+      // Build the basic runtime config
       Config runtime = Config.newBuilder()
           .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor)).build();
 
@@ -454,17 +455,18 @@ public class SubmitterMain {
       if (Context.dryRun(config)) {
         callLauncherRunner(runtime);
       } else {
+
+        // Check if topology is already running
         validateSubmit(adaptor, topology.getName());
 
-        // 2. Try to submit topology if valid
-        // invoke method to submit the topology
         LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
+        // Try to submit topology if valid
         // Firstly, try to upload necessary packages
         URI packageURI = uploadPackage(uploader);
 
-        // Secondly, try to submit a topology
-        // build the runtime config
+        // Secondly, try to submit the topology
+        // build the complete runtime config
         Config runtimeAll = Config.newBuilder()
             .putAll(runtime)
             .put(Keys.topologyPackageUri(), packageURI)
@@ -472,8 +474,6 @@ public class SubmitterMain {
             .build();
         callLauncherRunner(runtimeAll);
       }
-
-
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException
