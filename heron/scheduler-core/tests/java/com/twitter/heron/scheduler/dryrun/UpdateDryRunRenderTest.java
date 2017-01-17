@@ -33,6 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 // SUPPRESS CHECKSTYLE AvoidStarImport
@@ -131,7 +132,8 @@ public class UpdateDryRunRenderTest {
         Constants.TEST_DATA_PATH, "UpdateDryRunOutputATable.txt").toString();
     File sampleOutput = new File(filePath);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
-    Config config = PowerMockito.mock(Config.class);
+    Config config = Config.newBuilder().put(ConfigKeys.get("REPACKING_CLASS"),
+        "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanA, originalPlan, new HashMap<String, Integer>());
     String table = new UpdateDryRunRender(resp).renderTable();
@@ -146,7 +148,8 @@ public class UpdateDryRunRenderTest {
         Constants.TEST_DATA_PATH, "UpdateDryRunOutputBTable.txt").toString();
     File sampleOutput = new File(filePath);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
-    Config config = PowerMockito.mock(Config.class);
+    Config config = Config.newBuilder().put(ConfigKeys.get("REPACKING_CLASS"),
+        "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanB, originalPlan, new HashMap<String, Integer>());
     String table = new UpdateDryRunRender(resp).renderTable();

@@ -362,7 +362,8 @@ public class SubmitterMain {
     try {
       submitterMain.submitTopology();
     } catch (SubmitDryRunResponse response) {
-      System.out.println(submitterMain.renderDryRunResponse(response));
+      LOG.log(Level.FINE, "Sending out dry-run response");
+      System.out.print(submitterMain.renderDryRunResponse(response));
       // Exit with status code 200 to indicate dry-run response is sent out
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(200);

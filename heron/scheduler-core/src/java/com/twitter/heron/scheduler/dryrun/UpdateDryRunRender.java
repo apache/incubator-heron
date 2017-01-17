@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 
 // SUPPRESS CHECKSTYLE AvoidStarImport
 import com.twitter.heron.scheduler.dryrun.FormatterUtils.*;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 
@@ -86,10 +87,12 @@ public class UpdateDryRunRender implements DryRunRender {
 
   private class TableRenderer {
 
+    private final Config config;
     private final PackingPlan oldPlan;
     private final PackingPlan newPlan;
 
-    TableRenderer(PackingPlan oldPlan, PackingPlan newPlan) {
+    TableRenderer(Config config, PackingPlan oldPlan, PackingPlan newPlan) {
+      this.config = config;
       this.oldPlan = oldPlan;
       this.newPlan = newPlan;
     }
@@ -118,7 +121,7 @@ public class UpdateDryRunRender implements DryRunRender {
           }
           String containerTable = FormatterUtils.renderOneContainer(rows);
           builder.append(resourceUsage + "\n");
-          builder.append(containerTable + "\n");
+          builder.append(containerTable);
         } else {
           // Container plan has changed
           String resourceUsage = FormatterUtils.renderResourceUsageChange(
@@ -150,7 +153,7 @@ public class UpdateDryRunRender implements DryRunRender {
               ContainerChange.MODIFIED.toString()).toString() + "\n");
           builder.append(resourceUsage + "\n");
           String containerTable = FormatterUtils.renderOneContainer(rows);
-          builder.append(containerTable + "\n");
+          builder.append(containerTable);
         }
       } else if (oldPackingPlan.isPresent()) {
         // Container has been removed
@@ -164,7 +167,7 @@ public class UpdateDryRunRender implements DryRunRender {
             TextColor.RED).toString() + "\n");
         builder.append(FormatterUtils.renderResourceUsage(
             oldContainerPlan.getRequiredResource()) + "\n");
-        builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
+        builder.append(FormatterUtils.renderOneContainer(rows));
       } else if (newPackingPlan.isPresent()) {
         // New container has been added
         PackingPlan.ContainerPlan newContainerPlan = newPackingPlan.get();
@@ -178,7 +181,7 @@ public class UpdateDryRunRender implements DryRunRender {
             TextColor.GREEN).toString() + "\n");
         builder.append(FormatterUtils.renderResourceUsage(
             newContainerPlan.getRequiredResource()) + "\n");
-        builder.append(FormatterUtils.renderOneContainer(rows) + "\n");
+        builder.append(FormatterUtils.renderOneContainer(rows));
       } else {
         throw new RuntimeException(
             "Unexpected error: either new container plan or old container plan has to exist");
@@ -188,17 +191,22 @@ public class UpdateDryRunRender implements DryRunRender {
 
     public String render() {
       Map<Integer, ContainersDiffView> diffViews = getContainerDiffViews(oldPlan, newPlan);
+      int numContainers = newPlan.getContainers().size();
       StringBuilder builder = new StringBuilder();
-      for (Integer containerId: diffViews.keySet()) {
-        ContainersDiffView view = diffViews.get(containerId);
-        builder.append(renderContainerDiffView(containerId, view));
+      builder.append(String.format("Total number of containers: %d", numContainers) + "\n");
+      builder.append(String.format("Using repacking class: %s",
+          Context.repackingClass(config)) + "\n");
+      List<String> containerTables = new ArrayList<>();
+      for (Integer id: diffViews.keySet()) {
+        containerTables.add(renderContainerDiffView(id, diffViews.get(id)));
       }
+      builder.append(String.join("\n", containerTables));
       return builder.toString();
     }
   }
 
   public String renderTable() {
-    return new TableRenderer(oldPlan, newPlan).render();
+    return new TableRenderer(response.getConfig(), oldPlan, newPlan).render();
   }
 
   public String renderRaw() {

@@ -33,6 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 // SUPPRESS CHECKSTYLE AvoidStarImport
@@ -84,7 +85,8 @@ public class SubmitDryRunRenderTest {
         Constants.TEST_DATA_PATH, "SubmitDryRunOutputATable.txt").toString();
     File sampleOutput = new File(filePath);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
-    Config config = PowerMockito.mock(Config.class);
+    Config config = Config.newBuilder().put(ConfigKeys.get("PACKING_CLASS"),
+        "com.twitter.heron.packing.roundrobin.RoundRobinPacking").build();
     String table = new SubmitDryRunRender(
         new SubmitDryRunResponse(topology, config, plan)).renderTable();
     String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);

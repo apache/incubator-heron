@@ -317,7 +317,7 @@ public class RuntimeManagerMain {
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (UpdateDryRunResponse response) {
       LOG.log(Level.FINE, "Sending out dry-run response");
-      System.out.println(runtimeManagerMain.renderDryRunResponse(response));
+      System.out.print(runtimeManagerMain.renderDryRunResponse(response));
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       // Exit with status code 200 to indicate dry-run response is sent out
       System.exit(200);

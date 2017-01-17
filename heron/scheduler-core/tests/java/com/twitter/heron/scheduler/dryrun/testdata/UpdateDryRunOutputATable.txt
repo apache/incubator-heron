@@ -1,3 +1,5 @@
+Total number of containers: 4
+Using repacking class: com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking
 [1mContainer 1: [0mMODIFIED
 CPU: 3.0 ([31m-40.00%[0m), RAM: 10GB ([31m-9.09%[0m), Disk: 3GB ([31m-40.00%[0m)
 ====================================================
@@ -36,4 +38,3 @@ CPU: 1.0, RAM: 3GB, Disk: 1GB
 ----------------------------------------------------
 | [32m exclaim1[0m | [32m     10[0m | [32m1.0[0m | [32m       3[0m | [32m        1[0m |
 ====================================================
-

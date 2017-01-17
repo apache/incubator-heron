@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 
@@ -31,39 +32,46 @@ public class SubmitDryRunRender implements DryRunRender {
   }
 
   private class TableRender {
+
+    private final Config config;
     private final PackingPlan plan;
 
-    TableRender(PackingPlan plan) {
+    TableRender(Config config, PackingPlan plan) {
+      this.config = config;
       this.plan = plan;
     }
 
     public String render() {
       StringBuilder builder = new StringBuilder();
       Map<Integer, PackingPlan.ContainerPlan> containersMap = plan.getContainersMap();
+      int numContainers = containersMap.size();
+      builder.append(String.format("Total number of containers: %d", numContainers) + "\n");
+      builder.append(String.format("Using packing class: %s", Context.packingClass(config)) + "\n");
+      List<String> containerTables = new ArrayList<>();
       for (Integer containerId: containersMap.keySet()) {
         StringBuilder containerBuilder = new StringBuilder();
         String header =
             new FormatterUtils.Cell(String.format("Container %d", containerId),
                 FormatterUtils.TextStyle.BOLD).toString();
-        containerBuilder.append(header);
-        builder.append(header + "\n");
+        containerBuilder.append(header + "\n");
         PackingPlan.ContainerPlan containerPlan = containersMap.get(containerId);
-        builder.append(FormatterUtils.renderResourceUsage(
+        containerBuilder.append(FormatterUtils.renderResourceUsage(
             containerPlan.getRequiredResource()) + "\n");
         List<FormatterUtils.Row> rows = new ArrayList<>();
         for (PackingPlan.InstancePlan instancePlan: containerPlan.getInstances()) {
           rows.add(FormatterUtils.rowOfInstancePlan(instancePlan,
               FormatterUtils.TextColor.DEFAULT, FormatterUtils.TextStyle.DEFAULT));
         }
-        String containerTable = FormatterUtils.renderOneContainer(rows);
-        builder.append(containerTable + "\n");
+        containerBuilder.append(FormatterUtils.renderOneContainer(rows));
+        containerTables.add(containerBuilder.toString());
       }
+      builder.append(String.join("\n", containerTables));
       return builder.toString();
     }
   }
 
   public String renderTable() {
-    return new TableRender(plan).render();
+    return new TableRender(response.getConfig(), plan).render();
   }
 
   public String renderRaw() {
