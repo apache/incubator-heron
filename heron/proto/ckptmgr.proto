@@ -26,8 +26,14 @@ message RestoreTopologyState {
 // Message sent by stmgr to tmaster asking it to reset the topology
 // to some valid checkpoint. This is sent either if stmgr dies
 // and comes back up or if an instance dies.
-message RestoreTopologyStateMessage {
+message RestoreTopologyStateRequestMessage {
   required string reason = 1;
+}
+
+// Message that stmgr sends to tmaster after it restores
+// all of its local instances to a checkpoint_id
+message RestoredTopologyState {
+  required string checkpoint_id = 1;
 }
 
 // Message sent by stmgr to tmaster informing it about
@@ -36,6 +42,11 @@ message RestoreTopologyStateMessage {
 message TopologyStateStored {
   required string checkpoint_id = 1;
   required heron.proto.system.Instance instance = 2;
+}
+
+// Message sent by tmaster to stmgr to start processing
+message StatefulProcessingStart {
+  required string checkpoint_id = 1;
 }
 
 // stmgr -> ckptmgr messages
