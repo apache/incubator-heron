@@ -5,10 +5,51 @@ option java_outer_classname = "CheckpointManager";
 import "common.proto";
 import "physical_plan.proto";
 
+// message stored in zk by the tmaster
+message StatefulMostRecentCheckpoint {
+  required string checkpoint_id = 1;
+}
+
+// tmaster -> stmgr messages
+
 // Message sent to stmgrs by the tmaster to initiate checkpointing
 message StartStatefulCheckpoint {
   required string checkpoint_id = 1;
 }
+
+// Message sent by tmaster to stmgr asking them to reset their instances
+// to this checkpoint
+message RestoreTopologyState {
+  required string checkpoint_id = 1;
+}
+
+// Message sent by stmgr to tmaster asking it to reset the topology
+// to some valid checkpoint. This is sent either if stmgr dies
+// and comes back up or if an instance dies.
+message RestoreTopologyStateRequestMessage {
+  required string reason = 1;
+}
+
+// Message that stmgr sends to tmaster after it restores
+// all of its local instances to a checkpoint_id
+message RestoredTopologyState {
+  required string checkpoint_id = 1;
+}
+
+// Message sent by stmgr to tmaster informing it about
+// the fact that we stored a checkpoint belonging
+// to the instance
+message TopologyStateStored {
+  required string checkpoint_id = 1;
+  required heron.proto.system.Instance instance = 2;
+}
+
+// Message sent by tmaster to stmgr to start processing
+message StatefulProcessingStart {
+  required string checkpoint_id = 1;
+}
+
+// stmgr -> ckptmgr messages
 
 // This is the message that a stmgr sends
 // when it wants to establish the connection
@@ -26,19 +67,6 @@ message RegisterStMgrResponse {
   required heron.proto.system.Status status = 1;
 }
 
-// This is the message that the instance sends
-// when it wants stmgr to store its state
-message InstanceStateCheckpoint {
-  required string checkpoint_id = 1;
-  required bytes state = 2;
-}
-
-// This is the message that the stmgr sends to its
-// local tasks to begin initiating checkpoint
-message InitiateStatefulCheckpoint {
-  required string checkpoint_id = 1;
-}
-
 // This is the message that StMgr sends to Checkpoint Mgr
 // to store instance checkpoint data
 message SaveStateCheckpoint {
@@ -47,12 +75,50 @@ message SaveStateCheckpoint {
   required InstanceStateCheckpoint checkpoint = 2;
 }
 
+// After successfully saving state, this is what
+// Checkpoint Mgr sends back as response
+message SavedStateCheckpoint {
+  required heron.proto.system.Instance instance = 2;
+  required string checkpoint_id = 3;
+}
+
 // This is the message that StMgr sends to Checkpoint Mgr
 // to restore instance checkpoint data
-message RestoreStateCheckpoint {
+message RestoreStateCheckpointRequest {
   required heron.proto.system.Instance instance = 1;
   required string checkpoint_id = 2;
 }
+
+// This is the response that Checkpoint Mgr sends to StMgr
+// for its restore request
+message RestoreStateCheckpointResponse {
+  required heron.proto.system.Status status = 1;
+  required string checkpoint_id = 2;
+  optional InstanceStateCheckpoint checkpoint = 3;
+}
+
+// stmgr -> Instance messages
+
+// This is the message that the stmgr sends to its
+// local tasks to begin initiating checkpoint
+message InitiateStatefulCheckpoint {
+  required string checkpoint_id = 1;
+}
+
+// This is the message that the instance sends
+// when it wants stmgr to store its state
+message InstanceStateCheckpoint {
+  required string checkpoint_id = 1;
+  required bytes state = 2;
+}
+
+// This is the message that stmgr sends to its instace
+// asking them to restore their state
+message RestoreInstanceState {
+  required InstanceStateCheckpoint state = 1;
+}
+
+// stmgr -> stmgr messages
 
 // This is the message that stmgr sends to other stmgr
 // to send it to downstream task

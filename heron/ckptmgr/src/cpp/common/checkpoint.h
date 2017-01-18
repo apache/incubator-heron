@@ -30,7 +30,7 @@ class Checkpoint {
              ::heron::proto::ckptmgr::SaveStateCheckpoint* _checkpoint);
 
   Checkpoint(const std::string& topology,
-             ::heron::proto::ckptmgr::RestoreStateCheckpoint* _checkpoint);
+             ::heron::proto::ckptmgr::RestoreStateCheckpointRequest* _checkpoint);
 
   virtual ~Checkpoint() {
     if (savebytes_ != nullptr)
