@@ -45,7 +45,7 @@ message TopologyStateStored {
 }
 
 // Message sent by tmaster to stmgr to start processing
-message StatefulProcessingStart {
+message StatefulProcessingStMgrStart {
   required string checkpoint_id = 1;
 }
 
@@ -116,6 +116,11 @@ message InstanceStateCheckpoint {
 // asking them to restore their state
 message RestoreInstanceState {
   required InstanceStateCheckpoint state = 1;
+}
+
+// Message sent by stmgr to Instance to start processing
+message StatefulProcessingInstanceStart {
+  required string checkpoint_id = 1;
 }
 
 // stmgr -> stmgr messages
