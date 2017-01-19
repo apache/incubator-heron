@@ -84,8 +84,8 @@ class AuroraCLIController implements AuroraController {
   @Override
   public boolean restart(Integer containerId) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "restart"));
-    if (containerId != null && containerId != -1) {
-      auroraCmd.add(String.format("%s/%s", jobSpec, Integer.toString(containerId)));
+    if (containerId != null) {
+      auroraCmd.add(String.format("%s/%d", jobSpec, containerId));
     } else {
       auroraCmd.add(jobSpec);
     }
