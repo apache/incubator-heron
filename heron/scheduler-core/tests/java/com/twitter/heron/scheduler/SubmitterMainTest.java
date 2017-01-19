@@ -31,7 +31,6 @@ import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
-import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -191,8 +190,9 @@ public class SubmitterMainTest {
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     PowerMockito.mockStatic(Context.class);
     PowerMockito.when(Context.dryRun(config)).thenReturn(true);
+    /*
     doThrow(new SubmitDryRunResponse(topology, config, mock(PackingPlan.class))).
-        when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
+        when(submitterMain).callLauncherRunner(Mockito.any(Config.class)); */
     try {
       submitterMain.submitTopology();
     } finally {
