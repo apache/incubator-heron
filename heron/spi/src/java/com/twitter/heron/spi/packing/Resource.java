@@ -54,16 +54,8 @@ public class Resource {
     return disk;
   }
 
-  public Resource cloneWithCpu(double newCpu) {
-    return new Resource(newCpu, this.getRam(), this.getDisk());
-  }
-
   public Resource cloneWithRam(ByteAmount newRam) {
     return new Resource(this.getCpu(), newRam, this.getDisk());
-  }
-
-  public Resource cloneWithDisk(ByteAmount newDisk) {
-    return new Resource(this.getCpu(), this.getRam(), newDisk);
   }
 
   /**
