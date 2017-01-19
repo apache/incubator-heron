@@ -102,7 +102,10 @@ public class MetricsCacheManager {
     this.config = configExpand;
     this.metricscacheLocation = metricscacheLocation;
 
-    metricsCache = new MetricsCache(systemConfig, msconfig);
+    metricsCacheManagerServerLoop = new NIOLooper();
+
+    // initialize cache and hook to the shared nio-looper
+    metricsCache = new MetricsCache(systemConfig, msconfig, metricsCacheManagerServerLoop);
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
@@ -114,7 +117,6 @@ public class MetricsCacheManager {
             systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes());
 
     // Construct the server to accepts messages from sinks
-    metricsCacheManagerServerLoop = new NIOLooper();
     metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,
         serverHost, masterPort, serverSocketOptions, metricsCache);
 

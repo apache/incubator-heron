@@ -19,11 +19,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoint;
 import com.twitter.heron.metricscachemgr.metricscache.datapoint.MetricDatapoint;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
@@ -45,8 +44,8 @@ public class CacheCore {
   private static int componentInstanceCount = Integer.MIN_VALUE;
   private static int metricNameCount = Integer.MIN_VALUE;
 
-  // timer for purge
-  private Timer timer = null;
+  // looper for purge
+  private WakeableLooper looper = null;
 
   // index id maps
   private Map<String, Map<String, Integer>> idxComponentInstance = null;
@@ -480,33 +479,44 @@ public class CacheCore {
       }
       // add new
       cacheMetric.put(now, new HashMap<Long, LinkedList<MetricDatapoint>>());
-    }
-  }
-
-  /**
-   * start purge timer task
-   */
-  public void startPurge() {
-    if (timer != null) {
-      stopPurge();
-    }
-
-    timer = new Timer(true); // do not block exit
-    timer.scheduleAtFixedRate(new TimerTask() {
-      @Override
-      public void run() {
-        Purge();
+      // next timer task
+      if (looper != null) {
+        looper.registerTimerEventInSeconds(interval, new Runnable() {
+          @Override
+          public void run() {
+            Purge();
+          }
+        });
       }
-    }, 0, interval);
+    }
   }
 
   /**
-   * stop metric purge timer
+   * start purge looper task
+   */
+  public void startPurge(WakeableLooper wakeableLooper) {
+    synchronized (CacheCore.class) {
+      if (looper == null) {
+        looper = wakeableLooper;
+      }
+
+      looper.registerTimerEventInSeconds(interval, new Runnable() {
+        @Override
+        public void run() {
+          Purge();
+        }
+      });
+    }
+  }
+
+  /**
+   * stop metric purge looper
    */
   public void stopPurge() {
-    if (timer != null) {
-      timer.cancel();
-      timer = null;
+    synchronized (CacheCore.class) {
+      if (looper != null) {
+        looper = null;
+      }
     }
   }
 }
