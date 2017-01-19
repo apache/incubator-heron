@@ -27,7 +27,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
- * This file defines Utils methods used by Aurora
+ * Implementation of AuroraController that shells out to the Aurora CLI to control the Aurora
+ * scheduler workflow of a topology.
  */
 class AuroraCLIController implements AuroraController {
   private static final Logger LOG = Logger.getLogger(AuroraCLIController.class.getName());
