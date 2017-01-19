@@ -23,9 +23,15 @@ import com.twitter.heron.spi.packing.PackingPlan;
  */
 public interface AuroraController {
 
-  boolean createJob(Map<String, String> auroraProperties);
+  boolean createJob(Map<AuroraField, String> auroraProperties);
   boolean killJob();
-  boolean restartJob(int containerId);
+
+  /**
+   * Restarts a given container, or the entire job if containerId is null
+   * @param containerId ID of container to restart, or entire job if null
+   */
+  boolean restart(Integer containerId);
+
   void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);
   void addContainers(Integer count);
 }

@@ -50,13 +50,13 @@ class AuroraCLIController implements AuroraController {
   }
 
   @Override
-  public boolean createJob(Map<String, String> bindings) {
+  public boolean createJob(Map<AuroraField, String> bindings) {
     List<String> auroraCmd =
         new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 
-    for (Map.Entry<String, String> binding : bindings.entrySet()) {
+    for (AuroraField field : bindings.keySet()) {
       auroraCmd.add("--bind");
-      auroraCmd.add(String.format("%s=%s", binding.getKey(), binding.getValue()));
+      auroraCmd.add(String.format("%s=%s", field, bindings.get(field)));
     }
 
     auroraCmd.add(jobSpec);
@@ -82,9 +82,9 @@ class AuroraCLIController implements AuroraController {
 
   // Restart an aurora job
   @Override
-  public boolean restartJob(int containerId) {
+  public boolean restart(Integer containerId) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "restart"));
-    if (containerId != -1) {
+    if (containerId != null && containerId != -1) {
       auroraCmd.add(String.format("%s/%s", jobSpec, Integer.toString(containerId)));
     } else {
       auroraCmd.add(jobSpec);

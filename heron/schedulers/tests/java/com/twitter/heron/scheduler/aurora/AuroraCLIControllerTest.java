@@ -69,7 +69,7 @@ public class AuroraCLIControllerTest {
 
   @Test
   public void testCreateJob() throws Exception {
-    Map<String, String> bindings = new HashMap<>();
+    Map<AuroraField, String> bindings = new HashMap<>();
     List<String> expectedCommand = asList("aurora job create --wait-until RUNNING %s %s %s",
             JOB_SPEC, AURORA_FILENAME, VERBOSE_CONFIG);
 
@@ -108,12 +108,12 @@ public class AuroraCLIControllerTest {
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.restartJob(containerId));
+    Assert.assertFalse(controller.restart(containerId));
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.restartJob(containerId));
+    Assert.assertTrue(controller.restart(containerId));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }
 
