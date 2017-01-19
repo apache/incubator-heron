@@ -190,9 +190,6 @@ public class SubmitterMainTest {
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     PowerMockito.mockStatic(Context.class);
     PowerMockito.when(Context.dryRun(config)).thenReturn(true);
-    /*
-    doThrow(new SubmitDryRunResponse(topology, config, mock(PackingPlan.class))).
-        when(submitterMain).callLauncherRunner(Mockito.any(Config.class)); */
     try {
       submitterMain.submitTopology();
     } finally {
