@@ -61,12 +61,12 @@ public class AuroraScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * Get an AuroraControl basing on the config and runtime
+   * Get an AuroraController based on the config and runtime
    *
-   * @return AuroraControl
+   * @return AuroraController
    */
   protected AuroraController getController() {
-    return new AuroraController(
+    return new AuroraCLIController(
         Runtime.topologyName(runtime),
         Context.cluster(config),
         Context.role(config),

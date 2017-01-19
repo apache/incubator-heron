@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
-public class AuroraControllerTest {
+public class AuroraCLIControllerTest {
   private static final String JOB_NAME = "jobName";
   private static final String CLUSTER = "cluster";
   private static final String ROLE = "role";
@@ -45,7 +45,7 @@ public class AuroraControllerTest {
   private static final String JOB_SPEC = String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME);
   private static final boolean IS_VERBOSE = true;
 
-  private AuroraController controller;
+  private AuroraCLIController controller;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -58,7 +58,7 @@ public class AuroraControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    controller = Mockito.spy(new AuroraController(JOB_NAME, CLUSTER, ROLE, ENV, IS_VERBOSE));
+    controller = Mockito.spy(new AuroraCLIController(JOB_NAME, CLUSTER, ROLE, ENV, IS_VERBOSE));
   }
 
   @After
