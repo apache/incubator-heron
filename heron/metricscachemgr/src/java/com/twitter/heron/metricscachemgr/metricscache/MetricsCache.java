@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.system.Common;
@@ -44,7 +45,8 @@ public class MetricsCache {
    * @param systemConfig heron config
    * @param sinksConfig sink config
    */
-  public MetricsCache(SystemConfig systemConfig, MetricsSinksConfig sinksConfig) {
+  public MetricsCache(SystemConfig systemConfig, MetricsSinksConfig sinksConfig,
+                      WakeableLooper looper) {
     // metadata
     metricNameType = new MetricsFilter();
     Map<String, Object> sinksTmaster = sinksConfig.getConfigForSink(METRICS_SINKS_TMASTER_SINK);
@@ -61,7 +63,7 @@ public class MetricsCache {
 
     cache = new CacheCore(maxInterval, interval, maxException);
 
-    cache.startPurge();
+    cache.startPurge(looper);
   }
 
   private MetricsFilter.MetricAggregationType TranslateFromString(String type) {
