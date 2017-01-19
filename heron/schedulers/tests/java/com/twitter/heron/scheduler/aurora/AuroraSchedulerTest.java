@@ -112,24 +112,24 @@ public class AuroraSchedulerTest {
 
     // Failed to create job via controller
     Mockito.doReturn(false).when(controller)
-        .createJob(Mockito.anyString(), Matchers.anyMapOf(String.class, String.class));
+        .createJob(Matchers.anyMapOf(String.class, String.class));
     Mockito.doReturn(true).when(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     Assert.assertFalse(scheduler.onSchedule(validPlan));
 
     Mockito.verify(controller)
-        .createJob(Mockito.eq(AURORA_PATH), Matchers.anyMapOf(String.class, String.class));
+        .createJob(Matchers.anyMapOf(String.class, String.class));
     Mockito.verify(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     // Happy path
     Mockito.doReturn(true).when(controller)
-        .createJob(Mockito.anyString(), Matchers.anyMapOf(String.class, String.class));
+        .createJob(Matchers.anyMapOf(String.class, String.class));
     Assert.assertTrue(scheduler.onSchedule(validPlan));
 
     Mockito.verify(controller, Mockito.times(2))
-        .createJob(eq(AURORA_PATH), Matchers.anyMapOf(String.class, String.class));
+        .createJob(Matchers.anyMapOf(String.class, String.class));
     Mockito.verify(stateManager, Mockito.times(2))
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
   }

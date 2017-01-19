@@ -35,19 +35,22 @@ class AuroraCLIController implements AuroraController {
 
   private final String jobSpec;
   private final boolean isVerbose;
+  private final String auroraFilename;
 
   AuroraCLIController(
       String jobName,
       String cluster,
       String role,
       String env,
+      String auroraFilename,
       boolean isVerbose) {
+    this.auroraFilename = auroraFilename;
     this.isVerbose = isVerbose;
     this.jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
   }
 
   @Override
-  public boolean createJob(String auroraFilename, Map<String, String> bindings) {
+  public boolean createJob(Map<String, String> bindings) {
     List<String> auroraCmd =
         new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 

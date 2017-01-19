@@ -71,6 +71,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         Context.cluster(config),
         Context.role(config),
         Context.environ(config),
+        AuroraContext.getHeronAuroraPath(config),
         Context.verbose(config));
   }
 
@@ -97,7 +98,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     Map<String, String> auroraProperties = createAuroraProperties(updatedPackingPlan);
 
-    return controller.createJob(AuroraContext.getHeronAuroraPath(config), auroraProperties);
+    return controller.createJob(auroraProperties);
   }
 
   @Override

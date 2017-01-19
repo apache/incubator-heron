@@ -23,7 +23,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
  */
 public interface AuroraController {
 
-  boolean createJob(String auroraFilename, Map<String, String> bindings);
+  boolean createJob(Map<String, String> auroraProperties);
   boolean killJob();
   boolean restartJob(int containerId);
   void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);

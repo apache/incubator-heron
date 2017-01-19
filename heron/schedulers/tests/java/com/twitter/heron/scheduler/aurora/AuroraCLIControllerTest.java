@@ -40,6 +40,7 @@ public class AuroraCLIControllerTest {
   private static final String CLUSTER = "cluster";
   private static final String ROLE = "role";
   private static final String ENV = "gz";
+  private static final String AURORA_FILENAME = "file.aurora";
   private static final String VERBOSE_CONFIG = "--verbose";
   private static final String BATCH_CONFIG = "--batch-size";
   private static final String JOB_SPEC = String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME);
@@ -58,7 +59,8 @@ public class AuroraCLIControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    controller = Mockito.spy(new AuroraCLIController(JOB_NAME, CLUSTER, ROLE, ENV, IS_VERBOSE));
+    controller = Mockito.spy(
+        new AuroraCLIController(JOB_NAME, CLUSTER, ROLE, ENV, AURORA_FILENAME, IS_VERBOSE));
   }
 
   @After
@@ -67,19 +69,18 @@ public class AuroraCLIControllerTest {
 
   @Test
   public void testCreateJob() throws Exception {
-    String auroraFilename = "file.aurora";
     Map<String, String> bindings = new HashMap<>();
     List<String> expectedCommand = asList("aurora job create --wait-until RUNNING %s %s %s",
-            JOB_SPEC, auroraFilename, VERBOSE_CONFIG);
+            JOB_SPEC, AURORA_FILENAME, VERBOSE_CONFIG);
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.createJob(auroraFilename, bindings));
+    Assert.assertFalse(controller.createJob(bindings));
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.createJob(auroraFilename, bindings));
+    Assert.assertTrue(controller.createJob(bindings));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }
 
