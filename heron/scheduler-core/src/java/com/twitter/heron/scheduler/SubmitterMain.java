@@ -227,7 +227,7 @@ public class SubmitterMain {
         .build();
 
     Option dryRun = Option.builder("u")
-        .desc("dry-run")
+        .desc("run in dry-run mode")
         .longOpt("dry_run")
         .required(false)
         .build();

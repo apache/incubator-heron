@@ -21,7 +21,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 
-public class SubmitDryRunRender implements DryRunRender {
+public class SubmitDryRunRender {
 
   private final SubmitDryRunResponse response;
   private final PackingPlan plan;
@@ -31,7 +31,7 @@ public class SubmitDryRunRender implements DryRunRender {
     this.plan = response.getPackingPlan();
   }
 
-  private class TableRender {
+  private class TableRender implements DryRunRender {
 
     private final Config config;
     private final PackingPlan plan;
@@ -70,18 +70,31 @@ public class SubmitDryRunRender implements DryRunRender {
     }
   }
 
+  private class RawRender implements DryRunRender {
+
+    private final SubmitDryRunResponse response;
+
+    RawRender(SubmitDryRunResponse response) {
+      this.response = response;
+    }
+
+    public String render() {
+      StringBuilder builder = new StringBuilder();
+      String topologyName = response.getTopology().getName();
+      String packingClassName = Context.packingClass(response.getConfig());
+      builder.append("Packing class: " + packingClassName + "\n");
+      builder.append("Topology: " + topologyName + "\n");
+      builder.append("Packing plan:\n");
+      builder.append(response.getPackingPlan().toString());
+      return builder.toString();
+    }
+  }
+
   public String renderTable() {
     return new TableRender(response.getConfig(), plan).render();
   }
 
   public String renderRaw() {
-    StringBuilder builder = new StringBuilder();
-    String topologyName = response.getTopology().getName();
-    String packingClassName = Context.packingClass(response.getConfig());
-    builder.append("Packing class: " + packingClassName + "\n");
-    builder.append("Topology: " + topologyName + "\n");
-    builder.append("Packing plan:\n");
-    builder.append(response.getPackingPlan().toString());
-    return builder.toString();
+    return new RawRender(response).render();
   }
 }

@@ -19,14 +19,8 @@ package com.twitter.heron.scheduler.dryrun;
 public interface DryRunRender {
 
   /**
-   * Render dry-run response in table
+   * Render dry-run response
    * @return
    */
-  String renderTable();
-
-  /**
-   * Render dry-run response in a raw format
-   * @return
-   */
-  String renderRaw();
+  String render();
 }

@@ -29,7 +29,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 
-public class UpdateDryRunRender implements DryRunRender {
+public class UpdateDryRunRender {
 
   private final UpdateDryRunResponse response;
   private final PackingPlan oldPlan;
@@ -85,7 +85,7 @@ public class UpdateDryRunRender implements DryRunRender {
     this.newPlan = response.getPackingPlan();
   }
 
-  private class TableRenderer {
+  private class TableRenderer implements DryRunRender {
 
     private final Config config;
     private final PackingPlan oldPlan;
@@ -205,20 +205,33 @@ public class UpdateDryRunRender implements DryRunRender {
     }
   }
 
+  private class RawRender implements DryRunRender {
+
+    private final UpdateDryRunResponse response;
+
+    RawRender(UpdateDryRunResponse response) {
+      this.response = response;
+    }
+
+    public String render() {
+      StringBuilder builder = new StringBuilder();
+      String topologyName = response.getTopology().getName();
+      String packingClassName = Context.packingClass(response.getConfig());
+      builder.append("Packing class: " + packingClassName + "\n");
+      builder.append("Topology: " + topologyName + "\n");
+      builder.append("New packing plan:\n");
+      builder.append(response.getPackingPlan().toString() + "\n");
+      builder.append("Old packing plan:\n");
+      builder.append(response.getOldPackingPlan().toString() + "\n");
+      return builder.toString();
+    }
+  }
+
   public String renderTable() {
     return new TableRenderer(response.getConfig(), oldPlan, newPlan).render();
   }
 
   public String renderRaw() {
-    StringBuilder builder = new StringBuilder();
-    String topologyName = response.getTopology().getName();
-    String packingClassName = Context.packingClass(response.getConfig());
-    builder.append("Packing class: " + packingClassName + "\n");
-    builder.append("Topology: " + topologyName + "\n");
-    builder.append("New packing plan:\n");
-    builder.append(response.getPackingPlan().toString() + "\n");
-    builder.append("Old packing plan:\n");
-    builder.append(response.getOldPackingPlan().toString() + "\n");
-    return builder.toString();
+    return new RawRender(response).render();
   }
 }
