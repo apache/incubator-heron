@@ -28,7 +28,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -188,8 +187,7 @@ public class SubmitterMainTest {
     PowerMockito.whenNew(SchedulerStateManagerAdaptor.class).withAnyArguments().
         thenReturn(adaptor);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
-    PowerMockito.mockStatic(Context.class);
-    PowerMockito.when(Context.dryRun(config)).thenReturn(true);
+    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
     try {
       submitterMain.submitTopology();
     } finally {
