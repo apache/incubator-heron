@@ -13,17 +13,11 @@
 // limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.google.common.io.Files;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import org.apache.commons.io.IOUtils;
 
@@ -36,7 +30,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.InstanceId;

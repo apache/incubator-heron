@@ -13,15 +13,10 @@
 // limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.google.common.io.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
