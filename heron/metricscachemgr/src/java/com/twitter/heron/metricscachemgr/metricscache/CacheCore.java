@@ -192,9 +192,9 @@ public class CacheCore {
     e.componentName = exceptionLog.getComponentName();
     e.hostname = exceptionLog.getHostname();
     e.instanceId = exceptionLog.getInstanceId();
-    e.stacktrace = exceptionLog.getStacktrace();
-    e.lasttime = exceptionLog.getLasttime();
-    e.firsttime = exceptionLog.getFirsttime();
+    e.stackTrace = exceptionLog.getStacktrace();
+    e.lastTime = exceptionLog.getLasttime();
+    e.firstTime = exceptionLog.getFirsttime();
     e.count = exceptionLog.getCount();
     e.logging = exceptionLog.getLogging();
     bucket.offerFirst(e);
@@ -277,7 +277,7 @@ public class CacheCore {
             response.metricList.add(metricDatum);
 
             // iterate buckets
-            switch (request.minutely) {
+            switch (request.aggregationGranularity) {
               case 0:
                 getAggregatedMetrics(metricDatum.metricValue,
                     request.startTime/*when*/, request.endTime/*when*/,
@@ -292,7 +292,8 @@ public class CacheCore {
                     request.startTime, request.endTime, bucketId, type);
                 break;
               default:
-                LOG.warning("unknown minutely type " + request.minutely);
+                LOG.warning("unknown aggregationGranularity type "
+                    + request.aggregationGranularity);
             }
           } // end for: instance
         } // end for: component

@@ -29,7 +29,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 /**
  * server to accept metrics from a particular sink in metrics manager
- * <p>
+ * 
  * Differece from MetricsCacheManagerHttpServer:
  * 1. MetricsCacheManagerServer accepts metric publishing message from sinks;
  * MetricsCacheManagerHttpServer responds to queries.

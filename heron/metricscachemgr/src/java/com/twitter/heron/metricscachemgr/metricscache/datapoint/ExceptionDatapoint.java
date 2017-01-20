@@ -28,11 +28,11 @@ public class ExceptionDatapoint {
   public String instanceId;
 
   // Stack trace of exception. First two lines of stack trace is used for aggregating exception.
-  public String stacktrace;
+  public String stackTrace;
   // Last time the exception occurred in the metrics collection interval
-  public String lasttime;
+  public String lastTime;
   // First time the exception occurred in the metrics collection interval
-  public String firsttime;
+  public String firstTime;
   // Number of time exception occurred in the metrics collection interval
   public int count;
   // Additional text logged.
