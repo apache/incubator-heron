@@ -88,8 +88,8 @@ public class SubmitDryRunRenderTest {
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
     Config config = Config.newBuilder().put(ConfigKeys.get("PACKING_CLASS"),
         "com.twitter.heron.packing.roundrobin.RoundRobinPacking").build();
-    String table = new SubmitDryRunRender(
-        new SubmitDryRunResponse(topology, config, plan)).renderTable();
+    String table =
+        new SubmitTableDryRunRenderer(new SubmitDryRunResponse(topology, config, plan)).render();
     String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);
     assertEquals(exampleTable, table);
   }

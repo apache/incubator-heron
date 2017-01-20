@@ -31,8 +31,9 @@ import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.scheduler.dryrun.SubmitDryRunRender;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
+import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -514,11 +515,10 @@ public class SubmitterMain {
   }
 
   protected String renderDryRunResponse(SubmitDryRunResponse resp) {
-    SubmitDryRunRender render = new SubmitDryRunRender(resp);
     DryRunFormatType formatType = Context.dryRunFormatType(config);
     switch (formatType) {
-      case RAW : return render.renderRaw();
-      case TABLE: return render.renderTable();
+      case RAW : return new SubmitRawDryRunRenderer(resp).render();
+      case TABLE: return new SubmitTableDryRunRenderer(resp).render();
       default: throw new IllegalArgumentException(
           String.format("Unexpected rendering format: %s", formatType));
     }

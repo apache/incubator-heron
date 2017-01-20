@@ -137,7 +137,8 @@ public class UpdateDryRunRenderTest {
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanA, originalPlan, new HashMap<String, Integer>());
-    String table = new UpdateDryRunRender(resp).renderTable();
+    String table =
+        new UpdateTableDryRunRenderer(resp).render();
     String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);
     assertEquals(exampleTable, table);
   }
@@ -153,7 +154,8 @@ public class UpdateDryRunRenderTest {
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanB, originalPlan, new HashMap<String, Integer>());
-    String table = new UpdateDryRunRender(resp).renderTable();
+    String table =
+        new UpdateTableDryRunRenderer(resp).render();
     String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);
     assertEquals(exampleTable, table);
   }
