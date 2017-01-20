@@ -86,7 +86,7 @@ public class CacheCore {
     idxMetricName = new HashMap<>();
   }
 
-  private void AssureComponentInstance(String componentName, String instanceId) {
+  private void assureComponentInstance(String componentName, String instanceId) {
     if (!idxComponentInstance.containsKey(componentName)) {
       idxComponentInstance.put(componentName, new HashMap<String, Integer>());
     }
@@ -112,7 +112,7 @@ public class CacheCore {
     return idxMetricName.containsKey(name);
   }
 
-  private void AssureMetricName(String name) {
+  private void assureMetricName(String name) {
     if (!idxMetricName.containsKey(name)) {
       idxMetricName.put(name, metricNameCount++);
     }
@@ -121,13 +121,13 @@ public class CacheCore {
   /**
    * compatible with heron::tmaster::TMetricsCollector
    */
-  public void AddMetricException(TopologyMaster.PublishMetrics metrics) {
+  public void addMetricException(TopologyMaster.PublishMetrics metrics) {
     synchronized (CacheCore.class) {
       for (TopologyMaster.MetricDatum metricDatum : metrics.getMetricsList()) {
-        AddMetric(metricDatum);
+        addMetric(metricDatum);
       }
       for (TopologyMaster.TmasterExceptionLog exceptionLog : metrics.getExceptionsList()) {
-        AddException(exceptionLog);
+        addException(exceptionLog);
       }
     }
   }
@@ -143,13 +143,13 @@ public class CacheCore {
     return (((long) hi) << 32) | (lo & 0xffffffffL);
   }
 
-  private void AddMetric(TopologyMaster.MetricDatum metricDatum) {
+  private void addMetric(TopologyMaster.MetricDatum metricDatum) {
     String componentName = metricDatum.getComponentName();
     String instanceId = metricDatum.getInstanceId();
     String metricName = metricDatum.getName();
     LOG.info(componentName + " " + instanceId + " " + metricName);
-    AssureComponentInstance(componentName, instanceId);
-    AssureMetricName(metricName);
+    assureComponentInstance(componentName, instanceId);
+    assureMetricName(metricName);
     // calc bucket idx
     int idx1 = idxComponentInstance.get(componentName).get(instanceId);
     int idx2 = idxMetricName.get(metricName);
@@ -170,16 +170,16 @@ public class CacheCore {
       datum.timestamp = metricDatum.getTimestamp();
       datum.value = metricDatum.getValue();
       bucket.offerFirst(datum);
-      LOG.info("AddMetric " + datum);
+      LOG.info("addMetrics " + datum);
     } else {
       LOG.warning("too old metric: " + metricDatum);
     }
   }
 
-  private void AddException(TopologyMaster.TmasterExceptionLog exceptionLog) {
+  private void addException(TopologyMaster.TmasterExceptionLog exceptionLog) {
     String componentName = exceptionLog.getComponentName();
     String instanceId = exceptionLog.getInstanceId();
-    AssureComponentInstance(componentName, instanceId);
+    assureComponentInstance(componentName, instanceId);
     // get exception idx
     int idx = idxComponentInstance.get(componentName).get(instanceId);
     // fetch the bucket
@@ -220,7 +220,7 @@ public class CacheCore {
    * <p>
    * assert: startTime <= endTime
    */
-  public MetricsCacheQueryUtils.MetricResponse GetMetrics(
+  public MetricsCacheQueryUtils.MetricResponse getMetrics(
       MetricsCacheQueryUtils.MetricRequest request, MetricsFilter metricNameType) {
     LOG.info(request.toString());
     synchronized (CacheCore.class) {
@@ -279,16 +279,16 @@ public class CacheCore {
             // iterate buckets
             switch (request.minutely) {
               case 0:
-                GetAggregatedMetrics(metricDatum.metricValue,
+                getAggregatedMetrics(metricDatum.metricValue,
                     request.startTime/*when*/, request.endTime/*when*/,
                     bucketId/*where*/, type/*how*/);
                 break;
               case 1:
-                GetMinuteMetrics(metricDatum.metricValue,
+                getMinuteMetrics(metricDatum.metricValue,
                     request.startTime, request.endTime, bucketId, type);
                 break;
               case 2:
-                GetRawMetrics(metricDatum.metricValue,
+                getRawMetrics(metricDatum.metricValue,
                     request.startTime, request.endTime, bucketId, type);
                 break;
               default:
@@ -301,10 +301,10 @@ public class CacheCore {
     }
   }
 
-  private void GetRawMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
+  private void getRawMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
                              long startTime, long endTime, long bucketId,
                              MetricsFilter.MetricAggregationType type) {
-    LOG.info("GetRawMetrics " + startTime + " " + endTime);
+    LOG.info("getRawMetrics " + startTime + " " + endTime);
     Long startKey = cacheMetric.floorKey(startTime);
     for (Long key = startKey != null ? startKey : cacheMetric.firstKey();
          key != null && key <= endTime;
@@ -330,10 +330,10 @@ public class CacheCore {
 
   // we assume the metric value is Double: compatible with tmaster
   @SuppressWarnings("fallthrough")
-  private void GetMinuteMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
+  private void getMinuteMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
                                 long startTime, long endTime, long bucketId,
                                 MetricsFilter.MetricAggregationType type) {
-    LOG.info("GetMinuteMetrics " + startTime + " " + endTime);
+    LOG.info("getMinuteMetrics " + startTime + " " + endTime);
     Long startKey = cacheMetric.floorKey(startTime);
     for (Long key = startKey != null ? startKey : cacheMetric.firstKey();
          key != null && key <= endTime;
@@ -389,10 +389,10 @@ public class CacheCore {
 
   // we assume the metric value is Double: compatible with tmaster
   @SuppressWarnings("fallthrough")
-  private void GetAggregatedMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
+  private void getAggregatedMetrics(List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue,
                                     long startTime, long endTime, long bucketId,
                                     MetricsFilter.MetricAggregationType type) {
-    LOG.info("GetAggregatedMetrics " + startTime + " " + endTime);
+    LOG.info("getAggregatedMetrics " + startTime + " " + endTime);
     // per request
     long countAvg = 0;
 
@@ -449,7 +449,7 @@ public class CacheCore {
   /**
    * for internal process use
    */
-  public MetricsCacheQueryUtils.ExceptionResponse GetExceptions(
+  public MetricsCacheQueryUtils.ExceptionResponse getExceptions(
       MetricsCacheQueryUtils.ExceptionRequest request) {
     synchronized (CacheCore.class) {
       MetricsCacheQueryUtils.ExceptionResponse response =
@@ -467,9 +467,9 @@ public class CacheCore {
     }
   }
 
-  public void Purge() {
+  public void purge() {
     long now = System.currentTimeMillis();
-    LOG.info("Purge " + now);
+    LOG.info("purge " + now);
     synchronized (CacheCore.class) {
       // remove old
       for (Long firstKey = cacheMetric.firstKey();
@@ -484,7 +484,7 @@ public class CacheCore {
         looper.registerTimerEventInSeconds(interval, new Runnable() {
           @Override
           public void run() {
-            Purge();
+            purge();
           }
         });
       }
@@ -503,7 +503,7 @@ public class CacheCore {
       looper.registerTimerEventInSeconds(interval, new Runnable() {
         @Override
         public void run() {
-          Purge();
+          purge();
         }
       });
     }

@@ -31,6 +31,16 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 /**
  * MetricsCacheMgr http server:
  * compatible with tmaster and tracker http interface for metrics
+ * http path:
+ * "/stats" metric query
+ * "/exceptions" exception query
+ * "/exceptionsummary" exception query, with aggregation
+ * <p>
+ * Differece from MetricsCacheManagerServer:
+ * 1. MetricsCacheManagerServer accepts metric publishing message from sinks;
+ * MetricsCacheManagerHttpServer responds to queries.
+ * 2. MetricsCacheManagerServer is a HeronServer;
+ * MetricsCacheManagerHttpServer is a http server
  */
 public class MetricsCacheManagerHttpServer {
   // http path, compatible with tmaster stat interface
@@ -68,22 +78,21 @@ public class MetricsCacheManagerHttpServer {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       // get the entire stuff
-      byte[] pb = NetworkUtils.readHttpRequestBody(httpExchange);
+      byte[] payload = NetworkUtils.readHttpRequestBody(httpExchange);
       TopologyMaster.MetricRequest req;
       try {
-        req = TopologyMaster.MetricRequest.parseFrom(pb);
+        req = TopologyMaster.MetricRequest.parseFrom(payload);
       } catch (InvalidProtocolBufferException e) {
-        LOG.severe("Unable to decipher data specified in StatsRequest");
+        LOG.severe("Unable to decipher data specified in StatsRequest " + e.toString());
         httpExchange.sendResponseHeaders(400, -1); // throw exception
         return;
       }
       // query cache
-      TopologyMaster.MetricResponse res = metricsCache.GetMetrics(req);
+      TopologyMaster.MetricResponse res = metricsCache.getMetrics(req);
       // response
       NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
       // close
       httpExchange.close();
-      LOG.info("Done with stats request ");
     }
   }
 
@@ -103,7 +112,7 @@ public class MetricsCacheManagerHttpServer {
         return;
       }
       // query cache
-      TopologyMaster.ExceptionLogResponse res = metricsCache.GetExceptions(req);
+      TopologyMaster.ExceptionLogResponse res = metricsCache.getExceptions(req);
       // response
       NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
       // close
@@ -128,7 +137,7 @@ public class MetricsCacheManagerHttpServer {
         return;
       }
       // query cache
-      TopologyMaster.ExceptionLogResponse res = metricsCache.GetExceptionsSummary(req);
+      TopologyMaster.ExceptionLogResponse res = metricsCache.getExceptionsSummary(req);
       // response
       NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
       // close
