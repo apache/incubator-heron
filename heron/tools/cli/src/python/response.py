@@ -89,7 +89,7 @@ def render(resp):
     elif resp.status == Status.InvocationError:
       do_log(Log.error, resp.detailed_msg)
     elif resp.status == Status.DryRun:
-      do_log(Log.info, "Dry-run successful")
+      do_log(Log.info, resp.succ_context)
       # No need to prefix [INFO] here. We want to display dry-run response in a clean way
       print resp.msg
       do_log(Log.debug, resp.detailed_msg)
