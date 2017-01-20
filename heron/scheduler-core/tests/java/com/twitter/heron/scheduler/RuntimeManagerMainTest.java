@@ -24,6 +24,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.packing.roundrobin.ResourceCompliantRRPacking;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -33,13 +35,13 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -217,35 +219,36 @@ public class RuntimeManagerMainTest {
     config = mock(Config.class);
 
     // prepare packing class
-    /*
     ResourceCompliantRRPacking repacking = new ResourceCompliantRRPacking();
-    IRepacking repack = repacking;
-    PowerMockito.doReturn(repack)
-        .when(ReflectionUtils.class, "newInstance", REPACKING_CLASS);
-    when(config.getStringValue(ConfigKeys.get(REPACKING_CLASS)))
-        .thenReturn(REPACKING_CLASS); */
 
+    when(config.getStringValue(ConfigKeys.get("REPACKING_CLASS")))
+        .thenReturn(IRepacking.class.getName());
+    when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS")))
+        .thenReturn(IStateManager.class.getName());
     when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
-    when(config.getStringValue("NEW_COMPONENT_PARALLELISM")).thenReturn("testSpout:4,testBolt:5");
-    when(config.getBooleanValue("DRY_RUN")).thenReturn(true);
+    when(config.getStringValue(RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY))
+        .thenReturn("testSpout:4,testBolt:5");
+    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
+    when(config.getDoubleValue(ConfigKeys.get("INSTANCE_CPU"))).thenReturn(1.0);
+    when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_RAM")))
+        .thenReturn(ByteAmount.fromGigabytes(1));
+    when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_DISK")))
+        .thenReturn(ByteAmount.fromGigabytes(1));
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, Command.UPDATE));
 
     // Mock validate runtime
     PowerMockito.mockStatic(ReflectionUtils.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
-        thenReturn(IStateManager.class.getName());
-    PowerMockito.doReturn(Mockito.mock(IStateManager.class))
-        .when(ReflectionUtils.class, "newInstance", Mockito.eq(IStateManager.class.getName()));
+    PowerMockito.doReturn(mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", eq(IStateManager.class.getName()));
+    PowerMockito.doReturn(repacking)
+        .when(ReflectionUtils.class, "newInstance", eq(IRepacking.class.getName()));
     doNothing().when(runtimeManagerMain)
         .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
 
     // Successfully get ISchedulerClient
     ISchedulerClient client = mock(ISchedulerClient.class);
     doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
-
-    // Mock a runtime
-    Config runtime = Config.newBuilder().build();
 
     // Mock updateTopologyHandler of runner
     PowerMockito.mockStatic(Runtime.class);
@@ -255,8 +258,6 @@ public class RuntimeManagerMainTest {
     RoundRobinPacking packing = new RoundRobinPacking();
     PackingPlans.PackingPlan currentPlan =
         PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
-    PackingPlans.PackingPlan proposedPlan =
-        PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
 
     // the actual topology does not matter
     doReturn(TopologyAPI.Topology.getDefaultInstance()).when(manager).
@@ -264,14 +265,6 @@ public class RuntimeManagerMainTest {
 
     doReturn(currentPlan).when(manager).getPackingPlan(eq(TOPOLOGY_NAME));
 
-    // TODO: fix this mock
-    RuntimeManagerRunner runner =
-        spy(new RuntimeManagerRunner(config, runtime, Command.UPDATE, client));
-    doReturn(proposedPlan).when(runner).buildNewPackingPlan(
-        any(PackingPlans.PackingPlan.class), anyMapOf(String.class, Integer.class),
-        any(TopologyAPI.Topology.class));
-    PowerMockito.whenNew(RuntimeManagerRunner.class).withAnyArguments().thenReturn(runner);
-    // Happy path
     runtimeManagerMain.manageTopology();
   }
 
