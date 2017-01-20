@@ -17,7 +17,7 @@ package com.twitter.heron.scheduler.dryrun;
 public final class Constants {
 
   public static final String TEST_DATA_PATH =
-      "/__main__/heron/scheduler-core/tests/java/com/twitter/heron/scheduler/dryrun/resources";
+      "/__main__/heron/scheduler-core/tests/java/com/twitter/heron/scheduler/resources";
 
   private Constants() {
   }
