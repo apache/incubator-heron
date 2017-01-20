@@ -53,6 +53,7 @@ def create_parser(subparsers):
   cli_args.add_deactive_deploy(parser)
   cli_args.add_extra_launch_classpath(parser)
   cli_args.add_system_property(parser)
+  cli_args.add_dry_run(parser)
   cli_args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -98,6 +99,9 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
 
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
+
+  if cl_args["dry_run"]:
+    args.append("--dry_run")
 
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
@@ -319,4 +323,3 @@ def run(command, parser, cl_args, unknown_args):
 
   else:
     return submit_pex(cl_args, unknown_args, tmp_dir)
-
