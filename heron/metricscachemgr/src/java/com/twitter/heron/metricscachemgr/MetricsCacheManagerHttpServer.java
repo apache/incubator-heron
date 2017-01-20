@@ -35,7 +35,7 @@ import com.twitter.heron.spi.utils.NetworkUtils;
  * "/stats" metric query
  * "/exceptions" exception query
  * "/exceptionsummary" exception query, with aggregation
- * <p>
+ * 
  * Differece from MetricsCacheManagerServer:
  * 1. MetricsCacheManagerServer accepts metric publishing message from sinks;
  * MetricsCacheManagerHttpServer responds to queries.

@@ -346,20 +346,19 @@ public class MetricsManagerServer extends HeronServer {
       // The new one is the same as old one.
 
       // Just Log. Do nothing
-      LOG.info("We received a new MetricsCacheLocation the same as the old one. Do nothing.");
+      LOG.info("We received a new MetricsCacheLocation the same as the old one "
+          + newLocation + " . Do nothing.");
     } else {
       // Have received TMasterLocation earlier, but it changed.
 
       // We need update the SingletonRegistry
-      LOG.info("We received a new MetricsCacheLocation. Replace the old one.");
-      LOG.info("Old MetricsCacheLocation: " + oldLocation);
+      LOG.info("We received a new MetricsCacheLocation " + newLocation
+          + ". Replace the old one" + oldLocation + ".");
       SingletonRegistry.INSTANCE.updateSingleton(METRICSCACHE_LOCATION_BEAN_NAME, newLocation);
 
       // Update Metrics
       serverMetricsCounters.scope(SERVER_NEW_TMASTER_LOCATION).incr();
     }
-
-    LOG.info("Current MetricsCache location: " + newLocation);
 
     // Update Metrics
     serverMetricsCounters.scope(SERVER_TMASTER_LOCATION_RECEIVED).incr();

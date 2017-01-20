@@ -116,9 +116,9 @@ public class MetricsCache {
    */
   public TopologyMaster.ExceptionLogResponse getExceptions(
       TopologyMaster.ExceptionLogRequest request) {
-    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.convert(request);
+    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     MetricsCacheQueryUtils.ExceptionResponse response1 = cache.getExceptions(request1);
-    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.convert(response1);
+    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response1);
     return response;
   }
 
@@ -135,10 +135,10 @@ public class MetricsCache {
    */
   public TopologyMaster.ExceptionLogResponse getExceptionsSummary(
       TopologyMaster.ExceptionLogRequest request) {
-    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.convert(request);
+    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     MetricsCacheQueryUtils.ExceptionResponse response1 = cache.getExceptions(request1);
     MetricsCacheQueryUtils.ExceptionResponse response2 = summarizeException(response1);
-    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.convert(response2);
+    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response2);
     return response;
   }
 
@@ -164,9 +164,9 @@ public class MetricsCache {
       return buildResponseNotOk("No purgeIntervalSec or explicit purgeIntervalSec set").build();
     }
     // query
-    MetricsCacheQueryUtils.MetricRequest request1 = MetricsCacheQueryUtils.convert(request);
+    MetricsCacheQueryUtils.MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     MetricsCacheQueryUtils.MetricResponse response1 = cache.getMetrics(request1, metricNameType);
-    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.convert(response1, request1);
+    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.toProtobuf(response1, request1);
     return response;
   }
 }
