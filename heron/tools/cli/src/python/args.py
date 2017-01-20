@@ -176,10 +176,8 @@ def add_dry_run(parser):
 
   parser.add_argument(
       '--dry-run',
-      metavar='DRY_RUN',
-      nargs='?',
       default=False,
-      const=True,
+      action='store_true',
       help='Enable dry-run mode')
 
   parser.add_argument(
