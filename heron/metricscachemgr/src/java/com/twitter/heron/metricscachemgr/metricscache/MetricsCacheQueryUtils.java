@@ -29,7 +29,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 /**
  * define the query request and response format
  */
-public final class MetricsCacheQueryUtils {
+final class MetricsCacheQueryUtils {
   // logger
   private static final Logger LOG = Logger.getLogger(MetricsCacheQueryUtils.class.getName());
 
@@ -39,7 +39,7 @@ public final class MetricsCacheQueryUtils {
   /**
    * compatible with com.twitter.heron.proto.tmaster.TopologyMaster.MetricRequest
    */
-  public static MetricRequest Convert(TopologyMaster.MetricRequest request) {
+  public static MetricRequest convert(TopologyMaster.MetricRequest request) {
     String componentName = request.getComponentName();
 
     MetricRequest request1 = new MetricRequest();
@@ -91,7 +91,7 @@ public final class MetricsCacheQueryUtils {
   /**
    * compatible with com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse
    */
-  public static TopologyMaster.MetricResponse Convert(MetricResponse response,
+  public static TopologyMaster.MetricResponse convert(MetricResponse response,
                                                       MetricRequest request) {
     TopologyMaster.MetricResponse.Builder builder =
         TopologyMaster.MetricResponse.newBuilder();
@@ -159,7 +159,7 @@ public final class MetricsCacheQueryUtils {
   }
 
   // compatible with com.twitter.heron.proto.tmaster.TopologyMaster.ExceptionLogRequest
-  public static ExceptionRequest Convert(TopologyMaster.ExceptionLogRequest request) {
+  public static ExceptionRequest convert(TopologyMaster.ExceptionLogRequest request) {
     String componentName = request.getComponentName();
 
     ExceptionRequest request1 = new ExceptionRequest();
@@ -176,7 +176,7 @@ public final class MetricsCacheQueryUtils {
   }
 
   // compatible with com.twitter.heron.proto.tmaster.TopologyMaster.ExceptionLogResponse
-  public static TopologyMaster.ExceptionLogResponse Convert(ExceptionResponse response) {
+  public static TopologyMaster.ExceptionLogResponse convert(ExceptionResponse response) {
     TopologyMaster.ExceptionLogResponse.Builder builder =
         TopologyMaster.ExceptionLogResponse.newBuilder();
     // default OK if we have response to build already

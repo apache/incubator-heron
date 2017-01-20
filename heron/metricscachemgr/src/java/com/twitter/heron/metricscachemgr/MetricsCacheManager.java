@@ -40,12 +40,12 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-//import com.twitter.heron.spi.common.ConfigDefaults;
-
-//import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
-
 /**
  * main entry for metrics cache manager
+ * MetricsCacheManager holds three major objects:
+ * 1.MetricsCache metricsCache: it is the store where metrics and exceptions are cached.
+ * 2.MetricsCacheManagerServer metricsCacheManagerServer: it accepts the metric message from sink.
+ * 3.MetricsCacheManagerHttpServer metricsCacheManagerHttpServer: it responds to queries.
  */
 public class MetricsCacheManager {
   // logger
@@ -66,7 +66,6 @@ public class MetricsCacheManager {
 
   // process identification
   private String topologyName;
-  private String metricsmgrId;
 
   // store
   private MetricsCache metricsCache;
@@ -75,7 +74,7 @@ public class MetricsCacheManager {
   private Config config;
 
   // location for state mgr
-  private TopologyMaster.MetricsCacheLocation metricscacheLocation;
+  private TopologyMaster.MetricsCacheLocation metricsCacheLocation;
 
   /**
    * Constructor
@@ -84,28 +83,25 @@ public class MetricsCacheManager {
    * @param serverHost server host
    * @param masterPort port to accept message from sink
    * @param statsPort port to respond to query request
-   * @param metricsCacheMgrId process id (for future use)
    * @param systemConfig heron config
-   * @param msconfig sink config
+   * @param metricsSinkConfig sink config
    * @param configExpand other config
-   * @param metricscacheLocation location for state mgr
+   * @param metricsCacheLocation location for state mgr
    */
   public MetricsCacheManager(String topologyName,
                              String serverHost, int masterPort, int statsPort,
-                             String metricsCacheMgrId,
-                             SystemConfig systemConfig, MetricsSinksConfig msconfig,
+                             SystemConfig systemConfig, MetricsSinksConfig metricsSinkConfig,
                              Config configExpand,
-                             TopologyMaster.MetricsCacheLocation metricscacheLocation)
+                             TopologyMaster.MetricsCacheLocation metricsCacheLocation)
       throws IOException {
     this.topologyName = topologyName;
-    this.metricsmgrId = metricsCacheMgrId;
     this.config = configExpand;
-    this.metricscacheLocation = metricscacheLocation;
+    this.metricsCacheLocation = metricsCacheLocation;
 
     metricsCacheManagerServerLoop = new NIOLooper();
 
     // initialize cache and hook to the shared nio-looper
-    metricsCache = new MetricsCache(systemConfig, msconfig, metricsCacheManagerServerLoop);
+    metricsCache = new MetricsCache(systemConfig, metricsSinkConfig, metricsCacheManagerServerLoop);
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
@@ -147,9 +143,6 @@ public class MetricsCacheManager {
     String cluster = args[7];
     String role = args[8];
     String environ = args[9];
-//    String heronHome = args[10];
-//    String heronConfigPath = args[11];
-//    String heronReleaseFile = args[12];
 
     //-----------------
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
@@ -198,7 +191,7 @@ public class MetricsCacheManager {
     LOG.info("Config: " + config.toString());
 
     //-----------------
-    TopologyMaster.MetricsCacheLocation metricscacheLocation =
+    TopologyMaster.MetricsCacheLocation metricsCacheLocation =
         TopologyMaster.MetricsCacheLocation.newBuilder()
             .setTopologyName(topologyName)
             .setTopologyId(topologyId)
@@ -209,8 +202,8 @@ public class MetricsCacheManager {
             .build();
 
     MetricsCacheManager metricsCacheManager = new MetricsCacheManager(
-        topologyName, METRICS_CACHE_HOST, masterPort, statsPort, metricsCacheMgrId,
-        systemConfig, sinksConfig, configExpand, metricscacheLocation);
+        topologyName, METRICS_CACHE_HOST, masterPort, statsPort,
+        systemConfig, sinksConfig, configExpand, metricsCacheLocation);
     metricsCacheManager.start();
 
     LOG.info("Loops terminated. MetricsCache Manager exits.");
@@ -235,8 +228,8 @@ public class MetricsCacheManager {
       // initialize the statemgr
       statemgr.initialize(config);
 
-      statemgr.setMetricsCacheLocation(metricscacheLocation, topologyName);
-      LOG.info("metricscacheLocation " + metricscacheLocation.toString());
+      statemgr.setMetricsCacheLocation(metricsCacheLocation, topologyName);
+      LOG.info("metricsCacheLocation " + metricsCacheLocation.toString());
       LOG.info("topologyName " + topologyName.toString());
 
       LOG.info("Starting Metrics Cache HTTP Server");

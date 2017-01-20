@@ -29,6 +29,12 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 /**
  * server to accept metrics from a particular sink in metrics manager
+ * <p>
+ * Differece from MetricsCacheManagerHttpServer:
+ * 1. MetricsCacheManagerServer accepts metric publishing message from sinks;
+ * MetricsCacheManagerHttpServer responds to queries.
+ * 2. MetricsCacheManagerServer is a HeronServer;
+ * MetricsCacheManagerHttpServer is a http server
  */
 public class MetricsCacheManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(MetricsManagerServer.class.getName());
@@ -56,19 +62,20 @@ public class MetricsCacheManagerServer extends HeronServer {
   }
 
   @Override
-  public void onRequest(REQID rid, SocketChannel channel, Message request) {
+  public void onRequest(REQID requestId, SocketChannel channel, Message request) {
     LOG.info("MetricsCacheManagerServer onRequest from host:port "
         + channel.socket().getRemoteSocketAddress());
 
     if (request instanceof TopologyMaster.MetricRequest) {
-      LOG.info("received request " + (TopologyMaster.MetricRequest) request);
+      LOG.fine("received request " + (TopologyMaster.MetricRequest) request);
       TopologyMaster.MetricResponse resp =
-          metricsCache.GetMetrics((TopologyMaster.MetricRequest) request);
-      LOG.info("query finished, to send response");
-      sendResponse(rid, channel, resp);
-      LOG.info("queued response size " + resp.getSerializedSize());
+          metricsCache.getMetrics((TopologyMaster.MetricRequest) request);
+      LOG.fine("query finished, to send response");
+      sendResponse(requestId, channel, resp);
+      LOG.fine("queued response size " + resp.getSerializedSize());
     } else {
-      LOG.severe("Unknown kind of request received");
+      LOG.severe("Unknown kind of request received "
+          + channel.socket().getRemoteSocketAddress() + "; " + request);
     }
   }
 
@@ -79,10 +86,10 @@ public class MetricsCacheManagerServer extends HeronServer {
 
     if (message instanceof TopologyMaster.PublishMetrics) {
       LOG.info("received message " + (TopologyMaster.PublishMetrics) message);
-      metricsCache.AddMetric((TopologyMaster.PublishMetrics) message);
-//      LOG.info("after processing message " + metricsCache);
+      metricsCache.addMetrics((TopologyMaster.PublishMetrics) message);
     } else {
-      LOG.severe("Unknown kind of message received");
+      LOG.severe("Unknown kind of message received "
+          + channel.socket().getRemoteSocketAddress() + "; " + message);
     }
   }
 

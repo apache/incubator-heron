@@ -33,48 +33,46 @@ public class MetricsCache {
   public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
   public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
 
-  // logger
   private static final Logger LOG = Logger.getLogger(CacheCore.class.getName());
 
   private CacheCore cache = null;
   private MetricsFilter metricNameType = null;
 
-  /**
-   * constructor
-   *
-   * @param systemConfig heron config
-   * @param sinksConfig sink config
-   */
   public MetricsCache(SystemConfig systemConfig, MetricsSinksConfig sinksConfig,
                       WakeableLooper looper) {
     // metadata
     metricNameType = new MetricsFilter();
-    Map<String, Object> sinksTmaster = sinksConfig.getConfigForSink(METRICS_SINKS_TMASTER_SINK);
+    Map<String, Object> sinksTMaster = sinksConfig.getConfigForSink(METRICS_SINKS_TMASTER_SINK);
     @SuppressWarnings("unchecked")
-    Map<String, String> metricsType =
-        (Map<String, String>) sinksTmaster.get(METRICS_SINKS_TMASTER_METRICS);
-    for (Map.Entry<String, String> e : metricsType.entrySet()) {
-      metricNameType.setMetricToType(e.getKey(), TranslateFromString(e.getValue()));
+    Map<String, String> metricsTypes =
+        (Map<String, String>) sinksTMaster.get(METRICS_SINKS_TMASTER_METRICS);
+    for (String metricName : metricsTypes.keySet()) {
+      metricNameType.setMetricToType(metricName, translateFromString(metricsTypes.get(metricName)));
     }
     //
-    long maxInterval = systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60;
-    long interval = systemConfig.getTmasterMetricsCollectorPurgeIntervalSec();
-    long maxException = systemConfig.getTmasterMetricsCollectorMaximumException();
+    long maxIntervalSec = systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60;
+    long purgeIntervalSec = systemConfig.getTmasterMetricsCollectorPurgeIntervalSec();
+    long maxExceptions = systemConfig.getTmasterMetricsCollectorMaximumException();
 
-    cache = new CacheCore(maxInterval, interval, maxException);
+    cache = new CacheCore(maxIntervalSec, purgeIntervalSec, maxExceptions);
 
     cache.startPurge(looper);
   }
 
-  private MetricsFilter.MetricAggregationType TranslateFromString(String type) {
-    if ("SUM".equals(type)) {
-      return MetricsFilter.MetricAggregationType.SUM;
-    } else if ("AVG".equals(type)) {
-      return MetricsFilter.MetricAggregationType.AVG;
-    } else if ("LAST".equals(type)) {
-      return MetricsFilter.MetricAggregationType.LAST;
-    } else {
-      LOG.log(Level.SEVERE, "Unknown metrics type in metrics sinks " + type);
+  private static TopologyMaster.MetricResponse.Builder buildResponseNotOk(String message) {
+    TopologyMaster.MetricResponse.Builder builder =
+        TopologyMaster.MetricResponse.newBuilder();
+    builder.setStatus(Common.Status.newBuilder()
+        .setStatus(Common.StatusCode.NOTOK)
+        .setMessage(message));
+    return builder;
+  }
+
+  private MetricsFilter.MetricAggregationType translateFromString(String type) {
+    try {
+      return MetricsFilter.MetricAggregationType.valueOf(type);
+    } catch (IllegalArgumentException e) {
+      LOG.log(Level.SEVERE, "Unknown metrics type in metrics sinks " + type + "; " + e);
       return MetricsFilter.MetricAggregationType.UNKNOWN;
     }
   }
@@ -84,8 +82,8 @@ public class MetricsCache {
    *
    * @param metrics message from sinks
    */
-  public void AddMetric(TopologyMaster.PublishMetrics metrics) {
-    cache.AddMetricException(metrics);
+  public void addMetrics(TopologyMaster.PublishMetrics metrics) {
+    cache.addMetricException(metrics);
   }
 
   /**
@@ -94,9 +92,9 @@ public class MetricsCache {
    * @param request query statement
    * @return metric list
    */
-  public MetricsCacheQueryUtils.MetricResponse GetMetrics(
+  public MetricsCacheQueryUtils.MetricResponse getMetrics(
       MetricsCacheQueryUtils.MetricRequest request) {
-    return cache.GetMetrics(request, metricNameType);
+    return cache.getMetrics(request, metricNameType);
   }
 
   /**
@@ -105,9 +103,9 @@ public class MetricsCache {
    * @param request query statement
    * @return exception list
    */
-  public MetricsCacheQueryUtils.ExceptionResponse GetExceptions(
+  public MetricsCacheQueryUtils.ExceptionResponse getExceptions(
       MetricsCacheQueryUtils.ExceptionRequest request) {
-    return cache.GetExceptions(request);
+    return cache.getExceptions(request);
   }
 
   /**
@@ -116,15 +114,15 @@ public class MetricsCache {
    * @param request query request defined in protobuf
    * @return query result defined in protobuf
    */
-  public TopologyMaster.ExceptionLogResponse GetExceptions(
+  public TopologyMaster.ExceptionLogResponse getExceptions(
       TopologyMaster.ExceptionLogRequest request) {
-    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.Convert(request);
-    MetricsCacheQueryUtils.ExceptionResponse response1 = cache.GetExceptions(request1);
-    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.Convert(response1);
+    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.convert(request);
+    MetricsCacheQueryUtils.ExceptionResponse response1 = cache.getExceptions(request1);
+    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.convert(response1);
     return response;
   }
 
-  private MetricsCacheQueryUtils.ExceptionResponse SummarizeException(
+  private MetricsCacheQueryUtils.ExceptionResponse summarizeException(
       MetricsCacheQueryUtils.ExceptionResponse response1) {
     return null;
   }
@@ -135,12 +133,12 @@ public class MetricsCache {
    * @param request query statement defined in protobuf
    * @return query result defined in protobuf
    */
-  public TopologyMaster.ExceptionLogResponse GetExceptionsSummary(
+  public TopologyMaster.ExceptionLogResponse getExceptionsSummary(
       TopologyMaster.ExceptionLogRequest request) {
-    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.Convert(request);
-    MetricsCacheQueryUtils.ExceptionResponse response1 = cache.GetExceptions(request1);
-    MetricsCacheQueryUtils.ExceptionResponse response2 = SummarizeException(response1);
-    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.Convert(response2);
+    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.convert(request);
+    MetricsCacheQueryUtils.ExceptionResponse response1 = cache.getExceptions(request1);
+    MetricsCacheQueryUtils.ExceptionResponse response2 = summarizeException(response1);
+    TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.convert(response2);
     return response;
   }
 
@@ -150,40 +148,25 @@ public class MetricsCache {
    * @param request query statement defined in protobuf
    * @return query result defined in protobuf
    */
-  public TopologyMaster.MetricResponse GetMetrics(TopologyMaster.MetricRequest request) {
+  public TopologyMaster.MetricResponse getMetrics(TopologyMaster.MetricRequest request) {
     String componentName = request.getComponentName();
     if (!cache.existComponentInstance(componentName, null)) {
-      TopologyMaster.MetricResponse.Builder builder =
-          TopologyMaster.MetricResponse.newBuilder();
-      builder.setStatus(Common.Status.newBuilder()
-          .setStatus(Common.StatusCode.NOTOK)
-          .setMessage("Unknown component: " + componentName));
-      return builder.build();
+      return buildResponseNotOk("Unknown component: " + componentName).build();
     }
     if (request.getInstanceIdCount() > 0) {
       for (String instanceId : request.getInstanceIdList()) {
         if (!cache.existComponentInstance(componentName, instanceId)) {
-          TopologyMaster.MetricResponse.Builder builder =
-              TopologyMaster.MetricResponse.newBuilder();
-          builder.setStatus(Common.Status.newBuilder()
-              .setStatus(Common.StatusCode.NOTOK)
-              .setMessage("Unknown instance: " + instanceId));
-          return builder.build();
+          return buildResponseNotOk("Unknown instance: " + instanceId).build();
         }
       }
     }
     if (!request.hasInterval() && !request.hasExplicitInterval()) {
-      TopologyMaster.MetricResponse.Builder builder =
-          TopologyMaster.MetricResponse.newBuilder();
-      builder.setStatus(Common.Status.newBuilder()
-          .setStatus(Common.StatusCode.NOTOK)
-          .setMessage("No interval or explicit interval set"));
-      return builder.build();
+      return buildResponseNotOk("No purgeIntervalSec or explicit purgeIntervalSec set").build();
     }
     // query
-    MetricsCacheQueryUtils.MetricRequest request1 = MetricsCacheQueryUtils.Convert(request);
-    MetricsCacheQueryUtils.MetricResponse response1 = cache.GetMetrics(request1, metricNameType);
-    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.Convert(response1, request1);
+    MetricsCacheQueryUtils.MetricRequest request1 = MetricsCacheQueryUtils.convert(request);
+    MetricsCacheQueryUtils.MetricResponse response1 = cache.getMetrics(request1, metricNameType);
+    TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.convert(response1, request1);
     return response;
   }
 }

@@ -186,9 +186,6 @@ class HeronExecutor(object):
     self.scheduler_classpath = parsed_args.scheduler_classpath
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
-    # self.heron_home = parsed_args.heron_home
-    # self.heron_config_path = parsed_args.heron_config_path
-    # self.heron_release_file = parsed_args.heron_release_file
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -252,9 +249,6 @@ class HeronExecutor(object):
     parser.add_argument("metricscachemgr_classpath")
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
-    # parser.add_argument("heron_home")
-    # parser.add_argument("heron_config_path")
-    # parser.add_argument("heron_release_file")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
