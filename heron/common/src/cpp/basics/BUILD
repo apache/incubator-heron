@@ -33,6 +33,7 @@ cc_library(
         "sptest.h",
         "sptypes.h",
         "strutils.h",
+        "spmultimap.h"
     ],
     hdrs = [ 
         "basics.h",

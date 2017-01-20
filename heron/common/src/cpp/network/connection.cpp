@@ -45,7 +45,7 @@ Connection::Connection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
 
   mWriteBatchsize = __SYSTEM_NETWORK_DEFAULT_WRITE_BATCH_SIZE__;
   mCausedBackPressure = false;
-  mUnderBackPressure = false;
+  mUnderBackPressure = 0;
   mNumEnqueuesWithBufferFull = 0;
 }
 
@@ -251,21 +251,25 @@ void Connection::handleDataRead() {
 }
 
 sp_int32 Connection::putBackPressure() {
-  mUnderBackPressure = true;
-  // For now stop reads from this connection
-  if (unregisterEndpointForRead() < 0) {
-    LOG(ERROR) << "Could not start back pressure on connection";
-    return -1;
+  if (mUnderBackPressure == 0) {
+    // For now stop reads from this connection
+    if (unregisterEndpointForRead() < 0) {
+      LOG(ERROR) << "Could not start back pressure on connection";
+      return -1;
+    }
   }
+  mUnderBackPressure++;
   return 0;
 }
 
 sp_int32 Connection::removeBackPressure() {
-  mUnderBackPressure = false;
-  // Resume reading from this connection
-  if (registerEndpointForRead() < 0) {
-    LOG(ERROR) << "Could not remove back pressure from connection";
-    return -1;
+  mUnderBackPressure--;
+  if (mUnderBackPressure == 0) {
+    // Resume reading from this connection
+    if (registerEndpointForRead() < 0) {
+      LOG(ERROR) << "Could not remove back pressure from connection";
+      return -1;
+    }
   }
   return 0;
 }

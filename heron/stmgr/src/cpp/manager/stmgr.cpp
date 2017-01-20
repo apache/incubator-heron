@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <unordered_set>
 #include "manager/stmgr-clientmgr.h"
 #include "manager/stmgr-server.h"
 #include "manager/stream-consumers.h"
@@ -148,8 +149,6 @@ StMgr::~StMgr() {
 
   delete tuple_set_from_other_stmgr_;
 }
-
-bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
@@ -432,6 +431,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
     PopulateStreamConsumers(_pplan->mutable_topology(), component_to_task_ids);
     PopulateXorManagers(_pplan->topology(), ExtractTopologyTimeout(_pplan->topology()),
                         component_to_task_ids);
+    PopulateUpstreamTasks(_pplan);
   }
 
   delete pplan_;
@@ -519,6 +519,39 @@ void StMgr::PopulateXorManagers(
     }
   }
   xor_mgrs_ = new XorManager(eventLoop_, _message_timeout, all_spout_tasks);
+}
+
+void StMgr::PopulateUpstreamTasks(proto::system::PhysicalPlan* _pplan) {
+  proto::api::Topology* topology = _pplan->mutable_topology();
+  // Build a graph with components
+  std::unordered_map<sp_string, std::vector<sp_string>> components_mapping;
+  for (sp_int32 i = 0; i < topology->bolts_size(); ++i) {
+    const sp_string& component_name = topology->bolts(i).comp().name();
+    components_mapping[component_name] = {};
+    for (sp_int32 j = 0; j < topology->bolts(i).inputs_size(); ++j) {
+      const proto::api::InputStream& is = topology->bolts(i).inputs(j);
+      components_mapping[component_name].push_back(is.stream().component_name());
+      DLOG(INFO) << component_name << " <= " << is.stream().component_name();
+    }
+  }
+
+  // Build a component name to task id mapping
+  std::unordered_map<sp_string, sp_int32> component_to_task_id;
+  for (sp_int32 i = 0; i < _pplan->instances_size(); ++i) {
+    const sp_string& component_name = _pplan->instances(i).info().component_name();
+    component_to_task_id[component_name] = _pplan->instances(i).info().task_id();
+    DLOG(INFO) << component_name << " = " << _pplan->instances(i).info().task_id();
+  }
+
+  // Convert the above graph to task ids
+  for (auto it = components_mapping.begin(); it != components_mapping.end(); it++) {
+    sp_int32 task_id = component_to_task_id[it->first];
+    tasks_mapping_[task_id] = {};
+    for (auto s = it->second.begin(); s != it->second.end(); s++) {
+      tasks_mapping_[task_id].insert(component_to_task_id[*s]);
+      DLOG(INFO) << task_id << " <= " << component_to_task_id[*s];
+    }
+  }
 }
 
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
@@ -712,19 +745,41 @@ void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
 void StMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Ask the StMgrServer to stop consuming. The client does
   // not consume anything
-  server_->StartBackPressureClientCb(_other_stmgr_id);
+  sp_int32 task_id = clientmgr_->FindBusiestTaskOnStmgr(_other_stmgr_id);
+  server_->StartBackPressureClientCb(_other_stmgr_id, task_id);
+  backpressure_starters_.push(task_id);
 }
 
 void StMgr::StopBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Call the StMgrServers removeBackPressure method
-  server_->StopBackPressureClientCb(_other_stmgr_id);
+  // Note: This is not good, we probably do not want to unthrottle them all
+  // at once, the upper layer only calls this once.
+  while (!backpressure_starters_.empty()) {
+    server_->StopBackPressureClientCb(_other_stmgr_id, backpressure_starters_.front());
+    backpressure_starters_.pop();
+  }
 }
 
-void StMgr::SendStartBackPressureToOtherStMgrs() {
-  clientmgr_->SendStartBackPressureToOtherStMgrs();
+void StMgr::SendStartBackPressureToOtherStMgrs(const sp_int32 _task_id) {
+  clientmgr_->SendStartBackPressureToOtherStMgrs(_task_id);
 }
 
-void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
+void StMgr::SendStopBackPressureToOtherStMgrs(const sp_int32 _task_id) {
+  clientmgr_->SendStopBackPressureToOtherStMgrs(_task_id);
+}
+
+void StMgr::_GetUpstreamInstances(const sp_int32 _task_id, std::unordered_set<sp_int32>& result) {
+  for (auto& i : tasks_mapping_[_task_id]) {
+    result.insert(i);
+    _GetUpstreamInstances(i, result);
+  }
+}
+
+std::unordered_set<sp_int32> StMgr::GetUpstreamInstances(const sp_int32 _task_id) {
+  std::unordered_set<sp_int32> result;
+  _GetUpstreamInstances(_task_id, result);
+  return result;
+}
 
 }  // namespace stmgr
 }  // namespace heron
