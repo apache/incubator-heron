@@ -154,3 +154,13 @@ def add_extra_launch_classpath(parser):
       metavar='(a string; additional JVM class path for launching topology)',
       default="")
   return parser
+
+def add_dry_run(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--dry-run',
+      action='store_true')
+  return parser

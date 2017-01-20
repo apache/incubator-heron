@@ -219,6 +219,11 @@ public class SubmitterMain {
         .required()
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("dry run")
+        .longOpt("dry_run")
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -234,6 +239,7 @@ public class SubmitterMain {
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
+    options.addOption(dryRun);
     options.addOption(verbose);
 
     return options;
@@ -280,6 +286,12 @@ public class SubmitterMain {
 
     // init log
     LoggingHelper.loggerInit(logLevel, false);
+
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+      LOG.log(Level.FINE, "dry-run mode enabled");
+    }
 
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");

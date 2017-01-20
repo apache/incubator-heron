@@ -48,6 +48,7 @@ def create_parser(subparsers):
       + 'colon-delimited: [component_name]:[parallelism]')
 
   args.add_config(parser)
+  args.add_dry_run(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='update')
@@ -58,6 +59,9 @@ def create_parser(subparsers):
 def run(command, parser, cl_args, unknown_args):
   """ run the update command """
   extra_args = ["--component_parallelism", ','.join(cl_args['component_parallelism'])]
+  if cl_args['dry_run']:
+    extra_args.append('--dry_run')
+
   extra_lib_jars = jars.packing_jars()
 
   return cli_helper.run(command, cl_args, "update topology", extra_args, extra_lib_jars)
