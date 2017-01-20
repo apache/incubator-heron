@@ -178,14 +178,15 @@ def add_dry_run(parser):
       '--dry-run',
       default=False,
       action='store_true',
-      help='Enable dry-run mode')
+      help='Enable dry-run mode. Information about '
+           'the command will print but no action will be taken on the topology')
 
   parser.add_argument(
       '--dry-run-format',
       metavar='DRY_RUN_FORMAT',
       default='table',
       type=dry_run_resp_format,
-      help='Dry-run to display resource packing plan. Available options: %s. Default option: table'\
-           % available_options)
+      help='The format of the dry-run output ([raw|table], default=table). '
+           'Ignored when dry-run mode is not enabled')
 
   return parser
