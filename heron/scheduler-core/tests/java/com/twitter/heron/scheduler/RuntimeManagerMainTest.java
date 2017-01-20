@@ -49,6 +49,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -228,6 +229,7 @@ public class RuntimeManagerMainTest {
     when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
     when(config.getStringValue(RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY))
         .thenReturn("testSpout:4,testBolt:5");
+    // mock dry-run mode
     when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
     when(config.getDoubleValue(ConfigKeys.get("INSTANCE_CPU"))).thenReturn(1.0);
     when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_RAM")))
@@ -265,7 +267,12 @@ public class RuntimeManagerMainTest {
 
     doReturn(currentPlan).when(manager).getPackingPlan(eq(TOPOLOGY_NAME));
 
-    runtimeManagerMain.manageTopology();
+    try {
+      runtimeManagerMain.manageTopology();
+    } finally {
+      // verify scheduler client is never used
+      verifyZeroInteractions(client);
+    }
   }
 
   @PrepareForTest(ReflectionUtils.class)
