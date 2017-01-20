@@ -22,12 +22,15 @@ import java.util.Set;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-// SUPPRESS CHECKSTYLE AvoidStarImport
-import com.twitter.heron.scheduler.dryrun.FormatterUtils.*;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 
+import static com.twitter.heron.scheduler.dryrun.FormatterUtils.Cell;
+import static com.twitter.heron.scheduler.dryrun.FormatterUtils.Row;
+
+import static com.twitter.heron.scheduler.dryrun.FormatterUtils.TextColor;
+import static com.twitter.heron.scheduler.dryrun.FormatterUtils.TextStyle;
 
 public class UpdateDryRunRender {
 

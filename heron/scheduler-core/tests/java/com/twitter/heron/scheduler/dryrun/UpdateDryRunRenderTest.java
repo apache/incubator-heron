@@ -38,9 +38,10 @@ import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
-import static org.junit.Assert.assertEquals;
 import static com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import static com.twitter.heron.spi.packing.PackingPlan.InstancePlan;
+import static org.junit.Assert.assertEquals;
+
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(TopologyAPI.Topology.class)
