@@ -15,6 +15,7 @@ package com.twitter.heron.scheduler.dryrun;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Set;
 
 import com.google.common.io.Files;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,16 +83,17 @@ public class SubmitDryRunRenderTest {
 
   @Test
   public void testTableA() throws IOException {
-    String filePath = Paths.get(
-        System.getenv("JAVA_RUNFILES"),
-        Constants.TEST_DATA_PATH, "SubmitDryRunOutputATable.txt").toString();
-    File sampleOutput = new File(filePath);
+    InputStream stream  = UpdateDryRunRenderTest.class.
+        getResourceAsStream("/heron/scheduler-core/tests/resources/SubmitDryRunOutputATable.txt");
+    if (stream == null) {
+      throw new RuntimeException("Sample output file not found");
+    }
+    String exampleTable = IOUtils.toString(stream);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
     Config config = Config.newBuilder().put(ConfigKeys.get("PACKING_CLASS"),
         "com.twitter.heron.packing.roundrobin.RoundRobinPacking").build();
     String table =
         new SubmitTableDryRunRenderer(new SubmitDryRunResponse(topology, config, plan)).render();
-    String exampleTable = Files.toString(sampleOutput, StandardCharsets.UTF_8);
     assertEquals(exampleTable, table);
   }
 }
