@@ -140,7 +140,7 @@ public class Defaults {
   }
 
   public static DryRunFormatType dryRunFormatType() {
-    return ConfigDefaults.getDryRunFormatType("DRYRUN_FORMAT_TYPE");
+    return ConfigDefaults.getDryRunFormatType("DRY_RUN_FORMAT_TYPE");
   }
 
   public static ByteAmount stmgrRam() {
