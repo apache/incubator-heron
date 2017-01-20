@@ -164,7 +164,7 @@ def add_dry_run(parser):
   :param parser:
   :return:
   '''
-  resp_formats = ['raw', 'table', 'json']
+  resp_formats = ['raw', 'table']
   available_options = ', '.join(['%s' % opt for opt in resp_formats])
 
   def dry_run_resp_format(value):
