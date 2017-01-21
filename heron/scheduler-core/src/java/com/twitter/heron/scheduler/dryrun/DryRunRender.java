@@ -13,9 +13,14 @@
 // limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
+import com.twitter.heron.classification.InterfaceAudience;
+import com.twitter.heron.classification.InterfaceStability;
+
 /**
  * Interface of class that renders dry-run response
  */
+@InterfaceAudience.Private
+@InterfaceStability.Evolving
 public interface DryRunRender {
 
   /**
