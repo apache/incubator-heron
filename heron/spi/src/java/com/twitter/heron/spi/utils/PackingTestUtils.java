@@ -90,8 +90,7 @@ public final class PackingTestUtils {
 
   @SafeVarargs
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
-                                                            Pair<String, Integer>...
-                                                                instanceInfo) {
+                                                            Pair<String, Integer>... instanceInfo) {
     double cpu = 1.5;
     ByteAmount ram = ByteAmount.fromGigabytes(1);
 
