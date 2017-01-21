@@ -78,7 +78,7 @@ public class CacheCore {
     cacheException = new HashMap<>();
     cacheMetric = new TreeMap<>();
     long now = System.currentTimeMillis();
-    for (long i = now - maxInterval; i < now; i += interval) {
+    for (long i = now - this.maxInterval; i < now; i += this.interval) {
       cacheMetric.put(i, new HashMap<Long, LinkedList<MetricDatapoint>>());
     }
     // index
@@ -252,7 +252,8 @@ public class CacheCore {
         for (String componentName : componentNameFilter) {
           // candidate instance ids
           Set<String> instanceIdFilter;
-          if (request.componentNameInstanceId.get(componentName) == null) {
+          if (request.componentNameInstanceId == null
+              || request.componentNameInstanceId.get(componentName) == null) {
             instanceIdFilter = idxComponentInstance.get(componentName).keySet();
           } else {
             instanceIdFilter = request.componentNameInstanceId.get(componentName);
@@ -519,5 +520,24 @@ public class CacheCore {
         looper = null;
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("{");
+    for (Long k = cacheMetric.firstKey(); k != null; k = cacheMetric.higherKey(k)) {
+      sb.append("[").append(k).append(":");
+      for (Long idx : cacheMetric.get(k).keySet()) {
+        sb.append("<").append(idx).append("->");
+        for (MetricDatapoint dp : cacheMetric.get(k).get(idx)) {
+          sb.append(dp.toString());
+        }
+        sb.append(">");
+      }
+      sb.append("]");
+    }
+    sb.append("}");
+    return sb.toString();
   }
 }
