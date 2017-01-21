@@ -15,7 +15,10 @@ package com.twitter.heron.scheduler.dryrun;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -28,51 +31,38 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 import static com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
-import static com.twitter.heron.spi.packing.PackingPlan.InstancePlan;
 import static org.junit.Assert.assertEquals;
-
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(TopologyAPI.Topology.class)
 public class SubmitDryRunRenderTest {
 
-  private ContainerPlan containerOnePlan;
-  private ContainerPlan containerTwoPlan;
   private PackingPlan plan;
 
   @Before
   public void setUp() throws Exception {
-    Resource instanceResource = new Resource(
-        1.0, ByteAmount.fromGigabytes(3), ByteAmount.fromGigabytes(1));
-    Resource requiredResource = new Resource(
-        5.0, ByteAmount.fromGigabytes(11), ByteAmount.fromGigabytes(5));
-    Set<InstancePlan> instancesOne = new HashSet<>();
-    instancesOne.add(new InstancePlan(
-        new InstanceId("exclaim1", 1, 0), instanceResource));
-    instancesOne.add(new InstancePlan(
-        new InstanceId("exclaim1", 3, 0), instanceResource));
-    instancesOne.add(new InstancePlan(
-        new InstanceId("word", 5, 0), instanceResource));
-    containerOnePlan = new ContainerPlan(1, instancesOne, requiredResource);
-    Set<InstancePlan> instancesTwo = new HashSet<>();
-    instancesTwo.add(new InstancePlan(
-        new InstanceId("exclaim1", 4, 0), instanceResource));
-    instancesTwo.add(new InstancePlan(
-        new InstanceId("exclaim1", 2, 0), instanceResource));
-    instancesTwo.add(new InstancePlan(
-        new InstanceId("word", 6, 0), instanceResource));
-    containerTwoPlan = new ContainerPlan(2, instancesTwo, requiredResource);
+    final String COMPONENT_A = "exclaim1";
+    final String COMPONENT_B = "word";
+    List<Pair<String, Integer>> instancesA = new ArrayList<>(Arrays.asList(
+        new Pair<>(COMPONENT_A, 1),
+        new Pair<>(COMPONENT_A, 3),
+        new Pair<>(COMPONENT_B, 5)));
+    List<Pair<String, Integer>> instancesB = new ArrayList<>(Arrays.asList(
+        new Pair<>(COMPONENT_A, 2),
+        new Pair<>(COMPONENT_A, 4),
+        new Pair<>(COMPONENT_B, 6)));
+    ContainerPlan containerPlanA = PackingTestUtils.testContainerPlan(1, instancesA);
+    ContainerPlan containerPlanB = PackingTestUtils.testContainerPlan(2, instancesB);
     Set<ContainerPlan> containerPlans = new HashSet<>();
-    containerPlans.add(containerOnePlan);
-    containerPlans.add(containerTwoPlan);
+    containerPlans.add(containerPlanA);
+    containerPlans.add(containerPlanB);
     plan = new PackingPlan("A", containerPlans);
   }
 

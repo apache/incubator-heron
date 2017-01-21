@@ -13,13 +13,16 @@
 // limitations under the License.
 package com.twitter.heron.spi.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -74,13 +77,23 @@ public final class PackingTestUtils {
 
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
                                                             Integer... instanceIndices) {
+    List<Pair<String, Integer>> instanceInfo = new ArrayList<>();
+    for (int instanceIndex : instanceIndices) {
+      String componentName = "componentName-" + instanceIndex;
+      instanceInfo.add(new Pair<>(componentName, instanceIndex));
+    }
+    return testContainerPlan(containerId, instanceInfo);
+  }
+
+  public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
+                                                            List<Pair<String, Integer>>
+                                                                instanceInfo) {
     double cpu = 1.5;
     ByteAmount ram = ByteAmount.fromGigabytes(1);
 
     Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
-    for (int instanceIndex : instanceIndices) {
-      String componentName = "componentName-" + instanceIndex;
-      PackingPlan.InstancePlan instance = testInstancePlan(componentName, instanceIndex);
+    for (Pair<String, Integer> info: instanceInfo) {
+      PackingPlan.InstancePlan instance = testInstancePlan(info.first, info.second);
       instancePlans.add(instance);
       cpu += instance.getResource().getCpu();
       ram = ram.plus(instance.getResource().getRam());
