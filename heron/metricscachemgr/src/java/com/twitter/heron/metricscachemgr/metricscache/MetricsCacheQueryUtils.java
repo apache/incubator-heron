@@ -261,21 +261,25 @@ final class MetricsCacheQueryUtils {
           .append("[").append(startTime).append("-").append(endTime)
           .append(":").append(aggregationGranularity).append("]")
           .append("[");
-      for (String c : componentNameInstanceId.keySet()) {
-        sb.append(c).append("->(");
-        if (componentNameInstanceId.get(c) == null) {
-          sb.append("null");
-        } else {
-          for (String i : componentNameInstanceId.get(c)) {
-            sb.append(i).append(",");
+      if (componentNameInstanceId != null) {
+        for (String c : componentNameInstanceId.keySet()) {
+          sb.append(c).append("->(");
+          if (componentNameInstanceId.get(c) == null) {
+            sb.append("null");
+          } else {
+            for (String i : componentNameInstanceId.get(c)) {
+              sb.append(i).append(",");
+            }
           }
+          sb.append("),");
         }
-        sb.append("),");
       }
       sb.append("]")
           .append("[");
-      for (String name : metricNames) {
-        sb.append(name).append(",");
+      if (metricNames != null) {
+        for (String name : metricNames) {
+          sb.append(name).append(",");
+        }
       }
       sb.append("]")
           .append("}");
