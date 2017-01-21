@@ -72,7 +72,7 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.aurora.AuroraSchedulerTest",
     "com.twitter.heron.scheduler.aurora.AuroraLauncherTest",
-    "com.twitter.heron.scheduler.aurora.AuroraControllerTest",
+    "com.twitter.heron.scheduler.aurora.AuroraCLIControllerTest",
     "com.twitter.heron.scheduler.aurora.AuroraContextTest",
   ],
   runtime_deps = [ ":aurora-tests" ],

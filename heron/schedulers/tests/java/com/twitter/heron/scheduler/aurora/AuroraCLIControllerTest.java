@@ -35,17 +35,18 @@ import org.mockito.Mockito;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
-public class AuroraControllerTest {
+public class AuroraCLIControllerTest {
   private static final String JOB_NAME = "jobName";
   private static final String CLUSTER = "cluster";
   private static final String ROLE = "role";
   private static final String ENV = "gz";
+  private static final String AURORA_FILENAME = "file.aurora";
   private static final String VERBOSE_CONFIG = "--verbose";
   private static final String BATCH_CONFIG = "--batch-size";
   private static final String JOB_SPEC = String.format("%s/%s/%s/%s", CLUSTER, ROLE, ENV, JOB_NAME);
   private static final boolean IS_VERBOSE = true;
 
-  private AuroraController controller;
+  private AuroraCLIController controller;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -58,7 +59,8 @@ public class AuroraControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    controller = Mockito.spy(new AuroraController(JOB_NAME, CLUSTER, ROLE, ENV, IS_VERBOSE));
+    controller = Mockito.spy(
+        new AuroraCLIController(JOB_NAME, CLUSTER, ROLE, ENV, AURORA_FILENAME, IS_VERBOSE));
   }
 
   @After
@@ -67,19 +69,18 @@ public class AuroraControllerTest {
 
   @Test
   public void testCreateJob() throws Exception {
-    String auroraFilename = "file.aurora";
-    Map<String, String> bindings = new HashMap<>();
+    Map<AuroraField, String> bindings = new HashMap<>();
     List<String> expectedCommand = asList("aurora job create --wait-until RUNNING %s %s %s",
-            JOB_SPEC, auroraFilename, VERBOSE_CONFIG);
+            JOB_SPEC, AURORA_FILENAME, VERBOSE_CONFIG);
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.createJob(auroraFilename, bindings));
+    Assert.assertFalse(controller.createJob(bindings));
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.createJob(auroraFilename, bindings));
+    Assert.assertTrue(controller.createJob(bindings));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }
 
@@ -107,12 +108,12 @@ public class AuroraControllerTest {
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.restartJob(containerId));
+    Assert.assertFalse(controller.restart(containerId));
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.restartJob(containerId));
+    Assert.assertTrue(controller.restart(containerId));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }
 
