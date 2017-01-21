@@ -25,6 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.IPacking;
@@ -36,7 +37,6 @@ import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -181,8 +181,28 @@ public class SubmitterMainTest {
     submitterMain.submitTopology();
   }
 
+  @Test(expected = SubmitDryRunResponse.class)
+  public void testSubmitTopologyDryRun() throws Exception {
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    PowerMockito.whenNew(SchedulerStateManagerAdaptor.class).withAnyArguments().
+        thenReturn(adaptor);
+    SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
+    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
+    try {
+      submitterMain.submitTopology();
+    } finally {
+      /* under dry-run mode, the program should not
+         1. upload topology package
+         2. validate that topology is not running
+       */
+      verify(uploader, never()).uploadPackage();
+      verify(adaptor, never()).isTopologyRunning(anyString());
+    }
+  }
+
   @Test
   public void testSubmitTopologySuccessful() throws Exception {
+    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"))).thenReturn(false);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
