@@ -26,11 +26,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
+import com.twitter.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
@@ -141,6 +145,19 @@ public class RuntimeManagerMain {
         .argName("container id")
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("run in dry-run mode")
+        .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
+        .hasArg()
+        .required(false)
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -157,6 +174,8 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -225,6 +244,19 @@ public class RuntimeManagerMain {
       containerId = cmd.getOptionValue("container_id");
     }
 
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+    }
+
+    // Default dry-run output format type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (cmd.hasOption("t")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
+    }
+
     Command command = Command.makeCommand(commandOption);
 
     // first load the defaults, then the config from files to override it
@@ -237,6 +269,8 @@ public class RuntimeManagerMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.dryRun(), dryRun)
+        .put(Keys.dryRunFormat(), dryRunFormat)
         .put(Keys.verbose(), verbose)
         .put(Keys.topologyContainerId(), containerId);
 
@@ -264,27 +298,34 @@ public class RuntimeManagerMain {
     LOG.fine("Static config loaded successfully ");
     LOG.fine(config.toString());
 
+    /* Meaning of exit status code:
+      - status code = 0:
+        program exits without error
+      - 0 < status code < 100:
+        program fails to execute before program execution. For example,
+        JVM cannot find or load main class
+      - 100 <= status code < 200:
+        program fails to launch after program execution. For example,
+        topology definition file fails to be loaded
+      - status code == 200
+        program sends out dry-run response */
+    /* Since only stderr is used (by logging), we use stdout here to
+       propagate any message back to Python's executor.py (invoke site). */
     // Create a new instance of RuntimeManagerMain
     RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, command);
     try {
       runtimeManagerMain.manageTopology();
       // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (UpdateDryRunResponse response) {
+      LOG.log(Level.FINE, "Sending out dry-run response");
+      System.out.print(runtimeManagerMain.renderDryRunResponse(response));
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      // Exit with status code 200 to indicate dry-run response is sent out
+      System.exit(200);
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      /* Since only stderr is used (by logging), we use stdout here to
-         propagate error message back to Python's executor.py (invoke site). */
-            /* Since only stderr is used (by logging), we use stdout here to
-         propagate error message back to Python's executor.py (invoke site). */
       LOG.log(Level.FINE, "Exception when submitting topology", e);
       System.out.println(e.getMessage());
-      /* Meaning of exit status code:
-         - status code = 0:
-           program exits without error
-         - 0 < status code < 100:
-           program fails to execute before program execution. For example,
-           JVM cannot find or load main class
-         - status code >= 100:
-           program fails to launch after program execution. For example,
-           topology definition file fails to be loaded */
       // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(100);
@@ -408,5 +449,17 @@ public class RuntimeManagerMain {
   protected ISchedulerClient getSchedulerClient(Config runtime)
       throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
+  }
+
+  protected String renderDryRunResponse(UpdateDryRunResponse resp) {
+    DryRunFormatType formatType = Context.dryRunFormatType(config);
+    switch (formatType) {
+      case RAW :
+        return new UpdateRawDryRunRenderer(resp).render();
+      case TABLE:
+        return new UpdateTableDryRunRenderer(resp).render();
+      default: throw new IllegalArgumentException(
+          String.format("Unexpected rendering format: %s", formatType));
+    }
   }
 }

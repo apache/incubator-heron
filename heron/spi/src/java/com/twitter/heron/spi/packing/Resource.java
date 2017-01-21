@@ -71,6 +71,16 @@ public class Resource {
     return new Resource(extraCpu, extraRam, extraDisk);
   }
 
+   /**
+   * Adds a given resource from the current resource.
+   */
+  public Resource plus(Resource other) {
+    double totalCpu = this.getCpu() + other.getCpu();
+    ByteAmount totalRam = this.getRam().plus(other.getRam());
+    ByteAmount totalDisk = this.getDisk().plus(other.getDisk());
+    return new Resource(totalCpu, totalRam, totalDisk);
+  }
+
   /**
    * Divides a resource by another resource by dividing the cpu, memory and disk values of the resources.
    * It returns the maximum of the three results.

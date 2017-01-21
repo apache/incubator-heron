@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
@@ -120,13 +121,18 @@ public class LaunchRunner {
    *
    * @throws LauncherException
    * @throws PackingException
+   * @throws SubmitDryRunResponse
    */
-  public void call() throws LauncherException, PackingException {
+  public void call() throws LauncherException, PackingException, SubmitDryRunResponse {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
     PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
+
+    if (Context.dryRun(config)) {
+      throw new SubmitDryRunResponse(topology, config, packedPlan);
+    }
 
     int numContainers = TopologyUtils.getNumContainers(topology);
     int numContainerPlans = packedPlan.getContainers().size();
