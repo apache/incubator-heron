@@ -15,10 +15,7 @@ package com.twitter.heron.scheduler.dryrun;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -50,16 +47,14 @@ public class SubmitDryRunRenderTest {
   public void setUp() throws Exception {
     final String COMPONENT_A = "exclaim1";
     final String COMPONENT_B = "word";
-    List<Pair<String, Integer>> instancesA = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 1),
-        new Pair<>(COMPONENT_A, 3),
-        new Pair<>(COMPONENT_B, 5)));
-    List<Pair<String, Integer>> instancesB = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 2),
-        new Pair<>(COMPONENT_A, 4),
-        new Pair<>(COMPONENT_B, 6)));
-    ContainerPlan containerPlanA = PackingTestUtils.testContainerPlan(1, instancesA);
-    ContainerPlan containerPlanB = PackingTestUtils.testContainerPlan(2, instancesB);
+    ContainerPlan containerPlanA = PackingTestUtils.testContainerPlan(
+        1, new Pair<>(COMPONENT_A, 1),
+           new Pair<>(COMPONENT_A, 3),
+           new Pair<>(COMPONENT_B, 5));
+    ContainerPlan containerPlanB = PackingTestUtils.testContainerPlan(
+        2, new Pair<>(COMPONENT_A, 2),
+           new Pair<>(COMPONENT_A, 4),
+           new Pair<>(COMPONENT_B, 6));
     Set<ContainerPlan> containerPlans = new HashSet<>();
     containerPlans.add(containerPlanA);
     containerPlans.add(containerPlanB);

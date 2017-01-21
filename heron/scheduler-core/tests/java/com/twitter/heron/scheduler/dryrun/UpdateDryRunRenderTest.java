@@ -15,11 +15,8 @@ package com.twitter.heron.scheduler.dryrun;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -54,18 +51,14 @@ public class UpdateDryRunRenderTest {
     // set up original packing plan
     final String COMPONENT_A = "exclaim1";
     final String COMPONENT_B = "word";
-    List<Pair<String, Integer>> instancesA = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 1),
-        new Pair<>(COMPONENT_A, 3),
-        new Pair<>(COMPONENT_B, 5)));
-    List<Pair<String, Integer>> instancesB = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 2),
-        new Pair<>(COMPONENT_A, 4),
-        new Pair<>(COMPONENT_B, 6)));
     ContainerPlan containerPlanA = PackingTestUtils.testContainerPlan(
-        1, instancesA);
+        1, new Pair<>(COMPONENT_A, 1),
+           new Pair<>(COMPONENT_A, 3),
+           new Pair<>(COMPONENT_B, 5));
     ContainerPlan containerPlanB = PackingTestUtils.testContainerPlan(
-        2, instancesB);
+        2, new Pair<>(COMPONENT_A, 2),
+           new Pair<>(COMPONENT_A, 4),
+           new Pair<>(COMPONENT_B, 6));
     Set<ContainerPlan> containerPlans = new HashSet<>();
     containerPlans.add(containerPlanA);
     containerPlans.add(containerPlanB);
@@ -74,31 +67,23 @@ public class UpdateDryRunRenderTest {
     // setup new packing plan A: word:1, exclaim1:9
     Set<ContainerPlan> containerPlansA = new HashSet<>();
     containerPlansA.add(containerPlanA);
-    List<Pair<String, Integer>> instancesC = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 4),
-        new Pair<>(COMPONENT_A, 2),
-        new Pair<>(COMPONENT_A, 6)));
-    List<Pair<String, Integer>> instancesD = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 7),
-        new Pair<>(COMPONENT_A, 8),
-        new Pair<>(COMPONENT_A, 9)));
-    List<Pair<String, Integer>> instancesE = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 10)));
     containerPlansA.add(PackingTestUtils.testContainerPlan(
-        2, instancesC));
+        2, new Pair<>(COMPONENT_A, 4),
+           new Pair<>(COMPONENT_A, 2),
+           new Pair<>(COMPONENT_A, 6)));
     containerPlansA.add(PackingTestUtils.testContainerPlan(
-        3, instancesD));
+        3, new Pair<>(COMPONENT_A, 7),
+           new Pair<>(COMPONENT_A, 8),
+           new Pair<>(COMPONENT_A, 9)));
     containerPlansA.add(PackingTestUtils.testContainerPlan(
-        4, instancesE));
+        4, new Pair<>(COMPONENT_A, 10)));
     newPlanA = new PackingPlan("A", containerPlansA);
 
     // setup new packing plan B: word:1, exclaim1:1
     Set<ContainerPlan> containerPlansB = new HashSet<>();
-    List<Pair<String, Integer>> instancesF = new ArrayList<>(Arrays.asList(
-        new Pair<>(COMPONENT_A, 3),
-        new Pair<>(COMPONENT_B, 5)));
     containerPlansB.add(PackingTestUtils.testContainerPlan(
-        1, instancesF));
+        1, new Pair<>(COMPONENT_A, 3),
+           new Pair<>(COMPONENT_B, 5)));
     newPlanB = new PackingPlan("B", containerPlansB);
   }
 

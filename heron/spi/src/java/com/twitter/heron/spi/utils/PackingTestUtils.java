@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.spi.utils;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,6 +76,7 @@ public final class PackingTestUtils {
     return testContainerPlan(containerId, 0, 1);
   }
 
+  @SuppressWarnings("unchecked")
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
                                                             Integer... instanceIndices) {
     List<Pair<String, Integer>> instanceInfo = new ArrayList<>();
@@ -82,11 +84,13 @@ public final class PackingTestUtils {
       String componentName = "componentName-" + instanceIndex;
       instanceInfo.add(new Pair<>(componentName, instanceIndex));
     }
-    return testContainerPlan(containerId, instanceInfo);
+    return testContainerPlan(containerId, instanceInfo.toArray(
+        (Pair<String, Integer>[]) Array.newInstance(Pair.class, instanceInfo.size())));
   }
 
+  @SafeVarargs
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
-                                                            List<Pair<String, Integer>>
+                                                            Pair<String, Integer>...
                                                                 instanceInfo) {
     double cpu = 1.5;
     ByteAmount ram = ByteAmount.fromGigabytes(1);
