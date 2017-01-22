@@ -14,8 +14,8 @@
 
 package com.twitter.heron.scheduler;
 
-import java.net.URI;
 import java.io.PrintStream;
+import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
