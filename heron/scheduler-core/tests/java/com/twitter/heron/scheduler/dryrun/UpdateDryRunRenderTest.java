@@ -15,6 +15,7 @@ package com.twitter.heron.scheduler.dryrun;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -94,7 +95,8 @@ public class UpdateDryRunRenderTest {
     if (stream == null) {
       throw new RuntimeException("Sample output file not found");
     }
-    String exampleTable = IOUtils.toString(stream);
+    // Input might contain UTF-8 character, so we read stream with UTF-8 decoding
+    String exampleTable = IOUtils.toString(stream, StandardCharsets.UTF_8);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
     Config config = Config.newBuilder().put(ConfigKeys.get("REPACKING_CLASS"),
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
@@ -111,7 +113,8 @@ public class UpdateDryRunRenderTest {
     if (stream == null) {
       throw new RuntimeException("Sample output file not found");
     }
-    String exampleTable = IOUtils.toString(stream);
+    // Input might contain UTF-8 character, so we read stream with UTF-8 decoding
+    String exampleTable = IOUtils.toString(stream, StandardCharsets.UTF_8);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
     Config config = Config.newBuilder().put(ConfigKeys.get("REPACKING_CLASS"),
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
