@@ -102,10 +102,10 @@ public class MetricsCacheManagerHttpServer {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       // get the entire stuff
-      byte[] pb = NetworkUtils.readHttpRequestBody(httpExchange);
+      byte[] payload = NetworkUtils.readHttpRequestBody(httpExchange);
       TopologyMaster.ExceptionLogRequest req;
       try {
-        req = TopologyMaster.ExceptionLogRequest.parseFrom(pb);
+        req = TopologyMaster.ExceptionLogRequest.parseFrom(payload);
       } catch (InvalidProtocolBufferException e) {
         LOG.severe("Unable to decipher data specified in ExceptionRequest");
         httpExchange.sendResponseHeaders(400, -1); // throw exception
@@ -127,10 +127,10 @@ public class MetricsCacheManagerHttpServer {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       // get the entire stuff
-      byte[] pb = NetworkUtils.readHttpRequestBody(httpExchange);
+      byte[] payload = NetworkUtils.readHttpRequestBody(httpExchange);
       TopologyMaster.ExceptionLogRequest req;
       try {
-        req = TopologyMaster.ExceptionLogRequest.parseFrom(pb);
+        req = TopologyMaster.ExceptionLogRequest.parseFrom(payload);
       } catch (InvalidProtocolBufferException e) {
         LOG.severe("Unable to decipher data specified in ExceptionRequest");
         httpExchange.sendResponseHeaders(400, -1); // throw exception
