@@ -53,6 +53,7 @@ def create_parser(subparsers):
   cli_args.add_deactive_deploy(parser)
   cli_args.add_extra_launch_classpath(parser)
   cli_args.add_system_property(parser)
+  cli_args.add_dry_run(parser)
   cli_args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -99,6 +100,12 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
+  if cl_args["dry_run"]:
+    args.append("--dry_run")
+
+  if "dry_run_format" in cl_args:
+    args += ["--dry_run_format", cl_args["dry_run_format"]]
+
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
@@ -113,7 +120,11 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       args=args,
       java_defines=[])
   err_context = "Failed to launch topology '%s'" % topology_name
+  if cl_args["dry_run"]:
+    err_context += " in dry-run mode"
   succ_context = "Successfully launched topology '%s'" % topology_name
+  if cl_args["dry_run"]:
+    succ_context += " in dry-run mode"
   resp.add_context(err_context, succ_context)
   return resp
 

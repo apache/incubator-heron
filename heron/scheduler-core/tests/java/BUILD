@@ -3,6 +3,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
     "@com_google_guava_guava//jar",
+    "@commons_io_commons_io//jar",
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
@@ -47,9 +48,12 @@ java_tests(
     "com.twitter.heron.scheduler.client.LibrarySchedulerClientTest",
     "com.twitter.heron.scheduler.client.HttpServiceSchedulerClientTest",
     "com.twitter.heron.scheduler.client.SchedulerClientFactoryTest",
+    "com.twitter.heron.scheduler.dryrun.SubmitDryRunRenderTest",
+    "com.twitter.heron.scheduler.dryrun.UpdateDryRunRenderTest",
     "com.twitter.heron.scheduler.utils.LauncherUtilsTest",
     "com.twitter.heron.scheduler.utils.SchedulerUtilsTest",
   ],
   runtime_deps = [ ":scheduler-core-tests" ],
+  resources = ["//heron/scheduler-core/tests/resources:scheduler-resources"],
   size = "small",
 )
