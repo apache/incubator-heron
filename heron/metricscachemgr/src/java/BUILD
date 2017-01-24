@@ -38,13 +38,6 @@ java_binary(
     deps = metricscachemgr_deps_files,
 )
 
-java_binary(
-    name = "metricscache-queryclient-unshaded",
-    srcs = glob(["**/*.java"]),
-    deps = metricscachemgr_deps_files,
-    main_class="com.twitter.heron.metricscachemgr.ExampleMetricsQuery"
-)
-
 genrule(
     name = "heron-metricscachemgr",
     srcs = [":metricscachemgr-unshaded_deploy.jar"],
