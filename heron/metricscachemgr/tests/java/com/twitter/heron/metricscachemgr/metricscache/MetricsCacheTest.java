@@ -22,35 +22,70 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.metricsmgr.MetricsSinksConfig;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
+
 public class MetricsCacheTest {
-  public static final String CONFIG_PATH =
+  public static final String CONFIG_SYSTEM_PATH =
+      "../../../../../../../../../heron/config/src/yaml/conf/examples/heron_internals.yaml";
+  public static final String CONFIG_SINK_PATH =
       "../../../../../../../../../heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
   private static String debugFilePath =
       "/tmp/" + MetricsCacheTest.class.getSimpleName() + ".debug.txt";
-  private MetricsCache mc = null;
-  private Path file = null;
-  private List<String> lines = null;
+  private static Path file = null;
+  private static List<String> lines = null;
 
-  @Before
-  public void before() throws Exception {
+  @BeforeClass
+  public static void before() {
     file = Paths.get(debugFilePath);
     lines = new ArrayList<>();
 
     lines.add(Paths.get(".").toAbsolutePath().normalize().toString());
-
   }
 
-  @After
-  public void after() throws IOException {
+  @AfterClass
+  public static void after() throws IOException {
     Files.write(file, lines, Charset.forName("UTF-8"));
   }
 
   @Test
-  public void testMetricCache() {
+  public void testMetricCache() throws IOException {
+    // prepare config files
+    SystemConfig systemConfig = new SystemConfig(CONFIG_SYSTEM_PATH, true);
+    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(CONFIG_SINK_PATH);
 
+    // initialize metric cache, except looper
+    MetricsCache mc = new MetricsCache(systemConfig, sinksConfig, new NIOLooper());
+
+    mc.addMetrics(TopologyMaster.PublishMetrics.newBuilder()
+        .addMetrics(TopologyMaster.MetricDatum.newBuilder()
+            .setComponentName("c1").setInstanceId("i1").setName("__jvm-uptime-secs")
+            .setTimestamp(System.currentTimeMillis()).setValue("0.1"))
+        .addExceptions(TopologyMaster.TmasterExceptionLog.newBuilder()
+            .setComponentName("c1").setHostname("h1").setInstanceId("i1")
+            .setStacktrace("s1").setLogging("l1")
+            .setCount(1)
+            .setFirsttime(String.valueOf(System.currentTimeMillis()))
+            .setLasttime(String.valueOf(System.currentTimeMillis())))
+        .build());
+
+    // query last 10 seconds
+    TopologyMaster.MetricResponse response = mc.getMetrics(TopologyMaster.MetricRequest.newBuilder()
+        .setComponentName("c1").addInstanceId("i1")
+        .setInterval(10).addMetric("__jvm-uptime-secs")
+        .build());
+
+    Assert.assertEquals(response.getMetricCount(), 1);
+    Assert.assertEquals(response.getMetric(0).getInstanceId(), "i1");
+    Assert.assertEquals(response.getMetric(0).getMetricCount(), 1);
+    Assert.assertEquals(response.getMetric(0).getMetric(0).getName(), "__jvm-uptime-secs");
+    Assert.assertEquals(response.getMetric(0).getMetric(0).getValue(), "0.1");
   }
 }
