@@ -24,6 +24,7 @@ metricscachemgr_deps_files = [
     "//heron/proto:proto_packing_plan_java",
     "//heron/spi/src/java:statemgr-spi-java",
     "//heron/instance/src/java:instance-java",
+    "//heron/statemgrs/src/java:localfs-statemgr-java",
 ]
 
 test_deps_files = [
@@ -47,14 +48,18 @@ java_library(
              ]
 )
 
-
+java_binary(
+    name = "metricscache-queryclient-unshaded",
+    srcs = glob(["**/ManualLocalTest.java"]),
+    deps = metricscachemgr_deps_files + [
+    "//heron/spi/src/java:utils-spi-java",
+    ],
+    main_class="com.twitter.heron.metricscachemgr.ManualLocalTest"
+)
 
 java_tests(
    test_classes = [
        "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTest",
-#       "com.twitter.heron.metricscachemgr.metricscache.MetricTest",
-#       "com.twitter.heron.metricscachemgr.metricscache.InstanceMetricsTest",
-#       "com.twitter.heron.metricscachemgr.metricscache.ComponentMetricsTest",
        "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheTest",
      ],
      runtime_deps = [ ":metricscachemgr-tests" ],

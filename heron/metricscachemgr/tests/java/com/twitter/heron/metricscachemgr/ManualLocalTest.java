@@ -15,23 +15,38 @@
 package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
 
+
 /**
- * example: query metricscache
+ * manual test for local mode topology, for debug
+ * How to run:
+ * in the [source root directory], run bazel test,
+ * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \
+ * <topology_name> <component_name> <metrics_name>
+ * Example:
+ * 1. run the example topology,
+ * ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \
+ * com.twitter.heron.examples.ExclamationTopology ExclamationTopology \
+ * --deploy-deactivated --verbose
+ * 2. in the [source root directory],
+ * bazel run heron/metricscachemgr/tests/java:metricscache-queryclient-unshaded -- \
+ * ExclamationTopology exclaim1 \
+ * __emit-count __execute-count __fail-count __ack-count __complete-latency __execute-latency \
+ * __process-latency __jvm-uptime-secs __jvm-process-cpu-load __jvm-memory-used-mb \
+ * __jvm-memory-mb-total __jvm-gc-collection-time-ms __server/__time_spent_back_pressure_initiated \
+ * __time_spent_back_pressure_by_compid
  */
-public final class ExampleMetricsQuery {
-  private ExampleMetricsQuery() {
+public final class ManualLocalTest {
+  private ManualLocalTest() {
   }
 
   public static void main(String[] args)
@@ -56,40 +71,26 @@ public final class ExampleMetricsQuery {
       System.out.println("MetricsCacheMgr is not ready");
       return;
     }
-//    System.out.println("location: " + location);
 
-    //----------------
-
+    // construct metric cache stat url
     String url = "http://" + location.getHost() + ":" + location.getStatsPort()
         + MetricsCacheManagerHttpServer.PATH_STATS;
-//    System.out.println("url: " + url);
 
-    URL obj = new URL(url);
-    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-    //add reuqest header
-    con.setRequestMethod("POST");
-
-    con.setDoOutput(true);
-    OutputStream out = con.getOutputStream();
-    TopologyMaster.MetricRequest.newBuilder()
+    // construct query payload
+    byte[] requestData = TopologyMaster.MetricRequest.newBuilder()
         .setComponentName(args[1])
         .setMinutely(true)
         .setInterval(-1)
         .addAllMetric(Arrays.asList(Arrays.copyOfRange(args, 2, args.length)))
-        .build()
-        .writeTo(out);
-    out.close();
+        .build().toByteArray();
 
-    // response code
-    int responseCode = con.getResponseCode();
-    System.out.println("\nSending 'POST' request to URL : " + url);
-    System.out.println("Response Code : " + responseCode);
+    // http communication
+    HttpURLConnection con = NetworkUtils.getHttpConnection(url);
+    NetworkUtils.sendHttpPostRequest(con, "X", requestData);
+    byte[] responseData = NetworkUtils.readHttpResponse(con);
 
-    // response content
-    InputStream in = con.getInputStream();
-    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.parseFrom(in);
-    in.close();
+    // parse response data
+    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.parseFrom(responseData);
 
     //print result
     System.out.println(response.toString());
