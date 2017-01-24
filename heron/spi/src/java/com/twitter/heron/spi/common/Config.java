@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.TypeUtils;
 
@@ -80,6 +81,10 @@ public class Config {
   public ByteAmount getByteAmountValue(String key) {
     Object value = get(key);
     return TypeUtils.getByteAmount(value);
+  }
+
+  public DryRunFormatType getDryRunFormatType(String key) {
+    return (DryRunFormatType) get(key);
   }
 
   public PackageType getPackageType(String key) {

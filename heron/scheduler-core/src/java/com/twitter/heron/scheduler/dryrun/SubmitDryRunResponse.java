@@ -11,27 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.twitter.heron.scheduler.aurora;
+package com.twitter.heron.scheduler.dryrun;
 
-import java.util.Map;
-import java.util.Set;
-
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
- * Interface that defines how a client interacts with aurora to control the job lifecycle
+ * Dry-run response, which extends RuntimeException because it is easy
+ * to propagate up
  */
-public interface AuroraController {
+public class SubmitDryRunResponse extends DryRunResponse {
+  private static final long serialVersionUID = 999911708859944856L;
 
-  boolean createJob(Map<AuroraField, String> auroraProperties);
-  boolean killJob();
 
-  /**
-   * Restarts a given container, or the entire job if containerId is null
-   * @param containerId ID of container to restart, or entire job if null
-   */
-  boolean restart(Integer containerId);
-
-  void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);
-  void addContainers(Integer count);
+  public SubmitDryRunResponse(TopologyAPI.Topology topology, Config config,
+                              PackingPlan packingPlan) {
+    super(topology, config, packingPlan);
+  }
 }

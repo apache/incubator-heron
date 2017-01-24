@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,14 +23,23 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.packing.roundrobin.ResourceCompliantRRPacking;
+import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 import static org.mockito.Mockito.any;
@@ -39,6 +49,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -201,6 +212,67 @@ public class RuntimeManagerMainTest {
     doThrow(new TopologyRuntimeManagementException("")).when(runtimeManagerMain)
         .callRuntimeManagerRunner(any(Config.class), eq(client));
     runtimeManagerMain.manageTopology();
+  }
+
+  @PrepareForTest({ReflectionUtils.class, Runtime.class})
+  @Test(expected = UpdateDryRunResponse.class)
+  public void testManageTopologyDryRun() throws Exception {
+    config = mock(Config.class);
+
+    // prepare packing class
+    ResourceCompliantRRPacking repacking = new ResourceCompliantRRPacking();
+
+    when(config.getStringValue(ConfigKeys.get("REPACKING_CLASS")))
+        .thenReturn(IRepacking.class.getName());
+    when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS")))
+        .thenReturn(IStateManager.class.getName());
+    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY))
+        .thenReturn("testSpout:4,testBolt:5");
+    // mock dry-run mode
+    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
+    when(config.getDoubleValue(ConfigKeys.get("INSTANCE_CPU"))).thenReturn(1.0);
+    when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_RAM")))
+        .thenReturn(ByteAmount.fromGigabytes(1));
+    when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_DISK")))
+        .thenReturn(ByteAmount.fromGigabytes(1));
+
+    RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, Command.UPDATE));
+
+    // Mock validate runtime
+    PowerMockito.mockStatic(ReflectionUtils.class);
+    PowerMockito.doReturn(mock(IStateManager.class))
+        .when(ReflectionUtils.class, "newInstance", eq(IStateManager.class.getName()));
+    PowerMockito.doReturn(repacking)
+        .when(ReflectionUtils.class, "newInstance", eq(IRepacking.class.getName()));
+    doNothing().when(runtimeManagerMain)
+        .validateRuntimeManage(any(SchedulerStateManagerAdaptor.class), eq(TOPOLOGY_NAME));
+
+    // Successfully get ISchedulerClient
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
+
+    // Mock updateTopologyHandler of runner
+    PowerMockito.mockStatic(Runtime.class);
+    SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
+    PowerMockito.when(Runtime.schedulerStateManagerAdaptor(any(Config.class))).thenReturn(manager);
+
+    RoundRobinPacking packing = new RoundRobinPacking();
+    PackingPlans.PackingPlan currentPlan =
+        PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
+
+    // the actual topology does not matter
+    doReturn(TopologyAPI.Topology.getDefaultInstance()).when(manager).
+        getTopology(eq(TOPOLOGY_NAME));
+
+    doReturn(currentPlan).when(manager).getPackingPlan(eq(TOPOLOGY_NAME));
+
+    try {
+      runtimeManagerMain.manageTopology();
+    } finally {
+      // verify scheduler client is never used
+      verifyZeroInteractions(client);
+    }
   }
 
   @PrepareForTest(ReflectionUtils.class)

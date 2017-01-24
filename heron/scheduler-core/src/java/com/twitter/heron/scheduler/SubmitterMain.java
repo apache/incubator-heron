@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import java.io.PrintStream;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,9 +28,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
+import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -120,11 +125,15 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
+                                             Boolean dryRun,
+                                             DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.dryRun(), dryRun)
+        .put(Keys.dryRunFormat(), dryRunFormat)
         .put(Keys.verbose(), verbose)
         .build();
 
@@ -219,6 +228,19 @@ public class SubmitterMain {
         .required()
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("run in dry-run mode")
+        .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
+        .hasArg()
+        .required(false)
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -234,6 +256,8 @@ public class SubmitterMain {
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
+    options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -295,6 +319,19 @@ public class SubmitterMain {
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+    }
+
+    // Default dry-run output format type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (cmd.hasOption("f")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
+    }
+
     // first load the defaults, then the config from files to override it
     // next add config parameters from the command line
     // load the topology configs
@@ -304,7 +341,7 @@ public class SubmitterMain {
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath, releaseFile))
             .putAll(overrideConfigs(overrideConfigFile))
-            .putAll(commandLineConfigs(cluster, role, environ, verbose))
+            .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
             .build());
@@ -313,23 +350,33 @@ public class SubmitterMain {
     LOG.fine(config.toString());
 
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
+    /* Meaning of exit status code:
+       - status code = 0:
+         program exits without error
+       - 0 < status code < 100:
+         program fails to execute before program execution. For example,
+         JVM cannot find or load main class
+       - 100 <= status code < 200:
+         program fails to launch after program execution. For example,
+         topology definition file fails to be loaded
+       - status code >= 200
+         program sends out dry-run response */
     try {
       submitterMain.submitTopology();
+    } catch (SubmitDryRunResponse response) {
+      LOG.log(Level.FINE, "Sending out dry-run response");
+      // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
+      PrintStream out = new PrintStream(System.out, true, "UTF-8");
+      out.print(submitterMain.renderDryRunResponse(response));
+      // Exit with status code 200 to indicate dry-run response is sent out
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(200);
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       /* Since only stderr is used (by logging), we use stdout here to
          propagate error message back to Python's executor.py (invoke site). */
       LOG.log(Level.FINE, "Exception when submitting topology", e);
       System.out.println(e.getMessage());
-      /* Meaning of exit status code:
-         - status code = 0:
-           program exits without error
-         - 0 < status code < 100:
-           program fails to execute before program execution. For example,
-           JVM cannot find or load main class
-         - status code >= 100:
-           program fails to launch after program execution. For example,
-           topology definition file fails to be loaded */
       // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(100);
@@ -404,24 +451,33 @@ public class SubmitterMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      validateSubmit(adaptor, topology.getName());
-
-      // 2. Try to submit topology if valid
-      // invoke method to submit the topology
-      LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
-
-      // Firstly, try to upload necessary packages
-      URI packageURI = uploadPackage(uploader);
-
-      // Secondly, try to submit a topology
-      // build the runtime config
+      // Build the basic runtime config
       Config runtime = Config.newBuilder()
-          .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
-          .put(Keys.topologyPackageUri(), packageURI)
-          .put(Keys.launcherClassInstance(), launcher)
-          .build();
+          .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor)).build();
 
-      callLauncherRunner(runtime);
+      // Bypass validation and upload if in dry-run mode
+      if (Context.dryRun(config)) {
+        callLauncherRunner(runtime);
+      } else {
+
+        // Check if topology is already running
+        validateSubmit(adaptor, topology.getName());
+
+        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
+
+        // Try to submit topology if valid
+        // Firstly, try to upload necessary packages
+        URI packageURI = uploadPackage(uploader);
+
+        // Secondly, try to submit the topology
+        // build the complete runtime config
+        Config runtimeAll = Config.newBuilder()
+            .putAll(runtime)
+            .put(Keys.topologyPackageUri(), packageURI)
+            .put(Keys.launcherClassInstance(), launcher)
+            .build();
+        callLauncherRunner(runtimeAll);
+      }
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException
@@ -455,9 +511,19 @@ public class SubmitterMain {
   }
 
   protected void callLauncherRunner(Config runtime)
-      throws LauncherException, PackingException {
+      throws LauncherException, PackingException, SubmitDryRunResponse {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     launchRunner.call();
+  }
+
+  protected String renderDryRunResponse(SubmitDryRunResponse resp) {
+    DryRunFormatType formatType = Context.dryRunFormatType(config);
+    switch (formatType) {
+      case RAW : return new SubmitRawDryRunRenderer(resp).render();
+      case TABLE: return new SubmitTableDryRunRenderer(resp).render();
+      default: throw new IllegalArgumentException(
+          String.format("Unexpected rendering format: %s", formatType));
+    }
   }
 }
