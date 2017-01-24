@@ -28,9 +28,7 @@ metricscachemgr_deps_files = [
 
 java_library(
     name = "metricscachemgr-java",
-    srcs = glob(
-        ["**/*.java"],
-         ),
+    srcs = glob(["**/*.java"]),
     deps = metricscachemgr_deps_files,
 )
 

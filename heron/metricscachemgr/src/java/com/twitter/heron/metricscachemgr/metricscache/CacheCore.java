@@ -529,7 +529,7 @@ public class CacheCore {
     for (Long k = cacheMetric.firstKey(); k != null; k = cacheMetric.higherKey(k)) {
       sb.append("[").append(k).append(":");
       for (Long idx : cacheMetric.get(k).keySet()) {
-        sb.append("<").append(idx).append("->");
+        sb.append("<").append(Long.toHexString(idx)).append("->");
         for (MetricDatapoint dp : cacheMetric.get(k).get(idx)) {
           sb.append(dp.toString());
         }

@@ -14,12 +14,14 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoint;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
@@ -124,7 +126,35 @@ public class MetricsCache {
 
   private MetricsCacheQueryUtils.ExceptionResponse summarizeException(
       MetricsCacheQueryUtils.ExceptionResponse response1) {
-    return null;
+    Map<String, ExceptionDatapoint> exceptionSummary = new HashMap<>();
+    for (ExceptionDatapoint edp : response1.exceptionDatapointList) {
+      // Get classname by splitting on first colon
+      int pos = edp.stackTrace.indexOf(':');
+      if (pos >= 0) {
+        String className = edp.stackTrace.substring(0, pos);
+        if (!exceptionSummary.containsKey(className)) {
+          ExceptionDatapoint edp2 = new ExceptionDatapoint();
+          edp2.componentName = edp.componentName;
+          edp2.hostname = edp.hostname;
+          edp2.instanceId = edp.instanceId;
+          edp2.firstTime = edp.firstTime;
+          edp2.lastTime = edp.lastTime;
+          edp2.count = edp.count;
+          edp2.logging = edp.logging;
+          edp2.stackTrace = className;
+          exceptionSummary.put(className, edp2);
+        } else {
+          ExceptionDatapoint edp3 = exceptionSummary.get(className);
+          edp3.count += edp.count;
+          edp3.firstTime =
+              edp3.firstTime.compareTo(edp.firstTime) < 0 ? edp3.firstTime : edp.firstTime;
+          edp3.lastTime = edp3.lastTime.compareTo(edp.lastTime) > 0 ? edp3.lastTime : edp.lastTime;
+        }
+      }
+    }
+    MetricsCacheQueryUtils.ExceptionResponse ret = new MetricsCacheQueryUtils.ExceptionResponse();
+    ret.exceptionDatapointList.addAll(exceptionSummary.values());
+    return ret;
   }
 
   /**
