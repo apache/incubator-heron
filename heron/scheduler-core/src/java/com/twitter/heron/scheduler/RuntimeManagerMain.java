@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -320,7 +321,7 @@ public class RuntimeManagerMain {
     } catch (UpdateDryRunResponse response) {
       LOG.log(Level.FINE, "Sending out dry-run response");
       // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
-      PrintStream out = new PrintStream(System.out, true, "UTF-8");
+      PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
       out.print(runtimeManagerMain.renderDryRunResponse(response));
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       // Exit with status code 200 to indicate dry-run response is sent out
