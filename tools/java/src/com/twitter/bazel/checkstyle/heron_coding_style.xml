@@ -55,8 +55,6 @@ limitations under the License.
         <property name="basedir" value="${basedir}"/>
     -->
 
-    <property name="fileExtensions" value="java"/>
-
     <!-- We use this to turn off specific checks for specific file types.
     -->
     <module name="SuppressionFilter">
