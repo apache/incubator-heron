@@ -15,16 +15,8 @@
 package com.twitter.heron.metricscachemgr.metricscache;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.twitter.heron.common.basics.NIOLooper;
@@ -37,23 +29,23 @@ public class MetricsCacheTest {
       "../../../../../../../../../heron/config/src/yaml/conf/examples/heron_internals.yaml";
   public static final String CONFIG_SINK_PATH =
       "../../../../../../../../../heron/config/src/yaml/conf/examples/metrics_sinks.yaml";
-  private static String debugFilePath =
-      "/tmp/" + MetricsCacheTest.class.getSimpleName() + ".debug.txt";
-  private static Path file = null;
-  private static List<String> lines = null;
-
-  @BeforeClass
-  public static void before() {
-    file = Paths.get(debugFilePath);
-    lines = new ArrayList<>();
-
-    lines.add(Paths.get(".").toAbsolutePath().normalize().toString());
-  }
-
-  @AfterClass
-  public static void after() throws IOException {
-    Files.write(file, lines, Charset.forName("UTF-8"));
-  }
+//  private static String debugFilePath =
+//      "/tmp/" + MetricsCacheTest.class.getSimpleName() + ".debug.txt";
+//  private static Path file = null;
+//  private static List<String> lines = null;
+//
+//  @BeforeClass
+//  public static void before() {
+//    file = Paths.get(debugFilePath);
+//    lines = new ArrayList<>();
+//
+//    lines.add(Paths.get(".").toAbsolutePath().normalize().toString());
+//  }
+//
+//  @AfterClass
+//  public static void after() throws IOException {
+//    Files.write(file, lines, Charset.forName("UTF-8"));
+//  }
 
   @Test
   public void testMetricCache() throws IOException {

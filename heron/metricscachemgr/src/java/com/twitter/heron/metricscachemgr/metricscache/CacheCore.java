@@ -29,11 +29,22 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
- * different from tmaster:
+ * Cache Engine to store metrics and exceptions in memory and to respond to query,
+ * implementing insertion and selection methods:
+ * 1. Storage for metrics: timestamp_start -(tree)-> [sparse: bucket_id -(map)-> metric bucket]
+ * 2. Storage for exceptions: idxComponentInstance -(hash)-> exception bucket
+ * 3. Index for metrics:
+ * a. metricName -(map)-> idxMetricName (int: locator)
+ * b. component -(map)-> instance -(map)-> idxComponentInstance (int: locator)
+ * bucket_id is Long from idxComponentInstance Integer and idxMetricName Integer combined
+ * 4. Index for exceptions:
+ * component -(map)-> instance -(map)-> idxComponentInstance (int: locator)
+ * 5. Query pattern: component-instance (equality), metricName (equality), timestamp (range)
+ * Different from tmaster:
  * 1. order bucket by metric timestamp rather than metric message arriving time
  * 2. free buckets for instances that are gone during scaling process
  * 3. lock for multiple threads
- * same as tmaster:
+ * Same as tmaster:
  * 1. support same protobuf message/request format
  */
 public class CacheCore {
@@ -41,20 +52,20 @@ public class CacheCore {
   private static final Logger LOG = Logger.getLogger(CacheCore.class.getName());
 
   // index id generators
-  private static int componentInstanceCount = Integer.MIN_VALUE;
-  private static int metricNameCount = Integer.MIN_VALUE;
+  private static int componentInstanceCount = 0;
+  private static int metricNameCount = 0;
 
   // looper for purge
   private WakeableLooper looper = null;
 
-  // index id maps
+  // index id map: componentName -(map)-> instanceId -(map)-> locator:int
   private Map<String, Map<String, Integer>> idxComponentInstance = null;
+  // index id map: metricName -(map)-> locator:int
   private Map<String, Integer> idxMetricName = null;
 
   // exception store: following component-instance hierarchy
   private HashMap<Integer, LinkedList<ExceptionDatapoint>> cacheException;
-  // metric store: timestamp_start -> [sparse: bucket_id -> bucket]
-  // bucket_id is Long from idxComponentInstance Integer and idxMetricName Integer combined
+  // metric store
   private TreeMap<Long, Map<Long, LinkedList<MetricDatapoint>>> cacheMetric;
 
   // metric clock: rotate bucket, in milliseconds
@@ -133,7 +144,11 @@ public class CacheCore {
   }
 
   /**
-   * make bucket id
+   * Make metric bucket id
+   * Bucket id is made of two integers:
+   * 1. the higher part is from idxComponentInstance locator:int
+   * 2. the lower part is from idxMetricName locator:int
+   * The metric bucket id is considered as union hash index of <component-instance, metricName>
    *
    * @param hi index of [component-instance]
    * @param lo index of metric name
@@ -147,15 +162,14 @@ public class CacheCore {
     String componentName = metricDatum.getComponentName();
     String instanceId = metricDatum.getInstanceId();
     String metricName = metricDatum.getName();
-    LOG.info(componentName + " " + instanceId + " " + metricName);
+
     assureComponentInstance(componentName, instanceId);
     assureMetricName(metricName);
     // calc bucket idx
     int idx1 = idxComponentInstance.get(componentName).get(instanceId);
     int idx2 = idxMetricName.get(metricName);
     long bucketId = makeBucketId(idx1, idx2);
-    LOG.info(Long.toHexString(bucketId) + " = "
-        + Integer.toHexString(idx1) + " " + Integer.toHexString(idx2));
+
     // fetch the bucket
     Map.Entry<Long, Map<Long, LinkedList<MetricDatapoint>>> entry =
         cacheMetric.floorEntry(metricDatum.getTimestamp());
@@ -170,9 +184,8 @@ public class CacheCore {
       datum.timestamp = metricDatum.getTimestamp();
       datum.value = metricDatum.getValue();
       bucket.offerFirst(datum);
-      LOG.info("addMetrics " + datum);
     } else {
-      LOG.warning("too old metric: " + metricDatum);
+      LOG.warning("too old metric, out of cache timestamp window, drop it: " + metricDatum);
     }
   }
 
@@ -200,7 +213,7 @@ public class CacheCore {
     bucket.offerFirst(e);
     // purge
     while (bucket.size() > maxExceptionCount) {
-      LOG.warning("too many exception: " + exceptionLog);
+      LOG.warning("too many exception, reach exception cache size cap, drop it: " + exceptionLog);
       bucket.pollLast();
     }
   }
@@ -222,7 +235,7 @@ public class CacheCore {
    */
   public MetricsCacheQueryUtils.MetricResponse getMetrics(
       MetricsCacheQueryUtils.MetricRequest request, MetricsFilter metricNameType) {
-    LOG.info(request.toString());
+    LOG.fine("received query: " + request.toString());
     synchronized (CacheCore.class) {
       MetricsCacheQueryUtils.MetricResponse response =
           new MetricsCacheQueryUtils.MetricResponse();
@@ -230,7 +243,7 @@ public class CacheCore {
 
       // candidate metric names
       Set<String> metricNameFilter;
-      if (request.metricNames == null) { //
+      if (request.metricNames == null) {
         metricNameFilter = idxMetricName.keySet();
       } else {
         metricNameFilter = request.metricNames;
@@ -265,37 +278,31 @@ public class CacheCore {
             int idx1 = idxComponentInstance.get(componentName).get(instanceId);
             int idx2 = idxMetricName.get(metricName);
             long bucketId = makeBucketId(idx1, idx2);
-            LOG.info(Long.toHexString(bucketId) + " = "
-                + Integer.toHexString(idx1) + " " + Integer.toHexString(idx2));
-
-            // make metric list in response
-            MetricsCacheQueryUtils.MetricDatum metricDatum =
-                new MetricsCacheQueryUtils.MetricDatum();
-            metricDatum.componentName = componentName;
-            metricDatum.instanceId = instanceId;
-            metricDatum.metricName = metricName;
-            metricDatum.metricValue = new LinkedList<>();
-            response.metricList.add(metricDatum);
 
             // iterate buckets
+            List<MetricsCacheQueryUtils.MetricTimeRangeValue> metricValue = new LinkedList<>();
             switch (request.aggregationGranularity) {
-              case 0:
-                getAggregatedMetrics(metricDatum.metricValue,
+              case AGGREGATE_ALL_METRICS:
+                getAggregatedMetrics(metricValue,
                     request.startTime/*when*/, request.endTime/*when*/,
                     bucketId/*where*/, type/*how*/);
                 break;
-              case 1:
-                getMinuteMetrics(metricDatum.metricValue,
+              case AGGREGATE_BY_BUCKET:
+                getMinuteMetrics(metricValue,
                     request.startTime, request.endTime, bucketId, type);
                 break;
-              case 2:
-                getRawMetrics(metricDatum.metricValue,
+              case RAW:
+                getRawMetrics(metricValue,
                     request.startTime, request.endTime, bucketId, type);
                 break;
               default:
                 LOG.warning("unknown aggregationGranularity type "
                     + request.aggregationGranularity);
             }
+
+            // make metric list in response
+            response.metricList.add(new MetricsCacheQueryUtils.MetricDatum(
+                componentName, instanceId, metricName, metricValue));
           } // end for: instance
         } // end for: component
       } // end for: metric
@@ -317,12 +324,8 @@ public class CacheCore {
         for (MetricDatapoint datapoint : bucket) {
           if (startTime <= datapoint.timestamp && datapoint.timestamp <= endTime) {
             // per data point
-            MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
-                new MetricsCacheQueryUtils.MetricTimeRangeValue();
-            rangeValue.startTime = datapoint.timestamp;
-            rangeValue.endTime = datapoint.timestamp;
-            rangeValue.value = datapoint.value;
-            metricValue.add(rangeValue);
+            metricValue.add(new MetricsCacheQueryUtils.MetricTimeRangeValue(
+                datapoint.timestamp, datapoint.timestamp, datapoint.value));
           }
         } // end bucket
       }
@@ -346,10 +349,10 @@ public class CacheCore {
         // per bucket
         long countAvg = 0;
 
-        MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
-            new MetricsCacheQueryUtils.MetricTimeRangeValue();
-        rangeValue.startTime = Long.MAX_VALUE;
-        rangeValue.endTime = 0;
+        // prepare range value
+        long outStartTime = Long.MAX_VALUE;
+        long outEndTime = 0;
+        String outValue = null;
 
         double result = 0;
         for (MetricDatapoint datapoint : bucket) {
@@ -361,29 +364,30 @@ public class CacheCore {
                 result += Double.parseDouble(datapoint.value);
                 break;
               case LAST:
-                if (rangeValue.endTime < datapoint.timestamp) {
-                  rangeValue.value = datapoint.value;
+                if (outEndTime < datapoint.timestamp) {
+                  outValue = datapoint.value;
                 }
                 break;
               case UNKNOWN:
               default:
-                LOG.warning("Unknown metric type " + type);
+                LOG.warning(
+                    "Unknown metric type, CacheCore does not know how to aggregate " + type);
                 return;
             }
-            rangeValue.startTime = Math.min(rangeValue.startTime, datapoint.timestamp);
-            rangeValue.endTime = Math.max(rangeValue.endTime, datapoint.timestamp);
+            outStartTime = Math.min(outStartTime, datapoint.timestamp);
+            outEndTime = Math.max(outEndTime, datapoint.timestamp);
           }
         } // end bucket
 
         if (type.equals(MetricsFilter.MetricAggregationType.AVG)) {
-          rangeValue.value = String.valueOf(result / countAvg);
+          outValue = String.valueOf(result / countAvg);
         } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
-          rangeValue.value = String.valueOf(result);
+          outValue = String.valueOf(result);
         }
-        if (rangeValue.value != null) {
-          metricValue.add(rangeValue);
+        if (outValue != null) {
+          metricValue.add(new MetricsCacheQueryUtils.MetricTimeRangeValue(
+              outStartTime, outEndTime, outValue));
         }
-        LOG.info(rangeValue.toString());
       }
 
     } // end tree
@@ -398,10 +402,10 @@ public class CacheCore {
     // per request
     long countAvg = 0;
 
-    MetricsCacheQueryUtils.MetricTimeRangeValue rangeValue =
-        new MetricsCacheQueryUtils.MetricTimeRangeValue();
-    rangeValue.startTime = Long.MAX_VALUE;
-    rangeValue.endTime = 0;
+    // prepare range value
+    long outStartTime = Long.MAX_VALUE;
+    long outEndTime = 0;
+    String outValue = null;
 
     double result = 0;
     Long startKey = cacheMetric.floorKey(startTime);
@@ -420,17 +424,18 @@ public class CacheCore {
                 result += Double.parseDouble(datapoint.value);
                 break;
               case LAST:
-                if (rangeValue.endTime < datapoint.timestamp) {
-                  rangeValue.value = datapoint.value;
+                if (outEndTime < datapoint.timestamp) {
+                  outValue = datapoint.value;
                 }
                 break;
               case UNKNOWN:
               default:
-                LOG.warning("Unknown metric type " + type);
+                LOG.warning(
+                    "Unknown metric type, CacheCore does not know how to aggregate " + type);
                 return;
             }
-            rangeValue.startTime = Math.min(rangeValue.startTime, datapoint.timestamp);
-            rangeValue.endTime = Math.max(rangeValue.endTime, datapoint.timestamp);
+            outStartTime = Math.min(outStartTime, datapoint.timestamp);
+            outEndTime = Math.max(outEndTime, datapoint.timestamp);
           }
         } // end bucket
       }
@@ -438,14 +443,14 @@ public class CacheCore {
     } // end tree
 
     if (type.equals(MetricsFilter.MetricAggregationType.AVG)) {
-      rangeValue.value = String.valueOf(result / countAvg);
+      outValue = String.valueOf(result / countAvg);
     } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
-      rangeValue.value = String.valueOf(result);
+      outValue = String.valueOf(result);
     }
-    if (rangeValue.value != null) {
-      metricValue.add(rangeValue);
+    if (outValue != null) {
+      metricValue.add(new MetricsCacheQueryUtils.MetricTimeRangeValue(
+          outStartTime, outEndTime, outValue));
     }
-    LOG.info(rangeValue.toString());
   }
 
   /**
@@ -457,9 +462,8 @@ public class CacheCore {
       MetricsCacheQueryUtils.ExceptionResponse response =
           new MetricsCacheQueryUtils.ExceptionResponse();
 
-      for (Map.Entry<String, Set<String>> entry : request.componentNameInstanceId.entrySet()) {
-        String componentName = entry.getKey();
-        for (String instanceId : entry.getValue()) {
+      for (String componentName : request.componentNameInstanceId.keySet()) {
+        for (String instanceId : request.componentNameInstanceId.get(componentName)) {
           int idx = idxComponentInstance.get(componentName).get(instanceId);
           response.exceptionDatapointList.addAll(cacheException.get(idx));
         }
@@ -471,7 +475,6 @@ public class CacheCore {
 
   public void purge() {
     long now = System.currentTimeMillis();
-    LOG.info("purge " + now);
     synchronized (CacheCore.class) {
       // remove old
       for (Long firstKey = cacheMetric.firstKey();

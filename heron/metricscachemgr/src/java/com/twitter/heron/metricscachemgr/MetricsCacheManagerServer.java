@@ -57,13 +57,13 @@ public class MetricsCacheManagerServer extends HeronServer {
 
   @Override
   public void onConnect(SocketChannel channel) {
-    LOG.info("MetricsCacheManagerServer onConnect from host:port "
+    LOG.fine("MetricsCacheManagerServer onConnect from host:port "
         + channel.socket().getRemoteSocketAddress());
   }
 
   @Override
   public void onRequest(REQID requestId, SocketChannel channel, Message request) {
-    LOG.info("MetricsCacheManagerServer onRequest from host:port "
+    LOG.fine("MetricsCacheManagerServer onRequest from host:port "
         + channel.socket().getRemoteSocketAddress());
 
     if (request instanceof TopologyMaster.MetricRequest) {
@@ -81,7 +81,7 @@ public class MetricsCacheManagerServer extends HeronServer {
 
   @Override
   public void onMessage(SocketChannel channel, Message message) {
-    LOG.info("MetricsCacheManagerServer onMessage from host:port "
+    LOG.fine("MetricsCacheManagerServer onMessage from host:port "
         + channel.socket().getRemoteSocketAddress());
 
     if (message instanceof TopologyMaster.PublishMetrics) {
@@ -95,7 +95,7 @@ public class MetricsCacheManagerServer extends HeronServer {
 
   @Override
   public void onClose(SocketChannel channel) {
-    LOG.info("MetricsCacheManagerServer onClose from host:port "
+    LOG.fine("MetricsCacheManagerServer onClose from host:port "
         + channel.socket().getRemoteSocketAddress());
   }
 }
