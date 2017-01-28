@@ -26,11 +26,13 @@ import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoi
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
+import static com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.Granularity.AGGREGATE_ALL_METRICS;
+import static com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.Granularity.AGGREGATE_BY_BUCKET;
+
 /**
  * define the query request and response format
  */
 final class MetricsCacheQueryUtils {
-  // logger
   private static final Logger LOG = Logger.getLogger(MetricsCacheQueryUtils.class.getName());
 
   private MetricsCacheQueryUtils() {
@@ -80,9 +82,9 @@ final class MetricsCacheQueryUtils {
     }
 
     // default: aggregate all metrics
-    outRequest.aggregationGranularity = 0;
-    if (request.hasMinutely()) {
-      outRequest.aggregationGranularity = request.getMinutely() ? 1 : 0;
+    outRequest.aggregationGranularity = AGGREGATE_ALL_METRICS;
+    if (request.hasMinutely() && request.getMinutely()) {
+      outRequest.aggregationGranularity = AGGREGATE_BY_BUCKET;
     }
 
     return outRequest;
@@ -134,7 +136,6 @@ final class MetricsCacheQueryUtils {
         // add value|IntervalValue
         List<MetricTimeRangeValue> list = aggregation.get(instanceId).get(metricName);
         if (list.size() == 1) {
-          LOG.info("get0 " + list.get(0) + "; value " + list.get(0).value);
           individualMetricBuilder.setValue(list.get(0).value);
         } else {
           for (MetricTimeRangeValue v : list) {
@@ -204,6 +205,12 @@ final class MetricsCacheQueryUtils {
   }
 
 
+  public enum Granularity {
+    AGGREGATE_ALL_METRICS,
+    AGGREGATE_BY_BUCKET,
+    RAW
+  }
+
   public static class ExceptionRequest {
     public Map<String, Set<String>> componentNameInstanceId;
   }
@@ -212,11 +219,27 @@ final class MetricsCacheQueryUtils {
     public List<ExceptionDatapoint> exceptionDatapointList;
   }
 
+  /**
+   * immutable data bag for time range value
+   * time window: startTime ~ endTime
+   * metric value string: value
+   */
+  public static final class MetricTimeRangeValue {
+    public final long startTime;
+    public final long endTime;
+    public final String value;
 
-  public static class MetricTimeRangeValue {
-    public long startTime;
-    public long endTime;
-    public String value;
+    MetricTimeRangeValue(long startTime, long endTime, String value) {
+      this.startTime = startTime;
+      this.endTime = endTime;
+      this.value = value;
+    }
+
+    MetricTimeRangeValue(MetricTimeRangeValue metricTimeRangeValue) {
+      this.startTime = metricTimeRangeValue.startTime;
+      this.endTime = metricTimeRangeValue.endTime;
+      this.value = metricTimeRangeValue.value;
+    }
 
     @Override
     public String toString() {
@@ -230,11 +253,32 @@ final class MetricsCacheQueryUtils {
     }
   }
 
-  public static class MetricDatum {
-    public String componentName;
-    public String instanceId;
-    public String metricName;
-    public List<MetricTimeRangeValue> metricValue;
+  /**
+   * immutable data bag for metric datum
+   * metric locator: <componentName, instanceId, metricName>
+   * metric value list: metricValue (use immutable getter)
+   */
+  public static final class MetricDatum {
+    public final String componentName;
+    public final String instanceId;
+    public final String metricName;
+    private final List<MetricTimeRangeValue> metricValue;
+
+    MetricDatum(String componentName, String instanceId, String metricName,
+                List<MetricTimeRangeValue> metricValue) {
+      this.componentName = componentName;
+      this.instanceId = instanceId;
+      this.metricName = metricName;
+      this.metricValue = metricValue;
+    }
+
+    public List<MetricTimeRangeValue> getMetricValue() {
+      List<MetricTimeRangeValue> ret = new ArrayList<>();
+      for (MetricTimeRangeValue metricTimeRangeValue : metricValue) {
+        ret.add(new MetricTimeRangeValue(metricTimeRangeValue));
+      }
+      return ret;
+    }
   }
 
   public static class MetricRequest {
@@ -252,7 +296,7 @@ final class MetricsCacheQueryUtils {
     // 0: default, aggregate all metrics
     // 1: aggregate metrics by bucket
     // 2: no aggregation; return raw metrics
-    public int aggregationGranularity;
+    public Granularity aggregationGranularity;
 
     @Override
     public String toString() {

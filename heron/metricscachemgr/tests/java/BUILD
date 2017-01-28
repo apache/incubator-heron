@@ -59,7 +59,10 @@ java_binary(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTest",
+       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestPurge",
+       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestHashIndex",
+       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestTreeIndex",
+       "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtilsTest",
        "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheTest",
      ],
      runtime_deps = [ ":metricscachemgr-tests" ],

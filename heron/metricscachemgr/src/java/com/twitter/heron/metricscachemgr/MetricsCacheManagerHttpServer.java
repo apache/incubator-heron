@@ -16,6 +16,7 @@ package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -83,7 +84,8 @@ public class MetricsCacheManagerHttpServer {
       try {
         req = TopologyMaster.MetricRequest.parseFrom(payload);
       } catch (InvalidProtocolBufferException e) {
-        LOG.severe("Unable to decipher data specified in StatsRequest " + e.toString());
+        LOG.log(Level.SEVERE,
+            "Unable to decipher data specified in StatsRequest: " + httpExchange, e);
         httpExchange.sendResponseHeaders(400, -1); // throw exception
         return;
       }
@@ -107,7 +109,8 @@ public class MetricsCacheManagerHttpServer {
       try {
         req = TopologyMaster.ExceptionLogRequest.parseFrom(payload);
       } catch (InvalidProtocolBufferException e) {
-        LOG.severe("Unable to decipher data specified in ExceptionRequest");
+        LOG.log(Level.SEVERE,
+            "Unable to decipher data specified in ExceptionRequest: " + httpExchange, e);
         httpExchange.sendResponseHeaders(400, -1); // throw exception
         return;
       }
@@ -132,7 +135,8 @@ public class MetricsCacheManagerHttpServer {
       try {
         req = TopologyMaster.ExceptionLogRequest.parseFrom(payload);
       } catch (InvalidProtocolBufferException e) {
-        LOG.severe("Unable to decipher data specified in ExceptionRequest");
+        LOG.log(Level.SEVERE,
+            "Unable to decipher data specified in ExceptionRequest: " + httpExchange, e);
         httpExchange.sendResponseHeaders(400, -1); // throw exception
         return;
       }

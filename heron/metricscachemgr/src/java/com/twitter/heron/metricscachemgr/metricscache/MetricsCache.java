@@ -28,7 +28,8 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 
 /**
- * compatible with tmaster interface
+ * Interface for the cache core
+ * providing compatible interface with tmaster
  * see heron/tmaster/src/cpp/manager/tmetrics-collector.h
  */
 public class MetricsCache {
@@ -51,7 +52,7 @@ public class MetricsCache {
     for (String metricName : metricsTypes.keySet()) {
       metricNameType.setMetricToType(metricName, translateFromString(metricsTypes.get(metricName)));
     }
-    //
+
     long maxIntervalSec = systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60;
     long purgeIntervalSec = systemConfig.getTmasterMetricsCollectorPurgeIntervalSec();
     long maxExceptions = systemConfig.getTmasterMetricsCollectorMaximumException();
