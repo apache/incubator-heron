@@ -385,6 +385,14 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    // It is a EPHEMERAL node and would be removed automatically
+    final SettableFuture<Boolean> result = SettableFuture.create();
+    result.set(true);
+    return result;
+  }
+
+  @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
     // if scheduler is service, the znode is ephemeral and it's deleted automatically
     if (isSchedulerService) {

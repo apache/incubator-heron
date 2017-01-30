@@ -116,6 +116,11 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return deleteNode(StateLocation.METRICSCACHE_LOCATION, topologyName);
+  }
+
+  @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
     return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
   }

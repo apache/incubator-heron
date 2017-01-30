@@ -113,6 +113,11 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
   public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
     return nullFuture;
   }
