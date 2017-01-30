@@ -88,9 +88,9 @@ public class MetricsCacheSinkTest {
     // We wait for a while to let auto recover fully finish.
     Thread.sleep(RESTART_WAIT_INTERVAL_SECONDS * 1000);
 
-    // Then we check whether the MetricsCacheService has restarted the MetricsCacheClient for several times
-    // Take other factors into account, we would check whether the MetricsCacheClient has restarted
-    // at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL_SECONDS
+    // Then we check whether the MetricsCacheService has restarted the MetricsCacheClient for
+    // several times Take other factors into account, we would check whether the MetricsCacheClient
+    // has restarted at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL_SECONDS
     Assert.assertTrue(metricsCacheSink.getMetricsCacheStartedAttempts()
         > (RESTART_WAIT_INTERVAL_SECONDS / RECONNECT_INTERVAL_SECONDS / 2));
     metricsCacheSink.close();
@@ -106,7 +106,8 @@ public class MetricsCacheSinkTest {
     Map<String, Object> sinkConfig = new HashMap<String, Object>();
 
     // Fill with necessary config
-    sinkConfig.put("metricscache-location-check-interval-sec", METRICSCACHE_LOCATION_CHECK_INTERVAL_SECONDS);
+    sinkConfig.put(
+        "metricscache-location-check-interval-sec", METRICSCACHE_LOCATION_CHECK_INTERVAL_SECONDS);
 
     // These are config for MetricsCacheClient
     Map<String, Object> serviceConfig = new HashMap<String, Object>();
@@ -153,7 +154,8 @@ public class MetricsCacheSinkTest {
     Thread.sleep(WAIT_SECONDS * 1000);
 
     // The MetricsCacheService should use the new MetricsCacheLocation
-    Assert.assertTrue(metricsCacheSink.getMetricsCacheStartedAttempts() > lastMetricsCacheStartedAttempts);
+    Assert.assertTrue(
+        metricsCacheSink.getMetricsCacheStartedAttempts() > lastMetricsCacheStartedAttempts);
     Assert.assertNotSame(oldLoc, metricsCacheSink.getCurrentMetricsCacheLocation());
     Assert.assertNotSame(oldLoc, metricsCacheSink.getCurrentMetricsCacheLocationInService());
     Assert.assertEquals(newLoc, metricsCacheSink.getCurrentMetricsCacheLocation());

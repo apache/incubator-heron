@@ -15,10 +15,14 @@
 package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -26,7 +30,10 @@ import com.sun.net.httpserver.HttpServer;
 
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
 
 
 /**
@@ -65,6 +72,72 @@ public class MetricsCacheManagerHttpServer {
     server.createContext(PATH_EXCEPTIONSUMMARY, new HandleExceptionSummaryRequest());
   }
 
+  /**
+   * manual test for local mode topology, for debug
+   * How to run:
+   * in the [source root directory], run bazel test,
+   * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \
+   * <topology_name> <component_name> <metrics_name>
+   * Example:
+   * 1. run the example topology,
+   * ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \
+   * com.twitter.heron.examples.ExclamationTopology ExclamationTopology \
+   * --deploy-deactivated --verbose
+   * 2. in the [source root directory],
+   * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \
+   * ExclamationTopology exclaim1 \
+   * __emit-count __execute-count __fail-count __ack-count __complete-latency __execute-latency \
+   * __process-latency __jvm-uptime-secs __jvm-process-cpu-load __jvm-memory-used-mb \
+   * __jvm-memory-mb-total __jvm-gc-collection-time-ms __server/__time_spent_back_pressure_initiated \
+   * __time_spent_back_pressure_by_compid
+   */
+  public static void main(String[] args)
+      throws ExecutionException, InterruptedException, IOException {
+    if (args.length < 3) {
+      System.out.println(
+          "Usage: java MetricsQuery <topology_name> <component_name> <metrics_name>");
+    } else {
+      System.out.println("topology: " + args[0] + "; component: " + args[1]);
+    }
+
+    Config config = Config.newBuilder()
+        .put(Keys.stateManagerRootPath(),
+            System.getProperty("user.home") + "/.herondata/repository/state/local")
+        .build();
+    LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.initialize(config);
+
+    TopologyMaster.MetricsCacheLocation location =
+        stateManager.getMetricsCacheLocation(null, args[0]).get();
+    if (location == null || !location.isInitialized()) {
+      System.out.println("MetricsCacheMgr is not ready");
+      return;
+    }
+
+    // construct metric cache stat url
+    String url = "http://" + location.getHost() + ":" + location.getStatsPort()
+        + MetricsCacheManagerHttpServer.PATH_STATS;
+
+    // construct query payload
+    byte[] requestData = TopologyMaster.MetricRequest.newBuilder()
+        .setComponentName(args[1])
+        .setMinutely(true)
+        .setInterval(-1)
+        .addAllMetric(Arrays.asList(Arrays.copyOfRange(args, 2, args.length)))
+        .build().toByteArray();
+
+    // http communication
+    HttpURLConnection con = NetworkUtils.getHttpConnection(url);
+    NetworkUtils.sendHttpPostRequest(con, "X", requestData);
+    byte[] responseData = NetworkUtils.readHttpResponse(con);
+
+    // parse response data
+    TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.parseFrom(responseData);
+
+    //print result
+    System.out.println(response.toString());
+  }
+
   public void start() {
     server.start();
   }
@@ -73,80 +146,80 @@ public class MetricsCacheManagerHttpServer {
     server.stop(0);
   }
 
-  // compatible with tmaster stat interface: http+protobuf
-  public class HandleStatsRequest implements HttpHandler {
-
+  // T - request, U - response
+  abstract class RequestHandler<T extends GeneratedMessage, U extends GeneratedMessage>
+      implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       // get the entire stuff
       byte[] payload = NetworkUtils.readHttpRequestBody(httpExchange);
-      TopologyMaster.MetricRequest req;
+      T req;
       try {
-        req = TopologyMaster.MetricRequest.parseFrom(payload);
+        req = parseRequest(payload);
       } catch (InvalidProtocolBufferException e) {
         LOG.log(Level.SEVERE,
-            "Unable to decipher data specified in StatsRequest: " + httpExchange, e);
+            "Unable to decipher data specified in Request: " + httpExchange, e);
         httpExchange.sendResponseHeaders(400, -1); // throw exception
         return;
       }
       // query cache
-      TopologyMaster.MetricResponse res = metricsCache.getMetrics(req);
+      U res = generateResponse(req, metricsCache);
       // response
       NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
       // close
       httpExchange.close();
     }
+
+    abstract T parseRequest(byte[] requestBytes) throws InvalidProtocolBufferException;
+
+    abstract U generateResponse(T request, MetricsCache metricsCache1);
   }
 
   // compatible with tmaster stat interface: http+protobuf
-  public class HandleExceptionRequest implements HttpHandler {
+  class HandleStatsRequest
+      extends RequestHandler<TopologyMaster.MetricRequest, TopologyMaster.MetricResponse> {
+    @Override
+    public TopologyMaster.MetricRequest parseRequest(byte[] requestBytes)
+        throws InvalidProtocolBufferException {
+      return TopologyMaster.MetricRequest.parseFrom(requestBytes);
+    }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-      // get the entire stuff
-      byte[] payload = NetworkUtils.readHttpRequestBody(httpExchange);
-      TopologyMaster.ExceptionLogRequest req;
-      try {
-        req = TopologyMaster.ExceptionLogRequest.parseFrom(payload);
-      } catch (InvalidProtocolBufferException e) {
-        LOG.log(Level.SEVERE,
-            "Unable to decipher data specified in ExceptionRequest: " + httpExchange, e);
-        httpExchange.sendResponseHeaders(400, -1); // throw exception
-        return;
-      }
-      // query cache
-      TopologyMaster.ExceptionLogResponse res = metricsCache.getExceptions(req);
-      // response
-      NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
-      // close
-      httpExchange.close();
-      LOG.info("Done with exception request ");
+    public TopologyMaster.MetricResponse generateResponse(
+        TopologyMaster.MetricRequest request, MetricsCache metricsCache1) {
+      return metricsCache1.getMetrics(request);
     }
   }
 
-  // compatible with tmaster stat interface: http+protobuf
-  public class HandleExceptionSummaryRequest implements HttpHandler {
+  // compatible with tmaster exceptions interface: http+protobuf
+  public class HandleExceptionRequest extends
+      RequestHandler<TopologyMaster.ExceptionLogRequest, TopologyMaster.ExceptionLogResponse> {
+    @Override
+    public TopologyMaster.ExceptionLogRequest parseRequest(byte[] requestBytes)
+        throws InvalidProtocolBufferException {
+      return TopologyMaster.ExceptionLogRequest.parseFrom(requestBytes);
+    }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-      // get the entire stuff
-      byte[] payload = NetworkUtils.readHttpRequestBody(httpExchange);
-      TopologyMaster.ExceptionLogRequest req;
-      try {
-        req = TopologyMaster.ExceptionLogRequest.parseFrom(payload);
-      } catch (InvalidProtocolBufferException e) {
-        LOG.log(Level.SEVERE,
-            "Unable to decipher data specified in ExceptionRequest: " + httpExchange, e);
-        httpExchange.sendResponseHeaders(400, -1); // throw exception
-        return;
-      }
-      // query cache
-      TopologyMaster.ExceptionLogResponse res = metricsCache.getExceptionsSummary(req);
-      // response
-      NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
-      // close
-      httpExchange.close();
-      LOG.info("Done with exception summary request ");
+    public TopologyMaster.ExceptionLogResponse generateResponse(
+        TopologyMaster.ExceptionLogRequest request, MetricsCache metricsCache1) {
+      return metricsCache1.getExceptions(request);
+    }
+  }
+
+  // compatible with tmaster exceptionsummary interface: http+protobuf
+  public class HandleExceptionSummaryRequest extends
+      RequestHandler<TopologyMaster.ExceptionLogRequest, TopologyMaster.ExceptionLogResponse> {
+    @Override
+    public TopologyMaster.ExceptionLogRequest parseRequest(byte[] requestBytes)
+        throws InvalidProtocolBufferException {
+      return TopologyMaster.ExceptionLogRequest.parseFrom(requestBytes);
+    }
+
+    @Override
+    public TopologyMaster.ExceptionLogResponse generateResponse(
+        TopologyMaster.ExceptionLogRequest request, MetricsCache metricsCache1) {
+      return metricsCache1.getExceptionsSummary(request);
     }
   }
 

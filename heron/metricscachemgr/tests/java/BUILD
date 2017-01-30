@@ -48,15 +48,6 @@ java_library(
              ]
 )
 
-java_binary(
-    name = "metricscache-queryclient-unshaded",
-    srcs = glob(["**/ManualLocalTest.java"]),
-    deps = metricscachemgr_deps_files + [
-    "//heron/spi/src/java:utils-spi-java",
-    ],
-    main_class="com.twitter.heron.metricscachemgr.ManualLocalTest"
-)
-
 java_tests(
    test_classes = [
        "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestPurge",
