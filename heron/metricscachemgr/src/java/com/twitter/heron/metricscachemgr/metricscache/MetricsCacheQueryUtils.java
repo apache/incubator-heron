@@ -166,13 +166,15 @@ final class MetricsCacheQueryUtils {
 
     ExceptionRequest outRequest = new ExceptionRequest();
     outRequest.componentNameInstanceId = new HashMap<>();
-    Set<String> instances = new HashSet<>();
-    // only one component
-    outRequest.componentNameInstanceId.put(componentName, instances);
+    Set<String> instances = null;
 
     if (request.getInstancesCount() > 0) {
+      instances = new HashSet<>();
       instances.addAll(request.getInstancesList());
-    } // empty list means all instances
+    } // empty list means all instances; 'null' means all instances
+
+    // only one component
+    outRequest.componentNameInstanceId.put(componentName, instances);
 
     return outRequest;
   }
@@ -221,7 +223,7 @@ final class MetricsCacheQueryUtils {
 
   /**
    * immutable data bag for time range value
-   * time window: startTime ~ endTime
+   * time window: startTime ~ endTime, in milli-seconds
    * metric value string: value
    */
   public static final class MetricTimeRangeValue {
