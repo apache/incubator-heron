@@ -221,7 +221,8 @@ public class CacheCore {
   /**
    * for internal process use
    *
-   * @param request idxMetricName == null: query all metrics
+   * @param request <p>
+   * idxMetricName == null: query all metrics
    * idxMetricName == []: query none metric
    * idxMetricName == [a, b, c .. ]: query metric a, b and c, ..
    * <p>
@@ -455,6 +456,13 @@ public class CacheCore {
 
   /**
    * for internal process use
+   *
+   * @param request <p>
+   * idxComponentInstance == null: query all components
+   * idxComponentInstance == []: query none component
+   * idxComponentInstance == [c1->null, ..]: query all instances of c1, ..
+   * idxComponentInstance == [c1->[], ..]: query none instance of c1, ..
+   * idxComponentInstance == [c1>[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
    */
   public MetricsCacheQueryUtils.ExceptionResponse getExceptions(
       MetricsCacheQueryUtils.ExceptionRequest request) {
@@ -462,8 +470,25 @@ public class CacheCore {
       MetricsCacheQueryUtils.ExceptionResponse response =
           new MetricsCacheQueryUtils.ExceptionResponse();
 
-      for (String componentName : request.componentNameInstanceId.keySet()) {
-        for (String instanceId : request.componentNameInstanceId.get(componentName)) {
+      // candidate component names
+      Set<String> componentNameFilter;
+      if (request.componentNameInstanceId == null) {
+        componentNameFilter = idxComponentInstance.keySet();
+      } else {
+        componentNameFilter = request.componentNameInstanceId.keySet();
+      }
+
+      for (String componentName : componentNameFilter) {
+        // candidate instance ids
+        Set<String> instanceIdFilter;
+        if (request.componentNameInstanceId == null
+            || request.componentNameInstanceId.get(componentName) == null) {
+          instanceIdFilter = idxComponentInstance.get(componentName).keySet();
+        } else {
+          instanceIdFilter = request.componentNameInstanceId.get(componentName);
+        }
+
+        for (String instanceId : instanceIdFilter) {
           int idx = idxComponentInstance.get(componentName).get(instanceId);
           response.exceptionDatapointList.addAll(cacheException.get(idx));
         }
