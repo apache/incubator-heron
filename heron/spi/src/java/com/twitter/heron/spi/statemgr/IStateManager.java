@@ -132,6 +132,13 @@ public interface IStateManager extends AutoCloseable {
   ListenableFuture<Boolean> deleteTMasterLocation(String topologyName);
 
   /**
+   * Delete the metricscache location for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName);
+
+  /**
    * Delete the execution state for the given topology
    *
    * @return Boolean - Success or Failure
