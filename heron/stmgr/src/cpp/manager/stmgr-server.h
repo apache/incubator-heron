@@ -31,6 +31,7 @@ class MetricsMgrSt;
 class MultiCountMetric;
 class TimeSpentMetric;
 class AssignableMetric;
+class MultiAssignableMetric;
 }
 }
 
@@ -76,8 +77,9 @@ class StMgrServer : public Server {
  private:
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
+  sp_string MakeInstanceTuplesMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
-  void UpdateQueueMetrics(EventLoop::Status);
+  void UpdateStMgrServerMetrics(EventLoop::Status);
 
   // Various handlers for different requests
 
@@ -116,7 +118,8 @@ class StMgrServer : public Server {
   class InstanceData {
    public:
     explicit InstanceData(proto::system::Instance* _instance)
-        : instance_(_instance), local_spout_(false), conn_(NULL) {}
+        : instance_(_instance), local_spout_(false), conn_(NULL), data_tuples(0), ack_tuples(0),
+          fail_tuples(0) {}
     ~InstanceData() { delete instance_; }
 
     void set_local_spout() { local_spout_ = true; }
@@ -125,6 +128,10 @@ class StMgrServer : public Server {
     proto::system::Instance* instance_;
     bool local_spout_;
     Connection* conn_;
+
+    sp_int64 data_tuples;
+    sp_int64 ack_tuples;
+    sp_int64 fail_tuples;
   };
 
   // map from stmgr_id to their connection
@@ -150,6 +157,9 @@ class StMgrServer : public Server {
   // map of Instance_id/stmgrid to queue metric
   typedef std::map<sp_string, heron::common::AssignableMetric*> QueueMetricMap;
   QueueMetricMap queue_metric_map_;
+
+  typedef std::map<sp_string, heron::common::MultiAssignableMetric*> TuplesMetricMap;
+  TuplesMetricMap tuples_metrics_map_;
 
   // instances/stream mgrs causing back pressure
   std::set<sp_string> remote_ends_who_caused_back_pressure_;

@@ -75,6 +75,7 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
 // Queue size in bytes sent to each instance
 const sp_string METRIC_QUEUE_SIZE_TO_INSTANCE_COMPID = "__queue_size_bytes_to_instance_by_compid/";
+const sp_string METRIC_TUPLES_TO_INSTANCE_COMPID = "__tuples_to_instance_by_compid/";
 
 const sp_int64 QUEUE_METRICS_FREQUENCY = 10 * 1000 * 1000;
 
@@ -112,7 +113,7 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
 
   // Update queue related metrics every 10 seconds
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
-    this->UpdateQueueMetrics(status);
+    this->UpdateStMgrServerMetrics(status);
   }, true, QUEUE_METRICS_FREQUENCY), 0);
 }
 
@@ -145,6 +146,21 @@ StMgrServer::~StMgrServer() {
       delete qmmIter->second;
     }
   }
+
+  for (auto tmmIter = tuples_metrics_map_.begin();
+       tmmIter != tuples_metrics_map_.end(); ++tmmIter) {
+    const sp_string& instance_id = tmmIter->first;
+    for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+      if (iter->second->instance_->instance_id() != instance_id) continue;
+      InstanceData* data = iter->second;
+      Connection* iConn = data->conn_;
+      if (!iConn) break;
+      sp_string metric_name = MakeInstanceTuplesMetricName(instance_id);
+      metrics_manager_client_->unregister_metric(metric_name);
+      delete tmmIter->second;
+    }
+  }
+
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
@@ -172,12 +188,23 @@ sp_string StMgrServer::MakeQueueSizeCompIdMetricName(const sp_string& instanceid
   return METRIC_QUEUE_SIZE_TO_INSTANCE_COMPID + instanceid;
 }
 
-void StMgrServer::UpdateQueueMetrics(EventLoop::Status) {
+sp_string StMgrServer::MakeInstanceTuplesMetricName(const sp_string& instanceid) {
+  return METRIC_TUPLES_TO_INSTANCE_COMPID + instanceid;
+}
+
+void StMgrServer::UpdateStMgrServerMetrics(EventLoop::Status) {
   for (auto itr = active_instances_.begin(); itr != active_instances_.end(); ++itr) {
     sp_int32 task_id = itr->second;
     const sp_string& instance_id = instance_info_[task_id]->instance_->instance_id();
     sp_int32 bytes = itr->first->getOutstandingBytes();
     queue_metric_map_[instance_id]->SetValue(bytes);
+
+    tuples_metrics_map_[instance_id]->scope("data_tuples")
+            ->SetValue(instance_info_[task_id]->data_tuples);
+    tuples_metrics_map_[instance_id]->scope("ack_tuples")
+            ->SetValue(instance_info_[task_id]->ack_tuples);
+    tuples_metrics_map_[instance_id]->scope("fail_tuples")
+            ->SetValue(instance_info_[task_id]->fail_tuples);
   }
 }
 
@@ -336,6 +363,13 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
                                                  queue_metric);
         queue_metric_map_[instance_id] = queue_metric;
       }
+
+      if (tuples_metrics_map_.find(instance_id) == tuples_metrics_map_.end()) {
+        auto tuples_metric = new heron::common::MultiAssignableMetric();
+        metrics_manager_client_->register_metric(MakeInstanceTuplesMetricName(instance_id),
+                                                 tuples_metric);
+        tuples_metrics_map_[instance_id] = tuples_metric;
+      }
     }
     instance_info_[task_id]->set_connection(_conn);
 
@@ -412,11 +446,16 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
           ->incr_by(_message.control().fails_size());
     }
   } else {
+    if (_message.has_data()) {
+      instance_info_[_task_id]->data_tuples += _message.data().tuples_size();
+    }
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().fails_size());
+      instance_info_[_task_id]->ack_tuples += _message.control().acks_size();
+      instance_info_[_task_id]->fail_tuples += _message.control().fails_size();
     }
     SendMessage(iter->second->conn_, _message);
   }
