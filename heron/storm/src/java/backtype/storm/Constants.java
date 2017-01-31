@@ -16,21 +16,13 @@
  * limitations under the License.
  */
 
-package org.apache.storm.generated;
+package backtype.storm;
 
-import com.twitter.heron.api.HeronTopology;
+public final class Constants {
 
-public class StormTopology {
-  private HeronTopology topology;
-
-  public StormTopology() {
+  private Constants() {
   }
 
-  public StormTopology(HeronTopology topology) {
-    this.topology = topology;
-  }
-
-  public HeronTopology getStormTopology() {
-    return topology;
-  }
+  public static final String SYSTEM_COMPONENT_ID = "__system";
+  public static final String SYSTEM_TICK_STREAM_ID = "__tick";
 }
