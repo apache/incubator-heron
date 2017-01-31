@@ -66,7 +66,7 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
       TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
       kvBldr.setKey(entry.getKey());
-      kvBldr.setValue(entry.getValue().toString());
+      kvBldr.setValue(entry.getValue() == null ? "null" : entry.getValue().toString());
       kvBldr.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
       cBldr.addKvs(kvBldr);
     }
