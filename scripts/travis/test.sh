@@ -30,10 +30,10 @@ python ${DIR}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/travi
 end_timer "$T"
 
 # run local integration test
-T="heron integration-test local"
-start_timer "$T"
-python ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
-end_timer "$T"
+# T="heron integration-test local"
+# start_timer "$T"
+# python ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
+# end_timer "$T"
 
 # run the java integration test
 T="heron integration-test java"
@@ -51,15 +51,5 @@ for i in `seq 1 50`; do
     -ts 'IntegrationTest_MultiSpoutsMultiTasks'
 done
 end_timer "$T"
-
-# run the python integration test
-# T="heron integration-test python"
-# start_timer "$T"
-# ./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
-#   -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
-#   -rh localhost -rp 8080\
-#   -tp integration-test/src/python/integration_test/topology/ \
-#   -cl local -rl heron-staging -ev devel
-# end_timer "$T"
 
 print_timer_summary

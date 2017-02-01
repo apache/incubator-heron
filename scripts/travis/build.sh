@@ -62,25 +62,6 @@ python ${DIR}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
 end_timer "$T"
 
-# run heron unit tests
-T="heron test non-flaky"
-start_timer "$T"
-python ${DIR}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc test\
-  --test_summary=detailed --test_output=errors\
-  --config=ubuntu --test_tag_filters=-flaky heron/...
-end_timer "$T"
-
-# flaky tests are often due to test port race conditions,
-# which should be fixed. For now, run them serially
-T="heron test flaky"
-start_timer "$T"
-python ${DIR}/save-logs.py "heron_test_flaky.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc test\
-  --test_summary=detailed --test_output=errors\
-  --config=ubuntu --test_tag_filters=flaky --jobs=0 heron/...
-end_timer "$T"
-
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
