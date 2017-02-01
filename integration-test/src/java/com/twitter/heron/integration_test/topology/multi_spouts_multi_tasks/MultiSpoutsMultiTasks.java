@@ -32,8 +32,8 @@ public final class MultiSpoutsMultiTasks extends AbstractTestTopology {
 
   @Override
   protected TestTopologyBuilder buildTopology(TestTopologyBuilder builder) {
-    builder.setSpout("ab-spout-1", new ABSpout(), 3);
-    builder.setSpout("ab-spout-2", new ABSpout(), 3);
+    builder.setSpout("ab-spout-1", new ABSpout(true), 3);
+    builder.setSpout("ab-spout-2", new ABSpout(true), 3);
     builder.setBolt("identity-bolt", new IdentityBolt(new Fields("word")), 1)
         .shuffleGrouping("ab-spout-1")
         .shuffleGrouping("ab-spout-2");
