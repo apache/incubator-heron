@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 function die {
   echo "ERROR: $1" && exit 1;
 }
