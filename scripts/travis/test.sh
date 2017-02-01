@@ -47,7 +47,7 @@ for i in `seq 1 50`; do
     -rh localhost -rp 8080\
     -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
     -cl local -rl heron-staging -ev devel \
-    -ts 'IntegrationTest_MultiSpoutsMultiTasks'
+    -ts 'IntegrationTest_MultiSpoutsMultiTasks' || true
 done
 end_timer "$T"
 
