@@ -21,6 +21,7 @@ SCHEDULER_YAML:               ${HERON_CONF}/scheduler.yaml
 STATEMGR_YAML:                ${HERON_CONF}/statemgr.yaml
 SYSTEM_YAML:                  ${HERON_CONF}/heron_internals.yaml
 UPLOADER_YAML:                ${HERON_CONF}/uploader.yaml
+STATEFUL_YAML:                ${HERON_CONF}/stateful.yaml
 
 ################################################################################
 # Default values for heron verbose
@@ -83,6 +84,7 @@ SANDBOX_STATEMGR_YAML:        ${HERON_SANDBOX_CONF}/statemgr.yaml
 SANDBOX_SYSTEM_YAML:          ${HERON_SANDBOX_CONF}/heron_internals.yaml
 SANDBOX_UPLOADER_YAML:        ${HERON_SANDBOX_CONF}/uploader.yaml
 SANDBOX_OVERRIDE_YAML:        ${HERON_SANDBOX_CONF}/override.yaml
+SANDBOX_STATEFUL_YAML:        ${HERON_SANDBOX_CONF}/stateful.yaml
 
 ################################################################################
 # Default values for heron sandbox binaries and jars
@@ -93,6 +95,12 @@ SANDBOX_TMASTER_BINARY:           ${HERON_SANDBOX_BIN}/heron-tmaster
 SANDBOX_SHELL_BINARY:             ${HERON_SANDBOX_BIN}/heron-shell
 SANDBOX_PYTHON_INSTANCE_BINARY:   ${HERON_SANDBOX_BIN}/heron-python-instance
 SANDBOX_SCHEDULER_JAR:            ${HERON_SANDBOX_LIB}/scheduler/heron-scheduler.jar
+SANDBOX_CKPTMGR_BINARY:           ${HERON_SANDBOX_BIN}/heron-ckptmgr
+
+################################################################################
+# Default values for heron stateful processing
+################################################################################
+IS_STATEFUL:                  False
 
 ################################################################################
 # Default classpath for various modules

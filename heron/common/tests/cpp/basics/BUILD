@@ -59,3 +59,18 @@ cc_test(
     size = "small",
     linkstatic = 1,
 )
+
+cc_test(
+    name = "params_unittest",
+    srcs = ["params_unittest.cpp"],
+    deps = [
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "//third_party/gtest:gtest-cxx",
+    ],
+    copts = [
+        "-I.",
+        "-Iheron/common/src/cpp",
+    ],
+    size = "small",
+    linkstatic = 1,
+)

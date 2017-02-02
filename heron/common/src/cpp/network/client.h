@@ -174,19 +174,6 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  // TODO(mfu):
-  MemPool<google::protobuf::Message> _heron_message_pool;
-
-  template<typename M>
-  void release(M* m) {
-    _heron_message_pool.release(m);
-  }
-
-  template<typename M>
-  M* acquire(M* m) {
-    return _heron_message_pool.acquire(m);
-  }
-
  protected:
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
@@ -247,7 +234,7 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = new M();
+        m = __global_protobuf_pool_acquire__(m);
         context_map_.erase(rid);
         _ipkt->UnPackProtocolBuffer(m);
       } else {
@@ -269,11 +256,11 @@ class Client : public BaseClient {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
 
-    M* m = _heron_message_pool.acquire(m);
+    M* m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
+      __global_protobuf_pool_release__(m);
       return;
     }
     CHECK(m->IsInitialized());
@@ -285,11 +272,12 @@ class Client : public BaseClient {
 
   template <typename T, typename M>
   void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
-    M* m = new M();
+    M* m = NULL;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      __global_protobuf_pool_release__(m);
       return;
     }
     CHECK(m->IsInitialized());

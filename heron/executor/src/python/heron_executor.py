@@ -52,7 +52,8 @@ def print_usage():
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
-      " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
+      " <scheduler_classpath> <scheduler_port> <python_instance_binary> <is_stateful>"
+      " <ckptmgr_binary> <ckptmgr_port>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -62,6 +63,9 @@ def id_map(prefix, container_plans, add_zero_id=False):
   for container_plan in container_plans:
     ids[container_plan.id] = "%s-%d" % (prefix, container_plan.id)
   return ids
+
+def ckptmgr_map(container_plans):
+  return id_map("ckptmgr", container_plans)
 
 def stmgr_map(container_plans):
   return id_map("stmgr", container_plans)
@@ -142,6 +146,8 @@ class HeronExecutor(object):
     self.zkroot = parsed_args.zkroot
     self.tmaster_binary = parsed_args.tmaster_binary
     self.stmgr_binary = parsed_args.stmgr_binary
+    self.ckptmgr_binary = parsed_args.ckptmgr_binary
+    self.is_stateful = parsed_args.is_stateful
     self.metricsmgr_classpath = parsed_args.metricsmgr_classpath
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
@@ -184,6 +190,7 @@ class HeronExecutor(object):
     self.scheduler_classpath = parsed_args.scheduler_classpath
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
+    self.ckptmgr_port = parsed_args.ckptmgr_port
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -193,6 +200,7 @@ class HeronExecutor(object):
     self.stmgr_ids = {}
     self.metricsmgr_ids = {}
     self.heron_shell_ids = {}
+    self.ckptmgr_ids = {}
 
     # processes_to_monitor gets set once processes are launched. we need to synchronize rw to this
     # dict since is used by multiple threads
@@ -237,6 +245,9 @@ class HeronExecutor(object):
     parser.add_argument("scheduler_classpath")
     parser.add_argument("scheduler_port")
     parser.add_argument("python_instance_binary")
+    parser.add_argument("is_stateful", type=bool)
+    parser.add_argument("ckptmgr_binary")
+    parser.add_argument("ckptmgr_port")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -279,6 +290,7 @@ class HeronExecutor(object):
   def update_packing_plan(self, new_packing_plan):
     self.packing_plan = new_packing_plan
     self.stmgr_ids = stmgr_map(self.packing_plan.container_plans)
+    self.ckptmgr_ids = ckptmgr_map(self.packing_plan.container_plans)
     self.metricsmgr_ids = metricsmgr_map(self.packing_plan.container_plans)
     self.heron_shell_ids = heron_shell_map(self.packing_plan.container_plans)
 
@@ -464,7 +476,9 @@ class HeronExecutor(object):
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
-        self.heron_internals_config_file]
+        self.heron_internals_config_file,
+        self.ckptmgr_port,
+        self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -475,12 +489,29 @@ class HeronExecutor(object):
         self.metricsmgr_port
     )
 
+    if self.is_stateful:
+      retval.update(self._get_ckptmgr_process())
+
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
       retval.update(self._get_java_instance_cmd(instance_info))
     elif self.pkg_type == 'pex':
       retval.update(self._get_python_instance_cmd(instance_info))
     else:
       raise ValueError("Unrecognized package type: %s" % self.pkg_type)
+
+    return retval
+
+  def _get_ckptmgr_process(self):
+    ''' get the command to start the checkpoint manager process '''
+    retval = {}
+    ckptmgr_cmd = [
+        self.ckptmgr_binary,
+        self.topology_name,
+        self.topology_id,
+        self.ckptmgr_ids[self.shard],
+        self.ckptmgr_port,
+    ]
+    retval[self.ckptmgr_ids[self.shard]] = ckptmgr_cmd
 
     return retval
 

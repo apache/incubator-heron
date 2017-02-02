@@ -124,6 +124,7 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
   if (quit_) {
     delete this;
   } else {
+    client_manager_->HandleDeadStMgrConnection(other_stmgr_id_);
     LOG(INFO) << "Will try to reconnect again after 1 seconds" << std::endl;
     AddTimer([this]() { this->OnReConnectTimer(); },
              reconnect_other_streammgrs_interval_sec_ * 1000 * 1000);
@@ -177,7 +178,7 @@ void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg
 }
 
 void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
-  release(_message);
+  __global_protobuf_pool_release__(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 
@@ -200,14 +201,14 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID rand = generator.generate();
   // generator.generate(rand);
   proto::stmgr::StartBackPressureMessage* message = nullptr;
-  message = acquire(message);
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
 
-  release(message);
+  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendStopBackPressureMessage() {
@@ -215,14 +216,20 @@ void StMgrClient::SendStopBackPressureMessage() {
   REQID rand = generator.generate();
   // generator.generate(rand);
   proto::stmgr::StopBackPressureMessage* message = nullptr;
-  message = acquire(message);
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
 
-  release(message);
+  __global_protobuf_pool_release__(message);
+}
+
+void StMgrClient::SendDownstreamStatefulCheckpoint(
+                  proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  SendMessage(*_message);
+  delete _message;
 }
 
 }  // namespace stmgr

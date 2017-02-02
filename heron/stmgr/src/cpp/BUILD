@@ -71,6 +71,9 @@ cc_library(
         "manager/stmgr.cpp",
         "manager/stream-consumers.cpp",
         "manager/tmaster-client.cpp",
+        "manager/stateful-helper.cpp",
+        "manager/checkpoint-gateway.cpp",
+        "manager/ckptmgr-client.cpp",
 
         "manager/stmgr-client.h",
         "manager/stmgr-clientmgr.h",
@@ -78,9 +81,13 @@ cc_library(
         "manager/stmgr.h",
         "manager/stream-consumers.h",
         "manager/tmaster-client.h",
+        "manager/stateful-helper.h",
+        "manager/checkpoint-gateway.h",
+        "manager/ckptmgr-client.h"
     ],
     copts = [
         "-Iheron",
+        "-Iheron/ckptmgr/src/cpp",
         "-Iheron/common/src/cpp",
         "-Iheron/statemgrs/src/cpp",
         "-Iheron/stmgr/src/cpp",
@@ -95,6 +102,7 @@ cc_library(
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
+        "//heron/common/src/cpp/stateful:checkpointmgr-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//third_party/yaml-cpp:yaml-cxx",
     ],

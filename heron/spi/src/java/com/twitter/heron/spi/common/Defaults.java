@@ -39,6 +39,10 @@ public class Defaults {
     return ConfigDefaults.getBoolean("VERBOSE");
   }
 
+  public static Boolean stateful() {
+    return ConfigDefaults.getBoolean("IS_STATEFUL");
+  }
+
   public static String configPath() {
     return ConfigDefaults.get("CONFIG_PATH");
   }
@@ -273,6 +277,10 @@ public class Defaults {
 
   public static String stmgrSandboxBinary() {
     return ConfigDefaults.get("SANDBOX_STMGR_BINARY");
+  }
+
+  public static String ckptmgrSandboxBinary() {
+    return ConfigDefaults.get("SANDBOX_CKPTMGR_BINARY");
   }
 
   public static String tmasterSandboxBinary() {
