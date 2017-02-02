@@ -242,7 +242,8 @@ public abstract class FileSystemStateManager implements IStateManager {
     }
 
     String topologyName = args[0];
-    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
+    print("==> State Manager root path: %s",
+        config.getStringValue(Keys.stateManagerRootPath()));
 
     initialize(config);
 
@@ -257,7 +258,7 @@ public abstract class FileSystemStateManager implements IStateManager {
       print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
     } else {
       print("==> Topology %s not found under %s",
-          topologyName, config.get(Keys.stateManagerRootPath()));
+          topologyName, config.getStringValue(Keys.stateManagerRootPath()));
     }
   }
 
