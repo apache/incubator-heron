@@ -38,7 +38,6 @@ import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
@@ -78,38 +77,6 @@ public class SubmitterMain {
         .put(Keys.topologyPackageFile(), topologyPackage)
         .put(Keys.topologyBinaryFile(), topologyBinaryFile)
         .put(Keys.topologyPackageType(), packageType)
-        .build();
-    return config;
-  }
-
-  /**
-   * Load the defaults config
-   *
-   * @param heronHome, directory of heron home
-   * @param configPath, directory containing the config
-   * @param releaseFile, release file containing build information
-   * <p>
-   * return config, the defaults config
-   */
-  protected static Config defaultConfigs(String heronHome, String configPath, String releaseFile) {
-    Config config = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile))
-        .build();
-    return config;
-  }
-
-  /**
-   * Load the override config from cli
-   *
-   * @param overrideConfigPath, override config file path
-   * <p>
-   * @return config, the override config
-   */
-  protected static Config overrideConfigs(String overrideConfigPath) {
-    Config config = Config.newBuilder()
-        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath))
         .build();
     return config;
   }
@@ -338,14 +305,11 @@ public class SubmitterMain {
     // load the topology configs
 
     // build the final config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
-            .putAll(defaultConfigs(heronHome, configPath, releaseFile))
-            .putAll(overrideConfigs(overrideConfigFile))
-            .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, verbose))
-            .putAll(topologyConfigs(
-                topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
-            .build());
+    Config config = Config.expand(Config.newBuilder()
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, verbose))
+        .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
+        .build());
 
     LOG.fine("Static config loaded successfully");
     LOG.fine(config.toString());
