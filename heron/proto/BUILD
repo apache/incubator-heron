@@ -135,6 +135,19 @@ proto_library(
     ],
 )
 
+proto_library(
+    name = "proto_ckptmgr",
+    src = "ckptmgr.proto",
+    includes = ["heron/proto"],
+    gen_cc = 1,
+    gen_java = 1,
+    gen_py = 1,
+    deps = [
+        ":proto_common",
+        ":proto_physical_plan",
+    ],
+)
+
 java_library(
     name = "proto-java",
     deps = [
@@ -149,6 +162,7 @@ java_library(
         ":proto_tmaster_java",
         ":proto_tuple_java",
         ":proto_stmgr_java",
+        ":proto_ckptmgr_java",
         ":proto_networktests_java",
         "@com_google_protobuf_protobuf_java//jar",
     ],
@@ -176,6 +190,7 @@ java_library(
         ":proto_tmaster_java",
         ":proto_tuple_java",
         ":proto_stmgr_java",
+        ":proto_ckptmgr_java",
         ":proto_networktests_java",
         "//third_party/java:protobuf-java-neverlink",
     ],
@@ -204,6 +219,7 @@ pex_library(
         ":proto_tmaster_py",
         ":proto_tuple_py",
         ":proto_stmgr_py",
+        ":proto_ckptmgr_py",
     ],
     reqs = [
         "protobuf==2.5.0",
@@ -219,6 +235,7 @@ cc_library(
     hdrs = [
         "messages.h",
 
+        "ckptmgr.pb.h",
         "common.pb.h",
         "execution_state.pb.h",
         "metrics.pb.h",
@@ -232,6 +249,7 @@ cc_library(
     ],
     deps = [
         ":proto_metrics_cc",
+        ":proto_ckptmgr_cc",
         ":proto_stmgr_cc",
         ":proto_scheduler_cc",
         ":proto_tmaster_cc",

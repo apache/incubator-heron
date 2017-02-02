@@ -30,7 +30,8 @@ class TMasterClient : public Client {
  public:
   TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
                 sp_int32 _stmgr_port, sp_int32 _shell_port,
-                VCallback<proto::system::PhysicalPlan*> _pplan_watch);
+                VCallback<proto::system::PhysicalPlan*> _pplan_watch,
+                VCallback<sp_string> _stateful_checkpoint_watch);
   virtual ~TMasterClient();
 
   // Told by the upper layer to disconnect and self destruct
@@ -55,6 +56,7 @@ class TMasterClient : public Client {
                                NetworkErrorCode);
 
   void HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message);
+  void HandleStatefulCheckpointMessage(proto::ckptmgr::StartStatefulCheckpoint* _message);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();
@@ -68,6 +70,7 @@ class TMasterClient : public Client {
   std::vector<proto::system::Instance*> instances_;
   bool to_die_;
   VCallback<proto::system::PhysicalPlan*> pplan_watch_;
+  VCallback<sp_string> stateful_checkpoint_watch_;
 
   // Configs to be read
   sp_int32 reconnect_tmaster_interval_sec_;

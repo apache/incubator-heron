@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "basics/basics.h"
 #include "proto/messages.h"
 
@@ -74,6 +75,21 @@ class TopologyConfigHelper {
 
   // Gets the per container ram requested by this topology
   static sp_int64 GetContainerRamRequested(const proto::api::Topology& _topology);
+
+  // Is the topology stateful
+  static bool IsTopologyStateful(const proto::api::Topology& _topology);
+
+  // Gets the checkpoint interval for stateful topologies
+  static sp_int64 GetStatefulCheckpointInterval(const proto::api::Topology& _topology);
+
+  // Gets the state provider type for stateful topologies
+  static sp_string GetStatefulProviderType(const proto::api::Topology& _topology);
+
+  // Gets the state provider config for stateful topologies
+  static sp_string GetStatefulProviderConfig(const proto::api::Topology& _topology);
+
+  // Gets the list of all spout component names
+  static std::vector<sp_string> GetSpoutComponentNames(const proto::api::Topology& _topology);
 };
 }  // namespace config
 }  // namespace heron

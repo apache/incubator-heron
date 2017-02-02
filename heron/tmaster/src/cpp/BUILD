@@ -4,6 +4,7 @@ cc_library(
     name = "tmaster-cxx",
     srcs = [
         "manager/stats-interface.cpp",
+        "manager/stateful-coordinator.cpp",
         "manager/stmgrstate.cpp",
         "manager/tcontroller.cpp",
         "manager/tmaster.cpp",
@@ -15,6 +16,7 @@ cc_library(
         "processor/tmaster-processor.cpp",
 
         "manager/stats-interface.h",
+        "manager/stateful-coordinator.h",
         "manager/stmgrstate.h",
         "manager/tcontroller.h",
         "manager/tmasterserver.h",

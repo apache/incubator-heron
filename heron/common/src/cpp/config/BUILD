@@ -5,6 +5,7 @@ cc_library(
     srcs = [
         "cluster-config-reader.cpp",
         "cluster-config-vars.cpp",
+        "common-config-vars.cpp",
         "heron-internals-config-reader.cpp",
         "heron-internals-config-vars.cpp",
         "metrics-sinks-reader.cpp",
@@ -16,9 +17,11 @@ cc_library(
         "topology-config-reader.cpp",
         "topology-config-vars.cpp",
         "yaml-file-reader.cpp",
+        "config-map.cpp",
 
         "cluster-config-reader.h",
         "cluster-config-vars.h",
+        "common-config-vars.h",
         "config.h",
         "helper.h",
         "heron-internals-config-reader.h",
@@ -33,6 +36,7 @@ cc_library(
         "topology-config-vars.h",
     ],
     hdrs = [ 
+        "config-map.h",
         "metrics-sinks-reader.h",
         "yaml-file-reader.h",
     ],

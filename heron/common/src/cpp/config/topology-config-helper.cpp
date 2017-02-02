@@ -19,6 +19,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "basics/basics.h"
 #include "config/operational-config-vars.h"
 #include "config/topology-config-vars.h"
@@ -199,6 +200,61 @@ sp_int64 TopologyConfigHelper::GetContainerRamRequested(const proto::api::Topolo
   sp_int64 max_components_per_container =
       (total_parallelism / nstmgrs) + (total_parallelism % nstmgrs);
   return max_components_per_container * 1073741824l;
+}
+
+bool TopologyConfigHelper::IsTopologyStateful(const proto::api::Topology& _topology) {
+  sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL) {
+      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+    }
+  }
+  // There was no value specified. The default is false.
+  return false;
+}
+
+sp_int64 TopologyConfigHelper::GetStatefulCheckpointInterval(
+                               const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL) {
+      return atol(cfg.kvs(i).value().c_str());
+    }
+  }
+  // There was no value specified. The default is 0.
+  return 0;
+}
+
+sp_string TopologyConfigHelper::GetStatefulProviderType(const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_PROVIDER_TYPE) {
+      return cfg.kvs(i).value();
+    }
+  }
+  // There was no value specified. The default is empty.
+  return "";
+}
+
+sp_string TopologyConfigHelper::GetStatefulProviderConfig(const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_PROVIDER_CONFIG) {
+      return cfg.kvs(i).value();
+    }
+  }
+  // There was no value specified. The default is empty.
+  return "";
+}
+
+std::vector<sp_string> TopologyConfigHelper::GetSpoutComponentNames(
+  const proto::api::Topology& _topology) {
+  std::vector<sp_string> retval;
+  for (int i = 0; i < _topology.spouts_size(); ++i) {
+    retval.push_back(_topology.spouts(i).comp().name());
+  }
+  return retval;
 }
 }  // namespace config
 }  // namespace heron

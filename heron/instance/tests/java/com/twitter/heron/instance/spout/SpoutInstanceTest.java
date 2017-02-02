@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -81,11 +82,11 @@ public class SpoutInstanceTest {
   private PhysicalPlans.PhysicalPlan physicalPlan;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private Communicator<Message> inStreamQueue;
   private Communicator<InstanceControlMsg> inControlQueue;
   private ExecutorService threadsPool;
   private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
@@ -116,9 +117,9 @@ public class SpoutInstanceTest {
 
     testLooper = new SlaveLooper();
     slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper);
+    outStreamQueue = new Communicator<>(slaveLooper, testLooper);
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper);
+    inStreamQueue = new Communicator<>(testLooper, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     slaveMetricsOut =
         new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
@@ -177,7 +178,7 @@ public class SpoutInstanceTest {
       public void run() {
         for (int i = 0; i < Constants.RETRY_TIMES; i++) {
           if (outStreamQueue.size() != 0) {
-            HeronTuples.HeronTupleSet set = outStreamQueue.poll();
+            HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) outStreamQueue.poll();
 
             Assert.assertTrue(set.isInitialized());
             Assert.assertFalse(set.hasControl());
@@ -283,7 +284,7 @@ public class SpoutInstanceTest {
       @Override
       public void run() {
         while (outStreamQueue.size() != 0) {
-          HeronTuples.HeronTupleSet set = outStreamQueue.poll();
+          HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) outStreamQueue.poll();
 
           Assert.assertTrue(set.isInitialized());
           Assert.assertTrue(set.hasData());
@@ -370,7 +371,7 @@ public class SpoutInstanceTest {
       @Override
       public void run() {
         while (outStreamQueue.size() != 0) {
-          HeronTuples.HeronTupleSet set = outStreamQueue.poll();
+          HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) outStreamQueue.poll();
 
           Assert.assertTrue(set.isInitialized());
           Assert.assertTrue(set.hasData());
