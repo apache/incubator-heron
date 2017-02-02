@@ -41,7 +41,7 @@ start_timer "$T"
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
-for i in `seq 1 50`; do
+for i in `seq 1 5`; do
   ./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
     -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
     -rh localhost -rp 8080\
@@ -50,5 +50,7 @@ for i in `seq 1 50`; do
     -ts 'IntegrationTest_MultiSpoutsMultiTasks' || true
 done
 end_timer "$T"
+
+tail -n +1 ~/.herondata/topologies/local/heron-staging/*MultiSpoutsMultiTasks*/log-files/*stmgr*.INFO
 
 print_timer_summary

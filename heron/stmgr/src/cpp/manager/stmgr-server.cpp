@@ -358,6 +358,8 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
+  LOG(INFO) << "Dumping tuple!" << std::endl;
+  LOG(INFO) << _message->DebugString() << std::endl;
   release(_message);
 }
 
