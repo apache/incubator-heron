@@ -24,6 +24,7 @@
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
+#include "client/ckptmgr-client.h"
 
 namespace heron {
 namespace common {
@@ -31,6 +32,13 @@ class MetricsMgrSt;
 class MultiCountMetric;
 class TimeSpentMetric;
 class AssignableMetric;
+class CheckpointMgrClient;
+}
+}
+
+namespace heron {
+namespace ckptmgr {
+class CkptMgrClient;
 }
 }
 
@@ -44,7 +52,8 @@ class StMgrServer : public Server {
   StMgrServer(EventLoop* eventLoop, const NetworkOptions& options, const sp_string& _topology_name,
               const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
-              heron::common::MetricsMgrSt* _metrics_manager_client);
+              heron::common::MetricsMgrSt* _metrics_manager_client,
+              heron::ckptmgr::CkptMgrClient* _checkpoint_manager_client);
   virtual ~StMgrServer();
 
   void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
@@ -69,6 +78,8 @@ class StMgrServer : public Server {
 
   bool DidAnnounceBackPressure() { return !remote_ends_who_caused_back_pressure_.empty(); }
 
+  void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
+
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
@@ -84,12 +95,15 @@ class StMgrServer : public Server {
   void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
                                proto::stmgr::StrMgrHelloRequest* _request);
   void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage2* _message);
+  void HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
+                                        proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
                                      proto::stmgr::RegisterInstanceRequest* _request);
   void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
-
+  void HandleInstanceStateCheckpointMessage(Connection* _conn,
+                                            proto::ckptmgr::InstanceStateCheckpoint* _message);
   // Backpressure message from and to other stream managers
   void HandleStartBackPressureMessage(Connection* _conn,
                                       proto::stmgr::StartBackPressureMessage* _message);
@@ -122,6 +136,7 @@ class StMgrServer : public Server {
     ~InstanceData() { delete instance_; }
 
     void set_local_spout() { local_spout_ = true; }
+    bool is_local_spout() { return local_spout_; }
     void set_connection(Connection* _conn) { conn_ = _conn; }
 
     proto::system::Instance* instance_;
@@ -169,6 +184,9 @@ class StMgrServer : public Server {
   heron::common::MultiCountMetric* stmgr_server_metrics_;
   heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
+
+  // checkpoint manager client
+  heron::ckptmgr::CkptMgrClient* checkpoint_manager_client_;
 
   bool spouts_under_back_pressure_;
 };

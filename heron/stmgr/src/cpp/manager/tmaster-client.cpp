@@ -33,13 +33,15 @@ namespace stmgr {
 
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
-                             VCallback<proto::system::PhysicalPlan*> _pplan_watch)
+                             VCallback<proto::system::PhysicalPlan*> _pplan_watch,
+                             VCallback<sp_string> _stateful_checkpoint_watch)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_port_(_stmgr_port),
       shell_port_(_shell_port),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
+      stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
       reconnect_timer_id(0),
       heartbeat_timer_id(0) {
   reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
@@ -58,6 +60,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   InstallResponseHandler(new proto::tmaster::StMgrHeartbeatRequest(),
                          &TMasterClient::HandleHeartbeatResponse);
   InstallMessageHandler(&TMasterClient::HandleNewAssignmentMessage);
+  InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointMessage);
 }
 
 TMasterClient::~TMasterClient() {}
@@ -173,6 +176,14 @@ void TMasterClient::HandleHeartbeatResponse(void*,
 void TMasterClient::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message) {
   LOG(INFO) << "Got a new assignment" << std::endl;
   pplan_watch_(_message->release_new_pplan());
+  delete _message;
+}
+
+void TMasterClient::HandleStatefulCheckpointMessage(
+                                        proto::ckptmgr::StartStatefulCheckpoint* _message) {
+  LOG(INFO) << "Got a new checkpoint message from tmaster with id "
+            << _message->checkpoint_id();
+  stateful_checkpoint_watch_(_message->checkpoint_id());
   delete _message;
 }
 

@@ -11,6 +11,7 @@ def heron_core_bin_files():
         "//heron/stmgr/src/cpp:heron-stmgr",
         "//heron/tmaster/src/cpp:heron-tmaster",
         "//heron/instance/src/python/instance:heron-python-instance",
+        "//heron/ckptmgr/src/cpp:heron-ckptmgr",
     ]
 
 def heron_core_conf_files():
@@ -39,7 +40,7 @@ def heron_core_lib_scheduler_files():
 def heron_core_lib_packing_files():
     return [
         "//heron/packing/src/java:heron-roundrobin-packing",
-	"//heron/packing/src/java:heron-binpacking-packing"
+	      "//heron/packing/src/java:heron-binpacking-packing"
     ]
 
 def heron_core_lib_metricsmgr_files():

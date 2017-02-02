@@ -124,6 +124,7 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
   if (quit_) {
     delete this;
   } else {
+    client_manager_->HandleDeadStMgrConnection(other_stmgr_id_);
     LOG(INFO) << "Will try to reconnect again after 1 seconds" << std::endl;
     AddTimer([this]() { this->OnReConnectTimer(); },
              reconnect_other_streammgrs_interval_sec_ * 1000 * 1000);
@@ -222,6 +223,18 @@ void StMgrClient::SendStopBackPressureMessage() {
   message->set_message_id(rand.str());
   SendMessage(*message);
 
+  release(message);
+}
+
+void StMgrClient::SendDownstreamStatefulCheckpoint(sp_int32 _origin_task_id,
+                                                   sp_int32 _destination_task_id,
+                                                   const sp_string& _checkpoint_id) {
+  proto::ckptmgr::DownstreamStatefulCheckpoint* message = nullptr;
+  message = acquire(message);
+  message->set_origin_task_id(_origin_task_id);
+  message->set_destination_task_id(_destination_task_id);
+  message->set_checkpoint_id(_checkpoint_id);
+  SendMessage(*message);
   release(message);
 }
 

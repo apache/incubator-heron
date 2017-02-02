@@ -21,12 +21,14 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <utility>
 #include "manager/stmgr-clientmgr.h"
 #include "manager/stmgr-server.h"
 #include "manager/stream-consumers.h"
+#include "manager/stateful-helper.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -37,9 +39,11 @@
 #include "statemgr/heron-statemgr.h"
 #include "metrics/metrics.h"
 #include "metrics/metrics-mgr-st.h"
+#include "stateful/checkpointmgr-client.h"
 #include "util/xor-manager.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
+#include "client/ckptmgr-client.h"
 
 namespace heron {
 namespace stmgr {
@@ -56,7 +60,7 @@ StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_
              const sp_string& _topology_id, proto::api::Topology* _hydrated_topology,
              const sp_string& _stmgr_id, const std::vector<sp_string>& _instances,
              const sp_string& _zkhostport, const sp_string& _zkroot, sp_int32 _metricsmgr_port,
-             sp_int32 _shell_port)
+             sp_int32 _shell_port, sp_int32 _checkpoint_manager_port, const sp_string& _ckptmgr_id)
     : pplan_(NULL),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -74,7 +78,9 @@ StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_
       zkhostport_(_zkhostport),
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
-      shell_port_(_shell_port) {}
+      shell_port_(_shell_port),
+      checkpoint_manager_port_(_checkpoint_manager_port),
+      ckptmgr_id_(_ckptmgr_id) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -89,6 +95,9 @@ void StMgr::Init() {
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
 
+  // Start checkpoint manager client
+  CreateCheckpointMgrClient();
+
   FetchTMasterLocation();
 
   CHECK_GT(
@@ -97,6 +106,9 @@ void StMgr::Init() {
           config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
               1000 * 1000),
       0);  // fire only once
+
+  is_stateful_ =
+    heron::config::TopologyConfigHelper::GetStatefulCheckpointInterval(*hydrated_topology_) > 0;
 
   // Create and start StmgrServer
   StartStmgrServer();
@@ -126,6 +138,8 @@ void StMgr::Init() {
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
 
   tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
+
+  stateful_helper_ = new StatefulHelper();
 }
 
 StMgr::~StMgr() {
@@ -141,8 +155,10 @@ StMgr::~StMgr() {
   CleanupXorManagers();
   delete hydrated_topology_;
   delete metrics_manager_client_;
+  delete checkpoint_manager_client_;
 
   delete tuple_set_from_other_stmgr_;
+  delete stateful_helper_;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
@@ -191,7 +207,7 @@ void StMgr::StartStmgrServer() {
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
-                            this, metrics_manager_client_);
+                            this, metrics_manager_client_, checkpoint_manager_client_);
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
@@ -207,9 +223,28 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_socket_family(PF_INET);
   master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
+  auto stateful_checkpoint_watch =
+       [this](sp_string checkpoint_tag) {
+    this->InitiateStatefulCheckpoint(checkpoint_tag);
+  };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_port_,
-                                      shell_port_, std::move(pplan_watch));
+                                      shell_port_, std::move(pplan_watch),
+                                      std::move(stateful_checkpoint_watch));
+}
+
+void StMgr::CreateCheckpointMgrClient() {
+  LOG(INFO) << "Creating CheckpointMgr Client at " << IpUtils::getHostName() << ":"
+            << checkpoint_manager_port_ << std::endl;
+  NetworkOptions client_options;
+  client_options.set_host(IpUtils::getHostName());
+  client_options.set_port(checkpoint_manager_port_);
+  client_options.set_socket_family(PF_INET);
+  client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  checkpoint_manager_client_ = new ckptmgr::CkptMgrClient(eventLoop_, client_options,
+                                                          topology_name_, topology_id_,
+                                                          ckptmgr_id_, stmgr_id_);
+  checkpoint_manager_client_->Start();
 }
 
 void StMgr::CreateTupleCache() {
@@ -380,6 +415,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
 
   delete pplan_;
   pplan_ = _pplan;
+  stateful_helper_->Reconstruct(*pplan_);
   clientmgr_->NewPhysicalPlan(pplan_);
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
@@ -669,6 +705,50 @@ void StMgr::SendStartBackPressureToOtherStMgrs() {
 }
 
 void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
+
+// Do any actions if a local instance dies
+void StMgr::HandleDeadInstanceConnection(sp_int32 _task_id) {
+  // If we are stateful topology, we need to clear any tuple cache wrt this task_id
+  if (is_stateful_) {
+    tuple_cache_->clear(_task_id);
+  }
+}
+
+// Do any actions if a stmgr client connection dies
+void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {
+  // If we are stateful topology, we need to clear any tuple cache wrt all
+  // task_ids this stmgr processes
+  if (is_stateful_) {
+    std::set<sp_int32> task_ids;
+    config::PhysicalPlanHelper::GetTasks(*pplan_, _stmgr_id, task_ids);
+    for (std::set<sp_int32>::iterator iter = task_ids.begin(); iter != task_ids.end(); ++iter) {
+      tuple_cache_->clear(*iter);
+    }
+  }
+}
+
+// Initiate the process of stateful checkpointing
+void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_tag) {
+  server_->InitiateStatefulCheckpoint(_checkpoint_tag);
+}
+
+// Send checkpoint message to downstream components of this task_id
+void StMgr::SendDownstreamCheckpoint(sp_int32 _task_id, const sp_string& _checkpoint_id) {
+  std::set<sp_int32> downstream_tasks = stateful_helper_->get_receivers(_task_id);
+  for (auto downstream_task : downstream_tasks) {
+    sp_string stmgr = task_id_to_stmgr_[downstream_task];
+    if (stmgr == stmgr_id_) {
+      HandleDownStreamStatefulCheckpoint(_task_id, downstream_task, _checkpoint_id);
+    } else {
+      clientmgr_->SendDownstreamStatefulCheckpoint(stmgr, _task_id,
+                                                   downstream_task, _checkpoint_id);
+    }
+  }
+}
+
+void StMgr::HandleDownStreamStatefulCheckpoint(sp_int32, sp_int32,
+                                               const sp_string&) {
+}
 
 }  // namespace stmgr
 }  // namespace heron

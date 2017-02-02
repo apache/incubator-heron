@@ -1,3 +1,6 @@
+# global options
+build --copt=-Werror
+
 # For centos
 # To use it: bazel build --config=centos
 build:centos --java_toolchain=//tools/java:heron_java_toolchain
