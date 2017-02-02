@@ -26,6 +26,7 @@ cc_library(
         "processutils.h",
         "randutils.h",
         "ridgen.h",
+        "parameters.h",
         "sockutils.h",
         "spconsts.h",
         "spfuncs.h",

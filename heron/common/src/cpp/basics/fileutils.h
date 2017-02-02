@@ -33,7 +33,13 @@ class FileUtils {
   static std::string baseName(const std::string& path);
 
   //! creates a directory if it does not exist
-  static sp_int32 makeDirectory(const std::string& dir);
+  static sp_int32 makeDirectory(const std::string& dir, mode_t mode = 0700);
+
+  //! checks if a directory exists or not
+  static sp_int32 existsDirectory(const std::string& directory);
+
+  //! creates a path if some of the intermediate directories do not exist
+  static sp_int32 makePath(const std::string& path);
 
   //! removes a file given an absolute path
   static sp_int32 removeFile(const std::string& filepath);
@@ -58,6 +64,9 @@ class FileUtils {
 
   //! get the current working directory
   static sp_int32 getCwd(std::string& path);
+
+  //! get the user home directory
+  static std::string getHomeDirectory();
 };
 
 #endif

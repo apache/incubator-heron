@@ -30,10 +30,12 @@
 #include "config/topology-config-helper.h"
 #include "config/cluster-config-vars.h"
 #include "config/cluster-config-reader.h"
+#include "config/common-config-vars.h"
 #include "config/physical-plan-helper.h"
 #include "config/operational-config-vars.h"
 #include "config/operational-config-reader.h"
 #include "config/heron-internals-config-vars.h"
 #include "config/heron-internals-config-reader.h"
+#include "config/config-map.h"
 
 #endif

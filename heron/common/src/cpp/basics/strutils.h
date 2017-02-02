@@ -31,6 +31,9 @@ class StrUtils {
  public:
   //! Given a string and a delim, split it
   static std::vector<std::string> split(const std::string& _input, const std::string& _delim);
+
+  //! Trim the white spaces both in lhs and rhs of a string
+  static std::string trim(const std::string &s);
 };
 
 #endif

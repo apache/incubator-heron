@@ -33,6 +33,7 @@
 #include "basics/fileutils.h"
 #include "basics/processutils.h"
 #include "basics/iputils.h"
+#include "basics/parameters.h"
 #include "basics/strutils.h"
 #include "basics/randutils.h"
 #include "basics/sockutils.h"

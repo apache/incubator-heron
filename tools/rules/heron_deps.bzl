@@ -13,5 +13,6 @@ def heron_java_proto_files():
         "//heron/proto:proto_topology_java",
         "//heron/proto:proto_tuple_java",
         "//heron/proto:proto_stmgr_java",
+        "//heron/proto:proto_ckptmgr_java",
         "@com_google_protobuf_protobuf_java//jar",
     ]

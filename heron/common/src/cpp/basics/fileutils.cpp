@@ -18,6 +18,12 @@
 #include <dirent.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <pwd.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -32,7 +38,7 @@ std::string FileUtils::baseName(const std::string& path) {
   return path.substr(path.find_last_of(constPathSeparator) + 1);
 }
 
-sp_int32 FileUtils::makeDirectory(const std::string& directory) {
+sp_int32 FileUtils::makeDirectory(const std::string& directory, mode_t mode) {
   struct stat st;
 
   // get the directory name stats
@@ -41,7 +47,7 @@ sp_int32 FileUtils::makeDirectory(const std::string& directory) {
   // check for any errors
   if (retcode == -1) {
     if (errno == ENOENT) {
-      if (::mkdir(directory.c_str(), 0700) != 0) {
+      if (::mkdir(directory.c_str(), mode) != 0) {
         PLOG(ERROR) << "Unable to create directory " << directory;
         return SP_NOTOK;
       }
@@ -54,6 +60,47 @@ sp_int32 FileUtils::makeDirectory(const std::string& directory) {
 
   return S_ISDIR(st.st_mode) ? SP_OK : SP_NOTOK;
 }
+
+sp_int32 FileUtils::existsDirectory(const std::string& directory) {
+  struct stat info;
+  if (::stat(directory.c_str(), &info) != 0) {
+    PLOG(ERROR) << "Unable to stat directory " << directory;
+    return SP_NOTOK;
+  }
+
+  return S_ISDIR(info.st_mode) ? SP_OK : SP_NOTOK;
+}
+
+sp_int32 FileUtils::makePath(const std::string& path) {
+  mode_t mode = 0700;
+  auto retcode = makeDirectory(path, mode);
+  if (retcode == SP_OK)
+    return SP_OK;
+
+  switch (errno) {
+    case ENOENT: {
+      // parent didn't exist, try to create it
+      auto pos = path.find_last_of('/');
+      if (pos == std::string::npos)
+        return SP_NOTOK;
+
+      auto retcode = makeDirectory(path.substr(0, pos), mode);
+      if (retcode == SP_OK)
+        return SP_OK;
+
+      // now, try to create again
+      return makeDirectory(path, mode);
+    }
+    case EEXIST:
+    // done!
+    return existsDirectory(path);
+
+    default:
+    return SP_NOTOK;
+  }
+  return SP_NOTOK;
+}
+
 
 sp_int32 FileUtils::removeFile(const std::string& filepath) {
   if (::unlink(filepath.c_str()) != 0) {
@@ -167,4 +214,28 @@ sp_int32 FileUtils::getCwd(std::string& path) {
 
   path = maxpath;
   return SP_OK;
+}
+
+std::string FileUtils::getHomeDirectory() {
+  const char *homedir = ::getenv("HOME");
+  if (homedir != nullptr) {
+    return std::string(homedir);
+  }
+
+  auto bufsize = ::sysconf(_SC_GETPW_R_SIZE_MAX);
+  if (bufsize == -1)
+    bufsize = 16384;
+
+  char* buffer = new char[bufsize];
+  struct passwd pwd, *result = NULL;
+
+  auto code = ::getpwuid_r(::getuid(), &pwd, buffer, bufsize, &result);
+  if (code != 0 || !result) {
+    PLOG(ERROR) << "Unable to get home directory ";
+    return std::string();
+  }
+
+  std::string directory(pwd.pw_dir);
+  delete [] buffer;
+  return directory;
 }

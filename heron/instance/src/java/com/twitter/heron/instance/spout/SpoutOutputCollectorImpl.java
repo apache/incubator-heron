@@ -25,10 +25,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
@@ -72,7 +74,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
   public SpoutOutputCollectorImpl(IPluggableSerializer serializer,
                                   PhysicalPlanHelper helper,
-                                  Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                  Communicator<Message> streamOutQueue,
                                   SpoutMetrics spoutMetrics) {
     if (helper.getMySpout() == null) {
       throw new RuntimeException(helper.getMyTaskId() + " is not a spout ");
@@ -147,6 +149,10 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
   // Flush the tuples to next stage
   public void sendOutTuples() {
     outputter.sendOutTuples();
+  }
+
+  public void sendOutState(State state, String checkpointId) {
+    outputter.sendOutState(state, checkpointId);
   }
 
   public long getTotalTuplesEmitted() {

@@ -21,6 +21,7 @@ SCHEDULER_YAML:                      heron.config.file.scheduler.yaml
 STATEMGR_YAML:                       heron.config.file.statemgr.yaml
 SYSTEM_YAML:                         heron.config.file.system.yaml
 UPLOADER_YAML:                       heron.config.file.uploader.yaml
+STATEFUL_YAML:                       heron.config.file.stateful.yaml
 
 ################################################################################
 # keys for config provided in the command line
@@ -52,6 +53,11 @@ SCHEDULER_CLASS:                     heron.class.scheduler
 PACKING_CLASS:                       heron.class.packing.algorithm
 REPACKING_CLASS:                     heron.class.repacking.algorithm
 STATE_MANAGER_CLASS:                 heron.class.state.manager
+
+################################################################################
+# keys for stateful processing
+################################################################################
+IS_STATEFUL:                         heron.is.stateful
 
 ################################################################################
 # keys for scheduler config
@@ -163,6 +169,7 @@ SANDBOX_STATEMGR_YAML:               heron.config.sandbox.file.statemgr.yaml
 SANDBOX_SYSTEM_YAML:                 heron.config.sandbox.file.system.yaml
 SANDBOX_UPLOADER_YAML:               heron.config.sandbox.file.uploader.yaml
 SANDBOX_OVERRIDE_YAML:               heron.config.sandbox.file.override.yaml
+SANDBOX_STATEFUL_YAML:               heron.config.sandbox.file.stateful.yaml
 
 ################################################################################
 # keys for sandbox config provided user binaries
@@ -173,6 +180,7 @@ SANDBOX_TMASTER_BINARY:              heron.binaries.sandbox.tmaster
 SANDBOX_SHELL_BINARY:                heron.binaries.sandbox.shell
 SANDBOX_PYTHON_INSTANCE_BINARY:      heron.binaries.sandbox.python.instance
 SANDBOX_SCHEDULER_JAR:               heron.jars.sandbox.scheduler
+SANDBOX_CKPTMGR_BINARY:              heron.binaries.sandbox.ckptmgr
 
 ################################################################################
 # keys for config provided files and directories
