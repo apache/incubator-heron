@@ -77,7 +77,6 @@ class StMgrServer : public Server {
  private:
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
-  sp_string MakeInstanceTuplesMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
   void UpdateQueueMetrics(EventLoop::Status);
 
