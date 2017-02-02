@@ -21,16 +21,13 @@ import org.junit.Test;
 
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
 
 public class LocalFileSystemConfigTest {
 
-  private static final String TOPOLOGY_PACKAGE_FILE = "/tmp/something.tar.gz";
-
   private Config getDefaultConfig() {
-    Config config = Config.newBuilder()
+    return Config.newBuilder()
         .put(Keys.cluster(), "cluster")
         .put(Keys.role(), "role")
         .put(Keys.topologyName(), "topology")
@@ -39,7 +36,6 @@ public class LocalFileSystemConfigTest {
         .put(LocalFileSystemKeys.fileSystemDirectory(),
             LocalFileSystemDefaults.fileSystemDirectory())
         .build();
-    return config;
   }
 
   @Test
@@ -73,9 +69,6 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
-
-    String destDirectory = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
-        Context.cluster(config), Context.role(config), Context.topologyName(config)).toString();
 
     Assert.assertEquals(
         uploader.getTopologyDirectory(),

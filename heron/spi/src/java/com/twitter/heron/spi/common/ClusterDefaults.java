@@ -14,12 +14,14 @@
 
 package com.twitter.heron.spi.common;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public final class ClusterDefaults {
 
   private ClusterDefaults() {
   }
 
-  public static Config getDefaultHome() {
+  private static Config getDefaultHome() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.heronHome(), Defaults.heronHome());
@@ -32,7 +34,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxHome() {
+  private static Config getSandboxHome() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.heronSandboxHome(), Defaults.heronSandboxHome());
@@ -43,35 +45,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultFiles() {
-    Config.Builder cb = Config.newBuilder();
-
-    cb.put(Keys.clusterFile(), Defaults.clusterFile());
-    cb.put(Keys.defaultsFile(), Defaults.defaultsFile());
-    cb.put(Keys.metricsSinksFile(), Defaults.metricsSinksFile());
-    cb.put(Keys.packingFile(), Defaults.packingFile());
-    cb.put(Keys.schedulerFile(), Defaults.schedulerFile());
-    cb.put(Keys.stateManagerFile(), Defaults.stateManagerFile());
-    cb.put(Keys.systemFile(), Defaults.systemFile());
-    cb.put(Keys.uploaderFile(), Defaults.uploaderFile());
-    return cb.build();
-  }
-
-  public static Config getSandboxDefaultFiles() {
-    Config.Builder cb = Config.newBuilder();
-
-    cb.put(Keys.clusterSandboxFile(), Defaults.clusterSandboxFile());
-    cb.put(Keys.defaultsSandboxFile(), Defaults.defaultsSandboxFile());
-    cb.put(Keys.metricsSinksSandboxFile(), Defaults.metricsSinksSandboxFile());
-    cb.put(Keys.packingSandboxFile(), Defaults.packingSandboxFile());
-    cb.put(Keys.schedulerSandboxFile(), Defaults.schedulerSandboxFile());
-    cb.put(Keys.stateManagerSandboxFile(), Defaults.stateManagerSandboxFile());
-    cb.put(Keys.systemSandboxFile(), Defaults.systemSandboxFile());
-    cb.put(Keys.uploaderSandboxFile(), Defaults.uploaderSandboxFile());
-    return cb.build();
-  }
-
-  public static Config getSandboxBinaries() {
+  @VisibleForTesting
+  static Config getSandboxBinaries() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.executorSandboxBinary(), Defaults.executorSandboxBinary());
@@ -82,21 +57,22 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultJars() {
+  @VisibleForTesting
+  static Config getDefaultJars() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.schedulerJar(), Defaults.schedulerJar());
     return cb.build();
   }
 
-  public static Config getSandboxJars() {
+  private static Config getSandboxJars() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.schedulerSandboxJar(), Defaults.schedulerSandboxJar());
     return cb.build();
   }
 
-  public static Config getDefaultFilesAndPaths() {
+  private static Config getDefaultFilesAndPaths() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.corePackageUri(), Defaults.corePackageUri());
@@ -111,7 +87,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxFilesAndPaths() {
+  private static Config getSandboxFilesAndPaths() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.instanceSandboxClassPath(), Defaults.instanceSandboxClassPath());
@@ -123,7 +99,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultResources() {
+  static Config getDefaultResources() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.stmgrRam(), Defaults.stmgrRam());
@@ -133,7 +109,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultMiscellaneous() {
+  @VisibleForTesting
+  static Config getDefaultMiscellaneous() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.verbose(), Defaults.verbose());
@@ -152,7 +129,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxDefaults() {
+  static Config getSandboxDefaults() {
     Config.Builder cb = Config.newBuilder();
 
     cb.putAll(getSandboxHome());
