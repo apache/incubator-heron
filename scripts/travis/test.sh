@@ -51,9 +51,11 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 end_timer "$T"
 
 # Dump out stream manager log
+echo "DUMPING STMGR LOG"
 tail -n +1 ~/.herondata/topologies/local/*/*MultiSpoutsMultiTasks*/log-files/*stmgr*.INFO
 
 # Dump out Java program's logs
-tail -n +1 ~/.herondata/topologies/local/*/201702011700*/log-files/container_1*.log.0
+echo "DUMPING JAVA PROGRAM LOG"
+tail -n +1 ~/.herondata/topologies/local/*/*MultiSpoutsMultiTasks*/log-files/container*.log.0
 
 print_timer_summary
