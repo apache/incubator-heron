@@ -51,6 +51,6 @@ for i in `seq 1 5`; do
 done
 end_timer "$T"
 
-tail -n +1 ~/.herondata/topologies/local/heron-staging/*MultiSpoutsMultiTasks*/log-files/*stmgr*.INFO
+tail -n +1 ~/.herondata/topologies/local/*/*MultiSpoutsMultiTasks*/log-files/*stmgr*.INFO
 
 print_timer_summary
