@@ -66,6 +66,10 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
 
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
     for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
+      if (entry.getKey() == null) {
+        LOG.warning("ignore: config key is null");
+        continue;
+      }
       if (entry.getValue() == null) {
         LOG.warning("ignore: config key " + entry.getKey() + " has null value");
         continue;
