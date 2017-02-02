@@ -41,16 +41,19 @@ start_timer "$T"
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
-for i in `seq 1 5`; do
-  ./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
-    -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
-    -rh localhost -rp 8080\
-    -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
-    -cl local -rl heron-staging -ev devel \
-    -ts 'IntegrationTest_MultiSpoutsMultiTasks' || true
-done
+# Run MultiSpoutsMultiTasks
+./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
+  -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
+  -rh localhost -rp 8080\
+  -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
+  -cl local -rl heron-staging -ev devel \
+  -ts 'IntegrationTest_MultiSpoutsMultiTasks' || true
 end_timer "$T"
 
+# Dump out stream manager log
 tail -n +1 ~/.herondata/topologies/local/*/*MultiSpoutsMultiTasks*/log-files/*stmgr*.INFO
+
+# Dump out Java program's logs
+tail -n +1 ~/.herondata/topologies/local/rli/201702011700*/log-files/container_1*.log.0
 
 print_timer_summary
