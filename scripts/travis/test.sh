@@ -60,6 +60,7 @@ for i in `seq 1 100`; do
     tail -n +1 ~/.herondata/topologies/local/*/*MultiSpoutsMultiTasks*/log-files/container*.log.0
     exit 1
   fi
+done
 end_timer "$T"
 
 print_timer_summary
