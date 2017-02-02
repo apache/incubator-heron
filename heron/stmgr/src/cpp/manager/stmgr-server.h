@@ -79,7 +79,7 @@ class StMgrServer : public Server {
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string MakeInstanceTuplesMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
-  void UpdateStMgrServerMetrics(EventLoop::Status);
+  void UpdateQueueMetrics(EventLoop::Status);
 
   // Various handlers for different requests
 
@@ -155,11 +155,8 @@ class StMgrServer : public Server {
   InstanceMetricMap instance_metric_map_;
 
   // map of Instance_id/stmgrid to queue metric
-  typedef std::map<sp_string, heron::common::AssignableMetric*> QueueMetricMap;
+  typedef std::map<sp_string, heron::common::MultiAssignableMetric*> QueueMetricMap;
   QueueMetricMap queue_metric_map_;
-
-  typedef std::map<sp_string, heron::common::MultiAssignableMetric*> TuplesMetricMap;
-  TuplesMetricMap tuples_metrics_map_;
 
   // instances/stream mgrs causing back pressure
   std::set<sp_string> remote_ends_who_caused_back_pressure_;
