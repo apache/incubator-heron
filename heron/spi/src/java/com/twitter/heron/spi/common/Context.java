@@ -24,7 +24,7 @@ public class Context {
   }
 
   public static String cluster(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("CLUSTER"));
+    return cfg.getStringValue(Key.CLUSTER);
   }
 
   public static String role(Config cfg) {

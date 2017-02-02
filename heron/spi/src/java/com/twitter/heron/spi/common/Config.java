@@ -60,6 +60,10 @@ public class Config {
     return cfgMap.get(key);
   }
 
+  public String getStringValue(Key key) {
+    return getStringValue(key.value());
+  }
+
   public String getStringValue(String key) {
     return (String) get(key);
   }
