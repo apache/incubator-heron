@@ -16,6 +16,7 @@ package com.twitter.heron.api.topology;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 
@@ -25,6 +26,7 @@ import com.twitter.heron.api.utils.Utils;
 
 public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDeclarer<?>>
     extends BaseConfigurationDeclarer<T> {
+  private static final Logger LOG = Logger.getLogger(BaseComponentDeclarer.class.getName());
   private String name;
   private IComponent component;
   private Map<String, Object> componentConfiguration;
@@ -64,6 +66,14 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
 
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
     for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
+      if (entry.getKey() == null) {
+        LOG.warning("ignore: config key is null");
+        continue;
+      }
+      if (entry.getValue() == null) {
+        LOG.warning("ignore: config key " + entry.getKey() + " has null value");
+        continue;
+      }
       TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
       kvBldr.setKey(entry.getKey());
       kvBldr.setValue(entry.getValue().toString());
