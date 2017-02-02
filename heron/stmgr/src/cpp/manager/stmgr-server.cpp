@@ -419,16 +419,11 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
           ->incr_by(_message.control().fails_size());
     }
   } else {
-    if (_message.has_data()) {
-      instance_info_[_task_id]->data_tuples += _message.data().tuples_size();
-    }
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().fails_size());
-      instance_info_[_task_id]->ack_tuples += _message.control().acks_size();
-      instance_info_[_task_id]->fail_tuples += _message.control().fails_size();
     }
     SendMessage(iter->second->conn_, _message);
   }

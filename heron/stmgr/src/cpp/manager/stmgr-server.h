@@ -118,8 +118,7 @@ class StMgrServer : public Server {
   class InstanceData {
    public:
     explicit InstanceData(proto::system::Instance* _instance)
-        : instance_(_instance), local_spout_(false), conn_(NULL), data_tuples(0), ack_tuples(0),
-          fail_tuples(0) {}
+        : instance_(_instance), local_spout_(false), conn_(NULL) {}
     ~InstanceData() { delete instance_; }
 
     void set_local_spout() { local_spout_ = true; }
@@ -128,10 +127,6 @@ class StMgrServer : public Server {
     proto::system::Instance* instance_;
     bool local_spout_;
     Connection* conn_;
-
-    sp_int64 data_tuples;
-    sp_int64 ack_tuples;
-    sp_int64 fail_tuples;
   };
 
   // map from stmgr_id to their connection
