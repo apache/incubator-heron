@@ -16,6 +16,8 @@ package com.twitter.heron.spi.common;
 
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.common.config.ConfigReader;
 
 public final class ClusterConfig {
@@ -23,7 +25,8 @@ public final class ClusterConfig {
   private ClusterConfig() {
   }
 
-  protected static Config loadHeronHome(String heronHome, String configPath) {
+  @VisibleForTesting
+  static Config loadHeronHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronHome(), heronHome)
         .put(Keys.heronBin(), Misc.substitute(heronHome, Defaults.heronBin()))
@@ -35,7 +38,7 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
+  private static Config loadSandboxHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
         .put(Keys.heronSandboxBin(),
@@ -48,7 +51,8 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadConfigHome(String heronHome, String configPath) {
+  @VisibleForTesting
+  static Config loadConfigHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.clusterFile(),
             Misc.substitute(heronHome, configPath, Defaults.clusterFile()))
@@ -71,7 +75,7 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
+  private static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.clusterSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
@@ -96,79 +100,44 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadClusterConfig(String clusterFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(clusterFile);
+  @VisibleForTesting
+  static Config loadConfig(String file) {
+    Map<String, Object> readConfig = ConfigReader.loadFile(file);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadClientConfig(String clientFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(clientFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  protected static Config loadDefaultsConfig(String defaultsFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(defaultsFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  protected static Config loadPackingConfig(String packingFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(packingFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  protected static Config loadSchedulerConfig(String schedulerFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(schedulerFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  protected static Config loadStateManagerConfig(String stateMgrFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(stateMgrFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  protected static Config loadUploaderConfig(String uploaderFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(uploaderFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  public static Config loadOverrideConfig(String overrideConfigFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(overrideConfigFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  protected static Config loadReleaseConfig(String releaseFile) {
-    Map<String, Object> readConfig = ConfigReader.loadFile(releaseFile);
-    return Config.newBuilder().putAll(readConfig).build();
-  }
-
-  public static Config loadBasicConfig(String heronHome, String configPath) {
+  private static Config loadBasicConfig(String heronHome, String configPath) {
     return Config.newBuilder()
         .putAll(loadHeronHome(heronHome, configPath))
         .putAll(loadConfigHome(heronHome, configPath))
         .build();
   }
 
-  public static Config loadBasicSandboxConfig() {
+  private static Config loadBasicSandboxConfig() {
     return Config.newBuilder()
+        .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(loadSandboxHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
         .putAll(loadSandboxConfigHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
         .build();
   }
 
-  public static Config loadConfig(String heronHome, String configPath, String releaseFile) {
+  public static Config loadConfig(String heronHome, String configPath,
+                                  String releaseFile, String overrideConfigFile) {
     Config homeConfig = loadBasicConfig(heronHome, configPath);
     Config sandboxConfig = loadBasicSandboxConfig();
 
     Config.Builder cb = Config.newBuilder()
+        .putAll(ClusterDefaults.getDefaults())
         .putAll(homeConfig)
         .putAll(sandboxConfig)
-        .putAll(loadClusterConfig(Context.clusterFile(homeConfig)))
-        .putAll(loadClientConfig(Context.clientFile(homeConfig)))
-        .putAll(loadPackingConfig(Context.packingFile(homeConfig)))
-        .putAll(loadSchedulerConfig(Context.schedulerFile(homeConfig)))
-        .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)))
-        .putAll(loadUploaderConfig(Context.uploaderFile(homeConfig)))
-        .putAll(loadReleaseConfig(releaseFile));
+        .putAll(loadConfig(Context.clusterFile(homeConfig)))
+        .putAll(loadConfig(Context.clientFile(homeConfig)))
+        .putAll(loadConfig(Context.packingFile(homeConfig)))
+        .putAll(loadConfig(Context.schedulerFile(homeConfig)))
+        .putAll(loadConfig(Context.stateManagerFile(homeConfig)))
+        .putAll(loadConfig(Context.uploaderFile(homeConfig)))
+        .putAll(loadConfig(releaseFile))
+        .putAll(loadConfig(overrideConfigFile));
     return cb.build();
   }
 
@@ -177,13 +146,13 @@ public final class ClusterConfig {
 
     Config.Builder cb = Config.newBuilder()
         .putAll(sandboxConfig)
-        .putAll(loadPackingConfig(Context.packingSandboxFile(sandboxConfig)))
-        .putAll(loadSchedulerConfig(Context.schedulerSandboxFile(sandboxConfig)))
-        .putAll(loadStateManagerConfig(Context.stateManagerSandboxFile(sandboxConfig)))
-        .putAll(loadUploaderConfig(Context.uploaderSandboxFile(sandboxConfig)));
+        .putAll(loadConfig(Context.packingSandboxFile(sandboxConfig)))
+        .putAll(loadConfig(Context.schedulerSandboxFile(sandboxConfig)))
+        .putAll(loadConfig(Context.stateManagerSandboxFile(sandboxConfig)))
+        .putAll(loadConfig(Context.uploaderSandboxFile(sandboxConfig)));
 
-    // Add the override config at the end to replace any exisiting configs
-    cb.putAll(loadOverrideConfig(Context.overrideSandboxFile(sandboxConfig)));
+    // Add the override config at the end to replace any existing configs
+    cb.putAll(loadConfig(Context.overrideSandboxFile(sandboxConfig)));
 
     return cb.build();
   }

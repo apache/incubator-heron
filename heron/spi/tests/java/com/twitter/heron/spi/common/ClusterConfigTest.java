@@ -49,7 +49,7 @@ public class ClusterConfigTest {
   @Test
   public void testClusterFile() throws Exception {
 
-    Config props = ClusterConfig.loadClusterConfig(Context.clusterFile(basicConfig));
+    Config props = ClusterConfig.loadConfig(Context.clusterFile(basicConfig));
 
     Assert.assertEquals(4, props.size());
 
@@ -65,7 +65,7 @@ public class ClusterConfigTest {
    */
   @Test
   public void testDefaultsFile() throws Exception {
-    Config props = ClusterConfig.loadDefaultsConfig(Context.defaultsFile(basicConfig));
+    Config props = ClusterConfig.loadConfig(Context.defaultsFile(basicConfig));
 
     Assert.assertEquals(11, props.size());
 
@@ -123,7 +123,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testSchedulerFile() throws Exception {
-    Config props = ClusterConfig.loadSchedulerConfig(Context.schedulerFile(basicConfig));
+    Config props = ClusterConfig.loadConfig(Context.schedulerFile(basicConfig));
 
     Assert.assertEquals(2, props.size());
 
@@ -140,7 +140,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testPackingFile() throws Exception {
-    Config props = ClusterConfig.loadPackingConfig(Context.packingFile(basicConfig));
+    Config props = ClusterConfig.loadConfig(Context.packingFile(basicConfig));
 
     Assert.assertEquals(1, props.size());
     Assert.assertEquals(
@@ -151,7 +151,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testUploaderFile() throws Exception {
-    Config props = ClusterConfig.loadUploaderConfig(Context.uploaderFile(basicConfig));
+    Config props = ClusterConfig.loadConfig(Context.uploaderFile(basicConfig));
 
     Assert.assertEquals(2, props.size());
     Assert.assertEquals(
