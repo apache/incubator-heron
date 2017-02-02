@@ -54,6 +54,6 @@ end_timer "$T"
 tail -n +1 ~/.herondata/topologies/local/*/*MultiSpoutsMultiTasks*/log-files/*stmgr*.INFO
 
 # Dump out Java program's logs
-tail -n +1 ~/.herondata/topologies/local/rli/201702011700*/log-files/container_1*.log.0
+tail -n +1 ~/.herondata/topologies/local/*/201702011700*/log-files/container_1*.log.0
 
 print_timer_summary
