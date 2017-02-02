@@ -38,7 +38,6 @@ import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
 import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -261,11 +260,6 @@ public class RuntimeManagerMain {
 
     Command command = Command.makeCommand(commandOption);
 
-    // first load the defaults, then the config from files to override it
-    Config.Builder defaultsConfig = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile));
-
     // add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()
         .put(Keys.cluster(), cluster)
@@ -285,17 +279,12 @@ public class RuntimeManagerMain {
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
 
-    Config.Builder overrideConfig = Config.newBuilder()
-        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigFile));
-
     // build the final config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
-            .putAll(defaultsConfig.build())
-            .putAll(overrideConfig.build())
-            .putAll(commandLineConfig.build())
-            .putAll(topologyConfig.build())
-            .build());
+    Config config = Config.expand(Config.newBuilder()
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(commandLineConfig.build())
+        .putAll(topologyConfig.build())
+        .build());
 
     LOG.fine("Static config loaded successfully ");
     LOG.fine(config.toString());

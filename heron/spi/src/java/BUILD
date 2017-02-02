@@ -101,6 +101,7 @@ java_library(
     deps = [
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
+        "@com_google_guava_guava//jar",
     ],
     resources = common_resource_files,
 )
