@@ -18,6 +18,7 @@
 
 package org.apache.storm.spout;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.apache.storm.tuple.Fields;
@@ -27,7 +28,7 @@ import static org.apache.storm.utils.Utils.tuple;
 public class RawScheme implements Scheme {
   private static final long serialVersionUID = 6098042939916415521L;
 
-  public List<Object> deserialize(byte[] ser) {
+  public List<Object> deserialize(ByteBuffer ser) {
     return tuple(ser);
   }
 
