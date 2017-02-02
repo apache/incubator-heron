@@ -105,6 +105,7 @@ tools/jdk/ijar
 out/
 
 # Eclipse
+.autotools
 .settings/
 .project
 .classpath
