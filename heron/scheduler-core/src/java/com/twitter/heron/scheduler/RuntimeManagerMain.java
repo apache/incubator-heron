@@ -252,7 +252,7 @@ public class RuntimeManagerMain {
 
     // Default dry-run output format type
     DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
-    if (cmd.hasOption("t")) {
+    if (dryRun && cmd.hasOption("t")) {
       String format = cmd.getOptionValue("dry_run_format");
       dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
       LOG.fine(String.format("Running dry-run mode using format %s", format));
