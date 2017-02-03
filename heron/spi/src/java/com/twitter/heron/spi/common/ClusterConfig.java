@@ -88,7 +88,7 @@ public final class ClusterConfig {
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.packingSandboxFile()))
         .put(Key.SANDBOX_SCHEDULER_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.schedulerSandboxFile()))
-        .put(Key.SANDBOX_SCHEDULER_YAML,
+        .put(Key.SANDBOX_STATEMGR_YAML,
             Misc.substituteSandbox(
                 heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
         .put(Key.SANDBOX_SYSTEM_YAML,
