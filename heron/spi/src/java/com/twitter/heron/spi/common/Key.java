@@ -16,6 +16,7 @@ package com.twitter.heron.spi.common;
 /**
  * Enum of all configuration key values
  */
+@SuppressWarnings("checkstyle:MethodParamPad")
 public enum Key {
 
   //keys for heron environment
@@ -65,6 +66,7 @@ public enum Key {
 
   //keys for scheduler config
   SCHEDULER_IS_SERVICE                ("heron.scheduler.is.service"),
+  SCHEDULER_PROPERTIES                ("heron.scheduler.properties"),
 
   //keys for config provided user binaries and jars
   SCHEDULER_JAR                       ("heron.jars.scheduler"),
@@ -160,7 +162,7 @@ public enum Key {
   SANDBOX_STATEMGR_CLASSPATH          ("heron.classpath.sandbox.statemgr"),
   SANDBOX_UPLOADER_CLASSPATH          ("heron.classpath.sandbox.uploader");
 
-  private String value;
+  private final String value;
 
   Key(String value) {
     this.value = value;

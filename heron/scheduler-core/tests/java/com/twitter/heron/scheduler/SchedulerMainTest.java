@@ -35,7 +35,7 @@ import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -80,9 +80,9 @@ public class SchedulerMainTest {
   @Before
   public void setUp() throws Exception {
     Config config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+    when(config.getStringValue(Key.STATE_MANAGER_CLASS)).
         thenReturn(STATE_MANAGER_CLASS);
-    when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).
+    when(config.getStringValue(Key.SCHEDULER_CLASS)).
         thenReturn(SCHEDULER_CLASS);
 
     int iSchedulerServerPort = 0;

@@ -21,19 +21,19 @@ import org.junit.Test;
 
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.common.Misc;
 
 public class LocalFileSystemConfigTest {
 
   private Config getDefaultConfig() {
     return Config.newBuilder()
-        .put(Keys.cluster(), "cluster")
-        .put(Keys.role(), "role")
-        .put(Keys.topologyName(), "topology")
-        .put(Keys.topologyPackageType(), PackageType.TAR)
-        .put(Keys.topologyPackageFile(), "/tmp/something.tar.gz")
-        .put(LocalFileSystemKeys.fileSystemDirectory(),
+        .put(Key.CLUSTER, "cluster")
+        .put(Key.ROLE, "role")
+        .put(Key.TOPOLOGY_NAME, "topology")
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, PackageType.TAR)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, "/tmp/something.tar.gz")
+        .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(),
             LocalFileSystemDefaults.fileSystemDirectory())
         .build();
   }
@@ -55,7 +55,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(getDefaultConfig())
-            .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
+            .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), overrideDirectory)
             .build());
 
     Assert.assertEquals(
@@ -96,7 +96,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(getDefaultConfig())
-            .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
+            .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), overrideDirectory)
             .build());
 
     uploader.initialize(config);
@@ -114,7 +114,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(getDefaultConfig())
-            .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
+            .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), overrideDirectory)
             .build());
 
     uploader.initialize(config);

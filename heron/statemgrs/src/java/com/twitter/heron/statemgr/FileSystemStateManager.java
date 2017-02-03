@@ -30,7 +30,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
@@ -243,7 +243,7 @@ public abstract class FileSystemStateManager implements IStateManager {
 
     String topologyName = args[0];
     print("==> State Manager root path: %s",
-        config.getStringValue(Keys.stateManagerRootPath()));
+        config.getStringValue(Key.STATEMGR_ROOT_PATH));
 
     initialize(config);
 
@@ -258,7 +258,7 @@ public abstract class FileSystemStateManager implements IStateManager {
       print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
     } else {
       print("==> Topology %s not found under %s",
-          topologyName, config.getStringValue(Keys.stateManagerRootPath()));
+          topologyName, config.getStringValue(Key.STATEMGR_ROOT_PATH));
     }
   }
 

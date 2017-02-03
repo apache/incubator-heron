@@ -25,7 +25,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +69,7 @@ public class ZkUtilsTest {
         host0, port0, host1, port1, host2, port2);
 
     Config config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING")))
+    when(config.getStringValue(Key.STATEMGR_CONNECTION_STRING))
         .thenReturn(connectionString);
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.STATE_MANAGER);

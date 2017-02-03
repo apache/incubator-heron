@@ -33,7 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 @RunWith(PowerMockRunner.class)
@@ -75,10 +75,10 @@ public class SlurmSchedulerTest {
 
   private static Config createRunnerConfig() {
     Config config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
-    Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
-    Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
-    Mockito.when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
+    Mockito.when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(config.getStringValue(Key.CLUSTER)).thenReturn(CLUSTER);
+    Mockito.when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
+    Mockito.when(config.getStringValue(Key.ENVIRON)).thenReturn(ENVIRON);
 
     return config;
   }

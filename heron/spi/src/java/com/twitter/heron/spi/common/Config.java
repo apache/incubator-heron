@@ -25,7 +25,8 @@ import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
- * Config is an Immutable Map of &lt;String, Object&gt;
+ * Config is an Immutable Map of &lt;String, Object&gt; The get/set API that uses Key objects
+ * should be favored over Strings. Usage of the String API should be refactored out.
  */
 public class Config {
   private final Map<String, Object> cfgMap = new HashMap<>();
@@ -56,16 +57,25 @@ public class Config {
     return cfgMap.size();
   }
 
-  public Object get(String key) {
-    return cfgMap.get(key);
+  public Object get(Key key) {
+    return get(key.value());
   }
 
-  public String getStringValue(Key key) {
-    return getStringValue(key.value());
+  private Object get(String key) {
+    return cfgMap.get(key);
   }
 
   public String getStringValue(String key) {
     return (String) get(key);
+  }
+
+  public String getStringValue(Key key) {
+    return (String) get(key);
+  }
+
+  public String getStringValue(Key key, String defaultValue) {
+    String value = getStringValue(key);
+    return value != null ? value : defaultValue;
   }
 
   public String getStringValue(String key, String defaultValue) {
@@ -73,8 +83,16 @@ public class Config {
     return value != null ? value : defaultValue;
   }
 
-  public Boolean getBooleanValue(String key) {
+  public Boolean getBooleanValue(Key key) {
     return (Boolean) get(key);
+  }
+
+  private Boolean getBooleanValue(String key) {
+    return (Boolean) get(key);
+  }
+
+  public Boolean getBooleanValue(Key key, boolean defaultValue) {
+    return getBooleanValue(key.value(), defaultValue);
   }
 
   public Boolean getBooleanValue(String key, boolean defaultValue) {
@@ -82,22 +100,26 @@ public class Config {
     return value != null ? value : defaultValue;
   }
 
-  public ByteAmount getByteAmountValue(String key) {
+  public ByteAmount getByteAmountValue(Key key) {
     Object value = get(key);
     return TypeUtils.getByteAmount(value);
   }
 
-  public DryRunFormatType getDryRunFormatType(String key) {
+  DryRunFormatType getDryRunFormatType(Key key) {
     return (DryRunFormatType) get(key);
   }
 
-  public PackageType getPackageType(String key) {
+  PackageType getPackageType(Key key) {
     return (PackageType) get(key);
   }
 
-  public Long getLongValue(String key) {
+  public Long getLongValue(Key key) {
     Object value = get(key);
     return TypeUtils.getLong(value);
+  }
+
+  public Long getLongValue(Key key, long defaultValue) {
+    return getLongValue(key.value(), defaultValue);
   }
 
   public Long getLongValue(String key, long defaultValue) {
@@ -108,9 +130,13 @@ public class Config {
     return defaultValue;
   }
 
-  public Integer getIntegerValue(String key) {
+  public Integer getIntegerValue(Key key) {
     Object value = get(key);
     return TypeUtils.getInteger(value);
+  }
+
+  public Integer getIntegerValue(Key key, int defaultValue) {
+    return getIntegerValue(key.value(), defaultValue);
   }
 
   public Integer getIntegerValue(String key, int defaultValue) {
@@ -121,12 +147,12 @@ public class Config {
     return defaultValue;
   }
 
-  public Double getDoubleValue(String key) {
+  public Double getDoubleValue(Key key) {
     Object value = get(key);
     return TypeUtils.getDouble(value);
   }
 
-  public Double getDoubleValue(String key, double defaultValue) {
+  public Double getDoubleValue(Key key, double defaultValue) {
     Object value = get(key);
     if (value != null) {
       return TypeUtils.getDouble(value);
@@ -134,7 +160,7 @@ public class Config {
     return defaultValue;
   }
 
-  public boolean containsKey(String key) {
+  public boolean containsKey(Key key) {
     return cfgMap.containsKey(key);
   }
 
@@ -162,6 +188,11 @@ public class Config {
 
     public Builder put(String key, Object value) {
       this.keyValues.put(key, value);
+      return this;
+    }
+
+    public Builder put(Key key, Object value) {
+      put(key.value(), value);
       return this;
     }
 

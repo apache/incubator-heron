@@ -26,7 +26,7 @@ import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
@@ -69,8 +69,8 @@ public abstract class CommonPackingTests {
     this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
     this.instanceDefaultResources = new Resource(
@@ -86,8 +86,8 @@ public abstract class CommonPackingTests {
 
   private static Config newTestConfig(TopologyAPI.Topology topology) {
     return Config.newBuilder()
-            .put(Keys.topologyId(), topology.getId())
-            .put(Keys.topologyName(), topology.getName())
+            .put(Key.TOPOLOGY_ID, topology.getId())
+            .put(Key.TOPOLOGY_NAME, topology.getName())
             .putAll(ClusterDefaults.getDefaults())
             .build();
   }

@@ -27,7 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -89,13 +89,13 @@ public class SubmitterMainTest {
         .when(ReflectionUtils.class, "newInstance", UPLOADER_CLASS);
 
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get(STATE_MANAGER_CLASS)))
+    when(config.getStringValue(Key.STATE_MANAGER_CLASS))
         .thenReturn(STATE_MANAGER_CLASS);
-    when(config.getStringValue(ConfigKeys.get(LAUNCHER_CLASS)))
+    when(config.getStringValue(Key.LAUNCHER_CLASS))
         .thenReturn(LAUNCHER_CLASS);
-    when(config.getStringValue(ConfigKeys.get(PACKING_CLASS)))
+    when(config.getStringValue(Key.PACKING_CLASS))
         .thenReturn(PACKING_CLASS);
-    when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS)))
+    when(config.getStringValue(Key.UPLOADER_CLASS))
         .thenReturn(UPLOADER_CLASS);
 
     topology = TopologyAPI.Topology.getDefaultInstance();
@@ -139,7 +139,7 @@ public class SubmitterMainTest {
   @Test(expected = UploaderException.class)
   public void testSubmitTopologyClassNotExist() throws Exception {
     final String CLASS_NOT_EXIST = "class_not_exist";
-    when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(CLASS_NOT_EXIST);
+    when(config.getStringValue(Key.UPLOADER_CLASS)).thenReturn(CLASS_NOT_EXIST);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
@@ -149,7 +149,7 @@ public class SubmitterMainTest {
       verify(uploader, never()).close();
       verify(launcher, never()).close();
       verify(statemgr, never()).close();
-      when(config.getStringValue(ConfigKeys.get(UPLOADER_CLASS))).thenReturn(UPLOADER_CLASS);
+      when(config.getStringValue(Key.UPLOADER_CLASS)).thenReturn(UPLOADER_CLASS);
     }
   }
 
@@ -187,7 +187,7 @@ public class SubmitterMainTest {
     PowerMockito.whenNew(SchedulerStateManagerAdaptor.class).withAnyArguments().
         thenReturn(adaptor);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
-    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
+    when(config.getBooleanValue(Key.DRY_RUN, false)).thenReturn(true);
     try {
       submitterMain.submitTopology();
     } finally {
@@ -202,7 +202,7 @@ public class SubmitterMainTest {
 
   @Test
   public void testSubmitTopologySuccessful() throws Exception {
-    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"))).thenReturn(false);
+    when(config.getBooleanValue(Key.DRY_RUN)).thenReturn(false);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());

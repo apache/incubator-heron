@@ -57,31 +57,31 @@ final class ConfigDefaults {
    * @param key, the config key
    * @return String, the default value for the config key
    */
-  static String get(String key) {
-    return (String) defaults.get(key);
+  static String get(Key key) {
+    return (String) defaults.get(key.name());
   }
 
-  static Long getLong(String key) {
-    return TypeUtils.getLong(defaults.get(key));
+  static Long getLong(Key key) {
+    return TypeUtils.getLong(defaults.get(key.name()));
   }
 
-  static ByteAmount getByteAmount(String key) {
+  static ByteAmount getByteAmount(Key key) {
     return ByteAmount.fromBytes(getLong(key));
   }
 
-  static PackageType getPackageType(String key) {
-    return (PackageType) defaults.get(key);
+  static PackageType getPackageType(Key key) {
+    return (PackageType) defaults.get(key.name());
   }
 
-  static DryRunFormatType getDryRunFormatType(String key) {
-    return (DryRunFormatType) defaults.get(key);
+  static DryRunFormatType getDryRunFormatType(Key key) {
+    return (DryRunFormatType) defaults.get(key.name());
   }
 
-  static Double getDouble(String key) {
-    return TypeUtils.getDouble(defaults.get(key));
+  static Double getDouble(Key key) {
+    return TypeUtils.getDouble(defaults.get(key.name()));
   }
 
-  static Boolean getBoolean(String key) {
-    return TypeUtils.getBoolean(defaults.get(key));
+  static Boolean getBoolean(Key key) {
+    return TypeUtils.getBoolean(defaults.get(key.name()));
   }
 }

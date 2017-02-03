@@ -33,17 +33,11 @@ java_library(
 )
 
 filegroup(
-    name = "config-keys-yaml",
-    srcs = glob(["**/spi/common/**/keys.yaml"]),
-)
-
-filegroup(
     name = "config-defaults-yaml",
     srcs = glob(["**/spi/common/**/defaults.yaml"]),
 )
 
 common_resource_files = [
-    ":config-keys-yaml",
     ":config-defaults-yaml",
 ]
 

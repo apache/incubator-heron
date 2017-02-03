@@ -28,25 +28,25 @@ public final class ClusterConfig {
   @VisibleForTesting
   static Config loadHeronHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.heronHome(), heronHome)
-        .put(Keys.heronBin(), Misc.substitute(heronHome, Defaults.heronBin()))
-        .put(Keys.heronConf(), configPath)
-        .put(Keys.heronDist(), Misc.substitute(heronHome, Defaults.heronDist()))
-        .put(Keys.heronEtc(), Misc.substitute(heronHome, Defaults.heronEtc()))
-        .put(Keys.heronLib(), Misc.substitute(heronHome, Defaults.heronLib()))
-        .put(Keys.javaHome(), Misc.substitute(heronHome, Defaults.javaHome()));
+        .put(Key.HERON_HOME, heronHome)
+        .put(Key.HERON_BIN, Misc.substitute(heronHome, Defaults.heronBin()))
+        .put(Key.HERON_CONF, configPath)
+        .put(Key.HERON_DIST, Misc.substitute(heronHome, Defaults.heronDist()))
+        .put(Key.HERON_ETC, Misc.substitute(heronHome, Defaults.heronEtc()))
+        .put(Key.HERON_LIB, Misc.substitute(heronHome, Defaults.heronLib()))
+        .put(Key.JAVA_HOME, Misc.substitute(heronHome, Defaults.javaHome()));
     return cb.build();
   }
 
   private static Config loadSandboxHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.heronSandboxHome(), heronSandboxHome)
-        .put(Keys.heronSandboxBin(),
+        .put(Key.HERON_SANDBOX_HOME, heronSandboxHome)
+        .put(Key.HERON_SANDBOX_BIN,
             Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
-        .put(Keys.heronSandboxConf(), configPath)
-        .put(Keys.heronSandboxLib(),
+        .put(Key.HERON_SANDBOX_CONF, configPath)
+        .put(Key.HERON_SANDBOX_LIB,
             Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
-        .put(Keys.javaSandboxHome(),
+        .put(Key.HERON_SANDBOX_JAVA_HOME,
             Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
     return cb.build();
   }
@@ -54,48 +54,48 @@ public final class ClusterConfig {
   @VisibleForTesting
   static Config loadConfigHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.clusterFile(),
+        .put(Key.CLUSTER_YAML,
             Misc.substitute(heronHome, configPath, Defaults.clusterFile()))
-        .put(Keys.clientFile(),
+        .put(Key.CLIENT_YAML,
             Misc.substitute(heronHome, configPath, Defaults.clientFile()))
-        .put(Keys.defaultsFile(),
+        .put(Key.DEFAULTS_YAML,
             Misc.substitute(heronHome, configPath, Defaults.defaultsFile()))
-        .put(Keys.metricsSinksFile(),
+        .put(Key.METRICS_YAML,
             Misc.substitute(heronHome, configPath, Defaults.metricsSinksFile()))
-        .put(Keys.packingFile(),
+        .put(Key.PACKING_YAML,
             Misc.substitute(heronHome, configPath, Defaults.packingFile()))
-        .put(Keys.schedulerFile(),
+        .put(Key.SCHEDULER_YAML,
             Misc.substitute(heronHome, configPath, Defaults.schedulerFile()))
-        .put(Keys.stateManagerFile(),
+        .put(Key.STATEMGR_YAML,
             Misc.substitute(heronHome, configPath, Defaults.stateManagerFile()))
-        .put(Keys.systemFile(),
+        .put(Key.SYSTEM_YAML,
             Misc.substitute(heronHome, configPath, Defaults.systemFile()))
-        .put(Keys.uploaderFile(),
+        .put(Key.UPLOADER_YAML,
             Misc.substitute(heronHome, configPath, Defaults.uploaderFile()));
     return cb.build();
   }
 
   private static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.clusterSandboxFile(),
+        .put(Key.SANDBOX_CLUSTER_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
-        .put(Keys.defaultsSandboxFile(),
+        .put(Key.SANDBOX_DEFAULTS_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.defaultsSandboxFile()))
-        .put(Keys.metricsSinksSandboxFile(),
+        .put(Key.SANDBOX_METRICS_YAML,
             Misc.substituteSandbox(
                 heronSandboxHome, configPath, Defaults.metricsSinksSandboxFile()))
-        .put(Keys.packingSandboxFile(),
+        .put(Key.SANDBOX_PACKING_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.packingSandboxFile()))
-        .put(Keys.schedulerSandboxFile(),
+        .put(Key.SANDBOX_SCHEDULER_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.schedulerSandboxFile()))
-        .put(Keys.stateManagerSandboxFile(),
+        .put(Key.SANDBOX_SCHEDULER_YAML,
             Misc.substituteSandbox(
                 heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
-        .put(Keys.systemSandboxFile(),
+        .put(Key.SANDBOX_SYSTEM_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
-        .put(Keys.uploaderSandboxFile(),
+        .put(Key.SANDBOX_UPLOADER_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()))
-        .put(Keys.overrideSandboxFile(),
+        .put(Key.SANDBOX_OVERRIDE_YAML,
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.overrideSandboxFile()));
     return cb.build();
   }
