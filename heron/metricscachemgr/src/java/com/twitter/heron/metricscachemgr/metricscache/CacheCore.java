@@ -166,6 +166,17 @@ public class CacheCore {
     return (((long) hi) << 32) | (lo & 0xffffffffL);
   }
 
+  /**
+   * The 'cacheMetric' is a tree map organized by timestamp.
+   * The key indicates the startTime of the time window.
+   * <p>
+   * The insertion procedure:
+   * 1. find the leaf according to the metric timestamp. TreeMap.floorEntry finds the leaf whose
+   * time window contains the given timestamp
+   * 2. if the leaf is null, a new bucket is created; else insert into existing bucket.
+   *
+   * @param metricDatum the metric to be inserted
+   */
   private void addMetric(TopologyMaster.MetricDatum metricDatum) {
     String componentName = metricDatum.getComponentName();
     String instanceId = metricDatum.getInstanceId();
