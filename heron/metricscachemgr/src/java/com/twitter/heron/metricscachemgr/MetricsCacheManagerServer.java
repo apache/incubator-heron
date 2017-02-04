@@ -44,13 +44,13 @@ public class MetricsCacheManagerServer extends HeronServer {
   /**
    * Constructor
    *
-   * @param s the NIOLooper bind with this socket server
+   * @param looper the NIOLooper bind with this socket server
    * @param host the host of remote endpoint to communicate with
    * @param port the port of remote endpoint to communicate with
    */
-  public MetricsCacheManagerServer(NIOLooper s, String host, int port, HeronSocketOptions options,
-                                   MetricsCache cache) {
-    super(s, host, port, options);
+  public MetricsCacheManagerServer(NIOLooper looper, String host, int port,
+                                   HeronSocketOptions options, MetricsCache cache) {
+    super(looper, host, port, options);
 
     metricsCache = cache;
   }

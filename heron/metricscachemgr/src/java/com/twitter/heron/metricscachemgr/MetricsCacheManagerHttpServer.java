@@ -52,9 +52,9 @@ import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
  */
 public class MetricsCacheManagerHttpServer {
   // http path, compatible with tmaster stat interface
-  public static final String PATH_STATS = "/stats";
-  public static final String PATH_EXCEPTIONS = "/exceptions";
-  public static final String PATH_EXCEPTIONSUMMARY = "/exceptionsummary";
+  private static final String PATH_STATS = "/stats";
+  private static final String PATH_EXCEPTIONS = "/exceptions";
+  private static final String PATH_EXCEPTIONSUMMARY = "/exceptionsummary";
   // logger
   private static final Logger LOG = Logger.getLogger(MetricsCacheManagerHttpServer.class.getName());
   // http server
@@ -224,6 +224,7 @@ public class MetricsCacheManagerHttpServer {
   }
 
   // compatible with tracker: http+json
+  // TODO(huijun) add compatible query interface for tracker
   public class MetricsHandler implements HttpHandler {
 
     @Override

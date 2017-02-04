@@ -12,23 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.metricscachemgr.metricscache.datapoint;
+package com.twitter.heron.metricscachemgr.metricscache.query;
 
-/**
- * metric datum with timestamp
- * TODO(huijun) object pool to avoid java gc
- */
-public class MetricDatapoint {
-  public long timestamp = 0;
-  // one data point, compatible with protobuf message from sink
-  public String value = null;
-
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("(").append(timestamp).append(", ").append(value).append(")");
-    return sb.toString();
-  }
-
+public enum MetricGranularity {
+  AGGREGATE_ALL_METRICS,
+  AGGREGATE_BY_BUCKET,
+  RAW
 }

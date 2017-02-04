@@ -20,9 +20,16 @@ import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
-import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
@@ -32,13 +39,16 @@ import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Defaults;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.ReflectionUtils;
+
+//import org.apache.commons.cli.CommandLine;
+//import org.apache.commons.cli.CommandLineParser;
+//import org.apache.commons.cli.DefaultParser;
+//import org.apache.commons.cli.ParseException;
 
 /**
  * main entry for metrics cache manager
@@ -124,73 +134,202 @@ public class MetricsCacheManager {
     metricsCacheManagerHttpServer = new MetricsCacheManagerHttpServer(metricsCache, statsPort);
   }
 
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Options options = new Options();
+
+    Option cluster = Option.builder("c")
+        .desc("Cluster name in which the topology needs to run on")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
+
+    Option role = Option.builder("r")
+        .desc("Role under which the topology needs to run")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
+
+    Option environment = Option.builder("e")
+        .desc("Environment under which the topology needs to run")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
+
+    Option masterPort = Option.builder("m")
+        .desc("Master port to accept the metric/exception messages from sinks")
+        .longOpt("master_port")
+        .hasArgs()
+        .argName("master port")
+        .required()
+        .build();
+
+    Option statsPort = Option.builder("s")
+        .desc("Stats port to respond the queries on metrics/exceptions")
+        .longOpt("stats_port")
+        .hasArgs()
+        .argName("stats port")
+        .required()
+        .build();
+
+    Option systemConfig = Option.builder("y")
+        .desc("System configuration file path")
+        .longOpt("system_config_file")
+        .hasArgs()
+        .argName("system config file")
+        .build();
+
+    Option sinkConfig = Option.builder("i")
+        .desc("Sink configuration file path")
+        .longOpt("sink_config_file")
+        .hasArgs()
+        .argName("sink config file")
+        .build();
+
+    Option topologyName = Option.builder("n")
+        .desc("The topology name")
+        .longOpt("topology_name")
+        .hasArgs()
+        .argName("topology name")
+        .required()
+        .build();
+
+    Option topologyId = Option.builder("t")
+        .desc("The topology id")
+        .longOpt("topology_id")
+        .hasArgs()
+        .argName("topology id")
+        .required()
+        .build();
+
+    Option metricsCacheId = Option.builder("r")
+        .desc("The MetricsCache id")
+        .longOpt("metricscache_id")
+        .hasArgs()
+        .argName("metricscache id")
+        .required()
+        .build();
+
+    Option verbose = Option.builder("v")
+        .desc("Enable debug logs")
+        .longOpt("verbose")
+        .build();
+
+    options.addOption(cluster);
+    options.addOption(role);
+    options.addOption(environment);
+    options.addOption(masterPort);
+    options.addOption(statsPort);
+    options.addOption(systemConfig);
+    options.addOption(sinkConfig);
+    options.addOption(topologyName);
+    options.addOption(topologyId);
+    options.addOption(metricsCacheId);
+    options.addOption(verbose);
+
+    return options;
+  }
+
+  // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
+
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp("MetricsCache", options);
+  }
+
   public static void main(String[] args) throws Exception {
-    if (args.length != 10) {
-      throw new RuntimeException(
-          "Invalid arguments; Usage: java com.twitter.heron.metricscachemgr.MetricsCacheManager "
-              + "<id> <master-port> <stats-port> <topname> <topid> "
-              + "<heron_internals_config_filename> <metrics_sinks_config_filename> "
-              + "<cluster> <role> <environ>");
+    Options options = constructOptions();
+    Options helpOptions = constructHelpOptions();
+
+    CommandLineParser parser = new DefaultParser();
+
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+    if (cmd.hasOption("h")) {
+      usage(options);
+      return;
     }
 
-    String metricsCacheMgrId = args[0];
-    int masterPort = Integer.parseInt(args[1]);
-    int statsPort = Integer.parseInt(args[2]);
-    String topologyName = args[3];
-    String topologyId = args[4];
-    String systemConfigFilename = args[5];
-    String metricsSinksConfigFilename = args[6];
-    String cluster = args[7];
-    String role = args[8];
-    String environ = args[9];
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      usage(options);
+      throw new RuntimeException("Error parsing command line options: ", e);
+    }
 
-    //-----------------
+    Level logLevel = Level.INFO;
+    if (cmd.hasOption("v")) {
+      logLevel = Level.ALL;
+    }
+
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    int masterPort = Integer.valueOf(cmd.getOptionValue("master_port"));
+    int statsPort = Integer.valueOf(cmd.getOptionValue("stats_port"));
+    String systemConfigFilename = cmd.getOptionValue("system_config_file");
+    String metricsSinksConfigFilename = cmd.getOptionValue("sink_config_file");
+    String topologyName = cmd.getOptionValue("topology_name");
+    String topologyId = cmd.getOptionValue("topology_id");
+    String metricsCacheMgrId = cmd.getOptionValue("metricscache_id");
+
+    // read heron internal config file
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
-    // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
-    // Init the logging setting and redirect the stdout and stderr to logging
-    // For now we just set the logging level as INFO; later we may accept an argument to set it.
-    Level loggingLevel = Level.ALL; // for prototype debug
-    String loggingDir = systemConfig.getHeronLoggingDirectory();
-
-    // Log to file and TMaster
-    LoggingHelper.loggerInit(loggingLevel, true);
-    LoggingHelper.addLoggingHandler(
-        LoggingHelper.getFileHandler(metricsCacheMgrId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
-            systemConfig.getHeronLoggingMaximumFiles()));
+    // Log to file and sink(exception)
+    LoggingHelper.loggerInit(logLevel, true);
+    LoggingHelper.addLoggingHandler(LoggingHelper.getFileHandler(metricsCacheMgrId,
+        systemConfig.getHeronLoggingDirectory(), true,
+        systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+        systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting MetricsCache for topology %s with topologyId %s with "
-            + "MetricsCache Id %s, MericsCache Port: %d.",
+            + "MetricsCache Id %s, master port: %d.",
         topologyName, topologyId, metricsCacheMgrId, masterPort));
 
     LOG.info("System Config: " + systemConfig);
 
-    //-----------------
-    // Populate the msConfig
+    // read sink config file
     MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename);
-
     LOG.info("Sinks Config: " + sinksConfig.toString());
 
-    //----------------
-    Config.Builder config = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadConfig(Defaults.heronSandboxHome(),
-            Defaults.heronSandboxConf(), "./release.yaml"))
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.topologyName(), topologyName)
-        .put(Keys.topologyId(), topologyId);
-    LOG.info("Config: " + config.build().toString());
+    // build config from cli
+    Config config =
+        Config.expand(
+            Config.newBuilder()
+                .putAll(ClusterConfig.loadSandboxConfig())
+                .putAll(Config.newBuilder()
+                    .put(Keys.cluster(), cluster)
+                    .put(Keys.role(), role)
+                    .put(Keys.environ(), environ)
+                    .build())
+                .putAll(Config.newBuilder()
+                    .put(Keys.topologyName(), topologyName)
+                    .put(Keys.topologyId(), topologyId)
+                    .build())
+                .build());
+    LOG.info("Cli Config: " + config.toString());
 
-    Config configExpand = Config.expand(config.build());
-    LOG.info("Config: " + config.toString());
-
-    //-----------------
+    // build metricsCache location
     TopologyMaster.MetricsCacheLocation metricsCacheLocation =
         TopologyMaster.MetricsCacheLocation.newBuilder()
             .setTopologyName(topologyName)
@@ -203,7 +342,7 @@ public class MetricsCacheManager {
 
     MetricsCacheManager metricsCacheManager = new MetricsCacheManager(
         topologyName, METRICS_CACHE_HOST, masterPort, statsPort,
-        systemConfig, sinksConfig, configExpand, metricsCacheLocation);
+        systemConfig, sinksConfig, config, metricsCacheLocation);
     metricsCacheManager.start();
 
     LOG.info("Loops terminated. MetricsCache Manager exits.");

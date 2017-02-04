@@ -14,19 +14,66 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoint;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionDatum;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionRequest;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionResponse;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricDatum;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricGranularity;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricRequest;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricResponse;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 import static com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.toProtobuf;
 
 public class MetricsCacheQueryUtilsTest {
+  private static void assertMetricRequest(
+      MetricRequest request,
+      List<AbstractMap.SimpleEntry<String, List<String>>> componentNameInstanceId,
+      List<String> metricNames, MetricGranularity aggregationGranularity) {
+    Assert.assertEquals(aggregationGranularity, request.getAggregationGranularity());
+
+    Set<String> actualMetricName = request.getMetricNames();
+    if (metricNames == null) {
+      Assert.assertNull(actualMetricName);
+    } else {
+      Assert.assertEquals(metricNames.size(), actualMetricName.size());
+      for (String name : metricNames) {
+        Assert.assertTrue(actualMetricName.contains(name));
+      }
+    }
+
+    Map<String, Set<String>> actualComponentInstance = request.getComponentNameInstanceId();
+    if (componentNameInstanceId == null) {
+      Assert.assertNull(actualComponentInstance);
+    } else {
+      Assert.assertEquals(componentNameInstanceId.size(), actualComponentInstance.size());
+      for (Map.Entry<String, List<String>> entry : componentNameInstanceId) {
+        Assert.assertTrue(actualComponentInstance.containsKey(entry.getKey()));
+
+        Set<String> actualInstances = actualComponentInstance.get(entry.getKey());
+        if (actualInstances == null) {
+          Assert.assertNull(entry.getValue());
+        }
+        Assert.assertEquals(entry.getValue().size(), actualInstances.size());
+        for (String ins : entry.getValue()) {
+          Assert.assertTrue(actualInstances.contains(ins));
+        }
+      }
+    }
+  }
+
   @Test
   public void testFromProtoBufMetricInterval() {
     TopologyMaster.MetricRequest request =
@@ -37,17 +84,15 @@ public class MetricsCacheQueryUtilsTest {
             .setInterval(100)// in seconds
             .build();
 
-    MetricsCacheQueryUtils.MetricRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(2, request1.componentNameInstanceId.get("c1").size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
-    Assert.assertEquals(100 * 1000, request1.endTime - request1.startTime); // in milli-seconds
-    Assert.assertEquals(MetricsCacheQueryUtils.Granularity.AGGREGATE_ALL_METRICS,
-        request1.aggregationGranularity);
+    assertMetricRequest(request1,
+        Arrays.asList(
+            new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
+        Arrays.asList("m1", "m2"),
+        MetricGranularity.AGGREGATE_ALL_METRICS);
+    // in milli-seconds
+    Assert.assertEquals(100 * 1000, request1.getEndTime() - request1.getStartTime());
   }
 
   @Test
@@ -61,21 +106,15 @@ public class MetricsCacheQueryUtilsTest {
                 .setStart(100).setEnd(200)) // in seconds
             .build();
 
-    MetricsCacheQueryUtils.MetricRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(2, request1.componentNameInstanceId.get("c1").size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
-    Assert.assertEquals(2, request1.metricNames.size());
-    Assert.assertEquals(true, request1.metricNames.contains("m1"));
-    Assert.assertEquals(true, request1.metricNames.contains("m2"));
-    Assert.assertEquals(100 * 1000, request1.startTime); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.endTime); // in milli-seconds
-    Assert.assertEquals(MetricsCacheQueryUtils.Granularity.AGGREGATE_ALL_METRICS,
-        request1.aggregationGranularity);
+    assertMetricRequest(request1,
+        Arrays.asList(
+            new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
+        Arrays.asList("m1", "m2"),
+        MetricGranularity.AGGREGATE_ALL_METRICS);
+    Assert.assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
+    Assert.assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
   }
 
   @Test
@@ -90,21 +129,15 @@ public class MetricsCacheQueryUtilsTest {
             .setMinutely(true)
             .build();
 
-    MetricsCacheQueryUtils.MetricRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(2, request1.componentNameInstanceId.get("c1").size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
-    Assert.assertEquals(2, request1.metricNames.size());
-    Assert.assertEquals(true, request1.metricNames.contains("m1"));
-    Assert.assertEquals(true, request1.metricNames.contains("m2"));
-    Assert.assertEquals(100 * 1000, request1.startTime); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.endTime); // in milli-seconds
-    Assert.assertEquals(MetricsCacheQueryUtils.Granularity.AGGREGATE_BY_BUCKET,
-        request1.aggregationGranularity);
+    assertMetricRequest(request1,
+        Arrays.asList(
+            new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
+        Arrays.asList("m1", "m2"),
+        MetricGranularity.AGGREGATE_BY_BUCKET);
+    Assert.assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
+    Assert.assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
   }
 
   @Test
@@ -118,19 +151,15 @@ public class MetricsCacheQueryUtilsTest {
             .setMinutely(true)
             .build();
 
-    MetricsCacheQueryUtils.MetricRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(2, request1.componentNameInstanceId.get("c1").size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
-    Assert.assertEquals(0, request1.metricNames.size());
-    Assert.assertEquals(100 * 1000, request1.startTime); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.endTime); // in milli-seconds
-    Assert.assertEquals(MetricsCacheQueryUtils.Granularity.AGGREGATE_BY_BUCKET,
-        request1.aggregationGranularity);
+    assertMetricRequest(request1,
+        Arrays.asList(
+            new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
+        Arrays.asList(new String[]{}),
+        MetricGranularity.AGGREGATE_BY_BUCKET);
+    Assert.assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
+    Assert.assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
   }
 
   @Test
@@ -144,33 +173,22 @@ public class MetricsCacheQueryUtilsTest {
             .setMinutely(true)
             .build();
 
-    MetricsCacheQueryUtils.MetricRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true,
-        request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(null, request1.componentNameInstanceId.get("c1"));
-    Assert.assertEquals(2, request1.metricNames.size());
-    Assert.assertEquals(true, request1.metricNames.contains("m1"));
-    Assert.assertEquals(true, request1.metricNames.contains("m2"));
-    Assert.assertEquals(100 * 1000, request1.startTime); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.endTime); // in milli-seconds
-    Assert.assertEquals(MetricsCacheQueryUtils.Granularity.AGGREGATE_BY_BUCKET,
-        request1.aggregationGranularity);
+    Assert.assertEquals(null, request1.getComponentNameInstanceId().get("c1"));
   }
 
   @Test
   public void testToProtoBufMetric() {
-    List<MetricsCacheQueryUtils.MetricTimeRangeValue> list = new ArrayList<>();
-    list.add(new MetricsCacheQueryUtils.MetricTimeRangeValue(300 * 1000, 400 * 1000, "v1"));
-    MetricsCacheQueryUtils.MetricResponse response = new MetricsCacheQueryUtils.MetricResponse();
+    List<MetricTimeRangeValue> list = new ArrayList<>();
+    list.add(new MetricTimeRangeValue(300 * 1000, 400 * 1000, "v1"));
+    MetricResponse response = new MetricResponse();
     response.metricList = new ArrayList<>();
-    response.metricList.add(new MetricsCacheQueryUtils.MetricDatum("c1", "i1", "m1", list));
+    response.metricList.add(new MetricDatum("c1", "i1", "m1", list));
 
-    MetricsCacheQueryUtils.MetricRequest request = new MetricsCacheQueryUtils.MetricRequest();
-    request.startTime = 100 * 1000;
-    request.endTime = 200 * 1000;
+    long startTime = 100 * 1000;
+    long endTime = 200 * 1000;
+    MetricRequest request = new MetricRequest(null, null, startTime, endTime, null);
 
     TopologyMaster.MetricResponse response1 = toProtobuf(response, request);
 
@@ -185,16 +203,16 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testToProtoBufMetric2() {
-    List<MetricsCacheQueryUtils.MetricTimeRangeValue> list = new ArrayList<>();
-    list.add(new MetricsCacheQueryUtils.MetricTimeRangeValue(300 * 1000, 400 * 1000, "v1"));
-    list.add(new MetricsCacheQueryUtils.MetricTimeRangeValue(500 * 1000, 600 * 1000, "v2"));
-    MetricsCacheQueryUtils.MetricResponse response = new MetricsCacheQueryUtils.MetricResponse();
+    List<MetricTimeRangeValue> list = new ArrayList<>();
+    list.add(new MetricTimeRangeValue(300 * 1000, 400 * 1000, "v1"));
+    list.add(new MetricTimeRangeValue(500 * 1000, 600 * 1000, "v2"));
+    MetricResponse response = new MetricResponse();
     response.metricList = new ArrayList<>();
-    response.metricList.add(new MetricsCacheQueryUtils.MetricDatum("c1", "i1", "m1", list));
+    response.metricList.add(new MetricDatum("c1", "i1", "m1", list));
 
-    MetricsCacheQueryUtils.MetricRequest request = new MetricsCacheQueryUtils.MetricRequest();
-    request.startTime = 100 * 1000;
-    request.endTime = 200 * 1000;
+    long startTime = 100 * 1000;
+    long endTime = 200 * 1000;
+    MetricRequest request = new MetricRequest(null, null, startTime, endTime, null);
 
     TopologyMaster.MetricResponse response1 = toProtobuf(response, request);
 
@@ -225,8 +243,7 @@ public class MetricsCacheQueryUtilsTest {
             .addInstances("i1").addInstances("i2")
             .build();
 
-    MetricsCacheQueryUtils.ExceptionRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
     Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
     Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
@@ -242,8 +259,7 @@ public class MetricsCacheQueryUtilsTest {
             .setComponentName("c1")
             .build();
 
-    MetricsCacheQueryUtils.ExceptionRequest request1 =
-        MetricsCacheQueryUtils.fromProtobuf(request);
+    ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
     Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
     Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
@@ -252,18 +268,9 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testToProtoBufException() {
-    MetricsCacheQueryUtils.ExceptionResponse response =
-        new MetricsCacheQueryUtils.ExceptionResponse();
+    ExceptionResponse response = new ExceptionResponse();
     response.exceptionDatapointList = new ArrayList<>();
-    ExceptionDatapoint dp = new ExceptionDatapoint();
-    dp.componentName = "c1";
-    dp.instanceId = "i1";
-    dp.hostname = "h1";
-    dp.stackTrace = "s1";
-    dp.firstTime = "100";
-    dp.lastTime = "200";
-    dp.count = 10;
-    dp.logging = "l1";
+    ExceptionDatum dp = new ExceptionDatum("c1", "i1", "h1", "s1", "lt1", "ft1", 10, "l1");
     response.exceptionDatapointList.add(dp);
 
     TopologyMaster.ExceptionLogResponse response1 = toProtobuf(response);
@@ -274,8 +281,8 @@ public class MetricsCacheQueryUtilsTest {
     Assert.assertEquals("h1", response1.getExceptions(0).getHostname());
     Assert.assertEquals("s1", response1.getExceptions(0).getStacktrace());
     Assert.assertEquals("l1", response1.getExceptions(0).getLogging());
-    Assert.assertEquals("100", response1.getExceptions(0).getFirsttime());
-    Assert.assertEquals("200", response1.getExceptions(0).getLasttime());
+    Assert.assertEquals("ft1", response1.getExceptions(0).getFirsttime());
+    Assert.assertEquals("lt1", response1.getExceptions(0).getLasttime());
     Assert.assertEquals(10, response1.getExceptions(0).getCount());
   }
 }

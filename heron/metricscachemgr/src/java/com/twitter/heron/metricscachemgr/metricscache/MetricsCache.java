@@ -21,7 +21,11 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoint;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionDatum;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionRequest;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionResponse;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricRequest;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricResponse;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
@@ -95,8 +99,7 @@ public class MetricsCache {
    * @param request query statement
    * @return metric list
    */
-  public MetricsCacheQueryUtils.MetricResponse getMetrics(
-      MetricsCacheQueryUtils.MetricRequest request) {
+  public MetricResponse getMetrics(MetricRequest request) {
     return cache.getMetrics(request, metricNameType);
   }
 
@@ -106,8 +109,7 @@ public class MetricsCache {
    * @param request query statement
    * @return exception list
    */
-  public MetricsCacheQueryUtils.ExceptionResponse getExceptions(
-      MetricsCacheQueryUtils.ExceptionRequest request) {
+  public ExceptionResponse getExceptions(ExceptionRequest request) {
     return cache.getExceptions(request);
   }
 
@@ -119,41 +121,38 @@ public class MetricsCache {
    */
   public TopologyMaster.ExceptionLogResponse getExceptions(
       TopologyMaster.ExceptionLogRequest request) {
-    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
-    MetricsCacheQueryUtils.ExceptionResponse response1 = cache.getExceptions(request1);
+    ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
+    ExceptionResponse response1 = cache.getExceptions(request1);
     TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response1);
     return response;
   }
 
-  private MetricsCacheQueryUtils.ExceptionResponse summarizeException(
-      MetricsCacheQueryUtils.ExceptionResponse response1) {
-    Map<String, ExceptionDatapoint> exceptionSummary = new HashMap<>();
-    for (ExceptionDatapoint edp : response1.exceptionDatapointList) {
+  private ExceptionResponse summarizeException(ExceptionResponse response1) {
+    Map<String, ExceptionDatum> exceptionSummary = new HashMap<>();
+    for (ExceptionDatum edp : response1.exceptionDatapointList) {
       // Get classname by splitting on first colon
-      int pos = edp.stackTrace.indexOf(':');
+      int pos = edp.getStackTrace().indexOf(':');
       if (pos >= 0) {
-        String className = edp.stackTrace.substring(0, pos);
+        String className = edp.getStackTrace().substring(0, pos);
         if (!exceptionSummary.containsKey(className)) {
-          ExceptionDatapoint edp2 = new ExceptionDatapoint();
-          edp2.componentName = edp.componentName;
-          edp2.hostname = edp.hostname;
-          edp2.instanceId = edp.instanceId;
-          edp2.firstTime = edp.firstTime;
-          edp2.lastTime = edp.lastTime;
-          edp2.count = edp.count;
-          edp2.logging = edp.logging;
-          edp2.stackTrace = className;
-          exceptionSummary.put(className, edp2);
+          exceptionSummary.put(className,
+              new ExceptionDatum(edp.getComponentName(), edp.getInstanceId(), edp.getHostname(),
+                  className, edp.getLastTime(), edp.getFirstTime(),
+                  edp.getCount(), edp.getLogging()));
         } else {
-          ExceptionDatapoint edp3 = exceptionSummary.get(className);
-          edp3.count += edp.count;
-          edp3.firstTime =
-              edp3.firstTime.compareTo(edp.firstTime) < 0 ? edp3.firstTime : edp.firstTime;
-          edp3.lastTime = edp3.lastTime.compareTo(edp.lastTime) > 0 ? edp3.lastTime : edp.lastTime;
+          ExceptionDatum edp3 = exceptionSummary.get(className);
+          // update count and time
+          int count = edp3.getCount() + edp.getCount();
+          String firstTime = edp3.getFirstTime();
+          String lastTime = edp.getLastTime(); // should assure the time ?
+          // put it back in summary
+          exceptionSummary.put(className,
+              new ExceptionDatum(edp3.getComponentName(), edp3.getInstanceId(), edp3.getHostname(),
+                  edp3.getStackTrace(), lastTime, firstTime, count, edp3.getLogging()));
         }
       }
     }
-    MetricsCacheQueryUtils.ExceptionResponse ret = new MetricsCacheQueryUtils.ExceptionResponse();
+    ExceptionResponse ret = new ExceptionResponse();
     ret.exceptionDatapointList.addAll(exceptionSummary.values());
     return ret;
   }
@@ -166,9 +165,9 @@ public class MetricsCache {
    */
   public TopologyMaster.ExceptionLogResponse getExceptionsSummary(
       TopologyMaster.ExceptionLogRequest request) {
-    MetricsCacheQueryUtils.ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
-    MetricsCacheQueryUtils.ExceptionResponse response1 = cache.getExceptions(request1);
-    MetricsCacheQueryUtils.ExceptionResponse response2 = summarizeException(response1);
+    ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
+    ExceptionResponse response1 = cache.getExceptions(request1);
+    ExceptionResponse response2 = summarizeException(response1);
     TopologyMaster.ExceptionLogResponse response = MetricsCacheQueryUtils.toProtobuf(response2);
     return response;
   }
@@ -181,13 +180,17 @@ public class MetricsCache {
    */
   public TopologyMaster.MetricResponse getMetrics(TopologyMaster.MetricRequest request) {
     String componentName = request.getComponentName();
-    if (!cache.existComponentInstance(componentName, null)) {
-      return buildResponseNotOk("Unknown component: " + componentName).build();
+    if (!cache.componentInstanceExists(componentName, null)) {
+      return buildResponseNotOk(
+          String.format("Unknown component %s found in MetricRequest %s", componentName, request)
+      ).build();
     }
     if (request.getInstanceIdCount() > 0) {
       for (String instanceId : request.getInstanceIdList()) {
-        if (!cache.existComponentInstance(componentName, instanceId)) {
-          return buildResponseNotOk("Unknown instance: " + instanceId).build();
+        if (!cache.componentInstanceExists(componentName, instanceId)) {
+          return buildResponseNotOk(
+              String.format("Unknown instance %s found in MetricRequest %s", instanceId, request)
+          ).build();
         }
       }
     }
@@ -195,8 +198,8 @@ public class MetricsCache {
       return buildResponseNotOk("No purgeIntervalSec or explicit purgeIntervalSec set").build();
     }
     // query
-    MetricsCacheQueryUtils.MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
-    MetricsCacheQueryUtils.MetricResponse response1 = cache.getMetrics(request1, metricNameType);
+    MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
+    MetricResponse response1 = cache.getMetrics(request1, metricNameType);
     TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.toProtobuf(response1, request1);
     return response;
   }
