@@ -20,21 +20,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
-import com.twitter.heron.metricscachemgr.metricscache.datapoint.ExceptionDatapoint;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionDatum;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionRequest;
+import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionResponse;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricDatum;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricGranularity;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricRequest;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricResponse;
+import com.twitter.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
-import static com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.Granularity.AGGREGATE_ALL_METRICS;
-import static com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.Granularity.AGGREGATE_BY_BUCKET;
+import static com.twitter.heron.metricscachemgr.metricscache.query.MetricGranularity.AGGREGATE_ALL_METRICS;
+import static com.twitter.heron.metricscachemgr.metricscache.query.MetricGranularity.AGGREGATE_BY_BUCKET;
 
 /**
- * define the query request and response format
+ * converter from/to protobuf
  */
-final class MetricsCacheQueryUtils {
-  private static final Logger LOG = Logger.getLogger(MetricsCacheQueryUtils.class.getName());
-
+public final class MetricsCacheQueryUtils {
   private MetricsCacheQueryUtils() {
   }
 
@@ -44,50 +48,49 @@ final class MetricsCacheQueryUtils {
   public static MetricRequest fromProtobuf(TopologyMaster.MetricRequest request) {
     String componentName = request.getComponentName();
 
-    MetricRequest outRequest = new MetricRequest();
-    outRequest.componentNameInstanceId = new HashMap<>();
+    Map<String, Set<String>> componentNameInstanceId = new HashMap<>();
     if (request.getInstanceIdCount() == 0) {
       // empty list means all instances
       // 'null' means all instances
-      outRequest.componentNameInstanceId.put(componentName, null);
+      componentNameInstanceId.put(componentName, null);
     } else {
       Set<String> instances = new HashSet<>();
       // only one component
-      outRequest.componentNameInstanceId.put(componentName, instances);
+      componentNameInstanceId.put(componentName, instances);
       // if there are instances specified
       instances.addAll(request.getInstanceIdList());
     }
 
-    Set<String> metrics = new HashSet<>();
-    outRequest.metricNames = metrics;
+    Set<String> metricNames = new HashSet<>();
     if (request.getMetricCount() > 0) {
-      metrics.addAll(request.getMetricList());
+      metricNames.addAll(request.getMetricList());
     } // empty list means no metrics
 
     // default: the whole time horizon
-    outRequest.startTime = 0;
-    outRequest.endTime = Long.MAX_VALUE;
+    long startTime = 0;
+    long endTime = Long.MAX_VALUE;
     if (request.hasInterval()) { // endTime = now
-      outRequest.endTime = System.currentTimeMillis();
+      endTime = System.currentTimeMillis();
 
       long interval = request.getInterval(); // in seconds
       if (interval <= 0) { // means all
-        outRequest.startTime = 0;
+        startTime = 0;
       } else { // means [-interval, now]
-        outRequest.startTime = outRequest.endTime - interval * 1000;
+        startTime = endTime - interval * 1000;
       }
     } else {
-      outRequest.startTime = request.getExplicitInterval().getStart() * 1000;
-      outRequest.endTime = request.getExplicitInterval().getEnd() * 1000;
+      startTime = request.getExplicitInterval().getStart() * 1000;
+      endTime = request.getExplicitInterval().getEnd() * 1000;
     }
 
     // default: aggregate all metrics
-    outRequest.aggregationGranularity = AGGREGATE_ALL_METRICS;
+    MetricGranularity aggregationGranularity = AGGREGATE_ALL_METRICS;
     if (request.hasMinutely() && request.getMinutely()) {
-      outRequest.aggregationGranularity = AGGREGATE_BY_BUCKET;
+      aggregationGranularity = AGGREGATE_BY_BUCKET;
     }
 
-    return outRequest;
+    return new MetricRequest(componentNameInstanceId, metricNames,
+        startTime, endTime, aggregationGranularity);
   }
 
   /**
@@ -97,7 +100,7 @@ final class MetricsCacheQueryUtils {
                                                          MetricRequest request) {
     TopologyMaster.MetricResponse.Builder builder =
         TopologyMaster.MetricResponse.newBuilder();
-    builder.setInterval((request.endTime - request.startTime) / 1000); // in seconds
+    builder.setInterval((request.getEndTime() - request.getStartTime()) / 1000); // in seconds
 
     // default OK if we have response to build already
     builder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK));
@@ -107,9 +110,9 @@ final class MetricsCacheQueryUtils {
     Map<String, Map<String, List<MetricTimeRangeValue>>> aggregation =
         new HashMap<>();
     for (MetricDatum datum : response.metricList) {
-      String instanceId = datum.instanceId;
-      String metricName = datum.metricName;
-      List<MetricTimeRangeValue> metricValue = datum.metricValue;
+      String instanceId = datum.getInstanceId();
+      String metricName = datum.getMetricName();
+      List<MetricTimeRangeValue> metricValue = datum.getMetricValue();
       // prepare
       if (!aggregation.containsKey(instanceId)) {
         aggregation.put(instanceId, new HashMap<String, List<MetricTimeRangeValue>>());
@@ -136,16 +139,16 @@ final class MetricsCacheQueryUtils {
         // add value|IntervalValue
         List<MetricTimeRangeValue> list = aggregation.get(instanceId).get(metricName);
         if (list.size() == 1) {
-          individualMetricBuilder.setValue(list.get(0).value);
+          individualMetricBuilder.setValue(list.get(0).getValue());
         } else {
           for (MetricTimeRangeValue v : list) {
             TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.Builder
                 intervalValueBuilder =
                 TopologyMaster.MetricResponse.IndividualMetric.IntervalValue.newBuilder();
 
-            intervalValueBuilder.setValue(v.value);
+            intervalValueBuilder.setValue(v.getValue());
             intervalValueBuilder.setInterval(TopologyMaster.MetricInterval.newBuilder()
-                .setStart(v.startTime).setEnd(v.endTime));
+                .setStart(v.getStartTime()).setEnd(v.getEndTime()));
 
             individualMetricBuilder.addIntervalValues(intervalValueBuilder);
           }// end IntervalValue
@@ -186,154 +189,23 @@ final class MetricsCacheQueryUtils {
     // default OK if we have response to build already
     builder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK));
 
-    for (ExceptionDatapoint e : response.exceptionDatapointList) {
+    for (ExceptionDatum e : response.exceptionDatapointList) {
       TopologyMaster.TmasterExceptionLog.Builder exceptionBuilder =
           TopologyMaster.TmasterExceptionLog.newBuilder();
       // ExceptionDatapoint
-      exceptionBuilder.setComponentName(e.componentName);
-      exceptionBuilder.setHostname(e.hostname);
-      exceptionBuilder.setInstanceId(e.instanceId);
+      exceptionBuilder.setComponentName(e.getComponentName());
+      exceptionBuilder.setHostname(e.getHostname());
+      exceptionBuilder.setInstanceId(e.getInstanceId());
       // ExceptionData
-      exceptionBuilder.setStacktrace(e.stackTrace);
-      exceptionBuilder.setLasttime(e.lastTime);
-      exceptionBuilder.setFirsttime(e.firstTime);
-      exceptionBuilder.setCount(e.count);
-      exceptionBuilder.setLogging(e.logging);
+      exceptionBuilder.setStacktrace(e.getStackTrace());
+      exceptionBuilder.setLasttime(e.getLastTime());
+      exceptionBuilder.setFirsttime(e.getFirstTime());
+      exceptionBuilder.setCount(e.getCount());
+      exceptionBuilder.setLogging(e.getLogging());
 
       builder.addExceptions(exceptionBuilder);
     }
 
     return builder.build();
-  }
-
-
-  public enum Granularity {
-    AGGREGATE_ALL_METRICS,
-    AGGREGATE_BY_BUCKET,
-    RAW
-  }
-
-  public static class ExceptionRequest {
-    public Map<String, Set<String>> componentNameInstanceId;
-  }
-
-  public static class ExceptionResponse {
-    public List<ExceptionDatapoint> exceptionDatapointList;
-  }
-
-  /**
-   * immutable data bag for time range value
-   * time window: startTime ~ endTime, in milli-seconds
-   * metric value string: value
-   */
-  public static final class MetricTimeRangeValue {
-    public final long startTime;
-    public final long endTime;
-    public final String value;
-
-    MetricTimeRangeValue(long startTime, long endTime, String value) {
-      this.startTime = startTime;
-      this.endTime = endTime;
-      this.value = value;
-    }
-
-    MetricTimeRangeValue(MetricTimeRangeValue metricTimeRangeValue) {
-      this.startTime = metricTimeRangeValue.startTime;
-      this.endTime = metricTimeRangeValue.endTime;
-      this.value = metricTimeRangeValue.value;
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append("[")
-          .append(startTime).append("-").append(endTime)
-          .append(":")
-          .append(value)
-          .append("]");
-      return sb.toString();
-    }
-  }
-
-  /**
-   * immutable data bag for metric datum
-   * metric locator: <componentName, instanceId, metricName>
-   * metric value list: metricValue (use immutable getter)
-   */
-  public static final class MetricDatum {
-    public final String componentName;
-    public final String instanceId;
-    public final String metricName;
-    private final List<MetricTimeRangeValue> metricValue;
-
-    MetricDatum(String componentName, String instanceId, String metricName,
-                List<MetricTimeRangeValue> metricValue) {
-      this.componentName = componentName;
-      this.instanceId = instanceId;
-      this.metricName = metricName;
-      this.metricValue = metricValue;
-    }
-
-    public List<MetricTimeRangeValue> getMetricValue() {
-      List<MetricTimeRangeValue> ret = new ArrayList<>();
-      for (MetricTimeRangeValue metricTimeRangeValue : metricValue) {
-        ret.add(new MetricTimeRangeValue(metricTimeRangeValue));
-      }
-      return ret;
-    }
-  }
-
-  public static class MetricRequest {
-    // The instance ids to get the stats from
-    // If nothing is specified, we will get from
-    // all the instances of the component name
-    public Map<String, Set<String>> componentNameInstanceId;
-    // What set of metrics you are interested in
-    // Example is __emit-count/default
-    public Set<String> metricNames;
-    // what timeframe data in milliseconds
-    public long startTime;
-    public long endTime;
-    // aggregation granularity
-    // 0: default, aggregate all metrics
-    // 1: aggregate metrics by bucket
-    // 2: no aggregation; return raw metrics
-    public Granularity aggregationGranularity;
-
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append("{")
-          .append("[").append(startTime).append("-").append(endTime)
-          .append(":").append(aggregationGranularity).append("]")
-          .append("[");
-      if (componentNameInstanceId != null) {
-        for (String c : componentNameInstanceId.keySet()) {
-          sb.append(c).append("->(");
-          if (componentNameInstanceId.get(c) == null) {
-            sb.append("null");
-          } else {
-            for (String i : componentNameInstanceId.get(c)) {
-              sb.append(i).append(",");
-            }
-          }
-          sb.append("),");
-        }
-      }
-      sb.append("]")
-          .append("[");
-      if (metricNames != null) {
-        for (String name : metricNames) {
-          sb.append(name).append(",");
-        }
-      }
-      sb.append("]")
-          .append("}");
-      return sb.toString();
-    }
-  }
-
-  public static class MetricResponse {
-    public List<MetricDatum> metricList;
   }
 }

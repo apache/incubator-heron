@@ -12,30 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.metricscachemgr.metricscache.datapoint;
+package com.twitter.heron.metricscachemgr.metricscache.store;
 
 /**
- * exception data
+ * immutable exception data in store
  * TODO(huijun) object pool to avoid java gc
  */
-public class ExceptionDatapoint {
-  // Source of exception.
-  public String componentName;
+public final class ExceptionDatapoint {
   // Current hostname.
-  public String hostname;
-  // In case of a regular instance, it is the instance's
-  // instance_id. For stmgr it is the stmgr_id
-  public String instanceId;
+  private final String hostname;
 
   // Stack trace of exception. First two lines of stack trace is used for aggregating exception.
-  public String stackTrace;
+  private final String stackTrace;
   // Last time the exception occurred in the metrics collection interval
-  public String lastTime;
+  private final String lastTime;
   // First time the exception occurred in the metrics collection interval
-  public String firstTime;
+  private final String firstTime;
   // Number of time exception occurred in the metrics collection interval
-  public int count;
+  private final int count;
   // Additional text logged.
-  public String logging;
+  private final String logging;
 
+  public ExceptionDatapoint(String hostname, String stackTrace, String lastTime, String firstTime,
+                            int count, String logging) {
+    this.hostname = hostname;
+    this.stackTrace = stackTrace;
+    this.lastTime = lastTime;
+    this.firstTime = firstTime;
+    this.count = count;
+    this.logging = logging;
+  }
+
+  public String getHostname() {
+    return hostname;
+  }
+
+  public String getStackTrace() {
+    return stackTrace;
+  }
+
+  public String getLastTime() {
+    return lastTime;
+  }
+
+  public String getFirstTime() {
+    return firstTime;
+  }
+
+  public int getCount() {
+    return count;
+  }
+
+  public String getLogging() {
+    return logging;
+  }
 }

@@ -17,6 +17,7 @@ metricscachemgr_deps_files = [
     "@org_yaml_snakeyaml//jar",
     "@com_google_protobuf_protobuf_java//jar",
     "@org_apache_thrift_libthrift//jar",
+    "@commons_cli_commons_cli//jar",
     "//third_party/java:logging", # slf4j is only used for thrift in scribe-sink
     "//heron/proto:proto_topology_java",
     "//heron/metricscachemgr/src/java:metricscachemgr-java",
@@ -50,9 +51,7 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestPurge",
-       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestHashIndex",
-       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTestTreeIndex",
+       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTest",
        "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtilsTest",
        "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheTest",
      ],
