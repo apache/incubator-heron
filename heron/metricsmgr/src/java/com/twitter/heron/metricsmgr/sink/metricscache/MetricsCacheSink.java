@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
@@ -33,8 +35,6 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.network.HeronSocketOptions;
-//import com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheClient;
-//import com.twitter.heron.metricsmgr.MetricsManager;
 import com.twitter.heron.metricsmgr.MetricsManagerServer;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
@@ -128,16 +128,8 @@ public class MetricsCacheSink implements IMetricsSink {
     if (tmasterMetricsType != null) {
       for (Map.Entry<String, String> metricToType : tmasterMetricsType.entrySet()) {
         String value = metricToType.getValue();
-        MetricsFilter.MetricAggregationType type;
-        if ("SUM".equals(value)) {
-          type = MetricsFilter.MetricAggregationType.SUM;
-        } else if ("AVG".equals(value)) {
-          type = MetricsFilter.MetricAggregationType.AVG;
-        } else if ("LAST".equals(value)) {
-          type = MetricsFilter.MetricAggregationType.LAST;
-        } else {
-          type = MetricsFilter.MetricAggregationType.UNKNOWN;
-        }
+        MetricsFilter.MetricAggregationType type =
+            MetricsFilter.MetricAggregationType.valueOf(value);
         tMasterMetricsFilter.setPrefixToType(metricToType.getKey(), type);
       }
     }
@@ -246,36 +238,40 @@ public class MetricsCacheSink implements IMetricsSink {
     metricsCommunicator.clear();
   }
 
-  /////////////////////////////////////////////////////////
-  // Following protected methods should be used only for unit testing
-  /////////////////////////////////////////////////////////
-  protected MetricsCacheClientService getMetricsCacheClientService() {
+  @VisibleForTesting
+  MetricsCacheClientService getMetricsCacheClientService() {
     return metricsCacheClientService;
   }
 
-  protected void createSimpleMetricsCacheClientService(Map<String, Object> serviceConfig) {
+  @VisibleForTesting
+  void createSimpleMetricsCacheClientService(Map<String, Object> serviceConfig) {
     metricsCacheClientService =
         new MetricsCacheClientService(serviceConfig, metricsCommunicator);
   }
 
-  protected MetricsCacheClient getMetricsCacheClient() {
+  @VisibleForTesting
+  MetricsCacheClient getMetricsCacheClient() {
     return metricsCacheClientService.getMetricsCacheClient();
   }
 
-  protected void startNewMetricsCacheClient(TopologyMaster.MetricsCacheLocation location) {
+  @VisibleForTesting
+  void startNewMetricsCacheClient(TopologyMaster.MetricsCacheLocation location) {
     metricsCacheClientService.updateMetricsCacheLocation(location);
     metricsCacheClientService.startNewMasterClient();
   }
 
-  protected int getMetricsCacheStartedAttempts() {
+  @VisibleForTesting
+  int getMetricsCacheStartedAttempts() {
     return metricsCacheClientService.startedAttempts.get();
   }
 
-  protected TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocation() {
+  @VisibleForTesting
+  TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocation() {
     return currentMetricsCacheLocation;
   }
 
-  protected TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocationInService() {
+  @VisibleForTesting
+  TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocationInService() {
     return metricsCacheClientService.getCurrentMetricsCacheLocation();
   }
 
@@ -304,8 +300,9 @@ public class MetricsCacheSink implements IMetricsSink {
     // so we need to make it volatile to guarantee the visiability.
     private volatile TopologyMaster.MetricsCacheLocation currentMetricsCacheLocation;
 
-    private MetricsCacheClientService(Map<String, Object> metricsCacheClientConfig,
-                                 Communicator<TopologyMaster.PublishMetrics> metricsCommunicator) {
+    private MetricsCacheClientService(
+        Map<String, Object> metricsCacheClientConfig,
+        Communicator<TopologyMaster.PublishMetrics> metricsCommunicator) {
       this.metricsCacheClientConfig = metricsCacheClientConfig;
       this.metricsCommunicator = metricsCommunicator;
     }
@@ -371,18 +368,18 @@ public class MetricsCacheSink implements IMetricsSink {
       metricsCacheClientExecutor.shutdownNow();
     }
 
-    /////////////////////////////////////////////////////////
-    // Following protected methods should be used only for unit testing
-    /////////////////////////////////////////////////////////
-    protected MetricsCacheClient getMetricsCacheClient() {
+    @VisibleForTesting
+    MetricsCacheClient getMetricsCacheClient() {
       return metricsCacheClient;
     }
 
-    protected int getMetricsCacheStartedAttempts() {
+    @VisibleForTesting
+    int getMetricsCacheStartedAttempts() {
       return startedAttempts.get();
     }
 
-    protected TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocation() {
+    @VisibleForTesting
+    TopologyMaster.MetricsCacheLocation getCurrentMetricsCacheLocation() {
       return currentMetricsCacheLocation;
     }
 

@@ -32,6 +32,8 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 public class MetricsCacheClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(MetricsCacheClient.class.getName());
   private final Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator;
+  private String host;
+  private int port;
   private long reconnectIntervalSec = -1;
 
   /**
@@ -42,9 +44,12 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
    * @param port the port of remote endpoint to communicate with
    * @param publishMetricsCommunicator the queue to read PublishMetrics from and send to MetricsCache
    */
-  public MetricsCacheClient(NIOLooper s, String host, int port, HeronSocketOptions options,
-                       Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator) {
+  public MetricsCacheClient(
+      NIOLooper s, String host, int port, HeronSocketOptions options,
+      Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator) {
     super(s, host, port, options);
+    this.host = host;
+    this.port = port;
     this.publishMetricsCommunicator = publishMetricsCommunicator;
   }
 
@@ -63,7 +68,7 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
   @Override
   public void onConnect(StatusCode status) {
     if (status != StatusCode.OK) {
-      LOG.severe("Cannot connect to the MetricsCache port, Will Retry..");
+      LOG.severe("Cannot connect to the MetricsCache at " + host + ":" + port + ", Will Retry..");
       if (reconnectIntervalSec > 0) {
         Runnable r = new Runnable() {
           public void run() {

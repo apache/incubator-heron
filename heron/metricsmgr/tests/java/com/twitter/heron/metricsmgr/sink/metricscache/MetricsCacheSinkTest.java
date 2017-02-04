@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
@@ -43,8 +42,17 @@ public class MetricsCacheSinkTest {
   private static final int METRICSCACHE_LOCATION_CHECK_INTERVAL_SECONDS = 1;
   private static final int WAIT_SECONDS = 10;
 
-  @Before
-  public void before() throws Exception {
+  private static Map<String, Object> buildServiceConfig() {
+    Map<String, Object> serviceConfig = new HashMap<String, Object>();
+    // Fill with necessary config
+    serviceConfig.put("reconnect-interval-second", RECONNECT_INTERVAL_SECONDS);
+    serviceConfig.put("network-write-batch-size-bytes", 1);
+    serviceConfig.put("network-write-batch-time-ms", 1);
+    serviceConfig.put("network-read-batch-size-bytes", 1);
+    serviceConfig.put("network-read-batch-time-ms", 1);
+    serviceConfig.put("socket-send-buffer-size-bytes", 1);
+    serviceConfig.put("socket-received-buffer-size-bytes", 1);
+    return serviceConfig;
   }
 
   @After
@@ -65,15 +73,7 @@ public class MetricsCacheSinkTest {
   public void testMetricsCacheClientService() throws Exception {
     // create a new MetricsCacheClientService
     MetricsCacheSink metricsCacheSink = new MetricsCacheSink();
-    Map<String, Object> serviceConfig = new HashMap<String, Object>();
-    // Fill with necessary config
-    serviceConfig.put("reconnect-interval-second", RECONNECT_INTERVAL_SECONDS);
-    serviceConfig.put("network-write-batch-size-bytes", 1);
-    serviceConfig.put("network-write-batch-time-ms", 1);
-    serviceConfig.put("network-read-batch-size-bytes", 1);
-    serviceConfig.put("network-read-batch-time-ms", 1);
-    serviceConfig.put("socket-send-buffer-size-bytes", 1);
-    serviceConfig.put("socket-received-buffer-size-bytes", 1);
+    Map<String, Object> serviceConfig = buildServiceConfig();
 
     metricsCacheSink.createSimpleMetricsCacheClientService(serviceConfig);
 
@@ -110,14 +110,7 @@ public class MetricsCacheSinkTest {
         "metricscache-location-check-interval-sec", METRICSCACHE_LOCATION_CHECK_INTERVAL_SECONDS);
 
     // These are config for MetricsCacheClient
-    Map<String, Object> serviceConfig = new HashMap<String, Object>();
-    serviceConfig.put("reconnect-interval-second", RECONNECT_INTERVAL_SECONDS);
-    serviceConfig.put("network-write-batch-size-bytes", 1);
-    serviceConfig.put("network-write-batch-time-ms", 1);
-    serviceConfig.put("network-read-batch-size-bytes", 1);
-    serviceConfig.put("network-read-batch-time-ms", 1);
-    serviceConfig.put("socket-send-buffer-size-bytes", 1);
-    serviceConfig.put("socket-received-buffer-size-bytes", 1);
+    Map<String, Object> serviceConfig = buildServiceConfig();
 
     sinkConfig.put("metricscache-client", serviceConfig);
 
