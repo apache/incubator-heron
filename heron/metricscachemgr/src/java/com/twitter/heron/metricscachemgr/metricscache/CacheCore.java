@@ -291,7 +291,7 @@ public class CacheCore {
             int idx2 = idxMetricName.get(metricName);
             long bucketId = makeBucketId(idx1, idx2);
 
-            // iterate buckets
+            // iterate buckets: the result may be empty due to the bucketId/hash filter
             List<MetricTimeRangeValue> metricValue = new LinkedList<>();
             switch (request.getAggregationGranularity()) {
               case AGGREGATE_ALL_METRICS:
@@ -356,7 +356,7 @@ public class CacheCore {
     long outterEndTime = 0;
     String outterValue = null;
 
-    double result = 0;
+    double outterResult = 0;
     Long startKey = cacheMetric.floorKey(startTime);
     for (Long key = startKey != null ? startKey : cacheMetric.firstKey();
          key != null && key <= endTime;
@@ -380,7 +380,7 @@ public class CacheCore {
                 outterCountAvg++;
                 innerCountAvg++;
               case SUM:
-                result += Double.parseDouble(datapoint.getValue());
+                outterResult += Double.parseDouble(datapoint.getValue());
                 innerResult += Double.parseDouble(datapoint.getValue());
                 break;
               case LAST:
@@ -404,27 +404,25 @@ public class CacheCore {
           }
         } // end bucket
 
-        if (type.equals(MetricsFilter.MetricAggregationType.AVG)) {
+        if (type.equals(MetricsFilter.MetricAggregationType.AVG) && innerCountAvg > 0) {
           innerValue = String.valueOf(innerResult / innerCountAvg);
         } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
           innerValue = String.valueOf(innerResult);
         }
         if (innerValue != null && granularity.equals(MetricGranularity.AGGREGATE_BY_BUCKET)) {
-          metricValue.add(new MetricTimeRangeValue(
-              innerStartTime, innerEndTime, innerValue));
+          metricValue.add(new MetricTimeRangeValue(innerStartTime, innerEndTime, innerValue));
         }
       }
 
     } // end tree
 
-    if (type.equals(MetricsFilter.MetricAggregationType.AVG)) {
-      outterValue = String.valueOf(result / outterCountAvg);
+    if (type.equals(MetricsFilter.MetricAggregationType.AVG) && outterCountAvg > 0) {
+      outterValue = String.valueOf(outterResult / outterCountAvg);
     } else if (type.equals(MetricsFilter.MetricAggregationType.SUM)) {
-      outterValue = String.valueOf(result);
+      outterValue = String.valueOf(outterResult);
     }
     if (outterValue != null && granularity.equals(MetricGranularity.AGGREGATE_ALL_METRICS)) {
-      metricValue.add(new MetricTimeRangeValue(
-          outterStartTime, outterEndTime, outterValue));
+      metricValue.add(new MetricTimeRangeValue(outterStartTime, outterEndTime, outterValue));
     }
   }
 
