@@ -19,7 +19,7 @@ import java.util.Properties;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -30,54 +30,54 @@ public final class Runtime {
   }
 
   public static String topologyId(Config runtime) {
-    return runtime.getStringValue(Keys.topologyId());
+    return runtime.getStringValue(Key.TOPOLOGY_ID);
   }
 
   public static String topologyName(Config runtime) {
-    return runtime.getStringValue(Keys.topologyName());
+    return runtime.getStringValue(Key.TOPOLOGY_NAME);
   }
 
   public static String topologyClassPath(Config runtime) {
-    return runtime.getStringValue(Keys.topologyClassPath());
+    return runtime.getStringValue(Key.TOPOLOGY_CLASSPATH);
   }
 
   public static TopologyAPI.Topology topology(Config runtime) {
-    return (TopologyAPI.Topology) runtime.get(Keys.topologyDefinition());
+    return (TopologyAPI.Topology) runtime.get(Key.TOPOLOGY_DEFINITION);
   }
 
   public static URI topologyPackageUri(Config cfg) {
-    return (URI) cfg.get(Keys.topologyPackageUri());
+    return (URI) cfg.get(Key.TOPOLOGY_PACKAGE_URI);
   }
 
   public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {
-    return (SchedulerStateManagerAdaptor) runtime.get(Keys.schedulerStateManagerAdaptor());
+    return (SchedulerStateManagerAdaptor) runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR);
   }
 
   public static ILauncher launcherClassInstance(Config runtime) {
-    return (ILauncher) runtime.get(Keys.launcherClassInstance());
+    return (ILauncher) runtime.get(Key.LAUNCHER_CLASS_INSTANCE);
   }
 
   public static Shutdown schedulerShutdown(Config runtime) {
-    return (Shutdown) runtime.get(Keys.schedulerShutdown());
+    return (Shutdown) runtime.get(Key.SCHEDULER_SHUTDOWN);
   }
 
   public static String componentRamMap(Config runtime) {
-    return runtime.getStringValue(Keys.componentRamMap());
+    return runtime.getStringValue(Key.COMPONENT_RAMMAP);
   }
 
   public static String componentJvmOpts(Config runtime) {
-    return runtime.getStringValue(Keys.componentJvmOpts());
+    return runtime.getStringValue(Key.COMPONENT_JVM_OPTS_IN_BASE64);
   }
 
   public static String instanceJvmOpts(Config runtime) {
-    return runtime.getStringValue(Keys.instanceJvmOpts());
+    return runtime.getStringValue(Key.INSTANCE_JVM_OPTS_IN_BASE64);
   }
 
   public static Long numContainers(Config runtime) {
-    return runtime.getLongValue(Keys.numContainers());
+    return runtime.getLongValue(Key.NUM_CONTAINERS);
   }
 
   public static Properties schedulerProperties(Config runtime) {
-    return (Properties) runtime.get(Keys.SCHEDULER_PROPERTIES);
+    return (Properties) runtime.get(Key.SCHEDULER_PROPERTIES);
   }
 }

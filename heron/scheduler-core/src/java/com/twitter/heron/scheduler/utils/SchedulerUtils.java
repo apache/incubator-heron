@@ -40,6 +40,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
   public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
+  public static final String SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION = "P";
 
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 

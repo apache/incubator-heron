@@ -43,7 +43,7 @@ final class LocalFileSystemConfigDefaults {
    * @param key, the config key
    * @return String, the default value for the config key
    */
-  public static String get(String key) {
-    return (String) defaults.get(key);
+  public static String get(LocalFileSystemKey key) {
+    return (String) defaults.get(key.name());
   }
 }

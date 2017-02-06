@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.uploader.UploaderException;
 
 import static org.junit.Assert.assertEquals;
@@ -51,8 +51,8 @@ public class S3UploaderTest {
 
     configBuilder = Config.newBuilder()
         .put(S3Context.HERON_UPLOADER_S3_BUCKET, "bucket")
-        .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
-        .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), "topology.tar.gz");
+        .put(Key.TOPOLOGY_NAME, "test-topology")
+        .put(Key.TOPOLOGY_PACKAGE_FILE, "topology.tar.gz");
 
     uploader = new S3Uploader();
     uploader.initialize(configBuilder.build());
@@ -77,8 +77,8 @@ public class S3UploaderTest {
         .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, accessKey)
         .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, secretKey)
         .put(S3Context.HERON_UPLOADER_S3_URI, s3Url)
-        .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
-        .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), tempFile.getAbsolutePath());
+        .put(Key.TOPOLOGY_NAME, "test-topology")
+        .put(Key.TOPOLOGY_PACKAGE_FILE, tempFile.getAbsolutePath());
 
     S3Uploader s3Uploader = new S3Uploader();
     s3Uploader.initialize(s3Config.build());

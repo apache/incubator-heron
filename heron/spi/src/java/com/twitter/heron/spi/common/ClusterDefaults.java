@@ -24,24 +24,24 @@ public final class ClusterDefaults {
   private static Config getDefaultHome() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.heronHome(), Defaults.heronHome());
-    cb.put(Keys.heronBin(), Defaults.heronBin());
-    cb.put(Keys.heronConf(), Defaults.heronConf());
-    cb.put(Keys.heronDist(), Defaults.heronDist());
-    cb.put(Keys.heronEtc(), Defaults.heronEtc());
-    cb.put(Keys.heronLib(), Defaults.heronLib());
-    cb.put(Keys.javaHome(), Defaults.javaHome());
+    cb.put(Key.HERON_HOME, Defaults.heronHome());
+    cb.put(Key.HERON_BIN, Defaults.heronBin());
+    cb.put(Key.HERON_CONF, Defaults.heronConf());
+    cb.put(Key.HERON_DIST, Defaults.heronDist());
+    cb.put(Key.HERON_ETC, Defaults.heronEtc());
+    cb.put(Key.HERON_LIB, Defaults.heronLib());
+    cb.put(Key.JAVA_HOME, Defaults.javaHome());
     return cb.build();
   }
 
   private static Config getSandboxHome() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.heronSandboxHome(), Defaults.heronSandboxHome());
-    cb.put(Keys.heronSandboxBin(), Defaults.heronSandboxBin());
-    cb.put(Keys.heronSandboxConf(), Defaults.heronSandboxConf());
-    cb.put(Keys.heronSandboxLib(), Defaults.heronSandboxLib());
-    cb.put(Keys.javaSandboxHome(), Defaults.javaSandboxHome());
+    cb.put(Key.HERON_SANDBOX_HOME, Defaults.heronSandboxHome());
+    cb.put(Key.HERON_SANDBOX_BIN, Defaults.heronSandboxBin());
+    cb.put(Key.HERON_SANDBOX_CONF, Defaults.heronSandboxConf());
+    cb.put(Key.HERON_SANDBOX_LIB, Defaults.heronSandboxLib());
+    cb.put(Key.HERON_SANDBOX_JAVA_HOME, Defaults.javaSandboxHome());
     return cb.build();
   }
 
@@ -49,11 +49,11 @@ public final class ClusterDefaults {
   static Config getSandboxBinaries() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.executorSandboxBinary(), Defaults.executorSandboxBinary());
-    cb.put(Keys.stmgrSandboxBinary(), Defaults.stmgrSandboxBinary());
-    cb.put(Keys.tmasterSandboxBinary(), Defaults.tmasterSandboxBinary());
-    cb.put(Keys.shellSandboxBinary(), Defaults.shellSandboxBinary());
-    cb.put(Keys.pythonInstanceSandboxBinary(), Defaults.pythonInstanceSandboxBinary());
+    cb.put(Key.SANDBOX_EXECUTOR_BINARY, Defaults.executorSandboxBinary());
+    cb.put(Key.SANDBOX_STMGR_BINARY, Defaults.stmgrSandboxBinary());
+    cb.put(Key.SANDBOX_TMASTER_BINARY, Defaults.tmasterSandboxBinary());
+    cb.put(Key.SANDBOX_SHELL_BINARY, Defaults.shellSandboxBinary());
+    cb.put(Key.SANDBOX_PYTHON_INSTANCE_BINARY, Defaults.pythonInstanceSandboxBinary());
     return cb.build();
   }
 
@@ -61,51 +61,51 @@ public final class ClusterDefaults {
   static Config getDefaultJars() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.schedulerJar(), Defaults.schedulerJar());
+    cb.put(Key.SCHEDULER_JAR, Defaults.schedulerJar());
     return cb.build();
   }
 
   private static Config getSandboxJars() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.schedulerSandboxJar(), Defaults.schedulerSandboxJar());
+    cb.put(Key.SANDBOX_SCHEDULER_JAR, Defaults.schedulerSandboxJar());
     return cb.build();
   }
 
   private static Config getDefaultFilesAndPaths() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.corePackageUri(), Defaults.corePackageUri());
+    cb.put(Key.CORE_PACKAGE_URI, Defaults.corePackageUri());
     // cb.put(Keys.logDirectory(), Defaults.logDirectory());
 
-    cb.put(Keys.instanceClassPath(), Defaults.instanceClassPath());
-    cb.put(Keys.metricsManagerClassPath(), Defaults.metricsManagerClassPath());
-    cb.put(Keys.packingClassPath(), Defaults.packingClassPath());
-    cb.put(Keys.schedulerClassPath(), Defaults.schedulerClassPath());
-    cb.put(Keys.stateManagerClassPath(), Defaults.stateManagerClassPath());
-    cb.put(Keys.uploaderClassPath(), Defaults.uploaderClassPath());
+    cb.put(Key.INSTANCE_CLASSPATH, Defaults.instanceClassPath());
+    cb.put(Key.METRICSMGR_CLASSPATH, Defaults.metricsManagerClassPath());
+    cb.put(Key.PACKING_CLASSPATH, Defaults.packingClassPath());
+    cb.put(Key.SCHEDULER_CLASSPATH, Defaults.schedulerClassPath());
+    cb.put(Key.STATEMGR_CLASSPATH, Defaults.stateManagerClassPath());
+    cb.put(Key.UPLOADER_CLASSPATH, Defaults.uploaderClassPath());
     return cb.build();
   }
 
   private static Config getSandboxFilesAndPaths() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.instanceSandboxClassPath(), Defaults.instanceSandboxClassPath());
-    cb.put(Keys.metricsManagerSandboxClassPath(), Defaults.metricsManagerSandboxClassPath());
-    cb.put(Keys.packingSandboxClassPath(), Defaults.packingSandboxClassPath());
-    cb.put(Keys.schedulerSandboxClassPath(), Defaults.schedulerSandboxClassPath());
-    cb.put(Keys.stateManagerSandboxClassPath(), Defaults.stateManagerSandboxClassPath());
-    cb.put(Keys.uploaderSandboxClassPath(), Defaults.uploaderSandboxClassPath());
+    cb.put(Key.SANDBOX_INSTANCE_CLASSPATH, Defaults.instanceSandboxClassPath());
+    cb.put(Key.SANDBOX_METRICSMGR_CLASSPATH, Defaults.metricsManagerSandboxClassPath());
+    cb.put(Key.SANDBOX_PACKING_CLASSPATH, Defaults.packingSandboxClassPath());
+    cb.put(Key.SANDBOX_SCHEDULER_CLASSPATH, Defaults.schedulerSandboxClassPath());
+    cb.put(Key.SANDBOX_STATEMGR_CLASSPATH, Defaults.stateManagerSandboxClassPath());
+    cb.put(Key.SANDBOX_UPLOADER_CLASSPATH, Defaults.uploaderSandboxClassPath());
     return cb.build();
   }
 
   static Config getDefaultResources() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.stmgrRam(), Defaults.stmgrRam());
-    cb.put(Keys.instanceCpu(), Defaults.instanceCpu());
-    cb.put(Keys.instanceRam(), Defaults.instanceRam());
-    cb.put(Keys.instanceDisk(), Defaults.instanceDisk());
+    cb.put(Key.STMGR_RAM, Defaults.stmgrRam());
+    cb.put(Key.INSTANCE_CPU, Defaults.instanceCpu());
+    cb.put(Key.INSTANCE_RAM, Defaults.instanceRam());
+    cb.put(Key.INSTANCE_DISK, Defaults.instanceDisk());
     return cb.build();
   }
 
@@ -113,8 +113,8 @@ public final class ClusterDefaults {
   static Config getDefaultMiscellaneous() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.verbose(), Defaults.verbose());
-    cb.put(Keys.schedulerService(), Defaults.schedulerService());
+    cb.put(Key.VERBOSE, Defaults.verbose());
+    cb.put(Key.SCHEDULER_IS_SERVICE, Defaults.schedulerService());
     return cb.build();
   }
 

@@ -20,7 +20,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -133,11 +133,11 @@ public class LauncherUtils {
   public Config getPrimaryRuntime(TopologyAPI.Topology topology,
                                   SchedulerStateManagerAdaptor adaptor) {
     return Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-        .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
+        .put(Key.TOPOLOGY_DEFINITION, topology)
+        .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, adaptor)
+        .put(Key.NUM_CONTAINERS, 1 + TopologyUtils.getNumContainers(topology))
         .build();
   }
 
@@ -148,8 +148,8 @@ public class LauncherUtils {
     Config ytruntime;
     ytruntime = Config.newBuilder()
         .putAll(runtime)
-        .put(Keys.componentRamMap(), packing.getComponentRamDistribution())
-        .put(Keys.numContainers(), 1 + packing.getContainers().size())
+        .put(Key.COMPONENT_RAMMAP, packing.getComponentRamDistribution())
+        .put(Key.NUM_CONTAINERS, 1 + packing.getContainers().size())
         .build();
     return ytruntime;
   }

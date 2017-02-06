@@ -27,8 +27,7 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
@@ -44,7 +43,7 @@ public class LocalSchedulerTest {
   public void before() throws Exception {
     scheduler = Mockito.spy(LocalScheduler.class);
     config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     runtime = Mockito.mock(Config.class);
     scheduler.initialize(config, runtime);
@@ -101,7 +100,7 @@ public class LocalSchedulerTest {
 
   @Test
   public void testAddContainer() throws Exception {
-    Mockito.when(runtime.getLongValue(Keys.numContainers())).thenReturn(2L);
+    Mockito.when(runtime.getLongValue(Key.NUM_CONTAINERS)).thenReturn(2L);
     scheduler.initialize(config, runtime);
 
     //verify plan is deployed and containers are created
