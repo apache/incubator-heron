@@ -24,149 +24,153 @@ public class ConfigKeysTest {
 
   @Test
   public void testHeronEnviron() throws Exception {
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.home",
-        ConfigKeys.get("HERON_HOME")
+        Key.HERON_HOME
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.bin",
-        ConfigKeys.get("HERON_BIN")
+        Key.HERON_BIN
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.conf",
-        ConfigKeys.get("HERON_CONF")
+        Key.HERON_CONF
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.lib",
-        ConfigKeys.get("HERON_LIB")
+        Key.HERON_LIB
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.dist",
-        ConfigKeys.get("HERON_DIST")
+        Key.HERON_DIST
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.etc",
-        ConfigKeys.get("HERON_ETC")
+        Key.HERON_ETC
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.directory.java.home",
-        ConfigKeys.get("JAVA_HOME")
+        Key.JAVA_HOME
     );
   }
 
   @Test
   public void testConfigFiles() throws Exception {
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.cluster.yaml",
-        ConfigKeys.get("CLUSTER_YAML")
+        Key.CLUSTER_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.defaults.yaml",
-        ConfigKeys.get("DEFAULTS_YAML")
+        Key.DEFAULTS_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.metrics.yaml",
-        ConfigKeys.get("METRICS_YAML")
+        Key.METRICS_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.packing.yaml",
-        ConfigKeys.get("PACKING_YAML")
+        Key.PACKING_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.scheduler.yaml",
-        ConfigKeys.get("SCHEDULER_YAML")
+        Key.SCHEDULER_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.statemgr.yaml",
-        ConfigKeys.get("STATEMGR_YAML")
+        Key.STATEMGR_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.system.yaml",
-        ConfigKeys.get("SYSTEM_YAML")
+        Key.SYSTEM_YAML
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.file.uploader.yaml",
-        ConfigKeys.get("UPLOADER_YAML")
+        Key.UPLOADER_YAML
     );
   }
 
   @Test
   public void testConfig() throws Exception {
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.cluster",
-        ConfigKeys.get("CLUSTER")
+        Key.CLUSTER
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.role",
-        ConfigKeys.get("ROLE")
+        Key.ROLE
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.environ",
-        ConfigKeys.get("ENVIRON")
+        Key.ENVIRON
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.verbose",
-        ConfigKeys.get("VERBOSE")
+        Key.VERBOSE
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.path",
-        ConfigKeys.get("CONFIG_PATH")
+        Key.CONFIG_PATH
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.config.property",
-        ConfigKeys.get("CONFIG_PROPERTY")
+        Key.CONFIG_PROPERTY
     );
   }
 
   @Test
   public void testConfigClasses() throws Exception {
-    Assert.assertEquals(
+    assertEquals(
         "heron.class.uploader",
-        ConfigKeys.get("UPLOADER_CLASS")
+        Key.UPLOADER_CLASS
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.class.launcher",
-        ConfigKeys.get("LAUNCHER_CLASS")
+        Key.LAUNCHER_CLASS
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.class.scheduler",
-        ConfigKeys.get("SCHEDULER_CLASS")
+        Key.SCHEDULER_CLASS
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.class.packing.algorithm",
-        ConfigKeys.get("PACKING_CLASS")
+        Key.PACKING_CLASS
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.class.state.manager",
-        ConfigKeys.get("STATE_MANAGER_CLASS")
+        Key.STATE_MANAGER_CLASS
     );
   }
 
   @Test
   public void testBinaries() throws Exception {
-    Assert.assertEquals(
+    assertEquals(
         "heron.binaries.sandbox.executor",
-        ConfigKeys.get("SANDBOX_EXECUTOR_BINARY")
+        Key.SANDBOX_EXECUTOR_BINARY
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.binaries.sandbox.stmgr",
-        ConfigKeys.get("SANDBOX_STMGR_BINARY")
+        Key.SANDBOX_STMGR_BINARY
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.binaries.sandbox.tmaster",
-        ConfigKeys.get("SANDBOX_TMASTER_BINARY")
+        Key.SANDBOX_TMASTER_BINARY
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.binaries.sandbox.shell",
-        ConfigKeys.get("SANDBOX_SHELL_BINARY")
+        Key.SANDBOX_SHELL_BINARY
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.binaries.sandbox.python.instance",
-        ConfigKeys.get("SANDBOX_PYTHON_INSTANCE_BINARY")
+        Key.SANDBOX_PYTHON_INSTANCE_BINARY
     );
-    Assert.assertEquals(
+    assertEquals(
         "heron.jars.scheduler",
-        ConfigKeys.get("SCHEDULER_JAR")
+        Key.SCHEDULER_JAR
     );
+  }
+
+  private static void assertEquals(String value, Key key) {
+    Assert.assertEquals(value, key.value());
   }
 }

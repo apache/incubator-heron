@@ -27,7 +27,7 @@ import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -56,8 +56,8 @@ public final class PackingTestUtils {
         TopologyTests.createTopology(topologyName, topologyConfig, spouts, bolts);
 
     Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 

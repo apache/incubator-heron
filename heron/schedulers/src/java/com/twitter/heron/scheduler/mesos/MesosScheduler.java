@@ -38,7 +38,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -231,7 +231,7 @@ public class MesosScheduler implements IScheduler {
     // The dependencies for the container
     container.dependencies = new ArrayList<>();
     String topologyPath =
-        Runtime.schedulerProperties(runtime).getProperty(Keys.topologyPackageUri());
+        Runtime.schedulerProperties(runtime).getProperty(Key.TOPOLOGY_PACKAGE_URI.value());
     String heronCoreReleasePath = Context.corePackageUri(config);
 
     container.dependencies.add(topologyPath);

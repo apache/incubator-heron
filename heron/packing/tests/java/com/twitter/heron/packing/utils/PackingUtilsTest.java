@@ -23,7 +23,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyTests;
 
@@ -91,8 +91,8 @@ public class PackingUtilsTest {
     TopologyAPI.Topology topology = getTopology(noSpouts, noBolts, topologyConfig);
 
     Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
@@ -122,8 +122,8 @@ public class PackingUtilsTest {
     TopologyAPI.Topology topology = getTopology(noSpouts, noBolts, topologyConfig);
 
     Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 

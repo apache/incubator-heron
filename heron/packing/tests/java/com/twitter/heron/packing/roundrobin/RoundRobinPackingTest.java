@@ -25,7 +25,7 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -46,8 +46,8 @@ public class RoundRobinPackingTest {
 
   private PackingPlan getRoundRobinPackingPlan(TopologyAPI.Topology topology) {
     Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 

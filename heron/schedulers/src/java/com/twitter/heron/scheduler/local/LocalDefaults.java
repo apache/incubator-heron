@@ -15,16 +15,16 @@
 package com.twitter.heron.scheduler.local;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
 public final class LocalDefaults {
+
+  // name of the resource file that holds the default values for config keys
+  private static final String DEFAULTS_YAML = "com/twitter/heron/scheduler/local/defaults.yaml";
+
   private LocalDefaults() {
-
   }
-
-  private static final Logger LOG = Logger.getLogger(LocalDefaults.class.getName());
 
   // holds the mapping between the config keys and their default values
   private static Map<String, Object> defaults;
@@ -33,8 +33,7 @@ public final class LocalDefaults {
   static {
     try {
       defaults = Resource.load(
-          "com.twitter.heron.scheduler.local.LocalDefaults",
-          LocalConstants.DEFAULTS_YAML);
+          "com.twitter.heron.scheduler.local.LocalDefaults", DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException("Failed to load the Defaults class ", e);
     }

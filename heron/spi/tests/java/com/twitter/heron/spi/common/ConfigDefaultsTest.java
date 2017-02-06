@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.twitter.heron.spi.common;
 
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,35 +22,51 @@ import com.twitter.heron.common.basics.ByteAmount;
 
 public class ConfigDefaultsTest {
 
+  /*
+   * Test to check if all the default keys have a corresponding enum Key
+   */
+  @Test
+  public void testConfigKeysDefaults() throws Exception {
+    Map<String, Object> defaults = ConfigDefaults.defaults;
+
+    for (String key : defaults.keySet()) {
+      try {
+        Key.valueOf(key);
+      } catch (IllegalArgumentException e) {
+        Assert.fail("ConfigDefaults.defaults contains a key not found in Key enum: " + key);
+      }
+    }
+  }
+
   @Test
   public void testHeronEnviron() throws Exception {
     Assert.assertEquals(
         "/usr/local/heron",
-        ConfigDefaults.get("HERON_HOME")
+        ConfigDefaults.get(Key.HERON_HOME)
     );
     Assert.assertEquals(
         "${HERON_HOME}/bin",
-        ConfigDefaults.get("HERON_BIN")
+        ConfigDefaults.get(Key.HERON_BIN)
     );
     Assert.assertEquals(
         "${HERON_HOME}/conf",
-        ConfigDefaults.get("HERON_CONF")
+        ConfigDefaults.get(Key.HERON_CONF)
     );
     Assert.assertEquals(
         "${HERON_HOME}/dist",
-        ConfigDefaults.get("HERON_DIST")
+        ConfigDefaults.get(Key.HERON_DIST)
     );
     Assert.assertEquals(
         "${HERON_HOME}/etc",
-        ConfigDefaults.get("HERON_ETC")
+        ConfigDefaults.get(Key.HERON_ETC)
     );
     Assert.assertEquals(
         "${HERON_HOME}/lib",
-        ConfigDefaults.get("HERON_LIB")
+        ConfigDefaults.get(Key.HERON_LIB)
     );
     Assert.assertEquals(
         "${JAVA_HOME}",
-        ConfigDefaults.get("JAVA_HOME")
+        ConfigDefaults.get(Key.JAVA_HOME)
     );
   }
 
@@ -56,35 +74,35 @@ public class ConfigDefaultsTest {
   public void testConfigFiles() throws Exception {
     Assert.assertEquals(
         "${HERON_CONF}/cluster.yaml",
-        ConfigDefaults.get("CLUSTER_YAML")
+        ConfigDefaults.get(Key.CLUSTER_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/defaults.yaml",
-        ConfigDefaults.get("DEFAULTS_YAML")
+        ConfigDefaults.get(Key.DEFAULTS_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/metrics_sinks.yaml",
-        ConfigDefaults.get("METRICS_YAML")
+        ConfigDefaults.get(Key.METRICS_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/packing.yaml",
-        ConfigDefaults.get("PACKING_YAML")
+        ConfigDefaults.get(Key.PACKING_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/scheduler.yaml",
-        ConfigDefaults.get("SCHEDULER_YAML")
+        ConfigDefaults.get(Key.SCHEDULER_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/statemgr.yaml",
-        ConfigDefaults.get("STATEMGR_YAML")
+        ConfigDefaults.get(Key.STATEMGR_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/heron_internals.yaml",
-        ConfigDefaults.get("SYSTEM_YAML")
+        ConfigDefaults.get(Key.SYSTEM_YAML)
     );
     Assert.assertEquals(
         "${HERON_CONF}/uploader.yaml",
-        ConfigDefaults.get("UPLOADER_YAML")
+        ConfigDefaults.get(Key.UPLOADER_YAML)
     );
   }
 
@@ -92,28 +110,28 @@ public class ConfigDefaultsTest {
   public void testBinaries() throws Exception {
     Assert.assertEquals(
         "${HERON_SANDBOX_BIN}/heron-executor",
-        ConfigDefaults.get("SANDBOX_EXECUTOR_BINARY")
+        ConfigDefaults.get(Key.SANDBOX_EXECUTOR_BINARY)
     );
     Assert.assertEquals(
         "${HERON_SANDBOX_BIN}/heron-stmgr",
-        ConfigDefaults.get("SANDBOX_STMGR_BINARY")
+        ConfigDefaults.get(Key.SANDBOX_STMGR_BINARY)
     );
     Assert.assertEquals(
         "${HERON_SANDBOX_BIN}/heron-tmaster",
-        ConfigDefaults.get("SANDBOX_TMASTER_BINARY")
+        ConfigDefaults.get(Key.SANDBOX_TMASTER_BINARY)
     );
     Assert.assertEquals(
         "${HERON_SANDBOX_BIN}/heron-shell",
-        ConfigDefaults.get("SANDBOX_SHELL_BINARY")
+        ConfigDefaults.get(Key.SANDBOX_SHELL_BINARY)
     );
     Assert.assertEquals(
         "${HERON_SANDBOX_BIN}/heron-python-instance",
-        ConfigDefaults.get("SANDBOX_PYTHON_INSTANCE_BINARY")
+        ConfigDefaults.get(Key.SANDBOX_PYTHON_INSTANCE_BINARY)
     );
     Assert.assertEquals(
         "heron.jars.scheduler",
         "${HERON_LIB}/scheduler/heron-scheduler.jar",
-        ConfigDefaults.get("SCHEDULER_JAR")
+        ConfigDefaults.get(Key.SCHEDULER_JAR)
     );
   }
 
@@ -121,35 +139,37 @@ public class ConfigDefaultsTest {
   public void testClassPaths() throws Exception {
     Assert.assertEquals(
         "${HERON_LIB}/instance/*",
-        ConfigDefaults.get("INSTANCE_CLASSPATH")
+        ConfigDefaults.get(Key.INSTANCE_CLASSPATH)
     );
     Assert.assertEquals(
         "${HERON_LIB}/metricsmgr/*",
-        ConfigDefaults.get("METRICSMGR_CLASSPATH")
+        ConfigDefaults.get(Key.METRICSMGR_CLASSPATH)
     );
     Assert.assertEquals(
         "${HERON_LIB}/packing/*",
-        ConfigDefaults.get("PACKING_CLASSPATH")
+        ConfigDefaults.get(Key.PACKING_CLASSPATH)
     );
     Assert.assertEquals(
         "${HERON_LIB}/scheduler/*",
-        ConfigDefaults.get("SCHEDULER_CLASSPATH")
+        ConfigDefaults.get(Key.SCHEDULER_CLASSPATH)
     );
     Assert.assertEquals(
         "${HERON_LIB}/statemgr/*",
-        ConfigDefaults.get("STATEMGR_CLASSPATH")
+        ConfigDefaults.get(Key.STATEMGR_CLASSPATH)
     );
     Assert.assertEquals(
         "${HERON_LIB}/uploader/*",
-        ConfigDefaults.get("UPLOADER_CLASSPATH")
+        ConfigDefaults.get(Key.UPLOADER_CLASSPATH)
     );
   }
 
   @Test
   public void testResources() throws Exception {
-    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount("STMGR_RAM"));
-    Assert.assertEquals(1.0, ConfigDefaults.getDouble("INSTANCE_CPU"), 0.001);
-    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount("INSTANCE_RAM"));
-    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount("INSTANCE_DISK"));
+    Assert.assertEquals(ByteAmount.fromGigabytes(1), ConfigDefaults.getByteAmount(Key.STMGR_RAM));
+    Assert.assertEquals(1.0, ConfigDefaults.getDouble(Key.INSTANCE_CPU), 0.001);
+    Assert.assertEquals(ByteAmount.fromGigabytes(1),
+        ConfigDefaults.getByteAmount(Key.INSTANCE_RAM));
+    Assert.assertEquals(ByteAmount.fromGigabytes(1),
+        ConfigDefaults.getByteAmount(Key.INSTANCE_DISK));
   }
 }

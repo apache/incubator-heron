@@ -17,7 +17,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 
 public class AuroraContextTest {
 
@@ -26,7 +26,7 @@ public class AuroraContextTest {
     final String auroraTemplate = "/dir/test.aurora";
     Config config = Config.newBuilder()
         .put(AuroraContext.JOB_TEMPLATE, auroraTemplate)
-        .put(ConfigKeys.get("HERON_CONF"), "/test")
+        .put(Key.HERON_CONF, "/test")
         .build();
     Assert.assertEquals("Expected to use value from JOB_TEMPLATE config",
         auroraTemplate, AuroraContext.getHeronAuroraPath(config));
@@ -35,11 +35,9 @@ public class AuroraContextTest {
   @Test
   public void testFallback() {
     Config config = Config.newBuilder()
-        .put(ConfigKeys.get("HERON_CONF"), "/test")
+        .put(Key.HERON_CONF, "/test")
         .build();
     Assert.assertEquals("Expected to use heron_conf/heron.aurora", "/test/heron.aurora",
         AuroraContext.getHeronAuroraPath(config));
   }
-
-
 }
