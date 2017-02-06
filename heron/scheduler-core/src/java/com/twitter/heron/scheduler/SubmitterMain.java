@@ -40,7 +40,7 @@ import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.LauncherException;
@@ -71,12 +71,12 @@ public class SubmitterMain {
     PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
     Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyPackageFile(), topologyPackage)
-        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
-        .put(Keys.topologyPackageType(), packageType)
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
+        .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage)
+        .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
         .build();
     return config;
   }
@@ -97,12 +97,12 @@ public class SubmitterMain {
                                              DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
     Config config = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.dryRun(), dryRun)
-        .put(Keys.dryRunFormat(), dryRunFormat)
-        .put(Keys.verbose(), verbose)
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.DRY_RUN, dryRun)
+        .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
+        .put(Key.VERBOSE, verbose)
         .build();
 
     return config;
@@ -438,8 +438,8 @@ public class SubmitterMain {
         // build the complete runtime config
         Config runtimeAll = Config.newBuilder()
             .putAll(runtime)
-            .put(Keys.topologyPackageUri(), packageURI)
-            .put(Keys.launcherClassInstance(), launcher)
+            .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
+            .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
             .build();
         callLauncherRunner(runtimeAll);
       }

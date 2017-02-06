@@ -41,14 +41,9 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-
-//import org.apache.commons.cli.CommandLine;
-//import org.apache.commons.cli.CommandLineParser;
-//import org.apache.commons.cli.DefaultParser;
-//import org.apache.commons.cli.ParseException;
 
 /**
  * main entry for metrics cache manager
@@ -318,13 +313,13 @@ public class MetricsCacheManager {
             Config.newBuilder()
                 .putAll(ClusterConfig.loadSandboxConfig())
                 .putAll(Config.newBuilder()
-                    .put(Keys.cluster(), cluster)
-                    .put(Keys.role(), role)
-                    .put(Keys.environ(), environ)
+                    .put(Key.CLUSTER, cluster)
+                    .put(Key.ROLE, role)
+                    .put(Key.ENVIRON, environ)
                     .build())
                 .putAll(Config.newBuilder()
-                    .put(Keys.topologyName(), topologyName)
-                    .put(Keys.topologyId(), topologyId)
+                    .put(Key.TOPOLOGY_NAME, topologyName)
+                    .put(Key.TOPOLOGY_ID, topologyId)
                     .build())
                 .build());
     LOG.info("Cli Config: " + config.toString());

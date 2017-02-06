@@ -44,7 +44,7 @@ public final class Misc {
    */
   public static String substitute(String heronHome, String pathString) {
     Config config = Config.newBuilder()
-        .put(Keys.heronHome(), heronHome)
+        .put(Key.HERON_HOME, heronHome)
         .build();
     return substitute(config, pathString);
   }
@@ -60,8 +60,8 @@ public final class Misc {
    */
   public static String substitute(String heronHome, String configPath, String pathString) {
     Config config = Config.newBuilder()
-        .put(Keys.heronHome(), heronHome)
-        .put(Keys.heronConf(), configPath)
+        .put(Key.HERON_HOME, heronHome)
+        .put(Key.HERON_CONF, configPath)
         .build();
     return substitute(config, pathString);
   }
@@ -76,7 +76,7 @@ public final class Misc {
    */
   public static String substituteSandbox(String heronSandboxHome, String pathString) {
     Config config = Config.newBuilder()
-        .put(Keys.heronSandboxHome(), heronSandboxHome)
+        .put(Key.HERON_SANDBOX_HOME, heronSandboxHome)
         .build();
     return substitute(config, pathString);
   }
@@ -95,8 +95,8 @@ public final class Misc {
       String configPath,
       String pathString) {
     Config config = Config.newBuilder()
-        .put(Keys.heronSandboxHome(), heronSandboxHome)
-        .put(Keys.heronSandboxConf(), configPath)
+        .put(Key.HERON_SANDBOX_HOME, heronSandboxHome)
+        .put(Key.HERON_SANDBOX_CONF, configPath)
         .build();
     return substitute(config, pathString);
   }

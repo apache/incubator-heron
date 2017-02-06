@@ -32,7 +32,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
@@ -98,7 +98,7 @@ public class UpdateDryRunRenderTest {
     // Input might contain UTF-8 character, so we read stream with UTF-8 decoding
     String exampleTable = IOUtils.toString(stream, StandardCharsets.UTF_8);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
-    Config config = Config.newBuilder().put(ConfigKeys.get("REPACKING_CLASS"),
+    Config config = Config.newBuilder().put(Key.REPACKING_CLASS,
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanA, originalPlan, new HashMap<String, Integer>());
@@ -116,7 +116,7 @@ public class UpdateDryRunRenderTest {
     // Input might contain UTF-8 character, so we read stream with UTF-8 decoding
     String exampleTable = IOUtils.toString(stream, StandardCharsets.UTF_8);
     TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
-    Config config = Config.newBuilder().put(ConfigKeys.get("REPACKING_CLASS"),
+    Config config = Config.newBuilder().put(Key.REPACKING_CLASS,
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanB, originalPlan, new HashMap<String, Integer>());

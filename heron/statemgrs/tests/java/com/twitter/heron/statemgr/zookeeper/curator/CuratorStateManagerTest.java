@@ -42,7 +42,7 @@ import org.mockito.stubbing.Answer;
 
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 
@@ -76,9 +76,9 @@ public class CuratorStateManagerTest {
   @Before
   public void before() throws Exception {
     Config.Builder builder = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(), ROOT_ADDR)
-        .put(Keys.topologyName(), TOPOLOGY_NAME)
-        .put(Keys.stateManagerConnectionString(), CONNECTION_STRING);
+        .put(Key.STATEMGR_ROOT_PATH, ROOT_ADDR)
+        .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
+        .put(Key.STATEMGR_CONNECTION_STRING, CONNECTION_STRING);
 
     // config is used for testing all the methods exception initialize and close
     config = builder.build();
@@ -87,7 +87,7 @@ public class CuratorStateManagerTest {
     tunnelingConfig = builder
         .put(ZkContext.IS_INITIALIZE_TREE, true)
         .put(ZkContext.IS_TUNNEL_NEEDED, true)
-        .put(Keys.schedulerService(), false)
+        .put(Key.SCHEDULER_IS_SERVICE, false)
         .build();
   }
 

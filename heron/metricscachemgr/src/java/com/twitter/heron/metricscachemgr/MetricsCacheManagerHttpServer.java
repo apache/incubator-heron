@@ -31,7 +31,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
 
@@ -101,7 +101,7 @@ public class MetricsCacheManagerHttpServer {
     }
 
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(),
+        .put(Key.STATEMGR_ROOT_PATH,
             System.getProperty("user.home") + "/.herondata/repository/state/local")
         .build();
     LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();

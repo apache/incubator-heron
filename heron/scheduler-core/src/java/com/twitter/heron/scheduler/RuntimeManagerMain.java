@@ -41,7 +41,7 @@ import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -262,13 +262,13 @@ public class RuntimeManagerMain {
 
     // add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.dryRun(), dryRun)
-        .put(Keys.dryRunFormat(), dryRunFormat)
-        .put(Keys.verbose(), verbose)
-        .put(Keys.topologyContainerId(), containerId);
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.DRY_RUN, dryRun)
+        .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
+        .put(Key.VERBOSE, verbose)
+        .put(Key.TOPOLOGY_CONTAINER_ID, containerId);
 
     // This is a command line option, but not a valid config key. Hence we don't use Keys
     if (componentParallelism != null) {
@@ -277,7 +277,7 @@ public class RuntimeManagerMain {
     }
 
     Config.Builder topologyConfig = Config.newBuilder()
-        .put(Keys.topologyName(), topologyName);
+        .put(Key.TOPOLOGY_NAME, topologyName);
 
     // build the final config by expanding all the variables
     Config config = Config.expand(Config.newBuilder()
@@ -377,8 +377,8 @@ public class RuntimeManagerMain {
 
       // build the runtime config
       Config runtime = Config.newBuilder()
-          .put(Keys.topologyName(), Context.topologyName(config))
-          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+          .put(Key.TOPOLOGY_NAME, Context.topologyName(config))
+          .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, adaptor)
           .build();
 
       // Create a ISchedulerClient basing on the config
