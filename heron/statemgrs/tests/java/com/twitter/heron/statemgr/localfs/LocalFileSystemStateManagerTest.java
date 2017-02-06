@@ -35,7 +35,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 
@@ -72,8 +72,8 @@ public class LocalFileSystemStateManagerTest {
 
   private static LocalFileSystemStateManager initMockManager(String rootPath, boolean initTree) {
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(), rootPath)
-        .put(LocalFileSystemKeys.initializeFileTree(), initTree)
+        .put(Key.STATEMGR_ROOT_PATH, rootPath)
+        .put(LocalFileSystemKey.IS_INITIALIZE_FILE_TREE.value(), initTree)
         .build();
     LocalFileSystemStateManager manager = spy(new LocalFileSystemStateManager());
     manager.initialize(config);

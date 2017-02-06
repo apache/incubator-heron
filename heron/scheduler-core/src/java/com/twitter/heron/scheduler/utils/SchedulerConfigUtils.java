@@ -18,7 +18,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 
 /**
  * For loading scheduler config
@@ -42,11 +42,11 @@ public final class SchedulerConfigUtils {
     PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
     return Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
-        .put(Keys.topologyPackageType(), packageType)
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
+        .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+        .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
         .build();
   }
 
@@ -61,10 +61,10 @@ public final class SchedulerConfigUtils {
   private static Config commandLineConfigs(String cluster, String role,
                                              String environ, Boolean verbose) {
     return Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.verbose(), verbose)
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.VERBOSE, verbose)
         .build();
   }
 

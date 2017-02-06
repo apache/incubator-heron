@@ -29,7 +29,7 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 public class MarathonSchedulerTest {
@@ -148,7 +148,7 @@ public class MarathonSchedulerTest {
         .thenReturn(SCHEDULER_URI);
 
     Config mockRuntime = Mockito.mock(Config.class);
-    Mockito.when(mockRuntime.getStringValue(Keys.topologyName()))
+    Mockito.when(mockRuntime.getStringValue(Key.TOPOLOGY_NAME))
         .thenReturn(TOPOLOGY_NAME);
 
     scheduler.initialize(mockConfig, mockRuntime);

@@ -42,7 +42,7 @@ import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -134,7 +134,8 @@ public class SchedulerMain {
         .required()
         .build();
 
-    Option property = Option.builder(Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION)
+    Option property = Option.builder(
+        SchedulerUtils.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION)
         .desc("use value for given property")
         .longOpt("property_override")
         .hasArgs()
@@ -198,7 +199,7 @@ public class SchedulerMain {
     // It returns a new empty Properties instead of null,
     // if no properties passed from command line. So no need for null check.
     Properties schedulerProperties =
-        cmd.getOptionProperties(Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION);
+        cmd.getOptionProperties(SchedulerUtils.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION);
 
     // initialize the scheduler with the options
     String topologyName = cmd.getOptionValue("topology_name");
@@ -367,8 +368,8 @@ public class SchedulerMain {
       LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
           .putAll(launcherUtils.getPrimaryRuntime(topology, adaptor))
-          .put(Keys.schedulerShutdown(), getShutdown())
-          .put(Keys.SCHEDULER_PROPERTIES, properties)
+          .put(Key.SCHEDULER_SHUTDOWN, getShutdown())
+          .put(Key.SCHEDULER_PROPERTIES, properties)
           .build();
 
       Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packedPlan);

@@ -35,7 +35,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -87,8 +87,8 @@ public class AuroraSchedulerTest {
 
     SchedulerStateManagerAdaptor stateManager = mock(SchedulerStateManagerAdaptor.class);
     Config runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(stateManager);
-    Mockito.when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(stateManager);
+    Mockito.when(runtime.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     Config mConfig = Mockito.mock(Config.class);
     Mockito.when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE),
