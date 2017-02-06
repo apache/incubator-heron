@@ -21,7 +21,7 @@ import com.twitter.heron.spi.common.Misc;
 public class LocalContext extends Context {
   public static String workingDirectory(Config config) {
     String workingDirectory = config.getStringValue(
-        LocalKey.WORKING_DIRECTORY.value(), LocalDefaults.get(LocalKey.WORKING_DIRECTORY.name()));
+        LocalKey.WORKING_DIRECTORY.value(), LocalKey.WORKING_DIRECTORY.getDefaultString());
     return Misc.substitute(config, workingDirectory);
   }
 }
