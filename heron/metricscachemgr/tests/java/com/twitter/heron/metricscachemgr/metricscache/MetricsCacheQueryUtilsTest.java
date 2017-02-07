@@ -242,12 +242,13 @@ public class MetricsCacheQueryUtilsTest {
             .build();
 
     ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
+    Map<String, Set<String>> componentNameInstanceId = request1.getComponentNameInstanceId();
 
-    assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    assertEquals(2, request1.componentNameInstanceId.get("c1").size());
-    assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
-    assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
+    assertEquals(1, componentNameInstanceId.keySet().size());
+    assertEquals(true, componentNameInstanceId.containsKey("c1"));
+    assertEquals(2, componentNameInstanceId.get("c1").size());
+    assertEquals(true, componentNameInstanceId.get("c1").contains("i1"));
+    assertEquals(true, componentNameInstanceId.get("c1").contains("i2"));
   }
 
   @Test
@@ -258,10 +259,11 @@ public class MetricsCacheQueryUtilsTest {
             .build();
 
     ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
+    Map<String, Set<String>> componentNameInstanceId = request1.getComponentNameInstanceId();
 
-    assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    assertEquals(null, request1.componentNameInstanceId.get("c1"));
+    assertEquals(1, componentNameInstanceId.keySet().size());
+    assertEquals(true, componentNameInstanceId.containsKey("c1"));
+    assertEquals(null, componentNameInstanceId.get("c1"));
   }
 
   @Test

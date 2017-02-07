@@ -439,22 +439,24 @@ public class CacheCore {
     synchronized (CacheCore.class) {
       List<ExceptionDatum> response = new ArrayList<>();
 
+      Map<String, Set<String>> componentNameInstanceId = request.getComponentNameInstanceId();
+
       // candidate component names
       Set<String> componentNameFilter;
-      if (request.componentNameInstanceId == null) {
+      if (componentNameInstanceId == null) {
         componentNameFilter = idxComponentInstance.keySet();
       } else {
-        componentNameFilter = request.componentNameInstanceId.keySet();
+        componentNameFilter = componentNameInstanceId.keySet();
       }
 
       for (String componentName : componentNameFilter) {
         // candidate instance ids
         Set<String> instanceIdFilter;
-        if (request.componentNameInstanceId == null
-            || request.componentNameInstanceId.get(componentName) == null) {
+        if (componentNameInstanceId == null
+            || componentNameInstanceId.get(componentName) == null) {
           instanceIdFilter = idxComponentInstance.get(componentName).keySet();
         } else {
-          instanceIdFilter = request.componentNameInstanceId.get(componentName);
+          instanceIdFilter = componentNameInstanceId.get(componentName);
         }
 
         for (String instanceId : instanceIdFilter) {
