@@ -129,7 +129,7 @@ public class MetricsCache {
 
   private ExceptionResponse summarizeException(ExceptionResponse response1) {
     Map<String, ExceptionDatum> exceptionSummary = new HashMap<>();
-    for (ExceptionDatum edp : response1.exceptionDatapointList) {
+    for (ExceptionDatum edp : response1.getExceptionDatapointList()) {
       // Get classname by splitting on first colon
       int pos = edp.getStackTrace().indexOf(':');
       if (pos >= 0) {
@@ -152,8 +152,7 @@ public class MetricsCache {
         }
       }
     }
-    ExceptionResponse ret = new ExceptionResponse();
-    ret.exceptionDatapointList.addAll(exceptionSummary.values());
+    ExceptionResponse ret = new ExceptionResponse(exceptionSummary.values());
     return ret;
   }
 

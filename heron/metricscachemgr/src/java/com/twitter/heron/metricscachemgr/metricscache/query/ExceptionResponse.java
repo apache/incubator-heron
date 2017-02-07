@@ -14,8 +14,19 @@
 
 package com.twitter.heron.metricscachemgr.metricscache.query;
 
+import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 public class ExceptionResponse {
-  public List<ExceptionDatum> exceptionDatapointList;
+  private final ImmutableList<ExceptionDatum> exceptionDatapointList;
+
+  public ExceptionResponse(Collection<ExceptionDatum> list) {
+    exceptionDatapointList = ImmutableList.copyOf(list);
+  }
+
+  public List<ExceptionDatum> getExceptionDatapointList() {
+    return exceptionDatapointList;
+  }
 }

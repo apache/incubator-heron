@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -242,7 +243,7 @@ public class CacheCore {
    * idxComponentInstance == []: query none component
    * idxComponentInstance == [c1->null, ..]: query all instances of c1, ..
    * idxComponentInstance == [c1->[], ..]: query none instance of c1, ..
-   * idxComponentInstance == [c1>[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
+   * idxComponentInstance == [c1->[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
    * <p>
    * assert: startTime <= endTime
    */
@@ -439,8 +440,7 @@ public class CacheCore {
   public ExceptionResponse getExceptions(
       ExceptionRequest request) {
     synchronized (CacheCore.class) {
-      ExceptionResponse response =
-          new ExceptionResponse();
+      List<ExceptionDatum> response = new ArrayList<>();
 
       // candidate component names
       Set<String> componentNameFilter;
@@ -463,13 +463,12 @@ public class CacheCore {
         for (String instanceId : instanceIdFilter) {
           int idx = idxComponentInstance.get(componentName).get(instanceId);
           for (ExceptionDatapoint exceptionDatapoint : cacheException.get(idx)) {
-            response.exceptionDatapointList.add(
-                new ExceptionDatum(componentName, instanceId, exceptionDatapoint));
+            response.add(new ExceptionDatum(componentName, instanceId, exceptionDatapoint));
           }
         }
       }
 
-      return response;
+      return new ExceptionResponse(response);
     }
   }
 

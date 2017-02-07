@@ -189,7 +189,7 @@ public final class MetricsCacheQueryUtils {
     // default OK if we have response to build already
     builder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK));
 
-    for (ExceptionDatum e : response.exceptionDatapointList) {
+    for (ExceptionDatum e : response.getExceptionDatapointList()) {
       TopologyMaster.TmasterExceptionLog.Builder exceptionBuilder =
           TopologyMaster.TmasterExceptionLog.newBuilder();
       // ExceptionDatapoint
