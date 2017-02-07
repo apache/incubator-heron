@@ -381,7 +381,7 @@ public final class FormatterUtils {
     }
   }
 
-  private static final List<String> titleNames = Arrays.asList(
+  private static final List<String> TITLE_NAMES = Arrays.asList(
         "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
 
 
@@ -431,7 +431,7 @@ public final class FormatterUtils {
   }
 
   public static String renderOneContainer(List<Row> rows) {
-    Row title = new Row(titleNames);
+    Row title = new Row(TITLE_NAMES);
     title.setStyle(TextStyle.BOLD);
     return new Table(title, rows).createTable();
   }
