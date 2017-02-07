@@ -19,6 +19,7 @@ import com.twitter.heron.spi.common.Context;
 
 public class LocalFileSystemContext extends Context {
   public static String fileSystemDirectory(Config config) {
-    return config.getStringValue(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value());
+    return config.getStringValue(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(),
+        LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString());
   }
 }

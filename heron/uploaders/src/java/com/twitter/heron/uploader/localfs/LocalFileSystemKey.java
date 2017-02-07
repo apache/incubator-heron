@@ -18,15 +18,27 @@ package com.twitter.heron.uploader.localfs;
  */
 public enum LocalFileSystemKey {
   //key to specify the local file system directory for the uploader
-  FILE_SYSTEM_DIRECTORY("heron.uploader.localfs.file.system.directory");
+  FILE_SYSTEM_DIRECTORY("heron.uploader.localfs.file.system.directory",
+      "${HOME}/.herondata/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}");
 
-  private String value;
+  private final String value;
+  private final Object defaultValue;
 
   LocalFileSystemKey(String value) {
     this.value = value;
+    this.defaultValue = null;
+  }
+
+  LocalFileSystemKey(String value, String defaultValue) {
+    this.value = value;
+    this.defaultValue = defaultValue;
   }
 
   public String value() {
     return value;
+  }
+
+  public String getDefaultString() {
+    return (String) defaultValue;
   }
 }

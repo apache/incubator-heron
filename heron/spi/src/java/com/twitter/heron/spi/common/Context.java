@@ -36,7 +36,7 @@ public class Context {
   }
 
   public static Boolean dryRun(Config cfg) {
-    return cfg.getBooleanValue(Key.DRY_RUN, false);
+    return cfg.getBooleanValue(Key.DRY_RUN);
   }
 
   public static DryRunFormatType dryRunFormatType(Config cfg) {
@@ -44,7 +44,7 @@ public class Context {
   }
 
   public static Boolean verbose(Config cfg) {
-    return cfg.getBooleanValue(Key.VERBOSE, true);
+    return cfg.getBooleanValue(Key.VERBOSE);
   }
 
   public static String configPath(Config cfg) {
@@ -104,7 +104,7 @@ public class Context {
   }
 
   public static Boolean schedulerService(Config cfg) {
-    return cfg.getBooleanValue(Key.SCHEDULER_IS_SERVICE, true);
+    return cfg.getBooleanValue(Key.SCHEDULER_IS_SERVICE);
   }
 
   public static String clusterFile(Config cfg) {
@@ -113,10 +113,6 @@ public class Context {
 
   public static String clientFile(Config cfg) {
     return cfg.getStringValue(Key.CLIENT_YAML);
-  }
-
-  public static String defaultsFile(Config cfg) {
-    return cfg.getStringValue(Key.DEFAULTS_YAML);
   }
 
   public static String metricsSinksFile(Config cfg) {
@@ -277,10 +273,6 @@ public class Context {
 
   public static String clusterSandboxFile(Config cfg) {
     return cfg.getStringValue(Key.SANDBOX_CLUSTER_YAML);
-  }
-
-  public static String defaultsSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_DEFAULTS_YAML);
   }
 
   public static String metricsSinksSandboxFile(Config cfg) {
