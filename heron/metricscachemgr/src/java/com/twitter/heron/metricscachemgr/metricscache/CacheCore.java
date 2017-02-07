@@ -56,7 +56,6 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
  * 1. support same protobuf message/request format
  */
 public class CacheCore {
-  // logger
   private static final Logger LOG = Logger.getLogger(CacheCore.class.getName());
 
   // index id generators
@@ -83,7 +82,8 @@ public class CacheCore {
   private long maxExceptionCount;
 
   /**
-   * constructor
+   * constructor: CacheCore needs two intervals to configure metrics time window
+   * and one number to limit exception count
    *
    * @param maxIntervalSecs metric: cache how long time? in seconds
    * @param intervalSecs metric: purge how often? in seconds
@@ -93,14 +93,14 @@ public class CacheCore {
     this.maxIntervalMilliSecs = maxIntervalSecs * 1000;
     this.intervalMilliSecs = intervalSecs * 1000;
     this.maxExceptionCount = maxException;
-    // cache
+
     cacheException = new HashMap<>();
     cacheMetric = new TreeMap<>();
     long now = System.currentTimeMillis();
     for (long i = now - this.maxIntervalMilliSecs; i < now; i += this.intervalMilliSecs) {
       cacheMetric.put(i, new HashMap<Long, LinkedList<MetricDatapoint>>());
     }
-    // index
+
     idxComponentInstance = new HashMap<>();
     idxMetricName = new HashMap<>();
   }
