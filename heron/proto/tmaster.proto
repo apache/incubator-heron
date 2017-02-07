@@ -53,6 +53,11 @@ message StMgrHeartbeatResponse {
   required heron.proto.system.Status status = 1;
 }
 
+// Message sent by tmaster to stmgrs to send it to all of its local spouts
+message StatefulCheckpointStart {
+  required string checkpoint_id = 1;
+}
+
 //
 // interface called by the metric managers
 // TODO: Rename this message to something else to avoid confusion with metrics::MetricDatum

@@ -87,6 +87,14 @@ TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
   return l;
 }
 
+void TupleCache::clear(sp_int32 _task_id) {
+  std::map<sp_int32, TupleList*>::iterator iter = cache_.find(_task_id);
+  if (iter != cache_.end()) {
+    delete iter->second;
+    cache_.erase(_task_id);
+  }
+}
+
 void TupleCache::drain(EventLoop::Status) { drain_impl(); }
 
 void TupleCache::drain_impl() {

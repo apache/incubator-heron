@@ -1,0 +1,35 @@
+<configuration>
+        <property>
+                <name>hadoop.security.authentication</name>
+                <value>kerberos</value>
+        </property>
+        <property>
+                <name>dfs.nameservices</name>
+                <value>phdcluster</value>
+        </property>
+
+        <property>
+                <name>dfs.ha.namenodes.phdcluster</name>
+                <value>nn1 , 	nn2</value>
+        </property>
+
+        <property>
+                <name>dfs.namenode.rpc-address.phdcluster.nn1</name>
+                <value> 	mdw:8020</value>
+        </property>
+
+        <property>
+                <name>dfs.namenode.rpc-address.phdcluster.nn2</name>
+                <value>smdw:8020 </value>
+        </property>
+
+        <property>
+                <name>dfs.namenode.http-address.phdcluster.nn1</name>
+                 <value>mdw:50070</value>
+        </property>
+	
+        <property>
+                <name>dfs.client.failover.proxy.provider.phdcluster</name>
+                <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+        </property>
+</configuration>

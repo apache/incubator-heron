@@ -1,0 +1,28 @@
+Source: libhdfs3
+Priority: optional
+Maintainer: Zhanwei Wang <wangzw@wangzw.org>
+Build-Depends: debhelper (>= 9), cmake, libprotobuf-dev, protobuf-compiler, libxml2-dev, libkrb5-dev, uuid-dev, libgsasl7-dev
+Standards-Version: 3.9.5
+Section: libs
+
+Package: libhdfs3-dev
+Section: libdevel
+Architecture: any
+Depends: libhdfs3 (= ${binary:Version}), ${misc:Depends}
+Description: Native C/C++ HDFS Client - development files
+ Libhdfs3, designed as an alternative implementation of libhdfs,
+ is implemented based on native Hadoop RPC protocol and
+ HDFS data transfer protocol.
+ It gets rid of the drawbacks of JNI, and it has a lightweight,
+ small memory footprint code base. In addition, it is easy to use and deploy.
+
+Package: libhdfs3
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Native C/C++ HDFS Client
+ Libhdfs3, designed as an alternative implementation of libhdfs,
+ is implemented based on native Hadoop RPC protocol and
+ HDFS data transfer protocol.
+ It gets rid of the drawbacks of JNI, and it has a lightweight,
+ small memory footprint code base. In addition, it is easy to use and deploy.
+ .

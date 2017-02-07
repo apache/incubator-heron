@@ -1,0 +1,83 @@
+<configuration>
+
+	<property>
+		<name>TestString</name>
+		<value>TestString</value>
+	</property>
+
+	<property>
+		<name>TestInt32</name>
+		<value>123456</value>
+	</property>
+
+	<property>
+		<name>TestInt32Invalid</name>
+		<value>123a456</value>
+	</property>
+
+	<property>
+		<name>TestInt32OverFlow</name>
+		<value>12345678901</value>
+	</property>
+
+	<property>
+		<name>TestInt64</name>
+		<value>12345678901</value>
+	</property>
+
+	<property>
+		<name>TestInt64Invalid</name>
+		<value>12345a678901</value>
+	</property>
+
+	<property>
+		<name>TestInt64OverFlow</name>
+		<value>123456789011234567890112345678901</value>
+	</property>
+
+	<property>
+		<name>TestDouble</name>
+		<value>123.456</value>
+	</property>
+
+	<property>
+		<name>TestDoubleInvalid</name>
+		<value>123e1234a</value>
+	</property>
+
+	<property>
+		<name>TestDoubleOverflow</name>
+		<value>123e1234</value>
+	</property>
+
+	<property>
+		<name>TestDoubleUnderflow</name>
+		<value>123e-1234</value>
+	</property>
+
+	<property>
+		<name>TestTrue1</name>
+		<value>true</value>
+	</property>
+
+	<property>
+		<name>TestTrue2</name>
+		<value>1</value>
+	</property>
+
+	<property>
+		<name>TestFalse1</name>
+		<value>faLse</value>
+	</property>
+
+	<property>
+		<name>TestFalse2</name>
+		<value>0</value>
+	</property>
+
+	<property>
+		<name>TestBoolInvalid</name>
+		<value>atrue</value>
+	</property>
+
+</configuration>

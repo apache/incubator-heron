@@ -89,6 +89,11 @@ void StMgrState::heartbeat(sp_int64, proto::system::StMgrStats* _stats) {
   last_stats_ = _stats;
 }
 
+void StMgrState::StatefulNewCheckpoint(const proto::tmaster::StatefulCheckpointStart& _request) {
+  LOG(INFO) << "Sending a new stateful checkpoint request to stmgr " << stmgr_->id();
+  server_->SendMessage(connection_, _request);
+}
+
 void StMgrState::NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   LOG(INFO) << "Sending a new physical plan to stmgr " << stmgr_->id();
   proto::stmgr::NewPhysicalPlanMessage message;

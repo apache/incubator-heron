@@ -1,0 +1,15 @@
+files
+libhdfs3.postinst.debhelper
+libhdfs3.postrm.debhelper
+libhdfs3.debhelper.log
+libhdfs3.substvars
+libhdfs3-1.postinst.debhelper
+libhdfs3-1.postrm.debhelper
+libhdfs3-1.substvars
+libhdfs3-1/
+libhdfs3-dev.debhelper.log
+libhdfs3-dev.substvars
+libhdfs3-dev/
+libhdfs3/
+tmp/
+changelog

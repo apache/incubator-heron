@@ -55,6 +55,8 @@ class StMgrClientMgr {
   void SendStartBackPressureToOtherStMgrs();
   void SendStopBackPressureToOtherStMgrs();
   bool DidAnnounceBackPressure();
+  // Called by StMgrClient when its connection closes
+  void HandleDeadStMgrConnection(const sp_string& _stmgr_id);
 
  private:
   StMgrClient* CreateClient(const sp_string& _other_stmgr_id, const sp_string& _host_name,

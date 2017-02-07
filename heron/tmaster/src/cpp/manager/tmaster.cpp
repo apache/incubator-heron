@@ -27,6 +27,7 @@
 #include "manager/stats-interface.h"
 #include "manager/tmasterserver.h"
 #include "manager/stmgrstate.h"
+#include "manager/stateful-coordinator.h"
 #include "processor/processor.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -136,6 +137,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateProcessMetrics(status);
   }, true, PROCESS_METRICS_FREQUENCY), 0);
+
+  // Instantiate the stateful coordinator
+  stateful_coordinator_ = new StatefulCoordinator(start_time_);
 }
 
 void TMaster::EstablishTMaster(EventLoop::Status) {
@@ -165,6 +169,7 @@ TMaster::~TMaster() {
   mMetricsMgrClient->unregister_metric(METRIC_PREFIX);
   delete mMetricsMgrClient;
   delete tmasterProcessMetrics;
+  delete stateful_coordinator_;
 }
 
 void TMaster::UpdateProcessMetrics(EventLoop::Status) {
@@ -234,6 +239,19 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
     ::exit(1);
   }
   LOG(INFO) << "Topology Read and Validated\n";
+
+  // In case we are a stateful topology we need to start our checkpointing timer
+  sp_int64 stateful_checkpoint_interval =
+             config::TopologyConfigHelper::GetStatefulCheckpointInterval(*topology_);
+  if (stateful_checkpoint_interval > 0) {
+    LOG(INFO) << "Starting timer to checkpoint state every "
+              << stateful_checkpoint_interval << " seconds";
+    CHECK_GT(eventLoop_->registerTimer(
+                 [this](EventLoop::Status) { this->SendCheckpointMarker(); }, true,
+                 stateful_checkpoint_interval * 1000 * 1000),
+             0);
+  }
+
   // Now see if there is already a pplan
   proto::system::PhysicalPlan* pplan = new proto::system::PhysicalPlan();
   auto cb = [pplan, this](proto::system::StatusCode code) {
@@ -241,6 +259,10 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   };
 
   state_mgr_->GetPhysicalPlan(tmaster_location_->topology_name(), pplan, std::move(cb));
+}
+
+void TMaster::SendCheckpointMarker() {
+  stateful_coordinator_->DoCheckpoint(stmgrs_);
 }
 
 void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,

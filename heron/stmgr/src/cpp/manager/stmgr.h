@@ -32,9 +32,17 @@ namespace heron {
 namespace common {
 class HeronStateMgr;
 class MetricsMgrSt;
+class CheckpointMgrClient;
 class MultiAssignableMetric;
 }
 }
+
+namespace heron {
+namespace ckptmgr {
+  class CkptMgrClient;
+}
+}
+
 
 namespace heron {
 namespace stmgr {
@@ -51,7 +59,8 @@ class StMgr {
   StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
         const sp_string& _topology_id, proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
-        const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port);
+        const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+        sp_int32 _checkpoint_manager_port, const sp_string& _ckptmgr_id);
   virtual ~StMgr();
 
   // All kinds of initialization like starting servers and clients
@@ -76,6 +85,9 @@ class StMgr {
   void SendStopBackPressureToOtherStMgrs();
   void StartTMasterClient();
   bool DidAnnounceBackPressure();
+  void HandleDeadInstanceConnection(sp_int32 _task_id);
+  void HandleDeadStMgrConnection(const sp_string& _stmgr);
+  void InitiateStatefulCheckpoint(sp_string checkpoint_tag);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
@@ -83,6 +95,7 @@ class StMgr {
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
   void CheckTMasterLocation(EventLoop::Status);
   void UpdateProcessMetrics(EventLoop::Status);
+  void CreateCheckpointMgrClient();
 
   void CleanupStreamConsumers();
   void PopulateStreamConsumers(
@@ -125,6 +138,8 @@ class StMgr {
   // Pushing data to other streammanagers
   StMgrClientMgr* clientmgr_;
   TMasterClient* tmaster_client_;
+  ckptmgr::CkptMgrClient* checkpoint_manager_client_;
+  sp_string ckptmgr_id_;
   EventLoop* eventLoop_;
 
   // Map of task_id to stmgr_id
@@ -143,6 +158,9 @@ class StMgr {
   // Metrics Manager
   heron::common::MetricsMgrSt* metrics_manager_client_;
 
+  // Checkpoint Manager
+  //heron::common::CheckpointMgrClient* checkpoint_manager_client_;
+
   // Process related metrics
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;
 
@@ -152,11 +170,13 @@ class StMgr {
   sp_string zkroot_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
+  sp_int32 checkpoint_manager_port_;
 
   proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks_;
 
   bool is_acking_enabled;
+  bool is_stateful_;
 
   proto::system::HeronTupleSet2* tuple_set_from_other_stmgr_;
 

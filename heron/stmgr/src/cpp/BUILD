@@ -95,6 +95,8 @@ cc_library(
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
+        "//heron/common/src/cpp/stateful:checkpointmgr-cxx",
+        "//heron/ckptmgr/src/cpp:manager-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//third_party/yaml-cpp:yaml-cxx",
     ],
