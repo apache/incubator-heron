@@ -75,7 +75,7 @@ public class CuratorStateManagerTest {
 
   @Before
   public void before() throws Exception {
-    Config.Builder builder = Config.newBuilder()
+    Config.Builder builder = Config.newBuilder(true)
         .put(Key.STATEMGR_ROOT_PATH, ROOT_ADDR)
         .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
         .put(Key.STATEMGR_CONNECTION_STRING, CONNECTION_STRING);

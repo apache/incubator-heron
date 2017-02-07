@@ -42,8 +42,7 @@ public class SchedulerClientFactoryTest {
     SchedulerStateManagerAdaptor statemgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
 
     // Get a ServiceSchedulerClient
-    Mockito.when(config.getBooleanValue(Key.SCHEDULER_IS_SERVICE, true))
-        .thenReturn(true);
+    Mockito.when(config.getBooleanValue(Key.SCHEDULER_IS_SERVICE)).thenReturn(true);
 
     // Mock the runtime object
     Mockito.when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(statemgr);
@@ -66,8 +65,7 @@ public class SchedulerClientFactoryTest {
     SchedulerStateManagerAdaptor statemgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
 
     // Get a ServiceSchedulerClient
-    Mockito.when(config.getBooleanValue(Key.SCHEDULER_IS_SERVICE, true))
-        .thenReturn(true);
+    Mockito.when(config.getBooleanValue(Key.SCHEDULER_IS_SERVICE)).thenReturn(true);
 
     // Mock the runtime object
     Mockito.when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(statemgr);

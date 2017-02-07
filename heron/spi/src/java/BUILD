@@ -32,15 +32,6 @@ java_library(
     ],
 )
 
-filegroup(
-    name = "config-defaults-yaml",
-    srcs = glob(["**/spi/common/**/defaults.yaml"]),
-)
-
-common_resource_files = [
-    ":config-defaults-yaml",
-]
-
 utils_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
@@ -97,7 +88,6 @@ java_library(
         "//heron/common/src/java:config-java",
         "@com_google_guava_guava//jar",
     ],
-    resources = common_resource_files,
 )
 
 java_library(

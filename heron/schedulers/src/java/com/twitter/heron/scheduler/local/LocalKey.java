@@ -13,20 +13,39 @@
 //  limitations under the License.
 package com.twitter.heron.scheduler.local;
 
+import com.twitter.heron.spi.common.Key;
+
 /**
  * Keys specific to the local scheduler
  */
 public enum LocalKey {
   // config key for specifying the working directory of a topology
-  WORKING_DIRECTORY("heron.scheduler.local.working.directory");
+  WORKING_DIRECTORY("heron.scheduler.local.working.directory",
+      "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}");
 
-  private String value;
+  private final String value;
+  private final Key.Type type;
+  private final Object defaultValue;
 
-  LocalKey(String value) {
+  LocalKey(String value, String defaultValue) {
     this.value = value;
+    this.type = Key.Type.STRING;
+    this.defaultValue = defaultValue;
   }
 
   public String value() {
     return value;
+  }
+
+  public Object getDefault() {
+    return defaultValue;
+  }
+
+  public String getDefaultString() {
+    if (type != Key.Type.STRING) {
+      throw new IllegalAccessError(String.format(
+          "Config Key %s is type %s, getDefaultString() not supported", this.name(), this.type));
+    }
+    return (String) this.defaultValue;
   }
 }
