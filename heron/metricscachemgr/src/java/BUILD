@@ -2,29 +2,22 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-metricscachemgr_deps_files = [
+load("/tools/rules/heron_deps", "heron_java_proto_files")
+
+metricscachemgr_deps_files = heron_java_proto_files() + [
            "//heron/spi/src/java:common-spi-java",
            "//heron/spi/src/java:metricsmgr-spi-java",
            "//heron/spi/src/java:utils-spi-java",
            "//heron/spi/src/java:statemgr-spi-java",
            "//heron/spi/src/java:packing-spi-java",
            "//heron/api/src/java:api-java",
-           "//heron/proto:proto_common_java",
-           "//heron/proto:proto_metrics_java",
-           "//heron/proto:proto_tmaster_java",
-           "//heron/proto:proto_topology_java",
-           "//heron/proto:proto_packing_plan_java",
            "//heron/common/src/java:common-java",
            "//heron/scheduler-core/src/java:scheduler-java",
            "//heron/statemgrs/src/java:localfs-statemgr-java",
            "//heron/metricsmgr/src/thrift:thrift_scribe_java",
            "//heron/metricsmgr/src/java:metricsmgr-java",
-           "//third_party/java:jackson",
-           "//third_party/java:logging", # slf4j is only used for thrift in scribe-sink
-           "@org_yaml_snakeyaml//jar",
-           "@com_google_protobuf_protobuf_java//jar",
-           "@org_apache_thrift_libthrift//jar",
-           "@commons_cli_commons_cli//jar",
+           "//third_party/java:cli",
+           "//third_party/java:guava",
 ]
 
 java_library(
