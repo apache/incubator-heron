@@ -268,12 +268,11 @@ public class MetricsCacheQueryUtilsTest {
 
   @Test
   public void testToProtoBufException() {
-    ExceptionResponse response = new ExceptionResponse();
-    response.exceptionDatapointList = new ArrayList<>();
+    List<ExceptionDatum> response = new ArrayList<>();
     ExceptionDatum dp = new ExceptionDatum("c1", "i1", "h1", "s1", "lt1", "ft1", 10, "l1");
-    response.exceptionDatapointList.add(dp);
+    response.add(dp);
 
-    TopologyMaster.ExceptionLogResponse response1 = toProtobuf(response);
+    TopologyMaster.ExceptionLogResponse response1 = toProtobuf(new ExceptionResponse(response));
 
     assertEquals(1, response1.getExceptionsCount());
     assertEquals("c1", response1.getExceptions(0).getComponentName());
