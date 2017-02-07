@@ -19,7 +19,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-public class ExceptionResponse {
+public final class ExceptionResponse {
   private final ImmutableList<ExceptionDatum> exceptionDatapointList;
 
   public ExceptionResponse(Collection<ExceptionDatum> list) {

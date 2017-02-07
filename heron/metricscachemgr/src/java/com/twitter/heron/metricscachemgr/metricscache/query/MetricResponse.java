@@ -14,8 +14,19 @@
 
 package com.twitter.heron.metricscachemgr.metricscache.query;
 
+import java.util.Collection;
 import java.util.List;
 
-public class MetricResponse {
-  public List<MetricDatum> metricList;
+import com.google.common.collect.ImmutableList;
+
+public final class MetricResponse {
+  private final ImmutableList<MetricDatum> metricList;
+
+  public MetricResponse(Collection<MetricDatum> list) {
+    metricList = ImmutableList.copyOf(list);
+  }
+
+  public List<MetricDatum> getMetricList() {
+    return metricList;
+  }
 }
