@@ -22,12 +22,14 @@ import base
 import common
 import heron.tools.common.src.python.access as access
 
-
 ################################################################################
 # pylint: disable=abstract-method
 # pylint: disable=arguments-differ
 class TopologyConfigHandler(base.BaseHandler):
   ''' Handler for displaying the config for a topology '''
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   def get(self, cluster, environ, topology):
     '''
@@ -50,6 +52,9 @@ class TopologyConfigHandler(base.BaseHandler):
 class TopologyExceptionsPageHandler(base.BaseHandler):
   ''' Handler for displaying all the exceptions of a topology '''
 
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
+
   def get(self, cluster, environ, topology, comp_name, instance):
     '''
     :param cluster:
@@ -67,7 +72,8 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
         comp_name=comp_name,
         instance=instance,
         active="topologies",
-        function=common.className)
+        function=common.className,
+        baseUrl=self.baseUrl)
     # send the exception
     self.render("exception.html", **options)
 
@@ -97,6 +103,9 @@ class ListTopologiesHandler(base.BaseHandler):
 ################################################################################
 class TopologyPlanHandler(base.BaseHandler):
   ''' Handler for displaying the logical plan of a topology '''
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology):
@@ -129,7 +138,8 @@ class TopologyPlanHandler(base.BaseHandler):
         status="running" if random.randint(0, 1) else "errors",
         active="topologies",
         job_page_link=job_page_link,
-        function=common.className
+        function=common.className,
+        baseUrl=self.baseUrl
     )
 
     # send the single topology page
@@ -143,6 +153,9 @@ class ContainerFileHandler(base.BaseHandler):
   Responsible for creating the web page for files. The html
   will in turn call another endpoint to get the file data.
   """
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
@@ -160,7 +173,8 @@ class ContainerFileHandler(base.BaseHandler):
         environ=environ,
         topology=topology,
         container=container,
-        path=path
+        path=path,
+        baseUrl=self.baseUrl
     )
 
     self.render("file.html", **options)
@@ -172,6 +186,9 @@ class ContainerFileDataHandler(base.BaseHandler):
   """
   Responsible for getting the data for a file in a container of a topology.
   """
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
@@ -200,6 +217,9 @@ class ContainerFileStatsHandler(base.BaseHandler):
   Responsible for getting the file stats for a container.
   """
 
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
     '''
@@ -219,6 +239,7 @@ class ContainerFileStatsHandler(base.BaseHandler):
         container=container,
         path=path,
         filestats=data,
+        baseUrl=self.baseUrl
     )
     self.render("browse.html", **options)
 

@@ -25,6 +25,7 @@ import tornado.web
 import tornado.log
 import tornado.template
 from tornado.options import define
+from tornado.web import url
 
 import heron.common.src.python.utils.log as log
 import heron.tools.common.src.python.utils.config as common_config
@@ -36,21 +37,41 @@ Log = log.Log
 class Application(tornado.web.Application):
   ''' Application '''
 
-  def __init__(self):
+  def __init__(self, base_url):
+
+    # pylint: disable=fixme
+    # TODO: hacky solution
+    # sys.path[0] should be the path to the extracted files for heron-ui, as it is added
+    # when bootstrapping the pex file
+    static_prefix = '/static/'
+    if base_url != "":
+      static_prefix = os.path.join(base_url, 'static/')
+
+    settings = dict(
+        template_path=os.path.join(sys.path[0], "heron/tools/ui/resources/templates"),
+        static_path=os.path.join(sys.path[0], "heron/tools/ui/resources/static"),
+        static_url_prefix=static_prefix,
+        gzip=True,
+        debug=True,
+        default_handler_class=handlers.NotFoundHandler,
+    )
+    Log.info(os.path.join(base_url, 'static/'))
+
     # Change these to query string parameters, since
     # current format can lead to pattern matching issues.
     callbacks = [
         (r"/", handlers.MainHandler),
 
-        (r"/topologies", handlers.ListTopologiesHandler),
-        (r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)",
-         handlers.ContainerFileStatsHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config",
-         handlers.TopologyConfigHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions",
-         handlers.TopologyExceptionsPageHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)",
-         handlers.TopologyPlanHandler),
+        url(r"/service/heron/topologies", handlers.ListTopologiesHandler, name='topologies'),
+        url(r"/topologies", handlers.ListTopologiesHandler),
+        url(r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)",
+            handlers.ContainerFileStatsHandler, dict(baseUrl=base_url)),
+        url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config",
+            handlers.TopologyConfigHandler, dict(baseUrl=base_url)),
+        url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions",
+            handlers.TopologyExceptionsPageHandler, dict(baseUrl=base_url)),
+        url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)",
+            handlers.TopologyPlanHandler, dict(baseUrl=base_url)),
 
         # topology metric apis
         (r"/topologies/metrics",
@@ -58,12 +79,12 @@ class Application(tornado.web.Application):
         (r"/topologies/metrics/timeline",
          handlers.api.MetricsTimelineHandler),
 
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",
-         handlers.ContainerFileHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",
-         handlers.ContainerFileDataHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedownload",
-         handlers.ContainerFileDownloadHandler),
+        url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",
+            handlers.ContainerFileHandler, dict(baseUrl=base_url)),
+        url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",
+            handlers.ContainerFileDataHandler, dict(baseUrl=base_url)),
+        url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedownload",
+            handlers.ContainerFileDownloadHandler, dict(baseUrl=base_url)),
 
         # Topology list and plan handlers
         (r"/topologies/list.json",
@@ -92,23 +113,17 @@ class Application(tornado.web.Application):
          handlers.api.JmapHandler),
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/histo",
          handlers.api.MemoryHistogramHandler),
+
+        ## Static files
+        (r"/static/(.*)", tornado.web.StaticFileHandler,
+         dict(path=settings['static_path']))
+
     ]
 
-    # pylint: disable=fixme
-    # TODO: hacky solution
-    # sys.path[0] should be the path to the extracted files for heron-ui, as it is added
-    # when bootstrapping the pex file
-    settings = dict(
-        template_path=os.path.join(sys.path[0], "heron/tools/ui/resources/templates"),
-        static_path=os.path.join(sys.path[0], "heron/tools/ui/resources/static"),
-        gzip=True,
-        debug=True,
-        default_handler_class=handlers.NotFoundHandler,
-    )
     tornado.web.Application.__init__(self, callbacks, **settings)
 
 
-def define_options(address, port, tracker_url):
+def define_options(address, port, tracker_url, base_url):
   '''
   :param address:
   :param port:
@@ -118,6 +133,7 @@ def define_options(address, port, tracker_url):
   define("address", default=address)
   define("port", default=port)
   define("tracker_url", default=tracker_url)
+  define("base_url", default=base_url)
 
 
 def main():
@@ -144,14 +160,16 @@ def main():
   # log additional information
   command_line_args = vars(parsed_args)
 
-  Log.info("Listening at http://%s:%d", command_line_args['address'], command_line_args['port'])
+  Log.info("Listening at http://%s:%d%s", command_line_args['address'],
+           command_line_args['port'], command_line_args['base_url'])
   Log.info("Using tracker url: %s", command_line_args['tracker_url'])
 
   # pass the options to tornado and start the ui server
   define_options(command_line_args['address'],
                  command_line_args['port'],
-                 command_line_args['tracker_url'])
-  http_server = tornado.httpserver.HTTPServer(Application())
+                 command_line_args['tracker_url'],
+                 command_line_args['base_url'])
+  http_server = tornado.httpserver.HTTPServer(Application(command_line_args['base_url']))
   http_server.listen(command_line_args['port'], address=command_line_args['address'])
 
   # pylint: disable=unused-argument
