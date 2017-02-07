@@ -14,13 +14,10 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.logging.Logger;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ConfigKeysTest {
-  private static final Logger LOG = Logger.getLogger(ConfigKeysTest.class.getName());
 
   @Test
   public void testHeronEnviron() throws Exception {
@@ -59,10 +56,6 @@ public class ConfigKeysTest {
     assertEquals(
         "heron.config.file.cluster.yaml",
         Key.CLUSTER_YAML
-    );
-    assertEquals(
-        "heron.config.file.defaults.yaml",
-        Key.DEFAULTS_YAML
     );
     assertEquals(
         "heron.config.file.metrics.yaml",

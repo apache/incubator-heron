@@ -34,7 +34,7 @@ public class LocalFileSystemConfigTest {
         .put(Key.TOPOLOGY_PACKAGE_TYPE, PackageType.TAR)
         .put(Key.TOPOLOGY_PACKAGE_FILE, "/tmp/something.tar.gz")
         .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(),
-            LocalFileSystemDefaults.fileSystemDirectory())
+            LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
         .build();
   }
 
@@ -44,7 +44,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
-        Misc.substitute(config, LocalFileSystemDefaults.fileSystemDirectory())
+        Misc.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
 
@@ -72,7 +72,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         uploader.getTopologyDirectory(),
-        Misc.substitute(config, LocalFileSystemDefaults.fileSystemDirectory())
+        Misc.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
 

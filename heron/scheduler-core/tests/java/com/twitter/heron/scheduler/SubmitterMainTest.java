@@ -187,7 +187,7 @@ public class SubmitterMainTest {
     PowerMockito.whenNew(SchedulerStateManagerAdaptor.class).withAnyArguments().
         thenReturn(adaptor);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
-    when(config.getBooleanValue(Key.DRY_RUN, false)).thenReturn(true);
+    when(config.getBooleanValue(Key.DRY_RUN)).thenReturn(true);
     try {
       submitterMain.submitTopology();
     } finally {

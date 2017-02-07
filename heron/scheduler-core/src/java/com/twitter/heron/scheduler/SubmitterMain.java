@@ -70,7 +70,7 @@ public class SubmitterMain {
       TopologyAPI.Topology topology) {
     PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
-    Config config = Config.newBuilder()
+    return Config.newBuilder()
         .put(Key.TOPOLOGY_ID, topology.getId())
         .put(Key.TOPOLOGY_NAME, topology.getName())
         .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
@@ -78,7 +78,6 @@ public class SubmitterMain {
         .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
         .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
         .build();
-    return config;
   }
 
   /**
@@ -96,7 +95,7 @@ public class SubmitterMain {
                                              Boolean dryRun,
                                              DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
-    Config config = Config.newBuilder()
+    return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
         .put(Key.ENVIRON, environ)
@@ -104,8 +103,6 @@ public class SubmitterMain {
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
         .build();
-
-    return config;
   }
 
   // Print usage options
@@ -294,7 +291,7 @@ public class SubmitterMain {
 
     // Default dry-run output format type
     DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
-    if (cmd.hasOption("f")) {
+    if (dryRun && cmd.hasOption("t")) {
       String format = cmd.getOptionValue("dry_run_format");
       dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
       LOG.fine(String.format("Running dry-run mode using format %s", format));
