@@ -70,8 +70,7 @@ public final class MetricRequest {
     if (metricNames == null) {
       return null;
     }
-    Set<String> ret = new HashSet<>();
-    ret.addAll(metricNames);
+    Set<String> ret = new HashSet<>(metricNames);
     return ret;
   }
 
