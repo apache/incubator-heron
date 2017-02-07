@@ -54,14 +54,9 @@ public final class ExceptionDatum {
   }
 
   public ExceptionDatum(ExceptionDatum exceptionDatum) {
-    this.componentName = exceptionDatum.componentName;
-    this.instanceId = exceptionDatum.instanceId;
-    this.hostname = exceptionDatum.hostname;
-    this.stackTrace = exceptionDatum.stackTrace;
-    this.lastTime = exceptionDatum.lastTime;
-    this.firstTime = exceptionDatum.firstTime;
-    this.count = exceptionDatum.count;
-    this.logging = exceptionDatum.logging;
+    this(exceptionDatum.componentName, exceptionDatum.instanceId, exceptionDatum.hostname,
+        exceptionDatum.stackTrace, exceptionDatum.lastTime, exceptionDatum.firstTime,
+        exceptionDatum.count, exceptionDatum.logging);
   }
 
   public ExceptionDatum(String componentName, String instanceId,

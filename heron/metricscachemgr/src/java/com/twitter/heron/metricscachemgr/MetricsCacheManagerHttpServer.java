@@ -55,12 +55,12 @@ public class MetricsCacheManagerHttpServer {
   private static final String PATH_STATS = "/stats";
   private static final String PATH_EXCEPTIONS = "/exceptions";
   private static final String PATH_EXCEPTIONSUMMARY = "/exceptionsummary";
-  // logger
+
   private static final Logger LOG = Logger.getLogger(MetricsCacheManagerHttpServer.class.getName());
   // http server
-  private HttpServer server = null;
+  private final HttpServer server;
   // reference to MetricsCache object
-  private MetricsCache metricsCache = null;
+  private final MetricsCache metricsCache;
 
   public MetricsCacheManagerHttpServer(MetricsCache cache, int port) throws IOException {
     metricsCache = cache;
@@ -134,7 +134,6 @@ public class MetricsCacheManagerHttpServer {
     // parse response data
     TopologyMaster.MetricResponse response = TopologyMaster.MetricResponse.parseFrom(responseData);
 
-    //print result
     System.out.println(response.toString());
   }
 
@@ -162,11 +161,8 @@ public class MetricsCacheManagerHttpServer {
         httpExchange.sendResponseHeaders(400, -1); // throw exception
         return;
       }
-      // query cache
       U res = generateResponse(req, metricsCache);
-      // response
       NetworkUtils.sendHttpResponse(httpExchange, res.toByteArray());
-      // close
       httpExchange.close();
     }
 

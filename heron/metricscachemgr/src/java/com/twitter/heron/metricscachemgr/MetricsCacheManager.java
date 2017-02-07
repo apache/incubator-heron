@@ -53,10 +53,8 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
  * 3.MetricsCacheManagerHttpServer metricsCacheManagerHttpServer: it responds to queries.
  */
 public class MetricsCacheManager {
-  // logger
   private static final Logger LOG = Logger.getLogger(MetricsCacheManager.class.getName());
 
-  // Pre-defined value
   private static final String METRICS_CACHE_HOST = "0.0.0.0";
   private static final String METRICS_CACHE_COMPONENT_NAME = "__metricscachemgr__";
   private static final int METRICS_CACHE_INSTANCE_ID = -1;
@@ -69,20 +67,20 @@ public class MetricsCacheManager {
   // respond to query requests
   private MetricsCacheManagerHttpServer metricsCacheManagerHttpServer;
 
-  // process identification
   private String topologyName;
 
-  // store
   private MetricsCache metricsCache;
 
-  // holds all the config read
   private Config config;
 
-  // location for state mgr
   private TopologyMaster.MetricsCacheLocation metricsCacheLocation;
 
   /**
-   * Constructor
+   * Constructor: MetricsCacheManager needs 4 type information:
+   * 1. Servers: host and 2 ports
+   * 2. Topology: name
+   * 3. Config: heron config, sink config, and cli config
+   * 4. State: location node to be put in the state-mgr
    *
    * @param topologyName topology name
    * @param serverHost server host
@@ -369,7 +367,7 @@ public class MetricsCacheManager {
       LOG.info("Starting Metrics Cache HTTP Server");
       metricsCacheManagerHttpServer.start();
 
-      // The MetricsCacheServer would run in the main thread
+      // 2. The MetricsCacheServer would run in the main thread
       // We do it in the final step since it would await the main thread
       LOG.info("Starting Metrics Cache Server");
       metricsCacheManagerServer.start();

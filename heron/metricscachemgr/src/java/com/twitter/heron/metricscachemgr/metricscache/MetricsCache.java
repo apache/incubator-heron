@@ -42,8 +42,8 @@ public class MetricsCache {
 
   private static final Logger LOG = Logger.getLogger(CacheCore.class.getName());
 
-  private CacheCore cache = null;
-  private MetricsFilter metricNameType = null;
+  private final CacheCore cache;
+  private final MetricsFilter metricNameType;
 
   public MetricsCache(SystemConfig systemConfig, MetricsSinksConfig sinksConfig,
                       WakeableLooper looper) {
@@ -197,7 +197,7 @@ public class MetricsCache {
     if (!request.hasInterval() && !request.hasExplicitInterval()) {
       return buildResponseNotOk("No purgeIntervalSec or explicit purgeIntervalSec set").build();
     }
-    // query
+
     MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
     MetricResponse response1 = cache.getMetrics(request1, metricNameType);
     TopologyMaster.MetricResponse response = MetricsCacheQueryUtils.toProtobuf(response1, request1);

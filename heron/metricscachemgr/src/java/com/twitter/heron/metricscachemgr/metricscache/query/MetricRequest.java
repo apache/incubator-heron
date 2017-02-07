@@ -29,14 +29,14 @@ public final class MetricRequest {
   // The instance ids to get the stats from
   // If nothing is specified, we will get from
   // all the instances of the component name
-  private Map<String, Set<String>> componentNameInstanceId;
+  private final Map<String, Set<String>> componentNameInstanceId;
   // What set of metrics you are interested in
   // Example is __emit-count/default
-  private Set<String> metricNames;
+  private final Set<String> metricNames;
   // what timeframe data in milliseconds
-  private long startTime;
-  private long endTime;
-  private MetricGranularity aggregationGranularity;
+  private final long startTime;
+  private final long endTime;
+  private final MetricGranularity aggregationGranularity;
 
   public MetricRequest(Map<String, Set<String>> componentNameInstanceId,
                        Set<String> metricNames,

@@ -39,7 +39,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 public class MetricsCacheManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(MetricsManagerServer.class.getName());
 
-  private MetricsCache metricsCache = null;
+  private final MetricsCache metricsCache;
 
   /**
    * Constructor
