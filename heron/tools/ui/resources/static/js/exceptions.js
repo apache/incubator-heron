@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 
 // TODO(nbhagat): Aggregate exceptions for better display.
-// Requires cluster, environ, topology, comp_name, instance properties.
+// Requires baseUrl, cluster, environ, topology, comp_name, instance properties.
 var InstanceExceptionLogs = React.createClass({
   getInitialState: function() {
     return {
@@ -13,14 +13,14 @@ var InstanceExceptionLogs = React.createClass({
     // Use Ajax only in here.
     this.fetchPplan();
     if(this.props.comp_name === "All") {
-      this.fetchAllComponentException(this.props.cluster, this.props.environ, this.props.topology);
+      this.fetchAllComponentException(this.props.baseUrl, this.props.cluster, this.props.environ, this.props.topology);
     } else {
-      this.fetchExceptions(this.props.cluster, this.props.environ, this.props.topology, this.props.comp_name);
+      this.fetchExceptions(this.props.baseUrl, this.props.cluster, this.props.environ, this.props.topology, this.props.comp_name);
     }
   },
 
   fetchPplan: function () {
-    url = "/topologies/" +
+    url = this.props.baseUrl + "topologies/" +
       this.props.cluster + "/" +
       this.props.environ + "/" +
       this.props.topology + "/" +
@@ -35,8 +35,8 @@ var InstanceExceptionLogs = React.createClass({
     });
   },
 
-  fetchAllComponentException: function (cluster, environ, topology) {
-    var fetchUrl = ['/topologies', cluster, environ, topology, 'logicalplan.json'].join("/");
+  fetchAllComponentException: function (baseUrl, cluster, environ, topology) {
+    var fetchUrl = [baseUrl, 'topologies', cluster, environ, topology, 'logicalplan.json'].join("/");
     $.ajax({
       url: fetchUrl,
       dataType: 'json',
@@ -50,15 +50,15 @@ var InstanceExceptionLogs = React.createClass({
           compNames.push(boltName);
         }
         for (var i in compNames) {
-          this.fetchExceptions(cluster, environ, topology, compNames[i]);
+          this.fetchExceptions(baseUrl, cluster, environ, topology, compNames[i]);
         }
         this.setState({"compNames": compNames})
       }.bind(this),
     });
   },
 
-  fetchExceptions: function(cluster, environ, topology, compName) {
-    var urlTokens = ['/topologies', cluster, environ, topology, compName, 'exceptions.json'];
+  fetchExceptions: function(baseUrl, cluster, environ, topology, compName) {
+    var urlTokens = [baseUrl, 'topologies', cluster, environ, topology, compName, 'exceptions.json'];
     var fetchUrl = urlTokens.join("/");
     $.ajax({
       url: fetchUrl,
@@ -128,7 +128,7 @@ var InstanceExceptionLogs = React.createClass({
     var headings = ["Trace", "Instance", "Oldest Record", "Latest Record", "Count", ""];
     var exceptions = [];
     for (i = 0; i < exceptionLogs.length; ++i) {
-      var exceptionsUrl = '/topologies/' + this.props.cluster 
+      var exceptionsUrl = this.props.baseUrl + 'topologies/' + this.props.cluster 
         + '/' + this.props.environ + '/' + this.props.topology
         + '/' + this.props.comp_name + '/' + exceptionLogs[i].instance
         + '/exceptions';

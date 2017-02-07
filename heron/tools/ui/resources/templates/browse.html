@@ -14,7 +14,7 @@
 <html>
 
 <head>
-<link href="static/css/bootstrap.css" rel="stylesheet">
+<link href="{{ static_url('css/bootstrap.css') }}" rel="stylesheet">
 <style type="text/css">
 div.tight
 {
@@ -35,8 +35,8 @@ div.tight
   <div class="span12 tight">
     <pre>
 {% for fn in sorted(filestats.keys()) %} {% if not filestats[fn]["is_dir"] %}
-  {{ filestats[fn]["formatted_stat"] }} <a href='topologies/{{cluster}}/{{environ}}/{{topology}}/{{container}}/file?path={{filestats[fn]["path"]}}'>{{ fn }}</a> <a href='/topologies/{{cluster}}/{{environ}}/{{topology}}/{{container}}/filedownload?path={{filestats[fn]["path"]}}'><font size=1>dl</font></a> {% else %}
-  {{ filestats[fn]["formatted_stat"] }} <a href='topologies/filestats/{{cluster}}/{{environ}}/{{topology}}/{{container}}?path={{filestats[fn]["path"]}}'>{{ fn }}</a> {% end %} {% end %}
+  {{ filestats[fn]["formatted_stat"] }} <a href='{{baseUrl}}/topologies/{{cluster}}/{{environ}}/{{topology}}/{{container}}/file?path={{filestats[fn]["path"]}}'>{{ fn }}</a> <a href='/topologies/{{cluster}}/{{environ}}/{{topology}}/{{container}}/filedownload?path={{filestats[fn]["path"]}}'><font size=1>dl</font></a> {% else %}
+  {{ filestats[fn]["formatted_stat"] }} <a href='{{baseUrl}}/topologies/filestats/{{cluster}}/{{environ}}/{{topology}}/{{container}}?path={{filestats[fn]["path"]}}'>{{ fn }}</a> {% end %} {% end %}
     </pre>
   </div>
   </div>

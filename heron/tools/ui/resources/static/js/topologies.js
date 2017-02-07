@@ -10,8 +10,7 @@ var AllExceptions = React.createClass({
   },
   fetchExceptionSummary: function() {
     var compName = this.props.info.comp_name ? this.props.info.comp_name : 'All';
-    var fetchUrl = '/topologies/' + this.props.info.cluster
-        + '/' + this.props.info.environ + '/' + this.props.info.topology
+    var fetchUrl = './' + this.props.info.topology
         + '/' + compName + '/exceptionsummary.json'
     console.log('fetching url ' + fetchUrl);
     $.ajax({
@@ -42,8 +41,7 @@ var AllExceptions = React.createClass({
     }
     var compName = this.props.info.comp_name ? this.props.info.comp_name : 'All';
     var exceptionTable = this.state.summary;
-    var allExceptionsUrl = '/topologies/' + this.props.info.cluster
-        + '/' + this.props.info.environ + '/' + this.props.info.topology
+    var allExceptionsUrl = './' + this.props.info.topology
         + '/' + compName + '/All/exceptions';
     var allExceptionsStyle = {
       color: 'black',
@@ -246,7 +244,8 @@ var AllMetrics = React.createClass({
 
   fetchLplan: function () {
     if (this.state.lplan === undefined) {
-      var fetch_url = "/topologies/" +
+      var fetch_url = this.props.baseUrl + 
+       "/topologies/" +
         this.props.cluster + "/" +
         this.props.environ + "/" +
         this.props.topology + "/" +
@@ -346,7 +345,8 @@ var AllMetrics = React.createClass({
   },
 
   fetchPplan: function () {
-    url = "/topologies/" +
+    url = this.props.baseUrl +
+      "/topologies/" +
       this.props.cluster + "/" +
       this.props.environ + "/" +
       this.props.topology + "/" +
@@ -367,9 +367,8 @@ var AllMetrics = React.createClass({
 
   fetchCounters: function() {
     var fetch_url = "";
-
     if (this.props.hasOwnProperty("comp_name")) {
-      fetch_url = "/topologies/metrics?" +
+      fetch_url = this.props.baseUrl + "/topologies/metrics?" +
         "cluster=" + this.props.cluster + "&" +
         "environ=" + this.props.environ + "&" +
         "topology=" + this.props.topology + "&" +
@@ -432,7 +431,7 @@ var AllMetrics = React.createClass({
             spoutNames.push(name);
           }
         }
-        fetch_url = "/topologies/metrics?" +
+        fetch_url = this.props.baseUrl + "/topologies/metrics?" +
           "cluster=" + this.props.cluster + "&" +
           "environ=" + this.props.environ + "&" +
           "topology=" + this.props.topology;
@@ -519,6 +518,7 @@ var AllMetrics = React.createClass({
     }
     var info = {
       topology: this.props.topology,
+      baseUrl: this.props.baseUrl,
       comp_type: this.props.comp_type,
       comp_name: this.props.comp_name,
       comp_spout_type: this.props.comp_spout_type,
@@ -911,26 +911,20 @@ var InstanceCounters = React.createClass({
         if (instanceInfo) {
           var stmgrId = instanceInfo.stmgrId;
           var container = stmgrId.split("-")[1]
-          var logfileUrl = '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var logfileUrl = './' + this.props.info.topology
               + '/' + container + '/file?path=./log-files/' + instanceInfo.id + '.log.0'
           var jobUrl = '/topologies/filestats/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+              + '/' + this.props.info.environ + './' + this.props.info.topology
               + '/' + container;
-          var exceptionsUrl = '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var exceptionsUrl = './' + this.props.info.topology
               + '/' + this.props.info.comp_name + '/' + instance + '/exceptions';
-          var pidUrl = '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var pidUrl = './' + this.props.info.topology
               + '/' + instanceInfo.id + '/pid'
-          var jstackUrl = '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var jstackUrl = './' + this.props.info.topology
               + '/' + instanceInfo.id + '/jstack'
-          var jmapUrl = '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var jmapUrl = './' + this.props.info.topology
               + '/' + instanceInfo.id + '/jmap'
-          var histoUrl = '/topologies/' + this.props.info.cluster
-              + '/' + this.props.info.environ + '/' + this.props.info.topology
+          var histoUrl = './' + this.props.info.topology
               + '/' + instanceInfo.id + '/histo'
           var links = [['Logs', logfileUrl, "_blank"],
                        ['Job', jobUrl, "_blank"],
