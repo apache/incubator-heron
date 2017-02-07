@@ -410,20 +410,19 @@ public class SubmitterMain {
 
     // Put it in a try block so that we can always clean resources
     try {
-      // initialize the state manager
-      statemgr.initialize(config);
-
-      // TODO(mfu): timeout should read from config
-      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
-
       // Build the basic runtime config
-      Config runtime = Config.newBuilder()
-          .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor)).build();
+      Config primaryRuntime = Config.newBuilder()
+          .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
 
       // Bypass validation and upload if in dry-run mode
       if (Context.dryRun(config)) {
-        callLauncherRunner(runtime);
+        callLauncherRunner(primaryRuntime);
       } else {
+        // initialize the state manager
+        statemgr.initialize(config);
+
+        // TODO(mfu): timeout should read from config
+        SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
         // Check if topology is already running
         validateSubmit(adaptor, topology.getName());
@@ -437,7 +436,8 @@ public class SubmitterMain {
         // Secondly, try to submit the topology
         // build the complete runtime config
         Config runtimeAll = Config.newBuilder()
-            .putAll(runtime)
+            .putAll(primaryRuntime)
+            .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))
             .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
             .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
             .build();

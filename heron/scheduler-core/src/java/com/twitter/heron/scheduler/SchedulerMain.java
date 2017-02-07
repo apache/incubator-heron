@@ -367,7 +367,8 @@ public class SchedulerMain {
       // build the runtime config
       LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
-          .putAll(launcherUtils.getPrimaryRuntime(topology, adaptor))
+          .putAll(launcherUtils.createPrimaryRuntime(topology))
+          .putAll(launcherUtils.createAdaptorRuntime(adaptor))
           .put(Key.SCHEDULER_SHUTDOWN, getShutdown())
           .put(Key.SCHEDULER_PROPERTIES, properties)
           .build();
