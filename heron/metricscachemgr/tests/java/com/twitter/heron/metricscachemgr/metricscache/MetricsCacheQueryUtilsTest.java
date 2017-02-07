@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionDatum;
@@ -36,39 +35,40 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 import static com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.toProtobuf;
+import static org.junit.Assert.*;
 
 public class MetricsCacheQueryUtilsTest {
   private static void assertMetricRequest(
       MetricRequest request,
       List<AbstractMap.SimpleEntry<String, List<String>>> componentNameInstanceId,
       List<String> metricNames, MetricGranularity aggregationGranularity) {
-    Assert.assertEquals(aggregationGranularity, request.getAggregationGranularity());
+    assertEquals(aggregationGranularity, request.getAggregationGranularity());
 
     Set<String> actualMetricName = request.getMetricNames();
     if (metricNames == null) {
-      Assert.assertNull(actualMetricName);
+      assertNull(actualMetricName);
     } else {
-      Assert.assertEquals(metricNames.size(), actualMetricName.size());
+      assertEquals(metricNames.size(), actualMetricName.size());
       for (String name : metricNames) {
-        Assert.assertTrue(actualMetricName.contains(name));
+        assertTrue(actualMetricName.contains(name));
       }
     }
 
     Map<String, Set<String>> actualComponentInstance = request.getComponentNameInstanceId();
     if (componentNameInstanceId == null) {
-      Assert.assertNull(actualComponentInstance);
+      assertNull(actualComponentInstance);
     } else {
-      Assert.assertEquals(componentNameInstanceId.size(), actualComponentInstance.size());
+      assertEquals(componentNameInstanceId.size(), actualComponentInstance.size());
       for (Map.Entry<String, List<String>> entry : componentNameInstanceId) {
-        Assert.assertTrue(actualComponentInstance.containsKey(entry.getKey()));
+        assertTrue(actualComponentInstance.containsKey(entry.getKey()));
 
         Set<String> actualInstances = actualComponentInstance.get(entry.getKey());
         if (actualInstances == null) {
-          Assert.assertNull(entry.getValue());
+          assertNull(entry.getValue());
         }
-        Assert.assertEquals(entry.getValue().size(), actualInstances.size());
+        assertEquals(entry.getValue().size(), actualInstances.size());
         for (String ins : entry.getValue()) {
-          Assert.assertTrue(actualInstances.contains(ins));
+          assertTrue(actualInstances.contains(ins));
         }
       }
     }
@@ -92,7 +92,7 @@ public class MetricsCacheQueryUtilsTest {
         Arrays.asList("m1", "m2"),
         MetricGranularity.AGGREGATE_ALL_METRICS);
     // in milli-seconds
-    Assert.assertEquals(100 * 1000, request1.getEndTime() - request1.getStartTime());
+    assertEquals(100 * 1000, request1.getEndTime() - request1.getStartTime());
   }
 
   @Test
@@ -113,8 +113,8 @@ public class MetricsCacheQueryUtilsTest {
             new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
         Arrays.asList("m1", "m2"),
         MetricGranularity.AGGREGATE_ALL_METRICS);
-    Assert.assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
+    assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
+    assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
   }
 
   @Test
@@ -136,8 +136,8 @@ public class MetricsCacheQueryUtilsTest {
             new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
         Arrays.asList("m1", "m2"),
         MetricGranularity.AGGREGATE_BY_BUCKET);
-    Assert.assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
+    assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
+    assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
   }
 
   @Test
@@ -158,8 +158,8 @@ public class MetricsCacheQueryUtilsTest {
             new AbstractMap.SimpleEntry<String, List<String>>("c1", Arrays.asList("i1", "i2"))),
         Arrays.asList(new String[]{}),
         MetricGranularity.AGGREGATE_BY_BUCKET);
-    Assert.assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
-    Assert.assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
+    assertEquals(100 * 1000, request1.getStartTime()); // in milli-seconds
+    assertEquals(200 * 1000, request1.getEndTime()); // in milli-seconds
   }
 
   @Test
@@ -175,7 +175,7 @@ public class MetricsCacheQueryUtilsTest {
 
     MetricRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(null, request1.getComponentNameInstanceId().get("c1"));
+    assertEquals(null, request1.getComponentNameInstanceId().get("c1"));
   }
 
   @Test
@@ -192,13 +192,13 @@ public class MetricsCacheQueryUtilsTest {
 
     TopologyMaster.MetricResponse response1 = toProtobuf(response, request);
 
-    Assert.assertEquals(200 - 100, response1.getInterval());
-    Assert.assertEquals(Common.StatusCode.OK, response1.getStatus().getStatus());
-    Assert.assertEquals(1, response1.getMetricCount());
-    Assert.assertEquals("i1", response1.getMetric(0).getInstanceId());
-    Assert.assertEquals(1, response1.getMetric(0).getMetricCount());
-    Assert.assertEquals("m1", response1.getMetric(0).getMetric(0).getName());
-    Assert.assertEquals("v1", response1.getMetric(0).getMetric(0).getValue());
+    assertEquals(200 - 100, response1.getInterval());
+    assertEquals(Common.StatusCode.OK, response1.getStatus().getStatus());
+    assertEquals(1, response1.getMetricCount());
+    assertEquals("i1", response1.getMetric(0).getInstanceId());
+    assertEquals(1, response1.getMetric(0).getMetricCount());
+    assertEquals("m1", response1.getMetric(0).getMetric(0).getName());
+    assertEquals("v1", response1.getMetric(0).getMetric(0).getValue());
   }
 
   @Test
@@ -216,22 +216,22 @@ public class MetricsCacheQueryUtilsTest {
 
     TopologyMaster.MetricResponse response1 = toProtobuf(response, request);
 
-    Assert.assertEquals(200 - 100, response1.getInterval());
-    Assert.assertEquals(Common.StatusCode.OK, response1.getStatus().getStatus());
-    Assert.assertEquals(1, response1.getMetricCount());
-    Assert.assertEquals("i1", response1.getMetric(0).getInstanceId());
-    Assert.assertEquals(1, response1.getMetric(0).getMetricCount());
-    Assert.assertEquals("m1", response1.getMetric(0).getMetric(0).getName());
-    Assert.assertEquals(2, response1.getMetric(0).getMetric(0).getIntervalValuesCount());
-    Assert.assertEquals("v1", response1.getMetric(0).getMetric(0).getIntervalValues(0).getValue());
-    Assert.assertEquals(300 * 1000,
+    assertEquals(200 - 100, response1.getInterval());
+    assertEquals(Common.StatusCode.OK, response1.getStatus().getStatus());
+    assertEquals(1, response1.getMetricCount());
+    assertEquals("i1", response1.getMetric(0).getInstanceId());
+    assertEquals(1, response1.getMetric(0).getMetricCount());
+    assertEquals("m1", response1.getMetric(0).getMetric(0).getName());
+    assertEquals(2, response1.getMetric(0).getMetric(0).getIntervalValuesCount());
+    assertEquals("v1", response1.getMetric(0).getMetric(0).getIntervalValues(0).getValue());
+    assertEquals(300 * 1000,
         response1.getMetric(0).getMetric(0).getIntervalValues(0).getInterval().getStart());
-    Assert.assertEquals(400 * 1000,
+    assertEquals(400 * 1000,
         response1.getMetric(0).getMetric(0).getIntervalValues(0).getInterval().getEnd());
-    Assert.assertEquals("v2", response1.getMetric(0).getMetric(0).getIntervalValues(1).getValue());
-    Assert.assertEquals(500 * 1000,
+    assertEquals("v2", response1.getMetric(0).getMetric(0).getIntervalValues(1).getValue());
+    assertEquals(500 * 1000,
         response1.getMetric(0).getMetric(0).getIntervalValues(1).getInterval().getStart());
-    Assert.assertEquals(600 * 1000,
+    assertEquals(600 * 1000,
         response1.getMetric(0).getMetric(0).getIntervalValues(1).getInterval().getEnd());
   }
 
@@ -245,11 +245,11 @@ public class MetricsCacheQueryUtilsTest {
 
     ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(2, request1.componentNameInstanceId.get("c1").size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
-    Assert.assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
+    assertEquals(1, request1.componentNameInstanceId.keySet().size());
+    assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
+    assertEquals(2, request1.componentNameInstanceId.get("c1").size());
+    assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i1"));
+    assertEquals(true, request1.componentNameInstanceId.get("c1").contains("i2"));
   }
 
   @Test
@@ -261,9 +261,9 @@ public class MetricsCacheQueryUtilsTest {
 
     ExceptionRequest request1 = MetricsCacheQueryUtils.fromProtobuf(request);
 
-    Assert.assertEquals(1, request1.componentNameInstanceId.keySet().size());
-    Assert.assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
-    Assert.assertEquals(null, request1.componentNameInstanceId.get("c1"));
+    assertEquals(1, request1.componentNameInstanceId.keySet().size());
+    assertEquals(true, request1.componentNameInstanceId.containsKey("c1"));
+    assertEquals(null, request1.componentNameInstanceId.get("c1"));
   }
 
   @Test
@@ -275,14 +275,14 @@ public class MetricsCacheQueryUtilsTest {
 
     TopologyMaster.ExceptionLogResponse response1 = toProtobuf(response);
 
-    Assert.assertEquals(1, response1.getExceptionsCount());
-    Assert.assertEquals("c1", response1.getExceptions(0).getComponentName());
-    Assert.assertEquals("i1", response1.getExceptions(0).getInstanceId());
-    Assert.assertEquals("h1", response1.getExceptions(0).getHostname());
-    Assert.assertEquals("s1", response1.getExceptions(0).getStacktrace());
-    Assert.assertEquals("l1", response1.getExceptions(0).getLogging());
-    Assert.assertEquals("ft1", response1.getExceptions(0).getFirsttime());
-    Assert.assertEquals("lt1", response1.getExceptions(0).getLasttime());
-    Assert.assertEquals(10, response1.getExceptions(0).getCount());
+    assertEquals(1, response1.getExceptionsCount());
+    assertEquals("c1", response1.getExceptions(0).getComponentName());
+    assertEquals("i1", response1.getExceptions(0).getInstanceId());
+    assertEquals("h1", response1.getExceptions(0).getHostname());
+    assertEquals("s1", response1.getExceptions(0).getStacktrace());
+    assertEquals("l1", response1.getExceptions(0).getLogging());
+    assertEquals("ft1", response1.getExceptions(0).getFirsttime());
+    assertEquals("lt1", response1.getExceptions(0).getLasttime());
+    assertEquals(10, response1.getExceptions(0).getCount());
   }
 }

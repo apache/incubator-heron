@@ -16,13 +16,14 @@ package com.twitter.heron.metricscachemgr.metricscache;
 
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+
+import static org.junit.Assert.assertEquals;
 
 public class MetricsCacheTest {
   public static final String CONFIG_SYSTEM_PATH =
@@ -57,10 +58,10 @@ public class MetricsCacheTest {
         .setInterval(10).addMetric("__jvm-uptime-secs")
         .build());
 
-    Assert.assertEquals(response.getMetricCount(), 1);
-    Assert.assertEquals(response.getMetric(0).getInstanceId(), "i1");
-    Assert.assertEquals(response.getMetric(0).getMetricCount(), 1);
-    Assert.assertEquals(response.getMetric(0).getMetric(0).getName(), "__jvm-uptime-secs");
-    Assert.assertEquals(response.getMetric(0).getMetric(0).getValue(), "0.1");
+    assertEquals(response.getMetricCount(), 1);
+    assertEquals(response.getMetric(0).getInstanceId(), "i1");
+    assertEquals(response.getMetric(0).getMetricCount(), 1);
+    assertEquals(response.getMetric(0).getMetric(0).getName(), "__jvm-uptime-secs");
+    assertEquals(response.getMetric(0).getMetric(0).getValue(), "0.1");
   }
 }
