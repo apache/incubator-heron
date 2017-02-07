@@ -182,9 +182,8 @@ public class MetricsCacheQueryUtilsTest {
   public void testToProtoBufMetric() {
     List<MetricTimeRangeValue> list = new ArrayList<>();
     list.add(new MetricTimeRangeValue(300 * 1000, 400 * 1000, "v1"));
-    MetricResponse response = new MetricResponse();
-    response.metricList = new ArrayList<>();
-    response.metricList.add(new MetricDatum("c1", "i1", "m1", list));
+    MetricResponse response = new MetricResponse(
+        Arrays.asList(new MetricDatum("c1", "i1", "m1", list)));
 
     long startTime = 100 * 1000;
     long endTime = 200 * 1000;
@@ -206,9 +205,8 @@ public class MetricsCacheQueryUtilsTest {
     List<MetricTimeRangeValue> list = new ArrayList<>();
     list.add(new MetricTimeRangeValue(300 * 1000, 400 * 1000, "v1"));
     list.add(new MetricTimeRangeValue(500 * 1000, 600 * 1000, "v2"));
-    MetricResponse response = new MetricResponse();
-    response.metricList = new ArrayList<>();
-    response.metricList.add(new MetricDatum("c1", "i1", "m1", list));
+    MetricResponse response = new MetricResponse(
+        Arrays.asList(new MetricDatum("c1", "i1", "m1", list)));
 
     long startTime = 100 * 1000;
     long endTime = 200 * 1000;

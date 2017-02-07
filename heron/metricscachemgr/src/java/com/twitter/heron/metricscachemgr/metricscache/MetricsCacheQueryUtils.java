@@ -109,7 +109,7 @@ public final class MetricsCacheQueryUtils {
     // componentName is ignored, since there is only one component in the query
     Map<String, Map<String, List<MetricTimeRangeValue>>> aggregation =
         new HashMap<>();
-    for (MetricDatum datum : response.metricList) {
+    for (MetricDatum datum : response.getMetricList()) {
       String instanceId = datum.getInstanceId();
       String metricName = datum.getMetricName();
       List<MetricTimeRangeValue> metricValue = datum.getMetricValue();

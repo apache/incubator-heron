@@ -251,9 +251,7 @@ public class CacheCore {
       MetricRequest request, MetricsFilter metricNameType) {
     LOG.fine("received query: " + request.toString());
     synchronized (CacheCore.class) {
-      MetricResponse response =
-          new MetricResponse();
-      response.metricList = new LinkedList<>();
+      List<MetricDatum> response = new LinkedList<>();
 
       // candidate metric names
       Set<String> metricNameFilter = request.getMetricNames();
@@ -311,12 +309,11 @@ public class CacheCore {
             }
 
             // make metric list in response
-            response.metricList.add(new MetricDatum(
-                componentName, instanceId, metricName, metricValue));
+            response.add(new MetricDatum(componentName, instanceId, metricName, metricValue));
           } // end for: instance
         } // end for: component
       } // end for: metric
-      return response;
+      return new MetricResponse(response);
     }
   }
 
