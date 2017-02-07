@@ -23,16 +23,15 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.TopologyTests;
 
 /**
@@ -68,11 +67,7 @@ public abstract class CommonPackingTests {
     this.topologyConfig = new com.twitter.heron.api.Config();
     this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    Config config = Config.newBuilder()
-        .put(Key.TOPOLOGY_ID, topology.getId())
-        .put(Key.TOPOLOGY_NAME, topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
+    Config config = PackingTestUtils.newTestConfig(this.topology);
     this.instanceDefaultResources = new Resource(
         Context.instanceCpu(config), Context.instanceRam(config), Context.instanceDisk(config));
   }
@@ -84,17 +79,9 @@ public abstract class CommonPackingTests {
         spoutParallelism, boltParallelism);
   }
 
-  private static Config newTestConfig(TopologyAPI.Topology topology) {
-    return Config.newBuilder()
-            .put(Key.TOPOLOGY_ID, topology.getId())
-            .put(Key.TOPOLOGY_NAME, topology.getName())
-            .putAll(ClusterDefaults.getDefaults())
-            .build();
-  }
-
   protected PackingPlan pack(TopologyAPI.Topology testTopology) {
     IPacking packing = getPackingImpl();
-    packing.initialize(newTestConfig(testTopology), testTopology);
+    packing.initialize(PackingTestUtils.newTestConfig(testTopology), testTopology);
     return packing.pack();
   }
 
@@ -102,7 +89,7 @@ public abstract class CommonPackingTests {
                                PackingPlan initialPackingPlan,
                                Map<String, Integer> componentChanges) {
     IRepacking repacking = getRepackingImpl();
-    repacking.initialize(newTestConfig(testTopology), testTopology);
+    repacking.initialize(PackingTestUtils.newTestConfig(testTopology), testTopology);
     return repacking.repack(initialPackingPlan, componentChanges);
   }
 

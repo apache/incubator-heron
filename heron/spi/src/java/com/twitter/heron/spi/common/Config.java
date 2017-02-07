@@ -36,7 +36,11 @@ public class Config {
   }
 
   public static Builder newBuilder() {
-    return Builder.create();
+    return newBuilder(false);
+  }
+
+  public static Builder newBuilder(boolean loadDefaults) {
+    return Builder.create(loadDefaults);
   }
 
   public static Config expand(Config config) {
@@ -73,11 +77,6 @@ public class Config {
     return (String) get(key);
   }
 
-  public String getStringValue(Key key, String defaultValue) {
-    String value = getStringValue(key);
-    return value != null ? value : defaultValue;
-  }
-
   public String getStringValue(String key, String defaultValue) {
     String value = getStringValue(key);
     return value != null ? value : defaultValue;
@@ -89,10 +88,6 @@ public class Config {
 
   private Boolean getBooleanValue(String key) {
     return (Boolean) get(key);
-  }
-
-  public Boolean getBooleanValue(Key key, boolean defaultValue) {
-    return getBooleanValue(key.value(), defaultValue);
   }
 
   public Boolean getBooleanValue(String key, boolean defaultValue) {
@@ -118,10 +113,6 @@ public class Config {
     return TypeUtils.getLong(value);
   }
 
-  public Long getLongValue(Key key, long defaultValue) {
-    return getLongValue(key.value(), defaultValue);
-  }
-
   public Long getLongValue(String key, long defaultValue) {
     Object value = get(key);
     if (value != null) {
@@ -135,10 +126,6 @@ public class Config {
     return TypeUtils.getInteger(value);
   }
 
-  public Integer getIntegerValue(Key key, int defaultValue) {
-    return getIntegerValue(key.value(), defaultValue);
-  }
-
   public Integer getIntegerValue(String key, int defaultValue) {
     Object value = get(key);
     if (value != null) {
@@ -150,14 +137,6 @@ public class Config {
   public Double getDoubleValue(Key key) {
     Object value = get(key);
     return TypeUtils.getDouble(value);
-  }
-
-  public Double getDoubleValue(Key key, double defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      return TypeUtils.getDouble(value);
-    }
-    return defaultValue;
   }
 
   public boolean containsKey(Key key) {
@@ -182,8 +161,22 @@ public class Config {
   public static class Builder {
     private final Map<String, Object> keyValues = new HashMap<>();
 
-    private static Config.Builder create() {
-      return new Builder();
+    private static Config.Builder create(boolean loadDefaults) {
+      Config.Builder cb = new Builder();
+
+      if (loadDefaults) {
+        loadDefaults(cb, Key.values());
+      }
+
+      return cb;
+    }
+
+    private static void loadDefaults(Config.Builder cb, Key... keys) {
+      for (Key key : keys) {
+        if (key.getDefault() != null) {
+          cb.put(key, key.getDefault());
+        }
+      }
     }
 
     public Builder put(String key, Object value) {

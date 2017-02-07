@@ -230,7 +230,7 @@ public class RuntimeManagerMainTest {
     when(config.getStringValue(RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY))
         .thenReturn("testSpout:4,testBolt:5");
     // mock dry-run mode
-    when(config.getBooleanValue(Key.DRY_RUN, false)).thenReturn(true);
+    when(config.getBooleanValue(Key.DRY_RUN)).thenReturn(true);
     when(config.getDoubleValue(Key.INSTANCE_CPU)).thenReturn(1.0);
     when(config.getByteAmountValue(Key.INSTANCE_RAM))
         .thenReturn(ByteAmount.fromGigabytes(1));

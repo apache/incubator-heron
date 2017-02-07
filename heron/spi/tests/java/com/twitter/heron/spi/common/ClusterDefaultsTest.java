@@ -14,94 +14,51 @@
 
 package com.twitter.heron.spi.common;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class ClusterDefaultsTest {
   private Config props;
 
   @Before
   public void initialize() {
-    props = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaultMiscellaneous())
-        .putAll(ClusterDefaults.getDefaultJars())
-        .putAll(ClusterDefaults.getSandboxBinaries())
-        .build();
+    props = Config.newBuilder(true).build();
   }
 
   @Test
   public void testSandboxBinaries() throws Exception {
 
-    Assert.assertEquals(
-        Defaults.executorSandboxBinary(),
-        Context.executorSandboxBinary(props)
-    );
-
-    Assert.assertEquals(
-        Defaults.stmgrSandboxBinary(),
-        Context.stmgrSandboxBinary(props)
-    );
-
-    Assert.assertEquals(
-        Defaults.tmasterSandboxBinary(),
-        Context.tmasterSandboxBinary(props)
-    );
-
-    Assert.assertEquals(
-        Defaults.shellSandboxBinary(),
-        Context.shellSandboxBinary(props)
-    );
-
-    Assert.assertEquals(
-        Defaults.pythonInstanceSandboxBinary(),
+    assertEquals(Key.SANDBOX_EXECUTOR_BINARY.getDefault(), Context.executorSandboxBinary(props));
+    assertEquals(Key.SANDBOX_STMGR_BINARY.getDefault(), Context.stmgrSandboxBinary(props));
+    assertEquals(Key.SANDBOX_TMASTER_BINARY.getDefault(), Context.tmasterSandboxBinary(props));
+    assertEquals(Key.SANDBOX_SHELL_BINARY.getDefault(), Context.shellSandboxBinary(props));
+    assertEquals(
+        Key.SANDBOX_PYTHON_INSTANCE_BINARY.getDefault(),
         Context.pythonInstanceSandboxBinary(props)
     );
   }
 
   @Test
   public void testDefaultJars() throws Exception {
-    Assert.assertEquals(
-        Defaults.schedulerJar(),
-        Context.schedulerJar(props)
-    );
+    assertEquals(Key.SCHEDULER_JAR.getDefault(), Context.schedulerJar(props));
   }
 
   @Test
   public void testDefaultMiscellaneous() throws Exception {
-    Assert.assertEquals(
-        Defaults.verbose(),
-        Context.verbose(props)
-    );
-    Assert.assertEquals(
-        Defaults.schedulerService(),
-        Context.schedulerService(props)
-    );
+    assertEquals(Key.VERBOSE.getDefault(), Context.verbose(props));
+    assertEquals(Key.SCHEDULER_IS_SERVICE.getDefault(), Context.schedulerService(props));
   }
 
   @Test
   public void testDefaultResources() throws Exception {
-    Config defaultResources = ClusterDefaults.getDefaultResources();
+    Config defaultResources = props;
 
-    Assert.assertEquals(
-        Defaults.stmgrRam(),
-        Context.stmgrRam(defaultResources)
-    );
-
-    Assert.assertEquals(
-        Defaults.instanceCpu(),
-        Context.instanceCpu(defaultResources),
-        0.001
-    );
-
-    Assert.assertEquals(
-        Defaults.instanceRam(),
-        Context.instanceRam(defaultResources)
-    );
-
-    Assert.assertEquals(
-        Defaults.instanceDisk(),
-        Context.instanceDisk(defaultResources)
-    );
+    assertEquals(Key.STMGR_RAM.getDefault(), Context.stmgrRam(defaultResources));
+    assertEquals(
+        (Double) Key.INSTANCE_CPU.getDefault(), Context.instanceCpu(defaultResources), 0.001);
+    assertEquals(Key.INSTANCE_RAM.getDefault(), Context.instanceRam(defaultResources));
+    assertEquals(Key.INSTANCE_DISK.getDefault(), Context.instanceDisk(defaultResources));
   }
 }
