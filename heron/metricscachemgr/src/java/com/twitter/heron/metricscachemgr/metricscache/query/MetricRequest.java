@@ -42,8 +42,16 @@ public final class MetricRequest {
                        Set<String> metricNames,
                        long startTime, long endTime,
                        MetricGranularity aggregationGranularity) {
-    this.componentNameInstanceId = componentNameInstanceId;
-    this.metricNames = metricNames;
+    if (componentNameInstanceId == null) {
+      this.componentNameInstanceId = null;
+    } else {
+      this.componentNameInstanceId = new HashMap<>(componentNameInstanceId);
+    }
+    if (metricNames == null) {
+      this.metricNames = null;
+    } else {
+      this.metricNames = new HashSet<>(metricNames);
+    }
     this.startTime = startTime;
     this.endTime = endTime;
     this.aggregationGranularity = aggregationGranularity;

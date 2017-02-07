@@ -14,9 +14,49 @@
 
 package com.twitter.heron.metricscachemgr.metricscache.query;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ExceptionRequest {
-  public Map<String, Set<String>> componentNameInstanceId;
+public final class ExceptionRequest {
+  private final Map<String, Set<String>> componentNameInstanceId;
+
+  public ExceptionRequest(Map<String, Set<String>> componentNameInstanceId) {
+    if (componentNameInstanceId == null) {
+      this.componentNameInstanceId = null;
+    } else {
+      Map<String, Set<String>> map = new HashMap<>();
+      for (String componentName : componentNameInstanceId.keySet()) {
+        Set<String> instanceId = componentNameInstanceId.get(componentName);
+        if (instanceId == null) {
+          map.put(componentName, null);
+        } else {
+          Set<String> set = new HashSet<>(instanceId);
+          map.put(componentName, set);
+        }
+      }
+      this.componentNameInstanceId = map;
+    }
+  }
+
+  public Map<String, Set<String>> getComponentNameInstanceId() {
+    Map<String, Set<String>> ret;
+    if (componentNameInstanceId == null) {
+      ret = null;
+    } else {
+      Map<String, Set<String>> map = new HashMap<>();
+      for (String componentName : componentNameInstanceId.keySet()) {
+        Set<String> instanceId = componentNameInstanceId.get(componentName);
+        if (instanceId == null) {
+          map.put(componentName, null);
+        } else {
+          Set<String> set = new HashSet<>(instanceId);
+          map.put(componentName, set);
+        }
+      }
+      ret = map;
+    }
+    return ret;
+  }
 }

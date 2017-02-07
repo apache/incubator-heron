@@ -167,8 +167,7 @@ public final class MetricsCacheQueryUtils {
   public static ExceptionRequest fromProtobuf(TopologyMaster.ExceptionLogRequest request) {
     String componentName = request.getComponentName();
 
-    ExceptionRequest outRequest = new ExceptionRequest();
-    outRequest.componentNameInstanceId = new HashMap<>();
+    Map<String, Set<String>> componentNameInstanceId = new HashMap<>();
     Set<String> instances = null;
 
     if (request.getInstancesCount() > 0) {
@@ -177,9 +176,9 @@ public final class MetricsCacheQueryUtils {
     } // empty list means all instances; 'null' means all instances
 
     // only one component
-    outRequest.componentNameInstanceId.put(componentName, instances);
+    componentNameInstanceId.put(componentName, instances);
 
-    return outRequest;
+    return new ExceptionRequest(componentNameInstanceId);
   }
 
   // compatible with com.twitter.heron.proto.tmaster.TopologyMaster.ExceptionLogResponse
