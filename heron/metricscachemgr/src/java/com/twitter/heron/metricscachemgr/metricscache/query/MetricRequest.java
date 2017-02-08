@@ -78,8 +78,7 @@ public final class MetricRequest {
     if (metricNames == null) {
       return null;
     }
-    Set<String> ret = new HashSet<>(metricNames);
-    return ret;
+    return new HashSet<>(metricNames);
   }
 
   public long getStartTime() {

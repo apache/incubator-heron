@@ -56,7 +56,7 @@ public class CacheCoreTest {
     assertEquals(len, actual.size());
     for (int i = 0; i < len; i++) {
       MetricTimeRangeValue expectedVal = expected.get(i);
-      MetricTimeRangeValue actualVal = expected.get(i);
+      MetricTimeRangeValue actualVal = actual.get(i);
       assertEquals(expectedVal.getStartTime(), actualVal.getStartTime());
       assertEquals(expectedVal.getEndTime(), actualVal.getEndTime());
       assertEquals(expectedVal.getValue(), actualVal.getValue());
@@ -186,12 +186,7 @@ public class CacheCoreTest {
         startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 2 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 2);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 instances
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -199,7 +194,13 @@ public class CacheCoreTest {
         new MetricDatum("c1", "i2", "m1", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.3")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 2 instances
+    assertMetricResponse(metricList, expected);
   }
 
 
@@ -222,12 +223,7 @@ public class CacheCoreTest {
         startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 2 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 2);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 instances
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -235,7 +231,13 @@ public class CacheCoreTest {
         new MetricDatum("c1", "i2", "m1", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.3")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 2 instances
+    assertMetricResponse(metricList, expected);
   }
 
   /*
@@ -272,12 +274,7 @@ public class CacheCoreTest {
     MetricRequest request = new MetricRequest(null, metricNames, startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 4 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 4);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 4 component-instance
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -291,7 +288,13 @@ public class CacheCoreTest {
         new MetricDatum("c2", "i2", "m1", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.7")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 4 component-instance
+    assertMetricResponse(metricList, expected);
   }
 
   /*
@@ -312,12 +315,7 @@ public class CacheCoreTest {
         startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 4 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 4);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 4 component-instance
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -331,7 +329,13 @@ public class CacheCoreTest {
         new MetricDatum("c2", "i2", "m1", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.7")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 4 component-instance
+    assertMetricResponse(metricList, expected);
   }
 
   /*
@@ -372,12 +376,7 @@ public class CacheCoreTest {
         startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 2 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 2);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 metrics
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -385,7 +384,13 @@ public class CacheCoreTest {
         new MetricDatum("c1", "i1", "m2", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.2")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 2 metrics
+    assertMetricResponse(metricList, expected);
   }
 
   /*
@@ -409,12 +414,7 @@ public class CacheCoreTest {
         startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 4 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 4);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 4 metrics
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -428,7 +428,13 @@ public class CacheCoreTest {
         new MetricDatum("c2", "i1", "m2", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.6")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 4 metrics
+    assertMetricResponse(metricList, expected);
   }
 
   /*
@@ -447,12 +453,7 @@ public class CacheCoreTest {
         new MetricRequest(componentNameInstanceId, null, startTime, endTime, RAW);
     MetricResponse response = cacheCore.getMetrics(request, metricsFilter);
     // there is 2 <component, instance, metric> tuples
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), 2);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 metrics
-    assertMetricResponse(metricList,
+    MetricDatum[] expected = new MetricDatum[]{
         new MetricDatum("c1", "i1", "m1", Arrays.asList(
             // there should be 1 metric for each instance
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1")
@@ -460,7 +461,13 @@ public class CacheCoreTest {
         new MetricDatum("c1", "i1", "m2", Arrays.asList(
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.2")
         ))
-    );
+    };
+    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
+    assertEquals(metricList.size(), expected.length);
+    // sort
+    metricList.sort(datumComparator);
+    // there should be 2 metrics
+    assertMetricResponse(metricList, expected);
   }
 
   /*
@@ -518,7 +525,7 @@ public class CacheCoreTest {
     String[] vals = new String[]{
         "0.0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7"
     };
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < ts.length; i++) {
       builder.addMetrics(TopologyMaster.MetricDatum.newBuilder()
           .setTimestamp(ts[i])
           .setComponentName("c1").setInstanceId("i1")
@@ -557,17 +564,16 @@ public class CacheCoreTest {
     List<MetricDatum> metricList = response.getMetricList();
     assertEquals(metricList.size(), 1);
     // there should be 2 metrics
-    List<MetricTimeRangeValue> list =
-        metricList.get(0).getMetricValue();
-    assertEquals(list.size(), 2);
+    List<MetricTimeRangeValue> expected = Arrays.asList(
+        new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1"),
+        new MetricTimeRangeValue(now - 80 * 1000, now - 80 * 1000, "0.2")
+    );
+    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
+    assertEquals(list.size(), expected.size());
     // sort
     list.sort(timeRangeValueComparator);
     // check values
-    assertMetricValue(list, Arrays.asList(
-        new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1"),
-        new MetricTimeRangeValue(now - 80 * 1000, now - 80 * 1000, "0.2")
-        )
-    );
+    assertMetricValue(list, expected);
   }
 
   /*
@@ -585,19 +591,18 @@ public class CacheCoreTest {
     List<MetricDatum> metricList = response.getMetricList();
     assertEquals(metricList.size(), 1);
     // there should be 4 metrics
-    List<MetricTimeRangeValue> list =
-        metricList.get(0).getMetricValue();
-    assertEquals(list.size(), 4);
-    // sort
-    list.sort(timeRangeValueComparator);
-    // check value
-    assertMetricValue(list, Arrays.asList(
+    List<MetricTimeRangeValue> expected = Arrays.asList(
         new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1"),
         new MetricTimeRangeValue(now - 80 * 1000, now - 80 * 1000, "0.2"),
         new MetricTimeRangeValue(now - 60 * 1000, now - 60 * 1000, "0.3"),
         new MetricTimeRangeValue(now - 50 * 1000, now - 50 * 1000, "0.4")
-        )
     );
+    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
+    assertEquals(list.size(), expected.size());
+    // sort
+    list.sort(timeRangeValueComparator);
+    // check value
+    assertMetricValue(list, expected);
   }
 
   /*
@@ -615,13 +620,7 @@ public class CacheCoreTest {
     List<MetricDatum> metricList = response.getMetricList();
     assertEquals(metricList.size(), 1);
     // there should be 7 metrics
-    List<MetricTimeRangeValue> list =
-        metricList.get(0).getMetricValue();
-    assertEquals(list.size(), 7);
-    // sort
-    list.sort(timeRangeValueComparator);
-    // check value
-    assertMetricValue(list, Arrays.asList(
+    List<MetricTimeRangeValue> expected = Arrays.asList(
         new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1"),
         new MetricTimeRangeValue(now - 80 * 1000, now - 80 * 1000, "0.2"),
         new MetricTimeRangeValue(now - 60 * 1000, now - 60 * 1000, "0.3"),
@@ -629,8 +628,13 @@ public class CacheCoreTest {
         new MetricTimeRangeValue(now - 30 * 1000, now - 30 * 1000, "0.5"),
         new MetricTimeRangeValue(now - 20 * 1000, now - 20 * 1000, "0.6"),
         new MetricTimeRangeValue(now, now, "0.7")
-        )
     );
+    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
+    assertEquals(list.size(), expected.size());
+    // sort
+    list.sort(timeRangeValueComparator);
+    // check value
+    assertMetricValue(list, expected);
   }
 
   /*
@@ -648,11 +652,10 @@ public class CacheCoreTest {
     List<MetricDatum> metricList = response.getMetricList();
     assertEquals(metricList.size(), 1);
     // there should be 1 metric
-    assertEquals(metricList.get(0).getMetricValue().size(), 1);
-    // sort
-    metricList.get(0).getMetricValue().sort(timeRangeValueComparator);
+    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
+    assertEquals(list.size(), 1);
     // check value
-    assertEquals(metricList.get(0).getMetricValue().get(0).getValue(), "0.7");
+    assertEquals(list.get(0).getValue(), "0.7");
   }
 
   @Test
