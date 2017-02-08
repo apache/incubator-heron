@@ -46,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -71,7 +72,7 @@ public class AuroraSchedulerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     scheduler = Mockito.spy(AuroraScheduler.class);
-    Mockito.doReturn(new HashMap<String, String>())
+    doReturn(new HashMap<String, String>())
         .when(scheduler).createAuroraProperties(Mockito.any(Resource.class));
   }
 
@@ -86,7 +87,7 @@ public class AuroraSchedulerTest {
   @Test
   public void testOnSchedule() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
-    Mockito.doReturn(controller).when(scheduler).getController();
+    doReturn(controller).when(scheduler).getController();
 
     SchedulerStateManagerAdaptor stateManager = mock(SchedulerStateManagerAdaptor.class);
     Config runtime = Mockito.mock(Config.class);
@@ -114,9 +115,9 @@ public class AuroraSchedulerTest {
     PackingPlan validPlan = new PackingPlan(PACKING_PLAN_ID, containers);
 
     // Failed to create job via controller
-    Mockito.doReturn(false).when(controller)
+    doReturn(false).when(controller)
         .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
-    Mockito.doReturn(true).when(stateManager)
+    doReturn(true).when(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     Assert.assertFalse(scheduler.onSchedule(validPlan));
@@ -127,7 +128,7 @@ public class AuroraSchedulerTest {
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     // Happy path
-    Mockito.doReturn(true).when(controller)
+    doReturn(true).when(controller)
         .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
     assertTrue(scheduler.onSchedule(validPlan));
 
@@ -140,16 +141,16 @@ public class AuroraSchedulerTest {
   @Test
   public void testOnKill() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
-    Mockito.doReturn(controller).when(scheduler).getController();
+    doReturn(controller).when(scheduler).getController();
     scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
 
     // Failed to kill job via controller
-    Mockito.doReturn(false).when(controller).killJob();
+    doReturn(false).when(controller).killJob();
     Assert.assertFalse(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
     Mockito.verify(controller).killJob();
 
     // Happy path
-    Mockito.doReturn(true).when(controller).killJob();
+    doReturn(true).when(controller).killJob();
     assertTrue(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
     Mockito.verify(controller, Mockito.times(2)).killJob();
   }
@@ -157,7 +158,7 @@ public class AuroraSchedulerTest {
   @Test
   public void testOnRestart() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
-    Mockito.doReturn(controller).when(scheduler).getController();
+    doReturn(controller).when(scheduler).getController();
     scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
 
     // Construct the RestartTopologyRequest
@@ -168,13 +169,13 @@ public class AuroraSchedulerTest {
             build();
 
     // Failed to kill job via controller
-    Mockito.doReturn(false).when(
+    doReturn(false).when(
         controller).restart(containerToRestart);
     Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
     Mockito.verify(controller).restart(containerToRestart);
 
     // Happy path
-    Mockito.doReturn(true).when(
+    doReturn(true).when(
         controller).restart(containerToRestart);
     assertTrue(scheduler.onRestart(restartTopologyRequest));
     Mockito.verify(controller, Mockito.times(2)).restart(containerToRestart);
