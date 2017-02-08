@@ -14,7 +14,10 @@
 
 package com.twitter.heron.spi.common;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -25,98 +28,29 @@ public final class ClusterConfig {
   private ClusterConfig() {
   }
 
-  private static Config loadHeronHome(String heronHome, String configPath) {
-    Config.Builder cb = Config.newBuilder()
+  private static final Set<Key> NO_SUB_KEYS = new HashSet<>(Arrays.asList(
+      Key.HERON_HOME, Key.HERON_CONF, Key.HERON_SANDBOX_HOME, Key.HERON_SANDBOX_CONF));
+
+  private static Config loadDefaults(String heronHome, String configPath) {
+    Config defaults = Config.newBuilder(true)
         .put(Key.HERON_HOME, heronHome)
-        .put(Key.HERON_CONF, configPath);
+        .put(Key.HERON_CONF, configPath)
+        .put(Key.HERON_SANDBOX_HOME, heronHome)
+        .put(Key.HERON_SANDBOX_CONF, configPath)
+        .build();
 
-    return putDefaults(cb, Key.HERON_HOME, heronHome,
-        Key.HERON_BIN,
-        Key.HERON_DIST,
-        Key.HERON_ETC,
-        Key.HERON_LIB,
-        Key.JAVA_HOME).build();
-  }
-
-  private static Config loadSandboxHome(String heronSandboxHome, String configPath) {
-    Config.Builder cb = Config.newBuilder()
-        .put(Key.HERON_SANDBOX_HOME, heronSandboxHome)
-        .put(Key.HERON_SANDBOX_CONF, configPath);
-
-    return putDefaults(cb, Key.HERON_SANDBOX_HOME, heronSandboxHome,
-        Key.HERON_SANDBOX_BIN,
-        Key.HERON_SANDBOX_LIB,
-        Key.HERON_SANDBOX_JAVA_HOME).build();
-  }
-
-  private static Config loadConfigHome(String heronHome, String configPath) {
-    return putDefaults(Config.newBuilder(), Key.HERON_HOME, heronHome, Key.HERON_CONF, configPath,
-        Key.CLUSTER_YAML,
-        Key.CLIENT_YAML,
-        Key.METRICS_YAML,
-        Key.PACKING_YAML,
-        Key.SCHEDULER_YAML,
-        Key.STATEMGR_YAML,
-        Key.SYSTEM_YAML,
-        Key.UPLOADER_YAML).build();
-  }
-
-  private static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
-    return putDefaults(Config.newBuilder(),
-        Key.HERON_SANDBOX_HOME, heronSandboxHome, Key.HERON_SANDBOX_CONF, configPath,
-        Key.SANDBOX_CLUSTER_YAML,
-        Key.SANDBOX_METRICS_YAML,
-        Key.SANDBOX_PACKING_YAML,
-        Key.SANDBOX_SCHEDULER_YAML,
-        Key.SANDBOX_STATEMGR_YAML,
-        Key.SANDBOX_SYSTEM_YAML,
-        Key.SANDBOX_UPLOADER_YAML,
-        Key.SANDBOX_OVERRIDE_YAML).build();
-  }
-
-  private static Config.Builder putDefaults(Config.Builder cb,
-                                            Key homeKey, String heronHome,
-                                            Key... keys) {
-    for (Key key : keys) {
-      if (key.getType() == Key.Type.STRING) {
-        cb.put(key, Misc.substitute(homeKey, heronHome, key.getDefaultString()));
-      } else {
-        cb.put(key, key.getDefault());
+    Config.Builder cb = Config.newBuilder().putAll(defaults);
+    for (Key key : Key.values()) {
+      if (!NO_SUB_KEYS.contains(key) && key.getDefault() != null) {
+        if (key.getType() == Key.Type.STRING) {
+          cb.put(key, Misc.substitute(defaults, key.getDefaultString()));
+        } else {
+          cb.put(key, key.getDefault());
+        }
       }
     }
-    return cb;
-  }
 
-  private static Config.Builder putDefaults(Config.Builder cb,
-                                            Key homeKey, String heronHome,
-                                            Key configPathKey, String configPath,
-                                            Key... keys) {
-    for (Key key : keys) {
-      if (key.getType() == Key.Type.STRING) {
-        cb.put(key, Misc.substitute(
-            homeKey, heronHome, configPathKey, configPath, key.getDefaultString()));
-      } else {
-        cb.put(key, key.getDefault());
-      }
-    }
-    return cb;
-  }
-
-  private static Config loadBasicConfig(String heronHome, String configPath) {
-    return Config.newBuilder()
-        .putAll(loadHeronHome(heronHome, configPath))
-        .putAll(loadConfigHome(heronHome, configPath))
-        .build();
-  }
-
-  private static Config loadBasicSandboxConfig() {
-    String defaultHome = Key.HERON_SANDBOX_HOME.getDefaultString();
-    String defaultConfig = Key.HERON_SANDBOX_CONF.getDefaultString();
-
-    return Config.newBuilder()
-        .putAll(loadSandboxHome(defaultHome, defaultConfig))
-        .putAll(loadSandboxConfigHome(defaultHome, defaultConfig))
-        .build();
+    return cb.build();
   }
 
   @VisibleForTesting
@@ -127,35 +61,36 @@ public final class ClusterConfig {
 
   public static Config loadConfig(String heronHome, String configPath,
                                   String releaseFile, String overrideConfigFile) {
-    Config homeConfig = loadBasicConfig(heronHome, configPath);
-    Config sandboxConfig = loadBasicSandboxConfig();
+    Config defaultConfig = loadDefaults(heronHome, configPath);
 
-    Config.Builder cb = Config.newBuilder(true)
-        .putAll(homeConfig)
-        .putAll(sandboxConfig)
-        .putAll(loadConfig(Context.clusterFile(homeConfig)))
-        .putAll(loadConfig(Context.clientFile(homeConfig)))
-        .putAll(loadConfig(Context.packingFile(homeConfig)))
-        .putAll(loadConfig(Context.schedulerFile(homeConfig)))
-        .putAll(loadConfig(Context.stateManagerFile(homeConfig)))
-        .putAll(loadConfig(Context.uploaderFile(homeConfig)))
+    Config.Builder cb = Config.newBuilder()
+        .putAll(defaultConfig)
+        .putAll(loadConfig(Context.clusterFile(defaultConfig)))
+        .putAll(loadConfig(Context.clientFile(defaultConfig)))
+        .putAll(loadConfig(Context.packingFile(defaultConfig)))
+        .putAll(loadConfig(Context.schedulerFile(defaultConfig)))
+        .putAll(loadConfig(Context.stateManagerFile(defaultConfig)))
+        .putAll(loadConfig(Context.uploaderFile(defaultConfig)))
         .putAll(loadConfig(releaseFile))
         .putAll(loadConfig(overrideConfigFile));
     return cb.build();
   }
 
   public static Config loadSandboxConfig() {
-    Config sandboxConfig = loadBasicSandboxConfig();
+    String homePath = Key.HERON_SANDBOX_HOME.getDefaultString();
+    String configPath = Key.HERON_SANDBOX_CONF.getDefaultString();
 
-    Config.Builder cb = Config.newBuilder(true)
-        .putAll(sandboxConfig)
-        .putAll(loadConfig(Context.packingSandboxFile(sandboxConfig)))
-        .putAll(loadConfig(Context.schedulerSandboxFile(sandboxConfig)))
-        .putAll(loadConfig(Context.stateManagerSandboxFile(sandboxConfig)))
-        .putAll(loadConfig(Context.uploaderSandboxFile(sandboxConfig)));
+    Config defaultConfig = loadDefaults(homePath, configPath);
+
+    Config.Builder cb = Config.newBuilder()
+        .putAll(defaultConfig)
+        .putAll(loadConfig(Context.packingFile(defaultConfig)))
+        .putAll(loadConfig(Context.schedulerFile(defaultConfig)))
+        .putAll(loadConfig(Context.stateManagerFile(defaultConfig)))
+        .putAll(loadConfig(Context.uploaderFile(defaultConfig)));
 
     // Add the override config at the end to replace any existing configs
-    cb.putAll(loadConfig(Context.overrideSandboxFile(sandboxConfig)));
+    cb.putAll(loadConfig(Context.overrideFile(defaultConfig)));
 
     return cb.build();
   }

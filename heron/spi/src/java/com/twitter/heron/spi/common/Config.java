@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.DryRunFormatType;
@@ -29,6 +30,8 @@ import com.twitter.heron.common.basics.TypeUtils;
  * should be favored over Strings. Usage of the String API should be refactored out.
  */
 public class Config {
+  private static final Logger LOG = Logger.getLogger(Config.class.getName());
+
   private final Map<String, Object> cfgMap = new HashMap<>();
 
   protected Config(Builder build) {
@@ -44,17 +47,31 @@ public class Config {
   }
 
   public static Config expand(Config config) {
+    return expand(config, 0);
+  }
+
+  private static Config expand(Config config, int previousTokensCount) {
     Config.Builder cb = Config.newBuilder();
+    int tokensCount = 0;
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
       if (value instanceof String) {
         String expandedValue = Misc.substitute(config, (String) value);
+        if (expandedValue.contains("${")) {
+          tokensCount++;
+        }
         cb.put(key, expandedValue);
       } else {
         cb.put(key, value);
       }
     }
-    return cb.build();
+    if (previousTokensCount != tokensCount) {
+      LOG.info(String.format(
+          "Config expansion found %s values with tokens, will recurse", tokensCount));
+      return expand(config, tokensCount);
+    } else {
+      return cb.build();
+    }
   }
 
   public int size() {
@@ -104,7 +121,7 @@ public class Config {
     return (DryRunFormatType) get(key);
   }
 
-  PackageType getPackageType(Key key) {
+  public PackageType getPackageType(Key key) {
     return (PackageType) get(key);
   }
 

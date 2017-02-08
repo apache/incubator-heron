@@ -275,7 +275,7 @@ public class SchedulerMain {
 
   // Set up logging based on the Config
   private static void setupLogging(Config config) throws IOException {
-    String systemConfigFilename = Context.systemConfigSandboxFile(config);
+    String systemConfigFilename = Context.systemConfigFile(config);
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
 

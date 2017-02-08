@@ -21,6 +21,7 @@ import com.twitter.heron.common.basics.ByteAmount;
  * name() - return a string representation of the member name (e.g. HERON_HOME)
  * value() - return a key value bound to the enum (e.g. heron.directory.home)
  * getDefault() - return the default value bound to the enum
+ * getType() - return the type of the key entry
  */
 @SuppressWarnings({"checkstyle:MethodParamPad", "checkstyle:LineLength"})
 public enum Key {
@@ -90,7 +91,7 @@ public enum Key {
   TOPOLOGY_DEFINITION      ("heron.topology.definition",      Type.STRING),
   TOPOLOGY_BINARY_FILE     ("heron.topology.binary.file",     Type.STRING),
   TOPOLOGY_PACKAGE_FILE    ("heron.topology.package.file",    Type.STRING),
-  TOPOLOGY_PACKAGE_TYPE    ("heron.topology.package.type",    Type.STRING),
+  TOPOLOGY_PACKAGE_TYPE    ("heron.topology.package.type",    Type.PACKAGE_TYPE),
   TOPOLOGY_CONTAINER_ID    ("heron.topology.container.id",    Type.STRING),
 
   //keys for proxy config during submission
@@ -135,36 +136,18 @@ public enum Key {
 
   //keys for config provided paths
   HERON_SANDBOX_HOME     ("heron.directory.sandbox.home",      "./heron-core"),
-  HERON_SANDBOX_BIN      ("heron.directory.sandbox.bin",       "${HERON_SANDBOX_HOME}/bin"),
   HERON_SANDBOX_CONF     ("heron.directory.sandbox.conf",      "./heron-conf"),
-  HERON_SANDBOX_LIB      ("heron.directory.sandbox.lib",       "${HERON_SANDBOX_HOME}/lib"),
   HERON_SANDBOX_JAVA_HOME("heron.directory.sandbox.java.home", "/usr/lib/jvm/default-java"),
 
-  //keys for sandbox heron configuration files
-  SANDBOX_CLUSTER_YAML   ("heron.config.sandbox.file.cluster.yaml",   "${HERON_SANDBOX_CONF}/cluster.yaml"),
-  SANDBOX_METRICS_YAML   ("heron.config.sandbox.file.metrics.yaml",   "${HERON_SANDBOX_CONF}/metrics_sinks.yaml"),
-  SANDBOX_PACKING_YAML   ("heron.config.sandbox.file.packing.yaml",   "${HERON_SANDBOX_CONF}/packing.yaml"),
-  SANDBOX_SCHEDULER_YAML ("heron.config.sandbox.file.scheduler.yaml", "${HERON_SANDBOX_CONF}/scheduler.yaml"),
-  SANDBOX_STATEMGR_YAML  ("heron.config.sandbox.file.statemgr.yaml",  "${HERON_SANDBOX_CONF}/statemgr.yaml"),
-  SANDBOX_SYSTEM_YAML    ("heron.config.sandbox.file.system.yaml",    "${HERON_SANDBOX_CONF}/heron_internals.yaml"),
-  SANDBOX_UPLOADER_YAML  ("heron.config.sandbox.file.uploader.yaml",  "${HERON_SANDBOX_CONF}/uploader.yaml"),
-  SANDBOX_OVERRIDE_YAML  ("heron.config.sandbox.file.override.yaml",  "${HERON_SANDBOX_CONF}/override.yaml"),
+  //keys for heron configuration files on the cluster
+  OVERRIDE_YAML("heron.config.sandbox.file.override.yaml",  "${HERON_SANDBOX_CONF}/override.yaml"),
 
   //keys for sandbox config provided user binaries
-  SANDBOX_EXECUTOR_BINARY       ("heron.binaries.sandbox.executor",        "${HERON_SANDBOX_BIN}/heron-executor"),
-  SANDBOX_STMGR_BINARY          ("heron.binaries.sandbox.stmgr",           "${HERON_SANDBOX_BIN}/heron-stmgr"),
-  SANDBOX_TMASTER_BINARY        ("heron.binaries.sandbox.tmaster",         "${HERON_SANDBOX_BIN}/heron-tmaster"),
-  SANDBOX_SHELL_BINARY          ("heron.binaries.sandbox.shell",           "${HERON_SANDBOX_BIN}/heron-shell"),
-  SANDBOX_PYTHON_INSTANCE_BINARY("heron.binaries.sandbox.python.instance", "${HERON_SANDBOX_BIN}/heron-python-instance"),
-  SANDBOX_SCHEDULER_JAR         ("heron.jars.sandbox.scheduler",           "${HERON_SANDBOX_LIB}/scheduler/heron-scheduler.jar"),
-
-  //keys for sandbox config provided paths
-  SANDBOX_INSTANCE_CLASSPATH  ("heron.classpath.sandbox.instance",        "${HERON_SANDBOX_LIB}/instance/*"),
-  SANDBOX_METRICSMGR_CLASSPATH("heron.classpath.sandbox.metrics.manager", "${HERON_SANDBOX_LIB}/metricsmgr/*"),
-  SANDBOX_PACKING_CLASSPATH   ("heron.classpath.sandbox.packing",         "${HERON_SANDBOX_LIB}/packing/*"),
-  SANDBOX_SCHEDULER_CLASSPATH ("heron.classpath.sandbox.scheduler",       "${HERON_SANDBOX_LIB}/scheduler/*"),
-  SANDBOX_STATEMGR_CLASSPATH  ("heron.classpath.sandbox.statemgr",        "${HERON_SANDBOX_LIB}/statemgr/*"),
-  SANDBOX_UPLOADER_CLASSPATH  ("heron.classpath.sandbox.uploader",        "${HERON_SANDBOX_LIB}/uploader/*");
+  EXECUTOR_BINARY       ("heron.binaries.sandbox.executor",        "${HERON_SANDBOX_BIN}/heron-executor"),
+  STMGR_BINARY          ("heron.binaries.sandbox.stmgr",           "${HERON_SANDBOX_BIN}/heron-stmgr"),
+  TMASTER_BINARY        ("heron.binaries.sandbox.tmaster",         "${HERON_SANDBOX_BIN}/heron-tmaster"),
+  SHELL_BINARY          ("heron.binaries.sandbox.shell",           "${HERON_SANDBOX_BIN}/heron-shell"),
+  PYTHON_INSTANCE_BINARY("heron.binaries.sandbox.python.instance", "${HERON_SANDBOX_BIN}/heron-python-instance");
 
   private final String value;
   private final Object defaultValue;
@@ -178,6 +161,7 @@ public enum Key {
     INTEGER,
     LONG,
     STRING,
+    PACKAGE_TYPE,
     PROPERTIES,
     UNKNOWN
   }

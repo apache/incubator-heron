@@ -139,23 +139,23 @@ public class ConfigKeysTest {
   public void testBinaries() throws Exception {
     assertEquals(
         "heron.binaries.sandbox.executor",
-        Key.SANDBOX_EXECUTOR_BINARY
+        Key.EXECUTOR_BINARY
     );
     assertEquals(
         "heron.binaries.sandbox.stmgr",
-        Key.SANDBOX_STMGR_BINARY
+        Key.STMGR_BINARY
     );
     assertEquals(
         "heron.binaries.sandbox.tmaster",
-        Key.SANDBOX_TMASTER_BINARY
+        Key.TMASTER_BINARY
     );
     assertEquals(
         "heron.binaries.sandbox.shell",
-        Key.SANDBOX_SHELL_BINARY
+        Key.SHELL_BINARY
     );
     assertEquals(
         "heron.binaries.sandbox.python.instance",
-        Key.SANDBOX_PYTHON_INSTANCE_BINARY
+        Key.PYTHON_INSTANCE_BINARY
     );
     assertEquals(
         "heron.jars.scheduler",
