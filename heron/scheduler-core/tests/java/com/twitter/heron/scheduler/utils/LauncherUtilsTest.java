@@ -96,7 +96,9 @@ public class LauncherUtilsTest {
     PowerMockito.doReturn(456).when(TopologyUtils.class, "getNumContainers", mockTopology);
 
     Config runtime = Config.newBuilder()
-        .putAll(LauncherUtils.getInstance().getPrimaryRuntime(mockTopology, mockStMgr)).build();
+        .putAll(LauncherUtils.getInstance().createPrimaryRuntime(mockTopology))
+        .putAll(LauncherUtils.getInstance().createAdaptorRuntime(mockStMgr))
+            .build();
     Assert.assertEquals("testTopologyId", Runtime.topologyId(runtime));
     Assert.assertEquals("testTopologyName", Runtime.topologyName(runtime));
     Assert.assertEquals(mockTopology, Runtime.topology(runtime));
