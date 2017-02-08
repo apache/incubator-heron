@@ -183,9 +183,6 @@ public class SubmitterMainTest {
 
   @Test(expected = SubmitDryRunResponse.class)
   public void testSubmitTopologyDryRun() throws Exception {
-    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    PowerMockito.whenNew(SchedulerStateManagerAdaptor.class).withAnyArguments().
-        thenReturn(adaptor);
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     when(config.getBooleanValue(Key.DRY_RUN)).thenReturn(true);
     try {
@@ -196,7 +193,7 @@ public class SubmitterMainTest {
          2. validate that topology is not running
        */
       verify(uploader, never()).uploadPackage();
-      verify(adaptor, never()).isTopologyRunning(anyString());
+      verify(statemgr, never()).initialize(any(Config.class));
     }
   }
 
