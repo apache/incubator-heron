@@ -14,8 +14,9 @@
 
 package com.twitter.heron.metricscachemgr.metricscache.query;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * immutable data bag for metric datum
@@ -26,14 +27,14 @@ public final class MetricDatum {
   private final String componentName;
   private final String instanceId;
   private final String metricName;
-  private final List<MetricTimeRangeValue> metricValue;
+  private final ImmutableList<MetricTimeRangeValue> metricValue;
 
   public MetricDatum(String componentName, String instanceId, String metricName,
                      List<MetricTimeRangeValue> metricValue) {
     this.componentName = componentName;
     this.instanceId = instanceId;
     this.metricName = metricName;
-    this.metricValue = metricValue;
+    this.metricValue = ImmutableList.copyOf(metricValue);
   }
 
   public String getComponentName() {
@@ -49,10 +50,6 @@ public final class MetricDatum {
   }
 
   public List<MetricTimeRangeValue> getMetricValue() {
-    List<MetricTimeRangeValue> ret = new ArrayList<>();
-    for (MetricTimeRangeValue metricTimeRangeValue : metricValue) {
-      ret.add(new MetricTimeRangeValue(metricTimeRangeValue));
-    }
-    return ret;
+    return metricValue;
   }
 }
