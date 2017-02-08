@@ -240,9 +240,14 @@ public class AuroraSchedulerTest {
         new Resource(2.3, ByteAmount.fromGigabytes(2), ByteAmount.fromGigabytes(3));
     Map<AuroraField, String> properties = testScheduler.createAuroraProperties(containerResource);
 
+    // this part is key, the conf path in the config is absolute to the install dir, but what
+    // aurora properties get below is the relative ./heron-conf path to be used when run remotely
+    assertEquals("Invalid value for key " + Key.HERON_CONF,
+        "/some/config/path", config.getStringValue(Key.HERON_CONF));
+
+    String expectedConf = "./heron-conf";
     String expectedBin = "./heron-core/bin";
     String expectedLib = "./heron-core/lib";
-    String expectedConf = "./heron-conf";
     for (AuroraField field : AuroraField.values()) {
       boolean asserted = false;
       Object expected = null;
