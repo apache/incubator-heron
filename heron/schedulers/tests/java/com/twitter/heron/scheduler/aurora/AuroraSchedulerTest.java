@@ -224,6 +224,9 @@ public class AuroraSchedulerTest {
 
     // This must mimic how SubmitterMain loads configs
     CommandLine commandLine = mock(CommandLine.class);
+    when(commandLine.getOptionValue("cluster")).thenReturn("some_cluster");
+    when(commandLine.getOptionValue("role")).thenReturn("some_role");
+    when(commandLine.getOptionValue("environment")).thenReturn("some_env");
     when(commandLine.getOptionValue("heron_home")).thenReturn("/some/heron/home");
     when(commandLine.getOptionValue("config_path")).thenReturn("/some/config/path");
     when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
@@ -246,9 +249,15 @@ public class AuroraSchedulerTest {
       Object found = properties.get(field);
       switch (field) {
         case CLUSTER:
-        case COMPONENT_RAMMAP:
+          expected = "some_cluster";
+          break;
         case ENVIRON:
+          expected = "some_env";
+          break;
         case ROLE:
+          expected = "some_role";
+          break;
+        case COMPONENT_RAMMAP:
         case STATEMGR_CONNECTION_STRING:
         case STATEMGR_ROOT_PATH:
           expected = null;
