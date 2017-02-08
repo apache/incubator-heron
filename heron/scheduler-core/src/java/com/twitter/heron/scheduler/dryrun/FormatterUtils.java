@@ -341,7 +341,7 @@ public final class FormatterUtils {
      *
      * @return
      */
-    private int caculateFrameLength() {
+    private int calculateFrameLength() {
       int total = 0;
       for (Integer width: calculateColumnsMax()) {
         total += width + 3;
@@ -362,7 +362,7 @@ public final class FormatterUtils {
         row.setFormatters(formatters);
       }
       // Calculate length for frames
-      int frameLength = caculateFrameLength();
+      int frameLength = calculateFrameLength();
       // Start building table
       StringBuilder builder = new StringBuilder();
       // Add upper frame
@@ -380,6 +380,9 @@ public final class FormatterUtils {
       return builder.toString();
     }
   }
+
+  private static final List<String> TITLE_NAMES = Arrays.asList(
+        "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
 
 
   /******************************** Auxiliary functions ********************************/
@@ -428,9 +431,7 @@ public final class FormatterUtils {
   }
 
   public static String renderOneContainer(List<Row> rows) {
-    List<String> titleNames = Arrays.asList(
-        "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
-    Row title = new Row(titleNames);
+    Row title = new Row(TITLE_NAMES);
     title.setStyle(TextStyle.BOLD);
     return new Table(title, rows).createTable();
   }

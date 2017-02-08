@@ -126,31 +126,39 @@ public class LauncherUtils {
   }
 
   /**
-   * Builds initial runtime config instance using topology information.
+   * Creates initial runtime config instance using topology information.
    *
    * @return initial runtime config instance
    */
-  public Config getPrimaryRuntime(TopologyAPI.Topology topology,
-                                  SchedulerStateManagerAdaptor adaptor) {
+  public Config createPrimaryRuntime(TopologyAPI.Topology topology) {
     return Config.newBuilder()
         .put(Key.TOPOLOGY_ID, topology.getId())
         .put(Key.TOPOLOGY_NAME, topology.getName())
         .put(Key.TOPOLOGY_DEFINITION, topology)
-        .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, adaptor)
         .put(Key.NUM_CONTAINERS, 1 + TopologyUtils.getNumContainers(topology))
         .build();
   }
 
   /**
+   * Creates initial runtime config of scheduler state manager adaptor
+   *
+   * @return adaptor config
+   */
+  public Config createAdaptorRuntime(SchedulerStateManagerAdaptor adaptor) {
+    return Config.newBuilder()
+        .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, adaptor).build();
+  }
+
+  /**
    * Creates a config instance with packing plan info added to runtime config
+   *
+   * @return packing details config
    */
   public Config createConfigWithPackingDetails(Config runtime, PackingPlan packing) {
-    Config ytruntime;
-    ytruntime = Config.newBuilder()
+    return Config.newBuilder()
         .putAll(runtime)
         .put(Key.COMPONENT_RAMMAP, packing.getComponentRamDistribution())
         .put(Key.NUM_CONTAINERS, 1 + packing.getContainers().size())
         .build();
-    return ytruntime;
   }
 }
