@@ -11,7 +11,7 @@ if [ $PLATFORM = darwin ]; then
   brew list hugo || brew install hugo
   which wget || brew install wget
 elif [ $PLATFORM = ubuntu ]; then
-  sudo apt-get install golang git mercurial -y
+  sudo apt-get install golang git mercurial nodejs -y
   export GOROOT=/usr/lib/go
   export GOPATH=$HOME/go
   export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
