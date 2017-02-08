@@ -22,8 +22,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.filechooser.FileSystemView;
-
 public final class Misc {
 
   private static final Logger LOG = Logger.getLogger(Misc.class.getName());
@@ -173,7 +171,7 @@ public final class Misc {
     List<String> list = new LinkedList<String>(fixedList);
 
     // get the home path
-    String homePath = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
+    String homePath = System.getProperty("user.home");
 
     // substitute various variables
     for (int i = 0; i < list.size(); i++) {
