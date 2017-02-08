@@ -20,7 +20,8 @@ var InstanceExceptionLogs = React.createClass({
   },
 
   fetchPplan: function () {
-    url = this.props.baseUrl + "topologies/" +
+    console.log("PPlan", this.props.baseUrl);
+    url = this.props.baseUrl + "/topologies/" +
       this.props.cluster + "/" +
       this.props.environ + "/" +
       this.props.topology + "/" +
@@ -37,6 +38,8 @@ var InstanceExceptionLogs = React.createClass({
 
   fetchAllComponentException: function (baseUrl, cluster, environ, topology) {
     var fetchUrl = [baseUrl, 'topologies', cluster, environ, topology, 'logicalplan.json'].join("/");
+    console.log(baseUrl);
+    console.log(fetchUrl);
     $.ajax({
       url: fetchUrl,
       dataType: 'json',
@@ -60,6 +63,8 @@ var InstanceExceptionLogs = React.createClass({
   fetchExceptions: function(baseUrl, cluster, environ, topology, compName) {
     var urlTokens = [baseUrl, 'topologies', cluster, environ, topology, compName, 'exceptions.json'];
     var fetchUrl = urlTokens.join("/");
+    console.log(baseUrl);
+    console.log(fetchUrl);
     $.ajax({
       url: fetchUrl,
       dataType:  'json',
@@ -128,7 +133,7 @@ var InstanceExceptionLogs = React.createClass({
     var headings = ["Trace", "Instance", "Oldest Record", "Latest Record", "Count", ""];
     var exceptions = [];
     for (i = 0; i < exceptionLogs.length; ++i) {
-      var exceptionsUrl = this.props.baseUrl + 'topologies/' + this.props.cluster 
+      var exceptionsUrl = this.props.baseUrl + '/topologies/' + this.props.cluster 
         + '/' + this.props.environ + '/' + this.props.topology
         + '/' + this.props.comp_name + '/' + exceptionLogs[i].instance
         + '/exceptions';

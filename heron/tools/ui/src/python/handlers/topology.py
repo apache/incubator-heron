@@ -44,7 +44,8 @@ class TopologyConfigHandler(base.BaseHandler):
         environ=environ,
         topology=topology,
         active="topologies",
-        function=common.className)
+        function=common.className,
+        baseUrl=self.baseUrl)
     self.render("config.html", **options)
 
 
@@ -239,8 +240,7 @@ class ContainerFileStatsHandler(base.BaseHandler):
         container=container,
         path=path,
         filestats=data,
-        baseUrl=self.baseUrl
-    )
+        baseUrl=self.baseUrl)
     self.render("browse.html", **options)
 
 

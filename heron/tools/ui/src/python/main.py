@@ -47,6 +47,7 @@ class Application(tornado.web.Application):
     if base_url != "":
       static_prefix = os.path.join(base_url, 'static/')
 
+    Log.info("Using base url: {}".format(base_url))
     settings = dict(
         template_path=os.path.join(sys.path[0], "heron/tools/ui/resources/templates"),
         static_path=os.path.join(sys.path[0], "heron/tools/ui/resources/static"),
