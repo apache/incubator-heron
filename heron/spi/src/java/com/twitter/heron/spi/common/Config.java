@@ -50,8 +50,20 @@ public class Config {
     return expand(config, 0);
   }
 
+  /**
+   * Recursively expand each config value until token substitution is exhausted. We must recurse
+   * to handle the case where field expansion requires multiple iterations, due to new tokens being
+   * introduced as we replace. For example:
+   *
+   *   ${HERON_BIN}/heron-executor        gets expanded to
+   *   ${HERON_HOME}/bin/heron-executor   gets expanded to
+   *   /usr/local/heron/bin/heron-executor
+   *
+   * If break logic is when another round does not reduce the number of tokens, since it means we
+   * couldn't find a valid replacement.
+   */
   private static Config expand(Config config, int previousTokensCount) {
-    Config.Builder cb = Config.newBuilder();
+    Config.Builder cb = Config.newBuilder().putAll(config);
     int tokensCount = 0;
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
@@ -68,7 +80,7 @@ public class Config {
     if (previousTokensCount != tokensCount) {
       LOG.info(String.format(
           "Config expansion found %s values with tokens, will recurse", tokensCount));
-      return expand(config, tokensCount);
+      return expand(cb.build(), tokensCount);
     } else {
       return cb.build();
     }

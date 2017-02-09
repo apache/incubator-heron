@@ -44,32 +44,31 @@ public class ClusterConfigTest {
   @Before
   public void setUp() {
     PowerMockito.spy(ClusterConfig.class);
-    basicConfig = ClusterConfig
-        .loadConfig(heronHome, configPath, "/release/file", "/override/file");
+    basicConfig = ClusterConfig.loadConfig(
+        heronHome, configPath, "/release/file", "/override/file");
   }
 
   @Test
   public void testLoadSandboxConfig() {
     PowerMockito.spy(ClusterConfig.class);
-    Config config = Config.expand(ClusterConfig.loadSandboxConfig());
+    Config config = ClusterConfig.loadSandboxConfig();
 
     assertConfig(config, "./heron-core", "./heron-conf", 5);
   }
 
   @Test
   public void testLoadDefaultConfig() {
-    Config config = Config.expand(basicConfig);
-    assertConfig(config, heronHome, configPath, 8);
+    assertConfig(basicConfig, heronHome, configPath, 8);
 
-    assertKeyValue(config, Key.PACKING_CLASS,
+    assertKeyValue(basicConfig, Key.PACKING_CLASS,
         "com.twitter.heron.packing.roundrobin.RoundRobinPacking");
-    assertKeyValue(config, Key.SCHEDULER_CLASS,
+    assertKeyValue(basicConfig, Key.SCHEDULER_CLASS,
         "com.twitter.heron.scheduler.local.LocalScheduler");
-    assertKeyValue(config, Key.LAUNCHER_CLASS,
+    assertKeyValue(basicConfig, Key.LAUNCHER_CLASS,
         "com.twitter.heron.scheduler.local.LocalLauncher");
-    assertKeyValue(config, Key.STATE_MANAGER_CLASS,
+    assertKeyValue(basicConfig, Key.STATE_MANAGER_CLASS,
         "com.twitter.heron.state.localfile.LocalFileStateManager");
-    assertKeyValue(config, Key.UPLOADER_CLASS,
+    assertKeyValue(basicConfig, Key.UPLOADER_CLASS,
         "com.twitter.heron.uploader.localfs.FileSystemUploader");
   }
 

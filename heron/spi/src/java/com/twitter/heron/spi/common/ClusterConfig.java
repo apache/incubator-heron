@@ -14,10 +14,7 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -28,29 +25,13 @@ public final class ClusterConfig {
   private ClusterConfig() {
   }
 
-  private static final Set<Key> NO_SUB_KEYS = new HashSet<>(Arrays.asList(
-      Key.HERON_HOME, Key.HERON_CONF, Key.HERON_SANDBOX_HOME, Key.HERON_SANDBOX_CONF));
-
   private static Config loadDefaults(String heronHome, String configPath) {
-    Config defaults = Config.newBuilder(true)
+    return Config.expand(Config.newBuilder(true)
         .put(Key.HERON_HOME, heronHome)
         .put(Key.HERON_CONF, configPath)
         .put(Key.HERON_SANDBOX_HOME, heronHome)
         .put(Key.HERON_SANDBOX_CONF, configPath)
-        .build();
-
-    Config.Builder cb = Config.newBuilder().putAll(defaults);
-    for (Key key : Key.values()) {
-      if (!NO_SUB_KEYS.contains(key) && key.getDefault() != null) {
-        if (key.getType() == Key.Type.STRING) {
-          cb.put(key, Misc.substitute(defaults, key.getDefaultString()));
-        } else {
-          cb.put(key, key.getDefault());
-        }
-      }
-    }
-
-    return cb.build();
+        .build());
   }
 
   @VisibleForTesting
