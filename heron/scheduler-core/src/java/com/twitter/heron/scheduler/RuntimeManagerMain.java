@@ -280,7 +280,7 @@ public class RuntimeManagerMain {
         .put(Key.TOPOLOGY_NAME, topologyName);
 
     // build the final config by expanding all the variables
-    Config config = Config.expand(Config.newBuilder()
+    Config config = Config.toLocalMode(Config.newBuilder()
         .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
         .putAll(commandLineConfig.build())
         .putAll(topologyConfig.build())

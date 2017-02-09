@@ -277,7 +277,7 @@ public class SubmitterMain {
     // load the topology configs
 
     // build the final config by expanding all the variables
-    return Config.expand(Config.newBuilder()
+    return Config.toLocalMode(Config.newBuilder()
         .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
         .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
         .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))

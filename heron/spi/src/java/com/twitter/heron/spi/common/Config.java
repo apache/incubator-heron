@@ -28,14 +28,53 @@ import com.twitter.heron.common.basics.TypeUtils;
 /**
  * Config is an Immutable Map of &lt;String, Object&gt; The get/set API that uses Key objects
  * should be favored over Strings. Usage of the String API should be refactored out.
+ *
+ * A newly created Config object holds configs that might include wildcard tokens, like
+ * ${HERON_HOME}/bin, ${HERON_LIB}/packing/*. Token substitution can be done by converting that
+ * config to a local or remote config by using the toLocalMode or toRemoteMode methods.
+ *
+ * Local mode is for a config to be used to run Heron locally, where HERON_HOME might be an install
+ * dir on the local host (e.g. HERON_HOME=/usr/bin/heron). Remote mode is to be used when building
+ * configs for a remote process run on a service, where all directories are relative to the current
+ * dir (e.g. HERON_HOME=~/heron-core).
  */
 public class Config {
   private static final Logger LOG = Logger.getLogger(Config.class.getName());
 
-  private final Map<String, Object> cfgMap = new HashMap<>();
+  private final Map<String, Object> cfgMap;
 
+  private enum Mode {
+    RAW,
+    LOCAL,
+    REMOTE
+  }
+
+  // Used to initialize a raw config. Should be used by consumers of Config via the builder
   protected Config(Builder build) {
-    cfgMap.putAll(build.keyValues);
+    this.mode = Mode.RAW;
+    this.rawConfig = this;
+    this.cfgMap = new HashMap<>(build.keyValues);
+  }
+
+  // Used internally to create a Config that's actually a facade over a raw, local and remote config
+  private Config(Mode mode, Config rawConfig, Config localConfig, Config remoteConfig) {
+    this.mode = mode;
+    this.rawConfig = rawConfig;
+    this.localConfig = localConfig;
+    this.remoteConfig = remoteConfig;
+    switch (mode) {
+      case RAW:
+        this.cfgMap = rawConfig.cfgMap;
+        break;
+      case LOCAL:
+        this.cfgMap = localConfig.cfgMap;
+        break;
+      case REMOTE:
+        this.cfgMap = remoteConfig.cfgMap;
+        break;
+      default:
+        throw new IllegalArgumentException("Unrecognized mode passed to constructor: " + mode);
+    }
   }
 
   public static Builder newBuilder() {
@@ -46,7 +85,15 @@ public class Config {
     return Builder.create(loadDefaults);
   }
 
-  public static Config expand(Config config) {
+  public static Config toLocalMode(Config config) {
+    return config.lazyCreateConfig(Mode.LOCAL);
+  }
+
+  public static Config toRemoteMode(Config config) {
+    return config.lazyCreateConfig(Mode.REMOTE);
+  }
+
+  private static Config expand(Config config) {
     return expand(config, 0);
   }
 
@@ -78,11 +125,63 @@ public class Config {
       }
     }
     if (previousTokensCount != tokensCount) {
-      LOG.info(String.format(
-          "Config expansion found %s values with tokens, will recurse", tokensCount));
       return expand(cb.build(), tokensCount);
     } else {
       return cb.build();
+    }
+  }
+
+  private final Mode mode;
+  private final Config rawConfig;     // what the user first creates
+  private Config localConfig = null;  // what the generate during toLocalMode
+  private Config remoteConfig = null; // what the generate during toRemoteMode
+
+  private Config lazyCreateConfig(Mode newMode) {
+    if (newMode == this.mode) {
+      return this;
+    }
+
+    // this is here so that we don't keep cascading deeper into object creation so:
+    // localConfig == toLocalMode(toRemoteMode(localConfig))
+    Config newRawConfig = this.rawConfig;
+    Config newLocalConfig = this.localConfig;
+    Config newRemoteConfig = this.remoteConfig;
+    switch (this.mode) {
+      case RAW:
+        newRawConfig = this;
+        break;
+      case LOCAL:
+        newLocalConfig = this;
+        break;
+      case REMOTE:
+        newRemoteConfig = this;
+        break;
+      default:
+        throw new IllegalArgumentException(
+            "Unrecognized mode found in config: " + this.mode);
+    }
+
+    switch (newMode) {
+      case LOCAL:
+        if (this.localConfig == null) {
+          Config tempConfig = Config.expand(Config.newBuilder().putAll(rawConfig.cfgMap).build());
+          this.localConfig = new Config(Mode.LOCAL, newRawConfig, tempConfig, newRemoteConfig);
+        }
+        return this.localConfig;
+      case REMOTE:
+        if (this.remoteConfig == null) {
+          Config.Builder bc = Config.newBuilder()
+              .putAll(rawConfig.cfgMap)
+              .put(Key.HERON_HOME, get(Key.HERON_SANDBOX_HOME))
+              .put(Key.HERON_CONF, get(Key.HERON_SANDBOX_CONF));
+          Config tempConfig = Config.expand(bc.build());
+          this.remoteConfig = new Config(Mode.REMOTE, newRawConfig, newLocalConfig, tempConfig);
+        }
+        return this.remoteConfig;
+      case RAW:
+      default:
+        throw new IllegalArgumentException(
+            "Unrecognized mode passed to lazyCreateConfig: " + newMode);
     }
   }
 
@@ -95,7 +194,17 @@ public class Config {
   }
 
   private Object get(String key) {
-    return cfgMap.get(key);
+    switch (mode) {
+      case LOCAL:
+        return localConfig.cfgMap.get(key);
+      case REMOTE:
+        return remoteConfig.cfgMap.get(key);
+      case RAW:
+        return rawConfig.cfgMap.get(key);
+      default:
+        throw new IllegalArgumentException(String.format(
+            "Unrecognized mode passed to get for key=%s: %s", key, mode));
+    }
   }
 
   public String getStringValue(String key) {

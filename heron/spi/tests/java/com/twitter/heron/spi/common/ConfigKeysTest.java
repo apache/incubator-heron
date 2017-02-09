@@ -102,10 +102,6 @@ public class ConfigKeysTest {
         Key.VERBOSE
     );
     assertEquals(
-        "heron.config.path",
-        Key.CONFIG_PATH
-    );
-    assertEquals(
         "heron.config.property",
         Key.CONFIG_PROPERTY
     );

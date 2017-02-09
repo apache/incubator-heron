@@ -52,7 +52,6 @@ public enum Key {
   DRY_RUN                  ("heron.config.dry_run",             Boolean.FALSE),
   DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
   VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),
-  CONFIG_PATH              ("heron.config.path",                Type.STRING),
   CONFIG_PROPERTY          ("heron.config.property",            Type.STRING),
 
   //keys for release/build information
@@ -140,14 +139,14 @@ public enum Key {
   HERON_SANDBOX_JAVA_HOME("heron.directory.sandbox.java.home", "/usr/lib/jvm/default-java"),
 
   //keys for heron configuration files on the cluster
-  OVERRIDE_YAML("heron.config.sandbox.file.override.yaml",  "${HERON_SANDBOX_CONF}/override.yaml"),
+  OVERRIDE_YAML("heron.config.sandbox.file.override.yaml",  "${HERON_CONF}/override.yaml"),
 
   //keys for sandbox config provided user binaries
-  EXECUTOR_BINARY       ("heron.binaries.sandbox.executor",        "${HERON_SANDBOX_BIN}/heron-executor"),
-  STMGR_BINARY          ("heron.binaries.sandbox.stmgr",           "${HERON_SANDBOX_BIN}/heron-stmgr"),
-  TMASTER_BINARY        ("heron.binaries.sandbox.tmaster",         "${HERON_SANDBOX_BIN}/heron-tmaster"),
-  SHELL_BINARY          ("heron.binaries.sandbox.shell",           "${HERON_SANDBOX_BIN}/heron-shell"),
-  PYTHON_INSTANCE_BINARY("heron.binaries.sandbox.python.instance", "${HERON_SANDBOX_BIN}/heron-python-instance");
+  EXECUTOR_BINARY       ("heron.binaries.sandbox.executor",        "${HERON_BIN}/heron-executor"),
+  STMGR_BINARY          ("heron.binaries.sandbox.stmgr",           "${HERON_BIN}/heron-stmgr"),
+  TMASTER_BINARY        ("heron.binaries.sandbox.tmaster",         "${HERON_BIN}/heron-tmaster"),
+  SHELL_BINARY          ("heron.binaries.sandbox.shell",           "${HERON_BIN}/heron-shell"),
+  PYTHON_INSTANCE_BINARY("heron.binaries.sandbox.python.instance", "${HERON_BIN}/heron-python-instance");
 
   private final String value;
   private final Object defaultValue;

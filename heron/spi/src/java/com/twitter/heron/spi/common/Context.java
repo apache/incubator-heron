@@ -47,10 +47,6 @@ public class Context {
     return cfg.getBooleanValue(Key.VERBOSE);
   }
 
-  public static String configPath(Config cfg) {
-    return cfg.getStringValue(Key.CONFIG_PATH);
-  }
-
   public static String buildVersion(Config cfg) {
     return cfg.getStringValue(Key.BUILD_VERSION);
   }

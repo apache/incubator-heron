@@ -14,6 +14,8 @@
 
 package com.twitter.heron.spi.common;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
@@ -27,7 +29,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNotNull;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 @RunWith(PowerMockRunner.class)
@@ -44,21 +49,22 @@ public class ClusterConfigTest {
   @Before
   public void setUp() {
     PowerMockito.spy(ClusterConfig.class);
-    basicConfig = ClusterConfig.loadConfig(
-        heronHome, configPath, "/release/file", "/override/file");
+    basicConfig = Config.toLocalMode(ClusterConfig.loadConfig(
+        heronHome, configPath, "/release/file", "/override/file"));
   }
 
   @Test
   public void testLoadSandboxConfig() {
     PowerMockito.spy(ClusterConfig.class);
-    Config config = ClusterConfig.loadSandboxConfig();
+    Config config = Config.toRemoteMode(ClusterConfig.loadConfig(
+        heronHome, configPath, "/release/file", "/override/file"));
 
-    assertConfig(config, "./heron-core", "./heron-conf", 5);
+    assertConfig(config, "./heron-core", "./heron-conf");
   }
 
   @Test
   public void testLoadDefaultConfig() {
-    assertConfig(basicConfig, heronHome, configPath, 8);
+    assertConfig(basicConfig, heronHome, configPath);
 
     assertKeyValue(basicConfig, Key.PACKING_CLASS,
         "com.twitter.heron.packing.roundrobin.RoundRobinPacking");
@@ -74,12 +80,13 @@ public class ClusterConfigTest {
 
   private static void assertConfig(Config config,
                                    String heronHome,
-                                   String heronConfigPath,
-                                   int configFileLoads) {
+                                   String heronConfigPath) {
     // assert that the config filenames passed to loadConfig are never null. If they are, the
     // configs defaults are not producing the config files.
-    PowerMockito.verifyStatic(times(configFileLoads));
+    PowerMockito.verifyStatic(times(8));
     ClusterConfig.loadConfig(isNotNull(String.class));
+    PowerMockito.verifyStatic(never());
+    ClusterConfig.loadConfig(isNull(String.class));
 
     Set<String> tokenizedValues = new TreeSet<>();
     for (Key key : Key.values()) {
@@ -93,8 +100,6 @@ public class ClusterConfigTest {
     }
     assertTrue("Default config values have not all had tokens replaced: " + tokenizedValues,
         tokenizedValues.isEmpty());
-    assertKeyValue(config, Key.HERON_SANDBOX_HOME, heronHome);
-    assertKeyValue(config, Key.HERON_SANDBOX_CONF, heronConfigPath);
     assertKeyValue(config, Key.HERON_HOME, heronHome);
     assertKeyValue(config, Key.HERON_CONF, heronConfigPath);
     assertKeyValue(config, Key.HERON_BIN, heronHome + "/bin");

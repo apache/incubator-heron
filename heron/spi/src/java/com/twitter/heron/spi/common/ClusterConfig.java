@@ -26,12 +26,12 @@ public final class ClusterConfig {
   }
 
   private static Config loadDefaults(String heronHome, String configPath) {
-    return Config.expand(Config.newBuilder(true)
+    return Config.newBuilder(true)
         .put(Key.HERON_HOME, heronHome)
         .put(Key.HERON_CONF, configPath)
-        .put(Key.HERON_SANDBOX_HOME, heronHome)
-        .put(Key.HERON_SANDBOX_CONF, configPath)
-        .build());
+        .put(Key.HERON_SANDBOX_HOME, Key.HERON_SANDBOX_HOME.getDefaultString())
+        .put(Key.HERON_SANDBOX_CONF, Key.HERON_SANDBOX_CONF.getDefaultString())
+        .build();
   }
 
   @VisibleForTesting
@@ -44,14 +44,15 @@ public final class ClusterConfig {
                                   String releaseFile, String overrideConfigFile) {
     Config defaultConfig = loadDefaults(heronHome, configPath);
 
+    Config localConfig = Config.toLocalMode(defaultConfig);
     Config.Builder cb = Config.newBuilder()
         .putAll(defaultConfig)
-        .putAll(loadConfig(Context.clusterFile(defaultConfig)))
-        .putAll(loadConfig(Context.clientFile(defaultConfig)))
-        .putAll(loadConfig(Context.packingFile(defaultConfig)))
-        .putAll(loadConfig(Context.schedulerFile(defaultConfig)))
-        .putAll(loadConfig(Context.stateManagerFile(defaultConfig)))
-        .putAll(loadConfig(Context.uploaderFile(defaultConfig)))
+        .putAll(loadConfig(Context.clusterFile(localConfig)))
+        .putAll(loadConfig(Context.clientFile(localConfig)))
+        .putAll(loadConfig(Context.packingFile(localConfig)))
+        .putAll(loadConfig(Context.schedulerFile(localConfig)))
+        .putAll(loadConfig(Context.stateManagerFile(localConfig)))
+        .putAll(loadConfig(Context.uploaderFile(localConfig)))
         .putAll(loadConfig(releaseFile))
         .putAll(loadConfig(overrideConfigFile));
     return cb.build();

@@ -53,7 +53,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = mConfig;
+    this.config = Config.toRemoteMode(mConfig);
     this.runtime = mRuntime;
     this.controller = getController();
     this.updateTopologyManager =

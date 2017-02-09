@@ -94,6 +94,7 @@ java_tests(
         "com.twitter.heron.spi.common.ClusterConfigTest",
         "com.twitter.heron.spi.common.ClusterDefaultsTest",
         "com.twitter.heron.spi.common.ConfigKeysTest",
+        "com.twitter.heron.spi.common.ConfigTest",
         "com.twitter.heron.spi.common.MiscTest",
     ],
     runtime_deps = [ ":common-tests" ],

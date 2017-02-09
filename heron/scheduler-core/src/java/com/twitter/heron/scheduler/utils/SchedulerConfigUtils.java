@@ -78,7 +78,7 @@ public final class SchedulerConfigUtils {
       Boolean verbose,
       TopologyAPI.Topology topology) {
 
-    return Config.expand(
+    return Config.toRemoteMode(
         Config.newBuilder()
             .putAll(ClusterConfig.loadSandboxConfig())
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
