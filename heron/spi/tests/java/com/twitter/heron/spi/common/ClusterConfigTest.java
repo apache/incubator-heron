@@ -14,9 +14,8 @@
 
 package com.twitter.heron.spi.common;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,7 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.never;
@@ -87,6 +86,12 @@ public class ClusterConfigTest {
     ClusterConfig.loadConfig(isNotNull(String.class));
     PowerMockito.verifyStatic(never());
     ClusterConfig.loadConfig(isNull(String.class));
+
+    // addFromFile with an empty map means that the config file was not found. Of the 8 files that
+    // are attempted to be loaded, all but 3 should be found (clientConfig, overrideConfigFile and
+    // releaseFile do not exist)
+    PowerMockito.verifyStatic(times(3));
+    ClusterConfig.addFromFile(eq(new HashMap<String, Object>()));
 
     Set<String> tokenizedValues = new TreeSet<>();
     for (Key key : Key.values()) {

@@ -59,7 +59,7 @@ public final class SchedulerConfigUtils {
    * @return config, the command line config
    */
   private static Config commandLineConfigs(String cluster, String role,
-                                             String environ, Boolean verbose) {
+                                           String environ, Boolean verbose) {
     return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)

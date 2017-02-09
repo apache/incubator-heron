@@ -37,6 +37,11 @@ public final class ClusterConfig {
   @VisibleForTesting
   static Config loadConfig(String file) {
     Map<String, Object> readConfig = ConfigReader.loadFile(file);
+    return addFromFile(readConfig);
+  }
+
+  @VisibleForTesting
+  static Config addFromFile(Map<String, Object> readConfig) {
     return Config.newBuilder().putAll(readConfig).build();
   }
 
