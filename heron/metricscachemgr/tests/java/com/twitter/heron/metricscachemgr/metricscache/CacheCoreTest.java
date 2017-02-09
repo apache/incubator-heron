@@ -51,7 +51,9 @@ public class CacheCoreTest {
   private static Comparator<MetricDatum> datumComparator;
 
   private static void assertMetricValue(
-      List<MetricTimeRangeValue> expected, List<MetricTimeRangeValue> actual) {
+      List<MetricTimeRangeValue> expected, List<MetricTimeRangeValue> actualIn) {
+    List<MetricTimeRangeValue> actual = new ArrayList<>(actualIn);
+    actual.sort(timeRangeValueComparator);
     int len = expected.size();
     assertEquals(len, actual.size());
     for (int i = 0; i < len; i++) {
@@ -64,8 +66,10 @@ public class CacheCoreTest {
   }
 
   private static void assertMetricResponse(
-      List<MetricDatum> metricList, MetricDatum... metricData) {
+      List<MetricDatum> metricListIn, MetricDatum... metricData) {
+    List<MetricDatum> metricList = new ArrayList<>(metricListIn);
     assertEquals(metricData.length, metricList.size());
+    metricList.sort(datumComparator);
     for (int i = 0; i < metricData.length; i++) {
       MetricDatum expected = metricData[i];
       MetricDatum actual = metricList.get(i);
@@ -195,12 +199,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.3")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 instances
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
 
@@ -232,12 +231,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.3")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 instances
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
   /*
@@ -289,12 +283,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.7")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 4 component-instance
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
   /*
@@ -330,12 +319,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.7")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 4 component-instance
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
   /*
@@ -385,12 +369,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.2")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 metrics
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
   /*
@@ -429,12 +408,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.6")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 4 metrics
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
   /*
@@ -462,12 +436,7 @@ public class CacheCoreTest {
             new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.2")
         ))
     };
-    List<MetricDatum> metricList = new ArrayList<>(response.getMetricList());
-    assertEquals(metricList.size(), expected.length);
-    // sort
-    metricList.sort(datumComparator);
-    // there should be 2 metrics
-    assertMetricResponse(metricList, expected);
+    assertMetricResponse(response.getMetricList(), expected);
   }
 
   /*
@@ -568,12 +537,7 @@ public class CacheCoreTest {
         new MetricTimeRangeValue(now - 90 * 1000, now - 90 * 1000, "0.1"),
         new MetricTimeRangeValue(now - 80 * 1000, now - 80 * 1000, "0.2")
     );
-    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
-    assertEquals(list.size(), expected.size());
-    // sort
-    list.sort(timeRangeValueComparator);
-    // check values
-    assertMetricValue(list, expected);
+    assertMetricValue(expected, metricList.get(0).getMetricValue());
   }
 
   /*
@@ -597,12 +561,7 @@ public class CacheCoreTest {
         new MetricTimeRangeValue(now - 60 * 1000, now - 60 * 1000, "0.3"),
         new MetricTimeRangeValue(now - 50 * 1000, now - 50 * 1000, "0.4")
     );
-    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
-    assertEquals(list.size(), expected.size());
-    // sort
-    list.sort(timeRangeValueComparator);
-    // check value
-    assertMetricValue(list, expected);
+    assertMetricValue(expected, metricList.get(0).getMetricValue());
   }
 
   /*
@@ -629,12 +588,7 @@ public class CacheCoreTest {
         new MetricTimeRangeValue(now - 20 * 1000, now - 20 * 1000, "0.6"),
         new MetricTimeRangeValue(now, now, "0.7")
     );
-    List<MetricTimeRangeValue> list = new ArrayList<>(metricList.get(0).getMetricValue());
-    assertEquals(list.size(), expected.size());
-    // sort
-    list.sort(timeRangeValueComparator);
-    // check value
-    assertMetricValue(list, expected);
+    assertMetricValue(expected, metricList.get(0).getMetricValue());
   }
 
   /*
