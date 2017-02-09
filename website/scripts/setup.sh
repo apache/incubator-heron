@@ -7,11 +7,11 @@ PLATFORM=`platform`
 if [ $PLATFORM = darwin ]; then
   brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
   nvm install node
-  curl -L https://www.npmjs.com/install.sh | sh 
+  curl -L https://www.npmjs.com/install.sh | sh
   brew list hugo || brew install hugo
   which wget || brew install wget
 elif [ $PLATFORM = ubuntu ]; then
-  sudo apt-get install golang git mercurial nodejs -y
+  sudo apt-get install golang git mercurial -y
   export GOROOT=/usr/lib/go
   export GOPATH=$HOME/go
   export PATH=$PATH:$GOROOT/bin:$GOPATH/bin

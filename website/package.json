@@ -10,9 +10,6 @@
     "gulp-task-listing": "^1.0.1",
     "gulp-uglify": "^2.0.1"
   },
-  "engines": {
-    "node": "0.12.x"
-  },
   "scripts": {
     "build": "gulp build",
     "clean": "gulp clean",
