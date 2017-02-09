@@ -31,7 +31,6 @@ site:
 	@make linkchecker
 
 travis-site:
-	@make setup
 	@make clean
 	@make build-static-assets
 	@make pages
