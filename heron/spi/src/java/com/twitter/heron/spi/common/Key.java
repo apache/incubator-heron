@@ -134,19 +134,20 @@ public enum Key {
   HERON_UPLOADER_VERSION         ("heron.uploader.version",        Type.STRING),
 
   //keys for config provided paths
-  HERON_SANDBOX_HOME     ("heron.directory.sandbox.home",      "./heron-core"),
-  HERON_SANDBOX_CONF     ("heron.directory.sandbox.conf",      "./heron-conf"),
-  HERON_SANDBOX_JAVA_HOME("heron.directory.sandbox.java.home", "/usr/lib/jvm/default-java"),
+  HERON_CLUSTER_HOME     ("heron.directory.cluster.home",      "./heron-core"),
+  HERON_CLUSTER_CONF     ("heron.directory.cluster.conf",      "./heron-conf"),
+  // TODO: rename below to heron.directory.cluster.java.home, coordinate change with twitter configs
+  HERON_CLUSTER_JAVA_HOME("heron.directory.sandbox.java.home", "/usr/lib/jvm/default-java"),
 
   //keys for heron configuration files on the cluster
-  OVERRIDE_YAML("heron.config.sandbox.file.override.yaml",  "${HERON_CONF}/override.yaml"),
+  OVERRIDE_YAML("heron.config.file.override.yaml",  "${HERON_CONF}/override.yaml"),
 
-  //keys for sandbox config provided user binaries
-  EXECUTOR_BINARY       ("heron.binaries.sandbox.executor",        "${HERON_BIN}/heron-executor"),
-  STMGR_BINARY          ("heron.binaries.sandbox.stmgr",           "${HERON_BIN}/heron-stmgr"),
-  TMASTER_BINARY        ("heron.binaries.sandbox.tmaster",         "${HERON_BIN}/heron-tmaster"),
-  SHELL_BINARY          ("heron.binaries.sandbox.shell",           "${HERON_BIN}/heron-shell"),
-  PYTHON_INSTANCE_BINARY("heron.binaries.sandbox.python.instance", "${HERON_BIN}/heron-python-instance");
+  //keys for config provided user binaries
+  EXECUTOR_BINARY       ("heron.binaries.executor",        "${HERON_BIN}/heron-executor"),
+  STMGR_BINARY          ("heron.binaries.stmgr",           "${HERON_BIN}/heron-stmgr"),
+  TMASTER_BINARY        ("heron.binaries.tmaster",         "${HERON_BIN}/heron-tmaster"),
+  SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
+  PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance");
 
   private final String value;
   private final Object defaultValue;

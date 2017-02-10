@@ -62,7 +62,7 @@ public final class SchedulerUtils {
     List<String> commands = new ArrayList<>();
 
     // The java executable should be "{JAVA_HOME}/bin/java"
-    String javaExecutable = String.format("%s/%s", Context.javaSandboxHome(config), "bin/java");
+    String javaExecutable = String.format("%s/%s", Context.clusterJavaHome(config), "bin/java");
     commands.add(javaExecutable);
     commands.add("-cp");
 
@@ -216,7 +216,7 @@ public final class SchedulerUtils {
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config).name().toLowerCase());
     commands.add(Context.topologyBinaryFile(config));
-    commands.add(Context.javaSandboxHome(config));
+    commands.add(Context.clusterJavaHome(config));
     commands.add(shellPort);
     commands.add(Context.shellBinary(config));
     commands.add(metricsmgrPort);

@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ClusterDefaultsTest {
+public class ContextTest {
   private Config props;
 
   @Before
@@ -28,7 +28,7 @@ public class ClusterDefaultsTest {
   }
 
   @Test
-  public void testSandboxBinaries() throws Exception {
+  public void testBinaries() throws Exception {
 
     assertEquals(Key.EXECUTOR_BINARY.getDefault(), Context.executorBinary(props));
     assertEquals(Key.STMGR_BINARY.getDefault(), Context.stmgrBinary(props));

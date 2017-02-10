@@ -53,7 +53,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = Config.toRemoteMode(mConfig);
+    this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
     this.controller = getController();
     this.updateTopologyManager =
@@ -197,7 +197,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         Context.topologyPackageType(config).name().toLowerCase());
     auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
         FileUtils.getBaseName(Context.topologyBinaryFile(config)));
-    auroraProperties.put(AuroraField.HERON_SANDBOX_JAVA_HOME, Context.javaSandboxHome(config));
+    auroraProperties.put(AuroraField.HERON_SANDBOX_JAVA_HOME, Context.clusterJavaHome(config));
 
     auroraProperties.put(AuroraField.SANDBOX_SHELL_BINARY, Context.shellBinary(config));
     auroraProperties.put(AuroraField.SANDBOX_PYTHON_INSTANCE_BINARY,

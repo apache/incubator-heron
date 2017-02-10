@@ -35,8 +35,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ClusterConfig.class)
-public class ClusterConfigTest {
+@PrepareForTest(ConfigLoader.class)
+public class ConfigLoaderTest {
   private static final String TEST_DATA_PATH =
       "/__main__/heron/spi/tests/java/com/twitter/heron/spi/common/testdata";
 
@@ -47,15 +47,15 @@ public class ClusterConfigTest {
 
   @Before
   public void setUp() {
-    PowerMockito.spy(ClusterConfig.class);
-    basicConfig = Config.toLocalMode(ClusterConfig.loadConfig(
+    PowerMockito.spy(ConfigLoader.class);
+    basicConfig = Config.toLocalMode(ConfigLoader.loadConfig(
         heronHome, configPath, "/release/file", "/override/file"));
   }
 
   @Test
-  public void testLoadSandboxConfig() {
-    PowerMockito.spy(ClusterConfig.class);
-    Config config = Config.toRemoteMode(ClusterConfig.loadConfig(
+  public void testLoadClusterConfig() {
+    PowerMockito.spy(ConfigLoader.class);
+    Config config = Config.toClusterMode(ConfigLoader.loadConfig(
         heronHome, configPath, "/release/file", "/override/file"));
 
     assertConfig(config, "./heron-core", "./heron-conf");
@@ -83,15 +83,15 @@ public class ClusterConfigTest {
     // assert that the config filenames passed to loadConfig are never null. If they are, the
     // configs defaults are not producing the config files.
     PowerMockito.verifyStatic(times(8));
-    ClusterConfig.loadConfig(isNotNull(String.class));
+    ConfigLoader.loadConfig(isNotNull(String.class));
     PowerMockito.verifyStatic(never());
-    ClusterConfig.loadConfig(isNull(String.class));
+    ConfigLoader.loadConfig(isNull(String.class));
 
     // addFromFile with an empty map means that the config file was not found. Of the 8 files that
     // are attempted to be loaded, all but 3 should be found (clientConfig, overrideConfigFile and
     // releaseFile do not exist)
     PowerMockito.verifyStatic(times(3));
-    ClusterConfig.addFromFile(eq(new HashMap<String, Object>()));
+    ConfigLoader.addFromFile(eq(new HashMap<String, Object>()));
 
     Set<String> tokenizedValues = new TreeSet<>();
     for (Key key : Key.values()) {
@@ -147,7 +147,7 @@ public class ClusterConfigTest {
   @Test
   public void testClusterFile() throws Exception {
 
-    Config props = ClusterConfig.loadConfig(Context.clusterFile(basicConfig));
+    Config props = ConfigLoader.loadConfig(Context.clusterFile(basicConfig));
 
     assertEquals(4, props.size());
     assertEquals(
@@ -158,7 +158,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testSchedulerFile() throws Exception {
-    Config props = ClusterConfig.loadConfig(Context.schedulerFile(basicConfig));
+    Config props = ConfigLoader.loadConfig(Context.schedulerFile(basicConfig));
 
     assertEquals(2, props.size());
     assertEquals(
@@ -174,7 +174,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testPackingFile() throws Exception {
-    Config props = ClusterConfig.loadConfig(Context.packingFile(basicConfig));
+    Config props = ConfigLoader.loadConfig(Context.packingFile(basicConfig));
 
     assertEquals(1, props.size());
     assertEquals(
@@ -185,7 +185,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testUploaderFile() throws Exception {
-    Config props = ClusterConfig.loadConfig(Context.uploaderFile(basicConfig));
+    Config props = ConfigLoader.loadConfig(Context.uploaderFile(basicConfig));
 
     assertEquals(2, props.size());
     assertEquals(

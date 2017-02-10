@@ -105,7 +105,7 @@ public class AuroraSchedulerTest {
 
     Config mConfig = Mockito.mock(Config.class);
     PowerMockito.mockStatic(Config.class);
-    when(Config.toRemoteMode(mConfig)).thenReturn(mConfig);
+    when(Config.toClusterMode(mConfig)).thenReturn(mConfig);
 
     when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE),
         anyString())).thenReturn(AURORA_PATH);
@@ -154,7 +154,7 @@ public class AuroraSchedulerTest {
   public void testOnKill() throws Exception {
     Config mockConfig = Mockito.mock(Config.class);
     PowerMockito.mockStatic(Config.class);
-    when(Config.toRemoteMode(mockConfig)).thenReturn(mockConfig);
+    when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
     AuroraController controller = Mockito.mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
@@ -175,7 +175,7 @@ public class AuroraSchedulerTest {
   public void testOnRestart() throws Exception {
     Config mockConfig = Mockito.mock(Config.class);
     PowerMockito.mockStatic(Config.class);
-    when(Config.toRemoteMode(mockConfig)).thenReturn(mockConfig);
+    when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
     AuroraController controller = Mockito.mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
@@ -211,7 +211,7 @@ public class AuroraSchedulerTest {
         .thenReturn(JOB_LINK_FORMAT);
 
     PowerMockito.mockStatic(Config.class);
-    when(Config.toRemoteMode(mockConfig)).thenReturn(mockConfig);
+    when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
     scheduler.initialize(mockConfig, Mockito.mock(Config.class));
 

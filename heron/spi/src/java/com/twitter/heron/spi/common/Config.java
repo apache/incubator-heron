@@ -31,12 +31,13 @@ import com.twitter.heron.common.basics.TypeUtils;
  *
  * A newly created Config object holds configs that might include wildcard tokens, like
  * ${HERON_HOME}/bin, ${HERON_LIB}/packing/*. Token substitution can be done by converting that
- * config to a local or remote config by using the toLocalMode or toRemoteMode methods.
+ * config to a local or cluster config by using the {@code Config.toLocalMode} or
+ * {@code Config.toClusterMode} methods.
  *
  * Local mode is for a config to be used to run Heron locally, where HERON_HOME might be an install
- * dir on the local host (e.g. HERON_HOME=/usr/bin/heron). Remote mode is to be used when building
- * configs for a remote process run on a service, where all directories are relative to the current
- * dir (e.g. HERON_HOME=~/heron-core).
+ * dir on the local host (e.g. HERON_HOME=/usr/bin/heron). Cluster mode is to be used when building
+ * configs for a remote process run on a service, where all directories might be relative to the
+ * current dir by default (e.g. HERON_HOME=~/heron-core).
  */
 public class Config {
   private static final Logger LOG = Logger.getLogger(Config.class.getName());
@@ -44,9 +45,9 @@ public class Config {
   private final Map<String, Object> cfgMap;
 
   private enum Mode {
-    RAW,
-    LOCAL,
-    REMOTE
+    RAW,    // the initially provided configs without pattern substitution
+    LOCAL,  // the provided configs with pattern substitution for the local (i.e., client) env
+    CLUSTER // the provided configs with pattern substitution for the cluster (i.e., remote) env
   }
 
   // Used to initialize a raw config. Should be used by consumers of Config via the builder
@@ -56,12 +57,13 @@ public class Config {
     this.cfgMap = new HashMap<>(build.keyValues);
   }
 
-  // Used internally to create a Config that's actually a facade over a raw, local and remote config
-  private Config(Mode mode, Config rawConfig, Config localConfig, Config remoteConfig) {
+  // Used internally to create a Config that is actually a facade over a raw, local and
+  // cluster config
+  private Config(Mode mode, Config rawConfig, Config localConfig, Config clusterConfig) {
     this.mode = mode;
     this.rawConfig = rawConfig;
     this.localConfig = localConfig;
-    this.remoteConfig = remoteConfig;
+    this.clusterConfig = clusterConfig;
     switch (mode) {
       case RAW:
         this.cfgMap = rawConfig.cfgMap;
@@ -69,8 +71,8 @@ public class Config {
       case LOCAL:
         this.cfgMap = localConfig.cfgMap;
         break;
-      case REMOTE:
-        this.cfgMap = remoteConfig.cfgMap;
+      case CLUSTER:
+        this.cfgMap = clusterConfig.cfgMap;
         break;
       default:
         throw new IllegalArgumentException("Unrecognized mode passed to constructor: " + mode);
@@ -89,8 +91,8 @@ public class Config {
     return config.lazyCreateConfig(Mode.LOCAL);
   }
 
-  public static Config toRemoteMode(Config config) {
-    return config.lazyCreateConfig(Mode.REMOTE);
+  public static Config toClusterMode(Config config) {
+    return config.lazyCreateConfig(Mode.CLUSTER);
   }
 
   private static Config expand(Config config) {
@@ -134,7 +136,7 @@ public class Config {
   private final Mode mode;
   private final Config rawConfig;     // what the user first creates
   private Config localConfig = null;  // what gets generated during toLocalMode
-  private Config remoteConfig = null; // what gets generated during toRemoteMode
+  private Config clusterConfig = null; // what gets generated during toClusterMode
 
   private Config lazyCreateConfig(Mode newMode) {
     if (newMode == this.mode) {
@@ -142,10 +144,10 @@ public class Config {
     }
 
     // this is here so that we don't keep cascading deeper into object creation so:
-    // localConfig == toLocalMode(toRemoteMode(localConfig))
+    // localConfig == toLocalMode(toClusterMode(localConfig))
     Config newRawConfig = this.rawConfig;
     Config newLocalConfig = this.localConfig;
-    Config newRemoteConfig = this.remoteConfig;
+    Config newClusterConfig = this.clusterConfig;
     switch (this.mode) {
       case RAW:
         newRawConfig = this;
@@ -153,8 +155,8 @@ public class Config {
       case LOCAL:
         newLocalConfig = this;
         break;
-      case REMOTE:
-        newRemoteConfig = this;
+      case CLUSTER:
+        newClusterConfig = this;
         break;
       default:
         throw new IllegalArgumentException(
@@ -165,19 +167,19 @@ public class Config {
       case LOCAL:
         if (this.localConfig == null) {
           Config tempConfig = Config.expand(Config.newBuilder().putAll(rawConfig.cfgMap).build());
-          this.localConfig = new Config(Mode.LOCAL, newRawConfig, tempConfig, newRemoteConfig);
+          this.localConfig = new Config(Mode.LOCAL, newRawConfig, tempConfig, newClusterConfig);
         }
         return this.localConfig;
-      case REMOTE:
-        if (this.remoteConfig == null) {
+      case CLUSTER:
+        if (this.clusterConfig == null) {
           Config.Builder bc = Config.newBuilder()
               .putAll(rawConfig.cfgMap)
-              .put(Key.HERON_HOME, get(Key.HERON_SANDBOX_HOME))
-              .put(Key.HERON_CONF, get(Key.HERON_SANDBOX_CONF));
+              .put(Key.HERON_HOME, get(Key.HERON_CLUSTER_HOME))
+              .put(Key.HERON_CONF, get(Key.HERON_CLUSTER_CONF));
           Config tempConfig = Config.expand(bc.build());
-          this.remoteConfig = new Config(Mode.REMOTE, newRawConfig, newLocalConfig, tempConfig);
+          this.clusterConfig = new Config(Mode.CLUSTER, newRawConfig, newLocalConfig, tempConfig);
         }
-        return this.remoteConfig;
+        return this.clusterConfig;
       case RAW:
       default:
         throw new IllegalArgumentException(
@@ -197,8 +199,8 @@ public class Config {
     switch (mode) {
       case LOCAL:
         return localConfig.cfgMap.get(key);
-      case REMOTE:
-        return remoteConfig.cfgMap.get(key);
+      case CLUSTER:
+        return clusterConfig.cfgMap.get(key);
       case RAW:
         return rawConfig.cfgMap.get(key);
       default:

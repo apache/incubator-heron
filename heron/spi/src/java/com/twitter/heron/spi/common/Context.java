@@ -247,8 +247,8 @@ public class Context {
     return cfg.getStringValue(Key.JAVA_HOME);
   }
 
-  public static String javaSandboxHome(Config cfg) {
-    return cfg.getStringValue(Key.HERON_SANDBOX_JAVA_HOME);
+  public static String clusterJavaHome(Config cfg) {
+    return cfg.getStringValue(Key.HERON_CLUSTER_JAVA_HOME);
   }
 
   public static String overrideFile(Config cfg) {

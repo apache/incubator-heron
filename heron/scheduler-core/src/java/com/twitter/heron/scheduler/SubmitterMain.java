@@ -39,8 +39,8 @@ import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
-import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
@@ -278,7 +278,7 @@ public class SubmitterMain {
 
     // build the final config by expanding all the variables
     return Config.toLocalMode(Config.newBuilder()
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
         .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
         .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
         .build());

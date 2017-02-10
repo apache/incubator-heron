@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ClusterConfig.class)
+@PrepareForTest(ConfigLoader.class)
 
 public class ConfigTest {
   private static final String TEST_DATA_PATH =
@@ -39,8 +39,8 @@ public class ConfigTest {
 
   @Before
   public void setUp() {
-    PowerMockito.spy(ClusterConfig.class);
-    rawConfig = ClusterConfig.loadConfig(
+    PowerMockito.spy(ConfigLoader.class);
+    rawConfig = ConfigLoader.loadConfig(
         heronHome, configPath, "/release/file", "/override/file");
   }
 
@@ -50,27 +50,27 @@ public class ConfigTest {
   }
 
   @Test
-  public void testLocalThenRemote() {
+  public void testLocalThenCluster() {
     Config localConfig = Config.toLocalMode(rawConfig);
     assertLocal(localConfig);
     assertRaw(rawConfig);
 
-    Config remoteConfig = Config.toRemoteMode(localConfig);
-    assertRemote(remoteConfig);
+    Config clusterConfig = Config.toClusterMode(localConfig);
+    assertCluster(clusterConfig);
     assertLocal(localConfig);
     assertRaw(rawConfig);
   }
 
   @Test
-  public void testRemoteThenLocal() {
-    Config remoteConfig = Config.toRemoteMode(rawConfig);
-    assertRemote(remoteConfig);
+  public void testClusterThenLocal() {
+    Config clusterConfig = Config.toClusterMode(rawConfig);
+    assertCluster(clusterConfig);
     assertRaw(rawConfig);
 
-    Config localConfig = Config.toLocalMode(remoteConfig);
+    Config localConfig = Config.toLocalMode(clusterConfig);
     assertLocal(localConfig);
-    assertRemote(remoteConfig);
-    assertRemote(remoteConfig);
+    assertCluster(clusterConfig);
+    assertCluster(clusterConfig);
     assertRaw(rawConfig);
   }
 
@@ -79,27 +79,27 @@ public class ConfigTest {
     Config localConfig = Config.toLocalMode(rawConfig);
     assertTrue(localConfig == Config.toLocalMode(localConfig));
 
-    Config remoteConfig = Config.toRemoteMode(rawConfig);
-    assertTrue(remoteConfig == Config.toRemoteMode(remoteConfig));
+    Config clusterConfig = Config.toClusterMode(rawConfig);
+    assertTrue(clusterConfig == Config.toClusterMode(clusterConfig));
   }
 
   @Test
   public void testObjectReuseLocal() {
     Config localConfig = Config.toLocalMode(rawConfig);
-    assertTrue(localConfig == Config.toLocalMode(Config.toRemoteMode(localConfig)));
+    assertTrue(localConfig == Config.toLocalMode(Config.toClusterMode(localConfig)));
   }
 
   @Test
-  public void testObjectReuseRemote() {
-    Config remoteConfig = Config.toRemoteMode(rawConfig);
-    assertTrue(remoteConfig == Config.toRemoteMode(Config.toLocalMode(remoteConfig)));
+  public void testObjectReuseCluster() {
+    Config clusterConfig = Config.toClusterMode(rawConfig);
+    assertTrue(clusterConfig == Config.toClusterMode(Config.toLocalMode(clusterConfig)));
   }
 
   private void assertRaw(Config config) {
     assertKeyValue(config, Key.HERON_HOME, heronHome);
     assertKeyValue(config, Key.HERON_CONF, configPath);
     assertKeyValue(config, Key.HERON_LIB,       "${HERON_HOME}/lib");
-    assertKeyValue(config, Key.OVERRIDE_YAML,   "${HERON_CONF}/override.yaml");
+    assertKeyValue(config, Key.SCHEDULER_YAML,  "${HERON_CONF}/scheduler.yaml");
     assertKeyValue(config, Key.EXECUTOR_BINARY, "${HERON_BIN}/heron-executor");
   }
 
@@ -107,15 +107,15 @@ public class ConfigTest {
     assertKeyValue(config, Key.HERON_HOME, heronHome);
     assertKeyValue(config, Key.HERON_CONF, configPath);
     assertKeyValue(config, Key.HERON_LIB,       heronHome + "/lib");
-    assertKeyValue(config, Key.OVERRIDE_YAML,   configPath + "/override.yaml");
+    assertKeyValue(config, Key.SCHEDULER_YAML,  configPath + "/scheduler.yaml");
     assertKeyValue(config, Key.EXECUTOR_BINARY, heronHome + "/bin/heron-executor");
   }
 
-  private void assertRemote(Config config) {
+  private void assertCluster(Config config) {
     assertKeyValue(config, Key.HERON_HOME, "./heron-core");
     assertKeyValue(config, Key.HERON_CONF, "./heron-conf");
     assertKeyValue(config, Key.HERON_LIB,       "./heron-core/lib");
-    assertKeyValue(config, Key.OVERRIDE_YAML,   "./heron-conf/override.yaml");
+    assertKeyValue(config, Key.SCHEDULER_YAML,  "./heron-conf/scheduler.yaml");
     assertKeyValue(config, Key.EXECUTOR_BINARY, "./heron-core/bin/heron-executor");
   }
 

@@ -20,17 +20,15 @@ import com.google.common.annotations.VisibleForTesting;
 
 import com.twitter.heron.common.config.ConfigReader;
 
-public final class ClusterConfig {
+public final class ConfigLoader {
 
-  private ClusterConfig() {
+  private ConfigLoader() {
   }
 
   private static Config loadDefaults(String heronHome, String configPath) {
     return Config.newBuilder(true)
         .put(Key.HERON_HOME, heronHome)
         .put(Key.HERON_CONF, configPath)
-        .put(Key.HERON_SANDBOX_HOME, Key.HERON_SANDBOX_HOME.getDefaultString())
-        .put(Key.HERON_SANDBOX_CONF, Key.HERON_SANDBOX_CONF.getDefaultString())
         .build();
   }
 
@@ -63,22 +61,22 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  public static Config loadSandboxConfig() {
-    String homePath = Key.HERON_SANDBOX_HOME.getDefaultString();
-    String configPath = Key.HERON_SANDBOX_CONF.getDefaultString();
+  public static Config loadClusterConfig() {
+    String homePath = Key.HERON_CLUSTER_HOME.getDefaultString();
+    String configPath = Key.HERON_CLUSTER_CONF.getDefaultString();
 
     Config defaultConfig = loadDefaults(homePath, configPath);
-    Config remoteConfig = Config.toRemoteMode(defaultConfig);
+    Config clusterConfig = Config.toClusterMode(defaultConfig); //to token-substitute the conf paths
 
     Config.Builder cb = Config.newBuilder()
         .putAll(defaultConfig)
-        .putAll(loadConfig(Context.packingFile(remoteConfig)))
-        .putAll(loadConfig(Context.schedulerFile(remoteConfig)))
-        .putAll(loadConfig(Context.stateManagerFile(remoteConfig)))
-        .putAll(loadConfig(Context.uploaderFile(remoteConfig)));
+        .putAll(loadConfig(Context.packingFile(clusterConfig)))
+        .putAll(loadConfig(Context.schedulerFile(clusterConfig)))
+        .putAll(loadConfig(Context.stateManagerFile(clusterConfig)))
+        .putAll(loadConfig(Context.uploaderFile(clusterConfig)));
 
     // Add the override config at the end to replace any existing configs
-    cb.putAll(loadConfig(Context.overrideFile(remoteConfig)));
+    cb.putAll(loadConfig(Context.overrideFile(clusterConfig)));
 
     return cb.build();
   }
