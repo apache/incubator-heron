@@ -133,8 +133,8 @@ public class Config {
 
   private final Mode mode;
   private final Config rawConfig;     // what the user first creates
-  private Config localConfig = null;  // what the generate during toLocalMode
-  private Config remoteConfig = null; // what the generate during toRemoteMode
+  private Config localConfig = null;  // what gets generated during toLocalMode
+  private Config remoteConfig = null; // what gets generated during toRemoteMode
 
   private Config lazyCreateConfig(Mode newMode) {
     if (newMode == this.mode) {
