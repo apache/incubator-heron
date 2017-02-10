@@ -48,8 +48,8 @@ public final class ClusterConfig {
   public static Config loadConfig(String heronHome, String configPath,
                                   String releaseFile, String overrideConfigFile) {
     Config defaultConfig = loadDefaults(heronHome, configPath);
-
     Config localConfig = Config.toLocalMode(defaultConfig);
+
     Config.Builder cb = Config.newBuilder()
         .putAll(defaultConfig)
         .putAll(loadConfig(Context.clusterFile(localConfig)))
@@ -68,16 +68,17 @@ public final class ClusterConfig {
     String configPath = Key.HERON_SANDBOX_CONF.getDefaultString();
 
     Config defaultConfig = loadDefaults(homePath, configPath);
+    Config remoteConfig = Config.toRemoteMode(defaultConfig);
 
     Config.Builder cb = Config.newBuilder()
         .putAll(defaultConfig)
-        .putAll(loadConfig(Context.packingFile(defaultConfig)))
-        .putAll(loadConfig(Context.schedulerFile(defaultConfig)))
-        .putAll(loadConfig(Context.stateManagerFile(defaultConfig)))
-        .putAll(loadConfig(Context.uploaderFile(defaultConfig)));
+        .putAll(loadConfig(Context.packingFile(remoteConfig)))
+        .putAll(loadConfig(Context.schedulerFile(remoteConfig)))
+        .putAll(loadConfig(Context.stateManagerFile(remoteConfig)))
+        .putAll(loadConfig(Context.uploaderFile(remoteConfig)));
 
     // Add the override config at the end to replace any existing configs
-    cb.putAll(loadConfig(Context.overrideFile(defaultConfig)));
+    cb.putAll(loadConfig(Context.overrideFile(remoteConfig)));
 
     return cb.build();
   }
