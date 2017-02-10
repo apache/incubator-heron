@@ -31,7 +31,7 @@ public class ClusterDefaultsTest {
   public void testSandboxBinaries() throws Exception {
 
     assertEquals(Key.EXECUTOR_BINARY.getDefault(), Context.executorBinary(props));
-    assertEquals(Key.STMGR_BINARY.getDefault(), Context.stmgrSandbox(props));
+    assertEquals(Key.STMGR_BINARY.getDefault(), Context.stmgrBinary(props));
     assertEquals(Key.TMASTER_BINARY.getDefault(), Context.tmasterBinary(props));
     assertEquals(Key.SHELL_BINARY.getDefault(), Context.shellBinary(props));
     assertEquals(

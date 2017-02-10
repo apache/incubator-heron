@@ -204,7 +204,7 @@ public final class SchedulerUtils {
     commands.add(Context.stateManagerConnectionString(config));
     commands.add(Context.stateManagerRootPath(config));
     commands.add(Context.tmasterBinary(config));
-    commands.add(Context.stmgrSandbox(config));
+    commands.add(Context.stmgrBinary(config));
     commands.add(Context.metricsManagerClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));

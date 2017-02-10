@@ -74,10 +74,6 @@ public final class Misc {
     SUBS.put("${HERON_CONF}", Key.HERON_CONF);
     SUBS.put("${HERON_LIB}", Key.HERON_LIB);
     SUBS.put("${HERON_DIST}", Key.HERON_DIST);
-    SUBS.put("${HERON_SANDBOX_HOME}", Key.HERON_HOME);
-    SUBS.put("${HERON_SANDBOX_BIN}", Key.HERON_BIN);
-    SUBS.put("${HERON_SANDBOX_CONF}", Key.HERON_CONF);
-    SUBS.put("${HERON_SANDBOX_LIB}", Key.HERON_LIB);
     SUBS.put("${CLUSTER}", Key.CLUSTER);
     SUBS.put("${ROLE}", Key.ROLE);
     SUBS.put("${TOPOLOGY}", Key.TOPOLOGY_NAME);

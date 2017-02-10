@@ -259,7 +259,7 @@ public class Context {
     return cfg.getStringValue(Key.EXECUTOR_BINARY);
   }
 
-  public static String stmgrSandbox(Config cfg) {
+  public static String stmgrBinary(Config cfg) {
     return cfg.getStringValue(Key.STMGR_BINARY);
   }
 
