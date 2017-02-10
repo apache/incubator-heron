@@ -77,10 +77,11 @@ public final class SchedulerConfigUtils {
       Boolean verbose,
       TopologyAPI.Topology topology) {
 
-    return Config.newBuilder()
+    return Config.toClusterMode(
+        Config.newBuilder()
             .putAll(ConfigLoader.loadClusterConfig())
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(topologyBinaryFile, topologyDefnFile, topology))
-            .build();
+            .build());
   }
 }

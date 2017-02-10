@@ -67,8 +67,9 @@ public final class ConfigLoader {
   }
 
   /**
-   * Loads configurations from the default configured heronHome and configPath on the cluster. To
-   * be called from a cluster environment.
+   * Loads raw configurations using the default configured heronHome and configPath on the cluster.
+   * The returned config must be converted to either local or cluster mode to trigger pattern
+   * substitution of wildcards tokens.
    */
   public static Config loadClusterConfig() {
     Config defaultConfig = loadDefaults(
@@ -85,6 +86,6 @@ public final class ConfigLoader {
     // Add the override config at the end to replace any existing configs
     cb.putAll(loadConfig(Context.overrideFile(clusterConfig)));
 
-    return Config.toClusterMode(cb.build());
+    return cb.build();
   }
 }
