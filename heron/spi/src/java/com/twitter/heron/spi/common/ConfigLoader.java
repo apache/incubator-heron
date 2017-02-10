@@ -43,10 +43,15 @@ public final class ConfigLoader {
     return Config.newBuilder().putAll(readConfig).build();
   }
 
+  /**
+   * Loads raw configurations from files under the heronHome and configPath. The returned config
+   * must be converted to either local or cluster mode to trigger pattern substitution of wildcards
+   * tokens.
+   */
   public static Config loadConfig(String heronHome, String configPath,
                                   String releaseFile, String overrideConfigFile) {
     Config defaultConfig = loadDefaults(heronHome, configPath);
-    Config localConfig = Config.toLocalMode(defaultConfig);
+    Config localConfig = Config.toLocalMode(defaultConfig); //to token-substitute the conf paths
 
     Config.Builder cb = Config.newBuilder()
         .putAll(defaultConfig)
@@ -61,11 +66,13 @@ public final class ConfigLoader {
     return cb.build();
   }
 
+  /**
+   * Loads configurations from the default configured heronHome and configPath on the cluster. To
+   * be called from a cluster environment.
+   */
   public static Config loadClusterConfig() {
-    String homePath = Key.HERON_CLUSTER_HOME.getDefaultString();
-    String configPath = Key.HERON_CLUSTER_CONF.getDefaultString();
-
-    Config defaultConfig = loadDefaults(homePath, configPath);
+    Config defaultConfig = loadDefaults(
+        Key.HERON_CLUSTER_HOME.getDefaultString(), Key.HERON_CLUSTER_CONF.getDefaultString());
     Config clusterConfig = Config.toClusterMode(defaultConfig); //to token-substitute the conf paths
 
     Config.Builder cb = Config.newBuilder()
@@ -78,6 +85,6 @@ public final class ConfigLoader {
     // Add the override config at the end to replace any existing configs
     cb.putAll(loadConfig(Context.overrideFile(clusterConfig)));
 
-    return cb.build();
+    return Config.toClusterMode(cb.build());
   }
 }
