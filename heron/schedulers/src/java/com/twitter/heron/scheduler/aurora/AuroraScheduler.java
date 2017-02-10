@@ -66,13 +66,14 @@ public class AuroraScheduler implements IScheduler, IScalable {
    * @return AuroraController
    */
   protected AuroraController getController() {
+    Config localConfig = Config.toLocalMode(this.config);
     return new AuroraCLIController(
         Runtime.topologyName(runtime),
-        Context.cluster(config),
-        Context.role(config),
-        Context.environ(config),
-        AuroraContext.getHeronAuroraPath(config),
-        Context.verbose(config));
+        Context.cluster(localConfig),
+        Context.role(localConfig),
+        Context.environ(localConfig),
+        AuroraContext.getHeronAuroraPath(localConfig),
+        Context.verbose(localConfig));
   }
 
   @Override
