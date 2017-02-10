@@ -14,11 +14,15 @@
 
 package com.twitter.heron.scheduler.aurora;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.cli.CommandLine;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -32,19 +36,29 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.scheduler.SubmitterMain;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
+import com.twitter.heron.spi.utils.TopologyTests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Misc.class)
@@ -67,9 +81,8 @@ public class AuroraSchedulerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     scheduler = Mockito.spy(AuroraScheduler.class);
-    Mockito.doReturn(new HashMap<String, String>()).when(
-        scheduler).createAuroraProperties(
-        Mockito.any(PackingPlan.class));
+    doReturn(new HashMap<String, String>())
+        .when(scheduler).createAuroraProperties(Mockito.any(Resource.class));
   }
 
   @AfterClass
@@ -83,15 +96,15 @@ public class AuroraSchedulerTest {
   @Test
   public void testOnSchedule() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
-    Mockito.doReturn(controller).when(scheduler).getController();
+    doReturn(controller).when(scheduler).getController();
 
     SchedulerStateManagerAdaptor stateManager = mock(SchedulerStateManagerAdaptor.class);
     Config runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(stateManager);
-    Mockito.when(runtime.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
+    when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(stateManager);
+    when(runtime.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     Config mConfig = Mockito.mock(Config.class);
-    Mockito.when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE),
+    when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE),
         anyString())).thenReturn(AURORA_PATH);
 
     scheduler.initialize(mConfig, runtime);
@@ -100,7 +113,7 @@ public class AuroraSchedulerTest {
     Assert.assertFalse(scheduler.onSchedule(null));
 
     PackingPlan plan = new PackingPlan(PACKING_PLAN_ID, new HashSet<PackingPlan.ContainerPlan>());
-    Assert.assertTrue(plan.getContainers().isEmpty());
+    assertTrue(plan.getContainers().isEmpty());
 
     // Fail to schedule due to PackingPlan is empty
     Assert.assertFalse(scheduler.onSchedule(plan));
@@ -111,9 +124,9 @@ public class AuroraSchedulerTest {
     PackingPlan validPlan = new PackingPlan(PACKING_PLAN_ID, containers);
 
     // Failed to create job via controller
-    Mockito.doReturn(false).when(controller)
+    doReturn(false).when(controller)
         .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
-    Mockito.doReturn(true).when(stateManager)
+    doReturn(true).when(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     Assert.assertFalse(scheduler.onSchedule(validPlan));
@@ -124,9 +137,9 @@ public class AuroraSchedulerTest {
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     // Happy path
-    Mockito.doReturn(true).when(controller)
+    doReturn(true).when(controller)
         .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
-    Assert.assertTrue(scheduler.onSchedule(validPlan));
+    assertTrue(scheduler.onSchedule(validPlan));
 
     Mockito.verify(controller, Mockito.times(2))
         .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
@@ -137,24 +150,24 @@ public class AuroraSchedulerTest {
   @Test
   public void testOnKill() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
-    Mockito.doReturn(controller).when(scheduler).getController();
+    doReturn(controller).when(scheduler).getController();
     scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
 
     // Failed to kill job via controller
-    Mockito.doReturn(false).when(controller).killJob();
+    doReturn(false).when(controller).killJob();
     Assert.assertFalse(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
     Mockito.verify(controller).killJob();
 
     // Happy path
-    Mockito.doReturn(true).when(controller).killJob();
-    Assert.assertTrue(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
+    doReturn(true).when(controller).killJob();
+    assertTrue(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
     Mockito.verify(controller, Mockito.times(2)).killJob();
   }
 
   @Test
   public void testOnRestart() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
-    Mockito.doReturn(controller).when(scheduler).getController();
+    doReturn(controller).when(scheduler).getController();
     scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
 
     // Construct the RestartTopologyRequest
@@ -165,15 +178,15 @@ public class AuroraSchedulerTest {
             build();
 
     // Failed to kill job via controller
-    Mockito.doReturn(false).when(
+    doReturn(false).when(
         controller).restart(containerToRestart);
     Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
     Mockito.verify(controller).restart(containerToRestart);
 
     // Happy path
-    Mockito.doReturn(true).when(
+    doReturn(true).when(
         controller).restart(containerToRestart);
-    Assert.assertTrue(scheduler.onRestart(restartTopologyRequest));
+    assertTrue(scheduler.onRestart(restartTopologyRequest));
     Mockito.verify(controller, Mockito.times(2)).restart(containerToRestart);
   }
 
@@ -183,7 +196,7 @@ public class AuroraSchedulerTest {
     final String SUBSTITUTED_JOB_LINK = "http://go/local/heron/test/test_topology";
 
     Config mockConfig = Mockito.mock(Config.class);
-    Mockito.when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
+    when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
         .thenReturn(JOB_LINK_FORMAT);
 
     scheduler.initialize(mockConfig, Mockito.mock(Config.class));
@@ -194,7 +207,155 @@ public class AuroraSchedulerTest {
 
     List<String> result = scheduler.getJobLinks();
 
-    Assert.assertEquals(1, result.size());
-    Assert.assertTrue(result.get(0).equals(SUBSTITUTED_JOB_LINK));
+    assertEquals(1, result.size());
+    assertTrue(result.get(0).equals(SUBSTITUTED_JOB_LINK));
+  }
+
+
+  @Test
+  public void testProperties() throws URISyntaxException {
+    TopologyAPI.Topology topology = TopologyTests.createTopology(
+        TOPOLOGY_NAME, new com.twitter.heron.api.Config(),
+        "spoutName", "boltName", 1, 1);
+
+    Config runtime = mock(Config.class);
+    when(runtime.get(Key.TOPOLOGY_DEFINITION)).thenReturn(topology);
+    when(runtime.get(Key.TOPOLOGY_PACKAGE_URI)).thenReturn(new URI("http://foo/bar"));
+
+    // This must mimic how SubmitterMain loads configs
+    CommandLine commandLine = mock(CommandLine.class);
+    when(commandLine.getOptionValue("cluster")).thenReturn("some_cluster");
+    when(commandLine.getOptionValue("role")).thenReturn("some_role");
+    when(commandLine.getOptionValue("environment")).thenReturn("some_env");
+    when(commandLine.getOptionValue("heron_home")).thenReturn("/some/heron/home");
+    when(commandLine.getOptionValue("config_path")).thenReturn("/some/config/path");
+    when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
+    when(commandLine.getOptionValue("topology_defn")).thenReturn("/mock/defnFile.defn");
+    when(commandLine.getOptionValue("topology_bin")).thenReturn("/mock/binaryFile.jar");
+    Config config = Mockito.spy(SubmitterMain.loadConfig(commandLine, topology));
+
+    AuroraScheduler testScheduler = new AuroraScheduler();
+    testScheduler.initialize(config, runtime);
+    Resource containerResource =
+        new Resource(2.3, ByteAmount.fromGigabytes(2), ByteAmount.fromGigabytes(3));
+    Map<AuroraField, String> properties = testScheduler.createAuroraProperties(containerResource);
+
+    // this part is key, the conf path in the config is absolute to the install dir, but what
+    // aurora properties get below is the relative ./heron-conf path to be used when run remotely
+    assertEquals("Invalid value for key " + Key.HERON_CONF,
+        "/some/config/path", config.getStringValue(Key.HERON_CONF));
+
+    String expectedConf = "./heron-conf";
+    String expectedBin = "./heron-core/bin";
+    String expectedLib = "./heron-core/lib";
+    for (AuroraField field : AuroraField.values()) {
+      boolean asserted = false;
+      Object expected = null;
+      Object found = properties.get(field);
+      switch (field) {
+        case CLUSTER:
+          expected = "some_cluster";
+          break;
+        case ENVIRON:
+          expected = "some_env";
+          break;
+        case ROLE:
+          expected = "some_role";
+          break;
+        case COMPONENT_RAMMAP:
+        case STATEMGR_CONNECTION_STRING:
+        case STATEMGR_ROOT_PATH:
+          expected = null;
+          break;
+        case COMPONENT_JVM_OPTS_IN_BASE64:
+        case INSTANCE_JVM_OPTS_IN_BASE64:
+          expected = "\"\"";
+          break;
+        case CORE_PACKAGE_URI:
+          expected = "/some/heron/home/dist/heron-core.tar.gz";
+          break;
+        case CPUS_PER_CONTAINER:
+          expected = Double.valueOf(containerResource.getCpu()).toString();
+          break;
+        case DISK_PER_CONTAINER:
+          expected = Long.valueOf(containerResource.getDisk().asBytes()).toString();
+          break;
+        case RAM_PER_CONTAINER:
+          expected = Long.valueOf(containerResource.getRam().asBytes()).toString();
+          break;
+        case HERON_SANDBOX_JAVA_HOME:
+          expected = "/usr/lib/jvm/default-java";
+          break;
+        case ISPRODUCTION:
+        case IS_PRODUCTION:
+          expected = Boolean.FALSE.toString();
+          break;
+        case NUM_CONTAINERS:
+          expected = "2";
+          break;
+        case SANDBOX_EXECUTOR_BINARY:
+          expected = expectedBin + "/heron-executor";
+          break;
+        case SANDBOX_INSTANCE_CLASSPATH:
+          expected = expectedLib + "/instance/*";
+          break;
+        case SANDBOX_METRICSMGR_CLASSPATH:
+          expected = expectedLib + "/metricsmgr/*";
+          break;
+        case SANDBOX_METRICS_YAML:
+          expected = expectedConf + "/metrics_sinks.yaml";
+          break;
+        case SANDBOX_PYTHON_INSTANCE_BINARY:
+          expected = expectedBin + "/heron-python-instance";
+          break;
+        case SANDBOX_SCHEDULER_CLASSPATH:
+          expected =
+              expectedLib + "/scheduler/*:./heron-core/lib/packing/*:./heron-core/lib/statemgr/*";
+          break;
+        case SANDBOX_SHELL_BINARY:
+          expected = expectedBin + "/heron-shell";
+          break;
+        case SANDBOX_STMGR_BINARY:
+          expected = expectedBin + "/heron-stmgr";
+          break;
+        case SANDBOX_TMASTER_BINARY:
+          expected = expectedBin + "/heron-tmaster";
+          break;
+        case SANDBOX_SYSTEM_YAML:
+          expected = expectedConf + "/heron_internals.yaml";
+          break;
+        case TOPOLOGY_BINARY_FILE:
+        case TOPOLOGY_CLASSPATH:
+          expected = "binaryFile.jar";
+          break;
+        case TOPOLOGY_DEFINITION_FILE:
+          expected = "defnFile.defn";
+          break;
+        case TOPOLOGY_ID:
+          assertTrue(field + " does not start with topologyName: " + found,
+              found.toString().startsWith("topologyName"));
+          asserted = true;
+          break;
+        case TOPOLOGY_NAME:
+          expected = "topologyName";
+          break;
+        case TOPOLOGY_PACKAGE_TYPE:
+          expected = "jar";
+          break;
+        case TOPOLOGY_PACKAGE_URI:
+          expected = "http://foo/bar";
+          break;
+        default:
+          fail(String.format(
+              "Expected value for Aurora field %s not found in test (found=%s)", field, found));
+      }
+      if (!asserted) {
+        assertEquals("Incorrect value found for field " + field, expected, found);
+      }
+      properties.remove(field);
+    }
+
+    assertTrue("The following aurora fields were not set by the scheduler: " + properties,
+        properties.isEmpty());
   }
 }

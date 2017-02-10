@@ -96,7 +96,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 
-    Map<AuroraField, String> auroraProperties = createAuroraProperties(updatedPackingPlan);
+    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
+    Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
 
     return controller.createJob(auroraProperties);
   }
@@ -164,11 +165,10 @@ public class AuroraScheduler implements IScheduler, IScalable {
   }
 
   @SuppressWarnings("deprecation") // remove once we remove ISPRODUCTION usage below
-  protected Map<AuroraField, String> createAuroraProperties(PackingPlan packing) {
+  protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
     Map<AuroraField, String> auroraProperties = new HashMap<>();
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
-    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
 
     auroraProperties.put(AuroraField.SANDBOX_EXECUTOR_BINARY,
         Context.executorSandboxBinary(config));
