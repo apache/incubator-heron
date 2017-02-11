@@ -76,7 +76,7 @@ public final class Misc {
         if (m.matches()) {
           String token = m.group(1);
           try {
-            // For backwards compatibility the ${TOPOLOGY} token will match Key.TOPOLOGY
+            // For backwards compatibility the ${TOPOLOGY} token will match Key.TOPOLOGY_NAME
             if ("TOPOLOGY".equals(token)) {
               token = "TOPOLOGY_NAME";
             }
