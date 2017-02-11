@@ -17,7 +17,7 @@ package com.twitter.heron.spi.common;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ConfigKeysTest {
+public class KeysTest {
 
   @Test
   public void testHeronEnviron() throws Exception {
@@ -102,10 +102,6 @@ public class ConfigKeysTest {
         Key.VERBOSE
     );
     assertEquals(
-        "heron.config.path",
-        Key.CONFIG_PATH
-    );
-    assertEquals(
         "heron.config.property",
         Key.CONFIG_PROPERTY
     );
@@ -138,24 +134,24 @@ public class ConfigKeysTest {
   @Test
   public void testBinaries() throws Exception {
     assertEquals(
-        "heron.binaries.sandbox.executor",
-        Key.SANDBOX_EXECUTOR_BINARY
+        "heron.binaries.executor",
+        Key.EXECUTOR_BINARY
     );
     assertEquals(
-        "heron.binaries.sandbox.stmgr",
-        Key.SANDBOX_STMGR_BINARY
+        "heron.binaries.stmgr",
+        Key.STMGR_BINARY
     );
     assertEquals(
-        "heron.binaries.sandbox.tmaster",
-        Key.SANDBOX_TMASTER_BINARY
+        "heron.binaries.tmaster",
+        Key.TMASTER_BINARY
     );
     assertEquals(
-        "heron.binaries.sandbox.shell",
-        Key.SANDBOX_SHELL_BINARY
+        "heron.binaries.shell",
+        Key.SHELL_BINARY
     );
     assertEquals(
-        "heron.binaries.sandbox.python.instance",
-        Key.SANDBOX_PYTHON_INSTANCE_BINARY
+        "heron.binaries.python.instance",
+        Key.PYTHON_INSTANCE_BINARY
     );
     assertEquals(
         "heron.jars.scheduler",
