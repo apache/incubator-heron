@@ -14,13 +14,19 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.logging.Logger;
-
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class MiscTest {
-  private static final Logger LOG = Logger.getLogger(MiscTest.class.getName());
+
+  private static String substitute(String heronHome, String pathString) {
+    Config config = Config.newBuilder()
+        .put(Key.HERON_HOME, heronHome)
+        .build();
+    return Misc.substitute(config, pathString);
+  }
 
   /**
    * Test if the ${HERON_HOME} variable can be substituted
@@ -28,45 +34,44 @@ public class MiscTest {
   @Test
   public void testHeronHome() {
     // check no occurrence
-    Assert.assertEquals(
-        "./bin",
-        Misc.substitute("/usr/local/heron", "./bin")
+    assertEquals(
+        "./bin", substitute("/usr/local/heron", "./bin")
     );
 
-    // check a single subsitution at the begining
-    Assert.assertEquals(
+    // check a single substitution at the beginning
+    assertEquals(
         "/usr/local/heron/bin",
-        Misc.substitute("/usr/local/heron", "${HERON_HOME}/bin")
+        substitute("/usr/local/heron", "${HERON_HOME}/bin")
     );
 
-    // check a single subsitution at the begining with relative path
-    Assert.assertEquals(
+    // check a single substitution at the beginning with relative path
+    assertEquals(
         "./usr/local/heron/bin",
-        Misc.substitute("/usr/local/heron", "./${HERON_HOME}/bin")
+        substitute("/usr/local/heron", "./${HERON_HOME}/bin")
     );
 
     // check a single substitution at the end
-    Assert.assertEquals(
+    assertEquals(
         "/bin/usr/local/heron",
-        Misc.substitute("/usr/local/heron", "/bin/${HERON_HOME}")
+        substitute("/usr/local/heron", "/bin/${HERON_HOME}")
     );
 
     // check a single substitution at the end with relative path
-    Assert.assertEquals(
+    assertEquals(
         "./bin/usr/local/heron",
-        Misc.substitute("/usr/local/heron", "./bin/${HERON_HOME}")
+        substitute("/usr/local/heron", "./bin/${HERON_HOME}")
     );
 
     // check a single substitution in the middle
-    Assert.assertEquals(
+    assertEquals(
         "/bin/usr/local/heron/etc",
-        Misc.substitute("/usr/local/heron", "/bin/${HERON_HOME}/etc")
+        substitute("/usr/local/heron", "/bin/${HERON_HOME}/etc")
     );
 
     // check a single substitution in the middle with relative path
-    Assert.assertEquals(
+    assertEquals(
         "./bin/usr/local/heron/etc",
-        Misc.substitute("/usr/local/heron", "./bin/${HERON_HOME}/etc")
+        substitute("/usr/local/heron", "./bin/${HERON_HOME}/etc")
     );
   }
 

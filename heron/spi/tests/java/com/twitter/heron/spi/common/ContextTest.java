@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ClusterDefaultsTest {
+public class ContextTest {
   private Config props;
 
   @Before
@@ -28,15 +28,15 @@ public class ClusterDefaultsTest {
   }
 
   @Test
-  public void testSandboxBinaries() throws Exception {
+  public void testBinaries() throws Exception {
 
-    assertEquals(Key.SANDBOX_EXECUTOR_BINARY.getDefault(), Context.executorSandboxBinary(props));
-    assertEquals(Key.SANDBOX_STMGR_BINARY.getDefault(), Context.stmgrSandboxBinary(props));
-    assertEquals(Key.SANDBOX_TMASTER_BINARY.getDefault(), Context.tmasterSandboxBinary(props));
-    assertEquals(Key.SANDBOX_SHELL_BINARY.getDefault(), Context.shellSandboxBinary(props));
+    assertEquals(Key.EXECUTOR_BINARY.getDefault(), Context.executorBinary(props));
+    assertEquals(Key.STMGR_BINARY.getDefault(), Context.stmgrBinary(props));
+    assertEquals(Key.TMASTER_BINARY.getDefault(), Context.tmasterBinary(props));
+    assertEquals(Key.SHELL_BINARY.getDefault(), Context.shellBinary(props));
     assertEquals(
-        Key.SANDBOX_PYTHON_INSTANCE_BINARY.getDefault(),
-        Context.pythonInstanceSandboxBinary(props)
+        Key.PYTHON_INSTANCE_BINARY.getDefault(),
+        Context.pythonInstanceBinary(props)
     );
   }
 

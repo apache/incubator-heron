@@ -61,7 +61,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Misc.class)
+@PrepareForTest({Misc.class, Config.class})
 public class AuroraSchedulerTest {
   private static final String AURORA_PATH = "path.aurora";
   private static final String PACKING_PLAN_ID = "packing.plan.id";
@@ -104,6 +104,9 @@ public class AuroraSchedulerTest {
     when(runtime.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     Config mConfig = Mockito.mock(Config.class);
+    PowerMockito.mockStatic(Config.class);
+    when(Config.toClusterMode(mConfig)).thenReturn(mConfig);
+
     when(mConfig.getStringValue(eq(AuroraContext.JOB_TEMPLATE),
         anyString())).thenReturn(AURORA_PATH);
 
@@ -149,9 +152,13 @@ public class AuroraSchedulerTest {
 
   @Test
   public void testOnKill() throws Exception {
+    Config mockConfig = Mockito.mock(Config.class);
+    PowerMockito.mockStatic(Config.class);
+    when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
+
     AuroraController controller = Mockito.mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
 
     // Failed to kill job via controller
     doReturn(false).when(controller).killJob();
@@ -166,9 +173,13 @@ public class AuroraSchedulerTest {
 
   @Test
   public void testOnRestart() throws Exception {
+    Config mockConfig = Mockito.mock(Config.class);
+    PowerMockito.mockStatic(Config.class);
+    when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
+
     AuroraController controller = Mockito.mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
 
     // Construct the RestartTopologyRequest
     int containerToRestart = 1;
@@ -198,6 +209,9 @@ public class AuroraSchedulerTest {
     Config mockConfig = Mockito.mock(Config.class);
     when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
         .thenReturn(JOB_LINK_FORMAT);
+
+    PowerMockito.mockStatic(Config.class);
+    when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
     scheduler.initialize(mockConfig, Mockito.mock(Config.class));
 
@@ -248,6 +262,7 @@ public class AuroraSchedulerTest {
     String expectedConf = "./heron-conf";
     String expectedBin = "./heron-core/bin";
     String expectedLib = "./heron-core/lib";
+    String expectedDist = "./heron-core/dist";
     for (AuroraField field : AuroraField.values()) {
       boolean asserted = false;
       Object expected = null;
@@ -272,7 +287,7 @@ public class AuroraSchedulerTest {
           expected = "\"\"";
           break;
         case CORE_PACKAGE_URI:
-          expected = "/some/heron/home/dist/heron-core.tar.gz";
+          expected = expectedDist + "/heron-core.tar.gz";
           break;
         case CPUS_PER_CONTAINER:
           expected = Double.valueOf(containerResource.getCpu()).toString();
