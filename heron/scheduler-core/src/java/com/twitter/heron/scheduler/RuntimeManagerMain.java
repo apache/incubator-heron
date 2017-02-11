@@ -37,9 +37,9 @@ import com.twitter.heron.scheduler.client.SchedulerClientFactory;
 import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
-import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
@@ -280,8 +280,8 @@ public class RuntimeManagerMain {
         .put(Key.TOPOLOGY_NAME, topologyName);
 
     // build the final config by expanding all the variables
-    Config config = Config.expand(Config.newBuilder()
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+    Config config = Config.toLocalMode(Config.newBuilder()
+        .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
         .putAll(commandLineConfig.build())
         .putAll(topologyConfig.build())
         .build());
