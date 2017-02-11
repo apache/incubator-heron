@@ -38,7 +38,6 @@ import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
 import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;

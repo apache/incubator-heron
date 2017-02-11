@@ -22,7 +22,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
-import com.twitter.heron.spi.common.Command;
+import com.twitter.heron.scheduler.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
