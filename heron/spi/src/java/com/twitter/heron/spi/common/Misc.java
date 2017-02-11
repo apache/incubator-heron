@@ -16,10 +16,8 @@ package com.twitter.heron.spi.common;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,52 +30,9 @@ public final class Misc {
 
   // Pattern to match an URL - just looks for double forward slashes //
   private static final Pattern URL_PATTERN = Pattern.compile("(.+)://(.+)");
+  private static final Pattern TOKEN_PATTERN = Pattern.compile("^\\$\\{([A-Z_]+)}$");
 
   private Misc() {
-  }
-
-  /**
-   * Given a string, check if it is a URL - URL, according to our definition is
-   * the presence of two consecutive forward slashes //
-   *
-   * @param pathString string representing a path
-   * @return true if the pathString is a URL, else false
-   */
-  @VisibleForTesting
-  static boolean isURL(String pathString) {
-    Matcher m = URL_PATTERN.matcher(pathString);
-    return m.matches();
-  }
-
-  /**
-   * Given a static config map, substitute occurrences of ${HERON_*} variables
-   * in the provided URL
-   *
-   * @param config a static map config object of key value pairs
-   * @param pathString string representing a path including ${HERON_*} variables
-   * @return String string that represents the modified path
-   */
-  private static String substituteURL(Config config, String pathString) {
-    Matcher m = URL_PATTERN.matcher(pathString);
-    if (m.matches()) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(m.group(1)).append(":").append("//").append(substitute(config, m.group(2)));
-      return sb.toString();
-    }
-    return pathString;
-  }
-
-  private static final Map<String, Key> SUBS = new HashMap<>();
-  static {
-    SUBS.put("${HERON_HOME}", Key.HERON_HOME);
-    SUBS.put("${HERON_BIN}", Key.HERON_BIN);
-    SUBS.put("${HERON_CONF}", Key.HERON_CONF);
-    SUBS.put("${HERON_LIB}", Key.HERON_LIB);
-    SUBS.put("${HERON_DIST}", Key.HERON_DIST);
-    SUBS.put("${CLUSTER}", Key.CLUSTER);
-    SUBS.put("${ROLE}", Key.ROLE);
-    SUBS.put("${TOPOLOGY}", Key.TOPOLOGY_NAME);
-    SUBS.put("${ENVIRON}", Key.ENVIRON);
   }
 
   /**
@@ -98,7 +53,7 @@ public final class Misc {
     }
 
     // get platform independent file separator
-    String fileSeparator = Matcher.quoteReplacement(System.getProperty("file.separator"));
+    String fileSeparator = Matcher.quoteReplacement(File.separator);
 
     // split the trimmed path into a list of components
     List<String> fixedList = Arrays.asList(trimmedPath.split(fileSeparator));
@@ -116,19 +71,67 @@ public final class Misc {
         if (javaPath != null) {
           list.set(i, javaPath);
         }
-      } else if (SUBS.containsKey(elem)) {
-        Key key = SUBS.get(elem);
-        String value = config.getStringValue(key);
-        if (value == null) {
-          throw new IllegalArgumentException(String.format("Config value %s contains substitution "
-              + "token %s but the corresponding config setting %s not found",
-              pathString, elem, key.value()));
+      } else if (isToken(elem)) {
+        Matcher m = TOKEN_PATTERN.matcher(elem);
+        if (m.matches()) {
+          String token = m.group(1);
+          try {
+            // For backwards compatibility the ${TOPOLOGY} token will match Key.TOPOLOGY
+            if ("TOPOLOGY".equals(token)) {
+              token = "TOPOLOGY_NAME";
+            }
+            Key key = Key.valueOf(token);
+            String value = config.getStringValue(key);
+            if (value == null) {
+              throw new IllegalArgumentException(String.format("Config value %s contains "
+                      + "substitution token %s but the corresponding config setting %s not found",
+                  pathString, elem, key.value()));
+            }
+            list.set(i, value);
+          } catch (IllegalArgumentException e) {
+            LOG.warning(String.format("Config value %s contains substitution token %s which is "
+                    + "not defined in the Key enum, which is required for token substitution",
+                pathString, elem));
+          }
         }
-        list.set(i, value);
       }
     }
 
     return combinePaths(list);
+  }
+
+  /**
+   * Given a string, check if it is a URL - URL, according to our definition is
+   * the presence of two consecutive forward slashes //
+   *
+   * @param pathString string representing a path
+   * @return true if the pathString is a URL, else false
+   */
+  @VisibleForTesting
+  static boolean isURL(String pathString) {
+    return URL_PATTERN.matcher(pathString).matches();
+  }
+
+  /**
+   * Given a static config map, substitute occurrences of ${HERON_*} variables
+   * in the provided URL
+   *
+   * @param config a static map config object of key value pairs
+   * @param pathString string representing a path including ${HERON_*} variables
+   * @return String string that represents the modified path
+   */
+  private static String substituteURL(Config config, String pathString) {
+    Matcher m = URL_PATTERN.matcher(pathString);
+    if (m.matches()) {
+      return String.format("%s://%s", m.group(1), substitute(config, m.group(2)));
+    }
+    return pathString;
+  }
+
+  @VisibleForTesting
+  static boolean isToken(String pathString) {
+    Matcher m = TOKEN_PATTERN.matcher(pathString);
+    return m.matches() && m.groupCount() > 0;
   }
 
   /**
