@@ -29,7 +29,6 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.utils.Runtime;
-import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
