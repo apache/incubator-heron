@@ -19,9 +19,9 @@ import com.twitter.heron.spi.common.Key;
  * Keys specific to the YARN scheduler
  */
 public enum YarnKey {
-  // YARN default queue
+  // yarn queue for submitting and launching the topology
   HERON_SCHEDULER_YARN_QUEUE("heron.scheduler.yarn.queue", "default"),
-  // YARN driver memory mb
+  // the amount of memory topology's driver (yarn application master) needs
   YARN_SCHEDULER_DRIVER_MEMORY_MB("heron.scheduler.yarn.driver.memory.mb", 2048);
 
   private final String value;
