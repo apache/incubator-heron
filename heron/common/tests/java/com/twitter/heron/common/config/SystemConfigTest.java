@@ -14,9 +14,10 @@
 
 package com.twitter.heron.common.config;
 
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,11 +26,13 @@ public class SystemConfigTest {
 
   @Test
   public void testReadConfig() throws Exception {
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"),
-        Constants.TEST_DATA_PATH, "sysconfig.yaml").toString();
-
+    InputStream stream  = ConfigReaderTest.class.
+        getResourceAsStream("/heron/common/tests/resources/sysconfig.yaml");
+    if (stream == null) {
+      throw new RuntimeException("Sample output file not found");
+    }
+    String file = IOUtils.toString(stream);
     SystemConfig sysconfig = new SystemConfig(file);
-
     Assert.assertEquals("log-files", sysconfig.getHeronLoggingDirectory());
     Assert.assertEquals(100, sysconfig.getHeronLoggingMaximumSizeMb());
     Assert.assertEquals(5, sysconfig.getHeronLoggingMaximumFiles());

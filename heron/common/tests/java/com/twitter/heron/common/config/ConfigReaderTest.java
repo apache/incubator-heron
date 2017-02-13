@@ -14,10 +14,11 @@
 
 package com.twitter.heron.common.config;
 
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,8 +27,12 @@ public class ConfigReaderTest {
 
   @Test
   public void testLoadFile() throws Exception {
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"),
-        Constants.TEST_DATA_PATH, "defaults.yaml").toString();
+    InputStream stream  = ConfigReaderTest.class.
+        getResourceAsStream("/heron/common/tests/resources/defaults.yaml");
+    if (stream == null) {
+      throw new RuntimeException("Sample output file not found");
+    }
+    String file = IOUtils.toString(stream);
     Map<String, Object> props = ConfigReader.loadFile(file);
 
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
