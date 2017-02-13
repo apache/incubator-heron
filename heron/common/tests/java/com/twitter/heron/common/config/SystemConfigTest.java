@@ -14,25 +14,33 @@
 
 package com.twitter.heron.common.config;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.logging.Logger;
+import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class SystemConfigTest {
-  private static final Logger LOG = Logger.getLogger(SystemConfigTest.class.getName());
 
   @Test
   public void testReadConfig() throws Exception {
-    InputStream stream  = ConfigReaderTest.class.
-        getResourceAsStream("/heron/common/tests/resources/sysconfig.yaml");
-    if (stream == null) {
+    final String RESOURCE_LOC = "/heron/common/tests/resources/sysconfig.yaml";
+    InputStream inputStream  = ConfigReaderTest.class.
+        getResourceAsStream(RESOURCE_LOC);
+    if (inputStream == null) {
       throw new RuntimeException("Sample output file not found");
     }
-    String file = IOUtils.toString(stream);
-    SystemConfig sysconfig = new SystemConfig(file);
+    final String PREFIX = "system_temp";
+    final String SUFFIX = "yaml";
+    File file = File.createTempFile(PREFIX, SUFFIX);
+    file.deleteOnExit();
+    OutputStream outputStream = new FileOutputStream(file);
+    IOUtils.copy(inputStream, outputStream);
+    outputStream.close();
+    SystemConfig sysconfig = new SystemConfig(file.getAbsolutePath());
     Assert.assertEquals("log-files", sysconfig.getHeronLoggingDirectory());
     Assert.assertEquals(100, sysconfig.getHeronLoggingMaximumSizeMb());
     Assert.assertEquals(5, sysconfig.getHeronLoggingMaximumFiles());
