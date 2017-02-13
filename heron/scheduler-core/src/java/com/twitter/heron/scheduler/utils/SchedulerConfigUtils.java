@@ -16,8 +16,8 @@ package com.twitter.heron.scheduler.utils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
-import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Key;
 
 /**
@@ -26,7 +26,6 @@ import com.twitter.heron.spi.common.Key;
 public final class SchedulerConfigUtils {
 
   private SchedulerConfigUtils() {
-
   }
 
   /**
@@ -59,7 +58,7 @@ public final class SchedulerConfigUtils {
    * @return config, the command line config
    */
   private static Config commandLineConfigs(String cluster, String role,
-                                             String environ, Boolean verbose) {
+                                           String environ, Boolean verbose) {
     return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
@@ -78,9 +77,9 @@ public final class SchedulerConfigUtils {
       Boolean verbose,
       TopologyAPI.Topology topology) {
 
-    return Config.expand(
+    return Config.toClusterMode(
         Config.newBuilder()
-            .putAll(ClusterConfig.loadSandboxConfig())
+            .putAll(ConfigLoader.loadClusterConfig())
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(topologyBinaryFile, topologyDefnFile, topology))
             .build());
