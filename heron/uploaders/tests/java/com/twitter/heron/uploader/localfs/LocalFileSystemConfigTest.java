@@ -22,7 +22,7 @@ import org.junit.Test;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.TokenSub;
 
 public class LocalFileSystemConfigTest {
 
@@ -44,7 +44,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
-        Misc.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
+        TokenSub.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
 
@@ -72,7 +72,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         uploader.getTopologyDirectory(),
-        Misc.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
+        TokenSub.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
 
