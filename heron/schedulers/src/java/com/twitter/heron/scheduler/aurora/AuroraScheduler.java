@@ -36,7 +36,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.TokenSub;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
@@ -110,7 +110,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     //Only the aurora job page is returned
     String jobLinkFormat = AuroraContext.getJobLinkTemplate(config);
     if (jobLinkFormat != null && !jobLinkFormat.isEmpty()) {
-      String jobLink = Misc.substitute(config, jobLinkFormat);
+      String jobLink = TokenSub.substitute(config, jobLinkFormat);
       jobLinks.add(jobLink);
     }
 
@@ -171,7 +171,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    auroraProperties.put(AuroraField.SANDBOX_EXECUTOR_BINARY,
+    auroraProperties.put(AuroraField.EXECUTOR_BINARY,
         Context.executorBinary(config));
     auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
     auroraProperties.put(AuroraField.TOPOLOGY_ID, topology.getId());
@@ -180,16 +180,16 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.STATEMGR_CONNECTION_STRING,
         Context.stateManagerConnectionString(config));
     auroraProperties.put(AuroraField.STATEMGR_ROOT_PATH, Context.stateManagerRootPath(config));
-    auroraProperties.put(AuroraField.SANDBOX_TMASTER_BINARY, Context.tmasterBinary(config));
-    auroraProperties.put(AuroraField.SANDBOX_STMGR_BINARY, Context.stmgrBinary(config));
-    auroraProperties.put(AuroraField.SANDBOX_METRICSMGR_CLASSPATH,
+    auroraProperties.put(AuroraField.TMASTER_BINARY, Context.tmasterBinary(config));
+    auroraProperties.put(AuroraField.STMGR_BINARY, Context.stmgrBinary(config));
+    auroraProperties.put(AuroraField.METRICSMGR_CLASSPATH,
         Context.metricsManagerClassPath(config));
     auroraProperties.put(AuroraField.INSTANCE_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     auroraProperties.put(AuroraField.TOPOLOGY_CLASSPATH,
         TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
 
-    auroraProperties.put(AuroraField.SANDBOX_SYSTEM_YAML, Context.systemConfigFile(config));
+    auroraProperties.put(AuroraField.SYSTEM_YAML, Context.systemConfigFile(config));
     auroraProperties.put(AuroraField.COMPONENT_RAMMAP, Runtime.componentRamMap(runtime));
     auroraProperties.put(AuroraField.COMPONENT_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
@@ -197,10 +197,10 @@ public class AuroraScheduler implements IScheduler, IScalable {
         Context.topologyPackageType(config).name().toLowerCase());
     auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
         FileUtils.getBaseName(Context.topologyBinaryFile(config)));
-    auroraProperties.put(AuroraField.HERON_SANDBOX_JAVA_HOME, Context.clusterJavaHome(config));
+    auroraProperties.put(AuroraField.JAVA_HOME, Context.clusterJavaHome(config));
 
-    auroraProperties.put(AuroraField.SANDBOX_SHELL_BINARY, Context.shellBinary(config));
-    auroraProperties.put(AuroraField.SANDBOX_PYTHON_INSTANCE_BINARY,
+    auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
+    auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY,
         Context.pythonInstanceBinary(config));
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
@@ -219,19 +219,17 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     // TODO (nlu): currently enforce environment to be "prod" for a Production job
     String isProduction = Boolean.toString("prod".equals(Context.environ(config)));
-    // TODO: remove this and suppress above once we cut a release and update the aurora config file
-    auroraProperties.put(AuroraField.ISPRODUCTION, isProduction);
     auroraProperties.put(AuroraField.IS_PRODUCTION, isProduction);
 
-    auroraProperties.put(AuroraField.SANDBOX_INSTANCE_CLASSPATH, Context.instanceClassPath(config));
-    auroraProperties.put(AuroraField.SANDBOX_METRICS_YAML, Context.metricsSinksFile(config));
+    auroraProperties.put(AuroraField.INSTANCE_CLASSPATH, Context.instanceClassPath(config));
+    auroraProperties.put(AuroraField.METRICS_YAML, Context.metricsSinksFile(config));
 
     String completeSchedulerClassPath = String.format("%s:%s:%s",
         Context.schedulerClassPath(config),
         Context.packingClassPath(config),
         Context.stateManagerClassPath(config));
 
-    auroraProperties.put(AuroraField.SANDBOX_SCHEDULER_CLASSPATH, completeSchedulerClassPath);
+    auroraProperties.put(AuroraField.SCHEDULER_CLASSPATH, completeSchedulerClassPath);
 
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
