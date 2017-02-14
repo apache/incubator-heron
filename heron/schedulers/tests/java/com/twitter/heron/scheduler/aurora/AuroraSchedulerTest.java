@@ -298,45 +298,44 @@ public class AuroraSchedulerTest {
         case RAM_PER_CONTAINER:
           expected = Long.valueOf(containerResource.getRam().asBytes()).toString();
           break;
-        case HERON_SANDBOX_JAVA_HOME:
+        case JAVA_HOME:
           expected = "/usr/lib/jvm/default-java";
           break;
-        case ISPRODUCTION:
         case IS_PRODUCTION:
           expected = Boolean.FALSE.toString();
           break;
         case NUM_CONTAINERS:
           expected = "2";
           break;
-        case SANDBOX_EXECUTOR_BINARY:
+        case EXECUTOR_BINARY:
           expected = expectedBin + "/heron-executor";
           break;
-        case SANDBOX_INSTANCE_CLASSPATH:
+        case INSTANCE_CLASSPATH:
           expected = expectedLib + "/instance/*";
           break;
-        case SANDBOX_METRICSMGR_CLASSPATH:
+        case METRICSMGR_CLASSPATH:
           expected = expectedLib + "/metricsmgr/*";
           break;
-        case SANDBOX_METRICS_YAML:
+        case METRICS_YAML:
           expected = expectedConf + "/metrics_sinks.yaml";
           break;
-        case SANDBOX_PYTHON_INSTANCE_BINARY:
+        case PYTHON_INSTANCE_BINARY:
           expected = expectedBin + "/heron-python-instance";
           break;
-        case SANDBOX_SCHEDULER_CLASSPATH:
+        case SCHEDULER_CLASSPATH:
           expected =
               expectedLib + "/scheduler/*:./heron-core/lib/packing/*:./heron-core/lib/statemgr/*";
           break;
-        case SANDBOX_SHELL_BINARY:
+        case SHELL_BINARY:
           expected = expectedBin + "/heron-shell";
           break;
-        case SANDBOX_STMGR_BINARY:
+        case STMGR_BINARY:
           expected = expectedBin + "/heron-stmgr";
           break;
-        case SANDBOX_TMASTER_BINARY:
+        case TMASTER_BINARY:
           expected = expectedBin + "/heron-tmaster";
           break;
-        case SANDBOX_SYSTEM_YAML:
+        case SYSTEM_YAML:
           expected = expectedConf + "/heron_internals.yaml";
           break;
         case TOPOLOGY_BINARY_FILE:
