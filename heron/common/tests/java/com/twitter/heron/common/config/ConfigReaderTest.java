@@ -26,6 +26,8 @@ import org.junit.Test;
 
 public class ConfigReaderTest {
 
+  private static final String RESOURCE_LOC = "/heron/common/tests/resources/defaults.yaml";
+
   private void testProperty(Map<String, Object> props) {
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
@@ -35,7 +37,6 @@ public class ConfigReaderTest {
   }
 
   private InputStream loadResource() {
-    final String RESOURCE_LOC = "/heron/common/tests/resources/defaults.yaml";
     InputStream inputStream  = ConfigReaderTest.class.
         getResourceAsStream(RESOURCE_LOC);
     if (inputStream == null) {
@@ -47,9 +48,7 @@ public class ConfigReaderTest {
   @Test
   public void testLoadFile() throws Exception {
     InputStream inputStream = loadResource();
-    final String PREFIX = "defaults_temp";
-    final String SUFFIX = "yaml";
-    File file = File.createTempFile(PREFIX, SUFFIX);
+    File file = File.createTempFile("defaults_temp", "yaml");
     file.deleteOnExit();
     OutputStream outputStream = new FileOutputStream(file);
     IOUtils.copy(inputStream, outputStream);

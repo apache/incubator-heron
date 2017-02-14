@@ -25,17 +25,16 @@ import org.junit.Test;
 
 public class SystemConfigTest {
 
+  private static final String RESOURCE_LOC = "/heron/common/tests/resources/sysconfig.yaml";
+
   @Test
   public void testReadConfig() throws Exception {
-    final String RESOURCE_LOC = "/heron/common/tests/resources/sysconfig.yaml";
     InputStream inputStream  = ConfigReaderTest.class.
         getResourceAsStream(RESOURCE_LOC);
     if (inputStream == null) {
       throw new RuntimeException("Sample output file not found");
     }
-    final String PREFIX = "system_temp";
-    final String SUFFIX = "yaml";
-    File file = File.createTempFile(PREFIX, SUFFIX);
+    File file = File.createTempFile("system_temp", "yaml");
     file.deleteOnExit();
     OutputStream outputStream = new FileOutputStream(file);
     IOUtils.copy(inputStream, outputStream);
