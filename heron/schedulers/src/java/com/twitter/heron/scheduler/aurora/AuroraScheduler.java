@@ -36,7 +36,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.TokenSub;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
@@ -110,7 +110,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     //Only the aurora job page is returned
     String jobLinkFormat = AuroraContext.getJobLinkTemplate(config);
     if (jobLinkFormat != null && !jobLinkFormat.isEmpty()) {
-      String jobLink = Misc.substitute(config, jobLinkFormat);
+      String jobLink = TokenSub.substitute(config, jobLinkFormat);
       jobLinks.add(jobLink);
     }
 

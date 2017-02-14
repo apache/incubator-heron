@@ -43,7 +43,7 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.SubmitterMain;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.TokenSub;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -61,7 +61,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Misc.class, Config.class})
+@PrepareForTest({TokenSub.class, Config.class})
 public class AuroraSchedulerTest {
   private static final String AURORA_PATH = "path.aurora";
   private static final String PACKING_PLAN_ID = "packing.plan.id";
@@ -215,9 +215,9 @@ public class AuroraSchedulerTest {
 
     scheduler.initialize(mockConfig, Mockito.mock(Config.class));
 
-    PowerMockito.spy(Misc.class);
+    PowerMockito.spy(TokenSub.class);
     PowerMockito.doReturn(SUBSTITUTED_JOB_LINK)
-        .when(Misc.class, "substitute", mockConfig, JOB_LINK_FORMAT);
+        .when(TokenSub.class, "substitute", mockConfig, JOB_LINK_FORMAT);
 
     List<String> result = scheduler.getJobLinks();
 
