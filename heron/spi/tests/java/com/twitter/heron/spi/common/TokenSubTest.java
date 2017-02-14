@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class MiscTest {
+public class TokenSubTest {
 
   private static String substitute(String pathString) {
     Config config = Config.newBuilder()
@@ -29,7 +29,7 @@ public class MiscTest {
         .put(Key.HERON_HOME, "/usr/local/heron")
         .put(Key.TOPOLOGY_NAME, "topology_name")
         .build();
-    return Misc.substitute(config, pathString);
+    return TokenSub.substitute(config, pathString);
   }
 
   /**
@@ -61,21 +61,21 @@ public class MiscTest {
 
   @Test
   public void testURL() {
-    assertTrue(Misc.isURL("file:///users/john/afile.txt"));
-    assertFalse(Misc.isURL("/users/john/afile.txt"));
-    assertTrue(Misc.isURL("https://gotoanywebsite.net/afile.html"));
-    assertFalse(Misc.isURL("https//gotoanywebsite.net//afile.html"));
+    assertTrue(TokenSub.isURL("file:///users/john/afile.txt"));
+    assertFalse(TokenSub.isURL("/users/john/afile.txt"));
+    assertTrue(TokenSub.isURL("https://gotoanywebsite.net/afile.html"));
+    assertFalse(TokenSub.isURL("https//gotoanywebsite.net//afile.html"));
   }
 
   @Test
   public void testToken() {
-    assertTrue(Misc.isToken("${FOO_BAR}"));
-    assertTrue(Misc.isToken("${FOO}"));
-    assertFalse(Misc.isToken("x${FOO}"));
-    assertFalse(Misc.isToken("${FOO}x"));
-    assertFalse(Misc.isToken("${}"));
-    assertFalse(Misc.isToken("$FOO"));
-    assertFalse(Misc.isToken("foo"));
+    assertTrue(TokenSub.isToken("${FOO_BAR}"));
+    assertTrue(TokenSub.isToken("${FOO}"));
+    assertFalse(TokenSub.isToken("x${FOO}"));
+    assertFalse(TokenSub.isToken("${FOO}x"));
+    assertFalse(TokenSub.isToken("${}"));
+    assertFalse(TokenSub.isToken("$FOO"));
+    assertFalse(TokenSub.isToken("foo"));
   }
 
   @Test

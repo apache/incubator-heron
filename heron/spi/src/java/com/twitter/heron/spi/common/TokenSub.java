@@ -24,15 +24,15 @@ import java.util.regex.Pattern;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public final class Misc {
+public final class TokenSub {
 
-  private static final Logger LOG = Logger.getLogger(Misc.class.getName());
+  private static final Logger LOG = Logger.getLogger(TokenSub.class.getName());
 
   // Pattern to match an URL - just looks for double forward slashes //
   private static final Pattern URL_PATTERN = Pattern.compile("(.+)://(.+)");
   private static final Pattern TOKEN_PATTERN = Pattern.compile("^\\$\\{([A-Z_]+)}$");
 
-  private Misc() {
+  private TokenSub() {
   }
 
   /**
