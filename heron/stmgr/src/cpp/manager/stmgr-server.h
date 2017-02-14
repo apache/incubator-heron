@@ -31,6 +31,7 @@ class MetricsMgrSt;
 class MultiCountMetric;
 class TimeSpentMetric;
 class AssignableMetric;
+class MultiAssignableMetric;
 }
 }
 
@@ -77,6 +78,7 @@ class StMgrServer : public Server {
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
+  void UpdateQueueMetrics(EventLoop::Status);
 
   // Various handlers for different requests
 
@@ -103,9 +105,6 @@ class StMgrServer : public Server {
   void StartBackPressureConnectionCb(Connection* _connection);
   // Relieve back pressure
   void StopBackPressureConnectionCb(Connection* _connection);
-
-  // Connection buffer size metric
-  void ConnectionBufferChangeCb(Connection* _connection);
 
   // Can we free the back pressure on the spouts?
   void AttemptStopBackPressureFromSpouts();
@@ -150,7 +149,7 @@ class StMgrServer : public Server {
   InstanceMetricMap instance_metric_map_;
 
   // map of Instance_id/stmgrid to queue metric
-  typedef std::map<sp_string, heron::common::AssignableMetric*> QueueMetricMap;
+  typedef std::map<sp_string, heron::common::MultiAssignableMetric*> QueueMetricMap;
   QueueMetricMap queue_metric_map_;
 
   // instances/stream mgrs causing back pressure
