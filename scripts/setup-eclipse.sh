@@ -92,6 +92,10 @@ cat >> $classpath_file << 'EOF'
     <attributes>
       <attribute name="maven.pomderived" value="true"/>
     </attributes>
+    <accessrules>
+      <accessrule kind="accessible" pattern="com/sun/net/httpserver/**"/>
+      <accessrule kind="accessible" pattern="com/sun/management/**"/>
+    </accessrules>
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
     <attributes>
