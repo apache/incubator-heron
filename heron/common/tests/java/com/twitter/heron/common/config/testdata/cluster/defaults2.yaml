@@ -1,3 +1,0 @@
-role: role1
-heron.launcher.class: com.twitter.heron.scheduler.local.LocalLauncher
-version: 10.1

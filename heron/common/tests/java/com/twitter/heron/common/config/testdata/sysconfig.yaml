@@ -1,7 +1,0 @@
-heron.logging.directory: "log-files" 
-
-heron.logging.maximum.size.mb: 100 
-
-heron.logging.maximum.files: 5 
-
-heron.metrics.export.interval.sec: 60
