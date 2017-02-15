@@ -117,7 +117,7 @@ public class Config {
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
       if (value instanceof String) {
-        String expandedValue = Misc.substitute(config, (String) value);
+        String expandedValue = TokenSub.substitute(config, (String) value);
         if (expandedValue.contains("${")) {
           tokensCount++;
         }

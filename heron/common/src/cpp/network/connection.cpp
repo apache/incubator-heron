@@ -44,7 +44,6 @@ Connection::Connection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
   mOnNewPacket = NULL;
   mOnConnectionBufferEmpty = NULL;
   mOnConnectionBufferFull = NULL;
-  mOnConnectionBufferChange = NULL;
   mNumOutstandingBytes = 0;
   mIOVectorSize = 1024;
   mIOVector = new struct iovec[mIOVectorSize];
@@ -84,10 +83,6 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
   mOutstandingPackets.push_back(packet);
   mNumOutstandingBytes += packet->GetTotalPacketSize();
 
-  if (mOnConnectionBufferChange) {
-    mOnConnectionBufferChange(this);
-  }
-
   if (!hasCausedBackPressure()) {
     // Are we above the threshold?
     if (mNumOutstandingBytes >= systemHWMOutstandingBytes) {
@@ -107,10 +102,6 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
 
 void Connection::registerForNewPacket(VCallback<IncomingPacket*> cb) {
   mOnNewPacket = std::move(cb);
-}
-
-void Connection::registerForBufferChange(VCallback<Connection*> cb) {
-  mOnConnectionBufferChange = std::move(cb);
 }
 
 sp_int32 Connection::registerForBackPressure(VCallback<Connection*> cbStarter,
@@ -145,10 +136,6 @@ sp_int32 Connection::writeIntoIOVector(sp_int32 maxWrite, sp_int32* toWrite) {
 
 void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten) {
   mNumOutstandingBytes -= numWritten;
-
-  if (mOnConnectionBufferChange) {
-    mOnConnectionBufferChange(this);
-  }
 
   for (sp_int32 i = 0; i < simulWrites; ++i) {
     auto pr = mOutstandingPackets.front();
