@@ -119,7 +119,7 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
   delete _request;
 
   Connection* conn = static_cast<Connection*>(conn_);
-  if (conn->sendPacket(opkt, NULL) != 0) {
+  if (conn->sendPacket(opkt) != 0) {
     context_map_.erase(rid);
     delete opkt;
     responseHandlers[_expected_response_type](NULL, WRITE_ERROR);
@@ -152,7 +152,7 @@ void Client::InternalSendMessage(const google::protobuf::Message& _message) {
   CHECK_EQ(opkt->PackProtocolBuffer(_message, byte_size), 0);
 
   Connection* conn = static_cast<Connection*>(conn_);
-  if (conn->sendPacket(opkt, NULL) != 0) {
+  if (conn->sendPacket(opkt) != 0) {
     LOG(ERROR) << "Some problem sending message thru the connection. Dropping message" << std::endl;
     delete opkt;
     return;
@@ -168,7 +168,7 @@ void Client::InternalSendResponse(OutgoingPacket* _packet) {
   }
 
   Connection* conn = static_cast<Connection*>(conn_);
-  if (conn->sendPacket(_packet, NULL) != 0) {
+  if (conn->sendPacket(_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping..." << std::endl;
     delete _packet;
     return;

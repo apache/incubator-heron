@@ -180,7 +180,7 @@ void Server::InternalSendResponse(Connection* _connection, OutgoingPacket* _pack
     delete _packet;
     return;
   }
-  if (_connection->sendPacket(_packet, NULL) != 0) {
+  if (_connection->sendPacket(_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping... " << std::endl;
     delete _packet;
     return;
@@ -221,7 +221,7 @@ void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _
   // delete the request
   delete _request;
 
-  if (_conn->sendPacket(opkt, NULL) != 0) {
+  if (_conn->sendPacket(opkt) != 0) {
     context_map_.erase(rid);
     delete opkt;
     auto cb = [_response_placeholder, _ctx, this]() {

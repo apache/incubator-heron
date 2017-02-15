@@ -74,20 +74,9 @@ class Connection : public BaseConnection {
   /**
    * Add this packet to the list of packets to be sent. The packet in itself can be sent
    * later. A zero return value indicates that the packet has been successfully queued to be
-   * sent. It does not indicate that the packet was sent successfully. When the packet is
-   * actually sent(or determined that it cannot be sent), the callback cb will be called
-   * with appropriate status message.
+   * sent. It does not indicate that the packet was sent successfully.
    * A negative value of sendPacket indicates an error. The most likely error is improperly
    * formatted packet.
-   * packet should not be touched by the caller until the callback cb has been called.
-   */
-  sp_int32 sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCode> cb);
-
-  /**
-   * This is the same as above except that we dont need any callback to confirm packet
-   * delivery status.
-   * packet is owned by the Connection object. It will be deleted after the packet has been
-   * written down the wire.
    */
   sp_int32 sendPacket(OutgoingPacket* packet);
 
@@ -143,12 +132,12 @@ class Connection : public BaseConnection {
   virtual void handleDataRead();
 
   // The list of outstanding packets that need to be sent.
-  std::list<std::pair<OutgoingPacket*, VCallback<NetworkErrorCode>>> mOutstandingPackets;
+  std::list<OutgoingPacket*> mOutstandingPackets;
   sp_int64 mNumOutstandingPackets;  // primarily because list's size is linear
   sp_int64 mNumOutstandingBytes;
 
   // The list of packets that have been sent but not yet been reported to the higher layer
-  std::list<std::pair<OutgoingPacket*, VCallback<NetworkErrorCode>>> mSentPackets;
+  std::list<OutgoingPacket*> mSentPackets;
 
   // The list of packets that have been received but not yet delivered to the higher layer
   std::list<IncomingPacket*> mReceivedPackets;

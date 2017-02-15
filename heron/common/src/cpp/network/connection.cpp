@@ -63,10 +63,10 @@ Connection::~Connection() {
   delete mIncomingPacket;
   {
     for (auto iter = mOutstandingPackets.begin(); iter != mOutstandingPackets.end(); ++iter) {
-      delete iter->first;
+      delete *iter;
     }
     for (auto iter = mSentPackets.begin(); iter != mSentPackets.end(); ++iter) {
-      delete iter->first;
+      delete *iter;
     }
   }
   for (auto iter = mReceivedPackets.begin(); iter != mReceivedPackets.end(); ++iter) {
@@ -75,12 +75,10 @@ Connection::~Connection() {
   delete[] mIOVector;
 }
 
-sp_int32 Connection::sendPacket(OutgoingPacket* packet) { return sendPacket(packet, NULL); }
-
-sp_int32 Connection::sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCode> cb) {
+sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
   packet->PrepareForWriting();
   if (registerForWrite() != 0) return -1;
-  mOutstandingPackets.push_back(std::make_pair(packet, std::move(cb)));
+  mOutstandingPackets.push_back(packet);
   mNumOutstandingPackets++;
   mNumOutstandingBytes += packet->GetTotalPacketSize();
 
@@ -127,9 +125,9 @@ sp_int32 Connection::writeIntoIOVector(sp_int32 maxWrite, sp_int32* toWrite) {
   *toWrite = 0;
   auto iter = mOutstandingPackets.begin();
   for (sp_int32 i = 0; i < simulWrites; ++i) {
-    mIOVector[i].iov_base = iter->first->get_header() + iter->first->position_;
-    mIOVector[i].iov_len = PacketHeader::get_packet_size(iter->first->get_header()) +
-                           PacketHeader::header_size() - iter->first->position_;
+    mIOVector[i].iov_base = (*iter)->get_header() + (*iter)->position_;
+    mIOVector[i].iov_len = PacketHeader::get_packet_size((*iter)->get_header()) +
+                           PacketHeader::header_size() - (*iter)->position_;
     if (mIOVector[i].iov_len >= bytesLeft) {
       mIOVector[i].iov_len = bytesLeft;
     }
@@ -154,8 +152,8 @@ void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten
     auto pr = mOutstandingPackets.front();
     if (numWritten >= (ssize_t)mIOVector[i].iov_len) {
       // This iov structure was completely written as instructed
-      sp_uint32 bytesLeftForThisPacket = PacketHeader::get_packet_size(pr.first->get_header()) +
-                                         PacketHeader::header_size() - pr.first->position_;
+      sp_uint32 bytesLeftForThisPacket = PacketHeader::get_packet_size(pr->get_header()) +
+                                         PacketHeader::header_size() - pr->position_;
       bytesLeftForThisPacket -= mIOVector[i].iov_len;
       if (bytesLeftForThisPacket == 0) {
         // This whole packet has been consumed
@@ -163,12 +161,12 @@ void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten
         mOutstandingPackets.pop_front();
         mNumOutstandingPackets--;
       } else {
-        pr.first->position_ += mIOVector[i].iov_len;
+        pr->position_ += mIOVector[i].iov_len;
       }
       numWritten -= mIOVector[i].iov_len;
     } else {
       // This iov structure has been partially sent out
-      pr.first->position_ += numWritten;
+      pr->position_ += numWritten;
       numWritten = 0;
     }
     if (numWritten <= 0) break;
@@ -229,11 +227,7 @@ sp_int32 Connection::writeIntoEndPoint(sp_int32 fd) {
 void Connection::handleDataWritten() {
   while (!mSentPackets.empty()) {
     auto pr = mSentPackets.front();
-    if (pr.second) {
-      pr.second(OK);
-    } else {
-      delete pr.first;
-    }
+    delete pr;
     mSentPackets.pop_front();
   }
 }
