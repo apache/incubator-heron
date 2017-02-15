@@ -32,9 +32,8 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.utils.Runtime;
-import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -65,9 +64,9 @@ public class RuntimeManagerMainTest {
   @Before
   public void setUp() throws Exception {
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
-    when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
-    when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
+    when(config.getStringValue(Key.CLUSTER)).thenReturn(CLUSTER);
+    when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
+    when(config.getStringValue(Key.ENVIRON)).thenReturn(ENVIRON);
   }
 
   @Test(expected = TopologyRuntimeManagementException.class)
@@ -132,13 +131,13 @@ public class RuntimeManagerMainTest {
   @Test(expected = TopologyRuntimeManagementException.class)
   public void testManageTopologyNoClass() throws Exception {
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
 
     // Failed to create state manager instance
     final String CLASS_NOT_EXIST = "class_not_exist";
-    when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS")))
+    when(config.getStringValue(Key.STATE_MANAGER_CLASS))
         .thenReturn(CLASS_NOT_EXIST);
     runtimeManagerMain.manageTopology();
   }
@@ -147,11 +146,11 @@ public class RuntimeManagerMainTest {
   @Test(expected = TopologyRuntimeManagementException.class)
   public void testManageTopologyFailValidate() throws Exception {
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
     // Valid state manager class
-    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+    Mockito.when(config.getStringValue(Key.STATE_MANAGER_CLASS)).
         thenReturn(IStateManager.class.getName());
     PowerMockito.mockStatic(ReflectionUtils.class);
     PowerMockito.doReturn(Mockito.mock(IStateManager.class))
@@ -167,11 +166,11 @@ public class RuntimeManagerMainTest {
   @Test(expected = SchedulerException.class)
   public void testManageTopologyFailGetSchdulerClient() throws Exception {
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
     // Valid state manager class
-    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+    Mockito.when(config.getStringValue(Key.STATE_MANAGER_CLASS)).
         thenReturn(IStateManager.class.getName());
     PowerMockito.mockStatic(ReflectionUtils.class);
     PowerMockito.doReturn(Mockito.mock(IStateManager.class))
@@ -191,11 +190,11 @@ public class RuntimeManagerMainTest {
   @Test(expected = TopologyRuntimeManagementException.class)
   public void testManageTopologyFailCall() throws Exception {
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
     // Valid state manager class
-    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+    Mockito.when(config.getStringValue(Key.STATE_MANAGER_CLASS)).
         thenReturn(IStateManager.class.getName());
     PowerMockito.mockStatic(ReflectionUtils.class);
     PowerMockito.doReturn(Mockito.mock(IStateManager.class))
@@ -222,19 +221,19 @@ public class RuntimeManagerMainTest {
     // prepare packing class
     ResourceCompliantRRPacking repacking = new ResourceCompliantRRPacking();
 
-    when(config.getStringValue(ConfigKeys.get("REPACKING_CLASS")))
+    when(config.getStringValue(Key.REPACKING_CLASS))
         .thenReturn(IRepacking.class.getName());
-    when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS")))
+    when(config.getStringValue(Key.STATE_MANAGER_CLASS))
         .thenReturn(IStateManager.class.getName());
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
     when(config.getStringValue(RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY))
         .thenReturn("testSpout:4,testBolt:5");
     // mock dry-run mode
-    when(config.getBooleanValue(ConfigKeys.get("DRY_RUN"), false)).thenReturn(true);
-    when(config.getDoubleValue(ConfigKeys.get("INSTANCE_CPU"))).thenReturn(1.0);
-    when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_RAM")))
+    when(config.getBooleanValue(Key.DRY_RUN)).thenReturn(true);
+    when(config.getDoubleValue(Key.INSTANCE_CPU)).thenReturn(1.0);
+    when(config.getByteAmountValue(Key.INSTANCE_RAM))
         .thenReturn(ByteAmount.fromGigabytes(1));
-    when(config.getByteAmountValue(ConfigKeys.get("INSTANCE_DISK")))
+    when(config.getByteAmountValue(Key.INSTANCE_DISK))
         .thenReturn(ByteAmount.fromGigabytes(1));
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, Command.UPDATE));
@@ -279,11 +278,11 @@ public class RuntimeManagerMainTest {
   @Test
   public void testManageTopologyOk() throws Exception {
     config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain = spy(new RuntimeManagerMain(config, MOCK_COMMAND));
     // Valid state manager class
-    Mockito.when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
+    Mockito.when(config.getStringValue(Key.STATE_MANAGER_CLASS)).
         thenReturn(IStateManager.class.getName());
     PowerMockito.mockStatic(ReflectionUtils.class);
     PowerMockito.doReturn(Mockito.mock(IStateManager.class))

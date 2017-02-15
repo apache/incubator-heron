@@ -45,7 +45,7 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.scheduler.UpdateTopologyManager.ContainerDelta;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScalable;
@@ -114,8 +114,8 @@ public class UpdateTopologyManagerTest {
 
   private static Config mockRuntime(SchedulerStateManagerAdaptor stateManager) {
     Config runtime = mock(Config.class);
-    when(runtime.getStringValue(Keys.topologyName())).thenReturn(TOPOLOGY_NAME);
-    when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(stateManager);
+    when(runtime.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
+    when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(stateManager);
     return runtime;
   }
 

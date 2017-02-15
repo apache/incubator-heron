@@ -45,7 +45,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -396,8 +396,8 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     String zookeeperHostname = args[1];
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(), "/storm/heron/states")
-        .put(Keys.stateManagerConnectionString(), zookeeperHostname)
+        .put(Key.STATEMGR_ROOT_PATH, "/storm/heron/states")
+        .put(Key.STATEMGR_CONNECTION_STRING, zookeeperHostname)
         .build();
     CuratorStateManager stateManager = new CuratorStateManager();
     stateManager.doMain(args, config);

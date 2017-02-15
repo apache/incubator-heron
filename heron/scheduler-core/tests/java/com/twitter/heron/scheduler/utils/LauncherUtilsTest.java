@@ -27,7 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -52,8 +52,8 @@ public class LauncherUtilsTest {
     TopologyAPI.Topology mockTopology = PowerMockito.mock(TopologyAPI.Topology.class);
 
     Config mockConfig = Mockito.mock(Config.class);
-    Mockito.when(mockConfig.getStringValue(Keys.packingClass())).thenReturn(PACKING_CLASS);
-    Mockito.when(mockConfig.get(Keys.topologyDefinition())).thenReturn(mockTopology);
+    Mockito.when(mockConfig.getStringValue(Key.PACKING_CLASS)).thenReturn(PACKING_CLASS);
+    Mockito.when(mockConfig.get(Key.TOPOLOGY_DEFINITION)).thenReturn(mockTopology);
 
     PackingPlan resultPacking = LauncherUtils.getInstance().createPackingPlan(mockConfig,
         mockConfig);
@@ -96,7 +96,9 @@ public class LauncherUtilsTest {
     PowerMockito.doReturn(456).when(TopologyUtils.class, "getNumContainers", mockTopology);
 
     Config runtime = Config.newBuilder()
-        .putAll(LauncherUtils.getInstance().getPrimaryRuntime(mockTopology, mockStMgr)).build();
+        .putAll(LauncherUtils.getInstance().createPrimaryRuntime(mockTopology))
+        .putAll(LauncherUtils.getInstance().createAdaptorRuntime(mockStMgr))
+            .build();
     Assert.assertEquals("testTopologyId", Runtime.topologyId(runtime));
     Assert.assertEquals("testTopologyName", Runtime.topologyName(runtime));
     Assert.assertEquals(mockTopology, Runtime.topology(runtime));

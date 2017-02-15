@@ -62,7 +62,7 @@ def run(command, parser, cl_args, unknown_args):
   extra_lib_jars = jars.packing_jars()
   if cl_args["dry_run"]:
     extra_args.append('--dry_run')
-  if "dry_run_format" in cl_args:
-    extra_args += ["--dry_run_format", cl_args["dry_run_format"]]
+    if "dry_run_format" in cl_args:
+      extra_args += ["--dry_run_format", cl_args["dry_run_format"]]
 
   return cli_helper.run(command, cl_args, "update topology", extra_args, extra_lib_jars)

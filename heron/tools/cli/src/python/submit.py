@@ -102,9 +102,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
 
   if cl_args["dry_run"]:
     args.append("--dry_run")
-
-  if "dry_run_format" in cl_args:
-    args += ["--dry_run_format", cl_args["dry_run_format"]]
+    if "dry_run_format" in cl_args:
+      args += ["--dry_run_format", cl_args["dry_run_format"]]
 
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
