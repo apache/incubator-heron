@@ -27,6 +27,7 @@ import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.config.SystemConfigKey;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.executors.InstanceExecutor;
 import com.twitter.heron.simulator.executors.MetricsExecutor;
@@ -183,18 +184,18 @@ public class Simulator {
   }
 
   protected SystemConfig getSystemConfig() {
-    SystemConfig sysConfig = new SystemConfig();
-    sysConfig.put(SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256);
-    sysConfig.put(SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256);
-    sysConfig.put(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC, 60);
-    sysConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_TIME_MS, 16);
-    sysConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_SIZE_BYTES, 32768);
-    sysConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_TIME_MS, 16);
-    sysConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_SIZE_BYTES, 32768);
-    sysConfig.put(SystemConfig.INSTANCE_ACK_BATCH_TIME_MS, 128);
-    sysConfig.put(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
+    SystemConfig.Builder builder = SystemConfig.newBuilder(true)
+        .put(SystemConfigKey.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256)
+        .put(SystemConfigKey.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256)
+        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL_SEC, 60)
+        .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_TIME_MS, 16)
+        .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_SIZE_BYTES, 32768)
+        .put(SystemConfigKey.INSTANCE_EMIT_BATCH_TIME_MS, 16)
+        .put(SystemConfigKey.INSTANCE_EMIT_BATCH_SIZE_BYTES, 32768)
+        .put(SystemConfigKey.INSTANCE_ACK_BATCH_TIME_MS, 128)
+        .put(SystemConfigKey.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
 
-    return sysConfig;
+    return builder.build();
   }
 
   /**

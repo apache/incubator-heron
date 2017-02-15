@@ -28,7 +28,7 @@ public class SystemConfigTest {
     String file = Paths.get(System.getenv("JAVA_RUNFILES"),
         Constants.TEST_DATA_PATH, "sysconfig.yaml").toString();
 
-    SystemConfig sysconfig = new SystemConfig(file);
+    SystemConfig sysconfig = new SystemConfig(file, true);
 
     Assert.assertEquals("log-files", sysconfig.getHeronLoggingDirectory());
     Assert.assertEquals(100, sysconfig.getHeronLoggingMaximumSizeMb());
