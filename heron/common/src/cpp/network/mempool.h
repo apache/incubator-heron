@@ -16,6 +16,7 @@
 #ifndef MEM_POOL_H
 #define MEM_POOL_H
 
+#include <deque>
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -51,7 +52,7 @@ class BaseMemPool {
 template<typename B>
 class MemPool {
  public:
-  MemPool() {
+  MemPool() : size_(0), size_limit_(0) {
   }
 
   // TODO(cwang): we have a memory leak here.
@@ -65,27 +66,47 @@ class MemPool {
     map_.clear();
   }
 
+  void set_limit(sp_int32 limit) {
+    size_limit_ = limit;
+  }
+
   template<typename M>
   M* acquire(M* m) {
     std::type_index type = typeid(M);
-    std::vector<B*>& pool = map_[type];
+    auto& pool = map_[type];
 
     if (pool.empty()) {
       return new M();
     }
     B* t = pool.back();
     pool.pop_back();
+    size_ -= sizeof(M);
     return static_cast<M*>(t);
   }
 
   template<typename M>
   void release(M* ptr) {
+    if (size_limit_ == 0) {
+      delete ptr;
+      return;
+    }
+
     std::type_index type = typeid(M);
-    map_[type].push_back(static_cast<B*>(ptr));
+    auto& pool = map_[type];
+    if (size_ > size_limit_) {
+      auto first = pool.front();
+      pool.pop_front();
+      size_ -= sizeof(M);
+      delete first;
+    }
+    pool.push_back(static_cast<B*>(ptr));
+    size_ += sizeof(M);
   }
 
  private:
-  std::unordered_map<std::type_index, std::vector<B*>> map_;
+  sp_int32 size_;
+  sp_int32 size_limit_;
+  std::unordered_map<std::type_index, std::deque<B*>> map_;
 };
 
 #endif

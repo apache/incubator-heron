@@ -174,8 +174,9 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  // TODO(mfu):
-  MemPool<google::protobuf::Message> _heron_message_pool;
+  void set_pool_limit(sp_int32 limit) {
+    _heron_message_pool.set_limit(limit);
+  }
 
   template<typename M>
   void release(M* m) {
@@ -214,6 +215,8 @@ class Client : public BaseClient {
   virtual void StopBackPressureConnectionCb(Connection* _connection);
 
  private:
+  MemPool<google::protobuf::Message> _heron_message_pool;
+
   //! Imlement methods of BaseClient
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
                                            EventLoop* eventLoop);
