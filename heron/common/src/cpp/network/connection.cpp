@@ -45,7 +45,6 @@ Connection::Connection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
   mOnConnectionBufferEmpty = NULL;
   mOnConnectionBufferFull = NULL;
   mOnConnectionBufferChange = NULL;
-  mNumOutstandingPackets = 0;
   mNumOutstandingBytes = 0;
   mIOVectorSize = 1024;
   mIOVector = new struct iovec[mIOVectorSize];
@@ -65,12 +64,16 @@ Connection::~Connection() {
     for (auto iter = mOutstandingPackets.begin(); iter != mOutstandingPackets.end(); ++iter) {
       delete *iter;
     }
-    for (auto iter = mSentPackets.begin(); iter != mSentPackets.end(); ++iter) {
-      delete *iter;
+    while (!mSentPackets.empty()) {
+      auto p = mSentPackets.front();
+      delete p;
+      mSentPackets.pop();
     }
   }
-  for (auto iter = mReceivedPackets.begin(); iter != mReceivedPackets.end(); ++iter) {
-    delete *iter;
+  while (!mReceivedPackets.empty()) {
+    auto p = mReceivedPackets.front();
+    delete p;
+    mReceivedPackets.pop();
   }
   delete[] mIOVector;
 }
@@ -79,7 +82,6 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
   packet->PrepareForWriting();
   if (registerForWrite() != 0) return -1;
   mOutstandingPackets.push_back(packet);
-  mNumOutstandingPackets++;
   mNumOutstandingBytes += packet->GetTotalPacketSize();
 
   if (mOnConnectionBufferChange) {
@@ -121,7 +123,7 @@ sp_int32 Connection::registerForBackPressure(VCallback<Connection*> cbStarter,
 sp_int32 Connection::writeIntoIOVector(sp_int32 maxWrite, sp_int32* toWrite) {
   sp_uint32 bytesLeft = maxWrite;
   sp_int32 simulWrites =
-      mIOVectorSize > mNumOutstandingPackets ? mNumOutstandingPackets : mIOVectorSize;
+      mIOVectorSize > mOutstandingPackets.size() ?: mIOVectorSize;
   *toWrite = 0;
   auto iter = mOutstandingPackets.begin();
   for (sp_int32 i = 0; i < simulWrites; ++i) {
@@ -157,9 +159,8 @@ void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten
       bytesLeftForThisPacket -= mIOVector[i].iov_len;
       if (bytesLeftForThisPacket == 0) {
         // This whole packet has been consumed
-        mSentPackets.push_back(pr);
+        mSentPackets.push(pr);
         mOutstandingPackets.pop_front();
-        mNumOutstandingPackets--;
       } else {
         pr->position_ += mIOVector[i].iov_len;
       }
@@ -228,7 +229,7 @@ void Connection::handleDataWritten() {
   while (!mSentPackets.empty()) {
     auto pr = mSentPackets.front();
     delete pr;
-    mSentPackets.pop_front();
+    mSentPackets.pop();
   }
 }
 
@@ -240,7 +241,7 @@ sp_int32 Connection::readFromEndPoint(sp_int32 fd) {
       // Packet was succcessfully read.
       IncomingPacket* packet = mIncomingPacket;
       mIncomingPacket = new IncomingPacket(mOptions->max_packet_size_);
-      mReceivedPackets.push_back(packet);
+      mReceivedPackets.push(packet);
       bytesRead += packet->GetTotalPacketSize();
       if (bytesRead >= __SYSTEM_NETWORK_READ_BATCH_SIZE__) {
         return 0;
@@ -262,7 +263,7 @@ void Connection::handleDataRead() {
     } else {
       delete packet;
     }
-    mReceivedPackets.pop_front();
+    mReceivedPackets.pop();
   }
 }
 

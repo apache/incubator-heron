@@ -17,8 +17,9 @@
 #ifndef HERON_COMMON_SRC_CPP_NETWORK_CONNECTION_H_
 #define HERON_COMMON_SRC_CPP_NETWORK_CONNECTION_H_
 
+#include <deque>
 #include <functional>
-#include <list>
+#include <queue>
 #include <utility>
 #include "network/packet.h"
 #include "network/event_loop.h"
@@ -98,7 +99,7 @@ class Connection : public BaseConnection {
    */
   void registerForBufferChange(VCallback<Connection*> cb);
 
-  sp_int32 getOutstandingPackets() const { return mNumOutstandingPackets; }
+  sp_int32 getOutstandingPackets() const { return mOutstandingPackets.size(); }
   sp_int32 getOutstandingBytes() const { return mNumOutstandingBytes; }
 
   sp_int32 getWriteBatchSize() const { return mWriteBatchsize; }
@@ -131,16 +132,16 @@ class Connection : public BaseConnection {
 
   virtual void handleDataRead();
 
-  // The list of outstanding packets that need to be sent.
-  std::list<OutgoingPacket*> mOutstandingPackets;
-  sp_int64 mNumOutstandingPackets;  // primarily because list's size is linear
+  // The queue of outstanding packets that need to be sent. C++11 requires all containers'
+  // size() should be O(1).
+  std::deque<OutgoingPacket*> mOutstandingPackets;
   sp_int64 mNumOutstandingBytes;
 
-  // The list of packets that have been sent but not yet been reported to the higher layer
-  std::list<OutgoingPacket*> mSentPackets;
+  // The queue of packets that have been sent but not yet been reported to the higher layer
+  std::queue<OutgoingPacket*> mSentPackets;
 
-  // The list of packets that have been received but not yet delivered to the higher layer
-  std::list<IncomingPacket*> mReceivedPackets;
+  // The queue of packets that have been received but not yet delivered to the higher layer
+  std::queue<IncomingPacket*> mReceivedPackets;
 
   // Incompletely read next packet
   IncomingPacket* mIncomingPacket;
