@@ -36,8 +36,9 @@ public final class ConfigUtils {
    * @param stormConfig the storm config
    * @return a heron config
    */
-  public static Config translateConfig(Map<String, Object> stormConfig) {
-    Config heronConfig = new Config(stormConfig);
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static Config translateConfig(Map stormConfig) {
+    Config heronConfig = new Config((Map<String, Object>) stormConfig);
     // Look at serialization stuff first
     doSerializationTranslation(heronConfig);
 
