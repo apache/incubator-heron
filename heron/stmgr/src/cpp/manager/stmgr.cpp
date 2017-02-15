@@ -186,13 +186,13 @@ void StMgr::FetchTMasterLocation() {
 
 void StMgr::FetchMetricsCacheLocation() {
   LOG(INFO) << "Fetching MetricsCache Location";
-  auto tmaster = new proto::tmaster::MetricsCacheLocation();
+  auto metricscache = new proto::tmaster::MetricsCacheLocation();
 
-  auto cb = [tmaster, this](proto::system::StatusCode status) {
-    this->OnMetricsCacheLocationFetch(tmaster, status);
+  auto cb = [metricscache, this](proto::system::StatusCode status) {
+    this->OnMetricsCacheLocationFetch(metricscache, status);
   };
 
-  state_mgr_->GetMetricsCacheLocation(topology_name_, tmaster, std::move(cb));
+  state_mgr_->GetMetricsCacheLocation(topology_name_, metricscache, std::move(cb));
 }
 
 void StMgr::StartStmgrServer() {
