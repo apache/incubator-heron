@@ -28,11 +28,13 @@ public class SystemConfigTest {
     String file = Paths.get(System.getenv("JAVA_RUNFILES"),
         Constants.TEST_DATA_PATH, "sysconfig.yaml").toString();
 
-    SystemConfig sysconfig = new SystemConfig(file, true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(file, true)
+        .build();
 
-    Assert.assertEquals("log-files", sysconfig.getHeronLoggingDirectory());
-    Assert.assertEquals(100, sysconfig.getHeronLoggingMaximumSizeMb());
-    Assert.assertEquals(5, sysconfig.getHeronLoggingMaximumFiles());
-    Assert.assertEquals(60, sysconfig.getHeronMetricsExportIntervalSec());
+    Assert.assertEquals("log-files", systemConfig.getHeronLoggingDirectory());
+    Assert.assertEquals(100, systemConfig.getHeronLoggingMaximumSizeMb());
+    Assert.assertEquals(5, systemConfig.getHeronLoggingMaximumFiles());
+    Assert.assertEquals(60, systemConfig.getHeronMetricsExportIntervalSec());
   }
 }

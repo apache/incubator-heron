@@ -42,10 +42,6 @@ public class SystemConfig {
     this.config = new HashMap<>(build.keyValues);
   }
 
-  public static Builder newBuilder() {
-    return newBuilder(false);
-  }
-
   public static Builder newBuilder(boolean loadDefaults) {
     return Builder.create(loadDefaults);
   }
