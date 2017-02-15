@@ -73,8 +73,12 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
 // appended
 // to the string below
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
-// Queue size in bytes sent to each instance
-const sp_string METRIC_QUEUE_SIZE_TO_INSTANCE_COMPID = "__queue_size_bytes_to_instance_by_compid/";
+// Prefix for connection buffer's metrics
+const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_intanceid/";
+
+// TODO(mfu): Read this value from config
+const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10 * 1000 * 1000;
+
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
@@ -107,6 +111,11 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
+
+  // Update queue related metrics every 10 seconds
+  CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
+    this->UpdateQueueMetrics(status);
+  }, true, SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND), 0);
 }
 
 StMgrServer::~StMgrServer() {
@@ -126,7 +135,8 @@ StMgrServer::~StMgrServer() {
     }
   }
 
-  for (auto qmmIter = queue_metric_map_.begin(); qmmIter != queue_metric_map_.end(); ++qmmIter) {
+  for (auto qmmIter = connection_buffer_metric_map_.begin();
+      qmmIter != connection_buffer_metric_map_.end(); ++qmmIter) {
     const sp_string& instance_id = qmmIter->first;
     for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
       if (iter->second->instance_->instance_id() != instance_id) continue;
@@ -138,6 +148,7 @@ StMgrServer::~StMgrServer() {
       delete qmmIter->second;
     }
   }
+
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
@@ -162,7 +173,18 @@ sp_string StMgrServer::MakeBackPressureCompIdMetricName(const sp_string& instanc
 }
 
 sp_string StMgrServer::MakeQueueSizeCompIdMetricName(const sp_string& instanceid) {
-  return METRIC_QUEUE_SIZE_TO_INSTANCE_COMPID + instanceid;
+  return CONNECTION_BUFFER_BY_INSTANCEID + instanceid;
+}
+
+void StMgrServer::UpdateQueueMetrics(EventLoop::Status) {
+  for (auto itr = active_instances_.begin(); itr != active_instances_.end(); ++itr) {
+    sp_int32 task_id = itr->second;
+    const sp_string& instance_id = instance_info_[task_id]->instance_->instance_id();
+    sp_int32 bytes = itr->first->getOutstandingBytes();
+    connection_buffer_metric_map_[instance_id]->scope("bytes")->record(bytes);
+    sp_int32 pkts = itr->first->getOutstandingPackets();
+    connection_buffer_metric_map_[instance_id]->scope("packets")->record(pkts);
+  }
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {
@@ -213,10 +235,16 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
   if (iiter != active_instances_.end()) {
     sp_int32 task_id = iiter->second;
     CHECK(instance_info_.find(task_id) != instance_info_.end());
-    LOG(INFO) << "Instance " << instance_info_[task_id]->instance_->instance_id()
-              << " closed connection";
+    sp_string instance_id = instance_info_[task_id]->instance_->instance_id();
+    LOG(INFO) << "Instance " << instance_id << " closed connection";
+
     instance_info_[task_id]->set_connection(NULL);
     active_instances_.erase(_conn);
+
+    auto qmmiter = connection_buffer_metric_map_.find(instance_id);
+    if (qmmiter != connection_buffer_metric_map_.end()) {
+      connection_buffer_metric_map_.erase(instance_id);
+    }
   }
 }
 
@@ -314,11 +342,11 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
                                                  instance_metric);
         instance_metric_map_[instance_id] = instance_metric;
       }
-      if (queue_metric_map_.find(instance_id) == queue_metric_map_.end()) {
-        auto queue_metric = new heron::common::AssignableMetric(0);
+      if (connection_buffer_metric_map_.find(instance_id) == connection_buffer_metric_map_.end()) {
+        auto queue_metric = new heron::common::MultiMeanMetric();
         metrics_manager_client_->register_metric(MakeQueueSizeCompIdMetricName(instance_id),
                                                  queue_metric);
-        queue_metric_map_[instance_id] = queue_metric;
+        connection_buffer_metric_map_[instance_id] = queue_metric;
       }
     }
     instance_info_[task_id]->set_connection(_conn);
@@ -480,15 +508,6 @@ void StMgrServer::StopBackPressureConnectionCb(Connection* _connection) {
   }
   LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
   AttemptStopBackPressureFromSpouts();
-}
-
-void StMgrServer::ConnectionBufferChangeCb(Connection* _connection) {
-  // Find the instance this connection belongs to
-  const sp_string& instance_name = GetInstanceName(_connection);
-  if (instance_name != "") {
-    sp_int32 bytes = _connection->getOutstandingBytes();
-    queue_metric_map_[instance_name]->SetValue(bytes);
-  }
 }
 
 void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
