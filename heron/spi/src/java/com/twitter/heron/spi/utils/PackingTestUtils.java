@@ -13,17 +13,20 @@
 // limitations under the License.
 package com.twitter.heron.spi.utils;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.system.PackingPlans;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -51,10 +54,9 @@ public final class PackingTestUtils {
     TopologyAPI.Topology topology =
         TopologyTests.createTopology(topologyName, topologyConfig, spouts, bolts);
 
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
+    Config config = Config.newBuilder(true)
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
         .build();
 
     packing.initialize(config, topology);
@@ -72,15 +74,27 @@ public final class PackingTestUtils {
     return testContainerPlan(containerId, 0, 1);
   }
 
+  @SuppressWarnings("unchecked")
   public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
                                                             Integer... instanceIndices) {
+    List<Pair<String, Integer>> instanceInfo = new ArrayList<>();
+    for (int instanceIndex : instanceIndices) {
+      String componentName = "componentName-" + instanceIndex;
+      instanceInfo.add(new Pair<>(componentName, instanceIndex));
+    }
+    return testContainerPlan(containerId, instanceInfo.toArray(
+        (Pair<String, Integer>[]) Array.newInstance(Pair.class, instanceInfo.size())));
+  }
+
+  @SafeVarargs
+  public static PackingPlan.ContainerPlan testContainerPlan(int containerId,
+                                                            Pair<String, Integer>... instanceInfo) {
     double cpu = 1.5;
     ByteAmount ram = ByteAmount.fromGigabytes(1);
 
     Set<PackingPlan.InstancePlan> instancePlans = new HashSet<>();
-    for (int instanceIndex : instanceIndices) {
-      String componentName = "componentName-" + instanceIndex;
-      PackingPlan.InstancePlan instance = testInstancePlan(componentName, instanceIndex);
+    for (Pair<String, Integer> info: instanceInfo) {
+      PackingPlan.InstancePlan instance = testInstancePlan(info.first, info.second);
       instancePlans.add(instance);
       cpu += instance.getResource().getCpu();
       ram = ram.plus(instance.getResource().getRam());
@@ -93,5 +107,12 @@ public final class PackingTestUtils {
       String componentName, int instanceIndex) {
     Resource resource = new Resource(1.5, ByteAmount.fromGigabytes(2), ByteAmount.fromBytes(3));
     return new PackingPlan.InstancePlan(new InstanceId(componentName, instanceIndex, 1), resource);
+  }
+
+  public static Config newTestConfig(TopologyAPI.Topology topology) {
+    return Config.newBuilder(true)
+            .put(Key.TOPOLOGY_ID, topology.getId())
+            .put(Key.TOPOLOGY_NAME, topology.getName())
+            .build();
   }
 }

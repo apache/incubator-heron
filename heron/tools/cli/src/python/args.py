@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' args.py '''
+import argparse
 import os
 
 import heron.tools.common.src.python.utils.config as config
@@ -35,8 +36,8 @@ def add_verbose(parser):
   '''
   parser.add_argument(
       '--verbose',
-      metavar='(a boolean; default: "false")',
-      default=False)
+      default=False,
+      help='Verbose mode. Increases logging level to show debug messages')
   return parser
 
 
@@ -107,14 +108,15 @@ def add_config(parser):
 
   parser.add_argument(
       '--config-path',
-      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
-      default=os.path.join(config.get_heron_dir(), default_config_path))
+      default=os.path.join(config.get_heron_dir(), default_config_path),
+      help='Path to cluster configuration files')
 
   parser.add_argument(
       '--config-property',
-      metavar='(key=value; a config key and its value; default: [])',
+      metavar='PROPERTY=VALUE',
       action='append',
-      default=[])
+      default=[],
+      help='Configuration properties that overrides default options')
   return parser
 
 
@@ -125,9 +127,10 @@ def add_system_property(parser):
   '''
   parser.add_argument(
       '--topology-main-jvm-property',
-      metavar='(property=value; JVM system property for executing topology main; default: [])',
+      metavar='PROPERTY=VALUE',
       action="append",
-      default=[])
+      default=[],
+      help='JVM system property for executing topology main')
 
   return parser
 
@@ -139,8 +142,8 @@ def add_deactive_deploy(parser):
   '''
   parser.add_argument(
       '--deploy-deactivated',
-      metavar='(a boolean; default: "false")',
-      default=False)
+      default=False,
+      help='Deploy topology in deactivated mode')
   return parser
 
 
@@ -151,6 +154,39 @@ def add_extra_launch_classpath(parser):
   '''
   parser.add_argument(
       '--extra-launch-classpath',
-      metavar='(a string; additional JVM class path for launching topology)',
-      default="")
+      metavar='CLASS_PATH',
+      default="",
+      help='Additional JVM class path for launching topology')
+  return parser
+
+def add_dry_run(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  resp_formats = ['raw', 'table']
+  available_options = ', '.join(['%s' % opt for opt in resp_formats])
+
+  def dry_run_resp_format(value):
+    if value not in resp_formats:
+      raise argparse.ArgumentTypeError(
+          'Invalid dry-run response format: %s. Available formats: %s'
+          % (value, available_options))
+    return value
+
+  parser.add_argument(
+      '--dry-run',
+      default=False,
+      action='store_true',
+      help='Enable dry-run mode. Information about '
+           'the command will print but no action will be taken on the topology')
+
+  parser.add_argument(
+      '--dry-run-format',
+      metavar='DRY_RUN_FORMAT',
+      default='table',
+      type=dry_run_resp_format,
+      help='The format of the dry-run output ([raw|table], default=table). '
+           'Ignored when dry-run mode is not enabled')
+
   return parser

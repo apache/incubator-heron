@@ -1,0 +1,21 @@
+Total number of containers: 2
+Using packing class: com.twitter.heron.packing.roundrobin.RoundRobinPacking
+[1mContainer 1[0m
+CPU: 6.0, RAM: 7GB, Disk: 7GB
+====================================================
+| [1mcomponent[0m | [1mtask ID[0m | [1mCPU[0m | [1mRAM (GB)[0m | [1mdisk (GB)[0m |
+----------------------------------------------------
+|      word |       5 | 1.5 |        2 |         0 |
+|  exclaim1 |       3 | 1.5 |        2 |         0 |
+|  exclaim1 |       1 | 1.5 |        2 |         0 |
+====================================================
+
+[1mContainer 2[0m
+CPU: 6.0, RAM: 7GB, Disk: 7GB
+====================================================
+| [1mcomponent[0m | [1mtask ID[0m | [1mCPU[0m | [1mRAM (GB)[0m | [1mdisk (GB)[0m |
+----------------------------------------------------
+|      word |       6 | 1.5 |        2 |         0 |
+|  exclaim1 |       2 | 1.5 |        2 |         0 |
+|  exclaim1 |       4 | 1.5 |        2 |         0 |
+====================================================

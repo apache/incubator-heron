@@ -44,7 +44,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 
 public class YarnLauncherTest {
   // This test verifies if launcher correctly provides all heron specific configurations are to reef
@@ -61,16 +61,16 @@ public class YarnLauncherTest {
     // expected contains the reef configs launcher is expected to construct using testConfigs
     Map<String, String> expected = new HashMap<>();
 
-    setConfigs(inputConf, expected, Keys.topologyName(), "topology", TopologyName.class);
-    setConfigs(inputConf, expected, Keys.topologyBinaryFile(), "binary", TopologyJar.class);
-    setConfigs(inputConf, expected, Keys.topologyPackageFile(), "pack", TopologyPackageName.class);
-    setConfigs(inputConf, expected, Keys.cluster(), "cluster", Cluster.class);
-    setConfigs(inputConf, expected, Keys.role(), "role", Role.class);
-    setConfigs(inputConf, expected, Keys.environ(), "env", Environ.class);
+    setConfigs(inputConf, expected, Key.TOPOLOGY_NAME, "topology", TopologyName.class);
+    setConfigs(inputConf, expected, Key.TOPOLOGY_BINARY_FILE, "binary", TopologyJar.class);
+    setConfigs(inputConf, expected, Key.TOPOLOGY_PACKAGE_FILE, "pack", TopologyPackageName.class);
+    setConfigs(inputConf, expected, Key.CLUSTER, "cluster", Cluster.class);
+    setConfigs(inputConf, expected, Key.ROLE, "role", Role.class);
+    setConfigs(inputConf, expected, Key.ENVIRON, "env", Environ.class);
     setConfigs(inputConf, expected, YarnContext.HERON_SCHEDULER_YARN_QUEUE, "q", JobQueue.class);
     setConfigs(inputConf, expected, YarnContext.YARN_SCHEDULER_DRIVER_MEMORY_MB,
         "123", DriverMemory.class);
-    setConfigs(inputConf, expected, Keys.corePackageUri(),
+    setConfigs(inputConf, expected, Key.CORE_PACKAGE_URI,
         new File(".").getName(), HeronCorePackageName.class);
 
     // the following expected values are mostly specific to reef runtime
@@ -91,8 +91,8 @@ public class YarnLauncherTest {
     for (String configName : inputConf.keySet()) {
       builder.put(configName, inputConf.get(configName));
     }
-    builder.put(Keys.stateManagerClass(), "statemanager");
-    builder.put(Keys.packingClass(), "packing");
+    builder.put(Key.STATE_MANAGER_CLASS, "statemanager");
+    builder.put(Key.PACKING_CLASS, "packing");
     Config config = builder.build();
 
     spyLauncher.initialize(config, null);
@@ -112,6 +112,14 @@ public class YarnLauncherTest {
 
     Assert.assertEquals(String.format("Missing expected configurations: %s", expected),
         0, expected.size());
+  }
+
+  private void setConfigs(Map<String, String> inputConf,
+                          Map<String, String> outputConf,
+                          Key heronConfigKey,
+                          String value,
+                          Class<?> reefConfigKey) {
+    setConfigs(inputConf, outputConf, heronConfigKey.value(), value, reefConfigKey);
   }
 
   private void setConfigs(Map<String, String> inputConf,

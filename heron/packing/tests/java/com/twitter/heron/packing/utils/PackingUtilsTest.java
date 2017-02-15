@@ -20,11 +20,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.Resource;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.TopologyTests;
 
 public class PackingUtilsTest {
@@ -89,12 +88,7 @@ public class PackingUtilsTest {
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
 
     TopologyAPI.Topology topology = getTopology(noSpouts, noBolts, topologyConfig);
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
+    Config config = PackingTestUtils.newTestConfig(topology);
 
     Resource defaultInstanceResources = new Resource(
         Context.instanceCpu(config),
@@ -120,12 +114,7 @@ public class PackingUtilsTest {
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
 
     TopologyAPI.Topology topology = getTopology(noSpouts, noBolts, topologyConfig);
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
+    Config config = PackingTestUtils.newTestConfig(topology);
 
     Resource defaultInstanceResources = new Resource(
         Context.instanceCpu(config),

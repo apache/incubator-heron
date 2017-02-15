@@ -22,113 +22,17 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.filechooser.FileSystemView;
+import com.google.common.annotations.VisibleForTesting;
 
 public final class Misc {
 
   private static final Logger LOG = Logger.getLogger(Misc.class.getName());
 
   // Pattern to match an URL - just looks for double forward slashes //
-  private static Pattern urlPattern = Pattern.compile("(.+)://(.+)");
+  private static final Pattern URL_PATTERN = Pattern.compile("(.+)://(.+)");
+  private static final Pattern TOKEN_PATTERN = Pattern.compile("^\\$\\{([A-Z_]+)}$");
 
   private Misc() {
-  }
-
-  /**
-   * Given a string representing heron home, substitute occurrences of
-   * ${HERON_HOME} in the provided path.
-   *
-   * @param heronHome string representing a path to heron home
-   * @param pathString string representing a path including ${HERON_HOME}
-   * @return String string that represents the modified path
-   */
-  public static String substitute(String heronHome, String pathString) {
-    Config config = Config.newBuilder()
-        .put(Keys.heronHome(), heronHome)
-        .build();
-    return substitute(config, pathString);
-  }
-
-  /**
-   * Given strings representing heron home and heron conf, substitute occurrences of
-   * ${HERON_HOME} and ${HERON_CONF} in the provided path.
-   *
-   * @param heronHome string representing a path heron home
-   * @param configPath string representing a path to heron conf
-   * @param pathString string representing a path including ${HERON_HOME}/${HERON_CONF}
-   * @return String string that represents the modified path
-   */
-  public static String substitute(String heronHome, String configPath, String pathString) {
-    Config config = Config.newBuilder()
-        .put(Keys.heronHome(), heronHome)
-        .put(Keys.heronConf(), configPath)
-        .build();
-    return substitute(config, pathString);
-  }
-
-  /**
-   * Given a string representing heron sandbox home, substitute occurrences of
-   * ${HERON_SANDBOX_HOME} in the provided path.
-   *
-   * @param heronSandboxHome string representing a path to heron sandbox home
-   * @param pathString string representing a path including ${HERON_SANDBOX_HOME}
-   * @return String string that represents the modified path
-   */
-  public static String substituteSandbox(String heronSandboxHome, String pathString) {
-    Config config = Config.newBuilder()
-        .put(Keys.heronSandboxHome(), heronSandboxHome)
-        .build();
-    return substitute(config, pathString);
-  }
-
-  /**
-   * Given strings representing heron home and heron conf, substitute occurrences of
-   * ${HERON_SANDBOX_HOME} and ${HERON_SANDBOX_CONF} in the provided path.
-   *
-   * @param heronSandboxHome string representing a path heron sandbox home
-   * @param configPath string representing a path to heron conf
-   * @param pathString string representing a path including ${HERON_SANDBOX_HOME}/${HERON_SANDBOX_CONF}
-   * @return String string that represents the modified path
-   */
-  public static String substituteSandbox(
-      String heronSandboxHome,
-      String configPath,
-      String pathString) {
-    Config config = Config.newBuilder()
-        .put(Keys.heronSandboxHome(), heronSandboxHome)
-        .put(Keys.heronSandboxConf(), configPath)
-        .build();
-    return substitute(config, pathString);
-  }
-
-  /**
-   * Given a string, check if it is a URL - URL, according to our definition is
-   * the presence of two consecutive forward slashes //
-   *
-   * @param pathString string representing a path
-   * @return true if the pathString is a URL, else false
-   */
-  protected static boolean isURL(String pathString) {
-    Matcher m = urlPattern.matcher(pathString);
-    return m.matches();
-  }
-
-  /**
-   * Given a static config map, substitute occurrences of ${HERON_*} variables
-   * in the provided URL
-   *
-   * @param config a static map config object of key value pairs
-   * @param pathString string representing a path including ${HERON_*} variables
-   * @return String string that represents the modified path
-   */
-  private static String substituteURL(Config config, String pathString) {
-    Matcher m = urlPattern.matcher(pathString);
-    if (m.matches()) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(m.group(1)).append(":").append("//").append(substitute(config, m.group(2)));
-      return sb.toString();
-    }
-    return pathString;
   }
 
   /**
@@ -149,73 +53,85 @@ public final class Misc {
     }
 
     // get platform independent file separator
-    String fileSeparator = Matcher.quoteReplacement(System.getProperty("file.separator"));
+    String fileSeparator = Matcher.quoteReplacement(File.separator);
 
     // split the trimmed path into a list of components
     List<String> fixedList = Arrays.asList(trimmedPath.split(fileSeparator));
-    List<String> list = new LinkedList<String>(fixedList);
-
-    // get the home path
-    String homePath = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
+    List<String> list = new LinkedList<>(fixedList);
 
     // substitute various variables
     for (int i = 0; i < list.size(); i++) {
       String elem = list.get(i);
 
-      if ("${HOME}".equals(elem)) {
-        list.set(i, homePath);
-
-      } else if ("~".equals(elem)) {
-        list.set(i, homePath);
+      if ("${HOME}".equals(elem) || "~".equals(elem)) {
+        list.set(i, System.getProperty("user.home"));
 
       } else if ("${JAVA_HOME}".equals(elem)) {
         String javaPath = System.getenv("JAVA_HOME");
         if (javaPath != null) {
           list.set(i, javaPath);
         }
-      } else if ("${HERON_HOME}".equals(elem)) {
-        list.set(i, Context.heronHome(config));
-
-      } else if ("${HERON_BIN}".equals(elem)) {
-        list.set(i, Context.heronBin(config));
-
-      } else if ("${HERON_CONF}".equals(elem)) {
-        list.set(i, Context.heronConf(config));
-
-      } else if ("${HERON_LIB}".equals(elem)) {
-        list.set(i, Context.heronLib(config));
-
-      } else if ("${HERON_DIST}".equals(elem)) {
-        list.set(i, Context.heronDist(config));
-
-      } else if ("${HERON_SANDBOX_HOME}".equals(elem)) {
-        list.set(i, Context.heronSandboxHome(config));
-
-      } else if ("${HERON_SANDBOX_BIN}".equals(elem)) {
-        list.set(i, Context.heronSandboxBin(config));
-
-      } else if ("${HERON_SANDBOX_CONF}".equals(elem)) {
-        list.set(i, Context.heronSandboxConf(config));
-
-      } else if ("${HERON_SANDBOX_LIB}".equals(elem)) {
-        list.set(i, Context.heronSandboxLib(config));
-
-      } else if ("${CLUSTER}".equals(elem)) {
-        list.set(i, Context.cluster(config));
-
-      } else if ("${ROLE}".equals(elem)) {
-        list.set(i, Context.role(config));
-
-      } else if ("${TOPOLOGY}".equals(elem)) {
-        list.set(i, Context.topologyName(config));
-
-      } else if ("${ENVIRON}".equals(elem)) {
-        list.set(i, Context.environ(config));
-
+      } else if (isToken(elem)) {
+        Matcher m = TOKEN_PATTERN.matcher(elem);
+        if (m.matches()) {
+          String token = m.group(1);
+          try {
+            // For backwards compatibility the ${TOPOLOGY} token will match Key.TOPOLOGY_NAME
+            if ("TOPOLOGY".equals(token)) {
+              token = "TOPOLOGY_NAME";
+            }
+            Key key = Key.valueOf(token);
+            String value = config.getStringValue(key);
+            if (value == null) {
+              throw new IllegalArgumentException(String.format("Config value %s contains "
+                      + "substitution token %s but the corresponding config setting %s not found",
+                  pathString, elem, key.value()));
+            }
+            list.set(i, value);
+          } catch (IllegalArgumentException e) {
+            LOG.warning(String.format("Config value %s contains substitution token %s which is "
+                    + "not defined in the Key enum, which is required for token substitution",
+                pathString, elem));
+          }
+        }
       }
     }
 
     return combinePaths(list);
+  }
+
+  /**
+   * Given a string, check if it is a URL - URL, according to our definition is
+   * the presence of two consecutive forward slashes //
+   *
+   * @param pathString string representing a path
+   * @return true if the pathString is a URL, else false
+   */
+  @VisibleForTesting
+  static boolean isURL(String pathString) {
+    return URL_PATTERN.matcher(pathString).matches();
+  }
+
+  /**
+   * Given a static config map, substitute occurrences of ${HERON_*} variables
+   * in the provided URL
+   *
+   * @param config a static map config object of key value pairs
+   * @param pathString string representing a path including ${HERON_*} variables
+   * @return String string that represents the modified path
+   */
+  private static String substituteURL(Config config, String pathString) {
+    Matcher m = URL_PATTERN.matcher(pathString);
+    if (m.matches()) {
+      return String.format("%s://%s", m.group(1), substitute(config, m.group(2)));
+    }
+    return pathString;
+  }
+
+  @VisibleForTesting
+  static boolean isToken(String pathString) {
+    Matcher m = TOKEN_PATTERN.matcher(pathString);
+    return m.matches() && m.groupCount() > 0;
   }
 
   /**
@@ -225,7 +141,7 @@ public final class Misc {
    * @param paths a list of strings to be included in the path
    * @return String string that gives the file system path
    */
-  protected static String combinePaths(List<String> paths) {
+  private static String combinePaths(List<String> paths) {
     File file = new File(paths.get(0));
 
     for (int i = 1; i < paths.size(); i++) {
