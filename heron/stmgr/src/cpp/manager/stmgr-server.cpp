@@ -74,7 +74,7 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
 // to the string below
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
 // Prefix for connection buffer's metrics
-const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_intanceid/";
+const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_instanceid/";
 
 // TODO(mfu): Read this value from config
 const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10 * 1000 * 1000;
