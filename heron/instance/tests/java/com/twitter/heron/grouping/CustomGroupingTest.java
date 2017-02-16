@@ -93,10 +93,15 @@ public class CustomGroupingTest {
     tupleReceived = 0;
     customGroupingInfoInPrepare = null;
 
-    testLooper.exitLoop();
-    slaveLooper.exitLoop();
-    threadsPool.shutdownNow();
-
+    if (testLooper != null) {
+      testLooper.exitLoop();
+    }
+    if (slaveLooper != null) {
+      slaveLooper.exitLoop();
+    }
+    if (threadsPool != null) {
+      threadsPool.shutdownNow();
+    }
     physicalPlan = null;
     testLooper = null;
     slaveLooper = null;
