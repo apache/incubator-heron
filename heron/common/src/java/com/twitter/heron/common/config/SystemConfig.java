@@ -33,11 +33,6 @@ public class SystemConfig {
 
   private Map<String, Object> config = new HashMap<>();
 
-  public SystemConfig(String configFile, boolean mustExist) {
-    super();
-    this.config = Builder.create(true).putAll(configFile, mustExist).build().config;
-  }
-
   private SystemConfig(Builder build) {
     this.config = new HashMap<>(build.keyValues);
   }

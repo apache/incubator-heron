@@ -173,6 +173,7 @@ public enum SystemConfigKey {
   /**
    * The time interval for an instance to check the state change, for instance,
    * the interval a spout using to check whether activate/deactivate is invoked
+   * Slated for removal, see https://github.com/twitter/heron/issues/1712
    */
   INSTANCE_STATE_CHECK_INTERVAL_SEC("heron.instance.state.check.interval.sec", Type.INTEGER),
 
