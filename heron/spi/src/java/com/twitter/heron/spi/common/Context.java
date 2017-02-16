@@ -47,10 +47,6 @@ public class Context {
     return cfg.getBooleanValue(Key.VERBOSE);
   }
 
-  public static String configPath(Config cfg) {
-    return cfg.getStringValue(Key.CONFIG_PATH);
-  }
-
   public static String buildVersion(Config cfg) {
     return cfg.getStringValue(Key.BUILD_VERSION);
   }
@@ -211,147 +207,75 @@ public class Context {
     return cfg.getStringValue(Key.HERON_CONF);
   }
 
-  public static final String heronLib(Config cfg) {
+  public static String heronLib(Config cfg) {
     return cfg.getStringValue(Key.HERON_LIB);
   }
 
-  public static final String heronDist(Config cfg) {
+  public static String heronDist(Config cfg) {
     return cfg.getStringValue(Key.HERON_DIST);
   }
 
-  public static final String heronEtc(Config cfg) {
+  public static String heronEtc(Config cfg) {
     return cfg.getStringValue(Key.HERON_ETC);
   }
 
-  public static final String instanceClassPath(Config cfg) {
+  public static String instanceClassPath(Config cfg) {
     return cfg.getStringValue(Key.INSTANCE_CLASSPATH);
   }
 
-  public static final String metricsManagerClassPath(Config cfg) {
+  public static String metricsManagerClassPath(Config cfg) {
     return cfg.getStringValue(Key.METRICSMGR_CLASSPATH);
   }
 
-  public static final String packingClassPath(Config cfg) {
+  public static String metricsCacheManagerClassPath(Config cfg) {
+    return cfg.getStringValue(Key.METRICSCACHEMGR_CLASSPATH);
+  }
+
+  public static String packingClassPath(Config cfg) {
     return cfg.getStringValue(Key.PACKING_CLASSPATH);
   }
 
-  public static final String schedulerClassPath(Config cfg) {
+  public static String schedulerClassPath(Config cfg) {
     return cfg.getStringValue(Key.SCHEDULER_CLASSPATH);
   }
 
-  public static final String stateManagerClassPath(Config cfg) {
+  public static String stateManagerClassPath(Config cfg) {
     return cfg.getStringValue(Key.STATEMGR_CLASSPATH);
   }
 
-  public static final String uploaderClassPath(Config cfg) {
+  public static String uploaderClassPath(Config cfg) {
     return cfg.getStringValue(Key.UPLOADER_CLASSPATH);
   }
 
-  public static final String javaHome(Config cfg) {
+  public static String javaHome(Config cfg) {
     return cfg.getStringValue(Key.JAVA_HOME);
   }
 
-  public static String heronSandboxHome(Config cfg) {
-    return cfg.getStringValue(Key.HERON_SANDBOX_HOME);
+  public static String clusterJavaHome(Config cfg) {
+    return cfg.getStringValue(Key.HERON_CLUSTER_JAVA_HOME);
   }
 
-  public static String heronSandboxBin(Config cfg) {
-    return cfg.getStringValue(Key.HERON_SANDBOX_BIN);
+  public static String overrideFile(Config cfg) {
+    return cfg.getStringValue(Key.OVERRIDE_YAML);
   }
 
-  public static String heronSandboxConf(Config cfg) {
-    return cfg.getStringValue(Key.HERON_SANDBOX_CONF);
+  public static String executorBinary(Config cfg) {
+    return cfg.getStringValue(Key.EXECUTOR_BINARY);
   }
 
-  public static final String heronSandboxLib(Config cfg) {
-    return cfg.getStringValue(Key.HERON_SANDBOX_LIB);
+  public static String stmgrBinary(Config cfg) {
+    return cfg.getStringValue(Key.STMGR_BINARY);
   }
 
-  public static final String javaSandboxHome(Config cfg) {
-    return cfg.getStringValue(Key.HERON_SANDBOX_JAVA_HOME);
+  public static String tmasterBinary(Config cfg) {
+    return cfg.getStringValue(Key.TMASTER_BINARY);
   }
 
-  public static String clusterSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_CLUSTER_YAML);
+  public static String shellBinary(Config cfg) {
+    return cfg.getStringValue(Key.SHELL_BINARY);
   }
 
-  public static String metricsSinksSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_METRICS_YAML);
-  }
-
-  public static String packingSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_PACKING_YAML);
-  }
-
-  public static String overrideSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_OVERRIDE_YAML);
-  }
-
-  public static String schedulerSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_SCHEDULER_YAML);
-  }
-
-  public static String stateManagerSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_STATEMGR_YAML);
-  }
-
-  public static String systemConfigSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_SYSTEM_YAML);
-  }
-
-  public static String uploaderSandboxFile(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_UPLOADER_YAML);
-  }
-
-  public static String executorSandboxBinary(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_EXECUTOR_BINARY);
-  }
-
-  public static String stmgrSandboxBinary(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_STMGR_BINARY);
-  }
-
-  public static String tmasterSandboxBinary(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_TMASTER_BINARY);
-  }
-
-  public static String shellSandboxBinary(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_SHELL_BINARY);
-  }
-
-  public static final String pythonInstanceSandboxBinary(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_PYTHON_INSTANCE_BINARY);
-  }
-
-  public static final String metricsCacheManagerSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_METRICSCACHEMGR_CLASSPATH);
-  }
-
-  public static String schedulerSandboxJar(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_SCHEDULER_JAR);
-  }
-
-  public static final String instanceSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_INSTANCE_CLASSPATH);
-  }
-
-  public static final String metricsManagerSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_METRICSMGR_CLASSPATH);
-  }
-
-  public static final String packingSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_PACKING_CLASSPATH);
-  }
-
-  public static final String schedulerSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_SCHEDULER_CLASSPATH);
-  }
-
-  public static final String stateManagerSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_STATEMGR_CLASSPATH);
-  }
-
-  public static final String uploaderSandboxClassPath(Config cfg) {
-    return cfg.getStringValue(Key.SANDBOX_UPLOADER_CLASSPATH);
+  public static String pythonInstanceBinary(Config cfg) {
+    return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
   }
 }

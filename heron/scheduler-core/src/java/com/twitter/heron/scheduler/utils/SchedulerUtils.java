@@ -62,16 +62,15 @@ public final class SchedulerUtils {
     List<String> commands = new ArrayList<>();
 
     // The java executable should be "{JAVA_HOME}/bin/java"
-    String javaExecutable = String.format("%s/%s", Context.javaSandboxHome(config), "bin/java");
+    String javaExecutable = String.format("%s/%s", Context.clusterJavaHome(config), "bin/java");
     commands.add(javaExecutable);
     commands.add("-cp");
 
     // Construct the complete classpath to start scheduler
-    String completeSchedulerProcessClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
+    String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
+        Context.schedulerClassPath(config),
+        Context.packingClassPath(config),
+        Context.stateManagerClassPath(config));
     commands.add(completeSchedulerProcessClassPath);
     commands.add("com.twitter.heron.scheduler.SchedulerMain");
 
@@ -169,7 +168,7 @@ public final class SchedulerUtils {
       int containerIndex,
       List<String> ports) {
     List<String> commands = new ArrayList<>();
-    commands.add(Context.executorSandboxBinary(config));
+    commands.add(Context.executorBinary(config));
     commands.add(Integer.toString(containerIndex));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
@@ -206,39 +205,38 @@ public final class SchedulerUtils {
     commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
     commands.add(Context.stateManagerConnectionString(config));
     commands.add(Context.stateManagerRootPath(config));
-    commands.add(Context.tmasterSandboxBinary(config));
-    commands.add(Context.stmgrSandboxBinary(config));
-    commands.add(Context.metricsManagerSandboxClassPath(config));
+    commands.add(Context.tmasterBinary(config));
+    commands.add(Context.stmgrBinary(config));
+    commands.add(Context.metricsManagerClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
     commands.add(masterPort);
     commands.add(tmasterControllerPort);
     commands.add(tmasterStatsPort);
-    commands.add(Context.systemConfigSandboxFile(config));
+    commands.add(Context.systemConfigFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config).name().toLowerCase());
     commands.add(Context.topologyBinaryFile(config));
-    commands.add(Context.javaSandboxHome(config));
+    commands.add(Context.clusterJavaHome(config));
     commands.add(shellPort);
-    commands.add(Context.shellSandboxBinary(config));
+    commands.add(Context.shellBinary(config));
     commands.add(metricsmgrPort);
     commands.add(Context.cluster(config));
     commands.add(Context.role(config));
     commands.add(Context.environ(config));
-    commands.add(Context.instanceSandboxClassPath(config));
-    commands.add(Context.metricsSinksSandboxFile(config));
+    commands.add(Context.instanceClassPath(config));
+    commands.add(Context.metricsSinksFile(config));
 
-    String completeSchedulerProcessClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
+    String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
+        Context.schedulerClassPath(config),
+        Context.packingClassPath(config),
+        Context.stateManagerClassPath(config));
 
     commands.add(completeSchedulerProcessClassPath);
     commands.add(schedulerPort);
-    commands.add(Context.pythonInstanceSandboxBinary(config));
-    commands.add(Context.metricsCacheManagerSandboxClassPath(config));
+    commands.add(Context.pythonInstanceBinary(config));
+    commands.add(Context.metricsCacheManagerClassPath(config));
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
 

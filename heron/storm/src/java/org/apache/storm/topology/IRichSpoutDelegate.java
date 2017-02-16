@@ -40,7 +40,8 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   }
 
   @Override
-  public void open(Map<String, Object> conf, com.twitter.heron.api.topology.TopologyContext context,
+  @SuppressWarnings("rawtypes")
+  public void open(Map conf, com.twitter.heron.api.topology.TopologyContext context,
                    SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);

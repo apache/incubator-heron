@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -37,8 +39,8 @@ import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
-import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
@@ -240,6 +242,48 @@ public class SubmitterMain {
     return options;
   }
 
+  private static boolean isVerbose(CommandLine cmd) {
+    return cmd.hasOption("v");
+  }
+
+  @VisibleForTesting
+  public static Config loadConfig(CommandLine cmd, TopologyAPI.Topology topology) {
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String heronHome = cmd.getOptionValue("heron_home");
+    String configPath = cmd.getOptionValue("config_path");
+    String overrideConfigFile = cmd.getOptionValue("override_config_file");
+    String releaseFile = cmd.getOptionValue("release_file");
+    String topologyPackage = cmd.getOptionValue("topology_package");
+    String topologyDefnFile = cmd.getOptionValue("topology_defn");
+    String topologyBinaryFile = cmd.getOptionValue("topology_bin");
+
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+    }
+
+    // Default dry-run output format type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (dryRun && cmd.hasOption("t")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
+    }
+
+    // first load the defaults, then the config from files to override it
+    // next add config parameters from the command line
+    // load the topology configs
+
+    // build the final config by expanding all the variables
+    return Config.toLocalMode(Config.newBuilder()
+        .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
+        .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
+        .build());
+  }
+
   public static void main(String[] args) throws Exception {
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
@@ -260,53 +304,17 @@ public class SubmitterMain {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    Boolean verbose = false;
     Level logLevel = Level.INFO;
-    if (cmd.hasOption("v")) {
+    if (isVerbose(cmd)) {
       logLevel = Level.ALL;
-      verbose = true;
     }
 
     // init log
     LoggingHelper.loggerInit(logLevel, false);
 
-    String cluster = cmd.getOptionValue("cluster");
-    String role = cmd.getOptionValue("role");
-    String environ = cmd.getOptionValue("environment");
-    String heronHome = cmd.getOptionValue("heron_home");
-    String configPath = cmd.getOptionValue("config_path");
-    String overrideConfigFile = cmd.getOptionValue("override_config_file");
-    String releaseFile = cmd.getOptionValue("release_file");
-    String topologyPackage = cmd.getOptionValue("topology_package");
-    String topologyDefnFile = cmd.getOptionValue("topology_defn");
-    String topologyBinaryFile = cmd.getOptionValue("topology_bin");
-
     // load the topology definition into topology proto
-    TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
-
-    Boolean dryRun = false;
-    if (cmd.hasOption("u")) {
-      dryRun = true;
-    }
-
-    // Default dry-run output format type
-    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
-    if (dryRun && cmd.hasOption("t")) {
-      String format = cmd.getOptionValue("dry_run_format");
-      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
-      LOG.fine(String.format("Running dry-run mode using format %s", format));
-    }
-
-    // first load the defaults, then the config from files to override it
-    // next add config parameters from the command line
-    // load the topology configs
-
-    // build the final config by expanding all the variables
-    Config config = Config.expand(Config.newBuilder()
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
-        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, verbose))
-        .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
-        .build());
+    TopologyAPI.Topology topology = TopologyUtils.getTopology(cmd.getOptionValue("topology_defn"));
+    Config config = loadConfig(cmd, topology);
 
     LOG.fine("Static config loaded successfully");
     LOG.fine(config.toString());

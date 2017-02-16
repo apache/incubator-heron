@@ -91,10 +91,11 @@ java_library(
 
 java_tests(
     test_classes = [
-        "com.twitter.heron.spi.common.ClusterConfigTest",
-        "com.twitter.heron.spi.common.ClusterDefaultsTest",
-        "com.twitter.heron.spi.common.ConfigKeysTest",
-        "com.twitter.heron.spi.common.MiscTest",
+        "com.twitter.heron.spi.common.ConfigLoaderTest",
+        "com.twitter.heron.spi.common.ConfigTest",
+        "com.twitter.heron.spi.common.ContextTest",
+        "com.twitter.heron.spi.common.KeysTest",
+        "com.twitter.heron.spi.common.TokenSubTest",
     ],
     runtime_deps = [ ":common-tests" ],
     data = glob(["**/testdata/**/*.yaml"]),
