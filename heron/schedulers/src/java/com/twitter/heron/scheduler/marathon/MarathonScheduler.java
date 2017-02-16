@@ -104,7 +104,7 @@ public class MarathonScheduler implements IScheduler {
 
   protected String getTopologyConf(PackingPlan packing) {
 
-    Config marathonConfig = Config.newBuilder()
+    config = Config.newBuilder()
         .putAll(config)
         .put(Keys.topologyBinaryFile(),
             FileUtils.getBaseName(Context.topologyBinaryFile(config)))
@@ -127,7 +127,7 @@ public class MarathonScheduler implements IScheduler {
       ObjectNode instance = mapper.createObjectNode();
 
       instance.put(MarathonConstants.ID, Integer.toString(i));
-      instance.put(MarathonConstants.COMMAND, getExecutorCommand(marathonConfig, i));
+      instance.put(MarathonConstants.COMMAND, getExecutorCommand(config, i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
       instance.set(MarathonConstants.CONTAINER, getContainer(mapper));
       instance.put(MarathonConstants.MEMORY, containerResource.getRam().asMegabytes());
@@ -159,8 +159,9 @@ public class MarathonScheduler implements IScheduler {
   protected ObjectNode getDockerContainer(ObjectMapper mapper) {
     ObjectNode dockerNode = mapper.createObjectNode();
 
-    dockerNode.put(MarathonConstants.DOCKER_IMAGE, "ndustrialio/heron-executor:jre8");
-    dockerNode.put(MarathonConstants.DOCKER_NETWORK, "BRIDGE");
+    dockerNode.put(MarathonConstants.DOCKER_IMAGE,
+        MarathonContext.getExecutorDockerImage(config));
+    dockerNode.put(MarathonConstants.DOCKER_NETWORK, MarathonConstants.DOCKER_NETWORK_BRIDGE);
     dockerNode.put(MarathonConstants.DOCKER_PRIVILEGED, false);
     dockerNode.put(MarathonConstants.DOCKER_FORCE_PULL, true);
     dockerNode.set(MarathonConstants.DOCKER_PORT_MAPPINGS, getPorts(mapper));
