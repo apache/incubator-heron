@@ -198,7 +198,7 @@ public enum SystemConfigKey {
    * The interval in seconds to sample a system metric, for instance, jvm used memory.
    */
   INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC(
-      "heron.instance.metrics.system.sample.interval.sec", Type.LONG),
+      "heron.instance.metrics.system.sample.interval.sec", Type.INTEGER),
 
   /**
    * The lookForTimeout Interval in spout instance will be timeoutInSeconds / NBUCKETS

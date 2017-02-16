@@ -244,7 +244,7 @@ public final class SystemConfig {
   private void assertType(SystemConfigKey key, SystemConfigKey.Type type) {
     if (key.getType() != type) {
       throw new IllegalArgumentException(String.format(
-          "config key %s is not of expected type %s", key, type));
+          "config key %s is of type %s instead of expected type %s", key, key.getType(), type));
     }
   }
 
