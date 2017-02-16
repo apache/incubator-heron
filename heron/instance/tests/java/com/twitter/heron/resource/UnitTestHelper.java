@@ -49,7 +49,7 @@ public final class UnitTestHelper {
    *
    * @param ackEnabled whether the acking system is enabled
    * @param messageTimeout the seconds for a tuple to be time-out. -1 means the timeout is not enabled.
-   * @param topologyState the Topology State inside this PhysicaPlan, for intance, RUNNING.
+   * @param topologyState the Topology State inside this PhysicalPlan, for instance, RUNNING.
    * @return the corresponding Physical Plan
    */
   public static PhysicalPlans.PhysicalPlan getPhysicalPlan(

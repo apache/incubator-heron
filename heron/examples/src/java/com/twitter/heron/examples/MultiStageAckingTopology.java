@@ -75,8 +75,9 @@ public final class MultiStageAckingTopology {
     public AckingTestWordSpout() {
     }
 
+    @SuppressWarnings("rawtypes")
     public void open(
-        Map<String, Object> conf,
+        Map conf,
         TopologyContext context,
         SpoutOutputCollector acollector) {
       collector = acollector;

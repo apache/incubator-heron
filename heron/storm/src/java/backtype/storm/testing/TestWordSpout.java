@@ -35,8 +35,9 @@ public class TestWordSpout extends BaseRichSpout {
   private String[] words;
   private Random rand;
 
+  @SuppressWarnings("rawtypes")
   public void open(
-      Map<String, Object> conf,
+      Map conf,
       TopologyContext context,
       SpoutOutputCollector aCollector) {
     collector = aCollector;

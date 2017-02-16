@@ -33,6 +33,9 @@ cat >> $project_file <<EOH
   <projects/>
     <buildSpec>
       <buildCommand>
+        <name>org.python.pydev.PyDevBuilder</name>
+      </buildCommand>
+      <buildCommand>
          <name>org.eclipse.jdt.core.javabuilder</name>
       </buildCommand>
       <buildCommand>
@@ -40,11 +43,44 @@ cat >> $project_file <<EOH
       </buildCommand>
     </buildSpec>
     <natures>
+      <nature>org.python.pydev.pythonNature</nature>
       <nature>org.eclipse.jdt.core.javanature</nature>
       <nature>org.eclipse.m2e.core.maven2Nature</nature>
     </natures>
 </projectDescription>
 EOH
+
+
+# generate .pydevproject file
+readonly pydevproject_file=$DIR/../.pydevproject
+rm -rf $pydevproject_file
+cat >> $pydevproject_file <<EOH
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse-pydev version="1.0"?><pydev_project>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
+<pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
+EOH
+
+function generate_py_source_dirs() {
+for pysrcdir in $py_dir_list; do
+  cat >> $pydevproject_file << EOH
+  <path>/\${PROJECT_DIR_NAME}/$pysrcdir</path>
+EOH
+done
+}
+
+py_dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 3-`
+generate_py_source_dirs
+
+py_dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 3-`
+generate_py_source_dirs
+
+cat >> $pydevproject_file << 'EOF'
+</pydev_pathproperty>
+</pydev_project>
+EOF
+
 
 # generate .classpath file
 readonly classpath_file=$DIR/../.classpath
@@ -73,14 +109,14 @@ generate_source_dirs
 dir_list=`find $DIR/../heron -path "*/test/java" | cut -d '/' -f 3-`
 generate_source_dirs
 
-dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 3-`
-generate_source_dirs
+#dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 3-`
+#generate_source_dirs
 
-dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 3-`
-generate_source_dirs
+#dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 3-`
+#generate_source_dirs
 
 
-for jarfile in ` find $DIR/../bazel-genfiles/ -name \*.jar | cut -d '/' -f 3-`; do 
+for jarfile in `find $DIR/../bazel-genfiles/ -name \*.jar | cut -d '/' -f 3-`; do 
   cat >> $classpath_file << EOH
   <classpathentry kind="lib" path="$jarfile"/>
 EOH
@@ -92,6 +128,10 @@ cat >> $classpath_file << 'EOF'
     <attributes>
       <attribute name="maven.pomderived" value="true"/>
     </attributes>
+    <accessrules>
+      <accessrule kind="accessible" pattern="com/sun/net/httpserver/**"/>
+      <accessrule kind="accessible" pattern="com/sun/management/**"/>
+    </accessrules>
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
     <attributes>

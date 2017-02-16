@@ -30,7 +30,8 @@ import backtype.storm.task.TopologyContext;
 
 public class BaseTaskHook implements ITaskHook {
   @Override
-  public void prepare(Map<String, Object> conf, TopologyContext context) {
+  @SuppressWarnings("rawtypes")
+  public void prepare(Map conf, TopologyContext context) {
   }
 
   @Override

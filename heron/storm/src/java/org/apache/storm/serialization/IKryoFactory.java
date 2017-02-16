@@ -34,12 +34,13 @@ import com.esotericsoftware.kryo.Kryo;
  * 6. Storm calls all user-defined decorators through topology.kryo.decorators
  * 7. Storm calls postDecorate hook
  */
+@SuppressWarnings("rawtypes")
 public interface IKryoFactory {
-  Kryo getKryo(Map<String, Object> conf);
+  Kryo getKryo(Map conf);
 
-  void preRegister(Kryo k, Map<String, Object> conf);
+  void preRegister(Kryo k, Map conf);
 
-  void postRegister(Kryo k, Map<String, Object> conf);
+  void postRegister(Kryo k, Map conf);
 
-  void postDecorate(Kryo k, Map<String, Object> conf);
+  void postDecorate(Kryo k, Map conf);
 }

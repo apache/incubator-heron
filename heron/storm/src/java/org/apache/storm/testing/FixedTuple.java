@@ -15,23 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.storm.testing;
 
-package backtype.storm.spout;
+import java.io.Serializable;
+import java.util.List;
 
-import java.util.Map;
+import org.apache.storm.utils.Utils;
 
-/**
- * The strategy a spout needs to use when its waiting. Waiting is
- * triggered in one of two conditions:
- * <p>
- * 1. nextTuple emits no tuples
- * 2. The spout has hit maxSpoutPending and can't emit any more tuples
- * <p>
- * The default strategy sleeps for one millisecond.
- */
-public interface ISpoutWaitStrategy {
-  @SuppressWarnings("rawtypes")
-  void prepare(Map conf);
+public class FixedTuple implements Serializable {
+  private static final long serialVersionUID = 1488633754555739513L;
+  public String stream;
+  public List<Object> values;
 
-  void emptyEmit(long streak);
+  public FixedTuple(List<Object> values) {
+    this.stream = Utils.DEFAULT_STREAM_ID;
+    this.values = values;
+  }
+
+  public FixedTuple(String stream, List<Object> values) {
+    this.stream = stream;
+    this.values = values;
+  }
+
+  @Override
+  public String toString() {
+    return stream + ":" + "<" + values.toString() + ">";
+  }
 }

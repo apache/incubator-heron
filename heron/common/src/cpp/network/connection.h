@@ -104,10 +104,6 @@ class Connection : public BaseConnection {
    */
   sp_int32 registerForBackPressure(VCallback<Connection*> cbStarter,
                                    VCallback<Connection*> cbReliever);
-  /**
-   * Invoke this callback when the connection buffer size changes.
-   */
-  void registerForBufferChange(VCallback<Connection*> cb);
 
   sp_int32 getOutstandingPackets() const { return mNumOutstandingPackets; }
   sp_int32 getOutstandingBytes() const { return mNumOutstandingBytes; }
@@ -164,8 +160,6 @@ class Connection : public BaseConnection {
   // This call back gets registered from the Server and gets called once the conneciton pipe
   // becomes full (outstanding bytes exceed threshold)
   VCallback<Connection*> mOnConnectionBufferFull;
-
-  VCallback<Connection*> mOnConnectionBufferChange;
 
   sp_int32 mIOVectorSize;
   struct iovec* mIOVector;
