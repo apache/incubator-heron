@@ -94,7 +94,8 @@ public final class TaskHookTopology {
     }
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context) {
+    @SuppressWarnings("rawtypes")
+    public void prepare(Map conf, TopologyContext context) {
       GlobalMetrics.incr("hook_prepare");
       System.out.println(constructString);
       System.out.println("prepare() is invoked in hook");
@@ -191,8 +192,9 @@ public final class TaskHookTopology {
     public AckingTestWordSpout() {
     }
 
+    @SuppressWarnings("rawtypes")
     public void open(
-        Map<String, Object> conf,
+        Map conf,
         TopologyContext context,
         SpoutOutputCollector acollector) {
       collector = acollector;
