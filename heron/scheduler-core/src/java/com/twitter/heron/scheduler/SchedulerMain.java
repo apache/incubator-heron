@@ -277,7 +277,9 @@ public class SchedulerMain {
   private static void setupLogging(Config config) throws IOException {
     String systemConfigFilename = Context.systemConfigFile(config);
 
-    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .build();
 
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.

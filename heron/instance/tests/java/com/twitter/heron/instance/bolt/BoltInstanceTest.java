@@ -126,10 +126,15 @@ public class BoltInstanceTest {
     tupleExecutedCount = new AtomicInteger(0);
     receivedStrings = null;
 
-    testLooper.exitLoop();
-    slaveLooper.exitLoop();
-    threadsPool.shutdownNow();
-
+    if (testLooper != null) {
+      testLooper.exitLoop();
+    }
+    if (slaveLooper != null) {
+      slaveLooper.exitLoop();
+    }
+    if (threadsPool != null) {
+      threadsPool.shutdownNow();
+    }
     physicalPlan = null;
     testLooper = null;
     slaveLooper = null;

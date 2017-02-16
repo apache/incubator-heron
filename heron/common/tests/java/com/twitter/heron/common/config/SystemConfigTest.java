@@ -29,8 +29,7 @@ public class SystemConfigTest {
 
   @Test
   public void testReadConfig() throws Exception {
-    InputStream inputStream  = ConfigReaderTest.class.
-        getResourceAsStream(RESOURCE_LOC);
+    InputStream inputStream  = getClass().getResourceAsStream(RESOURCE_LOC);
     if (inputStream == null) {
       throw new RuntimeException("Sample output file not found");
     }
@@ -39,10 +38,12 @@ public class SystemConfigTest {
     OutputStream outputStream = new FileOutputStream(file);
     IOUtils.copy(inputStream, outputStream);
     outputStream.close();
-    SystemConfig sysconfig = new SystemConfig(file.getAbsolutePath());
-    Assert.assertEquals("log-files", sysconfig.getHeronLoggingDirectory());
-    Assert.assertEquals(100, sysconfig.getHeronLoggingMaximumSizeMb());
-    Assert.assertEquals(5, sysconfig.getHeronLoggingMaximumFiles());
-    Assert.assertEquals(60, sysconfig.getHeronMetricsExportIntervalSec());
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(file.getAbsolutePath(), true)
+        .build();
+    Assert.assertEquals("log-files", systemConfig.getHeronLoggingDirectory());
+    Assert.assertEquals(100, systemConfig.getHeronLoggingMaximumSizeMb());
+    Assert.assertEquals(5, systemConfig.getHeronLoggingMaximumFiles());
+    Assert.assertEquals(60, systemConfig.getHeronMetricsExportIntervalSec());
   }
 }
