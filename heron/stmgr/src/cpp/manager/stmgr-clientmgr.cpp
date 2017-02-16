@@ -16,8 +16,8 @@
 
 #include "manager/stmgr-clientmgr.h"
 #include <iostream>
-#include <set>
 #include <map>
+#include <unordered_set>
 #include "manager/stmgr.h"
 #include "manager/stmgr-client.h"
 #include "proto/messages.h"
@@ -57,7 +57,7 @@ StMgrClientMgr::~StMgrClientMgr() {
 void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) {
   // TODO(vikasr) : Currently we establish connections with all streammanagers
   // In the next iteration we might want to make it better
-  std::set<sp_string> all_stmgrs;
+  std::unordered_set<sp_string> all_stmgrs;
   for (sp_int32 i = 0; i < _pplan->stmgrs_size(); ++i) {
     const proto::system::StMgr& s = _pplan->stmgrs(i);
     if (s.id() == stmgr_id_) {
@@ -85,7 +85,7 @@ void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) 
   }
 
   // We need to remove any unused ports
-  std::set<sp_string> to_remove;
+  std::unordered_set<sp_string> to_remove;
   for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
     if (all_stmgrs.find(iter->first) == all_stmgrs.end()) {
       // This stmgr is no longer there in the physical map
