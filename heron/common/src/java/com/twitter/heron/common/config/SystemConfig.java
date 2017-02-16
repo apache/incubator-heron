@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionDatum;
 
 /**
  * SystemConfig are a set of configuration parameters that are set by the system
@@ -572,21 +571,21 @@ public class SystemConfig {
   }
 
   public long getTmasterMetricsCollectorMaximumException() {
-      return TypeUtils.
-          getLong(this.config.getOrDefault(
-              SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION, 256));
+    return TypeUtils.
+        getLong(this.config.getOrDefault(
+            SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION, 256));
   }
 
   public long getTmasterMetricsCollectorMaximumIntervalMin() {
-      return TypeUtils.
-          getLong(this.config.getOrDefault(
-              SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN, 180));
+    return TypeUtils.
+        getLong(this.config.getOrDefault(
+            SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN, 180));
   }
 
   public long getTmasterMetricsCollectorPurgeIntervalSec() {
-      return TypeUtils.
-          getLong(this.config.getOrDefault(
-              SystemConfig.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC, 60));
+    return TypeUtils.
+        getLong(this.config.getOrDefault(
+            SystemConfig.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC, 60));
   }
 
   public Object put(String key, Object value) {
