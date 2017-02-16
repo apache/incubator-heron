@@ -38,8 +38,8 @@ import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -306,20 +306,15 @@ public class MetricsCacheManager {
     LOG.info("Sinks Config: " + sinksConfig.toString());
 
     // build config from cli
-    Config config =
-        Config.expand(
-            Config.newBuilder()
-                .putAll(ClusterConfig.loadSandboxConfig())
-                .putAll(Config.newBuilder()
-                    .put(Key.CLUSTER, cluster)
-                    .put(Key.ROLE, role)
-                    .put(Key.ENVIRON, environ)
-                    .build())
-                .putAll(Config.newBuilder()
-                    .put(Key.TOPOLOGY_NAME, topologyName)
-                    .put(Key.TOPOLOGY_ID, topologyId)
-                    .build())
-                .build());
+    Config config = Config.toClusterMode(Config.newBuilder()
+        .putAll(ConfigLoader.loadClusterConfig())
+        .putAll(Config.newBuilder()
+            .put(Key.CLUSTER, cluster).put(Key.ROLE, role).put(Key.ENVIRON, environ)
+            .build())
+        .putAll(Config.newBuilder()
+            .put(Key.TOPOLOGY_NAME, topologyName).put(Key.TOPOLOGY_ID, topologyId)
+            .build())
+        .build());
     LOG.info("Cli Config: " + config.toString());
 
     // build metricsCache location

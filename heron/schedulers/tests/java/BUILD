@@ -65,7 +65,7 @@ marathon_deps_files = [
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
-  deps = scheduler_deps_files + aurora_deps_files,
+  deps = scheduler_deps_files + aurora_deps_files + ["@commons_cli_commons_cli//jar"],
 )
 
 java_tests(

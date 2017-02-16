@@ -22,7 +22,7 @@ import org.junit.Test;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.TokenSub;
 
 public class LocalFileSystemConfigTest {
 
@@ -40,11 +40,11 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testDefaultConfig() throws Exception {
-    Config config = Config.expand(getDefaultConfig());
+    Config config = Config.toLocalMode(getDefaultConfig());
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
-        Misc.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
+        TokenSub.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
 
@@ -52,7 +52,7 @@ public class LocalFileSystemConfigTest {
   public void testOverrideConfig() throws Exception {
     String overrideDirectory = "/users/twitter";
 
-    Config config = Config.expand(
+    Config config = Config.toLocalMode(
         Config.newBuilder()
             .putAll(getDefaultConfig())
             .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), overrideDirectory)
@@ -66,19 +66,19 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testTopologyDirectory() throws Exception {
-    Config config = Config.expand(getDefaultConfig());
+    Config config = Config.toLocalMode(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
     Assert.assertEquals(
         uploader.getTopologyDirectory(),
-        Misc.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
+        TokenSub.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
 
   @Test
   public void testTopologyFile() throws Exception {
-    Config config = Config.expand(getDefaultConfig());
+    Config config = Config.toLocalMode(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
@@ -93,7 +93,7 @@ public class LocalFileSystemConfigTest {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     String overrideDirectory = "/users/twitter";
 
-    Config config = Config.expand(
+    Config config = Config.toLocalMode(
         Config.newBuilder()
             .putAll(getDefaultConfig())
             .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), overrideDirectory)
@@ -111,7 +111,7 @@ public class LocalFileSystemConfigTest {
   public void testOverrideTopologyFile() throws Exception {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     String overrideDirectory = "/users/twitter";
-    Config config = Config.expand(
+    Config config = Config.toLocalMode(
         Config.newBuilder()
             .putAll(getDefaultConfig())
             .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), overrideDirectory)

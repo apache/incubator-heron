@@ -209,7 +209,7 @@ public class SchedulerMain {
         cmd.getOptionValue("topology_bin"),
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
-        (Boolean) cmd.hasOption("verbose"),
+        cmd.hasOption("verbose"),
         schedulerProperties);
 
     LOG.info("Scheduler command line properties override: " + schedulerProperties.toString());
@@ -275,7 +275,7 @@ public class SchedulerMain {
 
   // Set up logging based on the Config
   private static void setupLogging(Config config) throws IOException {
-    String systemConfigFilename = Context.systemConfigSandboxFile(config);
+    String systemConfigFilename = Context.systemConfigFile(config);
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
 
@@ -339,7 +339,7 @@ public class SchedulerMain {
       // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
+      LOG.log(Level.SEVERE, "Failed to instantiate instances using config: " + config, e);
       return false;
     }
 

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.DryRunFormatType;
@@ -27,12 +28,55 @@ import com.twitter.heron.common.basics.TypeUtils;
 /**
  * Config is an Immutable Map of &lt;String, Object&gt; The get/set API that uses Key objects
  * should be favored over Strings. Usage of the String API should be refactored out.
+ *
+ * A newly created Config object holds configs that might include wildcard tokens, like
+ * ${HERON_HOME}/bin, ${HERON_LIB}/packing/*. Token substitution can be done by converting that
+ * config to a local or cluster config by using the {@code Config.toLocalMode} or
+ * {@code Config.toClusterMode} methods.
+ *
+ * Local mode is for a config to be used to run Heron locally, where HERON_HOME might be an install
+ * dir on the local host (e.g. HERON_HOME=/usr/bin/heron). Cluster mode is to be used when building
+ * configs for a remote process run on a service, where all directories might be relative to the
+ * current dir by default (e.g. HERON_HOME=~/heron-core).
  */
 public class Config {
-  private final Map<String, Object> cfgMap = new HashMap<>();
+  private static final Logger LOG = Logger.getLogger(Config.class.getName());
 
+  private final Map<String, Object> cfgMap;
+
+  private enum Mode {
+    RAW,    // the initially provided configs without pattern substitution
+    LOCAL,  // the provided configs with pattern substitution for the local (i.e., client) env
+    CLUSTER // the provided configs with pattern substitution for the cluster (i.e., remote) env
+  }
+
+  // Used to initialize a raw config. Should be used by consumers of Config via the builder
   protected Config(Builder build) {
-    cfgMap.putAll(build.keyValues);
+    this.mode = Mode.RAW;
+    this.rawConfig = this;
+    this.cfgMap = new HashMap<>(build.keyValues);
+  }
+
+  // Used internally to create a Config that is actually a facade over a raw, local and
+  // cluster config
+  private Config(Mode mode, Config rawConfig, Config localConfig, Config clusterConfig) {
+    this.mode = mode;
+    this.rawConfig = rawConfig;
+    this.localConfig = localConfig;
+    this.clusterConfig = clusterConfig;
+    switch (mode) {
+      case RAW:
+        this.cfgMap = rawConfig.cfgMap;
+        break;
+      case LOCAL:
+        this.cfgMap = localConfig.cfgMap;
+        break;
+      case CLUSTER:
+        this.cfgMap = clusterConfig.cfgMap;
+        break;
+      default:
+        throw new IllegalArgumentException("Unrecognized mode passed to constructor: " + mode);
+    }
   }
 
   public static Builder newBuilder() {
@@ -43,18 +87,104 @@ public class Config {
     return Builder.create(loadDefaults);
   }
 
-  public static Config expand(Config config) {
-    Config.Builder cb = Config.newBuilder();
+  public static Config toLocalMode(Config config) {
+    return config.lazyCreateConfig(Mode.LOCAL);
+  }
+
+  public static Config toClusterMode(Config config) {
+    return config.lazyCreateConfig(Mode.CLUSTER);
+  }
+
+  private static Config expand(Config config) {
+    return expand(config, 0);
+  }
+
+  /**
+   * Recursively expand each config value until token substitution is exhausted. We must recurse
+   * to handle the case where field expansion requires multiple iterations, due to new tokens being
+   * introduced as we replace. For example:
+   *
+   *   ${HERON_BIN}/heron-executor        gets expanded to
+   *   ${HERON_HOME}/bin/heron-executor   gets expanded to
+   *   /usr/local/heron/bin/heron-executor
+   *
+   * If break logic is when another round does not reduce the number of tokens, since it means we
+   * couldn't find a valid replacement.
+   */
+  private static Config expand(Config config, int previousTokensCount) {
+    Config.Builder cb = Config.newBuilder().putAll(config);
+    int tokensCount = 0;
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
       if (value instanceof String) {
-        String expandedValue = Misc.substitute(config, (String) value);
+        String expandedValue = TokenSub.substitute(config, (String) value);
+        if (expandedValue.contains("${")) {
+          tokensCount++;
+        }
         cb.put(key, expandedValue);
       } else {
         cb.put(key, value);
       }
     }
-    return cb.build();
+    if (previousTokensCount != tokensCount) {
+      return expand(cb.build(), tokensCount);
+    } else {
+      return cb.build();
+    }
+  }
+
+  private final Mode mode;
+  private final Config rawConfig;     // what the user first creates
+  private Config localConfig = null;  // what gets generated during toLocalMode
+  private Config clusterConfig = null; // what gets generated during toClusterMode
+
+  private Config lazyCreateConfig(Mode newMode) {
+    if (newMode == this.mode) {
+      return this;
+    }
+
+    // this is here so that we don't keep cascading deeper into object creation so:
+    // localConfig == toLocalMode(toClusterMode(localConfig))
+    Config newRawConfig = this.rawConfig;
+    Config newLocalConfig = this.localConfig;
+    Config newClusterConfig = this.clusterConfig;
+    switch (this.mode) {
+      case RAW:
+        newRawConfig = this;
+        break;
+      case LOCAL:
+        newLocalConfig = this;
+        break;
+      case CLUSTER:
+        newClusterConfig = this;
+        break;
+      default:
+        throw new IllegalArgumentException(
+            "Unrecognized mode found in config: " + this.mode);
+    }
+
+    switch (newMode) {
+      case LOCAL:
+        if (this.localConfig == null) {
+          Config tempConfig = Config.expand(Config.newBuilder().putAll(rawConfig.cfgMap).build());
+          this.localConfig = new Config(Mode.LOCAL, newRawConfig, tempConfig, newClusterConfig);
+        }
+        return this.localConfig;
+      case CLUSTER:
+        if (this.clusterConfig == null) {
+          Config.Builder bc = Config.newBuilder()
+              .putAll(rawConfig.cfgMap)
+              .put(Key.HERON_HOME, get(Key.HERON_CLUSTER_HOME))
+              .put(Key.HERON_CONF, get(Key.HERON_CLUSTER_CONF));
+          Config tempConfig = Config.expand(bc.build());
+          this.clusterConfig = new Config(Mode.CLUSTER, newRawConfig, newLocalConfig, tempConfig);
+        }
+        return this.clusterConfig;
+      case RAW:
+      default:
+        throw new IllegalArgumentException(
+            "Unrecognized mode passed to lazyCreateConfig: " + newMode);
+    }
   }
 
   public int size() {
@@ -66,7 +196,17 @@ public class Config {
   }
 
   private Object get(String key) {
-    return cfgMap.get(key);
+    switch (mode) {
+      case LOCAL:
+        return localConfig.cfgMap.get(key);
+      case CLUSTER:
+        return clusterConfig.cfgMap.get(key);
+      case RAW:
+        return rawConfig.cfgMap.get(key);
+      default:
+        throw new IllegalArgumentException(String.format(
+            "Unrecognized mode passed to get for key=%s: %s", key, mode));
+    }
   }
 
   public String getStringValue(String key) {
@@ -104,7 +244,7 @@ public class Config {
     return (DryRunFormatType) get(key);
   }
 
-  PackageType getPackageType(Key key) {
+  public PackageType getPackageType(Key key) {
     return (PackageType) get(key);
   }
 
