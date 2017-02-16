@@ -572,33 +572,21 @@ public class SystemConfig {
   }
 
   public long getTmasterMetricsCollectorMaximumException() {
-    try {
       return TypeUtils.
-          getLong(this.config.get(
-              SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION));
-    } catch (Exception e) {
-      return 256;
-    }
+          getLong(this.config.getOrDefault(
+              SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION, 256));
   }
 
   public long getTmasterMetricsCollectorMaximumIntervalMin() {
-    try {
       return TypeUtils.
-          getLong(this.config.get(
-              SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN));
-    } catch (Exception e) {
-      return 180;
-    }
+          getLong(this.config.getOrDefault(
+              SystemConfig.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN, 180));
   }
 
   public long getTmasterMetricsCollectorPurgeIntervalSec() {
-    try {
       return TypeUtils.
-          getLong(this.config.get(
-              SystemConfig.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC));
-    } catch (Exception e) {
-      return 60;
-    }
+          getLong(this.config.getOrDefault(
+              SystemConfig.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC, 60));
   }
 
   public Object put(String key, Object value) {
