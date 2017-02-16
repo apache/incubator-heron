@@ -32,21 +32,6 @@ java_library(
     ],
 )
 
-filegroup(
-    name = "config-keys-yaml",
-    srcs = glob(["**/spi/common/**/keys.yaml"]),
-)
-
-filegroup(
-    name = "config-defaults-yaml",
-    srcs = glob(["**/spi/common/**/defaults.yaml"]),
-)
-
-common_resource_files = [
-    ":config-keys-yaml",
-    ":config-defaults-yaml",
-]
-
 utils_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
@@ -101,8 +86,8 @@ java_library(
     deps = [
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
+        "@com_google_guava_guava//jar",
     ],
-    resources = common_resource_files,
 )
 
 java_library(

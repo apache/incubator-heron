@@ -29,10 +29,10 @@ class StatesHandler(BaseHandler):
   {
     <cluster1>: {
       <environ1>: {
-        <top1>: {
+        <topology1>: {
           <the executionstate of the topology>
         },
-        <top2>: {...}
+        <topology2>: {...}
         ...
       },
       <environ2>: {...},

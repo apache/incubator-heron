@@ -1,2 +1,0 @@
-# default directory for uploading files in the local file system uploader
-FILE_SYSTEM_DIRECTORY:           ${HOME}/.herondata/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}

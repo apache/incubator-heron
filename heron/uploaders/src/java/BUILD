@@ -36,14 +36,12 @@ genrule(
 java_library(
     name = 'localfs-uploader-java',
     srcs = glob(["**/localfs/**/*.java"]),
-    resources = glob(["**/localfs/**/*.yaml"]),
     deps = uploader_spi_files,
 )
 
 java_binary(
     name = 'localfs-uploader-unshaded',
     srcs = glob(["**/localfs/**/*.java"]),
-    resources = glob(["**/localfs/**/*.yaml"]),
     deps = uploader_spi_files,
 )
 

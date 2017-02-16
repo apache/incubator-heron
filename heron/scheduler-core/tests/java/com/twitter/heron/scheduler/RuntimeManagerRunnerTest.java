@@ -29,10 +29,8 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.utils.Runtime;
-import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
@@ -57,7 +55,7 @@ public class RuntimeManagerRunnerTest {
 
   @Before
   public void setUp() throws Exception {
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
   }
 
   private RuntimeManagerRunner newRuntimeManagerRunner(Command command) {
@@ -96,7 +94,7 @@ public class RuntimeManagerRunnerTest {
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
-    when(config.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"))).thenReturn(1);
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
     when(client.restartTopology(restartTopologyRequest)).thenReturn(false);
     try {
       runner.restartTopologyHandler(TOPOLOGY_NAME);
@@ -115,7 +113,7 @@ public class RuntimeManagerRunnerTest {
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
-    when(config.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"))).thenReturn(1);
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
 
     // Success case
     when(client.restartTopology(restartTopologyRequest)).thenReturn(true);
@@ -134,10 +132,10 @@ public class RuntimeManagerRunnerTest {
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
-    when(config.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"))).thenReturn(1);
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
     // Restart container 0, containing TMaster
-    when(config.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"))).thenReturn(0);
-    when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(adaptor);
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(0);
+    when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(adaptor);
     when(adaptor.deleteTMasterLocation(TOPOLOGY_NAME)).thenReturn(false);
     try {
       runner.restartTopologyHandler(TOPOLOGY_NAME);

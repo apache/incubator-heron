@@ -14,23 +14,18 @@
 
 package com.twitter.heron.scheduler.utils;
 
-import java.util.logging.Logger;
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
-import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.ConfigLoader;
+import com.twitter.heron.spi.common.Key;
 
 /**
  * For loading scheduler config
  */
 public final class SchedulerConfigUtils {
-  private static final Logger LOG = Logger.getLogger(SchedulerConfigUtils.class.getName());
 
   private SchedulerConfigUtils() {
-
   }
 
   /**
@@ -45,28 +40,13 @@ public final class SchedulerConfigUtils {
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
     PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
-        .put(Keys.topologyPackageType(), packageType)
+    return Config.newBuilder()
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
+        .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+        .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
         .build();
-
-    return config;
-  }
-
-  /**
-   * Load the defaults config
-   * <p>
-   * return config, the defaults config
-   */
-  private static Config sandboxConfigs() {
-    Config config = Config.newBuilder()
-        .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadSandboxConfig())
-        .build();
-    return config;
   }
 
   /**
@@ -78,14 +58,13 @@ public final class SchedulerConfigUtils {
    * @return config, the command line config
    */
   private static Config commandLineConfigs(String cluster, String role,
-                                             String environ, Boolean verbose) {
-    Config config = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.verbose(), verbose)
+                                           String environ, Boolean verbose) {
+    return Config.newBuilder()
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.VERBOSE, verbose)
         .build();
-    return config;
   }
 
   // build the config by expanding all the variables
@@ -98,13 +77,11 @@ public final class SchedulerConfigUtils {
       Boolean verbose,
       TopologyAPI.Topology topology) {
 
-    Config config = Config.expand(
+    return Config.toClusterMode(
         Config.newBuilder()
-            .putAll(sandboxConfigs())
+            .putAll(ConfigLoader.loadClusterConfig())
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(topologyBinaryFile, topologyDefnFile, topology))
             .build());
-
-    return config;
   }
 }

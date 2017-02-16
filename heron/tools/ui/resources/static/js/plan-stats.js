@@ -330,7 +330,7 @@
     function colorTopLevel(value, statTableCell) {
       topLevelStatus.filter(function (d) {
         return d === statTableCell;
-      }).style('color', function (d) {
+      }).style('fill', function (d) {
         return d.color = !_.isNumber(value) || isNaN(value) ? NO_DATA_COLOR : statTableCell.metric.colorScale(value);
       }).style('visibility', null);
     }

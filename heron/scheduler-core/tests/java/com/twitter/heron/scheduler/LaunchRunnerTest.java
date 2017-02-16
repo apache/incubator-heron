@@ -40,8 +40,7 @@ import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
@@ -111,12 +110,12 @@ public class LaunchRunnerTest {
 
   private static Config createRunnerConfig() {
     Config config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
-    when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
-    when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
-    when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
-    when(config.getStringValue(ConfigKeys.get("BUILD_VERSION"))).thenReturn(BUILD_VERSION);
-    when(config.getStringValue(ConfigKeys.get("BUILD_USER"))).thenReturn(BUILD_USER);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.CLUSTER)).thenReturn(CLUSTER);
+    when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
+    when(config.getStringValue(Key.ENVIRON)).thenReturn(ENVIRON);
+    when(config.getStringValue(Key.BUILD_VERSION)).thenReturn(BUILD_VERSION);
+    when(config.getStringValue(Key.BUILD_USER)).thenReturn(BUILD_USER);
 
     return config;
   }
@@ -133,9 +132,9 @@ public class LaunchRunnerTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = createTopology(topologyConfig);
 
-    doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
-    doReturn(adaptor).when(runtime).get(Keys.schedulerStateManagerAdaptor());
-    doReturn(topology).when(runtime).get(Keys.topologyDefinition());
+    doReturn(launcher).when(runtime).get(Key.LAUNCHER_CLASS_INSTANCE);
+    doReturn(adaptor).when(runtime).get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR);
+    doReturn(topology).when(runtime).get(Key.TOPOLOGY_DEFINITION);
 
     PackingPlan packingPlan = mock(PackingPlan.class);
     when(packingPlan.getContainers()).thenReturn(
