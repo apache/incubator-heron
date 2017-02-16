@@ -48,6 +48,7 @@ public final class MarathonConstants {
   public static final String HOST_PORT = "hostPort";
   public static final String DOCKER_PRIVILEGED = "privileged";
   public static final String DOCKER_FORCE_PULL = "forcePullImage";
+  public static final String DOCKER_NETWORK_BRIDGE = "BRIDGE";
 
   public static final String[] PORT_NAMES = new String[]{
       "master", "tmaster-controller", "tmaster-stats", "shell", "metricsmgr", "scheduler"};
