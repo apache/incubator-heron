@@ -36,7 +36,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.TokenSub;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
@@ -53,7 +53,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = mConfig;
+    this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
     this.controller = getController();
     this.updateTopologyManager =
@@ -61,17 +61,19 @@ public class AuroraScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * Get an AuroraControl basing on the config and runtime
+   * Get an AuroraController based on the config and runtime
    *
-   * @return AuroraControl
+   * @return AuroraController
    */
   protected AuroraController getController() {
-    return new AuroraController(
+    Config localConfig = Config.toLocalMode(this.config);
+    return new AuroraCLIController(
         Runtime.topologyName(runtime),
-        Context.cluster(config),
-        Context.role(config),
-        Context.environ(config),
-        Context.verbose(config));
+        Context.cluster(localConfig),
+        Context.role(localConfig),
+        Context.environ(localConfig),
+        AuroraContext.getHeronAuroraPath(localConfig),
+        Context.verbose(localConfig));
   }
 
   @Override
@@ -95,9 +97,10 @@ public class AuroraScheduler implements IScheduler, IScalable {
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 
-    Map<String, String> auroraProperties = createAuroraProperties(updatedPackingPlan);
+    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
+    Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
 
-    return controller.createJob(AuroraContext.getHeronAuroraPath(config), auroraProperties);
+    return controller.createJob(auroraProperties);
   }
 
   @Override
@@ -107,7 +110,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     //Only the aurora job page is returned
     String jobLinkFormat = AuroraContext.getJobLinkTemplate(config);
     if (jobLinkFormat != null && !jobLinkFormat.isEmpty()) {
-      String jobLink = Misc.substitute(config, jobLinkFormat);
+      String jobLink = TokenSub.substitute(config, jobLinkFormat);
       jobLinks.add(jobLink);
     }
 
@@ -121,8 +124,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
-    int containerId = request.getContainerIndex();
-    return controller.restartJob(containerId);
+    Integer containerId = null;
+    if (request.getContainerIndex() != -1) {
+      containerId = request.getContainerIndex();
+    }
+    return controller.restart(containerId);
   }
 
   @Override
@@ -159,77 +165,78 @@ public class AuroraScheduler implements IScheduler, IScalable {
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
-  protected Map<String, String> createAuroraProperties(PackingPlan packing) {
-    Map<String, String> auroraProperties = new HashMap<>();
+  @SuppressWarnings("deprecation") // remove once we remove ISPRODUCTION usage below
+  protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
+    Map<AuroraField, String> auroraProperties = new HashMap<>();
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
-    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
 
-    auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
-    auroraProperties.put("TOPOLOGY_NAME", topology.getName());
-    auroraProperties.put("TOPOLOGY_ID", topology.getId());
-    auroraProperties.put("TOPOLOGY_DEFINITION_FILE",
+    auroraProperties.put(AuroraField.EXECUTOR_BINARY,
+        Context.executorBinary(config));
+    auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
+    auroraProperties.put(AuroraField.TOPOLOGY_ID, topology.getId());
+    auroraProperties.put(AuroraField.TOPOLOGY_DEFINITION_FILE,
         FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put("STATEMGR_CONNECTION_STRING",
+    auroraProperties.put(AuroraField.STATEMGR_CONNECTION_STRING,
         Context.stateManagerConnectionString(config));
-    auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
-    auroraProperties.put("SANDBOX_TMASTER_BINARY", Context.tmasterSandboxBinary(config));
-    auroraProperties.put("SANDBOX_STMGR_BINARY", Context.stmgrSandboxBinary(config));
-    auroraProperties.put("SANDBOX_METRICSMGR_CLASSPATH",
-        Context.metricsManagerSandboxClassPath(config));
-    auroraProperties.put("INSTANCE_JVM_OPTS_IN_BASE64",
+    auroraProperties.put(AuroraField.STATEMGR_ROOT_PATH, Context.stateManagerRootPath(config));
+    auroraProperties.put(AuroraField.TMASTER_BINARY, Context.tmasterBinary(config));
+    auroraProperties.put(AuroraField.STMGR_BINARY, Context.stmgrBinary(config));
+    auroraProperties.put(AuroraField.METRICSMGR_CLASSPATH,
+        Context.metricsManagerClassPath(config));
+    auroraProperties.put(AuroraField.INSTANCE_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_CLASSPATH",
+    auroraProperties.put(AuroraField.TOPOLOGY_CLASSPATH,
         TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
 
-    auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
-    auroraProperties.put("COMPONENT_RAMMAP", Runtime.componentRamMap(runtime));
-    auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
+    auroraProperties.put(AuroraField.SYSTEM_YAML, Context.systemConfigFile(config));
+    auroraProperties.put(AuroraField.COMPONENT_RAMMAP, Runtime.componentRamMap(runtime));
+    auroraProperties.put(AuroraField.COMPONENT_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE",
+    auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_TYPE,
         Context.topologyPackageType(config).name().toLowerCase());
-    auroraProperties.put("TOPOLOGY_BINARY_FILE",
+    auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
         FileUtils.getBaseName(Context.topologyBinaryFile(config)));
-    auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
+    auroraProperties.put(AuroraField.JAVA_HOME, Context.clusterJavaHome(config));
 
-    auroraProperties.put("SANDBOX_SHELL_BINARY", Context.shellSandboxBinary(config));
-    auroraProperties.put("SANDBOX_PYTHON_INSTANCE_BINARY",
-        Context.pythonInstanceSandboxBinary(config));
+    auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
+    auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY,
+        Context.pythonInstanceBinary(config));
 
-    auroraProperties.put("CPUS_PER_CONTAINER", Double.toString(containerResource.getCpu()));
-    auroraProperties.put("DISK_PER_CONTAINER",
+    auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
+        Double.toString(containerResource.getCpu()));
+    auroraProperties.put(AuroraField.DISK_PER_CONTAINER,
         Long.toString(containerResource.getDisk().asBytes()));
-    auroraProperties.put("RAM_PER_CONTAINER",
+    auroraProperties.put(AuroraField.RAM_PER_CONTAINER,
         Long.toString(containerResource.getRam().asBytes()));
 
-    auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
+    auroraProperties.put(AuroraField.NUM_CONTAINERS,
+        Integer.toString(1 + TopologyUtils.getNumContainers(topology)));
 
-    auroraProperties.put("CLUSTER", Context.cluster(config));
-    auroraProperties.put("ENVIRON", Context.environ(config));
-    auroraProperties.put("ROLE", Context.role(config));
-    auroraProperties.put("ISPRODUCTION", isProduction() + "");
+    auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
+    auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
+    auroraProperties.put(AuroraField.ROLE, Context.role(config));
 
-    auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
-    auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
+    // TODO (nlu): currently enforce environment to be "prod" for a Production job
+    String isProduction = Boolean.toString("prod".equals(Context.environ(config)));
+    auroraProperties.put(AuroraField.IS_PRODUCTION, isProduction);
 
-    String completeSchedulerClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
-    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
+    auroraProperties.put(AuroraField.INSTANCE_CLASSPATH, Context.instanceClassPath(config));
+    auroraProperties.put(AuroraField.METRICS_YAML, Context.metricsSinksFile(config));
+
+    String completeSchedulerClassPath = String.format("%s:%s:%s",
+        Context.schedulerClassPath(config),
+        Context.packingClassPath(config),
+        Context.stateManagerClassPath(config));
+
+    auroraProperties.put(AuroraField.SCHEDULER_CLASSPATH, completeSchedulerClassPath);
 
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
 
-    auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
-    auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
+    auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
+    auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
     return auroraProperties;
-  }
-
-  protected boolean isProduction() {
-    // TODO (nlu): currently enforce environment to be "prod" for a Production job
-    return "prod".equals(Context.environ(config));
   }
 }

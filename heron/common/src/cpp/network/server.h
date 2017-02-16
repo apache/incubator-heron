@@ -176,9 +176,6 @@ class Server : public BaseServer {
   // Backpressure Reliever
   virtual void StopBackPressureConnectionCb(Connection* _connection);
 
-  // Connection buffer size monitor
-  virtual void ConnectionBufferChangeCb(Connection* _connection);
-
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
@@ -251,7 +248,8 @@ class Server : public BaseServer {
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = _heron_message_pool.acquire(m);
+    M* m = nullptr;
+    m = _heron_message_pool.acquire(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();

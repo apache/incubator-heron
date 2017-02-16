@@ -50,14 +50,12 @@ java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
     deps = scheduler_deps_files,
-    resources = glob(["**/local/*.yaml"]),
 )
 
 java_binary(
     name='local-scheduler-unshaded',
     srcs = glob(["**/local/*.java"]),
     deps = scheduler_deps_files,
-    resources = glob(["**/local/*.yaml"]),
 )
 
 genrule(
@@ -117,14 +115,12 @@ java_library(
     name='slurm-scheduler-java',
     srcs = glob(["**/slurm/*.java"]),
     deps = scheduler_deps_files,
-    resources = glob(["**/slurm/*.sh","**/slurm/*.yaml"]),
 )
 
 java_binary(
     name='slurm-scheduler-unshaded',
     srcs = glob(["**/slurm/*.java"]),
     deps = scheduler_deps_files,
-    resources = glob(["**/slurm/*.sh","**/slurm/*.yaml"]),
 )
 
 genrule(
@@ -138,14 +134,12 @@ java_library(
     name='yarn-scheduler-java',
     srcs = glob(["**/yarn/*.java"]),
     deps = yarn_deps_files,
-    resources = glob(["**/yarn/*.yaml"]),
 )
 
 java_binary(
     name='yarn-scheduler-unshaded',
     srcs = glob(["**/yarn/*.java"]),
     deps = yarn_deps_files,
-    resources = glob(["**/yarn/*.yaml"]),
 )
 
 genrule(
@@ -159,14 +153,12 @@ java_library(
     name='mesos-scheduler-java',
     srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
     deps = mesos_deps_files,
-    resources = glob(["**/mesos/*.yaml"]),
 )
 
 java_binary(
     name='mesos-scheduler-unshaded',
     srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
     deps = mesos_deps_files,
-    resources = glob(["**/mesos/*.yaml"]),
 )
 
 genrule(
@@ -181,14 +173,12 @@ java_library(
     name='marathon-scheduler-java',
     srcs = glob(["com/twitter/heron/scheduler/marathon/**/*.java"]),
     deps = marathon_deps_files,
-    resources = glob(["**/marathon/*.yaml"]),
 )
 
 java_binary(
     name='marathon-scheduler-unshaded',
     srcs=glob(["com/twitter/heron/scheduler/marathon/**/*.java"]),
     deps = marathon_deps_files,
-    resources = glob(["**/marathon/*.yaml"]),
 )
 
 genrule(

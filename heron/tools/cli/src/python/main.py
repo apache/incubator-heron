@@ -234,14 +234,16 @@ def main():
 
   start = time.time()
   resp = run(command, parser, command_line_args, unknown_args)
-  response.render(resp)
+  if command not in ('help', 'version'):
+    response.render(resp)
   end = time.time()
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
     Log.info('Elapsed time: %.3fs.', (end - start))
-
-  return 0 if response.isAllSuccessful(resp) else 1
+    return 0 if response.isAllSuccessful(resp) else 1
+  else:
+    return 0 if resp else 1
 
 
 if __name__ == "__main__":

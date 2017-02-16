@@ -24,7 +24,6 @@ java_tests(
         "com.twitter.heron.common.network.EchoTest",
         "com.twitter.heron.common.network.HeronServerTest",
         "com.twitter.heron.common.config.ConfigReaderTest",
-        "com.twitter.heron.common.config.ClusterConfigReaderTest",
         "com.twitter.heron.common.config.SystemConfigTest",
     ],
     runtime_deps = [
