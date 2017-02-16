@@ -17,8 +17,8 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_SERVER_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_SERVER_H_
 
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include "network/network_error.h"
 #include "proto/messages.h"
@@ -153,9 +153,9 @@ class StMgrServer : public Server {
   ConnectionBufferMetricMap connection_buffer_metric_map_;
 
   // instances/stream mgrs causing back pressure
-  std::set<sp_string> remote_ends_who_caused_back_pressure_;
+  std::unordered_set<sp_string> remote_ends_who_caused_back_pressure_;
   // stream managers that have announced back pressure
-  std::set<sp_string> stmgrs_who_announced_back_pressure_;
+  std::unordered_set<sp_string> stmgrs_who_announced_back_pressure_;
 
   sp_string topology_name_;
   sp_string topology_id_;

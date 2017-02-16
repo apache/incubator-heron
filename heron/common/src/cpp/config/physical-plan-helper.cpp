@@ -16,7 +16,7 @@
 
 #include "config/physical-plan-helper.h"
 #include <map>
-#include <set>
+#include <unordered_set>
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "proto/messages.h"
@@ -43,8 +43,9 @@ void PhysicalPlanHelper::GetLocalTasks(const proto::system::PhysicalPlan& _pplan
 }
 
 void PhysicalPlanHelper::GetLocalSpouts(const proto::system::PhysicalPlan& _pplan,
-                                        const sp_string& _stmgr, std::set<sp_int32>& _return) {
-  std::set<sp_string> spouts;
+                                        const sp_string& _stmgr,
+                                        std::unordered_set<sp_int32>& _return) {
+  std::unordered_set<sp_string> spouts;
   for (sp_int32 i = 0; i < _pplan.topology().spouts_size(); ++i) {
     spouts.insert(_pplan.topology().spouts(i).comp().name());
   }

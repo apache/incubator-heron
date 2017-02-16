@@ -16,7 +16,7 @@
 
 #include "manager/stmgr-server.h"
 #include <iostream>
-#include <set>
+#include <unordered_set>
 #include <vector>
 #include "manager/stmgr.h"
 #include "proto/messages.h"
@@ -434,7 +434,7 @@ void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _p
 }
 
 void StMgrServer::ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan) {
-  std::set<sp_int32> local_spouts;
+  std::unordered_set<sp_int32> local_spouts;
   config::PhysicalPlanHelper::GetLocalSpouts(_pplan, stmgr_id_, local_spouts);
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (local_spouts.find(iter->first) != local_spouts.end()) {
