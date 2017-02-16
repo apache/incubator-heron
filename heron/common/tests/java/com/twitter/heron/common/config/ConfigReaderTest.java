@@ -14,27 +14,55 @@
 
 package com.twitter.heron.common.config;
 
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ConfigReaderTest {
-  private static final Logger LOG = Logger.getLogger(ConfigReaderTest.class.getName());
 
-  @Test
-  public void testLoadFile() throws Exception {
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"),
-        Constants.TEST_DATA_PATH, "defaults.yaml").toString();
-    Map<String, Object> props = ConfigReader.loadFile(file);
+  private static final String RESOURCE_LOC = "/heron/common/tests/resources/defaults.yaml";
 
+  private void testProperty(Map<String, Object> props) {
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
     Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher",
         props.get(Constants.LAUNCHER_CLASS_KEY));
-
     Assert.assertNull(props.get(Constants.USER_KEY));
+  }
+
+  private InputStream loadResource() {
+    InputStream inputStream  = ConfigReaderTest.class.
+        getResourceAsStream(RESOURCE_LOC);
+    if (inputStream == null) {
+      throw new RuntimeException("Sample output file not found");
+    }
+    return inputStream;
+  }
+
+  @Test
+  public void testLoadFile() throws Exception {
+    InputStream inputStream = loadResource();
+    File file = File.createTempFile("defaults_temp", "yaml");
+    file.deleteOnExit();
+    OutputStream outputStream = new FileOutputStream(file);
+    IOUtils.copy(inputStream, outputStream);
+    outputStream.close();
+    Map<String, Object> props =
+        ConfigReader.loadFile(file.getAbsolutePath());
+    testProperty(props);
+  }
+
+  @Test
+  public void testLoadStream() throws Exception {
+    InputStream inputStream = loadResource();
+    Map<String, Object> props =
+        ConfigReader.loadStream(inputStream);
+    testProperty(props);
   }
 }
