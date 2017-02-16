@@ -13,8 +13,8 @@
 //  limitations under the License.
 package com.twitter.heron.common.config;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.twitter.heron.common.basics.ByteAmount;
 
@@ -311,12 +311,13 @@ public enum SystemConfigKey {
     STRING
   }
 
-  private static final Set<String> VALUES;
+  // Map of value -> enum
+  private static final Map<String, SystemConfigKey> VALUE_MAP;
 
   static {
-    VALUES = new HashSet<>();
+    VALUE_MAP = new HashMap<>();
     for (SystemConfigKey key : SystemConfigKey.values()) {
-      VALUES.add(key.value());
+      VALUE_MAP.put(key.value(), key);
     }
   }
 
@@ -362,8 +363,8 @@ public enum SystemConfigKey {
     this.defaultValue = defaultValue;
   }
 
-  static boolean isValidValue(String value) {
-    return VALUES.contains(value);
+  static SystemConfigKey toSystemConfigKey(String value) {
+    return VALUE_MAP.get(value);
   }
 
   /**

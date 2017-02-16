@@ -25,7 +25,7 @@ import com.twitter.heron.common.basics.TypeUtils;
  * All the config associated with time is in the unit of milli-seconds, unless otherwise specified.
  * All the config associated with data is in the unit of bytes, unless otherwise specified.
  */
-public class SystemConfig {
+public final class SystemConfig {
   /**
    * Bean name for SingletonRegistry
    */
@@ -270,7 +270,7 @@ public class SystemConfig {
     }
 
     public Builder put(SystemConfigKey key, Object value) {
-      this.keyValues.put(key.value(), value);
+      convertAndAdd(this.keyValues, key, value);
       return this;
     }
 
@@ -281,14 +281,48 @@ public class SystemConfig {
             String.format("Config file %s does not exist", fileName));
       }
 
-      keyValues.putAll(ConfigReader.loadFile(fileName));
+      // convert to the correct type upon load eagerly verify type correctness
+      Map<String, Object> configValues = ConfigReader.loadFile(fileName);
+      for (String keyValue : configValues.keySet()) {
+        SystemConfigKey key = SystemConfigKey.toSystemConfigKey(keyValue);
+        if (key != null) { // sometimes config have non-java configs without an enum SystemConfigKey
+          convertAndAdd(configValues, key, configValues.get(keyValue));
+        }
+      }
+      keyValues.putAll(configValues);
       return this;
+    }
+
+    private static void convertAndAdd(Map<String, Object> config,
+                                      SystemConfigKey key, Object value) {
+      if (key != null) { // sometimes config have non-java configs without an enum SystemConfigKey
+        switch(key.getType()) {
+          case BOOLEAN:
+            config.put(key.value(), TypeUtils.getBoolean(value));
+            break;
+          case BYTE_AMOUNT:
+            config.put(key.value(), TypeUtils.getByteAmount(value));
+            break;
+          case DOUBLE:
+            config.put(key.value(), TypeUtils.getDouble(value));
+            break;
+          case INTEGER:
+            config.put(key.value(), TypeUtils.getInteger(value));
+            break;
+          case LONG:
+            config.put(key.value(), TypeUtils.getLong(value));
+            break;
+          case STRING:
+            break;
+          default:
+            throw new IllegalArgumentException(String.format(
+                "config key %s is of type %s which is not yet supported", key, key.getType()));
+        }
+      }
     }
 
     public SystemConfig build() {
       return new SystemConfig(this);
     }
   }
-
 }
-
