@@ -285,7 +285,9 @@ public class MetricsCacheManager {
     String metricsCacheMgrId = cmd.getOptionValue("metricscache_id");
 
     // read heron internal config file
-    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .build();
 
     // Log to file and sink(exception)
     LoggingHelper.loggerInit(logLevel, true);

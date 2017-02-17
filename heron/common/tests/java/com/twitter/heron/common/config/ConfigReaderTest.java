@@ -37,8 +37,7 @@ public class ConfigReaderTest {
   }
 
   private InputStream loadResource() {
-    InputStream inputStream  = ConfigReaderTest.class.
-        getResourceAsStream(RESOURCE_LOC);
+    InputStream inputStream  = getClass().getResourceAsStream(RESOURCE_LOC);
     if (inputStream == null) {
       throw new RuntimeException("Sample output file not found");
     }
@@ -53,16 +52,14 @@ public class ConfigReaderTest {
     OutputStream outputStream = new FileOutputStream(file);
     IOUtils.copy(inputStream, outputStream);
     outputStream.close();
-    Map<String, Object> props =
-        ConfigReader.loadFile(file.getAbsolutePath());
+    Map<String, Object> props = ConfigReader.loadFile(file.getAbsolutePath());
     testProperty(props);
   }
 
   @Test
   public void testLoadStream() throws Exception {
     InputStream inputStream = loadResource();
-    Map<String, Object> props =
-        ConfigReader.loadStream(inputStream);
+    Map<String, Object> props = ConfigReader.loadStream(inputStream);
     testProperty(props);
   }
 }

@@ -38,7 +38,6 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.WakeableLooper;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.Slave;
@@ -134,16 +133,20 @@ public class SpoutInstanceTest {
   @After
   public void after() throws Exception {
     UnitTestHelper.clearSingletonRegistry();
-    slaveLooper.exitLoop();
-    testLooper.exitLoop();
-
+    if (slaveLooper != null) {
+      slaveLooper.exitLoop();
+    }
+    if (testLooper != null) {
+      testLooper.exitLoop();
+    }
     tupleReceived = 0;
     heronDataTupleList = new ArrayList<HeronTuples.HeronDataTuple>();
     ackCount = new AtomicInteger(0);
     failCount = new AtomicInteger(0);
 
-    threadsPool.shutdownNow();
-
+    if (threadsPool != null) {
+      threadsPool.shutdownNow();
+    }
     physicalPlan = null;
     testLooper = null;
     slaveLooper = null;
@@ -221,11 +224,6 @@ public class SpoutInstanceTest {
   @Test
   public void testGatherMetrics() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
-    // Set the metrics export interval a small value
-    SystemConfig systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
-
-    systemConfig.put(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC, 1);
 
     PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
