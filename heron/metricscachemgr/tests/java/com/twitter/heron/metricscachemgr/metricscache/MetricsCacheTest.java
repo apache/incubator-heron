@@ -34,7 +34,9 @@ public class MetricsCacheTest {
   @Test
   public void testMetricCache() throws IOException {
     // prepare config files
-    SystemConfig systemConfig = new SystemConfig(CONFIG_SYSTEM_PATH, true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(CONFIG_SYSTEM_PATH, true)
+        .build();
     MetricsSinksConfig sinksConfig = new MetricsSinksConfig(CONFIG_SINK_PATH);
 
     // initialize metric cache, except looper

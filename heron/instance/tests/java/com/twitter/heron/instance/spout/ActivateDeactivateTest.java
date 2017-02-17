@@ -27,7 +27,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.Slave;
@@ -77,9 +76,12 @@ public class ActivateDeactivateTest {
   @After
   public void after() throws Exception {
     UnitTestHelper.clearSingletonRegistry();
-    slaveLooper.exitLoop();
-
-    threadsPool.shutdownNow();
+    if (slaveLooper != null) {
+      slaveLooper.exitLoop();
+    }
+    if (threadsPool != null) {
+      threadsPool.shutdownNow();
+    }
 
     physicalPlan = null;
     slaveLooper = null;
@@ -111,12 +113,6 @@ public class ActivateDeactivateTest {
     AtomicInteger deactivateCount = new AtomicInteger(0);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACTIVATE_COUNT, activateCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.DEACTIVATE_COUNT, deactivateCount);
-
-    // We reset the heron.instance.state.check.interval.sec in SystemConfig for faster test
-    SystemConfig systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-            SystemConfig.HERON_SYSTEM_CONFIG);
-    systemConfig.put("heron.instance.state.check.interval.sec", 1);
 
     // Now the activateCount and deactivateCount should be 0
     // And we start the test
