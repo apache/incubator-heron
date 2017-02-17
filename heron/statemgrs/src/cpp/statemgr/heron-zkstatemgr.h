@@ -167,6 +167,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   // A wrapper to be passed to select server registerTimer call.
   // Ignores the status and call SetTMasterLocationWatchInternal
   void CallSetTMasterLocationWatch(EventLoop::Status status);
+  void CallSetMetricsCacheLocationWatch(EventLoop::Status status);
   // A handler callback that gets called by ZkClient upon completion of
   // setting Tmaster watch. If the return code indicates failure, we
   // retry after SET_WATCH_RETRY_INTERVAL_S seconds.

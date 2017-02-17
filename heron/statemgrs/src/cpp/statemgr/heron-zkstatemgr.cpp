@@ -324,6 +324,21 @@ void HeronZKStateMgr::SetTMasterLocationDone(VCallback<proto::system::StatusCode
   cb(code);
 }
 
+void HeronZKStateMgr::SetMetricsCacheLocationDone(VCallback<proto::system::StatusCode> cb,
+                                             sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZNODEEXISTS) {
+    LOG(ERROR) << "Setting MetricsCache Location failed because another zmaster exists"
+               << std::endl;
+    code = proto::system::METRICSCACHELOCATION_ALREADY_EXISTS;
+  } else if (_rc != ZOK) {
+    LOG(ERROR) << "Setting MetricsCache Location failed with error " << _rc << std::endl;
+    code = proto::system::STATE_WRITE_ERROR;
+  }
+
+  cb(code);
+}
+
 void HeronZKStateMgr::GetTMasterLocationDone(std::string* _contents,
                                              proto::tmaster::TMasterLocation* _return,
                                              VCallback<proto::system::StatusCode> cb,
@@ -339,6 +354,28 @@ void HeronZKStateMgr::GetTMasterLocationDone(std::string* _contents,
     code = proto::system::PATH_DOES_NOT_EXIST;
   } else {
     LOG(ERROR) << "Getting TMaster Location failed with error " << _rc << std::endl;
+    code = proto::system::STATE_READ_ERROR;
+  }
+  delete _contents;
+  cb(code);
+}
+
+void HeronZKStateMgr::GetMetricsCacheLocationDone(std::string* _contents,
+                                             proto::tmaster::MetricsCacheLocation* _return,
+                                             VCallback<proto::system::StatusCode> cb,
+                                             sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZOK) {
+    if (!_return->ParseFromString(*_contents)) {
+      LOG(ERROR) << "Error parsing metricscache location" << std::endl;
+      code = proto::system::STATE_CORRUPTED;
+    }
+  } else if (_rc == ZNONODE) {
+    LOG(ERROR) << "Error getting metricscache location because the tmaster does not exist"
+               << std::endl;
+    code = proto::system::PATH_DOES_NOT_EXIST;
+  } else {
+    LOG(ERROR) << "Getting MetricsCache Location failed with error " << _rc << std::endl;
     code = proto::system::STATE_READ_ERROR;
   }
   delete _contents;
@@ -576,8 +613,31 @@ void HeronZKStateMgr::SetTMasterWatchCompletionHandler(sp_int32 rc) {
   }
 }
 
+void HeronZKStateMgr::SetMetricsCacheWatchCompletionHandler(sp_int32 rc) {
+  if (rc == ZOK || rc == ZNONODE) {
+    // NoNode is when there is no tmaster up yet, but the watch is set.
+    LOG(INFO) << "Setting watch on metricscache location succeeded: " << zerror(rc) << std::endl;
+  } else {
+    // Any other return code should be treated as warning, since ideally
+    // we shouldn't be in this state.
+    LOG(WARNING) << "Setting watch on metricscache location returned: " << zerror(rc) << std::endl;
+
+    if (ShouldRetrySetWatch(rc)) {
+      LOG(INFO) << "Retrying after " << SET_WATCH_RETRY_INTERVAL_S << " seconds" << std::endl;
+
+      auto cb = [this](EventLoop::Status status) { this->CallSetMetricsCacheLocationWatch(status);};
+
+      eventLoop_->registerTimer(std::move(cb), false, SET_WATCH_RETRY_INTERVAL_S * 1000 * 1000);
+    }
+  }
+}
+
 void HeronZKStateMgr::CallSetTMasterLocationWatch(EventLoop::Status) {
   SetTMasterLocationWatchInternal();
+}
+
+void HeronZKStateMgr::CallSetMetricsCacheLocationWatch(EventLoop::Status) {
+  SetMetricsCacheLocationWatchInternal();
 }
 
 void HeronZKStateMgr::SetTMasterLocationWatchInternal() {
