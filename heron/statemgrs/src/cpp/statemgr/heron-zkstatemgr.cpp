@@ -537,6 +537,12 @@ bool HeronZKStateMgr::IsTmasterWatchDefined() {
           !tmaster_location_watcher_info_->topology_name.empty());
 }
 
+bool HeronZKStateMgr::IsMetricsCacheWatchDefined() {
+  return (metricscache_location_watcher_info_ != NULL &&
+          metricscache_location_watcher_info_->watcher_cb &&
+          !metricscache_location_watcher_info_->topology_name.empty());
+}
+
 // 2 seconds
 const int HeronZKStateMgr::SET_WATCH_RETRY_INTERVAL_S = 2;
 
@@ -584,11 +590,29 @@ void HeronZKStateMgr::SetTMasterLocationWatchInternal() {
                     [this](sp_int32 rc) { this->SetTMasterWatchCompletionHandler(rc); });
 }
 
+void HeronZKStateMgr::SetMetricsCacheLocationWatchInternal() {
+  CHECK(IsMetricsCacheWatchDefined());
+
+  LOG(INFO) << "Setting watch on metricscache location " << std::endl;
+  std::string path = GetMetricsCacheLocationPath(
+                    metricscache_location_watcher_info_->topology_name);
+
+  zkclient_->Exists(path, [this]() { this->MetricsCacheLocationWatch(); },
+                    [this](sp_int32 rc) { this->SetMetricsCacheWatchCompletionHandler(rc); });
+}
+
 void HeronZKStateMgr::TMasterLocationWatch() {
   // First setup watch again
   SetTMasterLocationWatchInternal();
   // Then run the watcher
   tmaster_location_watcher_info_->watcher_cb();
+}
+
+void HeronZKStateMgr::MetricsCacheLocationWatch() {
+  // First setup watch again
+  SetMetricsCacheLocationWatchInternal();
+  // Then run the watcher
+  metricscache_location_watcher_info_->watcher_cb();
 }
 }  // namespace common
 }  // namespace heron
