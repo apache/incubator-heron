@@ -176,6 +176,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   // called by the client or not. It gets this info through
   // tmaster_location_watcher_info_
   bool IsTmasterWatchDefined();
+  bool IsMetricsCacheWatchDefined();
   // Common functionality for c`tors. Should be called only once from c`tor
   void Init();
 
