@@ -35,6 +35,8 @@ import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
 
+from heron.tools.cli.src.python.opts import cleaned_up_files
+
 Log = log.Log
 
 HELP_EPILOG = '''Getting more help:
@@ -125,7 +127,10 @@ def cleanup(files):
   :return:
   '''
   for cur_file in files:
-    shutil.rmtree(os.path.dirname(cur_file))
+    if os.path.isdir(cur_file):
+      shutil.rmtree(cur_file)
+    else:
+      shutil.rmtree(os.path.dirname(cur_file))
 
 
 ################################################################################
@@ -215,9 +220,6 @@ def main():
   # command to be execute
   command = command_line_args['subcommand']
 
-  # file resources to be cleaned when exit
-  files = []
-
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
@@ -225,9 +227,9 @@ def main():
     if not command_line_args:
       return 1
     # register dirs cleanup function during exit
-    files.append(command_line_args['override_config_file'])
+    cleaned_up_files.append(command_line_args['override_config_file'])
 
-  atexit.register(cleanup, files)
+  atexit.register(cleanup, cleaned_up_files)
 
   # print the input parameters, if verbose is enabled
   Log.debug(command_line_args)

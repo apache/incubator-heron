@@ -15,7 +15,6 @@
 import glob
 import logging
 import os
-import shutil
 import tempfile
 
 from heron.common.src.python.utils.log import Log
@@ -25,6 +24,7 @@ import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
+import heron.tools.cli.src.python.response as response
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.common.src.python.utils.classpath as classpath
 
@@ -140,7 +140,9 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   defn_files = glob.glob(tmp_dir + '/*.defn')
 
   if len(defn_files) == 0:
-    return Response(Status.HeronError, "No topologies found under %s" % tmp_dir)
+    resp = Response(status=Status.HeronError)
+    resp.add_context("No topologies found under %s" % tmp_dir)
+    return resp
 
   responses = []
   for defn_file in defn_files:
@@ -151,9 +153,10 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
       topology_defn.ParseFromString(handle.read())
       handle.close()
     except Exception as e:
-      msg = "Cannot load topology definition '%s'" % defn_file
-      return Response(Status.HeronError, msg, str(e))
-
+      err_msg = "Cannot load topology definition '%s': %s" % (defn_file, e)
+      resp = Response(status=Status.HeronError)
+      resp.add_context(err_msg)
+      return resp
     # launch the topology
     Log.info("Launching topology: \'%s\'", topology_defn.name)
     resp = launch_a_topology(
@@ -183,12 +186,15 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
 
   main_class = cl_args['topology-class-name']
+
   resp = execute.heron_class(
       class_name=main_class,
       lib_jars=config.get_heron_libs(jars.topology_jars()),
       extra_jars=[topology_file],
       args=tuple(unknown_args),
       java_defines=cl_args['topology_main_jvm_property'])
+
+  response.render(resp)
 
   if resp.status != Status.Ok:
     err_context = "Failed to create topology definition \
@@ -197,7 +203,6 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
     return resp
 
   responses = launch_topologies(cl_args, topology_file, tmp_dir)
-  shutil.rmtree(tmp_dir)
 
   return responses
 
@@ -233,6 +238,8 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
       tmp_dir,
       java_defines)
 
+  response.render(resp)
+
   if resp.status != Status.Ok:
     err_context = "Failed to create topology definition \
       file when executing class '%s' of file '%s'" % (main_class, topology_file)
@@ -240,7 +247,6 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
     return resp
 
   responses = launch_topologies(cl_args, topology_file, tmp_dir)
-  shutil.rmtree(tmp_dir)
 
   return responses
 
@@ -255,6 +261,9 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   topology_class_name = cl_args['topology-class-name']
   resp = execute.heron_pex(
       topology_file, topology_class_name, tuple(unknown_args))
+
+  response.render(resp)
+
   if resp.status != Status.Ok:
     err_context = "Failed to create topology definition \
       file when executing class '%s' of file '%s'" % (topology_class_name, topology_file)
@@ -262,7 +271,6 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
     return resp
 
   responses = launch_topologies(cl_args, topology_file, tmp_dir)
-  shutil.rmtree(tmp_dir)
 
   return responses
 
@@ -309,6 +317,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
+  opts.cleaned_up_files.append(tmp_dir)
 
   # if topology needs to be launched in deactivated state, do it so
   if cl_args['deploy_deactivated']:

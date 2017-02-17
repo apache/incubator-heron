@@ -55,13 +55,13 @@ def run(command, parser, args, unknown_args):
   # if no command is provided, just print main help
   if command_help == 'help':
     parser.print_help()
-    return Response(Status.Ok)
+    return Response(status=Status.Ok)
 
   # get the subparser for the specific command
   subparser = config.get_subparser(parser, command_help)
   if subparser:
     print subparser.format_help()
-    return Response(Status.Ok)
+    return Response(status=Status.Ok)
   else:
     Log.error("Unknown subcommand \'%s\'", command_help)
-    return Response(Status.InvocationError)
+    return Response(status=Status.InvocationError)
