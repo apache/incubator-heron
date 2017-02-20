@@ -99,9 +99,7 @@ import com.twitter.heron.spi.packing.Resource;
  */
 @Unit
 public class HeronMasterDriver {
-  static final int TM_MEM_SIZE_MB = 1024;
   static final int TMASTER_CONTAINER_ID = 0;
-  static final int MB = 1024 * 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
   private final String topologyPackageName;
   private final String heronCorePackageName;

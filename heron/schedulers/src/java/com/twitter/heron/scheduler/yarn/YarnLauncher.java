@@ -34,6 +34,7 @@ import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.tang.exceptions.InjectionException;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.ContainerAllocationHandler;
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.FailedContainerHandler;
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronSchedulerLauncher;
@@ -63,7 +64,7 @@ public class YarnLauncher implements ILauncher {
   private String role;
   private String env;
   private String queue;
-  private int driverMemory;
+  private ByteAmount driverMemory;
   private ArrayList<String> libJars = new ArrayList<>();
 
   @Override
@@ -161,7 +162,7 @@ public class YarnLauncher implements ILauncher {
         .set(HeronDriverConfiguration.HTTP_PORT, 0)
         .set(HeronDriverConfiguration.VERBOSE, false)
         .set(YarnDriverConfiguration.QUEUE, queue)
-        .set(DriverConfiguration.DRIVER_MEMORY, driverMemory)
+        .set(DriverConfiguration.DRIVER_MEMORY, driverMemory.asMegabytes())
         .build();
   }
 

@@ -240,6 +240,14 @@ public class Config {
     return TypeUtils.getByteAmount(value);
   }
 
+  public ByteAmount getByteAmountValueMB(String key, ByteAmount defaultValue) {
+    Object value = get(key);
+    if (value != null) {
+      return TypeUtils.getByteAmountMB(value);
+    }
+    return defaultValue;
+  }
+
   DryRunFormatType getDryRunFormatType(Key key) {
     return (DryRunFormatType) get(key);
   }

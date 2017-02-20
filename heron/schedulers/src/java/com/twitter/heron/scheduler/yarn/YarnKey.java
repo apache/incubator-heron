@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler.yarn;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.common.Key;
 
 /**
@@ -23,7 +24,7 @@ public enum YarnKey {
   // yarn queue for submitting and launching the topology
   HERON_SCHEDULER_YARN_QUEUE("heron.scheduler.yarn.queue", "default"),
   // the amount of memory topology's driver (yarn application master) needs
-  YARN_SCHEDULER_DRIVER_MEMORY_MB("heron.scheduler.yarn.driver.memory.mb", 2048);
+  YARN_SCHEDULER_DRIVER_MEMORY_MB("heron.scheduler.yarn.driver.memory.mb", ByteAmount.fromMegabytes(2048));
 
   private final String value;
   private final Key.Type type;
@@ -35,9 +36,9 @@ public enum YarnKey {
     this.defaultValue = defaultValue;
   }
 
-  YarnKey(String value, Integer defaultValue) {
+  YarnKey(String value, ByteAmount defaultValue) {
     this.value = value;
-    this.type = Key.Type.INTEGER;
+    this.type = Key.Type.BYTE_AMOUNT;
     this.defaultValue = defaultValue;
   }
 
@@ -55,13 +56,5 @@ public enum YarnKey {
           "Config Key %s is type %s, getDefaultString() not supported", this.name(), this.type));
     }
     return (String) this.defaultValue;
-  }
-
-  public int getDefaultInt() {
-    if (type != Key.Type.INTEGER) {
-      throw new IllegalAccessError(String.format(
-          "Config Key %s is type %s, getDefaultInt() not supported", this.name(), this.type));
-    }
-    return (Integer) this.defaultValue;
   }
 }
