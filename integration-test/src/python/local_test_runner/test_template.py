@@ -244,7 +244,7 @@ class TestTemplate(object):
   def _get_tracker_pplan(self):
     url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
           + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
-    logging.debug("Fetching packing plan from %s", url)
+    logging.debug("Fetching physical plan from %s", url)
     response = urllib.urlopen(url)
     physical_plan_json = json.loads(response.read())
 
@@ -268,7 +268,7 @@ class TestTemplate(object):
           return packing_plan
         elif retries_left == 0:
           raise status.TestFailure(
-              "Got packing plan from tracker for test %s but the number of " % self.testname +
+              "Got pplan from tracker for test %s but the number of " % self.testname +
               "instances found (%d) was less than min expected (%s)." %
               (instances_found, min_instances))
 

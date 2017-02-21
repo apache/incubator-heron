@@ -33,8 +33,9 @@ public class BoltDeclarerImpl implements BoltDeclarer {
   }
 
   @Override
-  public BoltDeclarer addConfigurations(Map<String, Object> conf) {
-    delegate.addConfigurations(conf);
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public BoltDeclarer addConfigurations(Map conf) {
+    delegate.addConfigurations((Map<String, Object>) conf);
     return this;
   }
 

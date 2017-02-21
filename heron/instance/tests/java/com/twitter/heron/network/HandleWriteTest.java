@@ -128,19 +128,25 @@ public class HandleWriteTest {
   public void after() throws Exception {
     UnitTestHelper.clearSingletonRegistry();
 
-    streamManagerClient.stop();
-    streamManagerClient = null;
+    if (streamManagerClient != null) {
+      streamManagerClient.stop();
+      streamManagerClient = null;
+    }
 
-    nioLooper.exitLoop();
-    nioLooper = null;
+    if (nioLooper != null) {
+      nioLooper.exitLoop();
+      nioLooper = null;
+    }
     slaveLooper = null;
     inStreamQueue = null;
     outStreamQueue = null;
 
     gatewayMetrics = null;
 
-    threadsPool.shutdownNow();
-    threadsPool = null;
+    if (threadsPool != null) {
+      threadsPool.shutdownNow();
+      threadsPool = null;
+    }
   }
 
   /**

@@ -15,23 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.storm.testing;
 
-package backtype.storm.spout;
-
-import java.util.Map;
-
-/**
- * The strategy a spout needs to use when its waiting. Waiting is
- * triggered in one of two conditions:
- * <p>
- * 1. nextTuple emits no tuples
- * 2. The spout has hit maxSpoutPending and can't emit any more tuples
- * <p>
- * The default strategy sleeps for one millisecond.
- */
-public interface ISpoutWaitStrategy {
-  @SuppressWarnings("rawtypes")
-  void prepare(Map conf);
-
-  void emptyEmit(long streak);
+// This class corresponds to storm 1.0.2 interface
+public interface CompletableSpout {
+  Object exhausted_QMARK_();
+  Object cleanup();
+  Object startup();
 }
