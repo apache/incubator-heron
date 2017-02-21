@@ -36,13 +36,14 @@ MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname, sp_int32 _port,
       component_id_(_component_id),
       task_id_(_task_id),
       tmaster_location_(NULL),
+      metricscache_location_(NULL),
       registered_(false) {
   InstallResponseHandler(new proto::system::MetricPublisherRegisterRequest(),
                          &MetricsMgrClient::HandleRegisterResponse);
   Start();
 }
 
-MetricsMgrClient::~MetricsMgrClient() { delete tmaster_location_; }
+MetricsMgrClient::~MetricsMgrClient() { delete tmaster_location_; delete metricscache_location_; }
 
 void MetricsMgrClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
