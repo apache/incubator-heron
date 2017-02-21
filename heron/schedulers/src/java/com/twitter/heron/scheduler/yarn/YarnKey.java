@@ -24,7 +24,8 @@ public enum YarnKey {
   // yarn queue for submitting and launching the topology
   HERON_SCHEDULER_YARN_QUEUE("heron.scheduler.yarn.queue", "default"),
   // the amount of memory topology's driver (yarn application master) needs
-  YARN_SCHEDULER_DRIVER_MEMORY_MB("heron.scheduler.yarn.driver.memory.mb", ByteAmount.fromMegabytes(2048));
+  YARN_SCHEDULER_DRIVER_MEMORY_MB("heron.scheduler.yarn.driver.memory.mb",
+      ByteAmount.fromMegabytes(2048));
 
   private final String value;
   private final Key.Type type;

@@ -15,7 +15,6 @@
 package com.twitter.heron.scheduler.yarn;
 
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
