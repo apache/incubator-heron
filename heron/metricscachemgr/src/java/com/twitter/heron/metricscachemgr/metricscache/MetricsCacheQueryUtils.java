@@ -44,6 +44,8 @@ public final class MetricsCacheQueryUtils {
 
   /**
    * compatible with com.twitter.heron.proto.tmaster.TopologyMaster.MetricRequest
+   * @param request protobuf defined message
+   * @return metricscache defined data structure
    */
   public static MetricRequest fromProtobuf(TopologyMaster.MetricRequest request) {
     String componentName = request.getComponentName();
@@ -95,6 +97,9 @@ public final class MetricsCacheQueryUtils {
 
   /**
    * compatible with com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse
+   * @param response metricscache defined data structure
+   * @param request metricscache defined data structure
+   * @return protobuf defined message
    */
   public static TopologyMaster.MetricResponse toProtobuf(MetricResponse response,
                                                          MetricRequest request) {
