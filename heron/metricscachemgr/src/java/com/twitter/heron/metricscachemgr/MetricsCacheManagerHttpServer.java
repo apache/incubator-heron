@@ -77,7 +77,7 @@ public class MetricsCacheManagerHttpServer {
    * How to run:
    * in the [source root directory], run bazel test,
    * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \
-   * <topology_name> <component_name> <metrics_name>
+   * &lt;topology_name&gt; &lt;component_name&gt; &lt;metrics_name&gt;
    * Example:
    * 1. run the example topology,
    * ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \

@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * immutable data bag for metric request
- * equality: <componentName, instanceId, metricName>
+ * equality: &lt;componentName, instanceId, metricName&gt;
  * range: startTime ~ endTime
  * type: aggregationGranularity
  */
