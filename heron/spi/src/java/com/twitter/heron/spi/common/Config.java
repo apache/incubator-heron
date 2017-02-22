@@ -244,7 +244,7 @@ public class Config {
   public ByteAmount getByteAmountValue(String key, ByteAmount defaultValue, ByteAmountUnit unit) {
     Object value = get(key);
     if (value != null) {
-      return TypeUtils.getByteAmount(defaultValue, unit);
+      return TypeUtils.getByteAmount(value, unit);
     }
     return defaultValue;
   }
