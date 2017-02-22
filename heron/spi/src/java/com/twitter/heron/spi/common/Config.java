@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.ByteAmountUnit;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.TypeUtils;
@@ -28,12 +29,12 @@ import com.twitter.heron.common.basics.TypeUtils;
 /**
  * Config is an Immutable Map of &lt;String, Object&gt; The get/set API that uses Key objects
  * should be favored over Strings. Usage of the String API should be refactored out.
- *
+ * <p>
  * A newly created Config object holds configs that might include wildcard tokens, like
  * ${HERON_HOME}/bin, ${HERON_LIB}/packing/*. Token substitution can be done by converting that
  * config to a local or cluster config by using the {@code Config.toLocalMode} or
  * {@code Config.toClusterMode} methods.
- *
+ * <p>
  * Local mode is for a config to be used to run Heron locally, where HERON_HOME might be an install
  * dir on the local host (e.g. HERON_HOME=/usr/bin/heron). Cluster mode is to be used when building
  * configs for a remote process run on a service, where all directories might be relative to the
@@ -103,11 +104,11 @@ public class Config {
    * Recursively expand each config value until token substitution is exhausted. We must recurse
    * to handle the case where field expansion requires multiple iterations, due to new tokens being
    * introduced as we replace. For example:
-   *
-   *   ${HERON_BIN}/heron-executor        gets expanded to
-   *   ${HERON_HOME}/bin/heron-executor   gets expanded to
-   *   /usr/local/heron/bin/heron-executor
-   *
+   * <p>
+   * ${HERON_BIN}/heron-executor        gets expanded to
+   * ${HERON_HOME}/bin/heron-executor   gets expanded to
+   * /usr/local/heron/bin/heron-executor
+   * <p>
    * If break logic is when another round does not reduce the number of tokens, since it means we
    * couldn't find a valid replacement.
    */
@@ -240,10 +241,10 @@ public class Config {
     return TypeUtils.getByteAmount(value);
   }
 
-  public ByteAmount getByteAmountValueMB(String key, ByteAmount defaultValue) {
+  public ByteAmount getByteAmountValue(String key, ByteAmount defaultValue, ByteAmountUnit unit) {
     Object value = get(key);
     if (value != null) {
-      return TypeUtils.getByteAmountMB(value);
+      return TypeUtils.getByteAmount(defaultValue, unit);
     }
     return defaultValue;
   }

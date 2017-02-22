@@ -81,18 +81,28 @@ public final class TypeUtils {
       return (ByteAmount) o;
     }
     try {
-      return ByteAmount.fromBytes(getLong(o));
+      return getByteAmount(o, ByteAmountUnit.BYTE);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("Don't know how to convert " + o + " to ByteAmount", e);
     }
   }
 
-  public static ByteAmount getByteAmountMB(Object o) {
+  public static ByteAmount getByteAmount(Object o, ByteAmountUnit unit) {
     if (o != null && o instanceof ByteAmount) {
       return (ByteAmount) o;
     }
     try {
-      return ByteAmount.fromMegabytes(getLong(o));
+      long amount = getLong(o);
+      switch (unit) {
+        case BYTE:
+          return ByteAmount.fromBytes(amount);
+        case MB:
+          return ByteAmount.fromMegabytes(amount);
+        case GB:
+          return ByteAmount.fromGigabytes(amount);
+        default:
+          return ByteAmount.fromBytes(amount);
+      }
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("Don't know how to convert " + o + " to ByteAmount", e);
     }

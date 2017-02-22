@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.yarn;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.ByteAmountUnit;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
@@ -28,8 +29,8 @@ public final class YarnContext extends Context {
         YarnKey.HERON_SCHEDULER_YARN_QUEUE.getDefaultString());
   }
 
-  public static ByteAmount heronDriverMemoryMb(Config cfg) {
-    return cfg.getByteAmountValueMB(YarnKey.YARN_SCHEDULER_DRIVER_MEMORY_MB.value(),
-        (ByteAmount) YarnKey.YARN_SCHEDULER_DRIVER_MEMORY_MB.getDefault());
+  public static ByteAmount heronDriverMemory(Config cfg) {
+    return cfg.getByteAmountValue(YarnKey.YARN_SCHEDULER_DRIVER_MEMORY_MB.value(),
+        (ByteAmount) YarnKey.YARN_SCHEDULER_DRIVER_MEMORY_MB.getDefault(), ByteAmountUnit.MB);
   }
 }

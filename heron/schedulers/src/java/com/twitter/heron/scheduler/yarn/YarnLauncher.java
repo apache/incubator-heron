@@ -76,7 +76,7 @@ public class YarnLauncher implements ILauncher {
     role = Context.role(config);
     env = Context.environ(config);
     queue = YarnContext.heronYarnQueue(config);
-    driverMemory = YarnContext.heronDriverMemoryMb(config);
+    driverMemory = YarnContext.heronDriverMemory(config);
 
     try {
       // In addition to jar for REEF's driver implementation, jar for packing and state manager
