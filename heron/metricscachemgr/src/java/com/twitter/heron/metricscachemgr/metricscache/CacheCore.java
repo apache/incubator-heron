@@ -140,6 +140,7 @@ public class CacheCore {
 
   /**
    * compatible with heron::tmaster::TMetricsCollector
+   * @param metrics The metrics to be added
    */
   public void addMetricException(TopologyMaster.PublishMetrics metrics) {
     synchronized (CacheCore.class) {
@@ -246,6 +247,10 @@ public class CacheCore {
    * idxComponentInstance == [c1-&gt;[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
    * <p>
    * assert: startTime &lt;= endTime
+   *
+   * @param metricNameType map: metric name to type
+   *
+   * @return query result
    */
   public MetricResponse getMetrics(
       MetricRequest request, MetricsFilter metricNameType) {
@@ -433,6 +438,8 @@ public class CacheCore {
    * idxComponentInstance == [c1-&gt;null, ..]: query all instances of c1, ..
    * idxComponentInstance == [c1-&gt;[], ..]: query none instance of c1, ..
    * idxComponentInstance == [c1-&gt;[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
+   *
+   * @return query result
    */
   public ExceptionResponse getExceptions(
       ExceptionRequest request) {
@@ -496,6 +503,7 @@ public class CacheCore {
 
   /**
    * start purge looper task
+   * @param wakeableLooper the looper to run timer
    */
   public void startPurge(WakeableLooper wakeableLooper) {
     synchronized (CacheCore.class) {
