@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * immutable data bag for metric datum
- * metric locator: <componentName, instanceId, metricName>
+ * metric locator: &lt;componentName, instanceId, metricName&gt;
  * metric value list: metricValue (use immutable getter)
  */
 public final class MetricDatum {

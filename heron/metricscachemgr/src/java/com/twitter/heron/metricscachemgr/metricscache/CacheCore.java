@@ -40,14 +40,14 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 /**
  * Cache Engine to store metrics and exceptions in memory and to respond to query,
  * implementing insertion and selection methods:
- * 1. Storage for metrics: timestamp_start -(tree)-> [sparse: bucket_id -(map)-> metric bucket]
- * 2. Storage for exceptions: idxComponentInstance -(hash)-> exception bucket
+ * 1. Storage for metrics: timestamp_start -(tree)-&gt; [sparse: bucket_id -(map)-&gt; metric bucket]
+ * 2. Storage for exceptions: idxComponentInstance -(hash)-&gt; exception bucket
  * 3. Index for metrics:
- * a. metricName -(map)-> idxMetricName (int: locator)
- * b. component -(map)-> instance -(map)-> idxComponentInstance (int: locator)
+ * a. metricName -(map)-&gt; idxMetricName (int: locator)
+ * b. component -(map)-&gt; instance -(map)-&gt; idxComponentInstance (int: locator)
  * bucket_id is Long from idxComponentInstance Integer and idxMetricName Integer combined
  * 4. Index for exceptions:
- * component -(map)-> instance -(map)-> idxComponentInstance (int: locator)
+ * component -(map)-&gt; instance -(map)-&gt; idxComponentInstance (int: locator)
  * 5. Query pattern: component-instance (equality), metricName (equality), timestamp (range)
  * Different from tmaster:
  * 1. order bucket by metric timestamp rather than metric message arriving time
@@ -63,9 +63,9 @@ public class CacheCore {
   private static int componentInstanceCount = 0;
   private static int metricNameCount = 0;
 
-  // index id map: componentName -(map)-> instanceId -(map)-> locator:int
+  // index id map: componentName -(map)-&gt; instanceId -(map)-&gt; locator:int
   private final Map<String, Map<String, Integer>> idxComponentInstance;
-  // index id map: metricName -(map)-> locator:int
+  // index id map: metricName -(map)-&gt; locator:int
   private final Map<String, Integer> idxMetricName;
 
   // exception store: following component-instance hierarchy
@@ -241,9 +241,9 @@ public class CacheCore {
    * <p>
    * idxComponentInstance == null: query all components
    * idxComponentInstance == []: query none component
-   * idxComponentInstance == [c1->null, ..]: query all instances of c1, ..
-   * idxComponentInstance == [c1->[], ..]: query none instance of c1, ..
-   * idxComponentInstance == [c1->[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
+   * idxComponentInstance == [c1-&gt;null, ..]: query all instances of c1, ..
+   * idxComponentInstance == [c1-&gt;[], ..]: query none instance of c1, ..
+   * idxComponentInstance == [c1-&gt;[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
    * <p>
    * assert: startTime <= endTime
    */
@@ -430,9 +430,9 @@ public class CacheCore {
    * @param request <p>
    * idxComponentInstance == null: query all components
    * idxComponentInstance == []: query none component
-   * idxComponentInstance == [c1->null, ..]: query all instances of c1, ..
-   * idxComponentInstance == [c1->[], ..]: query none instance of c1, ..
-   * idxComponentInstance == [c1>[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
+   * idxComponentInstance == [c1-&gt;null, ..]: query all instances of c1, ..
+   * idxComponentInstance == [c1-&gt;[], ..]: query none instance of c1, ..
+   * idxComponentInstance == [c1-&gt;[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
    */
   public ExceptionResponse getExceptions(
       ExceptionRequest request) {
