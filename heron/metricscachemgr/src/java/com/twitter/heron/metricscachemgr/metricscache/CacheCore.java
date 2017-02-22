@@ -245,7 +245,7 @@ public class CacheCore {
    * idxComponentInstance == [c1-&gt;[], ..]: query none instance of c1, ..
    * idxComponentInstance == [c1-&gt;[a, b, c, ..], ..]: query instance a, b, c, .. of c1, ..
    * <p>
-   * assert: startTime <= endTime
+   * assert: startTime &lt;= endTime
    */
   public MetricResponse getMetrics(
       MetricRequest request, MetricsFilter metricNameType) {
