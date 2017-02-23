@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -61,16 +60,16 @@ public final class ShellUtils {
   }
 
   public static int runProcess(String[] cmdline, StringBuilder stdout, StringBuilder stderr) {
-    return runSyncProcess(false, false, cmdline, stdout, stderr, null);
+    return runSyncProcess(false, cmdline, stdout, stderr, null);
   }
 
   public static int runProcess(
-      boolean verbose, String cmdline, StringBuilder stdout, StringBuilder stderr) {
-    return runSyncProcess(verbose, false, splitTokens(cmdline), stdout, stderr, null);
+      String cmdline, StringBuilder stdout, StringBuilder stderr) {
+    return runSyncProcess(false, splitTokens(cmdline), stdout, stderr, null);
   }
 
   public static int runSyncProcess(
-      boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
+      boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory) {
     return runSyncProcess(isInheritIO, cmdline, stdout, stderr, workingDirectory,
         new HashMap<String, String>());
@@ -109,14 +108,14 @@ public final class ShellUtils {
     final StringBuilder pStdErr = stderr == null ? new StringBuilder() : stderr;
 
     // Log the command for debugging
-    LOG.log(Level.FINE, "Process command: `$ {0}`", Arrays.toString(cmdline));
+    LOG.log(Level.INFO, "Process command: ``{0}''", String.join(" ", cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
 
     Process process;
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to run Sync Process ", e);
+      LOG.log(Level.SEVERE, "Failed to run sync process ", e);
       return -1;
     }
 
@@ -141,7 +140,7 @@ public final class ShellUtils {
       stdoutThread.interrupt();
       stderrThread.interrupt();
       process.destroy();
-      LOG.log(Level.SEVERE, "Running Sync Process was interrupted", e);
+      LOG.log(Level.SEVERE, "Running sync process was interrupted", e);
       // Reset the interrupt status to allow other codes noticing it.
       Thread.currentThread().interrupt();
       return -1;
@@ -183,7 +182,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.FINE, "$> {0}", Arrays.toString(command));
+    LOG.log(Level.INFO, "Run async process: ``{0}''", String.join(" ", command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
@@ -209,7 +208,7 @@ public final class ShellUtils {
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to run Async Process ", e);
+      LOG.log(Level.SEVERE, "Failed to run async process ", e);
     }
 
     return process;
@@ -278,7 +277,7 @@ public final class ShellUtils {
 
     // using curl copy the url to the target file
     String cmd = String.format("curl %s -o %s", uri, destination);
-    int ret = runSyncProcess(isVerbose, isInheritIO,
+    int ret = runSyncProcess(isInheritIO,
         splitTokens(cmd), new StringBuilder(), new StringBuilder(), parentDirectory);
 
     return ret == 0;
@@ -296,7 +295,7 @@ public final class ShellUtils {
       String packageName, String targetFolder, boolean isVerbose, boolean isInheritIO) {
     String cmd = String.format("tar -xvf %s", packageName);
 
-    int ret = runSyncProcess(isVerbose, isInheritIO,
+    int ret = runSyncProcess(isInheritIO,
         splitTokens(cmd), new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
     return ret == 0;

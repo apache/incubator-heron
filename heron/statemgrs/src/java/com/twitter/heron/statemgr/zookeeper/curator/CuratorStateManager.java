@@ -170,7 +170,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   protected void initTree() {
     // Make necessary directories
     for (StateLocation location : StateLocation.values()) {
-      LOG.info(String.format("%s directory: %s", location.getName(), getStateDirectory(location)));
+      LOG.fine(String.format("%s directory: %s", location.getName(), getStateDirectory(location)));
     }
 
     try {

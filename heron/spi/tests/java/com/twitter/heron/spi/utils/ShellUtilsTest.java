@@ -55,7 +55,7 @@ public class ShellUtilsTest {
     String testString = "testString";
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
-    Assert.assertEquals(0, ShellUtils.runProcess(true, "echo " + testString, stdout, stderr));
+    Assert.assertEquals(0, ShellUtils.runProcess("echo " + testString, stdout, stderr));
     Assert.assertEquals(testString, stdout.toString().trim());
     Assert.assertTrue(stderr.toString().trim().isEmpty());
   }
@@ -76,7 +76,7 @@ public class ShellUtilsTest {
       StringBuilder stdout = new StringBuilder();
       StringBuilder stderr = new StringBuilder();
       Assert.assertEquals(0,
-          ShellUtils.runProcess(true,
+          ShellUtils.runProcess(
               "/bin/bash -c " + testScript.getAbsolutePath(), stdout, stderr));
       // Only checks stdout and stderr are not empty. Correctness is checked in "testRunProcess".
       Assert.assertTrue(!stdout.toString().trim().isEmpty());

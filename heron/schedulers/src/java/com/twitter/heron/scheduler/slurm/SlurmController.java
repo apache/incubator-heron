@@ -126,7 +126,7 @@ public class SlurmController {
   protected boolean runProcess(String topologyWorkingDirectory, String[] slurmCmd,
                          StringBuilder stdout, StringBuilder stderr) {
     File file = topologyWorkingDirectory == null ? null : new File(topologyWorkingDirectory);
-    return 0 == ShellUtils.runSyncProcess(isVerbose, false, slurmCmd, stdout, stderr, file);
+    return 0 == ShellUtils.runSyncProcess(false, slurmCmd, stdout, stderr, file);
   }
 
   /**
