@@ -162,7 +162,7 @@ public class YarnLauncher implements ILauncher {
         .set(HeronDriverConfiguration.HTTP_PORT, 0)
         .set(HeronDriverConfiguration.VERBOSE, false)
         .set(YarnDriverConfiguration.QUEUE, queue)
-        .set(DriverConfiguration.DRIVER_MEMORY, driverMemory.asMegabytes())
+        .set(DriverConfiguration.DRIVER_MEMORY, (int) driverMemory.asMegabytes())
         .build();
   }
 
