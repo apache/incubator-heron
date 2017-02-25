@@ -20,5 +20,6 @@ from physicalplanhandler import PhysicalPlanHandler
 from pidhandler import PidHandler
 from schedulerlocationhandler import SchedulerLocationHandler
 from stateshandler import StatesHandler
+from stmgrsregsummaryhandler import StmgrsRegSummaryHandler
 from topologieshandler import TopologiesHandler
 from topologyhandler import TopologyHandler
