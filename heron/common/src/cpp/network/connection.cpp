@@ -61,8 +61,10 @@ Connection::~Connection() {
   }
   delete mIncomingPacket;
   {
-    for (auto iter = mOutstandingPackets.begin(); iter != mOutstandingPackets.end(); ++iter) {
-      delete *iter;
+    while (!mOutstandingPackets.empty()) {
+      auto p = mOutstandingPackets.front();
+      delete p;
+      mOutstandingPackets.pop_front();
     }
     while (!mSentPackets.empty()) {
       auto p = mSentPackets.front();
