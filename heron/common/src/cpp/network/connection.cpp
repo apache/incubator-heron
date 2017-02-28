@@ -15,6 +15,7 @@
  */
 
 #include "network/connection.h"
+#include <algorithm>
 #include <list>
 #include <utility>
 
@@ -113,8 +114,7 @@ sp_int32 Connection::registerForBackPressure(VCallback<Connection*> cbStarter,
 
 sp_int32 Connection::writeIntoIOVector(sp_int32 maxWrite, sp_int32* toWrite) {
   sp_uint32 bytesLeft = maxWrite;
-  sp_int32 simulWrites =
-      mIOVectorSize > mOutstandingPackets.size() ?: mIOVectorSize;
+  sp_int32 simulWrites = std::min(mIOVectorSize, (sp_int32)mOutstandingPackets.size());
   *toWrite = 0;
   auto iter = mOutstandingPackets.begin();
   for (sp_int32 i = 0; i < simulWrites; ++i) {
