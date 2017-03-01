@@ -84,9 +84,6 @@ public class WebSink implements IMetricsSink {
   private boolean isFlatMetrics = true;
   private boolean includeTopologyName = true;
   private String topologyName;
-  private long cacheMaxSize;
-  private long cacheTtlSec;
-
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
@@ -95,8 +92,8 @@ public class WebSink implements IMetricsSink {
     isFlatMetrics = TypeUtils.getBoolean(conf.getOrDefault(KEY_FLAT_METRICS, true));
     includeTopologyName = TypeUtils.getBoolean(
             conf.getOrDefault(KEY_INCLUDE_TOPOLOGY_NAME, false));
-    cacheMaxSize = TypeUtils.getLong(conf.getOrDefault(KEY_METRICS_CACHE_MAX_SIZE, 1000000));
-    cacheTtlSec = TypeUtils.getLong(conf.getOrDefault(KEY_METRICS_CACHE_TTL_SEC, 600));
+    long cacheMaxSize = TypeUtils.getLong(conf.getOrDefault(KEY_METRICS_CACHE_MAX_SIZE, 1000000));
+    long cacheTtlSec = TypeUtils.getLong(conf.getOrDefault(KEY_METRICS_CACHE_TTL_SEC, 600));
 
     metricsCache = CacheBuilder.newBuilder()
             .maximumSize(cacheMaxSize)
@@ -195,20 +192,8 @@ public class WebSink implements IMetricsSink {
     if (isFlatMetrics) {
       metricsCache.putAll(processMetrics(source + "/", record.getMetrics()));
     } else {
-      Map<String, Double> sourceCache;
-      Object sourceObj = metricsCache.getIfPresent(source);
-      if (sourceObj instanceof Map) {
-        @SuppressWarnings("unchecked")
-        Map<String, Double> castObj =  (Map<String, Double>) sourceObj;
-        sourceCache = castObj;
-      } else {
-        sourceCache =  CacheBuilder.newBuilder()
-            .maximumSize(cacheMaxSize)
-            .expireAfterWrite(cacheTtlSec, TimeUnit.SECONDS)
-            .<String, Double>build().asMap();
-      }
-      sourceCache.putAll(processMetrics("", record.getMetrics()));
-      metricsCache.put(source, sourceCache);
+      Map<String, Double> sourceMap = processMetrics("", record.getMetrics());
+      metricsCache.put(source, sourceMap);
     }
   }
 

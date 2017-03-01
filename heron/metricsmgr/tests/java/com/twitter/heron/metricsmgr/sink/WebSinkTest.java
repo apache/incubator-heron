@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -58,7 +57,7 @@ public class WebSinkTest {
 
   private Map<String, Object> defaultConf;
   private SinkContext context;
-  private List<MetricsRecord> records;
+  private Iterable<MetricsRecord> records;
 
 
   @Before
@@ -76,11 +75,9 @@ public class WebSinkTest {
 
     Iterable<MetricsInfo> infos = Arrays.asList(new MetricsInfo("metric_1", "1.0"),
         new MetricsInfo("metric_2", "2.0"));
-
     records = Arrays.asList(
         new MetricsRecord("machine/stuff/record_1", infos, Collections.<ExceptionInfo>emptyList()),
         new MetricsRecord("record_2", infos, Collections.<ExceptionInfo>emptyList()));
-
   }
 
   /**
@@ -171,13 +168,6 @@ public class WebSinkTest {
       sink.processRecord(r);
     }
 
-    //Update and override MetricsRecord 1
-    Iterable<MetricsInfo> infos2 = Arrays.asList(new MetricsInfo("metric_1", "3.0"),
-        new MetricsInfo("metric_3", "1.0"));
-    sink.processRecord(new MetricsRecord(records.get(0).getSource(),
-        infos2,
-        Collections.<ExceptionInfo>emptyList()));
-
     Map<String, Object> results = sink.getMetrics();
     Assert.assertEquals(2, results.size());
     @SuppressWarnings("unchecked")
@@ -185,13 +175,11 @@ public class WebSinkTest {
     @SuppressWarnings("unchecked")
     Map<String, Object> record2 = (Map<String, Object>) results.get("/record_2");
 
-    Assert.assertEquals(record1.get("metric_1"), 3.0d);
+    Assert.assertEquals(record1.get("metric_1"), 1.0d);
     Assert.assertEquals(record1.get("metric_2"), 2.0d);
-    Assert.assertEquals(record1.get("metric_3"), 1.0d);
     Assert.assertEquals(record2.get("metric_1"), 1.0d);
     Assert.assertEquals(record2.get("metric_2"), 2.0d);
   }
-
 
   /**
    * Testinging max metics size, and oldest keys get expired
