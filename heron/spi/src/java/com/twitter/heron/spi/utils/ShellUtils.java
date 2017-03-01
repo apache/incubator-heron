@@ -182,7 +182,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.INFO, "Runnning async process: ``{0}''", String.join(" ", command));
+    LOG.log(Level.INFO, "Running async process: ``{0}''", String.join(" ", command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
