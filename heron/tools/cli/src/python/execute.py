@@ -20,7 +20,7 @@ import tempfile
 import traceback
 
 from heron.common.src.python.utils.log import Log
-from heron.tools.cli.src.python.response import Response, Status
+from heron.tools.cli.src.python.result import SimpleResult, ProcessResult, Status
 import heron.common.src.python.pex_loader as pex_loader
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.cli.src.python.jars as jars
@@ -67,10 +67,11 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   Log.debug("Heron options: {%s}", str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
-  proc = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  proc = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE, bufsize=1)
   # stdout message has the information Java program sends back
   # stderr message has extra information, such as debugging message
-  return Response(proc=proc)
+  return ProcessResult(proc)
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   '''
@@ -116,11 +117,11 @@ def heron_pex(topology_pex, topology_class_name, args=None):
       cmd.extend(args)
     Log.debug("Invoking class using command: ``%s''", ' '.join(cmd))
     Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
-
     # invoke the command with subprocess and print error message, if any
-    proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE, bufsize=1)
     # todo(rli): improve python topology submission workflow
-    return Response(proc=proc)
+    return ProcessResult(proc)
   else:
     try:
       # loading topology from Topology's subclass (no main method)
@@ -133,11 +134,9 @@ def heron_pex(topology_pex, topology_class_name, args=None):
       pex_loader.load_pex(topology_pex)
       topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
       topology_class.write()
-      return Response(status=Status.Ok)
+      return SimpleResult(Status.Ok)
     except Exception as ex:
       Log.debug(traceback.format_exc())
-      err_str = "Topology %s failed to be loaded from the given pex: %s" %\
+      err_context = "Topology %s failed to be loaded from the given pex: %s" %\
                 (topology_class_name, ex)
-      resp = Response(status=Status.HeronError)
-      resp.add_context(err_str)
-      return err_str
+      return SimpleResult(Status.HeronError, err_context)
