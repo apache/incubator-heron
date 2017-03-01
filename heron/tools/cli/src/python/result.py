@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''result.py'''
-from Queue import Queue, Empty
 import abc
 import sys
-from threading import Thread
 from enum import Enum
 
 from heron.common.src.python.utils.log import Log
