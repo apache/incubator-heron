@@ -42,7 +42,7 @@ def create_parser(subparsers):
       help='Submit a topology',
       usage="%(prog)s [options] cluster/[role]/[env] " + \
             "topology-file-name topology-class-name [topology-args]",
-      add_help=False
+      add_help=True
   )
 
   cli_args.add_titles(parser)
