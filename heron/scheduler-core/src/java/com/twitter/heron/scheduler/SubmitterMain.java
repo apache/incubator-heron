@@ -380,6 +380,7 @@ public class SubmitterMain {
           .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
     if (Context.dryRun(config)) {
       callLauncherRunner(primaryRuntime);
+      return;
     }
     // 1. Do prepare work
     // create an instance of state manager

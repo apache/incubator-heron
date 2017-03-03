@@ -60,23 +60,28 @@ public final class ShellUtils {
     return builder.toString();
   }
 
-  public static int runProcess(String[] cmdline, StringBuilder stderr) {
-    return runSyncProcess(false, cmdline, stderr, null);
+  public static int runProcess(String[] cmdline, StringBuilder outputBuilder) {
+    return runSyncProcess(false, cmdline, outputBuilder, null);
   }
 
   public static int runProcess(
-      String cmdline, StringBuilder stderr) {
-    return runSyncProcess(false, splitTokens(cmdline), stderr, null);
+      String cmdline, StringBuilder outputBuilder) {
+    return runSyncProcess(false, splitTokens(cmdline), outputBuilder, null);
   }
 
   public static int runSyncProcess(
-      boolean isInheritIO, String[] cmdline, StringBuilder stderr, File workingDirectory) {
-    return runSyncProcess(isInheritIO, cmdline, stderr, workingDirectory,
+      boolean isInheritIO, String[] cmdline, StringBuilder outputBuilder, File workingDirectory) {
+    return runSyncProcess(isInheritIO, cmdline, outputBuilder, workingDirectory,
         new HashMap<String, String>());
   }
 
   /**
-   * Start a daemon thread to read data from "input" to "out".
+   * Read and print line from input, and save each line in a string builder
+   * line read from input is printed to stderr directly instead of using LOG (which will
+   * add redundant timestamp and class name info)
+   * @param input input stream
+   * @param builder string builder used to save input lines
+   * @return
    */
   private static Thread asyncProcessStream(final InputStream input, final StringBuilder builder) {
     Thread thread = new Thread() {
@@ -96,7 +101,9 @@ public final class ShellUtils {
             break;
           } else {
             System.err.println(line);
-            builder.append(line);
+            if (builder != null) {
+              builder.append(line);
+            }
           }
         }
         try {
@@ -115,17 +122,17 @@ public final class ShellUtils {
    */
   private static int runSyncProcess(
       boolean isInheritIO, String[] cmdline,
-      StringBuilder stderr, File workingDirectory, Map<String, String> envs) {
-    final StringBuilder pStdErr = stderr == null ? new StringBuilder() : stderr;
+      StringBuilder outputBuilder, File workingDirectory, Map<String, String> envs) {
+    final StringBuilder builder = outputBuilder == null ? new StringBuilder() : outputBuilder;
 
     // Log the command for debugging
-    LOG.log(Level.INFO, "Running synced process:\n``{0}''''", String.join(" ", cmdline));
+    LOG.log(Level.INFO, "Running synced process:``{0}''''", String.join(" ", cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
-    /* combine input stream and error stream because
+    /* combine input stream and error stream into stderr because
        1. this preserves order of process's stdout/stderr message
        2. there is no need to distinguish stderr from stdout
        3. follow one basic pattern of the design of Python<~>Java I/O redirection:
-          stdout contains useful message Java program needs to propagate back, stderr
+          stdout contains useful messages Java program needs to propagate back, stderr
           contains all other information */
     pb.redirectErrorStream(true);
 
@@ -137,12 +144,12 @@ public final class ShellUtils {
       return -1;
     }
 
-    // Launching threads to consume stdout and stderr before "waitFor". Otherwise, output from the
-    // "process" can exhaust the available buffer for the output or error stream because neither
-    // stream is read while waiting for the process to complete. If either buffer becomes full, it
-    // can block the "process" as well, preventing all progress for both the "process" and the
-    // current thread.
-    Thread outputsThread = asyncProcessStream(process.getInputStream(), pStdErr);
+    // Launching threads to consume combined stdout and stderr before "waitFor".
+    // Otherwise, output from the "process" can exhaust the available buffer for the combined stream
+    // because stream is not read while waiting for the process to complete.
+    // If buffer becomes full, it can block the "process" as well,
+    // preventing all progress for both the "process" and the current thread.
+    Thread outputsThread = asyncProcessStream(process.getInputStream(), builder);
 
     try {
       outputsThread.start();
@@ -184,7 +191,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.INFO, "Running async process:\n``{0}''''", String.join(" ", command));
+    LOG.log(Level.INFO, "Running async process:``{0}''''", String.join(" ", command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
@@ -260,7 +267,7 @@ public final class ShellUtils {
   }
 
   static Process establishSocksProxyProcess(String proxyHost, int proxyPort) {
-    LOG.info("Establishing SOCKS proxy...");
+    LOG.info(String.format("Establishing SOCKS proxy to: %s:%d", proxyHost, proxyPort));
     return ShellUtils.runASyncProcess(String.format("ssh -ND %d %s", proxyPort, proxyHost));
   }
 
