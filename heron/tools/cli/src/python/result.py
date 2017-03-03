@@ -60,9 +60,13 @@ class Result(object):
   @staticmethod
   def _do_log(log_f, msg):
     if msg:
+      if msg[-1] == '\n':
+        msg = msg[:-1]
       log_f(msg)
 
   def _log_context(self):
+    # render context only after process exits
+    assert self.status is not None
     if self.status == Status.Ok or self.status == Status.DryRun:
       self._do_log(Log.info, self.succ_context)
     elif self.status == Status.HeronError:
@@ -107,24 +111,63 @@ class ProcessResult(Result):
     super(ProcessResult, self).__init__()
     self.proc = proc
 
+  def renderProcessStdErr(self, stderr_line):
+    """ render stderr of shelled-out process
+        stderr could be error message of failure of invoking process or
+        normal stderr output from successfully shelled-out process.
+        In the first case, ``Popen'' should fail fast and we should be able to
+        get return code immediately. We then render the failure message.
+        In the second case, we simply print stderr line in stderr.
+        The way to handle the first case is shaky but should be the best we can
+        do since we have conflicts of design goals here.
+    :param stderr_line: one line from shelled-out process
+    :return:
+    """
+    retcode = self.proc.poll()
+    if retcode is not None and status_type(retcode) == Status.InvocationError:
+      self._do_log(Log.error, stderr_line)
+    else:
+      print >> sys.stderr, stderr_line,
+
+  def renderProcessStdOut(self, stdout):
+    """ render stdout of shelled-out process
+        stdout always contains information Java process wants to
+        propagate back to cli, so we do special rendering here
+    :param stdout: all lines from shelled-out process
+    :return:
+    """
+    # since we render stdout line based on Java process return code,
+    # ``status'' has to be already set
+    assert self.status is not None
+    # remove pending newline
+    if self.status == Status.Ok:
+      self._do_log(Log.info, stdout)
+    elif self.status == Status.HeronError:
+      # remove last newline since logging will append newline
+      self._do_log(Log.error, stdout)
+    # No need to prefix [INFO] here. We want to display dry-run response in a clean way
+    elif self.status == Status.DryRun:
+      print >> sys.stdout, stdout,
+    else:
+      raise RuntimeError(
+          "Unknown status type of value %d. Expected value: %s", self.status.value, list(Status))
+
   def render(self):
     while True:
       stderr_line = self.proc.stderr.readline()
       if not stderr_line:
         if self.proc.poll() is None:
           continue
-        stdout_line = self.proc.stdout.readline()
-        if not stdout_line:
-          if self.proc.poll() is None:
-            continue
-          else:
-            break
         else:
-          print >> sys.stdout, stdout_line[:-1]
+          break
       else:
-        print >> sys.stderr, stderr_line[:-1]
+        self.renderProcessStdErr(stderr_line)
     self.proc.wait()
     self.status = status_type(self.proc.returncode)
+    stdout = "".join(self.proc.stdout.readlines())
+    self.renderProcessStdOut(stdout)
+    self._log_context()
+
 
 def render(results):
   if isinstance(results, Result):

@@ -281,7 +281,7 @@ public final class SchedulerUtils {
 
     Scheduler.SchedulerLocation location = builder.build();
 
-    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
+    LOG.log(Level.INFO, "Setting Scheduler locations:\n{0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Boolean result =
         statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));

@@ -376,6 +376,11 @@ public class SubmitterMain {
    *
    */
   public void submitTopology() throws TopologySubmissionException {
+    Config primaryRuntime = Config.newBuilder()
+          .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
+    if (Context.dryRun(config)) {
+      callLauncherRunner(primaryRuntime);
+    }
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
@@ -415,39 +420,30 @@ public class SubmitterMain {
 
     // Put it in a try block so that we can always clean resources
     try {
-      // Build the basic runtime config
-      Config primaryRuntime = Config.newBuilder()
-          .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
+      // initialize the state manager
+      statemgr.initialize(config);
 
-      // Bypass validation and upload if in dry-run mode
-      if (Context.dryRun(config)) {
-        callLauncherRunner(primaryRuntime);
-      } else {
-        // initialize the state manager
-        statemgr.initialize(config);
+      // TODO(mfu): timeout should read from config
+      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-        // TODO(mfu): timeout should read from config
-        SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+      // Check if topology is already running
+      validateSubmit(adaptor, topology.getName());
 
-        // Check if topology is already running
-        validateSubmit(adaptor, topology.getName());
+      LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
-        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
+      // Try to submit topology if valid
+      // Firstly, try to upload necessary packages
+      URI packageURI = uploadPackage(uploader);
 
-        // Try to submit topology if valid
-        // Firstly, try to upload necessary packages
-        URI packageURI = uploadPackage(uploader);
-
-        // Secondly, try to submit the topology
-        // build the complete runtime config
-        Config runtimeAll = Config.newBuilder()
-            .putAll(primaryRuntime)
-            .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))
-            .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
-            .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
-            .build();
-        callLauncherRunner(runtimeAll);
-      }
+      // Secondly, try to submit the topology
+      // build the complete runtime config
+      Config runtimeAll = Config.newBuilder()
+          .putAll(primaryRuntime)
+          .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))
+          .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
+          .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
+          .build();
+      callLauncherRunner(runtimeAll);
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,42 +60,53 @@ public final class ShellUtils {
     return builder.toString();
   }
 
-  public static int runProcess(String[] cmdline, StringBuilder stdout, StringBuilder stderr) {
-    return runSyncProcess(false, cmdline, stdout, stderr, null);
+  public static int runProcess(String[] cmdline, StringBuilder stderr) {
+    return runSyncProcess(false, cmdline, stderr, null);
   }
 
   public static int runProcess(
-      String cmdline, StringBuilder stdout, StringBuilder stderr) {
-    return runSyncProcess(false, splitTokens(cmdline), stdout, stderr, null);
+      String cmdline, StringBuilder stderr) {
+    return runSyncProcess(false, splitTokens(cmdline), stderr, null);
   }
 
   public static int runSyncProcess(
-      boolean isInheritIO, String[] cmdline, StringBuilder stdout,
-      StringBuilder stderr, File workingDirectory) {
-    return runSyncProcess(isInheritIO, cmdline, stdout, stderr, workingDirectory,
+      boolean isInheritIO, String[] cmdline, StringBuilder stderr, File workingDirectory) {
+    return runSyncProcess(isInheritIO, cmdline, stderr, workingDirectory,
         new HashMap<String, String>());
   }
 
   /**
    * Start a daemon thread to read data from "input" to "out".
    */
-  private static Thread asyncProcessStream(final InputStream input, final StringBuilder out) {
+  private static Thread asyncProcessStream(final InputStream input, final StringBuilder builder) {
     Thread thread = new Thread() {
       @Override
       public void run() {
-        try {
-          out.append(inputstreamToString(input));
-        } finally {
+        // do not buffer
+        System.err.println("Process output (stdout+stderr):");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(input), 1);
+        while(true) {
+          String line = null;
           try {
-            input.close();
+            line = reader.readLine();
           } catch (IOException e) {
-            LOG.log(Level.WARNING, "Failed to close the input stream", e);
+            LOG.log(Level.SEVERE, "Error when reading line from subprocess", e);
           }
+          if (line == null) {
+            break;
+          } else {
+            System.err.println(line);
+            builder.append(line);
+          }
+        }
+        try {
+          input.close();
+        } catch (IOException e) {
+          LOG.log(Level.WARNING, "Failed to close the input stream", e);
         }
       }
     };
     thread.setDaemon(true);
-    thread.start();
     return thread;
   }
 
@@ -102,20 +114,26 @@ public final class ShellUtils {
    * run sync process
    */
   private static int runSyncProcess(
-      boolean isInheritIO, String[] cmdline, StringBuilder stdout,
+      boolean isInheritIO, String[] cmdline,
       StringBuilder stderr, File workingDirectory, Map<String, String> envs) {
-    final StringBuilder pStdOut = stdout == null ? new StringBuilder() : stdout;
     final StringBuilder pStdErr = stderr == null ? new StringBuilder() : stderr;
 
     // Log the command for debugging
-    LOG.log(Level.INFO, "Process command: ``{0}''", String.join(" ", cmdline));
+    LOG.log(Level.INFO, "Running synced process:\n``{0}''''", String.join(" ", cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
+    /* combine input stream and error stream because
+       1. this preserves order of process's stdout/stderr message
+       2. there is no need to distinguish stderr from stdout
+       3. follow one basic pattern of the design of Python<~>Java I/O redirection:
+          stdout contains useful message Java program needs to propagate back, stderr
+          contains all other information */
+    pb.redirectErrorStream(true);
 
     Process process;
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to run sync process ", e);
+      LOG.log(Level.SEVERE, "Failed to run synced process", e);
       return -1;
     }
 
@@ -124,39 +142,23 @@ public final class ShellUtils {
     // stream is read while waiting for the process to complete. If either buffer becomes full, it
     // can block the "process" as well, preventing all progress for both the "process" and the
     // current thread.
-    Thread stdoutThread = asyncProcessStream(process.getInputStream(), pStdOut);
-    Thread stderrThread = asyncProcessStream(process.getErrorStream(), pStdErr);
-
-    int exitValue;
+    Thread outputsThread = asyncProcessStream(process.getInputStream(), pStdErr);
 
     try {
-      exitValue = process.waitFor();
-      // Make sure `pStdOut` and `pStdErr` get the buffered data
-      stdoutThread.join();
-      stderrThread.join();
+      outputsThread.start();
+      int exitValue = process.waitFor();
+      outputsThread.join();
+      return exitValue;
     } catch (InterruptedException e) {
       // The current thread is interrupted, so try to interrupt reading threads and kill
       // the process to return quickly.
-      stdoutThread.interrupt();
-      stderrThread.interrupt();
+      outputsThread.interrupt();
       process.destroy();
-      LOG.log(Level.SEVERE, "Running sync process was interrupted", e);
+      LOG.log(Level.SEVERE, "Running synced process was interrupted", e);
       // Reset the interrupt status to allow other codes noticing it.
       Thread.currentThread().interrupt();
       return -1;
     }
-
-    String stdoutString = pStdOut.toString();
-    String stderrString = pStdErr.toString();
-    if (!stdoutString.isEmpty()) {
-      LOG.log(Level.FINE, "\nSTDOUT:\n {0}", stdoutString);
-    }
-
-    if (!stderrString.isEmpty()) {
-      LOG.log(Level.FINE, "\nSTDERR:\n {0}", stderrString);
-    }
-
-    return exitValue;
   }
 
   public static Process runASyncProcess(
@@ -182,7 +184,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.INFO, "Running async process: ``{0}''", String.join(" ", command));
+    LOG.log(Level.INFO, "Running async process:\n``{0}''''", String.join(" ", command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
@@ -208,7 +210,7 @@ public final class ShellUtils {
     try {
       process = pb.start();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to run async process ", e);
+      LOG.log(Level.SEVERE, "Failed to run async process", e);
     }
 
     return process;
@@ -258,6 +260,7 @@ public final class ShellUtils {
   }
 
   static Process establishSocksProxyProcess(String proxyHost, int proxyPort) {
+    LOG.info("Establishing SOCKS proxy...");
     return ShellUtils.runASyncProcess(String.format("ssh -ND %d %s", proxyPort, proxyHost));
   }
 
@@ -278,7 +281,7 @@ public final class ShellUtils {
     // using curl copy the url to the target file
     String cmd = String.format("curl %s -o %s", uri, destination);
     int ret = runSyncProcess(isInheritIO,
-        splitTokens(cmd), new StringBuilder(), new StringBuilder(), parentDirectory);
+        splitTokens(cmd), new StringBuilder(), parentDirectory);
 
     return ret == 0;
   }
@@ -296,7 +299,7 @@ public final class ShellUtils {
     String cmd = String.format("tar -xvf %s", packageName);
 
     int ret = runSyncProcess(isInheritIO,
-        splitTokens(cmd), new StringBuilder(), new StringBuilder(), new File(targetFolder));
+        splitTokens(cmd), new StringBuilder(), new File(targetFolder));
 
     return ret == 0;
   }
