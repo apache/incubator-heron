@@ -26,7 +26,7 @@ def create_parser(subparsers):
       'version',
       help='Print version of heron-cli',
       usage="%(prog)s",
-      add_help=False)
+      add_help=True)
 
   cli_args.add_titles(parser)
 
