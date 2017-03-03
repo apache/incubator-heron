@@ -46,14 +46,14 @@ def configure(level=logging.INFO, logfile=None):
 
   # if logfile is specified, FileHandler is used
   if logfile is not None:
-    log_format = "[%(levelname)s] [%(asctime)s] %(module)s: %(message)s"
+    log_format = "[%(asctime)s] [%(levelname)s]: %(message)s"
     formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
     file_handler = logging.FileHandler(logfile)
     file_handler.setFormatter(formatter)
     Log.addHandler(file_handler)
   # otherwise, use StreamHandler to output to stream (stdout, stderr...)
   else:
-    log_format = "%(log_color)s[%(levelname)s]%(reset)s [%(asctime)s]: %(message)s"
+    log_format = "[%(asctime)s] %(log_color)s[%(levelname)s]%(reset)s: %(message)s"
     # pylint: disable=redefined-variable-type
     formatter = colorlog.ColoredFormatter(fmt=log_format, datefmt=date_format)
     stream_handler = logging.StreamHandler()
@@ -70,7 +70,7 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
   logging.basicConfig()
 
   root_logger = logging.getLogger()
-  log_format = "[%(levelname)s] [%(asctime)s] %(filename)s: %(message)s"
+  log_format = "[%(asctime)s] [%(levelname)s] %(filename)s: %(message)s"
 
   root_logger.setLevel(level)
   handler = RotatingFileHandler(logfile, maxBytes=max_bytes, backupCount=max_files)
