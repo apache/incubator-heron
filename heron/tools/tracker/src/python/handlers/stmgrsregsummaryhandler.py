@@ -94,6 +94,11 @@ class StmgrsRegSummaryHandler(BaseHandler):
     reg_response.ParseFromString(result.body)
 
     # Send response
-    ret = {'registered_stmgrs': reg_response.registered_stmgrs,
-           'absent_stmgrs': reg_response.absent_stmgrs}
+    registered, absent = [], []
+    for stmgr in reg_response.registered_stmgrs:
+      registered.append(stmgr)
+    for stmgr in reg_response.absent_stmgrs:
+      absent.append(stmgr)
+    ret = {'registered_stmgrs': registered,
+           'absent_stmgrs': absent}
     raise tornado.gen.Return(ret)
