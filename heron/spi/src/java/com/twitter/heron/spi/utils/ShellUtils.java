@@ -78,12 +78,16 @@ public final class ShellUtils {
   /**
    * Read and print line from input, and save each line in a string builder
    * line read from input is printed to stderr directly instead of using LOG (which will
-   * add redundant timestamp and class name info)
+   * add redundant timestamp and class name info).
+   *
+   * This method does not start the thread. Instead, caller should start this thread.
+   *
    * @param input input stream
-   * @param builder string builder used to save input lines
-   * @return
+   * @param processOutputStringBuilder string builder used to save input lines
+   * @return thread
    */
-  private static Thread asyncProcessStream(final InputStream input, final StringBuilder builder) {
+  private static Thread createAsyncStreamThread(final InputStream input,
+                                                final StringBuilder processOutputStringBuilder) {
     Thread thread = new Thread() {
       @Override
       public void run() {
@@ -101,8 +105,8 @@ public final class ShellUtils {
             break;
           } else {
             System.err.println(line);
-            if (builder != null) {
-              builder.append(line);
+            if (processOutputStringBuilder != null) {
+              processOutputStringBuilder.append(line);
             }
           }
         }
@@ -126,7 +130,7 @@ public final class ShellUtils {
     final StringBuilder builder = outputBuilder == null ? new StringBuilder() : outputBuilder;
 
     // Log the command for debugging
-    LOG.log(Level.INFO, "Running synced process:``{0}''''", String.join(" ", cmdline));
+    LOG.log(Level.INFO, "Running synced process: ``{0}''''", String.join(" ", cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
     /* combine input stream and error stream into stderr because
        1. this preserves order of process's stdout/stderr message
@@ -149,7 +153,7 @@ public final class ShellUtils {
     // because stream is not read while waiting for the process to complete.
     // If buffer becomes full, it can block the "process" as well,
     // preventing all progress for both the "process" and the current thread.
-    Thread outputsThread = asyncProcessStream(process.getInputStream(), builder);
+    Thread outputsThread = createAsyncStreamThread(process.getInputStream(), builder);
 
     try {
       outputsThread.start();
@@ -191,7 +195,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.INFO, "Running async process:``{0}''''", String.join(" ", command));
+    LOG.log(Level.INFO, "Running async process: ``{0}''''", String.join(" ", command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
