@@ -88,7 +88,7 @@ public final class ShellUtils {
       @Override
       public void run() {
         // do not buffer
-        System.err.println("Process output (stdout+stderr):");
+        LOG.log(Level.INFO, "Process output (stdout+stderr):");
         BufferedReader reader = new BufferedReader(new InputStreamReader(input), 1);
         while(true) {
           String line = null;
