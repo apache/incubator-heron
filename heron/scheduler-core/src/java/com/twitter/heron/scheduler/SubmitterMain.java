@@ -442,13 +442,13 @@ public class SubmitterMain {
           .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
           .build();
 
-      PackingPlan packedPlan = LauncherUtils.getInstance()
+      PackingPlan packingPlan = LauncherUtils.getInstance()
           .createPackingPlan(config, runtimeWithoutPackageURI);
 
       // The packing plan might call for a number of containers different than the config
       // settings. If that's the case we need to modify the configs to match.
       runtimeWithoutPackageURI =
-          updateNumContainersIfNeeded(runtimeWithoutPackageURI, topology, packedPlan);
+          updateNumContainersIfNeeded(runtimeWithoutPackageURI, topology, packingPlan);
 
       // If the packing plan is valid we will upload necessary packages
       URI packageURI = uploadPackage(uploader);
