@@ -22,6 +22,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <algorithm>
 #include "manager/tmetrics-collector.h"
 #include "manager/tcontroller.h"
 #include "manager/stats-interface.h"
@@ -402,6 +403,13 @@ proto::system::Status* TMaster::RegisterStMgr(
       auto cb = [this](EventLoop::Status status) { this->DoPhysicalPlan(status); };
       CHECK_GE(eventLoop_->registerTimer(std::move(cb), false, 0), 0);
     }
+  } else if (sizeof(absent_stmgrs_) / static_cast<double>(sizeof(stmgrs_)) < .5) {
+    // TODO: do not merge until verified 
+    std::ostringstream stream;
+    std::copy(absent_stmgrs_.begin(), absent_stmgrs_.end(),
+        std::ostream_iterator<std::string>(stream, ", "));
+    std::string result = stream.str();
+    LOG(INFO) << "Still awaiting stmgr requests from " << result << std::endl;
   }
   _pplan = current_pplan_;
   proto::system::Status* status = new proto::system::Status();
