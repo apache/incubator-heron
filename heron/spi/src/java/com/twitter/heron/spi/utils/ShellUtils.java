@@ -94,7 +94,7 @@ public final class ShellUtils {
         // do not buffer
         LOG.log(Level.INFO, "Process output (stdout+stderr):");
         BufferedReader reader = new BufferedReader(new InputStreamReader(input), 1);
-        while(true) {
+        while (true) {
           String line = null;
           try {
             line = reader.readLine();
