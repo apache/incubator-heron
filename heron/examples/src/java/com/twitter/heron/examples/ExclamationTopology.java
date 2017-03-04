@@ -14,8 +14,10 @@
 
 package com.twitter.heron.examples;
 
+import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.common.basics.ByteAmount;
 
 import backtype.storm.Config;
@@ -68,7 +70,7 @@ public final class ExclamationTopology {
     }
   }
 
-  public static class ExclamationBolt extends BaseRichBolt {
+  public static class ExclamationBolt extends BaseRichBolt implements IUpdatable {
 
     private static final long serialVersionUID = 1184860508880121352L;
     private long nItems;
@@ -76,10 +78,7 @@ public final class ExclamationTopology {
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void prepare(
-        Map conf,
-        TopologyContext context,
-        OutputCollector collector) {
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
@@ -97,6 +96,13 @@ public final class ExclamationTopology {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
       // declarer.declare(new Fields("word"));
+    }
+
+    @Override
+    public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+      List<Integer> newTaskIds =
+          topologyContext.getComponentTasks(topologyContext.getThisComponentId());
+      System.out.println("Bolt updated with new topologyContext. New taskIds: " + newTaskIds);
     }
   }
 }

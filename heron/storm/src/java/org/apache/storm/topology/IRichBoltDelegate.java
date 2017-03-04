@@ -24,11 +24,13 @@ import org.apache.storm.task.OutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.TupleImpl;
 
+import com.twitter.heron.api.topology.IUpdatable;
+
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
  * to use to implement components of the topology.
  */
-public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
+public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt, IUpdatable {
   private static final long serialVersionUID = 8350418148268852902L;
   private IRichBolt delegate;
   private TopologyContext topologyContextImpl;
@@ -69,5 +71,12 @@ public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return delegate.getComponentConfiguration();
+  }
+
+  @Override
+  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+    if (delegate instanceof IUpdatable) {
+      ((IUpdatable) delegate).update(topologyContext);
+    }
   }
 }

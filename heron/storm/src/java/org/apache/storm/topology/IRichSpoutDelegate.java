@@ -24,12 +24,13 @@ import org.apache.storm.spout.SpoutOutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.topology.IUpdatable;
 
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
  * to use to implement components of the topology.
  */
-public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout {
+public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout, IUpdatable {
   private static final long serialVersionUID = -1543996045558101339L;
   private IRichSpout delegate;
   private TopologyContext topologyContextImpl;
@@ -87,5 +88,12 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return delegate.getComponentConfiguration();
+  }
+
+  @Override
+  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+    if (delegate instanceof IUpdatable) {
+      ((IUpdatable) delegate).update(topologyContext);
+    }
   }
 }
