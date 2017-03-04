@@ -53,11 +53,10 @@ public class ShellUtilsTest {
   @Test
   public void testRunProcess() {
     String testString = "testString";
-    StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
-    Assert.assertEquals(0, ShellUtils.runProcess("echo " + testString, stdout, stderr));
-    Assert.assertEquals(testString, stdout.toString().trim());
-    Assert.assertTrue(stderr.toString().trim().isEmpty());
+    Assert.assertEquals(0, ShellUtils.runProcess("echo " + testString, stderr));
+    Assert.assertEquals(testString, stderr.toString().trim());
+    Assert.assertTrue(!stderr.toString().trim().isEmpty());
   }
 
   @Test(timeout = 60000)
@@ -73,13 +72,11 @@ public class ShellUtilsTest {
         input.close();
       }
       Assert.assertTrue("Cannot make the test script executable", testScript.setExecutable(true));
-      StringBuilder stdout = new StringBuilder();
       StringBuilder stderr = new StringBuilder();
       Assert.assertEquals(0,
           ShellUtils.runProcess(
-              "/bin/bash -c " + testScript.getAbsolutePath(), stdout, stderr));
+              "/bin/bash -c " + testScript.getAbsolutePath(), stderr));
       // Only checks stdout and stderr are not empty. Correctness is checked in "testRunProcess".
-      Assert.assertTrue(!stdout.toString().trim().isEmpty());
       Assert.assertTrue(!stderr.toString().trim().isEmpty());
     } finally {
       testScript.delete();
