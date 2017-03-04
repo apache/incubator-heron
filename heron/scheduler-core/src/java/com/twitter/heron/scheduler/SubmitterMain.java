@@ -44,6 +44,7 @@ import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingException;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.LauncherException;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -360,9 +361,7 @@ public class SubmitterMain {
   // topology definition
   private final TopologyAPI.Topology topology;
 
-  public SubmitterMain(
-      Config config,
-      TopologyAPI.Topology topology) {
+  public SubmitterMain(Config config, TopologyAPI.Topology topology) {
     // initialize the options
     this.config = config;
     this.topology = topology;
@@ -422,32 +421,46 @@ public class SubmitterMain {
       // Bypass validation and upload if in dry-run mode
       if (Context.dryRun(config)) {
         callLauncherRunner(primaryRuntime);
-      } else {
-        // initialize the state manager
-        statemgr.initialize(config);
-
-        // TODO(mfu): timeout should read from config
-        SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
-
-        // Check if topology is already running
-        validateSubmit(adaptor, topology.getName());
-
-        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
-
-        // Try to submit topology if valid
-        // Firstly, try to upload necessary packages
-        URI packageURI = uploadPackage(uploader);
-
-        // Secondly, try to submit the topology
-        // build the complete runtime config
-        Config runtimeAll = Config.newBuilder()
-            .putAll(primaryRuntime)
-            .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))
-            .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
-            .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
-            .build();
-        callLauncherRunner(runtimeAll);
+        return;
       }
+
+      // initialize the state manager
+      statemgr.initialize(config);
+
+      // TODO(mfu): timeout should read from config
+      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+
+      // Check if topology is already running
+      validateSubmit(adaptor, topology.getName());
+
+      LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
+
+      // First, create the basic runtime config to generate the packing plan
+      Config runtimeWithoutPackageURI = Config.newBuilder()
+          .putAll(primaryRuntime)
+          .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))
+          .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
+          .build();
+
+      PackingPlan packingPlan = LauncherUtils.getInstance()
+          .createPackingPlan(config, runtimeWithoutPackageURI);
+
+      // The packing plan might call for a number of containers different than the config
+      // settings. If that's the case we need to modify the configs to match.
+      runtimeWithoutPackageURI =
+          updateNumContainersIfNeeded(runtimeWithoutPackageURI, topology, packingPlan);
+
+      // If the packing plan is valid we will upload necessary packages
+      URI packageURI = uploadPackage(uploader);
+
+      // Update the runtime config with the packageURI
+      Config runtimeAll = Config.newBuilder()
+          .putAll(runtimeWithoutPackageURI)
+          .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
+          .build();
+
+      callLauncherRunner(runtimeAll);
+
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException
@@ -458,6 +471,67 @@ public class SubmitterMain {
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
+  }
+
+  /**
+   * Checks that the number of containers specified in the topology matches the number of containers
+   * called for in the packing plan. If they are different, returns a new config with settings
+   * updated to align with the packing plan. The new config will include an updated
+   * Key.TOPOLOGY_DEFINITION containing a cloned Topology with it's settings also updated.
+   *
+   * @param initialConfig initial config to clone and update (if necessary)
+   * @param initialTopology topology to check and clone/update (if necessary)
+   * @param packingPlan packing plan to compare settings with
+   * @return a new Config cloned from initialConfig and modified as needed to align with packedPlan
+   */
+  @VisibleForTesting
+  Config updateNumContainersIfNeeded(Config initialConfig,
+                                     TopologyAPI.Topology initialTopology,
+                                     PackingPlan packingPlan) {
+
+    int configNumStreamManagers = TopologyUtils.getNumContainers(initialTopology);
+    int packingNumStreamManagers = packingPlan.getContainers().size();
+
+    if (configNumStreamManagers == packingNumStreamManagers) {
+      return initialConfig;
+    }
+
+    Config.Builder newConfigBuilder = Config.newBuilder()
+        .putAll(initialConfig)
+        .put(Key.NUM_CONTAINERS, packingNumStreamManagers + 1)
+        .put(Key.TOPOLOGY_DEFINITION,
+            cloneWithNewNumContainers(initialTopology, packingNumStreamManagers));
+
+    String packingClass = Context.packingClass(initialConfig);
+    LOG.warning(String.format("The packing plan (generated by %s) calls for a different number of "
+            + "containers (%d) than what was explicitly set in the topology configs (%d). "
+            + "Overriding the configs to specify %d containers. When using %s do not explicitly "
+            + "call config.setNumStmgrs(..) or config.setNumWorkers(..).",
+        packingClass, packingNumStreamManagers, configNumStreamManagers,
+        packingNumStreamManagers, packingClass));
+
+    return newConfigBuilder.build();
+  }
+
+  private TopologyAPI.Topology cloneWithNewNumContainers(TopologyAPI.Topology initialTopology,
+                                                         int numStreamManagers) {
+    TopologyAPI.Topology.Builder topologyBuilder = TopologyAPI.Topology.newBuilder(initialTopology);
+    TopologyAPI.Config.Builder configBuilder = TopologyAPI.Config.newBuilder();
+
+    for (TopologyAPI.Config.KeyValue keyValue : initialTopology.getTopologyConfig().getKvsList()) {
+
+      // override TOPOLOGY_STMGRS value once we find it
+      if (com.twitter.heron.api.Config.TOPOLOGY_STMGRS.equals(keyValue.getKey())) {
+        TopologyAPI.Config.KeyValue.Builder kvBuilder = TopologyAPI.Config.KeyValue.newBuilder();
+        kvBuilder.setKey(keyValue.getKey());
+        kvBuilder.setValue(Integer.toString(numStreamManagers));
+        configBuilder.addKvs(kvBuilder.build());
+      } else {
+        configBuilder.addKvs(keyValue);
+      }
+    }
+
+    return topologyBuilder.setTopologyConfig(configBuilder).build();
   }
 
   protected void validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName)

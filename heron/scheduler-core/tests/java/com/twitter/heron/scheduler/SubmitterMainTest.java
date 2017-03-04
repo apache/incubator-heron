@@ -25,7 +25,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
@@ -35,6 +37,7 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 import static org.mockito.Mockito.any;
@@ -51,7 +54,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ReflectionUtils.class)
+@PrepareForTest({LauncherUtils.class, ReflectionUtils.class})
 public class SubmitterMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
 
@@ -62,7 +65,6 @@ public class SubmitterMainTest {
 
   private IStateManager statemgr;
   private ILauncher launcher;
-  private IPacking packing;
   private IUploader uploader;
 
   private Config config;
@@ -72,9 +74,9 @@ public class SubmitterMainTest {
   @Before
   public void setUp() throws Exception {
     // Mock objects to be verified
+    IPacking packing = mock(IPacking.class);
     statemgr = mock(IStateManager.class);
     launcher = mock(ILauncher.class);
-    packing = mock(IPacking.class);
     uploader = mock(IUploader.class);
 
     // Mock ReflectionUtils stuff
@@ -97,6 +99,9 @@ public class SubmitterMainTest {
         .thenReturn(PACKING_CLASS);
     when(config.getStringValue(Key.UPLOADER_CLASS))
         .thenReturn(UPLOADER_CLASS);
+
+    when(packing.pack())
+        .thenReturn(PackingTestUtils.testPackingPlan(TOPOLOGY_NAME, new RoundRobinPacking()));
 
     topology = TopologyAPI.Topology.getDefaultInstance();
   }

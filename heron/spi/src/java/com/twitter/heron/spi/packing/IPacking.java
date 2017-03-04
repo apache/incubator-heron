@@ -21,7 +21,10 @@ import com.twitter.heron.spi.common.Config;
 
 /**
  * Packing algorithm to use for packing multiple instances into containers. Packing hints like
- * number of container may be passed through scheduler config.
+ * number of containers may be passed through scheduler config. Configs might contain settings for
+ * the number of containers requested or the amount of instance or container resources to allocate.
+ * Implementations may choose to ignore some or all of these settings as needed, since they could be
+ * contradictory, or not all possible to be achieved based on the algorithm.
  */
 @InterfaceAudience.LimitedPrivate
 @InterfaceStability.Unstable
