@@ -220,6 +220,7 @@ public final class TopologyUtils {
     return ramMap;
   }
 
+  // TODO: in a PR of it's own rename this to getNumStreamManagers to be correct
   public static int getNumContainers(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return Integer.parseInt(TopologyUtils.getConfigWithDefault(
