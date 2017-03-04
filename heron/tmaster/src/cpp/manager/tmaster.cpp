@@ -404,7 +404,7 @@ proto::system::Status* TMaster::RegisterStMgr(
       CHECK_GE(eventLoop_->registerTimer(std::move(cb), false, 0), 0);
     }
   } else if (sizeof(absent_stmgrs_) / static_cast<double>(sizeof(stmgrs_)) < .5) {
-    // TODO: do not merge until verified 
+    // TODO(billg): do not merge until verified
     std::ostringstream stream;
     std::copy(absent_stmgrs_.begin(), absent_stmgrs_.end(),
         std::ostream_iterator<std::string>(stream, ", "));
