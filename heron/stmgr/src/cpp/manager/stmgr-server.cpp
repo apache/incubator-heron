@@ -26,6 +26,7 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "metrics/metrics.h"
+#include "config/heron-internals-config-reader.h"
 
 namespace heron {
 namespace stmgr {

@@ -19,6 +19,7 @@ cc_library(
         "networkoptions.cpp",
         "packet.cpp",
         "server.cpp",
+        "mempool.cpp",
 
         "regevent.h",
         "asyncdns.h",

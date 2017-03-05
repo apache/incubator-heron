@@ -205,8 +205,6 @@ class Server : public BaseServer {
   // Called when the connection is closed
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status);
 
-  MemPool<google::protobuf::Message> _heron_message_pool;
-
   template<typename M>
   void release(M* m) {
     _heron_message_pool.release(m);
@@ -218,6 +216,8 @@ class Server : public BaseServer {
   }
 
  private:
+  MemPool<google::protobuf::Message> _heron_message_pool;
+
   // When a new packet arrives on the connection, this is invoked by the Connection
   void OnNewPacket(Connection* connection, IncomingPacket* packet);
 

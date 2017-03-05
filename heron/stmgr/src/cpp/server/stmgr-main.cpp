@@ -70,6 +70,10 @@ int main(int argc, char* argv[]) {
     LOG(FATAL) << "Corrupt topology defn file" << std::endl;
   }
 
+  sp_int32 pool_limit =
+    heron::config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrMempoolSizeMb();
+  BaseMemPool<google::protobuf::Message>::set_limit(pool_limit * 1024 * 1024);
+
   heron::stmgr::StMgr mgr(&ss, myport, topology_name, topology_id, topology, myid, instances,
                           zkhostportlist, topdir, metricsmgr_port, shell_port);
   mgr.Init();
