@@ -71,11 +71,8 @@ public class SlurmController {
     String[] slurmCmdArray = slurmCmd.toArray(new String[0]);
     LOG.log(Level.INFO, "Executing job [" + topologyWorkingDirectory + "]:",
         Arrays.toString(slurmCmdArray));
-    StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
-    boolean ret = runProcess(topologyWorkingDirectory, slurmCmdArray, stdout, stderr);
-    LOG.log(Level.FINE, "Stdout for Slurm script: ", stdout);
-    LOG.log(Level.FINE, "Stderror for Slurm script: ", stderr);
+    boolean ret = runProcess(topologyWorkingDirectory, slurmCmdArray, stderr);
     return ret;
   }
 
@@ -124,9 +121,9 @@ public class SlurmController {
    * This is for unit testing
    */
   protected boolean runProcess(String topologyWorkingDirectory, String[] slurmCmd,
-                         StringBuilder stdout, StringBuilder stderr) {
+                               StringBuilder stderr) {
     File file = topologyWorkingDirectory == null ? null : new File(topologyWorkingDirectory);
-    return 0 == ShellUtils.runSyncProcess(isVerbose, false, slurmCmd, stdout, stderr, file);
+    return 0 == ShellUtils.runSyncProcess(false, slurmCmd, stderr, file);
   }
 
   /**
@@ -140,7 +137,7 @@ public class SlurmController {
     List<String> jobIdFileContent = readFromFile(jobIdFile);
     if (jobIdFileContent.size() > 0) {
       String[] slurmCmd = new String[]{"scancel", jobIdFileContent.get(0)};
-      return runProcess(null, slurmCmd, new StringBuilder(), new StringBuilder());
+      return runProcess(null, slurmCmd, new StringBuilder());
     } else {
       LOG.log(Level.SEVERE, "Failed to read the Slurm Job id from file: {0}", jobIdFile);
       return false;

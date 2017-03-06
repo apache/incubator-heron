@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' version.py '''
-from heron.tools.cli.src.python.response import Response, Status
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.common.src.python.utils.config as config
 
@@ -44,4 +44,4 @@ def run(command, parser, args, unknown_args):
   :return:
   '''
   config.print_build_info()
-  return Response(Status.Ok)
+  return SimpleResult(Status.Ok)
