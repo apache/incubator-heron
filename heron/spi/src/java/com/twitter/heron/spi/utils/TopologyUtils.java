@@ -50,7 +50,7 @@ public final class TopologyUtils {
 
       return topology;
     } catch (IOException e) {
-      throw new RuntimeException("Failed to read/parse content of " + topologyDefnFile);
+      throw new RuntimeException("Failed to read/parse content of " + topologyDefnFile, e);
     }
   }
 
