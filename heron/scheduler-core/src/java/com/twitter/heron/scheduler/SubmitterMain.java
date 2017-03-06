@@ -375,6 +375,14 @@ public class SubmitterMain {
    *
    */
   public void submitTopology() throws TopologySubmissionException {
+    // build primary runtime config first
+    Config primaryRuntime = Config.newBuilder()
+          .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
+    // call launcher directly here if in dry-run mode
+    if (Context.dryRun(config)) {
+      callLauncherRunner(primaryRuntime);
+      return;
+    }
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
@@ -414,16 +422,6 @@ public class SubmitterMain {
 
     // Put it in a try block so that we can always clean resources
     try {
-      // Build the basic runtime config
-      Config primaryRuntime = Config.newBuilder()
-          .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
-
-      // Bypass validation and upload if in dry-run mode
-      if (Context.dryRun(config)) {
-        callLauncherRunner(primaryRuntime);
-        return;
-      }
-
       // initialize the state manager
       statemgr.initialize(config);
 
@@ -435,7 +433,6 @@ public class SubmitterMain {
 
       LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
-      // First, create the basic runtime config to generate the packing plan
       Config runtimeWithoutPackageURI = Config.newBuilder()
           .putAll(primaryRuntime)
           .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))

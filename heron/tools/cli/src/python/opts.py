@@ -21,6 +21,8 @@ config_opts = dict()
 verbose_flag = False
 trace_execution_flag = False
 
+cleaned_up_files = []
+
 
 ################################################################################
 def get_heron_config():
