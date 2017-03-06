@@ -281,10 +281,10 @@ public class LaunchRunnerTest {
     doTestLaunch(new com.twitter.heron.api.Config());
   }
 
-  @Test(expected = LauncherException.class)
-  public void testFailureNumContainers() throws Exception {
+  @Test
+  public void testCallSuccessWithDifferentNumContainers() throws Exception {
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.setNumStmgrs(2); // fails because packing plan has only 1 container plan
+    topologyConfig.setNumStmgrs(2); // packing plan has only 1 container plan but numStmgrs is 2
 
     doTestLaunch(topologyConfig);
   }

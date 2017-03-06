@@ -24,7 +24,7 @@ def create_parser(subparsers):
   parser = subparsers.add_parser(
       'help',
       help='Prints help for commands',
-      add_help=False)
+      add_help=True)
 
   # pylint: disable=protected-access
   parser._positionals.title = "Required arguments"

@@ -75,7 +75,7 @@ def create_parser():
       prog='heron',
       epilog=HELP_EPILOG,
       formatter_class=config.SubcommandHelpFormatter,
-      add_help=False,
+      add_help=True,
       fromfile_prefix_chars='@')
 
   subparsers = parser.add_subparsers(

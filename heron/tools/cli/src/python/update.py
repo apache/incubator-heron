@@ -26,7 +26,7 @@ def create_parser(subparsers):
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
       + "--component-parallelism <name:value>",
-      add_help=False)
+      add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)

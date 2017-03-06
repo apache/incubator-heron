@@ -32,7 +32,7 @@ def create_parser(subparsers, action, help_arg):
       action,
       help=help_arg,
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name>",
-      add_help=False)
+      add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
