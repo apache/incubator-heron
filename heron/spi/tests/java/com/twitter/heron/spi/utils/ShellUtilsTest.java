@@ -33,14 +33,6 @@ public class ShellUtilsTest {
 
   private static final Logger LOG = Logger.getLogger(ShellUtilsTest.class.getName());
 
-  private static void wait(int time, TimeUnit unit) {
-    try {
-      Thread.sleep(unit.toMillis(time));
-    } catch (InterruptedException e) {
-      LOG.log(Level.SEVERE, "Sleep interrupted ", e);
-    }
-  }
-
   private static String generateRandomLongString(int size) {
     StringBuilder builder = new StringBuilder();
     Random random = new Random();
@@ -125,7 +117,11 @@ public class ShellUtilsTest {
 
     // Process running normally
     Process p = pb.start();
-    wait(10, TimeUnit.MILLISECONDS);
+    try {
+      p.waitFor(2, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      LOG.log(Level.SEVERE, "Wait interrupted", e);
+    }
     Assert.assertTrue(p.getInputStream().available() > 0);
 
     String output = ShellUtils.inputstreamToString(p.getInputStream());
