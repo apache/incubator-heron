@@ -81,8 +81,8 @@ public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt, 
     if (delegate instanceof IUpdatable) {
       ((IUpdatable) delegate).update(topologyContext);
     } else {
-      LOG.warning(String.format("Update() event received but can not call update() on delegate " +
-          "because it does not implement %s: %s", IUpdatable.class.getName(), delegate));
+      LOG.warning(String.format("Update() event received but can not call update() on delegate "
+          + "because it does not implement %s: %s", IUpdatable.class.getName(), delegate));
     }
   }
 }
