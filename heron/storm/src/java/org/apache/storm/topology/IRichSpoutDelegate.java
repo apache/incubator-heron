@@ -19,6 +19,7 @@
 package org.apache.storm.topology;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.storm.spout.SpoutOutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
@@ -31,6 +32,8 @@ import com.twitter.heron.api.topology.IUpdatable;
  * to use to implement components of the topology.
  */
 public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout, IUpdatable {
+  private static final Logger LOG = Logger.getLogger(IRichSpoutDelegate.class.getName());
+
   private static final long serialVersionUID = -1543996045558101339L;
   private IRichSpout delegate;
   private TopologyContext topologyContextImpl;
@@ -46,6 +49,7 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
                    SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
+    LOG.info("Opening delegate spout: " + delegate);
     delegate.open(conf, topologyContextImpl, spoutOutputCollectorImpl);
   }
 
@@ -94,6 +98,9 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
     if (delegate instanceof IUpdatable) {
       ((IUpdatable) delegate).update(topologyContext);
+    } else {
+      LOG.warning(String.format("Update() event received but can not call update() on delegate " +
+          "because it does not implement %s: %s", IUpdatable.class.getName(), delegate));
     }
   }
 }

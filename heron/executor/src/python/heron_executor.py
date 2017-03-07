@@ -554,7 +554,7 @@ class HeronExecutor(object):
             Log.info("Killing %s process with pid %d: %s" %
                      (process_info.name, process_info.pid, ' '.join(command)))
             try:
-              process_info.process.kill()
+              process_info.process.terminate() # sends SIGTERM to process
             except OSError, e:
               if e.errno == 3: # No such process
                 Log.warn("Expected process %s with pid %d was not running, ignoring." %
