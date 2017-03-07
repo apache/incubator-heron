@@ -49,7 +49,6 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
                    SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
-    LOG.info("Opening delegate spout: " + delegate);
     delegate.open(conf, topologyContextImpl, spoutOutputCollectorImpl);
   }
 
