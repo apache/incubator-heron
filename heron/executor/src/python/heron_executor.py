@@ -391,10 +391,6 @@ class HeronExecutor(object):
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:ParallelGCThreads=4',
                       '-Xloggc:log-files/gc.%s.log' % instance_id]
-      # do not merge
-      # if global_task_id == 650 and component_name == 'Tail-FlatMap-Source':
-      #   instance_cmd = instance_cmd +\
-      #                  ['-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005']
       instance_cmd = instance_cmd + self.instance_jvm_opts.split()
       if component_name in self.component_jvm_opts:
         instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
