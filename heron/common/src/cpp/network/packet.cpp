@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <google/protobuf/message.h>
 #include <string>
+#include <cstring>
 #include "glog/logging.h"
 
 // PacketHeader static methods
@@ -165,7 +166,7 @@ sp_int32 IncomingPacket::InternalRead(sp_int32 _fd, char* _buffer, sp_uint32 _si
       } else {
         // something really bad happened. Bail out
         // try again
-        LOG(ERROR) << "Something really bad happened while reading " << errno << "\n";
+        LOG(ERROR) << "Something really bad happened while reading packet: " << strerror(errno);
         return -1;
       }
     }
