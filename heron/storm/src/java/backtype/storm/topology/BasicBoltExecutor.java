@@ -19,12 +19,17 @@
 package backtype.storm.topology;
 
 import java.util.Map;
+import java.util.logging.Logger;
+
+import com.twitter.heron.api.topology.IUpdatable;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Tuple;
 
-public class BasicBoltExecutor implements IRichBolt {
+public class BasicBoltExecutor implements IRichBolt, IUpdatable {
+  private static final Logger LOG = Logger.getLogger(BasicBoltExecutor.class.getName());
+
   private static final long serialVersionUID = 4359767045622072660L;
   private IBasicBolt delegate;
   private transient BasicOutputCollector collector;
@@ -69,5 +74,15 @@ public class BasicBoltExecutor implements IRichBolt {
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return delegate.getComponentConfiguration();
+  }
+
+  @Override
+  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+    if (delegate instanceof IUpdatable) {
+      ((IUpdatable) delegate).update(topologyContext);
+    } else {
+      LOG.warning(String.format("Update() event received but can not call update() on delegate "
+          + "because it does not implement %s: %s", IUpdatable.class.getName(), delegate));
+    }
   }
 }
