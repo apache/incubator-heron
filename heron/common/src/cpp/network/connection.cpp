@@ -31,12 +31,6 @@ const sp_int32 __SYSTEM_NETWORK_DEFAULT_WRITE_BATCH_SIZE__ = 1048576;  // 1M
 // before declaring start of back pressure
 const sp_uint8 __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__ = 3;
 
-// TODO(vikasr): Should read from config file rather than hard coding.
-// This is the high water mark on the num of bytes that can be left outstanding on a connection
-sp_int64 Connection::systemHWMOutstandingBytes = 1024 * 1024 * 100;  // 100M
-// This is the low water mark on the num of bytes that can be left outstanding on a connection
-sp_int64 Connection::systemLWMOutstandingBytes = 1024 * 1024 * 50;  // 50M
-
 Connection::Connection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
                        EventLoop* eventLoop)
     : BaseConnection(endpoint, options, eventLoop) {
@@ -85,7 +79,7 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCo
 
   if (!hasCausedBackPressure()) {
     // Are we above the threshold?
-    if (mNumOutstandingBytes >= systemHWMOutstandingBytes) {
+    if (mNumOutstandingBytes >= mOptions->high_watermark_) {
       // Have we been above the threshold enough number of times?
       if (++mNumEnqueuesWithBufferFull > __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__) {
         mNumEnqueuesWithBufferFull = 0;
@@ -165,7 +159,7 @@ void Connection::afterWriteIntoIOVector(sp_int32 simulWrites, ssize_t numWritten
   // pressure threshold
   if (hasCausedBackPressure()) {
     // Signal pipe free
-    if (mNumOutstandingBytes <= systemLWMOutstandingBytes) {
+    if (mNumOutstandingBytes <= mOptions->low_watermark_) {
       mOnConnectionBufferEmpty(this);
     }
   }

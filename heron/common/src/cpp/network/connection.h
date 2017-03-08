@@ -117,12 +117,6 @@ class Connection : public BaseConnection {
   sp_int32 putBackPressure();
   sp_int32 removeBackPressure();
 
- public:
-  // This is the high water mark on the num of bytes that can be left outstanding on a connection
-  static sp_int64 systemHWMOutstandingBytes;
-  // This is the low water mark on the num of bytes that can be left outstanding on a connection
-  static sp_int64 systemLWMOutstandingBytes;
-
  private:
   virtual sp_int32 writeIntoEndPoint(sp_int32 fd);
 

@@ -18,12 +18,19 @@
 #include <arpa/inet.h>
 #include <string>
 
+// This is the high water mark on the num of bytes that can be left outstanding on a connection
+const sp_int64 systemHWMOutstandingBytes = 1024 * 1024 * 100;  // 100M
+// This is the low water mark on the num of bytes that can be left outstanding on a connection
+const sp_int64 systemLWMOutstandingBytes = 1024 * 1024 * 50;  // 50M
+
 NetworkOptions::NetworkOptions() {
   host_ = "localhost";
   port_ = 8080;
   max_packet_size_ = 1024;
   socket_family_ = PF_INET;
   sin_path_ = "";
+  high_watermark_ = systemHWMOutstandingBytes;
+  low_watermark_ = systemLWMOutstandingBytes;
 }
 
 NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
@@ -31,6 +38,8 @@ NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
   port_ = _copyFrom.get_port();
   max_packet_size_ = _copyFrom.get_max_packet_size();
   socket_family_ = _copyFrom.get_socket_family();
+  high_watermark_ = _copyFrom.get_high_watermark();
+  low_watermark_ = _copyFrom.get_low_watermark();
   sin_path_ = _copyFrom.get_sin_path();
 }
 
@@ -49,6 +58,18 @@ void NetworkOptions::set_max_packet_size(sp_uint32 _max_packet_size) {
 }
 
 sp_uint32 NetworkOptions::get_max_packet_size() const { return max_packet_size_; }
+
+void NetworkOptions::set_high_watermark(sp_int64 _high_watermark) {
+  high_watermark_ = _high_watermark;
+}
+
+sp_int64 NetworkOptions::get_high_watermark() const { return high_watermark_; }
+
+void NetworkOptions::set_low_watermark(sp_int64 _low_watermark) {
+  low_watermark_ = _low_watermark;
+}
+
+sp_int64 NetworkOptions::get_low_watermark() const { return low_watermark_; }
 
 void NetworkOptions::set_socket_family(sp_int32 _socket_family) { socket_family_ = _socket_family; }
 

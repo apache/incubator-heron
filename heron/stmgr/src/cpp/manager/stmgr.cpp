@@ -190,6 +190,12 @@ void StMgr::StartStmgrServer() {
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_high_watermark(config::HeronInternalsConfigReader::Instance()
+                              ->GetHeronStreammgrNetworkBackpressureHighwatermarkMb() *
+                              1024 * 1024);
+  sops.set_low_watermark(config::HeronInternalsConfigReader::Instance()
+                              ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
+                              1024 * 1024);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
                             this, metrics_manager_client_);
 
@@ -206,6 +212,12 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_port(tmasterLocation->master_port());
   master_options.set_socket_family(PF_INET);
   master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  master_options.set_high_watermark(config::HeronInternalsConfigReader::Instance()
+                                        ->GetHeronStreammgrNetworkBackpressureHighwatermarkMb() *
+                                    1024 * 1024);
+  master_options.set_low_watermark(config::HeronInternalsConfigReader::Instance()
+                                        ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
+                                    1024 * 1024);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_port_,

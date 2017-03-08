@@ -40,6 +40,12 @@ class NetworkOptions {
   // set the socket family
   void set_socket_family(sp_int32 socket_family);
 
+  // set high water mark for back pressure
+  void set_high_watermark(sp_int64 _high_watermark);
+
+  // set low water mark for back pressure
+  void set_low_watermark(sp_int64 _low_watermark);
+
   // set the sin path
   // applicable only for unix sockets
   void set_sin_path(const std::string& socket_path);
@@ -50,6 +56,12 @@ class NetworkOptions {
 
   // get functions for unix address family
   sp_uint32 get_max_packet_size() const;
+
+  // get high water mark for back pressure
+  sp_int64 get_high_watermark() const;
+
+  // get low water mark for back pressure
+  sp_int64 get_low_watermark() const;
 
   // get the family type
   sp_int32 get_socket_family() const;
@@ -76,6 +88,9 @@ class NetworkOptions {
   // Whats the socket path
   // applicable only for UNIX sockets
   std::string sin_path_;
+
+  sp_int64 high_watermark_;
+  sp_int64 low_watermark_;
 };
 
 #endif  // NETWORKOPTIONS_H_
