@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Assert;
@@ -32,14 +31,6 @@ import org.junit.Test;
 public class ShellUtilsTest {
 
   private static final Logger LOG = Logger.getLogger(ShellUtilsTest.class.getName());
-
-  private static void wait(int time, TimeUnit unit) {
-    try {
-      Thread.sleep(unit.toMillis(time));
-    } catch (InterruptedException e) {
-      LOG.log(Level.SEVERE, "Sleep interrupted ", e);
-    }
-  }
 
   private static String generateRandomLongString(int size) {
     StringBuilder builder = new StringBuilder();
@@ -114,7 +105,7 @@ public class ShellUtilsTest {
   }
 
   @Test
-  public void testGetProcessBuilder() throws IOException {
+  public void testGetProcessBuilder() throws IOException, InterruptedException {
     String[] command = {"printenv"};
     Map<String, String> env = new HashMap<>();
     String key = "heron-shell-utils-test-env-key";
@@ -125,7 +116,7 @@ public class ShellUtilsTest {
 
     // Process running normally
     Process p = pb.start();
-    wait(10, TimeUnit.MILLISECONDS);
+    p.waitFor(2, TimeUnit.SECONDS);
     Assert.assertTrue(p.getInputStream().available() > 0);
 
     String output = ShellUtils.inputstreamToString(p.getInputStream());
