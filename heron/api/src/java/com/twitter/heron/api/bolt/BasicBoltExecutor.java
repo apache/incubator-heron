@@ -15,14 +15,18 @@
 package com.twitter.heron.api.bolt;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.exception.FailedException;
 import com.twitter.heron.api.exception.ReportedFailedException;
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 
-public class BasicBoltExecutor implements IRichBolt {
+public class BasicBoltExecutor implements IRichBolt, IUpdatable {
+  private static final Logger LOG = Logger.getLogger(BasicBoltExecutor.class.getName());
+
   private static final long serialVersionUID = 7021447981762957626L;
 
   private IBasicBolt bolt;
@@ -69,5 +73,15 @@ public class BasicBoltExecutor implements IRichBolt {
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return bolt.getComponentConfiguration();
+  }
+
+  @Override
+  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+    if (bolt instanceof IUpdatable) {
+      ((IUpdatable) bolt).update(topologyContext);
+    } else {
+      LOG.warning(String.format("Update() event received but can not call update() on delegate "
+          + "because it does not implement %s: %s", IUpdatable.class.getName(), bolt));
+    }
   }
 }
