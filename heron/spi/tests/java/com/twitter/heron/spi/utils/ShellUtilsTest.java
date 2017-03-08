@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Assert;
@@ -106,7 +105,7 @@ public class ShellUtilsTest {
   }
 
   @Test
-  public void testGetProcessBuilder() throws IOException {
+  public void testGetProcessBuilder() throws IOException, InterruptedException {
     String[] command = {"printenv"};
     Map<String, String> env = new HashMap<>();
     String key = "heron-shell-utils-test-env-key";
@@ -117,11 +116,7 @@ public class ShellUtilsTest {
 
     // Process running normally
     Process p = pb.start();
-    try {
-      p.waitFor(2, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      LOG.log(Level.SEVERE, "Wait interrupted", e);
-    }
+    p.waitFor(2, TimeUnit.SECONDS);
     Assert.assertTrue(p.getInputStream().available() > 0);
 
     String output = ShellUtils.inputstreamToString(p.getInputStream());
