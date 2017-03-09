@@ -17,7 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_UTIL_XOR_MANAGER_H_
 #define SRC_CPP_SVCS_STMGR_SRC_UTIL_XOR_MANAGER_H_
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -62,7 +62,7 @@ class XorManager {
   sp_int32 timeout_;
 
   // map of task_id to a RotatingMap
-  std::map<sp_int32, RotatingMap*> tasks_;
+  std::unordered_map<sp_int32, RotatingMap*> tasks_;
 
   // Configs to be read
   sp_int32 n_buckets_;

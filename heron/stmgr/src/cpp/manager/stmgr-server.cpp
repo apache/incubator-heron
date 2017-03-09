@@ -16,7 +16,7 @@
 
 #include "manager/stmgr-server.h"
 #include <iostream>
-#include <set>
+#include <unordered_set>
 #include <vector>
 #include "manager/stmgr.h"
 #include "proto/messages.h"
@@ -283,7 +283,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
                                            proto::stmgr::TupleStreamMessage2* _message) {
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
-    LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection" << std::endl;
+    LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
   } else {
     stmgr_->HandleStreamManagerData(iter->second, *_message);
   }
@@ -298,8 +298,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
   bool error = false;
   if (_request->topology_name() != topology_name_ || _request->topology_id() != topology_id_) {
     LOG(ERROR) << "Invalid topology name/id in register instance request"
-               << " Found " << _request->topology_name() << " and " << _request->topology_id()
-               << std::endl;
+               << " Found " << _request->topology_name() << " and " << _request->topology_id();
     error = true;
   }
   const sp_string& instance_id = _request->instance().instance_id();
@@ -372,7 +371,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
                                         proto::system::HeronTupleSet* _message) {
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
-    LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping.." << std::endl;
+    LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping..";
     release(_message);
     return;
   }
@@ -393,15 +392,9 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
                                   sp_int32 _byte_size,
                                   const sp_string _type_name,
                                   const char* _message) {
-  bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
-               << std::endl;
-    drop = true;
-  }
-
-  if (drop) {
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
   } else {
     SendMessage(iter->second->conn_, _byte_size, _type_name, _message);
   }
@@ -409,14 +402,10 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
 
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
                                   const proto::system::HeronTupleSet2& _message) {
-  bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
                << std::endl;
-    drop = true;
-  }
-  if (drop) {
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.control().acks_size());
@@ -445,7 +434,7 @@ void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _p
 }
 
 void StMgrServer::ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan) {
-  std::set<sp_int32> local_spouts;
+  std::unordered_set<sp_int32> local_spouts;
   config::PhysicalPlanHelper::GetLocalSpouts(_pplan, stmgr_id_, local_spouts);
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (local_spouts.find(iter->first) != local_spouts.end()) {

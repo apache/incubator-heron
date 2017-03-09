@@ -149,7 +149,7 @@ bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
-    LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. " << std::endl;
+    LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. ";
   }
 }
 
@@ -200,7 +200,7 @@ void StMgr::StartStmgrServer() {
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
   CHECK(!tmaster_client_);
   LOG(INFO) << "Creating Tmaster Client at " << tmasterLocation->host() << ":"
-            << tmasterLocation->master_port() << std::endl;
+            << tmasterLocation->master_port();
   NetworkOptions master_options;
   master_options.set_host(tmasterLocation->host());
   master_options.set_port(tmasterLocation->master_port());
@@ -214,7 +214,7 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
 
 void StMgr::CreateTupleCache() {
   CHECK(!tuple_cache_);
-  LOG(INFO) << "Creating tuple cache " << std::endl;
+  LOG(INFO) << "Creating tuple cache ";
   sp_uint32 drain_threshold_bytes_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1024 *
       1024;
@@ -226,7 +226,7 @@ void StMgr::CreateTupleCache() {
 void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation) {
   // Lets delete the existing tmaster if we have one.
   if (tmaster_client_) {
-    LOG(INFO) << "Destroying existing tmasterClient" << std::endl;
+    LOG(INFO) << "Destroying existing tmasterClient";
     tmaster_client_->Die();
     tmaster_client_ = NULL;
   }
@@ -271,7 +271,7 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
       LOG(FATAL) << "Topology name/id mismatch between stmgr and TMaster "
                  << "We expected " << topology_name_ << " : " << topology_id_ << " but tmaster had "
                  << newTmasterLocation->topology_name() << " : "
-                 << newTmasterLocation->topology_id() << std::endl;
+                 << newTmasterLocation->topology_id();
     }
 
     LOG(INFO) << "Fetched TMasterLocation to be " << newTmasterLocation->host() << ":"
@@ -286,12 +286,12 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
 
       if (currentTmasterHostPort == newTmasterHostPort) {
         LOG(INFO) << "New tmaster location same as the current one. "
-                  << "Nothing to do here... " << std::endl;
+                  << "Nothing to do here... ";
         isNewTmaster = false;
       } else {
         LOG(INFO) << "New tmaster location different from the current one."
                   << " Current one at " << currentTmasterHostPort << " and New one at "
-                  << newTmasterHostPort << std::endl;
+                  << newTmasterHostPort;
         isNewTmaster = true;
       }
     }
@@ -314,15 +314,14 @@ void StMgr::StartTMasterClient() {
   if (!tmaster_client_) {
     LOG(INFO) << "We haven't received tmaster location yet"
               << ", so tmaster_client_ hasn't been created"
-              << "Once we get the location, it will be started" << std::endl;
+              << "Once we get the location, it will be started";
     // Nothing else to do here
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
     server_->GetInstanceInfo(all_instance_info);
     tmaster_client_->SetInstanceInfo(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
-      LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us"
-                << std::endl;
+      LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();
     }
   }
@@ -340,7 +339,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   }
 
   if (!found) {
-    LOG(FATAL) << "We have no role in this topology!!" << std::endl;
+    LOG(FATAL) << "We have no role in this topology!!";
   }
 
   // The Topology structure here is not hydrated.
@@ -402,7 +401,7 @@ sp_int32 StMgr::ExtractTopologyTimeout(const proto::api::Topology& _topology) {
       return atoi(_topology.topology_config().kvs(i).value().c_str());
     }
   }
-  LOG(FATAL) << "topology.message.timeout.secs does not exist" << std::endl;
+  LOG(FATAL) << "topology.message.timeout.secs does not exist";
   return 0;
 }
 

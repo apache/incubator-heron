@@ -135,16 +135,6 @@ class Client : public BaseClient {
     delete _request;
   }
 
-  // Register a handler for a particular request type
-  template <typename T, typename M>
-  void InstallRequestHandler(void (T::*method)(REQID id, M*)) {
-    google::protobuf::Message* m = new M();
-    T* t = static_cast<T*>(this);
-    requestHandlers[m->GetTypeName()] =
-        std::bind(&Client::dispatchRequest<T, M>, this, t, method, std::placeholders::_1);
-    delete m;
-  }
-
   // Register a handler for a particular message type
   template <typename T, typename M>
   void InstallMessageHandler(void (T::*method)(M* _message)) {
@@ -174,9 +164,6 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
-  // TODO(mfu):
-  MemPool<google::protobuf::Message> _heron_message_pool;
-
   template<typename M>
   void release(M* m) {
     _heron_message_pool.release(m);
@@ -188,6 +175,7 @@ class Client : public BaseClient {
   }
 
  protected:
+  MemPool<google::protobuf::Message> _heron_message_pool;
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
   // successful in connecting to hte client. Requests can now be sent to
@@ -265,25 +253,6 @@ class Client : public BaseClient {
   }
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t, void (T::*method)(REQID id, M*), IncomingPacket* _ipkt) {
-    REQID rid;
-    CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-
-    M* m = _heron_message_pool.acquire(m);
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
-      // We could not decode the pb properly
-      std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
-      return;
-    }
-    CHECK(m->IsInitialized());
-
-    std::function<void()> cb = std::bind(method, _t, rid, m);
-
-    cb();
-  }
-
-  template <typename T, typename M>
   void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
     M* m = new M();
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
@@ -303,7 +272,6 @@ class Client : public BaseClient {
   std::unordered_map<REQID, std::pair<sp_string, void*> > context_map_;
 
   typedef std::function<void(IncomingPacket*)> handler;
-  std::unordered_map<std::string, handler> requestHandlers;
   std::unordered_map<std::string, handler> messageHandlers;
   typedef std::function<void(IncomingPacket*, NetworkErrorCode)> res_handler;
   std::unordered_map<std::string, res_handler> responseHandlers;
