@@ -177,7 +177,7 @@ void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg
 }
 
 void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
-  release(_message);
+  delete _message;
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 

@@ -17,7 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_CLIENTMGR_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_CLIENTMGR_H_
 
-#include <map>
+#include <unordered_map>
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
@@ -61,7 +61,7 @@ class StMgrClientMgr {
                             sp_int32 _port);
 
   // map of stmgrid to its client
-  std::map<sp_string, StMgrClient*> clients_;
+  std::unordered_map<sp_string, StMgrClient*> clients_;
 
   sp_string topology_name_;
   sp_string topology_id_;

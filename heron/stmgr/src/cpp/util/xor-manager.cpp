@@ -38,22 +38,19 @@ XorManager::XorManager(EventLoop* eventLoop, sp_int32 _timeout,
 
   eventLoop_->registerTimer([this](EventLoop::Status status) { this->rotate(status); }, false,
                             _timeout * 1000000);
-  std::vector<sp_int32>::const_iterator iter;
-  for (iter = _task_ids.begin(); iter != _task_ids.end(); ++iter) {
+  for (auto iter = _task_ids.begin(); iter != _task_ids.end(); ++iter) {
     tasks_[*iter] = new RotatingMap(n_buckets_);
   }
 }
 
 XorManager::~XorManager() {
-  std::map<sp_int32, RotatingMap*>::iterator iter;
-  for (iter = tasks_.begin(); iter != tasks_.end(); ++iter) {
+  for (auto iter = tasks_.begin(); iter != tasks_.end(); ++iter) {
     delete iter->second;
   }
 }
 
 void XorManager::rotate(EventLoopImpl::Status) {
-  std::map<sp_int32, RotatingMap*>::iterator iter;
-  for (iter = tasks_.begin(); iter != tasks_.end(); ++iter) {
+  for (auto iter = tasks_.begin(); iter != tasks_.end(); ++iter) {
     iter->second->rotate();
   }
   sp_int32 timeout = timeout_ / n_buckets_ + timeout_ % n_buckets_;
