@@ -37,13 +37,16 @@ const sp_string METRIC_STMGR_NEW_CONNECTIONS = "__stmgr_new_connections";
 StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_name,
                                const sp_string& _topology_id, const sp_string& _stmgr_id,
                                StMgr* _stream_manager,
-                               heron::common::MetricsMgrSt* _metrics_manager_client)
+                               heron::common::MetricsMgrSt* _metrics_manager_client,
+                               sp_int64 _high_watermark, sp_int64 _low_watermark)
     : topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
       eventLoop_(eventLoop),
       stream_manager_(_stream_manager),
-      metrics_manager_client_(_metrics_manager_client) {
+      metrics_manager_client_(_metrics_manager_client),
+      high_watermark_(_high_watermark),
+      low_watermark_(_low_watermark) {
   stmgr_clientmgr_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__clientmgr", stmgr_clientmgr_metrics_);
 }
@@ -114,12 +117,8 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
                                   ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
                               1024 * 1024);
-  options.set_high_watermark(config::HeronInternalsConfigReader::Instance()
-                                    ->GetHeronStreammgrNetworkBackpressureHighwatermarkMb() *
-                              1024 * 1024);
-  options.set_low_watermark(config::HeronInternalsConfigReader::Instance()
-                                    ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
-                              1024 * 1024);
+  options.set_high_watermark(high_watermark_);
+  options.set_low_watermark(low_watermark_);
   options.set_socket_family(PF_INET);
   StMgrClient* client = new StMgrClient(eventLoop_, options, topology_name_, topology_id_,
                                         stmgr_id_, _other_stmgr_id, this, metrics_manager_client_);

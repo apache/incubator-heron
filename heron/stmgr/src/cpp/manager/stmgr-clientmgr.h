@@ -38,7 +38,8 @@ class StMgrClientMgr {
  public:
   StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_name,
                  const sp_string& _topology_id, const sp_string& _stmgr_id, StMgr* _stream_manager,
-                 heron::common::MetricsMgrSt* _metrics_manager_client);
+                 heron::common::MetricsMgrSt* _metrics_manager_client, sp_int64 _high_watermark,
+                 sp_int64 _low_watermark);
   virtual ~StMgrClientMgr();
 
   void NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan);
@@ -72,6 +73,9 @@ class StMgrClientMgr {
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
   heron::common::MultiCountMetric* stmgr_clientmgr_metrics_;
+
+  sp_int64 high_watermark_;
+  sp_int64 low_watermark_;
 };
 
 }  // namespace stmgr

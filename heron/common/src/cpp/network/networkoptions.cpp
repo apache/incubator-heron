@@ -18,9 +18,11 @@
 #include <arpa/inet.h>
 #include <string>
 
-// This is the high water mark on the num of bytes that can be left outstanding on a connection
+// This is the default high water mark on the num of bytes that can be left outstanding on
+// a connection
 const sp_int64 systemHWMOutstandingBytes = 1024 * 1024 * 100;  // 100M
-// This is the low water mark on the num of bytes that can be left outstanding on a connection
+// This is the default low water mark on the num of bytes that can be left outstanding on
+// a connection
 const sp_int64 systemLWMOutstandingBytes = 1024 * 1024 * 50;  // 50M
 
 NetworkOptions::NetworkOptions() {
