@@ -362,6 +362,10 @@ struct CommonResources {
     snprintf(dpath, sizeof(dpath), "%s", "/tmp/XXXXXX");
     mkdtemp(dpath);
     dpath_ = sp_string(dpath);
+    // Lets change the Connection buffer HWM and LWN for back pressure to get the
+    // test case done faster
+    high_watermark_ = 10 * 1024 * 1024;
+    low_watermark_ = 5 * 1024 * 1024;
   }
 };
 
@@ -840,10 +844,6 @@ TEST(StMgr, test_back_pressure_instance) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
-  common.high_watermark_ = 10 * 1024 * 1024;
-  common.low_watermark_ = 5 * 1024 * 1024;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -952,10 +952,6 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
-  common.high_watermark_ = 10 * 1024 * 1024;
-  common.low_watermark_ = 5 * 1024 * 1024;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -1089,8 +1085,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
+  // Overwrite the default values for back pressure
   common.high_watermark_ = 1 * 1024 * 1024;
   common.low_watermark_ = 500 * 1024;
 
@@ -1204,10 +1199,6 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
-  common.high_watermark_ = 10 * 1024 * 1024;
-  common.low_watermark_ = 5 * 1024 * 1024;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -1319,11 +1310,6 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
-  common.high_watermark_ = 10 * 1024 * 1024;
-  common.low_watermark_ = 5 * 1024 * 1024;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -1451,11 +1437,6 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
-  common.high_watermark_ = 10 * 1024 * 1024;
-  common.low_watermark_ = 5 * 1024 * 1024;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
@@ -1587,10 +1568,6 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   // Empty so that we don't attempt to connect to the zk
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
-  // Lets change the Connection buffer HWM and LWN for back pressure to get the
-  // test case done faster
-  common.high_watermark_ = 10 * 1024 * 1024;
-  common.low_watermark_ = 5 * 1024 * 1024;
 
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
