@@ -165,7 +165,7 @@ sp_int32 IncomingPacket::InternalRead(sp_int32 _fd, char* _buffer, sp_uint32 _si
       } else {
         // something really bad happened. Bail out
         // try again
-        LOG(ERROR) << "Something really bad happened while reading " << errno << "\n";
+        PLOG(ERROR) << "Something really bad happened while reading packet";
         return -1;
       }
     }
