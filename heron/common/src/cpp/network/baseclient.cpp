@@ -64,6 +64,19 @@ void BaseClient::Start_Base() {
   bzero(reinterpret_cast<char*>(endpoint->addr()), endpoint->addrlen());
   // Set the address
   if (options_.get_socket_family() == PF_INET) {
+    // find the local address to bind to
+    struct sockaddr_in local_addr;
+    if (!SockUtils::FindBindAddress(options_.get_interface(), AF_INET, &local_addr)) {
+      local_addr.sin_family = AF_INET;
+      // Any local port will do
+      local_addr.sin_port = 0;
+      LOG(INFO) << "Binding to ip address: " << inet_ntoa(local_addr.sin_addr);
+      errno = 0;
+      if (bind(endpoint->get_fd(), (struct sockaddr *)&local_addr, sizeof(local_addr))) {
+         LOG(WARNING) << "Failed to bind to the interface: " << errno;
+      }
+    }
+
     struct sockaddr_in* addr = (struct sockaddr_in*)endpoint->addr();
     addr->sin_family = AF_INET;
     addr->sin_port = htons(options_.get_port());

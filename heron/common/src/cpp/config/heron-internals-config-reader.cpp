@@ -62,7 +62,7 @@ void HeronInternalsConfigReader::Create(const sp_string& _defaults_file) {
 }
 
 void HeronInternalsConfigReader::OnConfigFileLoad() {
-  // Nothing really
+  AddIfMissing(HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_BIND_INTERFACE, "");
 }
 
 sp_string HeronInternalsConfigReader::GetHeronLoggingDirectory() {
@@ -216,6 +216,11 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmasterInte
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrNetworkOptionsMaximumPacketMb() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB]
       .as<int>();
+}
+
+sp_string HeronInternalsConfigReader::GetHeronStreammgrNetworkOptionsBindInterface() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_BIND_INTERFACE]
+        .as<std::string>();
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrTmasterHeartbeatIntervalSec() {

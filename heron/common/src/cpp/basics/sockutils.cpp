@@ -18,6 +18,10 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+#include <vector>
+#include <string>
 #include "glog/logging.h"
 #include "config/heron-config.h"
 #include "basics/sprcodes.h"
@@ -177,4 +181,42 @@ sp_int32 SockUtils::setSocketDefaults(sp_int32 fd) {
   }
 
   return SP_OK;
+}
+
+sp_int32 SockUtils::FindBindAddress(sp_string interface,
+                                    int family, struct sockaddr_in *addr)  {
+  struct ifaddrs *ifaddr, *ifa;
+
+  if (getifaddrs(&ifaddr) < 0) {
+    PLOG(ERROR) << "Could not get the address information: " << strerror(errno);
+    return SP_NOTOK;
+  }
+
+  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == NULL) {
+      continue;
+    }
+    if (ifa->ifa_addr->sa_family == family && !strcmp(ifa->ifa_name, interface.c_str())) {
+      memcpy(addr, ifa->ifa_addr, sizeof(struct sockaddr_in));
+      freeifaddrs(ifaddr);
+      return SP_OK;
+    }
+  }
+
+  freeifaddrs(ifaddr);
+  return 1;
+}
+
+sp_int32 SockUtils::FindHostName(sp_string interface, char *hostname,
+                                    sp_int32 hostname_size) {
+  struct sockaddr_in addr;
+  if (!FindBindAddress(interface, AF_INET, &addr)) {
+    addr.sin_family = AF_INET;
+    addr.sin_port = 0;
+    if (!getnameinfo((struct sockaddr *)&addr, sizeof addr, hostname, hostname_size,
+                 NULL, 0, NI_NOFQDN)) {
+      return SP_OK;
+    }
+  }
+  return SP_NOTOK;
 }

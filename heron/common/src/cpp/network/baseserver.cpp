@@ -36,8 +36,12 @@ void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   listen_fd_ = -1;
+  listen_local_fd_ = -1;
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
-  on_new_connection_callback_ = [this](EventLoop::Status status) { this->OnNewConnection(status); };
+  on_new_connection_callback_ = [this](EventLoop::Status status)
+                                             { this->OnNewConnection(status); };
+  on_new_local_connection_callback_ = [this](EventLoop::Status status)
+                                             { this->OnLocalNewConnection(status); };
 }
 
 BaseServer::~BaseServer() {}
@@ -45,24 +49,11 @@ BaseServer::~BaseServer() {}
 sp_int32 BaseServer::Start_Base() {
   // open a socket
   errno = 0;
-  listen_fd_ = socket(options_.get_socket_family(), SOCK_STREAM, 0);
+  listen_fd_ = CreateSocket();
   if (listen_fd_ < 0) {
-    LOG(ERROR) << "Opening of a socket failed in server " << errno << "\n";
+    LOG(ERROR) << "Failed to create listening socket";
     return -1;
   }
-
-  if (SockUtils::setSocketDefaults(listen_fd_) < 0) {
-    close(listen_fd_);
-    return -1;
-  }
-
-  // Set the socket option for addr reuse
-  if (SockUtils::setReuseAddress(listen_fd_) < 0) {
-    LOG(ERROR) << "setsockopt of a socket failed in server " << errno << "\n";
-    close(listen_fd_);
-    return -1;
-  }
-
   // Set the address
   struct sockaddr_in in_addr;
   struct sockaddr_un unix_addr;
@@ -70,9 +61,43 @@ sp_int32 BaseServer::Start_Base() {
   socklen_t sockaddr_len = 0;
   if (options_.get_sin_family() == AF_INET) {
     bzero(reinterpret_cast<char*>(&in_addr), sizeof(in_addr));
+    if (SockUtils::FindBindAddress(options_.get_interface(), AF_INET, &in_addr)) {
+      in_addr.sin_addr.s_addr = INADDR_ANY;
+      LOG(INFO) << "Binding to all the ips";
+    } else {
+      char *ip = inet_ntoa(in_addr.sin_addr);
+      char local_ip[16] = "127.0.0.1";
+      LOG(INFO) << "Binding to ip address: " << ip << ":" << options_.get_port();
+
+      listen_local_fd_ = CreateSocket();
+      if (listen_local_fd_ < 0) {
+        LOG(ERROR) << "Failed to create local listening socket";
+        return -1;
+      }
+      // in case we are listening on a specific interface, listen on the loopback address
+      if (strcmp(ip, local_ip)) {
+        // listen for loopback address
+        struct sockaddr_in in_addr_lo;
+        struct sockaddr_un unix_addr_lo;
+        struct sockaddr* serv_addr_lo = NULL;
+        socklen_t sockaddr_len_lo = 0;
+
+        in_addr_lo.sin_addr.s_addr = inet_addr(local_ip);
+        in_addr_lo.sin_family = AF_INET;
+        in_addr_lo.sin_port = htons(options_.get_port());
+        serv_addr_lo = (struct sockaddr*)&in_addr_lo;
+        sockaddr_len_lo = sizeof(in_addr_lo);
+        LOG(INFO) << "Binding to loopback address: " << local_ip << ":" << options_.get_port();
+        if (StartListen(listen_local_fd_, serv_addr_lo, sockaddr_len_lo,
+                        on_new_local_connection_callback_)) {
+          LOG(ERROR) << "Failed to listen on loopback";
+          return -1;
+        }
+      }
+    }
+
     in_addr.sin_family = options_.get_sin_family();
     in_addr.sin_port = htons(options_.get_port());
-    in_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr = (struct sockaddr*)&in_addr;
     sockaddr_len = sizeof(in_addr);
   } else {
@@ -83,22 +108,49 @@ sp_int32 BaseServer::Start_Base() {
     sockaddr_len = sizeof(unix_addr);
   }
 
+  return StartListen(listen_fd_, serv_addr, sockaddr_len, on_new_connection_callback_);
+}
+
+sp_int32 BaseServer::CreateSocket() {
+  sp_int32 fd;
+  fd = socket(options_.get_socket_family(), SOCK_STREAM, 0);
+  if (fd < 0) {
+    LOG(ERROR) << "Opening of a socket failed in server " << errno << "\n";
+    return -1;
+  }
+
+  if (SockUtils::setSocketDefaults(fd) < 0) {
+    close(fd);
+    return -1;
+  }
+
+  // Set the socket option for addr reuse
+  if (SockUtils::setReuseAddress(fd) < 0) {
+    LOG(ERROR) << "setsockopt of a socket failed in server " << errno << "\n";
+    close(fd);
+    return -1;
+  }
+  return fd;
+}
+
+sp_int32 BaseServer::StartListen(sp_int32 _fd, struct sockaddr* _serv_addr, socklen_t _sockaddr_len,
+                                 VCallback<EventLoop::Status> _on_new_connection_callback) {
   // Bind to the address
-  if (bind(listen_fd_, serv_addr, sockaddr_len) < 0) {
+  if (bind(_fd, _serv_addr, _sockaddr_len) < 0) {
     LOG(ERROR) << "bind of a socket failed in server " << errno << "\n";
     close(listen_fd_);
     return -1;
   }
 
   // Listen for new connections
-  if (listen(listen_fd_, 100) < 0) {
+  if (listen(_fd, 100) < 0) {
     LOG(ERROR) << "listen of a socket failed in server " << errno << "\n";
     close(listen_fd_);
     return -1;
   }
 
   // Ask the EventLoop to deliver any read events
-  if (eventLoop_->registerForRead(listen_fd_, on_new_connection_callback_, true) < 0) {
+  if (eventLoop_->registerForRead(_fd, _on_new_connection_callback, true) < 0) {
     LOG(ERROR) << "register for read of the socket failed in server\n";
     close(listen_fd_);
     return -1;
@@ -113,6 +165,13 @@ sp_int32 BaseServer::Stop_Base() {
   // Close the listen socket.
   close(listen_fd_);
 
+  if (listen_local_fd_ > 0) {
+    // Stop accepting new connections
+    CHECK_EQ(eventLoop_->unRegisterForRead(listen_local_fd_), 0);
+    // Close the listen socket.
+    close(listen_local_fd_);
+  }
+
   // Close all active connections and delete them
   while (active_connections_.size() > 0) {
     BaseConnection* conn = *(active_connections_.begin());
@@ -125,14 +184,22 @@ sp_int32 BaseServer::Stop_Base() {
   return 0;
 }
 
+void BaseServer::OnLocalNewConnection(EventLoop::Status _status) {
+  OnNewConnection(_status, listen_local_fd_);
+}
+
 void BaseServer::OnNewConnection(EventLoop::Status _status) {
+  OnNewConnection(_status, listen_fd_);
+}
+
+void BaseServer::OnNewConnection(EventLoop::Status _status, sp_int32 _listen_fd) {
   if (_status == EventLoop::READ_EVENT) {
     // The EventLoop indicated that the socket is writable.
     // Which means that a new client has connected to it.
     auto endPoint = new ConnectionEndPoint(options_.get_sin_family() != AF_INET);
     struct sockaddr* serv_addr = endPoint->addr();
     socklen_t addrlen = endPoint->addrlen();
-    sp_int32 fd = accept(listen_fd_, serv_addr, &addrlen);
+    sp_int32 fd = accept(_listen_fd, serv_addr, &addrlen);
     endPoint->set_fd(fd);
     if (endPoint->get_fd() > 0) {
       // accept succeeded.
