@@ -332,6 +332,14 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location,
+      String topologyName) {
+    return createNode(
+        StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setExecutionState(
       ExecutionEnvironment.ExecutionState executionState,
       String topologyName) {
@@ -372,6 +380,14 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+    // It is a EPHEMERAL node and would be removed automatically
+    final SettableFuture<Boolean> result = SettableFuture.create();
+    result.set(true);
+    return result;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
     result.set(true);

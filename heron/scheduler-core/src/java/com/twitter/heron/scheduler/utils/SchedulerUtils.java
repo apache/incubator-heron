@@ -38,7 +38,7 @@ import com.twitter.heron.spi.utils.ShellUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
-  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
+  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 8;
   public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
   public static final String SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION = "P";
 
@@ -196,6 +196,8 @@ public final class SchedulerUtils {
     String shellPort = freePorts.get(3);
     String metricsmgrPort = freePorts.get(4);
     String schedulerPort = freePorts.get(5);
+    String metricsCacheMasterPort = freePorts.get(6);
+    String metricsCacheStatsPort = freePorts.get(7);
 
     List<String> commands = new ArrayList<>();
     commands.add(topology.getName());
@@ -234,6 +236,9 @@ public final class SchedulerUtils {
     commands.add(completeSchedulerProcessClassPath);
     commands.add(schedulerPort);
     commands.add(Context.pythonInstanceBinary(config));
+    commands.add(Context.metricsCacheManagerClassPath(config));
+    commands.add(metricsCacheMasterPort);
+    commands.add(metricsCacheStatsPort);
 
     return commands.toArray(new String[commands.size()]);
   }
