@@ -217,6 +217,30 @@ public final class SystemConfig {
     return getInteger(SystemConfigKey.HERON_METRICS_MAX_EXCEPTIONS_PER_MESSAGE_COUNT);
   }
 
+  public long getTmasterMetricsCollectorMaximumException() {
+    try {
+      return getLong(SystemConfigKey.TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION);
+    } catch (IllegalArgumentException e) {
+      return 256; // default value if not found in config
+    }
+  }
+
+  public long getTmasterMetricsCollectorMaximumIntervalMin() {
+    try {
+      return getLong(SystemConfigKey.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN);
+    } catch (IllegalArgumentException e) {
+      return 180; // default value if not found in config
+    }
+  }
+
+  public long getTmasterMetricsCollectorPurgeIntervalSec() {
+    try {
+      return getLong(SystemConfigKey.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC);
+    } catch (IllegalArgumentException e) {
+      return 60; // default value if not found in config
+    }
+  }
+
   private String getString(SystemConfigKey key) {
     assertType(key, SystemConfigKey.Type.STRING);
     return (String) get(key);
