@@ -51,7 +51,8 @@ class StMgr {
   StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
         const sp_string& _topology_id, proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
-        const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port);
+        const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+        sp_int64 _high_watermark, sp_int64 _low_watermark);
   virtual ~StMgr();
 
   // All kinds of initialization like starting servers and clients
@@ -161,6 +162,9 @@ class StMgr {
   proto::system::HeronTupleSet2* tuple_set_from_other_stmgr_;
 
   sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
+
+  sp_int64 high_watermark_;
+  sp_int64 low_watermark_;
 };
 
 }  // namespace stmgr
