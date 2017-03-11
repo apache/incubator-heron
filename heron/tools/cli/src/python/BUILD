@@ -13,7 +13,10 @@ pex_library(
         "//heron/tools/common/src/python:common-py",
         "//heron/proto:proto-py",
     ],
-    reqs = ["pyyaml==3.10"],
+    reqs = [
+        "pyyaml==3.10",
+        "enum34==1.1.6"
+    ],
 )
 
 pex_binary(

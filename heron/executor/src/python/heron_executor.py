@@ -550,7 +550,7 @@ class HeronExecutor(object):
             Log.info("Killing %s process with pid %d: %s" %
                      (process_info.name, process_info.pid, ' '.join(command)))
             try:
-              process_info.process.kill()
+              process_info.process.terminate()  # sends SIGTERM to process
             except OSError, e:
               if e.errno == 3: # No such process
                 Log.warn("Expected process %s with pid %d was not running, ignoring." %
@@ -735,7 +735,7 @@ def main():
   def setup(shardid):
     # Redirect stdout and stderr to files in append mode
     # The filename format is heron-executor-<container_id>.stdxxx
-    log.configure(logfile='heron-executor-%s.stdout' % shardid, with_time=True)
+    log.configure(logfile='heron-executor-%s.stdout' % shardid)
 
     Log.info('Set up process group; executor becomes leader')
     os.setpgrp() # create new process group, become its leader
