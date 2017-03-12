@@ -105,7 +105,6 @@ tools/jdk/ijar
 out/
 
 # Eclipse
-.autotools
 .settings/
 .metadata/
 .project

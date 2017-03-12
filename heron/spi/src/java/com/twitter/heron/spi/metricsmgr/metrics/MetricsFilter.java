@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A MetricsFilter which could be used to:
@@ -37,10 +36,6 @@ public class MetricsFilter {
 
   public void setMetricToType(String metricName, MetricAggregationType type) {
     setPrefixToType(metricName, type);
-  }
-
-  public Set<String> getMetricNames() {
-    return prefixToType.keySet();
   }
 
   public boolean contains(String metricName) {

@@ -173,15 +173,6 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
-   * Delete the metricscache location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean deleteMetricsCacheLocation(String topologyName) {
-    return awaitResult(delegate.deleteMetricsCacheLocation(topologyName));
-  }
-
-  /**
    * Delete the execution state for the given topology
    *
    * @return Boolean - Success or Failure
