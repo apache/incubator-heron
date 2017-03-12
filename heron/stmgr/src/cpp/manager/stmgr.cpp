@@ -90,10 +90,8 @@ void StMgr::Init() {
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
-  state_mgr_->SetMetricsCacheLocationWatch(
-                       topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
+
   FetchTMasterLocation();
-  FetchMetricsCacheLocation();
 
   CHECK_GT(
       eventLoop_->registerTimer(
@@ -186,17 +184,6 @@ void StMgr::FetchTMasterLocation() {
   state_mgr_->GetTMasterLocation(topology_name_, tmaster, std::move(cb));
 }
 
-void StMgr::FetchMetricsCacheLocation() {
-  LOG(INFO) << "Fetching MetricsCache Location";
-  auto metricscache = new proto::tmaster::MetricsCacheLocation();
-
-  auto cb = [metricscache, this](proto::system::StatusCode status) {
-    this->OnMetricsCacheLocationFetch(metricscache, status);
-  };
-
-  state_mgr_->GetMetricsCacheLocation(topology_name_, metricscache, std::move(cb));
-}
-
 void StMgr::StartStmgrServer() {
   CHECK(!server_);
   LOG(INFO) << "Creating StmgrServer" << std::endl;
@@ -274,13 +261,6 @@ void StMgr::BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLoc
   metrics_manager_client_->RefreshTMasterLocation(*tmasterLocation);
 }
 
-void StMgr::BroadcastMetricsCacheLocation(proto::tmaster::MetricsCacheLocation* tmasterLocation) {
-  // Notify metrics manager of the metricscache location changes
-  // TODO(huijun): What if the refresh fails?
-  LOG(INFO) << "BroadcastMetricsCacheLocation";
-  metrics_manager_client_->RefreshMetricsCacheLocation(*tmasterLocation);
-}
-
 void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLocation,
                                    proto::system::StatusCode _status) {
   if (_status != proto::system::OK) {
@@ -329,38 +309,6 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
     // Stmgr doesn't know what other things might have changed, so it is important
     // to broadcast the location, even though we know its the same tmaster.
     BroadcastTmasterLocation(newTmasterLocation);
-  }
-
-  // Delete the tmasterLocation Proto
-  delete newTmasterLocation;
-}
-
-void StMgr::OnMetricsCacheLocationFetch(proto::tmaster::MetricsCacheLocation* newTmasterLocation,
-                                   proto::system::StatusCode _status) {
-  if (_status != proto::system::OK) {
-    LOG(INFO) << "MetricsCache Location Fetch failed with status " << _status;
-    LOG(INFO) << "Retrying after " << TMASTER_RETRY_FREQUENCY << " micro seconds ";
-    CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status) {
-      this->FetchMetricsCacheLocation();
-    }, false, TMASTER_RETRY_FREQUENCY), 0);
-  } else {
-    // We got a new metricscache location.
-    // Just verify that we are talking to the right entity
-    if (newTmasterLocation->topology_name() != topology_name_ ||
-        newTmasterLocation->topology_id() != topology_id_) {
-      LOG(FATAL) << "Topology name/id mismatch between stmgr and MetricsCache "
-                 << "We expected " << topology_name_ << " : " << topology_id_
-                 << " but MetricsCache had "
-                 << newTmasterLocation->topology_name() << " : "
-                 << newTmasterLocation->topology_id() << std::endl;
-    }
-
-    LOG(INFO) << "Fetched MetricsCacheLocation to be " << newTmasterLocation->host() << ":"
-              << newTmasterLocation->master_port();
-
-    // Stmgr doesn't know what other things might have changed, so it is important
-    // to broadcast the location, even though we know its the same metricscache.
-    BroadcastMetricsCacheLocation(newTmasterLocation);
   }
 
   // Delete the tmasterLocation Proto

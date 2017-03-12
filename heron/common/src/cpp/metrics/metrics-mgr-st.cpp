@@ -59,12 +59,6 @@ void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation&
   client_->SendTMasterLocation(location);
 }
 
-void MetricsMgrSt::RefreshMetricsCacheLocation(
-    const proto::tmaster::MetricsCacheLocation& location) {
-  LOG(INFO) << "RefreshMetricsCacheLocation";
-  client_->SendMetricsCacheLocation(location);
-}
-
 void MetricsMgrSt::register_metric(const sp_string& _metric_name, IMetric* _metric) {
   metrics_[_metric_name] = _metric;
 }

@@ -218,19 +218,12 @@ public class RuntimeManagerRunner {
 
     Boolean result;
 
-    // It is possible that TMasterLocation, MetricsCacheLocation, PackingPlan, PhysicalPlan and
-    // SchedulerLocation are not set. Just log but don't consider it a failure and don't return
-    // false
+    // It is possible that TMasterLocation, PackingPlan, PhysicalPlan and SchedulerLocation are not
+    // set. Just log but don't consider it a failure and don't return false
     result = statemgr.deleteTMasterLocation(topologyName);
     if (result == null || !result) {
       throw new TopologyRuntimeManagementException(
           "Failed to clear TMaster location. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deleteMetricsCacheLocation(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear MetricsCache location. Check whether MetricsCache set it correctly.");
     }
 
     result = statemgr.deletePackingPlan(topologyName);
