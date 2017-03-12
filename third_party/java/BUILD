@@ -39,13 +39,6 @@ java_library(
 )
 
 java_library(
-    name = "cli",
-    srcs = [ "Empty.java" ],
-    exports = [ "@commons_cli_commons_cli//jar" ],
-    deps = [ "@commons_cli_commons_cli//jar" ],
-)
-
-java_library(
     name = "guava",
     srcs = [ "Empty.java" ],
     exports = [ "@com_google_guava_guava//jar" ],

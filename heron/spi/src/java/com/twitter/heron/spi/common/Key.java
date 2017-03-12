@@ -108,13 +108,12 @@ public enum Key {
   INSTANCE_DISK             ("heron.resources.instance.disk", ByteAmount.fromBytes(1073741824)),
 
   //keys for config provided paths
-  INSTANCE_CLASSPATH        ("heron.classpath.instance",             "${HERON_LIB}/instance/*"),
-  METRICSMGR_CLASSPATH      ("heron.classpath.metrics.manager",      "${HERON_LIB}/metricsmgr/*"),
-  METRICSCACHEMGR_CLASSPATH ("heron.classpath.metricscache.manager", "${HERON_LIB}/metricscachemgr/*"),
-  PACKING_CLASSPATH         ("heron.classpath.packing",              "${HERON_LIB}/packing/*"),
-  SCHEDULER_CLASSPATH       ("heron.classpath.scheduler",            "${HERON_LIB}/scheduler/*"),
-  STATEMGR_CLASSPATH        ("heron.classpath.statemgr",             "${HERON_LIB}/statemgr/*"),
-  UPLOADER_CLASSPATH        ("heron.classpath.uploader",             "${HERON_LIB}/uploader/*"),
+  INSTANCE_CLASSPATH        ("heron.classpath.instance",        "${HERON_LIB}/instance/*"),
+  METRICSMGR_CLASSPATH      ("heron.classpath.metrics.manager", "${HERON_LIB}/metricsmgr/*"),
+  PACKING_CLASSPATH         ("heron.classpath.packing",         "${HERON_LIB}/packing/*"),
+  SCHEDULER_CLASSPATH       ("heron.classpath.scheduler",       "${HERON_LIB}/scheduler/*"),
+  STATEMGR_CLASSPATH        ("heron.classpath.statemgr",        "${HERON_LIB}/statemgr/*"),
+  UPLOADER_CLASSPATH        ("heron.classpath.uploader",        "${HERON_LIB}/uploader/*"),
 
   //keys for run time config
   TOPOLOGY_CLASSPATH             ("heron.runtime.topology.class.path",             Type.STRING),

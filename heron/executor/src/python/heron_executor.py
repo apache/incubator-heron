@@ -52,8 +52,7 @@ def print_usage():
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
-      " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
-      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>")
+      " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -129,10 +128,12 @@ class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
-  def init_parsed_args(self, args):
-    """ initialize from parsed arguments """
+  def __init__(self, args, shell_env):
     parsed_args = self.parse_args(args)
 
+    self.shell_env = shell_env
+    self.max_runs = 100
+    self.interval_between_runs = 10
     self.shard = parsed_args.shard
     self.topology_name = parsed_args.topology_name
     self.topology_id = parsed_args.topology_id
@@ -142,7 +143,6 @@ class HeronExecutor(object):
     self.tmaster_binary = parsed_args.tmaster_binary
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metricsmgr_classpath = parsed_args.metricsmgr_classpath
-    self.metricscachemgr_classpath = parsed_args.metricscachemgr_classpath
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('&equals;', '='))
@@ -176,8 +176,6 @@ class HeronExecutor(object):
     self.shell_port = parsed_args.shell_port
     self.heron_shell_binary = parsed_args.heron_shell_binary
     self.metricsmgr_port = parsed_args.metricsmgr_port
-    self.metricscachemgr_masterport = parsed_args.metricscachemgr_masterport
-    self.metricscachemgr_statsport = parsed_args.metricscachemgr_statsport
     self.cluster = parsed_args.cluster
     self.role = parsed_args.role
     self.environ = parsed_args.environ
@@ -186,13 +184,6 @@ class HeronExecutor(object):
     self.scheduler_classpath = parsed_args.scheduler_classpath
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
-
-  def __init__(self, args, shell_env):
-    self.init_parsed_args(args)
-
-    self.shell_env = shell_env
-    self.max_runs = 100
-    self.interval_between_runs = 10
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -246,9 +237,6 @@ class HeronExecutor(object):
     parser.add_argument("scheduler_classpath")
     parser.add_argument("scheduler_port")
     parser.add_argument("python_instance_binary")
-    parser.add_argument("metricscachemgr_classpath")
-    parser.add_argument("metricscachemgr_masterport")
-    parser.add_argument("metricscachemgr_statsport")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -337,47 +325,6 @@ class HeronExecutor(object):
 
     return metricsmgr_cmd
 
-  def _get_metrics_cache_cmd(self):
-    ''' get the command to start the metrics manager processes '''
-    metricscachemgr_main_class = 'com.twitter.heron.metricscachemgr.MetricsCacheManager'
-
-    metricscachemgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
-                           # We could not rely on the default -Xmx setting, which could be very big,
-                           # for instance, the default -Xmx in Twitter mesos machine is around 18GB
-                           '-Xmx1024M',
-                           '-XX:+PrintCommandLineFlags',
-                           '-verbosegc',
-                           '-XX:+PrintGCDetails',
-                           '-XX:+PrintGCTimeStamps',
-                           '-XX:+PrintGCDateStamps',
-                           '-XX:+PrintGCCause',
-                           '-XX:+UseGCLogFileRotation',
-                           '-XX:NumberOfGCLogFiles=5',
-                           '-XX:GCLogFileSize=100M',
-                           '-XX:+PrintPromotionFailure',
-                           '-XX:+PrintTenuringDistribution',
-                           '-XX:+PrintHeapAtGC',
-                           '-XX:+HeapDumpOnOutOfMemoryError',
-                           '-XX:+UseConcMarkSweepGC',
-                           '-XX:+PrintCommandLineFlags',
-                           '-Xloggc:log-files/gc.metricscache.log',
-                           '-Djava.net.preferIPv4Stack=true',
-                           '-cp',
-                           self.metricscachemgr_classpath,
-                           metricscachemgr_main_class,
-                           "--metricscache_id", 'metricscache-0',
-                           "--master_port", self.metricscachemgr_masterport,
-                           "--stats_port", self.metricscachemgr_statsport,
-                           "--topology_name", self.topology_name,
-                           "--topology_id", self.topology_id,
-                           "--system_config_file", self.heron_internals_config_file,
-                           "--sink_config_file", self.metrics_sinks_config_file,
-                           "--cluster", self.cluster,
-                           "--role", self.role,
-                           "--environment", self.environ, "--verbose"]
-
-    return metricscachemgr_cmd
-
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
     retval = {}
@@ -395,8 +342,6 @@ class HeronExecutor(object):
         self.metrics_sinks_config_file,
         self.metricsmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
-
-    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 

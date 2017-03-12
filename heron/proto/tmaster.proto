@@ -26,23 +26,6 @@ message TMasterLocation {
   optional int32 stats_port = 6;
 }
 
-message MetricsCacheLocation {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string host = 3;
-  // The port to talk to the matricscache
-  // for topology control actions
-  // reserved for future use
-  required int32 controller_port = 4;
-  // The port that different components
-  // of the topology use to talk to the metricscache
-  // like metrics mgr for sending stats
-  required int32 master_port = 5;
-  // The port that is a http endpoint
-  // to publish stats about the topology
-  optional int32 stats_port = 6;
-}
-
 //
 // interface called by the StreamManagers.
 //

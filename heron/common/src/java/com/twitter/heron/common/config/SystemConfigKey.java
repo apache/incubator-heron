@@ -296,26 +296,7 @@ public enum SystemConfigKey {
    * The maximum socket's send buffer size in bytes
    */
   METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES(
-      "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
-
-  /**
-   *The maximum exception count be kept in tmaster
-   */
-  TMASTER_METRICS_COLLECTOR_MAXIMUM_EXCEPTION(
-      "heron.tmaster.metrics.collector.maximum.exception", Type.LONG),
-
-  /**
-   * The maximum interval in minutes of metrics to be kept in tmaster
-   */
-  TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN(
-      "heron.tmaster.metrics.collector.maximum.interval.min", Type.LONG),
-
-  /**
-   * The interval for tmaster to purge metrics from socket
-   */
-  TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC(
-       "heron.tmaster.metrics.collector.purge.interval.sec", Type.LONG);
-
+      "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.INTEGER);
 
   private final String value;
   private final Object defaultValue;
