@@ -84,10 +84,10 @@ heron.streammgr.connection.write.batch.size.mb: 1
 heron.streammgr.network.backpressure.threshold: 3
 
 # High water mark on the num in MB that can be left outstanding on a connection
-heron.streammgr.network.backpressure.highwatermark.mb: 50
+heron.streammgr.network.backpressure.highwatermark.mb: 100
 
 # Low water mark on the num in MB that can be left outstanding on a connection
-heron.streammgr.network.backpressure.lowwatermark.mb: 30
+heron.streammgr.network.backpressure.lowwatermark.mb: 50
 
 ################################################################################
 # Configs related to Topology Master, starts with heron.tmaster.*
