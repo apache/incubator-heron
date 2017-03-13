@@ -116,7 +116,7 @@ TEST(TupleCache, test_simple_data_drain) {
 
   // 300 milliseconds second
   auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
-  ss.registerTimer(std::move(cb), false, 300000);
+  ss.registerTimer(std::move(cb), false, 300_ms);
 
   ss.loop();
 

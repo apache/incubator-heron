@@ -49,8 +49,8 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
-const sp_int64 PROCESS_METRICS_FREQUENCY = 10 * 1000 * 1000;
-const sp_int64 TMASTER_RETRY_FREQUENCY = 10 * 1000 * 1000;  // in micro seconds
+const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
+const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
 StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
              const sp_string& _topology_id, proto::api::Topology* _hydrated_topology,
@@ -97,7 +97,7 @@ void StMgr::Init() {
       eventLoop_->registerTimer(
           [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
           config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
-              1000 * 1000),
+              1_s),
       0);  // fire only once
 
   // Create and start StmgrServer
@@ -109,14 +109,14 @@ void StMgr::Init() {
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingPruneIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Check for log flushing every 10 seconds
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::FlushLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingFlushIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Update Process related metrics every 10 seconds
@@ -165,9 +165,9 @@ void StMgr::UpdateProcessMetrics(EventLoop::Status) {
   struct rusage usage;
   ProcessUtils::getResourceUsage(&usage);
   stmgr_process_metrics_->scope(METRIC_CPU_USER)
-      ->SetValue((usage.ru_utime.tv_sec * 1000 * 1000) + usage.ru_utime.tv_usec);
+      ->SetValue((usage.ru_utime.tv_sec * 1_s) + usage.ru_utime.tv_usec);
   stmgr_process_metrics_->scope(METRIC_CPU_SYSTEM)
-      ->SetValue((usage.ru_stime.tv_sec * 1000 * 1000) + usage.ru_stime.tv_usec);
+      ->SetValue((usage.ru_stime.tv_sec * 1_s) + usage.ru_stime.tv_usec);
   // Memory
   size_t totalmemory = ProcessUtils::getTotalMemoryUsed();
   stmgr_process_metrics_->scope(METRIC_MEM_USED)->SetValue(totalmemory);
@@ -222,8 +222,7 @@ void StMgr::CreateTupleCache() {
   CHECK(!tuple_cache_);
   LOG(INFO) << "Creating tuple cache ";
   sp_uint32 drain_threshold_bytes_ =
-      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1024 *
-      1024;
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1_MB;
   tuple_cache_ = new TupleCache(eventLoop_, drain_threshold_bytes_);
 
   tuple_cache_->RegisterDrainer(&StMgr::DrainInstanceData, this);

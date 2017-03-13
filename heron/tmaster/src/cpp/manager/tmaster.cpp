@@ -47,7 +47,7 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
-const sp_int64 PROCESS_METRICS_FREQUENCY = 60 * 1000 * 1000;
+const sp_int64 PROCESS_METRICS_FREQUENCY = 60_s;
 const sp_string METRIC_PREFIX = "__process";
 
 TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
@@ -122,14 +122,14 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingPruneIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Flush logs every 10 seconds
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::FlushLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingFlushIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Update Process related metrics every 60 seconds
@@ -178,9 +178,9 @@ void TMaster::UpdateProcessMetrics(EventLoop::Status) {
   struct rusage usage;
   ProcessUtils::getResourceUsage(&usage);
   tmasterProcessMetrics->scope(METRIC_CPU_USER)
-      ->SetValue((usage.ru_utime.tv_sec * 1000 * 1000) + usage.ru_utime.tv_usec);
+      ->SetValue((usage.ru_utime.tv_sec * 1_s) + usage.ru_utime.tv_usec);
   tmasterProcessMetrics->scope(METRIC_CPU_SYSTEM)
-      ->SetValue((usage.ru_stime.tv_sec * 1000 * 1000) + usage.ru_stime.tv_usec);
+      ->SetValue((usage.ru_stime.tv_sec * 1_s) + usage.ru_stime.tv_usec);
   // Memory
   size_t totalmemory = ProcessUtils::getTotalMemoryUsed();
   tmasterProcessMetrics->scope(METRIC_MEM_USED)->SetValue(totalmemory);
@@ -198,7 +198,7 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
       eventLoop_->registerTimer(std::move(cb), false,
                                 config::HeronInternalsConfigReader::Instance()
                                         ->GetHeronTmasterEstablishRetryIntervalSec() *
-                                    1000000);
+                                    1_s);
       return;
     }
     // There was an error setting our location
@@ -277,7 +277,7 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
   master_options.set_port(master_port_);
   master_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
                                          ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
-                                     1024 * 1024);
+                                     1_MB);
   master_options.set_socket_family(PF_INET);
   master_ = new TMasterServer(eventLoop_, master_options, metrics_collector_, this);
 
@@ -293,7 +293,7 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
   controller_options.set_max_packet_size(
       config::HeronInternalsConfigReader::Instance()
           ->GetHeronTmasterNetworkControllerOptionsMaximumPacketMb() *
-      1024 * 1024);
+      1_MB);
   controller_options.set_socket_family(PF_INET);
   controller_ = new TController(eventLoop_, controller_options, this);
 
@@ -313,7 +313,7 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
   stats_options.set_port(stats_port_);
   stats_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
                                         ->GetHeronTmasterNetworkStatsOptionsMaximumPacketMb() *
-                                    1024 * 1024);
+                                    1_MB);
   stats_options.set_socket_family(PF_INET);
   stats_ = new StatsInterface(eventLoop_, stats_options, metrics_collector_, this);
 }
