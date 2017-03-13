@@ -72,10 +72,10 @@ int main(int argc, char* argv[]) {
 
   sp_int64 high_watermark = heron::config::HeronInternalsConfigReader::Instance()
                               ->GetHeronStreammgrNetworkBackpressureHighwatermarkMb() *
-                                1024 * 1024;
+                                1_MB;
   sp_int64 low_watermark = heron::config::HeronInternalsConfigReader::Instance()
                               ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
-                                1024 * 1024;
+                                1_MB;
   heron::stmgr::StMgr mgr(&ss, myport, topology_name, topology_id, topology, myid, instances,
                           zkhostportlist, topdir, metricsmgr_port, shell_port, high_watermark,
                           low_watermark);

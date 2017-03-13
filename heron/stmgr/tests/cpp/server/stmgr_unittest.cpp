@@ -223,7 +223,7 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1024 * 1024);
+  options.set_max_packet_size(1_MB);
   options.set_socket_family(PF_INET);
 
   mgr = new DummyStMgr(ss, options, stmgr_id, LOCALHOST, stmgr_port, LOCALHOST, tmaster_port,
@@ -241,7 +241,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(mtmgr_port);
-  options.set_max_packet_size(1024 * 1024);
+  options.set_max_packet_size(1_MB);
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
@@ -262,7 +262,7 @@ void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1024 * 1024);
+  options.set_max_packet_size(1_MB);
   options.set_socket_family(PF_INET);
 
   worker = new DummySpoutInstance(ss, options, topology_name, topology_id, instance_id,
@@ -284,7 +284,7 @@ void StartDummyBoltInstance(EventLoopImpl*& ss, DummyBoltInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1024 * 1024);
+  options.set_max_packet_size(1_MB);
   options.set_socket_family(PF_INET);
 
   worker =
@@ -364,8 +364,8 @@ struct CommonResources {
     dpath_ = sp_string(dpath);
     // Lets change the Connection buffer HWM and LWN for back pressure to get the
     // test case done faster
-    high_watermark_ = 10 * 1024 * 1024;
-    low_watermark_ = 5 * 1024 * 1024;
+    high_watermark_ = 10_MB;
+    low_watermark_ = 5_MB;
   }
 };
 
@@ -1086,8 +1086,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   // but instead connect to the local filesytem
   common.zkhostportlist_ = "";
   // Overwrite the default values for back pressure
-  common.high_watermark_ = 1 * 1024 * 1024;
-  common.low_watermark_ = 500 * 1024;
+  common.high_watermark_ = 1_MB;
+  common.low_watermark_ = 500_KB;
 
   int num_msgs_sent_by_spout_instance = 500 * 1000 * 1000;  // 100M
 

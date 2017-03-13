@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   NetworkOptions options;
   options.set_host(myhost);
   options.set_port(master_port);
-  options.set_max_packet_size(1024 * 1024);
+  options.set_max_packet_size(1_MB);
   options.set_socket_family(PF_INET);
   heron::tmaster::TMasterServer tmaster(&ss, options, topology_name, zkhostportlist, topdir,
                                         stmgrs);
