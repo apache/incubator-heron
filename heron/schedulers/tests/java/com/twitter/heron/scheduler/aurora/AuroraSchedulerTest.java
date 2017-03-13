@@ -359,6 +359,9 @@ public class AuroraSchedulerTest {
         case TOPOLOGY_PACKAGE_URI:
           expected = "http://foo/bar";
           break;
+        case METRICSCACHEMGR_CLASSPATH:
+            expected = expectedLib + "/metricscachemgr/*";
+            break;
         default:
           fail(String.format(
               "Expected value for Aurora field %s not found in test (found=%s)", field, found));
