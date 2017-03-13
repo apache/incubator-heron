@@ -66,6 +66,13 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location,
+      String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
   public ListenableFuture<Boolean> setExecutionState(
       ExecutionEnvironment.ExecutionState executionState,
       String topologyName) {
@@ -106,6 +113,11 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
   public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
     return nullFuture;
   }
@@ -132,6 +144,13 @@ public class NullStateManager implements IStateManager {
 
   @Override
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+      WatchCallback watcher,
+      String topologyName) {
+    return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();

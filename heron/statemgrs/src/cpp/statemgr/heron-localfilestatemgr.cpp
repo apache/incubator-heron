@@ -70,6 +70,20 @@ void HeronLocalFileStateMgr::SetTMasterLocationWatch(const std::string& topology
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
 }
 
+void HeronLocalFileStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_name,
+                                                     VCallback<> watcher) {
+  CHECK(watcher);
+  // We kind of cheat here. We check periodically
+  time_t tmaster_last_change = FileUtils::getModifiedTime(
+                               GetMetricsCacheLocationPath(topology_name));
+
+  auto cb = [topology_name, tmaster_last_change, watcher, this](EventLoop::Status status) {
+    this->CheckMetricsCacheLocation(topology_name, tmaster_last_change, std::move(watcher), status);
+  };
+
+  CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
+}
+
 void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_name,
                                                 proto::tmaster::TMasterLocation* _return,
                                                 VCallback<proto::system::StatusCode> cb) {
@@ -86,12 +100,42 @@ void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_nam
   CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
+void HeronLocalFileStateMgr::GetMetricsCacheLocation(const std::string& _topology_name,
+                                                proto::tmaster::MetricsCacheLocation* _return,
+                                                VCallback<proto::system::StatusCode> cb) {
+  std::string contents;
+  proto::system::StatusCode status =
+      ReadAllFileContents(GetMetricsCacheLocationPath(_topology_name), contents);
+  if (status == proto::system::OK) {
+    if (!_return->ParseFromString(contents)) {
+      status = proto::system::STATE_CORRUPTED;
+    }
+  }
+
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
+
 void HeronLocalFileStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                                                 VCallback<proto::system::StatusCode> cb) {
   // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
   // This is because when running in simulator we control when a tmaster dies and
   // comes up deterministically.
   std::string fname = GetTMasterLocationPath(_location.topology_name());
+  std::string contents;
+  _location.SerializeToString(&contents);
+  proto::system::StatusCode status = WriteToFile(fname, contents);
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
+
+void HeronLocalFileStateMgr::SetMetricsCacheLocation(
+        const proto::tmaster::MetricsCacheLocation& _location,
+        VCallback<proto::system::StatusCode> cb) {
+  // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+  // This is because when running in simulator we control when a tmaster dies and
+  // comes up deterministically.
+  std::string fname = GetMetricsCacheLocationPath(_location.topology_name());
   std::string contents;
   _location.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
@@ -337,5 +381,23 @@ void HeronLocalFileStateMgr::CheckTMasterLocation(std::string topology_name, tim
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
 }
+
+void HeronLocalFileStateMgr::CheckMetricsCacheLocation(
+        std::string topology_name, time_t last_change,
+        VCallback<> watcher, EventLoop::Status) {
+  time_t nlast_change = FileUtils::getModifiedTime(GetMetricsCacheLocationPath(topology_name));
+  if (nlast_change > last_change) {
+    watcher();
+  } else {
+    nlast_change = last_change;
+  }
+
+  auto cb = [topology_name, nlast_change, watcher, this](EventLoop::Status status) {
+    this->CheckMetricsCacheLocation(topology_name, nlast_change, std::move(watcher), status);
+  };
+
+  CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
+}
+
 }  // namespace common
 }  // namespace heron
