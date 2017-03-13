@@ -63,3 +63,7 @@ message MetricPublisherPublishMessage {
 message TMasterLocationRefreshMessage {
   required heron.proto.tmaster.TMasterLocation tmaster = 1;
 }
+
+message MetricsCacheLocationRefreshMessage {
+  required heron.proto.tmaster.MetricsCacheLocation metricscache = 1;
+}
