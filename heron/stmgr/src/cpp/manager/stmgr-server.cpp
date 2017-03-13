@@ -77,7 +77,7 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pres
 const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_instanceid/";
 
 // TODO(mfu): Read this value from config
-const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10 * 1000 * 1000;
+const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10_s;
 
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,

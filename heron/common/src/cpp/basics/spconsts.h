@@ -23,6 +23,8 @@
 #if !defined(HERON_CONSTS_H_)
 #define HERON_CONSTS_H_
 
+#include "basics/sptypes.h"
+
 // constants related to logs
 constexpr auto constMaxNumLogFiles = 5;
 constexpr auto constLogsDirectory = "log-files";
@@ -37,5 +39,21 @@ constexpr auto constPathSeparator = "/";
 constexpr auto constTcpKeepAliveSecs = 300;          // 5 min
 constexpr auto constTcpKeepAliveProbeInterval = 10;  // 10 seconds
 constexpr auto constTcpKeepAliveProbes = 5;
+
+constexpr sp_int64 operator"" _KB(unsigned long long bytes) { // NOLINT
+    return (sp_int64)bytes * 1024;
+}
+
+constexpr sp_int64 operator"" _MB(unsigned long long bytes) { // NOLINT
+    return (sp_int64)bytes * 1024 * 1024;
+}
+
+constexpr sp_int64 operator"" _s(unsigned long long us) { // NOLINT
+    return (sp_int64)us * 1000000;
+}
+
+constexpr sp_int64 operator"" _ms(unsigned long long us) { // NOLINT
+    return (sp_int64)us * 1000;
+}
 
 #endif

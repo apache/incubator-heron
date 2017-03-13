@@ -17,18 +17,19 @@
 #include "network/networkoptions.h"
 #include <arpa/inet.h>
 #include <string>
+#include "basics/spconsts.h"
 
 // This is the default high water mark on the num of bytes that can be left outstanding on
 // a connection
-const sp_int64 systemHWMOutstandingBytes = 1024 * 1024 * 100;  // 100M
+const sp_int64 systemHWMOutstandingBytes = 100_MB;
 // This is the default low water mark on the num of bytes that can be left outstanding on
 // a connection
-const sp_int64 systemLWMOutstandingBytes = 1024 * 1024 * 50;  // 50M
+const sp_int64 systemLWMOutstandingBytes = 50_MB;
 
 NetworkOptions::NetworkOptions() {
   host_ = "localhost";
   port_ = 8080;
-  max_packet_size_ = 1024;
+  max_packet_size_ = 1_KB;
   socket_family_ = PF_INET;
   sin_path_ = "";
   high_watermark_ = systemHWMOutstandingBytes;

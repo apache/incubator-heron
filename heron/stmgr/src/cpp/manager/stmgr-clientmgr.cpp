@@ -115,8 +115,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   options.set_host(_hostname);
   options.set_port(_port);
   options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
-                                  ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
-                              1024 * 1024);
+                                  ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() * 1_MB);
   options.set_high_watermark(high_watermark_);
   options.set_low_watermark(low_watermark_);
   options.set_socket_family(PF_INET);
