@@ -360,8 +360,8 @@ public class AuroraSchedulerTest {
           expected = "http://foo/bar";
           break;
         case METRICSCACHEMGR_CLASSPATH:
-            expected = expectedLib + "/metricscachemgr/*";
-            break;
+          expected = expectedLib + "/metricscachemgr/*";
+          break;
         default:
           fail(String.format(
               "Expected value for Aurora field %s not found in test (found=%s)", field, found));
