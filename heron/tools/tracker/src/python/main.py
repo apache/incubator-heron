@@ -56,6 +56,7 @@ class Application(tornado.web.Application):
         (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
         (r"/topologies/metadata", handlers.MetaDataHandler, {"tracker":self.tracker}),
+        (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
         (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
         (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
         (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":self.tracker}),
