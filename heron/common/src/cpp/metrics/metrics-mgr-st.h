@@ -54,6 +54,7 @@ class MetricsMgrSt {
   void register_metric(const sp_string& _metric_name, IMetric* _metric);
   void unregister_metric(const sp_string& _metric_name);
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
+  void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
  private:
   void gather_metrics(EventLoop::Status);
