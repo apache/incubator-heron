@@ -43,6 +43,7 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   protected enum StateLocation {
     TMASTER_LOCATION("tmasters", "TMaster location"),
+    METRICSCACHE_LOCATION("metricscaches", "MetricsCache location"),
     TOPOLOGY("topologies", "Topologies"),
     PACKING_PLAN("packingplans", "Packing plan"),
     PHYSICAL_PLAN("pplans", "Physical plan"),
@@ -115,6 +116,11 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return deleteNode(StateLocation.METRICSCACHE_LOCATION, topologyName);
+  }
+
+  @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
     return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
   }
@@ -179,6 +185,13 @@ public abstract class FileSystemStateManager implements IStateManager {
       WatchCallback watcher, String topologyName) {
     return getNodeData(watcher, StateLocation.TMASTER_LOCATION, topologyName,
         TopologyMaster.TMasterLocation.newBuilder());
+  }
+
+  @Override
+  public ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, StateLocation.METRICSCACHE_LOCATION, topologyName,
+        TopologyMaster.MetricsCacheLocation.newBuilder());
   }
 
   @Override
@@ -254,6 +267,7 @@ public abstract class FileSystemStateManager implements IStateManager {
       print("==> SchedulerLocation:\n%s",
           getSchedulerLocation(null, topologyName).get());
       print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
+      print("==> MetricsCacheLocation:\n%s", getMetricsCacheLocation(null, topologyName).get());
       print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
       print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
     } else {

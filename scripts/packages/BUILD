@@ -18,6 +18,7 @@ load("/tools/rules/heron_core", "heron_core_conf_files")
 load("/tools/rules/heron_core", "heron_core_lib_instance_files")
 load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
 load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
+load("/tools/rules/heron_core", "heron_core_lib_metricscachemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_packing_files")
 load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
 
@@ -67,6 +68,7 @@ pkg_tar(
         ":heron-core-lib-scheduler",
         ":heron-core-lib-packing",
         ":heron-core-lib-metricsmgr",
+        ":heron-core-lib-metricscachemgr",
         ":heron-core-lib-statemgr",
         ":heron-core-lib-instance",
     ],
@@ -94,6 +96,12 @@ pkg_tar(
     name = "heron-core-lib-metricsmgr",
     package_dir = "heron-core/lib/metricsmgr",
     files = heron_core_lib_metricsmgr_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-metricscachemgr",
+    package_dir = "heron-core/lib/metricscachemgr",
+    files = heron_core_lib_metricscachemgr_files(),
 )
 
 pkg_tar(
