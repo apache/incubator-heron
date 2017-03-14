@@ -17,7 +17,6 @@
 #include "config/topology-config-helper.h"
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
 #include "basics/basics.h"
 #include "config/operational-config-vars.h"
@@ -100,9 +99,7 @@ void TopologyConfigHelper::SetComponentParallelism(proto::api::Config* _config,
                                                    sp_int32 _parallelism) {
   proto::api::Config::KeyValue* kv = _config->add_kvs();
   kv->set_key(TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM);
-  std::ostringstream ostr;
-  ostr << _parallelism;
-  kv->set_value(ostr.str());
+  kv->set_value(std::to_string(_parallelism));
 }
 
 sp_string TopologyConfigHelper::GetWorkerChildOpts(const proto::api::Topology& _topology) {

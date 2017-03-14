@@ -21,7 +21,7 @@
 // Please see time-spent-metric.h for details
 //////////////////////////////////////////////////////////////////////////////
 #include "metrics/time-spent-metric.h"
-#include <sstream>
+#include <string>
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "metrics/imetric.h"
@@ -65,12 +65,11 @@ void TimeSpentMetric::GetAndReset(const sp_string& _prefix,
     total_time_msecs_ += duration_cast<milliseconds>(now - start_time_).count();
     start_time_ = now;
   }
-  std::ostringstream o;
-  o << total_time_msecs_;
+  std::string val = std::to_string(total_time_msecs_);
   total_time_msecs_ = 0;
   proto::system::MetricDatum* d = _message->add_metrics();
   d->set_name(_prefix);
-  d->set_value(o.str());
+  d->set_value(val);
 }
 }  // namespace common
 }  // namespace heron
