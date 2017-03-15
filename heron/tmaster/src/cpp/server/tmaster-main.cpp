@@ -26,12 +26,13 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 12) {
+  if (argc != 13) {
     std::cout << "Usage: " << argv[0] << " "
               << "<master-port> <controller-port> <stats-port> "
               << "<topology_name> <topology_id> <zk_hostportlist> "
               << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
-              << "<metrics_sinks_filename> <metrics-manager-port>" << std::endl;
+              << "<metrics_sinks_filename> <metrics-manager-port> "
+              << "<auto-restart_backpressure_sandbox_time_window>" << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
   }
@@ -51,6 +52,10 @@ int main(int argc, char* argv[]) {
   sp_string heron_internals_config_filename = argv[9];
   sp_string metrics_sinks_yaml = argv[10];
   sp_int32 metrics_manager_port = atoi(argv[11]);
+  // STREAMCOMP-1877 auto restart backpressure sandbox
+  // backpressue_window > 0: the time window size in minutes
+  // backpressue_window <= 0: disable the feature
+  sp_int32 backpressue_window = atoi(argv[12]);
 
   EventLoopImpl ss;
 
@@ -66,7 +71,7 @@ int main(int argc, char* argv[]) {
 
   heron::tmaster::TMaster tmaster(zkhostportlist, topology_name, topology_id, topdir, stmgrs,
                                   controller_port, master_port, stats_port, metrics_manager_port,
-                                  metrics_sinks_yaml, myhost, &ss);
+                                  metrics_sinks_yaml, myhost, &ss, backpressue_window);
   ss.loop();
   return 0;
 }

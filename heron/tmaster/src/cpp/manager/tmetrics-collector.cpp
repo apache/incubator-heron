@@ -47,12 +47,14 @@ namespace heron {
 namespace tmaster {
 
 TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
-                                     const std::string& metrics_sinks_yaml)
+                                     const std::string& metrics_sinks_yaml,
+                                     sp_int32 auto_restart_window)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),
       metrics_sinks_yaml_(metrics_sinks_yaml),
       tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
-      start_time_(time(NULL)) {
+      start_time_(time(NULL)),
+      auto_restart_window_(auto_restart_window) {
   interval_ = config::HeronInternalsConfigReader::Instance()
                   ->GetHeronTmasterMetricsCollectorPurgeIntervalSec();
   CHECK_EQ(max_interval_ % interval_, 0);
