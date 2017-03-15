@@ -74,15 +74,12 @@ class RuntimeStateHandler(BaseHandler):
     # Parse the response from tmaster.
     reg_response = tmaster_pb2.StmgrsRegistrationSummaryResponse()
     reg_response.ParseFromString(result.body)
-
     # Send response
-    registered, absent = [], []
+    ret = {}
     for stmgr in reg_response.registered_stmgrs:
-      registered.append(stmgr)
+      ret[stmgr] = True
     for stmgr in reg_response.absent_stmgrs:
-      absent.append(stmgr)
-    ret = {'registered_stmgrs': registered,
-           'absent_stmgrs': absent}
+      ret[stmgr] = False
     raise tornado.gen.Return(ret)
 
   @tornado.gen.coroutine
@@ -94,11 +91,12 @@ class RuntimeStateHandler(BaseHandler):
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
-      runtime_state = topology_info["runtimestate"]
+      runtime_state = topology_info["runtime_state"]
       topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
           cluster, role, environ, topology_name)
       reg_summary = yield tornado.gen.Task(self.getStmgrsRegSummary, topology.tmaster)
-      runtime_state["stmgrs_reg_summary"] = reg_summary
+      for stmgr, reg in reg_summary.iteritems():
+        runtime_state["stmgrs"].setdefault(stmgr, {})["is_registered"] = reg
       self.write_success_response(runtime_state)
     except Exception as e:
       Log.debug(traceback.format_exc())

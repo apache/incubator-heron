@@ -232,6 +232,11 @@ class Tracker(object):
       True if topology.tmaster else False
     runtime_state["has_scheduler_location"] = \
       True if topology.scheduler_location else False
+    # "stmgrs" listed runtime state for each stream manager
+    # however it is possible that physical plan is not complete
+    # yet and we do not know how many stmgrs there are. That said,
+    # we should not set any key below (stream manager name)
+    runtime_state["stmgrs"] = {}
     return runtime_state
 
   # pylint: disable=no-self-use
