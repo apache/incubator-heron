@@ -16,7 +16,7 @@
 
 #include "tmaster/src/cpp/manager/stats-interface.h"
 #include <iostream>
-#include <sstream>
+#include <string>
 #include "manager/tmaster.h"
 #include "manager/tmetrics-collector.h"
 #include "metrics/tmaster-metrics.h"
@@ -74,9 +74,7 @@ void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request) {
   CHECK(res->SerializeToString(&response_string));
   OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);
   response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream content_length;
-  content_length << response_string.size();
-  response->AddHeader("Content-Length", content_length.str());
+  response->AddHeader("Content-Length", std::to_string(response_string.size()));
   response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, response);
   delete res;
@@ -101,9 +99,7 @@ void StatsInterface::HandleExceptionRequest(IncomingHTTPRequest* _request) {
   CHECK(exception_response->SerializeToString(&response_string));
   OutgoingHTTPResponse* http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream length_str;
-  length_str << response_string.size();
-  http_response->AddHeader("Content-Length", length_str.str());
+  http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
   http_response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, http_response);
   delete exception_response;
@@ -127,9 +123,7 @@ void StatsInterface::HandleExceptionSummaryRequest(IncomingHTTPRequest* _request
   CHECK(exception_response->SerializeToString(&response_string));
   OutgoingHTTPResponse* http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream length_str;
-  length_str << response_string.size();
-  http_response->AddHeader("Content-Length", length_str.str());
+  http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
   http_response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, http_response);
   delete exception_response;
