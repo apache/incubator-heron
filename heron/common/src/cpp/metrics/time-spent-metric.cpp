@@ -65,11 +65,10 @@ void TimeSpentMetric::GetAndReset(const sp_string& _prefix,
     total_time_msecs_ += duration_cast<milliseconds>(now - start_time_).count();
     start_time_ = now;
   }
-  std::string val = std::to_string(total_time_msecs_);
-  total_time_msecs_ = 0;
   proto::system::MetricDatum* d = _message->add_metrics();
   d->set_name(_prefix);
-  d->set_value(val);
+  d->set_value(std::to_string(total_time_msecs_));
+  total_time_msecs_ = 0;
 }
 }  // namespace common
 }  // namespace heron
