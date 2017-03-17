@@ -18,8 +18,10 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
+#include "manager/tmaster.h"
 #include "metrics/tmaster-metrics.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -29,10 +31,12 @@
 #include "proto/metrics.pb.h"
 #include "proto/tmaster.pb.h"
 #include "proto/topology.pb.h"
+#include "proto/physical_plan.pb.h"
 #include "config/heron-internals-config-reader.h"
 
 namespace {
 typedef heron::common::TMasterMetrics TMasterMetrics;
+typedef heron::proto::system::PhysicalPlan PhysicalPlan;
 typedef heron::proto::tmaster::ExceptionLogRequest ExceptionLogRequest;
 typedef heron::proto::tmaster::ExceptionLogResponse ExceptionLogResponse;
 typedef heron::proto::tmaster::MetricRequest MetricRequest;
@@ -48,14 +52,14 @@ namespace tmaster {
 
 TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
                                      const std::string& metrics_sinks_yaml,
-                                     sp_int32 auto_restart_window, TMaster& tmaster)
+                                     sp_int32 auto_restart_window, TMaster* _tmaster)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),
       metrics_sinks_yaml_(metrics_sinks_yaml),
       tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
       start_time_(time(NULL)),
       auto_restart_window_(auto_restart_window),
-      tmaster_(tmaster) {
+      tmaster_(_tmaster) {
   interval_ = config::HeronInternalsConfigReader::Instance()
                   ->GetHeronTmasterMetricsCollectorPurgeIntervalSec();
   CHECK_EQ(max_interval_ % interval_, 0);
@@ -75,23 +79,28 @@ void TMetricsCollector::Purge(EventLoop::Status) {
   // STREAMCOMP-1877, share the same timer with Purge
   if (auto_restart_window_ > 0) {
     sp_int64 now = time(NULL);
-    std::set<sp_string> bad_sandbox;
+    std::set<sp_string> badSandbox;
     for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_stmgr.begin();
-        it!=last_timestamp_backpressure_stmgr.end(); it++) {
+        it != last_timestamp_backpressure_stmgr.end(); it++) {
       if (now-it->second > auto_restart_window_) {
-        bad_sandbox.insert(it->first);
+        badSandbox.insert(it->first);
       }
     }
     for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_instance.begin();
-        it!=last_timestamp_backpressure_instance.end(); it++) {
+        it != last_timestamp_backpressure_instance.end(); it++) {
       if (now-it->second > auto_restart_window_) {
-        bad_sandbox.insert(it->first);
+        badSandbox.insert(it->first);
       }
     }
-    for (std::set<sp_string>::iterator it = bad_sandbox.begin(); it!=bad_sandbox.end(); it++) {
-      tmaster_.killExecutor(*it);
+    for (std::set<sp_string>::iterator it = badSandbox.begin(); it != badSandbox.end(); it++) {
+      const PhysicalPlan* pplan = tmaster_->getPhysicalPlan();
+      for (int i=0; i < pplan->kStmgrsFieldNumber; i++) {
+        if (pplan->stmgrs(i).id().compare(*it) == 0) {
+          // TODO(huijun): send 'kill executor' cmd to heron-shell
+        }
+      }
 
-      // free bad_sandbox?
+      // free badSandbox?
       last_timestamp_backpressure_stmgr.erase(*it);
       last_timestamp_backpressure_instance.erase(*it);
     }
@@ -112,12 +121,13 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
   const TMasterMetrics::MetricAggregationType& type = tmetrics_info_->GetAggregationType(name);
   component_metrics->AddMetricForInstance(metrics_data.instance_id(), name, type,
                                           metrics_data.value());
-  // STREAMCOMP-1877
+
+  // STREAMCOMP-1877, record the last backpressure timestamp
   if (name.compare("__time_spent_back_pressure_by_compid") == 0) {
     sp_double64 val = stod(metrics_data.value());
-    if (val <= 0) { // backpressure gone
+    if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_stmgr.erase(metrics_data.instance_id());
-    } else { // there is backpressure
+    } else {  // there is backpressure
       if (last_timestamp_backpressure_stmgr.find(metrics_data.instance_id())
           == last_timestamp_backpressure_stmgr.end()) {
         last_timestamp_backpressure_stmgr.insert(
@@ -126,16 +136,16 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     }
   } else if (name.compare("__server/__time_spent_back_pressure_initiated") == 0) {
     sp_double64 val = stod(metrics_data.value());
-    if (val <= 0) { // backpressure gone
+    if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_instance.erase(metrics_data.instance_id());
-    } else { // there is backpressure
+    } else {  // there is backpressure
       if (last_timestamp_backpressure_instance.find(metrics_data.instance_id())
           == last_timestamp_backpressure_instance.end()) {
         last_timestamp_backpressure_instance.insert(
             std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
       }
     }
-  }
+  }  // STREAMCOMP-1877, end
 }
 
 void TMetricsCollector::AddExceptionsForComponent(const sp_string& component_name,

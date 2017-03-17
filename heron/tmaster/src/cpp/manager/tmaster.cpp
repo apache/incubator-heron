@@ -71,7 +71,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       new TMetricsCollector(config::HeronInternalsConfigReader::Instance()
                                     ->GetHeronTmasterMetricsCollectorMaximumIntervalMin() *
                                 60,
-                            eventLoop_, _metrics_sinks_yaml, auto_restart_window, *this);
+                            eventLoop_, _metrics_sinks_yaml, auto_restart_window, this);
 
   mMetricsMgrPort = metricsMgrPort;
 

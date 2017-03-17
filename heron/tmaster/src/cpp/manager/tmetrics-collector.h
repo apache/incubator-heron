@@ -40,7 +40,7 @@ class TMetricsCollector {
   // _max_interval is how far along we keep individual metric blobs.
   TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
                     const std::string& metrics_sinks_yaml, sp_int32 auto_restart_window,
-                    TMaster& tmaster);
+                    TMaster* tmaster);
 
   // Deletes all stored ComponentMetrics.
   virtual ~TMetricsCollector();
@@ -254,9 +254,11 @@ class TMetricsCollector {
   time_t start_time_;
   // STREAMCOMP-1877, feature switch [>0 enabled; <=0 disabled], in minutes
   sp_int32 auto_restart_window_;
+  // STREAMCOMP-1877, record the last backpressure timestamp
   std::map<sp_string, sp_int64> last_timestamp_backpressure_instance;
   std::map<sp_string, sp_int64> last_timestamp_backpressure_stmgr;
-  TMaster& tmaster_;
+  // STREAMCOMP-1877, reference to TMaster because of physical plan
+  TMaster* tmaster_;
 };
 }  // namespace tmaster
 }  // namespace heron

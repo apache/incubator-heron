@@ -70,10 +70,6 @@ class TMaster {
   // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
 
-  // STREAMCOMP-1877
-  // TODO(huijun): send 'kill sandbox' cmd to heron-shell
-  void killExecutor(sp_string stmgr_id);
-
  private:
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
