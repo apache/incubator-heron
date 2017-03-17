@@ -17,6 +17,7 @@
 import json
 import logging
 import os
+import signal
 import pkgutil
 import stat
 import subprocess
@@ -263,6 +264,22 @@ class FileDataHandler(tornado.web.RequestHandler):
     self.write(json.dumps(data))
     self.finish()
 
+class KillExecutorHandler(tornado.web.RequestHandler):
+  """
+  Responsible for killing heron-executor process.
+  """
+  @tornado.web.asynchronous
+  def post(self):
+    """ post method """
+    shared_secret = self.get_arguments('topology', '')
+    if (not shared_secret) or (shared_secret != options.secret):
+      self.write("Invalid secret")
+      self.set_status(403)
+      self.finish()
+      return
+    os.killpg(os.getppid(), signal.SIGTERM)
+    self.finish()
+
 class DownloadHandler(tornado.web.StaticFileHandler):
   """
   Responsible for downloading the files.
@@ -281,11 +298,13 @@ app = tornado.web.Application([
     (r"^/filedata/(.*)", FileDataHandler),
     (r"^/filestats/(.*)", FileStatsHandler),
     (r"^/download/(.*)", DownloadHandler, {"path":"."}),
+    (r"^/killexecutor/(.*)", KillExecutorHandler),
 ])
 
 
 if __name__ == '__main__':
   define("port", default=9999, help="Runs on the given port", type=int)
+  define("secret", help="Shared secret with TMaster", type=str)
   parse_command_line()
 
   logger = logging.getLogger(__file__)
