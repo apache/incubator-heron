@@ -271,9 +271,12 @@ class KillExecutorHandler(tornado.web.RequestHandler):
   @tornado.web.asynchronous
   def post(self):
     """ post method """
-    shared_secret = self.get_arguments('topology', '')
-    if (not shared_secret) or (shared_secret != options.secret):
-      self.write("Invalid secret")
+    if not options.secret:
+      self.set_status(404)
+      self.finish()
+      return
+    sharedSecret = self.get_arguments('topology', '')
+    if sharedSecret != options.secret:
       self.set_status(403)
       self.finish()
       return
@@ -304,7 +307,7 @@ app = tornado.web.Application([
 
 if __name__ == '__main__':
   define("port", default=9999, help="Runs on the given port", type=int)
-  define("secret", help="Shared secret with TMaster", type=str)
+  define("secret", default='', help="Shared secret with TMaster", type=str)
   parse_command_line()
 
   logger = logging.getLogger(__file__)
