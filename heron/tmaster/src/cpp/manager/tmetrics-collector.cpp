@@ -37,6 +37,7 @@
 namespace {
 typedef heron::common::TMasterMetrics TMasterMetrics;
 typedef heron::proto::system::PhysicalPlan PhysicalPlan;
+typedef heron::proto::system::StMgr StMgr;
 typedef heron::proto::tmaster::ExceptionLogRequest ExceptionLogRequest;
 typedef heron::proto::tmaster::ExceptionLogResponse ExceptionLogResponse;
 typedef heron::proto::tmaster::MetricRequest MetricRequest;
@@ -95,8 +96,23 @@ void TMetricsCollector::Purge(EventLoop::Status) {
     for (std::set<sp_string>::iterator it = badSandbox.begin(); it != badSandbox.end(); it++) {
       const PhysicalPlan* pplan = tmaster_->getPhysicalPlan();
       for (int i=0; i < pplan->kStmgrsFieldNumber; i++) {
-        if (pplan->stmgrs(i).id().compare(*it) == 0) {
-          // TODO(huijun): send 'kill executor' cmd to heron-shell
+        StMgr st = pplan->stmgrs(i);
+        if (st.id().compare(*it) == 0) {
+          // send 'kill executor' command to heron-shell
+          AsyncDNS dns(eventLoop_);
+          HTTPClient* client = new HTTPClient(eventLoop_, &dns);
+          HTTPKeyValuePairs kvs;
+          kvs.push_back(make_pair("secret", tmaster_->GetTopologyId()));
+          OutgoingHTTPRequest* request =
+              new OutgoingHTTPRequest(st.host_name(), st.shell_port(), "/killexecutor",
+                  BaseHTTPRequest::POST, kvs);
+          auto cb = [client](IncomingHTTPResponse* response) {
+            LOG(WARNING) << "Kill heron-executor : " << response->response_code();
+          };
+
+          if (client->SendRequest(request, std::move(cb)) != SP_OK) {
+            LOG(ERROR) << "Unable to send the request\n";
+          }
         }
       }
 
