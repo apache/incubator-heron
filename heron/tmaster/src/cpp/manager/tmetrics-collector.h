@@ -29,6 +29,9 @@
 
 namespace heron {
 namespace tmaster {
+
+class TMaster;
+
 // Helper class to manage aggregation and and serving of metrics. Metrics are logically stored as a
 // component_name -> {instance_id ->value}n .
 // TODO(kramasamy): Store metrics persistently to prevent against crashes.
@@ -36,7 +39,8 @@ class TMetricsCollector {
  public:
   // _max_interval is how far along we keep individual metric blobs.
   TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
-                    const std::string& metrics_sinks_yaml, sp_int32 auto_restart_window);
+                    const std::string& metrics_sinks_yaml, sp_int32 auto_restart_window,
+                    TMaster& tmaster);
 
   // Deletes all stored ComponentMetrics.
   virtual ~TMetricsCollector();
@@ -248,8 +252,11 @@ class TMetricsCollector {
   std::string metrics_sinks_yaml_;
   common::TMasterMetrics* tmetrics_info_;
   time_t start_time_;
-  // STREAMCOMP-1877
+  // STREAMCOMP-1877, feature switch [>0 enabled; <=0 disabled], in minutes
   sp_int32 auto_restart_window_;
+  std::map<sp_string, sp_int64> last_timestamp_backpressure_instance;
+  std::map<sp_string, sp_int64> last_timestamp_backpressure_stmgr;
+  TMaster& tmaster_;
 };
 }  // namespace tmaster
 }  // namespace heron

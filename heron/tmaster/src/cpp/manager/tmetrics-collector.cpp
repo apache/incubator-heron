@@ -48,13 +48,14 @@ namespace tmaster {
 
 TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
                                      const std::string& metrics_sinks_yaml,
-                                     sp_int32 auto_restart_window)
+                                     sp_int32 auto_restart_window, TMaster& tmaster)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),
       metrics_sinks_yaml_(metrics_sinks_yaml),
       tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
       start_time_(time(NULL)),
-      auto_restart_window_(auto_restart_window) {
+      auto_restart_window_(auto_restart_window),
+      tmaster_(tmaster) {
   interval_ = config::HeronInternalsConfigReader::Instance()
                   ->GetHeronTmasterMetricsCollectorPurgeIntervalSec();
   CHECK_EQ(max_interval_ % interval_, 0);
@@ -71,6 +72,31 @@ TMetricsCollector::~TMetricsCollector() {
 }
 
 void TMetricsCollector::Purge(EventLoop::Status) {
+  // STREAMCOMP-1877, share the same timer with Purge
+  if (auto_restart_window_ > 0) {
+    sp_int64 now = time(NULL);
+    std::set<sp_string> bad_sandbox;
+    for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_stmgr.begin();
+        it!=last_timestamp_backpressure_stmgr.end(); it++) {
+      if (now-it->second > auto_restart_window_) {
+        bad_sandbox.insert(it->first);
+      }
+    }
+    for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_instance.begin();
+        it!=last_timestamp_backpressure_instance.end(); it++) {
+      if (now-it->second > auto_restart_window_) {
+        bad_sandbox.insert(it->first);
+      }
+    }
+    for (std::set<sp_string>::iterator it = bad_sandbox.begin(); it!=bad_sandbox.end(); it++) {
+      tmaster_.killExecutor(*it);
+
+      // free bad_sandbox?
+      last_timestamp_backpressure_stmgr.erase(*it);
+      last_timestamp_backpressure_instance.erase(*it);
+    }
+  }  // STREAMCOMP-1877, end
+
   for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->Purge();
   }
@@ -86,6 +112,30 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
   const TMasterMetrics::MetricAggregationType& type = tmetrics_info_->GetAggregationType(name);
   component_metrics->AddMetricForInstance(metrics_data.instance_id(), name, type,
                                           metrics_data.value());
+  // STREAMCOMP-1877
+  if (name.compare("__time_spent_back_pressure_by_compid") == 0) {
+    sp_double64 val = stod(metrics_data.value());
+    if (val <= 0) { // backpressure gone
+      last_timestamp_backpressure_stmgr.erase(metrics_data.instance_id());
+    } else { // there is backpressure
+      if (last_timestamp_backpressure_stmgr.find(metrics_data.instance_id())
+          == last_timestamp_backpressure_stmgr.end()) {
+        last_timestamp_backpressure_stmgr.insert(
+            std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
+      }
+    }
+  } else if (name.compare("__server/__time_spent_back_pressure_initiated") == 0) {
+    sp_double64 val = stod(metrics_data.value());
+    if (val <= 0) { // backpressure gone
+      last_timestamp_backpressure_instance.erase(metrics_data.instance_id());
+    } else { // there is backpressure
+      if (last_timestamp_backpressure_instance.find(metrics_data.instance_id())
+          == last_timestamp_backpressure_instance.end()) {
+        last_timestamp_backpressure_instance.insert(
+            std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
+      }
+    }
+  }
 }
 
 void TMetricsCollector::AddExceptionsForComponent(const sp_string& component_name,
