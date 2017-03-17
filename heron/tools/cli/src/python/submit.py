@@ -55,6 +55,7 @@ def create_parser(subparsers):
   cli_args.add_system_property(parser)
   cli_args.add_dry_run(parser)
   cli_args.add_verbose(parser)
+  cli_args.add_auto_heal(parser)
 
   parser.set_defaults(subcommand='submit')
   return parser
@@ -99,6 +100,11 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
 
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
+
+  if cl_args["auto_heal"]:
+    args += ["--auto_heal", cl_args["auto_heal"]]
+  else:
+    args += ["--auto_heal", 0]
 
   if cl_args["dry_run"]:
     args.append("--dry_run")

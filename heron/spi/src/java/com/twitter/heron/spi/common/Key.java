@@ -53,6 +53,7 @@ public enum Key {
   DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
   VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),
   CONFIG_PROPERTY          ("heron.config.property",            Type.STRING),
+  AUTO_HEAL                ("heron.config.auto_heal",           Type.INTEGER),
 
   //keys for release/build information
   BUILD_VERSION            ("heron.build.version",   Type.STRING),

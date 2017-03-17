@@ -190,3 +190,13 @@ def add_dry_run(parser):
            'Ignored when dry-run mode is not enabled')
 
   return parser
+
+def add_auto_heal(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--auto-heal',
+      help='Auto restart backpressure container, in minutes. set=0 to disable.')
+  return parser
