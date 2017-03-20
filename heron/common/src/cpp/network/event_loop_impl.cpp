@@ -302,7 +302,7 @@ void EventLoopImpl::handleInstantCallback(Status) {
   mListInstantCallbacks.erase(mListInstantCallbacks.begin(), ++enditr);
 }
 
-void EventLoopImpl::handleReadCallback(sp_int16 event, sp_int32 fd) {
+void EventLoopImpl::handleReadCallback(sp_int32 fd, sp_int16 event) {
   if (mReadEvents.find(fd) == mReadEvents.end()) {
     // This is possible when UnRegisterEvent has been called before we handle this event
     // Just ignore this event.
@@ -324,7 +324,7 @@ void EventLoopImpl::handleReadCallback(sp_int16 event, sp_int32 fd) {
   }
 }
 
-void EventLoopImpl::handleWriteCallback(sp_int16 event, sp_int32 fd) {
+void EventLoopImpl::handleWriteCallback(sp_int32 fd, sp_int16 event) {
   if (mWriteEvents.find(fd) == mWriteEvents.end()) {
     // This is possible when UnRegisterEvent has been called before we handle this event
     // Just ignore this event.

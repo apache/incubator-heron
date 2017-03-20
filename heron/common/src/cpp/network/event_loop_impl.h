@@ -70,10 +70,10 @@ class EventLoopImpl : public EventLoop {
   void handleInstantCallback(Status status);
 
   // libevent callback on read events.
-  void handleReadCallback(sp_int16 event, sp_int32 fd);
+  void handleReadCallback(sp_int32 fd, sp_int16 event);
 
   // libevent callback on write events.
-  void handleWriteCallback(sp_int16 event, sp_int32 fd);
+  void handleWriteCallback(sp_int32 fd, sp_int16 event);
 
   // libevent callback on timer events.
   void handleTimerCallback(sp_int16 event, sp_int64 timerid);
