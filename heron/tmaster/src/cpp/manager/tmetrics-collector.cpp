@@ -77,7 +77,7 @@ TMetricsCollector::~TMetricsCollector() {
 }
 
 void TMetricsCollector::Purge(EventLoop::Status) {
-  // STREAMCOMP-1877, share the same timer with Purge
+  // auto restart backpressure container feature: share the same timer with Purge
   if (auto_restart_window_ > 0) {
     sp_int64 now = time(NULL);
     std::set<sp_string> badSandbox;
@@ -120,7 +120,7 @@ void TMetricsCollector::Purge(EventLoop::Status) {
       last_timestamp_backpressure_stmgr.erase(*it);
       last_timestamp_backpressure_instance.erase(*it);
     }
-  }  // STREAMCOMP-1877, end
+  }  // auto restart backpressure container feature: end
 
   for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
     iter->second->Purge();
@@ -138,7 +138,7 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
   component_metrics->AddMetricForInstance(metrics_data.instance_id(), name, type,
                                           metrics_data.value());
 
-  // STREAMCOMP-1877, record the last backpressure timestamp
+  // auto restart backpressure container feature: record the last backpressure timestamp
   if (name.compare("__time_spent_back_pressure_by_compid") == 0) {
     sp_double64 val = stod(metrics_data.value());
     if (val <= 0) {  // backpressure gone
@@ -161,7 +161,7 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
             std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
       }
     }
-  }  // STREAMCOMP-1877, end
+  }  // auto restart backpressure container feature: end
 }
 
 void TMetricsCollector::AddExceptionsForComponent(const sp_string& component_name,

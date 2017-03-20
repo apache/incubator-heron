@@ -252,12 +252,13 @@ class TMetricsCollector {
   std::string metrics_sinks_yaml_;
   common::TMasterMetrics* tmetrics_info_;
   time_t start_time_;
-  // STREAMCOMP-1877, feature switch [>0 enabled; <=0 disabled], in minutes
+
+  // auto restart backpressure container feature switch [>0 enabled; <=0 disabled], in minutes
   sp_int32 auto_restart_window_;
-  // STREAMCOMP-1877, record the last backpressure timestamp
+  // record the last backpressure timestamp
   std::map<sp_string, sp_int64> last_timestamp_backpressure_instance;
   std::map<sp_string, sp_int64> last_timestamp_backpressure_stmgr;
-  // STREAMCOMP-1877, reference to TMaster because of physical plan
+  // reference to TMaster because of physical plan
   TMaster* tmaster_;
 };
 }  // namespace tmaster

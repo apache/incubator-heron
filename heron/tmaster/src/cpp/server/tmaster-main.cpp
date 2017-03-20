@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   sp_string heron_internals_config_filename = argv[9];
   sp_string metrics_sinks_yaml = argv[10];
   sp_int32 metrics_manager_port = atoi(argv[11]);
-  // STREAMCOMP-1877 auto restart backpressure sandbox
+  // feature: auto restart backpressure sandbox
   // backpressue_window > 0: the time window size in minutes
   // backpressue_window <= 0: disable the feature
   sp_int32 backpressue_window = atoi(argv[12]);
