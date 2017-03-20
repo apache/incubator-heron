@@ -70,13 +70,13 @@ class EventLoopImpl : public EventLoop {
   void handleInstantCallback(Status status);
 
   // libevent callback on read events.
-  void handleReadCallback(sp_int32 fd, sp_int16 event);
+  void handleReadCallback(sp_int16 event, sp_int32 fd);
 
   // libevent callback on write events.
-  void handleWriteCallback(sp_int32 fd, sp_int16 event);
+  void handleWriteCallback(sp_int16 event, sp_int32 fd);
 
   // libevent callback on timer events.
-  void handleTimerCallback(sp_int64 timerid, sp_int16 event);
+  void handleTimerCallback(sp_int16 event, sp_int64 timerid);
 
   // The underlying dispatcher that we wrap around.
   struct event_base* mDispatcher;

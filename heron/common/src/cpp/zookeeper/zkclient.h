@@ -139,7 +139,7 @@ class ZKClient {
   // This completion function runs in the context of the
   // zk completion thread. It basically appends to
   // zkaction_responses_ and calls SignalMainThread
-  void ZkActionCb(VCallback<sp_int32> cb, sp_int32 rc);
+  void ZkActionCb(sp_int32 rc, VCallback<sp_int32> cb);
 
   // This is the watcher function that gets called
   // when a node changes
