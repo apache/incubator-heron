@@ -533,18 +533,12 @@ void TMetricsCollector::Metric::GetMetrics(bool minutely, sp_int64 start_time, s
         val->mutable_interval()->set_end(bucket->end_time_);
         sp_double64 result = bucket->aggregate();
         if (metric_type_ == common::TMasterMetrics::SUM) {
-          std::ostringstream str;
-          str << result;
-          val->set_value(str.str());
+          val->set_value(std::to_string(result));
         } else if (metric_type_ == common::TMasterMetrics::AVG) {
           sp_double64 avg = result / bucket->count();
-          std::ostringstream str;
-          str << avg;
-          val->set_value(str.str());
+          val->set_value(std::to_string(avg));
         } else if (metric_type_ == common::TMasterMetrics::LAST) {
-          std::ostringstream str;
-          str << result;
-          val->set_value(str.str());
+          val->set_value(std::to_string(result));
         } else {
           LOG(FATAL) << "Unknown metric type " << metric_type_;
         }
@@ -591,9 +585,7 @@ void TMetricsCollector::Metric::GetMetrics(bool minutely, sp_int64 start_time, s
         LOG(FATAL) << "Uknown metric type " << metric_type_;
       }
     }
-    std::ostringstream str;
-    str << result;
-    _response->set_value(str.str());
+    _response->set_value(std::to_string(result));
   }
 }
 }  // namespace tmaster
