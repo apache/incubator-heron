@@ -38,7 +38,7 @@ struct ZKClientGetChildrenStructure {
   CallBack1<sp_int32>* cb_;
 };
 
-void RunUserCb(VCallback<sp_int32> cb, sp_int32 rc) { cb(rc); }
+void RunUserCb(sp_int32 rc, VCallback<sp_int32> cb) { cb(rc); }
 
 void RunWatcherCb(VCallback<> cb) { cb(); }
 
@@ -385,8 +385,8 @@ void ZKClient::OnZkActionResponse(EventLoop::Status _status) {
   return;
 }
 
-void ZKClient::ZkActionCb(VCallback<sp_int32> cb, sp_int32 rc) {
-  zkaction_responses_->enqueue(CreateCallback(&RunUserCb, std::move(cb), rc));
+void ZKClient::ZkActionCb(sp_int32 rc, VCallback<sp_int32> cb) {
+  zkaction_responses_->enqueue(CreateCallback(&RunUserCb, rc, std::move(cb)));
   SignalMainThread();
 }
 

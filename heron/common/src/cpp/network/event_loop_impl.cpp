@@ -346,7 +346,7 @@ void EventLoopImpl::handleWriteCallback(sp_int32 fd, sp_int16 event) {
   }
 }
 
-void EventLoopImpl::handleTimerCallback(sp_int64 timerId, sp_int16 event) {
+void EventLoopImpl::handleTimerCallback(sp_int16 event, sp_int64 timerId) {
   if (mTimerEvents.find(timerId) == mTimerEvents.end()) {
     // This is possible when unRegisterTimer has been called before we handle this timer
     // Just ignore this event.
