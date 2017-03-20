@@ -166,7 +166,7 @@ public class SchedulerUtilsTest {
     String[] expectedArgs =
         {"--cluster", null, "--role", null,
             "--environment", null, "--topology_name", null,
-            "--topology_bin", null, "--http_port", "1"};
+            "--topology_bin", null, "--http_port", "1", "--auto_heal", null};
     Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
         Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
   }
