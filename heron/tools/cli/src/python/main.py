@@ -23,7 +23,6 @@ import time
 import traceback
 
 import heron.common.src.python.utils.log as log
-import heron.tools.common.src.python.utils.heronparser as hrc_parse
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.help as cli_help
 import heron.tools.cli.src.python.activate as activate
@@ -71,12 +70,11 @@ def create_parser():
   Main parser
   :return:
   '''
-  parser = hrc_parse.HeronArgumentParser(
+  parser = argparse.ArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
       formatter_class=config.SubcommandHelpFormatter,
-      add_help=True,
-      fromfile_prefix_chars='@')
+      add_help=True)
 
   subparsers = parser.add_subparsers(
       title="Available commands",
