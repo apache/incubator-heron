@@ -191,7 +191,7 @@ class HeronExecutorTest(unittest.TestCase):
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
-    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
+    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport 0
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):
