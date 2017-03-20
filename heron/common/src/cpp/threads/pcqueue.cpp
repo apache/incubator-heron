@@ -22,14 +22,16 @@
 #include "threads/pcqueue.h"
 #include <vector>
 
-void PCQueue::enqueue(void* _item) {
+template <typename T>
+void PCQueue<T>::enqueue(T _item) {
   std::unique_lock<std::mutex> m(mutex_);
   queue_.push(_item);
 
   cond_.notify_one();
 }
 
-void PCQueue::enqueue_all(void* _item, sp_int32 _ntimes) {
+template <typename T>
+void PCQueue<T>::enqueue_all(T _item, sp_int32 _ntimes) {
   std::unique_lock<std::mutex> m(mutex_);
 
   for (sp_int32 i = 0; i < _ntimes; i++) {
@@ -39,34 +41,37 @@ void PCQueue::enqueue_all(void* _item, sp_int32 _ntimes) {
   cond_.notify_one();
 }
 
-void* PCQueue::dequeue() {
+template <typename T>
+T PCQueue<T>::dequeue() {
   std::unique_lock<std::mutex> m(mutex_);
 
   while (queue_.empty()) cond_.wait(m);
 
-  void* item = queue_.front();
+  T item = queue_.front();
   queue_.pop();
   return item;
 }
 
-void* PCQueue::trydequeue(bool& _dequeued) {
+template <typename T>
+T PCQueue<T>::trydequeue(bool& _dequeued) {
   std::unique_lock<std::mutex> m(mutex_);
   if (queue_.empty()) {
     _dequeued = false;
     return NULL;
   }
-  void* item = queue_.front();
+  T item = queue_.front();
   queue_.pop();
   _dequeued = true;
   return item;
 }
 
-sp_uint32 PCQueue::trydequeuen(sp_uint32 _ntodequeue, std::vector<void*>& _retval) {
+template <typename T>
+sp_uint32 PCQueue<T>::trydequeuen(sp_uint32 _ntodequeue, std::vector<T>& _retval) {
   std::unique_lock<std::mutex> m(mutex_);
 
   sp_uint32 dequeued = 0;
   while (!queue_.empty() && dequeued < _ntodequeue) {
-    void* item = queue_.front();
+    T item = queue_.front();
     queue_.pop();
     _retval.push_back(item);
     dequeued++;
@@ -74,7 +79,8 @@ sp_uint32 PCQueue::trydequeuen(sp_uint32 _ntodequeue, std::vector<void*>& _retva
   return dequeued;
 }
 
-sp_int32 PCQueue::size(void) {
+template <typename T>
+sp_int32 PCQueue<T>::size(void) {
   std::unique_lock<std::mutex> m(mutex_);
   sp_int32 retval = queue_.size();
   return retval;

@@ -159,7 +159,7 @@ class ZKClient {
   // zk callbacks are all executed in the context of a zk thread.
   // These pipers are how they communicate it accross to our thread
   sp_int32 pipers_[2];
-  PCQueue* zkaction_responses_;
+  PCQueue<CallBack*>* zkaction_responses_;
   // A callback to notify the clients of this class about global session events.
   VCallback<ZkWatchEvent> client_global_watcher_cb_;
 };

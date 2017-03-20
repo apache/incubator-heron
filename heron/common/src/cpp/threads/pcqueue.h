@@ -29,6 +29,7 @@
 #include <condition_variable>
 #include "basics/sptypes.h"
 
+template <typename T>
 class PCQueue {
  public:
   PCQueue() {}
@@ -37,17 +38,17 @@ class PCQueue {
   PCQueue(const PCQueue& pcqueue) = delete;
   PCQueue& operator=(const PCQueue& pcqueue) = delete;
 
-  void enqueue(void* _item);
-  void enqueue_all(void* _item, sp_int32 _ntimes);
+  void enqueue(T _item);
+  void enqueue_all(T _item, sp_int32 _ntimes);
 
-  void* dequeue(void);
-  void* trydequeue(bool&);
-  sp_uint32 trydequeuen(sp_uint32 _n, std::vector<void*>& _queue);
+  T dequeue(void);
+  T trydequeue(bool&);
+  sp_uint32 trydequeuen(sp_uint32 _n, std::vector<T>& _queue);
 
   sp_int32 size(void);
 
  protected:
-  std::queue<void*> queue_;
+  std::queue<T> queue_;
 
   std::condition_variable cond_;
   std::mutex mutex_;
