@@ -567,8 +567,10 @@ class HeronExecutor(object):
     retval[self.heron_shell_ids[self.shard]] = [
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
-        '--log_file_prefix=%s/heron-shell.log' % self.log_dir,
-        '--secret=%s' % self.topology_id]
+        '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
+
+    if self.auto_restart_backpressure_sandbox_time_window > 0:
+      retval[self.heron_shell_ids[self.shard]].append('--secret=%s' % self.topology_id)
 
     return retval
 

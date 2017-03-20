@@ -198,5 +198,6 @@ def add_auto_heal(parser):
   '''
   parser.add_argument(
       '--auto-heal',
+      type=int,
       help='Auto restart backpressure container, in minutes. set=0 to disable.')
   return parser
