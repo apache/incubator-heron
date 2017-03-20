@@ -104,7 +104,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   if cl_args["auto_heal"]:
     args += ["--auto_heal", cl_args["auto_heal"]]
   else:
-    args += ["--auto_heal", 0]
+    args += ["--auto_heal", "0"]
 
   if cl_args["dry_run"]:
     args.append("--dry_run")
