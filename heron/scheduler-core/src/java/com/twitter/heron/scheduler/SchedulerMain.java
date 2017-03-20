@@ -148,6 +148,11 @@ public class SchedulerMain {
         .longOpt("verbose")
         .build();
 
+    Option autoHeal = Option.builder("a")
+        .desc("Auto restart backpressure container")
+        .longOpt("auto_heal")
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -156,6 +161,7 @@ public class SchedulerMain {
     options.addOption(schedulerHTTPPort);
     options.addOption(property);
     options.addOption(verbose);
+    options.addOption(autoHeal);
 
     return options;
   }

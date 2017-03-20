@@ -54,8 +54,10 @@ public class HeronExecutorTaskTest {
     Mockito.doReturn(testTopology).when(spyTask).getTopology("file");
     String[] command = spyTask.getExecutorCommand();
 
-    // only two configs; state manager root and url should be null.
-    int nullCounter = 2;
+    // only three configs;
+    // state manager root and url should be null.
+    // auto-heal is null
+    int nullCounter = 3;
     for (String subCommand : command) {
       if (subCommand == null) {
         nullCounter--;

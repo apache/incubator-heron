@@ -116,6 +116,8 @@ public final class SchedulerUtils {
     commands.add(Context.topologyBinaryFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
+    commands.add("--auto_heal");
+    commands.add(Context.autoRestartBackpressureContainerTimeWindow(config));
 
     return commands.toArray(new String[0]);
   }
