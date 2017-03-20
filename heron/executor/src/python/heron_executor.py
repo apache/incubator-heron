@@ -53,7 +53,8 @@ def print_usage():
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
-      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>")
+      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
+      " <auto_restart_backpressure_sandbox_time_window>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -186,6 +187,8 @@ class HeronExecutor(object):
     self.scheduler_classpath = parsed_args.scheduler_classpath
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
+    self.auto_restart_backpressure_sandbox_time_window =\
+        parsed_args.auto_restart_backpressure_sandbox_time_window
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -249,6 +252,7 @@ class HeronExecutor(object):
     parser.add_argument("metricscachemgr_classpath")
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
+    parser.add_argument("auto_restart_backpressure_sandbox_time_window")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -393,7 +397,8 @@ class HeronExecutor(object):
         ','.join(self.stmgr_ids.values()),
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
-        self.metricsmgr_port]
+        self.metricsmgr_port,
+        self.auto_restart_backpressure_sandbox_time_window]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()

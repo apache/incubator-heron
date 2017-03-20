@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
               << "<topology_name> <topology_id> <zk_hostportlist> "
               << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
               << "<metrics_sinks_filename> <metrics-manager-port> "
-              << "<auto-restart_backpressure_sandbox_time_window>" << std::endl;
+              << "<auto_restart_backpressure_sandbox_time_window>" << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
   }

@@ -240,6 +240,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.METRICSCACHEMGR_CLASSPATH,
         Context.metricsCacheManagerClassPath(config));
 
+    auroraProperties.put(AuroraField.AUTO_HEAL_TIME_WINDOW,
+        Context.autoRestartBackpressureContainerTimeWindow(config));
+
     return auroraProperties;
   }
 }

@@ -98,7 +98,7 @@ public class SubmitterMain {
                                              Boolean dryRun,
                                              DryRunFormatType dryRunFormat,
                                              Boolean verbose,
-                                             Integer autoHealMinutes) {
+                                             String autoHealMinutes) {
     return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
@@ -267,7 +267,7 @@ public class SubmitterMain {
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyBinaryFile = cmd.getOptionValue("topology_bin");
-    Integer autoHealMinutes = Integer.valueOf(cmd.getOptionValue("auto_heal"));
+    String autoHealMinutes = cmd.getOptionValue("auto_heal");
 
     Boolean dryRun = false;
     if (cmd.hasOption("u")) {

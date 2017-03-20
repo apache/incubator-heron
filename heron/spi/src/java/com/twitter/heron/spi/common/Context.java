@@ -278,4 +278,9 @@ public class Context {
   public static String pythonInstanceBinary(Config cfg) {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
   }
+
+  public static String autoRestartBackpressureContainerTimeWindow(Config cfg) {
+    return cfg.getStringValue(Key.AUTO_HEAL);
+  }
+
 }

@@ -239,6 +239,7 @@ public final class SchedulerUtils {
     commands.add(Context.metricsCacheManagerClassPath(config));
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
+    commands.add(Context.autoRestartBackpressureContainerTimeWindow(config));
 
     return commands.toArray(new String[commands.size()]);
   }
