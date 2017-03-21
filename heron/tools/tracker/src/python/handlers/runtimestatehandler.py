@@ -31,9 +31,23 @@ class RuntimeStateHandler(BaseHandler):
    - topology (required) name of the requested topology
 
   The response JSON is a dictionary with all the
-  information of runtime state of the topology.
-  """
+  runtime information of a topology. Static properties
+  is availble from /topologies/metadata.
 
+  Example JSON response:
+    {
+      has_tmaster_location: true,
+      stmgrs_reg_summary: {
+        registered_stmgrs: [
+          "stmgr-1",
+          "stmgr-2"
+        ],
+        absent_stmgrs: [ ]
+      },
+      has_scheduler_location: true,
+      has_physical_plan: true
+    }
+  """
   def initialize(self, tracker):
     """ initialize """
     self.tracker = tracker
@@ -51,7 +65,6 @@ class RuntimeStateHandler(BaseHandler):
     port = str(tmaster.stats_port)
     host = tmaster.host
     url = "http://{0}:{1}/stmgrsregistrationsummary".format(host, port)
-    Log.debug("Creating request object.")
     request = tornado.httpclient.HTTPRequest(url,
                                              body=request_str,
                                              method='POST',

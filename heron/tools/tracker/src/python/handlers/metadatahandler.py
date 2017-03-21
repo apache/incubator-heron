@@ -30,7 +30,22 @@ class MetaDataHandler(BaseHandler):
    - topology (required) name of the requested topology
 
   The response JSON is a dictionary with all the
-  information of execution state of the topology.
+  static properties of a topology. Runtime information
+  is available from /topologies/runtimestate.
+
+  Example JSON response:
+    {
+      release_version: "foo/bar",
+      cluster: "local",
+      release_tag: "",
+      environ: "default",
+      submission_user: "foo",
+      release_username: "foo",
+      submission_time: 1489523952,
+      viz: "",
+      role: "foo",
+      jobname: "EX"
+    }
   """
 
   def initialize(self, tracker):
@@ -49,6 +64,7 @@ class MetaDataHandler(BaseHandler):
       metadata = topology_info["metadata"]
       self.write_success_response(metadata)
     except Exception as e:
+      Log.error("Exception when handling GET request '/topologies/metadata'")
       Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
