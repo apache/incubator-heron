@@ -102,7 +102,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
     args.append("--verbose")
 
   if cl_args["auto_heal"]:
-    args += ["--auto_heal", cl_args["auto_heal"]]
+    args += ["--auto_heal", str(cl_args["auto_heal"])]
   else:
     args += ["--auto_heal", "0"]
 
