@@ -151,6 +151,7 @@ public class SchedulerMain {
     Option autoHeal = Option.builder("a")
         .desc("Auto restart backpressure container")
         .longOpt("auto_heal")
+        .hasArgs()
         .build();
 
     options.addOption(cluster);
