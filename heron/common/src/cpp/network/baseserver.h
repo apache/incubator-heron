@@ -53,7 +53,6 @@ struct hash<BaseConnection*> {
 }
 
 class PCThread_Group;
-class PCQueue;
 
 class BaseServer {
  public:
