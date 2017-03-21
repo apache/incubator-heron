@@ -160,9 +160,7 @@ void StatsInterface::HandleStmgrsRegistrationSummaryRequest(IncomingHTTPRequest*
   CHECK(stmgrs_reg_summary_response->SerializeToString(&response_string));
   auto http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream length_str;
-  length_str << response_string.size();
-  http_response->AddHeader("Content-Length", std::string(length_str));
+  http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
   http_response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, http_response);
   delete stmgrs_reg_summary_response;
