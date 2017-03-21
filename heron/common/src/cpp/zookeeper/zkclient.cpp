@@ -136,7 +136,7 @@ ZKClient::ZKClient(const std::string& hostportlist, EventLoop* eventLoop,
 }
 
 void ZKClient::Init() {
-  zkaction_responses_ = new PCQueue();
+  zkaction_responses_ = new PCQueue<CallBack*>();
   auto zkaction_response_cb = [this](EventLoop::Status status) {
     this->OnZkActionResponse(status);
   };
@@ -365,7 +365,7 @@ void ZKClient::OnZkActionResponse(EventLoop::Status _status) {
     ssize_t readcount = read(pipers_[0], buf, 1);
     if (readcount == 1) {
       bool dequeued = false;
-      CallBack* cb = reinterpret_cast<CallBack*>(zkaction_responses_->trydequeue(dequeued));
+      CallBack* cb = zkaction_responses_->trydequeue(dequeued);
       if (cb) {
         cb->Run();
       }
