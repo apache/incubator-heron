@@ -12,7 +12,6 @@ cc_library(
         "randutils.cpp",
         "ridgen.cpp",
         "sockutils.cpp",
-        "sptime.cpp",
         "strutils.cpp",
 
         "callback.h",
@@ -32,7 +31,6 @@ cc_library(
         "sphash.h",
         "sprcodes.h",
         "sptest.h",
-        "sptime.h",
         "sptypes.h",
         "strutils.h",
     ],
