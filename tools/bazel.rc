@@ -15,6 +15,9 @@ build:centos --workspace_status_command scripts/release/status.sh
 
 # For Mac
 # To use it: bazel build --config=darwin
+build:darwin --ignore_unsupported_sandboxing
+build:darwin --genrule_strategy=standalone
+build:darwin --spawn_strategy=standalone
 build:darwin --python2_path /usr/bin/python2.7
 build:darwin --java_toolchain=//tools/java:heron_java_toolchain
 build:darwin --experimental_action_listener=tools/cpp:compile_cpp

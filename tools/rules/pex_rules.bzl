@@ -237,6 +237,7 @@ pex_binary = rule(
             default = Label("//third_party/pex:_pex"),
             allow_files = False,
             executable = True,
+            cfg = "host",
         ),
     },
 )
@@ -249,6 +250,7 @@ pex_test = rule(
             default = Label("//third_party/pex:_pex"),
             allow_files = False,
             executable = True,
+            cfg = "host",
         ),
     },
     test = True,

@@ -46,6 +46,7 @@ jarjar_binary = rule(
             default = Label("//third_party/java/jarjar:jarjar_bin"),
             allow_files = True,
             executable = True,
+            cfg = "host",
         ),
     },
     outputs = {

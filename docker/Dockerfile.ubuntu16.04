@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM ubuntu
-ENV bazelVersion 0.2.3
+ENV bazelVersion 0.4.4
 
 RUN apt-get update && apt-get -y install \
       automake \
