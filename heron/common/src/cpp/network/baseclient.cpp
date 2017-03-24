@@ -18,6 +18,7 @@
 // Implements the BaseClient class. See baseclient.h for details on the API
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <netdb.h>
 #include "network/baseclient.h"
 #include "glog/logging.h"
 #include "basics/basics.h"
@@ -72,7 +73,8 @@ void BaseClient::Start_Base() {
     struct sockaddr_in t;
     int error = IpUtils::getAddressInfo(t, options_.get_host().c_str(), PF_INET, SOCK_STREAM);
     if (error) {
-      LOG(ERROR) << "getaddrinfo failed in Client " << errno << "\n";
+      LOG(ERROR) << "getaddrinfo failed in Client " << options_.get_host().c_str()
+          << ": "<< gai_strerror(error) << "\n";
       close(fd);
       delete endpoint;
       HandleConnect_Base(CONNECT_ERROR);
