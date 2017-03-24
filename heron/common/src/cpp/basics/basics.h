@@ -36,7 +36,6 @@
 #include "basics/strutils.h"
 #include "basics/randutils.h"
 #include "basics/sockutils.h"
-#include "basics/sptime.h"
 #include "basics/spconsts.h"
 #include "basics/ridgen.h"
 #include "basics/sphash.h"
