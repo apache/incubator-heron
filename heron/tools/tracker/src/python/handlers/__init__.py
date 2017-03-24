@@ -22,6 +22,5 @@ from pidhandler import PidHandler
 from runtimestatehandler import RuntimeStateHandler
 from schedulerlocationhandler import SchedulerLocationHandler
 from stateshandler import StatesHandler
-from stmgrsregsummaryhandler import StmgrsRegSummaryHandler
 from topologieshandler import TopologiesHandler
 from topologyhandler import TopologyHandler
