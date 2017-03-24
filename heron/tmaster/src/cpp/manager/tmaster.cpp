@@ -364,7 +364,10 @@ proto::system::Status* TMaster::RegisterStMgr(
     // First check to see if that other guy has timed out
     if (!stmgrs_[stmgr_id]->TimedOut()) {
       // we reject the new guy
-      LOG(ERROR) << "Another stmgr exists with the same id and it hasn't timed out" << std::endl;
+      LOG(ERROR) << "Another stmgr exists at "
+                 << stmgrs_[stmgr_id]->get_connection()->getIPAddress() << ":"
+                 << stmgrs_[stmgr_id]->get_connection()->getPort()
+                 << " with the same id and it hasn't timed out";
       proto::system::Status* status = new proto::system::Status();
       status->set_status(proto::system::DUPLICATE_STRMGR);
       status->set_message("Duplicate StreamManager");
@@ -375,7 +378,10 @@ proto::system::Status* TMaster::RegisterStMgr(
       // for the stmgrs_ list. Which means this case will only happen
       // if the stmgr maintains connection but hasn't sent a heartbeat
       // in a while.
-      LOG(ERROR) << "Another stmgr exists with the same id but it has timed out" << std::endl;
+      LOG(ERROR) << "Another stmgr exists at "
+                 << stmgrs_[stmgr_id]->get_connection()->getIPAddress() << ":"
+                 << stmgrs_[stmgr_id]->get_connection()->getPort()
+                 << " with the same id but it has timed out";
       stmgrs_[stmgr_id]->UpdateWithNewStMgr(_stmgr, _instances, _conn);
       connection_to_stmgr_id_[_conn] = stmgr_id;
     }
