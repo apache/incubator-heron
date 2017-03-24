@@ -49,7 +49,7 @@ void BaseClient::Start_Base() {
   int fd = -1;
   fd = socket(options_.get_socket_family(), SOCK_STREAM, 0);
   if (fd < 0) {
-    LOG(ERROR) << "Opening of socket failed in Client " << errno << "\n";
+    PLOG(ERROR) << "Opening of socket failed in Client";
     HandleConnect_Base(CONNECT_ERROR);
     return;
   }
@@ -99,7 +99,7 @@ void BaseClient::Start_Base() {
     return;
   } else {
     // connect failed. Bail out saying that the start failed.
-    LOG(ERROR) << "Connect failed " << errno << std::endl;
+    PLOG(ERROR) << "Connect failed";
     close(endpoint->get_fd());
     delete endpoint;
     HandleConnect_Base(CONNECT_ERROR);
