@@ -62,6 +62,9 @@ class TMaster {
   // When stmgr disconnects from us
   proto::system::StatusCode RemoveStMgrConnection(Connection* _conn);
 
+  // Get stream managers registration summary
+  proto::tmaster::StmgrsRegistrationSummaryResponse* GetStmgrsRegSummary();
+
   // Accessors
   const proto::system::PhysicalPlan* getPhysicalPlan() const { return current_pplan_; }
   // TODO(mfu): Should we provide this?

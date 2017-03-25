@@ -181,3 +181,17 @@ message ExceptionLogRequest {
   // for all instances will be returned.
   repeated string instances = 2;
 }
+
+
+// Request to fetch stream managers registration status
+message StmgrsRegistrationSummaryRequest {
+}
+
+// List of registered and absent stream managers
+message StmgrsRegistrationSummaryResponse {
+  // registered stream managers
+  repeated string registered_stmgrs = 1;
+
+  // absent stream managers
+  repeated string absent_stmgrs = 2;
+}
