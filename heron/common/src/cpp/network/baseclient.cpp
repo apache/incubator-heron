@@ -73,8 +73,8 @@ void BaseClient::Start_Base() {
     struct sockaddr_in t;
     int error = IpUtils::getAddressInfo(t, options_.get_host().c_str(), PF_INET, SOCK_STREAM);
     if (error) {
-      LOG(ERROR) << "getaddrinfo failed in Client " << options_.get_host().c_str()
-          << ": "<< gai_strerror(error) << "\n";
+      LOG(ERROR) << "getaddrinfo failed in Client " << options_.get_host()
+          << ": "<< gai_strerror(error);
       close(fd);
       delete endpoint;
       HandleConnect_Base(CONNECT_ERROR);
