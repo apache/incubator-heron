@@ -52,6 +52,7 @@ class Application(tornado.web.Application):
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
         (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
+        # Deprecated. See https://github.com/twitter/heron/issues/1754
         (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
         (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
