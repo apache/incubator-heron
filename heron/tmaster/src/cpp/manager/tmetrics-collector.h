@@ -39,7 +39,7 @@ class TMetricsCollector {
  public:
   // _max_interval is how far along we keep individual metric blobs.
   TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
-                    const std::string& metrics_sinks_yaml, sp_int32 auto_restart_window,
+                    const std::string& metrics_sinks_yaml, sp_int64 auto_restart_window,
                     TMaster* tmaster);
 
   // Deletes all stored ComponentMetrics.
@@ -254,7 +254,7 @@ class TMetricsCollector {
   time_t start_time_;
 
   // auto restart backpressure container feature switch [>0 enabled; <=0 disabled], in minutes
-  sp_int32 auto_restart_window_;
+  sp_int64 auto_restart_window_;
   // record the last backpressure timestamp
   std::map<sp_string, sp_int64> last_timestamp_backpressure_instance;
   std::map<sp_string, sp_int64> last_timestamp_backpressure_stmgr;

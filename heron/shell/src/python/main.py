@@ -19,6 +19,7 @@ import logging
 import os
 import signal
 import pkgutil
+import urlparse
 import stat
 import subprocess
 import tornado.ioloop
@@ -275,12 +276,15 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       self.set_status(404)
       self.finish()
       return
-    sharedSecret = self.get_arguments('topology', '')
+    data = dict(urlparse.parse_qsl(self.request.body))
+    sharedSecret = data.get('secret')
     if sharedSecret != options.secret:
       self.set_status(403)
       self.finish()
       return
+    logger.info("Killing parent executor")
     os.killpg(os.getppid(), signal.SIGTERM)
+    self.set_status(200)
     self.finish()
 
 class DownloadHandler(tornado.web.StaticFileHandler):
@@ -301,7 +305,7 @@ app = tornado.web.Application([
     (r"^/filedata/(.*)", FileDataHandler),
     (r"^/filestats/(.*)", FileStatsHandler),
     (r"^/download/(.*)", DownloadHandler, {"path":"."}),
-    (r"^/killexecutor/(.*)", KillExecutorHandler),
+    (r"^/killexecutor", KillExecutorHandler),
 ])
 
 

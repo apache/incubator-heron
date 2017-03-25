@@ -53,13 +53,13 @@ namespace tmaster {
 
 TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
                                      const std::string& metrics_sinks_yaml,
-                                     sp_int32 auto_restart_window, TMaster* _tmaster)
+                                     sp_int64 auto_restart_window, TMaster* _tmaster)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),
       metrics_sinks_yaml_(metrics_sinks_yaml),
       tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
       start_time_(time(NULL)),
-      auto_restart_window_(auto_restart_window),
+      auto_restart_window_(auto_restart_window * 60 * 1000),
       tmaster_(_tmaster) {
   LOG(INFO) << "Auto restart backpressure container window size "
             << auto_restart_window_ << std::endl;
@@ -81,20 +81,24 @@ TMetricsCollector::~TMetricsCollector() {
 void TMetricsCollector::Purge(EventLoop::Status) {
   // auto restart backpressure container feature: share the same timer with Purge
   if (auto_restart_window_ > 0) {
-    sp_int64 now = time(NULL);
+    sp_int64 now = time(NULL) * 1000;
+    LOG(INFO) << "Auto restart feature: checkpoint timestamp " << now;
     std::set<sp_string> badSandbox;
     for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_stmgr.begin();
         it != last_timestamp_backpressure_stmgr.end(); it++) {
+      LOG(INFO) << "checking stmgr pool " << it->first << " " << it->second;
       if (now-it->second > auto_restart_window_) {
         badSandbox.insert(it->first);
       }
     }
     for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_instance.begin();
         it != last_timestamp_backpressure_instance.end(); it++) {
+      LOG(INFO) << "checking instance pool " << it->first << " " << it->second;
       if (now-it->second > auto_restart_window_) {
         badSandbox.insert(it->first);
       }
     }
+    LOG(INFO) << "Auto restart feature: pool count " << badSandbox.size();
     for (std::set<sp_string>::iterator it = badSandbox.begin(); it != badSandbox.end(); it++) {
       const PhysicalPlan* pplan = tmaster_->getPhysicalPlan();
       for (int i=0; i < pplan->kStmgrsFieldNumber; i++) {
@@ -145,9 +149,12 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     sp_double64 val = stod(metrics_data.value());
     if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_stmgr.erase(metrics_data.instance_id());
+      LOG(INFO) << "Auto restart feature: stmgr backpressure gone";
     } else {  // there is backpressure
+      LOG(INFO) << "Auto restart feature: stmgr backpressure";
       if (last_timestamp_backpressure_stmgr.find(metrics_data.instance_id())
           == last_timestamp_backpressure_stmgr.end()) {
+        LOG(INFO) << "Auto restart feature: stmgr recorded " << metrics_data.instance_id();
         last_timestamp_backpressure_stmgr.insert(
             std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
       }
@@ -156,9 +163,12 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     sp_double64 val = stod(metrics_data.value());
     if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_instance.erase(metrics_data.instance_id());
+      LOG(INFO) << "Auto restart feature: instance backpressure gone";
     } else {  // there is backpressure
+      LOG(INFO) << "Auto restart feature: instance backpressure";
       if (last_timestamp_backpressure_instance.find(metrics_data.instance_id())
           == last_timestamp_backpressure_instance.end()) {
+        LOG(INFO) << "Auto restart feature: instance recorded " << metrics_data.instance_id();
         last_timestamp_backpressure_instance.insert(
             std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
       }
