@@ -272,6 +272,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
   @tornado.web.asynchronous
   def post(self):
     """ post method """
+    logger.info("Received 'Killing parent executor' request")
     if not options.secret:
       self.set_status(404)
       self.finish()
@@ -316,6 +317,7 @@ if __name__ == '__main__':
 
   logger = logging.getLogger(__file__)
   logger.info("Starting Heron Shell")
+  logger.info("Shard secret %s", options.secret)
 
   app.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
