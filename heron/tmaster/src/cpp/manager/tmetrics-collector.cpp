@@ -110,7 +110,7 @@ void TMetricsCollector::Purge(EventLoop::Status) {
           HTTPKeyValuePairs kvs;
           kvs.push_back(make_pair("secret", tmaster_->GetTopologyId()));
           LOG(INFO) << "Prepare 'Kill heron-executor' cmd: " << st.host_name() << " "
-              << st.shell_port() << " " << tmaster_->GetTopologyId() ;
+              << st.shell_port() << " " << tmaster_->GetTopologyId();
           OutgoingHTTPRequest* request =
               new OutgoingHTTPRequest(st.host_name(), st.shell_port(), "/killexecutor",
                   BaseHTTPRequest::POST, kvs);
