@@ -283,10 +283,11 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       self.set_status(403)
       self.finish()
       return
-    logger.info("Killing parent executor")
-    os.killpg(os.getppid(), signal.SIGTERM)
+    logger.info("Killing parent executor response 200")
     self.set_status(200)
     self.finish()
+    logger.info("Killing parent executor")
+    os.killpg(os.getppid(), signal.SIGTERM)
 
 class DownloadHandler(tornado.web.StaticFileHandler):
   """
@@ -317,7 +318,7 @@ if __name__ == '__main__':
 
   logger = logging.getLogger(__file__)
   logger.info("Starting Heron Shell")
-  logger.info("Shard secret %s", options.secret)
+  logger.info("Shared secret %s", options.secret)
 
   app.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
