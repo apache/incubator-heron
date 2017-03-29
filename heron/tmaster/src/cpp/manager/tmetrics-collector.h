@@ -260,6 +260,9 @@ class TMetricsCollector {
   std::map<sp_string, sp_int64> last_timestamp_backpressure_stmgr;
   // reference to TMaster because of physical plan
   TMaster* tmaster_;
+  // http client to send cmd to heron-shell for auto-restart backpressure container
+  AsyncDNS* dns_;
+  HTTPClient* client_;
 };
 }  // namespace tmaster
 }  // namespace heron

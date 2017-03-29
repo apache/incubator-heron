@@ -69,6 +69,9 @@ TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoo
   nintervals_ = max_interval_ / interval_;
   auto cb = [this](EventLoop::Status status) { this->Purge(status); };
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, interval_ * 1000000), 0);
+
+  dns_ = new AsyncDNS(eventLoop_);
+  client_ = new HTTPClient(eventLoop_, dns_);
 }
 
 TMetricsCollector::~TMetricsCollector() {
@@ -105,8 +108,6 @@ void TMetricsCollector::Purge(EventLoop::Status) {
         StMgr st = pplan->stmgrs(i);
         if (st.id().compare(*it) == 0) {
           // send 'kill executor' command to heron-shell
-          AsyncDNS dns(eventLoop_);
-          HTTPClient* client = new HTTPClient(eventLoop_, &dns);
           HTTPKeyValuePairs kvs;
           kvs.push_back(make_pair("secret", tmaster_->GetTopologyId()));
           LOG(INFO) << "Prepare 'Kill heron-executor' cmd: " << st.host_name() << " "
@@ -114,11 +115,11 @@ void TMetricsCollector::Purge(EventLoop::Status) {
           OutgoingHTTPRequest* request =
               new OutgoingHTTPRequest(st.host_name(), st.shell_port(), "/killexecutor",
                   BaseHTTPRequest::POST, kvs);
-          auto cb = [client](IncomingHTTPResponse* response) {
+          auto cb = [](IncomingHTTPResponse* response) {
             LOG(WARNING) << "Kill heron-executor: " << response->response_code();
           };
 
-          if (client->SendRequest(request, std::move(cb)) != SP_OK) {
+          if (client_->SendRequest(request, std::move(cb)) != SP_OK) {
             LOG(ERROR) << "Unable to send the request\n";
           }
         }
