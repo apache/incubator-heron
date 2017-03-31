@@ -96,7 +96,7 @@ void TMetricsCollector::Purge(EventLoop::Status) {
   if (auto_restart_window_ > 0) {
     sp_int64 now = time(NULL) * 1000;
     LOG(INFO) << "Auto restart feature: checkpoint timestamp " << now;
-    if (now - auto_restart_last_ > auto_restart_interval_) {
+    if (now - auto_restart_last_ >= auto_restart_interval_) {
       std::set<sp_string> badSandbox;
       for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_stmgr.begin();
           it != last_timestamp_backpressure_stmgr.end(); it++) {
