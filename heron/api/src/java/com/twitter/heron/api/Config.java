@@ -279,8 +279,28 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
   }
 
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setContainerDiskRequested(Map<String, Object> conf, ByteAmount nbytes)
+   */
+  @Deprecated
+  public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
+    setContainerDiskRequested(conf, ByteAmount.fromBytes(nbytes));
+  }
+
   public static void setContainerDiskRequested(Map<String, Object> conf, ByteAmount nbytes) {
     conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes.asBytes()));
+  }
+
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setContainerRamRequested(Map<String, Object> conf, ByteAmount nbytes)
+   */
+  @Deprecated
+  public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
+    setContainerRamRequested(conf, ByteAmount.fromBytes(nbytes));
   }
 
   public static void setContainerRamRequested(Map<String, Object> conf, ByteAmount nbytes) {
@@ -313,6 +333,17 @@ public class Config extends HashMap<String, Object> {
 
   public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
     return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
+  }
+
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setComponentRam(Map<String, Object> conf, String component, ByteAmount ramInBytes)
+   */
+  @Deprecated
+  public static void setComponentRam(Map<String, Object> conf,
+                                     String component, long ramInBytes) {
+    setComponentRam(conf, component, ByteAmount.fromBytes(ramInBytes));
   }
 
   public static void setComponentRam(Map<String, Object> conf,
