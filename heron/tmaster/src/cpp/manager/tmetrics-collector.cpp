@@ -168,9 +168,11 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     sp_double64 val = stod(metrics_data.value());
     if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_stmgr.erase(metrics_data.instance_id());
-      LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure gone";
+      LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure gone "
+          << metrics_data.instance_id();
     } else {  // there is backpressure
-      LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure observed";
+      LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure observed "
+          << metrics_data.instance_id();
       if (last_timestamp_backpressure_stmgr.find(metrics_data.instance_id())
           == last_timestamp_backpressure_stmgr.end()) {
         LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure recorded "
@@ -183,9 +185,11 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     sp_double64 val = stod(metrics_data.value());
     if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_instance.erase(metrics_data.instance_id());
-      LOG(INFO) << "Auto restart feature (add metrics): instance backpressure gone";
+      LOG(INFO) << "Auto restart feature (add metrics): instance backpressure gone "
+          << metrics_data.instance_id();
     } else {  // there is backpressure
-      LOG(INFO) << "Auto restart feature (add metrics): instance backpressure observed";
+      LOG(INFO) << "Auto restart feature (add metrics): instance backpressure observed "
+          << metrics_data.instance_id();
       if (last_timestamp_backpressure_instance.find(metrics_data.instance_id())
           == last_timestamp_backpressure_instance.end()) {
         LOG(INFO) << "Auto restart feature (add metrics): instance backpressure recorded "
