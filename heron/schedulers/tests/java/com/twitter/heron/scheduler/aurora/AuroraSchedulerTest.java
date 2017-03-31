@@ -368,7 +368,7 @@ public class AuroraSchedulerTest {
           expected = "0";
           break;
         case AUTO_HEAL_MIN_INTERVAL:
-	      expected = "20";
+          expected = "20";
           break;
         default:
           fail(String.format(
