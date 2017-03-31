@@ -282,7 +282,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * Users should use the version of this method at uses ByteAmount
    * @deprecated use
-   * setContainerDiskRequested(Map<String, Object> conf, ByteAmount nbytes)
+   * setContainerDiskRequested(Map&lt;String, Object&gt; conf, ByteAmount nbytes)
    */
   @Deprecated
   public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
@@ -296,7 +296,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * Users should use the version of this method at uses ByteAmount
    * @deprecated use
-   * setContainerRamRequested(Map<String, Object> conf, ByteAmount nbytes)
+   * setContainerRamRequested(Map&lt;String, Object&gt; conf, ByteAmount nbytes)
    */
   @Deprecated
   public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
@@ -338,7 +338,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * Users should use the version of this method at uses ByteAmount
    * @deprecated use
-   * setComponentRam(Map<String, Object> conf, String component, ByteAmount ramInBytes)
+   * setComponentRam(Map&lt;String, Object&gt; conf, String component, ByteAmount ramInBytes)
    */
   @Deprecated
   public static void setComponentRam(Map<String, Object> conf,
