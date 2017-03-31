@@ -280,7 +280,10 @@ public class Context {
   }
 
   public static String autoRestartBackpressureContainerTimeWindow(Config cfg) {
-    return cfg.getStringValue(Key.AUTO_HEAL);
+    return cfg.getStringValue(Key.AUTO_HEAL_WINDOW);
   }
 
+  public static String autoRestartBackpressureContainerMinInterval(Config cfg) {
+    return cfg.getStringValue(Key.AUTO_HEAL_INTERVAL);
+  }
 }

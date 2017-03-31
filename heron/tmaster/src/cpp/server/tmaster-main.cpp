@@ -32,7 +32,8 @@ int main(int argc, char* argv[]) {
               << "<topology_name> <topology_id> <zk_hostportlist> "
               << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
               << "<metrics_sinks_filename> <metrics-manager-port> "
-              << "<auto_restart_backpressure_sandbox_time_window>" << std::endl;
+              << "<auto_restart_backpressure_sandbox_time_window>"
+              << "<auto_restart_backpressure_sandbox_min_interval>" << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
   }
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
   // backpressue_window > 0: the time window size in minutes
   // backpressue_window <= 0: disable the feature
   sp_int32 backpressue_window = atoi(argv[12]);
+  sp_int32 backpressue_interval = atoi(argv[13]);
 
   EventLoopImpl ss;
 

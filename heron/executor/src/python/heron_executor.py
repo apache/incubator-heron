@@ -54,7 +54,8 @@ def print_usage():
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
       " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
-      " <auto_restart_backpressure_sandbox_time_window>")
+      " <auto_restart_backpressure_sandbox_time_window>"
+      " <auto_restart_backpressure_sandbox_min_interval>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -189,6 +190,8 @@ class HeronExecutor(object):
     self.python_instance_binary = parsed_args.python_instance_binary
     self.auto_restart_backpressure_sandbox_time_window =\
         parsed_args.auto_restart_backpressure_sandbox_time_window
+    self.auto_restart_backpressure_sandbox_min_interval =\
+        parsed_args.auto_restart_backpressure_sandbox_min_interval
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -253,6 +256,7 @@ class HeronExecutor(object):
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
     parser.add_argument("auto_restart_backpressure_sandbox_time_window")
+    parser.add_argument("auto_restart_backpressure_sandbox_min_interval")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -398,7 +402,8 @@ class HeronExecutor(object):
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
         self.metricsmgr_port,
-        self.auto_restart_backpressure_sandbox_time_window]
+        self.auto_restart_backpressure_sandbox_time_window,
+        self.auto_restart_backpressure_sandbox_min_interval]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()

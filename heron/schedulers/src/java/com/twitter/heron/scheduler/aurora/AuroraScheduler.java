@@ -242,6 +242,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     auroraProperties.put(AuroraField.AUTO_HEAL_TIME_WINDOW,
         Context.autoRestartBackpressureContainerTimeWindow(config));
+    auroraProperties.put(AuroraField.AUTO_HEAL_MIN_INTERVAL,
+            Context.autoRestartBackpressureContainerMinInterval(config));
 
     return auroraProperties;
   }
