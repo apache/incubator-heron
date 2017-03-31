@@ -53,16 +53,18 @@ namespace tmaster {
 
 TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
                                      const std::string& metrics_sinks_yaml,
-                                     sp_int64 auto_restart_window, TMaster* _tmaster)
+                                     sp_int64 auto_restart_window, sp_int64 auto_restart_interval,
+                                     TMaster* _tmaster)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),
       metrics_sinks_yaml_(metrics_sinks_yaml),
       tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
       start_time_(time(NULL)),
       auto_restart_window_(auto_restart_window * 60 * 1000),
+      auto_restart_interval_(auto_restart_interval * 60 * 1000),
       tmaster_(_tmaster) {
-  LOG(INFO) << "Auto restart backpressure container window size "
-            << auto_restart_window_ << std::endl;
+  LOG(INFO) << "Auto restart backpressure container window size " << auto_restart_window_
+            << " min interval " << auto_restart_interval_;
   interval_ = config::HeronInternalsConfigReader::Instance()
                   ->GetHeronTmasterMetricsCollectorPurgeIntervalSec();
   CHECK_EQ(max_interval_ % interval_, 0);

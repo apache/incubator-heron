@@ -226,7 +226,7 @@ public class SubmitterMain {
 
     Option autoHealInterval = Option.builder("i")
         .desc("Auto restart backpressure container restart min interval")
-        .longOpt("auto_heal_window")
+        .longOpt("auto_heal_interval")
         .hasArgs()
         .build();
 

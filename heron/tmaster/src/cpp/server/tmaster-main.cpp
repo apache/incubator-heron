@@ -26,13 +26,13 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 13) {
+  if (argc != 14) {
     std::cout << "Usage: " << argv[0] << " "
               << "<master-port> <controller-port> <stats-port> "
               << "<topology_name> <topology_id> <zk_hostportlist> "
               << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
               << "<metrics_sinks_filename> <metrics-manager-port> "
-              << "<auto_restart_backpressure_sandbox_time_window>"
+              << "<auto_restart_backpressure_sandbox_time_window> "
               << "<auto_restart_backpressure_sandbox_min_interval>" << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
@@ -73,7 +73,8 @@ int main(int argc, char* argv[]) {
 
   heron::tmaster::TMaster tmaster(zkhostportlist, topology_name, topology_id, topdir, stmgrs,
                                   controller_port, master_port, stats_port, metrics_manager_port,
-                                  metrics_sinks_yaml, myhost, &ss, backpressue_window);
+                                  metrics_sinks_yaml, myhost, &ss, backpressue_window,
+                                  backpressue_interval);
   ss.loop();
   return 0;
 }
