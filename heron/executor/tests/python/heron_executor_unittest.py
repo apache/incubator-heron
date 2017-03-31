@@ -130,7 +130,7 @@ class HeronExecutorTest(unittest.TestCase):
                   'tmaster_binary master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot stmgr-1,stmgr-7 '
-                  '%s metrics_sinks_config_file metricsmgr_port 10' % INTERNAL_CONF_PATH),
+                  '%s metrics_sinks_config_file metricsmgr_port 10 20' % INTERNAL_CONF_PATH),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
   ]
 
@@ -192,7 +192,7 @@ class HeronExecutorTest(unittest.TestCase):
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
-    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport 10
+    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport 10 20
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):
