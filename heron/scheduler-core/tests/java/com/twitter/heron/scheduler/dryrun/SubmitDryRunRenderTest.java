@@ -63,10 +63,9 @@ public class SubmitDryRunRenderTest {
     plan = new PackingPlan("A", containerPlans);
   }
 
-  @Test
-  public void testTableA() throws IOException {
-    InputStream stream  = UpdateDryRunRenderTest.class.
-        getResourceAsStream("/heron/scheduler-core/tests/resources/SubmitDryRunOutputATable.txt");
+  private void test(String filename, boolean rich) throws IOException {
+    InputStream stream  = SubmitDryRunRenderTest.class.
+        getResourceAsStream(filename);
     if (stream == null) {
       throw new RuntimeException("Sample output file not found");
     }
@@ -77,7 +76,17 @@ public class SubmitDryRunRenderTest {
         "com.twitter.heron.packing.roundrobin.RoundRobinPacking").build();
     String table =
         new SubmitTableDryRunRenderer(
-            new SubmitDryRunResponse(topology, config, plan), true).render();
+            new SubmitDryRunResponse(topology, config, plan), rich).render();
     assertEquals(exampleTable, table);
+  }
+
+  @Test
+  public void testTableA() throws IOException {
+    test("/heron/scheduler-core/tests/resources/SubmitDryRunOutputATable.txt", true);
+  }
+
+  @Test
+  public void testTableANonRich() throws IOException {
+    test("/heron/scheduler-core/tests/resources/SubmitDryRunOutputATableNonRich.txt", false);
   }
 }

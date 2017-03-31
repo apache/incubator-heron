@@ -484,7 +484,7 @@ public final class FormatterUtils {
     double cpu = resource.getCpu();
     ByteAmount ram = resource.getRam();
     ByteAmount disk = resource.getDisk();
-    return String.format("CPU: %s, RAM: %sMB, Disk: %sMB",
+    return String.format("CPU: %s, RAM: %s MB, Disk: %s MB",
       cpu, ram.asMegabytes(), disk.asMegabytes());
   }
 
@@ -502,11 +502,11 @@ public final class FormatterUtils {
     if (cpuUsageChange.isPresent()) {
       cpuUsage += String.format(" (%s)", cpuUsageChange.get().toString(rich));
     }
-    String ramUsage = String.format("RAM: %sMB", newRam);
+    String ramUsage = String.format("RAM: %s MB", newRam);
     if (ramUsageChange.isPresent()) {
       ramUsage += String.format(" (%s)", ramUsageChange.get().toString(rich));
     }
-    String diskUsage = String.format("Disk: %sMB", newDisk);
+    String diskUsage = String.format("Disk: %s MB", newDisk);
     if (diskUsageChange.isPresent()) {
       diskUsage += String.format(" (%s)", diskUsageChange.get().toString(rich));
     }

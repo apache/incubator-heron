@@ -1,7 +1,7 @@
 Total number of containers: 1
 Using repacking class: com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking
-[1mContainer 1[0mMODIFIED
-CPU: 4.5 ([31m-25.00%[0m), RAM: 5120MB ([31m-28.57%[0m), Disk: 5120MB ([31m-28.57%[0m)
+[1mContainer 1[0m MODIFIED
+CPU: 4.5 ([31m-25.00%[0m), RAM: 5120 MB ([31m-28.57%[0m), Disk: 5120 MB ([31m-28.57%[0m)
 ====================================================
 | [1mcomponent[0m | [1mtask ID[0m | [1mCPU[0m | [1mRAM (MB)[0m | [1mdisk (MB)[0m |
 ----------------------------------------------------
@@ -10,8 +10,8 @@ CPU: 4.5 ([31m-25.00%[0m), RAM: 5120MB ([31m-28.57%[0m), Disk: 5120MB ([31m
 | [31m ̶e̶x̶c̶l̶a̶i̶m̶1̶[0m | [31m ̶ ̶ ̶ ̶ ̶ ̶1̶[0m | [31m1̶.̶5̶[0m | [31m ̶ ̶ ̶ ̶2̶0̶4̶8̶[0m | [31m ̶ ̶ ̶ ̶ ̶ ̶ ̶ ̶0̶[0m |
 ====================================================
 
-[1mContainer 2[0m[31mREMOVED[0m
-CPU: 6.0, RAM: 7168MB, Disk: 7168MB
+[1mContainer 2[0m [31mREMOVED[0m
+CPU: 6.0, RAM: 7168 MB, Disk: 7168 MB
 ====================================================
 | [1mcomponent[0m | [1mtask ID[0m | [1mCPU[0m | [1mRAM (MB)[0m | [1mdisk (MB)[0m |
 ----------------------------------------------------

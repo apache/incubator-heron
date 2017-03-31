@@ -89,7 +89,7 @@ public class UpdateTableDryRunRenderer implements DryRunRender {
     StringBuilder builder = new StringBuilder();
     Optional<PackingPlan.ContainerPlan> oldPackingPlan = diffView.getOldPlan();
     Optional<PackingPlan.ContainerPlan> newPackingPlan = diffView.getNewPlan();
-    String header = formatter.renderContainerName(containerId);
+    String header = String.format("%s ", formatter.renderContainerName(containerId));
     builder.append(header);
     // Container exists in both old and new packing plan
     if (oldPackingPlan.isPresent() && newPackingPlan.isPresent()) {

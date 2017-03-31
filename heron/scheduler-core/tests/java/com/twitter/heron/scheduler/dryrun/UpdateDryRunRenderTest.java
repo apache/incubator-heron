@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import org.junit.Before;
@@ -90,10 +88,9 @@ public class UpdateDryRunRenderTest {
     newPlanB = new PackingPlan("B", containerPlansB);
   }
 
-  @Test
-  public void testTableA() throws IOException {
+  private void test(String filename, PackingPlan newPlan, boolean rich) throws IOException {
     InputStream stream  = UpdateDryRunRenderTest.class.
-        getResourceAsStream("/heron/scheduler-core/tests/resources/UpdateDryRunOutputATable.txt");
+        getResourceAsStream(filename);
     if (stream == null) {
       throw new RuntimeException("Sample output file not found");
     }
@@ -103,30 +100,34 @@ public class UpdateDryRunRenderTest {
     Config config = Config.newBuilder().put(Key.REPACKING_CLASS,
         "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
-        topology, config, newPlanA, originalPlan, new HashMap<String, Integer>());
+        topology, config, newPlan, originalPlan, new HashMap<String, Integer>());
     String table =
-        new UpdateTableDryRunRenderer(resp, true).render();
-    FileUtils.writeStringToFile(new File("/Users/rli/bbb.txt"), table);
+        new UpdateTableDryRunRenderer(resp, rich).render();
     assertEquals(exampleTable, table);
+  }
+
+
+  @Test
+  public void testTableA() throws IOException {
+    test("/heron/scheduler-core/tests/resources/UpdateDryRunOutputATable.txt",
+        newPlanA, true);
+  }
+
+  @Test
+  public void testTableANonRich() throws IOException {
+    test("/heron/scheduler-core/tests/resources/UpdateDryRunOutputATableNonRich.txt",
+        newPlanA, false);
   }
 
   @Test
   public void testTableB() throws IOException {
-    InputStream stream  = UpdateDryRunRenderTest.class.
-        getResourceAsStream("/heron/scheduler-core/tests/resources/UpdateDryRunOutputBTable.txt");
-    if (stream == null) {
-      throw new RuntimeException("Sample output file not found");
-    }
-    // Input might contain UTF-8 character, so we read stream with UTF-8 decoding
-    String exampleTable = IOUtils.toString(stream, StandardCharsets.UTF_8);
-    TopologyAPI.Topology topology = PowerMockito.mock(TopologyAPI.Topology.class);
-    Config config = Config.newBuilder().put(Key.REPACKING_CLASS,
-        "com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking").build();
-    UpdateDryRunResponse resp = new UpdateDryRunResponse(
-        topology, config, newPlanB, originalPlan, new HashMap<String, Integer>());
-    String table =
-        new UpdateTableDryRunRenderer(resp, true).render();
-    FileUtils.writeStringToFile(new File("/Users/rli/ccc.txt"), table);
-    assertEquals(exampleTable, table);
+    test("/heron/scheduler-core/tests/resources/UpdateDryRunOutputBTable.txt",
+        newPlanB, true);
+  }
+
+  @Test
+  public void testTableBNonRich() throws IOException {
+    test("/heron/scheduler-core/tests/resources/UpdateDryRunOutputBTableNonRich.txt",
+        newPlanB, false);
   }
 }
