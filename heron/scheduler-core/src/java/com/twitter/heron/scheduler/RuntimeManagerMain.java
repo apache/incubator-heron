@@ -449,7 +449,9 @@ public class RuntimeManagerMain {
       case RAW :
         return new UpdateRawDryRunRenderer(resp).render();
       case TABLE:
-        return new UpdateTableDryRunRenderer(resp).render();
+        return new UpdateTableDryRunRenderer(resp, false).render();
+      case COLORED_TABLE:
+        return new UpdateTableDryRunRenderer(resp, true).render();
       default: throw new IllegalArgumentException(
           String.format("Unexpected rendering format: %s", formatType));
     }

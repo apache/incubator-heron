@@ -26,9 +26,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 
-import static com.twitter.heron.scheduler.dryrun.FormatterUtils.Cell;
+import static com.twitter.heron.scheduler.dryrun.FormatterUtils.ContainerChange;
 import static com.twitter.heron.scheduler.dryrun.FormatterUtils.Row;
-
 import static com.twitter.heron.scheduler.dryrun.FormatterUtils.TextColor;
 import static com.twitter.heron.scheduler.dryrun.FormatterUtils.TextStyle;
 
@@ -36,13 +35,6 @@ import static com.twitter.heron.scheduler.dryrun.FormatterUtils.TextStyle;
  * Dry-run renderer that renders update dry-run response in table format
  */
 public class UpdateTableDryRunRenderer implements DryRunRender {
-
-  private enum ContainerChange {
-    UNAFFECTED,
-    MODIFIED,
-    NEW,
-    REMOVED
-  }
 
   private class ContainersDiffView {
     private final Optional<PackingPlan.ContainerPlan> oldPlan;
@@ -84,19 +76,20 @@ public class UpdateTableDryRunRenderer implements DryRunRender {
   private final Config config;
   private final PackingPlan oldPlan;
   private final PackingPlan newPlan;
+  private final FormatterUtils formatter;
 
-  public UpdateTableDryRunRenderer(UpdateDryRunResponse response) {
+  public UpdateTableDryRunRenderer(UpdateDryRunResponse response, boolean rich) {
     this.config = response.getConfig();
     this.oldPlan = response.getOldPackingPlan();
     this.newPlan = response.getPackingPlan();
+    this.formatter = new FormatterUtils(rich);
   }
 
   private String renderContainerDiffView(int containerId, ContainersDiffView diffView) {
     StringBuilder builder = new StringBuilder();
     Optional<PackingPlan.ContainerPlan> oldPackingPlan = diffView.getOldPlan();
     Optional<PackingPlan.ContainerPlan> newPackingPlan = diffView.getNewPlan();
-    String header = new Cell(
-        String.format("Container %d: ", containerId), TextStyle.BOLD).toString();
+    String header = formatter.renderContainerName(containerId);
     builder.append(header);
     // Container exists in both old and new packing plan
     if (oldPackingPlan.isPresent() && newPackingPlan.isPresent()) {
@@ -104,21 +97,21 @@ public class UpdateTableDryRunRenderer implements DryRunRender {
       PackingPlan.ContainerPlan oldContainerPlan = oldPackingPlan.get();
       // Container plan did not change
       if (newContainerPlan.equals(oldContainerPlan)) {
-        builder.append(ContainerChange.UNAFFECTED + "\n");
-        String resourceUsage = FormatterUtils.renderResourceUsage(
+        builder.append(formatter.renderContainerChange(ContainerChange.UNAFFECTED) + "\n");
+        String resourceUsage = formatter.renderResourceUsage(
             newContainerPlan.getRequiredResource());
         List<Row> rows = new ArrayList<>();
         for (PackingPlan.InstancePlan plan: newContainerPlan.getInstances()) {
-          rows.add(FormatterUtils.rowOfInstancePlan(plan,
+          rows.add(formatter.rowOfInstancePlan(plan,
               TextColor.DEFAULT,
               TextStyle.DEFAULT));
         }
-        String containerTable = FormatterUtils.renderOneContainer(rows);
+        String containerTable = formatter.renderOneContainer(rows);
         builder.append(resourceUsage + "\n");
         builder.append(containerTable);
       } else {
         // Container plan has changed
-        String resourceUsage = FormatterUtils.renderResourceUsageChange(
+        String resourceUsage = formatter.renderResourceUsageChange(
             oldContainerPlan.getRequiredResource(), newContainerPlan.getRequiredResource());
         Set<PackingPlan.InstancePlan> oldInstancePlans = oldContainerPlan.getInstances();
         Set<PackingPlan.InstancePlan> newInstancePlans = newContainerPlan.getInstances();
@@ -130,23 +123,22 @@ public class UpdateTableDryRunRenderer implements DryRunRender {
             Sets.difference(oldInstancePlans, newInstancePlans);
         List<Row> rows = new ArrayList<>();
         for (PackingPlan.InstancePlan plan: unchangedPlans) {
-          rows.add(FormatterUtils.rowOfInstancePlan(plan,
+          rows.add(formatter.rowOfInstancePlan(plan,
               TextColor.DEFAULT,
               TextStyle.DEFAULT));
         }
         for (PackingPlan.InstancePlan plan: newPlans) {
-          rows.add(FormatterUtils.rowOfInstancePlan(plan,
+          rows.add(formatter.rowOfInstancePlan(plan,
               TextColor.GREEN,
               TextStyle.DEFAULT));
         }
         for (PackingPlan.InstancePlan plan: removedPlans) {
-          rows.add(FormatterUtils.rowOfInstancePlan(
+          rows.add(formatter.rowOfInstancePlan(
               plan, TextColor.RED, TextStyle.STRIKETHROUGH));
         }
-        builder.append(new Cell(
-            ContainerChange.MODIFIED.toString()).toString() + "\n");
+        builder.append(formatter.renderContainerChange(ContainerChange.MODIFIED) + "\n");
         builder.append(resourceUsage + "\n");
-        String containerTable = FormatterUtils.renderOneContainer(rows);
+        String containerTable = formatter.renderOneContainer(rows);
         builder.append(containerTable);
       }
     } else if (oldPackingPlan.isPresent()) {
@@ -154,28 +146,26 @@ public class UpdateTableDryRunRenderer implements DryRunRender {
       PackingPlan.ContainerPlan oldContainerPlan = oldPackingPlan.get();
       List<Row> rows = new ArrayList<>();
       for (PackingPlan.InstancePlan plan: oldContainerPlan.getInstances()) {
-        rows.add(FormatterUtils.rowOfInstancePlan(
+        rows.add(formatter.rowOfInstancePlan(
             plan, TextColor.RED, TextStyle.STRIKETHROUGH));
       }
-      builder.append(new Cell(ContainerChange.REMOVED.toString(),
-          TextColor.RED).toString() + "\n");
-      builder.append(FormatterUtils.renderResourceUsage(
+      builder.append(formatter.renderContainerChange(ContainerChange.REMOVED) + "\n");
+      builder.append(formatter.renderResourceUsage(
           oldContainerPlan.getRequiredResource()) + "\n");
-      builder.append(FormatterUtils.renderOneContainer(rows));
+      builder.append(formatter.renderOneContainer(rows));
     } else if (newPackingPlan.isPresent()) {
       // New container has been added
       PackingPlan.ContainerPlan newContainerPlan = newPackingPlan.get();
       List<Row> rows = new ArrayList<>();
       for (PackingPlan.InstancePlan plan: newContainerPlan.getInstances()) {
-        rows.add(FormatterUtils.rowOfInstancePlan(plan,
+        rows.add(formatter.rowOfInstancePlan(plan,
             TextColor.GREEN,
             TextStyle.DEFAULT));
       }
-      builder.append(new Cell(ContainerChange.NEW.toString(),
-          TextColor.GREEN).toString() + "\n");
-      builder.append(FormatterUtils.renderResourceUsage(
+      builder.append(formatter.renderContainerChange(ContainerChange.NEW) + "\n");
+      builder.append(formatter.renderResourceUsage(
           newContainerPlan.getRequiredResource()) + "\n");
-      builder.append(FormatterUtils.renderOneContainer(rows));
+      builder.append(formatter.renderOneContainer(rows));
     } else {
       throw new RuntimeException(
           "Unexpected error: either new container plan or old container plan has to exist");

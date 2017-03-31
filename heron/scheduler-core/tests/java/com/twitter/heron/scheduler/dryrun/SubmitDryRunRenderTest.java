@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,7 +76,8 @@ public class SubmitDryRunRenderTest {
     Config config = Config.newBuilder().put(Key.PACKING_CLASS,
         "com.twitter.heron.packing.roundrobin.RoundRobinPacking").build();
     String table =
-        new SubmitTableDryRunRenderer(new SubmitDryRunResponse(topology, config, plan)).render();
+        new SubmitTableDryRunRenderer(
+            new SubmitDryRunResponse(topology, config, plan), true).render();
     assertEquals(exampleTable, table);
   }
 }

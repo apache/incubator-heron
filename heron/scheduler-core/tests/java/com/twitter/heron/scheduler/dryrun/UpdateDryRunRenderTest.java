@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.scheduler.dryrun;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import org.junit.Before;
@@ -103,11 +105,13 @@ public class UpdateDryRunRenderTest {
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanA, originalPlan, new HashMap<String, Integer>());
     String table =
-        new UpdateTableDryRunRenderer(resp).render();
+        new UpdateTableDryRunRenderer(resp, true).render();
+    FileUtils.writeStringToFile(new File("/Users/rli/bbb.txt"), table);
     assertEquals(exampleTable, table);
   }
 
-  @Test public void testTableB() throws IOException {
+  @Test
+  public void testTableB() throws IOException {
     InputStream stream  = UpdateDryRunRenderTest.class.
         getResourceAsStream("/heron/scheduler-core/tests/resources/UpdateDryRunOutputBTable.txt");
     if (stream == null) {
@@ -121,7 +125,8 @@ public class UpdateDryRunRenderTest {
     UpdateDryRunResponse resp = new UpdateDryRunResponse(
         topology, config, newPlanB, originalPlan, new HashMap<String, Integer>());
     String table =
-        new UpdateTableDryRunRenderer(resp).render();
+        new UpdateTableDryRunRenderer(resp, true).render();
+    FileUtils.writeStringToFile(new File("/Users/rli/ccc.txt"), table);
     assertEquals(exampleTable, table);
   }
 }
