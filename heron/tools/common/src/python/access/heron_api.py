@@ -74,12 +74,17 @@ memory = "DIVIDE(" \
 
 gc = "RATE(TS({0},{1},__jvm-gc-collection-time-ms))"
 
+bp = "DEFAULT(0, TS(__stmgr__,*,__time_spent_back_pressure_by_compid/{0}))"
+
+BACKPRESSURE_KEYWORD = "bp"
+
 queries = dict(
     cpu=cpu,
     capacity=capacity,
     failures=failures,
     memory=memory,
-    gc=gc
+    gc=gc,
+    bp=bp
 )
 
 
@@ -232,6 +237,26 @@ def get_comps(cluster, environ, topology, role=None):
   lplan = yield fetch_url_as_json(request_url)
   comps = lplan['spouts'].keys() + lplan['bolts'].keys()
   raise tornado.gen.Return(comps)
+
+################################################################################
+@tornado.gen.coroutine
+def get_instances(cluster, environ, topology, role=None):
+  '''
+  Get the list of instances for the topology from Heron Nest
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
+  params = dict(cluster=cluster, environ=environ, topology=topology)
+  if role is not None:
+    params['role'] = role
+  request_url = tornado.httputil.url_concat(
+      create_url(PHYSICALPLAN_URL_FMT), params)
+  pplan = yield fetch_url_as_json(request_url)
+  instances = pplan['instances'].keys()
+  raise tornado.gen.Return(instances)
 
 
 ################################################################################
@@ -691,26 +716,21 @@ class HeronQueryHandler(QueryHandler):
     :param environ:
     :return:
     '''
-    components = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
+    comps = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
 
     futures = []
-    for comp in components:
+    for comp in comps:
       query = self.get_query(metric, comp, instance)
       future = get_metrics(cluster, environ, topology, timerange, query)
       futures.append(future)
 
-    results = yield futures
+    res = yield futures
 
     timelines = []
-    for result in results:
+    for result in res:
       timelines.extend(result["timeline"])
 
-    result = dict(
-        status="success",
-        starttime=timerange[0],
-        endtime=timerange[1],
-        result=dict(timeline=timelines)
-    )
+    result = self.get_metric_response(timerange, timelines, False)
 
     raise tornado.gen.Return(result)
 
@@ -726,7 +746,6 @@ class HeronQueryHandler(QueryHandler):
     :param environ:
     :return:
     '''
-
     components = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
 
     futures = []
@@ -736,21 +755,91 @@ class HeronQueryHandler(QueryHandler):
       future = get_metrics(cluster, environ, topology, timerange, max_query)
       futures.append(future)
 
-      results = yield futures
+    results = yield futures
 
-      keys = results[0]["timeline"][0]["data"].keys()
-      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in results)
+    data = self.compute_max(results)
+
+    result = self.get_metric_response(timerange, data, True)
+
+    raise tornado.gen.Return(result)
+
+  @tornado.gen.coroutine
+  def fetch_bp(self, cluster, metric, topology, component, instance, \
+    timerange, is_max, environ=None):
+    '''
+    :param cluster:
+    :param metric:
+    :param topology:
+    :param component:
+    :param instance:
+    :param timerange:
+    :param isMax:
+    :param environ:
+    :return:
+    '''
+    instances = yield get_instances(cluster, environ, topology)
+    if component != "*":
+      filtered_inst = [instance for instance in instances if instance.split("_")[2] == component]
+    else:
+      filtered_inst = instances
+
+    futures_dict = {}
+    for inst in filtered_inst:
+      query = queries.get(metric).format(inst)
+      futures_dict[inst] = get_metrics(cluster, environ, topology, timerange, query)
+
+    res = yield futures_dict
+
+    if not is_max:
+      timelines = []
+      for key in res:
+        result = res[key]
+        # Replacing stream manager instance name with component instance name
+        if len(result["timeline"]) > 0:
+          result["timeline"][0]["instance"] = key
+        timelines.extend(result["timeline"])
+      result = self.get_metric_response(timerange, timelines, is_max)
+    else:
+      data = self.compute_max(res.values())
+      result = self.get_metric_response(timerange, data, is_max)
+
+    raise tornado.gen.Return(result)
+
+  # pylint: disable=no-self-use
+  def compute_max(self, multi_ts):
+    '''
+    :param multi_ts:
+    :return:
+    '''
+    if len(multi_ts) > 0 and len(multi_ts[0]["timeline"]) > 0:
+      keys = multi_ts[0]["timeline"][0]["data"].keys()
+      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in multi_ts)
       values = (max(v) for v in zip(*timelines))
-      data = dict(zip(keys, values))
+      return dict(zip(keys, values))
+    return {}
 
-      result = dict(
+  # pylint: disable=no-self-use
+  def get_metric_response(self, timerange, data, isMax):
+    '''
+    :param timerange:
+    :param data:
+    :param isMax:
+    :return:
+    '''
+    if isMax:
+      return dict(
           status="success",
           starttime=timerange[0],
           endtime=timerange[1],
           result=dict(timeline=[dict(data=data)])
       )
 
-    raise tornado.gen.Return(result)
+    return dict(
+        status="success",
+        starttime=timerange[0],
+        endtime=timerange[1],
+        result=dict(timeline=data)
+    )
 
   # pylint: disable=no-self-use
   def get_query(self, metric, component, instance):
