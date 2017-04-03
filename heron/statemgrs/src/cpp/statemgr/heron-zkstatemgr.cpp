@@ -371,7 +371,7 @@ void HeronZKStateMgr::GetMetricsCacheLocationDone(std::string* _contents,
       code = proto::system::STATE_CORRUPTED;
     }
   } else if (_rc == ZNONODE) {
-    LOG(ERROR) << "Error getting metricscache location because the tmaster does not exist"
+    LOG(ERROR) << "Error getting metricscache location because the metricscache does not exist"
                << std::endl;
     code = proto::system::PATH_DOES_NOT_EXIST;
   } else {
