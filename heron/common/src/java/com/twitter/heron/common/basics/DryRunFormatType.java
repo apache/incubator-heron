@@ -19,7 +19,8 @@ package com.twitter.heron.common.basics;
  */
 public enum DryRunFormatType {
   RAW,
-  TABLE;
+  TABLE,
+  COLORED_TABLE;
 
   public static DryRunFormatType getDryRunFormatType(String dryRunFormatType) {
     return DryRunFormatType.valueOf(dryRunFormatType.toUpperCase());
