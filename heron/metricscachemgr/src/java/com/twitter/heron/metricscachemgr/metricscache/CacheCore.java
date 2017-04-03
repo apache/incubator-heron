@@ -482,9 +482,9 @@ public class CacheCore {
     long now = System.currentTimeMillis();
     synchronized (CacheCore.class) {
       // remove old
-      for (Long firstKey = cacheMetric.firstKey();
+      for (Long firstKey = cacheMetric.isEmpty() ? null : cacheMetric.firstKey();
            firstKey != null && firstKey < now - maxIntervalMilliSecs;
-           firstKey = cacheMetric.firstKey()) {
+           firstKey = cacheMetric.isEmpty() ? null : cacheMetric.firstKey()) {
         cacheMetric.remove(firstKey);
       }
       // add new
