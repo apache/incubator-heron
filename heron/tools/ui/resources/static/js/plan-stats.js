@@ -69,7 +69,7 @@
         loMedHi: [3000, 12000, 30000],
         scaleTicks: [0, 7500, 15000, 22500, 30000],
         format: function (d) { return d.toFixed(0); }
-      },
+      }
     ];
 
     var colData = [

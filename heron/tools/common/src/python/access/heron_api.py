@@ -714,18 +714,18 @@ class HeronQueryHandler(QueryHandler):
     :param environ:
     :return:
     '''
-    comps = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
+    components = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
 
     futures = []
-    for comp in comps:
+    for comp in components:
       query = self.get_query(metric, comp, instance)
       future = get_metrics(cluster, environ, topology, timerange, query)
       futures.append(future)
 
-    res = yield futures
+    results = yield futures
 
     timelines = []
-    for result in res:
+    for result in results:
       timelines.extend(result["timeline"])
 
     result = self.get_metric_response(timerange, timelines, False)
