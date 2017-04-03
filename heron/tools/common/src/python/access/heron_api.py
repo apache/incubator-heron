@@ -76,8 +76,6 @@ gc = "RATE(TS({0},{1},__jvm-gc-collection-time-ms))"
 
 bp = "DEFAULT(0, TS(__stmgr__,*,__time_spent_back_pressure_by_compid/{0}))"
 
-BACKPRESSURE_KEYWORD = "bp"
-
 queries = dict(
     cpu=cpu,
     capacity=capacity,
