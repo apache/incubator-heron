@@ -93,7 +93,6 @@ void HeronStateMgr::ListExecutionStateDone(std::vector<proto::system::ExecutionS
 }
 
 std::string HeronStateMgr::GetTMasterLocationDir() { return topleveldir_ + "/tmasters"; }
-std::string HeronStateMgr::GetMetricsCacheLocationDir() { return topleveldir_ + "/metricscaches"; }
 
 std::string HeronStateMgr::GetTopologyDir() { return topleveldir_ + "/topologies"; }
 
@@ -103,9 +102,6 @@ std::string HeronStateMgr::GetExecutionStateDir() { return topleveldir_ + "/exec
 
 std::string HeronStateMgr::GetTMasterLocationPath(const std::string& _topname) {
   return GetTMasterLocationDir() + "/" + _topname;
-}
-std::string HeronStateMgr::GetMetricsCacheLocationPath(const std::string& _topname) {
-  return GetMetricsCacheLocationDir() + "/" + _topname;
 }
 
 std::string HeronStateMgr::GetTopologyPath(const std::string& _topname) {

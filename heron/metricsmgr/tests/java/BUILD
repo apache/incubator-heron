@@ -23,7 +23,6 @@ java_tests(
         "com.twitter.heron.metricsmgr.MetricsManagerServerTest",
         "com.twitter.heron.metricsmgr.executor.SinkExecutorTest",
         "com.twitter.heron.metricsmgr.sink.tmaster.TMasterSinkTest",
-        "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSinkTest",
         "com.twitter.heron.metricsmgr.sink.FileSinkTest",
         "com.twitter.heron.metricsmgr.sink.WebSinkTest",
     ],

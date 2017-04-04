@@ -132,13 +132,6 @@ public interface IStateManager extends AutoCloseable {
   ListenableFuture<Boolean> deleteTMasterLocation(String topologyName);
 
   /**
-   * Delete the metricscache location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName);
-
-  /**
    * Delete the execution state for the given topology
    *
    * @return Boolean - Success or Failure
@@ -192,15 +185,6 @@ public interface IStateManager extends AutoCloseable {
       WatchCallback watcher, String topologyName);
 
   /**
-   * Get the MetricsCache location for the given topology
-   *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @return TMasterLocation
-   */
-  ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
-      WatchCallback watcher, String topologyName);
-
-  /**
    * Get the scheduler location for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
@@ -243,14 +227,6 @@ public interface IStateManager extends AutoCloseable {
    */
   ListenableFuture<Boolean> setTMasterLocation(
       TopologyMaster.TMasterLocation location, String topologyName);
-
-  /**
-   * Set the location of MetricsCache.
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location, String topologyName);
 
   /**
    * Set the physical plan for the given topology

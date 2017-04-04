@@ -227,10 +227,6 @@ public class Context {
     return cfg.getStringValue(Key.METRICSMGR_CLASSPATH);
   }
 
-  public static String metricsCacheManagerClassPath(Config cfg) {
-    return cfg.getStringValue(Key.METRICSCACHEMGR_CLASSPATH);
-  }
-
   public static String packingClassPath(Config cfg) {
     return cfg.getStringValue(Key.PACKING_CLASSPATH);
   }

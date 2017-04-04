@@ -42,7 +42,6 @@ class MetricsMgrClient : public Client {
 
   void SendMetrics(proto::system::MetricPublisherPublishMessage* _message);
   void SendTMasterLocation(const proto::tmaster::TMasterLocation& location);
-  void SendMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);
@@ -50,7 +49,6 @@ class MetricsMgrClient : public Client {
 
  private:
   void InternalSendTMasterLocation();
-  void InternalSendMetricsCacheLocation();
   void ReConnect();
   void SendRegisterRequest();
   void HandleRegisterResponse(void* _ctx, proto::system::MetricPublisherRegisterResponse* _respose,
@@ -61,7 +59,6 @@ class MetricsMgrClient : public Client {
   sp_string component_id_;
   sp_string task_id_;
   proto::tmaster::TMasterLocation* tmaster_location_;
-  proto::tmaster::MetricsCacheLocation* metricscache_location_;
   // Tells if we have registered to metrics manager or not
   bool registered_;
 };
