@@ -562,7 +562,8 @@ public class SubmitterMain {
     DryRunFormatType formatType = Context.dryRunFormatType(config);
     switch (formatType) {
       case RAW : return new SubmitRawDryRunRenderer(resp).render();
-      case TABLE: return new SubmitTableDryRunRenderer(resp).render();
+      case TABLE: return new SubmitTableDryRunRenderer(resp, false).render();
+      case COLORED_TABLE: return new SubmitTableDryRunRenderer(resp, true).render();
       default: throw new IllegalArgumentException(
           String.format("Unexpected rendering format: %s", formatType));
     }
