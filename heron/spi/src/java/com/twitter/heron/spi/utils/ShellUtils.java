@@ -130,7 +130,7 @@ public final class ShellUtils {
     final StringBuilder builder = outputBuilder == null ? new StringBuilder() : outputBuilder;
 
     // Log the command for debugging
-    LOG.log(Level.INFO, "Running synced process: ``{0}''''", toString(cmdline));
+    LOG.log(Level.INFO, "Running synced process: ``{0}''''", joinString(cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
     /* combine input stream and error stream into stderr because
        1. this preserves order of process's stdout/stderr message
@@ -195,7 +195,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.INFO, "Running async process: ``{0}''''", toString(command));
+    LOG.log(Level.INFO, "Running async process: ``{0}''''", joinString(command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
@@ -316,7 +316,7 @@ public final class ShellUtils {
   }
 
   // java 7 compatible version of String.join(" ", array), available in java 8
-  private static String toString(String[] array) {
+  private static String joinString(String[] array) {
     StringBuilder sb = new StringBuilder();
     for (String value : array) {
       if (sb.length() > 0) {
