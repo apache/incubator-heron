@@ -1,0 +1,23 @@
+#global
+*:*:* --config-property test-hello-global
+
+#app - global
+heron:*:* --config-property  command-global
+
+#command specific
+heron:activate:* --config-property test-cmd-activate-*
+
+#role and command specific
+heron:submit:devcluster/ads/PROD --config-property test-cmd-submit-role
+heron:activate:devcluster/ads/PROD --config-property test-cmd-activate-role
+
+#conversion of positional arguments to optional
+heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
+
+#invalid
+:devcluster/ads/PROD --config-property test-cmd-invalid     
+--config-property test-hello
+
+#error for submit parser with ilocal role
+
+heron:submit:ilocal --verbose True --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
