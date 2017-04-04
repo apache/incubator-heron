@@ -61,7 +61,7 @@
         format: function (d) { return d.toFixed(0); }
       },
       {
-        name: 'Back Pressure',
+        name: 'BP',
         metricName: 'bp',
         get: getAndRenderStats,
         tooltip: 'Milliseconds spent in back pressure per minute.',
