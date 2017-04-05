@@ -164,7 +164,8 @@ def add_dry_run(parser):
   :param parser:
   :return:
   '''
-  resp_formats = ['raw', 'table']
+  default_format = 'table'
+  resp_formats = ['raw', 'table', 'colored_table']
   available_options = ', '.join(['%s' % opt for opt in resp_formats])
 
   def dry_run_resp_format(value):
@@ -186,8 +187,8 @@ def add_dry_run(parser):
       metavar='DRY_RUN_FORMAT',
       default='table',
       type=dry_run_resp_format,
-      help='The format of the dry-run output ([raw|table], default=table). '
-           'Ignored when dry-run mode is not enabled')
+      help='The format of the dry-run output ([%s], default=%s). '
+           'Ignored when dry-run mode is not enabled' % ('|'.join(resp_formats), default_format))
 
   return parser
 
