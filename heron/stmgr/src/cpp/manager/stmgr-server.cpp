@@ -243,6 +243,8 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 
     auto qmmiter = connection_buffer_metric_map_.find(instance_id);
     if (qmmiter != connection_buffer_metric_map_.end()) {
+      metrics_manager_client_->unregister_metric(MakeQueueSizeCompIdMetricName(instance_id));
+      delete connection_buffer_metric_map_[instance_id];
       connection_buffer_metric_map_.erase(instance_id);
     }
   }
