@@ -238,11 +238,27 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
     sp_string instance_id = instance_info_[task_id]->instance_->instance_id();
     LOG(INFO) << "Instance " << instance_id << " closed connection";
 
-    instance_info_[task_id]->set_connection(NULL);
+    // Remove the connection from active instances
     active_instances_.erase(_conn);
 
+    // Remove from instance info
+    instance_info_[task_id]->set_connection(NULL);
+    delete instance_info_[task_id];
+    instance_info_.erase(task_id);
+
+    // Clean the instance_metric_map
+    auto immiter = instance_metric_map_.find(instance_id);
+    if (immiter != instance_metric_map_.end()) {
+      metrics_manager_client_->unregister_metric(MakeBackPressureCompIdMetricName(instance_id));
+      delete instance_metric_map_[instance_id];
+      instance_metric_map_.erase(instance_id);
+    }
+
+    // Clean the connection_buffer_metric_map_
     auto qmmiter = connection_buffer_metric_map_.find(instance_id);
     if (qmmiter != connection_buffer_metric_map_.end()) {
+      metrics_manager_client_->unregister_metric(MakeQueueSizeCompIdMetricName(instance_id));
+      delete connection_buffer_metric_map_[instance_id];
       connection_buffer_metric_map_.erase(instance_id);
     }
   }

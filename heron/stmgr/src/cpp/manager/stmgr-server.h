@@ -139,8 +139,7 @@ class StMgrServer : public Server {
   typedef std::map<Connection*, sp_int32> ConnectionTaskIdMap;
   ConnectionTaskIdMap active_instances_;
   // map of task id to InstanceData
-  // Once populated, will not change
-  typedef std::map<sp_int32, InstanceData*> TaskIdInstanceDataMap;
+  typedef std::unordered_map<sp_int32, InstanceData*> TaskIdInstanceDataMap;
   TaskIdInstanceDataMap instance_info_;
 
   // map of Instance_id/stmgrid to metric
