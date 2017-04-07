@@ -394,10 +394,11 @@ def main():
   env_map['PYTHON2'] = discover_tool('python2.7', 'Python2', 'PYTHON2', '2.7')
 
   if platform == 'Darwin':
-    env_map['AR'] = discover_tool('libtool', 'archiver', 'AR')
+    env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.6')
   else:
-    env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
+    env_map['LIBTOOL'] = discover_tool('libtool', 'Libtool', 'LIBTOOL', '2.4.6')
 
+  env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
   env_map['GCOV']= discover_tool('gcov','coverage tool', 'GCOV')
   env_map['DWP'] = discover_tool_default('dwp', 'dwp', 'DWP', '/usr/bin/dwp')
   env_map['NM'] = discover_tool_default('nm', 'nm', 'NM', '/usr/bin/nm')
