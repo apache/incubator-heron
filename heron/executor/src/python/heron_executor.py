@@ -200,6 +200,7 @@ class HeronExecutor(object):
     self.processes_to_monitor = {}
 
     self.state_managers = []
+    self.jvm_version = None
 
   @staticmethod
   def parse_args(args):
@@ -357,21 +358,29 @@ class HeronExecutor(object):
     retval = {}
     # TO DO (Karthik) to be moved into keys and defaults files
     code_cache_size_mb = 64
-    perm_gen_size_mb = 128
+    java_metasize_mb = 128
+
+    java_version = self._get_jvm_version()
+    java_metasize_param = 'MetaspaceSize'
+    if java_version.startswith("1.7") or \
+            java_version.startswith("1.6") or \
+            java_version.startswith("1.5"):
+      java_metasize_param = 'PermSize'
+
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
-      heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
+      heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
       Log.info("component name: %s, ram request: %d, total jvm size: %dM, "
-               "cache size: %dM, perm size: %dM"
+               "cache size: %dM, metaspace size: %dM"
                % (component_name, self.component_rammap[component_name],
-                  total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
+                  total_jvm_size, code_cache_size_mb, java_metasize_mb))
       xmn_size = int(heap_size_mb / 2)
       instance_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       '-Xmx%dM' % heap_size_mb,
                       '-Xms%dM' % heap_size_mb,
                       '-Xmn%dM' % xmn_size,
-                      '-XX:MaxPermSize=%dM' % perm_gen_size_mb,
-                      '-XX:PermSize=%dM' % perm_gen_size_mb,
+                      '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
+                      '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
                       '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
                       '-XX:+CMSScavengeBeforeRemark',
                       '-XX:TargetSurvivorRatio=90',
@@ -410,6 +419,21 @@ class HeronExecutor(object):
                            self.heron_internals_config_file])
       retval[instance_id] = instance_cmd
     return retval
+
+  def _get_jvm_version(self):
+    if not self.jvm_version:
+      cmd = [os.path.join(self.heron_java_home, 'bin/java'),
+             '-cp', self.instance_classpath, 'com.twitter.heron.instance.util.JvmVersion']
+      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      (process_stdout, process_stderr) = process.communicate()
+      if process.returncode != 0:
+        Log.error("Failed to determine JVM version. Exiting. Output of %s: %s",
+                  ' '.join(cmd), process_stderr)
+        sys.exit(1)
+
+      self.jvm_version = process_stdout
+      Log.info("Detected JVM version %s" % self.jvm_version)
+    return self.jvm_version
 
   # Returns the processes for each Python Heron Instance
   def _get_python_instance_cmd(self, instance_info):
