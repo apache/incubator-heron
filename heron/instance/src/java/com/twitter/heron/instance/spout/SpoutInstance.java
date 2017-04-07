@@ -117,6 +117,11 @@ public class SpoutInstance implements IInstance {
       ((IUpdatable) spout).update(physicalPlanHelper.getTopologyContext());
     }
     collector.updatePhysicalPlanHelper(physicalPlanHelper);
+
+    // Re-prepare the CustomStreamGrouping since the downstream tasks can change
+    physicalPlanHelper.prepareForCustomStreamGrouping();
+    // Reset the helper
+    helper = physicalPlanHelper;
   }
 
   @Override
