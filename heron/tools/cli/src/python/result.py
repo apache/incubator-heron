@@ -64,16 +64,20 @@ class Result(object):
         msg = msg[:-1]
       log_f(msg)
 
+  @staticmethod
+  def _do_print(f, msg):
+    if msg:
+      if msg[-1] == '\n':
+        msg = msg[:-1]
+      print >> f, msg
+
   def _log_context(self):
     # render context only after process exits
     assert self.status is not None
-    if self.status == Status.Ok or self.status == Status.DryRun:
+    if self.status in [Status.Ok, Status.DryRun]:
       self._do_log(Log.info, self.succ_context)
-    elif self.status == Status.HeronError:
+    elif self.status in [Status.HeronError, Status.InvocationError]:
       self._do_log(Log.error, self.err_context)
-    elif self.status == Status.InvocationError:
-      # invocation error has no context
-      pass
     else:
       raise RuntimeError(
           "Unknown status type of value %d. Expected value: %s", self.status.value, list(Status))
@@ -98,8 +102,8 @@ class Result(object):
 class SimpleResult(Result):
   """Simple result: result that already and only
      contains status of the result"""
-  def __init__(self, status):
-    super(SimpleResult, self).__init__(status)
+  def __init__(self, *args):
+    super(SimpleResult, self).__init__(*args)
 
   def render(self):
     self._log_context()
@@ -127,7 +131,7 @@ class ProcessResult(Result):
     if retcode is not None and status_type(retcode) == Status.InvocationError:
       self._do_log(Log.error, stderr_line)
     else:
-      print >> sys.stderr, stderr_line,
+      self._do_print(sys.stderr, stderr_line)
 
   def renderProcessStdOut(self, stdout):
     """ render stdout of shelled-out process
@@ -147,10 +151,13 @@ class ProcessResult(Result):
       self._do_log(Log.error, stdout)
     # No need to prefix [INFO] here. We want to display dry-run response in a clean way
     elif self.status == Status.DryRun:
-      print >> sys.stdout, stdout,
+      self._do_print(sys.stdout, stdout)
+    elif self.status == Status.InvocationError:
+      self._do_print(sys.stdout, stdout)
     else:
       raise RuntimeError(
-          "Unknown status type of value %d. Expected value: %s", self.status.value, list(Status))
+          "Unknown status type of value %d. Expected value: %s" % \
+          (self.status.value, list(Status)))
 
   def render(self):
     while True:

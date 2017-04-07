@@ -196,8 +196,8 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   result.render(res)
 
   if not res.is_successful():
-    err_context = "Failed to create topology definition \
-      file when executing class '%s' of file '%s'" % (main_class, topology_file)
+    err_context = ("Failed to create topology definition " \
+      "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
     return res
 
@@ -237,11 +237,11 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
       tmp_dir,
       java_defines)
 
-  res.render()
+  result.render(res)
 
   if not res.is_successful():
-    err_context = "Failed to create topology definition \
-      file when executing class '%s' of file '%s'" % (main_class, topology_file)
+    err_context = ("Failed to create topology definition " \
+      "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
     return res
 
@@ -259,11 +259,10 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   res = execute.heron_pex(
       topology_file, topology_class_name, tuple(unknown_args))
 
-  res.render()
-
+  result.render(res)
   if not res.is_successful():
-    err_context = "Failed to create topology definition \
-      file when executing class '%s' of file '%s'" % (topology_class_name, topology_file)
+    err_context = ("Failed to create topology definition " \
+      "file when executing class '%s' of file '%s'") % (topology_class_name, topology_file)
     res.add_context(err_context)
     return res
 
@@ -290,7 +289,7 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    err_context = "Topology jar|tar|pex file '%s' does not exist" % topology_file
+    err_context = "Topology file '%s' does not exist" % topology_file
     return SimpleResult(Status.InvocationError, err_context)
 
   # check if it is a valid file type
