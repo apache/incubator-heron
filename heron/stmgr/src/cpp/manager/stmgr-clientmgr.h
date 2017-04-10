@@ -77,7 +77,8 @@ class StMgrClientMgr {
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
 
-  // Counters for remote instance traffic, this is used for back pressure
+  // Counters for the traffic per remote instance on per stmgr since the last back pressure,
+  // this is used by back pressure algorithm to decide which instance to blame
   std::unordered_map<sp_string, std::unordered_map<sp_int32, sp_int64>> instance_stats_;
 };
 

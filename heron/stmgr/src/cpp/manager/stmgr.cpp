@@ -753,7 +753,7 @@ void StMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {
 void StMgr::StopBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Call the StMgrServers removeBackPressure method
   // Note: This is not good, we probably do not want to unthrottle them all
-  // at once, the upper layer only calls this once.
+  // at once, but the lower layer only calls us once.
   while (!backpressure_starters_.empty()) {
     server_->StopBackPressureClientCb(_other_stmgr_id, backpressure_starters_.front());
     backpressure_starters_.pop();

@@ -124,6 +124,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
 }
 
 sp_int32 StMgrClientMgr::FindBusiestTaskOnStmgr(const sp_string& _stmgr_id) {
+  CHECK(instance_stats_.find(_stmgr_id) != instance_stats_.end());
   sp_int32 task_id;
   sp_int64 max = 0;
   for (auto iter = instance_stats_[_stmgr_id].begin();
@@ -162,6 +163,7 @@ void StMgrClientMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id)
 void StMgrClientMgr::StopBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Call the StMgrServers removeBackPressure method
   stream_manager_->StopBackPressureOnServer(_other_stmgr_id);
+  instance_stats_.clear();
 }
 
 void StMgrClientMgr::SendStartBackPressureToOtherStMgrs(const sp_int32 _task_id) {
