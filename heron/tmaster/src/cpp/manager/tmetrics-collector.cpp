@@ -65,7 +65,7 @@ TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoo
       auto_restart_last_(0),
       tmaster_(_tmaster) {
   LOG(INFO) << "Auto restart backpressure container: window size " << auto_restart_window_
-            << " minutes ; min interval " << auto_restart_interval_ << " minutes";
+            << " milliseconds ; min interval " << auto_restart_interval_ << " milliseconds";
   interval_ = config::HeronInternalsConfigReader::Instance()
                   ->GetHeronTmasterMetricsCollectorPurgeIntervalSec();
   CHECK_EQ(max_interval_ % interval_, 0);
