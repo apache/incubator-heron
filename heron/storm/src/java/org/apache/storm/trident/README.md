@@ -5,12 +5,14 @@ need to either support direct grouping in Heron, or refactor Trident to not requ
 possible).
 
 To run:
-`~/bin/heron kill local TridentWordCountTopology && rm -rf ~/.herondata/*
-bazel run --config=darwin --verbose_failures -- scripts/packages/heron-client-install.sh --user && \
+
+```
+$ ~/bin/heron kill local TridentWordCountTopology && rm -rf ~/.herondata/*
+$ bazel run --config=darwin --verbose_failures -- scripts/packages/heron-client-install.sh --user && \
   ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \
   com.twitter.heron.examples.TridentWordCountTopology TridentWordCountTopology
-less ~/.herondata/topologies/local/billg/TridentWordCountTopology/log-files/container_1_b-1_4.log.0
-`
+$ less ~/.herondata/topologies/local/billg/TridentWordCountTopology/log-files/container_1_b-1_4.log.0
+```
 
 Current status:
 - Topology compiles and can be submitted
@@ -22,6 +24,7 @@ Current status:
 - Failures appear in the counters for bolt b-1, but the logs don't show anything and
 - Correctness is not right due to the following
 
+Issues:
 1. Direct grouping needs to be implemented, currently hacking using shuffle grouping (see grouping.cpp)
 2. `com.twitter.heron.instance.bolt.BoltOutputCollectorImpl.emitDirect` not supported and hacked to just emit
 3. `com.twitter.heron.instance.bolt.BoltOutputCollectorImpl.admitBoltTuple` changed to return task ids
