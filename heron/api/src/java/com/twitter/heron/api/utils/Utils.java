@@ -25,8 +25,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import com.google.protobuf.ByteString;
+
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronTopology;
+import com.twitter.heron.api.generated.TopologyAPI;
 
 public final class Utils {
+  private static final Logger LOG = Logger.getLogger(HeronTopology.class.getName());
+
   public static final String DEFAULT_STREAM_ID = "default";
 
   private Utils() {
@@ -101,5 +111,40 @@ public final class Utils {
     }
 
     return ret;
+  }
+
+  /**
+   * Converts a Heron Config object into a TopologyAPI.Config.Builder. Config entries with null
+   * keys or values are ignored.
+   *
+   * @param config heron Config object
+   * @return TopologyAPI.Config.Builder with values loaded from config
+   */
+  public static TopologyAPI.Config.Builder getConfigBuilder(Config config) {
+    TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
+    Set<String> apiVars = config.getApiVars();
+    for (String key : config.keySet()) {
+      Object value = config.get(key);
+      if (key == null) {
+        LOG.warning("ignore: null config key found");
+        continue;
+      }
+      if (value == null) {
+        LOG.warning("ignore: config key " + key + " has null value");
+        continue;
+      }
+      TopologyAPI.Config.KeyValue.Builder b = TopologyAPI.Config.KeyValue.newBuilder();
+      b.setKey(key);
+      if (apiVars.contains(key)) {
+        b.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
+        b.setValue(value.toString());
+      } else {
+        b.setType(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE);
+        b.setSerializedValue(ByteString.copyFrom(serialize(value)));
+      }
+      cBldr.addKvs(b);
+    }
+
+    return cBldr;
   }
 }
