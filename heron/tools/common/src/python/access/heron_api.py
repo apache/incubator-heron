@@ -729,6 +729,7 @@ class HeronQueryHandler(QueryHandler):
 
     components = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
 
+    result = {}
     futures = []
     for comp in components:
       query = self.get_query(metric, comp, instance)
