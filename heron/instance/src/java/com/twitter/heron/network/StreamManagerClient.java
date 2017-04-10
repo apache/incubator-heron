@@ -254,7 +254,7 @@ public class StreamManagerClient extends HeronClient {
       }
     } else {
       long now = System.currentTimeMillis();
-      if (now - lastNotConnectedLogTime > lastNotConnectedLogThrottleSeconds * 5000) {
+      if (now - lastNotConnectedLogTime > lastNotConnectedLogThrottleSeconds * 1000) {
         LOG.info(String.format("Stop reading due to not yet connected to Stream Manager. This "
             + "message is throttled to emit no more than once every %d seconds.",
             lastNotConnectedLogThrottleSeconds));
