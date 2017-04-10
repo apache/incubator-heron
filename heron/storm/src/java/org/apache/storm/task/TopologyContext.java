@@ -22,10 +22,13 @@ package org.apache.storm.task;
 // import org.apache.storm.generated.Grouping;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.generated.Grouping;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.hooks.ITaskHook;
 import org.apache.storm.hooks.ITaskHookDelegate;
@@ -51,6 +54,7 @@ import org.apache.storm.tuple.Fields;
  */
 public class TopologyContext extends WorkerTopologyContext implements IMetricsContext {
   private com.twitter.heron.api.topology.TopologyContext delegate;
+  private Map<String, Object> _executorData;
 
   // Constructor to match the signature of the storm's TopologyContext
   // Note that here, we fake the clojure.lang.Atom by creating our own class
@@ -67,11 +71,13 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
                          Map<String, Object> executorData, Map<String, Object> registeredMetrics,
                          org.apache.storm.clojure.lang.Atom openOrPrepareWasCalled) {
     super((com.twitter.heron.api.topology.TopologyContext) null);
+    this._executorData = executorData;
   }
 
   public TopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
     super(delegate);
     this.delegate = delegate;
+    this._executorData = new HashMap<>();
   }
 
   /**
@@ -188,16 +194,28 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     }
   */
 
+  public Map<GlobalStreamId, Grouping> getThisSources() {
+    return getSources(getThisComponentId());
+  }
+
   /*
    * Gets information about who is consuming the outputs of this component, and how.
    *
    * @return Map from stream id to component id to the Grouping used.
    */
+//  public Map<String, Map<String, TopologyAPI.Grouping>> getThisHeronTargets() {
+//    return getHeronTargets(getThisComponentId());
+//  }
+
   /*
+   * Gets information about who is consuming the outputs of this component, and how.
+   *
+   * @return Map from stream id to component id to the Grouping used.
+   */
   public Map<String, Map<String, Grouping>> getThisTargets() {
       return getTargets(getThisComponentId());
   }
-  */
+
   public void setTaskData(String name, Object data) {
     delegate.setTaskData(name, data);
   }
@@ -206,15 +224,13 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     return delegate.getTaskData(name);
   }
 
-  /*
-    public void setExecutorData(String name, Object data) {
-        _executorData.put(name, data);
-    }
+  public void setExecutorData(String name, Object data) {
+    _executorData.put(name, data);
+  }
 
-    public Object getExecutorData(String name) {
-        return _executorData.get(name);
-    }
-  */
+  public Object getExecutorData(String name) {
+    return _executorData.get(name);
+  }
 
   public void addTaskHook(ITaskHook newHook) {
     Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();

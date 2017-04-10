@@ -18,6 +18,8 @@
 
 package org.apache.storm.topology;
 
+import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.generated.Grouping;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.tuple.Fields;
 
@@ -57,5 +59,9 @@ public interface InputDeclarer<T extends InputDeclarer> {
 
   T customGrouping(String componentId, String streamId, CustomStreamGrouping grouping);
 
-  //  T grouping(GlobalStreamId id, Grouping grouping);
+  T partialKeyGrouping(String componentId, Fields fields);
+
+  T partialKeyGrouping(String componentId, String streamId, Fields fields);
+
+  T grouping(GlobalStreamId id, Grouping grouping);
 }

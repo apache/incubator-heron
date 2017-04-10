@@ -15,23 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.storm.topology;
 
-import java.util.Map;
-
+/**
+ * This is a new base interface that can be used by anything that wants to mirror
+ * RAS's basic API. Trident uses this to allow setting resources in the Stream API.
+ */
 @SuppressWarnings("rawtypes")
-public interface ComponentConfigurationDeclarer<T extends ComponentConfigurationDeclarer>
-    extends ResourceDeclarer<T> {
-  T addConfigurations(Map conf);
-
-  T addConfiguration(String config, Object value);
-
-  T setDebug(boolean debug);
-
-  T setMaxTaskParallelism(Number val);
-
-  T setMaxSpoutPending(Number val);
-
-  T setNumTasks(Number val);
+public interface ResourceDeclarer <T extends ResourceDeclarer> {
+  T setMemoryLoad(Number onHeap);
+  T setMemoryLoad(Number onHeap, Number offHeap);
+  T setCPULoad(Number amount);
 }
+

@@ -37,9 +37,11 @@ public class HeronTopology {
     this.topologyBuilder = topologyBuilder;
   }
 
+  // TODO: share this logic with BaseComponentDeclarer.dump(), which is identical. Differences
+  // between the two have caused hard to troubleshoot bugs.
   private static TopologyAPI.Config.Builder getConfigBuilder(Config config) {
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
-    Set<String> apiVars = config.getApiVars();
+    Set<String> apiVars = Config.getApiVars();
     for (String key : config.keySet()) {
       Object value = config.get(key);
       TopologyAPI.Config.KeyValue.Builder b = TopologyAPI.Config.KeyValue.newBuilder();

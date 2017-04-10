@@ -16,6 +16,7 @@ package com.twitter.heron.api.topology;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
@@ -64,20 +65,29 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     bldr.setSpec(TopologyAPI.ComponentObjectSpec.JAVA_SERIALIZED_OBJECT);
     bldr.setSerializedObject(ByteString.copyFrom(Utils.serialize(component)));
 
+    // TODO: share this logic with HeronTopology.getConfigBuilder, which is identical. Differences
+    // between the two have caused hard to troubleshoot bugs.
+    Set<String> apiVars = Config.getApiVars();
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
-    for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
-      if (entry.getKey() == null) {
+    for (String key : componentConfiguration.keySet()) {
+      Object value = componentConfiguration.get(key);
+      if (key == null) {
         LOG.warning("ignore: config key is null");
         continue;
       }
-      if (entry.getValue() == null) {
-        LOG.warning("ignore: config key " + entry.getKey() + " has null value");
+      if (value == null) {
+        LOG.warning("ignore: config key " + key + " has null value");
         continue;
       }
       TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
-      kvBldr.setKey(entry.getKey());
-      kvBldr.setValue(entry.getValue().toString());
-      kvBldr.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
+      kvBldr.setKey(key);
+      if (apiVars.contains(key)) {
+        kvBldr.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
+        kvBldr.setValue(value.toString());
+      } else {
+        kvBldr.setType(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE);
+        kvBldr.setSerializedValue(ByteString.copyFrom(Utils.serialize(value)));
+      }
       cBldr.addKvs(kvBldr);
     }
     bldr.setConfig(cBldr);

@@ -276,6 +276,18 @@ maven_jar(
   artifact = "org.apache.reef:tang:" + reef_version
 )
 
+# added for trident prototype
+maven_jar(
+  name = "org_clojure_clojure",
+  artifact = "org.clojure:clojure:1.7.0"
+)
+
+# added for trident prototype
+maven_jar(
+  name = "org_apache_storm_core",
+  artifact = "org.apache.storm:storm-core:1.0.0"
+)
+
 maven_jar(
   name = "org_apache_thrift_libthrift",
   artifact = "org.apache.thrift:libthrift:0.5.0-1",

@@ -239,6 +239,8 @@ public class StreamManagerClient extends HeronClient {
     }
   }
 
+  private long lastNotConnectedLogTime = 0;
+  private long throttleSeconds = 5;
   private void readStreamMessageIfNeeded() {
     // If client is not connected, just return
     if (isConnected()) {
@@ -249,7 +251,12 @@ public class StreamManagerClient extends HeronClient {
         stopReading();
       }
     } else {
-      LOG.info("Stop reading due to not yet connected to Stream Manager.");
+      long now = System.currentTimeMillis();
+      if (now - lastNotConnectedLogTime > throttleSeconds * 5000) {
+        LOG.info(String.format("Stop reading due to not yet connected to Stream Manager. This "
+            + "message is throttled to emit no more than once every %d seconds.", throttleSeconds));
+        lastNotConnectedLogTime = now;
+      }
     }
   }
 

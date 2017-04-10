@@ -68,8 +68,10 @@ Grouping* Grouping::Create(proto::api::Grouping grouping_, const proto::api::Inp
     }
 
     case proto::api::DIRECT: {
-      LOG(FATAL) << "Direct grouping not supported";
-      return NULL;  // keep compiler happy
+      // TODO: do not merge in this state!
+      LOG(ERROR) << "Direct grouping not supported, faking with ShuffleGrouping for now";
+//      return NULL;  // keep compiler happy
+      return new ShuffleGrouping(_task_ids);
       break;
     }
 

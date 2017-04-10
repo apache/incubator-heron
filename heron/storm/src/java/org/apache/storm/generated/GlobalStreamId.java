@@ -18,7 +18,10 @@
 
 package org.apache.storm.generated;
 
-public class GlobalStreamId {
+import java.io.Serializable;
+
+public class GlobalStreamId implements Serializable {
+  private static final long serialVersionUID = 1873909238460677921L;
   private String componentId; // required
   private String streamId; // required
 
@@ -59,5 +62,29 @@ public class GlobalStreamId {
 
   public void unset_streamId() {
     this.streamId = null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    GlobalStreamId that = (GlobalStreamId) o;
+
+    if (componentId != null ? !componentId.equals(that.componentId) : that.componentId != null)
+      return false;
+    return streamId != null ? streamId.equals(that.streamId) : that.streamId == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = componentId != null ? componentId.hashCode() : 0;
+    result = 31 * result + (streamId != null ? streamId.hashCode() : 0);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    return "GlobalStreamId{componentId='" + componentId + "', streamId='" + streamId + "'}";
   }
 }

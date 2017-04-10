@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +109,9 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
       String streamId,
       Collection<Tuple> anchors,
       List<Object> tuple) {
-    throw new RuntimeException("emitDirect not supported");
+    LOG.warning(String.format("emitDirect not supported so emitting to stream %s as part of "
+        + "a prototype. This topology is likely broken.", streamId));
+    emit(streamId, anchors, tuple);
   }
 
   @Override
@@ -169,7 +172,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     // set the key. This is mostly ignored
     bldr.setKey(0);
 
-    List<Integer> customGroupingTargetTaskIds = null;
+    List<Integer> customGroupingTargetTaskIds = new ArrayList<>();
     if (!helper.isCustomGroupingEmpty()) {
       // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
       customGroupingTargetTaskIds =
@@ -218,8 +221,8 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     // Update metrics
     boltMetrics.emittedTuple(streamId);
 
-    // TODO:- remove this after changing the api
-    return null;
+    // TODO: this used to return null. modified to make Trident work. Verify this is correct
+    return customGroupingTargetTaskIds;
   }
 
   private void admitAckTuple(Tuple tuple) {

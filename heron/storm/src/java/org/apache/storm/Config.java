@@ -27,6 +27,7 @@ import com.esotericsoftware.kryo.Serializer;
 
 import org.apache.storm.serialization.IKryoDecorator;
 import org.apache.storm.serialization.IKryoFactory;
+import org.apache.storm.validation.ConfigValidationAnnotations;
 
 /**
  * Topology configs are specified as a plain old map. This class provides a
@@ -268,6 +269,63 @@ public class Config extends com.twitter.heron.api.Config {
    * The port Storm will use to connect to each of the ZooKeeper servers.
    */
   public static final String STORM_ZOOKEEPER_PORT = "storm.zookeeper.port";
+
+  /**
+   * The ceiling of the interval between retries of a Zookeeper operation.
+   */
+  @ConfigValidationAnnotations.isInteger
+  public static final String STORM_ZOOKEEPER_RETRY_INTERVAL_CEILING="storm.zookeeper.retry.intervalceiling.millis";
+
+  /**
+   * A list of hosts of Exhibitor servers used to discover/maintain connection to ZooKeeper cluster.
+   * Any configured ZooKeeper servers will be used for the curator/exhibitor backup connection string.
+   */
+  @ConfigValidationAnnotations.isStringList
+  public static final String STORM_EXHIBITOR_SERVERS = "storm.exhibitor.servers";
+
+  /**
+   * The port Storm will use to connect to each of the exhibitor servers.
+   */
+  @ConfigValidationAnnotations.isInteger
+  @ConfigValidationAnnotations.isPositiveNumber
+  public static final String STORM_EXHIBITOR_PORT = "storm.exhibitor.port";
+
+  /*
+   * How often to poll Exhibitor cluster in millis.
+   */
+  @ConfigValidationAnnotations.isString
+  public static final String STORM_EXHIBITOR_URIPATH="storm.exhibitor.poll.uripath";
+
+  /**
+   * How often to poll Exhibitor cluster in millis.
+   */
+  @ConfigValidationAnnotations.isInteger
+  public static final String STORM_EXHIBITOR_POLL="storm.exhibitor.poll.millis";
+
+  /**
+   * The number of times to retry an Exhibitor operation.
+   */
+  @ConfigValidationAnnotations.isInteger
+  public static final String STORM_EXHIBITOR_RETRY_TIMES="storm.exhibitor.retry.times";
+
+  /**
+   * The interval between retries of an Exhibitor operation.
+   */
+  @ConfigValidationAnnotations.isInteger
+  public static final String STORM_EXHIBITOR_RETRY_INTERVAL="storm.exhibitor.retry.interval";
+
+  /**
+   * The ceiling of the interval between retries of an Exhibitor operation.
+   */
+  @ConfigValidationAnnotations.isInteger
+  public static final String STORM_EXHIBITOR_RETRY_INTERVAL_CEILING="storm.exhibitor.retry.intervalceiling.millis";
+
+  /**
+   * How often a batch can be emitted in a Trident topology.
+   */
+  @ConfigValidationAnnotations.isInteger
+  @ConfigValidationAnnotations.isPositiveNumber
+  public static final String TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS="topology.trident.batch.emit.interval.millis";
 
   /**
    * The root directory in ZooKeeper for metadata about TransactionalSpouts.
