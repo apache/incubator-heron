@@ -67,6 +67,8 @@ public class StreamManagerClient extends HeronClient {
 
   private PhysicalPlanHelper helper;
 
+  private long lastNotConnectedLogTime = 0;
+
   public StreamManagerClient(NIOLooper s, String streamManagerHost, int streamManagerPort,
                              String topologyName, String topologyId,
                              PhysicalPlans.Instance instance,
@@ -239,9 +241,9 @@ public class StreamManagerClient extends HeronClient {
     }
   }
 
-  private long lastNotConnectedLogTime = 0;
-  private long throttleSeconds = 5;
   private void readStreamMessageIfNeeded() {
+    final long lastNotConnectedLogThrottleSeconds = 5;
+
     // If client is not connected, just return
     if (isConnected()) {
       if (isInQueuesAvailable() || helper == null) {
@@ -252,9 +254,10 @@ public class StreamManagerClient extends HeronClient {
       }
     } else {
       long now = System.currentTimeMillis();
-      if (now - lastNotConnectedLogTime > throttleSeconds * 5000) {
+      if (now - lastNotConnectedLogTime > lastNotConnectedLogThrottleSeconds * 1000) {
         LOG.info(String.format("Stop reading due to not yet connected to Stream Manager. This "
-            + "message is throttled to emit no more than once every %d seconds.", throttleSeconds));
+            + "message is throttled to emit no more than once every %d seconds.",
+            lastNotConnectedLogThrottleSeconds));
         lastNotConnectedLogTime = now;
       }
     }
