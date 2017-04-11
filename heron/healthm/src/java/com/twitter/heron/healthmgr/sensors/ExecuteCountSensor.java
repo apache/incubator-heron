@@ -25,7 +25,7 @@ import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.twitter.heron.healthmgr.common.HealthManagerContstants;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
-public class ExecuteCountSensor {
+public class ExecuteCountSensor extends BaseSensor {
   private final TopologyProvider topologyProvider;
   private final MetricsProvider metricsProvider;
 

@@ -12,18 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.healthmgr.common;
+package com.twitter.heron.healthmgr.sensors;
 
-public interface HealthManagerContstants {
-  int DEFAULT_METRIC_DURATION = 60;
+import com.microsoft.dhalion.api.ISensor;
 
-  String METRIC_EXE_COUNT = "__execute-count/default";
-  String METRIC_INSTANCE_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
-  String METRIC_BUFFER_SIZE = "__connection_buffer_by_intanceid/";
-  String METRIC_BUFFER_SIZE_SUFFIX = "/packets";
+public abstract class BaseSensor implements ISensor {
+  @Override
+  public void close() {
 
-  String COMPONENT_STMGR = "__stmgr__";
-
-  String CONF_TRACKER_URL = "TRACKER_URL";
-  String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
+  }
 }

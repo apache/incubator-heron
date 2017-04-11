@@ -14,10 +14,12 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
+import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
 import org.junit.Test;
 
@@ -29,9 +31,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class BackPressureSensorTest {
+public class BufferSizeSensorTest {
   @Test
-  public void providesBackPressureMetricForBolts() {
+  public void providesBufferSizeMetricForBolts() {
     TopologyProvider topologyProvider = mock(TopologyProvider.class);
     when(topologyProvider.getBoltNames()).thenReturn(new String[]{"bolt-1", "bolt-2"});
 
@@ -48,30 +50,39 @@ public class BackPressureSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE + boltId;
-      BufferSizeSensorTest
-          .registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
+      String metric = HealthManagerContstants.METRIC_BUFFER_SIZE
+          + boltId + HealthManagerContstants.METRIC_BUFFER_SIZE_SUFFIX;
+      registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
     }
 
-    BackPressureSensor backPressureSensor =
-        new BackPressureSensor(packingPlanProvider, topologyProvider, metricsProvider);
+    BufferSizeSensor bufferSizeSensor =
+        new BufferSizeSensor(packingPlanProvider, topologyProvider, metricsProvider);
 
-    Map<String, ComponentMetricsData> componentMetrics = backPressureSensor.get();
+    Map<String, ComponentMetricsData> componentMetrics = bufferSizeSensor.get();
     assertEquals(2, componentMetrics.size());
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricIntValue(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE));
+        .getMetricIntValue(HealthManagerContstants.METRIC_BUFFER_SIZE));
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricIntValue(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE));
+            .getMetricIntValue(HealthManagerContstants.METRIC_BUFFER_SIZE));
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricIntValue(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE));
+            .getMetricIntValue(HealthManagerContstants.METRIC_BUFFER_SIZE));
   }
 
-  //TODO
-  void emptyMetricTest() {
-//    {"status": "success", "executiontime": 0.30780792236328125, "message": "", "version": "delayedTopology", "result": {"metrics": {}, "interval": 0, "component": "split"}}
+  public static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
+                                                         String metric,
+                                                         int value) {
+    Map<String, ComponentMetricsData> result = new HashMap<>();
+    ComponentMetricsData metrics = new ComponentMetricsData("__stmgr__");
+    InstanceMetricsData instanceMetrics = new InstanceMetricsData("stmgr-1");
+    instanceMetrics.addMetric(metric, value);
+    metrics.addInstanceMetric(instanceMetrics);
+    result.put("__stmgr__", metrics);
+
+    when(metricsProvider.getComponentMetrics(metric, 60, "__stmgr__"))
+        .thenReturn(result);
   }
 }
