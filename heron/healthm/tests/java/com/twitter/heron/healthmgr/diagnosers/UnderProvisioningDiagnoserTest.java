@@ -14,11 +14,6 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.symptom.ComponentSymptom;
 import com.microsoft.dhalion.symptom.Diagnosis;
@@ -27,56 +22,63 @@ import org.junit.Test;
 
 import com.twitter.heron.healthmgr.common.HealthManagerContstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
+import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class UnderProvisioningDiagnoserTest {
   @Test
-  public void diagnosesCompWhen1Of1InstanceInBP() {
+  public void diagnosisWhen1Of1InstanceInBP() {
     BackPressureDetector bpDetector = createMockBackPressureDetector(123);
-    ExecuteCountSensor exeSensor = createMockExecuteCountSensor(5000);
+    BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000);
 
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, exeSensor);
+    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, bufferSensor);
     Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
-    assertEquals(1, result.getSymptoms().size());
-    ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
-    assertEquals(123,
-        data.getMetricValue("container_1_bolt_0",
-            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+    validateDiagnosis(result);
   }
 
   @Test
-  public void comparableExeCountDiagnosed1Of3InstanceInBP() {
+  public void diagnosesSucceedsAllInstanceFullBuffers() {
     BackPressureDetector bpDetector = createMockBackPressureDetector(123, 0, 0);
     // set execute count within 20%, hence diagnosis should be under provisioning
-    ExecuteCountSensor exeSensor = createMockExecuteCountSensor(5000, 4201, 4201);
+    BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000, 4000, 3500);
 
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, exeSensor);
+    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, bufferSensor);
     Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
-    assertEquals(1, result.getSymptoms().size());
-    ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
-    assertEquals(123,
-        data.getMetricValue("container_1_bolt_0",
-            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+    validateDiagnosis(result);
   }
 
   @Test
-  public void dataSkewIsNotDiagnosed1Of3InstanceInBP() {
+  public void diagnosisFailsIfBuffersDifferALot() {
     BackPressureDetector bpDetector = createMockBackPressureDetector(123, 0, 0);
-    // set execute count above 20%, hence diagnosis should NOT be under provisioning
-    ExecuteCountSensor exeSensor = createMockExecuteCountSensor(5000, 4100, 4100);
+    BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000, 1000, 1000);
 
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, exeSensor);
+    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, bufferSensor);
     Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
     assertNull(result);
   }
 
-  public static ExecuteCountSensor createMockExecuteCountSensor(int... exeCounts) {
-    return DataSkewDiagnoserTest.createMockExecuteCountSensor(exeCounts);
+  @Test
+  public void diagnosesSucceedsIfBufferSizeIsNotKnown() {
+    BackPressureDetector bpDetector = createMockBackPressureDetector(123, 0);
+    BufferSizeSensor bufferSensor = createMockBufferSizeSensor();
+
+    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bpDetector, bufferSensor);
+    Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
+    validateDiagnosis(result);
+  }
+
+  private void validateDiagnosis(Diagnosis<ComponentSymptom> result) {
+    assertEquals(1, result.getSymptoms().size());
+    ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
+    assertEquals(123,
+        data.getMetricValue("container_1_bolt_0",
+            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+  }
+
+  public static BufferSizeSensor createMockBufferSizeSensor(double... bufferSizes) {
+    return SlowInstanceDiagnoserTest.createMockBufferSizeSensor(bufferSizes);
   }
 
   private BackPressureDetector createMockBackPressureDetector(int... bpValues) {
