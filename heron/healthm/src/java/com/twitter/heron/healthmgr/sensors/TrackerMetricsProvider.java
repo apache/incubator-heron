@@ -61,7 +61,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
     for (String component : components) {
 
       String response = getMetricsFromTracker(metric, component, durationSec);
-      Map<String, InstanceMetricsData> metrics = parse(response, component, metric, durationSec);
+      Map<String, InstanceMetricsData> metrics = parse(response, component, metric);
       ComponentMetricsData componentMetric =
           new ComponentMetricsData(component, System.currentTimeMillis(), durationSec, metrics);
       result.put(component, componentMetric);
@@ -72,10 +72,8 @@ public class TrackerMetricsProvider implements MetricsProvider {
 
   private Map<String, InstanceMetricsData> parse(String response,
                                                  String component,
-                                                 String metric,
-                                                 int durationSec) {
+                                                 String metric) {
     Map<String, InstanceMetricsData> metricsData = new HashMap<>();
-    long timestampMillis = System.currentTimeMillis();
 
     Map<String, Map<String, String>> metricsMap = parseMetrics(response);
     if (metricsMap == null || metricsMap.get(metric) == null) {

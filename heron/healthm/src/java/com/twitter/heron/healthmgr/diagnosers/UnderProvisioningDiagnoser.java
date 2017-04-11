@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -27,19 +28,19 @@ import com.microsoft.dhalion.symptom.ComponentSymptom;
 import com.microsoft.dhalion.symptom.Diagnosis;
 
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
+import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 public class UnderProvisioningDiagnoser extends BaseDiagnoser {
+  private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
+
   private final BackPressureDetector bpDetector;
-  private final ExecuteCountSensor executeCountSensor;
-  private final double limit;
+  private final BufferSizeSensor bufferSizeSensor;
+  private final double limit = 1000;
 
   @Inject
-  UnderProvisioningDiagnoser(BackPressureDetector bpDetector,
-                             ExecuteCountSensor executeCountSensor) {
+  UnderProvisioningDiagnoser(BackPressureDetector bpDetector, BufferSizeSensor bufferSizeSensor) {
     this.bpDetector = bpDetector;
-    this.executeCountSensor = executeCountSensor;
-    limit = 0.2;
+    this.bufferSizeSensor = bufferSizeSensor;
   }
 
   @Override
@@ -53,25 +54,24 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
     Set<ComponentSymptom> symptoms = new HashSet<>();
     for (ComponentSymptom backPressureSymptom : backPressureSymptoms) {
       ComponentMetricsData bpMetricsData = backPressureSymptom.getMetricsData();
-      Map<String, ComponentMetricsData> result = executeCountSensor.get(bpMetricsData.getName());
-      ComponentMetricsData executionCountData = result.get(bpMetricsData.getName());
+
+      Map<String, ComponentMetricsData> result = bufferSizeSensor.get(bpMetricsData.getName());
+      ComponentMetricsData bufferSizeData = result.get(bpMetricsData.getName());
 
       ComponentMetricsData mergedData =
-          ComponentMetricsData.merge(bpMetricsData, executionCountData);
+          ComponentMetricsData.merge(bpMetricsData, bufferSizeData);
 
-      ComponentBackPressureExeStats compStats = new ComponentBackPressureExeStats(mergedData);
-      double executeDiff = Math.abs(compStats.avgBPExeCount - compStats.avgNonBPExeCount);
-      double lowerAvgBPExecuteCount =
-          compStats.avgBPExeCount > compStats.avgNonBPExeCount ?
-              compStats.avgNonBPExeCount : compStats.avgBPExeCount;
+      ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+      compStats.computeBufferSizeStats();
 
-      // if all instances are starting backpressure or the diff
-      if (compStats.bpInstanceCount == compStats.totalInstances
-          || executeDiff < limit * lowerAvgBPExecuteCount) {
+      // if all instances are reporting backpressure or if all instances have large pending buffers
+      if (compStats.bufferSizeMin > limit
+          && compStats.bufferSizeMin * 5 > compStats.bufferSizeMax) {
+        LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
+            mergedData.getName(), compStats.totalBackpressure, compStats.bufferSizeMin));
         symptoms.add(ComponentSymptom.from(mergedData));
       }
     }
-
     return symptoms.size() > 0 ? new Diagnosis<>(symptoms) : null;
   }
 }

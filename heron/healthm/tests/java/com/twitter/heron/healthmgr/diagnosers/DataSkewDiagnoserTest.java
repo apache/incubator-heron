@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
 import com.microsoft.dhalion.symptom.ComponentSymptom;
@@ -61,20 +62,6 @@ public class DataSkewDiagnoserTest {
             HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
   }
 
-  public static ExecuteCountSensor createMockExecuteCountSensor(int... exeCounts) {
-    ExecuteCountSensor exeSensor = mock(ExecuteCountSensor.class);
-    ComponentMetricsData exeMetrics = new ComponentMetricsData("bolt");
-
-    for (int i = 0; i < exeCounts.length; i++) {
-      addInstanceMetric(exeMetrics, i, exeCounts[i], HealthManagerContstants.METRIC_EXE_COUNT);
-    }
-
-    Map<String, ComponentMetricsData> exeMap = new HashMap<>();
-    exeMap.put("bolt", exeMetrics);
-    when(exeSensor.get("bolt")).thenReturn(exeMap);
-    return exeSensor;
-  }
-
   public static BackPressureDetector createMockBackPressureDetector(int... bpValues) {
     BackPressureDetector bpDetector = mock(BackPressureDetector.class);
     ComponentMetricsData bpMetrics = new ComponentMetricsData("bolt");
@@ -90,7 +77,25 @@ public class DataSkewDiagnoserTest {
     return bpDetector;
   }
 
-  static void addInstanceMetric(ComponentMetricsData metrics, int i, int value, String metric) {
+  public static ExecuteCountSensor createMockExecuteCountSensor(double... exeCounts) {
+    ExecuteCountSensor exeSensor = mock(ExecuteCountSensor.class);
+    return getMockSensor(HealthManagerContstants.METRIC_EXE_COUNT, exeSensor, exeCounts);
+  }
+
+  static <T extends ISensor> T getMockSensor(String metric, T sensor, double... values) {
+    ComponentMetricsData metrics = new ComponentMetricsData("bolt");
+
+    for (int i = 0; i < values.length; i++) {
+      DataSkewDiagnoserTest.addInstanceMetric(metrics, i, values[i], metric);
+    }
+
+    Map<String, ComponentMetricsData> resultMap = new HashMap<>();
+    resultMap.put("bolt", metrics);
+    when(sensor.get("bolt")).thenReturn(resultMap);
+    return sensor;
+  }
+
+  static void addInstanceMetric(ComponentMetricsData metrics, int i, double value, String metric) {
     String instanceName = "container_1_bolt_" + i;
     InstanceMetricsData instanceMetric = new InstanceMetricsData(instanceName);
     instanceMetric.addMetric(metric, value);

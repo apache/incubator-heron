@@ -15,8 +15,12 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -28,35 +32,46 @@ import com.twitter.heron.healthmgr.common.HealthManagerContstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
-public class BackPressureSensor extends BaseSensor {
+public class BufferSizeSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
   private final TopologyProvider topologyProvider;
 
   @Inject
-  BackPressureSensor(PackingPlanProvider packingPlanProvider,
-                     TopologyProvider topologyProvider,
-                     MetricsProvider metricsProvider) {
+  BufferSizeSensor(PackingPlanProvider packingPlanProvider,
+                   TopologyProvider topologyProvider,
+                   MetricsProvider metricsProvider) {
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
   }
 
-  @Override
-  public Map<String, ComponentMetricsData> get(String... components) {
-    return get();
+  public Map<String, ComponentMetricsData> get() {
+    return get(new String[0]);
   }
 
-  public Map<String, ComponentMetricsData> get() {
+  public Map<String, ComponentMetricsData> get(String... desiredBoltNames) {
     Map<String, ComponentMetricsData> result = new HashMap<>();
+
+    Set<String> boltNameFilter = new HashSet<>();
+    if (desiredBoltNames.length > 0) {
+      boltNameFilter.addAll(Arrays.asList(desiredBoltNames));
+    }
 
     String[] boltComponents = topologyProvider.getBoltNames();
     for (String boltComponent : boltComponents) {
+      if (!boltNameFilter.isEmpty() && !boltNameFilter.contains(boltComponent)) {
+        continue;
+      }
+
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
 
       Map<String, InstanceMetricsData> instanceMetricsData = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE + boltInstanceName;
+        String metric = HealthManagerContstants.METRIC_BUFFER_SIZE
+            + boltInstanceName
+            + HealthManagerContstants.METRIC_BUFFER_SIZE_SUFFIX;
+
         Map<String, ComponentMetricsData> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
             HealthManagerContstants.DEFAULT_METRIC_DURATION,
@@ -71,7 +86,7 @@ public class BackPressureSensor extends BaseSensor {
 
         InstanceMetricsData boltInstanceMetric = new InstanceMetricsData(boltInstanceName);
 
-        boltInstanceMetric.addMetric(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE,
+        boltInstanceMetric.addMetric(HealthManagerContstants.METRIC_BUFFER_SIZE,
             stmgrInstanceResult.getMetricIntValue(metric));
 
         instanceMetricsData.put(boltInstanceName, boltInstanceMetric);

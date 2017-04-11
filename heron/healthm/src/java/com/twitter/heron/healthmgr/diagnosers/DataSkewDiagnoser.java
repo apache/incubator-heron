@@ -19,28 +19,29 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
 import com.microsoft.dhalion.symptom.ComponentSymptom;
 import com.microsoft.dhalion.symptom.Diagnosis;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 public class DataSkewDiagnoser extends BaseDiagnoser {
+  private static final Logger LOG = Logger.getLogger(DataSkewDiagnoser.class.getName());
+
   private final BackPressureDetector bpDetector;
-  private final ExecuteCountSensor executeCountSensor;
-  private double limit = 0.5;
+  private final ExecuteCountSensor exeCountSensor;
+  private double limit = 1.5;
 
   @Inject
-  DataSkewDiagnoser(BackPressureDetector bpDetector, ExecuteCountSensor executeCountSensor) {
+  DataSkewDiagnoser(BackPressureDetector bpDetector, ExecuteCountSensor exeCountSensor) {
     this.bpDetector = bpDetector;
-    this.executeCountSensor = executeCountSensor;
+    this.exeCountSensor = exeCountSensor;
   }
 
   @Override
@@ -54,19 +55,30 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
     Set<ComponentSymptom> symptoms = new HashSet<>();
     for (ComponentSymptom backPressureSymptom : backPressureSymptoms) {
       ComponentMetricsData bpMetricsData = backPressureSymptom.getMetricsData();
-      Map<String, ComponentMetricsData> result = executeCountSensor.get(bpMetricsData.getName());
-      ComponentMetricsData executionCountData = result.get(bpMetricsData.getName());
+      if (bpMetricsData.getMetrics().size() <= 1) {
+        // Need more than one instance for comparison
+        continue;
+      }
 
-      ComponentMetricsData mergedData =
-          ComponentMetricsData.merge(bpMetricsData, executionCountData);
+      Map<String, ComponentMetricsData> result = exeCountSensor.get(bpMetricsData.getName());
+      ComponentMetricsData exeCountData = result.get(bpMetricsData.getName());
+      ComponentMetricsData mergedData = ComponentMetricsData.merge(bpMetricsData, exeCountData);
 
-      ComponentBackPressureExeStats compStats = new ComponentBackPressureExeStats(mergedData);
+      ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+      compStats.computeExeCountStats();
 
-      // if a minority of instances who are starting back pressures are also executing majority
-      // of the tuples
-      if (compStats.bpInstanceCount < compStats.totalInstances
-          && compStats.avgNonBPExeCount < limit * compStats.avgBPExeCount) {
-        symptoms.add(ComponentSymptom.from(mergedData));
+      if (compStats.exeCountMax > limit * compStats.exeCountMin) {
+        // there is wide gap between max and min executionCount, potential skew if the instances
+        // who are starting back pressures are also executing majority of the tuples
+        for (InstanceMetricsData boltMetrics : compStats.boltsWithBackpressure) {
+          int exeCount = boltMetrics.getMetricIntValue(EXE_COUNT);
+          int bpValue = boltMetrics.getMetricIntValue(BACK_PRESSURE);
+          if (compStats.exeCountMax < 1.10 * exeCount) {
+            LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
+                boltMetrics.getName(), bpValue, exeCount));
+            symptoms.add(ComponentSymptom.from(mergedData));
+          }
+        }
       }
     }
 

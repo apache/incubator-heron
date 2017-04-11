@@ -14,6 +14,9 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
@@ -23,6 +26,7 @@ import com.twitter.heron.healthmgr.common.HealthManagerContstants;
 
 public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
   protected static final String EXE_COUNT = HealthManagerContstants.METRIC_EXE_COUNT;
+  protected static final String BUFFER_SIZE = HealthManagerContstants.METRIC_BUFFER_SIZE;
   protected static final String BACK_PRESSURE =
       HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE;
 
@@ -37,30 +41,51 @@ public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
   /**
    * A helper class to compute and hold component stats
    */
-  protected static class ComponentBackPressureExeStats {
-    double sumBPExecuteCounts = 0;
-    double sumNonBPExecuteCounts = 0;
-    int bpInstanceCount = 0;
-    double avgBPExeCount;
-    double avgNonBPExeCount;
-    int totalInstances;
+  protected static class ComponentBackpressureStats {
+    private final ComponentMetricsData componentMetrics;
 
-    public ComponentBackPressureExeStats(ComponentMetricsData backPressureAndExeMetrics) {
-      for (InstanceMetricsData mergedInstance : backPressureAndExeMetrics.getMetrics().values()) {
+    List<InstanceMetricsData> boltsWithBackpressure = new ArrayList<>();
+    List<InstanceMetricsData> boltsWithoutBackpressure = new ArrayList<>();
+    double exeCountMax;
+    double exeCountMin;
+    double bufferSizeMax;
+    double bufferSizeMin;
+    double totalBackpressure = 0;
+
+    public ComponentBackpressureStats(ComponentMetricsData backPressureMetrics) {
+      this.componentMetrics = backPressureMetrics;
+
+      for (InstanceMetricsData mergedInstance : backPressureMetrics.getMetrics().values()) {
         int bpValue = mergedInstance.getMetricIntValue(BACK_PRESSURE);
-        int exeCount = mergedInstance.getMetricIntValue(EXE_COUNT);
-
         if (bpValue > 0) {
-          sumBPExecuteCounts += exeCount;
-          bpInstanceCount++;
+          boltsWithBackpressure.add(mergedInstance);
+          totalBackpressure += bpValue;
         } else {
-          sumNonBPExecuteCounts += exeCount;
+          boltsWithoutBackpressure.add(mergedInstance);
         }
       }
+    }
 
-      totalInstances = backPressureAndExeMetrics.getMetrics().size();
-      avgBPExeCount = sumBPExecuteCounts / bpInstanceCount;
-      avgNonBPExeCount = sumNonBPExecuteCounts / (totalInstances - bpInstanceCount);
+    protected void computeBufferSizeStats() {
+      bufferSizeMin = Double.MAX_VALUE;
+      bufferSizeMax = Double.MIN_VALUE;
+
+      for (InstanceMetricsData mergedInstance : componentMetrics.getMetrics().values()) {
+        Double bufferSize = mergedInstance.getMetric(BUFFER_SIZE);
+        if (bufferSize == null) {
+          continue;
+        }
+        bufferSizeMax = bufferSizeMax < bufferSize ? bufferSize : bufferSizeMax;
+        bufferSizeMin = bufferSizeMin > bufferSize ? bufferSize : bufferSizeMin;
+      }
+    }
+
+    protected void computeExeCountStats() {
+      for (InstanceMetricsData mergedInstance : componentMetrics.getMetrics().values()) {
+        int exeCount = mergedInstance.getMetricIntValue(EXE_COUNT);
+        exeCountMax = exeCountMax < exeCount ? exeCount : exeCountMax;
+        exeCountMin = exeCountMin > exeCount ? exeCount : exeCountMin;
+      }
     }
   }
 }
