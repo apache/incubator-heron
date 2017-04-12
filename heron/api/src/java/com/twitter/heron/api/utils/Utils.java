@@ -124,11 +124,11 @@ public final class Utils {
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
     Set<String> apiVars = config.getApiVars();
     for (String key : config.keySet()) {
-      Object value = config.get(key);
       if (key == null) {
         LOG.warning("ignore: null config key found");
         continue;
       }
+      Object value = config.get(key);
       if (value == null) {
         LOG.warning("ignore: config key " + key + " has null value");
         continue;
