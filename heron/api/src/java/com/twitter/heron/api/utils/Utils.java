@@ -31,11 +31,10 @@ import java.util.logging.Logger;
 import com.google.protobuf.ByteString;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
 
 public final class Utils {
-  private static final Logger LOG = Logger.getLogger(HeronTopology.class.getName());
+  private static final Logger LOG = Logger.getLogger(Utils.class.getName());
 
   public static final String DEFAULT_STREAM_ID = "default";
 
