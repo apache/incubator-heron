@@ -17,6 +17,7 @@
 #include "errors/sperror.h"
 #include <string>
 #include "errors/syserr.h"
+#include "errors/spin.h"
 #include "errors/sperrimpl.h"
 #include "errors/sys-einfo-gen.h"
 #include "errors/sys-einfo-bakw-gen.h"
