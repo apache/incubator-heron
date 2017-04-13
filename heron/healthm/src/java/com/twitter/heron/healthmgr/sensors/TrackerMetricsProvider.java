@@ -34,12 +34,14 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
+import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+
 public class TrackerMetricsProvider implements MetricsProvider {
   private static final Logger LOG = Logger.getLogger(TrackerMetricsProvider.class.getName());
   private final WebTarget baseTarget;
 
   @Inject
-  public TrackerMetricsProvider(@Named("TRACKER_URL") String trackerURL,
+  public TrackerMetricsProvider(@Named(HealthManagerContstants.CONF_TRACKER_URL) String trackerURL,
                                 @Named("CLUSTER") String cluster,
                                 @Named("ENVIRON") String environ,
                                 @Named("TOPOLOGY_NAME") String topologyName) {

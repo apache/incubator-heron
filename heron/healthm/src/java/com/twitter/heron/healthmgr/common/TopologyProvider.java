@@ -15,12 +15,17 @@
 package com.twitter.heron.healthmgr.common;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 /**
  * A topology may be updated after initial deployment. This provider is used to provide the latest
@@ -28,13 +33,45 @@ import com.twitter.heron.api.generated.TopologyAPI.Topology;
  */
 @Singleton
 public class TopologyProvider implements Provider<Topology> {
+  private static final Logger LOG = Logger.getLogger(TopologyProvider.class.getName());
+  private final SchedulerStateManagerAdaptor stateManagerAdaptor;
+  private final String topologyName;
+
   private Topology topology;
 
+  @Inject
+  public TopologyProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
+                          @Named(HealthManagerContstants.CONF_TOPOLOGY_NAME) String topologyName) {
+    this.stateManagerAdaptor = stateManagerAdaptor;
+    this.topologyName = topologyName;
+  }
+
   @Override
-  public Topology get() {
+  public synchronized Topology get() {
+    if (topology == null) {
+      fetchLatestTopology();
+    }
     return topology;
   }
 
+  private synchronized void fetchLatestTopology() {
+    LOG.log(Level.INFO, "Fetching topology from state manager: {0}", topologyName);
+    this.topology = stateManagerAdaptor.getTopology(topologyName);
+  }
+
+  /**
+   * Invalidates cached topology instance on receiving update notification
+   */
+  public synchronized void onNext(HealthManagerEvents.TOPOLOGY_UPDATE event) {
+    LOG.info("Received topology update event, invalidating cached topology: " + event);
+    this.topology = null;
+  }
+
+  /**
+   * A utility method to extract bolt component names from the topology.
+   *
+   * @return array of all bolt names
+   */
   public String[] getBoltNames() {
     Topology topology = get();
     ArrayList<String> boltNames = new ArrayList<>();
@@ -43,9 +80,5 @@ public class TopologyProvider implements Provider<Topology> {
     }
 
     return boltNames.toArray(new String[boltNames.size()]);
-  }
-
-  public void setTopology(Topology topology) {
-    this.topology = topology;
   }
 }
