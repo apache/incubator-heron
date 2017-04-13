@@ -14,10 +14,7 @@
 
 package com.twitter.heron.api.topology;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 
@@ -27,24 +24,22 @@ import com.twitter.heron.api.utils.Utils;
 
 public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDeclarer<?>>
     extends BaseConfigurationDeclarer<T> {
-  private static final Logger LOG = Logger.getLogger(BaseComponentDeclarer.class.getName());
   private String name;
   private IComponent component;
-  private Map<String, Object> componentConfiguration;
+  private Config componentConfiguration;
 
   public BaseComponentDeclarer(String name, IComponent comp, Number taskParallelism) {
     this.name = name;
     this.component = comp;
-    this.componentConfiguration = comp.getComponentConfiguration();
-    if (this.componentConfiguration == null) {
-      this.componentConfiguration = new HashMap<>();
+    if (comp.getComponentConfiguration() != null) {
+      this.componentConfiguration = new Config(comp.getComponentConfiguration());
+    } else {
+      this.componentConfiguration = new Config();
     }
     if (taskParallelism != null) {
-      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
-          taskParallelism.toString());
+      Config.setComponentParallelism(this.componentConfiguration, taskParallelism.intValue());
     } else {
-      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
-          "1");
+      Config.setComponentParallelism(this.componentConfiguration, 1);
     }
   }
 
@@ -64,32 +59,6 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     bldr.setName(name);
     bldr.setSpec(TopologyAPI.ComponentObjectSpec.JAVA_SERIALIZED_OBJECT);
     bldr.setSerializedObject(ByteString.copyFrom(Utils.serialize(component)));
-
-    // TODO: share this logic with HeronTopology.getConfigBuilder, which is identical. Differences
-    // between the two have caused hard to troubleshoot bugs.
-    Set<String> apiVars = Config.getApiVars();
-    TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
-    for (String key : componentConfiguration.keySet()) {
-      Object value = componentConfiguration.get(key);
-      if (key == null) {
-        LOG.warning("ignore: config key is null");
-        continue;
-      }
-      if (value == null) {
-        LOG.warning("ignore: config key " + key + " has null value");
-        continue;
-      }
-      TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
-      kvBldr.setKey(key);
-      if (apiVars.contains(key)) {
-        kvBldr.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
-        kvBldr.setValue(value.toString());
-      } else {
-        kvBldr.setType(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE);
-        kvBldr.setSerializedValue(ByteString.copyFrom(Utils.serialize(value)));
-      }
-      cBldr.addKvs(kvBldr);
-    }
-    bldr.setConfig(cBldr);
+    bldr.setConfig(Utils.getConfigBuilder(componentConfiguration));
   }
 }

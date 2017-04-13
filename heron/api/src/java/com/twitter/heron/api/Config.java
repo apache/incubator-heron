@@ -506,7 +506,7 @@ public class Config extends HashMap<String, Object> {
     setComponentJvmOptions(this, component, jvmOptions);
   }
 
-  public static Set<String> getApiVars() {
+  public Set<String> getApiVars() {
     return apiVars;
   }
 }
