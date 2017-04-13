@@ -14,16 +14,11 @@
 
 package com.twitter.heron.healthmgr.common;
 
-public interface HealthManagerContstants {
-  int DEFAULT_METRIC_DURATION = 60;
+public class HealthManagerEvents {
 
-  String METRIC_EXE_COUNT = "__execute-count/default";
-  String METRIC_INSTANCE_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
-  String METRIC_BUFFER_SIZE = "__connection_buffer_by_intanceid/";
-  String METRIC_BUFFER_SIZE_SUFFIX = "/packets";
-
-  String COMPONENT_STMGR = "__stmgr__";
-
-  String CONF_TRACKER_URL = "TRACKER_URL";
-  String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
+  /**
+   * This event is created when a resolver executes topology update action
+   */
+  public static class TOPOLOGY_UPDATE {
+  }
 }

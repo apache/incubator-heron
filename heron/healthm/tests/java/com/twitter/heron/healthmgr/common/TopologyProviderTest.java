@@ -17,36 +17,82 @@ package com.twitter.heron.healthmgr.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.TopologyTests;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class TopologyProviderTest {
+  String topology = "topology";
+
+  @Test
+  public void fetchesAndCachesPackingFromStateMgr() {
+    Topology testTopology
+        = TopologyTests.createTopology(topology, new Config(), getSpouts(), getBolts());
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    when(adaptor.getTopology(topology)).thenReturn(testTopology);
+
+    TopologyProvider provider = new TopologyProvider(adaptor, topology);
+    Assert.assertEquals(2, provider.get().getBoltsCount());
+
+    // once fetched it is cached
+    provider.get();
+    verify(adaptor, times(1)).getTopology(topology);
+  }
+
+  @Test
+  public void refreshesPackingPlanOnUpdate() {
+    Topology testTopology
+        = TopologyTests.createTopology(topology, new Config(), getSpouts(), getBolts());
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    when(adaptor.getTopology(topology)).thenReturn(testTopology);
+
+    TopologyProvider provider = new TopologyProvider(adaptor, topology);
+    Assert.assertEquals(2, provider.get().getBoltsCount());
+
+    // once fetched it is cached
+    provider.onNext(new HealthManagerEvents.TOPOLOGY_UPDATE());
+    provider.get();
+    verify(adaptor, times(2)).getTopology(topology);
+  }
+
   @Test
   public void providesBoltNames() {
-    Config topologyConfig = new Config();
-    Map<String, Integer> spouts = new HashMap<>();
-    spouts.put("spout", 1);
-    Map<String, Integer> bolts = new HashMap<>();
-    bolts.put("bolt-1", 1);
-    bolts.put("bolt-2", 1);
+    Map<String, Integer> bolts = getBolts();
 
-    final Topology topology =
-        TopologyTests.createTopology("topology", topologyConfig, spouts, bolts);
+    String topology = "topology";
+    Topology testTopology =
+        TopologyTests.createTopology(topology, new Config(), getSpouts(), bolts);
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    when(adaptor.getTopology(topology)).thenReturn(testTopology);
 
-    TopologyProvider topologyProvider = new TopologyProvider();
-    topologyProvider.setTopology(topology);
+    TopologyProvider topologyProvider = new TopologyProvider(adaptor, topology);
 
-    String[] boltNames = topologyProvider.getBoltNames();
-    assertEquals(2, boltNames.length);
     assertEquals(2, bolts.size());
+    String[] boltNames = topologyProvider.getBoltNames();
+    assertEquals(bolts.size(), boltNames.length);
     for (String boltName : boltNames) {
       bolts.remove(boltName);
     }
     assertEquals(0, bolts.size());
+  }
+
+  private Map<String, Integer> getBolts() {
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt-1", 1);
+    bolts.put("bolt-2", 1);
+    return bolts;
+  }
+
+  private Map<String, Integer> getSpouts() {
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", 1);
+    return spouts;
   }
 }
