@@ -17,17 +17,9 @@ java_library(
     deps = api_deps_files,
 )
 
-java_binary(
-    name = "api-unshaded",
-    srcs = glob(["com/twitter/heron/api/**/*.java"]),
-    deps = api_deps_files,
-)
-
-genrule(
+alias(
     name = "heron-api",
-    srcs = [":api-unshaded_deploy.jar"],
-    outs = ["heron-api.jar"],
-    cmd  = "cp $< $@",
+    actual = ":api-java",
 )
 
 java_library(

@@ -10,19 +10,11 @@ storm_deps_files = [
 
 java_library(
     name='storm-compatibility-java',
-    srcs = glob(["**/*.java"]),
+    srcs=glob(["**/org/apache/**/*.java"]),
     deps = storm_deps_files, 
 )
 
-java_binary(
-    name = "storm-compatibility-unshaded",
-    srcs = glob(["**/*.java"]),
-    deps = storm_deps_files,
-)
-
-genrule(
+alias(
     name = "heron-storm",
-    srcs = [":storm-compatibility-unshaded_deploy.jar"],
-    outs = ["heron-storm.jar"],
-    cmd  = "cp $< $@",
+    actual = ":storm-compatibility-java",
 )
