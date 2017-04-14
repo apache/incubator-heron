@@ -65,7 +65,7 @@ public class KafkaSpout extends BaseRichSpout {
 
   @Override
   @SuppressWarnings("unchecked")
-  public void open(Map<String, Object> conf,
+  public void open(Map conf,
                    final TopologyContext context,
                    final SpoutOutputCollector aCollector) {
     collector = aCollector;

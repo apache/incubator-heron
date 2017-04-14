@@ -193,29 +193,26 @@ public class PhysicalPlanHelper {
 
   public void setTopologyContext(MetricsCollector metricsCollector) {
     topologyContext =
-        new TopologyContextImpl(constructConfig(pplan.getTopology().getTopologyConfig(), component),
+        new TopologyContextImpl(mergeConfigs(pplan.getTopology().getTopologyConfig(), component),
             pplan.getTopology(), makeTaskToComponentMap(), myTaskId, metricsCollector);
   }
 
-  private Map<String, Object> constructConfig(TopologyAPI.Config config,
-                                              TopologyAPI.Component acomponent) {
-    Map<String, Object> retval = new HashMap<String, Object>();
+  private Map<String, Object> mergeConfigs(TopologyAPI.Config config,
+                                           TopologyAPI.Component acomponent) {
+    Map<String, Object> map = new HashMap<>();
+    addConfigsToMap(config, map);
+    addConfigsToMap(acomponent.getConfig(), map); // Override any component specific configs
+    return map;
+  }
+
+  private void addConfigsToMap(TopologyAPI.Config config, Map<String, Object> map) {
     for (TopologyAPI.Config.KeyValue kv : config.getKvsList()) {
       if (kv.hasValue()) {
-        retval.put(kv.getKey(), kv.getValue());
+        map.put(kv.getKey(), kv.getValue());
       } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
+        map.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
     }
-    // Override any component specific configs
-    for (TopologyAPI.Config.KeyValue kv : acomponent.getConfig().getKvsList()) {
-      if (kv.hasValue()) {
-        retval.put(kv.getKey(), kv.getValue());
-      } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
-      }
-    }
-    return retval;
   }
 
   private Map<Integer, String> makeTaskToComponentMap() {
