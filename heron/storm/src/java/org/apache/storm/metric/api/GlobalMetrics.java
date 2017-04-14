@@ -52,20 +52,4 @@ public enum GlobalMetrics implements Serializable {
   public static void safeIncrBy(String counterName, int incrValue) {
     com.twitter.heron.api.metric.GlobalMetrics.safeIncrBy(counterName, incrValue);
   }
-
-  /**
-   * Initialize the counter by registering the metricContainer. Should be done in open/prepare call.
-   * TODO: Investigate if it is possible to do this part in ctor. One thing to note is how this will
-   * affect the serialization of CounterFactory.
-   */
-  public static void init(IMetricsRegister metricsRegister, int metricsBucket) {
-    com.twitter.heron.api.metric.GlobalMetrics.init(metricsRegister, metricsBucket);
-  }
-
-  /**
-   * test-only
-   */
-  public static Object getUnderlyingCounter() {
-    return com.twitter.heron.api.metric.GlobalMetrics.getUnderlyingCounter();
-  }
 }
