@@ -18,11 +18,10 @@
 
 package org.apache.storm.metric.api;
 
-import java.io.Serializable;
+public final class GlobalMetrics {
 
-public enum GlobalMetrics implements Serializable {
+  private GlobalMetrics() {
 
-  GlobalMetrics() {
   }
 
   /**

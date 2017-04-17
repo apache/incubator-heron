@@ -19,7 +19,7 @@ import java.util.Random;
 
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.metric.api.
+import org.apache.storm.metric.api.GlobalMetrics;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
