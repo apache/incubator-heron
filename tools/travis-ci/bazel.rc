@@ -11,8 +11,8 @@ build --verbose_failures
 build --show_timestamps
 test --show_timestamps
 
-# Limits the jobs to 25 since the resources are limited
-build --jobs 25
+# Limits the jobs to 50 since the resources are limited
+build --jobs 50
 
 # Link with the appropriate libs
 build --linkopt -lm
