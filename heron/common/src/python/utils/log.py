@@ -16,6 +16,14 @@ import logging
 from logging.handlers import RotatingFileHandler
 import colorlog
 
+# Add default handler
+#
+# It is possible that user simply imports the Log object without configuring it.
+# This might cause exception "No handler found".
+# So we should at top level invoke ``logging.basic_config()`` to prepare
+# a default handler for Log object.
+logging.basicConfig()
+
 # Create the logger
 # pylint: disable=invalid-name
 logging.basicConfig()
@@ -67,7 +75,6 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
   It also makes sure that any StreamHandler is removed, so as to avoid stdout/stderr
   constipation issues
   """
-  logging.basicConfig()
 
   root_logger = logging.getLogger()
   log_format = "[%(asctime)s] [%(levelname)s] %(filename)s: %(message)s"
