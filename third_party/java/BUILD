@@ -97,6 +97,17 @@ java_library(
         "@com_esotericsoftware_minlog//jar",
         "@org_objenesis_objenesis//jar",
     ],
+    neverlink = 0,
+)
+
+java_library(
+    name = "kryo-provided",
+    srcs = [ "Empty.java" ],
+    exports = [ "@com_esotericsoftware_kryo//jar" ],
+    deps = [
+        "@com_esotericsoftware_kryo//jar",
+    ],
+    neverlink = 1,
 )
 
 java_library(
