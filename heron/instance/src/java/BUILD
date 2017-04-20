@@ -12,6 +12,13 @@ instance_deps_files =  \
         "//heron/common/src/java:common-java",
     ]
 
+instance_deps_files_nl =  \
+    heron_java_proto_files() + [
+        "//heron/api/src/java:api-java-neverlink",
+        "//heron/api/src/java:classification",
+        "//heron/common/src/java:common-java-neverlink",
+    ]
+
 java_library(
     name = "instance-java",
     srcs = glob(
@@ -19,6 +26,15 @@ java_library(
         exclude = ["**/HeronInstance.java"],
     ),
     deps = instance_deps_files,
+)
+
+java_library(
+    name = "instance-java-neverlink",
+    srcs = glob(
+        ["**/*.java"],
+        exclude = ["**/HeronInstance.java"],
+    ),
+    deps = instance_deps_files_nl,
 )
 
 java_binary(

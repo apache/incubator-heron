@@ -97,11 +97,14 @@ java_library(
         "@com_esotericsoftware_minlog//jar",
         "@org_objenesis_objenesis//jar",
     ],
-    neverlink = 0,
 )
 
+# This version is needed for dependents that don't want
+# kryo to be included in the generated binary
+# (e.g. //heron/storm/src/java:heron-storm and
+#       //heron/api/src/java:heron-api)
 java_library(
-    name = "kryo-provided",
+    name = "kryo-neverlink",
     srcs = [ "Empty.java" ],
     exports = [ "@com_esotericsoftware_kryo//jar" ],
     deps = [
@@ -162,16 +165,6 @@ java_library(
         "@org_powermock_powermock_reflect//jar",
         "@org_javassist_javassist//jar",
     ],
-)
-
-# This version is needed for dependents that don't want
-# protobuf to be included in the generated binary
-java_library(
-    name = "protobuf-java-neverlink",
-    srcs = [ "Empty.java" ],
-    deps = [ "@com_google_protobuf_protobuf_java//jar" ],
-    exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
-    neverlink = 1,
 )
 
 java_library(

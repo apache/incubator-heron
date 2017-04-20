@@ -45,6 +45,19 @@ utils_deps_files = \
         "@com_google_guava_guava//jar",
     ]
 
+utils_deps_files_nl = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        ":statemgr-spi-java",
+        ":scheduler-spi-java-neverlink",
+        ":packing-spi-java-neverlink",
+        ":metricsmgr-spi-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:config-java",
+        "//heron/api/src/java:api-java-neverlink",
+        "@com_google_guava_guava//jar",
+    ]
+
 scheduler_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
@@ -54,8 +67,28 @@ scheduler_deps_files = \
         "@com_google_guava_guava//jar",
     ]
 
+scheduler_deps_files_nl = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        ":packing-spi-java-neverlink",
+        "//heron/api/src/java:classification",
+        "//heron/common/src/java:config-java",
+        "@com_google_guava_guava//jar",
+    ]
+
 packing_deps_files = [
     "//heron/api/src/java:api-java",
+    ":common-spi-java",
+    "//heron/api/src/java:classification",
+    "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:config-java",
+    "//heron/proto:proto_packing_plan_java",
+    "//heron/proto:proto_topology_java",
+    "@com_google_guava_guava//jar",
+]
+
+packing_deps_files_nl = [
+    "//heron/api/src/java:api-java-neverlink",
     ":common-spi-java",
     "//heron/api/src/java:classification",
     "//heron/common/src/java:basics-java",
@@ -99,6 +132,14 @@ java_library(
 )
 
 java_library(
+    name='utils-spi-java-neverlink',
+    srcs = glob([
+        "**/spi/utils/**/*.java",
+    ]),
+    deps = utils_deps_files_nl,
+)
+
+java_library(
     name='packing-spi-java',
     srcs = glob([
         "**/spi/packing/**/*.java",
@@ -107,11 +148,27 @@ java_library(
 )
 
 java_library(
+    name='packing-spi-java-neverlink',
+    srcs = glob([
+        "**/spi/packing/**/*.java",
+    ]),
+    deps = packing_deps_files_nl,
+)
+
+java_library(
     name='scheduler-spi-java',
     srcs = glob([
         "**/spi/scheduler/**/*.java",
     ]),
     deps = scheduler_deps_files,
+)
+
+java_library(
+    name='scheduler-spi-java-neverlink',
+    srcs = glob([
+        "**/spi/scheduler/**/*.java",
+    ]),
+    deps = scheduler_deps_files_nl,
 )
 
 java_library(
