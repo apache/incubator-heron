@@ -271,6 +271,12 @@ public class RuntimeManagerRunner {
         "Failed to clear topology definition");
     }
 
+    result = statemgr.deletePackingPlan(topologyName);
+    if (result == null || !result) {
+      LOG.severe("Failed to clear packing plan");
+      return false;
+    }
+
     LOG.fine("Cleaned up topology state");
   }
 
