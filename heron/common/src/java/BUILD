@@ -3,7 +3,6 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/heron_deps", "heron_java_proto_files")
-load("/tools/rules/heron_deps", "heron_java_proto_files_nl")
 
 common_deps_files = \
     heron_java_proto_files() + [
