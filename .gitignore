@@ -33,7 +33,6 @@ tools/jdk/ijar
 
 # Compiled source #
 ###################
-/release
 *.com
 *.class
 *.dll
