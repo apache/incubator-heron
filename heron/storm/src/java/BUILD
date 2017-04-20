@@ -19,14 +19,14 @@ storm_deps_files_nl = [
 ]
 
 java_library(
-    name='storm-compatibility-java',
-    srcs=glob(["**/org/apache/**/*.java"]),
+    name = 'storm-compatibility-java',
+    srcs = glob(["**/org/apache/**/*.java"]),
     deps = storm_deps_files,
 )
 
 java_binary(
     name = "storm-compatibility-unshaded",
-    srcs=glob(["**/org/apache/**/*.java"]),
+    srcs = glob(["**/org/apache/**/*.java"]),
     deps = storm_deps_files_nl,
 )
 
