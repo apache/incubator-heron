@@ -200,7 +200,6 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
                 const std::vector<sp_string>& workers, const sp_string& stmgr_id,
                 const sp_string& zkhostportlist, const sp_string& dpath, sp_int32 metricsmgr_port,
                 sp_int32 shell_port, sp_int64 _high_watermark, sp_int64 _low_watermark) {
-
   // The topology will be owned and deleted by the strmgr
   heron::proto::api::Topology* stmgr_topology = new heron::proto::api::Topology();
   stmgr_topology->CopyFrom(*topology);
