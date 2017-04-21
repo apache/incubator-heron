@@ -237,6 +237,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
+    auroraProperties.put(AuroraField.METRICSCACHEMGR_CLASSPATH,
+        Context.metricsCacheManagerClassPath(config));
+
     return auroraProperties;
   }
 }

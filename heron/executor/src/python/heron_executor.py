@@ -53,7 +53,8 @@ def print_usage():
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
-      " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
+      " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
+      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -129,12 +130,10 @@ class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
-  def __init__(self, args, shell_env):
+  def init_parsed_args(self, args):
+    """ initialize from parsed arguments """
     parsed_args = self.parse_args(args)
 
-    self.shell_env = shell_env
-    self.max_runs = 100
-    self.interval_between_runs = 10
     self.shard = parsed_args.shard
     self.topology_name = parsed_args.topology_name
     self.topology_id = parsed_args.topology_id
@@ -144,6 +143,7 @@ class HeronExecutor(object):
     self.tmaster_binary = parsed_args.tmaster_binary
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metricsmgr_classpath = parsed_args.metricsmgr_classpath
+    self.metricscachemgr_classpath = parsed_args.metricscachemgr_classpath
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('&equals;', '='))
@@ -178,6 +178,8 @@ class HeronExecutor(object):
     self.shell_port = parsed_args.shell_port
     self.heron_shell_binary = parsed_args.heron_shell_binary
     self.metricsmgr_port = parsed_args.metricsmgr_port
+    self.metricscachemgr_masterport = parsed_args.metricscachemgr_masterport
+    self.metricscachemgr_statsport = parsed_args.metricscachemgr_statsport
     self.cluster = parsed_args.cluster
     self.role = parsed_args.role
     self.environ = parsed_args.environ
@@ -186,6 +188,13 @@ class HeronExecutor(object):
     self.scheduler_classpath = parsed_args.scheduler_classpath
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
+
+  def __init__(self, args, shell_env):
+    self.init_parsed_args(args)
+
+    self.shell_env = shell_env
+    self.max_runs = 100
+    self.interval_between_runs = 10
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -202,6 +211,7 @@ class HeronExecutor(object):
     self.processes_to_monitor = {}
 
     self.state_managers = []
+    self.jvm_version = None
 
   @staticmethod
   def parse_args(args):
@@ -239,6 +249,9 @@ class HeronExecutor(object):
     parser.add_argument("scheduler_classpath")
     parser.add_argument("scheduler_port")
     parser.add_argument("python_instance_binary")
+    parser.add_argument("metricscachemgr_classpath")
+    parser.add_argument("metricscachemgr_masterport")
+    parser.add_argument("metricscachemgr_statsport")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -327,6 +340,47 @@ class HeronExecutor(object):
 
     return metricsmgr_cmd
 
+  def _get_metrics_cache_cmd(self):
+    ''' get the command to start the metrics manager processes '''
+    metricscachemgr_main_class = 'com.twitter.heron.metricscachemgr.MetricsCacheManager'
+
+    metricscachemgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
+                           # We could not rely on the default -Xmx setting, which could be very big,
+                           # for instance, the default -Xmx in Twitter mesos machine is around 18GB
+                           '-Xmx1024M',
+                           '-XX:+PrintCommandLineFlags',
+                           '-verbosegc',
+                           '-XX:+PrintGCDetails',
+                           '-XX:+PrintGCTimeStamps',
+                           '-XX:+PrintGCDateStamps',
+                           '-XX:+PrintGCCause',
+                           '-XX:+UseGCLogFileRotation',
+                           '-XX:NumberOfGCLogFiles=5',
+                           '-XX:GCLogFileSize=100M',
+                           '-XX:+PrintPromotionFailure',
+                           '-XX:+PrintTenuringDistribution',
+                           '-XX:+PrintHeapAtGC',
+                           '-XX:+HeapDumpOnOutOfMemoryError',
+                           '-XX:+UseConcMarkSweepGC',
+                           '-XX:+PrintCommandLineFlags',
+                           '-Xloggc:log-files/gc.metricscache.log',
+                           '-Djava.net.preferIPv4Stack=true',
+                           '-cp',
+                           self.metricscachemgr_classpath,
+                           metricscachemgr_main_class,
+                           "--metricscache_id", 'metricscache-0',
+                           "--master_port", self.metricscachemgr_masterport,
+                           "--stats_port", self.metricscachemgr_statsport,
+                           "--topology_name", self.topology_name,
+                           "--topology_id", self.topology_id,
+                           "--system_config_file", self.heron_internals_config_file,
+                           "--sink_config_file", self.metrics_sinks_config_file,
+                           "--cluster", self.cluster,
+                           "--role", self.role,
+                           "--environment", self.environ, "--verbose"]
+
+    return metricscachemgr_cmd
+
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
     retval = {}
@@ -346,6 +400,8 @@ class HeronExecutor(object):
         self.metricsmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
 
+    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
+
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(
@@ -360,21 +416,29 @@ class HeronExecutor(object):
     retval = {}
     # TO DO (Karthik) to be moved into keys and defaults files
     code_cache_size_mb = 64
-    perm_gen_size_mb = 128
+    java_metasize_mb = 128
+
+    java_version = self._get_jvm_version()
+    java_metasize_param = 'MetaspaceSize'
+    if java_version.startswith("1.7") or \
+            java_version.startswith("1.6") or \
+            java_version.startswith("1.5"):
+      java_metasize_param = 'PermSize'
+
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
-      heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
+      heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
       Log.info("component name: %s, ram request: %d, total jvm size: %dM, "
-               "cache size: %dM, perm size: %dM"
+               "cache size: %dM, metaspace size: %dM"
                % (component_name, self.component_rammap[component_name],
-                  total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
+                  total_jvm_size, code_cache_size_mb, java_metasize_mb))
       xmn_size = int(heap_size_mb / 2)
       instance_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       '-Xmx%dM' % heap_size_mb,
                       '-Xms%dM' % heap_size_mb,
                       '-Xmn%dM' % xmn_size,
-                      '-XX:MaxPermSize=%dM' % perm_gen_size_mb,
-                      '-XX:PermSize=%dM' % perm_gen_size_mb,
+                      '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
+                      '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
                       '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
                       '-XX:+CMSScavengeBeforeRemark',
                       '-XX:TargetSurvivorRatio=90',
@@ -413,6 +477,21 @@ class HeronExecutor(object):
                            self.heron_internals_config_file])
       retval[instance_id] = instance_cmd
     return retval
+
+  def _get_jvm_version(self):
+    if not self.jvm_version:
+      cmd = [os.path.join(self.heron_java_home, 'bin/java'),
+             '-cp', self.instance_classpath, 'com.twitter.heron.instance.util.JvmVersion']
+      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      (process_stdout, process_stderr) = process.communicate()
+      if process.returncode != 0:
+        Log.error("Failed to determine JVM version. Exiting. Output of %s: %s",
+                  ' '.join(cmd), process_stderr)
+        sys.exit(1)
+
+      self.jvm_version = process_stdout
+      Log.info("Detected JVM version %s" % self.jvm_version)
+    return self.jvm_version
 
   # Returns the processes for each Python Heron Instance
   def _get_python_instance_cmd(self, instance_info):
@@ -554,7 +633,7 @@ class HeronExecutor(object):
             Log.info("Killing %s process with pid %d: %s" %
                      (process_info.name, process_info.pid, ' '.join(command)))
             try:
-              process_info.process.kill()
+              process_info.process.terminate()  # sends SIGTERM to process
             except OSError, e:
               if e.errno == 3: # No such process
                 Log.warn("Expected process %s with pid %d was not running, ignoring." %
@@ -739,7 +818,7 @@ def main():
   def setup(shardid):
     # Redirect stdout and stderr to files in append mode
     # The filename format is heron-executor-<container_id>.stdxxx
-    log.configure(logfile='heron-executor-%s.stdout' % shardid, with_time=True)
+    log.configure(logfile='heron-executor-%s.stdout' % shardid)
 
     Log.info('Set up process group; executor becomes leader')
     os.setpgrp() # create new process group, become its leader

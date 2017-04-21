@@ -163,7 +163,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
       } catch (ResourceExceededException e) {
         //Not enough containers. Adjust the number of containers.
-        LOG.info(String.format(
+        LOG.finest(String.format(
             "%s Increasing the number of containers to %s and attempting to place again.",
             e.getMessage(), this.numContainers + 1));
         increaseNumContainers(1);

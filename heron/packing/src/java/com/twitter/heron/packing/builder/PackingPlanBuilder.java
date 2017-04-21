@@ -124,7 +124,7 @@ public class PackingPlanBuilder {
           instanceId, instanceResource, containerId), e);
     }
 
-    LOG.fine(String.format("Added to container %d instance %s", containerId, instanceId));
+    LOG.finest(String.format("Added to container %d instance %s", containerId, instanceId));
     return this;
   }
 

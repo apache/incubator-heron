@@ -29,8 +29,14 @@ import com.twitter.heron.spi.packing.Resource;
  */
 public final class FormatterUtils {
 
-  private FormatterUtils() {
+  public FormatterUtils(boolean rich) {
+    this.rich = rich;
   }
+
+  /**
+   * If render in rich format (with color and text style)
+   */
+  private final boolean rich;
 
   /**
    * Simple and self-contained support of using ANSI escape codes.
@@ -62,6 +68,14 @@ public final class FormatterUtils {
     BOLD,
     STRIKETHROUGH
   }
+
+  public enum ContainerChange {
+    UNAFFECTED,
+    MODIFIED,
+    NEW,
+    REMOVED
+  }
+
 
   /**
    * Poor man's tabulate implementation
@@ -125,43 +139,52 @@ public final class FormatterUtils {
       return this.length;
     }
 
-    public String toString() {
+    /**
+     * Convert Cell to String
+     * @param rich if render in rich format
+     * @return
+     */
+    public String toString(boolean rich) {
       StringBuilder builder = new StringBuilder();
       String formattedText = String.format(formatter, text);
-      switch (style) {
-        case BOLD:
-          builder.append(ANSI_BOLD);
-          builder.append(formattedText);
-          break;
+      if (rich) {
+        switch (style) {
+          case BOLD:
+            builder.append(ANSI_BOLD);
+            builder.append(formattedText);
+            break;
         /* Adding strike-through effect to a string is different. One needs to append unicode of
            long strikethrough overlay to each single character in a string of characters. */
-        case STRIKETHROUGH:
-          for (int i = 0; i < formattedText.length(); i++) {
-            builder.append(formattedText.charAt(i));
-            builder.append(STRIKETHROUGH);
-          }
-          break;
-        case DEFAULT:
-          builder.append(formattedText);
-          break;
-        default:
-          throw new RuntimeException("Unknown text style: " + style);
-      }
-      switch (color) {
-        case RED:
-          builder.insert(0, ANSI_RED);
-          break;
-        case GREEN:
-          builder.insert(0, ANSI_GREEN);
-          break;
-        case DEFAULT:
-          break;
-        default:
-          throw new RuntimeException("Unknown text color: " + color);
-      }
-      // Only append ANSI reset escape code if text style or text color is added
-      if (style != TextStyle.DEFAULT || color != TextColor.DEFAULT) {
-        builder.append(ANSI_RESET);
+          case STRIKETHROUGH:
+            for (int i = 0; i < formattedText.length(); i++) {
+              builder.append(formattedText.charAt(i));
+              builder.append(STRIKETHROUGH);
+            }
+            break;
+          case DEFAULT:
+            builder.append(formattedText);
+            break;
+          default:
+            throw new RuntimeException("Unknown text style: " + style);
+        }
+        switch (color) {
+          case RED:
+            builder.insert(0, ANSI_RED);
+            break;
+          case GREEN:
+            builder.insert(0, ANSI_GREEN);
+            break;
+          case DEFAULT:
+            break;
+          default:
+            throw new RuntimeException("Unknown text color: " + color);
+        }
+        // Only append ANSI reset escape code if text style or text color is added
+        if (style != TextStyle.DEFAULT || color != TextColor.DEFAULT) {
+          builder.append(ANSI_RESET);
+        }
+      } else {
+        builder.append(formattedText);
       }
       return builder.toString();
     }
@@ -232,10 +255,10 @@ public final class FormatterUtils {
       return row.get(index);
     }
 
-    public String toString() {
+    public String toString(boolean rich) {
       List<String> renderedCells = new ArrayList<>();
       for (Cell c: row) {
-        renderedCells.add(c.toString());
+        renderedCells.add(c.toString(rich));
       }
       return String.format("%s %s %s",
           SEPARATOR, String.join(" " +  SEPARATOR + " ", renderedCells), SEPARATOR);
@@ -351,9 +374,10 @@ public final class FormatterUtils {
 
     /**
      * Format rows and title into a table
+     * @param rich if render table in rich format
      * @return Formatted table
      */
-    public String createTable() {
+    public String createTable(boolean rich) {
       // Generate formatter for each cell in a single row
       List<String> formatters = generateRowFormatter();
       // Set formatter for each row
@@ -368,12 +392,12 @@ public final class FormatterUtils {
       // Add upper frame
       addRow(builder, Strings.repeat("=", frameLength));
       // Add title
-      addRow(builder, title.toString());
+      addRow(builder, title.toString(rich));
       // Add one single line to separate title and content
       addRow(builder, Strings.repeat("-", frameLength));
       // Add each row
       for (Row row: rows) {
-        addRow(builder, row.toString());
+        addRow(builder, row.toString(rich));
       }
       // Add lower frame
       addRow(builder, Strings.repeat("=", frameLength));
@@ -382,7 +406,7 @@ public final class FormatterUtils {
   }
 
   private static final List<String> TITLE_NAMES = Arrays.asList(
-        "component", "task ID", "CPU", "RAM (GB)", "disk (GB)");
+        "component", "task ID", "CPU", "RAM (MB)", "disk (MB)");
 
 
   /******************************** Auxiliary functions ********************************/
@@ -416,12 +440,32 @@ public final class FormatterUtils {
     }
   }
 
-  public static Row rowOfInstancePlan(PackingPlan.InstancePlan plan,
+  public String renderContainerName(Integer containerId) {
+    return new Cell(String.format("Container %d", containerId),
+              FormatterUtils.TextStyle.BOLD).toString(rich);
+  }
+
+  public String renderContainerChange(ContainerChange change) {
+    Cell c = new Cell(change.toString());
+    switch (change) {
+      case NEW:
+        c.setColor(TextColor.GREEN);
+        break;
+      case REMOVED:
+        c.setColor(TextColor.RED);
+        break;
+      default:
+        break;
+    }
+    return c.toString(rich);
+  }
+
+  public Row rowOfInstancePlan(PackingPlan.InstancePlan plan,
                                       TextColor color, TextStyle style) {
     String taskId = String.valueOf(plan.getTaskId());
     String cpu = String.valueOf(plan.getResource().getCpu());
-    String ram = String.valueOf(plan.getResource().getRam().asGigabytes());
-    String disk = String.valueOf(plan.getResource().getDisk().asGigabytes());
+    String ram = String.valueOf(plan.getResource().getRam().asMegabytes());
+    String disk = String.valueOf(plan.getResource().getDisk().asMegabytes());
     List<String> cells = Arrays.asList(
           plan.getComponentName(), taskId, cpu, ram, disk);
     Row row = new Row(cells);
@@ -430,41 +474,41 @@ public final class FormatterUtils {
     return row;
   }
 
-  public static String renderOneContainer(List<Row> rows) {
+  public String renderOneContainer(List<Row> rows) {
     Row title = new Row(TITLE_NAMES);
     title.setStyle(TextStyle.BOLD);
-    return new Table(title, rows).createTable();
+    return new Table(title, rows).createTable(rich);
   }
 
-  public static String renderResourceUsage(Resource resource) {
+  public String renderResourceUsage(Resource resource) {
     double cpu = resource.getCpu();
     ByteAmount ram = resource.getRam();
     ByteAmount disk = resource.getDisk();
-    return String.format("CPU: %s, RAM: %sGB, Disk: %sGB",
-      cpu, ram.asGigabytes(), disk.asGigabytes());
+    return String.format("CPU: %s, RAM: %s MB, Disk: %s MB",
+      cpu, ram.asMegabytes(), disk.asMegabytes());
   }
 
-  public static String renderResourceUsageChange(Resource oldResource, Resource newResource) {
+  public String renderResourceUsageChange(Resource oldResource, Resource newResource) {
     double oldCpu = oldResource.getCpu();
     double newCpu = newResource.getCpu();
     Optional<Cell> cpuUsageChange = FormatterUtils.percentageChange(oldCpu, newCpu);
-    long oldRam = oldResource.getRam().asGigabytes();
-    long newRam = newResource.getRam().asGigabytes();
+    long oldRam = oldResource.getRam().asMegabytes();
+    long newRam = newResource.getRam().asMegabytes();
     Optional<Cell> ramUsageChange = FormatterUtils.percentageChange(oldRam, newRam);
-    long oldDisk = oldResource.getDisk().asGigabytes();
-    long newDisk = newResource.getDisk().asGigabytes();
+    long oldDisk = oldResource.getDisk().asMegabytes();
+    long newDisk = newResource.getDisk().asMegabytes();
     Optional<Cell> diskUsageChange = FormatterUtils.percentageChange(oldDisk, newDisk);
     String cpuUsage = String.format("CPU: %s", newCpu);
     if (cpuUsageChange.isPresent()) {
-      cpuUsage += String.format(" (%s)", cpuUsageChange.get().toString());
+      cpuUsage += String.format(" (%s)", cpuUsageChange.get().toString(rich));
     }
-    String ramUsage = String.format("RAM: %sGB", newRam);
+    String ramUsage = String.format("RAM: %s MB", newRam);
     if (ramUsageChange.isPresent()) {
-      ramUsage += String.format(" (%s)", ramUsageChange.get().toString());
+      ramUsage += String.format(" (%s)", ramUsageChange.get().toString(rich));
     }
-    String diskUsage = String.format("Disk: %sGB", newDisk);
+    String diskUsage = String.format("Disk: %s MB", newDisk);
     if (diskUsageChange.isPresent()) {
-      diskUsage += String.format(" (%s)", diskUsageChange.get().toString());
+      diskUsage += String.format(" (%s)", diskUsageChange.get().toString(rich));
     }
     return String.join(", ", cpuUsage, ramUsage, diskUsage);
   }

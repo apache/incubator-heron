@@ -49,14 +49,16 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
-const sp_int64 PROCESS_METRICS_FREQUENCY = 10 * 1000 * 1000;
-const sp_int64 TMASTER_RETRY_FREQUENCY = 10 * 1000 * 1000;  // in micro seconds
+const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
+const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
 StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
              const sp_string& _topology_name, const sp_string& _topology_id,
              proto::api::Topology* _hydrated_topology, const sp_string& _stmgr_id,
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
-             const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port)
+             const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+             sp_int64 _high_watermark, sp_int64 _low_watermark)
+
     : pplan_(NULL),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -75,7 +77,9 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
       zkhostport_(_zkhostport),
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
-      shell_port_(_shell_port) {}
+      shell_port_(_shell_port),
+      high_watermark_(_high_watermark),
+      low_watermark_(_low_watermark) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -89,14 +93,16 @@ void StMgr::Init() {
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
-
+  state_mgr_->SetMetricsCacheLocationWatch(
+                       topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
   FetchTMasterLocation();
+  FetchMetricsCacheLocation();
 
   CHECK_GT(
       eventLoop_->registerTimer(
           [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
           config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
-              1000 * 1000),
+              1_s),
       0);  // fire only once
 
   // Create and start StmgrServer
@@ -108,14 +114,14 @@ void StMgr::Init() {
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingPruneIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Check for log flushing every 10 seconds
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::FlushLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingFlushIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Update Process related metrics every 10 seconds
@@ -150,7 +156,7 @@ bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
-    LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. " << std::endl;
+    LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. ";
   }
 }
 
@@ -164,9 +170,9 @@ void StMgr::UpdateProcessMetrics(EventLoop::Status) {
   struct rusage usage;
   ProcessUtils::getResourceUsage(&usage);
   stmgr_process_metrics_->scope(METRIC_CPU_USER)
-      ->SetValue((usage.ru_utime.tv_sec * 1000 * 1000) + usage.ru_utime.tv_usec);
+      ->SetValue((usage.ru_utime.tv_sec * 1_s) + usage.ru_utime.tv_usec);
   stmgr_process_metrics_->scope(METRIC_CPU_SYSTEM)
-      ->SetValue((usage.ru_stime.tv_sec * 1000 * 1000) + usage.ru_stime.tv_usec);
+      ->SetValue((usage.ru_stime.tv_sec * 1_s) + usage.ru_stime.tv_usec);
   // Memory
   size_t totalmemory = ProcessUtils::getTotalMemoryUsed();
   stmgr_process_metrics_->scope(METRIC_MEM_USED)->SetValue(totalmemory);
@@ -183,6 +189,17 @@ void StMgr::FetchTMasterLocation() {
   state_mgr_->GetTMasterLocation(topology_name_, tmaster, std::move(cb));
 }
 
+void StMgr::FetchMetricsCacheLocation() {
+  LOG(INFO) << "Fetching MetricsCache Location";
+  auto metricscache = new proto::tmaster::MetricsCacheLocation();
+
+  auto cb = [metricscache, this](proto::system::StatusCode status) {
+    this->OnMetricsCacheLocationFetch(metricscache, status);
+  };
+
+  state_mgr_->GetMetricsCacheLocation(topology_name_, metricscache, std::move(cb));
+}
+
 void StMgr::StartStmgrServer() {
   CHECK(!server_);
   LOG(INFO) << "Creating StmgrServer" << std::endl;
@@ -191,6 +208,8 @@ void StMgr::StartStmgrServer() {
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_high_watermark(high_watermark_);
+  sops.set_low_watermark(low_watermark_);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
                             this, metrics_manager_client_);
 
@@ -201,12 +220,14 @@ void StMgr::StartStmgrServer() {
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
   CHECK(!tmaster_client_);
   LOG(INFO) << "Creating Tmaster Client at " << tmasterLocation->host() << ":"
-            << tmasterLocation->master_port() << std::endl;
+            << tmasterLocation->master_port();
   NetworkOptions master_options;
   master_options.set_host(tmasterLocation->host());
   master_options.set_port(tmasterLocation->master_port());
   master_options.set_socket_family(PF_INET);
   master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  master_options.set_high_watermark(high_watermark_);
+  master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_host_,
@@ -215,10 +236,9 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
 
 void StMgr::CreateTupleCache() {
   CHECK(!tuple_cache_);
-  LOG(INFO) << "Creating tuple cache " << std::endl;
+  LOG(INFO) << "Creating tuple cache ";
   sp_uint32 drain_threshold_bytes_ =
-      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1024 *
-      1024;
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1_MB;
   tuple_cache_ = new TupleCache(eventLoop_, drain_threshold_bytes_);
 
   tuple_cache_->RegisterDrainer(&StMgr::DrainInstanceData, this);
@@ -227,7 +247,7 @@ void StMgr::CreateTupleCache() {
 void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation) {
   // Lets delete the existing tmaster if we have one.
   if (tmaster_client_) {
-    LOG(INFO) << "Destroying existing tmasterClient" << std::endl;
+    LOG(INFO) << "Destroying existing tmasterClient";
     tmaster_client_->Die();
     tmaster_client_ = NULL;
   }
@@ -246,7 +266,7 @@ void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation
   // in the constructor rather than here.
   if (!clientmgr_) {
     clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
-                                    metrics_manager_client_);
+                                    metrics_manager_client_, high_watermark_, low_watermark_);
   }
 }
 
@@ -254,6 +274,13 @@ void StMgr::BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLoc
   // Notify metrics manager of the tmaster location changes
   // TODO(vikasr): What if the refresh fails?
   metrics_manager_client_->RefreshTMasterLocation(*tmasterLocation);
+}
+
+void StMgr::BroadcastMetricsCacheLocation(proto::tmaster::MetricsCacheLocation* tmasterLocation) {
+  // Notify metrics manager of the metricscache location changes
+  // TODO(huijun): What if the refresh fails?
+  LOG(INFO) << "BroadcastMetricsCacheLocation";
+  metrics_manager_client_->RefreshMetricsCacheLocation(*tmasterLocation);
 }
 
 void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLocation,
@@ -272,7 +299,7 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
       LOG(FATAL) << "Topology name/id mismatch between stmgr and TMaster "
                  << "We expected " << topology_name_ << " : " << topology_id_ << " but tmaster had "
                  << newTmasterLocation->topology_name() << " : "
-                 << newTmasterLocation->topology_id() << std::endl;
+                 << newTmasterLocation->topology_id();
     }
 
     LOG(INFO) << "Fetched TMasterLocation to be " << newTmasterLocation->host() << ":"
@@ -287,12 +314,12 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
 
       if (currentTmasterHostPort == newTmasterHostPort) {
         LOG(INFO) << "New tmaster location same as the current one. "
-                  << "Nothing to do here... " << std::endl;
+                  << "Nothing to do here... ";
         isNewTmaster = false;
       } else {
         LOG(INFO) << "New tmaster location different from the current one."
                   << " Current one at " << currentTmasterHostPort << " and New one at "
-                  << newTmasterHostPort << std::endl;
+                  << newTmasterHostPort;
         isNewTmaster = true;
       }
     }
@@ -310,20 +337,51 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
   delete newTmasterLocation;
 }
 
+void StMgr::OnMetricsCacheLocationFetch(proto::tmaster::MetricsCacheLocation* newTmasterLocation,
+                                   proto::system::StatusCode _status) {
+  if (_status != proto::system::OK) {
+    LOG(INFO) << "MetricsCache Location Fetch failed with status " << _status;
+    LOG(INFO) << "Retrying after " << TMASTER_RETRY_FREQUENCY << " micro seconds ";
+    CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status) {
+      this->FetchMetricsCacheLocation();
+    }, false, TMASTER_RETRY_FREQUENCY), 0);
+  } else {
+    // We got a new metricscache location.
+    // Just verify that we are talking to the right entity
+    if (newTmasterLocation->topology_name() != topology_name_ ||
+        newTmasterLocation->topology_id() != topology_id_) {
+      LOG(FATAL) << "Topology name/id mismatch between stmgr and MetricsCache "
+                 << "We expected " << topology_name_ << " : " << topology_id_
+                 << " but MetricsCache had "
+                 << newTmasterLocation->topology_name() << " : "
+                 << newTmasterLocation->topology_id() << std::endl;
+    }
+
+    LOG(INFO) << "Fetched MetricsCacheLocation to be " << newTmasterLocation->host() << ":"
+              << newTmasterLocation->master_port();
+
+    // Stmgr doesn't know what other things might have changed, so it is important
+    // to broadcast the location, even though we know its the same metricscache.
+    BroadcastMetricsCacheLocation(newTmasterLocation);
+  }
+
+  // Delete the tmasterLocation Proto
+  delete newTmasterLocation;
+}
+
 // Start the tmaster client
 void StMgr::StartTMasterClient() {
   if (!tmaster_client_) {
     LOG(INFO) << "We haven't received tmaster location yet"
               << ", so tmaster_client_ hasn't been created"
-              << "Once we get the location, it will be started" << std::endl;
+              << "Once we get the location, it will be started";
     // Nothing else to do here
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
     server_->GetInstanceInfo(all_instance_info);
     tmaster_client_->SetInstanceInfo(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
-      LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us"
-                << std::endl;
+      LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();
     }
   }
@@ -341,7 +399,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   }
 
   if (!found) {
-    LOG(FATAL) << "We have no role in this topology!!" << std::endl;
+    LOG(FATAL) << "We have no role in this topology!!";
   }
 
   // The Topology structure here is not hydrated.
@@ -403,7 +461,7 @@ sp_int32 StMgr::ExtractTopologyTimeout(const proto::api::Topology& _topology) {
       return atoi(_topology.topology_config().kvs(i).value().c_str());
     }
   }
-  LOG(FATAL) << "topology.message.timeout.secs does not exist" << std::endl;
+  LOG(FATAL) << "topology.message.timeout.secs does not exist";
   return 0;
 }
 

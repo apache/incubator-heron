@@ -34,7 +34,7 @@ import java.util.logging.SimpleFormatter;
  */
 public final class LoggingHelper {
   public static final String FORMAT_PROP_KEY = "java.util.logging.SimpleFormatter.format";
-  public static final String DEFAULT_FORMAT = "[%1$tF %1$tT %1$tz] %3$s %4$s:  %5$s %6$s %n";
+  public static final String DEFAULT_FORMAT = "[%1$tF %1$tT %1$tz] [%4$s] %3$s: %5$s %6$s %n";
 
   private LoggingHelper() {
   }

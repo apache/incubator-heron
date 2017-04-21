@@ -52,9 +52,12 @@ class Application(tornado.web.Application):
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
         (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
+        # Deprecated. See https://github.com/twitter/heron/issues/1754
         (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
         (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
+        (r"/topologies/metadata", handlers.MetaDataHandler, {"tracker":self.tracker}),
+        (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
         (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
         (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
         (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":self.tracker}),
@@ -197,7 +200,7 @@ def main():
 
   namespace = vars(args)
 
-  log.set_logging_level(namespace, with_time=True)
+  log.set_logging_level(namespace)
 
   # set Tornado global option
   define_options(namespace['port'], namespace['config_file'])

@@ -79,8 +79,8 @@ public class CuratorStateManager extends FileSystemStateManager {
 
       String newConnectionString = tunneledResults.first;
       if (newConnectionString.isEmpty()) {
-        throw new IllegalArgumentException("Cannot connect to tunnel host: "
-            + tunnelConfig.getTunnelHost());
+        throw new IllegalArgumentException("Failed to connect to tunnel host '"
+            + tunnelConfig.getTunnelHost() + "'");
       }
 
       // Use the new connection string
@@ -90,7 +90,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     // Start it
     client = getCuratorClient();
-    LOG.info("Starting client to: " + connectionString);
+    LOG.info("Starting Curator client connecting to: " + connectionString);
     client.start();
 
     try {
@@ -170,7 +170,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   protected void initTree() {
     // Make necessary directories
     for (StateLocation location : StateLocation.values()) {
-      LOG.info(String.format("%s directory: %s", location.getName(), getStateDirectory(location)));
+      LOG.fine(String.format("%s directory: %s", location.getName(), getStateDirectory(location)));
     }
 
     try {
@@ -196,8 +196,10 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     // Close the tunneling
     LOG.info("Closing the tunnel processes");
-    for (Process process : tunnelProcesses) {
-      process.destroy();
+    if (tunnelProcesses != null) {
+      for (Process process : tunnelProcesses) {
+        process.destroy();
+      }
     }
   }
 
@@ -330,6 +332,14 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location,
+      String topologyName) {
+    return createNode(
+        StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setExecutionState(
       ExecutionEnvironment.ExecutionState executionState,
       String topologyName) {
@@ -370,6 +380,14 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+    // It is a EPHEMERAL node and would be removed automatically
+    final SettableFuture<Boolean> result = SettableFuture.create();
+    result.set(true);
+    return result;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
     result.set(true);
