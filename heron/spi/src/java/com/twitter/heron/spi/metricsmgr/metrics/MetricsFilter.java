@@ -45,7 +45,7 @@ public class MetricsFilter {
 
   public boolean contains(String metricName) {
     for (String prefix : prefixToType.keySet()) {
-      if (metricName.contains(prefix)) {
+      if (metricName.startsWith(prefix)) {
         return true;
       }
     }
