@@ -13,23 +13,8 @@ simulator_deps_files = \
         "@org_yaml_snakeyaml//jar",
     ]
 
-simulator_deps_files_nl = \
-    heron_java_proto_files() + [
-        "//heron/api/src/java:api-java-neverlink",
-        "//heron/spi/src/java:utils-spi-java-neverlink",
-        "//heron/common/src/java:common-java-neverlink",
-        "//heron/instance/src/java:instance-java-neverlink",
-        "@org_yaml_snakeyaml//jar",
-    ]
-
 java_library(
     name = "simulator-java",
     srcs = glob(["**/*.java"]),
     deps = simulator_deps_files,
-)
-
-java_library(
-    name = "simulator-java-neverlink",
-    srcs = glob(["**/*.java"]),
-    deps = simulator_deps_files_nl,
 )

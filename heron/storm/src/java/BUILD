@@ -7,14 +7,6 @@ storm_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/simulator/src/java:simulator-java",
     "@com_googlecode_json_simple_json_simple//jar",
-    "//third_party/java:kryo",
-]
-
-storm_deps_files_nl = [
-    "//heron/api/src/java:api-java-neverlink",
-    "//heron/common/src/java:basics-java",
-    "//heron/simulator/src/java:simulator-java-neverlink",
-    "@com_googlecode_json_simple_json_simple//jar",
     "//third_party/java:kryo-neverlink",
 ]
 
@@ -27,7 +19,7 @@ java_library(
 java_binary(
     name = "storm-compatibility-unshaded",
     srcs = glob(["**/org/apache/**/*.java"]),
-    deps = storm_deps_files_nl,
+    deps = storm_deps_files,
 )
 
 jarjar_binary(

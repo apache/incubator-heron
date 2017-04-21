@@ -11,23 +11,10 @@ common_deps_files = \
         "@com_google_guava_guava//jar",
     ]
 
-common_deps_files_nl = \
-    heron_java_proto_files() + [
-        "//heron/api/src/java:api-java-neverlink",
-        "@org_yaml_snakeyaml//jar",
-        "@com_google_guava_guava//jar",
-    ]
-
 java_library(
     name='common-java',
     srcs = glob(["**/*.java"]),
     deps = common_deps_files,
-)
-
-java_library(
-    name='common-java-neverlink',
-    srcs = glob(["**/*.java"]),
-    deps = common_deps_files_nl,
 )
 
 java_library(

@@ -9,14 +9,6 @@ api_deps_files =  \
     heron_java_proto_files() + [
         ":classification",
         "//heron/common/src/java:basics-java",
-        "//third_party/java:kryo",
-    ]
-
-# Kryo dependency should be specified in POM
-api_deps_files_nl =  \
-    heron_java_proto_files() + [
-        ":classification",
-        "//heron/common/src/java:basics-java",
         "//third_party/java:kryo-neverlink",
     ]
 
@@ -26,16 +18,10 @@ java_library(
     deps = api_deps_files,
 )
 
-java_library(
-    name = "api-java-neverlink",
-    srcs = glob(["com/twitter/heron/api/**/*.java"]),
-    deps = api_deps_files_nl,
-)
-
 java_binary(
     name = "api",
     srcs = glob(["com/twitter/heron/api/**/*.java"]),
-    deps = api_deps_files_nl,
+    deps = api_deps_files,
 )
 
 jarjar_binary(
