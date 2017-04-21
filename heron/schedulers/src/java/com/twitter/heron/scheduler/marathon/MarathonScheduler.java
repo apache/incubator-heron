@@ -30,7 +30,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -106,7 +106,7 @@ public class MarathonScheduler implements IScheduler {
 
     config = Config.newBuilder()
         .putAll(config)
-        .put(Keys.topologyBinaryFile(),
+        .put(Key.TOPOLOGY_BINARY_FILE,
             FileUtils.getBaseName(Context.topologyBinaryFile(config)))
         .build();
 
@@ -127,7 +127,7 @@ public class MarathonScheduler implements IScheduler {
       ObjectNode instance = mapper.createObjectNode();
 
       instance.put(MarathonConstants.ID, Integer.toString(i));
-      instance.put(MarathonConstants.COMMAND, getExecutorCommand(config, i));
+      instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
       instance.set(MarathonConstants.CONTAINER, getContainer(mapper));
       instance.put(MarathonConstants.MEMORY, containerResource.getRam().asMegabytes());
@@ -210,8 +210,8 @@ public class MarathonScheduler implements IScheduler {
     return ports;
   }
 
-  protected String getExecutorCommand(Config marathonConfig, int containerIndex) {
-    String[] commands = SchedulerUtils.getExecutorCommand(marathonConfig, runtime,
+  protected String getExecutorCommand(int containerIndex) {
+    String[] commands = SchedulerUtils.getExecutorCommand(config, runtime,
         containerIndex, Arrays.asList(MarathonConstants.PORT_LIST));
     return "cd $MESOS_SANDBOX && " + Joiner.on(" ").join(commands);
   }
