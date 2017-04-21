@@ -67,8 +67,9 @@ public class YarnLauncherTest {
     setConfigs(inputConf, expected, Key.CLUSTER, "cluster", Cluster.class);
     setConfigs(inputConf, expected, Key.ROLE, "role", Role.class);
     setConfigs(inputConf, expected, Key.ENVIRON, "env", Environ.class);
-    setConfigs(inputConf, expected, YarnContext.HERON_SCHEDULER_YARN_QUEUE, "q", JobQueue.class);
-    setConfigs(inputConf, expected, YarnContext.YARN_SCHEDULER_DRIVER_MEMORY_MB,
+    setConfigs(inputConf, expected, YarnKey.HERON_SCHEDULER_YARN_QUEUE.value(),
+        "q", JobQueue.class);
+    setConfigs(inputConf, expected, YarnKey.YARN_SCHEDULER_DRIVER_MEMORY_MB.value(),
         "123", DriverMemory.class);
     setConfigs(inputConf, expected, Key.CORE_PACKAGE_URI,
         new File(".").getName(), HeronCorePackageName.class);

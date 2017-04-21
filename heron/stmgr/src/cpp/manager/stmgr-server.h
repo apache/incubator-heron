@@ -17,8 +17,8 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_SERVER_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_SERVER_H_
 
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include "network/network_error.h"
 #include "proto/messages.h"
@@ -129,33 +129,32 @@ class StMgrServer : public Server {
   };
 
   // map from stmgr_id to their connection
-  typedef std::map<sp_string, Connection*> StreamManagerConnectionMap;
+  typedef std::unordered_map<sp_string, Connection*> StreamManagerConnectionMap;
   StreamManagerConnectionMap stmgrs_;
   // Same as above but reverse
-  typedef std::map<Connection*, sp_string> ConnectionStreamManagerMap;
+  typedef std::unordered_map<Connection*, sp_string> ConnectionStreamManagerMap;
   ConnectionStreamManagerMap rstmgrs_;
 
   // map from Connection to their task_id
-  typedef std::map<Connection*, sp_int32> ConnectionTaskIdMap;
+  typedef std::unordered_map<Connection*, sp_int32> ConnectionTaskIdMap;
   ConnectionTaskIdMap active_instances_;
   // map of task id to InstanceData
-  // Once populated, will not change
-  typedef std::map<sp_int32, InstanceData*> TaskIdInstanceDataMap;
+  typedef std::unordered_map<sp_int32, InstanceData*> TaskIdInstanceDataMap;
   TaskIdInstanceDataMap instance_info_;
 
   // map of Instance_id/stmgrid to metric
   // Used for back pressure metrics
-  typedef std::map<sp_string, heron::common::TimeSpentMetric*> InstanceMetricMap;
+  typedef std::unordered_map<sp_string, heron::common::TimeSpentMetric*> InstanceMetricMap;
   InstanceMetricMap instance_metric_map_;
 
   // map of Instance_id/stmgrid to queue metric
-  typedef std::map<sp_string, heron::common::MultiMeanMetric*> ConnectionBufferMetricMap;
+  typedef std::unordered_map<sp_string, heron::common::MultiMeanMetric*> ConnectionBufferMetricMap;
   ConnectionBufferMetricMap connection_buffer_metric_map_;
 
   // instances/stream mgrs causing back pressure
-  std::set<sp_string> remote_ends_who_caused_back_pressure_;
+  std::unordered_set<sp_string> remote_ends_who_caused_back_pressure_;
   // stream managers that have announced back pressure
-  std::set<sp_string> stmgrs_who_announced_back_pressure_;
+  std::unordered_set<sp_string> stmgrs_who_announced_back_pressure_;
 
   sp_string topology_name_;
   sp_string topology_id_;

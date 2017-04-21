@@ -126,7 +126,7 @@ class AuroraCLIController implements AuroraController {
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
     int status =
-        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), stdout, stderr);
+        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), stderr);
 
     if (status != 0) {
       LOG.severe(String.format(

@@ -17,6 +17,7 @@
  */
 package org.apache.storm.kafka;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +31,7 @@ public class StringKeyValueScheme extends StringScheme implements KeyValueScheme
   @Override
   public List<Object> deserializeKeyAndValue(byte[] key, byte[] value) {
     if (key == null) {
-      return deserialize(value);
+      return deserialize(ByteBuffer.wrap(value));
     }
     String keyString = StringScheme.deserializeString(key);
     String valueString = StringScheme.deserializeString(value);

@@ -32,7 +32,7 @@ def create_parser(subparsers, action, help_arg):
       action,
       help=help_arg,
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name>",
-      add_help=False)
+      add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
@@ -77,7 +77,7 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
     new_args.append("--verbose")
 
   # invoke the runtime manager to kill the topology
-  resp = execute.heron_class(
+  result = execute.heron_class(
       'com.twitter.heron.scheduler.RuntimeManagerMain',
       lib_jars,
       extra_jars=[],
@@ -86,5 +86,5 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
 
   err_msg = "Failed to %s %s" % (action, topology_name)
   succ_msg = "Successfully %s %s" % (action, topology_name)
-  resp.add_context(err_msg, succ_msg)
-  return resp
+  result.add_context(err_msg, succ_msg)
+  return result

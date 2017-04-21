@@ -25,7 +25,7 @@ def create_parser(subparsers):
       'restart',
       help='Restart a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> [container-id]",
-      add_help=False)
+      add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)

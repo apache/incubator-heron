@@ -117,7 +117,7 @@ public class CuratorStateManagerTest {
     // Verify curator client is invoked
     verify(mockClient).start();
     verify(mockClient).blockUntilConnected(anyInt(), any(TimeUnit.class));
-    verify(mockClient, times(7)).createContainers(anyString());
+    verify(mockClient, times(8)).createContainers(anyString());
 
     // Verify initTree is called
     verify(spyStateManager).initTree();

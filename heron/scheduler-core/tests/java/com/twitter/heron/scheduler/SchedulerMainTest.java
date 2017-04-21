@@ -32,6 +32,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
@@ -44,6 +45,7 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyTests;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -66,6 +68,7 @@ import static org.mockito.Mockito.when;
 public class SchedulerMainTest {
   private static final String STATE_MANAGER_CLASS = "STATE_MANAGER_CLASS";
   private static final String SCHEDULER_CLASS = "SCHEDULER_CLASS";
+  private static final String TOPOLOGY_NAME = "topologyName";
   @Rule
   public final ExpectedException exception = ExpectedException.none();
   private IStateManager stateManager;
@@ -206,5 +209,48 @@ public class SchedulerMainTest {
   @Test
   public void testRunScheduler() throws Exception {
     assertTrue(schedulerMain.runScheduler());
+  }
+
+  @Test
+  public void updateNumContainersIfNeeded() {
+
+    int configuredNumContainers = 4;
+    int configuredNumStreamManagers = configuredNumContainers - 1;
+    int packingPlanSize = 1;
+
+    SubmitterMain submitterMain = new SubmitterMain(null, null);
+    PackingPlan packingPlan =
+        PackingTestUtils.testPackingPlan(TOPOLOGY_NAME, new RoundRobinPacking());
+    assertEquals(packingPlanSize, packingPlan.getContainers().size());
+
+    com.twitter.heron.api.Config apiConfig = new com.twitter.heron.api.Config();
+    apiConfig.setNumStmgrs(configuredNumStreamManagers);
+
+    TopologyAPI.Topology initialTopology = TopologyTests.createTopology(
+        TOPOLOGY_NAME, apiConfig, new HashMap<String, Integer>(), new HashMap<String, Integer>());
+
+    Config initialConfig = Config.newBuilder()
+        .put(Key.NUM_CONTAINERS, configuredNumContainers)
+        .put(Key.PACKING_CLASS, RoundRobinPacking.class.getName())
+        .put(Key.TOPOLOGY_DEFINITION, initialTopology)
+        .build();
+
+    // assert preconditions
+    assertEquals(Integer.toString(configuredNumStreamManagers),
+        apiConfig.get(com.twitter.heron.api.Config.TOPOLOGY_STMGRS));
+    assertEquals(configuredNumStreamManagers, TopologyUtils.getNumContainers(initialTopology));
+
+    assertContainerCount(configuredNumStreamManagers, initialConfig);
+
+    Config newConfig =
+        submitterMain.updateNumContainersIfNeeded(initialConfig, initialTopology, packingPlan);
+
+    assertContainerCount(packingPlanSize, newConfig);
+  }
+
+  private void assertContainerCount(int expectedNumStreamManagers, Config config) {
+    assertEquals(expectedNumStreamManagers + 1, config.get(Key.NUM_CONTAINERS));
+    assertEquals(expectedNumStreamManagers,
+        TopologyUtils.getNumContainers(Runtime.topology(config)));
   }
 }

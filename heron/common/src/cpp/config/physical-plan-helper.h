@@ -26,7 +26,7 @@
 #define SVCS_COMMON_CONFIG_PHYSICAL_PLAN_HELPER_H_
 
 #include <map>
-#include <set>
+#include <unordered_set>
 #include "basics/basics.h"
 #include "proto/messages.h"
 
@@ -48,7 +48,7 @@ class PhysicalPlanHelper {
   // Returns the map of <worker_id, task_id> of the spouts
   // that belong to the _stmgr
   static void GetLocalSpouts(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
-                             std::set<sp_int32>& _return);
+                             std::unordered_set<sp_int32>& _return);
 
   static void LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 };

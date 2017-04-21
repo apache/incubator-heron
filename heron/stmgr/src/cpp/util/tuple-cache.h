@@ -98,7 +98,7 @@ class TupleCache {
   TupleList* get(sp_int32 _task_id);
 
   // map from task_id to the TupleList
-  std::map<sp_int32, TupleList*> cache_;
+  std::unordered_map<sp_int32, TupleList*> cache_;
   EventLoop* eventLoop_;
   std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer_;
   sp_uint64 total_size_;

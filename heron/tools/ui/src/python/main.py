@@ -142,7 +142,7 @@ def main():
   :param argv:
   :return:
   '''
-  log.configure(logging.DEBUG, with_time=True)
+  log.configure(logging.DEBUG)
   tornado.log.enable_pretty_logging()
 
   # create the parser and parse the arguments

@@ -64,6 +64,9 @@ class MockExecutor(HeronExecutor):
     self.processes.append(ProcessInfo(popen, name, cmd))
     return popen
 
+  def _get_jvm_version(self):
+    return "1.8.y.x"
+
 class HeronExecutorTest(unittest.TestCase):
   """Unittest for Heron Executor"""
 
@@ -94,10 +97,23 @@ class HeronExecutorTest(unittest.TestCase):
            "metricsmgr_port topname topid %s " \
            "metrics_sinks_config_file" % (container_id, INTERNAL_CONF_PATH)
 
+  def get_expected_metricscachemgr_command():
+      return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc " \
+             "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause " \
+             "-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=100M " \
+             "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
+             "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
+             "-Xloggc:log-files/gc.metricscache.log -Djava.net.preferIPv4Stack=true " \
+             "-cp metricscachemgr_classpath com.twitter.heron.metricscachemgr.MetricsCacheManager " \
+             "--metricscache_id metricscache-0 --master_port metricscachemgr_masterport " \
+             "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
+             "--system_config_file %s --sink_config_file metrics_sinks_config_file " \
+             "--cluster cluster --role role --environment environ --verbose" % (INTERNAL_CONF_PATH)
+
   def get_expected_instance_command(component_name, instance_id, container_id):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
-    return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxPermSize=128M " \
-           "-XX:PermSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark " \
+    return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxMetaspaceSize=128M " \
+           "-XX:MetaspaceSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark " \
            "-XX:TargetSurvivorRatio=90 -XX:+PrintCommandLineFlags -verbosegc -XX:+PrintGCDetails " \
            "-XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause " \
            "-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=100M " \
@@ -119,6 +135,7 @@ class HeronExecutorTest(unittest.TestCase):
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot stmgr-1,stmgr-7 '
                   '%s metrics_sinks_config_file metricsmgr_port' % (HOSTNAME, INTERNAL_CONF_PATH )),
+      ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
   ]
 
   MockPOpen.set_next_pid(37)
@@ -179,6 +196,7 @@ class HeronExecutorTest(unittest.TestCase):
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
+    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):

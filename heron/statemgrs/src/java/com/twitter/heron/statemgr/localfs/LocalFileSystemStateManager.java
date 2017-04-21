@@ -187,6 +187,16 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location, String topologyName) {
+    // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+    // This is because when running in simulator we control when a tmaster dies and
+    // comes up deterministically.
+    LOG.info("setMetricsCacheLocation: ");
+    return setData(StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
     return setData(StateLocation.TOPOLOGY, topologyName, topology.toByteArray(), false);
   }

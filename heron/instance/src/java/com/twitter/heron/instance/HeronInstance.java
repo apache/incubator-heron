@@ -145,7 +145,7 @@ public class HeronInstance {
     String streamId = args[6];
     int streamPort = Integer.parseInt(args[7]);
     int metricsPort = Integer.parseInt(args[8]);
-    SystemConfig systemConfig = new SystemConfig(args[9], true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true).putAll(args[9], true).build();
 
     // Add the SystemConfig into SingletonRegistry
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);

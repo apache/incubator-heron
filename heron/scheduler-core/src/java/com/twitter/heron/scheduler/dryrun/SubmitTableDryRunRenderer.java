@@ -28,10 +28,12 @@ public class SubmitTableDryRunRenderer implements DryRunRender {
 
   private final Config config;
   private final PackingPlan plan;
+  private final FormatterUtils formatter;
 
-  public SubmitTableDryRunRenderer(SubmitDryRunResponse response) {
+  public SubmitTableDryRunRenderer(SubmitDryRunResponse response, boolean rich) {
     this.config = response.getConfig();
     this.plan = response.getPackingPlan();
+    this.formatter = new FormatterUtils(rich);
   }
 
   public String render() {
@@ -43,19 +45,17 @@ public class SubmitTableDryRunRenderer implements DryRunRender {
     List<String> containerTables = new ArrayList<>();
     for (Integer containerId: containersMap.keySet()) {
       StringBuilder containerBuilder = new StringBuilder();
-      String header =
-          new FormatterUtils.Cell(String.format("Container %d", containerId),
-              FormatterUtils.TextStyle.BOLD).toString();
+      String header = formatter.renderContainerName(containerId);
       containerBuilder.append(header + "\n");
       PackingPlan.ContainerPlan containerPlan = containersMap.get(containerId);
-      containerBuilder.append(FormatterUtils.renderResourceUsage(
+      containerBuilder.append(formatter.renderResourceUsage(
           containerPlan.getRequiredResource()) + "\n");
       List<FormatterUtils.Row> rows = new ArrayList<>();
       for (PackingPlan.InstancePlan instancePlan: containerPlan.getInstances()) {
-        rows.add(FormatterUtils.rowOfInstancePlan(instancePlan,
+        rows.add(formatter.rowOfInstancePlan(instancePlan,
             FormatterUtils.TextColor.DEFAULT, FormatterUtils.TextStyle.DEFAULT));
       }
-      containerBuilder.append(FormatterUtils.renderOneContainer(rows));
+      containerBuilder.append(formatter.renderOneContainer(rows));
       containerTables.add(containerBuilder.toString());
     }
     builder.append(String.join("\n", containerTables));

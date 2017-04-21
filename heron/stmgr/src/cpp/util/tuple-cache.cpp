@@ -44,8 +44,7 @@ TupleCache::~TupleCache() {
   // Drain the cache first
   drain_impl();
 
-  std::map<sp_int32, TupleList*>::iterator iter;
-  for (iter = cache_.begin(); iter != cache_.end(); ++iter) {
+  for (auto iter = cache_.begin(); iter != cache_.end(); ++iter) {
     delete iter->second;
   }
 }
@@ -77,7 +76,7 @@ void TupleCache::add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple
 
 TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
   TupleList* l = NULL;
-  std::map<sp_int32, TupleList*>::iterator iter = cache_.find(_task_id);
+  auto iter = cache_.find(_task_id);
   if (iter == cache_.end()) {
     l = new TupleList();
     cache_[_task_id] = l;
@@ -90,8 +89,7 @@ TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
 void TupleCache::drain(EventLoop::Status) { drain_impl(); }
 
 void TupleCache::drain_impl() {
-  std::map<sp_int32, TupleList*>::iterator iter;
-  for (iter = cache_.begin(); iter != cache_.end(); ++iter) {
+  for (auto iter = cache_.begin(); iter != cache_.end(); ++iter) {
     iter->second->drain(iter->first, drainer_);
   }
   total_size_ = 0;

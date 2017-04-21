@@ -71,8 +71,15 @@ int main(int argc, char* argv[]) {
     LOG(FATAL) << "Corrupt topology defn file" << std::endl;
   }
 
+  sp_int64 high_watermark = heron::config::HeronInternalsConfigReader::Instance()
+                              ->GetHeronStreammgrNetworkBackpressureHighwatermarkMb() *
+                                1_MB;
+  sp_int64 low_watermark = heron::config::HeronInternalsConfigReader::Instance()
+                              ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
+                                1_MB;
   heron::stmgr::StMgr mgr(&ss, myhost, myport, topology_name, topology_id, topology, myid,
-                          instances, zkhostportlist, topdir, metricsmgr_port, shell_port);
+                          instances, zkhostportlist, topdir, metricsmgr_port, shell_port,
+                          high_watermark, low_watermark);
   mgr.Init();
   ss.loop();
   return 0;

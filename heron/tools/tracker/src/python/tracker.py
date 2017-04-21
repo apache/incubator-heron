@@ -201,6 +201,44 @@ class Tracker(object):
     executionState["viz"] = viz_url
     return executionState
 
+  def extract_metadata(self, topology):
+    """
+    Returns metadata that will
+    be returned from Tracker.
+    """
+    execution_state = topology.execution_state
+    metadata = {
+        "cluster": execution_state.cluster,
+        "environ": execution_state.environ,
+        "role": execution_state.role,
+        "jobname": topology.name,
+        "submission_time": execution_state.submission_time,
+        "submission_user": execution_state.submission_user,
+        "release_username": execution_state.release_state.release_username,
+        "release_tag": execution_state.release_state.release_tag,
+        "release_version": execution_state.release_state.release_version,
+    }
+    # refactor get_formatteed_viz_url
+    viz_url = self.config.get_formatted_viz_url(metadata)
+    metadata["viz"] = viz_url
+    return metadata
+
+  @staticmethod
+  def extract_runtime_state(topology):
+    runtime_state = {}
+    runtime_state["has_physical_plan"] = \
+      True if topology.physical_plan else False
+    runtime_state["has_tmaster_location"] = \
+      True if topology.tmaster else False
+    runtime_state["has_scheduler_location"] = \
+      True if topology.scheduler_location else False
+    # "stmgrs" listed runtime state for each stream manager
+    # however it is possible that physical plan is not complete
+    # yet and we do not know how many stmgrs there are. That said,
+    # we should not set any key below (stream manager name)
+    runtime_state["stmgrs"] = {}
+    return runtime_state
+
   # pylint: disable=no-self-use
   def extract_scheduler_location(self, topology):
     """
@@ -445,6 +483,9 @@ class Tracker(object):
     executionState["has_tmaster_location"] = has_tmaster_location
     executionState["has_scheduler_location"] = has_scheduler_location
     executionState["status"] = topology.get_status()
+
+    topologyInfo["metadata"] = self.extract_metadata(topology)
+    topologyInfo["runtime_state"] = self.extract_runtime_state(topology)
 
     topologyInfo["execution_state"] = executionState
     topologyInfo["logical_plan"] = self.extract_logical_plan(topology)

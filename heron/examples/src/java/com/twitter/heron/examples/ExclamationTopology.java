@@ -14,8 +14,10 @@
 
 package com.twitter.heron.examples;
 
+import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.common.basics.ByteAmount;
 
 import backtype.storm.Config;
@@ -68,7 +70,7 @@ public final class ExclamationTopology {
     }
   }
 
-  public static class ExclamationBolt extends BaseRichBolt {
+  public static class ExclamationBolt extends BaseRichBolt implements IUpdatable {
 
     private static final long serialVersionUID = 1184860508880121352L;
     private long nItems;
@@ -76,10 +78,7 @@ public final class ExclamationTopology {
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void prepare(
-        Map conf,
-        TopologyContext context,
-        OutputCollector collector) {
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
@@ -97,6 +96,29 @@ public final class ExclamationTopology {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
       // declarer.declare(new Fields("word"));
+    }
+
+    /**
+     * Implementing this method is optional and only necessary if BOTH of the following are true:
+     *
+     * a.) you plan to dynamically scale your bolt/spout at runtime using 'heron update'.
+     * b.) you need to take action based on a runtime change to the component parallelism.
+     *
+     * Most bolts and spouts should be written to be unaffected by changes in their parallelism,
+     * but some must be aware of it. An example would be a spout that consumes a subset of queue
+     * partitions, which must be algorithmically divided amongst the total number of spouts.
+     * <P>
+     * Note that this method is from the IUpdatable Heron interface which does not exist in Storm.
+     * It is fine to implement IUpdatable along with other Storm interfaces, but implementing it
+     * will bind an otherwise generic Storm implementation to Heron.
+     *
+     * @param heronTopologyContext Heron topology context.
+     */
+    @Override
+    public void update(com.twitter.heron.api.topology.TopologyContext heronTopologyContext) {
+      List<Integer> newTaskIds =
+          heronTopologyContext.getComponentTasks(heronTopologyContext.getThisComponentId());
+      System.out.println("Bolt updated with new topologyContext. New taskIds: " + newTaskIds);
     }
   }
 }
