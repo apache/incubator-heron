@@ -10,10 +10,11 @@ storm_deps_files = [
     "//third_party/java:kryo-neverlink",
 ]
 
+# Kryo is bundled here for integration test
 java_library(
     name = 'storm-compatibility-java',
     srcs = glob(["**/org/apache/**/*.java"]),
-    deps = storm_deps_files,
+    deps = storm_deps_files + ["//third_party/java:kryo"],
 )
 
 java_binary(

@@ -18,7 +18,7 @@ import java.util.Map;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
-import com.twitter.heron.api.serializer.KryoSerializer;
+import com.twitter.heron.api.serializer.JavaSerializer;
 
 /**
  * Get the serializer according to the serializerClassName
@@ -33,7 +33,7 @@ public final class SerializeDeSerializeHelper {
     try {
       String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);
       if (serializerClassName == null) {
-        serializer = new KryoSerializer();
+        serializer = new JavaSerializer();
       } else {
         serializer = (IPluggableSerializer) Class.forName(serializerClassName).newInstance();
       }
