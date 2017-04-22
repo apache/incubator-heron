@@ -158,6 +158,12 @@ public class UpdateTopologyManagerTest {
         any(String.class), eq(TOPOLOGY_NAME),
         eq(mockStateMgr), any(NetworkUtils.TunnelConfig.class));
 
+    // reactivation won't happen since topology state is still running due to mock state manager
+    PowerMockito.doNothing().when(TMasterUtils.class, "transitionTopologyState",
+        eq(TOPOLOGY_NAME), eq(TMasterUtils.TMasterCommand.ACTIVATE), eq(mockStateMgr),
+        eq(TopologyAPI.TopologyState.PAUSED), eq(TopologyAPI.TopologyState.RUNNING),
+        any(NetworkUtils.TunnelConfig.class));
+
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
     verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(testTopology));
