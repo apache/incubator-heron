@@ -20,27 +20,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.storm.Config;
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.hooks.ITaskHook;
-import org.apache.storm.hooks.info.BoltAckInfo;
-import org.apache.storm.hooks.info.BoltExecuteInfo;
-import org.apache.storm.hooks.info.BoltFailInfo;
-import org.apache.storm.hooks.info.EmitInfo;
-import org.apache.storm.hooks.info.SpoutAckInfo;
-import org.apache.storm.hooks.info.SpoutFailInfo;
-import org.apache.storm.metric.api.GlobalMetrics;
-import org.apache.storm.spout.SpoutOutputCollector;
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.topology.base.BaseRichBolt;
-import org.apache.storm.topology.base.BaseRichSpout;
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.hooks.ITaskHook;
+import backtype.storm.hooks.info.BoltAckInfo;
+import backtype.storm.hooks.info.BoltExecuteInfo;
+import backtype.storm.hooks.info.BoltFailInfo;
+import backtype.storm.hooks.info.EmitInfo;
+import backtype.storm.hooks.info.SpoutAckInfo;
+import backtype.storm.hooks.info.SpoutFailInfo;
+import backtype.storm.metric.api.GlobalMetrics;
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.topology.base.BaseRichSpout;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import backtype.storm.utils.Utils;
 
 public final class TaskHookTopology {
 
