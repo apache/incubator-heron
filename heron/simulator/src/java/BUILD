@@ -16,5 +16,5 @@ simulator_deps_files = \
 java_library(
     name = "simulator-java",
     srcs = glob(["**/*.java"]),
-    deps = simulator_deps_files,
+    deps = simulator_deps_files, 
 )

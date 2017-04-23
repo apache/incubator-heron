@@ -79,7 +79,7 @@ statemgr_deps_files = \
     ]
 
 java_library(
-    name = 'common-spi-java',
+    name='common-spi-java',
     srcs = glob([
         "**/spi/common/**/*.java",
     ]),
@@ -91,7 +91,7 @@ java_library(
 )
 
 java_library(
-    name = 'utils-spi-java',
+    name='utils-spi-java',
     srcs = glob([
         "**/spi/utils/**/*.java",
     ]),
@@ -99,7 +99,7 @@ java_library(
 )
 
 java_library(
-    name = 'packing-spi-java',
+    name='packing-spi-java',
     srcs = glob([
         "**/spi/packing/**/*.java",
     ]),
@@ -107,7 +107,7 @@ java_library(
 )
 
 java_library(
-    name = 'scheduler-spi-java',
+    name='scheduler-spi-java',
     srcs = glob([
         "**/spi/scheduler/**/*.java",
     ]),
@@ -115,7 +115,7 @@ java_library(
 )
 
 java_library(
-    name = 'shell-utils-java',
+    name='shell-utils-java',
     srcs = glob([
         "**/spi/utils/ShellUtils.java",
     ]),
@@ -123,7 +123,7 @@ java_library(
 )
 
 java_library(
-    name = 'network-utils-java',
+    name='network-utils-java',
     srcs = glob([
         "**/spi/utils/NetworkUtils.java",
     ]),
@@ -135,7 +135,7 @@ java_library(
 )
 
 java_library(
-    name = 'uploader-spi-java',
+    name='uploader-spi-java',
     srcs = glob([
         "**/spi/uploader/**/*.java",
     ]),
@@ -143,7 +143,7 @@ java_library(
 )
 
 java_library(
-    name = 'uploader-utils-java',
+    name='uploader-utils-java',
     srcs = glob([
         "**/spi/utils/UploaderUtils.java",
     ]),
@@ -151,14 +151,14 @@ java_library(
 )
 
 java_library(
-    name = 'metricsmgr-spi-java',
+    name='metricsmgr-spi-java',
     srcs = glob(
         ["**/spi/metricsmgr/**/*.java"],
     ),
 )
 
 java_library(
-    name = 'statemgr-spi-java',
+    name='statemgr-spi-java',
     srcs = glob(
         ["**/spi/statemgr/**/*.java"],
     ),
