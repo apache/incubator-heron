@@ -27,7 +27,7 @@ between systems.
 In a distributed system like Heron, there are no guarantees that all system
 components will execute at the same speed. Heron has built-in [back pressure
 mechanisms]({{< relref "architecture.md#stream-manager" >}}) to ensure that
-topologies can self-adjust in case components lag.
+topologies can self-adjust in case of components lag.
 
 ### Performance
 
