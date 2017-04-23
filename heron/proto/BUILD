@@ -135,6 +135,61 @@ proto_library(
     ],
 )
 
+java_library(
+    name = "proto-java",
+    deps = [
+        ":proto_common_java",
+        ":proto_execution_state_java",
+        ":proto_stats_java",
+        ":proto_topology_java",
+        ":proto_scheduler_java",
+        ":proto_packing_plan_java",
+        ":proto_physical_plan_java",
+        ":proto_metrics_java",
+        ":proto_tmaster_java",
+        ":proto_tuple_java",
+        ":proto_stmgr_java",
+        ":proto_networktests_java",
+        "@com_google_protobuf_protobuf_java//jar",
+    ],
+    srcs = [
+        "Empty.java",
+    ],
+)
+
+# This is for binaries that don't want protobuf 
+# dependency to be included in the generated jar
+java_library(
+    name = "proto-java-nl",
+    srcs = [
+        "Empty.java",
+    ],
+    deps = [
+        ":proto_common_java",
+        ":proto_execution_state_java",
+        ":proto_stats_java",
+        ":proto_topology_java",
+        ":proto_scheduler_java",
+        ":proto_packing_plan_java",
+        ":proto_physical_plan_java",
+        ":proto_metrics_java",
+        ":proto_tmaster_java",
+        ":proto_tuple_java",
+        ":proto_stmgr_java",
+        ":proto_networktests_java",
+        "//third_party/java:protobuf-java-neverlink",
+    ],
+)
+
+java_binary(
+    name = "proto-bin-java",
+    srcs = ["Empty.java"],
+    create_executable = 0,
+    deps = [
+        ":proto-java-nl",
+    ],
+)
+
 pex_library(
     name = "proto-py",
     deps = [

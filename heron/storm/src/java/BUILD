@@ -12,7 +12,7 @@ storm_deps_files = [
 
 # Kryo is bundled here for integration test
 java_library(
-    name = 'storm-compatibility-java',
+    name='storm-compatibility-java',
     srcs = glob(["**/*.java"]),
     deps = storm_deps_files + ["//third_party/java:kryo"],
 )
