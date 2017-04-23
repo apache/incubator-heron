@@ -16,6 +16,8 @@ package com.twitter.heron.examples;
 
 import java.util.Map;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -27,8 +29,6 @@ import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
-
-import com.twitter.heron.common.basics.ByteAmount;
 
 /**
  * This is a basic example of a Storm topology.

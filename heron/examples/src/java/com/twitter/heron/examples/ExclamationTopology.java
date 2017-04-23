@@ -14,23 +14,22 @@
 
 package com.twitter.heron.examples;
 
-import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.Config;
-import org.apache.storm.LocalCluster;
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.metric.api.GlobalMetrics;
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.topology.base.BaseRichBolt;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
-
-import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.common.basics.ByteAmount;
+
+import backtype.storm.Config;
+import backtype.storm.LocalCluster;
+import backtype.storm.StormSubmitter;
+import backtype.storm.metric.api.GlobalMetrics;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.utils.Utils;
+
 /**
  * This is a basic example of a Storm topology.
  */
@@ -69,7 +68,7 @@ public final class ExclamationTopology {
     }
   }
 
-  public static class ExclamationBolt extends BaseRichBolt implements IUpdatable {
+  public static class ExclamationBolt extends BaseRichBolt {
 
     private static final long serialVersionUID = 1184860508880121352L;
     private long nItems;
@@ -77,7 +76,10 @@ public final class ExclamationTopology {
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+        Map conf,
+        TopologyContext context,
+        OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
@@ -95,29 +97,6 @@ public final class ExclamationTopology {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
       // declarer.declare(new Fields("word"));
-    }
-
-    /**
-     * Implementing this method is optional and only necessary if BOTH of the following are true:
-     *
-     * a.) you plan to dynamically scale your bolt/spout at runtime using 'heron update'.
-     * b.) you need to take action based on a runtime change to the component parallelism.
-     *
-     * Most bolts and spouts should be written to be unaffected by changes in their parallelism,
-     * but some must be aware of it. An example would be a spout that consumes a subset of queue
-     * partitions, which must be algorithmically divided amongst the total number of spouts.
-     * <P>
-     * Note that this method is from the IUpdatable Heron interface which does not exist in Storm.
-     * It is fine to implement IUpdatable along with other Storm interfaces, but implementing it
-     * will bind an otherwise generic Storm implementation to Heron.
-     *
-     * @param heronTopologyContext Heron topology context.
-     */
-    @Override
-    public void update(com.twitter.heron.api.topology.TopologyContext heronTopologyContext) {
-      List<Integer> newTaskIds =
-          heronTopologyContext.getComponentTasks(heronTopologyContext.getThisComponentId());
-      System.out.println("Bolt updated with new topologyContext. New taskIds: " + newTaskIds);
     }
   }
 }

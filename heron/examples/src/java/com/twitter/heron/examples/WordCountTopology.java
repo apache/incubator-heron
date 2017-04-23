@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
@@ -33,7 +35,6 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
-import com.twitter.heron.common.basics.ByteAmount;
 /**
  * This is a topology that does simple word counts.
  * <p>
