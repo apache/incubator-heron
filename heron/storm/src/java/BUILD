@@ -13,13 +13,13 @@ storm_deps_files = [
 # Kryo is bundled here for integration test
 java_library(
     name = 'storm-compatibility-java',
-    srcs = glob(["**/org/apache/**/*.java"]),
+    srcs = glob(["**/*.java"]),
     deps = storm_deps_files + ["//third_party/java:kryo"],
 )
 
 java_binary(
-    name = "storm-compatibility-unshaded",
-    srcs = glob(["**/org/apache/**/*.java"]),
+    name="storm-compatibility-unshaded",
+    srcs = glob(["**/*.java"]),
     deps = storm_deps_files,
 )
 

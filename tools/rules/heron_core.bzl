@@ -39,17 +39,12 @@ def heron_core_lib_scheduler_files():
 def heron_core_lib_packing_files():
     return [
         "//heron/packing/src/java:heron-roundrobin-packing",
-        "//heron/packing/src/java:heron-binpacking-packing"
+	"//heron/packing/src/java:heron-binpacking-packing"
     ]
 
 def heron_core_lib_metricsmgr_files():
     return [
         "//heron/metricsmgr/src/java:heron-metricsmgr",
-    ]
-
-def heron_core_lib_metricscachemgr_files():
-    return [
-        "//heron/metricscachemgr/src/java:heron-metricscachemgr",
     ]
 
 def heron_core_lib_statemgr_files():
