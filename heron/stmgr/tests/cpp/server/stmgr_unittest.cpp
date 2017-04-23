@@ -667,6 +667,7 @@ TEST(StMgr, test_tuple_route) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 15000;
   common.tmaster_controller_port_ = 15001;
   common.tmaster_stats_port_ = 15002;
@@ -744,6 +745,7 @@ TEST(StMgr, test_custom_grouping_route) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 15500;
   common.tmaster_controller_port_ = 15501;
   common.tmaster_stats_port_ = 15502;
@@ -829,6 +831,7 @@ TEST(StMgr, test_back_pressure_instance) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 17000;
   common.tmaster_controller_port_ = 17001;
   common.tmaster_stats_port_ = 17002;
@@ -937,6 +940,7 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 17300;
   common.tmaster_controller_port_ = 17301;
   common.tmaster_stats_port_ = 17302;
@@ -1070,6 +1074,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18000;
   common.tmaster_controller_port_ = 18001;
   common.tmaster_stats_port_ = 18002;
@@ -1186,6 +1191,7 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
@@ -1297,6 +1303,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
@@ -1424,6 +1431,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
@@ -1555,6 +1563,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
 TEST(StMgr, test_metricsmgr_reconnect) {
   CommonResources common;
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 19000;
   common.tmaster_controller_port_ = 19001;
   common.tmaster_stats_port_ = 19002;
