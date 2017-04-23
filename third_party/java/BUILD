@@ -167,6 +167,16 @@ java_library(
     ],
 )
 
+# This version is needed for dependents that don't want
+# protobuf to be included in the generated binary
+java_library(
+    name = "protobuf-java-neverlink",
+    srcs = [ "Empty.java" ],
+    deps = [ "@com_google_protobuf_protobuf_java//jar" ],
+    exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
+    neverlink = 1,
+)
+
 java_library(
     name = "joda_time",
     srcs = [ "Empty.java" ],
