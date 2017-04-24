@@ -15,6 +15,8 @@
 package com.twitter.heron.common.utils.misc;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
@@ -24,6 +26,7 @@ import com.twitter.heron.api.serializer.JavaSerializer;
  * Get the serializer according to the serializerClassName
  */
 public final class SerializeDeSerializeHelper {
+  private static final Logger LOG = Logger.getLogger(SerializeDeSerializeHelper.class.getName());
 
   private SerializeDeSerializeHelper() {
   }
@@ -33,6 +36,9 @@ public final class SerializeDeSerializeHelper {
     try {
       String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);
       if (serializerClassName == null) {
+        LOG.log(Level.WARNING, "Serializer class name not provided");
+        LOG.log(Level.WARNING, "Fall back to Java serializer. "
+                + "THIS COULD CAUSE SERIOUS PERFORMANCE DEGRADATION");
         serializer = new JavaSerializer();
       } else {
         serializer = (IPluggableSerializer) Class.forName(serializerClassName).newInstance();
