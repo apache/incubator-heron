@@ -38,7 +38,9 @@ public final class SerializeDeSerializeHelper {
       if (serializerClassName == null) {
         LOG.log(Level.WARNING, "Serializer class name not provided");
         LOG.log(Level.WARNING, "Fall back to Java serializer. "
-                + "THIS COULD CAUSE SERIOUS PERFORMANCE DEGRADATION");
+                + "This could cause serious performance degradation");
+        LOG.log(Level.WARNING, "You can specify to use Kryo as serializer. "
+            + "See https://twitter.github.io/heron/docs/developers/serialization/ for details");
         serializer = new JavaSerializer();
       } else {
         serializer = (IPluggableSerializer) Class.forName(serializerClassName).newInstance();
