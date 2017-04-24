@@ -36,10 +36,10 @@ public final class SerializeDeSerializeHelper {
     try {
       String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);
       if (serializerClassName == null) {
-        LOG.log(Level.WARNING, "Serializer class name not provided");
-        LOG.log(Level.WARNING, "Fall back to Java serializer. "
-                + "This could cause serious performance degradation");
-        LOG.log(Level.WARNING, "You can specify to use Kryo as serializer. "
+        LOG.log(Level.WARNING, "Serializer class name not provided. "
+            + "Fall back to Java serializer. "
+            + "This could cause serious performance degradation. "
+            + "You can specify to use Kryo as serializer. "
             + "See https://twitter.github.io/heron/docs/developers/serialization/ for details");
         serializer = new JavaSerializer();
       } else {
