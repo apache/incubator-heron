@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +44,10 @@ import com.twitter.heron.resource.TestBolt;
 import com.twitter.heron.resource.TestSpout;
 import com.twitter.heron.resource.UnitTestHelper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class CustomGroupingTest {
   private static final String SPOUT_INSTANCE_ID = "spout-id";
   private static final String CUSTOM_GROUPING_INFO = "custom-grouping-info-in-prepare";
@@ -56,7 +59,6 @@ public class CustomGroupingTest {
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
   private Communicator<InstanceControlMsg> inControlQueue;
   private ExecutorService threadsPool;
-  private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
   private volatile int tupleReceived;
   private volatile StringBuilder customGroupingInfoInPrepare;
   private Slave slave;
@@ -70,14 +72,14 @@ public class CustomGroupingTest {
 
     testLooper = new SlaveLooper();
     slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper);
+    outStreamQueue = new Communicator<>(slaveLooper, testLooper);
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper);
+    inStreamQueue = new Communicator<>(testLooper, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
+    inControlQueue = new Communicator<>(testLooper, slaveLooper);
 
-    slaveMetricsOut =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
+    Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut =
+        new Communicator<>(slaveLooper, testLooper);
     slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
 
     slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue, inControlQueue, slaveMetricsOut);
@@ -117,7 +119,7 @@ public class CustomGroupingTest {
    */
   @Test
   public void testCustomGrouping() throws Exception {
-    final MyCustomGrouping myCustomGrouping = new MyCustomGrouping();
+    final CustomStreamGrouping myCustomGrouping = new MyRoundRobinCustomGrouping();
     final String expectedCustomGroupingStringInPrepare = "test-spout+test-spout+default+[1]";
 
     physicalPlan = constructPhysicalPlan(myCustomGrouping);
@@ -131,6 +133,7 @@ public class CustomGroupingTest {
 
     SingletonRegistry.INSTANCE.registerSingleton(CUSTOM_GROUPING_INFO, customGroupingInfoInPrepare);
 
+    final int expectedTuplesValidated = 10;
     Runnable task = new Runnable() {
       @Override
       public void run() {
@@ -138,23 +141,23 @@ public class CustomGroupingTest {
           if (outStreamQueue.size() != 0) {
             HeronTuples.HeronTupleSet set = outStreamQueue.poll();
 
-            Assert.assertTrue(set.isInitialized());
-            Assert.assertFalse(set.hasControl());
-            Assert.assertTrue(set.hasData());
+            assertTrue(set.isInitialized());
+            assertFalse(set.hasControl());
+            assertTrue(set.hasData());
 
             HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
-            Assert.assertEquals(dataTupleSet.getStream().getId(), "default");
-            Assert.assertEquals(dataTupleSet.getStream().getComponentName(), "test-spout");
+            assertEquals(dataTupleSet.getStream().getId(), "default");
+            assertEquals(dataTupleSet.getStream().getComponentName(), "test-spout");
 
             for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
               List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
-              Assert.assertEquals(destTaskIds.size(), 1);
-              Assert.assertEquals(destTaskIds.get(0), (Integer) tupleReceived);
+              assertEquals(destTaskIds.size(), 1);
+              assertEquals(destTaskIds.get(0), (Integer) tupleReceived);
               tupleReceived++;
             }
           }
-          if (tupleReceived == 10) {
-            Assert.assertEquals(expectedCustomGroupingStringInPrepare,
+          if (tupleReceived == expectedTuplesValidated) {
+            assertEquals(expectedCustomGroupingStringInPrepare,
                 customGroupingInfoInPrepare.toString());
             testLooper.exitLoop();
             break;
@@ -166,17 +169,18 @@ public class CustomGroupingTest {
 
     testLooper.addTasksOnWakeup(task);
     testLooper.loop();
+    assertEquals(expectedTuplesValidated, tupleReceived);
   }
 
-  private PhysicalPlans.PhysicalPlan constructPhysicalPlan(MyCustomGrouping myCustomGrouping) {
+  private PhysicalPlans.PhysicalPlan constructPhysicalPlan(CustomStreamGrouping customGrouping) {
     PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
 
     // Set topology protobuf
     TopologyBuilder topologyBuilder = new TopologyBuilder();
     topologyBuilder.setSpout("test-spout", new TestSpout(), 1);
     // Here we need case switch to corresponding grouping
-    topologyBuilder.setBolt("test-bolt", new TestBolt(), 1).
-        customGrouping("test-spout", myCustomGrouping);
+    topologyBuilder.setBolt("test-bolt", new TestBolt(), 1)
+        .customGrouping("test-spout", customGrouping);
 
     Config conf = new Config();
     conf.setTeamEmail("streaming-compute@twitter.com");
@@ -186,12 +190,11 @@ public class CustomGroupingTest {
     conf.setMaxSpoutPending(100);
     conf.setEnableAcking(false);
 
-    TopologyAPI.Topology fTopology =
-        topologyBuilder.createTopology().
-            setName("topology-name").
-            setConfig(conf).
-            setState(TopologyAPI.TopologyState.RUNNING).
-            getTopology();
+    TopologyAPI.Topology fTopology = topologyBuilder.createTopology()
+        .setName("topology-name")
+        .setConfig(conf)
+        .setState(TopologyAPI.TopologyState.RUNNING)
+        .getTopology();
 
     pPlan.setTopology(fTopology);
 
@@ -232,26 +235,22 @@ public class CustomGroupingTest {
     return pPlan.build();
   }
 
-  private static class MyCustomGrouping implements CustomStreamGrouping {
+  private static class MyRoundRobinCustomGrouping implements CustomStreamGrouping {
     private static final long serialVersionUID = -4141962710451507976L;
     private volatile int emitted = 0;
 
     @Override
-    public void prepare(
-        TopologyContext context,
-        String component,
-        String streamId,
-        List<Integer> targetTasks) {
+    public void prepare(TopologyContext context, String component,
+                        String streamId, List<Integer> targetTasks) {
 
-      StringBuilder customGroupingInfoInPrepare =
-          (StringBuilder) SingletonRegistry.INSTANCE.getSingleton(CUSTOM_GROUPING_INFO);
-      customGroupingInfoInPrepare.append(context.getThisComponentId() + "+" + component
-          + "+" + streamId + "+" + targetTasks.toString());
+      ((StringBuilder) SingletonRegistry.INSTANCE.getSingleton(CUSTOM_GROUPING_INFO))
+          .append(String.format("%s+%s+%s+%s",
+              context.getThisComponentId(), component, streamId, targetTasks.toString()));
     }
 
     @Override
     public List<Integer> chooseTasks(List<Object> values) {
-      List<Integer> res = new ArrayList<Integer>();
+      List<Integer> res = new ArrayList<>();
       res.add(emitted);
       emitted++;
       return res;
