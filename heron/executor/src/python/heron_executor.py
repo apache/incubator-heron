@@ -105,6 +105,9 @@ def log_pid_for_process(process_name, pid):
   Log.info('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
+def is_docker_environment():
+  return os.path.isfile('/.dockerenv')
+
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
     """
@@ -148,7 +151,13 @@ class HeronExecutor(object):
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('&equals;', '='))
     self.classpath = parsed_args.classpath
-    self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+    # Needed for Docker environments since the hostname of a docker container is the container's
+    # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
+    # guaranteed to be set in all Docker executor environments (outside of Marathon)
+    if is_docker_environment():
+      self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+    else:
+      self.master_host = socket.gethostname()
     self.master_port = parsed_args.master_port
     self.tmaster_controller_port = parsed_args.tmaster_controller_port
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
