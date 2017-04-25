@@ -49,9 +49,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CustomGroupingTest {
-  private static final String SPOUT_INSTANCE_ID = "spout-id";
-  private static final String CUSTOM_GROUPING_INFO = "custom-grouping-info-in-prepare";
-
   private WakeableLooper testLooper;
   private SlaveLooper slaveLooper;
   private PhysicalPlans.PhysicalPlan physicalPlan;
@@ -60,15 +57,38 @@ public class CustomGroupingTest {
   private Communicator<InstanceControlMsg> inControlQueue;
   private ExecutorService threadsPool;
   private volatile int tupleReceived;
-  private volatile StringBuilder customGroupingInfoInPrepare;
+  private volatile StringBuilder groupingInitInfo;
   private Slave slave;
+
+  // Test component info. Topology is SPOUT -> BOLT_A -> BOLT_B
+  private enum Component {
+    SPOUT("test-spout", "spout-id"),
+    BOLT_A("test-bolt-a", "bolt-a-id"),
+    BOLT_B("test-bolt-b", "bolt-b-id");
+
+    private String name;
+    private String id;
+
+    Component(String name, String instanceId) {
+      this.name = name;
+      this.id = instanceId;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getInstanceId() {
+      return id;
+    }
+  }
 
   @Before
   public void before() throws Exception {
     UnitTestHelper.addSystemConfigToSingleton();
 
     tupleReceived = 0;
-    customGroupingInfoInPrepare = new StringBuilder();
+    groupingInitInfo = new StringBuilder();
 
     testLooper = new SlaveLooper();
     slaveLooper = new SlaveLooper();
@@ -93,7 +113,7 @@ public class CustomGroupingTest {
     UnitTestHelper.clearSingletonRegistry();
 
     tupleReceived = 0;
-    customGroupingInfoInPrepare = null;
+    groupingInitInfo = null;
 
     if (testLooper != null) {
       testLooper.exitLoop();
@@ -114,24 +134,27 @@ public class CustomGroupingTest {
     threadsPool = null;
   }
 
+  private String getInitInfoKey(String componentName) {
+    return "grouping-init-info+" + componentName;
+  }
+
   /**
    * Test custom grouping
    */
   @Test
   public void testCustomGrouping() throws Exception {
-    final CustomStreamGrouping myCustomGrouping = new MyRoundRobinCustomGrouping();
-    final String expectedCustomGroupingStringInPrepare = "test-spout+test-spout+default+[1]";
+    physicalPlan = constructPhysicalPlan();
 
-    physicalPlan = constructPhysicalPlan(myCustomGrouping);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
+    PhysicalPlanHelper physicalPlanHelper =
+        new PhysicalPlanHelper(physicalPlan, getComponentToVerify().getInstanceId());
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setNewPhysicalPlanHelper(physicalPlanHelper)
+        .build();
 
     inControlQueue.offer(instanceControlMsg);
 
-    SingletonRegistry.INSTANCE.registerSingleton(CUSTOM_GROUPING_INFO, customGroupingInfoInPrepare);
+    SingletonRegistry.INSTANCE.registerSingleton(
+        getInitInfoKey(getComponentToVerify().getName()), groupingInitInfo);
 
     final int expectedTuplesValidated = 10;
     Runnable task = new Runnable() {
@@ -147,7 +170,8 @@ public class CustomGroupingTest {
 
             HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
             assertEquals(dataTupleSet.getStream().getId(), "default");
-            assertEquals(dataTupleSet.getStream().getComponentName(), "test-spout");
+            assertEquals(dataTupleSet.getStream().getComponentName(),
+                getComponentToVerify().getName());
 
             for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
               List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
@@ -157,8 +181,7 @@ public class CustomGroupingTest {
             }
           }
           if (tupleReceived == expectedTuplesValidated) {
-            assertEquals(expectedCustomGroupingStringInPrepare,
-                customGroupingInfoInPrepare.toString());
+            assertEquals(getExpectedComponentInitInfo(), groupingInitInfo.toString());
             testLooper.exitLoop();
             break;
           }
@@ -172,15 +195,15 @@ public class CustomGroupingTest {
     assertEquals(expectedTuplesValidated, tupleReceived);
   }
 
-  private PhysicalPlans.PhysicalPlan constructPhysicalPlan(CustomStreamGrouping customGrouping) {
-    PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
+  private PhysicalPlans.PhysicalPlan constructPhysicalPlan() {
+    PhysicalPlans.PhysicalPlan.Builder physicalPlanBuilder
+        = PhysicalPlans.PhysicalPlan.newBuilder();
 
     // Set topology protobuf
     TopologyBuilder topologyBuilder = new TopologyBuilder();
-    topologyBuilder.setSpout("test-spout", new TestSpout(), 1);
-    // Here we need case switch to corresponding grouping
-    topologyBuilder.setBolt("test-bolt", new TestBolt(), 1)
-        .customGrouping("test-spout", customGrouping);
+    initSpout(topologyBuilder, Component.SPOUT.getName());
+    initBoltA(topologyBuilder, Component.BOLT_A.getName(), Component.SPOUT.getName());
+    initBoltB(topologyBuilder, Component.BOLT_B.getName(), Component.BOLT_A.getName());
 
     Config conf = new Config();
     conf.setTeamEmail("streaming-compute@twitter.com");
@@ -190,39 +213,19 @@ public class CustomGroupingTest {
     conf.setMaxSpoutPending(100);
     conf.setEnableAcking(false);
 
-    TopologyAPI.Topology fTopology = topologyBuilder.createTopology()
+    TopologyAPI.Topology topology = topologyBuilder.createTopology()
         .setName("topology-name")
         .setConfig(conf)
         .setState(TopologyAPI.TopologyState.RUNNING)
         .getTopology();
 
-    pPlan.setTopology(fTopology);
+    physicalPlanBuilder.setTopology(topology);
 
     // Set instances
-    // Construct the spoutInstance
-    PhysicalPlans.InstanceInfo.Builder spoutInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
-    spoutInstanceInfo.setComponentName("test-spout");
-    spoutInstanceInfo.setTaskId(0);
-    spoutInstanceInfo.setComponentIndex(0);
-
-    PhysicalPlans.Instance.Builder spoutInstance = PhysicalPlans.Instance.newBuilder();
-    spoutInstance.setInstanceId("spout-id");
-    spoutInstance.setStmgrId("stream-manager-id");
-    spoutInstance.setInfo(spoutInstanceInfo);
-
-    // Construct the boltInstanceInfo
-    PhysicalPlans.InstanceInfo.Builder boltInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
-    boltInstanceInfo.setComponentName("test-bolt");
-    boltInstanceInfo.setTaskId(1);
-    boltInstanceInfo.setComponentIndex(0);
-
-    PhysicalPlans.Instance.Builder boltInstance = PhysicalPlans.Instance.newBuilder();
-    boltInstance.setInstanceId("bolt-id");
-    boltInstance.setStmgrId("stream-manager-id");
-    boltInstance.setInfo(boltInstanceInfo);
-
-    pPlan.addInstances(spoutInstance);
-    pPlan.addInstances(boltInstance);
+    int taskId = 0;
+    for (Component component : Component.values()) {
+      addComponent(physicalPlanBuilder, component, taskId++);
+    }
 
     // Set stream mgr
     PhysicalPlans.StMgr.Builder stmgr = PhysicalPlans.StMgr.newBuilder();
@@ -230,20 +233,67 @@ public class CustomGroupingTest {
     stmgr.setHostName("127.0.0.1");
     stmgr.setDataPort(8888);
     stmgr.setLocalEndpoint("endpoint");
-    pPlan.addStmgrs(stmgr);
+    physicalPlanBuilder.addStmgrs(stmgr);
 
-    return pPlan.build();
+    return physicalPlanBuilder.build();
   }
 
-  private static class MyRoundRobinCustomGrouping implements CustomStreamGrouping {
+  private void addComponent(PhysicalPlans.PhysicalPlan.Builder builder,
+                            Component component, int taskId) {
+    PhysicalPlans.InstanceInfo.Builder instanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
+    instanceInfo.setComponentName(component.getName());
+    instanceInfo.setTaskId(taskId);
+    instanceInfo.setComponentIndex(0);
+
+    PhysicalPlans.Instance.Builder instance = PhysicalPlans.Instance.newBuilder();
+    instance.setInstanceId(component.getInstanceId());
+    instance.setStmgrId("stream-manager-id");
+    instance.setInfo(instanceInfo);
+
+    builder.addInstances(instance);
+  }
+
+  private void initSpout(TopologyBuilder topologyBuilder, String spoutId) {
+    topologyBuilder.setSpout(spoutId, new TestSpout(), 1);
+  }
+
+  private void initBoltA(TopologyBuilder topologyBuilder,
+                         String boltId, String upstreamComponentId) {
+    final CustomStreamGrouping myCustomGrouping =
+        new MyRoundRobinCustomGrouping(getInitInfoKey(upstreamComponentId));
+    topologyBuilder.setBolt(boltId, new TestBolt(), 1)
+        .customGrouping(upstreamComponentId, myCustomGrouping);
+  }
+
+  private void initBoltB(TopologyBuilder topologyBuilder,
+                         String boltId, String upstreamComponentId) {
+    topologyBuilder.setBolt(boltId, new TestBolt(), 1)
+        .shuffleGrouping(upstreamComponentId);
+  }
+
+  private Component getComponentToVerify() {
+    return Component.SPOUT;
+  }
+
+  private String getExpectedComponentInitInfo() {
+    return "test-spout+test-spout+default+[1]";
+  }
+
+  private static final class MyRoundRobinCustomGrouping implements CustomStreamGrouping {
     private static final long serialVersionUID = -4141962710451507976L;
     private volatile int emitted = 0;
+    private final String initInfoKey;
+
+    private MyRoundRobinCustomGrouping(String initInfoKey) {
+      super();
+      this.initInfoKey = initInfoKey;
+    }
 
     @Override
     public void prepare(TopologyContext context, String component,
                         String streamId, List<Integer> targetTasks) {
 
-      ((StringBuilder) SingletonRegistry.INSTANCE.getSingleton(CUSTOM_GROUPING_INFO))
+      ((StringBuilder) SingletonRegistry.INSTANCE.getSingleton(initInfoKey))
           .append(String.format("%s+%s+%s+%s",
               context.getThisComponentId(), component, streamId, targetTasks.toString()));
     }
