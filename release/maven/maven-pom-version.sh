@@ -25,6 +25,6 @@ if [ "$1" = "" ]; then
     exit 1
 fi
 
-cat ./maven/heron-api.pom.template | sed "s/VERSION/$1/g" >> ./heron-api-$1.pom
-cat ./maven/heron-storm.pom.template | sed "s/VERSION/$1/g" >> ./heron-storm-$1.pom
-cat ./maven/heron-spi.pom.template | sed "s/VERSION/$1/g" >> ./heron-spi-$1.pom
+cat ./maven/heron-api.template.pom | sed "s/VERSION/$1/g" >> ./heron-api-$1.pom
+cat ./maven/heron-storm.template.pom | sed "s/VERSION/$1/g" >> ./heron-storm-$1.pom
+cat ./maven/heron-spi.template.pom | sed "s/VERSION/$1/g" >> ./heron-spi-$1.pom
