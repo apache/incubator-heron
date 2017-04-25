@@ -14,10 +14,6 @@
 
 package com.twitter.heron.api.utils;
 
-// TODO:- Uncomment this
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
-
 /**
  * This is a class that helps to auto tune the max spout pending value
  */

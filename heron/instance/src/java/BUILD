@@ -10,7 +10,6 @@ instance_deps_files =  \
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:classification",
         "//heron/common/src/java:common-java",
-        "//third_party/java:logging", 
     ]
 
 java_library(
@@ -29,10 +28,6 @@ java_binary(
     deps = [
         ":instance-java",
         "//heron/common/src/java:common-java",
-        # Heron does not need it, we supply this,
-        # since we exclude them explicitly in target "heron_binary".
-        # Later we might remove it.
-        "//third_party/java:logging",
     ] + heron_java_proto_files(),
 )
 

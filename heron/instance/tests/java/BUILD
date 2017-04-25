@@ -7,6 +7,7 @@ test_deps_files = \
         "//heron/common/src/java:common-java",
         "//heron/instance/src/java:instance-java",
         "//third_party/java:junit4",
+        "//third_party/java:kryo",
     ]
 
 java_library(
