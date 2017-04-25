@@ -58,6 +58,11 @@
       "expectedResultRelativePath" : "bolt_double_emit_tuples/resources/BoltDoubleEmitTuples.json"
     },
     {
+      "topologyName" : "IntegrationTest_MultiSpoutsMultiTasks",
+      "classPath"    : "multi_spouts_multi_tasks.MultiSpoutsMultiTasks",
+      "expectedResultRelativePath" : "multi_spouts_multi_tasks/resources/MultiSpoutsMultiTasks.json"
+    },
+    {
       "topologyName" : "IntegrationTest_OneBoltMultiTasks",
       "classPath"    : "one_bolt_multi_tasks.OneBoltMultiTasks",
       "expectedResultRelativePath" : "one_bolt_multi_tasks/resources/OneBoltMultiTasks.json"
