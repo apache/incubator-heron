@@ -63,8 +63,8 @@ class Application(tornado.web.Application):
     callbacks = [
         (r"/", handlers.MainHandler),
 
-        url(r"/service/heron/topologies", handlers.ListTopologiesHandler, name='topologies'),
-        url(r"/topologies", handlers.ListTopologiesHandler),
+        url(r"/topologies", handlers.ListTopologiesHandler, dict(baseUrl=base_url),
+            name='topologies'),
         url(r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)",
             handlers.ContainerFileStatsHandler, dict(baseUrl=base_url)),
         url(r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config",
