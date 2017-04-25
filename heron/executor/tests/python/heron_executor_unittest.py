@@ -35,7 +35,7 @@ def get_test_heron_internal_yaml():
   return yaml_path
 
 INTERNAL_CONF_PATH = get_test_heron_internal_yaml()
-HOSTNAME = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+HOSTNAME = socket.gethostname()
 
 class MockPOpen(object):
   """fake subprocess.Popen object that we can use to mock processes and pids"""
