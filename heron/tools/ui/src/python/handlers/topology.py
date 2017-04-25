@@ -82,6 +82,9 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
 class ListTopologiesHandler(base.BaseHandler):
   ''' Handler for displaying all the topologies - defaults to 'local'''
 
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
+
   @tornado.gen.coroutine
   def get(self):
     '''
@@ -94,7 +97,8 @@ class ListTopologiesHandler(base.BaseHandler):
         topologies=[],  # no topologies
         clusters=[str(cluster) for cluster in clusters],
         active="topologies",  # active icon the nav bar
-        function=common.className
+        function=common.className,
+        baseUrl=self.baseUrl
     )
 
     # send the all topologies page
