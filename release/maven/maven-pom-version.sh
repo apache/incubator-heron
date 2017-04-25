@@ -25,6 +25,24 @@ if [ "$1" = "" ]; then
     exit 1
 fi
 
-cat ./maven/heron-api.template.pom | sed "s/VERSION/$1/g" >> ./heron-api-$1.pom
-cat ./maven/heron-storm.template.pom | sed "s/VERSION/$1/g" >> ./heron-storm-$1.pom
-cat ./maven/heron-spi.template.pom | sed "s/VERSION/$1/g" >> ./heron-spi-$1.pom
+cat ./maven/heron-no-kryo.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-api/g" | \
+    sed "s/NAME/heron-api/g" | \
+    sed "s/DESCRIPTION/Heron API/g" \
+    >> ./heron-api-$1.pom
+
+cat ./maven/heron-no-kryo.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-spi/g" | \
+    sed "s/NAME/heron-spi/g" | \
+    sed "s/DESCRIPTION/Heron SPI/g" \
+    >> ./heron-spi-$1.pom
+
+cat ./maven/heron-with-kryo.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-storm/g" | \
+    sed "s/NAME/heron-storm/g" | \
+    sed "s/DESCRIPTION/Heron Storm/g" \
+    >> ./heron-storm-$1.pom
+
