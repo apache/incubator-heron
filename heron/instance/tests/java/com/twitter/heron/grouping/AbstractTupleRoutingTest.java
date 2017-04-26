@@ -177,8 +177,8 @@ public abstract class AbstractTupleRoutingTest {
 
             for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
               List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
-              assertEquals(destTaskIds.size(), 1);
-              assertEquals(destTaskIds.get(0), (Integer) tupleReceived);
+              assertEquals(1, destTaskIds.size());
+              assertEquals((Integer) tupleReceived, destTaskIds.get(0));
               tupleReceived++;
             }
           }
