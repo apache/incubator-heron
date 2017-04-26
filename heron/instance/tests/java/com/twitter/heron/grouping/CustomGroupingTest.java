@@ -23,7 +23,7 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.resource.TestBolt;
 
 /**
- * Tests custom grouping by using round robin grouping from SPOUT -> BOLT_A
+ * Tests custom grouping by using round robin grouping from SPOUT to BOLT_A
  */
 public class CustomGroupingTest extends AbstractTupleRoutingTest {
 
