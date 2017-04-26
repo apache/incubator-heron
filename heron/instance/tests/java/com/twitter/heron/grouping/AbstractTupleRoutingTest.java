@@ -208,8 +208,8 @@ public abstract class AbstractTupleRoutingTest {
     initBoltB(topologyBuilder, Component.BOLT_B.getName(), Component.BOLT_A.getName());
 
     Config conf = new Config();
-    conf.setTeamEmail("streaming-compute@twitter.com");
-    conf.setTeamName("stream-computing");
+    conf.setTeamEmail("some-team@company.com");
+    conf.setTeamName("some-team");
     conf.setTopologyProjectName("heron-integration-test");
     conf.setNumStmgrs(1);
     conf.setMaxSpoutPending(100);
