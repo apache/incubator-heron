@@ -418,6 +418,26 @@ public class Config extends HashMap<String, Object> {
 
   }
 
+  public static void setTopologyStateful(Map<String, Object> conf, boolean stateful) {
+    conf.put(Config.TOPOLOGY_STATEFUL, String.valueOf(stateful));
+  }
+
+  public static void setTopologyStatefulCheckpointIntervalSecs(Map<String, Object> conf, int secs) {
+    conf.put(Config.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL, Integer.toString(secs));
+  }
+
+  public static void setTopologyStatefulProviderType(Map<String, Object> conf, String provider) {
+    conf.put(Config.TOPOLOGY_STATEFUL_PROVIDER_TYPE, provider);
+  }
+
+  public static void setTopologyStatefulProviderConfig(Map<String, Object> conf, String config) {
+    conf.put(Config.TOPOLOGY_STATEFUL_PROVIDER_CONFIG, config);
+  }
+
+  public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
+    conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
+  }
+
   public void setDebug(boolean isOn) {
     setDebug(this, isOn);
   }
@@ -538,5 +558,25 @@ public class Config extends HashMap<String, Object> {
 
   public Set<String> getApiVars() {
     return apiVars;
+  }
+
+  public void setTopologyStateful(boolean stateful) {
+    setTopologyStateful(this, stateful);
+  }
+
+  public void setTopologyStatefulCheckpointIntervalSecs(int secs) {
+    setTopologyStatefulCheckpointIntervalSecs(this, secs);
+  }
+
+  public void setTopologyStatefulProviderType(String provider) {
+    setTopologyStatefulProviderType(this, provider);
+  }
+
+  public void setTopologyStatefulProviderConfig(String config) {
+    setTopologyStatefulProviderConfig(this, config);
+  }
+
+  public void setTopologyStatefulStartClean(boolean clean) {
+    setTopologyStatefulStartClean(this, clean);
   }
 }

@@ -17,24 +17,11 @@ package com.twitter.heron.api.bolt;
 import com.twitter.heron.api.topology.IStatefulComponent;
 
 /**
- * An IBolt represents a component that takes tuples as input and produces tuples
- * as output. An IBolt can do everything from filtering to joining to functions
- * to aggregations. It does not have to process a tuple immediately and may
- * hold onto tuples to process later.
- * <p>
- * <p>A bolt's lifecycle is as follows:</p>
- * <p>
- * <p>IBolt object created on client machine. The IBolt is serialized into the topology
- * (using Java serialization) and submitted to the master machine of the cluster (Nimbus).
- * Nimbus then launches workers which deserialize the object, call prepare on it, and then
- * start processing tuples.</p>
- * <p>
- * <p>If you want to parameterize an IBolt, you should set the parameter's through its
- * constructor and save the parameterization state as instance variables (which will
- * then get serialized and shipped to every task executing this bolt across the cluster).</p>
- * <p>
- * <p>When defining bolts in Java, you should use the IRichBolt interface which adds
- * necessary methods for using the Java TopologyBuilder API.</p>
+ * An IStatefulBolt represents a bolt that implements stateful functionality.
+ * In addition to the regular prepare/execute methods, it has initialization
+ * methods with state as defined in IStatefulComponent. An implementation
+ * of the stateful bolt saves state in the State interface and is able
+ * to restore its state from the State during init call.
  */
 public interface IStatefulBolt extends IStatefulComponent, IRichBolt {
 }

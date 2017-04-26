@@ -17,14 +17,16 @@ package com.twitter.heron.api.topology;
 import com.twitter.heron.api.state.State;
 
 /**
- * Common methods for all possible components in a topology. This interface is used
- * when defining topologies using the Java API.
+ * Defines a component that saves its internal state in the State interface
  */
 public interface IStatefulComponent extends IComponent {
 
   /**
    * Initializes the state of the function or operator to that of a previous checkpoint.
-   * This method is invoked when a component is executed as part of a recovery run.
+   * This method is invoked when a component is executed as part of a recovery run. In case
+   * there was prior state associated with the component, the state will be empty.
+   * Stateful Spouts/Bolts are expected to hold on to the state variable to save their
+   * internal state
    * <p>
    * Note that initialState() is called before open() or prepare().
    *
