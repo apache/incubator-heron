@@ -41,6 +41,7 @@ com.twitter.heron.grouping
 com.twitter.heron.instance
 com.twitter.heron.instance.bolt
 com.twitter.heron.instance.spout
+com.twitter.heron.instance.util
 com.twitter.heron.integration_test.common
 com.twitter.heron.integration_test.common.bolt
 com.twitter.heron.integration_test.common.spout
@@ -60,9 +61,14 @@ com.twitter.heron.integration_test.topology.serialization
 com.twitter.heron.integration_test.topology.shuffle_grouping
 com.twitter.heron.local_integration_test.topology.local_readwrite
 com.twitter.heron.metrics
+com.twitter.heron.metricscachemgr
+com.twitter.heron.metricscachemgr.metricscache
+com.twitter.heron.metricscachemgr.metricscache.query
+com.twitter.heron.metricscachemgr.metricscache.store
 com.twitter.heron.metricsmgr
 com.twitter.heron.metricsmgr.executor
 com.twitter.heron.metricsmgr.sink
+com.twitter.heron.metricsmgr.sink.metricscache
 com.twitter.heron.metricsmgr.sink.tmaster
 com.twitter.heron.network
 com.twitter.heron.packing
@@ -79,6 +85,7 @@ com.twitter.heron.resource
 com.twitter.heron.scheduler
 com.twitter.heron.scheduler.aurora
 com.twitter.heron.scheduler.client
+com.twitter.heron.scheduler.dryrun
 com.twitter.heron.scheduler.local
 com.twitter.heron.scheduler.marathon
 com.twitter.heron.scheduler.mesos
@@ -87,6 +94,7 @@ com.twitter.heron.scheduler.server
 com.twitter.heron.scheduler.slurm
 com.twitter.heron.scheduler.utils
 com.twitter.heron.scheduler.yarn
+com.twitter.heron.serializer.kryo
 com.twitter.heron.simulator
 com.twitter.heron.simulator.executors
 com.twitter.heron.simulator.grouping
