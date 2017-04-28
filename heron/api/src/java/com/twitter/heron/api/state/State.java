@@ -22,5 +22,5 @@ import java.util.Map;
  * In Heron, state gives a notional Key/Value interface along with the
  * ability to iterate over the key/values
  */
-public interface State extends Map<Serializable, Serializable> {
+public interface State<K extends Serializable, V extends Serializable> extends Map<K, V> {
 }

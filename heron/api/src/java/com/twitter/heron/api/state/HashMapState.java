@@ -20,6 +20,7 @@ import java.util.HashMap;
 /**
  * A State backed up by HashMap
  */
-public class HashMapState extends HashMap<Serializable, Serializable> implements State {
+public class HashMapState<K extends Serializable, V extends Serializable>
+             extends HashMap<K, V> implements State<K, V> {
   private static final long serialVersionUID = -6152858128057246318L;
 }

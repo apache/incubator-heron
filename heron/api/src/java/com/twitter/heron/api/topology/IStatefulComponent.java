@@ -14,12 +14,15 @@
 
 package com.twitter.heron.api.topology;
 
+import java.io.Serializable;
+
 import com.twitter.heron.api.state.State;
 
 /**
  * Defines a component that saves its internal state in the State interface
  */
-public interface IStatefulComponent extends IComponent {
+public interface IStatefulComponent<K extends Serializable, V extends Serializable>
+                 extends IComponent {
 
   /**
    * Initializes the state of the function or operator to that of a previous checkpoint.
@@ -32,7 +35,7 @@ public interface IStatefulComponent extends IComponent {
    *
    * @param state the previously saved state of the component.
    */
-  void initState(State state);
+  void initState(State<K, V> state);
 
   /**
    * This is a hook for the component to perform some actions just before the
