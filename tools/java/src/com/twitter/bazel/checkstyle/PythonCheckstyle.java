@@ -84,6 +84,7 @@ public final class PythonCheckstyle {
       commandBuilder.add("--rcfile=" + PYLINT_RCFILE);
       commandBuilder.add("--reports=n");
       commandBuilder.add("--disable=I");
+      commandBuilder.add("--jobs=8");
       commandBuilder.addAll(sourceFiles);
       runLinter(commandBuilder);
 
