@@ -4,11 +4,11 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter.heron</groupId>
-  <artifactId>heron-storm</artifactId>
+  <artifactId>ARTIFACT_ID</artifactId>
   <version>VERSION</version>  
   <packaging>jar</packaging>
-  <name>heron-storm</name>
-  <description>Heron Storm</description>
+  <name>NAME</name>
+  <description>DESCRIPTION</description>
   <url>http://www.heronstreaming.io</url>
   <licenses>
     <license>
@@ -16,6 +16,14 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+  <dependencies>
+    <dependency>
+      <groupId>com.esotericsoftware</groupId>
+      <artifactId>kryo</artifactId>
+      <version>3.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
   <developers>
     <developer>
       <name>Heron Users</name>
