@@ -14,7 +14,7 @@
 
 package com.twitter.heron.healthmgr.common;
 
-public interface HealthManagerContstants {
+public interface HealthMgrConstants {
   int DEFAULT_METRIC_DURATION = 60;
 
   String METRIC_EXE_COUNT = "__execute-count/default";
@@ -26,4 +26,6 @@ public interface HealthManagerContstants {
 
   String CONF_TRACKER_URL = "TRACKER_URL";
   String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
+  String CONF_CLUSTER = "CLUSTER";
+  String CONF_ENVIRON = "ENVIRON";
 }

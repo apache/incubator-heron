@@ -27,7 +27,7 @@ import com.microsoft.dhalion.symptom.Diagnosis;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
@@ -59,7 +59,7 @@ public class DataSkewDiagnoserTest {
     ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0",
-            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+            HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
   }
 
   public static BackPressureDetector createMockBackPressureDetector(int... bpValues) {
@@ -68,7 +68,7 @@ public class DataSkewDiagnoserTest {
 
     for (int i = 0; i < bpValues.length; i++) {
       addInstanceMetric(bpMetrics, i, bpValues[i],
-          HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE);
+          HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE);
     }
 
     Collection<ComponentSymptom> bpSymptoms = new ArrayList<>();
@@ -79,7 +79,7 @@ public class DataSkewDiagnoserTest {
 
   public static ExecuteCountSensor createMockExecuteCountSensor(double... exeCounts) {
     ExecuteCountSensor exeSensor = mock(ExecuteCountSensor.class);
-    return getMockSensor(HealthManagerContstants.METRIC_EXE_COUNT, exeSensor, exeCounts);
+    return getMockSensor(HealthMgrConstants.METRIC_EXE_COUNT, exeSensor, exeCounts);
   }
 
   static <T extends ISensor> T getMockSensor(String metric, T sensor, double... values) {

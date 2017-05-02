@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
 public class ExecuteCountSensor extends BaseSensor {
@@ -43,8 +43,8 @@ public class ExecuteCountSensor extends BaseSensor {
 
   public Map<String, ComponentMetricsData> get(String ... boltNames) {
     return metricsProvider.getComponentMetrics(
-        HealthManagerContstants.METRIC_EXE_COUNT,
-        HealthManagerContstants.DEFAULT_METRIC_DURATION,
+        HealthMgrConstants.METRIC_EXE_COUNT,
+        HealthMgrConstants.DEFAULT_METRIC_DURATION,
         boltNames);
   }
 }

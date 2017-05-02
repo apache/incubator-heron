@@ -20,7 +20,7 @@ import com.microsoft.dhalion.symptom.Diagnosis;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
@@ -50,7 +50,7 @@ public class SlowInstanceDiagnoserTest {
     ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0",
-            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+            HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
   }
 
   @Test
@@ -69,7 +69,7 @@ public class SlowInstanceDiagnoserTest {
 
   static BufferSizeSensor createMockBufferSizeSensor(double... values) {
     BufferSizeSensor exeSensor = mock(BufferSizeSensor.class);
-    return DataSkewDiagnoserTest.getMockSensor(HealthManagerContstants.METRIC_BUFFER_SIZE,
+    return DataSkewDiagnoserTest.getMockSensor(HealthMgrConstants.METRIC_BUFFER_SIZE,
         exeSensor,
         values);
   }

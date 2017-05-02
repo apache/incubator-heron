@@ -24,7 +24,7 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
@@ -56,14 +56,14 @@ public class BackPressureSensor extends BaseSensor {
 
       Map<String, InstanceMetricsData> instanceMetricsData = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE + boltInstanceName;
+        String metric = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE + boltInstanceName;
         Map<String, ComponentMetricsData> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
-            HealthManagerContstants.DEFAULT_METRIC_DURATION,
-            HealthManagerContstants.COMPONENT_STMGR);
+            HealthMgrConstants.DEFAULT_METRIC_DURATION,
+            HealthMgrConstants.COMPONENT_STMGR);
 
         HashMap<String, InstanceMetricsData> streamManagerResult =
-            stmgrResult.get(HealthManagerContstants.COMPONENT_STMGR).getMetrics();
+            stmgrResult.get(HealthMgrConstants.COMPONENT_STMGR).getMetrics();
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
@@ -71,7 +71,7 @@ public class BackPressureSensor extends BaseSensor {
 
         InstanceMetricsData boltInstanceMetric = new InstanceMetricsData(boltInstanceName);
 
-        boltInstanceMetric.addMetric(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE,
+        boltInstanceMetric.addMetric(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE,
             stmgrInstanceResult.getMetricIntValue(metric));
 
         instanceMetricsData.put(boltInstanceName, boltInstanceMetric);
@@ -79,7 +79,7 @@ public class BackPressureSensor extends BaseSensor {
 
       ComponentMetricsData componentMetricsData = new ComponentMetricsData(boltComponent,
           System.currentTimeMillis(),
-          HealthManagerContstants.DEFAULT_METRIC_DURATION,
+          HealthMgrConstants.DEFAULT_METRIC_DURATION,
           instanceMetricsData);
       result.put(boltComponent, componentMetricsData);
     }

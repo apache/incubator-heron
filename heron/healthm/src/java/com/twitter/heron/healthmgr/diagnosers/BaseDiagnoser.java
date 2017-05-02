@@ -22,13 +22,13 @@ import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
 import com.microsoft.dhalion.symptom.ComponentSymptom;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
-  protected static final String EXE_COUNT = HealthManagerContstants.METRIC_EXE_COUNT;
-  protected static final String BUFFER_SIZE = HealthManagerContstants.METRIC_BUFFER_SIZE;
+  protected static final String EXE_COUNT = HealthMgrConstants.METRIC_EXE_COUNT;
+  protected static final String BUFFER_SIZE = HealthMgrConstants.METRIC_BUFFER_SIZE;
   protected static final String BACK_PRESSURE =
-      HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE;
+      HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
 
   @Override
   public void close() {

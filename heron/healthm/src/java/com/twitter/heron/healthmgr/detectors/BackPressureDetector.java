@@ -25,7 +25,7 @@ import com.microsoft.dhalion.app.ComponentInfo;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.symptom.ComponentSymptom;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
 public class BackPressureDetector extends BaseSymptomDetector {
@@ -47,7 +47,7 @@ public class BackPressureDetector extends BaseSymptomDetector {
     Map<String, ComponentMetricsData> backpressureMetrics = bpSensor.get();
     for (ComponentMetricsData compMetrics : backpressureMetrics.values()) {
       if (compMetrics
-          .anyInstanceAboveLimit(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE, 20)) {
+          .anyInstanceAboveLimit(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE, 20)) {
         result.add(new ComponentSymptom(new ComponentInfo(compMetrics.getName()), compMetrics));
       }
     }

@@ -20,7 +20,7 @@ import com.microsoft.dhalion.symptom.Diagnosis;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
@@ -74,7 +74,7 @@ public class UnderProvisioningDiagnoserTest {
     ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0",
-            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+            HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
   }
 
   public static BufferSizeSensor createMockBufferSizeSensor(double... bufferSizes) {
