@@ -101,7 +101,7 @@ sp_int32 BaseServer::Start_Base() {
 
   // Ask the EventLoop to deliver any read events
   if (eventLoop_->registerForRead(listen_fd_, on_new_connection_callback_, true) < 0) {
-    PLOG(ERROR) << "register for read of the socket failed in server";
+    LOG(ERROR) << "register for read of the socket failed in server";
     close(listen_fd_);
     return -1;
   }
