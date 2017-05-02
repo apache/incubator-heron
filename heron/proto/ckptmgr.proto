@@ -5,15 +5,17 @@ option java_outer_classname = "CheckpointManager";
 import "common.proto";
 import "physical_plan.proto";
 
-// message stored in zk by the tmaster
+// message stored in the state manager by the tmaster
 message StatefulConsistentCheckpoints {
-  // This is the most recent checkpoint that we believe exists
-  required string most_recent_checkpoint_id = 1;
-  // It might be possible that for various reasons(fs corruption, etc)
-  // the last checkpoint is not accessible. This is the set of
-  // other globally consistent checkpoints that can be recovered from.
-  // The order of preference(and recency) is from beginning to end
-  repeated string backup_checkpoint_ids = 2;
+  message StatefulConsistentCheckpoint {
+    required string checkpoint_id = 1;
+    // One can add more meta data about this ckpt later
+  }
+  // An ordered list of the globally consistent checkpoints
+  // that have been snapshotted and can be recovered from.
+  // 0th element is the most recent one, 1st is the next recent
+  // and so on
+  repeated StatefulConsistentCheckpoint consistent_checkpoints = 1;
 }
 
 // tmaster -> stmgr messages
@@ -27,6 +29,11 @@ message StartStatefulCheckpoint {
 // to this checkpoint
 message RestoreTopologyStateRequest {
   required string checkpoint_id = 1;
+  // Every Attempt made by Tmaster to restore to a globally consistent
+  // checkpoint is tagged with a unique id. The stmgrs include this in their
+  // RestoreTopologyStateResponse below. This way tmaster could
+  // try restoring to the same checkpoint_id multiple times and still
+  // keep track of for which attempt the restore was in the responses
   required int64 restore_txid = 2; 
 }
 
@@ -55,6 +62,9 @@ message InstanceStateStored {
 }
 
 // Message sent by tmaster to stmgr to start processing
+// For exactly once semantics, all the topology components
+// should be rolled back to a consistent state before they can
+// start processing.
 message StartStmgrStatefulProcessing {
   required string checkpoint_id = 1;
 }
@@ -87,6 +97,7 @@ message CleanStatefulCheckpointRequest {
 // Message sent by ckptmgr to tmaster about the cleanup request
 message CleanStatefulCheckpointResponse {
   required heron.proto.system.Status status = 1;
+  repeated string cleaned_checkpoints = 2;
 }
 
 // stmgr -> ckptmgr messages
@@ -97,7 +108,7 @@ message CleanStatefulCheckpointResponse {
 message RegisterStMgrRequest{
   required string topology_name = 1;
   required string topology_id = 2;
-  required string stmgr = 3;
+  required string stmgr_id = 3;
 }
 
 // This is the message that checkpoint manager
@@ -163,18 +174,22 @@ message RestoreInstanceStateRequest {
 // This is the message that instance sends to its stmgr
 // when done with restoring the state
 message RestoreInstanceStateResponse {
-  required string checkpoint_id = 1;
+  required heron.proto.system.Status status = 1;
+  required string checkpoint_id = 2;
 }
 
 // Message sent by stmgr to Instance to start processing
+// This is related to StartStmgrStatefulProcessing message above
+// but between stmgr -> instance.
 message StartInstanceStatefulProcessing {
   required string checkpoint_id = 1;
 }
 
 // stmgr -> stmgr messages
 
-// This is the message that stmgr sends to other stmgr
-// to send it to downstream task
+// Once an instance is done checkpointing, this message is sent
+// to all its downstream components so that they could checkpoint
+// their state. In that sense this is the marker message
 message DownstreamStatefulCheckpoint {
   required int32 origin_task_id = 1; 
   required int32 destination_task_id = 2; 
