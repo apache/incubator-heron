@@ -54,9 +54,8 @@ sp_int32 BaseServer::Start_Base() {
   }
 
   if (SockUtils::setSocketDefaults(listen_fd_) < 0) {
-    LOG(ERROR) << "SockUtils::setSocketDefaults() failed: " << strerror(errno);
     close(listen_fd_);
-    return errno;
+    return -1;
   }
 
   // Set the socket option for addr reuse
