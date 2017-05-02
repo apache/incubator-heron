@@ -148,17 +148,15 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
    * Is this topology stateful? The format of this flag is boolean
-   * When set to true, Heron will try to do a distributed checkpoint
-   * based on Lamport's idea of distributed snapshotting every
-   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. When any component
-   * of the topology dies, Heron initiates a recovery mechanism to restart
-   * the topology from the last globally consistent checkpoint.
-   * Submitting this flag to false does not initiate any checkpointing/recovery
-   * mechanism, and thus the topology is then run in either atmost/atleast once
-   * semantics as before. This means that even if the components themselves are
-   * IStatefulComponents their state is not saved/recovered. This allows topology
-   * developers to run the same topology in exacltly once or atleast/atmost once
-   * without changing any code.
+   * When set to true, Heron will try to take the snapshots of
+   * all of the components of the topology every
+   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure of
+   * any component, its state is recovered to the last checkpoint saved. The
+   * spouts/bolts of the topology have to implement IStatefulComponent for state
+   * to be actually captured.
+   * Setting this flag to false does not initiate any checkpointing
+   * mechanism. This means that even if the components themselves are
+   * IStatefulComponents their state is not saved/recovered.
    */
   public static final String TOPOLOGY_STATEFUL_ENABLED = "topology.stateful.enabled";
   /**
@@ -182,6 +180,26 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_STATEFUL_START_CLEAN =
                              "topology.stateful.start.clean";
+  /**
+   * Do we want to run this topology in exactly once semantics?
+   * The format of this flag is boolean.
+   * When set to true, Heron will try to do a distributed checkpoint
+   * based on Lamport's idea of distributed snapshotting every
+   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. When any component
+   * of the topology dies, Heron initiates a recovery mechanism to restart
+   * the topology from the last globally consistent checkpoint.
+   * Heron topologies can be run in many modes.
+   * 1. When TOPOLOGY_ENABLE_ACKING is enabled, Heron will run the topology
+   * in the classic atleast-once semantics.
+   * 2. When TOPOLOGY_EXACTLYONCE_ENABLED is enabled, Heron will run the
+   * topology in exactly once sematics. Note that the spouts/bolts have to
+   * implement IStatefulComponents for them to really save/restore their state.
+   * 3. When neither is enabled, the topology is run in atmost-once semantics
+   * 4. If both TOPOLOGY_ENABLE_ACKING and TOPOLOGY_EXACTLYONCE_ENABLED are set
+   * then the TOPOLOGY_EXACTLYONCE_ENABLED semantics has preference and the
+   * topology is run in exactly once semantics
+   */
+  public static final String TOPOLOGY_EXACTLYONCE_ENABLED = "topology.exactlyonce.enabled";
   /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
@@ -250,6 +268,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CLASS);
     apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CONFIG_FILE);
     apiVars.add(TOPOLOGY_STATEFUL_ENABLED);
+    apiVars.add(TOPOLOGY_EXACTLYONCE_ENABLED);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);
@@ -450,6 +469,10 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
   }
 
+  public static void setTopologyExactlyOnceEnabled(Map<String, Object> conf, boolean exactOnce) {
+    conf.put(Config.TOPOLOGY_EXACTLYONCE_ENABLED, String.valueOf(exactOnce));
+  }
+
   public void setDebug(boolean isOn) {
     setDebug(this, isOn);
   }
@@ -590,5 +613,9 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
+  }
+
+  public void setTopologyExactlyOnceEnabled(boolean exactOnce) {
+    setTopologyExactlyOnceEnabled(this, exactOnce);
   }
 }
