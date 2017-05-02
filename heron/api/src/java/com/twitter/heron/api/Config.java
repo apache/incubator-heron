@@ -148,6 +148,17 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
    * Is this topology stateful? The format of this flag is boolean
+   * When set to true, Heron will try to do a distributed checkpoint
+   * based on Lamport's idea of distributed snapshotting every
+   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. When any component
+   * of the topology dies, Heron initiates a recovery mechanism to restart
+   * the topology from the last globally consistent checkpoint.
+   * Submitting this flag to false does not initiate any checkpointing/recovery
+   * mechanism, and thus the topology is then run in either atmost/atleast once
+   * semantics as before. This means that even if the components themselves are
+   * IStatefulComponents their state is not saved/recovered. This allows topology
+   * developers to run the same topology in exacltly once or atleast/atmost once
+   * without changing any code.
    */
   public static final String TOPOLOGY_STATEFUL_ENABLED = "topology.stateful.enabled";
   /**
