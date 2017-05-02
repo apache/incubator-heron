@@ -5,12 +5,15 @@ option java_outer_classname = "CheckpointManager";
 import "common.proto";
 import "physical_plan.proto";
 
+// Message representing information about a globally consistent
+// checkpoint
+message StatefulConsistentCheckpoint {
+  required string checkpoint_id = 1;
+  // One can add more meta data about this ckpt later
+}
+
 // message stored in the state manager by the tmaster
 message StatefulConsistentCheckpoints {
-  message StatefulConsistentCheckpoint {
-    required string checkpoint_id = 1;
-    // One can add more meta data about this ckpt later
-  }
   // An ordered list of the globally consistent checkpoints
   // that have been snapshotted and can be recovered from.
   // 0th element is the most recent one, 1st is the next recent
