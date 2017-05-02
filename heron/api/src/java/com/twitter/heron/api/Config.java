@@ -149,7 +149,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * Is this topology stateful? The format of this flag is boolean
    */
-  public static final String TOPOLOGY_STATEFUL = "topology.stateful";
+  public static final String TOPOLOGY_STATEFUL_ENABLED = "topology.stateful.enabled";
   /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
@@ -238,7 +238,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CLASS);
     apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CONFIG_FILE);
-    apiVars.add(TOPOLOGY_STATEFUL);
+    apiVars.add(TOPOLOGY_STATEFUL_ENABLED);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);
@@ -418,8 +418,8 @@ public class Config extends HashMap<String, Object> {
 
   }
 
-  public static void setTopologyStateful(Map<String, Object> conf, boolean stateful) {
-    conf.put(Config.TOPOLOGY_STATEFUL, String.valueOf(stateful));
+  public static void setTopologyStatefulEnabled(Map<String, Object> conf, boolean stateful) {
+    conf.put(Config.TOPOLOGY_STATEFUL_ENABLED, String.valueOf(stateful));
   }
 
   public static void setTopologyStatefulCheckpointIntervalSecs(Map<String, Object> conf, int secs) {
@@ -561,7 +561,7 @@ public class Config extends HashMap<String, Object> {
     return apiVars;
   }
 
-  public void setTopologyStateful(boolean stateful) {
+  public void setTopologyStatefulEnabled(boolean stateful) {
     setTopologyStateful(this, stateful);
   }
 
