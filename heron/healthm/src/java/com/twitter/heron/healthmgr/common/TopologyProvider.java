@@ -41,7 +41,7 @@ public class TopologyProvider implements Provider<Topology> {
 
   @Inject
   public TopologyProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
-                          @Named(HealthManagerContstants.CONF_TOPOLOGY_NAME) String topologyName) {
+                          @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
   }
@@ -57,6 +57,9 @@ public class TopologyProvider implements Provider<Topology> {
   private synchronized void fetchLatestTopology() {
     LOG.log(Level.INFO, "Fetching topology from state manager: {0}", topologyName);
     this.topology = stateManagerAdaptor.getTopology(topologyName);
+    if (topology == null) {
+      throw new RuntimeException("Failed to fetch topology from the State Manager");
+    }
   }
 
   /**

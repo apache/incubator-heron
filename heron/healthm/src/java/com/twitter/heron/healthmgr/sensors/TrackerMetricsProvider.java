@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -34,17 +35,17 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetricsData;
 import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public class TrackerMetricsProvider implements MetricsProvider {
   private static final Logger LOG = Logger.getLogger(TrackerMetricsProvider.class.getName());
   private final WebTarget baseTarget;
 
   @Inject
-  public TrackerMetricsProvider(@Named(HealthManagerContstants.CONF_TRACKER_URL) String trackerURL,
-                                @Named("CLUSTER") String cluster,
-                                @Named("ENVIRON") String environ,
-                                @Named("TOPOLOGY_NAME") String topologyName) {
+  public TrackerMetricsProvider(@Named(HealthMgrConstants.CONF_TRACKER_URL) String trackerURL,
+                                @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName,
+                                @Named(HealthMgrConstants.CONF_CLUSTER) String cluster,
+                                @Named(HealthMgrConstants.CONF_ENVIRON) String environ) {
     LOG.info("Metrics will be provided by tracker at :" + trackerURL);
 
     Client client = ClientBuilder.newClient();

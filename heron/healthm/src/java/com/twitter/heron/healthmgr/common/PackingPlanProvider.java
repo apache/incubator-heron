@@ -94,5 +94,8 @@ public class PackingPlanProvider implements Provider<PackingPlan> {
     PackingPlans.PackingPlan protoPackingPlan = stateManagerAdaptor.getPackingPlan(topologyName);
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
     this.packingPlan = deserializer.fromProto(protoPackingPlan);
+    if (packingPlan == null) {
+      throw new RuntimeException("Failed to fetch packing plan from the State Manager");
+    }
   }
 }

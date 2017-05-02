@@ -32,7 +32,7 @@ public class TrackerMetricsProviderTest {
   @Test
   public void providesOneComponentMetricsFromTracker() {
     TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "dev", "env", "topology");
+        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
 
     TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
 
@@ -60,7 +60,7 @@ public class TrackerMetricsProviderTest {
   @Test
   public void providesMultipleComponentMetricsFromTracker() {
     TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "dev", "env", "topology");
+        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
 
     TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
 
@@ -97,7 +97,7 @@ public class TrackerMetricsProviderTest {
   @Test
   public void parsesBackPressureMetric() {
     TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "dev", "env", "topology");
+        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
 
     TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
 
@@ -125,7 +125,7 @@ public class TrackerMetricsProviderTest {
   @Test
   public void handleMissingData() {
     TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "dev", "env", "topology");
+        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
 
     TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
 
