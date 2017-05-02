@@ -228,7 +228,7 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
 
   mgr = new DummyStMgr(ss, options, stmgr_id, LOCALHOST, stmgr_port, LOCALHOST, tmaster_port,
                        shell_port, instances);
-  CHECK_EQ(0, mgr->Start()) << stmgr_port;
+  EXPECT_EQ(0, mgr->Start()) << stmgr_port;
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -245,7 +245,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
-  CHECK_EQ(0, mgr->Start()) << mtmgr_port;
+  EXPECT_EQ(0, mgr->Start()) << mtmgr_port;
   mtmgr_thread = new std::thread(StartServer, ss);
 }
 
