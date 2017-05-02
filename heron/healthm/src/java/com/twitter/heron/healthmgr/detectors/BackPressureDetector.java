@@ -16,19 +16,20 @@
 package com.twitter.heron.healthmgr.detectors;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.app.ComponentInfo;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.symptom.ComponentSymptom;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
-public class BackPressureDetector extends BaseSymptomDetector {
+public class BackPressureDetector implements IDetector {
   private final BackPressureSensor bpSensor;
 
   @Inject
@@ -41,17 +42,21 @@ public class BackPressureDetector extends BaseSymptomDetector {
    * will be only one component
    */
   @Override
-  public Collection<ComponentSymptom> detect() {
-    ArrayList<ComponentSymptom> result = new ArrayList<>();
+  public List<Symptom> detect() {
+    ArrayList<Symptom> result = new ArrayList<>();
 
-    Map<String, ComponentMetricsData> backpressureMetrics = bpSensor.get();
-    for (ComponentMetricsData compMetrics : backpressureMetrics.values()) {
+    Map<String, ComponentMetrics> backpressureMetrics = bpSensor.get();
+    for (ComponentMetrics compMetrics : backpressureMetrics.values()) {
       if (compMetrics
-          .anyInstanceAboveLimit(HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE, 20)) {
-        result.add(new ComponentSymptom(new ComponentInfo(compMetrics.getName()), compMetrics));
+          .anyInstanceAboveLimit(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE, 20)) {
+        result.add(new Symptom(new ComponentInfo(compMetrics.getName()), compMetrics));
       }
     }
 
     return result;
+  }
+
+  @Override
+  public void close() {
   }
 }

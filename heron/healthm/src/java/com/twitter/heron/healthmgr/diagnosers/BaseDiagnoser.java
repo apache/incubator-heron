@@ -18,17 +18,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.microsoft.dhalion.api.IDiagnoser;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
-import com.microsoft.dhalion.symptom.ComponentSymptom;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
-public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
-  protected static final String EXE_COUNT = HealthManagerContstants.METRIC_EXE_COUNT;
-  protected static final String BUFFER_SIZE = HealthManagerContstants.METRIC_BUFFER_SIZE;
-  protected static final String BACK_PRESSURE =
-      HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE;
+public abstract class BaseDiagnoser implements IDiagnoser {
+  protected static final String EXE_COUNT = HealthMgrConstants.METRIC_EXE_COUNT;
+  protected static final String BUFFER_SIZE = HealthMgrConstants.METRIC_BUFFER_SIZE;
+  protected static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
 
   @Override
   public void close() {
@@ -38,25 +37,36 @@ public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
   public void initialize() {
   }
 
+
+  protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
+    List<Symptom> result = new ArrayList<>();
+    for (Symptom symptom : symptoms) {
+      if (symptom.getMetrics().anyInstanceAboveLimit(BACK_PRESSURE, 0)) {
+        result.add(symptom);
+      }
+    }
+    return result;
+  }
+
   /**
    * A helper class to compute and hold component stats
    */
   protected static class ComponentBackpressureStats {
-    private final ComponentMetricsData componentMetrics;
+    private final ComponentMetrics componentMetrics;
 
-    List<InstanceMetricsData> boltsWithBackpressure = new ArrayList<>();
-    List<InstanceMetricsData> boltsWithoutBackpressure = new ArrayList<>();
+    List<InstanceMetrics> boltsWithBackpressure = new ArrayList<>();
+    List<InstanceMetrics> boltsWithoutBackpressure = new ArrayList<>();
     double exeCountMax;
     double exeCountMin;
     double bufferSizeMax;
     double bufferSizeMin;
     double totalBackpressure = 0;
 
-    public ComponentBackpressureStats(ComponentMetricsData backPressureMetrics) {
+    public ComponentBackpressureStats(ComponentMetrics backPressureMetrics) {
       this.componentMetrics = backPressureMetrics;
 
-      for (InstanceMetricsData mergedInstance : backPressureMetrics.getMetrics().values()) {
-        int bpValue = mergedInstance.getMetricIntValue(BACK_PRESSURE);
+      for (InstanceMetrics mergedInstance : backPressureMetrics.getMetrics().values()) {
+        double bpValue = mergedInstance.getMetricValue(BACK_PRESSURE);
         if (bpValue > 0) {
           boltsWithBackpressure.add(mergedInstance);
           totalBackpressure += bpValue;
@@ -70,8 +80,8 @@ public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
       bufferSizeMin = Double.MAX_VALUE;
       bufferSizeMax = Double.MIN_VALUE;
 
-      for (InstanceMetricsData mergedInstance : componentMetrics.getMetrics().values()) {
-        Double bufferSize = mergedInstance.getMetric(BUFFER_SIZE);
+      for (InstanceMetrics mergedInstance : componentMetrics.getMetrics().values()) {
+        Double bufferSize = mergedInstance.getMetricValue(BUFFER_SIZE);
         if (bufferSize == null) {
           continue;
         }
@@ -81,8 +91,8 @@ public abstract class BaseDiagnoser implements IDiagnoser<ComponentSymptom> {
     }
 
     protected void computeExeCountStats() {
-      for (InstanceMetricsData mergedInstance : componentMetrics.getMetrics().values()) {
-        int exeCount = mergedInstance.getMetricIntValue(EXE_COUNT);
+      for (InstanceMetrics mergedInstance : componentMetrics.getMetrics().values()) {
+        double exeCount = mergedInstance.getMetricValue(EXE_COUNT);
         exeCountMax = exeCountMax < exeCount ? exeCount : exeCountMax;
         exeCountMin = exeCountMin > exeCount ? exeCount : exeCountMin;
       }

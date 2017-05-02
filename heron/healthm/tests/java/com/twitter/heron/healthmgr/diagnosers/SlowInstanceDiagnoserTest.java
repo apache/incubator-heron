@@ -14,13 +14,16 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.symptom.ComponentSymptom;
-import com.microsoft.dhalion.symptom.Diagnosis;
+import java.util.List;
 
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+
+import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
@@ -31,45 +34,40 @@ import static org.mockito.Mockito.mock;
 public class SlowInstanceDiagnoserTest {
   @Test
   public void failsIfOnly1of1InstanceInBP() {
-    BackPressureDetector bpDetector = createMockBackPressureDetector(123);
+    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123);
     BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000);
 
-    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bpDetector, bufferSizeSensor);
-    Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
+    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
+    Diagnosis result = diagnoser.diagnose(symptoms);
     assertNull(result);
   }
 
   @Test
-  public void diagnoses1of3SlowInstances() {
-    BackPressureDetector bpDetector = createMockBackPressureDetector(123, 0, 0);
+  public void diagnosis1of3SlowInstances() {
+    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123, 0, 0);
     BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000, 20, 20);
 
-    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bpDetector, bufferSizeSensor);
-    Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
+    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
+    Diagnosis result = diagnoser.diagnose(symptoms);
     assertEquals(1, result.getSymptoms().size());
-    ComponentMetricsData data = result.getSymptoms().iterator().next().getMetricsData();
+    ComponentMetrics data = result.getSymptoms().iterator().next().getMetrics();
     assertEquals(123,
-        data.getMetricValue("container_1_bolt_0",
-            HealthManagerContstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+        data.getMetricValue("container_1_bolt_0", BaseDiagnoser.BACK_PRESSURE).intValue());
   }
 
   @Test
   public void failDiagnosisIfBufferSizeDoNotDifferMuch() {
-    BackPressureDetector bpDetector = createMockBackPressureDetector(123, 0, 0);
+    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123, 0, 0);
     BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000, 500, 500);
 
-    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bpDetector, bufferSizeSensor);
-    Diagnosis<ComponentSymptom> result = diagnoser.diagnose();
+    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
+    Diagnosis result = diagnoser.diagnose(symptoms);
     assertNull(result);
-  }
-
-  public static BackPressureDetector createMockBackPressureDetector(int... bpValues) {
-    return DataSkewDiagnoserTest.createMockBackPressureDetector(bpValues);
   }
 
   static BufferSizeSensor createMockBufferSizeSensor(double... values) {
     BufferSizeSensor exeSensor = mock(BufferSizeSensor.class);
-    return DataSkewDiagnoserTest.getMockSensor(HealthManagerContstants.METRIC_BUFFER_SIZE,
+    return DataSkewDiagnoserTest.getMockSensor(HealthMgrConstants.METRIC_BUFFER_SIZE,
         exeSensor,
         values);
   }
