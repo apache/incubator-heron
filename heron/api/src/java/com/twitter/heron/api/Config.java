@@ -562,7 +562,7 @@ public class Config extends HashMap<String, Object> {
   }
 
   public void setTopologyStatefulEnabled(boolean stateful) {
-    setTopologyStateful(this, stateful);
+    setTopologyStatefulEnabled(this, stateful);
   }
 
   public void setTopologyStatefulCheckpointIntervalSecs(int secs) {
