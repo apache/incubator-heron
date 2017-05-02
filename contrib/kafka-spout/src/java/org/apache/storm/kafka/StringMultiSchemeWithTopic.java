@@ -17,6 +17,7 @@
  */
 package org.apache.storm.kafka;
 
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class StringMultiSchemeWithTopic
   private static final long serialVersionUID = 1985667152241541458L;
 
   @Override
-  public Iterable<List<Object>> deserialize(byte[] bytes) {
+  public Iterable<List<Object>> deserialize(ByteBuffer bytes) {
     throw new UnsupportedOperationException();
   }
 

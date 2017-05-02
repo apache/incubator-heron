@@ -42,7 +42,7 @@ import com.twitter.heron.proto.system.HeronTuples;
 
 public class BoltInstance implements IInstance {
 
-  protected final PhysicalPlanHelper helper;
+  protected PhysicalPlanHelper helper;
   protected final IBolt bolt;
   protected final BoltOutputCollectorImpl collector;
   protected final IPluggableSerializer serializer;
@@ -99,6 +99,11 @@ public class BoltInstance implements IInstance {
       ((IUpdatable) bolt).update(physicalPlanHelper.getTopologyContext());
     }
     collector.updatePhysicalPlanHelper(physicalPlanHelper);
+
+    // Re-prepare the CustomStreamGrouping since the downstream tasks can change
+    physicalPlanHelper.prepareForCustomStreamGrouping();
+    // Reset the helper
+    helper = physicalPlanHelper;
   }
 
   @Override

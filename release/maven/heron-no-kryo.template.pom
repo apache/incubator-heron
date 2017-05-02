@@ -4,11 +4,11 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter.heron</groupId>
-  <artifactId>heron-api</artifactId>
+  <artifactId>ARTIFACT_ID</artifactId>
   <version>VERSION</version>  
   <packaging>jar</packaging>
-  <name>heron-api</name>
-  <description>Heron API</description>
+  <name>NAME</name>
+  <description>DESCRIPTION</description>
   <url>http://www.heronstreaming.io</url>
   <licenses>
     <license>
