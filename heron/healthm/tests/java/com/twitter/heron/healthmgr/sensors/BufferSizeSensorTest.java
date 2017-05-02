@@ -23,7 +23,7 @@ import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
@@ -50,8 +50,8 @@ public class BufferSizeSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = HealthManagerContstants.METRIC_BUFFER_SIZE
-          + boltId + HealthManagerContstants.METRIC_BUFFER_SIZE_SUFFIX;
+      String metric = HealthMgrConstants.METRIC_BUFFER_SIZE
+          + boltId + HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
       registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
     }
 
@@ -63,13 +63,13 @@ public class BufferSizeSensorTest {
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricIntValue(HealthManagerContstants.METRIC_BUFFER_SIZE));
+        .getMetricIntValue(HealthMgrConstants.METRIC_BUFFER_SIZE));
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-            .getMetricIntValue(HealthManagerContstants.METRIC_BUFFER_SIZE));
+            .getMetricIntValue(HealthMgrConstants.METRIC_BUFFER_SIZE));
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-            .getMetricIntValue(HealthManagerContstants.METRIC_BUFFER_SIZE));
+            .getMetricIntValue(HealthMgrConstants.METRIC_BUFFER_SIZE));
   }
 
   public static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,

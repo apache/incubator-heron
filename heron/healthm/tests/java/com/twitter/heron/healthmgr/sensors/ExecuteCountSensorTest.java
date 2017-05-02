@@ -23,7 +23,7 @@ import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerContstants;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +51,7 @@ public class ExecuteCountSensorTest {
     result.put("bolt-2", metrics);
 
     when(metricsProvider
-        .getComponentMetrics(HealthManagerContstants.METRIC_EXE_COUNT, 60, "bolt-1", "bolt-2"))
+        .getComponentMetrics(HealthMgrConstants.METRIC_EXE_COUNT, 60, "bolt-1", "bolt-2"))
         .thenReturn(result);
 
     ExecuteCountSensor executeCountSensor = new ExecuteCountSensor(topologyProvider, metricsProvider);
@@ -59,21 +59,21 @@ public class ExecuteCountSensorTest {
     assertEquals(2, componentMetrics.size());
     assertEquals(123, componentMetrics.get("bolt-1")
         .getMetrics("container_1_bolt-1_1")
-        .getMetricIntValue(HealthManagerContstants.METRIC_EXE_COUNT));
+        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
     assertEquals(345, componentMetrics.get("bolt-1")
         .getMetrics("container_1_bolt-1_2")
-        .getMetricIntValue(HealthManagerContstants.METRIC_EXE_COUNT));
+        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
     assertEquals(321, componentMetrics.get("bolt-2")
         .getMetrics("container_1_bolt-2_3")
-        .getMetricIntValue(HealthManagerContstants.METRIC_EXE_COUNT));
+        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
     assertEquals(543, componentMetrics.get("bolt-2")
         .getMetrics("container_1_bolt-2_4")
-        .getMetricIntValue(HealthManagerContstants.METRIC_EXE_COUNT));
+        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
   }
 
   private InstanceMetricsData createTestInstanceMetric(String name, int value) {
     InstanceMetricsData instanceMetrics = new InstanceMetricsData(name);
-    instanceMetrics.addMetric(HealthManagerContstants.METRIC_EXE_COUNT, value);
+    instanceMetrics.addMetric(HealthMgrConstants.METRIC_EXE_COUNT, value);
     return instanceMetrics;
   }
 }
