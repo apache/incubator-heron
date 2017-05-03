@@ -169,14 +169,14 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_stmgr.erase(metrics_data.instance_id());
       LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure gone "
-          << metrics_data.instance_id();
+          << metrics_data.instance_id() << " val: " << val;
     } else {  // there is backpressure
       LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure observed "
-          << metrics_data.instance_id();
+          << metrics_data.instance_id() << " val: " << val;
       if (last_timestamp_backpressure_stmgr.find(metrics_data.instance_id())
           == last_timestamp_backpressure_stmgr.end()) {
         LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure recorded "
-            << metrics_data.instance_id();
+            << metrics_data.instance_id() << " timestamp: " << metrics_data.timestamp();
         last_timestamp_backpressure_stmgr.insert(
             std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
       }
@@ -186,14 +186,14 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
     if (val <= 0) {  // backpressure gone
       last_timestamp_backpressure_instance.erase(metrics_data.instance_id());
       LOG(INFO) << "Auto restart feature (add metrics): instance backpressure gone "
-          << metrics_data.instance_id();
+          << metrics_data.instance_id() << " val: " << val;
     } else {  // there is backpressure
       LOG(INFO) << "Auto restart feature (add metrics): instance backpressure observed "
-          << metrics_data.instance_id();
+          << metrics_data.instance_id() << " val: " << val;
       if (last_timestamp_backpressure_instance.find(metrics_data.instance_id())
           == last_timestamp_backpressure_instance.end()) {
         LOG(INFO) << "Auto restart feature (add metrics): instance backpressure recorded "
-            << metrics_data.instance_id();
+            << metrics_data.instance_id() << " timestamp: " << metrics_data.timestamp();
         last_timestamp_backpressure_instance.insert(
             std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
       }
