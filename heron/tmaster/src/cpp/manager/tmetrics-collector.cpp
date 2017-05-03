@@ -115,39 +115,35 @@ void TMetricsCollector::Purge(EventLoop::Status) {
         }
       }
       LOG(INFO) << "Auto restart feature: pool count " << badSandbox.size();
-      for (std::set<sp_string>::iterator it = badSandbox.begin(); it != badSandbox.end(); it++) {
-        const PhysicalPlan* pplan = tmaster_->getPhysicalPlan();
-        for (int i=0; i < pplan->kStmgrsFieldNumber; i++) {
-          StMgr st = pplan->stmgrs(i);
-          if (st.id().compare(*it) == 0) {
-            // send 'kill executor' command to heron-shell
-            HTTPKeyValuePairs kvs;
-            kvs.push_back(make_pair("secret", tmaster_->GetTopologyId()));
-            LOG(INFO) << "Prepare 'Kill heron-executor' cmd: " << st.host_name() << " "
-                << st.shell_port() << " " << tmaster_->GetTopologyId();
-            OutgoingHTTPRequest* request =
-                new OutgoingHTTPRequest(st.host_name(), st.shell_port(), "/killexecutor",
-                    BaseHTTPRequest::POST, kvs);
-            auto cb = [](IncomingHTTPResponse* response) {
-              LOG(WARNING) << "Kill heron-executor: " << response->response_code();
-            };
+      const PhysicalPlan* pplan = tmaster_->getPhysicalPlan();
+      for (int i=0; i < pplan->stmgrs_size(); i++) {
+        StMgr st = pplan->stmgrs(i);
+        if (badSandbox.find(st.id()) != badSandbox.end()) {
+          // send 'kill executor' command to heron-shell
+          HTTPKeyValuePairs kvs;
+          kvs.push_back(make_pair("secret", tmaster_->GetTopologyId()));
+          LOG(INFO) << "Prepare 'Kill heron-executor' " << st.id() << " cmd: "
+              << st.host_name() << " " << st.shell_port() << " " << tmaster_->GetTopologyId();
+          OutgoingHTTPRequest* request =
+              new OutgoingHTTPRequest(st.host_name(), st.shell_port(), "/killexecutor",
+                  BaseHTTPRequest::POST, kvs);
+          auto cb = [](IncomingHTTPResponse* response) {
+            LOG(WARNING) << "Kill heron-executor: " << response->response_code();
+          };
 
-            if (client_->SendRequest(request, std::move(cb)) != SP_OK) {
-              LOG(ERROR) << "Unable to send the request\n";
-            } else {
-              auto_restart_last_ = now;  // set last=now after sending killing cmd
-              goto theEnd;  // restart only one container each time
-            }
+          if (client_->SendRequest(request, std::move(cb)) != SP_OK) {
+            LOG(ERROR) << "Unable to send the request\n";
+          } else {
+            auto_restart_last_ = now;  // set last=now after sending killing cmd
+            // restart only one container each time
+            last_timestamp_backpressure_stmgr.erase(st.id());
+            last_timestamp_backpressure_instance.erase(st.id());
+            return;
           }
+        } else {
+          LOG(INFO) << "Auto restart feature: not found in badSandbox " << st.id();
         }
       }
-theEnd:
-      // free badSandbox?
-      for (std::set<sp_string>::iterator it = badSandbox.begin(); it != badSandbox.end(); it++) {
-        last_timestamp_backpressure_stmgr.erase(*it);
-        last_timestamp_backpressure_instance.erase(*it);
-      }
-      return;
     } else {
       LOG(INFO) << "skip auto-restart-backpressure checking, last " << auto_restart_last_
           << " interval " << auto_restart_interval_;
