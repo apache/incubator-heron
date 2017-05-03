@@ -20,11 +20,16 @@ import com.twitter.heron.spi.common.Context;
 
 public final class MarathonContext extends Context {
   public static final String HERON_MARATHON_SCHEDULER_URI = "heron.marathon.scheduler.uri";
+  public static final String HERON_EXECUTOR_DOCKER_IMAGE = "heron.executor.docker.image";
 
   private MarathonContext() {
   }
 
   public static String getSchedulerURI(Config config) {
     return config.getStringValue(HERON_MARATHON_SCHEDULER_URI);
+  }
+
+  public static String getExecutorDockerImage(Config config) {
+    return config.getStringValue(HERON_EXECUTOR_DOCKER_IMAGE);
   }
 }

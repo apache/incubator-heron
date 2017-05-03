@@ -1,7 +1,7 @@
 /**
  * Render trendline for stats below the containers and instances view
  */
-function StatTrendlines(cluster, environ, toponame, physicalPlan, logicalPlan) {
+function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logicalPlan) {
   var result = {};
   var target = d3.select('#stat-trendlines').style('text-align', 'center');
 
@@ -214,7 +214,7 @@ function StatTrendlines(cluster, environ, toponame, physicalPlan, logicalPlan) {
     executeMetricsQuery();
 
     function executeMetricsQuery() {
-      var u = '/topologies/metrics/timeline?'
+      var u = baseUrl + '/topologies/metrics/timeline?'
       var request = [
         u + 'cluster=' + cluster,
         'environ=' + environ,
