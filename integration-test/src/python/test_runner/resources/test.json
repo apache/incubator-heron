@@ -68,6 +68,11 @@
       "expectedResultRelativePath" : "one_bolt_multi_tasks/resources/OneBoltMultiTasks.json"
     },
     {
+      "topologyName" : "IntegrationTest_OneSpoutBoltMultiTasks",		
+      "classPath"    : "one_spout_bolt_multi_tasks.OneSpoutBoltMultiTasks",		
+      "expectedResultRelativePath" : "one_spout_bolt_multi_tasks/resources/OneSpoutBoltMultiTasks.json"		
+    },		
+    {
       "topologyName" : "IntegrationTest_OneSpoutMultiTasks",
       "classPath"    : "one_spout_multi_tasks.OneSpoutMultiTasks",
       "expectedResultRelativePath" : "one_spout_multi_tasks/resources/OneSpoutMultiTasks.json"
