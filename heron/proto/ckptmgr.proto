@@ -141,7 +141,7 @@ message StartStmgrStatefulProcessing {
 // This is the message that a tmaster sends
 // when it wants to register itself
 // with checkpoint manager
-message RegisterTMasterRequest{
+message RegisterTMasterRequest {
   required string topology_name = 1;
   required string topology_id = 2;
 }
