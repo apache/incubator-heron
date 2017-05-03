@@ -66,6 +66,25 @@ genrule(
 )
 
 java_library(
+    name='ecs-scheduler-java',
+    srcs = glob(["**/ecs/*.java"]),
+    deps = scheduler_deps_files,
+)
+
+java_binary(
+    name='ecs-scheduler-unshaded',
+    srcs = glob(["**/ecs/*.java"]),
+    deps = scheduler_deps_files,
+)
+
+genrule(
+    name = "heron-ecs-scheduler",
+    srcs = [":ecs-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-ecs-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
     name='aurora-scheduler-java',
     srcs = glob(["**/aurora/*.java"]),
     deps = scheduler_deps_files,
