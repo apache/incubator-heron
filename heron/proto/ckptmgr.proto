@@ -25,7 +25,7 @@ import "physical_plan.proto";
 // From the StatefulConsistentCheckpoints message stored in the
 // state manager, Tmaster picks the latest checkpoint_id and
 // sends RestoreTopologyStateRequest to all stmgrs. Each stmgr
-// sends does a GetInstanceStateRequest/GetInstanceStateResponse
+// does a GetInstanceStateRequest/GetInstanceStateResponse
 // dance with its local checkpoint manager for all of its local
 // instances to fetch the state. Upon fetch, stmgr does a
 // RestoreInstanceStateRequest/RestoreInstanceStateResponse
