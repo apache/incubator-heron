@@ -108,6 +108,21 @@ def log_pid_for_process(process_name, pid):
 def is_docker_environment():
   return os.path.isfile('/.dockerenv')
 
+def isEcsAmiInstance():
+  meta = 'http://169.254.169.254/latest/meta-data/ami-id'
+  req = urllib2.Request(meta)
+  try:
+    response = urllib2.urlopen(req).read()
+    if 'ami' in response:
+      #_msg = 'I am in AWS running on {}'.format(response)
+      return 1
+    else:
+      #_msg = 'I am in dev - no AWS AMI'
+      return 0
+  except Exception:
+    #_msg = 'no metadata, not in AWS'
+    return 0
+
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
     """
@@ -155,7 +170,14 @@ class HeronExecutor(object):
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
     # guaranteed to be set in all Docker executor environments (outside of Marathon)
     if is_docker_environment():
-      self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+       # Need to set the HOST environment vairable if docker is for AWS ECS tasks
+      if isEcsAmiInstance():
+        self.master_host = subprocess.Popen(["curl",
+                                             "http://169.254.169.254/latest/meta-data/local-ipv4"]
+                                            , stdout=subprocess.PIPE).communicate()[0]
+        os.environ['HOST'] = self.master_host
+      else:
+        self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
     else:
       self.master_host = socket.gethostname()
     self.master_port = parsed_args.master_port
