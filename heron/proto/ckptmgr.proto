@@ -5,10 +5,74 @@ option java_outer_classname = "CheckpointManager";
 import "common.proto";
 import "physical_plan.proto";
 
+// The messages in this file are for stateful processing and providing
+// exactly once semantics. Below are the various sequence of events that
+// happen in a few(non exhaustive) scenarios
+//
+// On Startup
+//   For topologies needing exact once, the startup sequence of
+// tmaster/stmgr/instance is a little different. Normally, upon
+// all stmgrs connecting to tmaster, tmaster computes pplan
+// and distributes to stmgrs, which inturn send it to all their
+// local instances. As soon as instances get their pplan, they can
+// start processing(spouts emitting tuples, etc). However for
+// exactly once semantics, this is a little different. First
+// in addition to the pplan, tmaster needs to send the last
+// consistent checkpoint id(if any) to recover from as well.
+// Secondly because instances are all busy recovering their state,
+// any tuples emitted before they recover tend to start causing
+// backpressure right away. To avoid this(as well as for having
+// the same mechanism during failure recovery), after all instances
+// recover their state, the tmaster sends out a Start processing
+// message and only then all the components start processing.
+// WRT messages below, the sequence is the following.
+// From the StatefulConsistentCheckpoints message stored in the
+// state manager, Tmaster picks the latest checkpoint_id and
+// sends RestoreTopologyStateRequest to all stmgrs. Each stmgr
+// sends does a GetInstanceStateRequest/GetInstanceStateResponse
+// dance with its local checkpoint manager for all of its local
+// instances to fetch the state. Upon fetch, stmgr does a
+// RestoreInstanceStateRequest/RestoreInstanceStateResponse
+// dance with the corresponding instances to restore the
+// state. Completion of which, stmgr sends out the 
+// RestoreTopologyStateResponse message to the tmaster.
+// Once the tmaster recieves this from all stmgrs, it sends
+// out the StartStmgrStatefulProcessing message to all
+// stmgrs which inturn send out StartInstanceStatefulProcessing
+// to all their local instances. This gets the topology
+// humming
+//
+// Periodic checkpoints
+//  Every so often(as dictated by TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL)
+// tmaster sends out StartStatefulCheckpoint message to all
+// stmgrs. Each stmgr sends out InitiateStatefulCheckpoint
+// message to each of its local spout instances. Because of the best effort
+// nature, this is delivered as a message. After instance does its
+// checkpoint, it sends StoreInstanceStateCheckpoint to stmgr to store
+// its checkpoint. Stmgr passes this to ckptmgr via
+// SaveInstanceStateRequest/SaveInstanceStateResponse dance with its
+// local checkpoint manager. Upon getting a successful
+// SaveInstanceStateResponse message, stmgr sends out a
+// InstanceStateStored message notifying tmaster that the
+// state of a particular instance has been saved. Parallelly
+// stmgr also sends out DownstreamStatefulCheckpoint message
+// to each of the downstream components to do the distributed
+// Lamport style checkpointing. Meanwhile at tmaster, when it
+// receives InstanceStateStored from all instances for a particular
+// checkpoint_id, it has reached globally consistent checkpoint
+// and it stores it in the state manager as StatefulConsistentCheckpoint
+//
+// Failure Recovery
+//  Either when stmgr dies, or when an instance dies(which is notified
+// by the stmgr using the ResetTopologyState message), tmaster initiates
+// the recovery mechanism. The recovery mechanism is exactly the same
+// as the initial startup described above
+
 // Message representing information about a globally consistent
 // checkpoint
 message StatefulConsistentCheckpoint {
   required string checkpoint_id = 1;
+  required string packing_plan_id = 2;
   // One can add more meta data about this ckpt later
 }
 
@@ -75,7 +139,7 @@ message StartStmgrStatefulProcessing {
 // tmaster -> ckptmgr messages
 
 // This is the message that a tmaster sends
-// when it wants to establish the connection
+// when it wants to register itself
 // with checkpoint manager
 message RegisterTMasterRequest{
   required string topology_name = 1;
@@ -94,13 +158,13 @@ message RegisterTMasterResponse {
 message CleanStatefulCheckpointRequest {
   // Any checkpoints older than this can be cleaned
   optional string oldest_checkpoint_preserved = 1;
-  optional bool clean_all_checkpoints = 2 [default = false];
+  optional bool clean_all_checkpoints = 2;
 }
 
 // Message sent by ckptmgr to tmaster about the cleanup request
 message CleanStatefulCheckpointResponse {
   required heron.proto.system.Status status = 1;
-  repeated string cleaned_checkpoints = 2;
+  repeated string cleaned_checkpoint_ids = 2;
 }
 
 // stmgr -> ckptmgr messages
@@ -108,7 +172,7 @@ message CleanStatefulCheckpointResponse {
 // This is the message that a stmgr sends
 // when it wants to establish the connection
 // with checkpoint manager
-message RegisterStMgrRequest{
+message RegisterStMgrRequest {
   required string topology_name = 1;
   required string topology_id = 2;
   required string stmgr_id = 3;
@@ -161,14 +225,20 @@ message InitiateStatefulCheckpoint {
   required string checkpoint_id = 1;
 }
 
-// This is the message that the instance sends
-// when it wants stmgr to store its state
+// This proto encapsulates the info associated with
+// state of an instance
 message InstanceStateCheckpoint {
   required string checkpoint_id = 1;
   required bytes state = 2;
 }
 
-// This is the message that stmgr sends to its instace
+// This is the message that the instance sends
+// when it wants stmgr to store its state
+message StoreInstanceStateCheckpoint {
+  required InstanceStateCheckpoint state = 1;
+}
+
+// This is the message that stmgr sends to its instance
 // asking them to restore their state
 message RestoreInstanceStateRequest {
   required InstanceStateCheckpoint state = 1;
