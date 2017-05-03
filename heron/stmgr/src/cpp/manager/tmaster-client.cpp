@@ -32,10 +32,12 @@ namespace heron {
 namespace stmgr {
 
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
-                             const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
+                             const sp_string& _stmgr_id, const sp_string& _stmgr_host,
+                             sp_int32 _stmgr_port, sp_int32 _shell_port,
                              VCallback<proto::system::PhysicalPlan*> _pplan_watch)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
+      stmgr_host_(_stmgr_host),
       stmgr_port_(_stmgr_port),
       shell_port_(_shell_port),
       to_die_(false),
@@ -50,9 +52,6 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   reconnect_timer_cb = [this]() { this->OnReConnectTimer(); };
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
 
-  char hostname[1024];
-  CHECK_EQ(gethostname(hostname, 1023), 0);
-  stmgr_host_ = hostname;
   InstallResponseHandler(new proto::tmaster::StMgrRegisterRequest(),
                          &TMasterClient::HandleRegisterResponse);
   InstallResponseHandler(new proto::tmaster::StMgrHeartbeatRequest(),
