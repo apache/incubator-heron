@@ -227,7 +227,7 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
 
   mgr = new DummyStMgr(ss, options, stmgr_id, LOCALHOST, stmgr_port, LOCALHOST, tmaster_port,
                        shell_port, instances);
-  mgr->Start();
+  EXPECT_EQ(0, mgr->Start()) << "DummyStMgr bind " << LOCALHOST << ":" << stmgr_port;
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -244,7 +244,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
-  mgr->Start();
+  EXPECT_EQ(0, mgr->Start()) << "DummyMtrMgr bind " << LOCALHOST << ":" << mtmgr_port;
   mtmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -1307,7 +1307,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 28500;
+  common.stmgr_baseport_ = 28510;
   common.metricsmgr_port_ = 39001;
   common.shell_port_ = 49001;
   common.topology_name_ = "mytopology";
@@ -1435,7 +1435,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 28500;
+  common.stmgr_baseport_ = 28520;
   common.metricsmgr_port_ = 39002;
   common.shell_port_ = 49002;
   common.topology_name_ = "mytopology";
