@@ -125,7 +125,7 @@ message InstanceStateStored {
 }
 
 // Message sent by tmaster to stmgr to start processing
-// For exactly once semantics, all the topology components
+// For stateful processing, all the topology components
 // should be rolled back to a consistent state before they can
 // start processing.
 message StartStmgrStatefulProcessing {
@@ -166,8 +166,8 @@ message CleanStatefulCheckpointResponse {
 // stmgr -> ckptmgr messages
 
 // This is the message that a stmgr sends
-// when it wants to establish the connection
-// with checkpoint manager
+// when it wants to register itself with
+// the checkpoint manager
 message RegisterStMgrRequest {
   required string topology_name = 1;
   required string topology_id = 2;
