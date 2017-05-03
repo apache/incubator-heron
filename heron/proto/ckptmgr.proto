@@ -12,20 +12,16 @@ import "physical_plan.proto";
 // On Startup
 //   For topologies needing exact once, the startup sequence of
 // tmaster/stmgr/instance is a little different. Normally, upon
-// all stmgrs connecting to tmaster, tmaster computes pplan
-// and distributes to stmgrs, which inturn send it to all their
+// startup, all stmgrs connect to tmaster and then tmaster computes pplan
+// and distributes to stmgrs, which in turn send it to all their
 // local instances. As soon as instances get their pplan, they can
 // start processing(spouts emitting tuples, etc). However for
-// exactly once semantics, this is a little different. First
+// stateful topologies, this is a little different. First
 // in addition to the pplan, tmaster needs to send the last
 // consistent checkpoint id(if any) to recover from as well.
-// Secondly because instances are all busy recovering their state,
-// any tuples emitted before they recover tend to start causing
-// backpressure right away. To avoid this(as well as for having
-// the same mechanism during failure recovery), after all instances
-// recover their state, the tmaster sends out a Start processing
-// message and only then all the components start processing.
-// WRT messages below, the sequence is the following.
+// Secondly instances need to recover their prev state before
+// they can process any tuples.
+// WRT messages below, the startup sequence is the following.
 // From the StatefulConsistentCheckpoints message stored in the
 // state manager, Tmaster picks the latest checkpoint_id and
 // sends RestoreTopologyStateRequest to all stmgrs. Each stmgr
@@ -36,7 +32,7 @@ import "physical_plan.proto";
 // dance with the corresponding instances to restore the
 // state. Completion of which, stmgr sends out the 
 // RestoreTopologyStateResponse message to the tmaster.
-// Once the tmaster recieves this from all stmgrs, it sends
+// Once the tmaster receives this from all stmgrs, it sends
 // out the StartStmgrStatefulProcessing message to all
 // stmgrs which inturn send out StartInstanceStatefulProcessing
 // to all their local instances. This gets the topology
@@ -260,9 +256,9 @@ message StartInstanceStatefulProcessing {
 
 // stmgr -> stmgr messages
 
-// Once an instance is done checkpointing, this message is sent
-// to all its downstream components so that they could checkpoint
-// their state. In that sense this is the marker message
+// Once stmgr receives StoreInstanceStateCheckpoint from an instance,
+// it sends this message to all of that instance's 
+// downstream components' stmgrs to propagate the checkpoint marker
 message DownstreamStatefulCheckpoint {
   required int32 origin_task_id = 1; 
   required int32 destination_task_id = 2; 
