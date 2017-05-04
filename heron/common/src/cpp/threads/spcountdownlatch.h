@@ -41,7 +41,7 @@ class CountDownLatch {
   CountDownLatch& operator=(const CountDownLatch& latch) = delete;
 
   // Causes the current thread to wait until the latch has counted down to zero
-  void wait();
+  void wait(sp_uint32 target=0);
 
   // Decrements the count of the latch, releasing all waiting threads if the
   // count reaches zero
