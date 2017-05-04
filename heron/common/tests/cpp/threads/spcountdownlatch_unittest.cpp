@@ -30,7 +30,9 @@
 void testCountDownFunc(CountDownLatch& latch) { latch.countDown(); }
 
 void testWaitFunc(CountDownLatch& latch) { latch.wait(); }
-void testWaitFunc1(CountDownLatch& latch) { latch.wait(1); }
+void testWaitFunc1(CountDownLatch& latch) {
+  EXPECT_TRUE(latch.wait(1, std::chrono::seconds(2)));
+}
 
 TEST(CountDownLatchTest, testCountDownMethod) {
   CountDownLatch latch(2);
