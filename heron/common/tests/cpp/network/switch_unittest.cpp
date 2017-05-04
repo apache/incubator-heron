@@ -32,7 +32,7 @@
 #include "threads/modinit.h"
 #include "network/modinit.h"
 
-static const sp_uint32 SERVER_PORT = 61000;
+static const sp_uint32 SERVER_PORT = SockUtils::getFreePort();
 
 class Terminate : public Client {
  public:
@@ -147,6 +147,7 @@ TEST(NetworkTest, test_switch_2) { start_test(1, 1000); }
 TEST(NetworkTest, test_switch_3) { start_test(1, 10000); }
 
 int main(int argc, char** argv) {
+  std::cout << "getFreePort() " << SERVER_PORT << std::endl;
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
