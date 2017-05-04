@@ -97,7 +97,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 
-    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
+    Resource containerResource =
+        updatedPackingPlan.getContainers().iterator().next().getRequiredResource();
     Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
 
     return controller.createJob(auroraProperties);
