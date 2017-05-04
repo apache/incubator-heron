@@ -22,8 +22,8 @@ import java.util.logging.Logger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
-import com.twitter.heron.ckptmgr.backend.Checkpoint;
-import com.twitter.heron.ckptmgr.backend.IBackend;
+import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.network.HeronServer;
 import com.twitter.heron.common.network.HeronSocketOptions;
@@ -291,7 +291,5 @@ public class CheckpointManagerServer extends HeronServer {
 
     // Reset the connection
     connection = null;
-
-    // TODO(mfu): More handling
   }
 }

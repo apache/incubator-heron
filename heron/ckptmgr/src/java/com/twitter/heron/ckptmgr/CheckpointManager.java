@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.ckptmgr.backend.IBackend;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -55,13 +55,13 @@ public class CheckpointManager {
             655360,
             655360);
 
-    // Setup the IBackend
+    // Setup the IStatefulStorage
     // TODO(mfu): This should be done in an executor driven by another thread, kind of async
-    IBackend checkpointsBackend;
+    IStatefulStorage checkpointsBackend;
     String classname =
         (String) checkpointManagerConfig.get(CheckpointManagerConfig.CONFIG_KEY_CLASSNAME);
     try {
-      checkpointsBackend = (IBackend) Class.forName(classname).newInstance();
+      checkpointsBackend = (IStatefulStorage) Class.forName(classname).newInstance();
     } catch (InstantiationException e) {
       throw new RuntimeException(e + " class must have a no-arg constructor.");
     } catch (IllegalAccessException e) {

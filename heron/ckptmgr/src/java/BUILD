@@ -11,13 +11,13 @@ java_library(
         exclude = ["**/CheckpointManager.java"],
     ),
     deps = [
-        "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:api-java",
+        "//heron/api/src/java:statefulstorage-spi-java",
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
         "@com_google_protobuf_protobuf_java//jar",
         "@org_yaml_snakeyaml//jar",
-        "//third_party/java:hadoop-core",  # for hdfs-state-backend
     ],
 )
 
