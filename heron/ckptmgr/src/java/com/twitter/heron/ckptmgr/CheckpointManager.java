@@ -45,7 +45,7 @@ public class CheckpointManager {
       String topologyName, String topologyId, String checkpointMgrId,
       String serverHost, int serverPort,
       SystemConfig systemConfig, CheckpointManagerConfig checkpointManagerConfig)
-      throws IOException {
+      throws IOException, CheckpointManagerException {
 
     this.checkpointManagerServerLoop = new NIOLooper();
 
@@ -66,11 +66,11 @@ public class CheckpointManager {
     try {
       checkpointsBackend = (IStatefulStorage) Class.forName(classname).newInstance();
     } catch (InstantiationException e) {
-      throw new RuntimeException(e + " class must have a no-arg constructor.");
+      throw new CheckpointManagerException(classname + " class must have a no-arg constructor.", e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e + " class must be concrete.");
+      throw new CheckpointManagerException(classname + " class must be concrete.", e);
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e + " class must be a class path.");
+      throw new CheckpointManagerException(classname + " class must be a class path.", e);
     }
     checkpointsBackend.init(
         Collections.unmodifiableMap(checkpointManagerConfig.getBackendConfig()));
@@ -89,9 +89,9 @@ public class CheckpointManager {
     checkpointManagerServerLoop.loop();
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, CheckpointManagerException {
     if (args.length != 9) {
-      throw new RuntimeException(
+      throw new CheckpointManagerException(
           "Invalid arguments; Usage: java com.twitter.heron.ckptmgr.CheckpointManager "
               + "<topname> <topid> <ckptmgr_id> <myport> <stateful_config_filename> "
               + "<cluster> <role> <environ> <heron_internals_config_filename>");
