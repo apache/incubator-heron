@@ -35,10 +35,10 @@ void CountDownLatch::countDown() {
   // Nothing to do if count is already 0
   if (count_ == 0) return;
 
-  // Decrement count. If it is 0 after that, notify all blocked threads.
-  if (--count_ == 0) {
-    cond_.notify_all();
-  }
+  // Decrement count.
+  count_--;
+  //  Notify all blocked threads: give them a chance to compare (count_ and target)
+  cond_.notify_all();
 }
 
 sp_uint32 CountDownLatch::getCount() {

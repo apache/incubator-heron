@@ -1367,7 +1367,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
 
   // Check the count: should be 2-1=1
   metricsMgrTmasterLatch->wait(1);
-  EXPECT_EQ(1, metricsMgrTmasterLatch->getCount());
+  EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
 
   // Kill current tmaster
   common.ss_list_.front()->loopExit();
@@ -1499,7 +1499,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
 
   // Check the count: should be 2-1=1
   metricsMgrTmasterLatch->wait(1);
-  EXPECT_EQ(1, metricsMgrTmasterLatch->getCount());
+  EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
 
   // Kill current tmaster
   common.ss_list_.front()->loopExit();
