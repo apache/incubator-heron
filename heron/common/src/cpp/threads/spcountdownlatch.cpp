@@ -24,7 +24,7 @@ bool CountDownLatch::wait(sp_uint32 target, const std::chrono::seconds& d) {
   std::unique_lock<std::mutex> m(mutex_);
   // If count is greater than target, then wait until it is target.
   // Else return immediately.
-  if (d == d.zero()) {
+  if (std::chrono::seconds::zero() == d) {
     while (count_ > target) {
       cond_.wait(m);
     }
