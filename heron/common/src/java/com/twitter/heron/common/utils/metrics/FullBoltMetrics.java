@@ -36,7 +36,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
  * 4. Expose methods which could be called externally to change the value of metrics
  */
 
-public class FullBoltMetrics {
+public class FullBoltMetrics extends BoltMetrics {
   private final MultiCountMetric ackCount;
   private final MultiReducedMetric<MeanReducerState, Number, Double> processLatency;
   private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
