@@ -30,8 +30,11 @@
 void testCountDownFunc(CountDownLatch& latch) { latch.countDown(); }
 
 void testWaitFunc(CountDownLatch& latch) { latch.wait(); }
-void testWaitFunc1(CountDownLatch& latch) {
+void testWaitFuncTrue(CountDownLatch& latch) {
   EXPECT_TRUE(latch.wait(1, std::chrono::seconds(2)));
+}
+void testWaitFuncFalse(CountDownLatch& latch) {
+  EXPECT_FALSE(latch.wait(1, std::chrono::seconds(1)));
 }
 
 TEST(CountDownLatchTest, testCountDownMethod) {
@@ -56,7 +59,19 @@ TEST(CountDownLatchTest, testWaitMethod) {
 TEST(CountDownLatchTest, testWaitMethod1) {
   CountDownLatch latch(2);
 
-  std::thread t1(testWaitFunc1, std::ref(latch));
+  std::thread t1(testWaitFuncTrue, std::ref(latch));
+  latch.countDown();
+
+  // the wait method should see the countDown and release the blocked thread
+  t1.join();
+  EXPECT_EQ(latch.getCount(), static_cast<sp_uint32>(1));
+}
+
+TEST(CountDownLatchTest, testWaitMethod2) {
+  CountDownLatch latch(2);
+
+  std::thread t1(testWaitFuncFalse, std::ref(latch));
+  std::this_thread::sleep_for(std::chrono::seconds(2));
   latch.countDown();
 
   // the wait method should see the countDown and release the blocked thread

@@ -42,7 +42,6 @@ class CountDownLatch {
   CountDownLatch& operator=(const CountDownLatch& latch) = delete;
 
   // Causes the current thread to wait until the latch has counted down to target
-  // void wait(sp_uint32 target=0);
   bool wait(sp_uint32 target = 0, const std::chrono::seconds& d = std::chrono::seconds::zero());
 
   // Decrements the count of the latch, releasing all waiting threads if the
