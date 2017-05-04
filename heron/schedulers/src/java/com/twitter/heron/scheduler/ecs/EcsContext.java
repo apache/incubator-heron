@@ -14,9 +14,7 @@
 
 package com.twitter.heron.scheduler.ecs;
 
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.TokenSub;
 
 
 /**
@@ -57,9 +55,6 @@ public class EcsContext extends Context {
   public static final String ECS_CLUSTER_BINARY = "heron-examples.jar";
   public static final String COMPOSE_CMD = "ecs-cli compose --project-name ";
   public static final String UP = " up";
-  public static String workingDirectory(Config config) {
-    String workingDirectory = config.getStringValue(
-        EcsKey.WORKING_DIRECTORY.value(), EcsKey.WORKING_DIRECTORY.getDefaultString());
-    return TokenSub.substitute(config, workingDirectory);
-  }
+
 }
+
