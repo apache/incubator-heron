@@ -1365,6 +1365,10 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   // workers have connected
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
+  // Check the count: should be 2-1=1
+  metricsMgrTmasterLatch->wait(1);
+  EXPECT_EQ(1, metricsMgrTmasterLatch->getCount());
+
   // Kill current tmaster
   common.ss_list_.front()->loopExit();
   common.tmaster_thread_->join();
@@ -1492,6 +1496,10 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   // Wait till we get the physical plan populated on the stmgr. That way we know the
   // workers have connected
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
+
+  // Check the count: should be 2-1=1
+  metricsMgrTmasterLatch->wait(1);
+  EXPECT_EQ(1, metricsMgrTmasterLatch->getCount());
 
   // Kill current tmaster
   common.ss_list_.front()->loopExit();
