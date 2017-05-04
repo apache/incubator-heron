@@ -21,10 +21,10 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import com.twitter.heron.spi.statefulstorage.Checkpoint;
-import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
 public class LocalFS implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(LocalFS.class.getName());

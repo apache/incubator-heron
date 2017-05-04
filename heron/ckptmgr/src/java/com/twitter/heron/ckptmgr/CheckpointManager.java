@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -27,6 +26,7 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
 public class CheckpointManager {
   private static final Logger LOG = Logger.getLogger(CheckpointManager.class.getName());

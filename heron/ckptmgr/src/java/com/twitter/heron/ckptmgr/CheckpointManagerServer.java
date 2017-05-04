@@ -22,14 +22,14 @@ import java.util.logging.Logger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
-import com.twitter.heron.spi.statefulstorage.Checkpoint;
-import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.network.HeronServer;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.REQID;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
 public class CheckpointManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(CheckpointManagerServer.class.getName());
@@ -37,13 +37,13 @@ public class CheckpointManagerServer extends HeronServer {
   private final String topologyName;
   private final String topologyId;
   private final String checkpointMgrId;
-  private final IBackend checkpointsBackend;
+  private final IStatefulStorage checkpointsBackend;
 
   private SocketChannel connection;
 
   public CheckpointManagerServer(
       String topologyName, String topologyId, String checkpointMgrId,
-      IBackend checkpointsBackend, NIOLooper s, String host,
+      IStatefulStorage checkpointsBackend, NIOLooper s, String host,
       int port, HeronSocketOptions options) {
     super(s, host, port, options);
 
@@ -104,7 +104,9 @@ public class CheckpointManagerServer extends HeronServer {
     LOG.info("Got a clean request from " + request.toString() + " host:port "
         + channel.socket().getRemoteSocketAddress());
 
-    boolean res = checkpointsBackend.dispose(request, topologyName);
+    boolean deleteAll = request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints();
+    boolean res = checkpointsBackend.dispose(topologyName,
+                                             request.getOldestCheckpointPreserved(), deleteAll);
     Common.StatusCode statusCode = res ? Common.StatusCode.OK : Common.StatusCode.NOTOK;
 
     CheckpointManager.CleanStatefulCheckpointResponse.Builder responseBuilder =

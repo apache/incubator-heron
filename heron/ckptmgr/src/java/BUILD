@@ -11,8 +11,7 @@ java_library(
         exclude = ["**/CheckpointManager.java"],
     ),
     deps = [
-        "//heron/spi/src/java:api-java",
-        "//heron/api/src/java:statefulstorage-spi-java",
+        "//heron/spi/src/java:statefulstorage-spi-java",
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
@@ -26,6 +25,7 @@ java_binary(
     srcs = glob(["**/CheckpointManager.java"]),
     deps = [
         ":ckptmgr-java",
+        "//heron/spi/src/java:statefulstorage-spi-java",
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_ckptmgr_java",

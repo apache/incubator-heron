@@ -4,15 +4,20 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 spi_deps_files = [
     "//heron/spi/src/java:statefulstorage-spi-java",
+    "//heron/proto:proto_ckptmgr_java",
 ]
 
 hdfs_deps_files = \
     spi_deps_files + [
         "//third_party/java:hadoop-core",
+        "//heron/common/src/java:basics-java",
     ]
 
 localfs_deps_files = \
-    spi_deps_files
+    spi_deps_files + [
+        "//heron/common/src/java:basics-java",
+        "@com_google_protobuf_protobuf_java//jar",
+    ]
 
 java_library(
     name='localfs-statefulstorage-java',
