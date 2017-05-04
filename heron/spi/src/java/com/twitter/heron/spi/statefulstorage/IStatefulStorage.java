@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.ckptmgr.backend;
+package com.twitter.heron.spi.statefulstorage;
 
 import java.util.Map;
 
-import com.twitter.heron.proto.ckptmgr.CheckpointManager;
-
-public interface IBackend {
+public interface IStatefulStorage {
   /**
-   * Initialize the Checkpoints Backend
+   * Initialize the Storage Backend
    *
    * @param conf An unmodifiableMap containing basic configuration
    * Attempts to modify the returned map,
@@ -39,13 +37,12 @@ public interface IBackend {
   // Retrieve the checkpoint
   boolean restore(Checkpoint checkpoint);
 
-  // TODO(mfu): We should refactor all interfaces in IBackend,
+  // TODO(mfu): We should refactor all interfaces in IStatefulStorage,
   // TODO(mfu): instead providing Class Checkpoint, we should provide an Context class,
   // TODO(mfu): It should:
   // TODO(mfu): 1. Provide meta data access, like topologyName
   // TODO(mfu): 2. Provide utils method to parse the protobuf object, like getTaskId()
   // TODO(mfu): 3. Common methods, like getCheckpointDir()
   // Dispose the checkpoint
-  boolean dispose(CheckpointManager.CleanStatefulCheckpointRequest request,
-                  String topologyName);
+  boolean dispose(String topologyName, String oldestCheckpointId, boolean deleteAll);
 }
