@@ -28,6 +28,9 @@ import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
+/**
+ * Main class of CheckpointManager.
+ */
 public class CheckpointManager {
   private static final Logger LOG = Logger.getLogger(CheckpointManager.class.getName());
 
@@ -46,20 +49,20 @@ public class CheckpointManager {
 
     this.checkpointManagerServerLoop = new NIOLooper();
 
-    // TODO(mfu): Read from config
     HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(32768,
-            16,
-            32768,
-            16,
-            655360,
-            655360);
+        new HeronSocketOptions(
+            checkpointManagerConfig.getWriteBatchSizeBytes(),
+            checkpointManagerConfig.getWriteBatchSizeMs(),
+            checkpointManagerConfig.getReadBatchSizeBytes(),
+            checkpointManagerConfig.getReadBatchSizeMs(),
+            checkpointManagerConfig.getSocketSendSize(),
+            checkpointManagerConfig.getSocketReceiveSize());
 
     // Setup the IStatefulStorage
     // TODO(mfu): This should be done in an executor driven by another thread, kind of async
     IStatefulStorage checkpointsBackend;
-    String classname =
-        (String) checkpointManagerConfig.get(CheckpointManagerConfig.CONFIG_KEY_CLASSNAME);
+    String classname = (String) checkpointManagerConfig.getCkptMgrConfig(
+                                             CheckpointManagerConfig.STORAGE_CLASSNAME);
     try {
       checkpointsBackend = (IStatefulStorage) Class.forName(classname).newInstance();
     } catch (InstantiationException e) {

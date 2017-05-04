@@ -14,55 +14,66 @@
 
 package com.twitter.heron.ckptmgr;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.yaml.snakeyaml.Yaml;
-
-import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.config.ConfigReader;
 
 public class CheckpointManagerConfig {
-  public static final String CONFIG_KEY_STATEFUL_BACKEND = "stateful-backend";
-  public static final String CONFIG_KEY_CLASSNAME = "class";
-  public static final String CONFIG_KEY_CLASSPATH = "classpath";
+  public static final String STORAGE_CONFIG = "heron.statefulstorage.config";
+  public static final String STORAGE_CLASSNAME = "heron.class.statefulstorage";
+  public static final String WRITE_BATCH_SIZE = "heron.ckptmgr.network.write.batch.size.bytes";
+  public static final String WRITE_BATCH_TIME = "heron.ckptmgr.network.write.batch.time.ms";
+  public static final String READ_BATCH_SIZE = "heron.ckptmgr.network.read.batch.size.bytes";
+  public static final String READ_BATCH_TIME = "heron.ckptmgr.network.read.batch.time.ms";
+  public static final String SOCKET_SEND_SIZE =
+                             "heron.ckptmgr.network.options.socket.send.buffer.size.bytes";
+  public static final String SOCKET_RECEIVE_SIZE =
+                             "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes";
 
   private final Map<String, Object> backendConfig = new HashMap<>();
+  private final Map<String, Object> ckptmgrConfig = new HashMap<>();
 
   @SuppressWarnings("unchecked")
-  public CheckpointManagerConfig(String filename) throws FileNotFoundException {
-    FileInputStream fin = new FileInputStream(new File(filename));
-    try {
-      Yaml yaml = new Yaml();
-      Map<String, Object> ret = (Map<String, Object>) yaml.load(fin);
-
-      if (ret == null) {
-        throw new RuntimeException("Could not parse stateful backend config file");
-      } else {
-        String backend = (String) ret.get(CONFIG_KEY_STATEFUL_BACKEND);
-        backendConfig.putAll((Map<String, Object>) ret.get(backend));
-      }
-    } finally {
-      SysUtils.closeIgnoringExceptions(fin);
-    }
+  public CheckpointManagerConfig(String filename) {
+    ckptmgrConfig.putAll(ConfigReader.loadFile(filename));
+    String backend = (String) ckptmgrConfig.get(STORAGE_CONFIG);
+    backendConfig.putAll((Map<String, Object>) ckptmgrConfig.get(backend));
   }
 
-  public void setConfig(String key, Object value) {
-    backendConfig.put(key, value);
-  }
-
-  @Override
-  public String toString() {
-    return backendConfig.toString();
-  }
-
-  public Object get(String key) {
+  public Object getBackendConfig(String key) {
     return backendConfig.get(key);
+  }
+
+  public Object getCkptMgrConfig(String key) {
+    return ckptmgrConfig.get(key);
   }
 
   public Map<String, Object> getBackendConfig() {
     return backendConfig;
+  }
+
+  public long getWriteBatchSizeBytes() {
+    return (long) ckptmgrConfig.get(WRITE_BATCH_SIZE);
+  }
+
+  public long getWriteBatchSizeMs() {
+    return (long) ckptmgrConfig.get(WRITE_BATCH_TIME);
+  }
+
+  public long getReadBatchSizeBytes() {
+    return (long) ckptmgrConfig.get(READ_BATCH_SIZE);
+  }
+
+  public long getReadBatchSizeMs() {
+    return (long) ckptmgrConfig.get(READ_BATCH_TIME);
+  }
+
+  public int getSocketSendSize() {
+    return (int) ckptmgrConfig.get(SOCKET_SEND_SIZE);
+  }
+
+  public int getSocketReceiveSize() {
+    return (int) ckptmgrConfig.get(SOCKET_RECEIVE_SIZE);
   }
 }

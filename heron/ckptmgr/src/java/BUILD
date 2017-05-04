@@ -16,7 +16,6 @@ java_library(
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@org_yaml_snakeyaml//jar",
     ],
 )
 
