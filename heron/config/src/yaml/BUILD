@@ -18,6 +18,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-ecs-yaml",
+    srcs = glob(["conf/ecs/*.yaml"]),
+)
+
+filegroup(
     name = "conf-aurora-yaml",
     srcs = glob(["conf/aurora/*"]),
 )
