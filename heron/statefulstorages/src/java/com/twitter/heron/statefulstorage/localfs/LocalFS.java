@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.ckptmgr.backend.localfs;
+package com.twitter.heron.statefulstorage.localfs;
 
 import java.io.File;
 import java.util.Map;
@@ -21,12 +21,12 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import com.twitter.heron.ckptmgr.backend.Checkpoint;
-import com.twitter.heron.ckptmgr.backend.IBackend;
+import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 
-public class LocalFS implements IBackend {
+public class LocalFS implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(LocalFS.class.getName());
 
   private static final String ROOT_PATH_KEY = "root.path";
@@ -94,11 +94,11 @@ public class LocalFS implements IBackend {
   }
 
   @Override
-  public boolean dispose(CheckpointManager.CleanStatefulCheckpointRequest request,
-                         String topologyName) {
+  public boolean dispose(String topologyName, String oldestCheckpointPreserved,
+                         boolean deleteAll) {
     String topologyCheckpointRoot = getTopologyCheckpointRoot(topologyName);
 
-    if (request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints()) {
+    if (deleteAll) {
       // Clean all checkpoint states
       FileUtils.deleteDir(topologyCheckpointRoot);
 
@@ -107,8 +107,6 @@ public class LocalFS implements IBackend {
       }
 
     } else {
-      String oldestCheckpointPreserved = request.getOldestCheckpointPreserved();
-
       String[] names = new File(topologyCheckpointRoot).list();
       for (String name : names) {
         if (name.compareTo(oldestCheckpointPreserved) < 0) {

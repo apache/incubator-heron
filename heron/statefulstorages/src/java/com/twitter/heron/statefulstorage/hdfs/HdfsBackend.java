@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.ckptmgr.backend.hdfs;
+package com.twitter.heron.statefulstorage.hdfs;
 
 import java.io.IOException;
 import java.util.Map;
@@ -26,15 +26,15 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.twitter.heron.ckptmgr.backend.Checkpoint;
-import com.twitter.heron.ckptmgr.backend.IBackend;
+import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 
 /**
  * Note: The hadoop cluster config should be provided through the classpath
  */
-public class HdfsBackend implements IBackend {
+public class HdfsBackend implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(HdfsBackend.class.getName());
 
   private static final String ROOT_PATH_KEY = "root.path";
@@ -114,13 +114,13 @@ public class HdfsBackend implements IBackend {
   }
 
   @Override
-  public boolean dispose(CheckpointManager.CleanStatefulCheckpointRequest request,
-                         String topologyName) {
+  public boolean dispose(String topologyName, String oldestCheckpointPreserved,
+                         boolean deleteAll) {
     String topologyCheckpointRoot = getTopologyCheckpointRoot(topologyName);
     Path topologyRootPath = new Path(topologyCheckpointRoot);
 
 
-    if (request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints()) {
+    if (deleteAll) {
       // Clean all checkpoint states
       try {
         fileSystem.delete(topologyRootPath, true);
@@ -132,12 +132,11 @@ public class HdfsBackend implements IBackend {
         return false;
       }
     } else {
-      String oldestCheckpointPreserved = request.getOldestCheckpointPreserved();
       try {
         FileStatus[] statuses = fileSystem.listStatus(topologyRootPath);
         for (FileStatus status : statuses) {
           String name = status.getPath().getName();
-          if (name.compareTo(topologyCheckpointRoot) < 0) {
+          if (name.compareTo(oldestCheckpointPreserved) < 0) {
             fileSystem.delete(status.getPath(), true);
           }
         }
@@ -146,7 +145,7 @@ public class HdfsBackend implements IBackend {
         statuses = fileSystem.listStatus(topologyRootPath);
         for (FileStatus status : statuses) {
           String name = status.getPath().getName();
-          if (name.compareTo(topologyCheckpointRoot) < 0) {
+          if (name.compareTo(oldestCheckpointPreserved) < 0) {
             return false;
           }
         }
