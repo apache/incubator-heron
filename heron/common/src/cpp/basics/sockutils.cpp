@@ -23,41 +23,6 @@
 #include "basics/sprcodes.h"
 #include "basics/spconsts.h"
 
-sp_int32 SockUtils::getFreePort() {
-  int fd = -1;
-  fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd < 0) {
-    LOG(ERROR) << "socket() error: " << strerror(errno);
-    return SP_NOTOK;
-  }
-
-  struct sockaddr_in sin;
-  memset(&sin, 0, sizeof(sin));
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons(0);
-  sin.sin_addr.s_addr = htonl(INADDR_ANY);
-
-  if (bind(fd, (struct sockaddr *)&sin, sizeof(sin)) != 0)  {
-    LOG(ERROR) << "bind() error: " << strerror(errno);
-    close(fd);
-    return SP_NOTOK;
-  }
-
-  socklen_t len = sizeof(sin);
-  if (getsockname(fd, (struct sockaddr *)&sin, &len) != 0)  {
-    LOG(ERROR) << "getsockname() error: " << strerror(errno);
-    close(fd);
-    return SP_NOTOK;
-  }
-
-  int port = -1;
-  if (fd != -1) {
-    port = sin.sin_port;
-    close(fd);
-  }
-  return port;
-}
-
 sp_int32 SockUtils::setNonBlocking(sp_int32 fd) {
   sp_int32 flags;
   if ((flags = ::fcntl(fd, F_GETFL, 0)) < 0) return SP_NOTOK;

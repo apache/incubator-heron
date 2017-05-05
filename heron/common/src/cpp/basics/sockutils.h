@@ -21,9 +21,6 @@
 
 class SockUtils {
  public:
-  //! Get a free local port
-  static sp_int32 getFreePort();
-
   //! Set socket non blocking
   static sp_int32 setNonBlocking(sp_int32 fd);
 

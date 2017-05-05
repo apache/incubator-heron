@@ -106,7 +106,7 @@ void terminate_server(sp_uint32 port) {
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {
-  const sp_uint32 server_port = SockUtils::getFreePort();
+  const sp_uint32 server_port = IpUtils::getFreePort();
   std::cout << "getFreePort() " << server_port << std::endl;
 
   // start the server thread
