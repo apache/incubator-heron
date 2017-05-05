@@ -25,12 +25,10 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-//import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
-//import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.ShellUtils;
 
@@ -96,7 +94,6 @@ public class EcsScheduler implements IScheduler {
       IOUtils.closeQuietly(dockerFilestream);
     }
     String dockerComposeFileName = " --file " + tempDockerFile;
-
     String finalCommand = EcsContext.COMPOSE_CMD + ecsTaskProject + dockerComposeFileName;
     finalCommand = finalCommand + EcsContext.UP;
     System.out.println("final Ecs Task command " + finalCommand);
@@ -147,7 +144,6 @@ public class EcsScheduler implements IScheduler {
       }
       builder.append(string);
     }
-
     String stringToReturn = builder.toString();
     return stringToReturn;
   }
@@ -158,17 +154,13 @@ public class EcsScheduler implements IScheduler {
   @Override
   public boolean onSchedule(PackingPlan packing) {
     LOG.info("Starting to deploy topology: " + EcsContext.topologyName(config));
-
     LOG.info("Starting executor for TMaster");
     startExecutor(0);
-
       // for each container, run its own executor
     for (PackingPlan.ContainerPlan container : packing.getContainers()) {
       startExecutor(container.getId());
     }
-
     LOG.info("Executor for each container have been started.");
-
     return true;
   }
 
@@ -187,6 +179,5 @@ public class EcsScheduler implements IScheduler {
   public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
     return false;
   }
-
 
 }
