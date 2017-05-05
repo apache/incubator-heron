@@ -28,6 +28,7 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_ckptmgr_java",
+        "@commons_cli_commons_cli//jar",
     ],
 )
 

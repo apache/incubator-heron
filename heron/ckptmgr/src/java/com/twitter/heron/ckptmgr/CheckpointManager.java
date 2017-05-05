@@ -19,6 +19,14 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -40,6 +48,86 @@ public class CheckpointManager {
   // The looper drives CheckpointManagerServer
   private final NIOLooper checkpointManagerServerLoop;
   private final CheckpointManagerServer checkpointManagerServer;
+
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp("CheckpointManager", options);
+  }
+
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Options options = new Options();
+
+    Option topName = Option.builder("t")
+        .desc("Name of the topology")
+        .longOpt("topologyname")
+        .hasArgs()
+        .argName("topologyname")
+        .required()
+        .build();
+
+    Option topId = Option.builder("i")
+        .desc("Id of the topology")
+        .longOpt("topologyid")
+        .hasArgs()
+        .argName("topologyid")
+        .required()
+        .build();
+
+    Option ckptMgrId = Option.builder("c")
+        .desc("Id of the checkpoint manager")
+        .longOpt("ckptmgrid")
+        .hasArgs()
+        .argName("ckptmgrid")
+        .required()
+        .build();
+
+    Option ckptMgrPort = Option.builder("p")
+        .desc("Port of the checkpoint manager")
+        .longOpt("ckptmgrport")
+        .hasArgs()
+        .argName("ckptmgrport")
+        .required()
+        .build();
+
+    Option ckptMgrConfig = Option.builder("f")
+        .desc("Config name of the checkpoint manager")
+        .longOpt("ckptmgrconfig")
+        .hasArgs()
+        .argName("ckptmgrconfig")
+        .required()
+        .build();
+
+    Option heronInternalConfig = Option.builder("g")
+        .desc("Heron internal config filename")
+        .longOpt("heroninternalconfig")
+        .hasArgs()
+        .argName("heroninternalconfig")
+        .required()
+        .build();
+
+    options.addOption(topName);
+    options.addOption(topId);
+    options.addOption(ckptMgrId);
+    options.addOption(ckptMgrPort);
+    options.addOption(ckptMgrConfig);
+    options.addOption(heronInternalConfig);
+
+    return options;
+  }
+
+  // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
 
   public CheckpointManager(
       String topologyName, String topologyId, String checkpointMgrId,
@@ -89,27 +177,35 @@ public class CheckpointManager {
     checkpointManagerServerLoop.loop();
   }
 
-  public static void main(String[] args) throws IOException, CheckpointManagerException {
-    if (args.length != 9) {
-      throw new CheckpointManagerException(
-          "Invalid arguments; Usage: java com.twitter.heron.ckptmgr.CheckpointManager "
-              + "<topname> <topid> <ckptmgr_id> <myport> <stateful_config_filename> "
-              + "<cluster> <role> <environ> <heron_internals_config_filename>");
+  public static void main(String[] args) throws IOException,
+                                       ParseException, CheckpointManagerException {
+    Options options = constructOptions();
+    Options helpOptions = constructHelpOptions();
+    CommandLineParser parser = new DefaultParser();
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+
+    if (cmd.hasOption("h")) {
+      usage(options);
+      return;
     }
 
-    // Handling these arguments
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      usage(options);
+      throw new RuntimeException("Error parsing command line options: ", e);
+    }
 
-    String topologyName = args[0];
-    String topologyId = args[1];
-    String ckptmgrId = args[2];
-    int port = Integer.parseInt(args[3]);
-    String stateConfigFilename = args[4];
-    // TODO(mfu): Remove following 3 arguments?
-    String cluster = args[5];
-    String role = args[6];
-    String environ = args[7];
-
-    SystemConfig systemConfig = SystemConfig.newBuilder(true).putAll(args[8], true).build();
+    String topologyName = cmd.getOptionValue("topologyname");
+    String topologyId = cmd.getOptionValue("topologyid");
+    String ckptmgrId = cmd.getOptionValue("ckptmgrid");
+    int port = Integer.parseInt(cmd.getOptionValue("ckptmgrport"));
+    String stateConfigFilename = cmd.getOptionValue("ckptmgrconfig");
+    String heronInternalConfig = cmd.getOptionValue("heroninternalconfig");
+    SystemConfig systemConfig = SystemConfig.newBuilder(true).putAll(heronInternalConfig,
+                                                                     true).build();
     CheckpointManagerConfig ckptmgrConfig = new CheckpointManagerConfig(stateConfigFilename);
 
     // Add the SystemConfig into SingletonRegistry
