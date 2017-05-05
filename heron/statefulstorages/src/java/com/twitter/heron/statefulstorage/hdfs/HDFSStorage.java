@@ -34,8 +34,8 @@ import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 /**
  * Note: The hadoop cluster config should be provided through the classpath
  */
-public class HdfsBackend implements IStatefulStorage {
-  private static final Logger LOG = Logger.getLogger(HdfsBackend.class.getName());
+public class HDFSStorage implements IStatefulStorage {
+  private static final Logger LOG = Logger.getLogger(HDFSStorage.class.getName());
 
   private static final String ROOT_PATH_KEY = "root.path";
 
