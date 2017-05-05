@@ -617,9 +617,16 @@ class HeronExecutor(object):
       Log.info("%s stderr: %s" %(name, process_stderr))
 
   def _run_process(self, name, cmd, env_to_exec=None):
+    if env_to_exec is None:
+      _env = os.environ.copy()
+    else:
+      _env = env_to_exec
+    _env["PEX_PROFILE"] = os.environ.get("HERON_PROFILE", "false")
+    _env["PEX_PROFILE_SORT"] = "tottime"
+
     Log.info("Running %s process as %s" % (name, ' '.join(cmd)))
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env=env_to_exec)
+                            env=_env)
 
   def _run_blocking_process(self, cmd, is_shell, env_to_exec=None):
     Log.info("Running blocking process as %s" % cmd)
