@@ -28,7 +28,7 @@ sp_int32 SockUtils::getFreePort() {
   fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0) {
     LOG(ERROR) << "socket() error: " << strerror(errno);
-    return -1;
+    return SP_NOTOK;
   }
 
   struct sockaddr_in sin;
@@ -40,14 +40,14 @@ sp_int32 SockUtils::getFreePort() {
   if (bind(fd, (struct sockaddr *)&sin, sizeof(sin)) != 0)  {
     LOG(ERROR) << "bind() error: " << strerror(errno);
     close(fd);
-    return -1;
+    return SP_NOTOK;
   }
 
   socklen_t len = sizeof(sin);
   if (getsockname(fd, (struct sockaddr *)&sin, &len) != 0)  {
     LOG(ERROR) << "getsockname() error: " << strerror(errno);
     close(fd);
-    return -1;
+    return SP_NOTOK;
   }
 
   int port = -1;
