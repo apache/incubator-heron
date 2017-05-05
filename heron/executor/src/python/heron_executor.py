@@ -176,7 +176,6 @@ class HeronExecutor(object):
         self.master_host = subprocess.Popen(["curl",
                                              "http://169.254.169.254/latest/meta-data/local-ipv4"]
                                             , stdout=subprocess.PIPE).communicate()[0]
-        os.environ['HOST'] = self.master_host
       else:
         self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
     else:
