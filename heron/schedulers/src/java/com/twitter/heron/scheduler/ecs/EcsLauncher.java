@@ -14,24 +14,14 @@
 
 package com.twitter.heron.scheduler.ecs;
 
-//import java.io.File;
-//import java.nio.file.Paths;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.logging.Level;
+
 import java.util.logging.Logger;
 
-//import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
-//import com.twitter.heron.scheduler.utils.Runtime;
-//import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-//import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IScheduler;
-//import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
  * Created by ananth on 4/18/17.
@@ -42,8 +32,6 @@ public class EcsLauncher implements ILauncher {
   private Config config;
   private Config runtime;
 
-  private String ecsWorkingDirectory;
-  private String topologyWorkingDirectory;
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
