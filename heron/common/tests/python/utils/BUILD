@@ -176,3 +176,18 @@ pex_test(
     ],
     size = "small",
 )
+
+pex_test(
+    name = "log_unittest",
+    srcs = ["log_unittest.py"],
+    deps = [
+        "//heron/common/tests/python:pytest-py",
+        "//heron/common/tests/python/utils:common-utils-mock"
+    ],
+    reqs = [
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
+    ],
+    size = "small",
+)
