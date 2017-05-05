@@ -32,6 +32,7 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.metrics.FullSpoutMetrics;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
@@ -72,7 +73,7 @@ public class SpoutInstance implements IInstance {
     this.helper = helper;
     this.looper = looper;
     this.streamInQueue = streamInQueue;
-    this.spoutMetrics = new SpoutMetrics();
+    this.spoutMetrics = new FullSpoutMetrics();
     this.spoutMetrics.initMultiCountMetrics(helper);
     this.config = helper.getTopologyContext().getTopologyConfig();
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
