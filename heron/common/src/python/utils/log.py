@@ -44,7 +44,10 @@ def stream_process_stdout(process, log_fn):
   :param log_fn: a function that will be called for each log line
   :return: None
   """
-  for line in iter(process.stdout.readline, b''):
+  while 1:
+    line = process.stdout.readline()
+    if not line:
+      break
     log_fn(line)
 
 def configure(level=logging.INFO, logfile=None):

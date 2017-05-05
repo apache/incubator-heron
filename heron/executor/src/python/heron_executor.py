@@ -628,7 +628,7 @@ class HeronExecutor(object):
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
       process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 env=env_to_exec)
+                                 env=env_to_exec, bufsize=1)
 
       log.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
