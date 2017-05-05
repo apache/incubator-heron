@@ -184,24 +184,15 @@ public class HdfsBackend implements IStatefulStorage {
   }
 
   protected String getTopologyCheckpointRoot(String topologyName) {
-    return new StringBuilder()
-        .append(checkpointRootPath).append("/")
-        .append(topologyName)
-        .toString();
+    return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
   protected String getCheckpointDir(Checkpoint checkpoint) {
-    return new StringBuilder()
-        .append(getTopologyCheckpointRoot(checkpoint.getTopologyName())).append("/")
-        .append(checkpoint.getCheckpointId()).append("/")
-        .append(checkpoint.getComponent())
-        .toString();
+    return String.format("%s/%s/%s", getTopologyCheckpointRoot(checkpoint.getTopologyName()),
+                         checkpoint.getCheckpointId(), checkpoint.getComponent());
   }
 
   protected String getCheckpointPath(Checkpoint checkpoint) {
-    return new StringBuilder()
-        .append(getCheckpointDir(checkpoint)).append("/")
-        .append(checkpoint.getTaskId())
-        .toString();
+    return String.format("%s/%d", getCheckpointDir(checkpoint), checkpoint.getTaskId());
   }
 }

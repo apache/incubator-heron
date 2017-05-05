@@ -149,7 +149,7 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         connection.close();
       } catch (IOException e) {
-        LOG.error("Failed to close connection from: "
+        LOG.warning("Failed to close connection from: "
                   + connection.socket().getRemoteSocketAddress());
       }
 
@@ -190,7 +190,7 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         connection.close();
       } catch (IOException e) {
-        LOG.error("Failed to close connection from: "
+        LOG.warning("Failed to close connection from: "
                   + connection.socket().getRemoteSocketAddress());
       }
 

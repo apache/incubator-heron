@@ -78,9 +78,6 @@ public class Checkpoint {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(topologyName).append(" ").append(checkpointId)
-        .append(" ").append(componentName).append(" ").append(instanceId);
-    return sb.toString();
+    return String.format("%s %s %s %s", topologyName, checkpointId, componentName, instanceId);
   }
 }
