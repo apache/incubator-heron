@@ -233,6 +233,15 @@ public class HeronInstance {
 
     // The actual uncaught exceptions handing logic
     private void handleException(Thread thread, Throwable exception) {
+      // We would fail fast when errors occur to avoid unexpected bad situations
+      if (exception instanceof Error) {
+        LOG.log(Level.SEVERE,
+            "Error caught in thread: " + thread.getName()
+                + " with thread id: " + thread.getId() + ". Process halting...",
+            exception);
+        Runtime.getRuntime().halt(1);
+      }
+
       LOG.log(Level.SEVERE,
           String.format("Exception caught in thread: %s with id: %d",
               thread.getName(), thread.getId()), exception);
