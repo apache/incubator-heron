@@ -61,7 +61,7 @@ public final class MultiSpoutExclamationTopology {
     com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(1));
 
     if (args != null && args.length > 0) {
-      com.twitter.heron.api.Config.setNumStmgrs(conf, 1);
+      conf.setNumWorkers(1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       LocalCluster cluster = new LocalCluster();

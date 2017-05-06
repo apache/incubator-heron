@@ -60,7 +60,7 @@ public final class ComponentJVMOptionsTopology {
     com.twitter.heron.api.Config.setComponentJvmOptions(conf, "exclaim1", "-XX:NewSize=800m");
 
     if (args != null && args.length > 0) {
-      com.twitter.heron.api.Config.setNumStmgrs(conf, 1);
+      conf.setNumWorkers(1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       LocalCluster cluster = new LocalCluster();

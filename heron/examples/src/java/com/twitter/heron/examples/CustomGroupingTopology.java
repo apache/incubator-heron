@@ -47,7 +47,7 @@ public final class CustomGroupingTopology {
 
     Config conf = new Config();
 
-    com.twitter.heron.api.Config.setNumStmgrs(conf, 1);
+    conf.setNumWorkers(1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

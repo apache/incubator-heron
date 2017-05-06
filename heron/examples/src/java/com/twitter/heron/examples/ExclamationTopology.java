@@ -59,7 +59,7 @@ public final class ExclamationTopology {
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 5);
 
     if (args != null && args.length > 0) {
-      com.twitter.heron.api.Config.setNumStmgrs(conf, parallelism);
+      conf.setNumWorkers(parallelism);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       System.out.println("Topology name not provided as an argument, running in simulator mode.");

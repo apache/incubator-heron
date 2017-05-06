@@ -175,7 +175,7 @@ public final class WordCountTopology {
     builder.setBolt("consumer", new ConsumerBolt(), parallelism)
         .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
-    com.twitter.heron.api.Config.setNumStmgrs(conf, parallelism);
+    conf.setNumWorkers(parallelism);
 
     /*
     Set config here
