@@ -193,6 +193,6 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   protected String getCheckpointPath(Checkpoint checkpoint) {
-    return String.format("%s/%d", getCheckpointDir(checkpoint), checkpoint.getTaskId());
+    return String.format("%s/%s", getCheckpointDir(checkpoint), checkpoint.getTaskId());
   }
 }
