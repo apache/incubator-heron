@@ -51,14 +51,15 @@ public final class ExclamationTopology {
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
+    conf.setMessageTimeoutSecs(600);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", ByteAmount.fromGigabytes(3));
-    conf.setComponentRam("exclaim1", ByteAmount.fromGigabytes(3));
-    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(5));
-    conf.setContainerCpuRequested(5);
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(5));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 5);
 
     if (args != null && args.length > 0) {
-      conf.setNumStmgrs(parallelism);
+      com.twitter.heron.api.Config.setNumStmgrs(conf, parallelism);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       System.out.println("Topology name not provided as an argument, running in simulator mode.");

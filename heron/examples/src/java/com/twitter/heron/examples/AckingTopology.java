@@ -57,11 +57,11 @@ public final class AckingTopology {
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
     // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
+    com.twitter.heron.api.Config.setEnableAcking(conf, true);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // Set the number of workers or stream managers
-    conf.setNumStmgrs(1);
+    com.twitter.heron.api.Config.setNumStmgrs(conf, 1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

@@ -55,13 +55,13 @@ public final class MultiSpoutExclamationTopology {
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word0", ByteAmount.fromMegabytes(500));
-    conf.setComponentRam("word1", ByteAmount.fromMegabytes(500));
-    conf.setComponentRam("word2", ByteAmount.fromMegabytes(500));
-    conf.setComponentRam("exclaim1", ByteAmount.fromGigabytes(1));
+    com.twitter.heron.api.Config.setComponentRam(conf, "word0", ByteAmount.fromMegabytes(500));
+    com.twitter.heron.api.Config.setComponentRam(conf, "word1", ByteAmount.fromMegabytes(500));
+    com.twitter.heron.api.Config.setComponentRam(conf, "word2", ByteAmount.fromMegabytes(500));
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(1));
 
     if (args != null && args.length > 0) {
-      conf.setNumStmgrs(1);
+      com.twitter.heron.api.Config.setNumStmgrs(conf, 1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       LocalCluster cluster = new LocalCluster();

@@ -59,10 +59,10 @@ public final class MultiStageAckingTopology {
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
     // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
+    com.twitter.heron.api.Config.setEnableAcking(conf, true);
 
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setNumStmgrs(1);
+    com.twitter.heron.api.Config.setNumStmgrs(conf, 1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 
