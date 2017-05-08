@@ -15,6 +15,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import colorlog
+from threading import Thread
 
 # Create the logger
 # pylint: disable=invalid-name
@@ -25,6 +26,33 @@ Log = logging.getLogger()
 # e.g. "08/16/1988 21:30:00 +1030"
 # see time formatter documentation for more
 date_format = "%Y-%m-%d %H:%M:%S %z"
+
+def async_stream_process_stdout(process, log_fn):
+  """ Stream the stdout and stderr for a process out to display async
+  :param process: the process to stream the log for
+  :param log_fn: a function that will be called for each log line
+  :return: None
+  """
+  logging_thread = Thread(target=stream_process_stdout, args=(process, log_fn, ))
+
+  # Setting the logging thread as a daemon thread will allow it to exit with the program
+  # rather than blocking the exit waiting for it to be handled manually.
+  logging_thread.daemon = True
+  logging_thread.start()
+
+  return logging_thread
+
+def stream_process_stdout(process, log_fn):
+  """ Stream the stdout and stderr for a process out to display
+  :param process: the process to stream the logs for
+  :param log_fn: a function that will be called for each log line
+  :return: None
+  """
+  while 1:
+    line = process.stdout.readline()
+    if not line:
+      break
+    log_fn(line)
 
 def configure(level=logging.INFO, logfile=None):
   """ Configure logger which dumps log on terminal
