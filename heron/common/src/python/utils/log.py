@@ -34,6 +34,10 @@ def async_stream_process_stdout(process, log_fn):
   :return: None
   """
   logging_thread = Thread(target=stream_process_stdout, args=(process, log_fn, ))
+
+  # Setting the logging thread as a daemon thread will allow it to exit with the program
+  # rather than blocking the exit waiting for it to be handled manually.
+  logging_thread.daemon = True
   logging_thread.start()
 
   return logging_thread
