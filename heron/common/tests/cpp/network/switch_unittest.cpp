@@ -26,6 +26,7 @@
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
+#include "threads/spcountdownlatch.h"
 #include "network/network.h"
 #include "basics/modinit.h"
 #include "errors/modinit.h"
