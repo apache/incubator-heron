@@ -106,6 +106,17 @@ sp_int32 BaseServer::Start_Base() {
     return -1;
   }
 
+  // fetch the port after bind/listen port 0
+  if (options_.get_sin_family() == AF_INET) {
+    if (getsockname(listen_fd_, serv_addr, &sockaddr_len) != 0)  {
+      LOG(ERROR) << "getsockname() error: " << strerror(errno);
+      close(listen_fd_);
+      return SP_NOTOK;
+    } else {
+      options_.set_port(ntohs(in_addr.sin_port));
+    }
+  }
+
   return 0;
 }
 
