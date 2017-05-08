@@ -32,7 +32,7 @@
 #include "threads/modinit.h"
 #include "network/modinit.h"
 
-static const sp_uint32 SERVER_PORT = 61000;
+static sp_uint32 SERVER_PORT;
 
 class Terminate : public Client {
  public:
@@ -78,6 +78,7 @@ void start_server(sp_uint32 port) {
   EventLoopImpl ss;
   server_ = new TestServer(&ss, options);
   if (server_->Start() != 0) GTEST_FAIL();
+  SERVER_PORT = server_->get_serveroptions().get_port();
   ss.loop();
 }
 
@@ -108,6 +109,8 @@ void terminate_server(sp_uint32 port) {
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {
+  SERVER_PORT = 0;
+
   // start the server thread
   std::thread sthread(start_server, SERVER_PORT);
 
