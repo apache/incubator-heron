@@ -62,15 +62,15 @@ public final class TaskHookTopology {
     // Put an arbitrary large number here if you don't want to slow the topology down
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
     // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
+    conf.setNumAckers(1);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // Set the task hook
     List<String> taskHooks = new LinkedList<>();
     taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
-    conf.setAutoTaskHooks(taskHooks);
+    com.twitter.heron.api.Config.setAutoTaskHooks(conf, taskHooks);
 
-    conf.setNumStmgrs(1);
+    conf.setNumWorkers(1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 
