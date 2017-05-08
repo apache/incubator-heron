@@ -68,7 +68,7 @@ class Terminate : public Client {
 
 static TestServer* server_;
 
-void start_server(sp_uint32 port) {
+void start_server(sp_uint32 port, CountDownLatch* latch) {
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(port);
@@ -79,6 +79,7 @@ void start_server(sp_uint32 port) {
   server_ = new TestServer(&ss, options);
   if (server_->Start() != 0) GTEST_FAIL();
   SERVER_PORT = server_->get_serveroptions().get_port();
+  latch->countDown();
   ss.loop();
 }
 
@@ -110,9 +111,12 @@ void terminate_server(sp_uint32 port) {
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {
   SERVER_PORT = 0;
+  CountDownLatch* latch = new CountDownLatch(1);
 
   // start the server thread
-  std::thread sthread(start_server, SERVER_PORT);
+  std::thread sthread(start_server, SERVER_PORT, latch);
+  latch->wait();
+  std::cout << "server port " << SERVER_PORT << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
 
