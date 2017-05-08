@@ -78,6 +78,7 @@ void start_server(sp_uint32 port, CountDownLatch* latch) {
 
   EventLoopImpl ss;
   server_ = new TestServer(&ss, options);
+  EXPECT_EQ(0, server_->get_serveroptions().get_port());
   if (server_->Start() != 0) GTEST_FAIL();
   SERVER_PORT = server_->get_serveroptions().get_port();
   latch->countDown();
