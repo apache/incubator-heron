@@ -66,7 +66,7 @@ public class HDFSStorageTest {
   private static final byte[] BYTES = "HDFS test bytes".getBytes();
   private CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
-  private HDFSStorage hdfsBackend;
+  private HDFSStorage hdfsStorage;
   private FileSystem mockFileSystem;
 
   @Before
@@ -81,8 +81,8 @@ public class HDFSStorageTest {
     PowerMockito.spy(FileSystem.class);
     PowerMockito.doReturn(mockFileSystem).when(FileSystem.class, "get", any(Configuration.class));
 
-    hdfsBackend = spy(HDFSStorage.class);
-    hdfsBackend.init(config);
+    hdfsStorage = spy(HDFSStorage.class);
+    hdfsStorage.init(config);
 
     PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
         .setTaskId(TASK_ID)
@@ -115,7 +115,7 @@ public class HDFSStorageTest {
 
   @After
   public void after() throws Exception {
-    hdfsBackend.close();
+    hdfsStorage.close();
   }
 
   @Test
@@ -130,9 +130,9 @@ public class HDFSStorageTest {
     FSDataOutputStream mockFSDateOutpurStream = mock(FSDataOutputStream.class);
     when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutpurStream);
 
-    doReturn(true).when(hdfsBackend).createDirs(anyString());
+    doReturn(true).when(hdfsStorage).createDirs(anyString());
 
-    hdfsBackend.store(mockCheckpoint);
+    hdfsStorage.store(mockCheckpoint);
 
     verify(mockSaveInstanceStateRequest).writeTo(mockFSDateOutpurStream);
   }
@@ -149,14 +149,14 @@ public class HDFSStorageTest {
     PowerMockito.doReturn(saveInstanceStateRequest)
         .when(CheckpointManager.SaveInstanceStateRequest.class, "parseFrom", mockFSDataInputStream);
 
-    hdfsBackend.restore(restoreCheckpoint);
+    hdfsStorage.restore(restoreCheckpoint);
 
     assertEquals(restoreCheckpoint.checkpoint(), saveInstanceStateRequest);
   }
 
   @Test
   public void testDisposeAll() throws Exception {
-    hdfsBackend.dispose(TOPOLOGY_NAME, CHECKPOINT_ID, true);
+    hdfsStorage.dispose(TOPOLOGY_NAME, CHECKPOINT_ID, true);
     verify(mockFileSystem).delete(any(Path.class), eq(true));
   }
 
@@ -171,10 +171,13 @@ public class HDFSStorageTest {
     FileStatus mockFS2 = mock(FileStatus.class);
     when(mockFS2.getPath()).thenReturn(mockPath);
 
-    FileStatus[] fileStatus = {mockFS1, mockFS2};
-    when(mockFileSystem.listStatus(any(Path.class))).thenReturn(fileStatus);
+    FileStatus[] mockFileStatus = {mockFS1, mockFS2};
+    FileStatus[] emptyFileStatus = new FileStatus[0];
+    when(mockFileSystem.listStatus(any(Path.class)))
+        .thenReturn(mockFileStatus)
+        .thenReturn(emptyFileStatus);
 
-    hdfsBackend.dispose(TOPOLOGY_NAME, CHECKPOINT_ID, false);
+    hdfsStorage.dispose(TOPOLOGY_NAME, CHECKPOINT_ID, false);
 
     verify(mockFileSystem, times(2)).delete(any(Path.class), eq(true));
   }

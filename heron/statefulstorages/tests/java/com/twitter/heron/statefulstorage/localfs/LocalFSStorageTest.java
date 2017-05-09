@@ -58,7 +58,7 @@ public class LocalFSStorageTest {
   private static final int TASK_ID = 1;
   private static final int COMPONENT_INDEX = 1;
   private static final byte[] BYTES = "LocalFS test bytes".getBytes();
-  private LocalFSStorage localFSBackend;
+  private LocalFSStorage localFileSystemBackend;
   private SaveInstanceStateRequest saveInstanceStateRequest;
   private GetInstanceStateRequest getInstanceStateRequest;
   private PhysicalPlans.Instance instance;
@@ -69,8 +69,8 @@ public class LocalFSStorageTest {
     Map<String, Object> config = new HashMap<>();
     config.put(ROOT_PATH_KEY, ROOT_PATH);
 
-    localFSBackend = spy(new LocalFSStorage());
-    localFSBackend.init(config);
+    localFileSystemBackend = spy(new LocalFSStorage());
+    localFileSystemBackend.init(config);
 
     PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
         .setTaskId(TASK_ID)
@@ -102,7 +102,7 @@ public class LocalFSStorageTest {
 
   @After
   public void after() throws Exception {
-    localFSBackend.close();
+    localFileSystemBackend.close();
   }
 
   @Test
@@ -117,7 +117,7 @@ public class LocalFSStorageTest {
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
     when(mockCheckpoint.checkpoint()).thenReturn(saveInstanceStateRequest);
 
-    localFSBackend.store(mockCheckpoint);
+    localFileSystemBackend.store(mockCheckpoint);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.writeToFile(anyString(), eq(saveInstanceStateRequest.toByteArray()), eq(true));
@@ -131,7 +131,7 @@ public class LocalFSStorageTest {
 
     Checkpoint ckpt = new Checkpoint(TOPOLOGY_NAME, getInstanceStateRequest);
 
-    localFSBackend.restore(ckpt);
+    localFileSystemBackend.restore(ckpt);
 
     assertEquals(saveInstanceStateRequest, ckpt.checkpoint());
   }
@@ -142,7 +142,7 @@ public class LocalFSStorageTest {
     PowerMockito.doReturn(true).when(FileUtils.class, "deleteDir", anyString());
     PowerMockito.doReturn(false).when(FileUtils.class, "isDirectoryExists", anyString());
 
-    localFSBackend.dispose(TOPOLOGY_NAME, "", true);
+    localFileSystemBackend.dispose(TOPOLOGY_NAME, "", true);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.deleteDir(anyString());
