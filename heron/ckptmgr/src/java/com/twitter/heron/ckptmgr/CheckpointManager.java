@@ -140,17 +140,16 @@ public class CheckpointManager {
     HeronSocketOptions serverSocketOptions =
         new HeronSocketOptions(
             checkpointManagerConfig.getWriteBatchSizeBytes(),
-            checkpointManagerConfig.getWriteBatchSizeMs(),
+            checkpointManagerConfig.getWriteBatchTimeMs(),
             checkpointManagerConfig.getReadBatchSizeBytes(),
-            checkpointManagerConfig.getReadBatchSizeMs(),
+            checkpointManagerConfig.getReadBatchTimeMs(),
             checkpointManagerConfig.getSocketSendSize(),
             checkpointManagerConfig.getSocketReceiveSize());
 
     // Setup the IStatefulStorage
     // TODO(mfu): This should be done in an executor driven by another thread, kind of async
     IStatefulStorage checkpointsBackend;
-    String classname = (String) checkpointManagerConfig.getCkptMgrConfig(
-                                             CheckpointManagerConfig.STORAGE_CLASSNAME);
+    String classname = checkpointManagerConfig.getStorageClassname();
     try {
       checkpointsBackend = (IStatefulStorage) Class.forName(classname).newInstance();
     } catch (InstantiationException e) {
@@ -206,7 +205,8 @@ public class CheckpointManager {
     String heronInternalConfig = cmd.getOptionValue("heroninternalconfig");
     SystemConfig systemConfig = SystemConfig.newBuilder(true).putAll(heronInternalConfig,
                                                                      true).build();
-    CheckpointManagerConfig ckptmgrConfig = new CheckpointManagerConfig(stateConfigFilename);
+    CheckpointManagerConfig ckptmgrConfig =
+        CheckpointManagerConfig.newBuilder(true).putAll(stateConfigFilename, true).build();
 
     // Add the SystemConfig into SingletonRegistry
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
