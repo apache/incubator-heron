@@ -14,66 +14,151 @@
 
 package com.twitter.heron.ckptmgr;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.ConfigReader;
 
 public class CheckpointManagerConfig {
-  public static final String STORAGE_CONFIG = "heron.statefulstorage.config";
-  public static final String STORAGE_CLASSNAME = "heron.class.statefulstorage";
-  public static final String WRITE_BATCH_SIZE = "heron.ckptmgr.network.write.batch.size.bytes";
-  public static final String WRITE_BATCH_TIME = "heron.ckptmgr.network.write.batch.time.ms";
-  public static final String READ_BATCH_SIZE = "heron.ckptmgr.network.read.batch.size.bytes";
-  public static final String READ_BATCH_TIME = "heron.ckptmgr.network.read.batch.time.ms";
-  public static final String SOCKET_SEND_SIZE =
-                             "heron.ckptmgr.network.options.socket.send.buffer.size.bytes";
-  public static final String SOCKET_RECEIVE_SIZE =
-                             "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes";
 
-  private final Map<String, Object> storageConfig = new HashMap<>();
-  private final Map<String, Object> ckptmgrConfig = new HashMap<>();
+  private Map<String, Object> config = new HashMap<>();
 
-  @SuppressWarnings("unchecked")
-  public CheckpointManagerConfig(String filename) {
-    ckptmgrConfig.putAll(ConfigReader.loadFile(filename));
-    String backend = (String) ckptmgrConfig.get(STORAGE_CONFIG);
-    storageConfig.putAll((Map<String, Object>) ckptmgrConfig.get(backend));
+  private CheckpointManagerConfig(Builder build) {
+    this.config = new HashMap<>(build.keyValues);
   }
 
-  public Object getBackendConfig(String key) {
-    return storageConfig.get(key);
-  }
-
-  public Object getCkptMgrConfig(String key) {
-    return ckptmgrConfig.get(key);
+  public static Builder newBuilder(boolean loadDefaults) {
+    return Builder.create(loadDefaults);
   }
 
   public Map<String, Object> getBackendConfig() {
-    return storageConfig;
+    return (Map<String, Object>) get(CheckpointManagerConfigKey.STORAGE_CONFIG);
   }
 
-  public long getWriteBatchSizeBytes() {
-    return (long) ckptmgrConfig.get(WRITE_BATCH_SIZE);
+  public String getStorageClassname() {
+    return getString(CheckpointManagerConfigKey.STORAGE_CLASSNAME);
   }
 
-  public long getWriteBatchSizeMs() {
-    return (long) ckptmgrConfig.get(WRITE_BATCH_TIME);
+  public Long getWriteBatchSizeBytes() {
+    return getLong(CheckpointManagerConfigKey.WRITE_BATCH_SIZE);
   }
 
-  public long getReadBatchSizeBytes() {
-    return (long) ckptmgrConfig.get(READ_BATCH_SIZE);
+  public Long getWriteBatchTimeMs() {
+    return getLong(CheckpointManagerConfigKey.WRITE_BATCH_TIME);
   }
 
-  public long getReadBatchSizeMs() {
-    return (long) ckptmgrConfig.get(READ_BATCH_TIME);
+  public Long getReadBatchSizeBytes() {
+    return getLong(CheckpointManagerConfigKey.READ_BATCH_SIZE);
   }
 
-  public int getSocketSendSize() {
-    return (int) ckptmgrConfig.get(SOCKET_SEND_SIZE);
+  public Long getReadBatchTimeMs() {
+    return getLong(CheckpointManagerConfigKey.READ_BATCH_TIME);
   }
 
-  public int getSocketReceiveSize() {
-    return (int) ckptmgrConfig.get(SOCKET_RECEIVE_SIZE);
+  public Integer getSocketSendSize() {
+    return getInteger(CheckpointManagerConfigKey.SOCKET_SEND_SIZE);
+  }
+
+  public Integer getSocketReceiveSize() {
+    return getInteger(CheckpointManagerConfigKey.SOCKET_RECEIVE_SIZE);
+  }
+
+  private String getString(CheckpointManagerConfigKey key) {
+    assertType(key, CheckpointManagerConfigKey.Type.STRING);
+    return (String) get(key);
+  }
+
+  private Integer getInteger(CheckpointManagerConfigKey key) {
+    assertType(key, CheckpointManagerConfigKey.Type.INTEGER);
+    return TypeUtils.getInteger(get(key));
+  }
+
+  private Long getLong(CheckpointManagerConfigKey key) {
+    assertType(key, CheckpointManagerConfigKey.Type.LONG);
+    return TypeUtils.getLong(get(key));
+  }
+
+  private Object get(CheckpointManagerConfigKey key) {
+    return config.get(key.value());
+  }
+
+  private void assertType(CheckpointManagerConfigKey key, CheckpointManagerConfigKey.Type type) {
+    if (key.getType() != type) {
+      throw new IllegalArgumentException(String.format(
+          "config key %s is of type %s instead of expected type %s", key, key.getType(), type));
+    }
+  }
+
+  public static class Builder {
+    private final Map<String, Object> keyValues = new HashMap<>();
+
+    private static CheckpointManagerConfig.Builder create(boolean loadDefaults) {
+      CheckpointManagerConfig.Builder cb = new Builder();
+
+      if (loadDefaults) {
+        loadDefaults(cb, CheckpointManagerConfigKey.values());
+      }
+
+      return cb;
+    }
+
+    private static void loadDefaults(CheckpointManagerConfig.Builder cb, CheckpointManagerConfigKey... keys) {
+      for (CheckpointManagerConfigKey key : keys) {
+        if (key.getDefault() != null) {
+          cb.put(key, key.getDefault());
+        }
+      }
+    }
+
+    public Builder put(CheckpointManagerConfigKey key, Object value) {
+      convertAndAdd(this.keyValues, key, value);
+      return this;
+    }
+
+    public Builder putAll(String fileName, boolean mustExist) {
+      File file = new File(fileName);
+      if (!file.exists() && mustExist) {
+        throw new IllegalArgumentException(
+            String.format("Config file %s does not exist", fileName));
+      }
+
+      Map<String, Object> configValues = ConfigReader.loadFile(fileName);
+      for (String keyValue : configValues.keySet()) {
+        CheckpointManagerConfigKey key = CheckpointManagerConfigKey.toCheckpointManagerConfigKey(keyValue);
+        if (key != null) {
+          convertAndAdd(configValues, key, configValues.get(keyValue));
+        }
+      }
+      keyValues.putAll(configValues);
+      return this;
+    }
+
+    private static void convertAndAdd(Map<String, Object> config, CheckpointManagerConfigKey key, Object value) {
+      if (key != null) {
+        switch (key.getType()) {
+          case INTEGER:
+            config.put(key.value(), TypeUtils.getInteger(value));
+            break;
+          case LONG:
+            config.put(key.value(), TypeUtils.getLong(value));
+            break;
+          case STRING:
+            config.put(key.value(), value);
+            break;
+          case OBJECT:
+            config.put(key.value(), value);
+            break;
+          default:
+            throw new IllegalArgumentException(String.format(
+                "config key %s is of type %s which is not yet supported", key, key.getType()));
+        }
+      }
+    }
+
+    public CheckpointManagerConfig build() {
+      return new CheckpointManagerConfig(this);
+    }
   }
 }
