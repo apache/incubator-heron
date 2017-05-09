@@ -21,7 +21,7 @@ import java.util.Map;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.ConfigReader;
 
-public class CheckpointManagerConfig {
+public final class CheckpointManagerConfig {
 
   private Map<String, Object> config = new HashMap<>();
 
@@ -33,8 +33,17 @@ public class CheckpointManagerConfig {
     return Builder.create(loadDefaults);
   }
 
+  @SuppressWarnings("unchecked")
   public Map<String, Object> getBackendConfig() {
-    return (Map<String, Object>) get(CheckpointManagerConfigKey.STORAGE_CONFIG);
+    Object backendConfigObject = get(CheckpointManagerConfigKey.STORAGE_CONFIG);
+
+    if (backendConfigObject instanceof Map) {
+      return (Map<String, Object>) backendConfigObject;
+    } else {
+      throw new IllegalArgumentException(
+          String.format("configs for backend storage needs to be map, but is: %s",
+              backendConfigObject.getClass().getName()));
+    }
   }
 
   public String getStorageClassname() {
@@ -104,7 +113,8 @@ public class CheckpointManagerConfig {
       return cb;
     }
 
-    private static void loadDefaults(CheckpointManagerConfig.Builder cb, CheckpointManagerConfigKey... keys) {
+    private static void loadDefaults(CheckpointManagerConfig.Builder cb,
+                                     CheckpointManagerConfigKey... keys) {
       for (CheckpointManagerConfigKey key : keys) {
         if (key.getDefault() != null) {
           cb.put(key, key.getDefault());
@@ -126,7 +136,8 @@ public class CheckpointManagerConfig {
 
       Map<String, Object> configValues = ConfigReader.loadFile(fileName);
       for (String keyValue : configValues.keySet()) {
-        CheckpointManagerConfigKey key = CheckpointManagerConfigKey.toCheckpointManagerConfigKey(keyValue);
+        CheckpointManagerConfigKey key =
+            CheckpointManagerConfigKey.toCheckpointManagerConfigKey(keyValue);
         if (key != null) {
           convertAndAdd(configValues, key, configValues.get(keyValue));
         }
@@ -135,7 +146,9 @@ public class CheckpointManagerConfig {
       return this;
     }
 
-    private static void convertAndAdd(Map<String, Object> config, CheckpointManagerConfigKey key, Object value) {
+    private static void convertAndAdd(Map<String, Object> config,
+                                      CheckpointManagerConfigKey key,
+                                      Object value) {
       if (key != null) {
         switch (key.getType()) {
           case INTEGER:

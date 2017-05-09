@@ -59,8 +59,8 @@ public enum CheckpointManagerConfigKey {
   /**
    * The size for socket receive buffer in bytes
    */
-  SOCKET_RECEIVE_SIZE("heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.INTEGER);
-
+  SOCKET_RECEIVE_SIZE(
+      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.INTEGER);
 
   private final String value;
   private final Object defaultValue;
@@ -88,7 +88,6 @@ public enum CheckpointManagerConfigKey {
     this.type = type;
     this.defaultValue = null;
   }
-
 
   CheckpointManagerConfigKey(String value, Integer defaultValue) {
     this.value = value;
