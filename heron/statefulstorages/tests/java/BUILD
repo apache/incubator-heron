@@ -23,7 +23,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.statefulstorage.localfs.LocalFSStorageTest",
+    "com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorageTest",
   ],
   runtime_deps = [":localfs-tests"],
   size = "small",

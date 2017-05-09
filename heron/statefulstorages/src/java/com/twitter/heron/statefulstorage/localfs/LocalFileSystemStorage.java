@@ -26,8 +26,8 @@ import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 
-public class LocalFSStorage implements IStatefulStorage {
-  private static final Logger LOG = Logger.getLogger(LocalFSStorage.class.getName());
+public class LocalFileSystemStorage implements IStatefulStorage {
+  private static final Logger LOG = Logger.getLogger(LocalFileSystemStorage.class.getName());
 
   private static final String ROOT_PATH_KEY = "root.path";
 

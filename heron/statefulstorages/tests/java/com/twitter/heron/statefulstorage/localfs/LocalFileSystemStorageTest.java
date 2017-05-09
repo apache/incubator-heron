@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(FileUtils.class)
-public class LocalFSStorageTest {
+public class LocalFileSystemStorageTest {
 
   private static final String TOPOLOGY_NAME = "topology_name";
   private static final String ROOT_PATH_KEY = "root.path";
@@ -58,7 +58,7 @@ public class LocalFSStorageTest {
   private static final int TASK_ID = 1;
   private static final int COMPONENT_INDEX = 1;
   private static final byte[] BYTES = "LocalFS test bytes".getBytes();
-  private LocalFSStorage localFileSystemBackend;
+  private LocalFileSystemStorage localFileSystemBackend;
   private SaveInstanceStateRequest saveInstanceStateRequest;
   private GetInstanceStateRequest getInstanceStateRequest;
   private PhysicalPlans.Instance instance;
@@ -69,7 +69,7 @@ public class LocalFSStorageTest {
     Map<String, Object> config = new HashMap<>();
     config.put(ROOT_PATH_KEY, ROOT_PATH);
 
-    localFileSystemBackend = spy(new LocalFSStorage());
+    localFileSystemBackend = spy(new LocalFileSystemStorage());
     localFileSystemBackend.init(config);
 
     PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
