@@ -30,6 +30,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
+import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 
 /**
  * Note: The hadoop cluster config should be provided through the classpath
@@ -37,14 +38,14 @@ import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 public class HDFSStorage implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(HDFSStorage.class.getName());
 
-  private static final String ROOT_PATH_KEY = "root.path";
+  private static final String ROOT_PATH_KEY = "heron.stateful.storage.hdfs.root.path";
 
   private String checkpointRootPath;
   private FileSystem fileSystem;
 
   @Override
-  public void init(Map<String, Object> conf) {
-    LOG.info("Initialing... Config: " + conf.toString());
+  public void init(Map<String, Object> conf) throws StatefulStorageException {
+    LOG.info("Initializing... Config: " + conf.toString());
     LOG.info("Class path: " + System.getProperty("java.class.path"));
 
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
@@ -55,9 +56,10 @@ public class HDFSStorage implements IStatefulStorage {
 
     try {
       fileSystem = FileSystem.get(hadoopConfig);
-      LOG.info("URI: " + fileSystem.getUri() + " ; Home Dir: " + fileSystem.getHomeDirectory());
+      LOG.info("Hadoop FileSystem URI: " + fileSystem.getUri()
+               + " ; Home Dir: " + fileSystem.getHomeDirectory());
     } catch (IOException e) {
-      throw new RuntimeException("Failed to get hadoop file system", e);
+      throw new StatefulStorageException("Failed to get hadoop file system", e);
     }
   }
 
@@ -67,14 +69,14 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public boolean store(Checkpoint checkpoint) {
-    Path path = new Path(getCheckpointPath(checkpoint));
+  public void store(Checkpoint checkpoint) throws StatefulStorageException {
+    Path path = new Path(getCheckpointFile(checkpoint));
 
     // We need to ensure the existence of directories structure,
     // since it is not guaranteed that FileSystem.create(..) always creates parents' dirs.
-    if (!ensureDirExists(getCheckpointDir(checkpoint))) {
-      LOG.warning("Failed to ensure dir exists: " + getCheckpointDir(checkpoint));
-      return false;
+    if (!createDirs(getCheckpointDir(checkpoint))) {
+      throw new StatefulStorageException("Failed to create dir: "
+                                         + getCheckpointDir(checkpoint));
     }
 
     FSDataOutputStream out = null;
@@ -82,18 +84,15 @@ public class HDFSStorage implements IStatefulStorage {
       out = fileSystem.create(path);
       checkpoint.checkpoint().writeTo(out);
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to persist", e);
-      return false;
+      throw new StatefulStorageException("Failed to persist", e);
     } finally {
       SysUtils.closeIgnoringExceptions(out);
     }
-
-    return true;
   }
 
   @Override
-  public boolean restore(Checkpoint checkpoint) {
-    Path path = new Path(getCheckpointPath(checkpoint));
+  public void restore(Checkpoint checkpoint) throws StatefulStorageException {
+    Path path = new Path(getCheckpointFile(checkpoint));
 
     FSDataInputStream in = null;
     CheckpointManager.SaveInstanceStateRequest state = null;
@@ -102,34 +101,28 @@ public class HDFSStorage implements IStatefulStorage {
       state =
           CheckpointManager.SaveInstanceStateRequest.parseFrom(in);
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to read", e);
-      return false;
+      throw new StatefulStorageException("Failed to read", e);
     } finally {
       SysUtils.closeIgnoringExceptions(in);
     }
-
     checkpoint.setCheckpoint(state);
-
-    return true;
   }
 
   @Override
-  public boolean dispose(String topologyName, String oldestCheckpointPreserved,
-                         boolean deleteAll) {
+  public void dispose(String topologyName, String oldestCheckpointPreserved,
+                      boolean deleteAll) throws StatefulStorageException {
     String topologyCheckpointRoot = getTopologyCheckpointRoot(topologyName);
     Path topologyRootPath = new Path(topologyCheckpointRoot);
-
 
     if (deleteAll) {
       // Clean all checkpoint states
       try {
         fileSystem.delete(topologyRootPath, true);
         if (fileSystem.exists(topologyRootPath)) {
-          return false;
+          throw new StatefulStorageException("Failed to delete " + topologyRootPath);
         }
       } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Failed to delete: " + topologyCheckpointRoot, e);
-        return false;
+        throw new StatefulStorageException("Error while deleting " + topologyRootPath, e);
       }
     } else {
       try {
@@ -146,18 +139,14 @@ public class HDFSStorage implements IStatefulStorage {
         for (FileStatus status : statuses) {
           String name = status.getPath().getName();
           if (name.compareTo(oldestCheckpointPreserved) < 0) {
-            return false;
+            throw new StatefulStorageException("Error while deleting " + name);
           }
         }
 
       } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Failed to clean to: " + oldestCheckpointPreserved, e);
-        return false;
+        throw new StatefulStorageException("Failed to clean to: " + oldestCheckpointPreserved, e);
       }
     }
-
-
-    return true;
   }
 
   /**
@@ -167,7 +156,7 @@ public class HDFSStorage implements IStatefulStorage {
    * @param dir The path of dir to ensure existence
    * @return true if the directory exists after this call.
    */
-  protected boolean ensureDirExists(String dir) {
+  protected boolean createDirs(String dir) {
     Path path = new Path(dir);
 
     try {
@@ -192,7 +181,7 @@ public class HDFSStorage implements IStatefulStorage {
                          checkpoint.getCheckpointId(), checkpoint.getComponent());
   }
 
-  protected String getCheckpointPath(Checkpoint checkpoint) {
+  protected String getCheckpointFile(Checkpoint checkpoint) {
     return String.format("%s/%s", getCheckpointDir(checkpoint), checkpoint.getTaskId());
   }
 }

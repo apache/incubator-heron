@@ -16,7 +16,6 @@ package com.twitter.heron.statefulstorage.localfs;
 
 import java.io.File;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -25,6 +24,7 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
+import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 
 public class LocalFSStorage implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(LocalFSStorage.class.getName());
@@ -34,7 +34,7 @@ public class LocalFSStorage implements IStatefulStorage {
   private String checkpointRootPath;
 
   @Override
-  public void init(Map<String, Object> conf) {
+  public void init(Map<String, Object> conf) throws StatefulStorageException {
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
     LOG.info("Initialing... Checkpoint root path: " + checkpointRootPath);
   }
@@ -45,7 +45,7 @@ public class LocalFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public boolean store(Checkpoint checkpoint) {
+  public void store(Checkpoint checkpoint) throws StatefulStorageException {
     String path = getCheckpointPath(checkpoint);
 
     // We would try to create but we would not enforce this operation successful,
@@ -54,58 +54,46 @@ public class LocalFSStorage implements IStatefulStorage {
 
     // Do a check after the attempt
     if (!FileUtils.isDirectoryExists(getCheckpointDir(checkpoint))) {
-      LOG.severe("Failed to create dir: " + getCheckpointDir(checkpoint));
-      return false;
+      throw new StatefulStorageException("Failed to create dir: " + getCheckpointDir(checkpoint));
     }
 
     byte[] contents = checkpoint.checkpoint().toByteArray();
 
     // In fact, no need atomic write, since our mechanism requires only best effort
     if (!FileUtils.writeToFile(path, contents, true)) {
-      LOG.severe("Failed to persist checkpoint to: " + path);
-      return false;
+      throw new StatefulStorageException("Failed to persist checkpoint to: " + path);
     }
-
-    return true;
   }
 
   @Override
-  public boolean restore(Checkpoint checkpoint) {
+  public void restore(Checkpoint checkpoint) throws StatefulStorageException {
     String path = getCheckpointPath(checkpoint);
 
     byte[] res = FileUtils.readFromFile(path);
     if (res.length != 0) {
       // Try to parse the protobuf
       CheckpointManager.SaveInstanceStateRequest state;
-
       try {
         state =
             CheckpointManager.SaveInstanceStateRequest.parseFrom(res);
       } catch (InvalidProtocolBufferException e) {
-        LOG.log(Level.SEVERE, "Failed to parse the data", e);
-        return false;
+        throw new StatefulStorageException("Failed to parse the data", e);
       }
-
       checkpoint.setCheckpoint(state);
-      return true;
     }
-
-    return false;
   }
 
   @Override
-  public boolean dispose(String topologyName, String oldestCheckpointPreserved,
-                         boolean deleteAll) {
+  public void dispose(String topologyName, String oldestCheckpointPreserved,
+                      boolean deleteAll) throws StatefulStorageException {
     String topologyCheckpointRoot = getTopologyCheckpointRoot(topologyName);
 
     if (deleteAll) {
       // Clean all checkpoint states
       FileUtils.deleteDir(topologyCheckpointRoot);
-
       if (FileUtils.isDirectoryExists(topologyCheckpointRoot)) {
-        return false;
+        throw new StatefulStorageException("Failed to delete " + topologyCheckpointRoot);
       }
-
     } else {
       String[] names = new File(topologyCheckpointRoot).list();
       for (String name : names) {
@@ -118,12 +106,10 @@ public class LocalFSStorage implements IStatefulStorage {
       names = new File(topologyCheckpointRoot).list();
       for (String name : names) {
         if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          return false;
+          throw new StatefulStorageException("Failed to delete " + name);
         }
       }
     }
-
-    return true;
   }
 
   protected String getTopologyCheckpointRoot(String topologyName) {

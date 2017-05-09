@@ -24,7 +24,7 @@ public interface IStatefulStorage {
    * Attempts to modify the returned map,
    * whether direct or via its collection views, result in an UnsupportedOperationException.
    */
-  void init(Map<String, Object> conf);
+  void init(Map<String, Object> conf) throws StatefulStorageException;
 
   /**
    * Closes the Checkpoints Backend
@@ -32,10 +32,10 @@ public interface IStatefulStorage {
   void close();
 
   // Store the checkpoint
-  boolean store(Checkpoint checkpoint);
+  void store(Checkpoint checkpoint) throws StatefulStorageException;
 
   // Retrieve the checkpoint
-  boolean restore(Checkpoint checkpoint);
+  void restore(Checkpoint checkpoint) throws StatefulStorageException;
 
   // TODO(mfu): We should refactor all interfaces in IStatefulStorage,
   // TODO(mfu): instead providing Class Checkpoint, we should provide an Context class,
@@ -44,5 +44,6 @@ public interface IStatefulStorage {
   // TODO(mfu): 2. Provide utils method to parse the protobuf object, like getTaskId()
   // TODO(mfu): 3. Common methods, like getCheckpointDir()
   // Dispose the checkpoint
-  boolean dispose(String topologyName, String oldestCheckpointId, boolean deleteAll);
+  void dispose(String topologyName, String oldestCheckpointId, boolean deleteAll)
+                  throws StatefulStorageException;
 }

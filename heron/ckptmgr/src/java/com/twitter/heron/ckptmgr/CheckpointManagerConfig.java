@@ -31,18 +31,18 @@ public class CheckpointManagerConfig {
   public static final String SOCKET_RECEIVE_SIZE =
                              "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes";
 
-  private final Map<String, Object> backendConfig = new HashMap<>();
+  private final Map<String, Object> storageConfig = new HashMap<>();
   private final Map<String, Object> ckptmgrConfig = new HashMap<>();
 
   @SuppressWarnings("unchecked")
   public CheckpointManagerConfig(String filename) {
     ckptmgrConfig.putAll(ConfigReader.loadFile(filename));
     String backend = (String) ckptmgrConfig.get(STORAGE_CONFIG);
-    backendConfig.putAll((Map<String, Object>) ckptmgrConfig.get(backend));
+    storageConfig.putAll((Map<String, Object>) ckptmgrConfig.get(backend));
   }
 
   public Object getBackendConfig(String key) {
-    return backendConfig.get(key);
+    return storageConfig.get(key);
   }
 
   public Object getCkptMgrConfig(String key) {
@@ -50,7 +50,7 @@ public class CheckpointManagerConfig {
   }
 
   public Map<String, Object> getBackendConfig() {
-    return backendConfig;
+    return storageConfig;
   }
 
   public long getWriteBatchSizeBytes() {
