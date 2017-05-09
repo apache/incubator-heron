@@ -30,6 +30,7 @@ import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
+import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 
 public class CheckpointManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(CheckpointManagerServer.class.getName());
@@ -43,9 +44,9 @@ public class CheckpointManagerServer extends HeronServer {
 
   public CheckpointManagerServer(
       String topologyName, String topologyId, String checkpointMgrId,
-      IStatefulStorage checkpointsBackend, NIOLooper s, String host,
+      IStatefulStorage checkpointsBackend, NIOLooper looper, String host,
       int port, HeronSocketOptions options) {
-    super(s, host, port, options);
+    super(looper, host, port, options);
 
     this.topologyName = topologyName;
     this.topologyId = topologyId;
@@ -105,19 +106,20 @@ public class CheckpointManagerServer extends HeronServer {
         + channel.socket().getRemoteSocketAddress());
 
     boolean deleteAll = request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints();
-    boolean res = checkpointsBackend.dispose(topologyName,
-                                             request.getOldestCheckpointPreserved(), deleteAll);
-    Common.StatusCode statusCode = res ? Common.StatusCode.OK : Common.StatusCode.NOTOK;
+    Common.StatusCode statusCode = Common.StatusCode.OK;
+
+    try {
+      checkpointsBackend.dispose(topologyName,
+                                 request.getOldestCheckpointPreserved(), deleteAll);
+      LOG.info("Dispose checkpoint successful");
+    } catch (StatefulStorageException e) {
+      LOG.info("Dispose checkpoint failed with error " + e);
+      statusCode = Common.StatusCode.NOTOK;
+    }
 
     CheckpointManager.CleanStatefulCheckpointResponse.Builder responseBuilder =
         CheckpointManager.CleanStatefulCheckpointResponse.newBuilder();
     responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode));
-
-    if (res) {
-      LOG.info("Dispose checkpoint successful");
-    } else {
-      LOG.info("Dispose checkpoint not successful");
-    }
 
     sendResponse(rid, channel, responseBuilder.build());
   }
@@ -214,22 +216,22 @@ public class CheckpointManagerServer extends HeronServer {
         + checkpoint.getComponent() + " " + checkpoint.getInstance() + " on connection: "
         + channel.socket().getRemoteSocketAddress());
 
-    boolean res = checkpointsBackend.store(checkpoint);
-    Common.StatusCode statusCode = res ? Common.StatusCode.OK : Common.StatusCode.NOTOK;
+    Common.StatusCode statusCode = Common.StatusCode.OK;
+    try {
+      checkpointsBackend.store(checkpoint);
+      LOG.info("Save checkpoint successful for " + checkpoint.getCheckpointId() + " "
+          + checkpoint.getComponent() + " " + checkpoint.getInstance());
+    } catch (StatefulStorageException e) {
+      LOG.info("Save checkpoint not successful for " + checkpoint.getCheckpointId() + " "
+          + checkpoint.getComponent() + " " + checkpoint.getInstance() + " error: " + e);
+      statusCode = Common.StatusCode.NOTOK;
+    }
 
     CheckpointManager.SaveInstanceStateResponse.Builder responseBuilder =
         CheckpointManager.SaveInstanceStateResponse.newBuilder();
     responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode));
     responseBuilder.setCheckpointId(request.getCheckpoint().getCheckpointId());
     responseBuilder.setInstance(request.getInstance());
-
-    if (res) {
-      LOG.info("Save checkpoint successful for " + checkpoint.getCheckpointId() + " "
-          + checkpoint.getComponent() + " " + checkpoint.getInstance());
-    } else {
-      LOG.info("Save checkpoint not successful for " + checkpoint.getCheckpointId() + " "
-          + checkpoint.getComponent() + " " + checkpoint.getInstance());
-    }
 
     sendResponse(rid, channel, responseBuilder.build());
   }
@@ -250,6 +252,7 @@ public class CheckpointManagerServer extends HeronServer {
     responseBuilder.setCheckpointId(request.getCheckpointId());
 
     boolean res;
+    Common.StatusCode statusCode = Common.StatusCode.OK;
     if (!request.hasCheckpointId() || request.getCheckpointId().isEmpty()) {
       res = true;
 
@@ -261,21 +264,19 @@ public class CheckpointManagerServer extends HeronServer {
 
       responseBuilder.setCheckpoint(dummyState);
     } else {
-      res = checkpointsBackend.restore(checkpoint);
-
-      if (res) {
+      try {
+        checkpointsBackend.restore(checkpoint);
         LOG.info("Get checkpoint successful for " + checkpoint.getCheckpointId() + " "
             + checkpoint.getComponent() + " " + checkpoint.getInstance());
-
         // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.checkpoint().getCheckpoint());
-      } else {
+      } catch (StatefulStorageException e) {
         LOG.info("Get checkpoint not successful for " + checkpoint.getCheckpointId() + " "
             + checkpoint.getComponent() + " " + checkpoint.getInstance());
+        statusCode = Common.StatusCode.NOTOK;
       }
     }
 
-    Common.StatusCode statusCode = res ? Common.StatusCode.OK : Common.StatusCode.NOTOK;
     responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode));
 
     sendResponse(rid, channel, responseBuilder.build());

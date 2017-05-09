@@ -35,6 +35,7 @@ import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
+import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 
 /**
  * Main class of CheckpointManager.
@@ -159,8 +160,13 @@ public class CheckpointManager {
     } catch (ClassNotFoundException e) {
       throw new CheckpointManagerException(classname + " class must be a class path.", e);
     }
-    checkpointsBackend.init(
-        Collections.unmodifiableMap(checkpointManagerConfig.getBackendConfig()));
+
+    try {
+      checkpointsBackend.init(
+          Collections.unmodifiableMap(checkpointManagerConfig.getBackendConfig()));
+    } catch (StatefulStorageException e) {
+      throw new CheckpointManagerException("init of stateful storage threw exception", e);
+    }
 
     // Start the server
     this.checkpointManagerServer = new CheckpointManagerServer(
@@ -225,8 +231,8 @@ public class CheckpointManager {
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     // Start the actual things
-    LOG.info(String.format("Starting for topology %s with topologyId %s with "
-            + "Id %s, Port: %d.",
+    LOG.info(String.format("Starting topology %s with topologyId %s with "
+            + "Checkpoint Manager Id %s, Port: %d.",
         topologyName, topologyId, ckptmgrId, port));
 
     LOG.info("System Config: " + systemConfig);

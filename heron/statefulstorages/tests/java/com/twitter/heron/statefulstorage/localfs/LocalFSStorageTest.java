@@ -142,9 +142,7 @@ public class LocalFSStorageTest {
     PowerMockito.doReturn(true).when(FileUtils.class, "deleteDir", anyString());
     PowerMockito.doReturn(false).when(FileUtils.class, "isDirectoryExists", anyString());
 
-    boolean result = localFSBackend.dispose(TOPOLOGY_NAME, "", true);
-
-    assertEquals(result, true);
+    localFSBackend.dispose(TOPOLOGY_NAME, "", true);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.deleteDir(anyString());
