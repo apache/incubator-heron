@@ -525,7 +525,6 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
 }
 
 void StartStMgrs(CommonResources& common) {
-  common.stmgr_ports_.reserve(common.num_stmgrs_);
   // Spawn and start the stmgrs
   for (int i = 0; i < common.num_stmgrs_; ++i) {
     EventLoopImpl* stmgr_ss = NULL;
