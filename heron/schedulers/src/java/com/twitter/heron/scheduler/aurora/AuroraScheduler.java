@@ -30,6 +30,7 @@ import com.google.common.base.Optional;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
@@ -92,13 +93,14 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     LOG.info("Launching topology in aurora");
 
-    // Align the cpu, ram, disk to the maximal one
+    // Align the cpu, ram, disk to the maximal one, and set them to ScheduledResource
     PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 
+    // Use the ScheduledResource to request aurora resources
     Resource containerResource =
-        updatedPackingPlan.getContainers().iterator().next().getRequiredResource();
+        updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get();
     Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
 
     return controller.createJob(auroraProperties);
