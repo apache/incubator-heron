@@ -50,11 +50,12 @@ public class LocalFileSystemStorage implements IStatefulStorage {
 
     // We would try to create but we would not enforce this operation successful,
     // since it is possible already created by others
-    FileUtils.createDirectory(getCheckpointDir(checkpoint));
+    String checkpointDir = getCheckpointDir(checkpoint);
+    FileUtils.createDirectory(checkpointDir);
 
     // Do a check after the attempt
-    if (!FileUtils.isDirectoryExists(getCheckpointDir(checkpoint))) {
-      throw new StatefulStorageException("Failed to create dir: " + getCheckpointDir(checkpoint));
+    if (!FileUtils.isDirectoryExists(checkpointDir)) {
+      throw new StatefulStorageException("Failed to create dir: " + checkpointDir);
     }
 
     byte[] contents = checkpoint.checkpoint().toByteArray();
@@ -112,25 +113,17 @@ public class LocalFileSystemStorage implements IStatefulStorage {
     }
   }
 
-  protected String getTopologyCheckpointRoot(String topologyName) {
-    return new StringBuilder()
-        .append(checkpointRootPath).append("/")
-        .append(topologyName)
-        .toString();
+  private String getTopologyCheckpointRoot(String topologyName) {
+    return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
-  protected String getCheckpointDir(Checkpoint checkpoint) {
-    return new StringBuilder()
-        .append(getTopologyCheckpointRoot(checkpoint.getTopologyName())).append("/")
-        .append(checkpoint.getCheckpointId()).append("/")
-        .append(checkpoint.getComponent())
-        .toString();
+  private String getCheckpointDir(Checkpoint checkpoint) {
+    return String.format("%s/%s",
+        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointDir());
   }
 
-  protected String getCheckpointPath(Checkpoint checkpoint) {
-    return new StringBuilder()
-        .append(getCheckpointDir(checkpoint)).append("/")
-        .append(checkpoint.getTaskId())
-        .toString();
+  private String getCheckpointPath(Checkpoint checkpoint) {
+    return String.format("%s/%s",
+        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointPath());
   }
 }

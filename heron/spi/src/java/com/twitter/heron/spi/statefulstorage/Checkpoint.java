@@ -31,7 +31,7 @@ public class Checkpoint {
     this.checkpointId = saveRequest.getCheckpoint().getCheckpointId();
     this.componentName = saveRequest.getInstance().getInfo().getComponentName();
     this.instanceId = saveRequest.getInstance().getInstanceId();
-    this.taskId = "" + saveRequest.getInstance().getInfo().getTaskId();
+    this.taskId = Integer.toString(saveRequest.getInstance().getInfo().getTaskId());
     this.saveBytes = saveRequest;
     this.nBytes = saveRequest.getSerializedSize();
   }
@@ -41,7 +41,7 @@ public class Checkpoint {
     this.checkpointId = getRequest.getCheckpointId();
     this.componentName = getRequest.getInstance().getInfo().getComponentName();
     this.instanceId = getRequest.getInstance().getInstanceId();
-    this.taskId = "" + getRequest.getInstance().getInfo().getTaskId();
+    this.taskId = Integer.toString(getRequest.getInstance().getInfo().getTaskId());
     saveBytes = null;
     nBytes = 0;
   }
@@ -60,6 +60,14 @@ public class Checkpoint {
 
   public String getInstance() {
     return instanceId;
+  }
+
+  public String getCheckpointPath() {
+    return getCheckpointDir() + "/" + taskId;
+  }
+
+  public String getCheckpointDir() {
+    return checkpointId + "/" + componentName + "/";
   }
 
   public String getTaskId() {

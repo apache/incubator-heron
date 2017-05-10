@@ -57,7 +57,7 @@ public class HDFSStorage implements IStatefulStorage {
     try {
       fileSystem = FileSystem.get(hadoopConfig);
       LOG.info("Hadoop FileSystem URI: " + fileSystem.getUri()
-               + " ; Home Dir: " + fileSystem.getHomeDirectory());
+          + " ; Home Dir: " + fileSystem.getHomeDirectory());
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to get hadoop file system", e);
     }
@@ -70,13 +70,13 @@ public class HDFSStorage implements IStatefulStorage {
 
   @Override
   public void store(Checkpoint checkpoint) throws StatefulStorageException {
-    Path path = new Path(getCheckpointFile(checkpoint));
+    Path path = new Path(getCheckpointPath(checkpoint));
 
     // We need to ensure the existence of directories structure,
     // since it is not guaranteed that FileSystem.create(..) always creates parents' dirs.
-    if (!createDirs(getCheckpointDir(checkpoint))) {
-      throw new StatefulStorageException("Failed to create dir: "
-                                         + getCheckpointDir(checkpoint));
+    String checkpointDir = getCheckpointDir(checkpoint);
+    if (!createDirs(checkpointDir)) {
+      throw new StatefulStorageException("Failed to create dir: " + checkpointDir);
     }
 
     FSDataOutputStream out = null;
@@ -92,7 +92,7 @@ public class HDFSStorage implements IStatefulStorage {
 
   @Override
   public void restore(Checkpoint checkpoint) throws StatefulStorageException {
-    Path path = new Path(getCheckpointFile(checkpoint));
+    Path path = new Path(getCheckpointPath(checkpoint));
 
     FSDataInputStream in = null;
     CheckpointManager.SaveInstanceStateRequest state = null;
@@ -172,16 +172,17 @@ public class HDFSStorage implements IStatefulStorage {
     return true;
   }
 
-  protected String getTopologyCheckpointRoot(String topologyName) {
+  private String getTopologyCheckpointRoot(String topologyName) {
     return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
-  protected String getCheckpointDir(Checkpoint checkpoint) {
-    return String.format("%s/%s/%s", getTopologyCheckpointRoot(checkpoint.getTopologyName()),
-                         checkpoint.getCheckpointId(), checkpoint.getComponent());
+  private String getCheckpointDir(Checkpoint checkpoint) {
+    return String.format("%s/%s",
+        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointDir());
   }
 
-  protected String getCheckpointFile(Checkpoint checkpoint) {
-    return String.format("%s/%s", getCheckpointDir(checkpoint), checkpoint.getTaskId());
+  private String getCheckpointPath(Checkpoint checkpoint) {
+    return String.format("%s/%s",
+        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointPath());
   }
 }
