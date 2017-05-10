@@ -20,17 +20,17 @@ CountDownLatch::CountDownLatch(sp_uint32 count) : count_(count) {}
 
 CountDownLatch::~CountDownLatch() {}
 
-bool CountDownLatch::wait(sp_uint32 target, const std::chrono::seconds& d) {
+bool CountDownLatch::wait(sp_uint32 target, const std::chrono::seconds& duration) {
   std::unique_lock<std::mutex> m(mutex_);
-  // If count is greater than target, then wait until it is target.
+  // If the count is greater than target, then wait until the count reaches the value of target.
   // Else return immediately.
-  if (std::chrono::seconds::zero() == d) {
+  if (std::chrono::seconds::zero() == duration) {
     while (count_ > target) {
       cond_.wait(m);
     }
   } else {
     if (count_ > target) {
-      return cond_.wait_for(m, d, [this, &target]{return count_ <= target;});
+      return cond_.wait_for(m, duration, [this, &target]{return count_ <= target;});
     }
   }
   return true;
