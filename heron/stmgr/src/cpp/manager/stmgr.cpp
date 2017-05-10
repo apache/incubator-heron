@@ -154,6 +154,10 @@ StMgr::~StMgr() {
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
 
+const NetworkOptions&  StMgr::GetServerNetworkOptions() const {
+  return server_->get_serveroptions();
+}
+
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
     LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. ";

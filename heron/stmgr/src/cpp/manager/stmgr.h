@@ -78,6 +78,7 @@ class StMgr {
   void SendStopBackPressureToOtherStMgrs();
   void StartTMasterClient();
   bool DidAnnounceBackPressure();
+  const NetworkOptions&  GetServerNetworkOptions() const;
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
