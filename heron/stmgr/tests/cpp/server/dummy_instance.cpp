@@ -156,6 +156,8 @@ void DummySpoutInstance::CreateAndSendTupleMessages() {
     if (do_custom_grouping_) {
       tuple->add_dest_task_ids(custom_grouping_dest_task_);
     }
+    std::cout << "instance_id_ " << instance_id_
+        << " total_msgs_sent_ " << total_msgs_sent_ << std::endl;
     SendMessage(tuple_set);
   }
   if (total_msgs_sent_ != max_msgs_to_send_) {
@@ -182,8 +184,9 @@ void DummyBoltInstance::HandleInstanceResponse(
 
 void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
-  std::cout << "HandleTupleMessage msgs_recvd_ " << msgs_recvd_ << std::endl
-      << "expected_msgs_to_recv_ " << expected_msgs_to_recv_ << std::endl;
+  std::cout << "instance_id_ " << instance_id_
+      << " msgs_recvd_ " << msgs_recvd_
+      << " expected_msgs_to_recv_ " << expected_msgs_to_recv_ << std::endl;
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 
