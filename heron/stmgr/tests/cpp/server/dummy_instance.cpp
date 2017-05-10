@@ -182,6 +182,8 @@ void DummyBoltInstance::HandleInstanceResponse(
 
 void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
+  std::cout << "HandleTupleMessage msgs_recvd_ " << msgs_recvd_ << std::endl
+      << "expected_msgs_to_recv_ " << expected_msgs_to_recv_ << std::endl;
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 

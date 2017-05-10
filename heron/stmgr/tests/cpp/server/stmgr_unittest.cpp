@@ -302,7 +302,7 @@ struct CommonResources {
   sp_int32 tmaster_port_;
   sp_int32 tmaster_controller_port_;
   sp_int32 tmaster_stats_port_;
-  sp_int32 stmgr_baseport_;
+//  sp_int32 stmgr_baseport_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
   sp_string zkhostportlist_;
@@ -373,6 +373,12 @@ struct CommonResources {
     high_watermark_ = 10_MB;
     low_watermark_ = 5_MB;
   }
+
+  void setNumStmgrs(sp_int32 numStmgrs) {
+    num_stmgrs_ = numStmgrs;
+    stmgr_ports_.reserve(numStmgrs);
+    std::fill(stmgr_ports_.begin(), stmgr_ports_.end(), 0);
+  }
 };
 
 void StartTMaster(CommonResources& common) {
@@ -402,10 +408,6 @@ void StartTMaster(CommonResources& common) {
 }
 
 void DistributeWorkersAcrossStmgrs(CommonResources& common) {
-  common.stmgr_ports_.reserve(common.num_stmgrs_);
-  std::fill(common.stmgr_ports_.begin(), common.stmgr_ports_.end(), 0);
-//  common.stmgr_ports_[0] = common.stmgr_baseport_;
-
   // which stmgr is this component going to get assigned to
   sp_int32 stmgr_assignment_round = 0;
   sp_int32 global_index = 0;
@@ -453,6 +455,9 @@ void StartDummySpoutInstanceHelper(CommonResources& common, sp_int8 spout, sp_in
   sp_string streamid = STREAM_NAME;
   streamid += std::to_string(spout);
   sp_string instanceid = CreateInstanceId(spout, spout_instance, true);
+  std::cout << "StartDummySpoutInstance " << instanceid << std::endl
+      << "common.instanceid_stmgr_[instanceid] " << common.instanceid_stmgr_[instanceid] << std::endl
+      << "stmgr_ports_ " << common.stmgr_ports_[common.instanceid_stmgr_[instanceid]] << std::endl;
   StartDummySpoutInstance(worker_ss, worker, worker_thread,
                           common.stmgr_ports_[common.instanceid_stmgr_[instanceid]],
                           common.topology_name_, common.topology_id_, instanceid,
@@ -604,12 +609,12 @@ TEST(StMgr, test_pplan_decode) {
   common.tmaster_port_ = 10000;
   common.tmaster_controller_port_ = 10001;
   common.tmaster_stats_port_ = 10002;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 40000;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 5;
   common.num_spout_instances_ = 2;
   common.num_bolts_ = 5;
@@ -682,12 +687,12 @@ TEST(StMgr, test_tuple_route) {
   common.tmaster_port_ = 15000;
   common.tmaster_controller_port_ = 15001;
   common.tmaster_stats_port_ = 15002;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 45000;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 1;
   common.num_spout_instances_ = 2;
   common.num_bolts_ = 1;
@@ -765,12 +770,12 @@ TEST(StMgr, test_custom_grouping_route) {
   common.tmaster_port_ = 15500;
   common.tmaster_controller_port_ = 15501;
   common.tmaster_stats_port_ = 15502;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 45500;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 1;  // This test will only work with 1 type of spout
   common.num_spout_instances_ = 2;
   common.num_bolts_ = 1;
@@ -851,12 +856,12 @@ TEST(StMgr, test_back_pressure_instance) {
   common.tmaster_port_ = 17000;
   common.tmaster_controller_port_ = 17001;
   common.tmaster_stats_port_ = 17002;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 47000;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 2;
   common.num_spout_instances_ = 1;
   common.num_bolts_ = 2;
@@ -961,12 +966,12 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   common.tmaster_port_ = 17300;
   common.tmaster_controller_port_ = 17301;
   common.tmaster_stats_port_ = 17302;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 47300;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 1;
   common.num_spout_instances_ = 2;
   common.num_bolts_ = 2;
@@ -1096,12 +1101,12 @@ TEST(StMgr, test_back_pressure_stmgr) {
   common.tmaster_port_ = 18000;
   common.tmaster_controller_port_ = 18001;
   common.tmaster_stats_port_ = 18002;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 48000;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 3;
+  common.setNumStmgrs(3);
   common.num_spouts_ = 1;
   common.num_spout_instances_ = 3;
   common.num_bolts_ = 1;
@@ -1154,8 +1159,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   EventLoopImpl* dummy_stmgr_ss = NULL;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
-  sp_int32 stmgr_baseport_2 = 0;
-  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, stmgr_baseport_2,
+//  sp_int32 stmgr_baseport_2 = 0;
+  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[2],
                   common.tmaster_port_, common.shell_port_, common.stmgrs_id_list_[2],
                   common.stmgr_instance_list_[2]);
   common.ss_list_.push_back(dummy_stmgr_ss);
@@ -1215,12 +1220,12 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 49000;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 2;
   common.num_spout_instances_ = 1;
   common.num_bolts_ = 2;
@@ -1330,12 +1335,12 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 49001;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 2;
   common.num_spout_instances_ = 1;
   common.num_bolts_ = 2;
@@ -1461,12 +1466,12 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 49002;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 2;
   common.num_spout_instances_ = 1;
   common.num_bolts_ = 2;
@@ -1596,12 +1601,12 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   common.tmaster_port_ = 19000;
   common.tmaster_controller_port_ = 19001;
   common.tmaster_stats_port_ = 19002;
-  common.stmgr_baseport_ = 0;
+//  common.stmgr_baseport_ = 0;
   common.metricsmgr_port_ = 0;
   common.shell_port_ = 49500;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
-  common.num_stmgrs_ = 2;
+  common.setNumStmgrs(2);
   common.num_spouts_ = 2;
   common.num_spout_instances_ = 1;
   common.num_bolts_ = 2;
