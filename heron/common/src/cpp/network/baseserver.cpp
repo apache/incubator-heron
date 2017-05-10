@@ -107,7 +107,7 @@ sp_int32 BaseServer::Start_Base() {
   }
 
   // fetch the port after bind/listen port 0
-  if (options_.get_sin_family() == AF_INET) {
+  if (AF_INET == options_.get_sin_family() && 0 == options_.get_port()) {
     if (getsockname(listen_fd_, serv_addr, &sockaddr_len) != 0)  {
       LOG(ERROR) << "getsockname() error: " << strerror(errno);
       close(listen_fd_);
