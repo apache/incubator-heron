@@ -205,11 +205,13 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
   stmgr_topology->CopyFrom(*topology);
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
+  std::cout << "StartStMgr stmgr_port 1: " << stmgr_port << std::endl;
   mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, topology_name, topology_id,
                               stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
                               metricsmgr_port, shell_port, _high_watermark, _low_watermark);
   mgr->Init();
   stmgr_port = mgr->GetServerNetworkOptions().get_port();
+  std::cout << "StartStMgr stmgr_port 2: " << stmgr_port << std::endl;
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -226,10 +228,12 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
   options.set_max_packet_size(1_MB);
   options.set_socket_family(PF_INET);
 
+  std::cout << "StartDummyStMgr stmgr_port 1: " << stmgr_port << std::endl;
   mgr = new DummyStMgr(ss, options, stmgr_id, LOCALHOST, stmgr_port, LOCALHOST, tmaster_port,
                        shell_port, instances);
   EXPECT_EQ(0, mgr->Start()) << "DummyStMgr bind/listen " << LOCALHOST << ":" << stmgr_port;
   stmgr_port = mgr->get_serveroptions().get_port();
+  std::cout << "StartDummyStMgr stmgr_port 1: " << stmgr_port << std::endl;
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -376,8 +380,10 @@ struct CommonResources {
 
   void setNumStmgrs(sp_int32 numStmgrs) {
     num_stmgrs_ = numStmgrs;
-    stmgr_ports_.reserve(numStmgrs);
-    std::fill(stmgr_ports_.begin(), stmgr_ports_.end(), 0);
+    while (numStmgrs > 0) {
+      stmgr_ports_.push_back(0);
+      numStmgrs --;
+    }
   }
 };
 
@@ -474,6 +480,12 @@ void StartDummySpoutInstanceHelper(CommonResources& common, sp_int8 spout, sp_in
 
 void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_spout_instance,
                            sp_int32 num_msgs_to_expect_in_bolt) {
+  std::cout << "metrics mgr port " << common.metricsmgr_port_ << std::endl;
+  for (int i=0; i<common.num_stmgrs_; i++) {
+    std::cout << "stmgr port " << common.stmgr_ports_[i] << "; ";
+  }
+  std::cout << std::endl;
+
   // try to find the lowest bolt task id
   sp_int32 min_bolt_task_id = std::numeric_limits<sp_int32>::max() - 1;
   for (int bolt = 0; bolt < common.num_bolts_; ++bolt) {
@@ -509,6 +521,9 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
           nmessages_to_expect = 0;
         }
       }
+      std::cout << "StartDummyBoltInstance " << instanceid << std::endl
+          << "common.instanceid_stmgr_[instanceid] " << common.instanceid_stmgr_[instanceid] << std::endl
+          << "stmgr_ports_ " << common.stmgr_ports_[common.instanceid_stmgr_[instanceid]] << std::endl;
       StartDummyBoltInstance(worker_ss, worker, worker_thread,
                              common.stmgr_ports_[common.instanceid_stmgr_[instanceid]],
                              common.topology_name_, common.topology_id_, instanceid,
