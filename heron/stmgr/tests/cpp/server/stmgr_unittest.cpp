@@ -250,7 +250,6 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
-  EXPECT_EQ(0, mtmgr_port);
   EXPECT_EQ(0, mgr->Start()) << "DummyMtrMgr bind " << LOCALHOST << ":" << mtmgr_port;
   mtmgr_port = mgr->get_serveroptions().get_port();
   EXPECT_GT(mtmgr_port, 0);
@@ -1654,7 +1653,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
   // wait until metrics mgr also get time to get tmaster location
-  metricsMgrTmasterLatch->wait();
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(0, std::chrono::seconds(5)));
 
   // Check that metricsmgr got it
   VerifyMetricsMgrTMaster(common);
@@ -1677,7 +1676,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   // Stopping the server will enqueue connnection cleanup callbacks
   // to the select server. To ensure they get executed gracefully,
   // need to wait until metrics mgr notifies us.
-  metricsMgrConnectionCloseLatch->wait();
+  EXPECT_TRUE(metricsMgrConnectionCloseLatch->wait(0, std::chrono::seconds(5)));
   mmgr_ss->loopExit();
   common.metrics_mgr_thread_->join();
   delete common.metrics_mgr_thread_;
@@ -1691,7 +1690,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   metricsMgrConnectionCloseLatch = new CountDownLatch(1);
   // Start the metrics mgr again
   StartMetricsMgr(common, metricsMgrTmasterLatch, metricsMgrConnectionCloseLatch);
-  metricsMgrTmasterLatch->wait();
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(0, std::chrono::seconds(5)));
 
   // Check that metricsmgr got it
   VerifyMetricsMgrTMaster(common);
