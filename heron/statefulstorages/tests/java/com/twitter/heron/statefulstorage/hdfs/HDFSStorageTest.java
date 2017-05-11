@@ -125,7 +125,7 @@ public class HDFSStorageTest {
     PowerMockito.mockStatic(CheckpointManager.SaveInstanceStateRequest.class);
     CheckpointManager.SaveInstanceStateRequest mockSaveInstanceStateRequest =
         mock(CheckpointManager.SaveInstanceStateRequest.class);
-    when(mockCheckpoint.checkpoint()).thenReturn(mockSaveInstanceStateRequest);
+    when(mockCheckpoint.getCheckpoint()).thenReturn(mockSaveInstanceStateRequest);
 
     FSDataOutputStream mockFSDateOutpurStream = mock(FSDataOutputStream.class);
     when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutpurStream);
@@ -151,7 +151,7 @@ public class HDFSStorageTest {
 
     hdfsStorage.restore(restoreCheckpoint);
 
-    assertEquals(restoreCheckpoint.checkpoint(), saveInstanceStateRequest);
+    assertEquals(restoreCheckpoint.getCheckpoint(), saveInstanceStateRequest);
   }
 
   @Test

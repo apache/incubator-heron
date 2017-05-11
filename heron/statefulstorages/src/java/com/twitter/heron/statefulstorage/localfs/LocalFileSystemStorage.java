@@ -58,7 +58,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       throw new StatefulStorageException("Failed to create dir: " + checkpointDir);
     }
 
-    byte[] contents = checkpoint.checkpoint().toByteArray();
+    byte[] contents = checkpoint.getCheckpoint().toByteArray();
 
     // In fact, no need atomic write, since our mechanism requires only best effort
     if (!FileUtils.writeToFile(path, contents, true)) {

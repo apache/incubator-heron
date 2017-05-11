@@ -82,7 +82,7 @@ public class HDFSStorage implements IStatefulStorage {
     FSDataOutputStream out = null;
     try {
       out = fileSystem.create(path);
-      checkpoint.checkpoint().writeTo(out);
+      checkpoint.getCheckpoint().writeTo(out);
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to persist", e);
     } finally {

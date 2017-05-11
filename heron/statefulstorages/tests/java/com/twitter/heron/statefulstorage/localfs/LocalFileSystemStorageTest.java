@@ -115,7 +115,7 @@ public class LocalFileSystemStorageTest {
         .when(FileUtils.class, "writeToFile", anyString(), any(byte[].class), anyBoolean());
 
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
-    when(mockCheckpoint.checkpoint()).thenReturn(saveInstanceStateRequest);
+    when(mockCheckpoint.getCheckpoint()).thenReturn(saveInstanceStateRequest);
 
     localFileSystemBackend.store(mockCheckpoint);
 
@@ -133,7 +133,7 @@ public class LocalFileSystemStorageTest {
 
     localFileSystemBackend.restore(ckpt);
 
-    assertEquals(saveInstanceStateRequest, ckpt.checkpoint());
+    assertEquals(saveInstanceStateRequest, ckpt.getCheckpoint());
   }
 
   @Test

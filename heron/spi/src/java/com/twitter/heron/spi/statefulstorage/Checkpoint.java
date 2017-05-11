@@ -23,7 +23,7 @@ public class Checkpoint {
   private final String instanceId;
   private final String taskId;
 
-  private CheckpointManager.SaveInstanceStateRequest saveBytes;
+  private CheckpointManager.SaveInstanceStateRequest checkpoint;
   private int nBytes;
 
   public Checkpoint(String topologyName, CheckpointManager.SaveInstanceStateRequest saveRequest) {
@@ -32,7 +32,7 @@ public class Checkpoint {
     this.componentName = saveRequest.getInstance().getInfo().getComponentName();
     this.instanceId = saveRequest.getInstance().getInstanceId();
     this.taskId = Integer.toString(saveRequest.getInstance().getInfo().getTaskId());
-    this.saveBytes = saveRequest;
+    this.checkpoint = saveRequest;
     this.nBytes = saveRequest.getSerializedSize();
   }
 
@@ -42,7 +42,7 @@ public class Checkpoint {
     this.componentName = getRequest.getInstance().getInfo().getComponentName();
     this.instanceId = getRequest.getInstance().getInstanceId();
     this.taskId = Integer.toString(getRequest.getInstance().getInfo().getTaskId());
-    saveBytes = null;
+    checkpoint = null;
     nBytes = 0;
   }
 
@@ -74,13 +74,13 @@ public class Checkpoint {
     return taskId;
   }
 
-  public CheckpointManager.SaveInstanceStateRequest checkpoint() {
-    return saveBytes;
+  public CheckpointManager.SaveInstanceStateRequest getCheckpoint() {
+    return this.checkpoint;
   }
 
   public void setCheckpoint(CheckpointManager.SaveInstanceStateRequest checkpoint) {
     assert checkpoint != null;
-    saveBytes = checkpoint;
+    this.checkpoint = checkpoint;
     nBytes = checkpoint.getSerializedSize();
   }
 
