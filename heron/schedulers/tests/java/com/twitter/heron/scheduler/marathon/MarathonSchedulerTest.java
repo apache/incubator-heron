@@ -53,7 +53,8 @@ public class MarathonSchedulerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     scheduler = Mockito.spy(MarathonScheduler.class);
-    Mockito.doReturn(EXECUTOR_CMD).when(scheduler).getExecutorCommand(Mockito.anyInt());
+    Mockito.doReturn(EXECUTOR_CMD).when(scheduler)
+        .getExecutorCommand(Mockito.anyInt());
   }
 
   @AfterClass

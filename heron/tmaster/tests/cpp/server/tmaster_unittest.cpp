@@ -188,7 +188,8 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
                   const sp_string& dpath, const std::vector<sp_string>& stmgrs_id_list,
-                  sp_int32 tmaster_port, sp_int32 tmaster_controller_port) {
+                  const sp_string& tmaster_host, sp_int32 tmaster_port,
+                  sp_int32 tmaster_controller_port) {
   ss = new EventLoopImpl();
   tmaster =
       new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath, stmgrs_id_list,
@@ -220,6 +221,7 @@ void StartDummyStMgr(EventLoopImpl*& ss, heron::testing::DummyStMgr*& mgr,
 
 struct CommonResources {
   // arguments
+  sp_string tmaster_host_;
   sp_int32 tmaster_port_;
   sp_int32 tmaster_controller_port_;
   sp_int32 stmgr_baseport_;
@@ -287,7 +289,7 @@ void StartTMaster(CommonResources& common) {
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
                common.topology_name_, common.topology_id_, common.dpath_, common.stmgrs_id_list_,
-               common.tmaster_port_, common.tmaster_controller_port_);
+               common.tmaster_host_, common.tmaster_port_, common.tmaster_controller_port_);
   common.ss_list_.push_back(tmaster_eventLoop);
 }
 
@@ -348,6 +350,7 @@ void StartStMgrs(CommonResources& common) {
 
 void SetUpCommonResources(CommonResources& common) {
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 53001;
   common.tmaster_controller_port_ = 53002;
   common.stmgr_baseport_ = 53001;

@@ -24,14 +24,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
+
 
 public class MarathonScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(MarathonScheduler.class.getName());
@@ -100,6 +103,13 @@ public class MarathonScheduler implements IScheduler {
   }
 
   protected String getTopologyConf(PackingPlan packing) {
+
+    config = Config.newBuilder()
+        .putAll(config)
+        .put(Key.TOPOLOGY_BINARY_FILE,
+            FileUtils.getBaseName(Context.topologyBinaryFile(config)))
+        .build();
+
     ObjectMapper mapper = new ObjectMapper();
 
     // TODO (nlu): use heterogeneous resources
@@ -119,13 +129,12 @@ public class MarathonScheduler implements IScheduler {
       instance.put(MarathonConstants.ID, Integer.toString(i));
       instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
+      instance.set(MarathonConstants.CONTAINER, getContainer(mapper));
       instance.put(MarathonConstants.MEMORY, containerResource.getRam().asMegabytes());
       instance.put(MarathonConstants.DISK, containerResource.getDisk().asMegabytes());
-      instance.set(MarathonConstants.PORT_DEFINITIONS, getPorts(mapper));
       instance.put(MarathonConstants.INSTANCES, 1);
       instance.set(MarathonConstants.LABELS, getLabels(mapper));
       instance.set(MarathonConstants.FETCH, getFetchList(mapper));
-      instance.put(MarathonConstants.USER, Context.role(config));
 
       instances.add(instance);
     }
@@ -136,6 +145,28 @@ public class MarathonScheduler implements IScheduler {
     appConf.set(MarathonConstants.APPS, instances);
 
     return appConf.toString();
+  }
+
+  // build the container object
+  protected ObjectNode getContainer(ObjectMapper mapper) {
+    ObjectNode containerNode = mapper.createObjectNode();
+    containerNode.put(MarathonConstants.CONTAINER_TYPE, "DOCKER");
+    containerNode.set("docker", getDockerContainer(mapper));
+
+    return containerNode;
+  }
+
+  protected ObjectNode getDockerContainer(ObjectMapper mapper) {
+    ObjectNode dockerNode = mapper.createObjectNode();
+
+    dockerNode.put(MarathonConstants.DOCKER_IMAGE,
+        MarathonContext.getExecutorDockerImage(config));
+    dockerNode.put(MarathonConstants.DOCKER_NETWORK, MarathonConstants.DOCKER_NETWORK_BRIDGE);
+    dockerNode.put(MarathonConstants.DOCKER_PRIVILEGED, false);
+    dockerNode.put(MarathonConstants.DOCKER_FORCE_PULL, true);
+    dockerNode.set(MarathonConstants.DOCKER_PORT_MAPPINGS, getPorts(mapper));
+
+    return dockerNode;
   }
 
   protected ObjectNode getLabels(ObjectMapper mapper) {
@@ -169,9 +200,9 @@ public class MarathonScheduler implements IScheduler {
 
     for (String portName : MarathonConstants.PORT_NAMES) {
       ObjectNode port = mapper.createObjectNode();
-      port.put(MarathonConstants.PORT, 0);
+      port.put(MarathonConstants.DOCKER_CONTAINER_PORT, 0);
       port.put(MarathonConstants.PROTOCOL, MarathonConstants.TCP);
-      port.put(MarathonConstants.PORT_NAME, portName);
+      port.put(MarathonConstants.HOST_PORT, 0);
 
       ports.add(port);
     }
@@ -182,6 +213,6 @@ public class MarathonScheduler implements IScheduler {
   protected String getExecutorCommand(int containerIndex) {
     String[] commands = SchedulerUtils.getExecutorCommand(config, runtime,
         containerIndex, Arrays.asList(MarathonConstants.PORT_LIST));
-    return Joiner.on(" ").join(commands);
+    return "cd $MESOS_SANDBOX && " + Joiner.on(" ").join(commands);
   }
 }
