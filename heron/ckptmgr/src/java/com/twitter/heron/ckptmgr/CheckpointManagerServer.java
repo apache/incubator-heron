@@ -131,18 +131,18 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.RegisterTMasterRequest request
   ) {
-    LOG.info("Got a register request from TMaster host:port "
+    LOG.info("Got a TMaster register request from TMaster host:port "
         + channel.socket().getRemoteSocketAddress());
 
     CheckpointManager.RegisterTMasterResponse.Builder responseBuilder =
         CheckpointManager.RegisterTMasterResponse.newBuilder();
 
     if (!request.getTopologyName().equals(topologyName)) {
-      LOG.severe("The register message was from a different topology: "
+      LOG.severe("The TMaster register message was from a different topology: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (!request.getTopologyId().equals(topologyId)) {
-      LOG.severe("The register message was from a different topology id: "
+      LOG.severe("The TMaster register message was from a different topology id: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (connection != null) {
@@ -172,18 +172,18 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.RegisterStMgrRequest request
   ) {
-    LOG.info("Got a register request from " + request.getStmgrId() + " host:port "
+    LOG.info("Got a StMgr register request from " + request.getStmgrId() + " host:port "
         + channel.socket().getRemoteSocketAddress());
 
     CheckpointManager.RegisterStMgrResponse.Builder responseBuilder =
         CheckpointManager.RegisterStMgrResponse.newBuilder();
 
     if (!request.getTopologyName().equals(topologyName)) {
-      LOG.severe("The register message was from a different topology: "
+      LOG.severe("The StMgr register message was from a different topology: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (!request.getTopologyId().equals(topologyId)) {
-      LOG.severe("The register message was from a different topology id: "
+      LOG.severe("The StMgr register message was from a different topology id: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (connection != null) {
