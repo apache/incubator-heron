@@ -7,6 +7,7 @@ test_deps_files = \
         "//heron/common/src/java:common-java",
         "//heron/instance/src/java:instance-java",
         "//third_party/java:junit4",
+        "//third_party/java:kryo",
     ]
 
 java_library(
@@ -18,6 +19,8 @@ java_library(
 java_tests(
     test_classes = [
         "com.twitter.heron.grouping.CustomGroupingTest",
+        "com.twitter.heron.grouping.EmitDirectBoltTest",
+        "com.twitter.heron.grouping.EmitDirectSpoutTest",
         "com.twitter.heron.instance.bolt.BoltInstanceTest",
         "com.twitter.heron.instance.spout.ActivateDeactivateTest",
         "com.twitter.heron.instance.spout.SpoutInstanceTest",

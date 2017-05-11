@@ -32,7 +32,6 @@ public class OutgoingTupleCollection {
   protected final String componentName;
   // We have just one outQueue responsible for both control tuples and data tuples
   private final Communicator<HeronTuples.HeronTupleSet> outQueue;
-  private final SystemConfig systemConfig;
 
   private HeronTuples.HeronDataTupleSet.Builder currentDataTuple;
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
@@ -53,7 +52,7 @@ public class OutgoingTupleCollection {
       Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
     this.componentName = componentName;
-    this.systemConfig =
+    SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Initialize the values in constructor

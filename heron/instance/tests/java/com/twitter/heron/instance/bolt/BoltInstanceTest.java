@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
-import com.twitter.heron.api.serializer.KryoSerializer;
+import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
@@ -81,7 +81,7 @@ public class BoltInstanceTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    serializer = new KryoSerializer();
+    serializer = new JavaSerializer();
     serializer.initialize(null);
   }
 

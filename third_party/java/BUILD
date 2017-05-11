@@ -99,6 +99,19 @@ java_library(
     ],
 )
 
+# This version is needed for dependents that don't want
+# kryo to be included in the generated binary
+# (e.g. //heron/storm/src/java:heron-storm)
+java_library(
+    name = "kryo-neverlink",
+    srcs = [ "Empty.java" ],
+    exports = [ "@com_esotericsoftware_kryo//jar" ],
+    deps = [
+        "@com_esotericsoftware_kryo//jar",
+    ],
+    neverlink = 1,
+)
+
 java_library(
     name = "yarn",
     srcs = [ "Empty.java" ],

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include "grouping/direct-grouping.h"
 #include "grouping/shuffle-grouping.h"
 #include "grouping/fields-grouping.h"
 #include "grouping/all-grouping.h"
@@ -68,10 +69,7 @@ Grouping* Grouping::Create(proto::api::Grouping grouping_, const proto::api::Inp
     }
 
     case proto::api::DIRECT: {
-      // TODO: do not merge in this state!
-      LOG(ERROR) << "Direct grouping not supported, faking with ShuffleGrouping for now";
-//      return NULL;  // keep compiler happy
-      return new ShuffleGrouping(_task_ids);
+      return new DirectGrouping(_task_ids);
       break;
     }
 

@@ -155,6 +155,7 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
     bldr.setStream(
         TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.DIRECT);
+    bldr.setType(TopologyAPI.CustomGroupingObjectType.JAVA_OBJECT);
     return grouping(bldr);
   }
 
