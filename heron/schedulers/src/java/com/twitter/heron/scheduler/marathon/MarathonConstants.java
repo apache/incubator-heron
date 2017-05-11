@@ -39,9 +39,20 @@ public final class MarathonConstants {
   public static final String PROTOCOL = "protocol";
   public static final String PORT_NAME = "name";
   public static final String TCP = "tcp";
+  public static final String CONTAINER = "container";
+  public static final String CONTAINER_TYPE = "type";
+  public static final String DOCKER_IMAGE = "image";
+  public static final String DOCKER_NETWORK = "network";
+  public static final String DOCKER_PORT_MAPPINGS = "portMappings";
+  public static final String DOCKER_CONTAINER_PORT = "containerPort";
+  public static final String HOST_PORT = "hostPort";
+  public static final String DOCKER_PRIVILEGED = "privileged";
+  public static final String DOCKER_FORCE_PULL = "forcePullImage";
+  public static final String DOCKER_NETWORK_BRIDGE = "BRIDGE";
 
   public static final String[] PORT_NAMES = new String[]{
-      "master", "tmaster-controller", "tmaster-stats", "shell", "metricsmgr", "scheduler"};
+      "master", "tmaster-controller", "tmaster-stats", "shell", "metricsmgr", "scheduler",
+      "metrics-cache-master", "metrics-cache-stats"};
 
   public static final String MASTER_PORT = "$PORT0";
   public static final String TMASTER_CONTROLLER_PORT = "$PORT1";
@@ -49,10 +60,13 @@ public final class MarathonConstants {
   public static final String SHELL_PORT = "$PORT3";
   public static final String METRICSMGR_PORT = "$PORT4";
   public static final String SCHEDULER_PORT = "$PORT5";
+  public static final String METRICS_CACHE_MASTER_PORT = "$PORT6";
+  public static final String METRICS_CACHE_STATS_PORT = "$PORT7";
 
   public static final String[] PORT_LIST = new String[]{
       MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,
-      SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT};
+      SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT, METRICS_CACHE_MASTER_PORT,
+      METRICS_CACHE_STATS_PORT};
 
   public static final String JOB_LINK = "/ui/#/group/%2F";
 }

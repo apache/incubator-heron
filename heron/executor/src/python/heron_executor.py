@@ -29,6 +29,8 @@ import stat
 import threading
 import time
 import yaml
+import socket
+import traceback
 
 from functools import partial
 
@@ -104,6 +106,17 @@ def log_pid_for_process(process_name, pid):
   Log.info('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
+def is_docker_environment():
+  return os.path.isfile('/.dockerenv')
+
+def stdout_log_fn(cmd):
+  """Simple function callback that is used to log the streaming output of a subprocess command
+  :param cmd: the name of the command which will be added to the log line
+  :return: None
+  """
+  # Log the messages to stdout and strip off the newline because Log.info adds one automatically
+  return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
+
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
     """
@@ -147,6 +160,13 @@ class HeronExecutor(object):
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('&equals;', '='))
     self.classpath = parsed_args.classpath
+    # Needed for Docker environments since the hostname of a docker container is the container's
+    # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
+    # guaranteed to be set in all Docker executor environments (outside of Marathon)
+    if is_docker_environment():
+      self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+    else:
+      self.master_host = socket.gethostname()
     self.master_port = parsed_args.master_port
     self.tmaster_controller_port = parsed_args.tmaster_controller_port
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
@@ -384,6 +404,7 @@ class HeronExecutor(object):
     retval = {}
     tmaster_cmd = [
         self.tmaster_binary,
+        self.master_host,
         self.master_port,
         self.tmaster_controller_port,
         self.tmaster_stats_port,
@@ -544,6 +565,7 @@ class HeronExecutor(object):
         self.zkroot,
         self.stmgr_ids[self.shard],
         ','.join(map(lambda x: x[0], instance_info)),
+        self.master_host,
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
@@ -601,24 +623,37 @@ class HeronExecutor(object):
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
     ''' Wait for the termination of a process and log its stdout & stderr '''
-    (process_stdout, process_stderr) = process.communicate()
-    if process_stdout:
-      Log.info("%s stdout: %s" %(name, process_stdout))
-    if process_stderr:
-      Log.info("%s stderr: %s" %(name, process_stderr))
+    log.stream_process_stdout(process, stdout_log_fn(name))
+    process.wait()
 
   def _run_process(self, name, cmd, env_to_exec=None):
     Log.info("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env=env_to_exec)
+    try:
+      # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
+      # size and can cause the child process to deadlock if it fills up
+      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 env=env_to_exec, bufsize=1)
 
-  def _run_blocking_process(self, cmd, is_shell, env_to_exec=None):
+      log.async_stream_process_stdout(process, stdout_log_fn(name))
+    except Exception:
+      Log.info("Exception running command %:", cmd)
+      traceback.print_exc()
+
+    return process
+
+  def _run_blocking_process(self, cmd, is_shell=False, env_to_exec=None):
     Log.info("Running blocking process as %s" % cmd)
-    process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=env_to_exec)
+    try:
+      # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
+      # size and can cause the child process to deadlock if it fills up
+      process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT, env=env_to_exec)
 
-    # wait for termination
-    self._wait_process_std_out_err("", process)
+      # wait for termination
+      self._wait_process_std_out_err(cmd, process)
+    except Exception:
+      Log.info("Exception running command %:", cmd)
+      traceback.print_exc()
 
     # return the exit code
     return process.returncode

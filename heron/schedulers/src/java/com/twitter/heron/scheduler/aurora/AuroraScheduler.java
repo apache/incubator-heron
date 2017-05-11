@@ -92,12 +92,16 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     LOG.info("Launching topology in aurora");
 
-    // Align the cpu, ram, disk to the maximal one
+    // Align the cpu, ram, disk to the maximal one, and set them to ScheduledResource
     PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 
-    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
+    // Use the ScheduledResource to create aurora properties
+    // the ScheduledResource is guaranteed to be set after calling
+    // cloneWithHomogeneousScheduledResource in the above code
+    Resource containerResource =
+        updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get();
     Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
 
     return controller.createJob(auroraProperties);

@@ -195,20 +195,19 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
 }
 
 void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stmgr_thread,
-                sp_int32 stmgr_port, const sp_string& topology_name, const sp_string& topology_id,
-                const heron::proto::api::Topology* topology, const std::vector<sp_string>& workers,
-                const sp_string& stmgr_id, const sp_string& zkhostportlist, const sp_string& dpath,
-                sp_int32 metricsmgr_port, sp_int32 shell_port, sp_int64 _high_watermark,
-                sp_int64 _low_watermark) {
+                const sp_string& stmgr_host, sp_int32 stmgr_port, const sp_string& topology_name,
+                const sp_string& topology_id, const heron::proto::api::Topology* topology,
+                const std::vector<sp_string>& workers, const sp_string& stmgr_id,
+                const sp_string& zkhostportlist, const sp_string& dpath, sp_int32 metricsmgr_port,
+                sp_int32 shell_port, sp_int64 _high_watermark, sp_int64 _low_watermark) {
   // The topology will be owned and deleted by the strmgr
   heron::proto::api::Topology* stmgr_topology = new heron::proto::api::Topology();
   stmgr_topology->CopyFrom(*topology);
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
-  mgr =
-      new heron::stmgr::StMgr(ss, stmgr_port, topology_name, topology_id, stmgr_topology, stmgr_id,
-                              workers, zkhostportlist, dpath, metricsmgr_port, shell_port,
-                              _high_watermark, _low_watermark);
+  mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, topology_name, topology_id,
+                              stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
+                              metricsmgr_port, shell_port, _high_watermark, _low_watermark);
   mgr->Init();
   stmgr_thread = new std::thread(StartServer, ss);
 }
@@ -228,7 +227,7 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
 
   mgr = new DummyStMgr(ss, options, stmgr_id, LOCALHOST, stmgr_port, LOCALHOST, tmaster_port,
                        shell_port, instances);
-  mgr->Start();
+  EXPECT_EQ(0, mgr->Start()) << "DummyStMgr bind " << LOCALHOST << ":" << stmgr_port;
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -245,7 +244,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
-  mgr->Start();
+  EXPECT_EQ(0, mgr->Start()) << "DummyMtrMgr bind " << LOCALHOST << ":" << mtmgr_port;
   mtmgr_thread = new std::thread(StartServer, ss);
 }
 
@@ -296,6 +295,7 @@ void StartDummyBoltInstance(EventLoopImpl*& ss, DummyBoltInstance*& worker,
 
 struct CommonResources {
   // arguments
+  sp_string tmaster_host_;
   sp_int32 tmaster_port_;
   sp_int32 tmaster_controller_port_;
   sp_int32 tmaster_stats_port_;
@@ -515,10 +515,11 @@ void StartStMgrs(CommonResources& common) {
     EventLoopImpl* stmgr_ss = NULL;
     heron::stmgr::StMgr* mgr = NULL;
     std::thread* stmgr_thread = NULL;
-    StartStMgr(stmgr_ss, mgr, stmgr_thread, common.stmgr_baseport_ + i, common.topology_name_,
-               common.topology_id_, common.topology_, common.stmgr_instance_id_list_[i],
-               common.stmgrs_id_list_[i], common.zkhostportlist_, common.dpath_,
-               common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
+
+    StartStMgr(stmgr_ss, mgr, stmgr_thread, common.tmaster_host_, common.stmgr_baseport_ + i,
+               common.topology_name_, common.topology_id_, common.topology_,
+               common.stmgr_instance_id_list_[i], common.stmgrs_id_list_[i], common.zkhostportlist_,
+               common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
                common.low_watermark_);
 
     common.ss_list_.push_back(stmgr_ss);
@@ -588,6 +589,7 @@ void VerifyMetricsMgrTMaster(CommonResources& common) {
 TEST(StMgr, test_pplan_decode) {
   CommonResources common;
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 10000;
   common.tmaster_controller_port_ = 10001;
   common.tmaster_stats_port_ = 10002;
@@ -665,6 +667,7 @@ TEST(StMgr, test_tuple_route) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 15000;
   common.tmaster_controller_port_ = 15001;
   common.tmaster_stats_port_ = 15002;
@@ -742,6 +745,7 @@ TEST(StMgr, test_custom_grouping_route) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 15500;
   common.tmaster_controller_port_ = 15501;
   common.tmaster_stats_port_ = 15502;
@@ -827,6 +831,7 @@ TEST(StMgr, test_back_pressure_instance) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 17000;
   common.tmaster_controller_port_ = 17001;
   common.tmaster_stats_port_ = 17002;
@@ -860,8 +865,8 @@ TEST(StMgr, test_back_pressure_instance) {
   EventLoopImpl* regular_stmgr_ss = NULL;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
-  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);
@@ -935,6 +940,7 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 17300;
   common.tmaster_controller_port_ = 17301;
   common.tmaster_stats_port_ = 17302;
@@ -968,8 +974,8 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   EventLoopImpl* regular_stmgr_ss = NULL;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
-  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);
@@ -1068,6 +1074,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18000;
   common.tmaster_controller_port_ = 18001;
   common.tmaster_stats_port_ = 18002;
@@ -1105,8 +1112,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   heron::stmgr::StMgr* regular_stmgr1 = NULL;
   std::thread* regular_stmgr_thread1 = NULL;
 
-  StartStMgr(regular_stmgr_ss1, regular_stmgr1, regular_stmgr_thread1, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss1, regular_stmgr1, regular_stmgr_thread1, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);
@@ -1115,11 +1122,13 @@ TEST(StMgr, test_back_pressure_stmgr) {
   EventLoopImpl* regular_stmgr_ss2 = NULL;
   heron::stmgr::StMgr* regular_stmgr2 = NULL;
   std::thread* regular_stmgr_thread2 = NULL;
-  StartStMgr(regular_stmgr_ss2, regular_stmgr2, regular_stmgr_thread2, common.stmgr_baseport_ + 1,
-             common.topology_name_, common.topology_id_, common.topology_,
-             common.stmgr_instance_id_list_[1], common.stmgrs_id_list_[1], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+
+  StartStMgr(regular_stmgr_ss2, regular_stmgr2, regular_stmgr_thread2, common.tmaster_host_,
+             common.stmgr_baseport_ + 1, common.topology_name_, common.topology_id_,
+             common.topology_, common.stmgr_instance_id_list_[1], common.stmgrs_id_list_[1],
+             common.zkhostportlist_, common.dpath_, common.metricsmgr_port_, common.shell_port_,
+             common.high_watermark_, common.low_watermark_);
+
   common.ss_list_.push_back(regular_stmgr_ss2);
 
   // Start a dummy stmgr
@@ -1182,6 +1191,7 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
@@ -1215,8 +1225,8 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   EventLoopImpl* regular_stmgr_ss = NULL;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
-  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);
@@ -1293,10 +1303,11 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 28500;
+  common.stmgr_baseport_ = 28510;
   common.metricsmgr_port_ = 39001;
   common.shell_port_ = 49001;
   common.topology_name_ = "mytopology";
@@ -1331,8 +1342,8 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   EventLoopImpl* regular_stmgr_ss = NULL;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
-  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);
@@ -1420,10 +1431,11 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   CommonResources common;
 
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 18500;
   common.tmaster_controller_port_ = 18501;
   common.tmaster_stats_port_ = 18502;
-  common.stmgr_baseport_ = 28500;
+  common.stmgr_baseport_ = 28520;
   common.metricsmgr_port_ = 39002;
   common.shell_port_ = 49002;
   common.topology_name_ = "mytopology";
@@ -1458,8 +1470,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   EventLoopImpl* regular_stmgr_ss = NULL;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
-  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);
@@ -1551,6 +1563,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
 TEST(StMgr, test_metricsmgr_reconnect) {
   CommonResources common;
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 19000;
   common.tmaster_controller_port_ = 19001;
   common.tmaster_stats_port_ = 19002;
@@ -1591,8 +1604,8 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   EventLoopImpl* regular_stmgr_ss = NULL;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
-  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.stmgr_baseport_,
-             common.topology_name_, common.topology_id_, common.topology_,
+  StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
+             common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
              common.low_watermark_);

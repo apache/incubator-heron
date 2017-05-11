@@ -38,7 +38,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
  * 4. Expose methods which could be called externally to change the value of metrics
  */
 
-public class FullSpoutMetrics {
+public class FullSpoutMetrics extends SpoutMetrics {
   private final MultiCountMetric ackCount;
   private final MultiReducedMetric<MeanReducerState, Number, Double> completeLatency;
   private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;

@@ -57,11 +57,11 @@ public final class AckingTopology {
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
     // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
+    conf.setNumAckers(1);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // Set the number of workers or stream managers
-    conf.setNumStmgrs(1);
+    conf.setNumWorkers(1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

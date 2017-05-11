@@ -32,6 +32,7 @@ import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
+import com.twitter.heron.common.utils.metrics.FullBoltMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
@@ -61,7 +62,7 @@ public class BoltInstance implements IInstance {
     this.helper = helper;
     this.looper = looper;
     this.streamInQueue = streamInQueue;
-    this.boltMetrics = new BoltMetrics();
+    this.boltMetrics = new FullBoltMetrics();
     this.boltMetrics.initMultiCountMetrics(helper);
     this.serializer =
         SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
