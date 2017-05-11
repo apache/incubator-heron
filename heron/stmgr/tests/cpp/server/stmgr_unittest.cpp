@@ -382,7 +382,7 @@ struct CommonResources {
     num_stmgrs_ = numStmgrs;
     while (numStmgrs > 0) {
       stmgr_ports_.push_back(0);
-      numStmgrs --;
+      numStmgrs--;
     }
   }
 };
@@ -462,7 +462,7 @@ void StartDummySpoutInstanceHelper(CommonResources& common, sp_int8 spout, sp_in
   streamid += std::to_string(spout);
   sp_string instanceid = CreateInstanceId(spout, spout_instance, true);
   std::cout << "StartDummySpoutInstance " << instanceid << std::endl
-      << "common.instanceid_stmgr_[instanceid] " << common.instanceid_stmgr_[instanceid] << std::endl
+      << "common.instanceid_stmgr_[] " << common.instanceid_stmgr_[instanceid] << std::endl
       << "stmgr_ports_ " << common.stmgr_ports_[common.instanceid_stmgr_[instanceid]] << std::endl;
   StartDummySpoutInstance(worker_ss, worker, worker_thread,
                           common.stmgr_ports_[common.instanceid_stmgr_[instanceid]],
@@ -481,7 +481,7 @@ void StartDummySpoutInstanceHelper(CommonResources& common, sp_int8 spout, sp_in
 void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_spout_instance,
                            sp_int32 num_msgs_to_expect_in_bolt) {
   std::cout << "metrics mgr port " << common.metricsmgr_port_ << std::endl;
-  for (int i=0; i<common.num_stmgrs_; i++) {
+  for (int i=0; i < common.num_stmgrs_; i++) {
     std::cout << "stmgr port " << common.stmgr_ports_[i] << "; ";
   }
   std::cout << std::endl;
@@ -522,8 +522,8 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
         }
       }
       std::cout << "StartDummyBoltInstance " << instanceid << std::endl
-          << "common.instanceid_stmgr_[instanceid] " << common.instanceid_stmgr_[instanceid] << std::endl
-          << "stmgr_ports_ " << common.stmgr_ports_[common.instanceid_stmgr_[instanceid]] << std::endl;
+          << "common.instanceid_stmgr_[] " << common.instanceid_stmgr_[instanceid] << std::endl
+          << "stmgr_p_ " << common.stmgr_ports_[common.instanceid_stmgr_[instanceid]] << std::endl;
       StartDummyBoltInstance(worker_ss, worker, worker_thread,
                              common.stmgr_ports_[common.instanceid_stmgr_[instanceid]],
                              common.topology_name_, common.topology_id_, instanceid,
@@ -681,7 +681,7 @@ TEST(StMgr, test_pplan_decode) {
   // Verify that the pplan was decoded properly
   const heron::proto::system::PhysicalPlan* pplan0 = common.stmgrs_list_[0]->GetPhysicalPlan();
   EXPECT_EQ(pplan0->stmgrs_size(), common.num_stmgrs_);
-  for (int i=0; i<common.num_stmgrs_; i++) {
+  for (int i=0; i < common.num_stmgrs_; i++) {
     std::cout << "checking stmgr port " << pplan0->stmgrs(i).data_port() << std::endl;
     EXPECT_NE(common.stmgr_ports_.end(),
               std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),

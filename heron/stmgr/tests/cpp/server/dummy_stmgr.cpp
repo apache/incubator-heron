@@ -66,6 +66,8 @@ void DummyTMasterClient::CreateAndSendRegisterRequest() {
   stmgr->set_id(stmgr_id_);
   stmgr->set_host_name(stmgr_host_);
   stmgr->set_data_port(stmgr_port_);
+  std::cout << "DummyTMasterClient::CreateAndSendRegisterRequest() stmgr port " << stmgr_port_
+      << std::endl;
   stmgr->set_local_endpoint("/unused");
   stmgr->set_cwd(cwd);
   stmgr->set_pid((sp_int32)ProcessUtils::getPid());
