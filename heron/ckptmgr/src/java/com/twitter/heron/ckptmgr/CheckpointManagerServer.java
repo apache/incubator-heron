@@ -113,7 +113,9 @@ public class CheckpointManagerServer extends HeronServer {
                                  request.getOldestCheckpointPreserved(), deleteAll);
       LOG.info("Dispose checkpoint successful");
     } catch (StatefulStorageException e) {
-      LOG.info("Dispose checkpoint failed with error " + e);
+      LOG.log(Level.WARNING, "Request to dispose checkpoint failed for oldest Checkpoint "
+              + request.getOldestCheckpointPreserved() + " and deleteAll? "
+              + deleteAll, e);
       statusCode = Common.StatusCode.NOTOK;
     }
 
@@ -151,8 +153,8 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         connection.close();
       } catch (IOException e) {
-        LOG.warning("Failed to close connection from: "
-                  + connection.socket().getRemoteSocketAddress());
+        LOG.log(Level.WARNING, "Failed to close connection from: "
+                + connection.socket().getRemoteSocketAddress(), e);
       }
 
       connection = null;
@@ -192,8 +194,8 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         connection.close();
       } catch (IOException e) {
-        LOG.warning("Failed to close connection from: "
-                  + connection.socket().getRemoteSocketAddress());
+        LOG.log(Level.WARNING, "Failed to close connection from: "
+                + connection.socket().getRemoteSocketAddress(), e);
       }
 
       connection = null;
@@ -223,8 +225,8 @@ public class CheckpointManagerServer extends HeronServer {
       LOG.info("Save checkpoint successful for " + checkpoint.getCheckpointId() + " "
           + checkpoint.getComponent() + " " + checkpoint.getInstance());
     } catch (StatefulStorageException e) {
-      LOG.info("Save checkpoint not successful for " + checkpoint.getCheckpointId() + " "
-          + checkpoint.getComponent() + " " + checkpoint.getInstance() + " error: " + e);
+      LOG.log(Level.WARNING, "Save checkpoint not successful for " + checkpoint.getCheckpointId()
+              + " " + checkpoint.getComponent() + " " + checkpoint.getInstance() + " error: ", e);
       statusCode = Common.StatusCode.NOTOK;
     }
 
@@ -273,9 +275,9 @@ public class CheckpointManagerServer extends HeronServer {
         // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
-        LOG.info("Get checkpoint not successful for " + request.getCheckpointId() + " "
-            + request.getInstance().getInfo().getComponentName()
-            + " " + request.getInstance().getInfo().getTaskId());
+        LOG.log(Level.WARNING, "Get checkpoint not successful for " + request.getCheckpointId()
+                + " " + request.getInstance().getInfo().getComponentName()
+                + " " + request.getInstance().getInfo().getTaskId(), e);
         statusCode = Common.StatusCode.NOTOK;
       }
     }
