@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.instance;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +94,8 @@ public class AbstractOutputCollector {
   }
 
   protected HeronTuples.HeronDataTuple.Builder initTupleBuilder(String streamId,
-                                                                List<Object> tuple) {
+                                                                List<Object> tuple,
+                                                                Integer taskId) {
     // Start construct the data tuple
     HeronTuples.HeronDataTuple.Builder builder = HeronTuples.HeronDataTuple.newBuilder();
 
@@ -101,15 +103,21 @@ public class AbstractOutputCollector {
     builder.setKey(0);
 
     List<Integer> customGroupingTargetTaskIds = null;
-    if (!helper.isCustomGroupingEmpty()) {
+    if (taskId != null) {
+      // TODO: somehow assert that the input stream of the downstream bolt was configured
+      // with directGrouping
+
+      customGroupingTargetTaskIds = new ArrayList<>();
+      customGroupingTargetTaskIds.add(taskId);
+    } else if (!helper.isCustomGroupingEmpty()) {
       // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
       customGroupingTargetTaskIds =
           helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
+    }
 
-      if (customGroupingTargetTaskIds != null) {
-        // It is a CustomStreamGrouping
-        builder.addAllDestTaskIds(customGroupingTargetTaskIds);
-      }
+    if (customGroupingTargetTaskIds != null) {
+      // It is a CustomStreamGrouping
+      builder.addAllDestTaskIds(customGroupingTargetTaskIds);
     }
 
     // Invoke user-defined emit task hook

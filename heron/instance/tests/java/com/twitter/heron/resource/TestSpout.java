@@ -15,6 +15,7 @@
 package com.twitter.heron.resource;
 
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -92,9 +93,13 @@ public class TestSpout implements IRichSpout {
     // It will emit A, B, A, B, A, B, A, B, A, B
     if (emitted < EMIT_COUNT) {
       String word = toSend[emitted % toSend.length];
-      outputCollector.emit(new Values(word), MESSAGE_ID);
-      emitted++;
+      emit(outputCollector, new Values(word), MESSAGE_ID, emitted++);
     }
+  }
+
+  protected void emit(SpoutOutputCollector collector,
+                      List<Object> tuple, Object messageId, int emittedCount) {
+    collector.emit(tuple, messageId);
   }
 
   @Override

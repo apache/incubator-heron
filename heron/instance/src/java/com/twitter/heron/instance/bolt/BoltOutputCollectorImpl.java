@@ -69,13 +69,13 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
 
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
-    return admitBoltTuple(streamId, anchors, tuple);
+    return admitBoltTuple(streamId, anchors, tuple, null);
   }
 
   @Override
   public void emitDirect(int taskId, String streamId,
                          Collection<Tuple> anchors, List<Object> tuple) {
-    throw new RuntimeException("emitDirect not supported");
+    admitBoltTuple(streamId, anchors, tuple, taskId);
   }
 
   @Override
@@ -98,14 +98,15 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   /////////////////////////////////////////////////////////
   private List<Integer> admitBoltTuple(String streamId,
                                        Collection<Tuple> anchors,
-                                       List<Object> tuple) {
+                                       List<Object> tuple,
+                                       Integer taskId) {
     if (getPhysicalPlanHelper().isTerminatedComponent()) {
-      // No need to handle this tuples
+      // No need to handle this tuple
       return null;
     }
 
     // Start construct the data tuple
-    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple);
+    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, taskId);
 
     // Set the anchors for a tuple
     if (anchors != null) {
