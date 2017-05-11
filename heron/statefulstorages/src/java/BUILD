@@ -5,6 +5,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 spi_deps_files = [
     "//heron/spi/src/java:statefulstorage-spi-java",
     "//heron/proto:proto_ckptmgr_java",
+    "//heron/proto:proto_physical_plan_java",
 ]
 
 hdfs_deps_files = \

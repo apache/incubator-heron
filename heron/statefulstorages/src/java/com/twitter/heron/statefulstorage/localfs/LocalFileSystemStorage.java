@@ -22,6 +22,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
@@ -46,11 +47,14 @@ public class LocalFileSystemStorage implements IStatefulStorage {
 
   @Override
   public void store(Checkpoint checkpoint) throws StatefulStorageException {
-    String path = getCheckpointPath(checkpoint);
+    String path = getCheckpointPath(checkpoint.getTopologyName(), checkpoint.getCheckpointId(),
+                                    checkpoint.getComponent(), checkpoint.getTaskId());
 
     // We would try to create but we would not enforce this operation successful,
     // since it is possible already created by others
-    String checkpointDir = getCheckpointDir(checkpoint);
+    String checkpointDir = getCheckpointDir(checkpoint.getTopologyName(),
+                                            checkpoint.getCheckpointId(),
+                                            checkpoint.getComponent());
     FileUtils.createDirectory(checkpointDir);
 
     // Do a check after the attempt
@@ -67,20 +71,25 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   }
 
   @Override
-  public void restore(Checkpoint checkpoint) throws StatefulStorageException {
-    String path = getCheckpointPath(checkpoint);
+  public Checkpoint restore(String topologyName, String checkpointId,
+                            PhysicalPlans.Instance instanceInfo) throws StatefulStorageException {
+    String path = getCheckpointPath(topologyName, checkpointId,
+                                    instanceInfo.getInfo().getComponentName(),
+                                    instanceInfo.getInfo().getTaskId());
 
     byte[] res = FileUtils.readFromFile(path);
     if (res.length != 0) {
       // Try to parse the protobuf
-      CheckpointManager.SaveInstanceStateRequest state;
+      CheckpointManager.InstanceStateCheckpoint state;
       try {
         state =
-            CheckpointManager.SaveInstanceStateRequest.parseFrom(res);
+            CheckpointManager.InstanceStateCheckpoint.parseFrom(res);
       } catch (InvalidProtocolBufferException e) {
         throw new StatefulStorageException("Failed to parse the data", e);
       }
-      checkpoint.setCheckpoint(state);
+      return new Checkpoint(topologyName, instanceInfo, state);
+    } else {
+      throw new StatefulStorageException("Failed to parse the data");
     }
   }
 
@@ -117,13 +126,14 @@ public class LocalFileSystemStorage implements IStatefulStorage {
     return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
-  private String getCheckpointDir(Checkpoint checkpoint) {
-    return String.format("%s/%s",
-        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointDir());
+  private String getCheckpointDir(String topologyName, String checkpointId, String componentName) {
+    return String.format("%s/%s/%s",
+        getTopologyCheckpointRoot(topologyName), checkpointId, componentName);
   }
 
-  private String getCheckpointPath(Checkpoint checkpoint) {
-    return String.format("%s/%s",
-        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointPath());
+  private String getCheckpointPath(String topologyName, String checkpointId,
+                                   String componentName, int taskId) {
+    return String.format("%s/%d", getCheckpointDir(topologyName, checkpointId, componentName),
+                         taskId);
   }
 }

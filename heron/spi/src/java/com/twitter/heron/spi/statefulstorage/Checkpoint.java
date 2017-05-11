@@ -15,35 +15,23 @@
 package com.twitter.heron.spi.statefulstorage;
 
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.PhysicalPlans;
 
 public class Checkpoint {
   private final String topologyName;
   private final String checkpointId;
-  private final String componentName;
-  private final String instanceId;
-  private final String taskId;
+  private final PhysicalPlans.Instance instanceInfo;
 
-  private CheckpointManager.SaveInstanceStateRequest checkpoint;
+  private CheckpointManager.InstanceStateCheckpoint checkpoint;
   private int nBytes;
 
-  public Checkpoint(String topologyName, CheckpointManager.SaveInstanceStateRequest saveRequest) {
+  public Checkpoint(String topologyName, PhysicalPlans.Instance instanceInfo,
+                    CheckpointManager.InstanceStateCheckpoint checkpoint) {
     this.topologyName = topologyName;
-    this.checkpointId = saveRequest.getCheckpoint().getCheckpointId();
-    this.componentName = saveRequest.getInstance().getInfo().getComponentName();
-    this.instanceId = saveRequest.getInstance().getInstanceId();
-    this.taskId = Integer.toString(saveRequest.getInstance().getInfo().getTaskId());
-    this.checkpoint = saveRequest;
-    this.nBytes = saveRequest.getSerializedSize();
-  }
-
-  public Checkpoint(String topologyName, CheckpointManager.GetInstanceStateRequest getRequest) {
-    this.topologyName = topologyName;
-    this.checkpointId = getRequest.getCheckpointId();
-    this.componentName = getRequest.getInstance().getInfo().getComponentName();
-    this.instanceId = getRequest.getInstance().getInstanceId();
-    this.taskId = Integer.toString(getRequest.getInstance().getInfo().getTaskId());
-    checkpoint = null;
-    nBytes = 0;
+    this.checkpointId = checkpoint.getCheckpointId();
+    this.instanceInfo = instanceInfo;
+    this.checkpoint = checkpoint;
+    this.nBytes = checkpoint.getSerializedSize();
   }
 
   public String getTopologyName() {
@@ -55,37 +43,23 @@ public class Checkpoint {
   }
 
   public String getComponent() {
-    return componentName;
+    return instanceInfo.getInfo().getComponentName();
   }
 
   public String getInstance() {
-    return instanceId;
+    return instanceInfo.getInstanceId();
   }
 
-  public String getCheckpointPath() {
-    return getCheckpointDir() + "/" + taskId;
+  public int getTaskId() {
+    return instanceInfo.getInfo().getTaskId();
   }
 
-  public String getCheckpointDir() {
-    return checkpointId + "/" + componentName + "/";
-  }
-
-  public String getTaskId() {
-    return taskId;
-  }
-
-  public CheckpointManager.SaveInstanceStateRequest getCheckpoint() {
+  public CheckpointManager.InstanceStateCheckpoint getCheckpoint() {
     return this.checkpoint;
-  }
-
-  public void setCheckpoint(CheckpointManager.SaveInstanceStateRequest checkpoint) {
-    assert checkpoint != null;
-    this.checkpoint = checkpoint;
-    nBytes = checkpoint.getSerializedSize();
   }
 
   @Override
   public String toString() {
-    return String.format("%s %s %s %s", topologyName, checkpointId, componentName, instanceId);
+    return String.format("%s %s %s %s", topologyName, checkpointId, getComponent(), getInstance());
   }
 }
