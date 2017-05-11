@@ -121,7 +121,7 @@ public class HDFSStorageTest {
     FSDataOutputStream mockFSDateOutputStream = mock(FSDataOutputStream.class);
     when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutputStream);
 
-    doReturn(true).when(hdfsStorage).createDirs(anyString());
+    doReturn(true).when(hdfsStorage).createDir(anyString());
 
     hdfsStorage.store(checkpoint);
 
