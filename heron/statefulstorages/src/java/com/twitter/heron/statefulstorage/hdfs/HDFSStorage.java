@@ -16,7 +16,6 @@ package com.twitter.heron.statefulstorage.hdfs;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.hadoop.conf.Configuration;
@@ -81,9 +80,7 @@ public class HDFSStorage implements IStatefulStorage {
     String checkpointDir = getCheckpointDir(checkpoint.getTopologyName(),
                                             checkpoint.getCheckpointId(),
                                             checkpoint.getComponent());
-    if (!createDirs(checkpointDir)) {
-      throw new StatefulStorageException("Failed to create dir: " + checkpointDir);
-    }
+    createDir(checkpointDir);
 
     FSDataOutputStream out = null;
     try {
@@ -159,26 +156,22 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   /**
-   * Ensure the existence of a directory.
-   * Will create the directory if it does not exist.
+   * Creates the directory if it does not exist.
    *
    * @param dir The path of dir to ensure existence
    * @return true if the directory exists after this call.
    */
-  protected boolean createDirs(String dir) {
+  protected void createDir(String dir) throws StatefulStorageException {
     Path path = new Path(dir);
 
     try {
       fileSystem.mkdirs(path);
       if (!fileSystem.exists(path)) {
-        return false;
+        throw new StatefulStorageException("Failed to create dir: " + dir);
       }
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to mkdirs: " + dir, e);
-      return false;
+      throw new StatefulStorageException("Failed to create dir: " + dir, e);
     }
-
-    return true;
   }
 
   private String getTopologyCheckpointRoot(String topologyName) {
