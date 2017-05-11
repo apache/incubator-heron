@@ -1554,7 +1554,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
 
   // Kill current tmaster
-  common.ss_list_.front()->loopExit();
+  common.ss_list_[1]->loopExit();
   common.tmaster_thread_->join();
   delete common.tmaster_;
   delete common.tmaster_thread_;
@@ -1568,7 +1568,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
 
   // Start new dummy stmgr at different port, to generate a differnt pplan that we
   // can verify
-  sp_int32 stmgr_baseport_1 = common.stmgr_ports_[1];
+  sp_int32 stmgr_port_old = common.stmgr_ports_[1];
   common.stmgr_ports_[1] = 0;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
                   common.tmaster_port_, common.shell_port_, common.stmgrs_id_list_[1],
@@ -1587,7 +1587,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   // to tmasterClient could take upto 1 second (specified in test_heron_internals.yaml)
   // to retry connecting to tmaster.
   int retries = 30;
-  while (regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port() == stmgr_baseport_1
+  while (regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port() == stmgr_port_old
          && retries--)
     sleep(1);
 
@@ -1653,11 +1653,11 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   // Start the metrics mgr
   StartMetricsMgr(common, metricsMgrTmasterLatch, metricsMgrConnectionCloseLatch);
 
-  // Start the tmaster etc.
-  StartTMaster(common);
-
   // lets remember this
   EventLoopImpl* mmgr_ss = common.ss_list_.back();
+
+  // Start the tmaster etc.
+  StartTMaster(common);
 
   // Distribute workers across stmgrs
   DistributeWorkersAcrossStmgrs(common);
