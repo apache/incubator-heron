@@ -28,6 +28,10 @@ class DummyTMasterClient : public Client {
                      const std::vector<heron::proto::system::Instance*>& instances);
   virtual ~DummyTMasterClient();
 
+  void setStmgrPort(sp_int32 stmgrPort) {
+    stmgr_port_ = stmgrPort;
+  }
+
  private:
   void Retry() { Start(); }
   // Handle incoming connections
@@ -56,6 +60,7 @@ class DummyStMgr : public Server {
              const std::vector<heron::proto::system::Instance*>& instances);
 
   virtual ~DummyStMgr();
+  sp_int32 Start();
   sp_int32 NumStartBPMsgs() { return num_start_bp_; }
   sp_int32 NumStopBPMsgs() { return num_stop_bp_; }
   std::vector<sp_string>& OtherStmgrsIds() { return other_stmgrs_ids_; }

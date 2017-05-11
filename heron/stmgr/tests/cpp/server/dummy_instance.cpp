@@ -150,12 +150,18 @@ void DummySpoutInstance::CreateAndSendTupleMessages() {
     heron::proto::system::HeronDataTuple* tuple = data_set->add_tuples();
     tuple->set_key(0);
     // Add lots of data
-    for (size_t i = 0; i < 500; ++i) *(tuple->add_values()) = "dummy data";
+    for (size_t i = 0; i < 1; ++i)
+      *(tuple->add_values()) = "[" + instance_id_ + "%" + std::to_string(total_msgs_sent_) + "]";
 
     // Add custom grouping if need be
     if (do_custom_grouping_) {
       tuple->add_dest_task_ids(custom_grouping_dest_task_);
     }
+//    std::cout << "instance_id_ " << instance_id_
+//        << " total_msgs_sent_ " << total_msgs_sent_ << std::endl;
+//    for (int i=0; i < tuple->dest_task_ids_size(); i++) {
+//      std::cout << "tuple dest " << tuple->dest_task_ids(i) << std::endl;
+//    }
     SendMessage(tuple_set);
   }
   if (total_msgs_sent_ != max_msgs_to_send_) {
@@ -182,6 +188,12 @@ void DummyBoltInstance::HandleInstanceResponse(
 
 void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
+//  std::cout << "instance_id_ " << instance_id_
+//      << " msgs_recvd_ " << msgs_recvd_
+//      << " expected_msgs_to_recv_ " << expected_msgs_to_recv_ << std::endl;
+//  for (int i=0; i < msg->data().tuples_size(); i++) {
+//    std::cout << "data " << msg->data().tuples(i) << std::endl;
+//  }
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 

@@ -66,6 +66,8 @@ void DummyTMasterClient::CreateAndSendRegisterRequest() {
   stmgr->set_id(stmgr_id_);
   stmgr->set_host_name(stmgr_host_);
   stmgr->set_data_port(stmgr_port_);
+  std::cout << "DummyTMasterClient::CreateAndSendRegisterRequest() stmgr port " << stmgr_port_
+      << std::endl;
   stmgr->set_local_endpoint("/unused");
   stmgr->set_cwd(cwd);
   stmgr->set_pid((sp_int32)ProcessUtils::getPid());
@@ -90,7 +92,7 @@ DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const s
 
   tmaster_client_ = new DummyTMasterClient(ss, tmaster_options, stmgr_id, stmgr_host, stmgr_port,
                                            shell_port, _instances);
-  tmaster_client_->Start();
+//  tmaster_client_->Start();
   InstallRequestHandler(&DummyStMgr::HandleStMgrHelloRequest);
   InstallMessageHandler(&DummyStMgr::HandleTupleStreamMessage);
   InstallMessageHandler(&DummyStMgr::HandleStartBackPressureMessage);
@@ -100,6 +102,16 @@ DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const s
 DummyStMgr::~DummyStMgr() {
   tmaster_client_->Stop();
   delete tmaster_client_;
+}
+
+sp_int32 DummyStMgr::Start() {
+  if (SP_OK == Server::Start()) {
+    tmaster_client_->setStmgrPort(get_serveroptions().get_port());
+    tmaster_client_->Start();
+    return SP_OK;
+  } else {
+    return SP_NOTOK;
+  }
 }
 
 void DummyStMgr::HandleNewConnection(Connection* conn) {}

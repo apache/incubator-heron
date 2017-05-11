@@ -41,6 +41,13 @@ class TMasterClient : public Client {
     instances_ = _instances;
   }
 
+  // Sets the stmgr_port_ if stmgr_port_ binds to port 0 originally
+  void SetStmgrPort(const sp_int32 _stmgr_port) {
+    if (0 == stmgr_port_ && 0 != _stmgr_port) {
+      stmgr_port_ = _stmgr_port;
+    }
+  }
+
   // returns the tmaster address "host:port" form.
   sp_string getTmasterHostPort();
 
