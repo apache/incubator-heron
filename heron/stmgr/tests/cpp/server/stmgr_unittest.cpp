@@ -231,7 +231,7 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
   mgr = new DummyStMgr(ss, options, stmgr_id, LOCALHOST, stmgr_port, LOCALHOST, tmaster_port,
                        shell_port, instances);
   EXPECT_EQ(0, stmgr_port);
-  EXPECT_EQ(0, mgr->Start()) << "DummyStMgr bind/listen " << LOCALHOST << ":" << stmgr_port;
+  EXPECT_EQ(0, mgr->Start()) << "DummyStMgr bind " << LOCALHOST << ":" << stmgr_port;
   stmgr_port = mgr->get_serveroptions().get_port();
   EXPECT_GT(stmgr_port, 0);
   stmgr_thread = new std::thread(StartServer, ss);
@@ -251,7 +251,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
   EXPECT_EQ(0, mtmgr_port);
-  EXPECT_EQ(0, mgr->Start()) << "DummyMtrMgr bind/listen " << LOCALHOST << ":" << mtmgr_port;
+  EXPECT_EQ(0, mgr->Start()) << "DummyMtrMgr bind " << LOCALHOST << ":" << mtmgr_port;
   mtmgr_port = mgr->get_serveroptions().get_port();
   EXPECT_GT(mtmgr_port, 0);
   mtmgr_thread = new std::thread(StartServer, ss);
