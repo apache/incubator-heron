@@ -149,10 +149,10 @@ public class CheckpointManager {
 
     // Setup the IStatefulStorage
     // TODO(mfu): This should be done in an executor driven by another thread, kind of async
-    IStatefulStorage checkpointsBackend;
+    IStatefulStorage statefulStorage;
     String classname = checkpointManagerConfig.getStorageClassname();
     try {
-      checkpointsBackend = (IStatefulStorage) Class.forName(classname).newInstance();
+      statefulStorage = (IStatefulStorage) Class.forName(classname).newInstance();
     } catch (InstantiationException e) {
       throw new CheckpointManagerException(classname + " class must have a no-arg constructor.", e);
     } catch (IllegalAccessException e) {
@@ -162,15 +162,15 @@ public class CheckpointManager {
     }
 
     try {
-      checkpointsBackend.init(
+      statefulStorage.init(
           Collections.unmodifiableMap(checkpointManagerConfig.getBackendConfig()));
     } catch (StatefulStorageException e) {
-      throw new CheckpointManagerException("init of stateful storage threw exception", e);
+      throw new CheckpointManagerException(classname + " init threw exception", e);
     }
 
     // Start the server
     this.checkpointManagerServer = new CheckpointManagerServer(
-        topologyName, topologyId, checkpointMgrId, checkpointsBackend,
+        topologyName, topologyId, checkpointMgrId, statefulStorage,
         checkpointManagerServerLoop, serverHost, serverPort, serverSocketOptions);
   }
 
@@ -200,7 +200,7 @@ public class CheckpointManager {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       usage(options);
-      throw new RuntimeException("Error parsing command line options: ", e);
+      throw new RuntimeException("Error parsing command line options ", e);
     }
 
     String topologyName = cmd.getOptionValue("topologyname");

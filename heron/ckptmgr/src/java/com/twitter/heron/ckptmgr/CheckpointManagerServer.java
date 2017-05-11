@@ -211,7 +211,8 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.SaveInstanceStateRequest request
   ) {
-    Checkpoint checkpoint = new Checkpoint(topologyName, request);
+    Checkpoint checkpoint = new Checkpoint(topologyName, request.getInstance(),
+                                           request.getCheckpoint());
     LOG.info("Got a save checkpoint request for " + checkpoint.getCheckpointId() + " "
         + checkpoint.getComponent() + " " + checkpoint.getInstance() + " on connection: "
         + channel.socket().getRemoteSocketAddress());
@@ -241,9 +242,9 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.GetInstanceStateRequest request
   ) {
-    Checkpoint checkpoint = new Checkpoint(topologyName, request);
-    LOG.info("Got a get checkpoint request for " + checkpoint.getCheckpointId() + " "
-        + checkpoint.getComponent() + " " + checkpoint.getInstance() + " on connection: "
+    LOG.info("Got a get checkpoint request for " + request.getCheckpointId() + " "
+        + request.getInstance().getInfo().getComponentName() + " "
+        + request.getInstance().getInfo().getTaskId() + " on connection: "
         + channel.socket().getRemoteSocketAddress());
 
     CheckpointManager.GetInstanceStateResponse.Builder responseBuilder =
@@ -265,14 +266,16 @@ public class CheckpointManagerServer extends HeronServer {
       responseBuilder.setCheckpoint(dummyState);
     } else {
       try {
-        checkpointsBackend.restore(checkpoint);
+        Checkpoint checkpoint = checkpointsBackend.restore(topologyName, request.getCheckpointId(),
+                                                request.getInstance());
         LOG.info("Get checkpoint successful for " + checkpoint.getCheckpointId() + " "
             + checkpoint.getComponent() + " " + checkpoint.getInstance());
         // Set the checkpoint-state in response
-        responseBuilder.setCheckpoint(checkpoint.checkpoint().getCheckpoint());
+        responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
-        LOG.info("Get checkpoint not successful for " + checkpoint.getCheckpointId() + " "
-            + checkpoint.getComponent() + " " + checkpoint.getInstance());
+        LOG.info("Get checkpoint not successful for " + request.getCheckpointId() + " "
+            + request.getInstance().getInfo().getComponentName()
+            + " " + request.getInfo().getTaskId());
         statusCode = Common.StatusCode.NOTOK;
       }
     }

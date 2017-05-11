@@ -16,6 +16,8 @@ package com.twitter.heron.spi.statefulstorage;
 
 import java.util.Map;
 
+import com.twitter.heron.proto.system.PhysicalPlans;
+
 public interface IStatefulStorage {
   /**
    * Initialize the Storage Backend
@@ -35,7 +37,8 @@ public interface IStatefulStorage {
   void store(Checkpoint checkpoint) throws StatefulStorageException;
 
   // Retrieve the checkpoint
-  void restore(Checkpoint checkpoint) throws StatefulStorageException;
+  Checkpoint restore(String topologyName, String checkpointId,
+                     PhysicalPlans.Instance instanceInfo) throws StatefulStorageException;
 
   // TODO(mfu): We should refactor all interfaces in IStatefulStorage,
   // TODO(mfu): instead providing Class Checkpoint, we should provide an Context class,

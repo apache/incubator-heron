@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
@@ -70,11 +71,16 @@ public class HDFSStorage implements IStatefulStorage {
 
   @Override
   public void store(Checkpoint checkpoint) throws StatefulStorageException {
-    Path path = new Path(getCheckpointPath(checkpoint));
+    Path path = new Path(getCheckpointPath(checkpoint.getTopologyName(),
+                                           checkpoint.getCheckpointId(),
+                                           checkpoint.getComponent(),
+                                           checkpoint.getTaskId()));
 
     // We need to ensure the existence of directories structure,
     // since it is not guaranteed that FileSystem.create(..) always creates parents' dirs.
-    String checkpointDir = getCheckpointDir(checkpoint);
+    String checkpointDir = getCheckpointDir(checkpoint.getTopologyName(),
+                                            checkpoint.getCheckpointId(),
+                                            checkpoint.getComponent());
     if (!createDirs(checkpointDir)) {
       throw new StatefulStorageException("Failed to create dir: " + checkpointDir);
     }
@@ -82,7 +88,7 @@ public class HDFSStorage implements IStatefulStorage {
     FSDataOutputStream out = null;
     try {
       out = fileSystem.create(path);
-      checkpoint.checkpoint().writeTo(out);
+      checkpoint.getCheckpoint().writeTo(out);
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to persist", e);
     } finally {
@@ -91,21 +97,24 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public void restore(Checkpoint checkpoint) throws StatefulStorageException {
-    Path path = new Path(getCheckpointPath(checkpoint));
+  public Checkpoint restore(String topologyName, String checkpointId,
+                            PhysicalPlans.Instance instanceInfo) throws StatefulStorageException {
+    Path path = new Path(getCheckpointPath(topologyName, checkpointId,
+                                           instanceInfo.getInfo().getComponentName(),
+                                           instanceInfo.getInfo().getTaskId()));
 
     FSDataInputStream in = null;
-    CheckpointManager.SaveInstanceStateRequest state = null;
+    CheckpointManager.InstanceStateCheckpoint state = null;
     try {
       in = fileSystem.open(path);
       state =
-          CheckpointManager.SaveInstanceStateRequest.parseFrom(in);
+          CheckpointManager.InstanceStateCheckpoint.parseFrom(in);
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to read", e);
     } finally {
       SysUtils.closeIgnoringExceptions(in);
     }
-    checkpoint.setCheckpoint(state);
+    return new Checkpoint(topologyName, instanceInfo, state);
   }
 
   @Override
@@ -176,13 +185,14 @@ public class HDFSStorage implements IStatefulStorage {
     return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
-  private String getCheckpointDir(Checkpoint checkpoint) {
-    return String.format("%s/%s",
-        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointDir());
+  private String getCheckpointDir(String topologyName, String checkpointId, String componentName) {
+    return String.format("%s/%s/%s",
+        getTopologyCheckpointRoot(topologyName), checkpointId, componentName);
   }
 
-  private String getCheckpointPath(Checkpoint checkpoint) {
-    return String.format("%s/%s",
-        getTopologyCheckpointRoot(checkpoint.getTopologyName()), checkpoint.getCheckpointPath());
+  private String getCheckpointPath(String topologyName, String checkpointId,
+                                   String componentName, int taskId) {
+    return String.format("%s/%d", getCheckpointDir(topologyName, checkpointId, componentName),
+                         taskId);
   }
 }
