@@ -58,11 +58,11 @@ public class LocalFileSystemStorageTest {
   private static final int TASK_ID = 1;
   private static final int COMPONENT_INDEX = 1;
   private static final byte[] BYTES = "LocalFS test bytes".getBytes();
-  private LocalFileSystemStorage localFileSystemBackend;
+
   private SaveInstanceStateRequest saveInstanceStateRequest;
   private GetInstanceStateRequest getInstanceStateRequest;
-  private PhysicalPlans.Instance instance;
-  private InstanceStateCheckpoint checkpoint;
+
+  private LocalFileSystemStorage localFileSystemBackend;
 
   @Before
   public void before() throws Exception {
@@ -78,13 +78,13 @@ public class LocalFileSystemStorageTest {
         .setComponentName(COMPONENT_NAME)
         .build();
 
-    instance = PhysicalPlans.Instance.newBuilder()
+    PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder()
         .setInstanceId(INSTANCE_ID)
         .setStmgrId(STMGR_ID)
         .setInfo(info)
         .build();
 
-    checkpoint = InstanceStateCheckpoint.newBuilder()
+    InstanceStateCheckpoint checkpoint = InstanceStateCheckpoint.newBuilder()
         .setCheckpointId(CHECKPOINT_ID)
         .setState(ByteString.copyFrom(BYTES))
         .build();

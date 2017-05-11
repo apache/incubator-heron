@@ -64,8 +64,10 @@ public class HDFSStorageTest {
   private static final int TASK_ID = 1;
   private static final int COMPONENT_INDEX = 1;
   private static final byte[] BYTES = "HDFS test bytes".getBytes();
+
   private CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
+
   private HDFSStorage hdfsStorage;
   private FileSystem mockFileSystem;
 
@@ -127,14 +129,14 @@ public class HDFSStorageTest {
         mock(CheckpointManager.SaveInstanceStateRequest.class);
     when(mockCheckpoint.checkpoint()).thenReturn(mockSaveInstanceStateRequest);
 
-    FSDataOutputStream mockFSDateOutpurStream = mock(FSDataOutputStream.class);
-    when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutpurStream);
+    FSDataOutputStream mockFSDateOutputStream = mock(FSDataOutputStream.class);
+    when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutputStream);
 
     doReturn(true).when(hdfsStorage).createDirs(anyString());
 
     hdfsStorage.store(mockCheckpoint);
 
-    verify(mockSaveInstanceStateRequest).writeTo(mockFSDateOutpurStream);
+    verify(mockSaveInstanceStateRequest).writeTo(mockFSDateOutputStream);
   }
 
   @Test

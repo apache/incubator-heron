@@ -14,15 +14,15 @@
 
 package com.twitter.heron.ckptmgr;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,6 +39,8 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
@@ -47,7 +49,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class CheckpointManagerServerTest {
-  private static final Logger LOG = Logger.getLogger("haha");
 
   private static final String TOPOLOGY_NAME = "topology_name";
   private static final String TOPOLOGY_ID = "topology_id";
@@ -77,6 +78,7 @@ public class CheckpointManagerServerTest {
   private NIOLooper serverLooper;
   private NIOLooper clientLooper;
   private ExecutorService threadPools;
+  private CountDownLatch finishedSignal;
 
   private IStatefulStorage backendStorage;
 
@@ -129,6 +131,8 @@ public class CheckpointManagerServerTest {
 
   @Before
   public void before() throws Exception {
+    finishedSignal = new CountDownLatch(1);
+
     serverLooper = new NIOLooper();
     clientLooper = new NIOLooper();
     threadPools = Executors.newFixedThreadPool(2);
@@ -148,8 +152,6 @@ public class CheckpointManagerServerTest {
         serverLooper, SERVER_HOST, serverPort, serverSocketOptions);
 
     runServer();
-    // let the server warm up
-    Thread.sleep(2 * 1000);
   }
 
   @After
@@ -177,15 +179,15 @@ public class CheckpointManagerServerTest {
 
     runClient(simpleCheckpointManagerClient);
     // let the client start and send request
-    Thread.sleep(2 * 1000);
+    finishedSignal.await(2, TimeUnit.SECONDS);
 
     verify(backendStorage).store(any(Checkpoint.class));
-    Assert.assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
     Message response = simpleCheckpointManagerClient.getResponse();
-    Assert.assertTrue(response instanceof CheckpointManager.SaveInstanceStateResponse);
-    Assert.assertEquals(CHECKPOINT_ID,
+    assertTrue(response instanceof CheckpointManager.SaveInstanceStateResponse);
+    assertEquals(CHECKPOINT_ID,
         ((CheckpointManager.SaveInstanceStateResponse) response).getCheckpointId());
-    Assert.assertEquals(instance,
+    assertEquals(instance,
         ((CheckpointManager.SaveInstanceStateResponse) response).getInstance());
   }
 
@@ -203,16 +205,14 @@ public class CheckpointManagerServerTest {
     prepareClient(SimpleCheckpointManagerClient.RequestType.GET_INSTANCE_STATE);
 
     runClient(simpleCheckpointManagerClient);
-
-    // let the client start and send request
-    Thread.sleep(2 * 1000);
+    finishedSignal.await(2, TimeUnit.SECONDS);
 
     verify(backendStorage).restore(any(Checkpoint.class));
-    Assert.assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
 
     Message response = simpleCheckpointManagerClient.getResponse();
-    Assert.assertTrue(response instanceof CheckpointManager.GetInstanceStateResponse);
-    Assert.assertEquals(saveInstanceStateRequest.getCheckpoint(),
+    assertTrue(response instanceof CheckpointManager.GetInstanceStateResponse);
+    assertEquals(saveInstanceStateRequest.getCheckpoint(),
         ((CheckpointManager.GetInstanceStateResponse) response).getCheckpoint());
   }
 
@@ -221,13 +221,13 @@ public class CheckpointManagerServerTest {
     prepareClient(SimpleCheckpointManagerClient.RequestType.CLEAN_STATEFUL_CHECKOINTS);
 
     runClient(simpleCheckpointManagerClient);
-    Thread.sleep(2 * 1000);
+    finishedSignal.await(2, TimeUnit.SECONDS);
 
     verify(backendStorage).dispose(anyString(), anyString(), anyBoolean());
 
     Message response = simpleCheckpointManagerClient.getResponse();
-    Assert.assertTrue(response instanceof CheckpointManager.CleanStatefulCheckpointResponse);
-    Assert.assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    assertTrue(response instanceof CheckpointManager.CleanStatefulCheckpointResponse);
+    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
   }
 
   @Test
@@ -235,12 +235,12 @@ public class CheckpointManagerServerTest {
     prepareClient(SimpleCheckpointManagerClient.RequestType.REGISTER_TMASTER);
 
     runClient(simpleCheckpointManagerClient);
-    Thread.sleep(2 * 1000);
+    finishedSignal.await(2, TimeUnit.SECONDS);
 
     Message response = simpleCheckpointManagerClient.getResponse();
 
-    Assert.assertTrue(response instanceof CheckpointManager.RegisterTMasterResponse);
-    Assert.assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    assertTrue(response instanceof CheckpointManager.RegisterTMasterResponse);
+    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
   }
 
   @Test
@@ -248,17 +248,20 @@ public class CheckpointManagerServerTest {
     prepareClient(SimpleCheckpointManagerClient.RequestType.REGISTER_STMGR);
 
     runClient(simpleCheckpointManagerClient);
-    Thread.sleep(2 * 1000);
+    finishedSignal.await(2, TimeUnit.SECONDS);
 
     Message response = simpleCheckpointManagerClient.getResponse();
-    Assert.assertTrue(response instanceof CheckpointManager.RegisterStMgrResponse);
-    Assert.assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    assertTrue(response instanceof CheckpointManager.RegisterStMgrResponse);
+    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
   }
 
-  private void prepareClient(
-      SimpleCheckpointManagerClient.RequestType requestType) {
+  private void prepareClient(SimpleCheckpointManagerClient.RequestType requestType) {
     simpleCheckpointManagerClient =
-        new SimpleCheckpointManagerClient(clientLooper, SERVER_HOST, serverPort, requestType);
+        new SimpleCheckpointManagerClient(clientLooper,
+            SERVER_HOST,
+            serverPort,
+            finishedSignal,
+            requestType);
   }
 
   private void runServer() {
@@ -287,6 +290,7 @@ public class CheckpointManagerServerTest {
     private RequestType requestType;
     private Message response;
     private StatusCode responseStatus;
+    private CountDownLatch finishedSignal;
 
     public enum RequestType {
       SAVE_INSTANCE_STATE,
@@ -297,12 +301,15 @@ public class CheckpointManagerServerTest {
     }
 
     SimpleCheckpointManagerClient(NIOLooper looper, String host,
-                                  int port, RequestType requestType) {
+                                  int port, CountDownLatch finishedSignal,
+                                  RequestType requestType) {
       super(looper, host, port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,
               5 * 1024 * 1024,
               5 * 1024 * 1024));
+
+      this.finishedSignal = finishedSignal;
       this.requestType = requestType;
       this.responseStatus = StatusCode.TIMEOUT_ERROR;
     }
@@ -377,6 +384,7 @@ public class CheckpointManagerServerTest {
     public void onResponse(StatusCode status, Object ctx, Message aResponse) {
       this.responseStatus = status;
       this.response = aResponse;
+      this.finishedSignal.countDown();
     }
 
     @Override
