@@ -275,7 +275,7 @@ public class CheckpointManagerServer extends HeronServer {
       } catch (StatefulStorageException e) {
         LOG.info("Get checkpoint not successful for " + request.getCheckpointId() + " "
             + request.getInstance().getInfo().getComponentName()
-            + " " + request.getInfo().getTaskId());
+            + " " + request.getInstance().getInfo().getTaskId());
         statusCode = Common.StatusCode.NOTOK;
       }
     }

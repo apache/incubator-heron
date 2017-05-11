@@ -28,9 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.proto.ckptmgr.CheckpointManager.GetInstanceStateRequest;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpoint;
-import com.twitter.heron.proto.ckptmgr.CheckpointManager.SaveInstanceStateRequest;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 
@@ -59,8 +57,8 @@ public class LocalFileSystemStorageTest {
   private static final int COMPONENT_INDEX = 1;
   private static final byte[] BYTES = "LocalFS test bytes".getBytes();
 
-  private SaveInstanceStateRequest saveInstanceStateRequest;
-  private GetInstanceStateRequest getInstanceStateRequest;
+  private PhysicalPlans.Instance instance;
+  private InstanceStateCheckpoint checkpoint;
 
   private LocalFileSystemStorage localFileSystemBackend;
 
@@ -78,25 +76,15 @@ public class LocalFileSystemStorageTest {
         .setComponentName(COMPONENT_NAME)
         .build();
 
-    PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder()
+    instance = PhysicalPlans.Instance.newBuilder()
         .setInstanceId(INSTANCE_ID)
         .setStmgrId(STMGR_ID)
         .setInfo(info)
         .build();
 
-    InstanceStateCheckpoint checkpoint = InstanceStateCheckpoint.newBuilder()
+    checkpoint = InstanceStateCheckpoint.newBuilder()
         .setCheckpointId(CHECKPOINT_ID)
         .setState(ByteString.copyFrom(BYTES))
-        .build();
-
-    saveInstanceStateRequest = SaveInstanceStateRequest.newBuilder()
-        .setInstance(instance)
-        .setCheckpoint(checkpoint)
-        .build();
-
-    getInstanceStateRequest = GetInstanceStateRequest.newBuilder()
-        .setInstance(instance)
-        .setCheckpointId(CHECKPOINT_ID)
         .build();
   }
 
@@ -115,25 +103,25 @@ public class LocalFileSystemStorageTest {
         .when(FileUtils.class, "writeToFile", anyString(), any(byte[].class), anyBoolean());
 
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
-    when(mockCheckpoint.getCheckpoint()).thenReturn(saveInstanceStateRequest);
+    when(mockCheckpoint.getCheckpoint()).thenReturn(checkpoint);
 
     localFileSystemBackend.store(mockCheckpoint);
 
     PowerMockito.verifyStatic(times(1));
-    FileUtils.writeToFile(anyString(), eq(saveInstanceStateRequest.toByteArray()), eq(true));
+    FileUtils.writeToFile(anyString(), eq(checkpoint.toByteArray()), eq(true));
   }
 
   @Test
   public void testRestore() throws Exception {
     PowerMockito.spy(FileUtils.class);
-    PowerMockito.doReturn(saveInstanceStateRequest.toByteArray())
+    PowerMockito.doReturn(checkpoint.toByteArray())
         .when(FileUtils.class, "readFromFile", anyString());
 
-    Checkpoint ckpt = new Checkpoint(TOPOLOGY_NAME, getInstanceStateRequest);
+    Checkpoint ckpt = new Checkpoint(TOPOLOGY_NAME, instance, checkpoint);
 
-    localFileSystemBackend.restore(ckpt);
+    localFileSystemBackend.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
 
-    assertEquals(saveInstanceStateRequest, ckpt.getCheckpoint());
+    assertEquals(checkpoint, ckpt.getCheckpoint());
   }
 
   @Test

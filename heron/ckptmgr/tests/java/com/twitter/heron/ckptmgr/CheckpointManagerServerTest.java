@@ -26,8 +26,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
@@ -44,9 +42,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CheckpointManagerServerTest {
 
@@ -64,6 +62,7 @@ public class CheckpointManagerServerTest {
   private static final String SERVER_HOST = "127.0.0.1";
   private static int serverPort;
 
+  private static CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
   private static CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private static CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
   private static CheckpointManager.CleanStatefulCheckpointRequest cleanStatefulCheckpointRequest;
@@ -96,15 +95,14 @@ public class CheckpointManagerServerTest {
         .setInfo(info)
         .build();
 
-    CheckpointManager.InstanceStateCheckpoint checkpoint =
-        CheckpointManager.InstanceStateCheckpoint.newBuilder()
+    instanceStateCheckpoint = CheckpointManager.InstanceStateCheckpoint.newBuilder()
             .setCheckpointId(CHECKPOINT_ID)
             .setState(ByteString.copyFrom(BYTES))
             .build();
 
     saveInstanceStateRequest = CheckpointManager.SaveInstanceStateRequest.newBuilder()
         .setInstance(instance)
-        .setCheckpoint(checkpoint)
+        .setCheckpoint(instanceStateCheckpoint)
         .build();
 
     getInstanceStateRequest = CheckpointManager.GetInstanceStateRequest.newBuilder()
@@ -193,26 +191,20 @@ public class CheckpointManagerServerTest {
 
   @Test
   public void testGetInstanceState() throws Exception {
-    doAnswer(new Answer<Checkpoint>() {
-      @Override
-      public Checkpoint answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Checkpoint checkpoint = (Checkpoint) invocationOnMock.getArguments()[0];
-        checkpoint.setCheckpoint(saveInstanceStateRequest);
-        return checkpoint;
-      }
-    }).when(backendStorage).restore(any(Checkpoint.class));
+    Checkpoint checkpoint = new Checkpoint(TOPOLOGY_NAME, instance, instanceStateCheckpoint);
+    when(backendStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance)).thenReturn(checkpoint);
 
     prepareClient(SimpleCheckpointManagerClient.RequestType.GET_INSTANCE_STATE);
 
     runClient(simpleCheckpointManagerClient);
     finishedSignal.await(2, TimeUnit.SECONDS);
 
-    verify(backendStorage).restore(any(Checkpoint.class));
+    verify(backendStorage).restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
     assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
 
     Message response = simpleCheckpointManagerClient.getResponse();
     assertTrue(response instanceof CheckpointManager.GetInstanceStateResponse);
-    assertEquals(saveInstanceStateRequest.getCheckpoint(),
+    assertEquals(checkpoint.getCheckpoint(),
         ((CheckpointManager.GetInstanceStateResponse) response).getCheckpoint());
   }
 

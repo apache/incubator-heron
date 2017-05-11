@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FileSystem.class, CheckpointManager.SaveInstanceStateRequest.class})
+@PrepareForTest({FileSystem.class, CheckpointManager.InstanceStateCheckpoint.class})
 public class HDFSStorageTest {
 
   private static final String TOPOLOGY_NAME = "topology_name";
@@ -65,8 +65,8 @@ public class HDFSStorageTest {
   private static final int COMPONENT_INDEX = 1;
   private static final byte[] BYTES = "HDFS test bytes".getBytes();
 
-  private CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
-  private CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
+  private PhysicalPlans.Instance instance;
+  private CheckpointManager.InstanceStateCheckpoint instanceCheckpointState;
 
   private HDFSStorage hdfsStorage;
   private FileSystem mockFileSystem;
@@ -92,26 +92,15 @@ public class HDFSStorageTest {
         .setComponentName(COMPONENT_NAME)
         .build();
 
-    PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder()
+    instance = PhysicalPlans.Instance.newBuilder()
         .setInstanceId(INSTANCE_ID)
         .setStmgrId(STMGR_ID)
         .setInfo(info)
         .build();
 
-    CheckpointManager.InstanceStateCheckpoint checkpoint =
-        CheckpointManager.InstanceStateCheckpoint.newBuilder()
-            .setCheckpointId(CHECKPOINT_ID)
-            .setState(ByteString.copyFrom(BYTES))
-            .build();
-
-    saveInstanceStateRequest = CheckpointManager.SaveInstanceStateRequest.newBuilder()
-        .setInstance(instance)
-        .setCheckpoint(checkpoint)
-        .build();
-
-    getInstanceStateRequest = CheckpointManager.GetInstanceStateRequest.newBuilder()
-        .setInstance(instance)
+    instanceCheckpointState = CheckpointManager.InstanceStateCheckpoint.newBuilder()
         .setCheckpointId(CHECKPOINT_ID)
+        .setState(ByteString.copyFrom(BYTES))
         .build();
   }
 
@@ -122,38 +111,38 @@ public class HDFSStorageTest {
 
   @Test
   public void testStore() throws Exception {
-    Checkpoint mockCheckpoint = mock(Checkpoint.class);
+    PowerMockito.mockStatic(CheckpointManager.InstanceStateCheckpoint.class);
+    CheckpointManager.InstanceStateCheckpoint mockCheckpointState =
+        mock(CheckpointManager.InstanceStateCheckpoint.class);
 
-    PowerMockito.mockStatic(CheckpointManager.SaveInstanceStateRequest.class);
-    CheckpointManager.SaveInstanceStateRequest mockSaveInstanceStateRequest =
-        mock(CheckpointManager.SaveInstanceStateRequest.class);
-    when(mockCheckpoint.getCheckpoint()).thenReturn(mockSaveInstanceStateRequest);
+    Checkpoint checkpoint =
+        new Checkpoint(TOPOLOGY_NAME, instance, mockCheckpointState);
 
     FSDataOutputStream mockFSDateOutputStream = mock(FSDataOutputStream.class);
     when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutputStream);
 
     doReturn(true).when(hdfsStorage).createDirs(anyString());
 
-    hdfsStorage.store(mockCheckpoint);
+    hdfsStorage.store(checkpoint);
 
-    verify(mockSaveInstanceStateRequest).writeTo(mockFSDateOutputStream);
+    verify(mockCheckpointState).writeTo(mockFSDateOutputStream);
   }
 
   @Test
   public void testRestore() throws Exception {
-    Checkpoint restoreCheckpoint = new Checkpoint(TOPOLOGY_NAME, getInstanceStateRequest);
+    Checkpoint restoreCheckpoint = new Checkpoint(TOPOLOGY_NAME, instance, instanceCheckpointState);
 
     FSDataInputStream mockFSDataInputStream = mock(FSDataInputStream.class);
 
     when(mockFileSystem.open(any(Path.class))).thenReturn(mockFSDataInputStream);
 
-    PowerMockito.spy(CheckpointManager.SaveInstanceStateRequest.class);
-    PowerMockito.doReturn(saveInstanceStateRequest)
-        .when(CheckpointManager.SaveInstanceStateRequest.class, "parseFrom", mockFSDataInputStream);
+    PowerMockito.spy(CheckpointManager.InstanceStateCheckpoint.class);
+    PowerMockito.doReturn(instanceCheckpointState)
+        .when(CheckpointManager.InstanceStateCheckpoint.class, "parseFrom", mockFSDataInputStream);
 
-    hdfsStorage.restore(restoreCheckpoint);
+    hdfsStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
 
-    assertEquals(restoreCheckpoint.getCheckpoint(), saveInstanceStateRequest);
+    assertEquals(restoreCheckpoint.getCheckpoint(), instanceCheckpointState);
   }
 
   @Test
