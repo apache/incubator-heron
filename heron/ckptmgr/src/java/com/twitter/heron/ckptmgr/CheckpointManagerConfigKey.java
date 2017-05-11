@@ -24,7 +24,7 @@ public enum CheckpointManagerConfigKey {
   /**
    * The configs for the backend storage
    */
-  STORAGE_CONFIG("heron.statefulstorage.config", Type.OBJECT),
+  STORAGE_CONFIG("heron.statefulstorage.config", Type.MAP),
 
   /**
    * The class name of the backend storage
@@ -70,7 +70,7 @@ public enum CheckpointManagerConfigKey {
     INTEGER,
     LONG,
     STRING,
-    OBJECT
+    MAP
   }
 
   // Map of value -> enum
@@ -107,9 +107,9 @@ public enum CheckpointManagerConfigKey {
     this.defaultValue = defaultValue;
   }
 
-  CheckpointManagerConfigKey(String value, Object defaultValue) {
+  CheckpointManagerConfigKey(String value, Map<String, Object> defaultValue) {
     this.value = value;
-    this.type = Type.OBJECT;
+    this.type = Type.MAP;
     this.defaultValue = defaultValue;
   }
 

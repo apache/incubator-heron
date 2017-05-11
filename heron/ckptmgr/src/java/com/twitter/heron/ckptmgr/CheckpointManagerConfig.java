@@ -160,7 +160,7 @@ public final class CheckpointManagerConfig {
           case STRING:
             config.put(key.value(), value);
             break;
-          case OBJECT:
+          case MAP:
             config.put(key.value(), value);
             break;
           default:
