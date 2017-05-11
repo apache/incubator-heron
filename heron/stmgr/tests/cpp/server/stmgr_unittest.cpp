@@ -1415,7 +1415,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
   // Kill current tmaster
-  common.ss_list_.front()->loopExit();
+  common.ss_list_[1]->loopExit();
   common.tmaster_thread_->join();
   delete common.tmaster_;
   delete common.tmaster_thread_;
