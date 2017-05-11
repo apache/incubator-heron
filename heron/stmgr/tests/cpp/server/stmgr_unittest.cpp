@@ -681,6 +681,12 @@ TEST(StMgr, test_pplan_decode) {
   // Verify that the pplan was decoded properly
   const heron::proto::system::PhysicalPlan* pplan0 = common.stmgrs_list_[0]->GetPhysicalPlan();
   EXPECT_EQ(pplan0->stmgrs_size(), common.num_stmgrs_);
+  for (int i=0; i<common.num_stmgrs_; i++) {
+    std::cout << "checking stmgr port " << pplan0->stmgrs(i).data_port() << std::endl;
+    EXPECT_NE(common.stmgr_ports_.end(),
+              std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),
+                        pplan0->stmgrs(i).data_port()));
+  }
   EXPECT_EQ(pplan0->instances_size(), common.num_stmgrs_ * num_workers_per_stmgr_);
   std::map<sp_string, heron::config::PhysicalPlanHelper::TaskData> tasks;
   heron::config::PhysicalPlanHelper::GetLocalTasks(*pplan0, common.stmgrs_id_list_[0], tasks);
