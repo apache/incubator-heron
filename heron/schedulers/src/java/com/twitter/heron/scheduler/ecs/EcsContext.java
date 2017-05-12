@@ -14,47 +14,24 @@
 
 package com.twitter.heron.scheduler.ecs;
 
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.TokenSub;
 
-
-/**
- * Created by ananth on 4/29/17.
- */
 public class EcsContext extends Context {
-  public static final String PART1 = "version: '2'\n"
-      + "services:\n"
-      + "  container_number:\n"
-      + "    image: ananthgs/onlyheronandubuntu\n";
-  public static final String CMD = "    command: [\"sh\", \"-c\", \"mkdir /s3; cd /s3 ;"
-      + "aws s3 cp s3://herondockercal/TOPOLOGY_NAME/topology.tar.gz /s3 ;"
-      + "aws s3 cp s3://herondockercal/heron-core-testbuild-ubuntu14.04.tar.gz /s3 ;cd /s3;"
-      + " tar -zxvf topology.tar.gz; tar -zxvf heron-core-testbuild-ubuntu14.04.tar.gz;"
-      + "heron_executor ;\"] \n";
-  public static final String ECSNETWORK = "    networks:\n"
-      + "      - heron\n"
-      + "    ports:\n"
-      + "    - \"5000:5000\"\n"
-      + "    - \"5001:5001\"\n"
-      + "    - \"5002:5002\"\n"
-      + "    - \"5003:5003\"\n"
-      + "    - \"5004:5004\"\n"
-      + "    - \"5005:5005\"\n"
-      + "    - \"5006:5006\"\n"
-      + "    - \"5007:5007\"\n"
-      + "    - \"5008:5008\"\n"
-      + "    - \"5009:5009\"\n"
-      + "    volumes:\n"
-      + "      - \"herondata:/root/.herondata\"\n"
-      + "networks:\n"
-      + "  heron:\n"
-      + "    driver: bridge\n"
-      + "volumes:\n"
-      + "  herondata:\n"
-      + "    driver: local";
-  public static final String DESTINATION_JVM = "/usr/lib/jvm/java-8-oracle";
-  public static final String ECS_CLUSTER_BINARY = "heron-examples.jar";
   public static final String COMPOSE_CMD = "ecs-cli compose --project-name ";
   public static final String UP = " up";
+
+  public static String ecsClusterBinary(Config config) {
+    String workingDirectory = config.getStringValue(
+        EcsKey.ECS_CLUSTER_BINARY.value(), EcsKey.ECS_CLUSTER_BINARY.getDefaultString());
+    return TokenSub.substitute(config, workingDirectory);
+  }
+  public static String ecsComposeTemplate(Config config) {
+    String workingDirectory = config.getStringValue(
+        EcsKey.ECS_COMPOSE_TEMPLATE.value(), EcsKey.ECS_COMPOSE_TEMPLATE.getDefaultString());
+    return TokenSub.substitute(config, workingDirectory);
+  }
 
 }
 
