@@ -38,20 +38,20 @@ public class CheckpointManagerServer extends HeronServer {
   private final String topologyName;
   private final String topologyId;
   private final String checkpointMgrId;
-  private final IStatefulStorage checkpointsBackend;
+  private final IStatefulStorage statefulStorage;
 
   private SocketChannel connection;
 
   public CheckpointManagerServer(
       String topologyName, String topologyId, String checkpointMgrId,
-      IStatefulStorage checkpointsBackend, NIOLooper looper, String host,
+      IStatefulStorage statefulStorage, NIOLooper looper, String host,
       int port, HeronSocketOptions options) {
     super(looper, host, port, options);
 
     this.topologyName = topologyName;
     this.topologyId = topologyId;
     this.checkpointMgrId = checkpointMgrId;
-    this.checkpointsBackend = checkpointsBackend;
+    this.statefulStorage = statefulStorage;
 
     this.connection = null;
 
@@ -109,7 +109,7 @@ public class CheckpointManagerServer extends HeronServer {
     Common.StatusCode statusCode = Common.StatusCode.OK;
 
     try {
-      checkpointsBackend.dispose(topologyName,
+      statefulStorage.dispose(topologyName,
                                  request.getOldestCheckpointPreserved(), deleteAll);
       LOG.info("Dispose checkpoint successful");
     } catch (StatefulStorageException e) {
@@ -195,7 +195,7 @@ public class CheckpointManagerServer extends HeronServer {
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
     try {
-      checkpointsBackend.store(checkpoint);
+      statefulStorage.store(checkpoint);
       LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instance %s",
                              checkpoint.getCheckpointId(), checkpoint.getComponent(),
                              checkpoint.getInstance()));
@@ -244,7 +244,7 @@ public class CheckpointManagerServer extends HeronServer {
       responseBuilder.setCheckpoint(dummyState);
     } else {
       try {
-        Checkpoint checkpoint = checkpointsBackend.restore(topologyName, request.getCheckpointId(),
+        Checkpoint checkpoint = statefulStorage.restore(topologyName, request.getCheckpointId(),
                                                 request.getInstance());
         LOG.info(String.format("Get checkpoint successful for checkpointId %s "
                                + "component %s taskId %d", checkpoint.getCheckpointId(),
