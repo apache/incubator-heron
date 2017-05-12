@@ -174,7 +174,7 @@ public class CheckpointManager {
         checkpointManagerServerLoop, serverHost, serverPort, serverSocketOptions);
   }
 
-  public void start() {
+  public void startAndLoop() {
     // The CheckpointManagerServer would run in the main thread
     // We do it in the final step since it would await the main thread
     LOG.info("Starting CheckpointManager Server");
@@ -240,7 +240,7 @@ public class CheckpointManager {
     CheckpointManager checkpointManager =
         new CheckpointManager(topologyName, topologyId, ckptmgrId,
             CHECKPOINT_MANAGER_HOST, port, systemConfig, ckptmgrConfig);
-    checkpointManager.start();
+    checkpointManager.startAndLoop();
 
     LOG.info("Loops terminated. Exiting.");
   }

@@ -47,15 +47,15 @@ public class LocalFileSystemStorageTest {
   private PhysicalPlans.Instance instance;
   private InstanceStateCheckpoint checkpoint;
 
-  private LocalFileSystemStorage localFileSystemBackend;
+  private LocalFileSystemStorage localFileSystemStorage;
 
   @Before
   public void before() throws Exception {
     Map<String, Object> config = new HashMap<>();
     config.put(StatefulStorageTestContext.ROOT_PATH_KEY, StatefulStorageTestContext.ROOT_PATH);
 
-    localFileSystemBackend = spy(new LocalFileSystemStorage());
-    localFileSystemBackend.init(config);
+    localFileSystemStorage = spy(new LocalFileSystemStorage());
+    localFileSystemStorage.init(config);
 
     instance = StatefulStorageTestContext.getInstance();
     checkpoint = StatefulStorageTestContext.getInstanceStateCheckpoint();
@@ -63,7 +63,7 @@ public class LocalFileSystemStorageTest {
 
   @After
   public void after() throws Exception {
-    localFileSystemBackend.close();
+    localFileSystemStorage.close();
   }
 
   @Test
@@ -78,7 +78,7 @@ public class LocalFileSystemStorageTest {
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
     when(mockCheckpoint.getCheckpoint()).thenReturn(checkpoint);
 
-    localFileSystemBackend.store(mockCheckpoint);
+    localFileSystemStorage.store(mockCheckpoint);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.writeToFile(anyString(), eq(checkpoint.toByteArray()), eq(true));
@@ -93,7 +93,7 @@ public class LocalFileSystemStorageTest {
     Checkpoint ckpt =
         new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, checkpoint);
 
-    localFileSystemBackend.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
+    localFileSystemStorage.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
 
     assertEquals(checkpoint, ckpt.getCheckpoint());
@@ -105,7 +105,7 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(true).when(FileUtils.class, "deleteDir", anyString());
     PowerMockito.doReturn(false).when(FileUtils.class, "isDirectoryExists", anyString());
 
-    localFileSystemBackend.dispose(StatefulStorageTestContext.TOPOLOGY_NAME, "", true);
+    localFileSystemStorage.dispose(StatefulStorageTestContext.TOPOLOGY_NAME, "", true);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.deleteDir(anyString());
