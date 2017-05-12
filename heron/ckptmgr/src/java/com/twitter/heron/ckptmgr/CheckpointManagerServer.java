@@ -102,8 +102,8 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.CleanStatefulCheckpointRequest request
   ) {
-    LOG.info("Got a clean request from " + request.toString() + " host:port "
-        + channel.socket().getRemoteSocketAddress());
+    LOG.info(String.format("Got a clean request from %s running at host:port %s",
+             request.toString(), channel.socket().getRemoteSocketAddress()));
 
     boolean deleteAll = request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints();
     Common.StatusCode statusCode = Common.StatusCode.OK;
@@ -113,7 +113,10 @@ public class CheckpointManagerServer extends HeronServer {
                                  request.getOldestCheckpointPreserved(), deleteAll);
       LOG.info("Dispose checkpoint successful");
     } catch (StatefulStorageException e) {
-      LOG.info("Dispose checkpoint failed with error " + e);
+      LOG.log(Level.WARNING,
+              String.format("Request to dispose checkpoint failed for oldest Checkpoint "
+                            + "%s and deleteAll? %b",
+                            request.getOldestCheckpointPreserved(), deleteAll), e);
       statusCode = Common.StatusCode.NOTOK;
     }
 
@@ -129,18 +132,18 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.RegisterTMasterRequest request
   ) {
-    LOG.info("Got a register request from TMaster host:port "
+    LOG.info("Got a TMaster register request from TMaster host:port "
         + channel.socket().getRemoteSocketAddress());
 
     CheckpointManager.RegisterTMasterResponse.Builder responseBuilder =
         CheckpointManager.RegisterTMasterResponse.newBuilder();
 
     if (!request.getTopologyName().equals(topologyName)) {
-      LOG.severe("The register message was from a different topology: "
+      LOG.severe("The TMaster register message was from a different topology: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (!request.getTopologyId().equals(topologyId)) {
-      LOG.severe("The register message was from a different topology id: "
+      LOG.severe("The TMaster register message was from a different topology id: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (connection != null) {
@@ -151,8 +154,8 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         connection.close();
       } catch (IOException e) {
-        LOG.warning("Failed to close connection from: "
-                  + connection.socket().getRemoteSocketAddress());
+        LOG.log(Level.WARNING, "Failed to close connection from: "
+                + connection.socket().getRemoteSocketAddress(), e);
       }
 
       connection = null;
@@ -170,18 +173,18 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.RegisterStMgrRequest request
   ) {
-    LOG.info("Got a register request from " + request.getStmgrId() + " host:port "
-        + channel.socket().getRemoteSocketAddress());
+    LOG.info(String.format("Got a StMgr register request from %s running on host:port %s",
+                           request.getStmgrId(), channel.socket().getRemoteSocketAddress()));
 
     CheckpointManager.RegisterStMgrResponse.Builder responseBuilder =
         CheckpointManager.RegisterStMgrResponse.newBuilder();
 
     if (!request.getTopologyName().equals(topologyName)) {
-      LOG.severe("The register message was from a different topology: "
+      LOG.severe("The StMgr register message was from a different topology: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (!request.getTopologyId().equals(topologyId)) {
-      LOG.severe("The register message was from a different topology id: "
+      LOG.severe("The StMgr register message was from a different topology id: "
           + request.getTopologyName());
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else if (connection != null) {
@@ -192,8 +195,8 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         connection.close();
       } catch (IOException e) {
-        LOG.warning("Failed to close connection from: "
-                  + connection.socket().getRemoteSocketAddress());
+        LOG.log(Level.WARNING, "Failed to close connection from: "
+                + connection.socket().getRemoteSocketAddress(), e);
       }
 
       connection = null;
@@ -213,18 +216,22 @@ public class CheckpointManagerServer extends HeronServer {
   ) {
     Checkpoint checkpoint = new Checkpoint(topologyName, request.getInstance(),
                                            request.getCheckpoint());
-    LOG.info("Got a save checkpoint request for " + checkpoint.getCheckpointId() + " "
-        + checkpoint.getComponent() + " " + checkpoint.getInstance() + " on connection: "
-        + channel.socket().getRemoteSocketAddress());
+    LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
+                           + " component %s instance %s on connection %s",
+                           checkpoint.getCheckpointId(), checkpoint.getComponent(),
+                           checkpoint.getInstance(), channel.socket().getRemoteSocketAddress()));
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
     try {
       checkpointsBackend.store(checkpoint);
-      LOG.info("Save checkpoint successful for " + checkpoint.getCheckpointId() + " "
-          + checkpoint.getComponent() + " " + checkpoint.getInstance());
+      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instance %s",
+                             checkpoint.getCheckpointId(), checkpoint.getComponent(),
+                             checkpoint.getInstance()));
     } catch (StatefulStorageException e) {
-      LOG.info("Save checkpoint not successful for " + checkpoint.getCheckpointId() + " "
-          + checkpoint.getComponent() + " " + checkpoint.getInstance() + " error: " + e);
+      LOG.log(Level.WARNING, String.format("Save checkpoint not successful for checkpointId "
+                                           + "%s component %s instance %s",
+                                           checkpoint.getCheckpointId(), checkpoint.getComponent(),
+                                           checkpoint.getInstance()), e);
       statusCode = Common.StatusCode.NOTOK;
     }
 
@@ -242,21 +249,20 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.GetInstanceStateRequest request
   ) {
-    LOG.info("Got a get checkpoint request for " + request.getCheckpointId() + " "
-        + request.getInstance().getInfo().getComponentName() + " "
-        + request.getInstance().getInfo().getTaskId() + " on connection: "
-        + channel.socket().getRemoteSocketAddress());
+    LOG.info(String.format("Got a get checkpoint request for checkpointId %s "
+                           + " component %s taskId %d on connection %s",
+                           request.getCheckpointId(),
+                           request.getInstance().getInfo().getComponentName(),
+                           request.getInstance().getInfo().getTaskId(),
+                           channel.socket().getRemoteSocketAddress()));
 
     CheckpointManager.GetInstanceStateResponse.Builder responseBuilder =
         CheckpointManager.GetInstanceStateResponse.newBuilder();
     responseBuilder.setInstance(request.getInstance());
     responseBuilder.setCheckpointId(request.getCheckpointId());
 
-    boolean res;
     Common.StatusCode statusCode = Common.StatusCode.OK;
     if (!request.hasCheckpointId() || request.getCheckpointId().isEmpty()) {
-      res = true;
-
       LOG.info("The checkpoint id was empty, this sending empty state");
       CheckpointManager.InstanceStateCheckpoint dummyState =
           CheckpointManager.InstanceStateCheckpoint.newBuilder()
@@ -268,14 +274,16 @@ public class CheckpointManagerServer extends HeronServer {
       try {
         Checkpoint checkpoint = checkpointsBackend.restore(topologyName, request.getCheckpointId(),
                                                 request.getInstance());
-        LOG.info("Get checkpoint successful for " + checkpoint.getCheckpointId() + " "
-            + checkpoint.getComponent() + " " + checkpoint.getInstance());
+        LOG.info(String.format("Get checkpoint successful for checkpointId %s "
+                               + "component %s taskId %d", checkpoint.getCheckpointId(),
+                               checkpoint.getComponent(), checkpoint.getTaskId()));
         // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
-        LOG.info("Get checkpoint not successful for " + request.getCheckpointId() + " "
-            + request.getInstance().getInfo().getComponentName()
-            + " " + request.getInstance().getInfo().getTaskId());
+        LOG.log(Level.WARNING, String.format("Get checkpoint not successful for checkpointId %s "
+                                             + "component %s taskId %d", request.getCheckpointId(),
+                                             request.getInstance().getInfo().getComponentName(),
+                                             request.getInstance().getInfo().getTaskId()), e);
         statusCode = Common.StatusCode.NOTOK;
       }
     }
