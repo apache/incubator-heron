@@ -138,27 +138,13 @@ public class CheckpointManagerServer extends HeronServer {
     CheckpointManager.RegisterTMasterResponse.Builder responseBuilder =
         CheckpointManager.RegisterTMasterResponse.newBuilder();
 
-    if (!request.getTopologyName().equals(topologyName)) {
-      LOG.severe("The TMaster register message was from a different topology: "
-          + request.getTopologyName());
+    if (!checkRegistrationValidity(request.getTopologyName(),
+                                   request.getTopologyId())) {
+      LOG.severe(String.format("The TMaster register message came with a different topologyName: "
+                               + "%s and/or topologyId: %s", request.getTopologyName(),
+                               request.getTopologyId()));
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
-    } else if (!request.getTopologyId().equals(topologyId)) {
-      LOG.severe("The TMaster register message was from a different topology id: "
-          + request.getTopologyName());
-      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
-    } else if (connection != null) {
-      // TODO(mfu): Should we do this?
-      LOG.warning("We already have an active connection from the tmaster "
-          + "Closing existing connection...");
-
-      try {
-        connection.close();
-      } catch (IOException e) {
-        LOG.log(Level.WARNING, "Failed to close connection from: "
-                + connection.socket().getRemoteSocketAddress(), e);
-      }
-
-      connection = null;
+    } else if (!checkExistingConnection()) {
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else {
       connection = channel;
@@ -179,27 +165,13 @@ public class CheckpointManagerServer extends HeronServer {
     CheckpointManager.RegisterStMgrResponse.Builder responseBuilder =
         CheckpointManager.RegisterStMgrResponse.newBuilder();
 
-    if (!request.getTopologyName().equals(topologyName)) {
-      LOG.severe("The StMgr register message was from a different topology: "
-          + request.getTopologyName());
+    if (!checkRegistrationValidity(request.getTopologyName(),
+                                   request.getTopologyId())) {
+      LOG.severe(String.format("The StMgr register message came with a different topologyName: "
+                               + "%s and/or topologyId: %s", request.getTopologyName(),
+                               request.getTopologyId()));
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
-    } else if (!request.getTopologyId().equals(topologyId)) {
-      LOG.severe("The StMgr register message was from a different topology id: "
-          + request.getTopologyName());
-      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
-    } else if (connection != null) {
-      // TODO(mfu): Should we do this?
-      LOG.warning("We already have an active connection from the stmgr "
-          + request.getStmgrId() + ". Closing existing connection...");
-
-      try {
-        connection.close();
-      } catch (IOException e) {
-        LOG.log(Level.WARNING, "Failed to close connection from: "
-                + connection.socket().getRemoteSocketAddress(), e);
-      }
-
-      connection = null;
+    } else if (!checkExistingConnection()) {
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else {
       connection = channel;
@@ -305,5 +277,25 @@ public class CheckpointManagerServer extends HeronServer {
 
     // Reset the connection
     connection = null;
+  }
+
+  private boolean checkRegistrationValidity(String topName, String topId) {
+    return this.topologyName.equals(topName) && this.topologyId.equals(topId);
+  }
+
+  private boolean checkExistingConnection() {
+    if (connection != null) {
+      LOG.warning("We already have an active connection Closing it..");
+      try {
+        connection.close();
+      } catch (IOException e) {
+        LOG.log(Level.WARNING, "Failed to close connection from: "
+                + connection.socket().getRemoteSocketAddress(), e);
+      }
+      connection = null;
+      return false;
+    } else {
+      return true;
+    }
   }
 }
