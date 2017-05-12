@@ -17,8 +17,6 @@ package com.twitter.heron.statefulstorage.localfs;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.protobuf.ByteString;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +29,7 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpoint;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -45,18 +44,6 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(FileUtils.class)
 public class LocalFileSystemStorageTest {
-
-  private static final String TOPOLOGY_NAME = "topology_name";
-  private static final String ROOT_PATH_KEY = "root.path";
-  private static final String ROOT_PATH = "localFSTest";
-  private static final String CHECKPOINT_ID = "checkpoint_id";
-  private static final String STMGR_ID = "stmgr_id";
-  private static final String INSTANCE_ID = "instance_id";
-  private static final String COMPONENT_NAME = "component_name";
-  private static final int TASK_ID = 1;
-  private static final int COMPONENT_INDEX = 1;
-  private static final byte[] BYTES = "LocalFS test bytes".getBytes();
-
   private PhysicalPlans.Instance instance;
   private InstanceStateCheckpoint checkpoint;
 
@@ -65,27 +52,13 @@ public class LocalFileSystemStorageTest {
   @Before
   public void before() throws Exception {
     Map<String, Object> config = new HashMap<>();
-    config.put(ROOT_PATH_KEY, ROOT_PATH);
+    config.put(StatefulStorageTestContext.ROOT_PATH_KEY, StatefulStorageTestContext.ROOT_PATH);
 
     localFileSystemBackend = spy(new LocalFileSystemStorage());
     localFileSystemBackend.init(config);
 
-    PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
-        .setTaskId(TASK_ID)
-        .setComponentIndex(COMPONENT_INDEX)
-        .setComponentName(COMPONENT_NAME)
-        .build();
-
-    instance = PhysicalPlans.Instance.newBuilder()
-        .setInstanceId(INSTANCE_ID)
-        .setStmgrId(STMGR_ID)
-        .setInfo(info)
-        .build();
-
-    checkpoint = InstanceStateCheckpoint.newBuilder()
-        .setCheckpointId(CHECKPOINT_ID)
-        .setState(ByteString.copyFrom(BYTES))
-        .build();
+    instance = StatefulStorageTestContext.getInstance();
+    checkpoint = StatefulStorageTestContext.getInstanceStateCheckpoint();
   }
 
   @After
@@ -117,9 +90,11 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(checkpoint.toByteArray())
         .when(FileUtils.class, "readFromFile", anyString());
 
-    Checkpoint ckpt = new Checkpoint(TOPOLOGY_NAME, instance, checkpoint);
+    Checkpoint ckpt =
+        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, checkpoint);
 
-    localFileSystemBackend.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
+    localFileSystemBackend.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
 
     assertEquals(checkpoint, ckpt.getCheckpoint());
   }
@@ -130,7 +105,7 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(true).when(FileUtils.class, "deleteDir", anyString());
     PowerMockito.doReturn(false).when(FileUtils.class, "isDirectoryExists", anyString());
 
-    localFileSystemBackend.dispose(TOPOLOGY_NAME, "", true);
+    localFileSystemBackend.dispose(StatefulStorageTestContext.TOPOLOGY_NAME, "", true);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.deleteDir(anyString());

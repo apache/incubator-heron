@@ -19,8 +19,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.protobuf.ByteString;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -38,6 +36,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
+import com.twitter.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -54,17 +53,6 @@ import static org.mockito.Mockito.when;
 @PrepareForTest({FileSystem.class, CheckpointManager.InstanceStateCheckpoint.class})
 public class HDFSStorageTest {
 
-  private static final String TOPOLOGY_NAME = "topology_name";
-  private static final String ROOT_PATH_KEY = "root.path";
-  private static final String ROOT_PATH = "HDFSTest";
-  private static final String CHECKPOINT_ID = "checkpoint_id";
-  private static final String STMGR_ID = "stmgr_id";
-  private static final String INSTANCE_ID = "instance_id";
-  private static final String COMPONENT_NAME = "component_name";
-  private static final int TASK_ID = 1;
-  private static final int COMPONENT_INDEX = 1;
-  private static final byte[] BYTES = "HDFS test bytes".getBytes();
-
   private PhysicalPlans.Instance instance;
   private CheckpointManager.InstanceStateCheckpoint instanceCheckpointState;
 
@@ -74,7 +62,7 @@ public class HDFSStorageTest {
   @Before
   public void before() throws Exception {
     Map<String, Object> config = new HashMap<>();
-    config.put(ROOT_PATH_KEY, ROOT_PATH);
+    config.put(StatefulStorageTestContext.ROOT_PATH_KEY, StatefulStorageTestContext.ROOT_PATH);
 
     mockFileSystem = mock(FileSystem.class);
     when(mockFileSystem.getUri()).thenReturn(new URI("hdfs://hdfs_home_path/ckpgmgr"));
@@ -86,22 +74,8 @@ public class HDFSStorageTest {
     hdfsStorage = spy(HDFSStorage.class);
     hdfsStorage.init(config);
 
-    PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
-        .setTaskId(TASK_ID)
-        .setComponentIndex(COMPONENT_INDEX)
-        .setComponentName(COMPONENT_NAME)
-        .build();
-
-    instance = PhysicalPlans.Instance.newBuilder()
-        .setInstanceId(INSTANCE_ID)
-        .setStmgrId(STMGR_ID)
-        .setInfo(info)
-        .build();
-
-    instanceCheckpointState = CheckpointManager.InstanceStateCheckpoint.newBuilder()
-        .setCheckpointId(CHECKPOINT_ID)
-        .setState(ByteString.copyFrom(BYTES))
-        .build();
+    instance = StatefulStorageTestContext.getInstance();
+    instanceCheckpointState = StatefulStorageTestContext.getInstanceStateCheckpoint();
   }
 
   @After
@@ -116,7 +90,7 @@ public class HDFSStorageTest {
         mock(CheckpointManager.InstanceStateCheckpoint.class);
 
     Checkpoint checkpoint =
-        new Checkpoint(TOPOLOGY_NAME, instance, mockCheckpointState);
+        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, mockCheckpointState);
 
     FSDataOutputStream mockFSDateOutputStream = mock(FSDataOutputStream.class);
     when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutputStream);
@@ -130,7 +104,8 @@ public class HDFSStorageTest {
 
   @Test
   public void testRestore() throws Exception {
-    Checkpoint restoreCheckpoint = new Checkpoint(TOPOLOGY_NAME, instance, instanceCheckpointState);
+    Checkpoint restoreCheckpoint =
+        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, instanceCheckpointState);
 
     FSDataInputStream mockFSDataInputStream = mock(FSDataInputStream.class);
 
@@ -140,13 +115,15 @@ public class HDFSStorageTest {
     PowerMockito.doReturn(instanceCheckpointState)
         .when(CheckpointManager.InstanceStateCheckpoint.class, "parseFrom", mockFSDataInputStream);
 
-    hdfsStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
+    hdfsStorage.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
     assertEquals(restoreCheckpoint.getCheckpoint(), instanceCheckpointState);
   }
 
   @Test
   public void testDisposeAll() throws Exception {
-    hdfsStorage.dispose(TOPOLOGY_NAME, CHECKPOINT_ID, true);
+    hdfsStorage.dispose(StatefulStorageTestContext.TOPOLOGY_NAME,
+        StatefulStorageTestContext.CHECKPOINT_ID, true);
     verify(mockFileSystem).delete(any(Path.class), eq(true));
   }
 
@@ -167,7 +144,8 @@ public class HDFSStorageTest {
         .thenReturn(mockFileStatus)
         .thenReturn(emptyFileStatus);
 
-    hdfsStorage.dispose(TOPOLOGY_NAME, CHECKPOINT_ID, false);
+    hdfsStorage.dispose(StatefulStorageTestContext.TOPOLOGY_NAME,
+        StatefulStorageTestContext.CHECKPOINT_ID, false);
 
     verify(mockFileSystem, times(2)).delete(any(Path.class), eq(true));
   }

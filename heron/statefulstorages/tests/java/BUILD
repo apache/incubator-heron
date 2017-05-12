@@ -17,7 +17,7 @@ localfs_deps_files = [
 
 java_library(
   name = "localfs-tests",
-  srcs = glob(["**/localfs/*.java"]),
+  srcs = glob(["**/localfs/*.java", "**/StatefulStorageTestContext.java"]),
   deps = test_deps_files + localfs_deps_files,
 )
 
@@ -37,7 +37,7 @@ hdfs_deps_files = [
 
 java_library(
   name = "hdfs-tests",
-  srcs = glob(["**/hdfs/*.java"]),
+  srcs = glob(["**/hdfs/*.java", "**/StatefulStorageTestContext.java"]),
   deps = test_deps_files + hdfs_deps_files,
 )
 
