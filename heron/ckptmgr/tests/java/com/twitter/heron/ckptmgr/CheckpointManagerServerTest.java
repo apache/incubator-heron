@@ -50,14 +50,8 @@ public class CheckpointManagerServerTest {
 
   private static final String TOPOLOGY_NAME = "topology_name";
   private static final String TOPOLOGY_ID = "topology_id";
-  private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
-  private static final String INSTANCE_ID = "instance_id";
-  private static final String STMGR_ID = "stmgr_id";
-  private static final int TASK_ID = 1;
-  private static final int COMPONENT_INDEX = 1;
   private static final String CHECKPOINT_ID = "checkpoint_id";
-  private static final String COMPONENT_NAME = "component_name";
-  private static final byte[] BYTES = "checkpoint manager server test bytes".getBytes();
+  private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
 
   private static final String SERVER_HOST = "127.0.0.1";
   private static int serverPort;
@@ -83,6 +77,13 @@ public class CheckpointManagerServerTest {
 
   @BeforeClass
   public static void setup() throws Exception {
+    final String INSTANCE_ID = "instance_id";
+    final String STMGR_ID = "stmgr_id";
+    final int TASK_ID = 1;
+    final int COMPONENT_INDEX = 1;
+    final String COMPONENT_NAME = "component_name";
+    final byte[] BYTES = "checkpoint manager server test bytes".getBytes();
+
     PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
         .setTaskId(TASK_ID)
         .setComponentIndex(COMPONENT_INDEX)
