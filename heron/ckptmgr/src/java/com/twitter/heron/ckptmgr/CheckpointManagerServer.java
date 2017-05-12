@@ -107,22 +107,24 @@ public class CheckpointManagerServer extends HeronServer {
 
     boolean deleteAll = request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints();
     Common.StatusCode statusCode = Common.StatusCode.OK;
+    String errorMessage = "";
 
     try {
       statefulStorage.dispose(topologyName,
                                  request.getOldestCheckpointPreserved(), deleteAll);
       LOG.info("Dispose checkpoint successful");
     } catch (StatefulStorageException e) {
-      LOG.log(Level.WARNING,
-              String.format("Request to dispose checkpoint failed for oldest Checkpoint "
-                            + "%s and deleteAll? %b",
-                            request.getOldestCheckpointPreserved(), deleteAll), e);
+      errorMessage = String.format("Request to dispose checkpoint failed for oldest Checkpoint "
+                                   + "%s and deleteAll? %b",
+                                   request.getOldestCheckpointPreserved(), deleteAll);
       statusCode = Common.StatusCode.NOTOK;
+      LOG.log(Level.WARNING, errorMessage, e);
     }
 
     CheckpointManager.CleanStatefulCheckpointResponse.Builder responseBuilder =
         CheckpointManager.CleanStatefulCheckpointResponse.newBuilder();
-    responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode));
+    responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode)
+                              .setMessage(errorMessage));
 
     sendResponse(rid, channel, responseBuilder.build());
   }
@@ -140,10 +142,13 @@ public class CheckpointManagerServer extends HeronServer {
 
     if (!checkRegistrationValidity(request.getTopologyName(),
                                    request.getTopologyId())) {
-      LOG.severe(String.format("The TMaster register message came with a different topologyName: "
-                               + "%s and/or topologyId: %s", request.getTopologyName(),
-                               request.getTopologyId()));
-      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
+      String errorMessage = String.format("The TMaster register message came with a different "
+                               + "topologyName: %s and/or topologyId: %s",
+                               request.getTopologyName(),
+                               request.getTopologyId());
+      LOG.severe(errorMessage);
+      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK)
+                                .setMessage(errorMessage));
     } else if (!checkExistingConnection()) {
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else {
@@ -167,10 +172,13 @@ public class CheckpointManagerServer extends HeronServer {
 
     if (!checkRegistrationValidity(request.getTopologyName(),
                                    request.getTopologyId())) {
-      LOG.severe(String.format("The StMgr register message came with a different topologyName: "
-                               + "%s and/or topologyId: %s", request.getTopologyName(),
-                               request.getTopologyId()));
-      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
+      String errorMessage = String.format("The StMgr register message came with a different "
+                               + "topologyName: %s and/or topologyId: %s",
+                               request.getTopologyName(),
+                               request.getTopologyId());
+      LOG.severe(errorMessage);
+      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK)
+                                .setMessage(errorMessage));
     } else if (!checkExistingConnection()) {
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
     } else {
@@ -194,17 +202,19 @@ public class CheckpointManagerServer extends HeronServer {
                            checkpoint.getInstance(), channel.socket().getRemoteSocketAddress()));
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
+    String errorMessage = "";
     try {
       statefulStorage.store(checkpoint);
       LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instance %s",
                              checkpoint.getCheckpointId(), checkpoint.getComponent(),
                              checkpoint.getInstance()));
     } catch (StatefulStorageException e) {
-      LOG.log(Level.WARNING, String.format("Save checkpoint not successful for checkpointId "
-                                           + "%s component %s instance %s",
-                                           checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                                           checkpoint.getInstance()), e);
+      errorMessage = String.format("Save checkpoint not successful for checkpointId "
+                                   + "%s component %s instance %s",
+                                   checkpoint.getCheckpointId(), checkpoint.getComponent(),
+                                   checkpoint.getInstance());
       statusCode = Common.StatusCode.NOTOK;
+      LOG.log(Level.WARNING, errorMessage, e);
     }
 
     CheckpointManager.SaveInstanceStateResponse.Builder responseBuilder =
@@ -252,10 +262,11 @@ public class CheckpointManagerServer extends HeronServer {
         // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
-        LOG.log(Level.WARNING, String.format("Get checkpoint not successful for checkpointId %s "
+        String errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
                                              + "component %s taskId %d", request.getCheckpointId(),
                                              request.getInstance().getInfo().getComponentName(),
-                                             request.getInstance().getInfo().getTaskId()), e);
+                                             request.getInstance().getInfo().getTaskId());
+        LOG.log(Level.WARNING, errorMessage, e);
         statusCode = Common.StatusCode.NOTOK;
       }
     }
