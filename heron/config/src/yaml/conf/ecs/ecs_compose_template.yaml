@@ -1,0 +1,16 @@
+version: '2'
+services:
+  CONTAINER_NUMBER:
+    image: ananthgs/onlyheronandubuntu
+    command: ["sh", "-c", "mkdir /s3; cd /s3 ;aws s3 cp s3://herondockercal/TOPOLOGY_NAME/topology.tar.gz /s3 ;aws s3 cp s3://herondockercal/heron-core-testbuild-ubuntu14.04.tar.gz /s3 ;cd /s3; tar -zxvf topology.tar.gz; tar -zxvf heron-core-testbuild-ubuntu14.04.tar.gz; HERON_EXECUTOR ;"]
+    networks:
+      - heron
+    ports:FREEPORTS
+    volumes:
+      - "herondata:/root/.herondata"
+networks:
+  heron:
+    driver: bridge
+volumes:
+  herondata:
+    driver: local
