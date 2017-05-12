@@ -163,7 +163,7 @@ public class CheckpointManager {
 
     try {
       statefulStorage.init(
-          Collections.unmodifiableMap(checkpointManagerConfig.getBackendConfig()));
+          Collections.unmodifiableMap(checkpointManagerConfig.getStatefulStorageConfig()));
     } catch (StatefulStorageException e) {
       throw new CheckpointManagerException(classname + " init threw exception", e);
     }

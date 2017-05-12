@@ -34,15 +34,15 @@ public final class CheckpointManagerConfig {
   }
 
   @SuppressWarnings("unchecked")
-  public Map<String, Object> getBackendConfig() {
-    Object backendConfigObject = get(CheckpointManagerConfigKey.STORAGE_CONFIG);
+  public Map<String, Object> getStatefulStorageConfig() {
+    Object statefulStorageConfigObject = get(CheckpointManagerConfigKey.STORAGE_CONFIG);
 
-    if (backendConfigObject instanceof Map) {
-      return (Map<String, Object>) backendConfigObject;
+    if (statefulStorageConfigObject instanceof Map) {
+      return (Map<String, Object>) statefulStorageConfigObject;
     } else {
       throw new IllegalArgumentException(
           String.format("configs for backend storage needs to be map, but is: %s",
-              backendConfigObject.getClass().getName()));
+              statefulStorageConfigObject.getClass().getName()));
     }
   }
 
