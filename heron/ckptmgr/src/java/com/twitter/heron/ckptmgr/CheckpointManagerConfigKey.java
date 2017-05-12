@@ -22,12 +22,12 @@ import java.util.Map;
 public enum CheckpointManagerConfigKey {
 
   /**
-   * The configs for the backend storage
+   * The configs for the stateful storage
    */
   STORAGE_CONFIG("heron.statefulstorage.config", Type.MAP),
 
   /**
-   * The class name of the backend storage
+   * The class name of the stateful storage
    */
   STORAGE_CLASSNAME("heron.class.statefulstorage", Type.STRING),
 

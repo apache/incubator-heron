@@ -41,7 +41,7 @@ public final class CheckpointManagerConfig {
       return (Map<String, Object>) statefulStorageConfigObject;
     } else {
       throw new IllegalArgumentException(
-          String.format("configs for backend storage needs to be map, but is: %s",
+          String.format("configs for stateful storage needs to be map, but is: %s",
               statefulStorageConfigObject.getClass().getName()));
     }
   }

@@ -20,7 +20,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 
 public interface IStatefulStorage {
   /**
-   * Initialize the Storage Backend
+   * Initialize the Stateful Storage
    *
    * @param conf An unmodifiableMap containing basic configuration
    * Attempts to modify the returned map,
@@ -29,7 +29,7 @@ public interface IStatefulStorage {
   void init(Map<String, Object> conf) throws StatefulStorageException;
 
   /**
-   * Closes the Checkpoints Backend
+   * Closes the Stateful Storage
    */
   void close();
 
