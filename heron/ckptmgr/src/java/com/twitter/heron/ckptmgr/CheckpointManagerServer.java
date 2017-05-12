@@ -150,7 +150,9 @@ public class CheckpointManagerServer extends HeronServer {
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK)
                                 .setMessage(errorMessage));
     } else if (!checkExistingConnection()) {
-      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
+      String errorMessage = "Please try again";
+      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK)
+                                .setMessage(errorMessage));
     } else {
       connection = channel;
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK));
@@ -180,7 +182,9 @@ public class CheckpointManagerServer extends HeronServer {
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK)
                                 .setMessage(errorMessage));
     } else if (!checkExistingConnection()) {
-      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK));
+      String errorMessage = "Please try again";
+      responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.NOTOK)
+                                .setMessage(errorMessage));
     } else {
       connection = channel;
       responseBuilder.setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK));
@@ -219,7 +223,8 @@ public class CheckpointManagerServer extends HeronServer {
 
     CheckpointManager.SaveInstanceStateResponse.Builder responseBuilder =
         CheckpointManager.SaveInstanceStateResponse.newBuilder();
-    responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode));
+    responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode)
+                              .setMessage(errorMessage));
     responseBuilder.setCheckpointId(request.getCheckpoint().getCheckpointId());
     responseBuilder.setInstance(request.getInstance());
 
@@ -242,6 +247,7 @@ public class CheckpointManagerServer extends HeronServer {
         CheckpointManager.GetInstanceStateResponse.newBuilder();
     responseBuilder.setInstance(request.getInstance());
     responseBuilder.setCheckpointId(request.getCheckpointId());
+    String errorMessage = "";
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
     if (!request.hasCheckpointId() || request.getCheckpointId().isEmpty()) {
@@ -262,16 +268,17 @@ public class CheckpointManagerServer extends HeronServer {
         // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
-        String errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
-                                             + "component %s taskId %d", request.getCheckpointId(),
-                                             request.getInstance().getInfo().getComponentName(),
-                                             request.getInstance().getInfo().getTaskId());
+        errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
+                                     + "component %s taskId %d", request.getCheckpointId(),
+                                     request.getInstance().getInfo().getComponentName(),
+                                     request.getInstance().getInfo().getTaskId());
         LOG.log(Level.WARNING, errorMessage, e);
         statusCode = Common.StatusCode.NOTOK;
       }
     }
 
-    responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode));
+    responseBuilder.setStatus(Common.Status.newBuilder().setStatus(statusCode)
+                              .setMessage(errorMessage));
 
     sendResponse(rid, channel, responseBuilder.build());
   }
