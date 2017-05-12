@@ -42,7 +42,7 @@ import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -121,7 +121,7 @@ public class HDFSStorageTest {
     FSDataOutputStream mockFSDateOutputStream = mock(FSDataOutputStream.class);
     when(mockFileSystem.create(any(Path.class))).thenReturn(mockFSDateOutputStream);
 
-    doReturn(true).when(hdfsStorage).createDir(anyString());
+    doNothing().when(hdfsStorage).createDir(anyString());
 
     hdfsStorage.store(checkpoint);
 
@@ -141,7 +141,6 @@ public class HDFSStorageTest {
         .when(CheckpointManager.InstanceStateCheckpoint.class, "parseFrom", mockFSDataInputStream);
 
     hdfsStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
-
     assertEquals(restoreCheckpoint.getCheckpoint(), instanceCheckpointState);
   }
 
