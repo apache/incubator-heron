@@ -23,9 +23,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
-/**
- * Created by ananth on 4/18/17.
- */
 public class EcsLauncher implements ILauncher {
   protected static final Logger LOG = Logger.getLogger(EcsLauncher.class.getName());
 
