@@ -63,6 +63,12 @@ void MetricsMgrClient::HandleClose(NetworkErrorCode) {
 
 void MetricsMgrClient::ReConnect() { Start(); }
 
+void MetricsMgrClient::SetPublisherPort(const sp_int32 _port) {
+  if (0 == port_ && 0 != _port) {
+    port_ = _port;
+  }
+}
+
 void MetricsMgrClient::SendRegisterRequest() {
   proto::system::MetricPublisherRegisterRequest* request;
   request = new proto::system::MetricPublisherRegisterRequest();

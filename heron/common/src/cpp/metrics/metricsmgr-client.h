@@ -44,6 +44,9 @@ class MetricsMgrClient : public Client {
   void SendTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void SendMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
+  // Sets the port_ if port_ binds to port 0 originally
+  void SetPublisherPort(const sp_int32 _port);
+
  protected:
   virtual void HandleConnect(NetworkErrorCode status);
   virtual void HandleClose(NetworkErrorCode status);
