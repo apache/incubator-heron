@@ -18,12 +18,16 @@ package com.twitter.heron.scheduler.ecs;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
@@ -33,13 +37,11 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 
-/**
- * Created by ananth on 4/19/17.
- */
 public class EcsScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(EcsScheduler.class.getName());
   private Config config;
   private Config runtime;
+  private StringBuilder nfreePorts;
 
   private volatile boolean isTopologyKilled = false;
   private File tempDockerFile = null;
@@ -72,11 +74,21 @@ public class EcsScheduler implements IScheduler {
 
   private String[] getExecutorCommand(int container) {
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
+    Integer localFreePort = null;
+    nfreePorts = new StringBuilder();
     for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      //freePorts.add(SysUtils.getFreePort());
-      freePorts.add(5000 + (i + (container * 10)));
+      localFreePort = SysUtils.getFreePort();
+      freePorts.add(localFreePort);
+      nfreePorts.append("\n    - \"");
+      nfreePorts.append(localFreePort);
+      nfreePorts.append(":");
+      nfreePorts.append(localFreePort);
+      nfreePorts.append("\"");
     }
+
+
     String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, freePorts);
+    System.out.println("Executor Cmd before replacement %s" + formHeronExecCommand(executorCmd));
     String finalExecCommand = setClusterValues(formHeronExecCommand(executorCmd));
     String ecsTaskProject =  EcsContext.topologyName(config) + "_" + String.valueOf(container);
     FileOutputStream dockerFilestream = null;
@@ -96,42 +108,42 @@ public class EcsScheduler implements IScheduler {
     String dockerComposeFileName = " --file " + tempDockerFile;
     String finalCommand = EcsContext.COMPOSE_CMD + ecsTaskProject + dockerComposeFileName;
     finalCommand = finalCommand + EcsContext.UP;
-    System.out.println("final Ecs Task command " + finalCommand);
-    tempDockerFile.deleteOnExit();
+    LOG.info("final Ecs Task command " + finalCommand);
+    //tempDockerFile.deleteOnExit();
     return  new String[] {finalCommand};
 
   }
 
   public String setClusterValues(String localExecCommand) {
+    //LOG.info("topologyBinaryFile:  " + Context.topologyBinaryFile(config));
+    //LOG.info(" cluster topologyBinaryFile:  "
+    //          + EcsContext.ecsClusterBinary(config));
+    //String clusterExecCommand = localExecCommand.replace(Context.topologyBinaryFile(config),
+    //                                                       EcsContext.ECS_CLUSTER_BINARY);
     String clusterExecCommand = localExecCommand.replace(Context.topologyBinaryFile(config),
-                                                           EcsContext.ECS_CLUSTER_BINARY);
+                                                          EcsContext.ecsClusterBinary(config));
+
     // line below can be removed once the Cluster JVM TODO is resolved
-    clusterExecCommand = clusterExecCommand.replace(Context.clusterJavaHome(config),
-                                                     EcsContext.DESTINATION_JVM);
+    //LOG.info("HERON_CLUSTER_JAVA_HOME:  "
+    //          + EcsContext.clusterJavaHome(Config.toClusterMode(config)));
+    //clusterExecCommand = clusterExecCommand.replace(Context.clusterJavaHome(config),
+    //                                                 EcsContext.DESTINATION_JVM);
     clusterExecCommand = clusterExecCommand.replaceAll("\"", "'");
     return clusterExecCommand;
   }
 
-  public String replacePortNumbers(int container, String content) {
-    int basePortnumber = 5000;
-    String localContent = new String(content);
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      localContent = localContent.replace(String.valueOf(basePortnumber + i),
-          String.valueOf(basePortnumber + (i + (container * 10))));
-    }
-    return localContent;
-  }
 
-  public String getDockerFileContent(String execCommand, int container) {
-    String commandBuiler = EcsContext.PART1 + EcsContext.CMD;
-    commandBuiler = commandBuiler + EcsContext.ECSNETWORK;
-    commandBuiler = replacePortNumbers(container, commandBuiler);
+  public String getDockerFileContent(String execCommand, int container) throws IOException {
+    
+    String commandBuiler = new String(Files.readAllBytes(
+                                       Paths.get(EcsContext.ecsComposeTemplate(config))));
     commandBuiler = commandBuiler.replaceAll("TOPOLOGY_NAME",
                                               EcsContext.topologyName(config));
-    commandBuiler = commandBuiler.replaceAll("container_number",
+    commandBuiler = commandBuiler.replaceAll("CONTAINER_NUMBER",
                                               "executor" + String.valueOf(container));
-    commandBuiler = commandBuiler.replace("heron_executor", execCommand);
-
+    commandBuiler = commandBuiler.replace("HERON_EXECUTOR", execCommand);
+    commandBuiler = commandBuiler.replace("FREEPORTS", nfreePorts);
+    //System.out.println("commandBuiler  :\n" + commandBuiler);
     return commandBuiler;
   }
 
