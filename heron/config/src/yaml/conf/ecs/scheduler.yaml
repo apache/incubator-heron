@@ -5,4 +5,9 @@ heron.class.scheduler:                       com.twitter.heron.scheduler.ecs.Ecs
 heron.class.launcher:                        com.twitter.heron.scheduler.ecs.EcsLauncher
 
 # location of java - pick it up from shell environment
-heron.directory.sandbox.java.home:           ${JAVA_HOME}
+heron.directory.sandbox.java.home:           /usr/lib/jvm/java-8-oracle
+
+heron.ecs.topology.binary.file:              heron-examples.jar
+
+# location of java - pick it up from shell environment
+heron.ecs.compose.template.file:              ${HOME}/.heron/conf/ecs/ecs_compose_template.yaml
