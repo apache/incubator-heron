@@ -1,12 +1,13 @@
 Hackweek prototype to get a sample trident topology working.
 
-tl;dr; Heron does not support direct grouping, which Trident requires. To get Trident to work, we
-need to either support direct grouping in Heron, or refactor Trident to not require it (if that's
-possible).
+tl;dr; TridentWordCountTopologyHeron runs and tuples are being transmitted. Bolt b-1 receives
+sentances and splits them into words and counts. Bolt b-0 does not seem to receive and aggregate
+them. We need to understand why.
 
 To run:
 
 ```
+$ cd path/to/zookeeper && bin/zkServer.sh start
 $ ~/bin/heron kill local TridentWordCountTopology && rm -rf ~/.herondata/*
 $ bazel run --config=darwin --verbose_failures -- scripts/packages/heron-client-install.sh --user && \
   ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \
@@ -17,26 +18,26 @@ $ less ~/.herondata/topologies/local/billg/TridentWordCountTopology/log-files/co
 Current status:
 - Topology compiles and can be submitted
 - DAG and streams appears to be correctly represented
-- Tuple routing is incorrect due to hacks (see below)
+- Aggregation does not appear to be happening on the terminal bolt (b-0)
 - Trident/Storm do not provide reasonable defaults to configs and instances fails violently when
   expected configs are not set. See TridentWordCountTopology.
 - Many methods have been added/hacked to get the topology to run, but
-- Failures appear in the counters for bolt b-1, but the logs don't show anything and
-- Correctness is not right due to the following
+- Failures on stream $coord-bg0 appear in the counters for bolt b-1, but the logs don't show anything
 
 Issues:
-1. Direct grouping needs to be implemented, currently hacking using shuffle grouping (see grouping.cpp)
-2. `com.twitter.heron.instance.bolt.BoltOutputCollectorImpl.emitDirect` not supported and hacked to just emit
-3. `com.twitter.heron.instance.bolt.BoltOutputCollectorImpl.admitBoltTuple` changed to return task ids
-4. `BoltDeclarerImpl.grouping(GlobalStreamId id, Grouping grouping)` doesn't support `CUSTOM_SERIALIZED` properly
-5. GeneralTopologyContext does a bunch of janky stuff with NoValueMap, for callers who need keySets only
-6. Zookeeper acls are not implemented in Utils.
+1. `com.twitter.heron.instance.bolt.BoltOutputCollectorImpl.admitBoltTuple` changed to return task ids
+2. `BoltDeclarerImpl.grouping(GlobalStreamId id, Grouping grouping)` doesn't support `CUSTOM_SERIALIZED` properly
+3. GeneralTopologyContext does a bunch of janky stuff with NoValueMap, for callers who need keySets only
+4. Zookeeper acls are not implemented in Utils.
 
 TODO:
-- Figure out why bolt b-1 is failing. This is likely because tuples are being mis-routed due to the
-  grouping hacks
-- Understand why direct grouping and `emitDirect` are needed and how to support, remove hacks (see #1, #2 above)
-- Fix `admitBoltTuple` changed to return task ids to return real tuples ids (see #3 above)
+- Figure out why bolt b-1 is failing to process tuples on the $coord-bg0 stream.
+- Bolt b-1 seems to receive sentences on stream s1 and split them into words in the code, but they
+don't seem to be getting to b-0. Understand why. Are they being emitted and received and he counters
+are wrong, or are they not emitted.
+- Understand MemoryMapState and see counts getting persisted in it. I suspect this should be done by b-0.
+- Understand why direct grouping and `emitDirect` are needed
+- Fix `admitBoltTuple` changed to return task ids to return real tuples ids (see #1 above)
 - Understand why `CUSTOM_SERIALIZED` is needed and how to support (see #4 above)
 - Figure out why `org.apache.storm.trident.topology.TransactionAttempt` is only registered as
   `Config.TOPOLOGY_KRYO_REGISTER` in spouts and not bolts.

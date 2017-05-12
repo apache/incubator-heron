@@ -12,6 +12,8 @@ storm_deps_files = [
     "@commons_lang_commons_lang//jar",    # added for trident prototype
     "@org_apache_storm_core//jar",        # added for trident prototype
     "@org_clojure_clojure//jar",          # added for trident prototype
+    "@org_slf4j_slf4j_api//jar",          # added for trident prototype
+    "@org_slf4j_slf4j_jdk14//jar",          # added for trident prototype
     "@org_yaml_snakeyaml//jar",           # added for trident prototype
     "@org_ow2_asm_asm_all//jar",          # added for trident prototype, required at runtime
     "//third_party/java:kryo-neverlink",

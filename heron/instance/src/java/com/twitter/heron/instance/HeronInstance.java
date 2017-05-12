@@ -159,7 +159,7 @@ public class HeronInstance {
 
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.
-    Level loggingLevel = Level.INFO;
+    Level loggingLevel = Level.FINE;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
     // Log to file and TMaster
