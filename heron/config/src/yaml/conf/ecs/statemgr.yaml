@@ -25,7 +25,7 @@ heron.statemgr.zookeeper.retry.interval.ms:               10000
 # Following are config for tunneling
 ####################################################################
 # Whether we need tunnel if no direct access on zk server
-heron.statemgr.is.tunnel.needed:           True
+heron.statemgr.is.tunnel.needed:           False
 
 # The connection timeout in ms when trying to connect to zk server
 heron.statemgr.tunnel.connection.timeout.ms:    1000
