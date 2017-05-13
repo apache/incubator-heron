@@ -40,7 +40,7 @@ def create_parser(subparsers):
     return value
 
   parser.add_argument(
-      '--component-parallelism',
+      '--heron-component-parallelism',
       action='append',
       type=parallelism_type,
       required=True,
