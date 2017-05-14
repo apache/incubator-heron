@@ -159,7 +159,6 @@ public class HDFSStorage implements IStatefulStorage {
    * Creates the directory if it does not exist.
    *
    * @param dir The path of dir to ensure existence
-   * @return true if the directory exists after this call.
    */
   protected void createDir(String dir) throws StatefulStorageException {
     Path path = new Path(dir);
