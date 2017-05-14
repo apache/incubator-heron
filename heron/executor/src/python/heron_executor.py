@@ -290,7 +290,7 @@ class HeronExecutor(object):
     parser.add_argument("metricscachemgr_classpath")
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
-    parser.add_argument("ecsAmiUrl")
+    parser.add_argument("ecsAmiUrl", nargs='?', default="")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
