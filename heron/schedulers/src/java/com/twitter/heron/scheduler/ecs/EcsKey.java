@@ -20,7 +20,11 @@ public enum EcsKey {
   // config key for specifying the destination topology binary file
   ECS_CLUSTER_BINARY("heron.ecs.topology.binary.file", "heron-examples.jar"),
   ECS_COMPOSE_TEMPLATE("heron.ecs.compose.template.file",
-                        "${HOME}/.heron/conf/ecs/ecs_compose_template.yaml");
+                        "${HOME}/.heron/conf/ecs/ecs_compose_template.yaml"),
+  ECS_AMI_INSTANCE("heron.ecs.ami.instance", "http://169.254.169.254/latest/meta-data/local-ipv4"),
+  ECS_COMPOSE_UPCMD("heron.ecs.compose.up", "ecs-cli compose --project-name "),
+  ECS_COMPOSE_STOP("heron.ecs.compose.up", "ecs-cli stop"),
+  ECS_COMPOSE_LIST("heron.ecs.compose.up", "ecs-cli ps");
 
   private final String value;
   private final Key.Type type;
