@@ -19,19 +19,38 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.TokenSub;
 
 public class EcsContext extends Context {
-  public static final String COMPOSE_CMD = "ecs-cli compose --project-name ";
-  public static final String UP = " up";
 
   public static String ecsClusterBinary(Config config) {
     String workingDirectory = config.getStringValue(
         EcsKey.ECS_CLUSTER_BINARY.value(), EcsKey.ECS_CLUSTER_BINARY.getDefaultString());
     return TokenSub.substitute(config, workingDirectory);
   }
+
   public static String ecsComposeTemplate(Config config) {
-    String workingDirectory = config.getStringValue(
+    String composeTemplate = config.getStringValue(
         EcsKey.ECS_COMPOSE_TEMPLATE.value(), EcsKey.ECS_COMPOSE_TEMPLATE.getDefaultString());
-    return TokenSub.substitute(config, workingDirectory);
+    return TokenSub.substitute(config, composeTemplate);
   }
 
+  public static String AmiInstanceUrl(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_AMI_INSTANCE.value(), EcsKey.ECS_AMI_INSTANCE.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
+  public static String composeupCmd(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_COMPOSE_UPCMD.value(), EcsKey.ECS_COMPOSE_UPCMD.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
+  public static String composeStopCmd(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_COMPOSE_STOP.value(), EcsKey.ECS_COMPOSE_STOP.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
+  public static String composeListCmd(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_COMPOSE_LIST.value(), EcsKey.ECS_COMPOSE_LIST.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
 }
 
