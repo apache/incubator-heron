@@ -68,11 +68,12 @@ public class CheckpointManagerServerTest {
   private CheckpointManagerServer checkpointManagerServer;
   private SimpleCheckpointManagerClient simpleCheckpointManagerClient;
 
+  private CountDownLatch finishedSignal;
+  private CountDownLatch serverStartedSignal;
+
   private NIOLooper serverLooper;
   private NIOLooper clientLooper;
   private ExecutorService threadPools;
-  private CountDownLatch finishedSignal;
-
   private IStatefulStorage backendStorage;
 
   @BeforeClass
@@ -131,6 +132,7 @@ public class CheckpointManagerServerTest {
   @Before
   public void before() throws Exception {
     finishedSignal = new CountDownLatch(1);
+    serverStartedSignal = new CountDownLatch(1);
 
     serverLooper = new NIOLooper();
     clientLooper = new NIOLooper();
@@ -162,7 +164,6 @@ public class CheckpointManagerServerTest {
 
     if (simpleCheckpointManagerClient != null) {
       simpleCheckpointManagerClient.stop();
-
       simpleCheckpointManagerClient.getNIOLooper().exitLoop();
     }
 
@@ -262,6 +263,7 @@ public class CheckpointManagerServerTest {
       @Override
       public void run() {
         checkpointManagerServer.start();
+        serverStartedSignal.countDown();
         checkpointManagerServer.getNIOLooper().loop();
       }
     };
@@ -272,8 +274,14 @@ public class CheckpointManagerServerTest {
     Runnable runClient = new Runnable() {
       @Override
       public void run() {
-        client.start();
-        client.getNIOLooper().loop();
+        try {
+          // wait for the server start before connecting
+          serverStartedSignal.await(2, TimeUnit.SECONDS);
+          client.start();
+          client.getNIOLooper().loop();
+        } catch (InterruptedException ex) {
+          throw new RuntimeException("Client failed to connect to server", ex);
+        }
       }
     };
     threadPools.execute(runClient);
