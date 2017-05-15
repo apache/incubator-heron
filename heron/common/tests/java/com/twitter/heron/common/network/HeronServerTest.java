@@ -31,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.testing.Tests;
@@ -44,6 +45,11 @@ public class HeronServerTest {
   private static final String MESSAGE = "message";
   private static final Logger LOG = Logger.getLogger(HeronServerTest.class.getName());
   private static final String SERVER_HOST = "127.0.0.1";
+  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100),100,
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(5));
   private static int serverPort;
   // Following are state variable to test correctness
   private volatile boolean isOnConnectedInvoked = false;
@@ -394,10 +400,7 @@ public class HeronServerTest {
   private class SimpleHeronServer extends HeronServer {
 
     SimpleHeronServer(NIOLooper s, String host, int port) {
-      super(s, host, port, new HeronSocketOptions(100 * 1024 * 1024, 100,
-          100 * 1024 * 1024, 100,
-          5 * 1024 * 1024,
-          5 * 1024 * 1024));
+      super(s, host, port, TEST_SOCKET_OPTIONS);
     }
 
     @Override
@@ -466,11 +469,7 @@ public class HeronServerTest {
 
   private class SimpleHeronClient extends HeronClient {
     SimpleHeronClient(NIOLooper looper, String host, int port) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      super(looper, host, port, TEST_SOCKET_OPTIONS);
     }
 
     @Override

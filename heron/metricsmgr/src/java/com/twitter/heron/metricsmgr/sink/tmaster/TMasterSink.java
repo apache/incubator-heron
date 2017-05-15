@@ -334,12 +334,12 @@ public class TMasterSink implements IMetricsSink {
 
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
-              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);

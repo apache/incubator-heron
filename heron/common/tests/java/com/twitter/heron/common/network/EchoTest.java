@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.testing.Tests;
@@ -36,6 +37,11 @@ import com.twitter.heron.proto.testing.Tests;
 public class EchoTest {
   private static int serverPort;
   private ExecutorService threadsPool;
+  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100),100,
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(5));
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -106,12 +112,7 @@ public class EchoTest {
     private int maxRequests;
 
     EchoServer(NIOLooper looper, int port, int maxRequests) {
-      super(looper, "localhost", port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024,
-              100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      super(looper, "localhost", port, TEST_SOCKET_OPTIONS);
       nRequests = 0;
       this.maxRequests = maxRequests;
       registerOnRequest(Tests.EchoServerRequest.newBuilder());
@@ -168,11 +169,7 @@ public class EchoTest {
     private int maxRequests;
 
     EchoClient(NIOLooper looper, int port, int maxRequests) {
-      super(looper, "localhost", port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      super(looper, "localhost", port, TEST_SOCKET_OPTIONS);
       nRequests = 0;
       this.maxRequests = maxRequests;
     }

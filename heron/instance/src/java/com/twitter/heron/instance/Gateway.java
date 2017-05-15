@@ -95,12 +95,12 @@ public class Gateway implements Runnable, AutoCloseable {
 
     // Initialize the corresponding 2 socket clients with corresponding socket options
     HeronSocketOptions socketOptions = new HeronSocketOptions(
-        systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
+        systemConfig.getInstanceNetworkWriteBatchSize(),
         systemConfig.getInstanceNetworkWriteBatchTimeMs(),
-        systemConfig.getInstanceNetworkReadBatchSizeBytes(),
+        systemConfig.getInstanceNetworkReadBatchSize(),
         systemConfig.getInstanceNetworkReadBatchTimeMs(),
-        systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
-        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
+        systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
+        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
     );
     this.streamManagerClient =
         new StreamManagerClient(gatewayLooper, STREAM_MGR_HOST, streamPort,

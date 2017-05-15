@@ -337,12 +337,18 @@ public class MetricsCacheSink implements IMetricsSink {
 
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
-              TypeUtils.getLong(metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
-              TypeUtils.getLong(metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
-              TypeUtils.getLong(metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
-              TypeUtils.getLong(metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
-              TypeUtils.getInteger(metricsCacheClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              TypeUtils.getInteger(metricsCacheClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getByteAmount(
+                  metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
+              TypeUtils.getLong(
+                  metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
+              TypeUtils.getByteAmount(
+                  metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
+              TypeUtils.getLong(
+                  metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
+              TypeUtils.getByteAmount(
+                  metricsCacheClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
+              TypeUtils.getByteAmount(
+                  metricsCacheClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);

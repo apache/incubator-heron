@@ -166,7 +166,7 @@ public class HeronInstance {
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(instanceId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 

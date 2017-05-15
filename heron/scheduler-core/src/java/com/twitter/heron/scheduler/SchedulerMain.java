@@ -302,7 +302,7 @@ public class SchedulerMain {
         String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(processId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
 
     LOG.info("Logging setup done.");
