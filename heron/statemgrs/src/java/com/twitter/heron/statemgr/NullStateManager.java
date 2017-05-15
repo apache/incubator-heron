@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -189,5 +190,24 @@ public class NullStateManager implements IStateManager {
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoint(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint,
+      String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoint(
+      WatchCallback watcher,
+      String topologyName) {
+    return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName) {
+    return nullFuture;
   }
 }
