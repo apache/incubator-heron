@@ -39,7 +39,7 @@ public class EchoTest {
   private ExecutorService threadsPool;
   private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
       ByteAmount.fromMegabytes(100), 100,
-      ByteAmount.fromMegabytes(100),100,
+      ByteAmount.fromMegabytes(100), 100,
       ByteAmount.fromMegabytes(5),
       ByteAmount.fromMegabytes(5));
 
