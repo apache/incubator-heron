@@ -167,11 +167,9 @@ public class EcsScheduler implements IScheduler {
   public List<String> getJobLinks() {
     List<String> list = new ArrayList<String>();
     StringBuilder familyListcmd = new StringBuilder();
-    //String tempStr = "aws ecs list-task-definition-families --family-prefix ecscompose-";
     familyListcmd.append(EcsContext.composeFamilyName(config));
     familyListcmd.append(EcsContext.topologyName(config));
-    //tempStr = tempStr + EcsContext.topologyName(config);
-    LOG.info("final list cmd:" + familyListcmd);
+    LOG.info(String.format("final list cmd: %s", familyListcmd));
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
     List<String> familyString;
@@ -233,8 +231,19 @@ public class EcsScheduler implements IScheduler {
 
   @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
-    ShellUtils.runProcess(EcsContext.composeStopCmd(config), null);
-    return true;
+    StringBuilder stdout = new StringBuilder();
+    StringBuilder stderr = new StringBuilder();
+    int status = ShellUtils.runProcess(EcsContext.composeStopCmd(config), null);
+    if (status != 0) {
+      LOG.severe(String.format(
+          "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s",
+          EcsContext.composeStopCmd(config), stdout, stderr));
+      isTopologyKilled = false;
+    } else {
+      LOG.info("Topology Taks stop Successful");
+      isTopologyKilled = true;
+    }
+    return isTopologyKilled;
   }
 
   @Override
