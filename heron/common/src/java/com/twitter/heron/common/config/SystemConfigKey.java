@@ -94,8 +94,8 @@ public enum SystemConfigKey {
   /**
    * Size based,the maximum batch size in bytes to read from stream manager
    */
-  INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES(
-      "heron.instance.network.read.batch.size.bytes", Type.LONG),
+  INSTANCE_NETWORK_READ_BATCH_SIZE(
+      "heron.instance.network.read.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * Time based, the maximum batch time in ms for instance to read from stream manager per attempt
@@ -105,20 +105,20 @@ public enum SystemConfigKey {
   /**
    * Size based, the maximum batch size in bytes to write to stream manager
    */
-  INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES(
-      "heron.instance.network.write.batch.size.bytes", Type.LONG),
+  INSTANCE_NETWORK_WRITE_BATCH_SIZE(
+      "heron.instance.network.write.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * # The maximum socket's received buffer size in bytes of instance's network options
    */
-  INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES(
-      "heron.instance.network.options.socket.received.buffer.size.bytes", Type.INTEGER),
+  INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE(
+      "heron.instance.network.options.socket.received.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum socket's send buffer size in bytes
    */
-  INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES(
-      "heron.instance.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
+  INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE(
+      "heron.instance.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
@@ -128,7 +128,8 @@ public enum SystemConfigKey {
   /**
    * The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
    */
-  INSTANCE_SET_DATA_TUPLE_SIZE_BYTES("heron.instance.set.data.tuple.size.bytes", Long.MAX_VALUE),
+  INSTANCE_SET_DATA_TUPLE_SIZE(
+      "heron.instance.set.data.tuple.size.bytes", ByteAmount.fromBytes(Long.MAX_VALUE)),
 
   /**
    * The size of packets read from stream manager will be determined by the minimal of
@@ -158,7 +159,7 @@ public enum SystemConfigKey {
   /**
    * The maximum batch size in bytes for an spout instance to emit tuples per attempt
    */
-  INSTANCE_EMIT_BATCH_SIZE_BYTES("heron.instance.emit.batch.size.bytes", Type.LONG),
+  INSTANCE_EMIT_BATCH_SIZE("heron.instance.emit.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum time in ms for an bolt instance to execute tuples per attempt
@@ -168,7 +169,7 @@ public enum SystemConfigKey {
   /**
    * The maximum batch size in bytes for an bolt instance to execute tuples per attempt
    */
-  INSTANCE_EXECUTE_BATCH_SIZE_BYTES("heron.instance.execute.batch.size.bytes", Type.LONG),
+  INSTANCE_EXECUTE_BATCH_SIZE("heron.instance.execute.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The time interval for an instance to check the state change, for instance,
@@ -268,8 +269,8 @@ public enum SystemConfigKey {
   /**
    * Size based,the maximum batch size in bytes to read from socket
    */
-  METRICSMGR_NETWORK_READ_BATCH_SIZE_BYTES(
-      "heron.metricsmgr.network.read.batch.size.bytes", Type.LONG),
+  METRICSMGR_NETWORK_READ_BATCH_SIZE(
+      "heron.metricsmgr.network.read.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The size of packets written to socket will be determined by the minimal of
@@ -283,20 +284,20 @@ public enum SystemConfigKey {
   /**
    * Size based, the maximum batch size in bytes to write to socket
    */
-  METRICSMGR_NETWORK_WRITE_BATCH_SIZE_BYTES(
-      "heron.metricsmgr.network.write.batch.size.bytes", Type.LONG),
+  METRICSMGR_NETWORK_WRITE_BATCH_SIZE(
+      "heron.metricsmgr.network.write.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum socket's received buffer size in bytes
    */
-  METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES(
-      "heron.metricsmgr.network.options.socket.received.buffer.size.bytes", Type.INTEGER),
+  METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE(
+      "heron.metricsmgr.network.options.socket.received.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum socket's send buffer size in bytes
    */
-  METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES(
-      "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
+  METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE(
+      "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    *The maximum exception count be kept in tmaster

@@ -34,7 +34,7 @@ public enum CheckpointManagerConfigKey {
   /**
    * The batch size in bytes for write operation
    */
-  WRITE_BATCH_SIZE("heron.ckptmgr.network.write.batch.size.bytes", Type.LONG),
+  WRITE_BATCH_SIZE("heron.ckptmgr.network.write.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The time for ckptmgr write batch
@@ -44,7 +44,7 @@ public enum CheckpointManagerConfigKey {
   /**
    * The batch size in bytes for read operation
    */
-  READ_BATCH_SIZE("heron.ckptmgr.network.read.batch.size.bytes", Type.LONG),
+  READ_BATCH_SIZE("heron.ckptmgr.network.read.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The time for ckptmger read batch
@@ -54,19 +54,20 @@ public enum CheckpointManagerConfigKey {
   /**
    * The size for socket send buffer in bytes
    */
-  SOCKET_SEND_SIZE("heron.ckptmgr.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
+  SOCKET_SEND_SIZE("heron.ckptmgr.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The size for socket receive buffer in bytes
    */
   SOCKET_RECEIVE_SIZE(
-      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.INTEGER);
+      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.BYTE_AMOUNT);
 
   private final String value;
   private final Object defaultValue;
   private final Type type;
 
   public enum Type {
+    BYTE_AMOUNT,
     INTEGER,
     LONG,
     STRING,

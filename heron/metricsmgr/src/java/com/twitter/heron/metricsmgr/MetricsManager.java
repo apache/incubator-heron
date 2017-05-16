@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
@@ -141,12 +140,12 @@ public class MetricsManager {
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSizeBytes(),
+        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSize(),
             systemConfig.getMetricsMgrNetworkWriteBatchTimeMs(),
-            systemConfig.getMetricsMgrNetworkReadBatchSizeBytes(),
+            systemConfig.getMetricsMgrNetworkReadBatchSize(),
             systemConfig.getMetricsMgrNetworkReadBatchTimeMs(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes());
+            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSize(),
+            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize());
 
     // Set the MultiCountMetric for MetricsManagerServer
     MultiCountMetric serverCounters = new MultiCountMetric();
@@ -228,7 +227,7 @@ public class MetricsManager {
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 

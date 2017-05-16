@@ -27,7 +27,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -140,9 +139,9 @@ public class CheckpointManager {
 
     HeronSocketOptions serverSocketOptions =
         new HeronSocketOptions(
-            checkpointManagerConfig.getWriteBatchSizeBytes(),
+            checkpointManagerConfig.getWriteBatchSize(),
             checkpointManagerConfig.getWriteBatchTimeMs(),
-            checkpointManagerConfig.getReadBatchSizeBytes(),
+            checkpointManagerConfig.getReadBatchSize(),
             checkpointManagerConfig.getReadBatchTimeMs(),
             checkpointManagerConfig.getSocketSendSize(),
             checkpointManagerConfig.getSocketReceiveSize());
@@ -226,7 +225,7 @@ public class CheckpointManager {
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(ckptmgrId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 

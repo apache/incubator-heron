@@ -32,6 +32,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
@@ -56,6 +57,12 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
  */
 
 public class HandleTMasterLocationTest {
+
+  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(5));
 
   // Two TMasterLocationRefreshMessage to verify
   private static final Metrics.TMasterLocationRefreshMessage TMASTERLOCATIONREFRESHMESSAGE0 =
@@ -92,18 +99,12 @@ public class HandleTMasterLocationTest {
 
     threadsPool = Executors.newFixedThreadPool(2);
 
-    HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(100 * 1024 * 1024, 100,
-            100 * 1024 * 1024, 100,
-            5 * 1024 * 1024,
-            5 * 1024 * 1024);
-
     serverLooper = new NIOLooper();
 
     // Spy it for unit test
     metricsManagerServer =
         Mockito.spy(new MetricsManagerServer(serverLooper, SERVER_HOST,
-            serverPort, serverSocketOptions, new MultiCountMetric()));
+            serverPort, TEST_SOCKET_OPTIONS, new MultiCountMetric()));
   }
 
   @After
@@ -214,11 +215,7 @@ public class HandleTMasterLocationTest {
         SimpleTMasterLocationPublisher.class.getName());
 
     SimpleTMasterLocationPublisher(NIOLooper looper, String host, int port) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      super(looper, host, port, TEST_SOCKET_OPTIONS);
     }
 
     @Override

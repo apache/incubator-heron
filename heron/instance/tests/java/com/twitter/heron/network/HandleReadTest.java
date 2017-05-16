@@ -278,12 +278,12 @@ public class HandleReadTest {
                   SystemConfig.HERON_SYSTEM_CONFIG);
 
           HeronSocketOptions socketOptions = new HeronSocketOptions(
-              systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
+              systemConfig.getInstanceNetworkWriteBatchSize(),
               systemConfig.getInstanceNetworkWriteBatchTimeMs(),
-              systemConfig.getInstanceNetworkReadBatchSizeBytes(),
+              systemConfig.getInstanceNetworkReadBatchSize(),
               systemConfig.getInstanceNetworkReadBatchTimeMs(),
-              systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
-              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
+              systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
+              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
           );
 
           streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,
