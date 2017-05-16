@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.classification.InterfaceAudience;
 import com.twitter.heron.classification.InterfaceStability;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -276,4 +277,27 @@ public interface IStateManager extends AutoCloseable {
    */
   ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
       WatchCallback watcher, String topologyName);
+
+  /**
+   * Set the Stateful Checkpoint
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setStatefulCheckpoint(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName);
+
+  /**
+   * Get the Stateful Checkpoint
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoint(
+      WatchCallback watcher, String topologyName);
+
+  /**
+   * Delete the stateful checkpoint for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName);
 }

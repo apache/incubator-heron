@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -49,6 +50,7 @@ public abstract class FileSystemStateManager implements IStateManager {
     PHYSICAL_PLAN("pplans", "Physical plan"),
     EXECUTION_STATE("executionstate", "Execution state"),
     SCHEDULER_LOCATION("schedulers", "Scheduler location"),
+    STATEFUL_CHECKPOINT("statefulcheckpoint", "Stateful checkpoint"),
     LOCKS("locks", "Distributed locks");
 
     private final String dir;
@@ -88,6 +90,7 @@ public abstract class FileSystemStateManager implements IStateManager {
   protected abstract <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
                                                                          String path,
                                                                          Message.Builder builder);
+
   protected abstract Lock getLock(String path);
 
   protected String getStateDirectory(StateLocation location) {
@@ -192,6 +195,18 @@ public abstract class FileSystemStateManager implements IStateManager {
       WatchCallback watcher, String topologyName) {
     return getNodeData(watcher, StateLocation.METRICSCACHE_LOCATION, topologyName,
         TopologyMaster.MetricsCacheLocation.newBuilder());
+  }
+
+  @Override
+  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoint(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, StateLocation.STATEFUL_CHECKPOINT, topologyName,
+        CheckpointManager.StatefulConsistentCheckpoints.newBuilder());
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName) {
+    return deleteNode(StateLocation.STATEFUL_CHECKPOINT, topologyName);
   }
 
   @Override
