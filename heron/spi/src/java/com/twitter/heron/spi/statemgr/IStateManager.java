@@ -279,15 +279,15 @@ public interface IStateManager extends AutoCloseable {
   ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName);
 
   /**
-   * Set the Stateful Checkpoint
+   * Set the Stateful Checkpoints
    *
    * @return Boolean - Success or Failure
    */
-  ListenableFuture<Boolean> setStatefulCheckpoint(
+  ListenableFuture<Boolean> setStatefulCheckpoints(
       CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName);
 
   /**
-   * Get the Stateful Checkpoint
+   * Get the Stateful Checkpoints
    *
    * @return Boolean - Success or Failure
    */
@@ -295,9 +295,9 @@ public interface IStateManager extends AutoCloseable {
       WatchCallback watcher, String topologyName);
 
   /**
-   * Delete the stateful checkpoint for the given topology
+   * Delete the stateful checkpoints for the given topology
    *
    * @return Boolean - Success or Failure
    */
-  ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName);
+  ListenableFuture<Boolean> deleteStatefulCheckpoints(String topologyName);
 }

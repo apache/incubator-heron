@@ -210,7 +210,7 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName) {
+  public ListenableFuture<Boolean> deleteStatefulCheckpoints(String topologyName) {
     return deleteNode(StateLocation.STATEFUL_CHECKPOINT, topologyName);
   }
 

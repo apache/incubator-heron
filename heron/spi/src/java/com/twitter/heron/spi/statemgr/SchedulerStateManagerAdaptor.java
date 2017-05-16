@@ -231,7 +231,7 @@ public class SchedulerStateManagerAdaptor {
   }
 
   public Boolean deleteStatefulCheckpoint(String topologyName) {
-    return awaitResult(delegate.deleteStatefulCheckpoint(topologyName));
+    return awaitResult(delegate.deleteStatefulCheckpoints(topologyName));
   }
 
   /**

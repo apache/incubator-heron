@@ -224,7 +224,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setStatefulCheckpoint(
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
       CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName) {
     return setData(StateLocation.STATEFUL_CHECKPOINT, topologyName, checkpoint.toByteArray(), true);
   }

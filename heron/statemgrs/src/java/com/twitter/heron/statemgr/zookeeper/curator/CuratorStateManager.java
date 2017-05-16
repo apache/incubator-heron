@@ -371,7 +371,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setStatefulCheckpoint(
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
       CheckpointManager.StatefulConsistentCheckpoints checkpoint,
       String topologyName) {
     return createNode(StateLocation.STATEFUL_CHECKPOINT, topologyName,

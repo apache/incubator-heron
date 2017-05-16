@@ -193,7 +193,7 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setStatefulCheckpoint(
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
       CheckpointManager.StatefulConsistentCheckpoints checkpoint,
       String topologyName) {
     return nullFuture;
@@ -207,7 +207,7 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName) {
+  public ListenableFuture<Boolean> deleteStatefulCheckpoints(String topologyName) {
     return nullFuture;
   }
 }
