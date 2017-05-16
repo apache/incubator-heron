@@ -14,8 +14,10 @@
 ''' utils.py '''
 import grp
 import os
+import pkgutil
 import pwd
 import stat
+import subprocess
 
 from datetime import datetime
 from xml.sax.saxutils import escape
@@ -138,3 +140,52 @@ def read_chunk(filename, offset=None, length=None):
     return dict(offset=offset, length=len(data), data=escape(data.decode('utf8', 'replace')))
 
   return dict(offset=offset, length=0)
+
+def stream_to_string(stream):
+  """
+  Converts stream to string. Blocks until end of stream
+  """
+  str_builder = ''
+  while True:
+    line = stream.readline()
+    if not line:
+      break
+    str_builder += line
+  return str_builder
+
+def pipe(in_stream, to_cmd):
+  """
+  Pipes in_stream from output of previous pipe into to_cmd.
+  Returns stdout stream of to_cmd
+  """
+  p = subprocess.Popen(to_cmd,
+                       stdout=subprocess.PIPE,
+                       stdin=in_stream)
+  return p.stdout
+
+def str_cmd(cmd):
+  """
+  Runs the command and returns its stdout and stderr.
+  """
+  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  (stdout, stderr) = (stream_to_string(p.stdout), stream_to_string(p.stderr))
+  return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
+
+# pylint: disable=unnecessary-lambda
+def chain(cmd_list):
+  """
+  Feed output of one command to the next and return final output
+  Returns string output of chained application of commands.
+  """
+  return {
+      'command' : ' | '.join(map(lambda x: ' '.join(x), cmd_list)),
+      'stdout' : stream_to_string(reduce(pipe, [None] + cmd_list))
+  }
+
+def get_container_id(instance_id):
+  ''' get container id '''
+  return instance_id.split('_')[1]  # Format: container_<index>_component_name_<index>
+
+def get_asset(asset_name):
+  ''' get assset '''
+  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))
