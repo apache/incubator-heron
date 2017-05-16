@@ -200,7 +200,7 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoint(
+  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoints(
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();

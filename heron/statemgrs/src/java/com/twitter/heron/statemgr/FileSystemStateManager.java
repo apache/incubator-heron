@@ -108,44 +108,14 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
+    return nodeExists(getStatePath(StateLocation.TOPOLOGY, topologyName));
+  }
+
+  @Override
   public Lock getLock(String topologyName, LockName lockName) {
     return getLock(
         StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName.getName()));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return deleteNode(StateLocation.TMASTER_LOCATION, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
-    return deleteNode(StateLocation.METRICSCACHE_LOCATION, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteNode(StateLocation.EXECUTION_STATE, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteNode(StateLocation.TOPOLOGY, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
-    return deleteNode(StateLocation.PACKING_PLAN, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteNode(StateLocation.PHYSICAL_PLAN, topologyName);
   }
 
   @Override
@@ -198,20 +168,50 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoint(
+  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoints(
       WatchCallback watcher, String topologyName) {
     return getNodeData(watcher, StateLocation.STATEFUL_CHECKPOINT, topologyName,
         CheckpointManager.StatefulConsistentCheckpoints.newBuilder());
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName) {
-    return deleteNode(StateLocation.STATEFUL_CHECKPOINT, topologyName);
+  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+    return deleteNode(StateLocation.TMASTER_LOCATION, topologyName);
   }
 
   @Override
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    return nodeExists(getStatePath(StateLocation.TOPOLOGY, topologyName));
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return deleteNode(StateLocation.METRICSCACHE_LOCATION, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
+    return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
+    return deleteNode(StateLocation.EXECUTION_STATE, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
+    return deleteNode(StateLocation.TOPOLOGY, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
+    return deleteNode(StateLocation.PACKING_PLAN, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
+    return deleteNode(StateLocation.PHYSICAL_PLAN, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteStatefulCheckpoint(String topologyName) {
+    return deleteNode(StateLocation.STATEFUL_CHECKPOINT, topologyName);
   }
 
   @Override

@@ -57,6 +57,7 @@ import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
+
   private CuratorFramework client;
   private String connectionString;
   private boolean isSchedulerService;
