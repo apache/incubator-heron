@@ -99,14 +99,14 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   private List<Integer> admitBoltTuple(String streamId,
                                        Collection<Tuple> anchors,
                                        List<Object> tuple,
-                                       Integer taskId) {
+                                       Integer emitDirectTaskId) {
     if (getPhysicalPlanHelper().isTerminatedComponent()) {
       // No need to handle this tuple
       return null;
     }
 
     // Start construct the data tuple
-    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, taskId);
+    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, emitDirectTaskId);
 
     // Set the anchors for a tuple
     if (anchors != null) {

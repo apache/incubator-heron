@@ -138,14 +138,14 @@ public class SpoutOutputCollectorImpl
   /////////////////////////////////////////////////////////
 
   private List<Integer> admitSpoutTuple(String streamId, List<Object> tuple,
-                                        Object messageId, Integer taskId) {
+                                        Object messageId, Integer emitDirectTaskId) {
     // No need to send tuples if it is already terminated
     if (getPhysicalPlanHelper().isTerminatedComponent()) {
       return null;
     }
 
     // Start construct the data tuple
-    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, taskId);
+    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, emitDirectTaskId);
 
     if (messageId != null) {
       RootTupleInfo tupleInfo = new RootTupleInfo(streamId, messageId);
