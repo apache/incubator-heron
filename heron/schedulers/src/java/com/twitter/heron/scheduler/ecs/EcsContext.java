@@ -52,5 +52,20 @@ public class EcsContext extends Context {
         EcsKey.ECS_COMPOSE_LIST.value(), EcsKey.ECS_COMPOSE_LIST.getDefaultString());
     return TokenSub.substitute(config, amiInstanceUrl);
   }
+  public static String composeListby(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_LIST_BY.value(), EcsKey.ECS_LIST_BY.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
+  public static String composeFamilyName(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_GET_FAMILY.value(), EcsKey.ECS_GET_FAMILY.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
+  public static String composeTaskTag(Config config) {
+    String amiInstanceUrl = config.getStringValue(
+        EcsKey.ECS_TASK_TAG.value(), EcsKey.ECS_TASK_TAG.getDefaultString());
+    return TokenSub.substitute(config, amiInstanceUrl);
+  }
 }
 
