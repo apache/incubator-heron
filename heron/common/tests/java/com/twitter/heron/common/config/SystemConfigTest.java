@@ -42,7 +42,7 @@ public class SystemConfigTest {
         .putAll(file.getAbsolutePath(), true)
         .build();
     Assert.assertEquals("log-files", systemConfig.getHeronLoggingDirectory());
-    Assert.assertEquals(100, systemConfig.getHeronLoggingMaximumSizeMb());
+    Assert.assertEquals(100, systemConfig.getHeronLoggingMaximumSize().asMegabytes());
     Assert.assertEquals(5, systemConfig.getHeronLoggingMaximumFiles());
     Assert.assertEquals(60, systemConfig.getHeronMetricsExportIntervalSec());
   }

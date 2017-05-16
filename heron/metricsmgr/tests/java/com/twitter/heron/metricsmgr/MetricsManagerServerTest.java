@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
@@ -55,6 +56,12 @@ public class MetricsManagerServerTest {
   private static final int EXCEPTION_COUNT = 20;
 
   private static final String SERVER_HOST = "127.0.0.1";
+  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(5));
+
   private static int serverPort;
 
   private MetricsManagerServer metricsManagerServer;
@@ -70,15 +77,9 @@ public class MetricsManagerServerTest {
 
     threadsPool = Executors.newFixedThreadPool(2);
 
-    HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(100 * 1024 * 1024, 100,
-            100 * 1024 * 1024, 100,
-            5 * 1024 * 1024,
-            5 * 1024 * 1024);
-
     serverLooper = new NIOLooper();
     metricsManagerServer = new MetricsManagerServer(serverLooper, SERVER_HOST,
-        serverPort, serverSocketOptions, new MultiCountMetric());
+        serverPort, TEST_SOCKET_OPTIONS, new MultiCountMetric());
   }
 
   @After
@@ -210,11 +211,7 @@ public class MetricsManagerServerTest {
     private int maxMessages;
 
     SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      super(looper, host, port, TEST_SOCKET_OPTIONS);
       this.maxMessages = maxMessages;
     }
 

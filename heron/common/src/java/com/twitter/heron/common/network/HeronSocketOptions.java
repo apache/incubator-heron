@@ -14,78 +14,56 @@
 
 package com.twitter.heron.common.network;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 /**
  * Options that Heron Server/Client passes to config
  * 1. JAVA SocketChannel
  * 2. SocketChannelHelper
  */
 public class HeronSocketOptions {
-  private long networkWriteBatchSizeInBytes;
+  private ByteAmount networkWriteBatchSize;
   private long networkWriteBatchTimeInMs;
-  private long networkReadBatchSizeInBytes;
+  private ByteAmount networkReadBatchSize;
   private long networkReadBatchTimeInMs;
-  private int socketSendBufferSizeInBytes;
-  private int socketReceivedBufferSizeInBytes;
+  private ByteAmount socketSendBufferSize;
+  private ByteAmount socketReceivedBufferSize;
 
-  public HeronSocketOptions(long networkWriteBatchSizeInBytes,
+  public HeronSocketOptions(ByteAmount networkWriteBatchSize,
                             long networkWriteBatchTimeInMs,
-                            long networkReadBatchSizeInBytes,
+                            ByteAmount networkReadBatchSize,
                             long networkReadBatchTimeInMs,
-                            int socketSendBufferSizeInBytes,
-                            int socketReceivedBufferSizeInBytes) {
-    this.networkWriteBatchSizeInBytes = networkWriteBatchSizeInBytes;
+                            ByteAmount socketSendBufferSize,
+                            ByteAmount socketReceivedBufferSize) {
+    this.networkWriteBatchSize = networkWriteBatchSize;
     this.networkWriteBatchTimeInMs = networkWriteBatchTimeInMs;
-    this.networkReadBatchSizeInBytes = networkReadBatchSizeInBytes;
+    this.networkReadBatchSize = networkReadBatchSize;
     this.networkReadBatchTimeInMs = networkReadBatchTimeInMs;
-    this.socketSendBufferSizeInBytes = socketSendBufferSizeInBytes;
-    this.socketReceivedBufferSizeInBytes = socketReceivedBufferSizeInBytes;
+    this.socketSendBufferSize = socketSendBufferSize;
+    this.socketReceivedBufferSize = socketReceivedBufferSize;
   }
 
-  public long getNetworkWriteBatchSizeInBytes() {
-    return networkWriteBatchSizeInBytes;
-  }
-
-  public void setNetworkWriteBatchSizeInBytes(long networkWriteBatchSizeInBytes) {
-    this.networkWriteBatchSizeInBytes = networkWriteBatchSizeInBytes;
+  public ByteAmount getNetworkWriteBatchSize() {
+    return networkWriteBatchSize;
   }
 
   public long getNetworkWriteBatchTimeInMs() {
     return networkWriteBatchTimeInMs;
   }
 
-  public void setNetworkWriteBatchTimeInMs(long networkWriteBatchTimeInMs) {
-    this.networkWriteBatchTimeInMs = networkWriteBatchTimeInMs;
-  }
-
-  public long getNetworkReadBatchSizeInBytes() {
-    return networkReadBatchSizeInBytes;
-  }
-
-  public void setNetworkReadBatchSizeInBytes(long networkReadBatchSizeInBytes) {
-    this.networkReadBatchSizeInBytes = networkReadBatchSizeInBytes;
+  public ByteAmount getNetworkReadBatchSize() {
+    return networkReadBatchSize;
   }
 
   public long getNetworkReadBatchTimeInMs() {
     return networkReadBatchTimeInMs;
   }
 
-  public void setNetworkReadBatchTimeInMs(long networkReadBatchTimeInMs) {
-    this.networkReadBatchTimeInMs = networkReadBatchTimeInMs;
+  public ByteAmount getSocketSendBufferSize() {
+    return socketSendBufferSize;
   }
 
-  public int getSocketSendBufferSizeInBytes() {
-    return socketSendBufferSizeInBytes;
-  }
-
-  public void setSocketSendBufferSizeInBytes(int socketSendBufferSizeInBytes) {
-    this.socketSendBufferSizeInBytes = socketSendBufferSizeInBytes;
-  }
-
-  public int getSocketReceivedBufferSizeInBytes() {
-    return socketReceivedBufferSizeInBytes;
-  }
-
-  public void setSocketReceivedBufferSizeInBytes(int socketReceivedBufferSizeInBytes) {
-    this.socketReceivedBufferSizeInBytes = socketReceivedBufferSizeInBytes;
+  public ByteAmount getSocketReceivedBufferSize() {
+    return socketReceivedBufferSize;
   }
 }

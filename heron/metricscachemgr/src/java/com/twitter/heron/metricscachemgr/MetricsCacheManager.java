@@ -28,7 +28,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
@@ -108,12 +107,12 @@ public class MetricsCacheManager {
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSizeBytes(),
+        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSize(),
             systemConfig.getMetricsMgrNetworkWriteBatchTimeMs(),
-            systemConfig.getMetricsMgrNetworkReadBatchSizeBytes(),
+            systemConfig.getMetricsMgrNetworkReadBatchSize(),
             systemConfig.getMetricsMgrNetworkReadBatchTimeMs(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes());
+            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSize(),
+            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize());
 
     // Construct the server to accepts messages from sinks
     metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,
@@ -293,7 +292,7 @@ public class MetricsCacheManager {
     LoggingHelper.loggerInit(logLevel, true);
     LoggingHelper.addLoggingHandler(LoggingHelper.getFileHandler(metricsCacheMgrId,
         systemConfig.getHeronLoggingDirectory(), true,
-        systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+        systemConfig.getHeronLoggingMaximumSize(),
         systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 

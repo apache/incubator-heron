@@ -17,6 +17,7 @@ package com.twitter.heron.simulator.instance;
 import java.util.Map;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -32,7 +33,7 @@ public class SpoutInstance
   private final boolean ackEnabled;
   private final int maxSpoutPending;
   private final long instanceEmitBatchTime;
-  private final long instanceEmitBatchSize;
+  private final ByteAmount instanceEmitBatchSize;
 
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<HeronTuples.HeronTupleSet> streamInQueue,
@@ -45,7 +46,7 @@ public class SpoutInstance
     this.maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
     this.instanceEmitBatchTime =
         systemConfig.getInstanceEmitBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
-    this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSizeBytes();
+    this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSize();
     this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
   }
 
@@ -78,7 +79,7 @@ public class SpoutInstance
       }
 
       if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceEmitBatchSize) {
+          > instanceEmitBatchSize.asBytes()) {
         break;
       }
     }

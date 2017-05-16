@@ -20,6 +20,7 @@ import java.util.List;
 import com.google.protobuf.ByteString;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -33,7 +34,7 @@ public class BoltInstance
     extends com.twitter.heron.instance.bolt.BoltInstance implements IInstance {
 
   private final long instanceExecuteBatchTime;
-  private final long instanceExecuteBatchSize;
+  private final ByteAmount instanceExecuteBatchSize;
 
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
@@ -45,7 +46,7 @@ public class BoltInstance
 
     this.instanceExecuteBatchTime
         = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
-    this.instanceExecuteBatchSize = systemConfig.getInstanceExecuteBatchSizeBytes();
+    this.instanceExecuteBatchSize = systemConfig.getInstanceExecuteBatchSize();
 
   }
 
@@ -106,7 +107,7 @@ public class BoltInstance
 
       // To avoid emitting too much data
       if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceExecuteBatchSize) {
+          > instanceExecuteBatchSize.asBytes()) {
         break;
       }
     }

@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
@@ -54,6 +55,12 @@ public class CheckpointManagerServerTest {
   private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
 
   private static final String SERVER_HOST = "127.0.0.1";
+  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(5));
+
   private static int serverPort;
 
   private static CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
@@ -140,17 +147,11 @@ public class CheckpointManagerServerTest {
 
     backendStorage = mock(IStatefulStorage.class);
 
-    HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(100 * 1024 * 1024, 100,
-            100 * 1024 * 1024, 100,
-            5 * 1024 * 1024,
-            5 * 1024 * 1024);
-
     serverPort = SysUtils.getFreePort();
     checkpointManagerServer = new CheckpointManagerServer(
         TOPOLOGY_NAME, TOPOLOGY_ID,
         CHECKPOINT_MANAGER_ID, backendStorage,
-        serverLooper, SERVER_HOST, serverPort, serverSocketOptions);
+        serverLooper, SERVER_HOST, serverPort, TEST_SOCKET_OPTIONS);
 
     runServer();
   }
@@ -304,12 +305,7 @@ public class CheckpointManagerServerTest {
     SimpleCheckpointManagerClient(NIOLooper looper, String host,
                                   int port, CountDownLatch finishedSignal,
                                   RequestType requestType) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
-
+      super(looper, host, port, TEST_SOCKET_OPTIONS);
       this.finishedSignal = finishedSignal;
       this.requestType = requestType;
       this.responseStatus = StatusCode.TIMEOUT_ERROR;

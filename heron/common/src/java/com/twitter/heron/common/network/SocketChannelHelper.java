@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.ISelectHandler;
 import com.twitter.heron.common.basics.NIOLooper;
@@ -71,9 +72,9 @@ public class SocketChannelHelper {
   private long totalBytesRead;
   private long totalBytesWritten;
   // System Config related
-  private long writeBatchSizeInBytes;
+  private ByteAmount writeBatchSize;
   private long writeBatchTimeInNs;
-  private long readBatchSizeInBytes;
+  private ByteAmount readBatchSize;
   private long readReadBatchTimeInNs;
 
   public SocketChannelHelper(NIOLooper looper,
@@ -86,11 +87,11 @@ public class SocketChannelHelper {
     this.outgoingPacketsToWrite = new LinkedList<OutgoingPacket>();
     this.incomingPacket = new IncomingPacket();
 
-    this.writeBatchSizeInBytes = options.getNetworkWriteBatchSizeInBytes();
+    this.writeBatchSize = options.getNetworkWriteBatchSize();
     this.writeBatchTimeInNs = options.getNetworkWriteBatchTimeInMs()
         * Constants.MILLISECONDS_TO_NANOSECONDS;
 
-    this.readBatchSizeInBytes = options.getNetworkReadBatchSizeInBytes();
+    this.readBatchSize = options.getNetworkReadBatchSize();
     this.readReadBatchTimeInNs = options.getNetworkReadBatchTimeInMs()
         * Constants.MILLISECONDS_TO_NANOSECONDS;
 
@@ -134,7 +135,7 @@ public class SocketChannelHelper {
     // 1. We spent too much time
     // 2. We have read large enough data
     while ((System.nanoTime() - startOfCycle - readReadBatchTimeInNs) < 0
-        && (bytesRead < readBatchSizeInBytes)) {
+        && (bytesRead < readBatchSize.asBytes())) {
       int readState = incomingPacket.readFromChannel(socketChannel);
 
       if (readState > 0) {
@@ -172,7 +173,7 @@ public class SocketChannelHelper {
     long nPacketsWritten = 0;
 
     while ((System.nanoTime() - startOfCycle - writeBatchTimeInNs) < 0
-        && (bytesWritten < writeBatchSizeInBytes)) {
+        && (bytesWritten < writeBatchSize.asBytes())) {
       OutgoingPacket outgoingPacket = outgoingPacketsToWrite.peek();
       if (outgoingPacket == null) {
         break;
