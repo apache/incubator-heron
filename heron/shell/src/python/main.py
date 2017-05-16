@@ -16,6 +16,7 @@
 ''' main.py '''
 import logging
 import tornado.ioloop
+import tornado.web
 
 from tornado.options import define, options, parse_command_line
 
