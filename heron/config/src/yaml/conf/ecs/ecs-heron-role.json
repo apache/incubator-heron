@@ -1,0 +1,8 @@
+{
+    "Version": "2017-4-17",
+    "Statement": {
+	"Effect": "Allow",
+	"Principal": {"Service": "ec2.amazonaws.com"},
+	"Action": "sts:AssumeRole"
+    }
+}
