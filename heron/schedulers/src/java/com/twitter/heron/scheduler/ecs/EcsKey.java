@@ -24,7 +24,13 @@ public enum EcsKey {
   ECS_AMI_INSTANCE("heron.ecs.ami.instance", "http://169.254.169.254/latest/meta-data/local-ipv4"),
   ECS_COMPOSE_UPCMD("heron.ecs.compose.up", "ecs-cli compose --project-name "),
   ECS_COMPOSE_STOP("heron.ecs.compose.up", "ecs-cli stop"),
-  ECS_COMPOSE_LIST("heron.ecs.compose.up", "ecs-cli ps");
+  //ECS_COMPOSE_LIST("heron.ecs.compose.up", "ecs-cli ps")
+  ECS_COMPOSE_LIST("heron.ecs.compose.up", "aws ecs list-tasks --family "),
+  ECS_LIST_BY("heron.ecs.list.by", "families"),
+  ECS_TASK_TAG("heron.ecs.task.tag", "taskArns"),
+  ECS_GET_FAMILY("heron.ecs.family.name",
+                  "aws ecs list-task-definition-families --family-prefix ecscompose-");
+
 
   private final String value;
   private final Key.Type type;
