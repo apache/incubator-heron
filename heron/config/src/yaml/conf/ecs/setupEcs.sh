@@ -26,7 +26,7 @@ AMI=$(aws --region $REGION ec2 describe-images  --filters Name=root-device-type,
 # Check that setup wasn't already run
 CLUSTER_STATUS=$(aws ecs describe-clusters --clusters ecs-heron-cluster --query 'clusters[0].status' --output text)
 if [ "$CLUSTER_STATUS" != "None" -a "$CLUSTER_STATUS" != "INACTIVE" ]; then
-    echo "error: ECS cluster weave-ecs-demo-cluster is active, cleanup first"
+    echo "error: ECS cluster ecs-heron-cluster is active, cleanup first"
     exit 1
 fi
 
@@ -38,7 +38,7 @@ aws ecs create-cluster --cluster-name ecs-heron-cluster > /dev/null
 echo "done"
 
 # Security group
-echo -n "Creating Security Group (weave-ecs-demo) .. "
+echo -n "Creating Security Group (ecs-heron-demo) .. "
 SECURITY_GROUP_ID=$(aws ec2 create-security-group --group-name ecs-heron-group  --description 'ECS Heron' --query 'GroupId' --output text)
 # Wait for the group to get associated with the VPC
 sleep 5
@@ -72,11 +72,11 @@ echo -n "Creating Launch Configuration (ecs-heron-launch-configuration) .. "
 
 sleep 15
 
-TMP_USER_DATA_FILE=$(mktemp /tmp/weave-ecs-demo-user-data-XXXX)
+TMP_USER_DATA_FILE=$(mktemp /tmp/ecs-heron-user-data-XXXX)
 trap 'rm $TMP_USER_DATA_FILE' EXIT
 cp data/set-ecs-cluster-name.sh $TMP_USER_DATA_FILE
 if [ -n "$SCOPE_AAS_PROBE_TOKEN" ]; then
-    echo "echo SERVICE_TOKEN=$SCOPE_AAS_PROBE_TOKEN >> /etc/weave/scope.config" >> $TMP_USER_DATA_FILE
+    echo "echo SERVICE_TOKEN=$SCOPE_AAS_PROBE_TOKEN >> /etc/ecs-heron/scope.config" >> $TMP_USER_DATA_FILE
 fi
 
 aws autoscaling create-launch-configuration --image-id $AMI --launch-configuration-name ecs-heron-launch-configuration --key-name ecs-heron-key --security-groups $SECURITY_GROUP_ID --instance-type t2.micro --user-data file://$TMP_USER_DATA_FILE  --iam-instance-profile ecs-heron-instance-profile --associate-public-ip-address --instance-monitoring Enabled=false
