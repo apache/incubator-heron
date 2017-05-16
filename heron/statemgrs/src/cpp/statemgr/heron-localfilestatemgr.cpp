@@ -55,6 +55,9 @@ void HeronLocalFileStateMgr::InitTree() {
   path = dpath;
   path += "/executionstate";
   FileUtils::makeDirectory(path);
+  path = dpath;
+  path += "/statefulcheckpoint";
+  FileUtils::makeDirectory(path);
 }
 
 void HeronLocalFileStateMgr::SetTMasterLocationWatch(const std::string& topology_name,
@@ -399,5 +402,55 @@ void HeronLocalFileStateMgr::CheckMetricsCacheLocation(
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
 }
 
+void HeronLocalFileStateMgr::CreateStatefulCheckpoint(const std::string& _topology_name,
+                                const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                                VCallback<proto::system::StatusCode> cb) {
+  std::string fname = GetStatefulCheckpointPath(_topology_name);
+  // First check to see if location exists.
+  if (MakeSureFileDoesNotExist(fname) != proto::system::OK) {
+    auto wCb = [cb](EventLoop::Status) { cb(proto::system::PATH_ALREADY_EXISTS); };
+    CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+    return;
+  }
+
+  std::string contents;
+  _ckpt.SerializeToString(&contents);
+  proto::system::StatusCode status = WriteToFile(fname, contents);
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
+
+void HeronLocalFileStateMgr::DeleteStatefulCheckpoint(const std::string& _topology_name,
+                                                VCallback<proto::system::StatusCode> cb) {
+  proto::system::StatusCode status = DeleteFile(GetStatefulCheckpointPath(_topology_name));
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
+
+void HeronLocalFileStateMgr::SetStatefulCheckpoint(const std::string& _topology_name,
+                                const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                                VCallback<proto::system::StatusCode> cb) {
+  std::string contents;
+  _ckpt.SerializeToString(&contents);
+  proto::system::StatusCode status =
+      WriteToFile(GetStatefulCheckpointPath(_topology_name), contents);
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
+
+void HeronLocalFileStateMgr::GetStatefulCheckpoint(const std::string& _topology_name,
+                                 proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                                 VCallback<proto::system::StatusCode> cb) {
+  std::string contents;
+  proto::system::StatusCode status =
+      ReadAllFileContents(GetStatefulCheckpointPath(_topology_name), contents);
+  if (status == proto::system::OK) {
+    if (!_return->ParseFromString(contents)) {
+      status = proto::system::STATE_CORRUPTED;
+    }
+  }
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
 }  // namespace common
 }  // namespace heron

@@ -106,6 +106,19 @@ class HeronZKStateMgr : public HeronStateMgr {
   void SetExecutionState(const proto::system::ExecutionState& _state,
                          VCallback<proto::system::StatusCode> _cb);
 
+  // Gets/Sets the Stateful Checkpoint
+  void CreateStatefulCheckpoint(const std::string& _topology_name,
+               const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+               VCallback<proto::system::StatusCode> _cb);
+  void DeleteStatefulCheckpoint(const std::string& _topology_name,
+               VCallback<proto::system::StatusCode> _cb);
+  void SetStatefulCheckpoint(const std::string& _topology_name,
+               const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+               VCallback<proto::system::StatusCode> _cb);
+  void GetStatefulCheckpoint(const std::string& _topology_name,
+               proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+               VCallback<proto::system::StatusCode> _cb);
+
   void ListTopologies(std::vector<sp_string>* _return, VCallback<proto::system::StatusCode> _cb);
   void ListExecutionStateTopologies(std::vector<sp_string>* _return,
                                     VCallback<proto::system::StatusCode> _cb);
@@ -147,6 +160,13 @@ class HeronZKStateMgr : public HeronStateMgr {
   void SetExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void GetExecutionStateDone(std::string* _contents, proto::system::ExecutionState* _return,
                              VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+
+  void CreateStatefulCheckpointDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void DeleteStatefulCheckpointDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void SetStatefulCheckpointDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void GetStatefulCheckpointDone(std::string* _contents,
+                           proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                           VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void ListTopologiesDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void ListExecutionStateTopologiesDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);

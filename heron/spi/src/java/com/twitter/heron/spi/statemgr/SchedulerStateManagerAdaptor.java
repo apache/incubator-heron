@@ -230,6 +230,10 @@ public class SchedulerStateManagerAdaptor {
     return awaitResult(delegate.deleteLocks(topologyName));
   }
 
+  public Boolean deleteStatefulCheckpoint(String topologyName) {
+    return awaitResult(delegate.deleteStatefulCheckpoint(topologyName));
+  }
+
   /**
    * Get the tmaster location for the given topology
    *

@@ -261,6 +261,48 @@ void HeronZKStateMgr::GetExecutionState(const std::string& _topology_name,
   zkclient_->Get(path, contents, std::move(wCb));
 }
 
+void HeronZKStateMgr::CreateStatefulCheckpoint(const std::string& _topology_name,
+                                  const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                                  VCallback<proto::system::StatusCode> cb) {
+  std::string path = GetStatefulCheckpointPath(_topology_name);
+  std::string contents;
+  _ckpt.SerializeToString(&contents);
+  auto wCb = [cb, this](sp_int32 rc) { this->CreateStatefulCheckpointDone(std::move(cb), rc); };
+
+  zkclient_->CreateNode(path, contents, false, std::move(wCb));
+}
+
+void HeronZKStateMgr::DeleteStatefulCheckpoint(const std::string& _topology_name,
+                                               VCallback<proto::system::StatusCode> cb) {
+  std::string path = GetStatefulCheckpointPath(_topology_name);
+  auto wCb = [cb, this](sp_int32 rc) { this->DeleteStatefulCheckpointDone(std::move(cb), rc); };
+
+  zkclient_->DeleteNode(path, std::move(wCb));
+}
+
+void HeronZKStateMgr::SetStatefulCheckpoint(const std::string& _topology_name,
+                                  const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                                  VCallback<proto::system::StatusCode> cb) {
+  std::string path = GetStatefulCheckpointPath(_topology_name);
+  std::string contents;
+  _ckpt.SerializeToString(&contents);
+  auto wCb = [cb, this](sp_int32 rc) { this->SetStatefulCheckpointDone(std::move(cb), rc); };
+
+  zkclient_->Set(path, contents, std::move(wCb));
+}
+
+void HeronZKStateMgr::GetStatefulCheckpoint(const std::string& _topology_name,
+                                   proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                                   VCallback<proto::system::StatusCode> cb) {
+  std::string path = GetStatefulCheckpointPath(_topology_name);
+  std::string* contents = new std::string();
+  auto wCb = [contents, _return, cb, this](sp_int32 rc) {
+    this->GetStatefulCheckpointDone(contents, _return, std::move(cb), rc);
+  };
+
+  zkclient_->Get(path, contents, std::move(wCb));
+}
+
 void HeronZKStateMgr::ListTopologies(std::vector<sp_string>* _return,
                                      VCallback<proto::system::StatusCode> cb) {
   sp_string path = GetTopologyDir();
@@ -546,6 +588,66 @@ void HeronZKStateMgr::GetExecutionStateDone(std::string* _contents,
     code = proto::system::PATH_DOES_NOT_EXIST;
   } else {
     LOG(ERROR) << "Getting ExecutionState failed with error " << _rc << std::endl;
+    code = proto::system::STATE_READ_ERROR;
+  }
+  delete _contents;
+  cb(code);
+}
+
+void HeronZKStateMgr::CreateStatefulCheckpointDone(VCallback<proto::system::StatusCode> cb,
+                                                   sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZNONODE) {
+    LOG(ERROR) << "Creating StatefulCheckpoint failed because zookeeper was not setup properly"
+               << std::endl;
+    code = proto::system::PATH_DOES_NOT_EXIST;
+  } else if (_rc != ZOK) {
+    LOG(ERROR) << "Creating Stateful Checkpoint failed with error " << _rc;
+    code = proto::system::STATE_WRITE_ERROR;
+  }
+  cb(code);
+}
+
+void HeronZKStateMgr::DeleteStatefulCheckpointDone(VCallback<proto::system::StatusCode> cb,
+                                                   sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZNONODE) {
+    LOG(ERROR) << "Deleting StatefulCheckpoint failed because the node does not exists";
+    code = proto::system::PATH_DOES_NOT_EXIST;
+  } else if (_rc != ZOK) {
+    LOG(ERROR) << "Deleting StatefulCheckpoint failed with error " << _rc;
+    code = proto::system::STATE_WRITE_ERROR;
+  } else {
+    LOG(ERROR) << "Deleted Exectution state";
+  }
+  cb(code);
+}
+
+void HeronZKStateMgr::SetStatefulCheckpointDone(VCallback<proto::system::StatusCode> cb,
+                                                sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZNONODE) {
+    LOG(ERROR) << "Setting StatefulCheckpoint failed because there was no such node";
+    code = proto::system::PATH_DOES_NOT_EXIST;
+  } else if (_rc != ZOK) {
+    LOG(ERROR) << "Setting StatefulCheckpoint failed with error " << _rc;
+    code = proto::system::STATE_WRITE_ERROR;
+  }
+  cb(code);
+}
+
+void HeronZKStateMgr::GetStatefulCheckpointDone(std::string* _contents,
+                                     proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                                     VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZOK) {
+    if (!_return->ParseFromString(*_contents)) {
+      code = proto::system::STATE_CORRUPTED;
+    }
+  } else if (_rc == ZNONODE) {
+    code = proto::system::PATH_DOES_NOT_EXIST;
+  } else {
+    LOG(ERROR) << "Getting StatefulCheckpoint failed with error " << _rc;
     code = proto::system::STATE_READ_ERROR;
   }
   delete _contents;

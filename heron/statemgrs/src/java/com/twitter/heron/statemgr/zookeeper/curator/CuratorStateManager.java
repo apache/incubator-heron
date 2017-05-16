@@ -38,6 +38,7 @@ import org.apache.zookeeper.Watcher;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Pair;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -366,6 +367,14 @@ public class CuratorStateManager extends FileSystemStateManager {
       PackingPlans.PackingPlan packingPlan,
       String topologyName) {
     return createNode(StateLocation.PACKING_PLAN, topologyName, packingPlan.toByteArray(), false);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoint(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint,
+      String topologyName) {
+    return createNode(StateLocation.STATEFUL_CHECKPOINT, topologyName,
+        checkpoint.toByteArray(), false);
   }
 
   @Override

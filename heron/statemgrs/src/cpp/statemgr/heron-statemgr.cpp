@@ -101,6 +101,10 @@ std::string HeronStateMgr::GetPhysicalPlanDir() { return topleveldir_ + "/pplans
 
 std::string HeronStateMgr::GetExecutionStateDir() { return topleveldir_ + "/executionstate"; }
 
+std::string HeronStateMgr::GetStatefulCheckpointDir() {
+  return topleveldir_ + "/statefulcheckpoint";
+}
+
 std::string HeronStateMgr::GetTMasterLocationPath(const std::string& _topname) {
   return GetTMasterLocationDir() + "/" + _topname;
 }
@@ -118,6 +122,10 @@ std::string HeronStateMgr::GetPhysicalPlanPath(const std::string& _topname) {
 
 std::string HeronStateMgr::GetExecutionStatePath(const std::string& _topname) {
   return GetExecutionStateDir() + "/" + _topname;
+}
+
+std::string HeronStateMgr::GetStatefulCheckpointPath(const std::string& _topname) {
+  return GetStatefulCheckpointDir() + "/" + _topname;
 }
 }  // namespace common
 }  // namespace heron
