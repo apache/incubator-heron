@@ -14,6 +14,8 @@
 
 package com.twitter.heron.common.network;
 
+import java.time.Duration;
+
 import com.twitter.heron.common.basics.ByteAmount;
 
 /**
@@ -23,22 +25,22 @@ import com.twitter.heron.common.basics.ByteAmount;
  */
 public class HeronSocketOptions {
   private ByteAmount networkWriteBatchSize;
-  private long networkWriteBatchTimeInMs;
+  private Duration networkWriteBatchTime;
   private ByteAmount networkReadBatchSize;
-  private long networkReadBatchTimeInMs;
+  private Duration networkReadBatchTime;
   private ByteAmount socketSendBufferSize;
   private ByteAmount socketReceivedBufferSize;
 
   public HeronSocketOptions(ByteAmount networkWriteBatchSize,
-                            long networkWriteBatchTimeInMs,
+                            Duration networkWriteBatchTime,
                             ByteAmount networkReadBatchSize,
-                            long networkReadBatchTimeInMs,
+                            Duration networkReadBatchTime,
                             ByteAmount socketSendBufferSize,
                             ByteAmount socketReceivedBufferSize) {
     this.networkWriteBatchSize = networkWriteBatchSize;
-    this.networkWriteBatchTimeInMs = networkWriteBatchTimeInMs;
+    this.networkWriteBatchTime = networkWriteBatchTime;
     this.networkReadBatchSize = networkReadBatchSize;
-    this.networkReadBatchTimeInMs = networkReadBatchTimeInMs;
+    this.networkReadBatchTime = networkReadBatchTime;
     this.socketSendBufferSize = socketSendBufferSize;
     this.socketReceivedBufferSize = socketReceivedBufferSize;
   }
@@ -47,16 +49,16 @@ public class HeronSocketOptions {
     return networkWriteBatchSize;
   }
 
-  public long getNetworkWriteBatchTimeInMs() {
-    return networkWriteBatchTimeInMs;
+  public Duration getNetworkWriteBatchTime() {
+    return networkWriteBatchTime;
   }
 
   public ByteAmount getNetworkReadBatchSize() {
     return networkReadBatchSize;
   }
 
-  public long getNetworkReadBatchTimeInMs() {
-    return networkReadBatchTimeInMs;
+  public Duration getNetworkReadBatchTime() {
+    return networkReadBatchTime;
   }
 
   public ByteAmount getSocketSendBufferSize() {

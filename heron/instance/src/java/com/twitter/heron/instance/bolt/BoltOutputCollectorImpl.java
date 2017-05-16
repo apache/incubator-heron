@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -129,7 +130,7 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   }
 
   private void admitAckTuple(Tuple tuple) {
-    long latency = 0;
+    Duration latency = Duration.ZERO;
     if (ackEnabled) {
       if (tuple instanceof TupleImpl) {
         TupleImpl tuplImpl = (TupleImpl) tuple;
@@ -145,18 +146,19 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
         }
         outputter.addAckTuple(bldr, tupleSizeInBytes);
 
-        latency = System.nanoTime() - tuplImpl.getCreationTime();
+        latency = Duration.ofNanos(System.nanoTime()).minusNanos(tuplImpl.getCreationTime());
       }
     }
 
     // Invoke user-defined boltAck task hook
     getPhysicalPlanHelper().getTopologyContext().invokeHookBoltAck(tuple, latency);
 
-    boltMetrics.ackedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
+    boltMetrics.ackedTuple(
+        tuple.getSourceStreamId(), tuple.getSourceComponent(), latency.toNanos());
   }
 
   private void admitFailTuple(Tuple tuple) {
-    long latency = 0;
+    Duration latency = Duration.ZERO;
     if (ackEnabled) {
       if (tuple instanceof TupleImpl) {
         TupleImpl tuplImpl = (TupleImpl) tuple;
@@ -172,13 +174,14 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
         }
         outputter.addFailTuple(bldr, tupleSizeInBytes);
 
-        latency = System.nanoTime() - tuplImpl.getCreationTime();
+        latency = Duration.ofNanos(System.nanoTime()).minusNanos(tuplImpl.getCreationTime());
       }
     }
 
     // Invoke user-defined boltFail task hook
     getPhysicalPlanHelper().getTopologyContext().invokeHookBoltFail(tuple, latency);
 
-    boltMetrics.failedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
+    boltMetrics.failedTuple(
+        tuple.getSourceStreamId(), tuple.getSourceComponent(), latency.toNanos());
   }
 }

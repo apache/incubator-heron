@@ -14,6 +14,7 @@
 
 package com.twitter.heron.simulator.instance;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,6 @@ import com.google.protobuf.ByteString;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.config.SystemConfig;
@@ -33,7 +33,7 @@ import com.twitter.heron.proto.system.HeronTuples;
 public class BoltInstance
     extends com.twitter.heron.instance.bolt.BoltInstance implements IInstance {
 
-  private final long instanceExecuteBatchTime;
+  private final Duration instanceExecuteBatchTime;
   private final ByteAmount instanceExecuteBatchSize;
 
   public BoltInstance(PhysicalPlanHelper helper,
@@ -44,8 +44,7 @@ public class BoltInstance
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
-    this.instanceExecuteBatchTime
-        = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
+    this.instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
     this.instanceExecuteBatchSize = systemConfig.getInstanceExecuteBatchSize();
 
   }
@@ -68,7 +67,7 @@ public class BoltInstance
     // Delegate to the use defined bolt
     bolt.execute(t);
 
-    long executeLatency = System.nanoTime() - deserializedTime;
+    Duration executeLatency = Duration.ofNanos(System.nanoTime()).minusNanos(deserializedTime);
 
     // Invoke user-defined execute task hook
     helper.getTopologyContext().invokeHookBoltExecute(t, executeLatency);
@@ -77,7 +76,7 @@ public class BoltInstance
         deserializedTime - startTime);
 
     // Update metrics
-    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
+    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency.toNanos());
   }
 
   @Override
@@ -101,7 +100,7 @@ public class BoltInstance
       }
 
       // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - instanceExecuteBatchTime > 0) {
+      if (System.nanoTime() - startOfCycle - instanceExecuteBatchTime.toNanos() > 0) {
         break;
       }
 

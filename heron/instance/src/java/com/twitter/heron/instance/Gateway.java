@@ -15,11 +15,11 @@
 package com.twitter.heron.instance;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -88,17 +88,16 @@ public class Gateway implements Runnable, AutoCloseable {
     gatewayMetrics.registerMetrics(gatewayMetricsCollector);
 
     // Init the ErrorReportHandler
-    ErrorReportLoggingHandler.init(
-        instance.getInstanceId(), gatewayMetricsCollector,
-        systemConfig.getHeronMetricsExportIntervalSec(),
+    ErrorReportLoggingHandler.init(gatewayMetricsCollector,
+        systemConfig.getHeronMetricsExportInterval(),
         systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
 
     // Initialize the corresponding 2 socket clients with corresponding socket options
     HeronSocketOptions socketOptions = new HeronSocketOptions(
         systemConfig.getInstanceNetworkWriteBatchSize(),
-        systemConfig.getInstanceNetworkWriteBatchTimeMs(),
+        systemConfig.getInstanceNetworkWriteBatchTime(),
         systemConfig.getInstanceNetworkReadBatchSize(),
-        systemConfig.getInstanceNetworkReadBatchTimeMs(),
+        systemConfig.getInstanceNetworkReadBatchTime(),
         systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
         systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
     );
@@ -112,7 +111,7 @@ public class Gateway implements Runnable, AutoCloseable {
 
     // Attach sample Runnable to gatewayMetricsCollector
     gatewayMetricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
-        systemConfig.getInstanceMetricsSystemSampleIntervalSec());
+        systemConfig.getInstanceMetricsSystemSampleInterval());
     Runnable sampleStreamQueuesSize = new Runnable() {
       @Override
       public void run() {
@@ -125,10 +124,9 @@ public class Gateway implements Runnable, AutoCloseable {
       }
     };
     gatewayMetricsCollector.registerMetricSampleRunnable(sampleStreamQueuesSize,
-        systemConfig.getInstanceMetricsSystemSampleIntervalSec());
+        systemConfig.getInstanceMetricsSystemSampleInterval());
 
-    final long instanceTuningIntervalMs = systemConfig.getInstanceTuningIntervalMs()
-        * Constants.MILLISECONDS_TO_NANOSECONDS;
+    final Duration instanceTuningInterval = systemConfig.getInstanceTuningInterval();
 
     // Attache Runnable to update the expected stream's expected available capacity
     Runnable tuningStreamQueueSize = new Runnable() {
@@ -138,11 +136,11 @@ public class Gateway implements Runnable, AutoCloseable {
       public void run() {
         inStreamQueue.updateExpectedAvailableCapacity();
         outStreamQueue.updateExpectedAvailableCapacity();
-        gatewayLooper.registerTimerEventInNanoSeconds(instanceTuningIntervalMs, this);
+        gatewayLooper.registerTimerEvent(instanceTuningInterval, this);
       }
     };
-    gatewayLooper.registerTimerEventInSeconds(
-        systemConfig.getInstanceMetricsSystemSampleIntervalSec(),
+    gatewayLooper.registerTimerEvent(
+        systemConfig.getInstanceMetricsSystemSampleInterval(),
         tuningStreamQueueSize);
   }
 

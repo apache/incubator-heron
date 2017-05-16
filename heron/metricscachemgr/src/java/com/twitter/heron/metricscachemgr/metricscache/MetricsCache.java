@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -57,11 +58,11 @@ public class MetricsCache {
       metricNameType.setMetricToType(metricName, translateFromString(metricsTypes.get(metricName)));
     }
 
-    long maxIntervalSec = systemConfig.getTmasterMetricsCollectorMaximumIntervalMin() * 60;
-    long purgeIntervalSec = systemConfig.getTmasterMetricsCollectorPurgeIntervalSec();
+    Duration maxInterval = systemConfig.getTmasterMetricsCollectorMaximumInterval();
+    Duration purgeInterval = systemConfig.getTmasterMetricsCollectorPurgeInterval();
     long maxExceptions = systemConfig.getTmasterMetricsCollectorMaximumException();
 
-    cache = new CacheCore(maxIntervalSec, purgeIntervalSec, maxExceptions);
+    cache = new CacheCore(maxInterval, purgeInterval, maxExceptions);
 
     cache.startPurge(looper);
   }

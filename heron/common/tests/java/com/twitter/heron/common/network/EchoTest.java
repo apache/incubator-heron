@@ -16,6 +16,7 @@ package com.twitter.heron.common.network;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -38,8 +39,8 @@ public class EchoTest {
   private static int serverPort;
   private ExecutorService threadsPool;
   private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
-      ByteAmount.fromMegabytes(100), 100,
-      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(5),
       ByteAmount.fromMegabytes(5));
 
@@ -141,7 +142,7 @@ public class EchoTest {
         }
         if (nRequests >= maxRequests) {
           // We wait for 1 second to let client to receive the request and then exit
-          registerTimerEventInSeconds(1,
+          registerTimerEvent(Duration.ofSeconds(1),
               new Runnable() {
                 @Override
                 public void run() {

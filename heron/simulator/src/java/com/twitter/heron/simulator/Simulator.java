@@ -188,12 +188,12 @@ public class Simulator {
     SystemConfig.Builder builder = SystemConfig.newBuilder(true)
         .put(SystemConfigKey.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256)
         .put(SystemConfigKey.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256)
-        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL_SEC, 60)
-        .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_TIME_MS, 16)
+        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 60)
+        .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_TIME, 16)
         .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_SIZE, ByteAmount.fromBytes(32768))
-        .put(SystemConfigKey.INSTANCE_EMIT_BATCH_TIME_MS, 16)
+        .put(SystemConfigKey.INSTANCE_EMIT_BATCH_TIME, 16)
         .put(SystemConfigKey.INSTANCE_EMIT_BATCH_SIZE, ByteAmount.fromBytes(32768))
-        .put(SystemConfigKey.INSTANCE_ACK_BATCH_TIME_MS, 128)
+        .put(SystemConfigKey.INSTANCE_ACK_BATCH_TIME, 128)
         .put(SystemConfigKey.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
 
     return builder.build();

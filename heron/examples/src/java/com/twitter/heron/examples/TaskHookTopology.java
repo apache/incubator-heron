@@ -128,7 +128,7 @@ public final class TaskHookTopology {
       ++spoutAcked;
       if (spoutAcked % N == 0) {
         System.out.println("spoutAck() is invoked in hook");
-        System.out.println(info.completeLatencyMs);
+        System.out.println(info.completeLatency);
         System.out.println(info.messageId);
         System.out.println(info.spoutTaskId);
       }
