@@ -6,6 +6,9 @@ common_deps_files = [
     "//heron/common/src/java:basics-java",
     "@commons_io_commons_io//jar",
     "@com_google_guava_guava//jar",
+    "@com_fasterxml_jackson_core_jackson_annotations//jar",
+    "@com_fasterxml_jackson_core_jackson_core//jar",
+    "@com_fasterxml_jackson_core_jackson_databind//jar",
 ]
 
 spi_deps_files = [
