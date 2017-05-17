@@ -24,6 +24,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.time.Duration;
 import java.util.List;
 
 import com.twitter.heron.api.metric.AssignableMetric;
@@ -32,7 +33,6 @@ import com.twitter.heron.api.metric.MeanReducerState;
 import com.twitter.heron.api.metric.MultiAssignableMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.ThreadNames;
@@ -209,7 +209,7 @@ public class JVMMetrics {
     SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
 
-    int interval = systemConfig.getHeronMetricsExportIntervalSec();
+    int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
     metricsCollector.registerMetric("__jvm-gc-collection-time-ms", jvmGCTimeMs, interval);
     metricsCollector.registerMetric("__jvm-gc-collection-count", jvmGCCount, interval);
@@ -264,7 +264,7 @@ public class JVMMetrics {
       public void run() {
         updateGcMetrics();
 
-        jvmUpTimeSecs.setValue(runtimeMXBean.getUptime() / Constants.SECONDS_TO_MILLISECONDS);
+        jvmUpTimeSecs.setValue(Duration.ofMillis(runtimeMXBean.getUptime()).getSeconds());
 
         processCPUTimeNs.setValue(getProcessCPUTimeNs());
         getThreadsMetrics();

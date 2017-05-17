@@ -15,6 +15,7 @@
 package com.twitter.heron.ckptmgr;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,16 +56,16 @@ public final class CheckpointManagerConfig {
     return getByteAmount(CheckpointManagerConfigKey.WRITE_BATCH_SIZE);
   }
 
-  public Long getWriteBatchTimeMs() {
-    return getLong(CheckpointManagerConfigKey.WRITE_BATCH_TIME);
+  public Duration getWriteBatchTime() {
+    return getDuration(CheckpointManagerConfigKey.WRITE_BATCH_TIME);
   }
 
   public ByteAmount getReadBatchSize() {
     return getByteAmount(CheckpointManagerConfigKey.READ_BATCH_SIZE);
   }
 
-  public Long getReadBatchTimeMs() {
-    return getLong(CheckpointManagerConfigKey.READ_BATCH_TIME);
+  public Duration getReadBatchTime() {
+    return getDuration(CheckpointManagerConfigKey.READ_BATCH_TIME);
   }
 
   public ByteAmount getSocketSendSize() {
@@ -88,6 +89,11 @@ public final class CheckpointManagerConfig {
   private Long getLong(CheckpointManagerConfigKey key) {
     assertType(key, CheckpointManagerConfigKey.Type.LONG);
     return TypeUtils.getLong(get(key));
+  }
+
+  private Duration getDuration(CheckpointManagerConfigKey key) {
+    assertType(key, CheckpointManagerConfigKey.Type.DURATION);
+    return TypeUtils.getDuration(get(key), key.getTemporalUnit());
   }
 
   private ByteAmount getByteAmount(CheckpointManagerConfigKey key) {

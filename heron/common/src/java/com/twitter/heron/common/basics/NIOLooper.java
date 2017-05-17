@@ -19,6 +19,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -52,16 +53,15 @@ public class NIOLooper extends WakeableLooper {
   public void doWait() {
     // If timer task exists, the doWait() should wait not later than the time timer to execute
     // It no timer exists, we consider it will wait forever until other threads call wakeUp()
-    // The nextTimeoutIntervalMs is in milli-seconds
-    long nextTimeoutIntervalMs = getNextTimeoutIntervalMs();
+    Duration nextTimeoutInterval = getNextTimeoutInterval();
 
     // doWait(timeout), which in fact is implemented by selector.select(timeout), and it will
     // wake up, if other threads wake it up, it meets the timeout, one channel is selected, or
     // the current thread is interrupted.
     try {
-      if (nextTimeoutIntervalMs > 0) {
+      if (nextTimeoutInterval.toMillis() > 0) {
         // The select will take the timeout in unit of milli-seconds
-        selector.select(nextTimeoutIntervalMs);
+        selector.select(nextTimeoutInterval.toMillis());
       } else {
         selector.selectNow();
       }

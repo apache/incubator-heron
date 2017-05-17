@@ -15,6 +15,7 @@
 package com.twitter.heron.instance;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -248,8 +249,7 @@ public class HeronInstance {
       // CountDownLatch to notify ForceExitTask whether exit is done
       final CountDownLatch exited = new CountDownLatch(1);
       final ExecutorService exitExecutor = Executors.newSingleThreadExecutor();
-      exitExecutor.execute(
-          new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
+      exitExecutor.execute(new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeout()));
 
       // Clean up
       if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
@@ -297,19 +297,19 @@ public class HeronInstance {
   // this Runnable would forcibly halt the process
   public class ForceExitTask implements Runnable {
     private final CountDownLatch exited;
-    private final long timeoutInMs;
+    private final Duration timeout;
 
-    public ForceExitTask(CountDownLatch exited, long timeoutInMs) {
+    public ForceExitTask(CountDownLatch exited, Duration timeout) {
       this.exited = exited;
-      this.timeoutInMs = timeoutInMs;
+      this.timeout = timeout;
     }
 
     @Override
     public void run() {
-      LOG.info(String.format("Waiting for process exit in %d ms...", timeoutInMs));
+      LOG.info(String.format("Waiting for process exit in %s", timeout));
       boolean ret = false;
       try {
-        ret = exited.await(timeoutInMs, TimeUnit.MILLISECONDS);
+        ret = exited.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
         LOG.log(Level.SEVERE, "ForceExitTask is interrupted:", e);
       }

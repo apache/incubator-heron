@@ -15,6 +15,8 @@
 package com.twitter.heron.metricsmgr.sink.metricscache;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -29,7 +31,6 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
@@ -339,12 +340,12 @@ public class MetricsCacheSink implements IMetricsSink {
           new HeronSocketOptions(
               TypeUtils.getByteAmount(
                   metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
-              TypeUtils.getLong(
-                  metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
+              TypeUtils.getDuration(
+                  metricsCacheClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS), ChronoUnit.MILLIS),
               TypeUtils.getByteAmount(
                   metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
-              TypeUtils.getLong(
-                  metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
+              TypeUtils.getDuration(
+                  metricsCacheClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS), ChronoUnit.MILLIS),
               TypeUtils.getByteAmount(
                   metricsCacheClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
               TypeUtils.getByteAmount(
@@ -353,14 +354,13 @@ public class MetricsCacheSink implements IMetricsSink {
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);
 
-      metricsCacheClient =
-          new MetricsCacheClient(looper,
-              currentMetricsCacheLocation.getHost(),
-              currentMetricsCacheLocation.getMasterPort(),
-              socketOptions, metricsCommunicator);
-      metricsCacheClient.
-          setReconnectIntervalSec(
-              TypeUtils.getLong(metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC)));
+      metricsCacheClient = new MetricsCacheClient(looper,
+          currentMetricsCacheLocation.getHost(),
+          currentMetricsCacheLocation.getMasterPort(),
+          socketOptions, metricsCommunicator,
+          TypeUtils.getDuration(
+              metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC),
+              ChronoUnit.SECONDS));
 
       LOG.severe(String.format("Starting metricsCacheClient for the %d time.",
           startedAttempts.incrementAndGet()));
@@ -404,9 +404,9 @@ public class MetricsCacheSink implements IMetricsSink {
         public void uncaughtException(Thread t, Throwable e) {
           LOG.log(Level.SEVERE, "metricsCacheClient dies in thread: " + t, e);
 
-          long reconnectInterval =
-              TypeUtils.getLong(metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC));
-          SysUtils.sleep(reconnectInterval * Constants.SECONDS_TO_MILLISECONDS);
+          Duration reconnectInterval = TypeUtils.getDuration(
+              metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS);
+          SysUtils.sleep(reconnectInterval);
           LOG.info("Restarting metricsCacheClient");
 
           // We would use the MetricsCacheLocation in cache, since

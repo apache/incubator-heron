@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metrics;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class GlobalMetricsTest {
         new HashMap<Integer, String>(),
         0,
         fakeCollector);
-    GlobalMetrics.init(fakeContext, 5);
+    GlobalMetrics.init(fakeContext, Duration.ofSeconds(5));
     GlobalMetrics.incr("mycounter");
     Map<String, Long> metricsContent = GlobalMetrics.getUnderlyingCounter().getValueAndReset();
     assertTrue(metricsContent.containsKey("mycounter"));

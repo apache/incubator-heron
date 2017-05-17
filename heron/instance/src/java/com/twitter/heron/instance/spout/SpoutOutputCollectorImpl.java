@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.spout;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -112,7 +113,7 @@ public class SpoutOutputCollectorImpl
     return inFlightTuples.remove(rootId);
   }
 
-  List<RootTupleInfo> retireExpired(long timeout) {
+  List<RootTupleInfo> retireExpired(Duration timeout) {
     List<RootTupleInfo> retval = new ArrayList<>();
     long curTime = System.nanoTime();
 
@@ -122,7 +123,7 @@ public class SpoutOutputCollectorImpl
     Iterator<RootTupleInfo> iterator = inFlightTuples.values().iterator();
     while (iterator.hasNext()) {
       RootTupleInfo rootTupleInfo = iterator.next();
-      if (rootTupleInfo.isExpired(curTime, timeout)) {
+      if (rootTupleInfo.isExpired(curTime, timeout.toNanos())) {
         retval.add(rootTupleInfo);
         iterator.remove();
       } else {

@@ -17,6 +17,7 @@ package com.twitter.heron.metricsmgr;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,8 +60,8 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 public class HandleTMasterLocationTest {
 
   private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
-      ByteAmount.fromMegabytes(100), 100,
-      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(5),
       ByteAmount.fromMegabytes(5));
 

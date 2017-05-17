@@ -16,6 +16,7 @@ package com.twitter.heron.common.network;
 
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +24,6 @@ import java.util.Queue;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.ISelectHandler;
 import com.twitter.heron.common.basics.NIOLooper;
 
@@ -58,24 +58,26 @@ import com.twitter.heron.common.basics.NIOLooper;
 
 public class SocketChannelHelper {
   private static final Logger LOG = Logger.getLogger(SocketChannelHelper.class.getName());
-  private NIOLooper looper;
-  private ISelectHandler selectHandler;
-  private SocketChannel socketChannel;
+  private final NIOLooper looper;
+  private final ISelectHandler selectHandler;
+  private final SocketChannel socketChannel;
   // The unbounded queue of outstanding packets that need to be sent
   // Carefully check the size of queue before offering packets into it
   // to avoid the unbounded-growth of queue
-  private Queue<OutgoingPacket> outgoingPacketsToWrite;
+  private final Queue<OutgoingPacket> outgoingPacketsToWrite;
+
+  // System Config related
+  private final ByteAmount writeBatchSize;
+  private final Duration writeBatchTime;
+  private final ByteAmount readBatchSize;
+  private final Duration readReadBatchTime;
+
   // Incompletely read next packet
   private IncomingPacket incomingPacket;
   private long totalPacketsRead;
   private long totalPacketsWritten;
   private long totalBytesRead;
   private long totalBytesWritten;
-  // System Config related
-  private ByteAmount writeBatchSize;
-  private long writeBatchTimeInNs;
-  private ByteAmount readBatchSize;
-  private long readReadBatchTimeInNs;
 
   public SocketChannelHelper(NIOLooper looper,
                              ISelectHandler selectHandler,
@@ -88,12 +90,10 @@ public class SocketChannelHelper {
     this.incomingPacket = new IncomingPacket();
 
     this.writeBatchSize = options.getNetworkWriteBatchSize();
-    this.writeBatchTimeInNs = options.getNetworkWriteBatchTimeInMs()
-        * Constants.MILLISECONDS_TO_NANOSECONDS;
+    this.writeBatchTime = options.getNetworkWriteBatchTime();
 
     this.readBatchSize = options.getNetworkReadBatchSize();
-    this.readReadBatchTimeInNs = options.getNetworkReadBatchTimeInMs()
-        * Constants.MILLISECONDS_TO_NANOSECONDS;
+    this.readReadBatchTime = options.getNetworkReadBatchTime();
 
     // We will register Read by default when the connection is established
     // However, we will register Write only when we have something to write since
@@ -134,7 +134,7 @@ public class SocketChannelHelper {
     // We would stop reading when:
     // 1. We spent too much time
     // 2. We have read large enough data
-    while ((System.nanoTime() - startOfCycle - readReadBatchTimeInNs) < 0
+    while ((System.nanoTime() - startOfCycle - readReadBatchTime.toNanos()) < 0
         && (bytesRead < readBatchSize.asBytes())) {
       int readState = incomingPacket.readFromChannel(socketChannel);
 
@@ -172,7 +172,7 @@ public class SocketChannelHelper {
 
     long nPacketsWritten = 0;
 
-    while ((System.nanoTime() - startOfCycle - writeBatchTimeInNs) < 0
+    while ((System.nanoTime() - startOfCycle - writeBatchTime.toNanos()) < 0
         && (bytesWritten < writeBatchSize.asBytes())) {
       OutgoingPacket outgoingPacket = outgoingPacketsToWrite.peek();
       if (outgoingPacket == null) {

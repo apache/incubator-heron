@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricsmgr.sink.metricscache;
 
+import java.time.Duration;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -32,9 +33,9 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 public class MetricsCacheClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(MetricsCacheClient.class.getName());
   private final Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator;
-  private String host;
-  private int port;
-  private long reconnectIntervalSec = -1;
+  private final String host;
+  private final int port;
+  private final Duration reconnectInterval;
 
   /**
    * Constructor
@@ -46,15 +47,13 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
    */
   public MetricsCacheClient(
       NIOLooper s, String host, int port, HeronSocketOptions options,
-      Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator) {
+      Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator,
+      Duration reconnectInterval) {
     super(s, host, port, options);
     this.host = host;
     this.port = port;
     this.publishMetricsCommunicator = publishMetricsCommunicator;
-  }
-
-  public void setReconnectIntervalSec(long interval) {
-    this.reconnectIntervalSec = interval;
+    this.reconnectInterval = reconnectInterval;
   }
 
   @Override
@@ -69,13 +68,13 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
   public void onConnect(StatusCode status) {
     if (status != StatusCode.OK) {
       LOG.severe("Cannot connect to the MetricsCache at " + host + ":" + port + ", Will Retry..");
-      if (reconnectIntervalSec > 0) {
+      if (reconnectInterval != Duration.ZERO) {
         Runnable r = new Runnable() {
           public void run() {
             start();
           }
         };
-        getNIOLooper().registerTimerEventInSeconds(reconnectIntervalSec, r);
+        getNIOLooper().registerTimerEvent(reconnectInterval, r);
       }
       return;
     }

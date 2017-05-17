@@ -15,6 +15,7 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -87,7 +88,7 @@ public class CacheCoreTest {
     // bucket 2: [now-70 seconds ~ now-40 seconds)
     // bucket 3: [now-40 seconds ~ now-10 seconds)
     // bucket 4: [now-10 seconds ~ now]
-    cacheCore = new CacheCore(100, 30, 0);
+    cacheCore = new CacheCore(Duration.ofSeconds(100), Duration.ofSeconds(30), 0);
 
     // current timestamp used as time origin
     // although it may be slightly different from the time origin
@@ -466,7 +467,7 @@ public class CacheCoreTest {
     // bucket 2: [now-70 seconds ~ now-40 seconds)
     // bucket 3: [now-40 seconds ~ now-10 seconds)
     // bucket 4: [now-10 seconds ~ now]
-    cacheCore = new CacheCore(100, 30, 0);
+    cacheCore = new CacheCore(Duration.ofSeconds(100), Duration.ofSeconds(30), 0);
 
     // current timestamp used as time origin
     // although it may be slightly different from the time origin
@@ -620,7 +621,7 @@ public class CacheCoreTest {
     // bucket 2: [now-7 seconds ~ now-4 seconds)
     // bucket 3: [now-4 seconds ~ now-1 seconds)
     // bucket 4: [now-1 seconds ~ now]
-    cacheCore = new CacheCore(10, 3, 0);
+    cacheCore = new CacheCore(Duration.ofSeconds(10), Duration.ofSeconds(3), 0);
 
     // current timestamp used as time origin
     // although it may be slightly different from the time origin
