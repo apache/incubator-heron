@@ -75,5 +75,5 @@ void OrderServer::Terminate() {
 
 void OrderServer::HandleTerminateMessage(Connection* _connection __attribute__((unused)),
                                          TerminateMessage* _message __attribute__((unused))) {
-  AddTimer([this]() { this->Terminate(); }, 1);
+  AddTimer([this]() { std::cout << "OrderServer:Terminate"; this->Terminate(); }, 1);
 }
