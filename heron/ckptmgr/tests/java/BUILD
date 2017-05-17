@@ -5,7 +5,8 @@ test_deps_files = \
   heron_java_proto_files() + [
     "//heron/ckptmgr/src/java:ckptmgr-java",
     "//heron/spi/src/java:statefulstorage-spi-java",
-    "//heron/common/src/java:common-java",
+    "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:network-java",
     "//third_party/java:powermock",
     "//third_party/java:mockito",
     "//third_party/java:junit4"
