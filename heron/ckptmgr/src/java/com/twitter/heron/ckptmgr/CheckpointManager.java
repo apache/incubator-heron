@@ -140,9 +140,9 @@ public class CheckpointManager {
     HeronSocketOptions serverSocketOptions =
         new HeronSocketOptions(
             checkpointManagerConfig.getWriteBatchSize(),
-            checkpointManagerConfig.getWriteBatchTimeMs(),
+            checkpointManagerConfig.getWriteBatchTime(),
             checkpointManagerConfig.getReadBatchSize(),
-            checkpointManagerConfig.getReadBatchTimeMs(),
+            checkpointManagerConfig.getReadBatchTime(),
             checkpointManagerConfig.getSocketSendSize(),
             checkpointManagerConfig.getSocketReceiveSize());
 

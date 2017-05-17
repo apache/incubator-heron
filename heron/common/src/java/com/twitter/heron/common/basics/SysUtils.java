@@ -16,6 +16,7 @@ package com.twitter.heron.common.basics;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,12 +32,12 @@ public final class SysUtils {
    * the precision and accuracy of system timers and schedulers. The thread
    * does not lose ownership of any monitors.
    *
-   * @param millis the length of time to sleep in milliseconds
+   * @param duration the length of time to sleep
    * @throws IllegalArgumentException if the value of {@code millis} is negative
    */
-  public static void sleep(long millis) {
+  public static void sleep(Duration duration) {
     try {
-      Thread.sleep(millis);
+      Thread.sleep(duration.toMillis());
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -49,8 +50,7 @@ public final class SysUtils {
    */
   public static int getFreePort() {
     try (ServerSocket socket = new ServerSocket(0)) {
-      int port = socket.getLocalPort();
-      return port;
+      return socket.getLocalPort();
     } catch (IOException ioe) {
       return -1;
     }

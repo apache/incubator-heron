@@ -14,13 +14,13 @@
 
 package com.twitter.heron.simulator.utils;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.WakeableLooper;
 
 public class XORManager {
@@ -30,10 +30,10 @@ public class XORManager {
   private final Map<Integer, RotatingMap> spoutTasksToRotatingMap;
 
   // The rotate interval in nano-seconds
-  private final long rotateIntervalNs;
+  private final Duration rotateInterval;
 
   public XORManager(WakeableLooper looper,
-                    int timeoutSec,
+                    Duration timeout,
                     List<Integer> taskIds,
                     int nBuckets) {
     this.looper = looper;
@@ -47,10 +47,9 @@ public class XORManager {
         rotate();
       }
     };
-    looper.registerTimerEventInNanoSeconds(timeoutSec * Constants.SECONDS_TO_NANOSECONDS, r);
+    looper.registerTimerEvent(timeout, r);
 
-    this.rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets
-        + (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
+    this.rotateInterval = timeout.dividedBy(nBuckets).plusNanos(timeout.getNano());
 
     for (Integer taskId : taskIds) {
       spoutTasksToRotatingMap.put(taskId, new RotatingMap(nBuckets));
@@ -129,7 +128,7 @@ public class XORManager {
         rotate();
       }
     };
-    looper.registerTimerEventInNanoSeconds(rotateIntervalNs, r);
+    looper.registerTimerEvent(rotateInterval, r);
   }
 
   // For unit test

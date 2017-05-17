@@ -14,6 +14,7 @@
 
 package com.twitter.heron.simulator.utils;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -30,7 +31,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.WakeableLooper;
 
 /**
@@ -40,7 +40,7 @@ public class XORManagerTest {
 
   private static List<Integer> taskIds = new LinkedList<>();
   private static TopologyAPI.Topology topology;
-  private static int timeoutSec = 1;
+  private static Duration timeout = Duration.ofSeconds(1);
   private static int nBuckets = 3;
 
   @BeforeClass
@@ -68,15 +68,13 @@ public class XORManagerTest {
    */
   @Test
   public void testXORManagerMethods() throws Exception {
-    long rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets
-        + (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
+    Duration rotateInterval = timeout.dividedBy(nBuckets).plusNanos(timeout.getNano() % nBuckets);
 
     WakeableLooper looper = Mockito.mock(WakeableLooper.class);
 
-    XORManager g = new XORManager(looper, timeoutSec, taskIds, nBuckets);
+    XORManager g = new XORManager(looper, timeout, taskIds, nBuckets);
 
-    Mockito.verify(looper).registerTimerEventInNanoSeconds(
-        Mockito.eq(Constants.SECONDS_TO_NANOSECONDS * timeoutSec), Mockito.any(Runnable.class));
+    Mockito.verify(looper).registerTimerEvent(Mockito.eq(timeout), Mockito.any(Runnable.class));
 
     // Create some items
     for (int i = 0; i < 100; ++i) {
@@ -121,7 +119,7 @@ public class XORManagerTest {
     }
 
     g.rotate();
-    Mockito.verify(looper).registerTimerEventInNanoSeconds(Mockito.eq(rotateIntervalNs),
+    Mockito.verify(looper).registerTimerEvent(Mockito.eq(rotateInterval),
         Mockito.any(Runnable.class));
     for (int j = 0; j < 99; ++j) {
       Assert.assertEquals(g.anchor(1, 1, oneAdded.get(j)), false);
@@ -147,8 +145,8 @@ public class XORManagerTest {
       g.rotate();
     }
     // We expected (nBuckets+1) since we have done one rotate earlier
-    Mockito.verify(looper, Mockito.times(nBuckets + 1)).registerTimerEventInNanoSeconds(
-        Mockito.eq(rotateIntervalNs), Mockito.any(Runnable.class));
+    Mockito.verify(looper, Mockito.times(nBuckets + 1)).registerTimerEvent(
+        Mockito.eq(rotateInterval), Mockito.any(Runnable.class));
 
     for (int j = 0; j < 100; ++j) {
       Assert.assertEquals(g.anchor(2, 1, twoAdded.get(j)), false);

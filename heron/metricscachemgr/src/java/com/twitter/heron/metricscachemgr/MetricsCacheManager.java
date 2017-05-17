@@ -108,9 +108,9 @@ public class MetricsCacheManager {
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
         new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSize(),
-            systemConfig.getMetricsMgrNetworkWriteBatchTimeMs(),
+            systemConfig.getMetricsMgrNetworkWriteBatchTime(),
             systemConfig.getMetricsMgrNetworkReadBatchSize(),
-            systemConfig.getMetricsMgrNetworkReadBatchTimeMs(),
+            systemConfig.getMetricsMgrNetworkReadBatchTime(),
             systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSize(),
             systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize());
 

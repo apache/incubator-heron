@@ -15,6 +15,7 @@
 package com.twitter.heron.metricsmgr;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -57,8 +58,8 @@ public class MetricsManagerServerTest {
 
   private static final String SERVER_HOST = "127.0.0.1";
   private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
-      ByteAmount.fromMegabytes(100), 100,
-      ByteAmount.fromMegabytes(100), 100,
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(5),
       ByteAmount.fromMegabytes(5));
 

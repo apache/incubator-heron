@@ -14,6 +14,8 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +28,6 @@ import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
@@ -112,7 +113,7 @@ public class BoltInstance implements IInstance {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
-    GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
+    GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportInterval());
 
     boltMetrics.registerMetrics(topologyContext);
 
@@ -174,8 +175,7 @@ public class BoltInstance implements IInstance {
   @Override
   public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
-    long instanceExecuteBatchTime
-        = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
+    Duration instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
 
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
@@ -215,14 +215,14 @@ public class BoltInstance implements IInstance {
         long executeLatency = currentTime - startTime;
 
         // Invoke user-defined execute task hook
-        topologyContext.invokeHookBoltExecute(t, executeLatency);
+        topologyContext.invokeHookBoltExecute(t, Duration.ofNanos(executeLatency));
 
         // Update metrics
         boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
       }
 
       // To avoid spending too much time
-      if (currentTime - startOfCycle - instanceExecuteBatchTime > 0) {
+      if (currentTime - startOfCycle - instanceExecuteBatchTime.toNanos() > 0) {
         break;
       }
     }
@@ -241,7 +241,7 @@ public class BoltInstance implements IInstance {
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
 
     if (tickTupleFreqSecs != null) {
-      int freq = TypeUtils.getInteger(tickTupleFreqSecs);
+      Duration freq = TypeUtils.getDuration(tickTupleFreqSecs, ChronoUnit.SECONDS);
 
       Runnable r = new Runnable() {
         public void run() {
@@ -249,7 +249,7 @@ public class BoltInstance implements IInstance {
         }
       };
 
-      looper.registerTimerEventInSeconds(freq, r);
+      looper.registerTimerEvent(freq, r);
     }
   }
 

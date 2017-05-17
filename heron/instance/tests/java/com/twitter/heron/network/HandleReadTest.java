@@ -21,6 +21,7 @@ import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -172,7 +173,7 @@ public class HandleReadTest {
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
         // 1ms sleep to mitigate busy looping
-        SysUtils.sleep(1);
+        SysUtils.sleep(Duration.ofMillis(1));
       }
 
       // Send back response
@@ -190,7 +191,7 @@ public class HandleReadTest {
         if (instanceControlMsg != null) {
           break;
         } else {
-          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
 
@@ -201,7 +202,7 @@ public class HandleReadTest {
         if (!inStreamQueue.isEmpty()) {
           break;
         }
-        SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+        SysUtils.sleep(Constants.RETRY_INTERVAL);
       }
       nioLooper.exitLoop();
 
@@ -279,9 +280,9 @@ public class HandleReadTest {
 
           HeronSocketOptions socketOptions = new HeronSocketOptions(
               systemConfig.getInstanceNetworkWriteBatchSize(),
-              systemConfig.getInstanceNetworkWriteBatchTimeMs(),
+              systemConfig.getInstanceNetworkWriteBatchTime(),
               systemConfig.getInstanceNetworkReadBatchSize(),
-              systemConfig.getInstanceNetworkReadBatchTimeMs(),
+              systemConfig.getInstanceNetworkReadBatchTime(),
               systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
               systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
           );
