@@ -156,14 +156,14 @@ class HeronStateMgr {
   std::string GetTopologyPath(const std::string& _topology_name);
   std::string GetPhysicalPlanPath(const std::string& _topology_name);
   std::string GetExecutionStatePath(const std::string& _topology_name);
-  std::string GetStatefulCheckpointPath(const std::string& _topology_name);
+  std::string GetStatefulCheckpointsPath(const std::string& _topology_name);
 
   std::string GetTMasterLocationDir();
   std::string GetMetricsCacheLocationDir();
   std::string GetTopologyDir();
   std::string GetPhysicalPlanDir();
   std::string GetExecutionStateDir();
-  std::string GetStatefulCheckpointDir();
+  std::string GetStatefulCheckpointsDir();
 
  private:
   void ListExecutionStateDone(std::vector<proto::system::ExecutionState*>* _return,

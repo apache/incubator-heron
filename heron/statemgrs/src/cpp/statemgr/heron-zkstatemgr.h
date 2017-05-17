@@ -161,10 +161,10 @@ class HeronZKStateMgr : public HeronStateMgr {
   void GetExecutionStateDone(std::string* _contents, proto::system::ExecutionState* _return,
                              VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
-  void CreateStatefulCheckpointDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void DeleteStatefulCheckpointDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void SetStatefulCheckpointDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetStatefulCheckpointDone(std::string* _contents,
+  void CreateStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void DeleteStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void SetStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void GetStatefulCheckpointsDone(std::string* _contents,
                            proto::ckptmgr::StatefulConsistentCheckpoints* _return,
                            VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
