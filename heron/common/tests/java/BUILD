@@ -4,7 +4,9 @@ java_library(
     name = "common-tests",
     srcs = glob(["**/*.java"]),
     deps = [
-        "//heron/common/src/java:common-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:config-java",
+        "//heron/common/src/java:network-java",
         "//heron/proto:proto_networktests_java",
         "//third_party/java:powermock",
         "@commons_io_commons_io//jar",

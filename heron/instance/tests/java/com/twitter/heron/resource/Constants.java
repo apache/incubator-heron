@@ -14,6 +14,8 @@
 
 package com.twitter.heron.resource;
 
+import java.time.Duration;
+
 import org.junit.Ignore;
 
 /**
@@ -22,8 +24,8 @@ import org.junit.Ignore;
 @Ignore
 public final class Constants {
   public static final int RETRY_TIMES = 10;
-  public static final int RETRY_INTERVAL_MS = 1000;
-  public static final int TEST_WAIT_TIME_MS = 2000;
+  public static final Duration RETRY_INTERVAL = Duration.ofSeconds(1);
+  public static final Duration TEST_WAIT_TIME = Duration.ofSeconds(2);
 
   public static final int QUEUE_BUFFER_SIZE = 128;
 

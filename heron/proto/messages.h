@@ -27,5 +27,6 @@
 #include "proto/scheduler.pb.h"
 #include "proto/stmgr.pb.h"
 #include "proto/metrics.pb.h"
+#include "proto/ckptmgr.pb.h"
 
 #endif  // SRC_CPP_PROTO_MESSAGES_H_

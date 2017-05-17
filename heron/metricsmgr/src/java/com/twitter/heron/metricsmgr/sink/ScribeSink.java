@@ -14,6 +14,8 @@
 
 package com.twitter.heron.metricsmgr.sink;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +35,6 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
@@ -183,7 +184,8 @@ public class ScribeSink implements IMetricsSink {
   // Log the message to scribe, optionally retrying
   private void logToScribe(List<LogEntry> pendingEntries) {
     int retryAttempts = TypeUtils.getInteger(config.get(KEY_SCRIBE_RETRY_ATTEMPTS));
-    long retryIntervalMs = TypeUtils.getLong(config.get(KEY_SCRIBE_RETRY_INTERVAL_MS));
+    Duration retryInterval = TypeUtils.getDuration(
+        config.get(KEY_SCRIBE_RETRY_INTERVAL_MS), ChronoUnit.MILLIS);
     try {
       for (int attempt = 0; attempt < retryAttempts; attempt++) {
         ResultCode result = client.Log(pendingEntries);
@@ -200,7 +202,7 @@ public class ScribeSink implements IMetricsSink {
         }
 
         // Sleep a while to avoid to hit scribe server heavily
-        SysUtils.sleep(retryIntervalMs);
+        SysUtils.sleep(retryInterval);
       }
     } catch (TException te) {
       LOG.log(Level.SEVERE, "Message sending failed due to TransportException: ", te);
@@ -219,7 +221,7 @@ public class ScribeSink implements IMetricsSink {
     String[] sources = record.getSource().split("/");
     String source = String.format("/%s/%s", sources[1], sources[2]);
     // The timestamp is in ms, however, we need to convert it in seconds to fit Twitter Infra
-    long timestamp = record.getTimestamp() / Constants.SECONDS_TO_MILLISECONDS;
+    long timestamp = Duration.ofMillis(record.getTimestamp()).getSeconds();
 
     Map<String, Object> json = new HashMap<String, Object>();
     // Add the service name

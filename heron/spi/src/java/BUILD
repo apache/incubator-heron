@@ -9,6 +9,7 @@ java_library(
         "**/spi/common/**/*.java",
         "**/spi/packing/**/*.java",
         "**/spi/scheduler/**/*.java",
+        "**/spi/statefulstorage/**/*.java",
         "**/spi/uploader/**/*.java",
         "**/spi/utils/**/*.java",
         "**/spi/statemgr/**/*.java",
@@ -26,6 +27,7 @@ java_library(
         "//heron/proto:proto_topology_java",
         "//heron/proto:proto_packing_plan_java",
         "//heron/proto:proto_physical_plan_java",
+        "//heron/proto:proto_ckptmgr_java",
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
         "@com_google_protobuf_protobuf_java//jar",
@@ -37,6 +39,7 @@ utils_deps_files = \
         ":common-spi-java",
         ":statemgr-spi-java",
         ":scheduler-spi-java",
+        ":statefulstorage-spi-java",
         ":packing-spi-java",
         ":metricsmgr-spi-java",
         "//heron/common/src/java:basics-java",
@@ -52,6 +55,12 @@ scheduler_deps_files = \
         "//heron/api/src/java:classification",
         "//heron/common/src/java:config-java",
         "@com_google_guava_guava//jar",
+    ]
+
+statefulstorage_deps_files = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        "//heron/common/src/java:config-java",
     ]
 
 packing_deps_files = [
@@ -115,6 +124,14 @@ java_library(
 )
 
 java_library(
+    name='statefulstorage-spi-java',
+    srcs = glob([
+        "**/spi/statefulstorage/**/*.java",
+    ]),
+    deps = statefulstorage_deps_files,
+)
+
+java_library(
     name='shell-utils-java',
     srcs = glob([
         "**/spi/utils/ShellUtils.java",
@@ -172,6 +189,7 @@ java_binary(
         "**/spi/metricsmgr/**/*.java",
         "**/spi/packing/**/*.java",
         "**/spi/scheduler/**/*.java",
+        "**/spi/statefulstorage/**/*.java",
         "**/spi/statemgr/**/*.java",
         "**/spi/uploader/**/*.java",
         "**/spi/utils/**/*.java",

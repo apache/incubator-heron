@@ -124,7 +124,7 @@ public class ActivateDeactivateTest {
 
     inControlQueue.offer(instanceControlMsg);
 
-    Thread.sleep(Constants.TEST_WAIT_TIME_MS);
+    Thread.sleep(Constants.TEST_WAIT_TIME.toMillis());
 
     Assert.assertEquals(1, deactivateCount.get());
 
@@ -136,7 +136,7 @@ public class ActivateDeactivateTest {
 
     inControlQueue.offer(instanceControlMsg);
 
-    Thread.sleep(Constants.TEST_WAIT_TIME_MS);
+    Thread.sleep(Constants.TEST_WAIT_TIME.toMillis());
 
     Assert.assertEquals(1, activateCount.get());
     Assert.assertEquals(1, deactivateCount.get());

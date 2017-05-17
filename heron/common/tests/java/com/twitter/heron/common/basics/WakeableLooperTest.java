@@ -16,6 +16,7 @@ package com.twitter.heron.common.basics;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -95,11 +96,11 @@ public class WakeableLooperTest {
     };
 
     long startTime = System.nanoTime();
-    int intervalSeconds = 1;
-    slaveLooper.registerTimerEventInSeconds(intervalSeconds, r);
+    Duration interval = Duration.ofSeconds(1);
+    slaveLooper.registerTimerEvent(interval, r);
     slaveLooper.loop();
     long endTime = System.nanoTime();
-    Assert.assertTrue(endTime - startTime - (long) intervalSeconds * SECONDS_TO_NANOSECONDS >= 0);
+    Assert.assertTrue(endTime - startTime - interval.toNanos() >= 0);
     Assert.assertEquals(10, globalValue);
   }
 
@@ -117,11 +118,11 @@ public class WakeableLooperTest {
     };
 
     long startTime = System.nanoTime();
-    int intervalNs = 6 * 1000 * 1000;
-    slaveLooper.registerTimerEventInNanoSeconds(intervalNs, r);
+    Duration interval = Duration.ofMillis(6);
+    slaveLooper.registerTimerEvent(interval, r);
     slaveLooper.loop();
     long endTime = System.nanoTime();
-    Assert.assertTrue(endTime - startTime - intervalNs >= 0);
+    Assert.assertTrue(endTime - startTime - interval.toNanos() >= 0);
     Assert.assertEquals(10, globalValue);
   }
 
@@ -143,7 +144,7 @@ public class WakeableLooperTest {
   }
 
   /**
-   * Method: getNextTimeoutIntervalMs()
+   * Method: getNextTimeoutInterval()
    */
   @Test
   public void testGetNextTimeoutIntervalMs() throws Exception {
@@ -155,16 +156,16 @@ public class WakeableLooperTest {
       }
     };
 
-    long intervalNs = 6L * 1000 * 1000 * 1000;
-    slaveLooper.registerTimerEventInNanoSeconds(intervalNs, r);
+    Duration interval = Duration.ofSeconds(6);
+    slaveLooper.registerTimerEvent(interval, r);
 
-    long res = 1000;
+    Duration res = Duration.ofNanos(1000);
 
     try {
       Method method =
-          slaveLooper.getClass().getSuperclass().getDeclaredMethod("getNextTimeoutIntervalMs");
+          slaveLooper.getClass().getSuperclass().getDeclaredMethod("getNextTimeoutInterval");
       method.setAccessible(true);
-      res = (Long) method.invoke(slaveLooper) * 1000 * 1000;
+      res = (Duration) method.invoke(slaveLooper);
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -175,7 +176,7 @@ public class WakeableLooperTest {
 
     Assert.assertNotNull(res);
 
-    Assert.assertTrue(res <= intervalNs && res > intervalNs / 2);
+    Assert.assertTrue(res.compareTo(interval) <= 0 && res.compareTo(interval.dividedBy(2)) > 0);
   }
 
   /**
@@ -241,8 +242,8 @@ public class WakeableLooperTest {
       }
     };
 
-    int intervalNs = 1;
-    slaveLooper.registerTimerEventInNanoSeconds(intervalNs, r);
+    Duration interval = Duration.ofNanos(1);
+    slaveLooper.registerTimerEvent(interval, r);
 
     try {
       Method method =

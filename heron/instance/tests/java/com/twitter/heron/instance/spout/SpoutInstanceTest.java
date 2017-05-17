@@ -32,7 +32,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.twitter.heron.api.serializer.IPluggableSerializer;
-import com.twitter.heron.api.serializer.KryoSerializer;
+import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
@@ -95,7 +95,7 @@ public class SpoutInstanceTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    serializer = new KryoSerializer();
+    serializer = new JavaSerializer();
     serializer.initialize(null);
   }
 
@@ -207,7 +207,7 @@ public class SpoutInstanceTest {
             testLooper.exitLoop();
             break;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
     };
@@ -252,7 +252,7 @@ public class SpoutInstanceTest {
             testLooper.exitLoop();
             break;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
     };
@@ -297,11 +297,11 @@ public class SpoutInstanceTest {
             if (ackCount.intValue() != 0) {
               break;
             }
-            SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+            SysUtils.sleep(Constants.RETRY_INTERVAL);
           }
 
           // Wait the bolt's finishing
-          SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
+          SysUtils.sleep(Constants.TEST_WAIT_TIME);
           Assert.assertEquals(10, ackCount.intValue());
           testLooper.exitLoop();
         }
@@ -332,11 +332,11 @@ public class SpoutInstanceTest {
           if (failCount.intValue() != 0) {
             break;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
 
         // Wait the bolt's finishing
-        SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
+        SysUtils.sleep(Constants.TEST_WAIT_TIME);
         Assert.assertEquals(10, failCount.intValue());
         testLooper.exitLoop();
       }
@@ -385,11 +385,11 @@ public class SpoutInstanceTest {
             if (ackCount.intValue() != 0 || failCount.intValue() != 0) {
               break;
             }
-            SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+            SysUtils.sleep(Constants.RETRY_INTERVAL);
           }
 
           // Wait the bolt's finishing
-          SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
+          SysUtils.sleep(Constants.TEST_WAIT_TIME);
           Assert.assertEquals(5, ackCount.intValue());
           Assert.assertEquals(5, failCount.intValue());
           testLooper.exitLoop();

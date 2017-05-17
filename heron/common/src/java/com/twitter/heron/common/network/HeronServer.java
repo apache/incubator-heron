@@ -20,6 +20,7 @@ import java.net.SocketAddress;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,9 +132,10 @@ public abstract class HeronServer implements ISelectHandler {
       if (socketChannel != null) {
         socketChannel.configureBlocking(false);
         // Set the maximum possible send and receive buffers
-        socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
+        socketChannel.socket().setSendBufferSize(
+            (int) socketOptions.getSocketSendBufferSize().asBytes());
         socketChannel.socket().setReceiveBufferSize(
-            socketOptions.getSocketReceivedBufferSizeInBytes());
+            (int) socketOptions.getSocketReceivedBufferSize().asBytes());
         socketChannel.socket().setTcpNoDelay(true);
         SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel,
             socketOptions);
@@ -262,14 +264,9 @@ public abstract class HeronServer implements ISelectHandler {
     return nioLooper;
   }
 
-  // Add a timer to be invoked after timerInSeconds seconds.
-  public void registerTimerEventInSeconds(long timerInSeconds, Runnable task) {
-    nioLooper.registerTimerEventInSeconds(timerInSeconds, task);
-  }
-
-  // Add a timer to be invoked after timerInNanoSecnods nano-seconds.
-  public void registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task) {
-    nioLooper.registerTimerEventInNanoSeconds(timerInNanoSecnods, task);
+  // Add a timer to be invoked after timer duration.
+  public void registerTimerEvent(Duration timer, Runnable task) {
+    nioLooper.registerTimerEvent(timer, task);
   }
 
   /////////////////////////////////////////////////////////

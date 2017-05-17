@@ -15,6 +15,7 @@
 package com.twitter.heron.statemgr.zookeeper;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.Test;
@@ -82,16 +83,16 @@ public class ZkUtilsTest {
     PowerMockito.spy(NetworkUtils.class);
     PowerMockito.doReturn(new Pair<>(address0, process))
         .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
-            eq(address0), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
-            anyInt(), anyInt(), anyInt());
+            eq(address0), anyString(), any(NetworkUtils.TunnelType.class), any(Duration.class),
+            anyInt(), any(Duration.class), anyInt());
     PowerMockito.doReturn(new Pair<>(address1, process))
         .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
-            eq(address1), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
-            anyInt(), anyInt(), anyInt());
+            eq(address1), anyString(), any(NetworkUtils.TunnelType.class), any(Duration.class),
+            anyInt(), any(Duration.class), anyInt());
     PowerMockito.doReturn(new Pair<>(tunnelAddress, process))
         .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
-            eq(address2), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
-            anyInt(), anyInt(), anyInt());
+            eq(address2), anyString(), any(NetworkUtils.TunnelType.class), any(Duration.class),
+            anyInt(), any(Duration.class), anyInt());
 
     Pair<String, List<Process>> ret = ZkUtils.setupZkTunnel(config, tunnelConfig);
 

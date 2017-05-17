@@ -14,26 +14,23 @@
 
 package com.twitter.heron.instance.spout;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.protobuf.ByteString;
-
-import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.utils.metrics.SpoutMetrics;
+import com.twitter.heron.common.utils.metrics.ComponentMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.TupleKeyGenerator;
-import com.twitter.heron.instance.OutgoingTupleCollection;
+import com.twitter.heron.instance.AbstractOutputCollector;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -49,7 +46,8 @@ import com.twitter.heron.proto.system.HeronTuples;
  * 3. Maintain some statistics, for instance, total tuples emitted.
  * <p>
  */
-public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
+public class SpoutOutputCollectorImpl
+    extends AbstractOutputCollector implements ISpoutOutputCollector {
   private static final Logger LOG = Logger.getLogger(SpoutOutputCollectorImpl.class.getName());
 
   // Map from tuple key to composite object with insertion-order, i.e. ordered by time
@@ -57,60 +55,30 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
 
   private final TupleKeyGenerator keyGenerator;
 
-  private final SpoutMetrics spoutMetrics;
-  private PhysicalPlanHelper helper;
-
-  private final boolean ackingEnabled;
   // When acking is not enabled, if the spout does an emit with a anchor
   // we need to ack it immediately. This keeps the list of those
   private final Queue<RootTupleInfo> immediateAcks;
 
-  private final IPluggableSerializer serializer;
-  private final OutgoingTupleCollection outputter;
-
-  private long totalTuplesEmitted;
-
-  public SpoutOutputCollectorImpl(IPluggableSerializer serializer,
-                                  PhysicalPlanHelper helper,
-                                  Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
-                                  SpoutMetrics spoutMetrics) {
+  protected SpoutOutputCollectorImpl(IPluggableSerializer serializer,
+                                     PhysicalPlanHelper helper,
+                                     Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                     ComponentMetrics spoutMetrics) {
+    super(serializer, helper, streamOutQueue, spoutMetrics);
     if (helper.getMySpout() == null) {
       throw new RuntimeException(helper.getMyTaskId() + " is not a spout ");
     }
 
-    this.serializer = serializer;
-    this.spoutMetrics = spoutMetrics;
     this.keyGenerator = new TupleKeyGenerator();
-    updatePhysicalPlanHelper(helper);
 
     // with default capacity, load factor and insertion order
-    inFlightTuples = new LinkedHashMap<Long, RootTupleInfo>();
+    inFlightTuples = new LinkedHashMap<>();
 
-    Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
-        && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
-      this.ackingEnabled =
-          Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
-    } else {
-      this.ackingEnabled = false;
-    }
-
-    if (!ackingEnabled) {
-      immediateAcks = new ArrayDeque<RootTupleInfo>();
+    if (!ackEnabled) {
+      immediateAcks = new ArrayDeque<>();
     } else {
       immediateAcks = null;
     }
-
-    this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
   }
-
-  void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
-    this.helper = physicalPlanHelper;
-  }
-
-  /////////////////////////////////////////////////////////
-  // Following public methods are overrides OutputCollector
-  /////////////////////////////////////////////////////////
 
   @Override
   public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
@@ -133,40 +101,20 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
   // Following public methods are used for querying or
   // interacting internal state of the BoltOutputCollectorImpl
   /////////////////////////////////////////////////////////
-
-  // Return true we could offer item to outQueue
-  public boolean isOutQueuesAvailable() {
-    return outputter.isOutQueuesAvailable();
-  }
-
-  // Return the total data emitted in bytes
-  public long getTotalDataEmittedInBytes() {
-    return outputter.getTotalDataEmittedInBytes();
-  }
-
-  // Flush the tuples to next stage
-  public void sendOutTuples() {
-    outputter.sendOutTuples();
-  }
-
-  public long getTotalTuplesEmitted() {
-    return totalTuplesEmitted;
-  }
-
   public int numInFlight() {
     return inFlightTuples.size();
   }
 
-  public Queue<RootTupleInfo> getImmediateAcks() {
+  Queue<RootTupleInfo> getImmediateAcks() {
     return immediateAcks;
   }
 
-  public RootTupleInfo retireInFlight(long rootId) {
+  RootTupleInfo retireInFlight(long rootId) {
     return inFlightTuples.remove(rootId);
   }
 
-  public List<RootTupleInfo> retireExpired(long timeout) {
-    List<RootTupleInfo> retval = new ArrayList<RootTupleInfo>();
+  List<RootTupleInfo> retireExpired(Duration timeout) {
+    List<RootTupleInfo> retval = new ArrayList<>();
     long curTime = System.nanoTime();
 
     // The LinkedHashMap is ordered by insertion order, i.e. ordered by time
@@ -175,7 +123,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     Iterator<RootTupleInfo> iterator = inFlightTuples.values().iterator();
     while (iterator.hasNext()) {
       RootTupleInfo rootTupleInfo = iterator.next();
-      if (rootTupleInfo.isExpired(curTime, timeout)) {
+      if (rootTupleInfo.isExpired(curTime, timeout.toNanos())) {
         retval.add(rootTupleInfo);
         iterator.remove();
       } else {
@@ -186,81 +134,41 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     return retval;
   }
 
-  // Clean the internal state of BoltOutputCollectorImpl
-  public void clear() {
-    outputter.clear();
-  }
-
   /////////////////////////////////////////////////////////
   // Following private methods are internal implementations
   /////////////////////////////////////////////////////////
 
   private List<Integer> admitSpoutTuple(String streamId, List<Object> tuple, Object messageId) {
     // No need to send tuples if it is already terminated
-    if (helper.isTerminatedComponent()) {
+    if (getPhysicalPlanHelper().isTerminatedComponent()) {
       return null;
     }
 
     // Start construct the data tuple
-    HeronTuples.HeronDataTuple.Builder bldr = HeronTuples.HeronDataTuple.newBuilder();
-
-    // set the key. This is mostly ignored
-    bldr.setKey(0);
-
-    // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
-    List<Integer> customGroupingTargetTaskIds = null;
-    if (!helper.isCustomGroupingEmpty()) {
-      customGroupingTargetTaskIds =
-          helper.chooseTasksForCustomStreamGrouping(streamId, tuple);
-
-      if (customGroupingTargetTaskIds != null) {
-        // It is a CustomStreamGrouping
-        bldr.addAllDestTaskIds(customGroupingTargetTaskIds);
-      }
-    }
-
-    // Invoke user-defined emit task hook
-    helper.getTopologyContext().invokeHookEmit(tuple, streamId, customGroupingTargetTaskIds);
+    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple);
 
     if (messageId != null) {
       RootTupleInfo tupleInfo = new RootTupleInfo(streamId, messageId);
-      if (ackingEnabled) {
+      if (ackEnabled) {
         // This message is rooted
-        HeronTuples.RootId.Builder rtbldr = EstablishRootId(tupleInfo);
+        HeronTuples.RootId.Builder rtbldr = establishRootId(tupleInfo);
         bldr.addRoots(rtbldr);
       } else {
         immediateAcks.offer(tupleInfo);
       }
     }
 
-    long tupleSizeInBytes = 0;
-    long startTime = System.nanoTime();
-
-    // Serialize it
-    for (Object obj : tuple) {
-      byte[] b = serializer.serialize(obj);
-      ByteString bstr = ByteString.copyFrom(b);
-      bldr.addValues(bstr);
-      tupleSizeInBytes += b.length;
-    }
-
-    long latency = System.nanoTime() - startTime;
-    spoutMetrics.serializeDataTuple(streamId, latency);
-
-    // submit to outputter
-    outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
-    totalTuplesEmitted++;
-    spoutMetrics.emittedTuple(streamId);
+    sendTuple(bldr, streamId, tuple);
 
     // TODO:- remove this after changing the api
     return null;
   }
 
-  private HeronTuples.RootId.Builder EstablishRootId(RootTupleInfo tupleInfo) {
+  private HeronTuples.RootId.Builder establishRootId(RootTupleInfo tupleInfo) {
     // This message is rooted
     long rootId = keyGenerator.next();
     HeronTuples.RootId.Builder rtbldr = HeronTuples.RootId.newBuilder();
-    rtbldr.setTaskid(helper.getMyTaskId());
+    rtbldr.setTaskid(getPhysicalPlanHelper().getMyTaskId());
     rtbldr.setKey(rootId);
     inFlightTuples.put(rootId, tupleInfo);
     return rtbldr;

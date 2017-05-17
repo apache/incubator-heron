@@ -134,8 +134,8 @@ public class MetricsManagerClient extends HeronClient {
           start();
         }
       };
-      getNIOLooper().registerTimerEventInSeconds(
-          systemConfig.getInstanceReconnectMetricsmgrIntervalSec(), r);
+      getNIOLooper().registerTimerEvent(
+          systemConfig.getInstanceReconnectMetricsmgrInterval(), r);
       return;
     }
 
@@ -167,7 +167,7 @@ public class MetricsManagerClient extends HeronClient {
     // The timeout would be the reconnect-interval-seconds
     sendRequest(request, null,
         Metrics.MetricPublisherRegisterResponse.newBuilder(),
-        systemConfig.getInstanceReconnectMetricsmgrIntervalSec());
+        systemConfig.getInstanceReconnectMetricsmgrInterval());
   }
 
   @Override
