@@ -18,10 +18,12 @@ import logging
 import tornado.ioloop
 import tornado.web
 
+from tornado.httpclient import AsyncHTTPClient
 from tornado.options import define, options, parse_command_line
 
 from heron.shell.src.python import handlers
 
+AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
 app = tornado.web.Application([
     (r"^/jmap/([0-9]+$)", handlers.JmapHandler),
     (r"^/histo/([0-9]+$)", handlers.MemoryHistogramHandler),
