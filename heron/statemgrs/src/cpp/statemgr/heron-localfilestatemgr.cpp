@@ -292,7 +292,7 @@ void HeronLocalFileStateMgr::SetExecutionState(const proto::system::ExecutionSta
   CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
-void HeronLocalFileStateMgr::CreateStatefulCheckpoint(const std::string& _topology_name,
+void HeronLocalFileStateMgr::CreateStatefulCheckpoints(const std::string& _topology_name,
                                 const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                                 VCallback<proto::system::StatusCode> cb) {
   std::string fname = GetStatefulCheckpointPath(_topology_name);
@@ -310,14 +310,14 @@ void HeronLocalFileStateMgr::CreateStatefulCheckpoint(const std::string& _topolo
   CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
-void HeronLocalFileStateMgr::DeleteStatefulCheckpoint(const std::string& _topology_name,
+void HeronLocalFileStateMgr::DeleteStatefulCheckpoints(const std::string& _topology_name,
                                                 VCallback<proto::system::StatusCode> cb) {
   proto::system::StatusCode status = DeleteFile(GetStatefulCheckpointPath(_topology_name));
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
   CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
-void HeronLocalFileStateMgr::SetStatefulCheckpoint(const std::string& _topology_name,
+void HeronLocalFileStateMgr::SetStatefulCheckpoints(const std::string& _topology_name,
                                 const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                                 VCallback<proto::system::StatusCode> cb) {
   std::string contents;
@@ -328,7 +328,7 @@ void HeronLocalFileStateMgr::SetStatefulCheckpoint(const std::string& _topology_
   CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
-void HeronLocalFileStateMgr::GetStatefulCheckpoint(const std::string& _topology_name,
+void HeronLocalFileStateMgr::GetStatefulCheckpoints(const std::string& _topology_name,
                                  proto::ckptmgr::StatefulConsistentCheckpoints* _return,
                                  VCallback<proto::system::StatusCode> cb) {
   std::string contents;

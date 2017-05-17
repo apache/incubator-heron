@@ -261,7 +261,7 @@ void HeronZKStateMgr::GetExecutionState(const std::string& _topology_name,
   zkclient_->Get(path, contents, std::move(wCb));
 }
 
-void HeronZKStateMgr::CreateStatefulCheckpoint(const std::string& _topology_name,
+void HeronZKStateMgr::CreateStatefulCheckpoints(const std::string& _topology_name,
                                   const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                                   VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointPath(_topology_name);
@@ -272,7 +272,7 @@ void HeronZKStateMgr::CreateStatefulCheckpoint(const std::string& _topology_name
   zkclient_->CreateNode(path, contents, false, std::move(wCb));
 }
 
-void HeronZKStateMgr::DeleteStatefulCheckpoint(const std::string& _topology_name,
+void HeronZKStateMgr::DeleteStatefulCheckpoints(const std::string& _topology_name,
                                                VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointPath(_topology_name);
   auto wCb = [cb, this](sp_int32 rc) { this->DeleteStatefulCheckpointDone(std::move(cb), rc); };
@@ -280,7 +280,7 @@ void HeronZKStateMgr::DeleteStatefulCheckpoint(const std::string& _topology_name
   zkclient_->DeleteNode(path, std::move(wCb));
 }
 
-void HeronZKStateMgr::SetStatefulCheckpoint(const std::string& _topology_name,
+void HeronZKStateMgr::SetStatefulCheckpoints(const std::string& _topology_name,
                                   const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                                   VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointPath(_topology_name);
@@ -291,7 +291,7 @@ void HeronZKStateMgr::SetStatefulCheckpoint(const std::string& _topology_name,
   zkclient_->Set(path, contents, std::move(wCb));
 }
 
-void HeronZKStateMgr::GetStatefulCheckpoint(const std::string& _topology_name,
+void HeronZKStateMgr::GetStatefulCheckpoints(const std::string& _topology_name,
                                    proto::ckptmgr::StatefulConsistentCheckpoints* _return,
                                    VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointPath(_topology_name);

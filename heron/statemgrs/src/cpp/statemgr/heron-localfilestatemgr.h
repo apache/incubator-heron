@@ -84,15 +84,15 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
   void SetExecutionState(const proto::system::ExecutionState& _state,
                          VCallback<proto::system::StatusCode> _cb);
 
-  void CreateStatefulCheckpoint(const std::string& _topology_name,
+  void CreateStatefulCheckpoints(const std::string& _topology_name,
                       const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                       VCallback<proto::system::StatusCode> _cb);
-  void DeleteStatefulCheckpoint(const std::string& _topology_name,
+  void DeleteStatefulCheckpoints(const std::string& _topology_name,
                             VCallback<proto::system::StatusCode> _cb);
-  void GetStatefulCheckpoint(const std::string& _topology_name,
+  void GetStatefulCheckpoints(const std::string& _topology_name,
                       proto::ckptmgr::StatefulConsistentCheckpoints* _return,
                       VCallback<proto::system::StatusCode> _cb);
-  void SetStatefulCheckpoint(const std::string& _topology_name,
+  void SetStatefulCheckpoints(const std::string& _topology_name,
                       const proto::ckptmgr::StatefulConsistentCheckpoints& _state,
                       VCallback<proto::system::StatusCode> _cb);
 

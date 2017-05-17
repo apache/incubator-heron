@@ -125,15 +125,15 @@ class HeronStateMgr {
                                   VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets Stateful Checkpoint
-  virtual void CreateStatefulCheckpoint(const std::string& _topology_name,
+  virtual void CreateStatefulCheckpoints(const std::string& _topology_name,
                            const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                            VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void DeleteStatefulCheckpoint(const std::string& _topology_name,
+  virtual void DeleteStatefulCheckpoints(const std::string& _topology_name,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void SetStatefulCheckpoint(const std::string& _topology_name,
+  virtual void SetStatefulCheckpoints(const std::string& _topology_name,
                            const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
                             VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void GetStatefulCheckpoint(const std::string& _topology_name,
+  virtual void GetStatefulCheckpoints(const std::string& _topology_name,
                                proto::ckptmgr::StatefulConsistentCheckpoints* _return,
                                VCallback<proto::system::StatusCode> _cb) = 0;
 
