@@ -24,6 +24,7 @@ import tornado.options
 import tornado.web
 import tornado.log
 import tornado.template
+from tornado.httpclient import AsyncHTTPClient
 from tornado.options import define
 from tornado.web import url
 
@@ -47,7 +48,8 @@ class Application(tornado.web.Application):
     if base_url != "":
       static_prefix = os.path.join(base_url, 'static/')
 
-    Log.info("Using base url: {}".format(base_url))
+    AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
+    Log.info("Using base url: %s", base_url)
     settings = dict(
         template_path=os.path.join(sys.path[0], "heron/tools/ui/resources/templates"),
         static_path=os.path.join(sys.path[0], "heron/tools/ui/resources/static"),
