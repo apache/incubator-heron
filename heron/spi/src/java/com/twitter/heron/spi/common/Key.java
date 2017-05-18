@@ -112,7 +112,7 @@ public enum Key {
   IS_STATEFUL                       ("heron.is.stateful", Boolean.FALSE),
   IS_CLEAN_STATEFUL_CHECKPOINTS     ("heron.is.clean.stateful.checkpoints", Boolean.FALSE),
   CKPTMGR_STATEFUL_STORAGE          ("heron.statefulstorage.type", Type.STRING),
-  STATEFUL_STORAGE_CONF             ("heron.statefulstorage.config", Type.STRING),
+  STATEFUL_STORAGE_CONF             ("heron.statefulstorage.config", Type.MAP),
   STATEFUL_STORAGE_CLASSPATH        ("heron.statefulstorage.classpath", Type.STRING),
 
   //keys for config provided paths
@@ -173,6 +173,7 @@ public enum Key {
     STRING,
     PACKAGE_TYPE,
     PROPERTIES,
+    MAP,
     UNKNOWN
   }
 
