@@ -71,6 +71,10 @@ public abstract class HeronServer implements ISelectHandler {
     activeConnections = new HashMap<SocketChannel, SocketChannelHelper>();
   }
 
+  InetSocketAddress getEndpoint() {
+    return endpoint;
+  }
+
   // Register the protobuf Message's name with protobuf Message
   public void registerOnMessage(Message.Builder builder) {
     messageMap.put(builder.getDescriptorForType().getFullName(), builder);
