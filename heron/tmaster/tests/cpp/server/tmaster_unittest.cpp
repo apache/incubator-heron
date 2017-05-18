@@ -353,8 +353,8 @@ void StartStMgrs(CommonResources& common) {
 void SetUpCommonResources(CommonResources& common) {
   // Initialize dummy params
   common.tmaster_host_ = LOCALHOST;
-  common.tmaster_port_ = 53001;
-  common.tmaster_controller_port_ = 53002;
+  common.tmaster_port_ = 0;
+  common.tmaster_controller_port_ = 0;
   common.stmgr_baseport_ = 53001;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
