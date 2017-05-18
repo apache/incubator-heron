@@ -154,6 +154,10 @@ StMgr::~StMgr() {
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
 
+const NetworkOptions&  StMgr::GetServerNetworkOptions() const {
+  return server_->get_serveroptions();
+}
+
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
     LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. ";
@@ -215,6 +219,10 @@ void StMgr::StartStmgrServer() {
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
+
+  // if 'bind 0' is applied in Start(), set the actual port for the clients
+  // the tmaster_client_ will be set just before it Start() in StartTMasterClient()
+  metrics_manager_client_->SetPublisherPort(server_->get_serveroptions().get_port());
 }
 
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
@@ -380,6 +388,7 @@ void StMgr::StartTMasterClient() {
     std::vector<proto::system::Instance*> all_instance_info;
     server_->GetInstanceInfo(all_instance_info);
     tmaster_client_->SetInstanceInfo(all_instance_info);
+    tmaster_client_->SetStmgrPort(server_->get_serveroptions().get_port());
     if (!tmaster_client_->IsConnected()) {
       LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();

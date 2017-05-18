@@ -26,13 +26,12 @@
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
+#include "threads/spcountdownlatch.h"
 #include "network/network.h"
 #include "basics/modinit.h"
 #include "errors/modinit.h"
 #include "threads/modinit.h"
 #include "network/modinit.h"
-
-static const sp_uint32 SERVER_PORT = 61000;
 
 class Terminate : public Client {
  public:
@@ -68,16 +67,19 @@ class Terminate : public Client {
 
 static TestServer* server_;
 
-void start_server(sp_uint32 port) {
+void start_server(sp_uint32* port, CountDownLatch* latch) {
   NetworkOptions options;
   options.set_host(LOCALHOST);
-  options.set_port(port);
+  options.set_port(*port);
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
   EventLoopImpl ss;
   server_ = new TestServer(&ss, options);
+  EXPECT_EQ(0, server_->get_serveroptions().get_port());
   if (server_->Start() != 0) GTEST_FAIL();
+  *port = server_->get_serveroptions().get_port();
+  latch->countDown();
   ss.loop();
 }
 
@@ -108,15 +110,20 @@ void terminate_server(sp_uint32 port) {
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {
+  sp_uint32 server_port = 0;
+  CountDownLatch* latch = new CountDownLatch(1);
+
   // start the server thread
-  std::thread sthread(start_server, SERVER_PORT);
+  std::thread sthread(start_server, &server_port, latch);
+  latch->wait();
+  std::cout << "server port " << server_port << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
 
   // start the client threads
   std::vector<std::thread> cthreads;
   for (sp_int32 i = 0; i < nclients; i++) {
-    cthreads.push_back(std::thread(start_client, SERVER_PORT, requests));
+    cthreads.push_back(std::thread(start_client, server_port, requests));
   }
 
   // wait for the client threads to terminate
@@ -127,7 +134,7 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
   auto stop = std::chrono::high_resolution_clock::now();
 
   // now send a terminate message to server
-  terminate_server(SERVER_PORT);
+  terminate_server(server_port);
   sthread.join();
 
   ASSERT_TRUE(server_->sent_pkts() == server_->recv_pkts());

@@ -56,6 +56,9 @@ class MetricsMgrSt {
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
+  // Sets the port_ if port_ binds to port 0 originally
+  void SetPublisherPort(const sp_int32 _port);
+
  private:
   void gather_metrics(EventLoop::Status);
 

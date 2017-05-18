@@ -55,6 +55,10 @@ MetricsMgrSt::~MetricsMgrSt() {
   }
 }
 
+void MetricsMgrSt::SetPublisherPort(const sp_int32 _port) {
+  client_->SetPublisherPort(_port);
+}
+
 void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location) {
   client_->SendTMasterLocation(location);
 }
