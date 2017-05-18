@@ -105,6 +105,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   do_reassign_ = false;
 
   master_establish_attempts_ = 0;
+
+  StartServers();
+
   tmaster_location_ = new proto::tmaster::TMasterLocation();
   tmaster_location_->set_topology_name(_topology_name);
   tmaster_location_->set_topology_id(_topology_id);
@@ -113,8 +116,6 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
-
-  StartServers();
 
   EstablishTMaster(EventLoop::TIMEOUT_EVENT);
 
