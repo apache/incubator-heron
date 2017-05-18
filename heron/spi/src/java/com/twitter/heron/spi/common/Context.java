@@ -298,8 +298,7 @@ public class Context {
   }
 
   @SuppressWarnings("unchecked")
-  public static final String stateBackendSandboxClassPath(Config cfg) {
-    String stateBackend = cfg.getStringValue(Key.CKPTMGR_STATEFUL_STORAGE);
+  public static final String statefulStorageClassPath(Config cfg) {
     Map<String, Object> backendConfig = (Map<String, Object>) cfg.get(Key.STATEFUL_STORAGE_CONF);
     Object o = backendConfig.get(Key.STATEFUL_STORAGE_CLASSPATH.value());
     return o == null ? "" : (String) o;
