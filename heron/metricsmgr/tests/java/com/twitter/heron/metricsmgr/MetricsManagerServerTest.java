@@ -35,6 +35,8 @@ import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
+import static com.twitter.heron.common.network.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
+
 /**
  * MetricsManagerServer Tester.
  */
@@ -61,7 +63,7 @@ public class MetricsManagerServerTest {
     serverTester = new HeronServerTester(metricsManagerServer,
         new MetricsManagerClientRequestHandler(),
         new HeronServerTester.SuccessResponseHandler(Metrics.MetricPublisherRegisterResponse.class,
-            new MetricsManagerClientResponseHandler(MESSAGE_SIZE)));
+            new MetricsManagerClientResponseHandler(MESSAGE_SIZE)), RESPONSE_RECEIVED_TIMEOUT);
   }
 
   @After
@@ -99,7 +101,7 @@ public class MetricsManagerServerTest {
     metricsManagerServer.addSinkCommunicator(sinkCommunicator);
 
     serverTester.start();
-    sinkCommunicator.awaitOffers(HeronServerTester.RESPONSE_RECEIVED_WAIT_TIME);
+    sinkCommunicator.awaitOffers(RESPONSE_RECEIVED_TIMEOUT);
 
     int messages = 0;
     while (!sinkCommunicator.isEmpty()) {

@@ -15,6 +15,7 @@ package com.twitter.heron.common.network;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Message;
 
+import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
@@ -35,12 +37,10 @@ import static org.junit.Assert.fail;
 /**
  * Class to help simplify testing HeronServer implementations by consolidating common test
  * functionality. A new instance of this class should be used for each test. After initializing the
- * class, tests should call start(), which does the following:
+ * class, tests should call start() which guarantees the following:
  * <ol>
- * <li>starts the server and waits for it to come up</li>
- * <li>starts the client</li>
- * <li>calls sendMessage on the client using the message from TestRequestHandler</li>
- * <li>invokes the TestResponseHandler.handleResponse method</li>
+ * <li>the server has started</li>
+ * <li>the client has been launched</li>
  * </ol>
  * Upon test completion, the stop() method should be closed to properly release resources. This
  * method is safe to be called on an instance that was never properly started.
@@ -52,27 +52,62 @@ public class HeronServerTester {
       ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(5),
       ByteAmount.fromMegabytes(5));
-  private static final Duration SERVER_START_WAIT_TIME = Duration.ofSeconds(2);
-  public static final Duration RESPONSE_RECEIVED_WAIT_TIME = Duration.ofSeconds(10);
+  private static final Duration DEFAULT_LATCH_TIMEOUT = Duration.ofSeconds(2);
+  private static final Duration SERVER_START_TIMEOUT = Duration.ofSeconds(2);
+  public static final Duration RESPONSE_RECEIVED_TIMEOUT = Duration.ofSeconds(10);
 
   private final HeronServer server;
-  private final TestRequestHandler requestHandler;
-  private final TestResponseHandler responseHandler;
   private final ExecutorService threadsPool;
 
-  private CountDownLatch serverStartedSignal;
-  private CountDownLatch responseReceivedSignal;
   private HeronClient client;
+  private final CountDownLatch serverStartedSignal;
+  private CountDownLatch responseReceivedSignal;
+  private Duration responseReceivedTimeout;
 
+
+  /**
+   * Constructor to use for the common use case of sending a single request and taking some action
+   * upon a response. The start() method does the following:
+   * <ol>
+   * <li>Initializes the server and a default client</li>
+   * <li>Calls sendMessage on the client using the message from TestRequestHandler</li>
+   * <li>Waits up to responseReceivedTimeout for the client to receive a response</li>
+   * <li>Invokes the TestResponseHandler.handleResponse method</li>
+   * </ol>
+   *
+   * @param server the server to test
+   * @param requestHandler the request handler to use to build the request and response builder
+   * @param responseHandler the handler to handle the received response
+   * @param responseReceivedTimeout how long to wait for the response
+   * @throws IOException
+   */
   public HeronServerTester(HeronServer server,
                            TestRequestHandler requestHandler,
-                           TestResponseHandler responseHandler) throws IOException {
+                           TestResponseHandler responseHandler,
+                           Duration responseReceivedTimeout) throws IOException {
+    this(server);
+    this.responseReceivedSignal = new CountDownLatch(1);
+    this.responseReceivedTimeout = responseReceivedTimeout;
+    this.client = new TestClient(new NIOLooper(),
+        server.getEndpoint().getHostName(), server.getEndpoint().getPort(),
+        responseReceivedSignal, requestHandler, responseHandler);
+  }
+
+  /**
+   * Constructor where a custom client is to be used. The start() method starts both the server and
+   * the client.
+   * @param server server to test
+   * @param client client to test
+   */
+  public HeronServerTester(HeronServer server, HeronClient client) {
+    this(server);
+    this.client = client;
+  }
+
+  private HeronServerTester(HeronServer server) {
     this.server = server;
     this.threadsPool = Executors.newFixedThreadPool(2);
-    this.requestHandler = requestHandler;
-    this.responseHandler = responseHandler;
     this.serverStartedSignal = new CountDownLatch(1);
-    this.responseReceivedSignal = new CountDownLatch(1);
   }
 
   public void start() throws InterruptedException {
@@ -83,7 +118,9 @@ public class HeronServerTester {
     runClient();
 
     // Wait to make sure message was sent and response was received
-    responseReceivedSignal.await(RESPONSE_RECEIVED_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS);
+    if (responseReceivedTimeout != null) {
+      await(responseReceivedSignal, responseReceivedTimeout);
+    }
   }
 
   public void stop() {
@@ -97,6 +134,54 @@ public class HeronServerTester {
     }
 
     server.getNIOLooper().exitLoop();
+  }
+
+  /**
+   * Convenience method to wait on a latch with a default timeout. If the timeout is reached, the
+   * fail() method will be invoked.
+   */
+  public static void await(CountDownLatch latch) {
+    await(latch, DEFAULT_LATCH_TIMEOUT);
+  }
+
+  /**
+   * Convenience method to wait on a latch with a default timeout. If the timeout is reached, the
+   * fail() method will be invoked.
+   */
+  public static void await(CountDownLatch latch, Duration timeout) {
+    try {
+      latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+      fail(String.format(
+          "Await latch failed to release until timeout of %s was reached. Check latch logic.",
+          timeout));
+    }
+  }
+
+  /**
+   * Wait for a multiCountMetric to reach or exceed a specific value before returning. Assumes that
+   * values are being increased over time by the implementor.
+   * @param multiCountMetric the multiCountMetric to check
+   * @param key the key of the value to be checked
+   * @param expected the minimum expected value to observe before returning
+   * @param timeout how long to wait for the expected value before failing
+   * @throws InterruptedException
+   */
+  public static void awaitMultiCountMetric(MultiCountMetric multiCountMetric, String key,
+                                           Long expected, Duration timeout)
+      throws InterruptedException {
+    Instant expiration = Instant.now().plus(timeout);
+    Long found = multiCountMetric.scope(key).getValue();
+    while (Instant.now().isBefore(expiration)) {
+      if (found >= expected) {
+        return;
+      }
+      Thread.sleep(5);
+      found = multiCountMetric.scope(key).getValue();
+    }
+    fail(String.format(
+        "After waiting for %s, the expected multiCountMetric for key '%s' is %d, found %d",
+        timeout, key, expected, found));
   }
 
   private void runServer() {
@@ -117,17 +202,9 @@ public class HeronServerTester {
       @Override
       public void run() {
         try {
-          NIOLooper looper = new NIOLooper();
-          client = new TestClient(looper,
-              server.getEndpoint().getHostName(), server.getEndpoint().getPort(),
-              responseReceivedSignal, requestHandler, responseHandler);
-          serverStartedSignal.await(SERVER_START_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS);
+          await(serverStartedSignal, SERVER_START_TIMEOUT);
           client.start();
-          looper.loop();
-        } catch (IOException e) {
-          throw new RuntimeException("Error instantiating client", e);
-        } catch (InterruptedException e) {
-          throw new RuntimeException("Timeout waiting for server to start", e);
+          client.getNIOLooper().loop();
         } finally {
           client.stop();
         }
@@ -136,7 +213,40 @@ public class HeronServerTester {
     threadsPool.execute(runClient);
   }
 
-  private static class TestClient extends HeronClient {
+  /**
+   * Abstract class to simplify writing test clients by providing default method impls.
+   */
+  public abstract static class AbstractTestClient extends HeronClient {
+    protected AbstractTestClient(NIOLooper looper,
+                                 String host, int port,
+                                 HeronSocketOptions options) {
+      super(looper, host, port, options);
+    }
+
+    @Override
+    public void onError() {
+      fail("Error in client while talking to server");
+    }
+
+    @Override
+    public void onConnect(StatusCode status) {
+    }
+
+    @Override
+    public void onResponse(StatusCode status, Object ctx, Message response) {
+    }
+
+    @Override
+    public void onIncomingMessage(Message request) {
+      fail("Incoming message not expected on the client");
+    }
+
+    @Override
+    public void onClose() {
+    }
+  }
+
+  private static class TestClient extends AbstractTestClient {
     private static final Logger LOG = Logger.getLogger(TestClient.class.getName());
     private final TestRequestHandler requestHandler;
     private final TestResponseHandler responseHandler;
@@ -161,15 +271,6 @@ public class HeronServerTester {
     }
 
     @Override
-    public void onError() {
-      fail("Error in client while talking to server");
-    }
-
-    @Override
-    public void onClose() {
-    }
-
-    @Override
     public void onResponse(StatusCode status, Object ctx, Message response) {
       responseReceivedSignal.countDown();
       try {
@@ -178,11 +279,6 @@ public class HeronServerTester {
       } catch (Exception e) {
         fail("Exception while handling response:" + e);
       }
-    }
-
-    @Override
-    public void onIncomingMessage(Message request) {
-      fail("Expected message from client");
     }
   }
 
@@ -207,7 +303,7 @@ public class HeronServerTester {
 
   /**
    * Test communicator that allows the ability to await a certain number of expected offers to be
-   * recieved before proceeding by calling the awaitOffers method.
+   * received before proceeding by calling the awaitOffers method.
    * @param <E>
    */
   public static class TestCommunicator<E> extends Communicator<E> {
@@ -221,10 +317,9 @@ public class HeronServerTester {
     /**
      * Returns one the number of offers received has reached numExpectedOffers.
      * @param timeout how long to await the offers to reach numExpectedOffers
-     * @throws InterruptedException if the number of offers is not received before the timeout
      */
     public void awaitOffers(Duration timeout) throws InterruptedException {
-      offersReceivedLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+      await(offersReceivedLatch, timeout);
     }
 
     @Override
