@@ -15,7 +15,6 @@ package com.twitter.heron.common.network;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,9 +24,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Message;
 
-import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 
 import static org.junit.Assert.assertEquals;
@@ -158,32 +155,6 @@ public class HeronServerTester {
     }
   }
 
-  /**
-   * Wait for a multiCountMetric to reach or exceed a specific value before returning. Assumes that
-   * values are being increased over time by the implementor.
-   * @param multiCountMetric the multiCountMetric to check
-   * @param key the key of the value to be checked
-   * @param expected the minimum expected value to observe before returning
-   * @param timeout how long to wait for the expected value before failing
-   * @throws InterruptedException
-   */
-  public static void awaitMultiCountMetric(MultiCountMetric multiCountMetric, String key,
-                                           Long expected, Duration timeout)
-      throws InterruptedException {
-    Instant expiration = Instant.now().plus(timeout);
-    Long found = multiCountMetric.scope(key).getValue();
-    while (Instant.now().isBefore(expiration)) {
-      if (found >= expected) {
-        return;
-      }
-      Thread.sleep(5);
-      found = multiCountMetric.scope(key).getValue();
-    }
-    fail(String.format(
-        "After waiting for %s, the expected multiCountMetric for key '%s' is %d, found %d",
-        timeout, key, expected, found));
-  }
-
   private void runServer() {
     Runnable runServer = new Runnable() {
       @Override
@@ -299,35 +270,6 @@ public class HeronServerTester {
                         StatusCode status,
                         Object ctx,
                         Message response) throws Exception;
-  }
-
-  /**
-   * Test communicator that allows the ability to await a certain number of expected offers to be
-   * received before proceeding by calling the awaitOffers method.
-   * @param <E>
-   */
-  public static class TestCommunicator<E> extends Communicator<E> {
-    private final CountDownLatch offersReceivedLatch;
-
-    public TestCommunicator(int numExpectedOffers) {
-      super();
-      this.offersReceivedLatch = new CountDownLatch(numExpectedOffers);
-    }
-
-    /**
-     * Returns one the number of offers received has reached numExpectedOffers.
-     * @param timeout how long to await the offers to reach numExpectedOffers
-     */
-    public void awaitOffers(Duration timeout) throws InterruptedException {
-      await(offersReceivedLatch, timeout);
-    }
-
-    @Override
-    public boolean offer(E e) {
-      boolean response = super.offer(e);
-      offersReceivedLatch.countDown();
-      return response;
-    }
   }
 
   /**

@@ -27,6 +27,7 @@ import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.basics.TestCommunicator;
 import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.StatusCode;
@@ -36,6 +37,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
 import static com.twitter.heron.common.network.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
+import static org.junit.Assert.fail;
 
 /**
  * MetricsManagerServer Tester.
@@ -96,12 +98,18 @@ public class MetricsManagerServerTest {
    */
   @Test
   public void testMetricsManagerServer() throws InterruptedException {
-    HeronServerTester.TestCommunicator<MetricsRecord> sinkCommunicator =
-        new HeronServerTester.TestCommunicator<>(MESSAGE_SIZE);
+    TestCommunicator<MetricsRecord> sinkCommunicator =
+        new TestCommunicator<>(MESSAGE_SIZE);
     metricsManagerServer.addSinkCommunicator(sinkCommunicator);
 
     serverTester.start();
-    sinkCommunicator.awaitOffers(RESPONSE_RECEIVED_TIMEOUT);
+
+    try {
+      sinkCommunicator.awaitOffers(RESPONSE_RECEIVED_TIMEOUT);
+    } catch (InterruptedException e) {
+      fail(String.format("awaitOffers failed to release until timeout of %s was reached.",
+          RESPONSE_RECEIVED_TIMEOUT));
+    }
 
     int messages = 0;
     while (!sinkCommunicator.isEmpty()) {
