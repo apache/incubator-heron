@@ -24,23 +24,35 @@ public class MarathonController {
   private static final Logger LOG = Logger.getLogger(MarathonController.class.getName());
 
   private final String marathonURI;
+  private final String marathonAuthToken;
   private final String topologyName;
   private final boolean isVerbose;
 
   public MarathonController(
       String marathonURI,
+      String marathonAuthToken,
       String topologyName,
       boolean isVerbose
   ) {
     this.marathonURI = marathonURI;
+    this.marathonAuthToken = marathonAuthToken;
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
   }
 
+  /**
+   * Kills a marathon app (topology)
+   */
   public boolean killTopology() {
     // Setup Connection
     String topologyURI = String.format("%s/v2/groups/%s", this.marathonURI, this.topologyName);
     HttpURLConnection conn = NetworkUtils.getHttpConnection(topologyURI);
+
+    // Attach a token if there is one specified
+    if (this.marathonAuthToken != null) {
+      conn.setRequestProperty("Authorization", String.format("token=%s", this.marathonAuthToken));
+    }
+
     if (conn == null) {
       LOG.log(Level.SEVERE, "Failed to find marathon scheduler");
       return false;
@@ -59,6 +71,9 @@ public class MarathonController {
       if (success) {
         LOG.log(Level.INFO, "Successfully killed topology");
         return true;
+      } else if (NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_UNAUTHORIZED)) {
+        LOG.log(Level.SEVERE, "Marathon requires authentication");
+        return false;
       } else {
         LOG.log(Level.SEVERE, "Failed to kill topology");
         return false;
@@ -69,6 +84,10 @@ public class MarathonController {
     }
   }
 
+  /**
+   * Restarts a given marathon app (topology)
+   * @param appId ID of marathon app
+   */
   public boolean restartApp(int appId) {
     if (appId == -1) {
       // TODO (nlu): implement restart all
@@ -82,6 +101,11 @@ public class MarathonController {
     String restartRequest = String.format("%s/v2/apps/%s/%d/restart",
         this.marathonURI, this.topologyName, appId);
     HttpURLConnection conn = NetworkUtils.getHttpConnection(restartRequest);
+
+    if (this.marathonAuthToken != null) {
+      conn.setRequestProperty("Authorization", String.format("token=%s", this.marathonAuthToken));
+    }
+
     if (conn == null) {
       LOG.log(Level.SEVERE, "Failed to find marathon scheduler");
       return false;
@@ -101,6 +125,9 @@ public class MarathonController {
       if (success) {
         LOG.log(Level.INFO, "Successfully restarted container {0}", appId);
         return true;
+      } else if (NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_UNAUTHORIZED)) {
+        LOG.log(Level.SEVERE, "Marathon requires authentication");
+        return false;
       } else {
         LOG.log(Level.SEVERE, "Failed to restart container {0}", appId);
         return false;
@@ -111,6 +138,10 @@ public class MarathonController {
     }
   }
 
+  /**
+   * Restarts a given marathon app (topology)
+   * @param appConf App configuration
+   */
   // submit a topology as a group, containers as apps in the group
   public boolean submitTopology(String appConf) {
     if (this.isVerbose) {
@@ -120,6 +151,12 @@ public class MarathonController {
     // Setup Connection
     String schedulerURI = String.format("%s/v2/groups", this.marathonURI);
     HttpURLConnection conn = NetworkUtils.getHttpConnection(schedulerURI);
+
+    // Attach a token if there is one specified
+    if (this.marathonAuthToken != null) {
+      conn.setRequestProperty("Authorization", String.format("token=%s", this.marathonAuthToken));
+    }
+
     if (conn == null) {
       LOG.log(Level.SEVERE, "Failed to find marathon scheduler");
       return false;
@@ -138,6 +175,9 @@ public class MarathonController {
       if (success) {
         LOG.log(Level.INFO, "Topology submitted successfully");
         return true;
+      } else if (NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_UNAUTHORIZED)) {
+        LOG.log(Level.SEVERE, "Marathon requires authentication");
+        return false;
       } else {
         LOG.log(Level.SEVERE, "Failed to submit topology");
         return false;

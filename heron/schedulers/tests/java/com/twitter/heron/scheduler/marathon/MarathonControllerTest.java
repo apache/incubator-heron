@@ -34,6 +34,7 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 @PrepareForTest(NetworkUtils.class)
 public class MarathonControllerTest {
   private static final String MARATHON_URI = "http://marathon.uri:8080";
+  private static final String MARATHON_AUTH_TOKEN = null;
   private static final String TOPOLOGY_NAME = "topology_name";
   private static final boolean IS_VERBOSE = true;
 
@@ -41,7 +42,8 @@ public class MarathonControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    controller = Mockito.spy(new MarathonController(MARATHON_URI, TOPOLOGY_NAME, IS_VERBOSE));
+    controller = Mockito.spy(new MarathonController(MARATHON_URI, MARATHON_AUTH_TOKEN,
+                                                    TOPOLOGY_NAME, IS_VERBOSE));
   }
 
   @After
