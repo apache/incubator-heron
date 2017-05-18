@@ -39,10 +39,8 @@ import static org.junit.Assert.fail;
  * <ol>
  * <li>starts the server and waits for it to come up</li>
  * <li>starts the client</li>
- * <li>calls sendMessage on the client using the TestRequestHandler</li>
- * <li>once the number of expected responses are recieved (via
- * TestResponseHandler.numExpectedResponses()) the TestResponseHandler.handleResponse method is
- * invoked</li>
+ * <li>calls sendMessage on the client using the message from TestRequestHandler</li>
+ * <li>invokes the TestResponseHandler.handleResponse method</li>
  * </ol>
  * Upon test completion, the stop() method should be closed to properly release resources. This
  * method is safe to be called on an instance that was never properly started.
@@ -155,7 +153,7 @@ public class HeronServerTester {
     @Override
     public void onConnect(StatusCode status) {
       if (status != StatusCode.OK) {
-        fail("Connection with server failed");
+        fail("Connection with server failed, onConnect status: " + status);
       } else {
         LOG.info("Connected with Metrics Manager Server");
         sendRequest(requestHandler.getRequestMessage(), requestHandler.getResponseBuilder());
@@ -188,11 +186,18 @@ public class HeronServerTester {
     }
   }
 
+  /**
+   * Interface to provide the Message to be sent upon onConnect and the expected Message.Builder
+   * to be used for the response.
+   */
   public interface TestRequestHandler {
     Message getRequestMessage();
     Message.Builder getResponseBuilder();
   }
 
+  /**
+   * Interface to handle a response received by the server.
+   */
   public interface TestResponseHandler {
     void handleResponse(HeronClient client,
                         StatusCode status,
@@ -200,6 +205,11 @@ public class HeronServerTester {
                         Message response) throws Exception;
   }
 
+  /**
+   * Test communicator that allows the ability to await a certain number of expected offers to be
+   * recieved before proceeding by calling the awaitOffers method.
+   * @param <E>
+   */
   public static class TestCommunicator<E> extends Communicator<E> {
     private final CountDownLatch offersReceivedLatch;
 
@@ -208,6 +218,11 @@ public class HeronServerTester {
       this.offersReceivedLatch = new CountDownLatch(numExpectedOffers);
     }
 
+    /**
+     * Returns one the number of offers received has reached numExpectedOffers.
+     * @param timeout how long to await the offers to reach numExpectedOffers
+     * @throws InterruptedException if the number of offers is not received before the timeout
+     */
     public void awaitOffers(Duration timeout) throws InterruptedException {
       offersReceivedLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
