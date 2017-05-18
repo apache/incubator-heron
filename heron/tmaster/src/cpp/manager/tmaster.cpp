@@ -116,7 +116,6 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
-
   EstablishTMaster(EventLoop::TIMEOUT_EVENT);
 
   // Send tmaster location to metrics mgr
