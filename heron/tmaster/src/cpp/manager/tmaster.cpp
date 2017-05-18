@@ -209,6 +209,14 @@ void TMaster::EstablishTMaster(EventLoop::Status) {
   auto cb = [this](proto::system::StatusCode code) { this->SetTMasterLocationDone(code); };
 
   state_mgr_->SetTMasterLocation(*tmaster_location_, std::move(cb));
+
+  // if zk lost the tmaster location, tmaster quits to bail out and re-establish its location
+  auto cb2 = [this]() {
+    LOG(ERROR) << " lost tmaster location in zk state manager. Bailing out..." << std::endl;
+    ::exit(1);
+  };
+  state_mgr_->SetTMasterLocationWatch(tmaster_location_->topology_name(), std::move(cb2));
+
   master_establish_attempts_++;
 }
 
