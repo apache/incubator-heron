@@ -33,6 +33,8 @@ class StatsInterface {
                  TMetricsCollector* _collector, TMaster* tmaster);
   virtual ~StatsInterface();
 
+  const NetworkOptions& get_serveroptions() const { return http_server_->get_serveroptions(); }
+
  private:
   void HandleStatsRequest(IncomingHTTPRequest* _request);
   void HandleUnknownRequest(IncomingHTTPRequest* _request);

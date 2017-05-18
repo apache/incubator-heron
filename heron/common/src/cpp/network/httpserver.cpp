@@ -47,13 +47,25 @@ sp_int32 HTTPServer::Start() {
             << "0.0.0.0"
             << ":" << port;
   // Bind to INADDR_ANY instead of using the hostname
-  sp_int32 retval = evhttp_bind_socket(http_, "0.0.0.0", port);
-  if (retval == 0) {
+  auto* retval = evhttp_bind_socket_with_handle(http_, "0.0.0.0", port);
+  if (retval != NULL) {
     // record the successfully bound hostport
     hostports_.push_back(std::make_pair(host, port));
+    // fetch the true port
+    if (0 == port) {
+      evutil_socket_t fd = evhttp_bound_socket_get_fd(retval);
+      struct sockaddr_storage ss;
+      memset(&ss, 0, sizeof(ss));
+      ev_socklen_t socklen = sizeof(ss);
+      if (getsockname(fd, (struct sockaddr *)&ss, &socklen)) {
+        PLOG(ERROR) << "getsockname() failed";
+        return SP_NOTOK;
+      }
+      options_.set_port(ntohs(((struct sockaddr_in*)&ss)->sin_port));
+    }
   } else {
     // failed to bind on the socket
-    return retval;
+    return SP_NOTOK;
   }
   evhttp_set_max_body_size(http_, options_.get_max_packet_size());
   return SP_OK;

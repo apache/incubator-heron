@@ -73,6 +73,10 @@ class TMaster {
   // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
 
+  const NetworkOptions& getMasterOptions() const;
+  const NetworkOptions& getControllerOptions() const;
+  const NetworkOptions& getStatsOptions() const;
+
  private:
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
@@ -111,6 +115,9 @@ class TMaster {
 
   // Function called when we want to setup ourselves as tmaster
   void EstablishTMaster(EventLoop::Status);
+
+  // Start 3 servers: master server, controller server and stats server
+  void StartServers();
 
   void UpdateProcessMetrics(EventLoop::Status);
 

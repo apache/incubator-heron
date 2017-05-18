@@ -34,6 +34,8 @@ class TController {
   // Starts the controller
   sp_int32 Start();
 
+  const NetworkOptions& get_serveroptions() const { return http_server_->get_serveroptions(); }
+
  private:
   // Handlers for the requests
   // In all the below handlers, the incoming _request

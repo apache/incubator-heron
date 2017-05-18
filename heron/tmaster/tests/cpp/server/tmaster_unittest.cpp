@@ -188,13 +188,15 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
                   const sp_string& dpath, const std::vector<sp_string>& stmgrs_id_list,
-                  const sp_string& tmaster_host, sp_int32 tmaster_port,
-                  sp_int32 tmaster_controller_port) {
+                  const sp_string& tmaster_host, sp_int32& tmaster_port,
+                  sp_int32& tmaster_controller_port) {
   ss = new EventLoopImpl();
   tmaster =
       new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath, stmgrs_id_list,
-                                  tmaster_controller_port, tmaster_port, tmaster_port + 2,
+                                  tmaster_controller_port, tmaster_port, 0,
                                   tmaster_port + 3, metrics_sinks_config_filename, LOCALHOST, ss);
+  tmaster_port = tmaster->getMasterOptions().get_port();
+  tmaster_controller_port = tmaster->getControllerOptions().get_port();
   tmaster_thread = new std::thread(StartServer, ss);
   // tmaster_thread->start();
 }
@@ -425,6 +427,8 @@ TEST(StMgr, test_pplan_distribute) {
                                     common.num_stmgrs_);
   // Start the tmaster etc.
   StartTMaster(common);
+  std::cout << "tmaster master port " << common.tmaster_port_ << std::endl;
+  std::cout << "tmaster controller port " << common.tmaster_controller_port_ << std::endl;
 
   // Distribute workers across stmgrs
   DistributeWorkersAcrossStmgrs(common);
@@ -472,6 +476,8 @@ TEST(StMgr, test_activate_deactivate) {
                                     common.num_stmgrs_);
   // Start the tmaster etc.
   StartTMaster(common);
+  std::cout << "tmaster master port " << common.tmaster_port_ << std::endl;
+  std::cout << "tmaster controller port " << common.tmaster_controller_port_ << std::endl;
 
   // Distribute workers across stmgrs
   DistributeWorkersAcrossStmgrs(common);

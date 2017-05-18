@@ -60,6 +60,7 @@ class HTTPServer {
 
   // Accessors
   EventLoop* getEventLoop() { return eventLoop_; }
+  const NetworkOptions& get_serveroptions() const { return options_; }
 
  private:
   void HandleHTTPRequest(struct evhttp_request* _request);
