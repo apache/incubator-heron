@@ -30,7 +30,7 @@ import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 public class LocalFileSystemStorage implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStorage.class.getName());
 
-  private static final String ROOT_PATH_KEY = "heron.stateful.storage.localfs.root.path";
+  private static final String ROOT_PATH_KEY = "heron.statefulstorage.localfs.root.path";
 
   private String checkpointRootPath;
 
