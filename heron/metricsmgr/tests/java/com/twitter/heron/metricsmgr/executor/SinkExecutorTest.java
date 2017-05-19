@@ -135,7 +135,7 @@ public class SinkExecutorTest {
       communicator.offer(constructMetricsRecord());
     }
 
-    // wait for the SinkExecutor fully process the MetrñicsRecord
+    // wait for the SinkExecutor to fully process the MetricsRecord
     metricsSink.awaitRecordsProcessed(Duration.ofSeconds(5));
 
     Assert.assertEquals(1, initInvoked);
@@ -145,6 +145,7 @@ public class SinkExecutorTest {
     // the flush interval is 100ms, so wait up to 220 ms for 2 flushes to occur
     metricsSink.awaitFlushes(
         Duration.ofMillis(FLUSH_INTERVAL_MS).multipliedBy(EXPECTED_FLUSHES).plusMillis(20));
+
     Assert.assertTrue(String.format("metrics flush invocations expected: %d, found: %d",
         EXPECTED_FLUSHES, flushInvoked), flushInvoked >= EXPECTED_FLUSHES);
 
