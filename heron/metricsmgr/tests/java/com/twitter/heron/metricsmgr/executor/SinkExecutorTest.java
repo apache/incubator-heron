@@ -15,12 +15,15 @@
 package com.twitter.heron.metricsmgr.executor;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -38,9 +41,12 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
+import static org.junit.Assert.fail;
+
 public class SinkExecutorTest {
-  private static final int FLUSH_INTERVAL_MS = 100;
+  private static final long FLUSH_INTERVAL_MS = 100;
   private static final int N = 100;
+  private static final int EXPECTED_FLUSHES = 2;
   private static final String METRICS_NAME = "metrics_name";
   private static final String METRICS_VALUE = "metrics_value";
   private static final String EXCEPTION_STACK_TRACE = "stackTrace";
@@ -53,7 +59,7 @@ public class SinkExecutorTest {
   private volatile int processRecordInvoked = 0;
   private volatile int flushInvoked = 0;
   private volatile int initInvoked = 0;
-  private IMetricsSink metricsSink;
+  private DummyMetricsSink metricsSink;
   private SlaveLooper slaveLooper;
   private Communicator<MetricsRecord> communicator;
   private SinkExecutor sinkExecutor;
@@ -61,7 +67,7 @@ public class SinkExecutorTest {
 
   @Before
   public void before() throws Exception {
-    metricsSink = new DummyMetricsSink();
+    metricsSink = new DummyMetricsSink(N, EXPECTED_FLUSHES);
     slaveLooper = new SlaveLooper();
     communicator = new Communicator<>(null, slaveLooper);
 
@@ -129,16 +135,18 @@ public class SinkExecutorTest {
       communicator.offer(constructMetricsRecord());
     }
 
-    // Sleep for a while to let the SinkExecutor fully process the MetricsRecord
-    Thread.sleep(5 * 1000);
+    // wait for the SinkExecutor fully process the MetrñicsRecord
+    metricsSink.awaitRecordsProcessed(Duration.ofSeconds(5));
 
     Assert.assertEquals(1, initInvoked);
     // Totally we offer N MetricsRecord
     Assert.assertEquals(N, processRecordInvoked);
-    // We sleep for 5000ms while the flush interval is 100ms
-    // So the flushInvoked should be nearly 50
-    // We claim it is bigger than 25
-    Assert.assertTrue(flushInvoked > 25);
+
+    // the flush interval is 100ms, so wait up to 220 ms for 2 flushes to occur
+    metricsSink.awaitFlushes(
+        Duration.ofMillis(FLUSH_INTERVAL_MS).multipliedBy(EXPECTED_FLUSHES).plusMillis(20));
+    Assert.assertTrue(String.format("metrics flush invocations expected: %d, found: %d",
+        EXPECTED_FLUSHES, flushInvoked), flushInvoked >= EXPECTED_FLUSHES);
 
     threadsPool.shutdownNow();
     threadsPool = null;
@@ -171,7 +179,32 @@ public class SinkExecutorTest {
     return new MetricsRecord(RECORD_SOURCE, metricsInfos, exceptionInfos, RECORD_CONTEXT);
   }
 
-  private class DummyMetricsSink implements IMetricsSink {
+  private final class DummyMetricsSink implements IMetricsSink {
+
+    private final CountDownLatch recordProcessedLatch;
+    private final CountDownLatch flushesLatch;
+
+    private DummyMetricsSink(int expectedRecords, int expectedFlushes) {
+      this.recordProcessedLatch = new CountDownLatch(expectedRecords);
+      this.flushesLatch = new CountDownLatch(expectedFlushes);
+    }
+
+    void awaitRecordsProcessed(Duration timeout) {
+      await(recordProcessedLatch, timeout);
+    }
+
+    void awaitFlushes(Duration timeout) {
+      await(flushesLatch, timeout);
+    }
+
+    void await(CountDownLatch latch, Duration timeout) {
+      try {
+        latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        fail(String.format(
+            "latch failed to release until timeout of %s was reached.", timeout));
+      }
+    }
 
     @Override
     public void init(Map<String, Object> map, SinkContext context) {
@@ -210,11 +243,13 @@ public class SinkExecutorTest {
       Assert.assertEquals(exceptions, N);
 
       processRecordInvoked++;
+      recordProcessedLatch.countDown();
     }
 
     @Override
     public void flush() {
       flushInvoked++;
+      flushesLatch.countDown();
     }
 
     @Override
