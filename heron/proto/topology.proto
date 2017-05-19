@@ -37,6 +37,7 @@ enum ComponentObjectSpec {
   JAVA_CLASS_NAME = 1;
   JAVA_SERIALIZED_OBJECT = 2;
   PYTHON_CLASS_NAME = 3;
+  CPP_CLASS_INFO = 4;
 }
 
 enum CustomGroupingObjectType {
@@ -48,6 +49,12 @@ enum ConfigValueType {
   STRING_VALUE = 1; //normal string
   JAVA_SERIALIZED_VALUE = 2;
   PYTHON_SERIALIZED_VALUE = 3;
+}
+
+message CPPClassInfo {
+  // The extern "C" style function name that can
+  // instantiate an object of the component
+  required string class_constructor = 1;
 }
 
 message StreamSchema {
@@ -106,6 +113,9 @@ message Component {
 
   // This is made optional for backward compatibility
   optional ComponentObjectSpec spec = 5;
+
+  // present if spec is CPP_CLASS_INFO
+  optional CPPClassInfo cpp_class_info = 6;
 }
 
 message Spout {
