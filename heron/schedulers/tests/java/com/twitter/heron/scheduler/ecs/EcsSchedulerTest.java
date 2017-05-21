@@ -37,16 +37,16 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.PackageType;
-import com.twitter.heron.scheduler.utils.LauncherUtils;
+//import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 
 import com.twitter.heron.spi.common.Key;
-import com.twitter.heron.spi.packing.IPacking;
+//import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+//import com.twitter.heron.spi.scheduler.ILauncher;
+//import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.TopologyTests;
 
@@ -107,41 +107,6 @@ public class EcsSchedulerTest {
     scheduler.close();
   }
 
-  private  Config createRunnerRuntime(
-      com.twitter.heron.api.Config topologyConfig) throws Exception {
-    Config lRuntime = Mockito.spy(Config.newBuilder().build());
-    ILauncher launcher = Mockito.mock(ILauncher.class);
-    IPacking packing = Mockito.mock(IPacking.class);
-    SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
-    //TopologyAPI.Topology topology = createTopology(topologyConfig);
-    TopologyAPI.Topology topology = TopologyTests.createTopology(
-        TOPOLOGY_NAME, new com.twitter.heron.api.Config(), new HashMap<String, Integer>(),
-        new HashMap<String, Integer>());
-
-    Mockito.doReturn(launcher).when(lRuntime).get(Key.LAUNCHER_CLASS_INSTANCE);
-    Mockito.doReturn(adaptor).when(lRuntime).get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR);
-    Mockito.doReturn(topology).when(lRuntime).get(Key.TOPOLOGY_DEFINITION);
-
-    PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    Mockito.when(packingPlan.getContainers()).thenReturn(
-        new HashSet<PackingPlan.ContainerPlan>());
-    Mockito.when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
-    Mockito.when(packingPlan.getId()).thenReturn("packing_plan_id");
-    containerPlans = new HashSet<>();
-    containerPlans.add(PackingTestUtils.testContainerPlan(1)); // just need it to be of size 1
-    Mockito.when(packingPlan.getContainers()).thenReturn(containerPlans);
-    Mockito.when(packing.pack()).thenReturn(packingPlan);
-
-    LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
-    Mockito.when(mockLauncherUtils.createPackingPlan(Mockito.any(Config.class),
-        Mockito.any(Config.class)))
-        .thenReturn(packingPlan);
-    PowerMockito.spy(LauncherUtils.class);
-    PowerMockito.doReturn(mockLauncherUtils).when(LauncherUtils.class, "getInstance");
-
-
-    return lRuntime;
-  }
   @Test
   public void testOnSchedule() throws Exception {
 
