@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.io.IOUtils;
 
@@ -49,7 +50,11 @@ public class EcsScheduler implements IScheduler {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = Config.toClusterMode(mConfig);
+    if (Config.toClusterMode(mConfig) != null) {
+      this.config = Config.toClusterMode(mConfig);
+    } else {
+      this.config = mConfig;
+    }
     this.runtime = mRuntime;
   }
 
@@ -63,7 +68,7 @@ public class EcsScheduler implements IScheduler {
     executingInShell = getExecutorCommand(container)[0];
     return ShellUtils.runProcess(executingInShell, null);
   }
-
+  @VisibleForTesting
   protected void startExecutor(final int container) {
     LOG.info("Starting a new executor for container: " + container);
     int shellOutput = startExecutorSyncProcess(container);
@@ -71,7 +76,7 @@ public class EcsScheduler implements IScheduler {
         + container + String.valueOf(shellOutput));
   }
 
-  private String[] getExecutorCommand(int container) {
+  protected String[] getExecutorCommand(int container) {
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
     Integer localFreePort = null;
     nfreePorts = new StringBuilder();
@@ -104,19 +109,19 @@ public class EcsScheduler implements IScheduler {
     String finalCommand = String.format("%s %s --file %s up",
                                          EcsContext.composeupCmd(config),
                                           ecsTaskProject, tempDockerFile);
-    //LOG.info("final Ecs Task command " + finalCommand);
-    tempDockerFile.deleteOnExit();
+    LOG.info("final Ecs Task command " + finalCommand);
+    //tempDockerFile.deleteOnExit();
     return  new String[] {finalCommand};
   }
 
-  private String setClusterValues(String localExecCommand) {
+  protected String setClusterValues(String localExecCommand) {
     String clusterExecCommand = localExecCommand.replace(Context.topologyBinaryFile(config),
                                                           EcsContext.ecsClusterBinary(config));
     clusterExecCommand = clusterExecCommand.replaceAll("\"", "'");
     return clusterExecCommand;
   }
 
-  private String getDockerFileContent(String execCommand, int container) throws IOException {
+  protected String getDockerFileContent(String execCommand, int container) throws IOException {
 
     String commandBuiler = new String(Files.readAllBytes(
                                        Paths.get(EcsContext.ecsComposeTemplate(config))));
@@ -126,7 +131,7 @@ public class EcsScheduler implements IScheduler {
                                               "executor" + String.valueOf(container));
     commandBuiler = commandBuiler.replace("HERON_EXECUTOR", execCommand);
     commandBuiler = commandBuiler.replace("FREEPORTS", nfreePorts);
-    //System.out.println("commandBuiler  :\n" + commandBuiler);
+    System.out.println("commandBuiler  :\n" + commandBuiler);
     return commandBuiler;
   }
 
@@ -157,9 +162,6 @@ public class EcsScheduler implements IScheduler {
       startExecutor(container.getId());
     }
     LOG.info("Executor for each container have been started.");
-    LOG.info("Listing each of tasks started.");
-   // List<String> jobLinks = new ArrayList<String>();
-    //jobLinks = getJobLinks();
     return true;
   }
 
@@ -233,15 +235,23 @@ public class EcsScheduler implements IScheduler {
   public boolean onKill(Scheduler.KillTopologyRequest request) {
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
-    int status = ShellUtils.runProcess(EcsContext.composeStopCmd(config), null);
-    if (status != 0) {
-      LOG.severe(String.format(
-          "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s",
-          EcsContext.composeStopCmd(config), stdout, stderr));
-      isTopologyKilled = false;
-    } else {
-      LOG.info("Topology Taks stop Successful");
-      isTopologyKilled = true;
+
+    List<String> taskList = getJobLinks();
+    for (String taskId : taskList) {
+      StringBuilder killJob = new StringBuilder();
+      killJob.append(EcsContext.composeStopCmd(config));
+      killJob.append(" ");
+      killJob.append(taskId);
+      int status = ShellUtils.runProcess(killJob.toString(), null);
+      if (status != 0) {
+        LOG.severe(String.format(
+            "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s",
+            EcsContext.composeStopCmd(config), stdout, stderr));
+        isTopologyKilled = false;
+      } else {
+        LOG.info("Topology Task stop Successful");
+        isTopologyKilled = true;
+      }
     }
     return isTopologyKilled;
   }
