@@ -21,8 +21,13 @@ import com.twitter.heron.spi.common.TokenSub;
 public class EcsContext extends Context {
 
   public static String ecsClusterBinary(Config config) {
-    String workingDirectory = config.getStringValue(
+    String ecsClusterBinary = config.getStringValue(
         EcsKey.ECS_CLUSTER_BINARY.value(), EcsKey.ECS_CLUSTER_BINARY.getDefaultString());
+    return TokenSub.substitute(config, ecsClusterBinary);
+  }
+  public static String workingDirectory(Config config) {
+    String workingDirectory = config.getStringValue(
+        EcsKey.WORKING_DIRECTORY.value(), EcsKey.WORKING_DIRECTORY.getDefaultString());
     return TokenSub.substitute(config, workingDirectory);
   }
 
