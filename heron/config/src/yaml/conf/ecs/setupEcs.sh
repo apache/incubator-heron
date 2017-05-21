@@ -84,9 +84,9 @@ aws autoscaling create-launch-configuration --image-id $AMI --launch-configurati
 echo "done"
 
 #set up the ecs cli config 
-ecs-cli configure --region $REGION --access-key ecs-heron-keypair --cluster ecs-heron-cluster 
+ecs-cli configure --force --region $REGION --access-key ecs-heron-keypair --cluster ecs-heron-cluster 
 
 #create a CloudFormation template
-ecs-cli up --keypair ecs-heron-keypair --capability-iam --size 2 --instance-type t2.micro
+ecs-cli up --force  --keypair ecs-heron-keypair --capability-iam --size 2 --instance-type m4.large
 
 echo "Setup is ready! Please submit the ECS HERON Topology"
