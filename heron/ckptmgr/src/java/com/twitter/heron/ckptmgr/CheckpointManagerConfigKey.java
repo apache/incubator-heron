@@ -31,7 +31,7 @@ public enum CheckpointManagerConfigKey {
   /**
    * The class name of the stateful storage
    */
-  STORAGE_CLASSNAME("heron.class.statefulstorage", Type.STRING),
+  STORAGE_CLASSNAME("heron.statefulstorage.classname", Type.STRING),
 
   /**
    * The batch size in bytes for write operation
