@@ -62,7 +62,7 @@ public final class SchedulerUtils {
     List<String> commands = new ArrayList<>();
 
     // The java executable should be "{JAVA_HOME}/bin/java"
-    String javaExecutable = String.format("%s/%s", Context.clusterJavaHome(config), "bin/java");
+    String javaExecutable = String.format("%s/%s", Context.javaHome(config), "bin/java");
     commands.add(javaExecutable);
     commands.add("-cp");
 
@@ -88,7 +88,7 @@ public final class SchedulerUtils {
    * @param freePorts list of free ports
    * @return String[] representing the arguments to start heron-scheduler
    */
-  public static String[] schedulerCommandArgs(
+  public static String[]  schedulerCommandArgs(
       Config config, Config runtime, List<Integer> freePorts) {
     // First let us have some safe checks
     if (freePorts.size() < PORTS_REQUIRED_FOR_SCHEDULER) {
