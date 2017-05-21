@@ -11,6 +11,8 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+
     packages:
       - gcc-4.8
       - g++-4.8
@@ -19,6 +21,8 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
+      - cmake
+      - cmake-data
 
 env:
   - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
@@ -44,4 +48,6 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version
+  - which cmake
+  - cmake --version
   - scripts/travis/ci.sh
