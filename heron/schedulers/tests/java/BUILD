@@ -62,6 +62,10 @@ marathon_deps_files = [
     "//heron/schedulers/src/java:marathon-scheduler-java",
 ]
 
+ecs_deps_files = [
+    "//heron/schedulers/src/java:ecs-scheduler-java",
+]
+
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
@@ -159,5 +163,20 @@ java_tests(
     "com.twitter.heron.scheduler.marathon.MarathonControllerTest",
   ],
   runtime_deps = [ ":marathon-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "ecs-tests",
+  srcs = glob(["**/ecs/*.java"]),
+  deps = scheduler_deps_files + ecs_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.ecs.EcsSchedulerTest",
+    "com.twitter.heron.scheduler.ecs.EcsLauncherTest",
+  ],
+  runtime_deps = [ ":ecs-tests" ],
   size = "small",
 )

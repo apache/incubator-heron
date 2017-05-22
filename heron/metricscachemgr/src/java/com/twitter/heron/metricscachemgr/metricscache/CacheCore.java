@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,28 +78,28 @@ public class CacheCore {
   private WakeableLooper looper = null;
 
   // metric clock: rotate bucket, in milliseconds
-  private long maxIntervalMilliSecs;
-  private long intervalMilliSecs;
+  private final Duration maxInterval;
+  private final Duration interval;
   // exception limit
-  private long maxExceptionCount;
+  private final long maxExceptionCount;
 
   /**
    * constructor: CacheCore needs two intervals to configure metrics time window
    * and one number to limit exception count
    *
-   * @param maxIntervalSecs metric: cache how long time? in seconds
-   * @param intervalSecs metric: purge how often? in seconds
+   * @param maxInterval metric: cache how long time? in seconds
+   * @param interval metric: purge how often? in seconds
    * @param maxException exception: cache how many?
    */
-  public CacheCore(long maxIntervalSecs, long intervalSecs, long maxException) {
-    this.maxIntervalMilliSecs = maxIntervalSecs * 1000;
-    this.intervalMilliSecs = intervalSecs * 1000;
+  public CacheCore(Duration maxInterval, Duration interval, long maxException) {
+    this.maxInterval = maxInterval;
+    this.interval = interval;
     this.maxExceptionCount = maxException;
 
     cacheException = new HashMap<>();
     cacheMetric = new TreeMap<>();
     long now = System.currentTimeMillis();
-    for (long i = now - this.maxIntervalMilliSecs; i < now; i += this.intervalMilliSecs) {
+    for (long i = now - this.maxInterval.toMillis(); i < now; i += this.interval.toMillis()) {
       cacheMetric.put(i, new HashMap<Long, LinkedList<MetricDatapoint>>());
     }
 
@@ -484,7 +485,7 @@ public class CacheCore {
       // remove old
       while (!cacheMetric.isEmpty()) {
         Long firstKey = cacheMetric.firstKey();
-        if (firstKey >= now - maxIntervalMilliSecs) {
+        if (firstKey >= now - maxInterval.toMillis()) {
           break;
         }
         cacheMetric.remove(firstKey);
@@ -493,7 +494,7 @@ public class CacheCore {
       cacheMetric.put(now, new HashMap<Long, LinkedList<MetricDatapoint>>());
       // next timer task
       if (looper != null) {
-        looper.registerTimerEventInSeconds(intervalMilliSecs, new Runnable() {
+        looper.registerTimerEvent(interval, new Runnable() {
           @Override
           public void run() {
             purge();
@@ -513,7 +514,7 @@ public class CacheCore {
         looper = wakeableLooper;
       }
 
-      looper.registerTimerEventInSeconds(intervalMilliSecs, new Runnable() {
+      looper.registerTimerEvent(interval, new Runnable() {
         @Override
         public void run() {
           purge();

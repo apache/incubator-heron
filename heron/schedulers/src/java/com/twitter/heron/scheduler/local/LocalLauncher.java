@@ -49,6 +49,7 @@ public class LocalLauncher implements ILauncher {
 
     // get the topology working directory
     this.topologyWorkingDirectory = LocalContext.workingDirectory(config);
+
   }
 
   @Override

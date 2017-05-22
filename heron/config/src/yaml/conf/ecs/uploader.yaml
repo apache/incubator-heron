@@ -3,7 +3,7 @@ heron.class.uploader:         com.twitter.heron.uploader.s3.S3Uploader
 
 # S3 bucket to put the jar file into
 #heron.uploader.s3.bucket:     bucketname
-
+heron.uploader.s3.bucket:     herondockercal
 
 # By default the path prefix will be empty and the full path would be s3://#{bucket}/#{topology_name}/topology.tar.gz
 # This allows you to prepend a prefix to the path to specify a sub-folder in which cased the full path would be:
@@ -19,14 +19,14 @@ heron.class.uploader:         com.twitter.heron.uploader.s3.S3Uploader
 
 # Specifies a custom region - see http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/regions/Regions.html#US_EAST_1
 #heron.uploader.s3.region : meh
-
+heron.uploader.s3.region : us-west-1
 
 # AWS Credentials
 # By default the S3 Uploader will use the Default Credential Provider Chain for accessing the S3 bucket -
 # see http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#using-the-default-credential-provider-chain
 # However you have the option to directly specify aws credentials:
-#heron.uploader.s3.access_key: xxxx
-#heron.uploader.s3.secret_key: xxxx
+#heron.uploader.s3.access_key: xxxxxx
+#heron.uploader.s3.secret_key: xxxxxx
 # Alternatively to directly specifying aws credentials, you can specify the aws profile
 # in case you have multiple AWS profiles in your credentials file (~/.aws/credentials):
 # heron.uploader.s3.aws_profile: profile_name

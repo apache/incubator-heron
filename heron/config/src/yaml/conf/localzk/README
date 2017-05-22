@@ -1,11 +1,6 @@
-This folder contains sample configs needed for using zookeeper in LocalScheduler.
-In order to run LocalScheduler, you need to set up a running zookeeper server basing on the config inside statemgr.yaml:
-1. Set up the appropriate connection string.
-2. Create following required nodes in zookeeper (one time effort):
-  /{heron.statemgr.root.path}/tmasters
-  /{heron.statemgr.root.path}/topologies
-  /{heron.statemgr.root.path}/pplans
-  /{heron.statemgr.root.path}/executionstate
-  /{heron.statemgr.root.path}/schedulers
+This folder contains sample configs needed for using running heron on AWS Cluster
+Please follow the steps at this google doc for detailed set up and workflow:
 
-Then you can run LocalScheduler with zookeeper state manager.
+https://docs.google.com/document/d/1ecbCuA46cIKPfY0SP0F1dcRlei4DIPz3pZ6ZSZ5zZgc/edit
+
+Then you can run Heorn on AWS !!!

@@ -14,11 +14,12 @@
 
 package com.twitter.heron.simulator.instance;
 
+import java.time.Duration;
 import java.util.Map;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
@@ -31,8 +32,8 @@ public class SpoutInstance
 
   private final boolean ackEnabled;
   private final int maxSpoutPending;
-  private final long instanceEmitBatchTime;
-  private final long instanceEmitBatchSize;
+  private final Duration instanceEmitBatchTime;
+  private final ByteAmount instanceEmitBatchSize;
 
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<HeronTuples.HeronTupleSet> streamInQueue,
@@ -43,9 +44,8 @@ public class SpoutInstance
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
-    this.instanceEmitBatchTime =
-        systemConfig.getInstanceEmitBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
-    this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSizeBytes();
+    this.instanceEmitBatchTime = systemConfig.getInstanceEmitBatchTime();
+    this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSize();
     this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
   }
 
@@ -73,12 +73,12 @@ public class SpoutInstance
       totalTuplesEmitted = newTotalTuplesEmitted;
 
       // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - instanceEmitBatchTime > 0) {
+      if (System.nanoTime() - startOfCycle - instanceEmitBatchTime.toNanos() > 0) {
         break;
       }
 
       if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceEmitBatchSize) {
+          > instanceEmitBatchSize.asBytes()) {
         break;
       }
     }
