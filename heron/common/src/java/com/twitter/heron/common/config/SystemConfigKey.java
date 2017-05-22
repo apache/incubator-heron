@@ -13,6 +13,9 @@
 //  limitations under the License.
 package com.twitter.heron.common.config;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +51,7 @@ public enum SystemConfigKey {
    * The interval in seconds to get and reset the system metrics.
    * The metrics collected will be sent to metrics manager
    */
-  HERON_METRICS_EXPORT_INTERVAL_SEC("heron.metrics.export.interval.sec", Type.INTEGER),
+  HERON_METRICS_EXPORT_INTERVAL("heron.metrics.export.interval.sec", ChronoUnit.SECONDS),
 
   /**
    * The maximum number of exceptions in one MetricPublisherPublishMessage protobuf
@@ -89,36 +92,37 @@ public enum SystemConfigKey {
   /**
    * Time based, the maximum batch time in ms for instance to read from stream manager per attempt
    */
-  INSTANCE_NETWORK_READ_BATCH_TIME_MS("heron.instance.network.read.batch.time.ms", Type.LONG),
+  INSTANCE_NETWORK_READ_BATCH_TIME("heron.instance.network.read.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * Size based,the maximum batch size in bytes to read from stream manager
    */
-  INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES(
-      "heron.instance.network.read.batch.size.bytes", Type.LONG),
+  INSTANCE_NETWORK_READ_BATCH_SIZE(
+      "heron.instance.network.read.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * Time based, the maximum batch time in ms for instance to read from stream manager per attempt
    */
-  INSTANCE_NETWORK_WRITE_BATCH_TIME_MS("heron.instance.network.write.batch.time.ms", Type.LONG),
+  INSTANCE_NETWORK_WRITE_BATCH_TIME(
+      "heron.instance.network.write.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * Size based, the maximum batch size in bytes to write to stream manager
    */
-  INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES(
-      "heron.instance.network.write.batch.size.bytes", Type.LONG),
+  INSTANCE_NETWORK_WRITE_BATCH_SIZE(
+      "heron.instance.network.write.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * # The maximum socket's received buffer size in bytes of instance's network options
    */
-  INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES(
-      "heron.instance.network.options.socket.received.buffer.size.bytes", Type.INTEGER),
+  INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE(
+      "heron.instance.network.options.socket.received.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum socket's send buffer size in bytes
    */
-  INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES(
-      "heron.instance.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
+  INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE(
+      "heron.instance.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
@@ -128,7 +132,8 @@ public enum SystemConfigKey {
   /**
    * The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
    */
-  INSTANCE_SET_DATA_TUPLE_SIZE_BYTES("heron.instance.set.data.tuple.size.bytes", Long.MAX_VALUE),
+  INSTANCE_SET_DATA_TUPLE_SIZE(
+      "heron.instance.set.data.tuple.size.bytes", ByteAmount.fromBytes(Long.MAX_VALUE)),
 
   /**
    * The size of packets read from stream manager will be determined by the minimal of
@@ -143,7 +148,7 @@ public enum SystemConfigKey {
   /**
    * The maximum time in ms for an spout to do acknowledgement per attempt
    */
-  INSTANCE_ACK_BATCH_TIME_MS("heron.instance.ack.batch.time.ms", Type.LONG),
+  INSTANCE_ACK_BATCH_TIME("heron.instance.ack.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * The size of packets written to stream manager will be determined by the minimal of
@@ -153,52 +158,52 @@ public enum SystemConfigKey {
   /**
    * The maximum time in ms for an spout instance to emit tuples per attempt
    */
-  INSTANCE_EMIT_BATCH_TIME_MS("heron.instance.emit.batch.time.ms", Type.LONG),
+  INSTANCE_EMIT_BATCH_TIME("heron.instance.emit.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * The maximum batch size in bytes for an spout instance to emit tuples per attempt
    */
-  INSTANCE_EMIT_BATCH_SIZE_BYTES("heron.instance.emit.batch.size.bytes", Type.LONG),
+  INSTANCE_EMIT_BATCH_SIZE("heron.instance.emit.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum time in ms for an bolt instance to execute tuples per attempt
    */
-  INSTANCE_EXECUTE_BATCH_TIME_MS("heron.instance.execute.batch.time.ms", Type.LONG),
+  INSTANCE_EXECUTE_BATCH_TIME("heron.instance.execute.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * The maximum batch size in bytes for an bolt instance to execute tuples per attempt
    */
-  INSTANCE_EXECUTE_BATCH_SIZE_BYTES("heron.instance.execute.batch.size.bytes", Type.LONG),
+  INSTANCE_EXECUTE_BATCH_SIZE("heron.instance.execute.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The time interval for an instance to check the state change, for instance,
    * the interval a spout using to check whether activate/deactivate is invoked
    * Slated for removal, see https://github.com/twitter/heron/issues/1712
    */
-  INSTANCE_STATE_CHECK_INTERVAL_SEC("heron.instance.state.check.interval.sec", Type.INTEGER),
+  INSTANCE_STATE_CHECK_INTERVAL("heron.instance.state.check.interval.sec", ChronoUnit.SECONDS),
 
   /**
    * The time to wait before the instance exits forcibly when uncaught exception happens
    */
-  INSTANCE_FORCE_EXIT_TIMEOUT_MS("heron.instance.force.exit.timeout.ms", Type.LONG),
+  INSTANCE_FORCE_EXIT_TIMEOUT("heron.instance.force.exit.timeout.ms", ChronoUnit.MILLIS),
 
   /**
    * Interval in seconds to reconnect to the stream manager
    */
-  INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC(
-      "heron.instance.reconnect.streammgr.interval.sec", Type.INTEGER),
+  INSTANCE_RECONNECT_STREAMMGR_INTERVAL(
+      "heron.instance.reconnect.streammgr.interval.sec", ChronoUnit.SECONDS),
 
   /**
    * Interval in seconds to reconnect to the metrics manager
    */
-  INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC(
-      "heron.instance.reconnect.metricsmgr.interval.sec", Type.INTEGER),
+  INSTANCE_RECONNECT_METRICSMGR_INTERVAL(
+      "heron.instance.reconnect.metricsmgr.interval.sec", ChronoUnit.SECONDS),
 
   /**
    * The interval in seconds to sample a system metric, for instance, jvm used memory.
    */
-  INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC(
-      "heron.instance.metrics.system.sample.interval.sec", Type.INTEGER),
+  INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL(
+      "heron.instance.metrics.system.sample.interval.sec", ChronoUnit.SECONDS),
 
   /**
    * The lookForTimeout Interval in spout instance will be timeoutInSeconds / NBUCKETS
@@ -210,8 +215,8 @@ public enum SystemConfigKey {
   /**
    * The interval for different threads to attempt to fetch physical plan from SingletonRegistry
    */
-  INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC(
-      "heron.instance.slave.fetch.pplan.interval.sec", Type.INTEGER),
+  INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL(
+      "heron.instance.slave.fetch.pplan.interval.sec", ChronoUnit.SECONDS),
 
   /**
    * The expected size on read queue in bolt
@@ -254,7 +259,7 @@ public enum SystemConfigKey {
   /**
    * Interval in ms to tune the size of in &amp; out data queue in instance
    */
-  INSTANCE_TUNING_INTERVAL_MS("heron.instance.tuning.interval.ms", Type.LONG),
+  INSTANCE_TUNING_INTERVAL("heron.instance.tuning.interval.ms", ChronoUnit.MILLIS),
 
   /**
    * The size of packets read from socket will be determined by the minimal of:
@@ -262,14 +267,14 @@ public enum SystemConfigKey {
    * <p>
    * Time based, the maximum batch time in ms for instance to read from socket per attempt
    */
-  METRICSMGR_NETWORK_READ_BATCH_TIME_MS(
-      "heron.metricsmgr.network.read.batch.time.ms", Type.LONG),
+  METRICSMGR_NETWORK_READ_BATCH_TIME(
+      "heron.metricsmgr.network.read.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * Size based,the maximum batch size in bytes to read from socket
    */
-  METRICSMGR_NETWORK_READ_BATCH_SIZE_BYTES(
-      "heron.metricsmgr.network.read.batch.size.bytes", Type.LONG),
+  METRICSMGR_NETWORK_READ_BATCH_SIZE(
+      "heron.metricsmgr.network.read.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The size of packets written to socket will be determined by the minimal of
@@ -277,26 +282,26 @@ public enum SystemConfigKey {
    * <p>
    * Time based, the maximum batch time in ms to write to socket
    */
-  METRICSMGR_NETWORK_WRITE_BATCH_TIME_MS(
-      "heron.metricsmgr.network.write.batch.time.ms", Type.LONG),
+  METRICSMGR_NETWORK_WRITE_BATCH_TIME(
+      "heron.metricsmgr.network.write.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * Size based, the maximum batch size in bytes to write to socket
    */
-  METRICSMGR_NETWORK_WRITE_BATCH_SIZE_BYTES(
-      "heron.metricsmgr.network.write.batch.size.bytes", Type.LONG),
+  METRICSMGR_NETWORK_WRITE_BATCH_SIZE(
+      "heron.metricsmgr.network.write.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum socket's received buffer size in bytes
    */
-  METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES(
-      "heron.metricsmgr.network.options.socket.received.buffer.size.bytes", Type.INTEGER),
+  METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE(
+      "heron.metricsmgr.network.options.socket.received.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The maximum socket's send buffer size in bytes
    */
-  METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES(
-      "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
+  METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE(
+      "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    *The maximum exception count be kept in tmaster
@@ -307,24 +312,28 @@ public enum SystemConfigKey {
   /**
    * The maximum interval in minutes of metrics to be kept in tmaster
    */
-  TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN(
-      "heron.tmaster.metrics.collector.maximum.interval.min", Type.LONG),
+  TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL(
+      "heron.tmaster.metrics.collector.maximum.interval.min",
+      ChronoUnit.MINUTES, Duration.ofHours(3)),
 
   /**
    * The interval for tmaster to purge metrics from socket
    */
-  TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC(
-       "heron.tmaster.metrics.collector.purge.interval.sec", Type.LONG);
+  TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL(
+       "heron.tmaster.metrics.collector.purge.interval.sec",
+      ChronoUnit.SECONDS, Duration.ofMinutes(1));
 
 
   private final String value;
   private final Object defaultValue;
   private final Type type;
+  private final TemporalUnit temporalUnit; // only used for Duration types
 
   public enum Type {
     BOOLEAN,
     BYTE_AMOUNT,
     DOUBLE,
+    DURATION,
     INTEGER,
     LONG,
     STRING
@@ -341,45 +350,66 @@ public enum SystemConfigKey {
   }
 
   SystemConfigKey(String value, Type type) {
+    if (type == Type.DURATION) {
+      throw new IllegalArgumentException("DURATION types are created by passing a temporalUnit");
+    }
     this.value = value;
     this.type = type;
     this.defaultValue = null;
+    this.temporalUnit = null;
+  }
+
+  SystemConfigKey(String value, TemporalUnit temporalUnit) {
+    this(value, temporalUnit, null);
   }
 
   SystemConfigKey(String value, String defaultValue) {
     this.value = value;
     this.type = Type.STRING;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   SystemConfigKey(String value, Integer defaultValue) {
     this.value = value;
     this.type = Type.INTEGER;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   SystemConfigKey(String value, Long defaultValue) {
     this.value = value;
     this.type = Type.LONG;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   SystemConfigKey(String value, Double defaultValue) {
     this.value = value;
     this.type = Type.DOUBLE;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
+  }
+
+  SystemConfigKey(String value, TemporalUnit temporalUnit, Duration defaultValue) {
+    this.value = value;
+    this.type = Type.DURATION;
+    this.defaultValue = defaultValue;
+    this.temporalUnit = temporalUnit;
   }
 
   SystemConfigKey(String value, Boolean defaultValue) {
     this.value = value;
     this.type = Type.BOOLEAN;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   SystemConfigKey(String value, ByteAmount defaultValue) {
     this.value = value;
     this.type = Type.BYTE_AMOUNT;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   static SystemConfigKey toSystemConfigKey(String value) {
@@ -391,18 +421,22 @@ public enum SystemConfigKey {
    *
    * @return key value
    */
-  public String value() {
+  String value() {
     return value;
   }
 
-  public Type getType() {
+  Type getType() {
     return type;
+  }
+
+  TemporalUnit getTemporalUnit() {
+    return temporalUnit;
   }
 
   /**
    * Return the default value
    */
-  public Object getDefault() {
+  Object getDefault() {
     return this.defaultValue;
   }
 

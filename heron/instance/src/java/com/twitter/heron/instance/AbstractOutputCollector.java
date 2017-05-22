@@ -95,7 +95,7 @@ public class AbstractOutputCollector {
 
   protected HeronTuples.HeronDataTuple.Builder initTupleBuilder(String streamId,
                                                                 List<Object> tuple,
-                                                                Integer taskId) {
+                                                                Integer emitDirectTaskId) {
     // Start construct the data tuple
     HeronTuples.HeronDataTuple.Builder builder = HeronTuples.HeronDataTuple.newBuilder();
 
@@ -103,12 +103,12 @@ public class AbstractOutputCollector {
     builder.setKey(0);
 
     List<Integer> customGroupingTargetTaskIds = null;
-    if (taskId != null) {
+    if (emitDirectTaskId != null) {
       // TODO: somehow assert that the input stream of the downstream bolt was configured
       // with directGrouping
 
       customGroupingTargetTaskIds = new ArrayList<>();
-      customGroupingTargetTaskIds.add(taskId);
+      customGroupingTargetTaskIds.add(emitDirectTaskId);
     } else if (!helper.isCustomGroupingEmpty()) {
       // customGroupingTargetTaskIds will be null if this stream is not CustomStreamGrouping
       customGroupingTargetTaskIds =

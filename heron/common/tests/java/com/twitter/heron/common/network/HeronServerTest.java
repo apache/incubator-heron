@@ -17,6 +17,7 @@ package com.twitter.heron.common.network;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.testing.Tests;
@@ -44,7 +46,11 @@ public class HeronServerTest {
   private static final String MESSAGE = "message";
   private static final Logger LOG = Logger.getLogger(HeronServerTest.class.getName());
   private static final String SERVER_HOST = "127.0.0.1";
-  private static int serverPort;
+  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
+      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(5));
   // Following are state variable to test correctness
   private volatile boolean isOnConnectedInvoked = false;
   private volatile boolean isOnRequestInvoked = false;
@@ -71,7 +77,7 @@ public class HeronServerTest {
   @Before
   public void before() throws Exception {
     // Get an available port
-    serverPort = SysUtils.getFreePort();
+    int serverPort = SysUtils.getFreePort();
 
     serverLooper = new NIOLooper();
     heronServer = new SimpleHeronServer(serverLooper, SERVER_HOST, serverPort);
@@ -245,7 +251,7 @@ public class HeronServerTest {
         isTimerEventInvoked = true;
       }
     };
-    heronServer.registerTimerEventInSeconds(0, r);
+    heronServer.registerTimerEvent(Duration.ofSeconds(1), r);
 
     runBase();
 
@@ -296,7 +302,7 @@ public class HeronServerTest {
         isTimerEventInvoked = true;
       }
     };
-    heronServer.registerTimerEventInNanoSeconds(0, r);
+    heronServer.registerTimerEvent(Duration.ZERO, r);
 
     runBase();
 
@@ -394,10 +400,7 @@ public class HeronServerTest {
   private class SimpleHeronServer extends HeronServer {
 
     SimpleHeronServer(NIOLooper s, String host, int port) {
-      super(s, host, port, new HeronSocketOptions(100 * 1024 * 1024, 100,
-          100 * 1024 * 1024, 100,
-          5 * 1024 * 1024,
-          5 * 1024 * 1024));
+      super(s, host, port, TEST_SOCKET_OPTIONS);
     }
 
     @Override
@@ -466,11 +469,7 @@ public class HeronServerTest {
 
   private class SimpleHeronClient extends HeronClient {
     SimpleHeronClient(NIOLooper looper, String host, int port) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      super(looper, host, port, TEST_SOCKET_OPTIONS);
     }
 
     @Override

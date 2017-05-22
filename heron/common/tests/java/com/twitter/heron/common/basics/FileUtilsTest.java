@@ -14,6 +14,7 @@
 
 package com.twitter.heron.common.basics;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,9 @@ import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
 
 /**
  * FileUtils Tester.
@@ -121,8 +125,6 @@ public class FileUtilsTest {
     Assert.assertFalse(FileUtils.isDirectoryExists(""));
   }
 
-
-
   /**
    * Method: getBaseName(String file)
    */
@@ -134,4 +136,43 @@ public class FileUtilsTest {
     filename = "b";
     Assert.assertEquals("b", FileUtils.getBaseName(filename));
   }
+
+  /**
+   * Method: deleteDir(File file)
+   */
+  @Test
+  public void testDeleteDirWithFile() throws Exception {
+    // Test delete a file
+    Path file = Files.createTempFile("testDeleteFile", "txt");
+    Assert.assertEquals(true, FileUtils.deleteDir(file.toFile()));
+    Assert.assertFalse(file.toFile().exists());
+  }
+
+  /**
+   * Method: deleteDir(File dir)
+   */
+  @Test
+  public void testDeleteDirWithDirs() throws Exception {
+    // Test delete dirs recursively,
+    //  parent/ -- child1/ -- child3/
+    //          |
+    //          -- child2/
+    Path parent = Files.createTempDirectory("testDeleteDir");
+    Path child1 = Files.createTempDirectory(parent, "child1");
+    Path child2 = Files.createTempDirectory(parent, "child2");
+    Path child3 = Files.createTempDirectory(child1, "child3");
+
+    PowerMockito.spy(FileUtils.class);
+
+    FileUtils.deleteDir(parent.toFile());
+
+    PowerMockito.verifyStatic(times(4));
+    FileUtils.deleteDir(any(File.class));
+
+    Assert.assertFalse(parent.toFile().exists());
+    Assert.assertFalse(child1.toFile().exists());
+    Assert.assertFalse(child2.toFile().exists());
+    Assert.assertFalse(child3.toFile().exists());
+  }
+
 }

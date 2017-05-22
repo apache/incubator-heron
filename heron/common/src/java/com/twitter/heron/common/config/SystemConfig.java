@@ -15,9 +15,11 @@
 package com.twitter.heron.common.config;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
@@ -53,20 +55,20 @@ public final class SystemConfig {
     return getInteger(SystemConfigKey.INSTANCE_SET_DATA_TUPLE_CAPACITY);
   }
 
-  public long getInstanceSetDataTupleSizeBytes() {
-    return getLong(SystemConfigKey.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES);
+  public ByteAmount getInstanceSetDataTupleSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_SET_DATA_TUPLE_SIZE);
   }
 
   public int getInstanceSetControlTupleCapacity() {
     return getInteger(SystemConfigKey.INSTANCE_SET_CONTROL_TUPLE_CAPACITY);
   }
 
-  public long getInstanceForceExitTimeoutMs() {
-    return getLong(SystemConfigKey.INSTANCE_FORCE_EXIT_TIMEOUT_MS);
+  public Duration getInstanceForceExitTimeout() {
+    return getDuration(SystemConfigKey.INSTANCE_FORCE_EXIT_TIMEOUT);
   }
 
-  public int getInstanceStateCheckIntervalSec() {
-    return getInteger(SystemConfigKey.INSTANCE_STATE_CHECK_INTERVAL_SEC);
+  public Duration getInstanceStateCheckInterval() {
+    return getDuration(SystemConfigKey.INSTANCE_STATE_CHECK_INTERVAL);
   }
 
   public int getInstanceInternalBoltReadQueueCapacity() {
@@ -85,8 +87,8 @@ public final class SystemConfig {
     return getInteger(SystemConfigKey.INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY);
   }
 
-  public long getInstanceAckBatchTimeMs() {
-    return getLong(SystemConfigKey.INSTANCE_ACK_BATCH_TIME_MS);
+  public Duration getInstanceAckBatchTime() {
+    return getDuration(SystemConfigKey.INSTANCE_ACK_BATCH_TIME);
   }
 
   public int getInstanceTuningExpectedBoltReadQueueSize() {
@@ -109,108 +111,108 @@ public final class SystemConfig {
     return getString(SystemConfigKey.HERON_LOGGING_DIRECTORY);
   }
 
-  public int getHeronLoggingMaximumSizeMb() {
-    return getInteger(SystemConfigKey.HERON_LOGGING_MAXIMUM_SIZE_MB);
+  public ByteAmount getHeronLoggingMaximumSize() {
+    return ByteAmount.fromMegabytes(getInteger(SystemConfigKey.HERON_LOGGING_MAXIMUM_SIZE_MB));
   }
 
   public int getHeronLoggingMaximumFiles() {
     return getInteger(SystemConfigKey.HERON_LOGGING_MAXIMUM_FILES);
   }
 
-  public int getHeronMetricsExportIntervalSec() {
-    return getInteger(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL_SEC);
+  public Duration getHeronMetricsExportInterval() {
+    return getDuration(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL);
   }
 
-  public long getInstanceNetworkReadBatchTimeMs() {
-    return getLong(SystemConfigKey.INSTANCE_NETWORK_READ_BATCH_TIME_MS);
+  public Duration getInstanceNetworkReadBatchTime() {
+    return getDuration(SystemConfigKey.INSTANCE_NETWORK_READ_BATCH_TIME);
   }
 
-  public long getInstanceNetworkReadBatchSizeBytes() {
-    return getLong(SystemConfigKey.INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES);
+  public ByteAmount getInstanceNetworkReadBatchSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_NETWORK_READ_BATCH_SIZE);
   }
 
-  public long getInstanceNetworkWriteBatchTimeMs() {
-    return getLong(SystemConfigKey.INSTANCE_NETWORK_WRITE_BATCH_TIME_MS);
+  public Duration getInstanceNetworkWriteBatchTime() {
+    return getDuration(SystemConfigKey.INSTANCE_NETWORK_WRITE_BATCH_TIME);
   }
 
-  public long getInstanceNetworkWriteBatchSizeBytes() {
-    return getLong(SystemConfigKey.INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES);
+  public ByteAmount getInstanceNetworkWriteBatchSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_NETWORK_WRITE_BATCH_SIZE);
   }
 
-  public int getInstanceNetworkOptionsSocketReceivedBufferSizeBytes() {
-    return getInteger(SystemConfigKey.INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES);
+  public ByteAmount getInstanceNetworkOptionsSocketReceivedBufferSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE);
   }
 
-  public int getInstanceNetworkOptionsSocketSendBufferSizeBytes() {
-    return getInteger(SystemConfigKey.INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES);
+  public ByteAmount getInstanceNetworkOptionsSocketSendBufferSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE);
   }
 
-  public long getInstanceEmitBatchTimeMs() {
-    return getLong(SystemConfigKey.INSTANCE_EMIT_BATCH_TIME_MS);
+  public Duration getInstanceEmitBatchTime() {
+    return getDuration(SystemConfigKey.INSTANCE_EMIT_BATCH_TIME);
   }
 
-  public long getInstanceEmitBatchSizeBytes() {
-    return getLong(SystemConfigKey.INSTANCE_EMIT_BATCH_SIZE_BYTES);
+  public ByteAmount getInstanceEmitBatchSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_EMIT_BATCH_SIZE);
   }
 
-  public long getInstanceExecuteBatchTimeMs() {
-    return getLong(SystemConfigKey.INSTANCE_EXECUTE_BATCH_TIME_MS);
+  public Duration getInstanceExecuteBatchTime() {
+    return getDuration(SystemConfigKey.INSTANCE_EXECUTE_BATCH_TIME);
   }
 
-  public long getInstanceExecuteBatchSizeBytes() {
-    return getLong(SystemConfigKey.INSTANCE_EXECUTE_BATCH_SIZE_BYTES);
+  public ByteAmount getInstanceExecuteBatchSize() {
+    return getByteAmount(SystemConfigKey.INSTANCE_EXECUTE_BATCH_SIZE);
   }
 
-  public int getInstanceReconnectStreammgrIntervalSec() {
-    return getInteger(SystemConfigKey.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC);
+  public Duration getInstanceReconnectStreammgrInterval() {
+    return getDuration(SystemConfigKey.INSTANCE_RECONNECT_STREAMMGR_INTERVAL);
   }
 
-  public int getInstanceReconnectMetricsmgrIntervalSec() {
-    return getInteger(SystemConfigKey.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC);
+  public Duration getInstanceReconnectMetricsmgrInterval() {
+    return getDuration(SystemConfigKey.INSTANCE_RECONNECT_METRICSMGR_INTERVAL);
   }
 
-  public int getInstanceMetricsSystemSampleIntervalSec() {
-    return getInteger(SystemConfigKey.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC);
+  public Duration getInstanceMetricsSystemSampleInterval() {
+    return getDuration(SystemConfigKey.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL);
   }
 
   public int getInstanceAcknowledgementNbuckets() {
     return getInteger(SystemConfigKey.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS);
   }
 
-  public int getInstanceSlaveFetchPplanIntervalSec() {
-    return getInteger(SystemConfigKey.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC);
+  public Duration getInstanceSlaveFetchPplanInterval() {
+    return getDuration(SystemConfigKey.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL);
   }
 
-  public long getInstanceTuningIntervalMs() {
-    return getLong(SystemConfigKey.INSTANCE_TUNING_INTERVAL_MS);
+  public Duration getInstanceTuningInterval() {
+    return getDuration(SystemConfigKey.INSTANCE_TUNING_INTERVAL);
   }
 
   public double getInstanceTuningCurrentSampleWeight() {
     return getDouble(SystemConfigKey.INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT);
   }
 
-  public long getMetricsMgrNetworkReadBatchTimeMs() {
-    return getLong(SystemConfigKey.METRICSMGR_NETWORK_READ_BATCH_TIME_MS);
+  public Duration getMetricsMgrNetworkReadBatchTime() {
+    return getDuration(SystemConfigKey.METRICSMGR_NETWORK_READ_BATCH_TIME);
   }
 
-  public long getMetricsMgrNetworkReadBatchSizeBytes() {
-    return getLong(SystemConfigKey.METRICSMGR_NETWORK_READ_BATCH_SIZE_BYTES);
+  public ByteAmount getMetricsMgrNetworkReadBatchSize() {
+    return getByteAmount(SystemConfigKey.METRICSMGR_NETWORK_READ_BATCH_SIZE);
   }
 
-  public long getMetricsMgrNetworkWriteBatchTimeMs() {
-    return getLong(SystemConfigKey.METRICSMGR_NETWORK_WRITE_BATCH_TIME_MS);
+  public Duration getMetricsMgrNetworkWriteBatchTime() {
+    return getDuration(SystemConfigKey.METRICSMGR_NETWORK_WRITE_BATCH_TIME);
   }
 
-  public long getMetricsMgrNetworkWriteBatchSizeBytes() {
-    return getLong(SystemConfigKey.METRICSMGR_NETWORK_WRITE_BATCH_SIZE_BYTES);
+  public ByteAmount getMetricsMgrNetworkWriteBatchSize() {
+    return getByteAmount(SystemConfigKey.METRICSMGR_NETWORK_WRITE_BATCH_SIZE);
   }
 
-  public int getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes() {
-    return getInteger(SystemConfigKey.METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES);
+  public ByteAmount getMetricsMgrNetworkOptionsSocketReceivedBufferSize() {
+    return getByteAmount(SystemConfigKey.METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE);
   }
 
-  public int getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes() {
-    return getInteger(SystemConfigKey.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES);
+  public ByteAmount getMetricsMgrNetworkOptionsSocketSendBufferSize() {
+    return getByteAmount(SystemConfigKey.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE);
   }
 
   public int getHeronMetricsMaxExceptionsPerMessageCount() {
@@ -225,20 +227,12 @@ public final class SystemConfig {
     }
   }
 
-  public long getTmasterMetricsCollectorMaximumIntervalMin() {
-    try {
-      return getLong(SystemConfigKey.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL_MIN);
-    } catch (IllegalArgumentException e) {
-      return 180; // default value if not found in config
-    }
+  public Duration getTmasterMetricsCollectorMaximumInterval() {
+    return getDuration(SystemConfigKey.TMASTER_METRICS_COLLECTOR_MAXIMUM_INTERVAL);
   }
 
-  public long getTmasterMetricsCollectorPurgeIntervalSec() {
-    try {
-      return getLong(SystemConfigKey.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL_SEC);
-    } catch (IllegalArgumentException e) {
-      return 60; // default value if not found in config
-    }
+  public Duration getTmasterMetricsCollectorPurgeInterval() {
+    return getDuration(SystemConfigKey.TMASTER_METRICS_COLLECTOR_PURGE_INTERVAL);
   }
 
   private String getString(SystemConfigKey key) {
@@ -259,6 +253,16 @@ public final class SystemConfig {
   private Double getDouble(SystemConfigKey key) {
     assertType(key, SystemConfigKey.Type.DOUBLE);
     return TypeUtils.getDouble(get(key));
+  }
+
+  private Duration getDuration(SystemConfigKey key) {
+    assertType(key, SystemConfigKey.Type.DURATION);
+    return TypeUtils.getDuration(get(key), key.getTemporalUnit());
+  }
+
+  private ByteAmount getByteAmount(SystemConfigKey key) {
+    assertType(key, SystemConfigKey.Type.BYTE_AMOUNT);
+    return TypeUtils.getByteAmount(get(key));
   }
 
   private Object get(SystemConfigKey key) {
@@ -329,6 +333,9 @@ public final class SystemConfig {
             break;
           case DOUBLE:
             config.put(key.value(), TypeUtils.getDouble(value));
+            break;
+          case DURATION:
+            config.put(key.value(), TypeUtils.getDuration(value, key.getTemporalUnit()));
             break;
           case INTEGER:
             config.put(key.value(), TypeUtils.getInteger(value));
