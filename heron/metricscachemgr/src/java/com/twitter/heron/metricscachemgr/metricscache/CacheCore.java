@@ -87,8 +87,8 @@ public class CacheCore {
    * constructor: CacheCore needs two intervals to configure metrics time window
    * and one number to limit exception count
    *
-   * @param maxInterval metric: cache how long time? in seconds
-   * @param interval metric: purge how often? in seconds
+   * @param maxInterval metric: cache how long time?
+   * @param interval metric: purge how often?
    * @param maxException exception: cache how many?
    */
   public CacheCore(Duration maxInterval, Duration interval, long maxException) {

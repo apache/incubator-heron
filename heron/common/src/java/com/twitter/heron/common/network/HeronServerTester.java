@@ -107,7 +107,7 @@ public class HeronServerTester {
     this.serverStartedSignal = new CountDownLatch(1);
   }
 
-  public void start() throws InterruptedException {
+  public void start() {
     // First run Server
     runServer();
 
@@ -147,11 +147,15 @@ public class HeronServerTester {
    */
   public static void await(CountDownLatch latch, Duration timeout) {
     try {
-      latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+      if (!latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+        fail(String.format(
+            "Await latch failed to release until timeout of %s was reached. Check latch logic.",
+            timeout));
+      }
     } catch (InterruptedException e) {
       fail(String.format(
-          "Await latch failed to release until timeout of %s was reached. Check latch logic.",
-          timeout));
+          "Await latch interrupted before timeout of %s was reached: %s",
+          timeout, e));
     }
   }
 
