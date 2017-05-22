@@ -30,6 +30,7 @@ import threading
 import time
 import yaml
 import socket
+import traceback
 import urllib2
 
 from functools import partial
@@ -142,6 +143,14 @@ def getHost(ecs_ami):
       l_host = socket.gethostname()
     return l_host
 
+
+def stdout_log_fn(cmd):
+  """Simple function callback that is used to log the streaming output of a subprocess command
+  :param cmd: the name of the command which will be added to the log line
+  :return: None
+  """
+  # Log the messages to stdout and strip off the newline because Log.info adds one automatically
+  return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
@@ -640,24 +649,37 @@ class HeronExecutor(object):
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
     ''' Wait for the termination of a process and log its stdout & stderr '''
-    (process_stdout, process_stderr) = process.communicate()
-    if process_stdout:
-      Log.info("%s stdout: %s" %(name, process_stdout))
-    if process_stderr:
-      Log.info("%s stderr: %s" %(name, process_stderr))
+    log.stream_process_stdout(process, stdout_log_fn(name))
+    process.wait()
 
   def _run_process(self, name, cmd, env_to_exec=None):
     Log.info("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env=env_to_exec)
+    try:
+      # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
+      # size and can cause the child process to deadlock if it fills up
+      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 env=env_to_exec, bufsize=1)
 
-  def _run_blocking_process(self, cmd, is_shell, env_to_exec=None):
+      log.async_stream_process_stdout(process, stdout_log_fn(name))
+    except Exception:
+      Log.info("Exception running command %:", cmd)
+      traceback.print_exc()
+
+    return process
+
+  def _run_blocking_process(self, cmd, is_shell=False, env_to_exec=None):
     Log.info("Running blocking process as %s" % cmd)
-    process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=env_to_exec)
+    try:
+      # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
+      # size and can cause the child process to deadlock if it fills up
+      process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT, env=env_to_exec)
 
-    # wait for termination
-    self._wait_process_std_out_err("", process)
+      # wait for termination
+      self._wait_process_std_out_err(cmd, process)
+    except Exception:
+      Log.info("Exception running command %:", cmd)
+      traceback.print_exc()
 
     # return the exit code
     return process.returncode
