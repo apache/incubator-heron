@@ -27,7 +27,7 @@ class JstackHandler(tornado.web.RequestHandler):
   @tornado.web.asynchronous
   def get(self, pid):
     ''' get method '''
-    body = utils.str_cmd(['jstack', pid])
+    body = utils.str_cmd(['jstack', pid], None, None)
     self.content_type = 'application/json'
     self.write(json.dumps(body))
     self.finish()

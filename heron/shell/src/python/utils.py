@@ -166,7 +166,7 @@ def pipe(prev_proc, to_cmd):
     prev_proc.stdout.close() # Allow prev_proc to receive a SIGPIPE
   return proc
 
-def str_cmd(cmd, cwd=None, env=None):
+def str_cmd(cmd, cwd, env):
   """
   Runs the command and returns its stdout and stderr.
   """
@@ -189,6 +189,7 @@ def chain(cmd_list):
   chained_proc = reduce(pipe, [None] + cmd_list)
   stdout_builder = StringBuilder()
   log.async_stream_process_stdout(chained_proc, stdout_builder.add)
+  chained_proc.wait()
   return {
       'command': command,
       'stdout': stdout_builder.result()
