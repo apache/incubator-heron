@@ -155,7 +155,7 @@ class StringBuilder(object):
 
 def pipe(prev_proc, to_cmd):
   """
-  Pipes in_stream from output of previous pipe into to_cmd.
+  Pipes output of prev_proc into to_cmd.
   Returns stdout stream of to_cmd
   """
   stdin = None if prev_proc is None else prev_proc.stdout
