@@ -23,7 +23,7 @@ public enum EcsKey {
                         "${HOME}/.heron/conf/ecs/ecs_compose_template.yaml"),
   ECS_AMI_INSTANCE("heron.ecs.ami.instance", "http://169.254.169.254/latest/meta-data/local-ipv4"),
   ECS_COMPOSE_UPCMD("heron.ecs.compose.up", "ecs-cli compose --project-name "),
-  ECS_COMPOSE_STOP("heron.ecs.compose.up", "aws ecs stop-task --cluster default --task "),
+  ECS_COMPOSE_STOP("heron.ecs.compose.up", "aws ecs stop-task --cluster ecs-heron-cluster --task "),
   //ECS_COMPOSE_LIST("heron.ecs.compose.up", "ecs-cli ps")
   ECS_COMPOSE_LIST("heron.ecs.compose.up", "aws ecs list-tasks --family "),
   ECS_LIST_BY("heron.ecs.list.by", "families"),
