@@ -305,6 +305,9 @@ public class Context {
   public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =
         (Map<String, Object>) cfg.get(Key.STATEFUL_STORAGE_CONF);
+    if (statefulStorageConfig == null) {
+      return "";
+    }
     Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CUSTOM_CLASSPATH.value());
     return o == null ? "" : (String) o;
   }
