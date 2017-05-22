@@ -156,7 +156,7 @@ class StringBuilder(object):
 def pipe(prev_proc, to_cmd):
   """
   Pipes output of prev_proc into to_cmd.
-  Returns stdout stream of to_cmd
+  Returns piped process
   """
   stdin = None if prev_proc is None else prev_proc.stdout
   proc = subprocess.Popen(to_cmd,

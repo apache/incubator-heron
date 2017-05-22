@@ -77,7 +77,7 @@ def async_stream_process_stdout(process, handler):
   :param handler: a function that will be called to handle each line
   :return: None
   """
-  _async_stream_process_output(process, stream_process_stdout, handler)
+  return _async_stream_process_output(process, stream_process_stdout, handler)
 
 def async_stream_process_stderr(process, handler):
   """ Stream and handler the stderr of a process
@@ -85,7 +85,7 @@ def async_stream_process_stderr(process, handler):
   :param handler: a function that will be called to handle each line
   :return: None
   """
-  _async_stream_process_output(process, stream_process_stderr, handler)
+  return _async_stream_process_output(process, stream_process_stderr, handler)
 
 def configure(level=logging.INFO, logfile=None):
   """ Configure logger which dumps log on terminal
