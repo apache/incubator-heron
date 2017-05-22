@@ -82,12 +82,12 @@ public class SpoutOutputCollectorImpl
 
   @Override
   public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
-    return admitSpoutTuple(streamId, tuple, messageId);
+    return admitSpoutTuple(streamId, tuple, messageId, null);
   }
 
   @Override
   public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
-    throw new RuntimeException("emitDirect Not implemented");
+    admitSpoutTuple(streamId, tuple, messageId, taskId);
   }
 
   // Log the report error and also send the stack trace to metrics manager.
@@ -138,14 +138,15 @@ public class SpoutOutputCollectorImpl
   // Following private methods are internal implementations
   /////////////////////////////////////////////////////////
 
-  private List<Integer> admitSpoutTuple(String streamId, List<Object> tuple, Object messageId) {
+  private List<Integer> admitSpoutTuple(String streamId, List<Object> tuple,
+                                        Object messageId, Integer emitDirectTaskId) {
     // No need to send tuples if it is already terminated
     if (getPhysicalPlanHelper().isTerminatedComponent()) {
       return null;
     }
 
     // Start construct the data tuple
-    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple);
+    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, emitDirectTaskId);
 
     if (messageId != null) {
       RootTupleInfo tupleInfo = new RootTupleInfo(streamId, messageId);
