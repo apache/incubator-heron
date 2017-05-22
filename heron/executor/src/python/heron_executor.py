@@ -31,6 +31,7 @@ import time
 import yaml
 import socket
 import traceback
+import traceback
 import urllib2
 
 from functools import partial
@@ -143,6 +144,14 @@ def getHost(ecs_ami):
       l_host = socket.gethostname()
     return l_host
 
+
+def stdout_log_fn(cmd):
+  """Simple function callback that is used to log the streaming output of a subprocess command
+  :param cmd: the name of the command which will be added to the log line
+  :return: None
+  """
+  # Log the messages to stdout and strip off the newline because Log.info adds one automatically
+  return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
 def stdout_log_fn(cmd):
   """Simple function callback that is used to log the streaming output of a subprocess command
