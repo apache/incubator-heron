@@ -40,7 +40,7 @@ aws ecs create-cluster --cluster-name ecs-heron-cluster > /dev/null
 echo "done"
 
 # Security group
-echo -n "Creating Security Group (ecs-heron-demo) .. "
+echo -n "Creating Security Group (ecs-heron-securitygroup) .. "
 SECURITY_GROUP_ID=$(aws ec2 create-security-group --group-name ecs-heron-securitygroup  --description 'ECS Heron' --query 'GroupId' --output text)
 # Wait for the group to get associated with the VPC
 sleep 5
