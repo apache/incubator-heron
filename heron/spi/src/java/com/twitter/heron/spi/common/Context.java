@@ -249,8 +249,12 @@ public class Context {
     return cfg.getStringValue(Key.CKPTMGR_CLASSPATH);
   }
 
+  public static String statefulStoragesClassPath(Config cfg) {
+    return cfg.getStringValue(Key.STATEFULSTORAGES_CLASSPATH);
+  }
+
   public static Boolean isStateful(Config cfg) {
-    return cfg.getBooleanValue(Key.IS_STATEFUL);
+    return cfg.getBooleanValue(Key.IS_STATEFUL_ENABLED);
   }
 
   public static String stateManagerClassPath(Config cfg) {
@@ -298,10 +302,10 @@ public class Context {
   }
 
   @SuppressWarnings("unchecked")
-  public static final String statefulStorageClassPath(Config cfg) {
+  public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =
         (Map<String, Object>) cfg.get(Key.STATEFUL_STORAGE_CONF);
-    Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CLASSPATH.value());
+    Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CUSTOM_CLASSPATH.value());
     return o == null ? "" : (String) o;
   }
 }

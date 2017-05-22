@@ -85,6 +85,11 @@ public final class TopologyUtils {
     return ByteAmount.fromBytes(getConfigWithDefault(config, key, defaultBytes));
   }
 
+  public static Boolean getConfigWithDefault(
+      List<TopologyAPI.Config.KeyValue> config, String key, boolean defaultValue) {
+    return Boolean.parseBoolean(getConfigWithDefault(config, key, Boolean.toString(defaultValue)));
+  }
+
   public static String getConfigWithException(
       List<TopologyAPI.Config.KeyValue> config, String key) {
     for (TopologyAPI.Config.KeyValue kv : config) {
