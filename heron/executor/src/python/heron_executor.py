@@ -31,7 +31,7 @@ import time
 import yaml
 import socket
 import urllib2
-
+import traceback
 from functools import partial
 
 
@@ -151,21 +151,6 @@ def stdout_log_fn(cmd):
   # Log the messages to stdout and strip off the newline because Log.info adds one automatically
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
-def stdout_log_fn(cmd):
-  """Simple function callback that is used to log the streaming output of a subprocess command
-  :param cmd: the name of the command which will be added to the log line
-  :return: None
-  """
-  # Log the messages to stdout and strip off the newline because Log.info adds one automatically
-  return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
-
-def stdout_log_fn(cmd):
-  """Simple function callback that is used to log the streaming output of a subprocess command
-  :param cmd: the name of the command which will be added to the log line
-  :return: None
-  """
-  # Log the messages to stdout and strip off the newline because Log.info adds one automatically
-  return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
