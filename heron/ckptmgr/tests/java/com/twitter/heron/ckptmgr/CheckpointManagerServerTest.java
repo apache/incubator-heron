@@ -14,12 +14,10 @@
 
 package com.twitter.heron.ckptmgr;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 
 import org.junit.After;
@@ -30,15 +28,15 @@ import org.junit.Test;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
-import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
+import static com.twitter.heron.common.network.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
@@ -53,9 +51,6 @@ public class CheckpointManagerServerTest {
   private static final String CHECKPOINT_ID = "checkpoint_id";
   private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
 
-  private static final String SERVER_HOST = "127.0.0.1";
-  private static int serverPort;
-
   private static CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
   private static CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private static CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
@@ -66,15 +61,8 @@ public class CheckpointManagerServerTest {
   private static PhysicalPlans.Instance instance;
 
   private CheckpointManagerServer checkpointManagerServer;
-  private SimpleCheckpointManagerClient simpleCheckpointManagerClient;
-
-  private CountDownLatch finishedSignal;
-  private CountDownLatch serverStartedSignal;
-
-  private NIOLooper serverLooper;
-  private NIOLooper clientLooper;
-  private ExecutorService threadPools;
-  private IStatefulStorage backendStorage;
+  private IStatefulStorage statefulStorage;
+  private HeronServerTester serverTester;
 
   @BeforeClass
   public static void setup() throws Exception {
@@ -131,266 +119,139 @@ public class CheckpointManagerServerTest {
 
   @Before
   public void before() throws Exception {
-    finishedSignal = new CountDownLatch(1);
-    serverStartedSignal = new CountDownLatch(1);
+    statefulStorage = mock(IStatefulStorage.class);
 
-    serverLooper = new NIOLooper();
-    clientLooper = new NIOLooper();
-    threadPools = Executors.newFixedThreadPool(2);
-
-    backendStorage = mock(IStatefulStorage.class);
-
-    HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(100 * 1024 * 1024, 100,
-            100 * 1024 * 1024, 100,
-            5 * 1024 * 1024,
-            5 * 1024 * 1024);
-
-    serverPort = SysUtils.getFreePort();
-    checkpointManagerServer = new CheckpointManagerServer(
-        TOPOLOGY_NAME, TOPOLOGY_ID,
-        CHECKPOINT_MANAGER_ID, backendStorage,
-        serverLooper, SERVER_HOST, serverPort, serverSocketOptions);
-
-    runServer();
+    checkpointManagerServer = new CheckpointManagerServer(TOPOLOGY_NAME, TOPOLOGY_ID,
+        CHECKPOINT_MANAGER_ID, statefulStorage, new NIOLooper(), HeronServerTester.SERVER_HOST,
+        SysUtils.getFreePort(), HeronServerTester.TEST_SOCKET_OPTIONS);
   }
 
   @After
   public void after() {
-    threadPools.shutdownNow();
+    serverTester.stop();
+  }
 
-    checkpointManagerServer.stop();
-    checkpointManagerServer = null;
-
-    if (simpleCheckpointManagerClient != null) {
-      simpleCheckpointManagerClient.stop();
-      simpleCheckpointManagerClient.getNIOLooper().exitLoop();
-    }
-
-    serverLooper.exitLoop();
-    serverLooper = null;
-
-    threadPools = null;
+  private void runTest(TestRequestHandler.RequestType requestType,
+                       HeronServerTester.TestResponseHandler responseHandler)
+      throws IOException, InterruptedException {
+    serverTester = new HeronServerTester(checkpointManagerServer,
+        new TestRequestHandler(requestType), responseHandler, RESPONSE_RECEIVED_TIMEOUT);
+    serverTester.start();
   }
 
   @Test
   public void testSaveInstanceState() throws Exception {
-    prepareClient(SimpleCheckpointManagerClient.RequestType.SAVE_INSTANCE_STATE);
 
-    runClient(simpleCheckpointManagerClient);
-    // let the client start and send request
-    finishedSignal.await(2, TimeUnit.SECONDS);
-
-    verify(backendStorage).store(any(Checkpoint.class));
-    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
-    Message response = simpleCheckpointManagerClient.getResponse();
-    assertTrue(response instanceof CheckpointManager.SaveInstanceStateResponse);
-    assertEquals(CHECKPOINT_ID,
-        ((CheckpointManager.SaveInstanceStateResponse) response).getCheckpointId());
-    assertEquals(instance,
-        ((CheckpointManager.SaveInstanceStateResponse) response).getInstance());
+    runTest(TestRequestHandler.RequestType.SAVE_INSTANCE_STATE,
+        new HeronServerTester.SuccessResponseHandler(
+            CheckpointManager.SaveInstanceStateResponse.class,
+            new HeronServerTester.TestResponseHandler() {
+              @Override
+              public void handleResponse(HeronClient client, StatusCode status,
+                                         Object ctx, Message response) throws Exception {
+                verify(statefulStorage).store(any(Checkpoint.class));
+                assertEquals(CHECKPOINT_ID,
+                    ((CheckpointManager.SaveInstanceStateResponse) response).getCheckpointId());
+                assertEquals(instance,
+                    ((CheckpointManager.SaveInstanceStateResponse) response).getInstance());
+              }
+            })
+    );
   }
 
   @Test
   public void testGetInstanceState() throws Exception {
-    Checkpoint checkpoint = new Checkpoint(TOPOLOGY_NAME, instance, instanceStateCheckpoint);
-    when(backendStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance)).thenReturn(checkpoint);
+    final Checkpoint checkpoint = new Checkpoint(TOPOLOGY_NAME, instance, instanceStateCheckpoint);
+    when(statefulStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance)).thenReturn(checkpoint);
 
-    prepareClient(SimpleCheckpointManagerClient.RequestType.GET_INSTANCE_STATE);
-
-    runClient(simpleCheckpointManagerClient);
-    finishedSignal.await(2, TimeUnit.SECONDS);
-
-    verify(backendStorage).restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
-    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
-
-    Message response = simpleCheckpointManagerClient.getResponse();
-    assertTrue(response instanceof CheckpointManager.GetInstanceStateResponse);
-    assertEquals(checkpoint.getCheckpoint(),
-        ((CheckpointManager.GetInstanceStateResponse) response).getCheckpoint());
+    runTest(TestRequestHandler.RequestType.GET_INSTANCE_STATE,
+        new HeronServerTester.SuccessResponseHandler(
+            CheckpointManager.GetInstanceStateResponse.class,
+            new HeronServerTester.TestResponseHandler() {
+              @Override
+              public void handleResponse(HeronClient client, StatusCode status,
+                                         Object ctx, Message response) throws Exception {
+                verify(statefulStorage).restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
+                assertEquals(checkpoint.getCheckpoint(),
+                    ((CheckpointManager.GetInstanceStateResponse) response).getCheckpoint());
+              }
+            })
+    );
   }
 
   @Test
   public void testCleanStatefulCheckpoint() throws Exception {
-    prepareClient(SimpleCheckpointManagerClient.RequestType.CLEAN_STATEFUL_CHECKOINTS);
-
-    runClient(simpleCheckpointManagerClient);
-    finishedSignal.await(2, TimeUnit.SECONDS);
-
-    verify(backendStorage).dispose(anyString(), anyString(), anyBoolean());
-
-    Message response = simpleCheckpointManagerClient.getResponse();
-    assertTrue(response instanceof CheckpointManager.CleanStatefulCheckpointResponse);
-    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    runTest(TestRequestHandler.RequestType.CLEAN_STATEFUL_CHECKPOINTS,
+        new HeronServerTester.SuccessResponseHandler(
+            CheckpointManager.CleanStatefulCheckpointResponse.class,
+            new HeronServerTester.TestResponseHandler() {
+              @Override
+              public void handleResponse(HeronClient client, StatusCode status,
+                                         Object ctx, Message response) throws Exception {
+                verify(statefulStorage).dispose(anyString(), anyString(), anyBoolean());
+              }
+            })
+    );
   }
 
   @Test
-  public void testRegiseterTMaster() throws Exception {
-    prepareClient(SimpleCheckpointManagerClient.RequestType.REGISTER_TMASTER);
-
-    runClient(simpleCheckpointManagerClient);
-    finishedSignal.await(2, TimeUnit.SECONDS);
-
-    Message response = simpleCheckpointManagerClient.getResponse();
-
-    assertTrue(response instanceof CheckpointManager.RegisterTMasterResponse);
-    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+  public void testRegisterTMaster() throws Exception {
+    runTest(TestRequestHandler.RequestType.REGISTER_TMASTER,
+        new HeronServerTester.SuccessResponseHandler(
+            CheckpointManager.RegisterTMasterResponse.class));
   }
 
   @Test
   public void testRegisterStmgr() throws Exception {
-    prepareClient(SimpleCheckpointManagerClient.RequestType.REGISTER_STMGR);
-
-    runClient(simpleCheckpointManagerClient);
-    finishedSignal.await(2, TimeUnit.SECONDS);
-
-    Message response = simpleCheckpointManagerClient.getResponse();
-    assertTrue(response instanceof CheckpointManager.RegisterStMgrResponse);
-    assertEquals(StatusCode.OK, simpleCheckpointManagerClient.getResponseStatus());
+    runTest(TestRequestHandler.RequestType.REGISTER_STMGR,
+        new HeronServerTester.SuccessResponseHandler(
+            CheckpointManager.RegisterStMgrResponse.class));
   }
 
-  private void prepareClient(SimpleCheckpointManagerClient.RequestType requestType) {
-    simpleCheckpointManagerClient =
-        new SimpleCheckpointManagerClient(clientLooper,
-            SERVER_HOST,
-            serverPort,
-            finishedSignal,
-            requestType);
-  }
-
-  private void runServer() {
-    Runnable runServer = new Runnable() {
-      @Override
-      public void run() {
-        checkpointManagerServer.start();
-        serverStartedSignal.countDown();
-        checkpointManagerServer.getNIOLooper().loop();
-      }
-    };
-    threadPools.execute(runServer);
-  }
-
-  private void runClient(final SimpleCheckpointManagerClient client) {
-    Runnable runClient = new Runnable() {
-      @Override
-      public void run() {
-        try {
-          // wait for the server start before connecting
-          serverStartedSignal.await(2, TimeUnit.SECONDS);
-          client.start();
-          client.getNIOLooper().loop();
-        } catch (InterruptedException ex) {
-          throw new RuntimeException("Client failed to connect to server", ex);
-        }
-      }
-    };
-    threadPools.execute(runClient);
-  }
-
-  private static class SimpleCheckpointManagerClient extends HeronClient {
+  private static final class TestRequestHandler implements HeronServerTester.TestRequestHandler {
     private RequestType requestType;
-    private Message response;
-    private StatusCode responseStatus;
-    private CountDownLatch finishedSignal;
 
     public enum RequestType {
-      SAVE_INSTANCE_STATE,
-      GET_INSTANCE_STATE,
-      CLEAN_STATEFUL_CHECKOINTS,
-      REGISTER_STMGR,
-      REGISTER_TMASTER
-    }
+      SAVE_INSTANCE_STATE(saveInstanceStateRequest,
+          CheckpointManager.SaveInstanceStateResponse.getDescriptor()),
+      GET_INSTANCE_STATE(getInstanceStateRequest,
+          CheckpointManager.GetInstanceStateResponse.getDescriptor()),
+      CLEAN_STATEFUL_CHECKPOINTS(cleanStatefulCheckpointRequest,
+          CheckpointManager.CleanStatefulCheckpointResponse.getDescriptor()),
+      REGISTER_STMGR(registerStmgrRequest,
+          CheckpointManager.RegisterStMgrResponse.getDescriptor()),
+      REGISTER_TMASTER(registerTMasterRequest,
+          CheckpointManager.RegisterTMasterResponse.getDescriptor());
 
-    SimpleCheckpointManagerClient(NIOLooper looper, String host,
-                                  int port, CountDownLatch finishedSignal,
-                                  RequestType requestType) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
+      private Message requestMessage;
+      private Descriptors.Descriptor responseMessageDescriptor;
 
-      this.finishedSignal = finishedSignal;
-      this.requestType = requestType;
-      this.responseStatus = StatusCode.TIMEOUT_ERROR;
-    }
+      RequestType(Message requestMessage, Descriptors.Descriptor responseMessageDescriptor) {
+        this.requestMessage = requestMessage;
+        this.responseMessageDescriptor = responseMessageDescriptor;
+      }
 
-    @Override
-    public void onConnect(StatusCode status) {
-      if (status != StatusCode.OK) {
-        org.junit.Assert.fail("Connection with server failed");
-      } else {
-        switch (requestType) {
-          case SAVE_INSTANCE_STATE:
-            sendSaveInstanceStateRequest(saveInstanceStateRequest);
-            break;
-          case GET_INSTANCE_STATE:
-            sendGetInstanceStateRequest(getInstanceStateRequest);
-            break;
-          case CLEAN_STATEFUL_CHECKOINTS:
-            sendCleanStatefulCheckpointRequest(cleanStatefulCheckpointRequest);
-            break;
-          case REGISTER_STMGR:
-            sendRegisterStMgrRequest(registerStmgrRequest);
-            break;
-          case REGISTER_TMASTER:
-            sendRegisterTMasterRequest(registerTMasterRequest);
-            break;
-          default:
-            break;
-        }
+      public Message getRequestMessage() {
+        return requestMessage;
+      }
+
+      public Message.Builder newResponseBuilder() {
+        return responseMessageDescriptor.toProto().newBuilderForType();
       }
     }
 
-    @Override
-    public void onError() {
-      org.junit.Assert.fail("Error in client while talking to server");
+    private TestRequestHandler(RequestType requestType) {
+      this.requestType = requestType;
     }
 
     @Override
-    public void onClose() {
-
-    }
-
-    public void sendSaveInstanceStateRequest(CheckpointManager.SaveInstanceStateRequest request) {
-      sendRequest(request, CheckpointManager.SaveInstanceStateResponse.newBuilder());
-    }
-
-    public void sendGetInstanceStateRequest(CheckpointManager.GetInstanceStateRequest request) {
-      sendRequest(request, CheckpointManager.GetInstanceStateResponse.newBuilder());
-    }
-
-    public void sendCleanStatefulCheckpointRequest(
-        CheckpointManager.CleanStatefulCheckpointRequest request) {
-      sendRequest(request, CheckpointManager.CleanStatefulCheckpointResponse.newBuilder());
-    }
-
-    public void sendRegisterTMasterRequest(CheckpointManager.RegisterTMasterRequest request) {
-      sendRequest(request, CheckpointManager.RegisterTMasterResponse.newBuilder());
-    }
-
-    public void sendRegisterStMgrRequest(CheckpointManager.RegisterStMgrRequest request) {
-      sendRequest(request, CheckpointManager.RegisterStMgrResponse.newBuilder());
-    }
-
-    public StatusCode getResponseStatus() {
-      return this.responseStatus;
-    }
-
-    public Message getResponse() {
-      return this.response;
+    public Message getRequestMessage() {
+      return requestType.getRequestMessage();
     }
 
     @Override
-    public void onResponse(StatusCode status, Object ctx, Message aResponse) {
-      this.responseStatus = status;
-      this.response = aResponse;
-      this.finishedSignal.countDown();
-    }
-
-    @Override
-    public void onIncomingMessage(Message request) {
-      org.junit.Assert.fail("Expected message from client");
+    public Message.Builder getResponseBuilder() {
+      return requestType.newResponseBuilder();
     }
   }
 }

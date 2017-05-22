@@ -153,18 +153,6 @@ class StringBuilder(object):
   def result(self):
     return self.str
 
-def stream_to_string(stream):
-  """
-  Converts stream to string. Blocks until end of stream
-  """
-  str_builder = ''
-  while True:
-    line = stream.readline()
-    if not line:
-      break
-    str_builder += line
-  return str_builder
-
 def pipe(prev_proc, to_cmd):
   """
   Pipes in_stream from output of previous pipe into to_cmd.

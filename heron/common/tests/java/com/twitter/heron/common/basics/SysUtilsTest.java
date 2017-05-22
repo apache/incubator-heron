@@ -17,6 +17,7 @@ package com.twitter.heron.common.basics;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.time.Duration;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -41,11 +42,11 @@ public class SysUtilsTest {
   public void testSleep() throws Exception {
     for (int i = 0; i < NUM_ATTEMPTS; i++) {
       // The value can not be negative
-      long expectedSleepTimeMs = new Random().nextInt(100);
+      Duration expectedSleepTime = Duration.ofMillis(new Random().nextInt(100));
       long start = System.currentTimeMillis();
-      SysUtils.sleep(expectedSleepTimeMs);
+      SysUtils.sleep(expectedSleepTime);
       long end = System.currentTimeMillis();
-      Assert.assertTrue((end - start) >= expectedSleepTimeMs);
+      Assert.assertTrue((end - start) >= expectedSleepTime.toMillis());
     }
   }
 

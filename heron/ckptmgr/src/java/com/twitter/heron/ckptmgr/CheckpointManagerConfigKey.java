@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.twitter.heron.ckptmgr;
 
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,39 +36,42 @@ public enum CheckpointManagerConfigKey {
   /**
    * The batch size in bytes for write operation
    */
-  WRITE_BATCH_SIZE("heron.ckptmgr.network.write.batch.size.bytes", Type.LONG),
+  WRITE_BATCH_SIZE("heron.ckptmgr.network.write.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The time for ckptmgr write batch
    */
-  WRITE_BATCH_TIME("heron.ckptmgr.network.write.batch.time.ms", Type.LONG),
+  WRITE_BATCH_TIME("heron.ckptmgr.network.write.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * The batch size in bytes for read operation
    */
-  READ_BATCH_SIZE("heron.ckptmgr.network.read.batch.size.bytes", Type.LONG),
+  READ_BATCH_SIZE("heron.ckptmgr.network.read.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The time for ckptmger read batch
    */
-  READ_BATCH_TIME("heron.ckptmgr.network.read.batch.time.ms", Type.LONG),
+  READ_BATCH_TIME("heron.ckptmgr.network.read.batch.time.ms", ChronoUnit.MILLIS),
 
   /**
    * The size for socket send buffer in bytes
    */
-  SOCKET_SEND_SIZE("heron.ckptmgr.network.options.socket.send.buffer.size.bytes", Type.INTEGER),
+  SOCKET_SEND_SIZE("heron.ckptmgr.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
 
   /**
    * The size for socket receive buffer in bytes
    */
   SOCKET_RECEIVE_SIZE(
-      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.INTEGER);
+      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.BYTE_AMOUNT);
 
   private final String value;
   private final Object defaultValue;
   private final Type type;
+  private final TemporalUnit temporalUnit;
 
   public enum Type {
+    BYTE_AMOUNT,
+    DURATION,
     INTEGER,
     LONG,
     STRING,
@@ -84,33 +89,48 @@ public enum CheckpointManagerConfigKey {
   }
 
   CheckpointManagerConfigKey(String value, Type type) {
+    if (type == Type.DURATION) {
+      throw new IllegalArgumentException("DURATION types are created by passing a temporalUnit");
+    }
     this.value = value;
     this.type = type;
     this.defaultValue = null;
+    this.temporalUnit = null;
   }
 
   CheckpointManagerConfigKey(String value, Integer defaultValue) {
     this.value = value;
     this.type = Type.INTEGER;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   CheckpointManagerConfigKey(String value, Long defaultValue) {
     this.value = value;
     this.type = Type.LONG;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   CheckpointManagerConfigKey(String value, String defaultValue) {
     this.value = value;
     this.type = Type.STRING;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
+  }
+
+  CheckpointManagerConfigKey(String value, TemporalUnit temporalUnit) {
+    this.value = value;
+    this.type = Type.DURATION;
+    this.defaultValue = null;
+    this.temporalUnit = temporalUnit;
   }
 
   CheckpointManagerConfigKey(String value, Map<String, Object> defaultValue) {
     this.value = value;
     this.type = Type.MAP;
     this.defaultValue = defaultValue;
+    this.temporalUnit = null;
   }
 
   static CheckpointManagerConfigKey toCheckpointManagerConfigKey(String value) {
@@ -122,12 +142,16 @@ public enum CheckpointManagerConfigKey {
    *
    * @return key value
    */
-  public String value() {
+  String value() {
     return value;
   }
 
-  public Type getType() {
+  Type getType() {
     return type;
+  }
+
+  TemporalUnit getTemporalUnit() {
+    return temporalUnit;
   }
 
   /**

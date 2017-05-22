@@ -15,9 +15,11 @@
 package com.twitter.heron.ckptmgr;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.ConfigReader;
 
@@ -50,28 +52,28 @@ public final class CheckpointManagerConfig {
     return getString(CheckpointManagerConfigKey.STORAGE_CLASSNAME);
   }
 
-  public Long getWriteBatchSizeBytes() {
-    return getLong(CheckpointManagerConfigKey.WRITE_BATCH_SIZE);
+  public ByteAmount getWriteBatchSize() {
+    return getByteAmount(CheckpointManagerConfigKey.WRITE_BATCH_SIZE);
   }
 
-  public Long getWriteBatchTimeMs() {
-    return getLong(CheckpointManagerConfigKey.WRITE_BATCH_TIME);
+  public Duration getWriteBatchTime() {
+    return getDuration(CheckpointManagerConfigKey.WRITE_BATCH_TIME);
   }
 
-  public Long getReadBatchSizeBytes() {
-    return getLong(CheckpointManagerConfigKey.READ_BATCH_SIZE);
+  public ByteAmount getReadBatchSize() {
+    return getByteAmount(CheckpointManagerConfigKey.READ_BATCH_SIZE);
   }
 
-  public Long getReadBatchTimeMs() {
-    return getLong(CheckpointManagerConfigKey.READ_BATCH_TIME);
+  public Duration getReadBatchTime() {
+    return getDuration(CheckpointManagerConfigKey.READ_BATCH_TIME);
   }
 
-  public Integer getSocketSendSize() {
-    return getInteger(CheckpointManagerConfigKey.SOCKET_SEND_SIZE);
+  public ByteAmount getSocketSendSize() {
+    return getByteAmount(CheckpointManagerConfigKey.SOCKET_SEND_SIZE);
   }
 
-  public Integer getSocketReceiveSize() {
-    return getInteger(CheckpointManagerConfigKey.SOCKET_RECEIVE_SIZE);
+  public ByteAmount getSocketReceiveSize() {
+    return getByteAmount(CheckpointManagerConfigKey.SOCKET_RECEIVE_SIZE);
   }
 
   private String getString(CheckpointManagerConfigKey key) {
@@ -87,6 +89,16 @@ public final class CheckpointManagerConfig {
   private Long getLong(CheckpointManagerConfigKey key) {
     assertType(key, CheckpointManagerConfigKey.Type.LONG);
     return TypeUtils.getLong(get(key));
+  }
+
+  private Duration getDuration(CheckpointManagerConfigKey key) {
+    assertType(key, CheckpointManagerConfigKey.Type.DURATION);
+    return TypeUtils.getDuration(get(key), key.getTemporalUnit());
+  }
+
+  private ByteAmount getByteAmount(CheckpointManagerConfigKey key) {
+    assertType(key, CheckpointManagerConfigKey.Type.BYTE_AMOUNT);
+    return TypeUtils.getByteAmount(get(key));
   }
 
   private Object get(CheckpointManagerConfigKey key) {
@@ -151,6 +163,9 @@ public final class CheckpointManagerConfig {
                                       Object value) {
       if (key != null) {
         switch (key.getType()) {
+          case BYTE_AMOUNT:
+            config.put(key.value(), TypeUtils.getByteAmount(value));
+            break;
           case INTEGER:
             config.put(key.value(), TypeUtils.getInteger(value));
             break;
