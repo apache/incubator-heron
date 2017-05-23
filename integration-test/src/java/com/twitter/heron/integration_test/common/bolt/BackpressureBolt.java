@@ -20,19 +20,37 @@ import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.tuple.Values;
 
-public class BlackHoleBolt extends BaseBasicBolt {
+public class BackpressureBolt extends BaseBasicBolt {
   private static final long serialVersionUID = 8606341173199587030L;
   private static final Logger LOG = Logger.getLogger(IdentityBolt.class.getName());
   private Fields fields;
+  private boolean alreadyEmitMarker;
 
-  public BlackHoleBolt(Fields fields) {
+  public BackpressureBolt(Fields fields) {
     this.fields = fields;
+    this.alreadyEmitMarker = false;
   }
 
+  // no matter what input tuple is, emit 'BackpressureBolt' once and stuck
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    LOG.info("This bolt is a black hole emitting nothing");
+    if (!alreadyEmitMarker) {
+      // send marker only once
+      collector.emit(new Values("BackpressureBolt"));
+      alreadyEmitMarker = true;
+    } else {
+      // sleep forever to trigger backpressure
+      while (true) {
+        try {
+          Thread.sleep(Long.MAX_VALUE);
+        } catch (InterruptedException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
   }
 
   @Override

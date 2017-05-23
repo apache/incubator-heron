@@ -78,6 +78,11 @@
       "expectedResultRelativePath" : "one_spout_multi_tasks/resources/OneSpoutMultiTasks.json"
     },
     {
+      "topologyName" : "IntegrationTest_AutoRestartBackpressureContainer",
+      "classPath"    : "auto_restart_backpressure_container.BackpressureBoltTask",
+      "expectedResultRelativePath" : "auto_restart_backpressure_container/resources/BackpressureBoltTask.json"
+    },
+    {
       "topologyName" : "IntegrationTest_OneSpoutTwoBolts",
       "classPath"    : "one_spout_two_bolts.OneSpoutTwoBolts",
       "expectedResultRelativePath" : "one_spout_two_bolts/resources/OneSpoutTwoBolts.json"
