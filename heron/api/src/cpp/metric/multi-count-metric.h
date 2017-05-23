@@ -17,8 +17,10 @@
 #ifndef HERON_API_METRIC_MULTI_COUNT_METRIC_H_
 #define HERON_API_METRIC_MULTI_COUNT_METRIC_H_
 
-#include <string>
+#include <iostream>
 #include <map>
+#include <memory>
+#include <string>
 
 #include "metric/imetric.h"
 #include "metric/imulti-metric.h"

@@ -17,8 +17,10 @@
 #ifndef HERON_API_SERIALIZER_IPLUGGABLE_SERIALIZER_H_
 #define HERON_API_SERIALIZER_IPLUGGABLE_SERIALIZER_H_
 
-#include <ostream>
 #include <istream>
+#include <iostream>
+#include <memory>
+#include <ostream>
 
 #include "config/config.h"
 

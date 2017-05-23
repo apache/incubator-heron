@@ -17,6 +17,8 @@
 #ifndef HERON_API_METRIC_IMETRICS_REGISTRAR_H_
 #define HERON_API_METRIC_IMETRICS_REGISTRAR_H_
 
+#include <iostream>
+#include <memory>
 #include <string>
 
 #include "metric/imetric.h"
