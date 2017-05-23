@@ -30,6 +30,10 @@ import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+
 /**
  * TMasterSink Tester.
  */
@@ -42,6 +46,29 @@ public class TMasterSinkTest {
   private static final Duration RECONNECT_INTERVAL = Duration.ofSeconds(1);
   private static final Duration RESTART_WAIT_INTERVAL = Duration.ofSeconds(2);
   private static final Duration TMASTER_LOCATION_CHECK_INTERVAL = Duration.ofSeconds(1);
+
+  // These are config for TMasterClient
+  private static Map<String, Object> buildServiceConfig() {
+    Map<String, Object> serviceConfig = new HashMap<>();
+    // Fill with necessary config
+    serviceConfig.put("reconnect-interval-second", RECONNECT_INTERVAL.getSeconds());
+    serviceConfig.put("network-write-batch-size-bytes", 1);
+    serviceConfig.put("network-write-batch-time-ms", 1);
+    serviceConfig.put("network-read-batch-size-bytes", 1);
+    serviceConfig.put("network-read-batch-time-ms", 1);
+    serviceConfig.put("socket-send-buffer-size-bytes", 1);
+    serviceConfig.put("socket-received-buffer-size-bytes", 1);
+    return serviceConfig;
+  }
+
+  private static TopologyMaster.TMasterLocation getTMasterLocation(int masterPort) {
+    // Notice here we set host and port as invalid values
+    // So TMaster would throw "java.nio.channels.UnresolvedAddressException" once it starts,
+    // and then dies
+    return TopologyMaster.TMasterLocation.newBuilder().
+        setTopologyName("topology-name").setTopologyId("topology-id").setHost("host").
+        setControllerPort(0).setMasterPort(masterPort).setStatsPort(0).build();
+  }
 
   @Before
   public void before() {
@@ -65,25 +92,8 @@ public class TMasterSinkTest {
   public void testTMasterClientService() throws InterruptedException {
     // create a new TMasterClientService
     TMasterSink tMasterSink = new TMasterSink();
-    Map<String, Object> serviceConfig = new HashMap<>();
-    // Fill with necessary config
-    serviceConfig.put("reconnect-interval-second", RECONNECT_INTERVAL.getSeconds());
-    serviceConfig.put("network-write-batch-size-bytes", 1);
-    serviceConfig.put("network-write-batch-time-ms", 1);
-    serviceConfig.put("network-read-batch-size-bytes", 1);
-    serviceConfig.put("network-read-batch-time-ms", 1);
-    serviceConfig.put("socket-send-buffer-size-bytes", 1);
-    serviceConfig.put("socket-received-buffer-size-bytes", 1);
-
-    tMasterSink.createSimpleTMasterClientService(serviceConfig);
-
-    // Notice here we set host and port as invalid values
-    // So TMaster would throw "java.nio.channels.UnresolvedAddressException" once it starts,
-    // and then dies
-    TopologyMaster.TMasterLocation location = TopologyMaster.TMasterLocation.newBuilder().
-        setTopologyName("topology-name").setTopologyId("topology-id").setHost("host").
-        setControllerPort(0).setMasterPort(0).setStatsPort(0).build();
-    tMasterSink.startNewTMasterClient(location);
+    tMasterSink.createSimpleTMasterClientService(buildServiceConfig());
+    tMasterSink.startNewTMasterClient(getTMasterLocation(0));
 
     // We wait for a while to let auto recover fully finish.
     Thread.sleep(RESTART_WAIT_INTERVAL.toMillis());
@@ -91,7 +101,7 @@ public class TMasterSinkTest {
     // Then we check whether the TMasterService has restarted the TMasterClient for several times
     // Take other factors into account, we would check whether the TMasterClient has restarted
     // at least half the RESTART_WAIT_INTERVAL/RECONNECT_INTERVAL
-    Assert.assertTrue(tMasterSink.getTMasterStartedAttempts()
+    assertTrue(tMasterSink.getTMasterStartedAttempts()
         > (RESTART_WAIT_INTERVAL.getSeconds() / RECONNECT_INTERVAL.getSeconds() / 2));
     tMasterSink.close();
   }
@@ -109,17 +119,7 @@ public class TMasterSinkTest {
     sinkConfig.put(
         "tmaster-location-check-interval-sec", TMASTER_LOCATION_CHECK_INTERVAL.getSeconds());
 
-    // These are config for TMasterClient
-    Map<String, Object> serviceConfig = new HashMap<>();
-    serviceConfig.put("reconnect-interval-second", RECONNECT_INTERVAL.getSeconds());
-    serviceConfig.put("network-write-batch-size-bytes", 1);
-    serviceConfig.put("network-write-batch-time-ms", 1);
-    serviceConfig.put("network-read-batch-size-bytes", 1);
-    serviceConfig.put("network-read-batch-time-ms", 1);
-    serviceConfig.put("socket-send-buffer-size-bytes", 1);
-    serviceConfig.put("socket-received-buffer-size-bytes", 1);
-
-    sinkConfig.put("tmaster-client", serviceConfig);
+    sinkConfig.put("tmaster-client", buildServiceConfig());
 
     // It is null since we have not set it
     Assert.assertNull(tMasterSink.getCurrentTMasterLocation());
@@ -133,22 +133,18 @@ public class TMasterSinkTest {
     tMasterSink.init(sinkConfig, sinkContext);
 
     // Put the TMasterLocation into SingletonRegistry
-    TopologyMaster.TMasterLocation oldLoc = TopologyMaster.TMasterLocation.newBuilder().
-        setTopologyName("topology-name").setTopologyId("topology-id").
-        setHost("host").setControllerPort(0).setMasterPort(0).build();
+    TopologyMaster.TMasterLocation oldLoc = getTMasterLocation(0);
     SingletonRegistry.INSTANCE.registerSingleton(TMASTER_LOCATION_BEAN_NAME, oldLoc);
 
     multiCountMetric.await(RESTART_WAIT_INTERVAL);
 
     // The TMasterService should start
-    Assert.assertTrue(tMasterSink.getTMasterStartedAttempts() > 0);
-    Assert.assertEquals(oldLoc, tMasterSink.getCurrentTMasterLocation());
-    Assert.assertEquals(oldLoc, tMasterSink.getCurrentTMasterLocationInService());
+    assertTrue(tMasterSink.getTMasterStartedAttempts() > 0);
+    assertEquals(oldLoc, tMasterSink.getCurrentTMasterLocation());
+    assertEquals(oldLoc, tMasterSink.getCurrentTMasterLocationInService());
 
     // Update it, the TMasterSink should pick up the new one.
-    TopologyMaster.TMasterLocation newLoc = TopologyMaster.TMasterLocation.newBuilder().
-        setTopologyName("topology-name").setTopologyId("topology-id").
-        setHost("host").setControllerPort(0).setMasterPort(1).build();
+    TopologyMaster.TMasterLocation newLoc = getTMasterLocation(1);
     SingletonRegistry.INSTANCE.updateSingleton(TMASTER_LOCATION_BEAN_NAME, newLoc);
 
     int lastTMasterStartedAttempts = tMasterSink.getTMasterStartedAttempts();
@@ -156,11 +152,11 @@ public class TMasterSinkTest {
     multiCountMetric.await(RESTART_WAIT_INTERVAL);
 
     // The TMasterService should use the new TMasterLocation
-    Assert.assertTrue(tMasterSink.getTMasterStartedAttempts() > lastTMasterStartedAttempts);
-    Assert.assertNotSame(oldLoc, tMasterSink.getCurrentTMasterLocation());
-    Assert.assertNotSame(oldLoc, tMasterSink.getCurrentTMasterLocationInService());
-    Assert.assertEquals(newLoc, tMasterSink.getCurrentTMasterLocation());
-    Assert.assertEquals(newLoc, tMasterSink.getCurrentTMasterLocationInService());
+    assertTrue(tMasterSink.getTMasterStartedAttempts() > lastTMasterStartedAttempts);
+    assertNotSame(oldLoc, tMasterSink.getCurrentTMasterLocation());
+    assertNotSame(oldLoc, tMasterSink.getCurrentTMasterLocationInService());
+    assertEquals(newLoc, tMasterSink.getCurrentTMasterLocation());
+    assertEquals(newLoc, tMasterSink.getCurrentTMasterLocationInService());
 
     tMasterSink.close();
   }
