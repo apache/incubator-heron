@@ -612,7 +612,7 @@ class HeronExecutor(object):
     ckptmgr_main_class = 'com.twitter.heron.ckptmgr.CheckpointManager'
 
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
-                   '-Xmx512M',
+                   '-Xmx1024M',
                    '-XX:+PrintCommandLineFlags',
                    '-verbosegc',
                    '-XX:+PrintGCDetails',
@@ -628,7 +628,7 @@ class HeronExecutor(object):
                    '-XX:+HeapDumpOnOutOfMemoryError',
                    '-XX:+UseConcMarkSweepGC',
                    '-XX:+UseConcMarkSweepGC',
-                   '-Xloggc:log-files/gc.metricsmgr.log',
+                   '-Xloggc:log-files/gc.ckptmgr.log',
                    '-Djava.net.preferIPv4Stack=true',
                    '-cp',
                    self.ckptmgr_classpath,
