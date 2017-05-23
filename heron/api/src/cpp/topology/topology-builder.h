@@ -60,7 +60,7 @@ namespace topology {
  */
 class TopologyBuilder {
  public:
-  TopologyBuilder() : topology_(NULL) { }
+  TopologyBuilder() : topology_(nullptr) { }
   ~TopologyBuilder() { delete topology_; }
 
   const proto::api::Topology& createTopology(const std::string& name,
@@ -71,7 +71,7 @@ class TopologyBuilder {
 
     topology_ = new proto::api::Topology();
 
-    srand(time(NULL));
+    srand(time(nullptr));
     std::ostringstream ss;
     ss << rand();
     std::string topologyId = name + ss.str();

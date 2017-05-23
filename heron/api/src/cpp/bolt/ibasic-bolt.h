@@ -31,6 +31,18 @@ namespace bolt {
 
 class IBasicBolt : public IRichBolt {
  public:
+  /**
+   * Called when a task for this component is initialized on the cluster.
+   * It provides the bolt with the environment in which the bolt executes.
+   * <p>
+   * <p>This includes the:</p>
+   *
+   * @param conf The Heron configuration for this bolt. This is the configuration provided
+   * to the topology merged in with cluster configuration on this machine.
+   * @param context This object can be used to get information about this task's place within
+   * the topology, including the task id and component id of this task, input and output
+   * information, etc.
+   */
   virtual void prepare(std::shared_ptr<config::Config> conf,
                        std::shared_ptr<topology::TaskContext> context) = 0;
 

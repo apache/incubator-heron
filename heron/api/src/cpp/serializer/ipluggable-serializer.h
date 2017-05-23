@@ -34,9 +34,9 @@ class StringSerializer;
 class IPluggableSerializer {
  public:
   explicit IPluggableSerializer(CerealSerializer* serializer)
-    : cereal_serializer_(serializer), string_serializer_(NULL) { }
+    : cereal_serializer_(serializer), string_serializer_(nullptr) { }
   explicit IPluggableSerializer(StringSerializer* serializer)
-    : cereal_serializer_(NULL), string_serializer_(serializer) { }
+    : cereal_serializer_(nullptr), string_serializer_(serializer) { }
   virtual ~IPluggableSerializer() { }
 
   template<typename T>

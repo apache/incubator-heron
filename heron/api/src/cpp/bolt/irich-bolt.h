@@ -25,7 +25,7 @@ namespace api {
 namespace bolt {
 
 /**
- * IRichBolt and IRichBolt are the main interfaces to use to implement components of the topology.
+ * IRichBolt is one of the main interface to use to implement components of the topology.
  */
 class IRichBolt : public IBolt, public topology::IComponent {
 };

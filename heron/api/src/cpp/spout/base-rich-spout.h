@@ -34,7 +34,7 @@ class BaseRichSpout : public IRichSpout {
   virtual void ack(int64_t) { }
   virtual void fail(int64_t msgId) { }
   virtual std::shared_ptr<config::Config> getComponentConfiguration() {
-    return NULL;
+    return nullptr;
   }
 };
 

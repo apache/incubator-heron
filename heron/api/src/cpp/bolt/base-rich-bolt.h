@@ -32,7 +32,7 @@ class BaseRichBolt : public IRichBolt {
   }
 
   virtual std::shared_ptr<config::Config> getComponentConfiguration() {
-    return NULL;
+    return nullptr;
   }
 };
 

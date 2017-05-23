@@ -47,7 +47,7 @@ namespace bolt {
 class IBolt {
  public:
   /**
-   * Called when a task for this component is initialized within a worker on the cluster.
+   * Called when a task for this component is initialized on the cluster.
    * It provides the bolt with the environment in which the bolt executes.
    * <p>
    * <p>This includes the:</p>
