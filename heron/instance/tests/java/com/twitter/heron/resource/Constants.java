@@ -31,8 +31,8 @@ public final class Constants {
 
   public static final String FAIL_COUNT = "fail-count";
   public static final String ACK_COUNT = "ack-count";
-  public static final String ACTIVATE_COUNT = "activate-count";
-  public static final String DEACTIVATE_COUNT = "deactivate-count";
+  public static final String ACTIVATE_COUNT_LATCH = "activate-count-latch";
+  public static final String DEACTIVATE_COUNT_LATCH = "deactivate-count-latch";
 
   public static final String GATEWAY_METRICS = "com.twitter.heron.metrics.GatewayMetrics";
 
