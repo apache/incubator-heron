@@ -49,8 +49,8 @@ sp_int32 BaseServer::Start_Base() {
   errno = 0;
   listen_fd_ = socket(options_.get_socket_family(), SOCK_STREAM, 0);
   if (listen_fd_ < 0) {
-    LOG(ERROR) << "Opening of a socket failed in server " << errno << "\n";
-    return -1;
+    PLOG(ERROR) << "Opening of a socket failed in server";
+    return errno;
   }
 
   if (SockUtils::setSocketDefaults(listen_fd_) < 0) {
@@ -60,9 +60,9 @@ sp_int32 BaseServer::Start_Base() {
 
   // Set the socket option for addr reuse
   if (SockUtils::setReuseAddress(listen_fd_) < 0) {
-    LOG(ERROR) << "setsockopt of a socket failed in server " << errno << "\n";
+    PLOG(ERROR) << "setsockopt of a socket failed in server";
     close(listen_fd_);
-    return -1;
+    return errno;
   }
 
   // Set the address
@@ -87,21 +87,21 @@ sp_int32 BaseServer::Start_Base() {
 
   // Bind to the address
   if (bind(listen_fd_, serv_addr, sockaddr_len) < 0) {
-    LOG(ERROR) << "bind of a socket failed in server " << errno << "\n";
+    PLOG(ERROR) << "bind of a socket failed in server";
     close(listen_fd_);
-    return -1;
+    return errno;
   }
 
   // Listen for new connections
   if (listen(listen_fd_, 100) < 0) {
-    LOG(ERROR) << "listen of a socket failed in server " << errno << "\n";
+    PLOG(ERROR) << "listen of a socket failed in server";
     close(listen_fd_);
-    return -1;
+    return errno;
   }
 
   // Ask the EventLoop to deliver any read events
   if (eventLoop_->registerForRead(listen_fd_, on_new_connection_callback_, true) < 0) {
-    LOG(ERROR) << "register for read of the socket failed in server\n";
+    LOG(ERROR) << "register for read of the socket failed in server";
     close(listen_fd_);
     return -1;
   }
