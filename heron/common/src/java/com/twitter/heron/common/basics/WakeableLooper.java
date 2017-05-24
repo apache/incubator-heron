@@ -14,6 +14,7 @@
 
 package com.twitter.heron.common.basics;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -49,7 +50,7 @@ public abstract class WakeableLooper {
   // use a timeout > 10 * Integer.MAX_VALUE
   // So here we set Integer.MAX_VALUE as the infinite future
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
-  private static final long INFINITE_FUTURE = Integer.MAX_VALUE;
+  private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
 
   public WakeableLooper() {
@@ -97,15 +98,11 @@ public abstract class WakeableLooper {
     exitTasks.add(task);
   }
 
-  public void registerTimerEventInSeconds(long timerInSeconds, Runnable task) {
-    registerTimerEventInNanoSeconds(timerInSeconds * Constants.SECONDS_TO_NANOSECONDS, task);
-  }
-
-  public void registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task) {
-    assert timerInNanoSecnods >= 0;
+  public void registerTimerEvent(Duration timerDuration, Runnable task) {
+    assert timerDuration.getSeconds() >= 0;
     assert task != null;
-    long expirationNs = System.nanoTime() + timerInNanoSecnods;
-    timers.add(new TimerTask(expirationNs, task));
+    Duration expiration = timerDuration.plusNanos(System.nanoTime());
+    timers.add(new TimerTask(expiration, task));
   }
 
   public void exitLoop() {
@@ -114,22 +111,19 @@ public abstract class WakeableLooper {
   }
 
   /**
-   * Get the timeout in milli-seconds which should be used in doWait().
-   * We use milli-second here since the select.select(timeout) accepts only timeout in milli-seconds
+   * Get the timeout which should be used in doWait().
    *
    * @return INFINITE_FUTURE : if there are no timer events
    * or the time to next timer event in milli-second
    */
-  protected long getNextTimeoutIntervalMs() {
-    long nextTimeoutIntervalMs = INFINITE_FUTURE;
+  protected Duration getNextTimeoutInterval() {
+    Duration nextTimeoutInterval = INFINITE_FUTURE;
     if (!timers.isEmpty()) {
       // The time recorded in timer is in nano-seconds. We have to convert it to milli-seconds
       // We need to ceil the result to avoid early wake up
-      nextTimeoutIntervalMs =
-          (timers.peek().getExpirationNs() - System.nanoTime()
-          + Constants.MILLISECONDS_TO_NANOSECONDS) / Constants.MILLISECONDS_TO_NANOSECONDS;
+      nextTimeoutInterval = timers.peek().expirationTime.minusNanos(System.nanoTime());
     }
-    return nextTimeoutIntervalMs;
+    return nextTimeoutInterval;
   }
 
   private void executeTasksOnWakeup() {
@@ -146,7 +140,7 @@ public abstract class WakeableLooper {
   private void triggerExpiredTimers(long currentTime) {
     // Executes the task should be executed no later than current time
     while (!timers.isEmpty()) {
-      long nextExpiredTime = timers.peek().getExpirationNs();
+      long nextExpiredTime = timers.peek().expirationTime.toNanos();
       if (nextExpiredTime - currentTime <= 0) {
         timers.poll().handler.run();
       } else {
@@ -156,28 +150,21 @@ public abstract class WakeableLooper {
   }
 
   /**
-   * A TimerTask will has the runnable, and expirationNs to indicate when it will be executed.
-   * The expirationNs is the time in nano-seconds
+   * A TimerTask will has the runnable, and expirationTime to indicate when it will be executed.
+   * The expirationTime is the Duration until expiry should occur.
    */
   private static class TimerTask implements Comparable<TimerTask> {
-    public final long expirationNs;
-    public final Runnable handler;
+    private final Duration expirationTime;
+    private final Runnable handler;
 
-    TimerTask(long expirationNs, Runnable handler) {
-      this.expirationNs = expirationNs;
+    TimerTask(Duration expirationTime, Runnable handler) {
+      this.expirationTime = expirationTime;
       this.handler = handler;
     }
 
     @Override
     public int compareTo(TimerTask other) {
-      // We could not use t0 < t1, which may has over-flow issue
-      if (this.expirationNs - other.expirationNs < 0) {
-        return -1;
-      }
-      if (this.expirationNs - other.expirationNs > 0) {
-        return 1;
-      }
-      return 0;
+      return this.expirationTime.compareTo(other.expirationTime);
     }
 
     @Override
@@ -188,10 +175,6 @@ public abstract class WakeableLooper {
     @Override
     public int hashCode() {
       throw new RuntimeException("TODO: implement");
-    }
-
-    public long getExpirationNs() {
-      return expirationNs;
     }
   }
 }

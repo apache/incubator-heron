@@ -15,7 +15,9 @@
 package com.twitter.heron.resource;
 
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
@@ -71,20 +73,16 @@ public class TestSpout implements IRichSpout {
 
   @Override
   public void activate() {
-    AtomicInteger activateCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACTIVATE_COUNT);
-    if (activateCount != null) {
-      activateCount.getAndIncrement();
-    }
+    CountDownLatch latch =
+        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.ACTIVATE_COUNT_LATCH);
+    latch.countDown();
   }
 
   @Override
   public void deactivate() {
-    AtomicInteger deactivateCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.DEACTIVATE_COUNT);
-    if (deactivateCount != null) {
-      deactivateCount.getAndIncrement();
-    }
+    CountDownLatch latch =
+        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.DEACTIVATE_COUNT_LATCH);
+    latch.countDown();
   }
 
   @Override
@@ -92,9 +90,13 @@ public class TestSpout implements IRichSpout {
     // It will emit A, B, A, B, A, B, A, B, A, B
     if (emitted < EMIT_COUNT) {
       String word = toSend[emitted % toSend.length];
-      outputCollector.emit(new Values(word), MESSAGE_ID);
-      emitted++;
+      emit(outputCollector, new Values(word), MESSAGE_ID, emitted++);
     }
+  }
+
+  protected void emit(SpoutOutputCollector collector,
+                      List<Object> tuple, Object messageId, int emittedCount) {
+    collector.emit(tuple, messageId);
   }
 
   @Override

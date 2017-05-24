@@ -14,6 +14,8 @@
 
 package com.twitter.heron.spi.common;
 
+import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -277,6 +279,14 @@ public class Config {
   public Double getDoubleValue(Key key) {
     Object value = get(key);
     return TypeUtils.getDouble(value);
+  }
+
+  public Duration getDurationValue(String key, TemporalUnit unit, Duration defaultValue) {
+    Object value = get(key);
+    if (value != null) {
+      return TypeUtils.getDuration(value, unit);
+    }
+    return defaultValue;
   }
 
   public boolean containsKey(Key key) {

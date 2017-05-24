@@ -21,6 +21,7 @@ import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -170,7 +171,7 @@ public class HandleWriteTest {
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
         // 1ms sleep to mitigate busy looping
-        SysUtils.sleep(1);
+        SysUtils.sleep(Duration.ofMillis(1));
       }
 
       // Send back response
@@ -188,7 +189,7 @@ public class HandleWriteTest {
         if (instanceControlMsg != null) {
           break;
         } else {
-          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
 
@@ -201,7 +202,7 @@ public class HandleWriteTest {
         incomingPacket = new IncomingPacket();
         while (incomingPacket.readFromChannel(socketChannel) != 0) {
           // 1ms sleep to mitigate busy looping
-          SysUtils.sleep(1);
+          SysUtils.sleep(Duration.ofMillis(1));
         }
         typeName = incomingPacket.unpackString();
         rid = incomingPacket.unpackREQID();
@@ -239,12 +240,12 @@ public class HandleWriteTest {
                   SystemConfig.HERON_SYSTEM_CONFIG);
 
           HeronSocketOptions socketOptions = new HeronSocketOptions(
-              systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
-              systemConfig.getInstanceNetworkWriteBatchTimeMs(),
-              systemConfig.getInstanceNetworkReadBatchSizeBytes(),
-              systemConfig.getInstanceNetworkReadBatchTimeMs(),
-              systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
-              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
+              systemConfig.getInstanceNetworkWriteBatchSize(),
+              systemConfig.getInstanceNetworkWriteBatchTime(),
+              systemConfig.getInstanceNetworkReadBatchSize(),
+              systemConfig.getInstanceNetworkReadBatchTime(),
+              systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
+              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
           );
 
           streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,

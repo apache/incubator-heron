@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -69,13 +70,13 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
 
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
-    return admitBoltTuple(streamId, anchors, tuple);
+    return admitBoltTuple(streamId, anchors, tuple, null);
   }
 
   @Override
   public void emitDirect(int taskId, String streamId,
                          Collection<Tuple> anchors, List<Object> tuple) {
-    throw new RuntimeException("emitDirect not supported");
+    admitBoltTuple(streamId, anchors, tuple, taskId);
   }
 
   @Override
@@ -98,14 +99,15 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   /////////////////////////////////////////////////////////
   private List<Integer> admitBoltTuple(String streamId,
                                        Collection<Tuple> anchors,
-                                       List<Object> tuple) {
+                                       List<Object> tuple,
+                                       Integer emitDirectTaskId) {
     if (getPhysicalPlanHelper().isTerminatedComponent()) {
-      // No need to handle this tuples
+      // No need to handle this tuple
       return null;
     }
 
     // Start construct the data tuple
-    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple);
+    HeronTuples.HeronDataTuple.Builder bldr = initTupleBuilder(streamId, tuple, emitDirectTaskId);
 
     // Set the anchors for a tuple
     if (anchors != null) {
@@ -129,7 +131,7 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   }
 
   private void admitAckTuple(Tuple tuple) {
-    long latency = 0;
+    Duration latency = Duration.ZERO;
     if (ackEnabled) {
       if (tuple instanceof TupleImpl) {
         TupleImpl tuplImpl = (TupleImpl) tuple;
@@ -145,18 +147,19 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
         }
         outputter.addAckTuple(bldr, tupleSizeInBytes);
 
-        latency = System.nanoTime() - tuplImpl.getCreationTime();
+        latency = Duration.ofNanos(System.nanoTime()).minusNanos(tuplImpl.getCreationTime());
       }
     }
 
     // Invoke user-defined boltAck task hook
     getPhysicalPlanHelper().getTopologyContext().invokeHookBoltAck(tuple, latency);
 
-    boltMetrics.ackedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
+    boltMetrics.ackedTuple(
+        tuple.getSourceStreamId(), tuple.getSourceComponent(), latency.toNanos());
   }
 
   private void admitFailTuple(Tuple tuple) {
-    long latency = 0;
+    Duration latency = Duration.ZERO;
     if (ackEnabled) {
       if (tuple instanceof TupleImpl) {
         TupleImpl tuplImpl = (TupleImpl) tuple;
@@ -172,13 +175,14 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
         }
         outputter.addFailTuple(bldr, tupleSizeInBytes);
 
-        latency = System.nanoTime() - tuplImpl.getCreationTime();
+        latency = Duration.ofNanos(System.nanoTime()).minusNanos(tuplImpl.getCreationTime());
       }
     }
 
     // Invoke user-defined boltFail task hook
     getPhysicalPlanHelper().getTopologyContext().invokeHookBoltFail(tuple, latency);
 
-    boltMetrics.failedTuple(tuple.getSourceStreamId(), tuple.getSourceComponent(), latency);
+    boltMetrics.failedTuple(
+        tuple.getSourceStreamId(), tuple.getSourceComponent(), latency.toNanos());
   }
 }
