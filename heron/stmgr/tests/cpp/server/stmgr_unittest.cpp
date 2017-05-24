@@ -1403,6 +1403,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
 
   // Start new dummy stmgr at different port, to generate a differnt pplan that we
   // can verify
+  std::cout << "old stmgr_ports_[1] " << common.stmgr_ports_[1] << std::endl;
   common.stmgr_ports_[1] = 0;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
                   common.tmaster_port_, common.shell_port_, common.stmgrs_id_list_[1],
