@@ -31,6 +31,9 @@ typedef std::set<std::string> IPAddress_Set;
 
 class IpUtils {
  public:
+  // get a free local port
+  static sp_int32 getFreePort();
+
   // get the ip address and host name
   static sp_int32 getIPAddressHost(IPAddress_Set& aset);
 

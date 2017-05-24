@@ -32,8 +32,6 @@
 #include "threads/modinit.h"
 #include "network/modinit.h"
 
-static const sp_uint32 SERVER_PORT = 61000;
-
 class Terminate : public Client {
  public:
   Terminate(EventLoopImpl* eventLoop, const NetworkOptions& _options)
@@ -108,15 +106,18 @@ void terminate_server(sp_uint32 port) {
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {
+  const sp_uint32 server_port = IpUtils::getFreePort();
+  std::cout << "getFreePort() " << server_port << std::endl;
+
   // start the server thread
-  std::thread sthread(start_server, SERVER_PORT);
+  std::thread sthread(start_server, server_port);
 
   auto start = std::chrono::high_resolution_clock::now();
 
   // start the client threads
   std::vector<std::thread> cthreads;
   for (sp_int32 i = 0; i < nclients; i++) {
-    cthreads.push_back(std::thread(start_client, SERVER_PORT, requests));
+    cthreads.push_back(std::thread(start_client, server_port, requests));
   }
 
   // wait for the client threads to terminate
@@ -127,7 +128,7 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
   auto stop = std::chrono::high_resolution_clock::now();
 
   // now send a terminate message to server
-  terminate_server(SERVER_PORT);
+  terminate_server(server_port);
   sthread.join();
 
   ASSERT_TRUE(server_->sent_pkts() == server_->recv_pkts());
