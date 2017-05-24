@@ -48,7 +48,7 @@ sp_int32 HTTPServer::Start() {
             << ":" << port;
   // Bind to INADDR_ANY instead of using the hostname
   auto* retval = evhttp_bind_socket_with_handle(http_, "0.0.0.0", port);
-  if (retval != NULL) {
+  if (retval != nullptr) {
     // record the successfully bound hostport
     hostports_.push_back(std::make_pair(host, port));
     // fetch the true port
