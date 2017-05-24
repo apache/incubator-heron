@@ -8,6 +8,9 @@ pex_library(
         ["**/*.py"],
         exclude = ["main.py"]
     ),
+    deps = [
+        "//heron/common/src/python:common-log-py",
+    ],
     reqs = [
         "requests==2.11.1",
         "tornado==4.0.2",

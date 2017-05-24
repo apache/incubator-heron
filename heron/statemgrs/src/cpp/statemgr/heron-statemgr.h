@@ -124,6 +124,19 @@ class HeronStateMgr {
                                   std::vector<proto::system::ExecutionState*>* _return,
                                   VCallback<proto::system::StatusCode> _cb);
 
+  // Gets/Sets Stateful Checkpoint
+  virtual void CreateStatefulCheckpoints(const std::string& _topology_name,
+                           const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                           VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void DeleteStatefulCheckpoints(const std::string& _topology_name,
+                                  VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void SetStatefulCheckpoints(const std::string& _topology_name,
+                           const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                            VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void GetStatefulCheckpoints(const std::string& _topology_name,
+                               proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                               VCallback<proto::system::StatusCode> _cb) = 0;
+
   // Calls to list the topologies and physical plans
   virtual void ListTopologies(std::vector<sp_string>* _return,
                               VCallback<proto::system::StatusCode> _cb) = 0;
@@ -143,12 +156,14 @@ class HeronStateMgr {
   std::string GetTopologyPath(const std::string& _topology_name);
   std::string GetPhysicalPlanPath(const std::string& _topology_name);
   std::string GetExecutionStatePath(const std::string& _topology_name);
+  std::string GetStatefulCheckpointsPath(const std::string& _topology_name);
 
   std::string GetTMasterLocationDir();
   std::string GetMetricsCacheLocationDir();
   std::string GetTopologyDir();
   std::string GetPhysicalPlanDir();
   std::string GetExecutionStateDir();
+  std::string GetStatefulCheckpointsDir();
 
  private:
   void ListExecutionStateDone(std::vector<proto::system::ExecutionState*>* _return,

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,9 +110,10 @@ public abstract class HeronClient implements ISelectHandler {
       socketChannel.configureBlocking(false);
 
       // Set the maximum possible send and receive buffers
-      socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
+      socketChannel.socket().setSendBufferSize(
+          (int) socketOptions.getSocketSendBufferSize().asBytes());
       socketChannel.socket().setReceiveBufferSize(
-          socketOptions.getSocketReceivedBufferSizeInBytes());
+          (int) socketOptions.getSocketReceivedBufferSize().asBytes());
       socketChannel.socket().setTcpNoDelay(true);
 
       // If the socketChannel has already connect to endpoint, call handleConnect()
@@ -130,7 +132,7 @@ public abstract class HeronClient implements ISelectHandler {
           onConnect(StatusCode.CONNECT_ERROR);
         }
       };
-      nioLooper.registerTimerEventInSeconds(0, r);
+      nioLooper.registerTimerEvent(Duration.ZERO, r);
     }
   }
 
@@ -183,15 +185,15 @@ public abstract class HeronClient implements ISelectHandler {
   // The response is a MessageBuilder to handle the response from server
   // A negative value of the timeout means no timeout.
   public void sendRequest(Message request, Object context, Message.Builder responseBuilder,
-      long timeoutInSeconds) {
+                          Duration timeout) {
     // Pack it as a no-timeout request and send it!
     final REQID rid = REQID.generate();
     contextMap.put(rid, context);
     responseMessageMap.put(rid, responseBuilder);
 
     // Add timeout for this request if necessary
-    if (timeoutInSeconds > 0) {
-      registerTimerEventInSeconds(timeoutInSeconds, new Runnable() {
+    if (timeout.getSeconds() > 0) {
+      registerTimerEvent(timeout, new Runnable() {
         @Override
         public void run() {
           handleTimeout(rid);
@@ -205,7 +207,7 @@ public abstract class HeronClient implements ISelectHandler {
 
   // Convenience method of the above method with no timeout or context
   public void sendRequest(Message request, Message.Builder responseBuilder) {
-    sendRequest(request, null, responseBuilder, -1);
+    sendRequest(request, null, responseBuilder, Duration.ZERO);
   }
 
   // This method is used if you want to communicate with the other end
@@ -223,14 +225,9 @@ public abstract class HeronClient implements ISelectHandler {
     return nioLooper;
   }
 
-  // Add a timer to be invoked after timerInSeconds seconds.
-  public void registerTimerEventInSeconds(long timerInSeconds, Runnable task) {
-    nioLooper.registerTimerEventInSeconds(timerInSeconds, task);
-  }
-
-  // Add a timer to be invoked after timerInNanoSecnods nano-seconds.
-  public void registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task) {
-    nioLooper.registerTimerEventInNanoSeconds(timerInNanoSecnods, task);
+  // Add a timer to be invoked after timer duration.
+  private void registerTimerEvent(Duration timer, Runnable task) {
+    nioLooper.registerTimerEvent(timer, task);
   }
 
   @Override
@@ -253,7 +250,7 @@ public abstract class HeronClient implements ISelectHandler {
           onConnect(StatusCode.CONNECT_ERROR);
         }
       };
-      nioLooper.registerTimerEventInSeconds(0, r);
+      nioLooper.registerTimerEvent(Duration.ZERO, r);
       return;
     }
 

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.common.utils.topology;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,7 +39,6 @@ import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 
@@ -121,12 +121,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   /**
    * Task hook called in spout every time a tuple gets acked
    */
-  public void invokeHookSpoutAck(Object messageId, long completeLatencyNs) {
+  public void invokeHookSpoutAck(Object messageId, Duration completeLatency) {
     if (taskHooks.size() != 0) {
-      SpoutAckInfo ackInfo =
-          new SpoutAckInfo(messageId,
-              getThisTaskId(),
-              completeLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+      SpoutAckInfo ackInfo = new SpoutAckInfo(messageId, getThisTaskId(), completeLatency);
 
       for (ITaskHook taskHook : taskHooks) {
         taskHook.spoutAck(ackInfo);
@@ -137,12 +134,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   /**
    * Task hook called in spout every time a tuple gets failed
    */
-  public void invokeHookSpoutFail(Object messageId, long failLatencyNs) {
+  public void invokeHookSpoutFail(Object messageId, Duration failLatency) {
     if (taskHooks.size() != 0) {
-      SpoutFailInfo failInfo =
-          new SpoutFailInfo(messageId,
-              getThisTaskId(),
-              failLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+      SpoutFailInfo failInfo = new SpoutFailInfo(messageId, getThisTaskId(), failLatency);
 
       for (ITaskHook taskHook : taskHooks) {
         taskHook.spoutFail(failInfo);
@@ -153,12 +147,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   /**
    * Task hook called in bolt every time a tuple gets executed
    */
-  public void invokeHookBoltExecute(Tuple tuple, long executeLatencyNs) {
+  public void invokeHookBoltExecute(Tuple tuple, Duration executeLatency) {
     if (taskHooks.size() != 0) {
-      BoltExecuteInfo executeInfo =
-          new BoltExecuteInfo(tuple,
-              getThisTaskId(),
-              executeLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+      BoltExecuteInfo executeInfo = new BoltExecuteInfo(tuple, getThisTaskId(), executeLatency);
 
       for (ITaskHook taskHook : taskHooks) {
         taskHook.boltExecute(executeInfo);
@@ -169,12 +160,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   /**
    * Task hook called in bolt every time a tuple gets acked
    */
-  public void invokeHookBoltAck(Tuple tuple, long processLatencyNs) {
+  public void invokeHookBoltAck(Tuple tuple, Duration processLatency) {
     if (taskHooks.size() != 0) {
-      BoltAckInfo ackInfo =
-          new BoltAckInfo(tuple,
-              getThisTaskId(),
-              processLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+      BoltAckInfo ackInfo = new BoltAckInfo(tuple, getThisTaskId(), processLatency);
 
       for (ITaskHook taskHook : taskHooks) {
         taskHook.boltAck(ackInfo);
@@ -185,12 +173,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   /**
    * Task hook called in bolt every time a tuple gets failed
    */
-  public void invokeHookBoltFail(Tuple tuple, long failLatencyNs) {
+  public void invokeHookBoltFail(Tuple tuple, Duration failLatency) {
     if (taskHooks.size() != 0) {
-      BoltFailInfo failInfo =
-          new BoltFailInfo(tuple,
-              getThisTaskId(),
-              failLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+      BoltFailInfo failInfo = new BoltFailInfo(tuple, getThisTaskId(), failLatency);
 
       for (ITaskHook taskHook : taskHooks) {
         taskHook.boltFail(failInfo);

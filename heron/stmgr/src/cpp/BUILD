@@ -5,6 +5,7 @@ cc_library(
     srcs = [
         "grouping/all-grouping.cpp",
         "grouping/custom-grouping.cpp",
+        "grouping/direct-grouping.cpp",
         "grouping/fields-grouping.cpp",
         "grouping/grouping.cpp",
         "grouping/lowest-grouping.cpp",
@@ -14,6 +15,7 @@ cc_library(
         "grouping/grouping.h",
         "grouping/all-grouping.h",
         "grouping/custom-grouping.h",
+        "grouping/direct-grouping.h",
         "grouping/fields-grouping.h",
         "grouping/lowest-grouping.h",
         "grouping/shuffle-grouping.h",

@@ -47,7 +47,7 @@ public final class CustomGroupingTopology {
 
     Config conf = new Config();
 
-    conf.setNumStmgrs(1);
+    conf.setNumWorkers(1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

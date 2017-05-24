@@ -14,6 +14,8 @@
 
 package com.twitter.heron.resource;
 
+import java.time.Duration;
+
 import org.junit.Ignore;
 
 /**
@@ -22,15 +24,15 @@ import org.junit.Ignore;
 @Ignore
 public final class Constants {
   public static final int RETRY_TIMES = 10;
-  public static final int RETRY_INTERVAL_MS = 1000;
-  public static final int TEST_WAIT_TIME_MS = 2000;
+  public static final Duration RETRY_INTERVAL = Duration.ofSeconds(1);
+  public static final Duration TEST_WAIT_TIME = Duration.ofSeconds(2);
 
   public static final int QUEUE_BUFFER_SIZE = 128;
 
   public static final String FAIL_COUNT = "fail-count";
   public static final String ACK_COUNT = "ack-count";
-  public static final String ACTIVATE_COUNT = "activate-count";
-  public static final String DEACTIVATE_COUNT = "deactivate-count";
+  public static final String ACTIVATE_COUNT_LATCH = "activate-count-latch";
+  public static final String DEACTIVATE_COUNT_LATCH = "deactivate-count-latch";
 
   public static final String GATEWAY_METRICS = "com.twitter.heron.metrics.GatewayMetrics";
 

@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.classification.InterfaceAudience;
 import com.twitter.heron.classification.InterfaceStability;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -84,6 +85,13 @@ public interface IStateManager extends AutoCloseable {
   void close();
 
   /**
+   * Is the given topology in RUNNING state?
+   *
+   * @return Boolean
+   */
+  ListenableFuture<Boolean> isTopologyRunning(String topologyName);
+
+  /**
    * Return a lock object backed by the state manager store.
    *
    * @param topologyName the name of the topology
@@ -92,86 +100,6 @@ public interface IStateManager extends AutoCloseable {
    * @return an object representing an implementation of a lock.
    */
   Lock getLock(String topologyName, LockName lockName);
-
-  /**
-   * Is the given topology in RUNNING state?
-   *
-   * @return Boolean
-   */
-  ListenableFuture<Boolean> isTopologyRunning(String topologyName);
-
-  /**
-   * Set the execution state for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setExecutionState(
-      ExecutionEnvironment.ExecutionState executionState, String topologyName);
-
-  /**
-   * Set the topology definition for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setTopology(
-      TopologyAPI.Topology topology, String topologyName);
-
-  /**
-   * Set the scheduler location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setSchedulerLocation(
-      Scheduler.SchedulerLocation location, String topologyName);
-
-  /**
-   * Delete the tmaster location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deleteTMasterLocation(String topologyName);
-
-  /**
-   * Delete the metricscache location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName);
-
-  /**
-   * Delete the execution state for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deleteExecutionState(String topologyName);
-
-  /**
-   * Delete the topology definition for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deleteTopology(String topologyName);
-
-  /**
-   * Delete the packing plan for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deletePackingPlan(String topologyName);
-
-  /**
-   * Delete the physical plan for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deletePhysicalPlan(String topologyName);
-
-  /**
-   * Delete the scheduler location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName);
 
   /**
    * Delete all locks for a given topology. Ideally locks should be deleted when released but it's
@@ -183,6 +111,14 @@ public interface IStateManager extends AutoCloseable {
   ListenableFuture<Boolean> deleteLocks(String topologyName);
 
   /**
+   * Set the location of Tmaster.
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setTMasterLocation(
+      TopologyMaster.TMasterLocation location, String topologyName);
+
+  /**
    * Get the tmaster location for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
@@ -190,6 +126,21 @@ public interface IStateManager extends AutoCloseable {
    */
   ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
       WatchCallback watcher, String topologyName);
+
+  /**
+   * Delete the tmaster location for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deleteTMasterLocation(String topologyName);
+
+  /**
+   * Set the location of MetricsCache.
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location, String topologyName);
 
   /**
    * Get the MetricsCache location for the given topology
@@ -201,13 +152,19 @@ public interface IStateManager extends AutoCloseable {
       WatchCallback watcher, String topologyName);
 
   /**
-   * Get the scheduler location for the given topology
+   * Delete the metricscache location for the given topology
    *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @return SchedulerLocation
+   * @return Boolean - Success or Failure
    */
-  ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-      WatchCallback watcher, String topologyName);
+  ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName);
+
+  /**
+   * Set the topology definition for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setTopology(
+      TopologyAPI.Topology topology, String topologyName);
 
   /**
    * Get the topology definition for the given topology
@@ -219,13 +176,19 @@ public interface IStateManager extends AutoCloseable {
       WatchCallback watcher, String topologyName);
 
   /**
-   * Get the execution state for the given topology
+   * Delete the topology definition for the given topology
    *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @return ExecutionState
+   * @return Boolean - Success or Failure
    */
-  ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
-      WatchCallback watcher, String topologyName);
+  ListenableFuture<Boolean> deleteTopology(String topologyName);
+
+  /**
+   * Set the packing plan for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setPackingPlan(
+      PackingPlans.PackingPlan packingPlan, String topologyName);
 
   /**
    * Get the packing plan for the given topology
@@ -237,20 +200,11 @@ public interface IStateManager extends AutoCloseable {
       WatchCallback watcher, String topologyName);
 
   /**
-   * Set the location of Tmaster.
+   * Delete the packing plan for the given topology
    *
    * @return Boolean - Success or Failure
    */
-  ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location, String topologyName);
-
-  /**
-   * Set the location of MetricsCache.
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setMetricsCacheLocation(
-      TopologyMaster.MetricsCacheLocation location, String topologyName);
+  ListenableFuture<Boolean> deletePackingPlan(String topologyName);
 
   /**
    * Set the physical plan for the given topology
@@ -261,14 +215,6 @@ public interface IStateManager extends AutoCloseable {
       PhysicalPlans.PhysicalPlan physicalPlan, String topologyName);
 
   /**
-   * Set the packing plan for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setPackingPlan(
-      PackingPlans.PackingPlan packingPlan, String topologyName);
-
-  /**
    * Get the physical plan for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
@@ -276,4 +222,82 @@ public interface IStateManager extends AutoCloseable {
    */
   ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
       WatchCallback watcher, String topologyName);
+
+  /**
+   * Delete the physical plan for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deletePhysicalPlan(String topologyName);
+
+  /**
+   * Set the execution state for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setExecutionState(
+      ExecutionEnvironment.ExecutionState executionState, String topologyName);
+
+  /**
+   * Get the execution state for the given topology
+   *
+   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
+   * @return ExecutionState
+   */
+  ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
+      WatchCallback watcher, String topologyName);
+
+  /**
+   * Delete the execution state for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deleteExecutionState(String topologyName);
+
+  /**
+   * Set the scheduler location for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setSchedulerLocation(
+      Scheduler.SchedulerLocation location, String topologyName);
+
+  /**
+   * Get the scheduler location for the given topology
+   *
+   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
+   * @return SchedulerLocation
+   */
+  ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
+      WatchCallback watcher, String topologyName);
+
+  /**
+   * Delete the scheduler location for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName);
+
+  /**
+   * Set the Stateful Checkpoints
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setStatefulCheckpoints(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName);
+
+  /**
+   * Get the Stateful Checkpoints
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoints(
+      WatchCallback watcher, String topologyName);
+
+  /**
+   * Delete the stateful checkpoints for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> deleteStatefulCheckpoints(String topologyName);
 }

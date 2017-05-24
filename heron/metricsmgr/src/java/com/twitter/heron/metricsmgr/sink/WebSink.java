@@ -29,7 +29,9 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.base.Ticker;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -86,7 +88,16 @@ public class WebSink implements IMetricsSink {
   private String topologyName;
   private long cacheMaxSize;
   private long cacheTtlSec;
+  private final Ticker cacheTicker;
 
+  public WebSink() {
+    this(Ticker.systemTicker());
+  }
+
+  @VisibleForTesting
+  protected WebSink(Ticker cacheTicker) {
+    this.cacheTicker = cacheTicker;
+  }
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
@@ -101,6 +112,7 @@ public class WebSink implements IMetricsSink {
     metricsCache = CacheBuilder.newBuilder()
             .maximumSize(cacheMaxSize)
             .expireAfterWrite(cacheTtlSec, TimeUnit.SECONDS)
+            .ticker(this.cacheTicker)
             .build();
 
     topologyName = context.getTopologyName();

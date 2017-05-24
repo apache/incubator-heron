@@ -137,8 +137,8 @@ public class StreamManagerClient extends HeronClient {
           start();
         }
       };
-      getNIOLooper().registerTimerEventInSeconds(
-          systemConfig.getInstanceReconnectStreammgrIntervalSec(), r);
+      getNIOLooper().registerTimerEvent(
+          systemConfig.getInstanceReconnectStreammgrInterval(), r);
       return;
     }
 
@@ -160,7 +160,7 @@ public class StreamManagerClient extends HeronClient {
     // The timeout would be the reconnect-interval-seconds
     sendRequest(request, null,
         StreamManager.RegisterInstanceResponse.newBuilder(),
-        systemConfig.getInstanceReconnectStreammgrIntervalSec());
+        systemConfig.getInstanceReconnectStreammgrInterval());
   }
 
   @Override
