@@ -80,9 +80,8 @@
     {
       "topologyName" : "IntegrationTest_AutoRestartBackpressureContainer",
       "classPath"    : "auto_restart_backpressure_container.BackpressureBoltTask",
-      "updateArgs"   : "--auto-heal-window 1 --auto-heal-interval 1",
+      "autoRestartBackpressureContainerArgs"   : "--auto-heal-window 1 --auto-heal-interval 1",
       "topologyArgs" : "-u backpressure_time_window -S emit_until",
-      "expectedHttpResultTaskCount" : 2,
       "expectedResultRelativePath" : "auto_restart_backpressure_container/resources/BackpressureBoltTask.json"
     },
     {

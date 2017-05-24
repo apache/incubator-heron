@@ -318,8 +318,10 @@ def run_tests(conf, args):
       update_args = topology_conf["updateArgs"]
 
     if "topologyArgs" in topology_conf:
-      if topology_conf["topologyArgs"] == "emit_util" and update_args == "":
+      if topology_conf["topologyArgs"] == "emit_util" and update_args == "" \
+      and ("autoRestartBackpressureContainerArgs" not in topology_conf):
         raise ValueError("Specifying a test with emit_until spout wrapper without updateArgs "
+                         + "or autoRestartBackpressureContainerArgs "
                          + "will cause the spout to emit indefinitely. Not running topology "
                          + topology_name)
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
@@ -356,7 +358,8 @@ def load_result_checker(topology_name, topology_conf,
   # the task count setting controls is used to trigger the emit until spout wrapper, which is
   # currently only used in at least once tests. if that changes we need to expand our config
   # settings
-  if "expectedHttpResultTaskCount" in topology_conf:
+  if ("expectedHttpResultTaskCount" in topology_conf) \
+  or ("autoRestartBackpressureContainerArgs" in topology_conf):
     return AtLeastOnceResultsChecker(
         topology_name, expected_result_handler, actual_result_handler)
   else:
