@@ -14,40 +14,22 @@
 
 package com.twitter.heron.network;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.NIOLooper;
-import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.basics.WakeableLooper;
-import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.IncomingPacket;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
-import com.twitter.heron.metrics.GatewayMetrics;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
 
@@ -61,95 +43,7 @@ import com.twitter.heron.resource.UnitTestHelper;
  * 4. Check whether the Instance adds the Physical Plan to the singletonRegistry.
  */
 
-public class ConnectTest {
-  private static final String HOST = "127.0.0.1";
-  private static int serverPort;
-
-  // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
-
-  // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
-  // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
-
-  private Communicator<InstanceControlMsg> inControlQueue;
-
-  private NIOLooper nioLooper;
-  private WakeableLooper slaveLooper;
-
-  private StreamManagerClient streamManagerClient;
-
-  private GatewayMetrics gatewayMetrics;
-
-  private ExecutorService threadsPool;
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-
-  }
-
-  @AfterClass
-  public static void afterClass() throws Exception {
-
-  }
-
-  static void close(Closeable sc2) {
-    if (sc2 != null) {
-      try {
-        sc2.close();
-      } catch (IOException ignored) {
-      }
-    }
-  }
-
-  static void configure(SocketChannel sc) throws SocketException {
-    sc.socket().setTcpNoDelay(true);
-  }
-
-  @Before
-  public void before() throws Exception {
-    UnitTestHelper.addSystemConfigToSingleton();
-
-    nioLooper = new NIOLooper();
-    slaveLooper = new SlaveLooper();
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(nioLooper, slaveLooper);
-    inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, nioLooper);
-    outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inControlQueue = new Communicator<InstanceControlMsg>(nioLooper, slaveLooper);
-
-    gatewayMetrics = new GatewayMetrics();
-
-    threadsPool = Executors.newSingleThreadExecutor();
-
-    // Get an available port
-    serverPort = SysUtils.getFreePort();
-  }
-
-  @After
-  public void after() throws Exception {
-    UnitTestHelper.clearSingletonRegistry();
-
-    if (streamManagerClient != null) {
-      streamManagerClient.stop();
-      streamManagerClient = null;
-    }
-
-    if (nioLooper != null) {
-      nioLooper.exitLoop();
-      nioLooper = null;
-    }
-    slaveLooper = null;
-    inStreamQueue = null;
-    outStreamQueue = null;
-
-    gatewayMetrics = null;
-
-    if (threadsPool != null) {
-      threadsPool.shutdownNow();
-      threadsPool = null;
-    }
-  }
+public class ConnectTest extends AbstractNetworkTest {
 
   /**
    * Test connection
@@ -178,7 +72,6 @@ public class ConnectTest {
       // Send back response
       // Though we do not use typeName, we need to unpack it first,
       // since the order is required
-      String typeName = incomingPacket.unpackString();
       REQID rid = incomingPacket.unpackREQID();
 
       OutgoingPacket outgoingPacket
@@ -186,10 +79,10 @@ public class ConnectTest {
       outgoingPacket.writeToChannel(socketChannel);
 
       for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-        InstanceControlMsg instanceControlMsg = inControlQueue.poll();
+        InstanceControlMsg instanceControlMsg = getInControlQueue().poll();
         if (instanceControlMsg != null) {
-          nioLooper.exitLoop();
-          threadsPool.shutdownNow();
+          getNIOLooper().exitLoop();
+          getThreadPool().shutdownNow();
 
           PhysicalPlanHelper physicalPlanHelper = instanceControlMsg.getNewPhysicalPlanHelper();
 
@@ -209,37 +102,5 @@ public class ConnectTest {
     } finally {
       close(socketChannel);
     }
-  }
-
-  void runStreamManagerClient() {
-    Runnable r = new Runnable() {
-      @Override
-      public void run() {
-        try {
-          SystemConfig systemConfig =
-              (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-                  SystemConfig.HERON_SYSTEM_CONFIG);
-
-          HeronSocketOptions socketOptions = new HeronSocketOptions(
-              systemConfig.getInstanceNetworkWriteBatchSize(),
-              systemConfig.getInstanceNetworkWriteBatchTime(),
-              systemConfig.getInstanceNetworkReadBatchSize(),
-              systemConfig.getInstanceNetworkReadBatchTime(),
-              systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
-              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
-          );
-
-          streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,
-              "topology-name", "topologyId", UnitTestHelper.getInstance("bolt-id"),
-              inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
-          streamManagerClient.start();
-          nioLooper.loop();
-        } finally {
-          streamManagerClient.stop();
-          nioLooper.exitLoop();
-        }
-      }
-    };
-    threadsPool.execute(r);
   }
 }
