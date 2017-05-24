@@ -369,7 +369,7 @@ public class AuroraSchedulerTest {
         case IS_STATEFUL_ENABLED:
           expected = Boolean.FALSE.toString();
           break;
-        case STATEFUL_YAML:
+        case STATEFUL_CONFIG_YAML:
           expected = expectedConf + "/stateful.yaml";
           break;
         default:

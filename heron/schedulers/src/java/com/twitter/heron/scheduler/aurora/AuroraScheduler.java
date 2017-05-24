@@ -254,7 +254,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         Context.statefulStoragesClassPath(config),
         Context.statefulStorageCustomClassPath(config));
     auroraProperties.put(AuroraField.CKPTMGR_CLASSPATH, completeCkptmgrProcessClassPath);
-    auroraProperties.put(AuroraField.STATEFUL_YAML, Context.statefulFile(config));
+    auroraProperties.put(AuroraField.STATEFUL_CONFIG_YAML, Context.statefulConfigFile(config));
 
     return auroraProperties;
   }

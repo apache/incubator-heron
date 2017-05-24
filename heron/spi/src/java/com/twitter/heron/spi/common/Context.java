@@ -109,7 +109,7 @@ public class Context {
     return cfg.getStringValue(Key.CLUSTER_YAML);
   }
 
-  public static String statefulFile(Config cfg) {
+  public static String statefulConfigFile(Config cfg) {
     return cfg.getStringValue(Key.STATEFUL_YAML);
   }
 

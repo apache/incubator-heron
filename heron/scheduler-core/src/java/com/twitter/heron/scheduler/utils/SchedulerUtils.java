@@ -251,7 +251,7 @@ public final class SchedulerUtils {
         Context.statefulStorageCustomClassPath(config));
     commands.add(completeCkptmgrProcessClassPath);
     commands.add(ckptmgrPort);
-    commands.add(Context.statefulFile(config));
+    commands.add(Context.statefulConfigFile(config));
 
     return commands.toArray(new String[commands.size()]);
   }
