@@ -153,6 +153,7 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
             << std::endl;
 
   delete server_;
+  delete latch;
 }
 
 // Test ordering with 1 client and 1 server
