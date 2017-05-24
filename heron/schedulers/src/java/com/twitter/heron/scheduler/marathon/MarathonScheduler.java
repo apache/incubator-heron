@@ -176,12 +176,11 @@ public class MarathonScheduler implements IScheduler {
   }
 
   protected ArrayNode getFetchList(ObjectMapper mapper) {
-    String heronCoreURI = Context.corePackageUri(config);
-    String topologyURI = Runtime.topologyPackageUri(runtime).toString();
+    final String topologyURI = Runtime.topologyPackageUri(runtime).toString();
 
-    String[] uris = new String[]{heronCoreURI, topologyURI};
+    final String[] uris = new String[]{ topologyURI };
 
-    ArrayNode urisNode = mapper.createArrayNode();
+    final ArrayNode urisNode = mapper.createArrayNode();
     for (String uri : uris) {
       ObjectNode uriObject = mapper.createObjectNode();
       uriObject.put(MarathonConstants.URI, uri);
