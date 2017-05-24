@@ -178,7 +178,7 @@ public class MarathonScheduler implements IScheduler {
   protected ArrayNode getFetchList(ObjectMapper mapper) {
     final String topologyURI = Runtime.topologyPackageUri(runtime).toString();
 
-    final String[] uris = new String[]{ topologyURI };
+    final String[] uris = new String[]{topologyURI};
 
     final ArrayNode urisNode = mapper.createArrayNode();
     for (String uri : uris) {
