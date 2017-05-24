@@ -1420,7 +1420,9 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   sleep(2);
 
   // Ensure that Stmgr connected to the new tmaster and has received new physical plan
-  CHECK_EQ(regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port(), common.stmgr_ports_[1]);
+  if (regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port() != common.stmgr_ports_[1]) {
+    CHECK_EQ(regular_stmgr->GetPhysicalPlan()->stmgrs(0).data_port(), common.stmgr_ports_[1]);
+  }
 
   // Stop the schedulers
   for (size_t i = 0; i < common.ss_list_.size(); ++i) {
