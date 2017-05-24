@@ -6,6 +6,9 @@ common_deps_files = [
     "//heron/common/src/java:basics-java",
     "@commons_io_commons_io//jar",
     "@com_google_guava_guava//jar",
+    "@com_fasterxml_jackson_core_jackson_annotations//jar",
+    "@com_fasterxml_jackson_core_jackson_core//jar",
+    "@com_fasterxml_jackson_core_jackson_databind//jar",
 ]
 
 spi_deps_files = [
@@ -62,6 +65,25 @@ genrule(
     name = "heron-local-scheduler",
     srcs = [":local-scheduler-unshaded_deploy.jar"],
     outs = ["heron-local-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='ecs-scheduler-java',
+    srcs = glob(["**/ecs/*.java"]),
+    deps = scheduler_deps_files,
+)
+
+java_binary(
+    name='ecs-scheduler-unshaded',
+    srcs = glob(["**/ecs/*.java"]),
+    deps = scheduler_deps_files,
+)
+
+genrule(
+    name = "heron-ecs-scheduler",
+    srcs = [":ecs-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-ecs-scheduler.jar"],
     cmd  = "cp $< $@",
 )
 

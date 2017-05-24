@@ -3,6 +3,21 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 java_library(
+    name = "jackson-databind",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@com_fasterxml_jackson_core_jackson-annotations//jar", 
+        "@com_fasterxml_jackson_core_jackson-core//jar",
+        "@com_fasterxml_jackson_core_jackson-databind//jar", 
+    ],
+    deps = [
+        "@com_fasterxml_jackson_core_jackson_annotations//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@com_fasterxml_jackson_core_jackson_databind//jar",
+    ],
+)
+
+java_library(
     name = "aws-java-sdk",
     srcs = [ "Empty.java" ],
     exports = [

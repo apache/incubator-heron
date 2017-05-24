@@ -30,8 +30,8 @@ import threading
 import time
 import yaml
 import socket
+import urllib2
 import traceback
-
 from functools import partial
 
 
@@ -55,7 +55,8 @@ def print_usage():
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
-      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>")
+      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
+      " <ecsAmiUrl>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -106,8 +107,41 @@ def log_pid_for_process(process_name, pid):
   Log.info('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
-def is_docker_environment():
-  return os.path.isfile('/.dockerenv')
+def isEcsAmiInstance(ecs_ami):
+  meta = ecs_ami + '/ami-id'
+  req = urllib2.Request(meta)
+
+  try:
+    response = urllib2.urlopen(req).read()
+    if 'ami' in response:
+      #_msg = 'I am in AWS running on {}'.format(response)
+      return 1
+    else:
+      #_msg = 'I am in dev - no AWS AMI'
+      return 0
+  except Exception:
+    #_msg = 'no metadata, not in AWS'
+    return 0
+
+def getHost(ecs_ami):
+  if not ecs_ami:
+    return socket.gethostname()
+  else:
+    l_host = ''
+  # Needed for Docker environments since the hostname of a docker container is the container's
+  # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
+  # guaranteed to be set in all Docker executor environments (outside of Marathon)
+    if os.path.isfile('/.dockerenv'):
+      # Need to set the HOST environment vaira ble if docker is for AWS ECS tasks
+      if isEcsAmiInstance(ecs_ami):
+        l_host = subprocess.Popen(["curl", ecs_ami + "/local-ipv4"]
+                                  , stdout=subprocess.PIPE).communicate()[0]
+      else:
+        l_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
+    else:
+      l_host = socket.gethostname()
+    return l_host
+
 
 def stdout_log_fn(cmd):
   """Simple function callback that is used to log the streaming output of a subprocess command
@@ -116,6 +150,7 @@ def stdout_log_fn(cmd):
   """
   # Log the messages to stdout and strip off the newline because Log.info adds one automatically
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
+
 
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
@@ -160,13 +195,7 @@ class HeronExecutor(object):
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('&equals;', '='))
     self.classpath = parsed_args.classpath
-    # Needed for Docker environments since the hostname of a docker container is the container's
-    # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
-    # guaranteed to be set in all Docker executor environments (outside of Marathon)
-    if is_docker_environment():
-      self.master_host = os.environ.get('HOST') if 'HOST' in os.environ else socket.gethostname()
-    else:
-      self.master_host = socket.gethostname()
+    self.master_host = getHost(parsed_args.ecsAmiUrl)
     self.master_port = parsed_args.master_port
     self.tmaster_controller_port = parsed_args.tmaster_controller_port
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
@@ -270,6 +299,7 @@ class HeronExecutor(object):
     parser.add_argument("metricscachemgr_classpath")
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
+    parser.add_argument("ecsAmiUrl", nargs='?', default="")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 

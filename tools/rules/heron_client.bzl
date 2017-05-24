@@ -17,6 +17,11 @@ def heron_client_local_files():
         "//heron/config/src/yaml:conf-local-yaml",
     ]
 
+def heron_client_ecs_files():
+    return [
+        "//heron/config/src/yaml:conf-ecs-yaml",
+    ]
+
 def heron_client_aurora_files():
     return [
         "//heron/config/src/yaml:conf-aurora-yaml",
@@ -36,6 +41,7 @@ def heron_client_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-yarn-scheduler",
         "//heron/schedulers/src/java:heron-mesos-scheduler",
         "//heron/schedulers/src/java:heron-marathon-scheduler",
+        "//heron/schedulers/src/java:heron-ecs-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
 	"//heron/packing/src/java:heron-binpacking-packing",
     ]

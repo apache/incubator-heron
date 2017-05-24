@@ -1,0 +1,18 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.ecs.EcsScheduler
+
+# launcher class for submitting and launching the topology
+heron.class.launcher:                        com.twitter.heron.scheduler.ecs.EcsLauncher
+
+# location of java - pick it up from shell environment
+#heron.directory.sandbox.java.home:           /usr/lib/jvm/java-8-oracle
+#heron.directory.sandbox.java.home:           ${JAVA_HOME}
+
+heron.ecs.topology.binary.file:              heron-examples.jar
+
+heron.scheduler.ecs.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
+
+# location of java - pick it up from shell environment
+heron.ecs.compose.template.file:              ${HOME}/.heron/conf/ecs/ecs_compose_template.yaml
+
+heron.ecs.ami.instance:                       http://169.254.169.254/latest/meta-data
