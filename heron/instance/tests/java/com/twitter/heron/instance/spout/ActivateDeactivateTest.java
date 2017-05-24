@@ -14,12 +14,12 @@
 
 package com.twitter.heron.instance.spout;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,12 +36,12 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class ActivateDeactivateTest {
   private static final String SPOUT_INSTANCE_ID = "spout-id";
   private SlaveLooper slaveLooper;
-
-  // Singleton to be changed globally for testing
-  private PhysicalPlans.PhysicalPlan physicalPlan;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
@@ -83,7 +83,6 @@ public class ActivateDeactivateTest {
       threadsPool.shutdownNow();
     }
 
-    physicalPlan = null;
     slaveLooper = null;
     outStreamQueue = null;
     inStreamQueue = null;
@@ -100,45 +99,36 @@ public class ActivateDeactivateTest {
 
   @Test
   public void testActivateAndDeactivate() throws Exception {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, TopologyAPI.TopologyState.RUNNING);
+    CountDownLatch activateLatch = new CountDownLatch(1);
+    CountDownLatch deactivateLatch = new CountDownLatch(1);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.ACTIVATE_COUNT_LATCH, activateLatch);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.DEACTIVATE_COUNT_LATCH, deactivateLatch);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
+    inControlQueue.offer(buildMessage(TopologyAPI.TopologyState.RUNNING));
 
-    inControlQueue.offer(instanceControlMsg);
+    // Now the activateLatch and deactivateLatch should be 1
+    assertEquals(1, activateLatch.getCount());
+    assertEquals(1, deactivateLatch.getCount());
 
-    AtomicInteger activateCount = new AtomicInteger(0);
-    AtomicInteger deactivateCount = new AtomicInteger(0);
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.ACTIVATE_COUNT, activateCount);
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.DEACTIVATE_COUNT, deactivateCount);
-
-    // Now the activateCount and deactivateCount should be 0
     // And we start the test
-    physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, TopologyAPI.TopologyState.PAUSED);
-    physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
+    inControlQueue.offer(buildMessage(TopologyAPI.TopologyState.PAUSED));
+    assertTrue(deactivateLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
-    inControlQueue.offer(instanceControlMsg);
+    assertEquals(1, activateLatch.getCount());
+    assertEquals(0, deactivateLatch.getCount());
 
-    Thread.sleep(Constants.TEST_WAIT_TIME.toMillis());
+    inControlQueue.offer(buildMessage(TopologyAPI.TopologyState.RUNNING));
+    assertTrue(activateLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
 
-    Assert.assertEquals(1, deactivateCount.get());
+    assertEquals(0, activateLatch.getCount());
+    assertEquals(0, deactivateLatch.getCount());
+  }
 
-    physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, TopologyAPI.TopologyState.RUNNING);
-    physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
-    inControlQueue.offer(instanceControlMsg);
-
-    Thread.sleep(Constants.TEST_WAIT_TIME.toMillis());
-
-    Assert.assertEquals(1, activateCount.get());
-    Assert.assertEquals(1, deactivateCount.get());
+  private InstanceControlMsg buildMessage(TopologyAPI.TopologyState state) {
+    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, state);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
+    return InstanceControlMsg.newBuilder()
+        .setNewPhysicalPlanHelper(physicalPlanHelper)
+        .build();
   }
 }

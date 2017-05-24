@@ -38,7 +38,7 @@ import com.twitter.heron.spi.statefulstorage.StatefulStorageException;
 public class HDFSStorage implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(HDFSStorage.class.getName());
 
-  private static final String ROOT_PATH_KEY = "heron.stateful.storage.hdfs.root.path";
+  private static final String ROOT_PATH_KEY = "heron.statefulstorage.hdfs.root.path";
 
   private String checkpointRootPath;
   private FileSystem fileSystem;

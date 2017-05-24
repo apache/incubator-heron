@@ -220,8 +220,8 @@ void StMgr::StartStmgrServer() {
   // start the server
   CHECK_EQ(server_->Start(), 0);
 
-  // if 'bind 0' is applied in Start(), set the actual port for the clients
-  // the tmaster_client_ will be set just before it Start() in StartTMasterClient()
+  // If 'bind 0' is applied in Start(), set the actual port for the clients.
+  // The tmaster_client_ will be set just before it Start() in StartTMasterClient().
   metrics_manager_client_->SetPublisherPort(server_->get_serveroptions().get_port());
 }
 

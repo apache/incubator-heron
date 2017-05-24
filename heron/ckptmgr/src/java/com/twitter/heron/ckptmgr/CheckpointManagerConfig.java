@@ -166,6 +166,9 @@ public final class CheckpointManagerConfig {
           case BYTE_AMOUNT:
             config.put(key.value(), TypeUtils.getByteAmount(value));
             break;
+          case DURATION:
+            config.put(key.value(), TypeUtils.getDuration(value, key.getTemporalUnit()));
+            break;
           case INTEGER:
             config.put(key.value(), TypeUtils.getInteger(value));
             break;
