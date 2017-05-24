@@ -61,7 +61,7 @@ public final class ConfigLoader {
         .putAll(loadConfig(Context.schedulerFile(localConfig)))
         .putAll(loadConfig(Context.stateManagerFile(localConfig)))
         .putAll(loadConfig(Context.uploaderFile(localConfig)))
-        .putAll(loadConfig(Context.statefulFile(localConfig)))
+        .putAll(loadConfig(Context.statefulConfigFile(localConfig)))
         .putAll(loadConfig(releaseFile))
         .putAll(loadConfig(overrideConfigFile));
     return cb.build();
@@ -83,7 +83,7 @@ public final class ConfigLoader {
         .putAll(loadConfig(Context.schedulerFile(clusterConfig)))
         .putAll(loadConfig(Context.stateManagerFile(clusterConfig)))
         .putAll(loadConfig(Context.uploaderFile(clusterConfig)))
-        .putAll(loadConfig(Context.statefulFile(clusterConfig)));
+        .putAll(loadConfig(Context.statefulConfigFile(clusterConfig)));
 
     // Add the override config at the end to replace any existing configs
     cb.putAll(loadConfig(Context.overrideFile(clusterConfig)));
