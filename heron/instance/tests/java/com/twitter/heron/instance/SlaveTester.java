@@ -16,46 +16,20 @@ package com.twitter.heron.instance;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SlaveLooper;
-import com.twitter.heron.common.basics.WakeableLooper;
-import com.twitter.heron.proto.system.HeronTuples;
-import com.twitter.heron.proto.system.Metrics;
-import com.twitter.heron.resource.Constants;
-import com.twitter.heron.resource.UnitTestHelper;
 
 /**
  * Class to help write tests that require Slave instances, loopers and communicators
  */
-public class SlaveTester {
-  private final WakeableLooper testLooper;
-  private final SlaveLooper slaveLooper;
-
-  // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
-
-  // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
-  // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
-  private final Communicator<InstanceControlMsg> inControlQueue;
+public class SlaveTester extends CommunicatorTester {
   private final ExecutorService threadsPool;
-  private final Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
   private final Slave slave;
 
   public SlaveTester() {
-    UnitTestHelper.addSystemConfigToSingleton();
-    testLooper = new SlaveLooper();
-    slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<>(slaveLooper, testLooper);
-    outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<>(testLooper, slaveLooper);
-    inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inControlQueue = new Communicator<>(testLooper, slaveLooper);
+    super(new SlaveLooper());
 
-    slaveMetricsOut = new Communicator<>(slaveLooper, testLooper);
-    slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-
-    slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue, inControlQueue, slaveMetricsOut);
+    slave = new Slave(getSlaveLooper(), getInStreamQueue(), getOutStreamQueue(),
+        getInControlQueue(), getSlaveMetricsOut());
     threadsPool = Executors.newSingleThreadExecutor();
   }
 
@@ -64,40 +38,10 @@ public class SlaveTester {
   }
 
   public void stop() throws NoSuchFieldException, IllegalAccessException {
-    UnitTestHelper.clearSingletonRegistry();
+    super.stop();
 
-    if (testLooper != null) {
-      testLooper.exitLoop();
-    }
-    if (slaveLooper != null) {
-      slaveLooper.exitLoop();
-    }
     if (threadsPool != null) {
       threadsPool.shutdownNow();
     }
-  }
-
-  public Communicator<Metrics.MetricPublisherPublishMessage> getSlaveMetricsOut() {
-    return slaveMetricsOut;
-  }
-
-  public WakeableLooper getTestLooper() {
-    return testLooper;
-  }
-
-  public SlaveLooper getSlaveLooper() {
-    return slaveLooper;
-  }
-
-  public Communicator<InstanceControlMsg> getInControlQueue() {
-    return inControlQueue;
-  }
-
-  public Communicator<HeronTuples.HeronTupleSet> getInStreamQueue() {
-    return inStreamQueue;
-  }
-
-  public Communicator<HeronTuples.HeronTupleSet> getOutStreamQueue() {
-    return outStreamQueue;
   }
 }
