@@ -59,6 +59,7 @@ public class HeronServerTest {
   private volatile boolean isMessageNeed = false;
   private volatile int messagesReceived = 0;
 
+  private CountDownLatch serverOnConnectSignal;
   private CountDownLatch serverOnMessageSignal;
   private CountDownLatch serverOnRequestSignal;
   private CountDownLatch clientOnConnectSignal;
@@ -76,12 +77,13 @@ public class HeronServerTest {
     // Get an available port
     int serverPort = SysUtils.getFreePort();
 
+    serverOnConnectSignal = new CountDownLatch(1);
     serverOnMessageSignal = new CountDownLatch(TOTAL_MESSAGES);
     serverOnRequestSignal = new CountDownLatch(1);
     clientOnConnectSignal = new CountDownLatch(1);
     clientOnResponseSignal = new CountDownLatch(1);
     heronServer = new SimpleHeronServer(new NIOLooper(), HeronServerTester.SERVER_HOST, serverPort,
-        serverOnMessageSignal, serverOnRequestSignal);
+        serverOnConnectSignal, serverOnMessageSignal, serverOnRequestSignal);
     heronClient = new SimpleHeronClient(new NIOLooper(), HeronServerTester.SERVER_HOST, serverPort,
         clientOnConnectSignal, clientOnResponseSignal);
 
@@ -152,6 +154,7 @@ public class HeronServerTest {
   public void testHandleAccept() {
     runBase();
 
+    HeronServerTester.await(serverOnConnectSignal);
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
     ServerSocketChannel acceptChannel = heronServer.getAcceptChannel();
 
@@ -362,12 +365,14 @@ public class HeronServerTest {
   }
 
   private class SimpleHeronServer extends HeronServer {
+    private final CountDownLatch onConnectSignal;
     private final CountDownLatch onMessageSignal;
     private final CountDownLatch onRequestSignal;
 
-    SimpleHeronServer(NIOLooper s, String host, int port,
+    SimpleHeronServer(NIOLooper s, String host, int port, CountDownLatch onConnectSignal,
                       CountDownLatch onMessageSignal, CountDownLatch onRequestSignal) {
       super(s, host, port, HeronServerTester.TEST_SOCKET_OPTIONS);
+      this.onConnectSignal = onConnectSignal;
       this.onMessageSignal = onMessageSignal;
       this.onRequestSignal = onRequestSignal;
     }
@@ -387,6 +392,7 @@ public class HeronServerTest {
       if (isMessageNeed) {
         registerOnMessage(Tests.EchoServerResponse.newBuilder());
       }
+      onConnectSignal.countDown();
     }
 
     @Override
