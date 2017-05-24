@@ -187,7 +187,7 @@ public abstract class AbstractTupleRoutingTest {
             testLooper.exitLoop();
             break;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
     };

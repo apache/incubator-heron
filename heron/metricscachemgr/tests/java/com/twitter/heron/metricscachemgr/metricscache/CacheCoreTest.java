@@ -15,6 +15,7 @@
 
 package com.twitter.heron.metricscachemgr.metricscache;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 
@@ -87,7 +89,7 @@ public class CacheCoreTest {
     // bucket 2: [now-70 seconds ~ now-40 seconds)
     // bucket 3: [now-40 seconds ~ now-10 seconds)
     // bucket 4: [now-10 seconds ~ now]
-    cacheCore = new CacheCore(100, 30, 0);
+    cacheCore = new CacheCore(Duration.ofSeconds(100), Duration.ofSeconds(30), 0);
 
     // current timestamp used as time origin
     // although it may be slightly different from the time origin
@@ -466,7 +468,7 @@ public class CacheCoreTest {
     // bucket 2: [now-70 seconds ~ now-40 seconds)
     // bucket 3: [now-40 seconds ~ now-10 seconds)
     // bucket 4: [now-10 seconds ~ now]
-    cacheCore = new CacheCore(100, 30, 0);
+    cacheCore = new CacheCore(Duration.ofSeconds(100), Duration.ofSeconds(30), 0);
 
     // current timestamp used as time origin
     // although it may be slightly different from the time origin
@@ -620,12 +622,13 @@ public class CacheCoreTest {
     // bucket 2: [now-7 seconds ~ now-4 seconds)
     // bucket 3: [now-4 seconds ~ now-1 seconds)
     // bucket 4: [now-1 seconds ~ now]
-    cacheCore = new CacheCore(10, 3, 0);
+    FakeTicker ticker = new FakeTicker();
+    cacheCore = new CacheCore(Duration.ofSeconds(10), Duration.ofSeconds(3), 0, ticker);
 
     // current timestamp used as time origin
     // although it may be slightly different from the time origin
     // in the CacheCore initialization.
-    now = System.currentTimeMillis();
+    now = ticker.read();
 
     TopologyMaster.PublishMetrics.Builder builder = TopologyMaster.PublishMetrics.newBuilder();
     // should be in bucket 1
@@ -648,7 +651,7 @@ public class CacheCoreTest {
     HashMap<String, Set<String>> componentNameInstanceId = new HashMap<>();
     componentNameInstanceId.put("c1", new HashSet<String>());
     componentNameInstanceId.get("c1").add("i1");
-    Set<String> metricNames = new HashSet<String>();
+    Set<String> metricNames = new HashSet<>();
     metricNames.add("m1");
     MetricRequest request = new MetricRequest(componentNameInstanceId, metricNames,
         startTime, endTime, RAW);
@@ -662,7 +665,7 @@ public class CacheCoreTest {
     );
 
     // purge
-    Thread.sleep(3 * 1000); // assure more than 1 bucket is purged
+    ticker.advance(Duration.ofSeconds(3)); // assure more than 1 bucket is purged
     cacheCore.purge();
 
     // query after purge
@@ -695,4 +698,16 @@ public class CacheCoreTest {
     );
   }
 
+  private static final class FakeTicker extends CacheCore.Ticker {
+    private AtomicLong now = new AtomicLong(System.currentTimeMillis());
+
+    void advance(Duration duration) {
+      now.addAndGet(duration.toMillis());
+    }
+
+    @Override
+    long read() {
+      return now.get();
+    }
+  }
 }

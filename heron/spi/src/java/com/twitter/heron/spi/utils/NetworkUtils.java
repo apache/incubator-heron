@@ -26,6 +26,8 @@ import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,27 +76,27 @@ public final class NetworkUtils {
   public static class TunnelConfig {
     private static final String IS_TUNNEL_NEEDED = "heron.%s.is.tunnel.needed";
     private static final String TUNNEL_CONNECTION_TIMEOUT_MS =
-        "heron.%s.tunnel.connection.timeoutMs.ms";
+        "heron.%s.tunnel.connection.timeout.ms";
     private static final String TUNNEL_CONNECTION_RETRY_COUNT =
         "heron.%s.tunnel.connection.retryCount.count";
     private static final String TUNNEL_VERIFY_COUNT = "heron.%s.tunnel.verify.count";
     private static final String TUNNEL_RETRY_INTERVAL_MS = "heron.%s.tunnel.retryCount.interval.ms";
     private static final String TUNNEL_HOST = "heron.%s.tunnel.host";
 
-    private boolean isTunnelNeeded;
-    private String tunnelHost;
-    private int timeoutMs;
-    private int retryCount;
-    private int retryIntervalMs;
-    private int verifyCount;
+    private final boolean isTunnelNeeded;
+    private final String tunnelHost;
+    private final Duration timeout;
+    private final int retryCount;
+    private final Duration retryInterval;
+    private final int verifyCount;
 
-    TunnelConfig(boolean isTunnelNeeded, String tunnelHost, int timeoutMs, int retryCount,
-                 int retryIntervalMs, int verifyCount) {
+    TunnelConfig(boolean isTunnelNeeded, String tunnelHost, Duration timeout, int retryCount,
+                 Duration retryInterval, int verifyCount) {
       this.isTunnelNeeded = isTunnelNeeded;
       this.tunnelHost = tunnelHost;
-      this.timeoutMs = timeoutMs;
+      this.timeout = timeout;
       this.retryCount = retryCount;
-      this.retryIntervalMs = retryIntervalMs;
+      this.retryInterval = retryInterval;
       this.verifyCount = verifyCount;
     }
 
@@ -106,16 +108,16 @@ public final class NetworkUtils {
       return tunnelHost;
     }
 
-    private int getTimeoutMs() {
-      return timeoutMs;
+    private Duration getTimeout() {
+      return timeout;
     }
 
     public int getRetryCount() {
       return retryCount;
     }
 
-    private int getRetryIntervalMs() {
-      return retryIntervalMs;
+    private Duration getRetryInterval() {
+      return retryInterval;
     }
 
     private int getVerifyCount() {
@@ -126,9 +128,11 @@ public final class NetworkUtils {
       return new TunnelConfig(
           config.getBooleanValue(getConfigKey(IS_TUNNEL_NEEDED, heronSystem), false),
           config.getStringValue(getConfigKey(TUNNEL_HOST, heronSystem), "no.tunnel.host.specified"),
-          config.getIntegerValue(getConfigKey(TUNNEL_CONNECTION_TIMEOUT_MS, heronSystem), 1000),
+          config.getDurationValue(getConfigKey(TUNNEL_CONNECTION_TIMEOUT_MS, heronSystem),
+              ChronoUnit.MILLIS, Duration.ofSeconds(1)),
           config.getIntegerValue(getConfigKey(TUNNEL_CONNECTION_RETRY_COUNT, heronSystem), 2),
-          config.getIntegerValue(getConfigKey(TUNNEL_RETRY_INTERVAL_MS, heronSystem), 1000),
+          config.getDurationValue(getConfigKey(TUNNEL_RETRY_INTERVAL_MS, heronSystem),
+              ChronoUnit.MILLIS, Duration.ofSeconds(1)),
           config.getIntegerValue(getConfigKey(TUNNEL_VERIFY_COUNT, heronSystem), 10)
       );
     }
@@ -410,24 +414,24 @@ public final class NetworkUtils {
    * not reachable.
    *
    * @param endpoint the endpoint to connect to
-   * @param timeoutMs Open connection will wait for this timeoutMs in ms.
-   * @param retryCount In case of connection timeoutMs try retryCount times.
-   * @param retryIntervalMs the interval in ms to retryCount
+   * @param timeout Open connection will wait for this timeout.
+   * @param retryCount In case of connection timeout try retryCount times.
+   * @param retryInterval the interval to retryCount
    * @return true if the network location is reachable
    */
   public static boolean isLocationReachable(
       InetSocketAddress endpoint,
-      int timeoutMs,
+      Duration timeout,
       int retryCount,
-      int retryIntervalMs) {
+      Duration retryInterval) {
     int retryLeft = retryCount;
     while (retryLeft > 0) {
       try (Socket s = new Socket()) {
-        s.connect(endpoint, timeoutMs);
+        s.connect(endpoint, (int) timeout.toMillis());
         return true;
       } catch (IOException e) {
       } finally {
-        SysUtils.sleep(retryIntervalMs);
+        SysUtils.sleep(retryInterval);
         retryLeft--;
       }
     }
@@ -438,8 +442,8 @@ public final class NetworkUtils {
   public static Pair<InetSocketAddress, Process> establishSSHTunnelIfNeeded(
       InetSocketAddress endpoint, TunnelConfig tunnelConfig, TunnelType tunnelType) {
     return establishSSHTunnelIfNeeded(endpoint, tunnelConfig.getTunnelHost(), tunnelType,
-        tunnelConfig.getTimeoutMs(), tunnelConfig.getRetryCount(),
-        tunnelConfig.getRetryIntervalMs(), tunnelConfig.getVerifyCount());
+        tunnelConfig.getTimeout(), tunnelConfig.getRetryCount(),
+        tunnelConfig.getRetryInterval(), tunnelConfig.getVerifyCount());
   }
 
   /**
@@ -449,9 +453,9 @@ public final class NetworkUtils {
    * @param endpoint the endpoint to connect to
    * @param tunnelHost the host used to tunnel
    * @param tunnelType what type of tunnel should be established
-   * @param timeoutMs Open connection will wait for this timeoutMs in ms.
-   * @param retryCount In case of connection timeoutMs try retryCount times.
-   * @param retryIntervalMs the interval in ms to retryCount
+   * @param timeout Open connection will wait for this timeout in ms.
+   * @param retryCount In case of connection timeout try retryCount times.
+   * @param retryInterval the interval in ms to retryCount
    * @param verifyCount In case of longer tunnel setup, try verify times to wait
    * @return a &lt;new_reachable_endpoint, tunnelProcess&gt; pair.
    * If the endpoint already reachable, then new_reachable_endpoint equals to original endpoint, and
@@ -463,11 +467,11 @@ public final class NetworkUtils {
       InetSocketAddress endpoint,
       String tunnelHost,
       TunnelType tunnelType,
-      int timeoutMs,
+      Duration timeout,
       int retryCount,
-      int retryIntervalMs,
+      Duration retryInterval,
       int verifyCount) {
-    if (NetworkUtils.isLocationReachable(endpoint, timeoutMs, retryCount, retryIntervalMs)) {
+    if (NetworkUtils.isLocationReachable(endpoint, timeout, retryCount, retryInterval)) {
 
       // Already reachable, return original endpoint directly
       return new Pair<InetSocketAddress, Process>(endpoint, null);
@@ -496,7 +500,7 @@ public final class NetworkUtils {
       // Tunnel can take time to setup.
       // Verify whether the tunnel process is working fine.
       if (tunnelProcess != null && tunnelProcess.isAlive() && NetworkUtils.isLocationReachable(
-          newEndpoint, timeoutMs, verifyCount, retryIntervalMs)) {
+          newEndpoint, timeout, verifyCount, retryInterval)) {
 
         java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
           @Override

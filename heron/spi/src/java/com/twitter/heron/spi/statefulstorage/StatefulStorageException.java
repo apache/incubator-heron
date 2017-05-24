@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.common.basics;
+package com.twitter.heron.spi.statefulstorage;
 
-public final class Constants {
-  public static final long SECONDS_TO_NANOSECONDS = 1000 * 1000 * 1000;
-  public static final long MILLISECONDS_TO_NANOSECONDS = 1000 * 1000;
-  public static final long SECONDS_TO_MILLISECONDS = 1000;
-  public static final int MB_TO_BYTES = 1024 * 1024;
+/**
+ * Thrown in IStatefulStorage to indicate that something went wrong
+ */
+public class StatefulStorageException extends Exception {
+  private static final long serialVersionUID = -3263229190395580148L;
 
-  private Constants() {
+  public StatefulStorageException(String message) {
+    super(message);
+  }
+
+  public StatefulStorageException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

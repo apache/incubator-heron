@@ -74,7 +74,7 @@ public class FullBoltMetrics extends BoltMetrics {
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
-    int interval = systemConfig.getHeronMetricsExportIntervalSec();
+    int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
     topologyContext.registerMetric("__ack-count", ackCount, interval);
     topologyContext.registerMetric("__process-latency", processLatency, interval);

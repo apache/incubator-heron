@@ -201,11 +201,11 @@ public class BoltInstanceTest {
       if (tupleExecutedCount.intValue() == 10) {
         break;
       }
-      SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+      SysUtils.sleep(Constants.RETRY_INTERVAL);
     }
 
     // Wait the bolt's finishing
-    SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
+    SysUtils.sleep(Constants.TEST_WAIT_TIME);
     Assert.assertEquals(10, tupleExecutedCount.intValue());
     Assert.assertEquals(5, ackCount.intValue());
     Assert.assertEquals(5, failCount.intValue());
