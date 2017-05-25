@@ -14,6 +14,7 @@
 
 package com.twitter.heron.network;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
@@ -50,7 +51,7 @@ public class HandleReadTest extends AbstractNetworkTest {
    * Test reading from network
    */
   @Test
-  public void testHandleRead() throws Exception {
+  public void testHandleRead() throws IOException {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
     serverSocketChannel.socket().bind(new InetSocketAddress(HOST, serverPort));
 
@@ -145,14 +146,8 @@ public class HandleReadTest extends AbstractNetworkTest {
       rootId.setTaskid(0);
       dataTuple.addRoots(rootId);
 
-      String s;
-      if ((i & 1) == 0) {
-        s = "A";
-      } else {
-        s = "B";
-      }
-      ByteString byteString = ByteString.copyFrom(s.getBytes());
-      dataTuple.addValues(byteString);
+      String tupleData = ((i & 1) == 0) ? "A" : "B";
+      dataTuple.addValues(ByteString.copyFrom(tupleData.getBytes()));
 
       dataTupleSet.addTuples(dataTuple);
     }

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.network;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
@@ -49,7 +50,7 @@ public class ConnectTest extends AbstractNetworkTest {
    * Test connection
    */
   @Test
-  public void testStart() throws Exception {
+  public void testStart() throws IOException {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
     serverSocketChannel.socket().bind(new InetSocketAddress(HOST, serverPort));
 

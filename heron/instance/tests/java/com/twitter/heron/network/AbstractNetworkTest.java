@@ -47,21 +47,21 @@ public abstract class AbstractNetworkTest {
   private GatewayMetrics gatewayMetrics;
   private ExecutorService threadPool;
 
-  static void close(Closeable sc2) {
-    if (sc2 != null) {
+  static void close(Closeable closeable) {
+    if (closeable != null) {
       try {
-        sc2.close();
+        closeable.close();
       } catch (IOException ignored) {
       }
     }
   }
 
-  static void configure(SocketChannel sc) throws SocketException {
-    sc.socket().setTcpNoDelay(true);
+  static void configure(SocketChannel socketChannel) throws SocketException {
+    socketChannel.socket().setTcpNoDelay(true);
   }
 
   @Before
-  public void before() throws Exception {
+  public void before() throws IOException {
     communicatorTester = new CommunicatorTester();
     gatewayMetrics = new GatewayMetrics();
     threadPool = Executors.newSingleThreadExecutor();
@@ -71,7 +71,7 @@ public abstract class AbstractNetworkTest {
   }
 
   @After
-  public void after() throws Exception {
+  public void after() throws NoSuchFieldException, IllegalAccessException {
     communicatorTester.stop();
 
     if (streamManagerClient != null) {

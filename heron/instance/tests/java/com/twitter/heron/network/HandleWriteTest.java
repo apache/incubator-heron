@@ -14,6 +14,7 @@
 
 package com.twitter.heron.network;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
@@ -47,7 +48,7 @@ public class HandleWriteTest extends AbstractNetworkTest {
    * Test write into network
    */
   @Test
-  public void testHandleWrite() throws Exception {
+  public void testHandleWrite() throws IOException {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
     serverSocketChannel.socket().bind(new InetSocketAddress(HOST, serverPort));
 
