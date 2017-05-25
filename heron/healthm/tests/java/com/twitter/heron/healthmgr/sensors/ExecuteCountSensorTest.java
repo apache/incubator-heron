@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
@@ -38,14 +38,14 @@ public class ExecuteCountSensorTest {
 
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
-    Map<String, ComponentMetricsData> result = new HashMap<>();
+    Map<String, ComponentMetrics> result = new HashMap<>();
 
-    ComponentMetricsData metrics = new ComponentMetricsData("bolt-1");
+    ComponentMetrics metrics = new ComponentMetrics("bolt-1");
     metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-1_1", 123));
     metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-1_2", 345));
     result.put("bolt-1", metrics);
 
-    metrics = new ComponentMetricsData("bolt-2");
+    metrics = new ComponentMetrics("bolt-2");
     metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-2_3", 321));
     metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-2_4", 543));
     result.put("bolt-2", metrics);
@@ -55,24 +55,24 @@ public class ExecuteCountSensorTest {
         .thenReturn(result);
 
     ExecuteCountSensor executeCountSensor = new ExecuteCountSensor(topologyProvider, metricsProvider);
-    Map<String, ComponentMetricsData> componentMetrics = executeCountSensor.get();
+    Map<String, ComponentMetrics> componentMetrics = executeCountSensor.get();
     assertEquals(2, componentMetrics.size());
     assertEquals(123, componentMetrics.get("bolt-1")
         .getMetrics("container_1_bolt-1_1")
-        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
+        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
     assertEquals(345, componentMetrics.get("bolt-1")
         .getMetrics("container_1_bolt-1_2")
-        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
+        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
     assertEquals(321, componentMetrics.get("bolt-2")
         .getMetrics("container_1_bolt-2_3")
-        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
+        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
     assertEquals(543, componentMetrics.get("bolt-2")
         .getMetrics("container_1_bolt-2_4")
-        .getMetricIntValue(HealthMgrConstants.METRIC_EXE_COUNT));
+        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
   }
 
-  private InstanceMetricsData createTestInstanceMetric(String name, int value) {
-    InstanceMetricsData instanceMetrics = new InstanceMetricsData(name);
+  private InstanceMetrics createTestInstanceMetric(String name, int value) {
+    InstanceMetrics instanceMetrics = new InstanceMetrics(name);
     instanceMetrics.addMetric(HealthMgrConstants.METRIC_EXE_COUNT, value);
     return instanceMetrics;
   }

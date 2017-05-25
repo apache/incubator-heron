@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
@@ -58,26 +58,26 @@ public class BufferSizeSensorTest {
     BufferSizeSensor bufferSizeSensor =
         new BufferSizeSensor(packingPlanProvider, topologyProvider, metricsProvider);
 
-    Map<String, ComponentMetricsData> componentMetrics = bufferSizeSensor.get();
+    Map<String, ComponentMetrics> componentMetrics = bufferSizeSensor.get();
     assertEquals(2, componentMetrics.size());
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricIntValue(HealthMgrConstants.METRIC_BUFFER_SIZE));
+        .getMetricValue(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-            .getMetricIntValue(HealthMgrConstants.METRIC_BUFFER_SIZE));
+            .getMetricValue(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-            .getMetricIntValue(HealthMgrConstants.METRIC_BUFFER_SIZE));
+            .getMetricValue(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
   }
 
   public static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
                                                          String metric,
                                                          int value) {
-    Map<String, ComponentMetricsData> result = new HashMap<>();
-    ComponentMetricsData metrics = new ComponentMetricsData("__stmgr__");
-    InstanceMetricsData instanceMetrics = new InstanceMetricsData("stmgr-1");
+    Map<String, ComponentMetrics> result = new HashMap<>();
+    ComponentMetrics metrics = new ComponentMetrics("__stmgr__");
+    InstanceMetrics instanceMetrics = new InstanceMetrics("stmgr-1");
     instanceMetrics.addMetric(metric, value);
     metrics.addInstanceMetric(instanceMetrics);
     result.put("__stmgr__", metrics);
