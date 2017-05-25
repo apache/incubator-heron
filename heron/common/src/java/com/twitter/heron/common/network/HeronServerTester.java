@@ -176,13 +176,9 @@ public class HeronServerTester {
     Runnable runClient = new Runnable() {
       @Override
       public void run() {
-        try {
-          await(serverStartedSignal, SERVER_START_TIMEOUT);
-          client.start();
-          client.getNIOLooper().loop();
-        } finally {
-          client.stop();
-        }
+        await(serverStartedSignal, SERVER_START_TIMEOUT);
+        client.start();
+        client.getNIOLooper().loop();
       }
     };
     threadsPool.execute(runClient);

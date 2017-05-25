@@ -244,6 +244,18 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.METRICSCACHEMGR_CLASSPATH,
         Context.metricsCacheManagerClassPath(config));
 
+    boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
+        topology.getTopologyConfig().getKvsList(),
+        com.twitter.heron.api.Config.TOPOLOGY_STATEFUL_ENABLED, false);
+    auroraProperties.put(AuroraField.IS_STATEFUL_ENABLED, Boolean.toString(isStatefulEnabled));
+
+    String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
+        Context.ckptmgrClassPath(config),
+        Context.statefulStoragesClassPath(config),
+        Context.statefulStorageCustomClassPath(config));
+    auroraProperties.put(AuroraField.CKPTMGR_CLASSPATH, completeCkptmgrProcessClassPath);
+    auroraProperties.put(AuroraField.STATEFUL_CONFIG_YAML, Context.statefulConfigFile(config));
+
     return auroraProperties;
   }
 }
