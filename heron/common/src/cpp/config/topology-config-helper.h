@@ -91,6 +91,11 @@ class TopologyConfigHelper {
   // Gets the list of all spout component names
   static void GetSpoutComponentNames(const proto::api::Topology& _topology,
                                      std::unordered_set<std::string> spouts);
+
+ private:
+  static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
+                                    const std::string& _config_name,
+                                    bool _default_value);
 };
 }  // namespace config
 }  // namespace heron

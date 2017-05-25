@@ -211,27 +211,13 @@ bool TopologyConfigHelper::IsTopologyStateful(const proto::api::Topology& _topol
 }
 
 bool TopologyConfigHelper::IsTopologyExactlyOnce(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_EXACTLYONCE_ENABLED) {
-      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
-    }
-  }
-  // There was no value specified. The default is false.
-  return false;
+  return GetBooleanConfigValue(_topology,
+                               TopologyConfigVars::TOPOLOGY_EXACTLYONCE_ENABLED, false);
 }
 
 bool TopologyConfigHelper::StatefulTopologyStartClean(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN) {
-      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
-    }
-  }
-  // There was no value specified. The default is false.
-  return false;
+  return GetBooleanConfigValue(_topology,
+                               TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN, false);
 }
 
 sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecs(
@@ -251,6 +237,19 @@ void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _t
   for (int i = 0; i < _topology.spouts_size(); ++i) {
     spouts.insert(_topology.spouts(i).comp().name());
   }
+}
+
+bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
+                                                 const std::string& _config_name,
+                                                 bool _default_value) {
+  sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == _config_name) {
+      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+    }
+  }
+  return _default_value;
 }
 }  // namespace config
 }  // namespace heron
