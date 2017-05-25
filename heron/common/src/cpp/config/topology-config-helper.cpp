@@ -199,15 +199,8 @@ sp_int64 TopologyConfigHelper::GetContainerRamRequested(const proto::api::Topolo
 }
 
 bool TopologyConfigHelper::IsTopologyStateful(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED) {
-      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
-    }
-  }
-  // There was no value specified. The default is false.
-  return false;
+  return GetBooleanConfigValue(_topology,
+                               TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED, false);
 }
 
 bool TopologyConfigHelper::IsTopologyExactlyOnce(const proto::api::Topology& _topology) {
