@@ -26,6 +26,7 @@
 #define TOPOLOGY_CONFIG_HELPERS_H_
 
 #include <map>
+#include <unordered_set>
 #include <string>
 #include "basics/basics.h"
 #include "proto/messages.h"
@@ -74,6 +75,22 @@ class TopologyConfigHelper {
 
   // Gets the per container ram requested by this topology
   static sp_int64 GetContainerRamRequested(const proto::api::Topology& _topology);
+
+  // Is the topology stateful
+  static bool IsTopologyStateful(const proto::api::Topology& _topology);
+
+  // Is the topology exactly once
+  static bool IsTopologyExactlyOnce(const proto::api::Topology& _topology);
+
+  // Should this stateful topology start from clean state
+  static bool StatefulTopologyStartClean(const proto::api::Topology& _topology);
+
+  // Gets the checkpoint interval for stateful topologies
+  static sp_int64 GetStatefulCheckpointIntervalSecs(const proto::api::Topology& _topology);
+
+  // Gets the list of all spout component names
+  static void GetSpoutComponentNames(const proto::api::Topology& _topology,
+                                     std::unordered_set<std::string> spouts);
 };
 }  // namespace config
 }  // namespace heron

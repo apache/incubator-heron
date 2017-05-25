@@ -197,5 +197,60 @@ sp_int64 TopologyConfigHelper::GetContainerRamRequested(const proto::api::Topolo
       (total_parallelism / nstmgrs) + (total_parallelism % nstmgrs);
   return max_components_per_container * 1073741824l;
 }
+
+bool TopologyConfigHelper::IsTopologyStateful(const proto::api::Topology& _topology) {
+  sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED) {
+      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+    }
+  }
+  // There was no value specified. The default is false.
+  return false;
+}
+
+bool TopologyConfigHelper::IsTopologyExactlyOnce(const proto::api::Topology& _topology) {
+  sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_EXACTLYONCE_ENABLED) {
+      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+    }
+  }
+  // There was no value specified. The default is false.
+  return false;
+}
+
+bool TopologyConfigHelper::StatefulTopologyStartClean(const proto::api::Topology& _topology) {
+  sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN) {
+      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+    }
+  }
+  // There was no value specified. The default is false.
+  return false;
+}
+
+sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecs(
+                               const proto::api::Topology& _topology) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS) {
+      return atol(cfg.kvs(i).value().c_str());
+    }
+  }
+  // There was no value specified. The default is 0.
+  return 0;
+}
+
+void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _topology,
+                                                  std::unordered_set<std::string> spouts) {
+  for (int i = 0; i < _topology.spouts_size(); ++i) {
+    spouts.insert(_topology.spouts(i).comp().name());
+  }
+}
 }  // namespace config
 }  // namespace heron
