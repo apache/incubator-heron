@@ -18,8 +18,8 @@ package com.twitter.heron.healthmgr.sensors;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
@@ -45,16 +45,17 @@ public class TrackerMetricsProviderTest {
         "\"interval\": 60, \"component\": \"bolt\"}}";
 
     doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60);
-    Map<String, ComponentMetricsData> metrics
-        = spyMetricsProvider.getComponentMetrics(metric, 60, component);
+    Map<String, ComponentMetrics> metrics = spyMetricsProvider.getComponentMetrics(metric, 60, component);
 
     assertEquals(1, metrics.size());
     assertNotNull(metrics.get(component));
     assertEquals(2, metrics.get(component).getMetrics().size());
 
-    HashMap<String, InstanceMetricsData> componentMetrics = metrics.get(component).getMetrics();
-    assertEquals(104, componentMetrics.get("container_1_bolt_1").getMetricIntValue("count"));
-    assertEquals(496, componentMetrics.get("container_1_bolt_2").getMetricIntValue("count"));
+    HashMap<String, InstanceMetrics> componentMetrics = metrics.get(component).getMetrics();
+    assertEquals(104,
+        componentMetrics.get("container_1_bolt_1").getMetricValue("count").intValue());
+    assertEquals(496,
+        componentMetrics.get("container_1_bolt_2").getMetricValue("count").intValue());
   }
 
   @Test
@@ -79,7 +80,7 @@ public class TrackerMetricsProviderTest {
         "\"interval\": 60, \"component\": \"bolt-2\"}}";
     doReturn(response2).when(spyMetricsProvider).getMetricsFromTracker(metric, comp2, 60);
 
-    Map<String, ComponentMetricsData> metrics
+    Map<String, ComponentMetrics> metrics
         = spyMetricsProvider.getComponentMetrics(metric, 60, comp1, comp2);
 
     assertEquals(2, metrics.size());
@@ -111,15 +112,15 @@ public class TrackerMetricsProviderTest {
         "\"interval\": 60, \"component\": \"__stmgr__\"}}";
 
     doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60);
-    Map<String, ComponentMetricsData> metrics
+    Map<String, ComponentMetrics> metrics
         = spyMetricsProvider.getComponentMetrics(metric, 60, component);
 
     assertEquals(1, metrics.size());
     assertNotNull(metrics.get(component));
     assertEquals(1, metrics.get(component).getMetrics().size());
 
-    HashMap<String, InstanceMetricsData> componentMetrics = metrics.get(component).getMetrics();
-    assertEquals(601, componentMetrics.get("stmgr-1").getMetricIntValue(metric));
+    HashMap<String, InstanceMetrics> componentMetrics = metrics.get(component).getMetrics();
+    assertEquals(601, componentMetrics.get("stmgr-1").getMetricValue(metric).intValue());
   }
 
   @Test
@@ -136,7 +137,7 @@ public class TrackerMetricsProviderTest {
         "{\"metrics\": {}, \"interval\": 0, \"component\": \"split\"}}";
 
     doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60);
-    Map<String, ComponentMetricsData> metrics
+    Map<String, ComponentMetrics> metrics
         = spyMetricsProvider.getComponentMetrics(metric, 60, component);
 
     assertEquals(1, metrics.size());

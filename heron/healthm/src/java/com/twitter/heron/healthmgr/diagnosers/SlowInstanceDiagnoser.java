@@ -12,58 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
-import com.microsoft.dhalion.symptom.ComponentSymptom;
-import com.microsoft.dhalion.symptom.Diagnosis;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
-import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 public class SlowInstanceDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
-  private final BackPressureDetector bpDetector;
   private final BufferSizeSensor bufferSizeSensor;
   private double limit = 25;
 
   @Inject
-  SlowInstanceDiagnoser(BackPressureDetector bpDetector, BufferSizeSensor bufferSizeSensor) {
-    this.bpDetector = bpDetector;
+  SlowInstanceDiagnoser(BufferSizeSensor bufferSizeSensor) {
     this.bufferSizeSensor = bufferSizeSensor;
   }
 
   @Override
-  public Diagnosis<ComponentSymptom> diagnose() {
-    Collection<ComponentSymptom> backPressureSymptoms = bpDetector.detect();
-    if (backPressureSymptoms.isEmpty()) {
-      // no issue as there is no back pressure
+  public Diagnosis diagnose(List<Symptom> symptoms) {
+    List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
+    if (bpSymptoms.isEmpty()) {
+      // Since there is no back pressure, any more capacity is not needed
       return null;
     }
 
-    Set<ComponentSymptom> symptoms = new HashSet<>();
-    for (ComponentSymptom backPressureSymptom : backPressureSymptoms) {
-      ComponentMetricsData bpMetricsData = backPressureSymptom.getMetricsData();
+    List<Symptom> resultSymptoms = new ArrayList<>();
+    for (Symptom backPressureSymptom : bpSymptoms) {
+      ComponentMetrics bpMetricsData = backPressureSymptom.getMetrics();
       if (bpMetricsData.getMetrics().size() <= 1) {
         // Need more than one instance for comparison
         continue;
       }
 
-      Map<String, ComponentMetricsData> result = bufferSizeSensor.get(bpMetricsData.getName());
-      ComponentMetricsData bufferSizeData = result.get(bpMetricsData.getName());
-      ComponentMetricsData mergedData = ComponentMetricsData.merge(bpMetricsData, bufferSizeData);
+      Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
+      ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
+      ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
 
       ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
       compStats.computeBufferSizeStats();
@@ -72,18 +66,18 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
         // there is wide gap between max and min bufferSize, potential slow instance if the
         // instances who are starting back pressure are also executing less tuples
 
-        for (InstanceMetricsData boltMetrics : compStats.boltsWithBackpressure) {
-          int bpValue = boltMetrics.getMetricIntValue(BACK_PRESSURE);
-          double bufferSize = boltMetrics.getMetric(BUFFER_SIZE);
+        for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
+          double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
+          double bufferSize = boltMetrics.getMetricValue(BUFFER_SIZE);
           if (compStats.bufferSizeMax < bufferSize * 2) {
             LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s",
                 boltMetrics.getName(), bpValue, bufferSize));
-            symptoms.add(ComponentSymptom.from(mergedData));
+            resultSymptoms.add(Symptom.from(mergedData));
           }
         }
       }
     }
 
-    return symptoms.size() > 0 ? new Diagnosis<>(symptoms) : null;
+    return resultSymptoms.size() > 0 ? new Diagnosis(resultSymptoms) : null;
   }
 }

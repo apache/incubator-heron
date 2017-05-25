@@ -17,7 +17,7 @@ package com.twitter.heron.healthmgr.sensors;
 import java.util.Map;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import org.junit.Test;
 
@@ -56,18 +56,18 @@ public class BackPressureSensorTest {
     BackPressureSensor backPressureSensor =
         new BackPressureSensor(packingPlanProvider, topologyProvider, metricsProvider);
 
-    Map<String, ComponentMetricsData> componentMetrics = backPressureSensor.get();
+    Map<String, ComponentMetrics> componentMetrics = backPressureSensor.get();
     assertEquals(2, componentMetrics.size());
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricIntValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE));
+        .getMetricValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricIntValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE));
+        .getMetricValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricIntValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE));
+        .getMetricValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
   }
 
   //TODO

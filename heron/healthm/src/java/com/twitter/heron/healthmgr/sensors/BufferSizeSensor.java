@@ -24,8 +24,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
@@ -45,12 +45,12 @@ public class BufferSizeSensor extends BaseSensor {
     this.metricsProvider = metricsProvider;
   }
 
-  public Map<String, ComponentMetricsData> get() {
+  public Map<String, ComponentMetrics> get() {
     return get(new String[0]);
   }
 
-  public Map<String, ComponentMetricsData> get(String... desiredBoltNames) {
-    Map<String, ComponentMetricsData> result = new HashMap<>();
+  public Map<String, ComponentMetrics> get(String... desiredBoltNames) {
+    Map<String, ComponentMetrics> result = new HashMap<>();
 
     Set<String> boltNameFilter = new HashSet<>();
     if (desiredBoltNames.length > 0) {
@@ -65,37 +65,34 @@ public class BufferSizeSensor extends BaseSensor {
 
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
 
-      Map<String, InstanceMetricsData> instanceMetricsData = new HashMap<>();
+      Map<String, InstanceMetrics> InstanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
         String metric = HealthMgrConstants.METRIC_BUFFER_SIZE
             + boltInstanceName
             + HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
 
-        Map<String, ComponentMetricsData> stmgrResult = metricsProvider.getComponentMetrics(
+        Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
             HealthMgrConstants.DEFAULT_METRIC_DURATION,
             HealthMgrConstants.COMPONENT_STMGR);
 
-        HashMap<String, InstanceMetricsData> streamManagerResult =
+        HashMap<String, InstanceMetrics> streamManagerResult =
             stmgrResult.get(HealthMgrConstants.COMPONENT_STMGR).getMetrics();
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
-        InstanceMetricsData stmgrInstanceResult = streamManagerResult.values().iterator().next();
+        InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
-        InstanceMetricsData boltInstanceMetric = new InstanceMetricsData(boltInstanceName);
+        InstanceMetrics boltInstanceMetric = new InstanceMetrics(boltInstanceName);
 
         boltInstanceMetric.addMetric(HealthMgrConstants.METRIC_BUFFER_SIZE,
-            stmgrInstanceResult.getMetricIntValue(metric));
+            stmgrInstanceResult.getMetricValue(metric));
 
-        instanceMetricsData.put(boltInstanceName, boltInstanceMetric);
+        InstanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
 
-      ComponentMetricsData componentMetricsData = new ComponentMetricsData(boltComponent,
-          System.currentTimeMillis(),
-          HealthMgrConstants.DEFAULT_METRIC_DURATION,
-          instanceMetricsData);
-      result.put(boltComponent, componentMetricsData);
+      ComponentMetrics ComponentMetrics = new ComponentMetrics(boltComponent, InstanceMetrics);
+      result.put(boltComponent, ComponentMetrics);
     }
 
     return result;

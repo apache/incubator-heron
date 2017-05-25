@@ -19,8 +19,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
@@ -36,12 +37,12 @@ public class ExecuteCountSensor extends BaseSensor {
     this.metricsProvider = metricsProvider;
   }
 
-  public Map<String, ComponentMetricsData> get() {
+  public Map<String, ComponentMetrics> get() {
     String[] boltNames = topologyProvider.getBoltNames();
     return get(boltNames);
   }
 
-  public Map<String, ComponentMetricsData> get(String ... boltNames) {
+  public Map<String, ComponentMetrics> get(String ... boltNames) {
     return metricsProvider.getComponentMetrics(
         HealthMgrConstants.METRIC_EXE_COUNT,
         HealthMgrConstants.DEFAULT_METRIC_DURATION,

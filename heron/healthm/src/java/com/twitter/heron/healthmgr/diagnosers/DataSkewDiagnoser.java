@@ -15,54 +15,50 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
-import com.microsoft.dhalion.symptom.ComponentSymptom;
-import com.microsoft.dhalion.symptom.Diagnosis;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
-import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 public class DataSkewDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(DataSkewDiagnoser.class.getName());
 
-  private final BackPressureDetector bpDetector;
   private final ExecuteCountSensor exeCountSensor;
   private double limit = 1.5;
 
   @Inject
-  DataSkewDiagnoser(BackPressureDetector bpDetector, ExecuteCountSensor exeCountSensor) {
-    this.bpDetector = bpDetector;
+  DataSkewDiagnoser(ExecuteCountSensor exeCountSensor) {
     this.exeCountSensor = exeCountSensor;
   }
 
   @Override
-  public Diagnosis<ComponentSymptom> diagnose() {
-    Collection<ComponentSymptom> backPressureSymptoms = bpDetector.detect();
-    if (backPressureSymptoms.isEmpty()) {
-      // no issue as there is no back pressure
+  public Diagnosis diagnose(List<Symptom> symptoms) {
+    List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
+    if (bpSymptoms.isEmpty()) {
+      // Since there is no back pressure, any more capacity is not needed
       return null;
     }
 
-    Set<ComponentSymptom> symptoms = new HashSet<>();
-    for (ComponentSymptom backPressureSymptom : backPressureSymptoms) {
-      ComponentMetricsData bpMetricsData = backPressureSymptom.getMetricsData();
+    List<Symptom> resultSymptoms = new ArrayList<>();
+    for (Symptom backPressureSymptom : bpSymptoms) {
+      ComponentMetrics bpMetricsData = backPressureSymptom.getMetrics();
       if (bpMetricsData.getMetrics().size() <= 1) {
         // Need more than one instance for comparison
         continue;
       }
 
-      Map<String, ComponentMetricsData> result = exeCountSensor.get(bpMetricsData.getName());
-      ComponentMetricsData exeCountData = result.get(bpMetricsData.getName());
-      ComponentMetricsData mergedData = ComponentMetricsData.merge(bpMetricsData, exeCountData);
+      Map<String, ComponentMetrics> result = exeCountSensor.get(bpMetricsData.getName());
+      ComponentMetrics exeCountData = result.get(bpMetricsData.getName());
+      ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, exeCountData);
 
       ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
       compStats.computeExeCountStats();
@@ -70,18 +66,18 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
       if (compStats.exeCountMax > limit * compStats.exeCountMin) {
         // there is wide gap between max and min executionCount, potential skew if the instances
         // who are starting back pressures are also executing majority of the tuples
-        for (InstanceMetricsData boltMetrics : compStats.boltsWithBackpressure) {
-          int exeCount = boltMetrics.getMetricIntValue(EXE_COUNT);
-          int bpValue = boltMetrics.getMetricIntValue(BACK_PRESSURE);
+        for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
+          double exeCount = boltMetrics.getMetricValue(EXE_COUNT);
+          double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
           if (compStats.exeCountMax < 1.10 * exeCount) {
             LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
                 boltMetrics.getName(), bpValue, exeCount));
-            symptoms.add(ComponentSymptom.from(mergedData));
+            resultSymptoms.add(Symptom.from(mergedData));
           }
         }
       }
     }
 
-    return symptoms.size() > 0 ? new Diagnosis<>(symptoms) : null;
+    return resultSymptoms.size() > 0 ? new Diagnosis(resultSymptoms) : null;
   }
 }

@@ -15,51 +15,46 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.symptom.ComponentSymptom;
-import com.microsoft.dhalion.symptom.Diagnosis;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 public class UnderProvisioningDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
-  private final BackPressureDetector bpDetector;
   private final BufferSizeSensor bufferSizeSensor;
   private final double limit = 1000;
 
   @Inject
-  UnderProvisioningDiagnoser(BackPressureDetector bpDetector, BufferSizeSensor bufferSizeSensor) {
-    this.bpDetector = bpDetector;
+  UnderProvisioningDiagnoser(BufferSizeSensor bufferSizeSensor) {
     this.bufferSizeSensor = bufferSizeSensor;
   }
 
   @Override
-  public Diagnosis<ComponentSymptom> diagnose() {
-    Collection<ComponentSymptom> backPressureSymptoms = bpDetector.detect();
-    if (backPressureSymptoms.isEmpty()) {
+  public Diagnosis diagnose(List<Symptom> symptoms) {
+    List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
+    if (bpSymptoms.isEmpty()) {
       // Since there is no back pressure, any more capacity is not needed
       return null;
     }
 
-    Set<ComponentSymptom> symptoms = new HashSet<>();
-    for (ComponentSymptom backPressureSymptom : backPressureSymptoms) {
-      ComponentMetricsData bpMetricsData = backPressureSymptom.getMetricsData();
+    List<Symptom> resultSymptoms = new ArrayList<>();
+    for (Symptom backPressureSymptom : bpSymptoms) {
+      ComponentMetrics bpMetricsData = backPressureSymptom.getMetrics();
 
-      Map<String, ComponentMetricsData> result = bufferSizeSensor.get(bpMetricsData.getName());
-      ComponentMetricsData bufferSizeData = result.get(bpMetricsData.getName());
+      Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
+      ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
 
-      ComponentMetricsData mergedData =
-          ComponentMetricsData.merge(bpMetricsData, bufferSizeData);
+      ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
 
       ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
       compStats.computeBufferSizeStats();
@@ -69,9 +64,9 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
           && compStats.bufferSizeMin * 5 > compStats.bufferSizeMax) {
         LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
             mergedData.getName(), compStats.totalBackpressure, compStats.bufferSizeMin));
-        symptoms.add(ComponentSymptom.from(mergedData));
+        resultSymptoms.add(Symptom.from(mergedData));
       }
     }
-    return symptoms.size() > 0 ? new Diagnosis<>(symptoms) : null;
+    return resultSymptoms.size() > 0 ? new Diagnosis(resultSymptoms) : null;
   }
 }
