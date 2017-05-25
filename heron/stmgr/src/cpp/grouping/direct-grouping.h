@@ -14,33 +14,28 @@
  * limitations under the License.
  */
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// This file defines the implementation of a simple spin lock
-//
-////////////////////////////////////////////////////////////////////////////////
+#ifndef SRC_CPP_SVCS_STMGR_SRC_GROUPING_DIRECT_GROUPING_H_
+#define SRC_CPP_SVCS_STMGR_SRC_GROUPING_DIRECT_GROUPING_H_
 
-#if !defined(__ERROR_SPIN_H)
-#define __ERROR_SPIN_H
+#include <list>
+#include <vector>
+#include "grouping/grouping.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
 namespace heron {
-namespace error {
+namespace stmgr {
 
-class __Spinlock {
+class DirectGrouping : public Grouping {
  public:
-  __Spinlock() : lock_(0) {}
-  ~__Spinlock() {}
+  explicit DirectGrouping(const std::vector<sp_int32>& _task_ids);
+  virtual ~DirectGrouping();
 
-  void acquire() {
-    while (__sync_lock_test_and_set(&lock_, 1)) {}
-  }
-
-  void release() { __sync_lock_release(&lock_); }
-
- private:
-  sp_int32 lock_;
+  virtual void GetListToSend(const proto::system::HeronDataTuple& _tuple,
+                             std::vector<sp_int32>& _return);
 };
-}  // namespace error
+
+}  // namespace stmgr
 }  // namespace heron
 
-#endif  // end of header file
+#endif  // SRC_CPP_SVCS_STMGR_SRC_GROUPING_DIRECT_GROUPING_H_

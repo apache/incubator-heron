@@ -14,11 +14,15 @@
 ''' utils.py '''
 import grp
 import os
+import pkgutil
 import pwd
 import stat
+import subprocess
 
 from datetime import datetime
 from xml.sax.saxutils import escape
+
+from heron.common.src.python.utils import log
 
 def format_mode(sres):
   """
@@ -138,3 +142,63 @@ def read_chunk(filename, offset=None, length=None):
     return dict(offset=offset, length=len(data), data=escape(data.decode('utf8', 'replace')))
 
   return dict(offset=offset, length=0)
+
+class StringBuilder(object):
+  def __init__(self):
+    self.str = ""
+
+  def add(self, line):
+    self.str += line
+
+  def result(self):
+    return self.str
+
+def pipe(prev_proc, to_cmd):
+  """
+  Pipes output of prev_proc into to_cmd.
+  Returns piped process
+  """
+  stdin = None if prev_proc is None else prev_proc.stdout
+  proc = subprocess.Popen(to_cmd,
+                          stdout=subprocess.PIPE,
+                          stdin=stdin)
+  if prev_proc is not None:
+    prev_proc.stdout.close() # Allow prev_proc to receive a SIGPIPE
+  return proc
+
+def str_cmd(cmd, cwd, env):
+  """
+  Runs the command and returns its stdout and stderr.
+  """
+  proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, cwd=cwd, env=env)
+  stdout_builder, stderr_builder = StringBuilder(), StringBuilder()
+  log.async_stream_process_stdout(proc, stdout_builder.add)
+  log.async_stream_process_stderr(proc, stderr_builder.add)
+  proc.wait()
+  stdout, stderr = stdout_builder.result(), stderr_builder.result()
+  return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
+
+# pylint: disable=unnecessary-lambda
+def chain(cmd_list):
+  """
+  Feed output of one command to the next and return final output
+  Returns string output of chained application of commands.
+  """
+  command = ' | '.join(map(lambda x: ' '.join(x), cmd_list))
+  chained_proc = reduce(pipe, [None] + cmd_list)
+  stdout_builder = StringBuilder()
+  log.async_stream_process_stdout(chained_proc, stdout_builder.add)
+  chained_proc.wait()
+  return {
+      'command': command,
+      'stdout': stdout_builder.result()
+  }
+
+def get_container_id(instance_id):
+  ''' get container id '''
+  return instance_id.split('_')[1]  # Format: container_<index>_component_name_<index>
+
+def get_asset(asset_name):
+  ''' get assset '''
+  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))

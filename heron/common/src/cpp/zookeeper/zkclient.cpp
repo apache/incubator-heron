@@ -38,7 +38,7 @@ struct ZKClientGetChildrenStructure {
   CallBack1<sp_int32>* cb_;
 };
 
-void RunUserCb(VCallback<sp_int32> cb, sp_int32 rc) { cb(rc); }
+void RunUserCb(sp_int32 rc, VCallback<sp_int32> cb) { cb(rc); }
 
 void RunWatcherCb(VCallback<> cb) { cb(); }
 
@@ -136,7 +136,7 @@ ZKClient::ZKClient(const std::string& hostportlist, EventLoop* eventLoop,
 }
 
 void ZKClient::Init() {
-  zkaction_responses_ = new PCQueue();
+  zkaction_responses_ = new PCQueue<CallBack*>();
   auto zkaction_response_cb = [this](EventLoop::Status status) {
     this->OnZkActionResponse(status);
   };
@@ -365,7 +365,7 @@ void ZKClient::OnZkActionResponse(EventLoop::Status _status) {
     ssize_t readcount = read(pipers_[0], buf, 1);
     if (readcount == 1) {
       bool dequeued = false;
-      CallBack* cb = reinterpret_cast<CallBack*>(zkaction_responses_->trydequeue(dequeued));
+      CallBack* cb = zkaction_responses_->trydequeue(dequeued);
       if (cb) {
         cb->Run();
       }
@@ -385,8 +385,8 @@ void ZKClient::OnZkActionResponse(EventLoop::Status _status) {
   return;
 }
 
-void ZKClient::ZkActionCb(VCallback<sp_int32> cb, sp_int32 rc) {
-  zkaction_responses_->enqueue(CreateCallback(&RunUserCb, std::move(cb), rc));
+void ZKClient::ZkActionCb(sp_int32 rc, VCallback<sp_int32> cb) {
+  zkaction_responses_->enqueue(CreateCallback(&RunUserCb, rc, std::move(cb)));
   SignalMainThread();
 }
 

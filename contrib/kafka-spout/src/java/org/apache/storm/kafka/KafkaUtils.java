@@ -286,7 +286,7 @@ public final class KafkaUtils {
         tups = ((StringMultiSchemeWithTopic) kafkaConfig.scheme)
             .deserializeWithTopic(topic, payloadBytes);
       } else {
-        tups = kafkaConfig.scheme.deserialize(payloadBytes);
+        tups = kafkaConfig.scheme.deserialize(payload);
       }
     }
     return tups;

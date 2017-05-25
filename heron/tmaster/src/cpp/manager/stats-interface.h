@@ -38,6 +38,7 @@ class StatsInterface {
   void HandleUnknownRequest(IncomingHTTPRequest* _request);
   void HandleExceptionRequest(IncomingHTTPRequest* _request);
   void HandleExceptionSummaryRequest(IncomingHTTPRequest* _request);
+  void HandleStmgrsRegistrationSummaryRequest(IncomingHTTPRequest* _request);
 
   HTTPServer* http_server_;  // Our http server
   TMetricsCollector* metrics_collector_;

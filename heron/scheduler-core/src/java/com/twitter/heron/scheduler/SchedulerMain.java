@@ -28,7 +28,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
@@ -302,7 +301,7 @@ public class SchedulerMain {
         String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(processId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
 
     LOG.info("Logging setup done.");

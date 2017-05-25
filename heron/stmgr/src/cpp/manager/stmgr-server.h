@@ -139,7 +139,6 @@ class StMgrServer : public Server {
   typedef std::unordered_map<Connection*, sp_int32> ConnectionTaskIdMap;
   ConnectionTaskIdMap active_instances_;
   // map of task id to InstanceData
-  // Once populated, will not change
   typedef std::unordered_map<sp_int32, InstanceData*> TaskIdInstanceDataMap;
   TaskIdInstanceDataMap instance_info_;
 

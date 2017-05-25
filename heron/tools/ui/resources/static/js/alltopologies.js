@@ -32,7 +32,7 @@ var TopologyItem = React.createClass({
 
     return (
        <tr className={state_class}>
-         <td className="col-md-3 break-all"><a className="toponame" href={'/topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
+         <td className="col-md-3 break-all"><a className="toponame" href={'./topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
          <td className="col-md-1 topostatus">{topology.status}</td>
          <td className="col-md-1 topocluster">{displaycluster}</td>
          <td className="col-md-1 topoenviron">{displayenv}</td>
@@ -57,7 +57,7 @@ var TopologyTable = React.createClass({
 
   fetchTopologies: function() {
     $.ajax({
-      url:      '/topologies/list.json',
+      url:      './topologies/list.json',
       dataType: 'json',
       data:     { format: 'json' },
       success:  function (result) {

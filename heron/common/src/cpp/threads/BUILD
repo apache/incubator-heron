@@ -4,7 +4,6 @@ cc_library(
     name = "threads-cxx",
     srcs = [
         "modinit.cpp",
-        "pcqueue.cpp",
         "spcountdownlatch.cpp",
 
         "pcqueue.h",

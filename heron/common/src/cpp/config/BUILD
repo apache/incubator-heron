@@ -19,7 +19,7 @@ cc_library(
 
         "cluster-config-reader.h",
         "cluster-config-vars.h",
-        "config.h",
+        "allconfig.h",
         "helper.h",
         "heron-internals-config-reader.h",
         "heron-internals-config-vars.h",

@@ -59,7 +59,7 @@ void GeneratePhysicalPlan(heron::proto::system::PhysicalPlan& _pplan,
   instance2->set_component_name("exclaim1");
 }
 
-void OnCreatePlan(EventLoop* eventLoop, heron::proto::system::StatusCode _code) {
+void OnCreatePlan(heron::proto::system::StatusCode _code, EventLoop* eventLoop) {
   if (_code != heron::proto::system::OK) {
     LOG(ERROR) << "Error creating pplan " << _code << std::endl;
     ::exit(1);
@@ -67,8 +67,8 @@ void OnCreatePlan(EventLoop* eventLoop, heron::proto::system::StatusCode _code) 
   _ss->loopExit();
 }
 
-void OnGetTopology(heron::proto::api::Topology* _topology, EventLoop* eventLoop,
-                   heron::proto::system::StatusCode _code) {
+void OnGetTopology(heron::proto::system::StatusCode _code, heron::proto::api::Topology* _topology,
+                   EventLoop* eventLoop) {
   if (_code != heron::proto::system::OK) {
     LOG(ERROR) << "Error getting topology " << _code << std::endl;
     ::exit(1);

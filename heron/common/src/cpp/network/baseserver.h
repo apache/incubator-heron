@@ -53,7 +53,6 @@ struct hash<BaseConnection*> {
 }
 
 class PCThread_Group;
-class PCQueue;
 
 class BaseServer {
  public:
@@ -68,6 +67,9 @@ class BaseServer {
   // Start listening on the host port pair for new requests
   // A zero return value means success. A negative value implies
   // that the server could not bind/listen on the port.
+  // If the port is 0, the actual port is stored in options_
+  // after Start_Base() called, which can be fetched through
+  // get_serveroptions()
   sp_int32 Start_Base();
 
   // Close all active connections and stop listening.
@@ -136,6 +138,8 @@ class BaseServer {
   ConnectionOptions connection_options_;
 
   // The options of this server.
+  // If the port is 0, the actual port can be fetched through
+  // get_serveroptions() after Start_Base() called.
   NetworkOptions options_;
 
   // Placeholders for various callbacks that we pass to the Connection.

@@ -72,6 +72,7 @@ class MetricsManagerClient(HeronClient):
       Log.error("Error connecting to Metrics Manager with status: %s" % str(status))
       retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
       self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
+      return
     self._send_register_req()
 
   def on_response(self, status, context, response):

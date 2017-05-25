@@ -79,7 +79,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
-      IpUtils::getHostName(), master_port_, mMetricsMgrPort, "__tmaster__",
+      myhost_name_, master_port_, mMetricsMgrPort, "__tmaster__",
       "0",  // MM expects task_id, so just giving 0 for tmaster.
       metricsExportIntervalSec, eventLoop_);
 
@@ -142,6 +142,14 @@ void TMaster::EstablishTMaster(EventLoop::Status) {
   auto cb = [this](proto::system::StatusCode code) { this->SetTMasterLocationDone(code); };
 
   state_mgr_->SetTMasterLocation(*tmaster_location_, std::move(cb));
+
+  // if zk lost the tmaster location, tmaster quits to bail out and re-establish its location
+  auto cb2 = [this]() {
+    LOG(ERROR) << " lost tmaster location in zk state manager. Bailing out..." << std::endl;
+    ::exit(1);
+  };
+  state_mgr_->SetTMasterLocationWatch(tmaster_location_->topology_name(), std::move(cb2));
+
   master_establish_attempts_++;
 }
 
@@ -364,7 +372,10 @@ proto::system::Status* TMaster::RegisterStMgr(
     // First check to see if that other guy has timed out
     if (!stmgrs_[stmgr_id]->TimedOut()) {
       // we reject the new guy
-      LOG(ERROR) << "Another stmgr exists with the same id and it hasn't timed out" << std::endl;
+      LOG(ERROR) << "Another stmgr exists at "
+                 << stmgrs_[stmgr_id]->get_connection()->getIPAddress() << ":"
+                 << stmgrs_[stmgr_id]->get_connection()->getPort()
+                 << " with the same id and it hasn't timed out";
       proto::system::Status* status = new proto::system::Status();
       status->set_status(proto::system::DUPLICATE_STRMGR);
       status->set_message("Duplicate StreamManager");
@@ -375,7 +386,10 @@ proto::system::Status* TMaster::RegisterStMgr(
       // for the stmgrs_ list. Which means this case will only happen
       // if the stmgr maintains connection but hasn't sent a heartbeat
       // in a while.
-      LOG(ERROR) << "Another stmgr exists with the same id but it has timed out" << std::endl;
+      LOG(ERROR) << "Another stmgr exists at "
+                 << stmgrs_[stmgr_id]->get_connection()->getIPAddress() << ":"
+                 << stmgrs_[stmgr_id]->get_connection()->getPort()
+                 << " with the same id but it has timed out";
       stmgrs_[stmgr_id]->UpdateWithNewStMgr(_stmgr, _instances, _conn);
       connection_to_stmgr_id_[_conn] = stmgr_id;
     }
@@ -485,12 +499,22 @@ bool TMaster::DistributePhysicalPlan() {
     for (iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
       iter->second->NewPhysicalPlan(*current_pplan_);
     }
-
     return true;
   }
 
   LOG(ERROR) << "No valid assignment yet" << std::endl;
   return false;
+}
+
+proto::tmaster::StmgrsRegistrationSummaryResponse* TMaster::GetStmgrsRegSummary() {
+  auto response = new proto::tmaster::StmgrsRegistrationSummaryResponse();
+  for (auto it = stmgrs_.begin(); it != stmgrs_.end(); ++it) {
+    response->add_registered_stmgrs(it->first);
+  }
+  for (auto it = absent_stmgrs_.begin(); it != absent_stmgrs_.end(); ++it) {
+    response->add_absent_stmgrs(*it);
+  }
+  return response;
 }
 
 proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {

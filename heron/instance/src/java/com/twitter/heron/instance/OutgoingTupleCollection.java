@@ -15,6 +15,7 @@
 package com.twitter.heron.instance;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -32,7 +33,11 @@ public class OutgoingTupleCollection {
   protected final String componentName;
   // We have just one outQueue responsible for both control tuples and data tuples
   private final Communicator<HeronTuples.HeronTupleSet> outQueue;
-  private final SystemConfig systemConfig;
+
+  // Maximum data tuple size in bytes we can put in one HeronTupleSet
+  private final ByteAmount maxDataTupleSize;
+  private final int dataTupleSetCapacity;
+  private final int controlTupleSetCapacity;
 
   private HeronTuples.HeronDataTupleSet.Builder currentDataTuple;
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
@@ -42,18 +47,13 @@ public class OutgoingTupleCollection {
 
   // Current size in bytes for data types to pack into the HeronTupleSet
   private long currentDataTupleSizeInBytes;
-  // Maximum data tuple size in bytes we can put in one HeronTupleSet
-  private long maxDataTupleSizeInBytes;
-
-  private int dataTupleSetCapacity;
-  private int controlTupleSetCapacity;
 
   public OutgoingTupleCollection(
       String componentName,
       Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
     this.componentName = componentName;
-    this.systemConfig =
+    SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Initialize the values in constructor
@@ -62,7 +62,7 @@ public class OutgoingTupleCollection {
 
     // Read the config values
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
-    this.maxDataTupleSizeInBytes = systemConfig.getInstanceSetDataTupleSizeBytes();
+    this.maxDataTupleSize = systemConfig.getInstanceSetDataTupleSize();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }
 
@@ -77,7 +77,7 @@ public class OutgoingTupleCollection {
     if (currentDataTuple == null
         || !currentDataTuple.getStream().getId().equals(streamId)
         || currentDataTuple.getTuplesCount() >= dataTupleSetCapacity
-        || currentDataTupleSizeInBytes >= maxDataTupleSizeInBytes) {
+        || currentDataTupleSizeInBytes >= maxDataTupleSize.asBytes()) {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);

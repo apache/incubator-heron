@@ -18,10 +18,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Duration;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.twitter.heron.common.basics.ByteAmount;
 
 public class SystemConfigTest {
 
@@ -42,8 +45,8 @@ public class SystemConfigTest {
         .putAll(file.getAbsolutePath(), true)
         .build();
     Assert.assertEquals("log-files", systemConfig.getHeronLoggingDirectory());
-    Assert.assertEquals(100, systemConfig.getHeronLoggingMaximumSizeMb());
+    Assert.assertEquals(ByteAmount.fromMegabytes(100), systemConfig.getHeronLoggingMaximumSize());
     Assert.assertEquals(5, systemConfig.getHeronLoggingMaximumFiles());
-    Assert.assertEquals(60, systemConfig.getHeronMetricsExportIntervalSec());
+    Assert.assertEquals(Duration.ofSeconds(60), systemConfig.getHeronMetricsExportInterval());
   }
 }

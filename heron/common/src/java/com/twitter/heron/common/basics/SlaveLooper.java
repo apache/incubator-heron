@@ -14,6 +14,8 @@
 
 package com.twitter.heron.common.basics;
 
+import java.time.Duration;
+
 /**
  * A SlaveLooper, implementing WakeableLooper, is a class wrapping object wait()/notify() to await/unblock a thread.
  * It extends WakeableLooper, so it will execute in a while loop unless the exitLoop() is called.
@@ -37,15 +39,15 @@ public class SlaveLooper extends WakeableLooper {
         // If timer task exists, the doWait() should wait not later than the time timer to execute
         // It no timer exists, we consider it will wait forever until other threads call wakeUp()
         // The nextTimeoutIntervalMs is in milli-seconds
-        long nextTimeoutIntervalMs = getNextTimeoutIntervalMs();
+        Duration nextTimeoutInterval = getNextTimeoutInterval();
 
         // In fact, only when the timeout > 0 (no timer should be executed before now)
         // or no wakeUp() is called during the thread's run, will the thread wait().
-        if (nextTimeoutIntervalMs > 0) {
+        if (nextTimeoutInterval.toMillis() > 0) {
           try {
             lock.isWaiting = true;
             // The wait will take the timeout in unit of milli-seconds
-            lock.proceedLock.wait(nextTimeoutIntervalMs);
+            lock.proceedLock.wait(nextTimeoutInterval.toMillis());
           } catch (InterruptedException e) {
             e.printStackTrace();
           } finally {

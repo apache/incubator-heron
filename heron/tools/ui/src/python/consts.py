@@ -23,4 +23,6 @@ DEFAULT_PORT = 8889
 # default parameter - url to connect to heron tracker
 DEFAULT_TRACKER_URL = "http://localhost:8888"
 
+DEFAULT_BASE_URL = ""
+
 VERSION = common_config.get_version_number(zipped_pex=True)

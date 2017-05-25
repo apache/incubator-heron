@@ -22,6 +22,7 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 from tornado.options import define, options
+from tornado.httpclient import AsyncHTTPClient
 
 import heron.tools.common.src.python.utils.config as common_config
 import heron.common.src.python.utils.log as log
@@ -37,6 +38,7 @@ class Application(tornado.web.Application):
   """ Tornado server application """
   def __init__(self):
 
+    AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
     config = Config(options.config_file)
     self.tracker = Tracker(config)
     self.tracker.synch_topologies()
@@ -52,9 +54,12 @@ class Application(tornado.web.Application):
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
         (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
+        # Deprecated. See https://github.com/twitter/heron/issues/1754
         (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
         (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
+        (r"/topologies/metadata", handlers.MetaDataHandler, {"tracker":self.tracker}),
+        (r"/topologies/runtimestate", handlers.RuntimeStateHandler, {"tracker":self.tracker}),
         (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
         (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
         (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":self.tracker}),

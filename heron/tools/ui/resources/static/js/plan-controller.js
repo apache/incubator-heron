@@ -9,10 +9,10 @@
  *   dim all the others. This doesn't change any information in the details table and shouldn't
  *   result in any network requests.
  */
-function PlanController(cluster, environ, toponame, physicalPlan, logicalPlan) {
+function PlanController(baseUrl, cluster, environ, toponame, physicalPlan, logicalPlan) {
   var manager = {};
   var d3instances, d3nodes, d3links, d3nodeText, d3containerCount, d3instanceCount;
-  var instanceDetails = new StatTrendlines(cluster, environ, toponame, physicalPlan, logicalPlan);
+  var instanceDetails = new StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logicalPlan);
 
   function getFocusedElement() {
     var parts = window.location.hash.substr(2).split('/');
@@ -111,6 +111,7 @@ function PlanController(cluster, environ, toponame, physicalPlan, logicalPlan) {
     var comp_spout_source = isBolt ? undefined : logicalPlan.spouts[name]["spout_source"]
     React.renderComponent(
       AllMetrics({
+        baseUrl: baseUrl,
         cluster: cluster,
         environ: environ,
         topology: toponame,

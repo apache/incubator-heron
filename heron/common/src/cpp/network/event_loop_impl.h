@@ -76,7 +76,7 @@ class EventLoopImpl : public EventLoop {
   void handleWriteCallback(sp_int32 fd, sp_int16 event);
 
   // libevent callback on timer events.
-  void handleTimerCallback(sp_int64 timerid, sp_int16 event);
+  void handleTimerCallback(sp_int16 event, sp_int64 timerid);
 
   // The underlying dispatcher that we wrap around.
   struct event_base* mDispatcher;

@@ -14,6 +14,8 @@
 
 package com.twitter.heron.simulator.utils;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Map;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
 public final class PhysicalPlanUtil {
@@ -112,10 +115,10 @@ public final class PhysicalPlanUtil {
    * @param topology The given topology protobuf
    * @return the config value of "topology.message.timeout.secs"
    */
-  public static int extractTopologyTimeout(TopologyAPI.Topology topology) {
+  public static Duration extractTopologyTimeout(TopologyAPI.Topology topology) {
     for (TopologyAPI.Config.KeyValue keyValue : topology.getTopologyConfig().getKvsList()) {
       if (keyValue.getKey().equals("topology.message.timeout.secs")) {
-        return Integer.parseInt(keyValue.getValue());
+        return TypeUtils.getDuration(keyValue.getValue(), ChronoUnit.SECONDS);
       }
     }
 

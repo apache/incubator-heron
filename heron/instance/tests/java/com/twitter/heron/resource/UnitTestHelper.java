@@ -141,7 +141,7 @@ public final class UnitTestHelper {
   }
 
   @SuppressWarnings("unchecked")
-  public static void clearSingletonRegistry() throws Exception {
+  public static void clearSingletonRegistry() throws IllegalAccessException, NoSuchFieldException {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
     field.setAccessible(true);
@@ -176,7 +176,7 @@ public final class UnitTestHelper {
         Paths.get(runFiles, Constants.BUILD_TEST_HERON_INTERNALS_CONFIG_PATH).toString();
     SystemConfig.Builder sb = SystemConfig.newBuilder(true)
         .putAll(filePath, true)
-        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL_SEC, 1);
+        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 1);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, sb.build());
   }
 
