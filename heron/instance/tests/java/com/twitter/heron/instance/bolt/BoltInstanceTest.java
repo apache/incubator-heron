@@ -15,6 +15,7 @@
 package com.twitter.heron.instance.bolt;
 
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.ByteString;
@@ -28,7 +29,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
@@ -92,9 +93,12 @@ public class BoltInstanceTest {
 
     slaveTester.getInControlQueue().offer(instanceControlMsg);
 
+    int expectedTuples = 10;
+    CountDownLatch executeLatch = new CountDownLatch(expectedTuples);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
-    SingletonRegistry.INSTANCE.registerSingleton("execute-count", tupleExecutedCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_COUNT, tupleExecutedCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
     SingletonRegistry.INSTANCE.registerSingleton("received-string-list", receivedStrings);
 
     // Send tuples to bolt instance
@@ -130,15 +134,8 @@ public class BoltInstanceTest {
     heronTupleSet.setData(dataTupleSet);
     slaveTester.getInStreamQueue().offer(heronTupleSet.build());
 
-    for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-      if (tupleExecutedCount.intValue() == 10) {
-        break;
-      }
-      SysUtils.sleep(Constants.RETRY_INTERVAL);
-    }
-
     // Wait the bolt's finishing
-    SysUtils.sleep(Constants.TEST_WAIT_TIME);
+    HeronServerTester.await(executeLatch);
     Assert.assertEquals(10, tupleExecutedCount.intValue());
     Assert.assertEquals(5, ackCount.intValue());
     Assert.assertEquals(5, failCount.intValue());

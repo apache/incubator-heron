@@ -14,8 +14,10 @@
 package com.twitter.heron.instance;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 
 import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.CommunicatorTestHelper;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
@@ -40,22 +42,42 @@ public class CommunicatorTester {
   private final Communicator<InstanceControlMsg> inControlQueue;
   private final Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
 
-  public CommunicatorTester() throws IOException {
-    this(new NIOLooper());
+  public CommunicatorTester(CountDownLatch inControlQueueOfferLatch,
+                            CountDownLatch inStreamQueueOfferLatch) throws IOException {
+    this(new NIOLooper(), inControlQueueOfferLatch, inStreamQueueOfferLatch, null);
   }
 
-  protected CommunicatorTester(WakeableLooper testLooper) {
+  protected CommunicatorTester(WakeableLooper testLooper, CountDownLatch outStreamQueueOfferLatch) {
+    this(testLooper, null, null, outStreamQueueOfferLatch);
+  }
+
+  private CommunicatorTester(WakeableLooper testLooper,
+                             final CountDownLatch inControlQueueOfferLatch,
+                             final CountDownLatch inStreamQueueOfferLatch,
+                             final CountDownLatch outStreamQueueOfferLatch) {
     UnitTestHelper.addSystemConfigToSingleton();
     this.testLooper = testLooper;
     slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<>(slaveLooper, testLooper);
-    outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<>(testLooper, slaveLooper);
-    inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inControlQueue = new Communicator<>(testLooper, slaveLooper);
+    outStreamQueue = initCommunicator(
+        new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper),
+        outStreamQueueOfferLatch);
+    inStreamQueue = initCommunicator(
+        new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper),
+        inStreamQueueOfferLatch);
+    inControlQueue = initCommunicator(
+        new Communicator<InstanceControlMsg>(testLooper, slaveLooper), inControlQueueOfferLatch);
+    slaveMetricsOut = initCommunicator(
+        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper), null);
+  }
 
-    slaveMetricsOut = new Communicator<>(slaveLooper, testLooper);
-    slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
+  private <T> Communicator<T> initCommunicator(Communicator<T> communicator,
+                                               final CountDownLatch offerLatch) {
+    communicator.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
+    if (offerLatch != null) {
+      return CommunicatorTestHelper.spyCommunicator(communicator, offerLatch);
+    } else {
+      return communicator;
+    }
   }
 
   public void stop() throws NoSuchFieldException, IllegalAccessException {

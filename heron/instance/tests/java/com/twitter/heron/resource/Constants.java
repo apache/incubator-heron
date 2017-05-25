@@ -29,8 +29,14 @@ public final class Constants {
 
   public static final int QUEUE_BUFFER_SIZE = 128;
 
+  public static final String EXECUTE_COUNT = "execute-count";
   public static final String FAIL_COUNT = "fail-count";
   public static final String ACK_COUNT = "ack-count";
+
+  public static final String EXECUTE_LATCH = "execute-latch";
+  public static final String FAIL_LATCH = "fail-latch";
+  public static final String ACK_LATCH = "ack-latch";
+
   public static final String ACTIVATE_COUNT_LATCH = "activate-count-latch";
   public static final String DEACTIVATE_COUNT_LATCH = "deactivate-count-latch";
 
