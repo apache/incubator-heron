@@ -154,7 +154,6 @@ public class HeronServerTest {
   public void testHandleAccept() {
     runBase();
 
-    HeronServerTester.await(serverOnConnectSignal);
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
     ServerSocketChannel acceptChannel = heronServer.getAcceptChannel();
 
@@ -362,6 +361,7 @@ public class HeronServerTest {
   private void runBase() {
     heronServerTester.start();
     HeronServerTester.await(clientOnConnectSignal);
+    HeronServerTester.await(serverOnConnectSignal);
   }
 
   private class SimpleHeronServer extends HeronServer {
