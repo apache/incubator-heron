@@ -36,7 +36,7 @@ import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.UnitTestHelper;
 
 /**
- * Common superclass for share setup required for network tests.
+ * Common superclass to share setup required for network tests.
  */
 public abstract class AbstractNetworkTest {
   static final String HOST = "127.0.0.1";
