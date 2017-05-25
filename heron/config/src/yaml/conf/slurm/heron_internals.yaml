@@ -55,6 +55,10 @@ heron.streammgr.packet.maximum.size.bytes: 102400
 # The frequency in ms to drain the tuple cache in stream manager
 heron.streammgr.cache.drain.frequency.ms: 10 
 
+# The sized based threshold in MB for buffering data tuples
+# waiting for checkpoint markers before giving up
+heron.streammgr.stateful.buffer.size.mb: 100
+
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100 
 
