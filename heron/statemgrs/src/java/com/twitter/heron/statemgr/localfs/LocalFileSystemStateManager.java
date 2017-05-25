@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -220,6 +221,12 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // This is because when running in simulator we control when a scheduler dies and
     // comes up deterministically.
     return setData(StateLocation.SCHEDULER_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName) {
+    return setData(StateLocation.STATEFUL_CHECKPOINT, topologyName, checkpoint.toByteArray(), true);
   }
 
   @Override

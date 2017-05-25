@@ -364,6 +364,16 @@ public class AuroraSchedulerTest {
         case METRICSCACHEMGR_CLASSPATH:
           expected = expectedLib + "/metricscachemgr/*";
           break;
+        case CKPTMGR_CLASSPATH:
+          expected =
+              expectedLib + "/ckptmgr/*:" + expectedLib + "/statefulstorages/*:";
+          break;
+        case IS_STATEFUL_ENABLED:
+          expected = Boolean.FALSE.toString();
+          break;
+        case STATEFUL_CONFIG_YAML:
+          expected = expectedConf + "/stateful.yaml";
+          break;
         case AUTO_HEAL_TIME_WINDOW:
           expected = "0";
           break;

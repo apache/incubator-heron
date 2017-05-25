@@ -80,7 +80,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
-      IpUtils::getHostName(), master_port_, mMetricsMgrPort, "__tmaster__",
+      myhost_name_, master_port_, mMetricsMgrPort, "__tmaster__",
       "0",  // MM expects task_id, so just giving 0 for tmaster.
       metricsExportIntervalSec, eventLoop_);
 
@@ -143,6 +143,14 @@ void TMaster::EstablishTMaster(EventLoop::Status) {
   auto cb = [this](proto::system::StatusCode code) { this->SetTMasterLocationDone(code); };
 
   state_mgr_->SetTMasterLocation(*tmaster_location_, std::move(cb));
+
+  // if zk lost the tmaster location, tmaster quits to bail out and re-establish its location
+  auto cb2 = [this]() {
+    LOG(ERROR) << " lost tmaster location in zk state manager. Bailing out..." << std::endl;
+    ::exit(1);
+  };
+  state_mgr_->SetTMasterLocationWatch(tmaster_location_->topology_name(), std::move(cb2));
+
   master_establish_attempts_++;
 }
 

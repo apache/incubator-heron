@@ -13,6 +13,7 @@
 # limitations under the License.
 '''heron executor unittest'''
 import os
+import socket
 import unittest2 as unittest
 
 from heron.executor.src.python.heron_executor import ProcessInfo
@@ -34,6 +35,7 @@ def get_test_heron_internal_yaml():
   return yaml_path
 
 INTERNAL_CONF_PATH = get_test_heron_internal_yaml()
+HOSTNAME = socket.gethostname()
 
 class MockPOpen(object):
   """fake subprocess.Popen object that we can use to mock processes and pids"""
@@ -130,10 +132,10 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'heron-shell-0', shell_command_expected),
       ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-tmaster',
-                  'tmaster_binary master_port '
+                  'tmaster_binary %s master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot stmgr-1,stmgr-7 '
-                  '%s metrics_sinks_config_file metricsmgr_port 10 20' % INTERNAL_CONF_PATH),
+                  '%s metrics_sinks_config_file metricsmgr_port 10 20' % (HOSTNAME, INTERNAL_CONF_PATH )),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
   ]
 
@@ -141,8 +143,8 @@ class HeronExecutorTest(unittest.TestCase):
   expected_processes_container_1 = [
       ProcessInfo(MockPOpen(), 'stmgr-1',
                   'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
-                  'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port '
-                  'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
+                  'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 %s master_port '
+                  'metricsmgr_port shell-port %s' % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
                   get_expected_instance_command('exclaim1', 1, 1)),
@@ -159,8 +161,8 @@ class HeronExecutorTest(unittest.TestCase):
                   get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'stmgr-7',
                 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
-                'container_7_word_11,container_7_exclaim1_210 master_port '
-                'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
+                'container_7_word_11,container_7_exclaim1_210 %s master_port '
+                'metricsmgr_port shell-port %s' % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', shell_command_expected),
   ]
@@ -195,7 +197,8 @@ class HeronExecutorTest(unittest.TestCase):
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
-    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport 10 20
+    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
+    is_stateful_enabled ckptmgr_classpath ckgtmgr_port stateful_config_file 10 20
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):

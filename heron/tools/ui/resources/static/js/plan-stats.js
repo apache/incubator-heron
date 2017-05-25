@@ -2,7 +2,7 @@
  * Generate the stats rollup table.
  */
 (function (global) {
-  function drawStatsTable(planController, cluster, environ, toponame, physicalPlan, logicalPlan) {
+  function drawStatsTable(planController, baseUrl, cluster, environ, toponame, physicalPlan, logicalPlan) {
     var NO_DATA_COLOR = "#f0f5fa";
 
     var table = d3.selectAll('.stat-rollup-table tbody.stats');
@@ -346,7 +346,7 @@
     }
 
     function createMetricsUrl(metric, component, instance, start, end) {
-      var url = '/topologies/metrics/timeline?';
+      var url = baseUrl + '/topologies/metrics/timeline?';
       return [
         url + 'cluster=' + cluster,
         'environ=' + environ,

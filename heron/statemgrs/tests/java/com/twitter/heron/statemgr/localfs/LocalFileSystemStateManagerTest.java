@@ -67,10 +67,10 @@ public class LocalFileSystemStateManagerTest {
 
   @Before
   public void before() throws Exception {
-    manager = initMockManager(ROOT_ADDR, false);
+    manager = initSpyManager(ROOT_ADDR, false);
   }
 
-  private static LocalFileSystemStateManager initMockManager(String rootPath, boolean initTree) {
+  private static LocalFileSystemStateManager initSpyManager(String rootPath, boolean initTree) {
     Config config = Config.newBuilder()
         .put(Key.STATEMGR_ROOT_PATH, rootPath)
         .put(LocalFileSystemKey.IS_INITIALIZE_FILE_TREE.value(), initTree)
@@ -231,7 +231,7 @@ public class LocalFileSystemStateManagerTest {
   @Test
   public void testGetFilesystemLock() throws Exception {
     Path tempDir = Files.createTempDirectory("heron-testGetFilesystemLock");
-    LocalFileSystemStateManager fsBackedManager = initMockManager(tempDir.toString(), true);
+    LocalFileSystemStateManager fsBackedManager = initSpyManager(tempDir.toString(), true);
     Lock lock = fsBackedManager.getLock(TOPOLOGY_NAME, LOCK_NAME);
     assertTrue("Failed to get lock", lock.tryLock(0, TimeUnit.MILLISECONDS));
     lock.unlock();
