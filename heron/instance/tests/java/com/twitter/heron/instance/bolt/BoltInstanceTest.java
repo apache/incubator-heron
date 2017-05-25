@@ -99,7 +99,7 @@ public class BoltInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_COUNT, tupleExecutedCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
-    SingletonRegistry.INSTANCE.registerSingleton("received-string-list", receivedStrings);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.RECEIVED_STRING_LIST, receivedStrings);
 
     // Send tuples to bolt instance
     HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();

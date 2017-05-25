@@ -40,9 +40,7 @@ public final class Constants {
   public static final String ACTIVATE_COUNT_LATCH = "activate-count-latch";
   public static final String DEACTIVATE_COUNT_LATCH = "deactivate-count-latch";
 
-  public static final String GATEWAY_METRICS = "com.twitter.heron.metrics.GatewayMetrics";
-
-  public static final String PHYSICAL_PLAN_HELPER = "com.twitter.heron.utility.PhysicalPlanHelper";
+  public static final String RECEIVED_STRING_LIST = "received-string-list";
 
   public static final String HERON_SYSTEM_CONFIG = "com.twitter.heron.common.config.SystemConfig";
 

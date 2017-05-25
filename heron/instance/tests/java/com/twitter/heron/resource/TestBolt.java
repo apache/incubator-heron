@@ -61,7 +61,7 @@ public class TestBolt extends BaseRichBolt {
     CountDownLatch tupleExecutedLatch =
         (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.EXECUTE_LATCH);
     StringBuilder receivedStrings =
-        (StringBuilder) SingletonRegistry.INSTANCE.getSingleton("received-string-list");
+        (StringBuilder) SingletonRegistry.INSTANCE.getSingleton(Constants.RECEIVED_STRING_LIST);
 
     if (receivedStrings != null) {
       receivedStrings.append(tuple.getString(0));
