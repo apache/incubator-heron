@@ -68,7 +68,6 @@ public class SpoutInstanceTest {
   // Singleton to be changed globally for testing
   private AtomicInteger ackCount;
   private AtomicInteger failCount;
-  private PhysicalPlans.PhysicalPlan physicalPlan;
 
   private SlaveTester slaveTester;
 
@@ -100,14 +99,7 @@ public class SpoutInstanceTest {
    */
   @Test
   public void testNextTuple() {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    initSpout(slaveTester, false, -1);
 
     Runnable task = new Runnable() {
       private String streamId = "";
@@ -161,14 +153,7 @@ public class SpoutInstanceTest {
    */
   @Test
   public void testGatherMetrics() {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    initSpout(slaveTester, false, -1);
 
     Runnable task = new Runnable() {
       @Override
@@ -204,16 +189,9 @@ public class SpoutInstanceTest {
    */
   @Test
   public void testDoImmediateAcks() {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
 
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    initSpout(slaveTester, false, -1);
 
     Runnable task = new Runnable() {
       @Override
@@ -242,16 +220,9 @@ public class SpoutInstanceTest {
 
   @Test
   public void testLookForTimeouts() {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(true, 1);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
 
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    initSpout(slaveTester, true, 1);
 
     Runnable task = new Runnable() {
       @Override
@@ -280,17 +251,10 @@ public class SpoutInstanceTest {
 
   @Test
   public void testAckAndFail() {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
 
-    slaveTester.getInControlQueue().offer(instanceControlMsg);
+    initSpout(slaveTester, true, -1);
 
     Runnable task = new Runnable() {
       @Override
@@ -364,5 +328,13 @@ public class SpoutInstanceTest {
       tupleReceived += dataTupleSet.getTuplesCount();
       heronDataTupleList.addAll(dataTupleSet.getTuplesList());
     }
+  }
+
+  private static void initSpout(SlaveTester slaveTester, boolean ackEnabled, int timeout) {
+    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(ackEnabled, timeout);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
+
+    slaveTester.getInControlQueue().offer(
+        InstanceControlMsg.newBuilder().setNewPhysicalPlanHelper(physicalPlanHelper).build());
   }
 }
