@@ -190,7 +190,8 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
   tmaster =
       new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath, stmgrs_id_list,
                                   tmaster_controller_port, tmaster_port, tmaster_stats_port,
-                                  metrics_mgr_port, metrics_sinks_config_filename, LOCALHOST, ss);
+                                  metrics_mgr_port, metrics_sinks_config_filename, LOCALHOST, ss,
+                                  0, 20);
   tmaster_thread = new std::thread(StartServer, ss);
 }
 
@@ -1365,6 +1366,10 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   // workers have connected
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
+  // Check the count: should be 2-1=1
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(1, std::chrono::seconds(5)));
+  EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
+
   // Kill current tmaster
   common.ss_list_.front()->loopExit();
   common.tmaster_thread_->join();
@@ -1392,7 +1397,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   StartTMaster(common);
 
   // This confirms that metrics manager received the new tmaster location
-  metricsMgrTmasterLatch->wait();
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(0, std::chrono::seconds(5)));
 
   // Now wait until stmgr receives the new physical plan
   // No easy way to avoid sleep here.
@@ -1493,6 +1498,10 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   // workers have connected
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
+  // Check the count: should be 2-1=1
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(1, std::chrono::seconds(5)));
+  EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
+
   // Kill current tmaster
   common.ss_list_.front()->loopExit();
   common.tmaster_thread_->join();
@@ -1517,7 +1526,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   StartTMaster(common);
 
   // This confirms that metrics manager received the new tmaster location
-  metricsMgrTmasterLatch->wait();
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(0, std::chrono::seconds(5)));
 
   // Now wait until stmgr receives the new physical plan.
   // No easy way to avoid sleep here.

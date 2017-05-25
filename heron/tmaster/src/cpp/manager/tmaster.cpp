@@ -55,7 +55,8 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
                  const std::vector<std::string>& _stmgrs, sp_int32 _controller_port,
                  sp_int32 _master_port, sp_int32 _stats_port, sp_int32 metricsMgrPort,
                  const std::string& _metrics_sinks_yaml, const std::string& _myhost_name,
-                 EventLoop* eventLoop) {
+                 EventLoop* eventLoop, sp_int32 auto_restart_window,
+                 sp_int32 auto_restart_interval) {
   start_time_ = std::chrono::high_resolution_clock::now();
   zk_hostport_ = _zk_hostport;
   topdir_ = _topdir;
@@ -69,9 +70,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   eventLoop_ = eventLoop;
   metrics_collector_ =
       new TMetricsCollector(config::HeronInternalsConfigReader::Instance()
-                                    ->GetHeronTmasterMetricsCollectorMaximumIntervalMin() *
-                                60,
-                            eventLoop_, _metrics_sinks_yaml);
+                                    ->GetHeronTmasterMetricsCollectorMaximumIntervalMin() * 60,
+                            eventLoop_, _metrics_sinks_yaml, auto_restart_window,
+                            auto_restart_interval, this);
 
   mMetricsMgrPort = metricsMgrPort;
 

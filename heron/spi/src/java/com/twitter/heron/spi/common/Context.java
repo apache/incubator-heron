@@ -109,7 +109,7 @@ public class Context {
     return cfg.getStringValue(Key.CLUSTER_YAML);
   }
 
-  public static String statefulFile(Config cfg) {
+  public static String statefulConfigFile(Config cfg) {
     return cfg.getStringValue(Key.STATEFUL_YAML);
   }
 
@@ -249,8 +249,12 @@ public class Context {
     return cfg.getStringValue(Key.CKPTMGR_CLASSPATH);
   }
 
+  public static String statefulStoragesClassPath(Config cfg) {
+    return cfg.getStringValue(Key.STATEFULSTORAGES_CLASSPATH);
+  }
+
   public static Boolean isStateful(Config cfg) {
-    return cfg.getBooleanValue(Key.IS_STATEFUL);
+    return cfg.getBooleanValue(Key.IS_STATEFUL_ENABLED);
   }
 
   public static String stateManagerClassPath(Config cfg) {
@@ -293,15 +297,26 @@ public class Context {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
   }
 
+  public static String autoRestartBackpressureContainerTimeWindow(Config cfg) {
+    return cfg.getStringValue(Key.AUTO_HEAL_WINDOW);
+  }
+
+  public static String autoRestartBackpressureContainerMinInterval(Config cfg) {
+    return cfg.getStringValue(Key.AUTO_HEAL_INTERVAL);
+  }
+
   public static final Boolean isCleanStateCheckpoints(Config cfg) {
     return cfg.getBooleanValue(Key.IS_CLEAN_STATEFUL_CHECKPOINTS);
   }
 
   @SuppressWarnings("unchecked")
-  public static final String statefulStorageClassPath(Config cfg) {
+  public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =
         (Map<String, Object>) cfg.get(Key.STATEFUL_STORAGE_CONF);
-    Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CLASSPATH.value());
+    if (statefulStorageConfig == null) {
+      return "";
+    }
+    Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CUSTOM_CLASSPATH.value());
     return o == null ? "" : (String) o;
   }
 }

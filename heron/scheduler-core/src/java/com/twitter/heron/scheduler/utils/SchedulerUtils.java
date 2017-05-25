@@ -38,7 +38,7 @@ import com.twitter.heron.spi.utils.ShellUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
-  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 8;
+  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 9;
   public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
   public static final String SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION = "P";
 
@@ -116,6 +116,10 @@ public final class SchedulerUtils {
     commands.add(Context.topologyBinaryFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
+    commands.add("--auto_heal_window");
+    commands.add(Context.autoRestartBackpressureContainerTimeWindow(config));
+    commands.add("--auto_heal_interval");
+    commands.add(Context.autoRestartBackpressureContainerMinInterval(config));
 
     return commands.toArray(new String[0]);
   }
@@ -198,6 +202,7 @@ public final class SchedulerUtils {
     String schedulerPort = freePorts.get(5);
     String metricsCacheMasterPort = freePorts.get(6);
     String metricsCacheStatsPort = freePorts.get(7);
+    String ckptmgrPort = freePorts.get(8);
 
     List<String> commands = new ArrayList<>();
     commands.add(topology.getName());
@@ -239,6 +244,20 @@ public final class SchedulerUtils {
     commands.add(Context.metricsCacheManagerClassPath(config));
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
+    commands.add(Context.autoRestartBackpressureContainerTimeWindow(config));
+    commands.add(Context.autoRestartBackpressureContainerMinInterval(config));
+
+    Boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
+        topology.getTopologyConfig().getKvsList(),
+        com.twitter.heron.api.Config.TOPOLOGY_STATEFUL_ENABLED, false);
+    commands.add(Boolean.toString(isStatefulEnabled));
+    String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
+        Context.ckptmgrClassPath(config),
+        Context.statefulStoragesClassPath(config),
+        Context.statefulStorageCustomClassPath(config));
+    commands.add(completeCkptmgrProcessClassPath);
+    commands.add(ckptmgrPort);
+    commands.add(Context.statefulConfigFile(config));
 
     return commands.toArray(new String[commands.size()]);
   }

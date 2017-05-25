@@ -147,6 +147,18 @@ public class SchedulerMain {
         .longOpt("verbose")
         .build();
 
+    Option autoHeal = Option.builder("a")
+        .desc("Auto restart backpressure container monitor time window")
+        .longOpt("auto_heal_window")
+        .hasArgs()
+        .build();
+
+    Option autoHealInterval = Option.builder("i")
+        .desc("Auto restart backpressure container restart min interval")
+        .longOpt("auto_heal_interval")
+        .hasArgs()
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -155,6 +167,8 @@ public class SchedulerMain {
     options.addOption(schedulerHTTPPort);
     options.addOption(property);
     options.addOption(verbose);
+    options.addOption(autoHeal);
+    options.addOption(autoHealInterval);
 
     return options;
   }
@@ -209,7 +223,9 @@ public class SchedulerMain {
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
         cmd.hasOption("verbose"),
-        schedulerProperties);
+        schedulerProperties,
+        cmd.getOptionValue("auto_heal_window"),
+        cmd.getOptionValue("auto_heal_interval"));
 
     LOG.info("Scheduler command line properties override: " + schedulerProperties.toString());
 
@@ -234,7 +250,8 @@ public class SchedulerMain {
                                              Boolean verbose
                                              ) throws IOException {
     return createInstance(
-        cluster, role, env, topologyJar, topologyName, httpPort, verbose, new Properties());
+        cluster, role, env, topologyJar, topologyName, httpPort, verbose, new Properties(),
+        "0", "20");
   }
 
   public static SchedulerMain createInstance(String cluster,
@@ -244,7 +261,9 @@ public class SchedulerMain {
                                              String topologyName,
                                              int httpPort,
                                              Boolean verbose,
-                                             Properties schedulerProperties) throws IOException {
+                                             Properties schedulerProperties,
+                                             String autoHeal,
+                                             String autoHealInterval) throws IOException {
     // Look up the topology def file location
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
 
@@ -259,7 +278,9 @@ public class SchedulerMain {
         topologyJar,
         topologyDefnFile,
         verbose,
-        topology);
+        topology,
+        autoHeal,
+        autoHealInterval);
 
     // set up logging with complete Config
     setupLogging(schedulerConfig);

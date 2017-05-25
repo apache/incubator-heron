@@ -43,7 +43,8 @@ class TMaster {
           const std::string& _topology_id, const std::string& _topdir,
           const std::vector<std::string>& _stmgrs, sp_int32 _controller_port, sp_int32 _master_port,
           sp_int32 _stats_port, sp_int32 metricsMgrPort, const std::string& metrics_sinks_yaml,
-          const std::string& _myhost_name, EventLoop* eventLoop);
+          const std::string& _myhost_name, EventLoop* eventLoop, sp_int32 auto_restart_window,
+          sp_int32 auto_restart_interval);
 
   virtual ~TMaster();
 

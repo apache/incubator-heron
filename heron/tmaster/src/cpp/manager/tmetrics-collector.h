@@ -29,6 +29,9 @@
 
 namespace heron {
 namespace tmaster {
+
+class TMaster;
+
 // Helper class to manage aggregation and and serving of metrics. Metrics are logically stored as a
 // component_name -> {instance_id ->value}n .
 // TODO(kramasamy): Store metrics persistently to prevent against crashes.
@@ -36,7 +39,8 @@ class TMetricsCollector {
  public:
   // _max_interval is how far along we keep individual metric blobs.
   TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
-                    const std::string& metrics_sinks_yaml);
+                    const std::string& metrics_sinks_yaml, sp_int64 auto_restart_window,
+                    sp_int64 auto_restart_interval, TMaster* tmaster);
 
   // Deletes all stored ComponentMetrics.
   virtual ~TMetricsCollector();
@@ -248,6 +252,19 @@ class TMetricsCollector {
   std::string metrics_sinks_yaml_;
   common::TMasterMetrics* tmetrics_info_;
   time_t start_time_;
+
+  // auto restart backpressure container feature switch [>0 enabled; <=0 disabled], in minutes
+  sp_int64 auto_restart_window_;
+  sp_int64 auto_restart_interval_;
+  sp_int64 auto_restart_last_;
+  // record the last backpressure timestamp
+  std::map<sp_string, sp_int64> last_timestamp_backpressure_instance;
+  std::map<sp_string, sp_int64> last_timestamp_backpressure_stmgr;
+  // reference to TMaster because of physical plan
+  TMaster* tmaster_;
+  // http client to send cmd to heron-shell for auto-restart backpressure container
+  AsyncDNS* dns_;
+  HTTPClient* client_;
 };
 }  // namespace tmaster
 }  // namespace heron
