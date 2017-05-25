@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -32,8 +31,8 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
@@ -57,28 +56,22 @@ public class TrackerMetricsProvider implements MetricsProvider {
   }
 
   @Override
-  public Map<String, ComponentMetricsData> getComponentMetrics(String metric,
-                                                               int durationSec,
-                                                               String... components) {
-    Map<String, ComponentMetricsData> result = new HashMap<>();
+  public Map<String, ComponentMetrics> getComponentMetrics(String metric,
+                                                           int durationSec,
+                                                           String... components) {
+    Map<String, ComponentMetrics> result = new HashMap<>();
     for (String component : components) {
-
       String response = getMetricsFromTracker(metric, component, durationSec);
-      Map<String, InstanceMetricsData> metrics = parse(response, component, metric, durationSec);
-      ComponentMetricsData componentMetric =
-          new ComponentMetricsData(component, System.currentTimeMillis(), durationSec, metrics);
+      Map<String, InstanceMetrics> metrics = parse(response, component, metric);
+      ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
       result.put(component, componentMetric);
     }
 
     return result;
   }
 
-  private Map<String, InstanceMetricsData> parse(String response,
-                                                 String component,
-                                                 String metric,
-                                                 int durationSec) {
-    Map<String, InstanceMetricsData> metricsData = new HashMap<>();
-    long timestampMillis = System.currentTimeMillis();
+  private Map<String, InstanceMetrics> parse(String response, String component, String metric) {
+    Map<String, InstanceMetrics> metricsData = new HashMap<>();
 
     Map<String, Map<String, String>> metricsMap = parseMetrics(response);
     if (metricsMap == null || metricsMap.get(metric) == null) {
@@ -86,11 +79,10 @@ public class TrackerMetricsProvider implements MetricsProvider {
       return metricsData;
     }
 
-    Map<String, String> instanceMetricsData = metricsMap.get(metric);
-    for (String instanceName : instanceMetricsData.keySet()) {
-      double value = Double.parseDouble(instanceMetricsData.get(instanceName));
-      InstanceMetricsData instanceMetric
-          = new InstanceMetricsData(instanceName);
+    Map<String, String> instanceMetrics = metricsMap.get(metric);
+    for (String instanceName : instanceMetrics.keySet()) {
+      double value = Double.parseDouble(instanceMetrics.get(instanceName));
+      InstanceMetrics instanceMetric = new InstanceMetrics(instanceName);
       instanceMetric.addMetric(metric, value);
 
       metricsData.put(instanceName, instanceMetric);
@@ -105,7 +97,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
     }
 
     ObjectMapper mapper = new ObjectMapper();
-    TrackerOutput output = null;
+    TrackerOutput output;
     try {
       output = mapper.readValue(response, TrackerOutput.class);
     } catch (IOException e) {
