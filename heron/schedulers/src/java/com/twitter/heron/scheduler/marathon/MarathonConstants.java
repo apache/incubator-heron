@@ -52,7 +52,7 @@ public final class MarathonConstants {
 
   public static final String[] PORT_NAMES = new String[]{
       "master", "tmaster-controller", "tmaster-stats", "shell", "metricsmgr", "scheduler",
-      "metrics-cache-master", "metrics-cache-stats"};
+      "metrics-cache-master", "metrics-cache-stats", "ckptmgr"};
 
   public static final String MASTER_PORT = "$PORT0";
   public static final String TMASTER_CONTROLLER_PORT = "$PORT1";
@@ -62,11 +62,12 @@ public final class MarathonConstants {
   public static final String SCHEDULER_PORT = "$PORT5";
   public static final String METRICS_CACHE_MASTER_PORT = "$PORT6";
   public static final String METRICS_CACHE_STATS_PORT = "$PORT7";
+  public static final String CKPTMGR_PORT = "$PORT8";
 
   public static final String[] PORT_LIST = new String[]{
       MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,
       SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT, METRICS_CACHE_MASTER_PORT,
-      METRICS_CACHE_STATS_PORT};
+      METRICS_CACHE_STATS_PORT, CKPTMGR_PORT};
 
   public static final String JOB_LINK = "/ui/#/group/%2F";
 }
