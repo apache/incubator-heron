@@ -14,7 +14,9 @@
 
 package com.twitter.heron.grouping;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,18 +26,18 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.PhysicalPlans;
-import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.TestBolt;
 import com.twitter.heron.resource.TestSpout;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -46,6 +48,7 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractTupleRoutingTest {
   private volatile int tupleReceived;
   private volatile StringBuilder groupingInitInfo;
+  private CountDownLatch outStreamQueueOfferLatch;
   private SlaveTester slaveTester;
 
   // Test component info. Topology is SPOUT -> BOLT_A -> BOLT_B
@@ -76,7 +79,8 @@ public abstract class AbstractTupleRoutingTest {
     tupleReceived = 0;
     groupingInitInfo = new StringBuilder();
 
-    slaveTester = new SlaveTester();
+    outStreamQueueOfferLatch = new CountDownLatch(1);
+    slaveTester = new SlaveTester(outStreamQueueOfferLatch);
     slaveTester.start();
   }
 
@@ -109,33 +113,35 @@ public abstract class AbstractTupleRoutingTest {
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-          if (slaveTester.getOutStreamQueue().size() != 0) {
-            HeronTuples.HeronTupleSet set = slaveTester.getOutStreamQueue().poll();
+        HeronServerTester.await(outStreamQueueOfferLatch, Duration.ofSeconds(10));
+        assertNotEquals(0, slaveTester.getOutStreamQueue().size());
 
-            assertTrue(set.isInitialized());
-            assertFalse(set.hasControl());
-            assertTrue(set.hasData());
-
-            HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
-            assertEquals(dataTupleSet.getStream().getId(), "default");
-            assertEquals(dataTupleSet.getStream().getComponentName(),
-                getComponentToVerify().getName());
-
-            for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
-              List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
-              assertEquals(1, destTaskIds.size());
-              assertEquals((Integer) tupleReceived, destTaskIds.get(0));
-              tupleReceived++;
-            }
+        while (tupleReceived < expectedTuplesValidated) {
+          if (slaveTester.getOutStreamQueue().isEmpty()) {
+            continue;
           }
-          if (tupleReceived == expectedTuplesValidated) {
-            assertEquals(getExpectedComponentInitInfo(), groupingInitInfo.toString());
-            slaveTester.getTestLooper().exitLoop();
-            break;
+          HeronTuples.HeronTupleSet set = slaveTester.getOutStreamQueue().poll();
+
+          assertTrue(set.isInitialized());
+          assertFalse(set.hasControl());
+          assertTrue(set.hasData());
+
+          HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+          assertEquals(dataTupleSet.getStream().getId(), "default");
+          assertEquals(dataTupleSet.getStream().getComponentName(),
+              getComponentToVerify().getName());
+
+          for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
+            List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
+            assertEquals(1, destTaskIds.size());
+            assertEquals((Integer) tupleReceived, destTaskIds.get(0));
+            tupleReceived++;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
+
+        assertEquals(expectedTuplesValidated, tupleReceived);
+        assertEquals(getExpectedComponentInitInfo(), groupingInitInfo.toString());
+        slaveTester.getTestLooper().exitLoop();
       }
     };
 
