@@ -22,7 +22,7 @@ load("/tools/rules/heron_core", "heron_core_lib_metricscachemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_packing_files")
 load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_ckptmgr_files")
-load("/tools/rules/heron_core", "heron_core_lib_statefulstorages_files")
+load("/tools/rules/heron_core", "heron_core_lib_statefulstorage_files")
 
 load("/tools/rules/heron_tools", "heron_tools_files")
 load("/tools/rules/heron_tools", "heron_tools_bin_files")
@@ -74,7 +74,7 @@ pkg_tar(
         ":heron-core-lib-statemgr",
         ":heron-core-lib-instance",
         ":heron-core-lib-ckptmgr",
-        ":heron-core-lib-statefulstorages",
+        ":heron-core-lib-statefulstorage",
     ],
 )
 
@@ -127,9 +127,9 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-core-lib-statefulstorages",
-    package_dir = "heron-core/lib/statefulstorages",
-    files = heron_core_lib_statefulstorages_files(),
+    name = "heron-core-lib-statefulstorage",
+    package_dir = "heron-core/lib/statefulstorage",
+    files = heron_core_lib_statefulstorage_files(),
 )
 
 ################################################################################
