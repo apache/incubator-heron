@@ -107,8 +107,7 @@ heron.marathon.scheduler.auth.token: "<auth_token>"
 heron.scheduler.is.service:                  False
 
 # location of the core package
-heron.package.core.uri:  
-https://github.com/twitter/heron/releases/download/0.14.7/heron-core-0.14.7-ubuntu.tar.gz
+heron.package.core.uri:  https://github.com/twitter/heron/releases/download/0.14.7/heron-core-0.14.7-ubuntu.tar.gz
 
 # docker repo for executor
 heron.executor.docker.image: 'ndustrialio/heron-executor:jre8'
