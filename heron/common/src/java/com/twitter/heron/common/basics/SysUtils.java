@@ -28,7 +28,7 @@ public final class SysUtils {
 
   /**
    * Causes the currently executing thread to sleep (temporarily cease
-   * execution) for the specified number of milliseconds, subject to
+   * execution) for the specified duration, subject to
    * the precision and accuracy of system timers and schedulers. The thread
    * does not lose ownership of any monitors.
    *
