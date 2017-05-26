@@ -34,6 +34,8 @@
 #include "threads/modinit.h"
 #include "network/modinit.h"
 
+const sp_int64 timeout_sec_ = 5;
+
 class Terminate : public Client {
  public:
   Terminate(EventLoopImpl* eventLoop, const NetworkOptions& _options)
@@ -131,8 +133,8 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
 
   // wait for the client threads to terminate
   for (auto& thread : cthreads) {
-    if (thread.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
-      GTEST_FAIL() << "timeout for client thread to join in 5 seconds";
+    if (thread.wait_for(std::chrono::seconds(timeout_sec_)) == std::future_status::timeout) {
+      GTEST_FAIL() << "timeout for client thread to join in " << timeout_sec_ << " seconds";
     }
   }
 
@@ -140,7 +142,7 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
 
   // now send a terminate message to server
   terminate_server(server_port);
-  if (sthread.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
+  if (sthread.wait_for(std::chrono::seconds(timeout_sec_)) == std::future_status::timeout) {
     GTEST_FAIL() << "server recv " << server_->recv_pkts()
         << "; server sent " << server_->sent_pkts();
   }
