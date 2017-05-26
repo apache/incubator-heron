@@ -56,7 +56,7 @@ public class HandleWriteTest extends AbstractNetworkTest {
       socketChannel = acceptSocketChannel(serverSocketChannel);
 
       // Receive request
-      REQID rid = blockForIncomingPacket(socketChannel).unpackREQID();
+      REQID rid = readIncomingPacket(socketChannel).unpackREQID();
 
       OutgoingPacket outgoingPacket
           = new OutgoingPacket(rid, UnitTestHelper.getRegisterInstanceResponse());
@@ -70,7 +70,7 @@ public class HandleWriteTest extends AbstractNetworkTest {
       }
 
       for (int i = 0; i < 10; i++) {
-        IncomingPacket incomingPacket = blockForIncomingPacket(socketChannel);
+        IncomingPacket incomingPacket = readIncomingPacket(socketChannel);
         incomingPacket.unpackREQID();
 
         StreamManager.RegisterInstanceResponse.Builder builder

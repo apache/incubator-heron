@@ -134,8 +134,7 @@ public abstract class AbstractNetworkTest {
     return inStreamQueueOfferLatch;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  IncomingPacket blockForIncomingPacket(SocketChannel socketChannel) throws IOException {
+  IncomingPacket readIncomingPacket(SocketChannel socketChannel) throws IOException {
     // Receive request
     IncomingPacket incomingPacket = new IncomingPacket();
 

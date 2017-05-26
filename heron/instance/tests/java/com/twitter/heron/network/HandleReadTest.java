@@ -58,7 +58,7 @@ public class HandleReadTest extends AbstractNetworkTest {
       socketChannel = acceptSocketChannel(serverSocketChannel);
 
       // Receive request
-      REQID rid = blockForIncomingPacket(socketChannel).unpackREQID();
+      REQID rid = readIncomingPacket(socketChannel).unpackREQID();
 
       OutgoingPacket outgoingPacket
           = new OutgoingPacket(rid, UnitTestHelper.getRegisterInstanceResponse());
