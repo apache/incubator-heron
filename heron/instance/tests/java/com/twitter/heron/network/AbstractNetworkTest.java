@@ -16,6 +16,9 @@ package com.twitter.heron.network;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -29,19 +32,23 @@ import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.IncomingPacket;
 import com.twitter.heron.instance.CommunicatorTester;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.UnitTestHelper;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Common superclass to share setup required for network tests.
  */
 public abstract class AbstractNetworkTest {
   static final String HOST = "127.0.0.1";
-  protected int serverPort;
+  private int serverPort;
 
   private StreamManagerClient streamManagerClient;
   private CommunicatorTester communicatorTester;
@@ -59,7 +66,16 @@ public abstract class AbstractNetworkTest {
     }
   }
 
-  static void configure(SocketChannel socketChannel) throws SocketException {
+  static SocketChannel acceptSocketChannel(
+      ServerSocketChannel serverSocketChannel) throws IOException {
+    SocketChannel socketChannel = serverSocketChannel.accept();
+    configure(socketChannel);
+    socketChannel.configureBlocking(false);
+    close(serverSocketChannel);
+    return socketChannel;
+  }
+
+  private static void configure(SocketChannel socketChannel) throws SocketException {
     socketChannel.socket().setTcpNoDelay(true);
   }
 
@@ -90,6 +106,10 @@ public abstract class AbstractNetworkTest {
     }
   }
 
+  protected int getServerPort() {
+    return serverPort;
+  }
+
   protected ExecutorService getThreadPool() {
     return threadPool;
   }
@@ -112,6 +132,28 @@ public abstract class AbstractNetworkTest {
 
   public CountDownLatch getInStreamQueueOfferLatch() {
     return inStreamQueueOfferLatch;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  IncomingPacket blockForIncomingPacket(SocketChannel socketChannel) throws IOException {
+    // Receive request
+    IncomingPacket incomingPacket = new IncomingPacket();
+
+    Selector readSelector = Selector.open();
+    socketChannel.register(readSelector, SelectionKey.OP_READ);
+    readSelector.select(HeronServerTester.RESPONSE_RECEIVED_TIMEOUT.toMillis());
+
+    // reading might not return the full payload in one shot. It could take 2 due to the header
+    // and the data read
+    if (incomingPacket.readFromChannel(socketChannel) != 0) {
+      readSelector.select(HeronServerTester.RESPONSE_RECEIVED_TIMEOUT.toMillis());
+      assertEquals(0, incomingPacket.readFromChannel(socketChannel));
+    }
+
+    // Though we do not use typeName, we need to unpack it first, since the order is required.
+    // doing this as a convenience since none of the callers of this method need this.
+    incomingPacket.unpackString();
+    return incomingPacket;
   }
 
   StreamManagerClient runStreamManagerClient() {

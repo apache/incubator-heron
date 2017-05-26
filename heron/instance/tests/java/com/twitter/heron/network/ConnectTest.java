@@ -20,19 +20,18 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.time.Duration;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.network.IncomingPacket;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
-import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * To test whether Instance could connect to stream manager successfully.
@@ -52,52 +51,36 @@ public class ConnectTest extends AbstractNetworkTest {
   @Test
   public void testStart() throws IOException {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-    serverSocketChannel.socket().bind(new InetSocketAddress(HOST, serverPort));
+    serverSocketChannel.socket().bind(new InetSocketAddress(HOST, getServerPort()));
 
     SocketChannel socketChannel = null;
     try {
       runStreamManagerClient();
 
-      socketChannel = serverSocketChannel.accept();
-      configure(socketChannel);
-      socketChannel.configureBlocking(false);
-      close(serverSocketChannel);
+      socketChannel = acceptSocketChannel(serverSocketChannel);
 
       // Receive request
-      IncomingPacket incomingPacket = new IncomingPacket();
-      while (incomingPacket.readFromChannel(socketChannel) != 0) {
-        // 1ms sleep to mitigate busy looping
-        SysUtils.sleep(Duration.ofMillis(1));
-      }
-
-      // Send back response
-      // Though we do not use typeName, we need to unpack it first,
-      // since the order is required
-      REQID rid = incomingPacket.unpackREQID();
+      REQID rid = blockForIncomingPacket(socketChannel).unpackREQID();
 
       OutgoingPacket outgoingPacket
           = new OutgoingPacket(rid, UnitTestHelper.getRegisterInstanceResponse());
       outgoingPacket.writeToChannel(socketChannel);
 
-      for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-        InstanceControlMsg instanceControlMsg = getInControlQueue().poll();
-        if (instanceControlMsg != null) {
-          getNIOLooper().exitLoop();
-          getThreadPool().shutdownNow();
+      HeronServerTester.await(getInControlQueueOfferLatch());
 
-          PhysicalPlanHelper physicalPlanHelper = instanceControlMsg.getNewPhysicalPlanHelper();
+      InstanceControlMsg instanceControlMsg = getInControlQueue().poll();
+      assertNotNull(instanceControlMsg);
 
-          Assert.assertEquals("test-bolt", physicalPlanHelper.getMyComponent());
-          Assert.assertEquals(InetAddress.getLocalHost().getHostName(),
-              physicalPlanHelper.getMyHostname());
-          Assert.assertEquals(0, physicalPlanHelper.getMyInstanceIndex());
-          Assert.assertEquals(1, physicalPlanHelper.getMyTaskId());
+      getNIOLooper().exitLoop();
+      getThreadPool().shutdownNow();
 
-          break;
-        } else {
-          SysUtils.sleep(Constants.RETRY_INTERVAL);
-        }
-      }
+      PhysicalPlanHelper physicalPlanHelper = instanceControlMsg.getNewPhysicalPlanHelper();
+
+      Assert.assertEquals("test-bolt", physicalPlanHelper.getMyComponent());
+      Assert.assertEquals(InetAddress.getLocalHost().getHostName(),
+          physicalPlanHelper.getMyHostname());
+      Assert.assertEquals(0, physicalPlanHelper.getMyInstanceIndex());
+      Assert.assertEquals(1, physicalPlanHelper.getMyTaskId());
 
     } catch (ClosedChannelException ignored) {
     } finally {
