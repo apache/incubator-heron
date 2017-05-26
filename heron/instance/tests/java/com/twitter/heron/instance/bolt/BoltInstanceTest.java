@@ -93,7 +93,7 @@ public class BoltInstanceTest {
 
     slaveTester.getInControlQueue().offer(instanceControlMsg);
 
-    int expectedTuples = 10;
+    final int expectedTuples = 10;
     CountDownLatch executeLatch = new CountDownLatch(expectedTuples);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
