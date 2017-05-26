@@ -44,6 +44,10 @@ class TopologyConfigVars {
   static const sp_string TOPOLOGY_ENABLE_ACKING;
   static const sp_string TOPOLOGY_CONTAINER_CPU_REQUESTED;
   static const sp_string TOPOLOGY_CONTAINER_RAM_REQUESTED;
+  static const sp_string TOPOLOGY_STATEFUL_ENABLED;
+  static const sp_string TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS;
+  static const sp_string TOPOLOGY_STATEFUL_START_CLEAN;
+  static const sp_string TOPOLOGY_EXACTLYONCE_ENABLED;
   static const sp_string TOPOLOGY_NAME;
   static const sp_string TOPOLOGY_TEAM_NAME;
   static const sp_string TOPOLOGY_TEAM_EMAIL;
