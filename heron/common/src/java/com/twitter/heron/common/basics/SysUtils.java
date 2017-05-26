@@ -27,13 +27,11 @@ public final class SysUtils {
   }
 
   /**
-   * Causes the currently executing thread to sleep (temporarily cease
-   * execution) for the specified duration, subject to
-   * the precision and accuracy of system timers and schedulers. The thread
-   * does not lose ownership of any monitors.
+   * Wrapper around Thread.sleep() that throws RuntimeException if the thread is interrupted. Only
+   * use this method if you don't care to be notified of interruptions via InterruptedException.
    *
    * @param duration the length of time to sleep
-   * @throws IllegalArgumentException if the value of {@code millis} is negative
+   * @throws IllegalArgumentException if the value of {@code duration} is negative
    */
   public static void sleep(Duration duration) {
     try {
