@@ -364,7 +364,7 @@ public class AuroraSchedulerTest {
           break;
         case CKPTMGR_CLASSPATH:
           expected =
-              expectedLib + "/ckptmgr/*:" + expectedLib + "/statefulstorages/*:";
+              expectedLib + "/ckptmgr/*:" + expectedLib + "/statefulstorage/*:";
           break;
         case IS_STATEFUL_ENABLED:
           expected = Boolean.FALSE.toString();

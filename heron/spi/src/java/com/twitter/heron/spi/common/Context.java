@@ -250,11 +250,7 @@ public class Context {
   }
 
   public static String statefulStoragesClassPath(Config cfg) {
-    return cfg.getStringValue(Key.STATEFULSTORAGES_CLASSPATH);
-  }
-
-  public static Boolean isStateful(Config cfg) {
-    return cfg.getBooleanValue(Key.IS_STATEFUL_ENABLED);
+    return cfg.getStringValue(Key.STATEFULSTORAGE_CLASSPATH);
   }
 
   public static String stateManagerClassPath(Config cfg) {
@@ -295,10 +291,6 @@ public class Context {
 
   public static String pythonInstanceBinary(Config cfg) {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
-  }
-
-  public static final Boolean isCleanStateCheckpoints(Config cfg) {
-    return cfg.getBooleanValue(Key.IS_CLEAN_STATEFUL_CHECKPOINTS);
   }
 
   @SuppressWarnings("unchecked")

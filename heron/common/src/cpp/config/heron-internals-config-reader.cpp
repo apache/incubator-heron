@@ -200,6 +200,11 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrCacheDrainSizeMb() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB].as<int>();
 }
 
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrStatefulBufferSizeMb() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB]
+      .as<int>();
+}
+
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS].as<int>();
 }

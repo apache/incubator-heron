@@ -141,7 +141,7 @@ public final class UnitTestHelper {
   }
 
   @SuppressWarnings("unchecked")
-  public static void clearSingletonRegistry() throws Exception {
+  public static void clearSingletonRegistry() throws IllegalAccessException, NoSuchFieldException {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
     field.setAccessible(true);
