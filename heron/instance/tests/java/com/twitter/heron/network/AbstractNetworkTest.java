@@ -17,6 +17,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,6 +47,8 @@ public abstract class AbstractNetworkTest {
   private CommunicatorTester communicatorTester;
   private GatewayMetrics gatewayMetrics;
   private ExecutorService threadPool;
+  private CountDownLatch inControlQueueOfferLatch;
+  private CountDownLatch inStreamQueueOfferLatch;
 
   static void close(Closeable closeable) {
     if (closeable != null) {
@@ -61,8 +64,10 @@ public abstract class AbstractNetworkTest {
   }
 
   @Before
-  public void before() throws IOException {
-    communicatorTester = new CommunicatorTester();
+  public void before() throws Exception {
+    inControlQueueOfferLatch = new CountDownLatch(1);
+    inStreamQueueOfferLatch = new CountDownLatch(1);
+    communicatorTester = new CommunicatorTester(inControlQueueOfferLatch, inStreamQueueOfferLatch);
     gatewayMetrics = new GatewayMetrics();
     threadPool = Executors.newSingleThreadExecutor();
 
@@ -72,7 +77,9 @@ public abstract class AbstractNetworkTest {
 
   @After
   public void after() throws NoSuchFieldException, IllegalAccessException {
-    communicatorTester.stop();
+    if (communicatorTester != null) {
+      communicatorTester.stop();
+    }
 
     if (streamManagerClient != null) {
       streamManagerClient.stop();
@@ -99,10 +106,17 @@ public abstract class AbstractNetworkTest {
     return communicatorTester.getInStreamQueue();
   }
 
+  public CountDownLatch getInControlQueueOfferLatch() {
+    return inControlQueueOfferLatch;
+  }
+
+  public CountDownLatch getInStreamQueueOfferLatch() {
+    return inStreamQueueOfferLatch;
+  }
+
   StreamManagerClient runStreamManagerClient() {
     SystemConfig systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-            SystemConfig.HERON_SYSTEM_CONFIG);
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     HeronSocketOptions socketOptions = new HeronSocketOptions(
          systemConfig.getInstanceNetworkWriteBatchSize(),

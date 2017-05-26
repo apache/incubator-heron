@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.ByteString;
@@ -30,7 +31,7 @@ import org.junit.Test;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
@@ -137,7 +138,6 @@ public class SpoutInstanceTest {
             slaveTester.getTestLooper().exitLoop();
             break;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
     };
@@ -175,7 +175,6 @@ public class SpoutInstanceTest {
             slaveTester.getTestLooper().exitLoop();
             break;
           }
-          SysUtils.sleep(Constants.RETRY_INTERVAL);
         }
       }
     };
@@ -189,7 +188,11 @@ public class SpoutInstanceTest {
    */
   @Test
   public void testDoImmediateAcks() {
+    final int tuplesExpected = 10;
+    final CountDownLatch ackLatch = new CountDownLatch(tuplesExpected);
+
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_LATCH, ackLatch);
 
     initSpout(slaveTester, false, -1);
 
@@ -198,17 +201,9 @@ public class SpoutInstanceTest {
       public void run() {
         drainOutStream();
         if (tupleReceived == 10) {
-          // We fetch it from SingletonRegistry
-          for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-            if (ackCount.intValue() != 0) {
-              break;
-            }
-            SysUtils.sleep(Constants.RETRY_INTERVAL);
-          }
-
-          // Wait the bolt's finishing
-          SysUtils.sleep(Constants.TEST_WAIT_TIME);
-          Assert.assertEquals(10, ackCount.intValue());
+          // Wait until the acks are received
+          HeronServerTester.await(ackLatch);
+          Assert.assertEquals(tuplesExpected, ackCount.intValue());
           slaveTester.getTestLooper().exitLoop();
         }
       }
@@ -220,23 +215,21 @@ public class SpoutInstanceTest {
 
   @Test
   public void testLookForTimeouts() {
+    final int tuplesExpected = 10;
+    final CountDownLatch failLatch = new CountDownLatch(tuplesExpected);
+
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_LATCH, failLatch);
 
     initSpout(slaveTester, true, 1);
 
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-          if (failCount.intValue() != 0) {
-            break;
-          }
-          SysUtils.sleep(Constants.RETRY_INTERVAL);
-        }
+        // Wait until the fails are received
+        HeronServerTester.await(failLatch);
 
-        // Wait the bolt's finishing
-        SysUtils.sleep(Constants.TEST_WAIT_TIME);
-        Assert.assertEquals(10, failCount.intValue());
+        Assert.assertEquals(tuplesExpected, failCount.intValue());
         slaveTester.getTestLooper().exitLoop();
       }
     };
@@ -251,8 +244,15 @@ public class SpoutInstanceTest {
 
   @Test
   public void testAckAndFail() {
+    final int failsExpected = 5;
+    final int acksExpected = 5;
+    final CountDownLatch failLatch = new CountDownLatch(failsExpected);
+    final CountDownLatch ackLatch = new CountDownLatch(acksExpected);
+
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_LATCH, ackLatch);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_LATCH, failLatch);
 
     initSpout(slaveTester, true, -1);
 
@@ -260,20 +260,15 @@ public class SpoutInstanceTest {
       @Override
       public void run() {
         drainOutStream();
-        if (tupleReceived == 10) {
+        if (tupleReceived == acksExpected + failsExpected) {
           constructAndSendAcks();
-          // We fetch it from SingletonRegistry
-          for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-            if (ackCount.intValue() != 0 || failCount.intValue() != 0) {
-              break;
-            }
-            SysUtils.sleep(Constants.RETRY_INTERVAL);
-          }
 
-          // Wait the bolt's finishing
-          SysUtils.sleep(Constants.TEST_WAIT_TIME);
-          Assert.assertEquals(5, ackCount.intValue());
-          Assert.assertEquals(5, failCount.intValue());
+          // Wait until the fails and acks are received
+          HeronServerTester.await(failLatch);
+          HeronServerTester.await(ackLatch);
+
+          Assert.assertEquals(acksExpected, ackCount.intValue());
+          Assert.assertEquals(failsExpected, failCount.intValue());
           slaveTester.getTestLooper().exitLoop();
         }
       }
