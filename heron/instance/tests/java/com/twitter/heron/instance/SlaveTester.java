@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.instance;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,8 +27,11 @@ public class SlaveTester extends CommunicatorTester {
   private final Slave slave;
 
   public SlaveTester() {
-    super(new SlaveLooper());
+    this(null);
+  }
 
+  public SlaveTester(CountDownLatch outStreamQueueOfferLatch) {
+    super(new SlaveLooper(), outStreamQueueOfferLatch);
     slave = new Slave(getSlaveLooper(), getInStreamQueue(), getOutStreamQueue(),
         getInControlQueue(), getSlaveMetricsOut());
     threadsPool = Executors.newSingleThreadExecutor();

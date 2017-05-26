@@ -15,6 +15,7 @@
 package com.twitter.heron.instance.bolt;
 
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.ByteString;
@@ -28,7 +29,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
@@ -92,10 +93,13 @@ public class BoltInstanceTest {
 
     slaveTester.getInControlQueue().offer(instanceControlMsg);
 
+    final int expectedTuples = 10;
+    CountDownLatch executeLatch = new CountDownLatch(expectedTuples);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
-    SingletonRegistry.INSTANCE.registerSingleton("execute-count", tupleExecutedCount);
-    SingletonRegistry.INSTANCE.registerSingleton("received-string-list", receivedStrings);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_COUNT, tupleExecutedCount);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.EXECUTE_LATCH, executeLatch);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.RECEIVED_STRING_LIST, receivedStrings);
 
     // Send tuples to bolt instance
     HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
@@ -106,7 +110,7 @@ public class BoltInstanceTest {
     dataTupleSet.setStream(streamId);
 
     // We will add 10 tuples to the set
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < expectedTuples; i++) {
       HeronTuples.HeronDataTuple.Builder dataTuple = HeronTuples.HeronDataTuple.newBuilder();
       dataTuple.setKey(19901017 + i);
 
@@ -115,14 +119,8 @@ public class BoltInstanceTest {
       rootId.setTaskid(0);
       dataTuple.addRoots(rootId);
 
-      String s;
-      if ((i & 1) == 0) {
-        s = "A";
-      } else {
-        s = "B";
-      }
-      ByteString byteString = ByteString.copyFrom(serializer.serialize(s));
-      dataTuple.addValues(byteString);
+      String tupleValue = (i & 1) == 0 ? "A" : "B";
+      dataTuple.addValues(ByteString.copyFrom(serializer.serialize(tupleValue)));
 
       dataTupleSet.addTuples(dataTuple);
     }
@@ -130,18 +128,11 @@ public class BoltInstanceTest {
     heronTupleSet.setData(dataTupleSet);
     slaveTester.getInStreamQueue().offer(heronTupleSet.build());
 
-    for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-      if (tupleExecutedCount.intValue() == 10) {
-        break;
-      }
-      SysUtils.sleep(Constants.RETRY_INTERVAL);
-    }
-
     // Wait the bolt's finishing
-    SysUtils.sleep(Constants.TEST_WAIT_TIME);
-    Assert.assertEquals(10, tupleExecutedCount.intValue());
-    Assert.assertEquals(5, ackCount.intValue());
-    Assert.assertEquals(5, failCount.intValue());
+    HeronServerTester.await(executeLatch);
+    Assert.assertEquals(expectedTuples, tupleExecutedCount.intValue());
+    Assert.assertEquals(expectedTuples / 2, ackCount.intValue());
+    Assert.assertEquals(expectedTuples / 2, failCount.intValue());
     Assert.assertEquals("ABABABABAB", receivedStrings.toString());
   }
 }

@@ -11,6 +11,7 @@ test_deps_files = \
         "//heron/instance/src/java:instance-java",
         "//third_party/java:junit4",
         "//third_party/java:kryo",
+        "//third_party/java:mockito",
     ]
 
 java_library(
