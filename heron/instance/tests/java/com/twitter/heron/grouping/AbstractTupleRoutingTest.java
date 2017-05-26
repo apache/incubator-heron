@@ -14,7 +14,6 @@
 
 package com.twitter.heron.grouping;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -113,7 +112,7 @@ public abstract class AbstractTupleRoutingTest {
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        HeronServerTester.await(outStreamQueueOfferLatch, Duration.ofSeconds(3));
+        HeronServerTester.await(outStreamQueueOfferLatch);
         assertNotEquals(0, slaveTester.getOutStreamQueue().size());
 
         while (tupleReceived < expectedTuplesValidated) {
