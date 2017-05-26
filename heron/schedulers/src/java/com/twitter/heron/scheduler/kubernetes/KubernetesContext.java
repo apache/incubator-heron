@@ -22,10 +22,23 @@ import com.twitter.heron.spi.common.Context;
 public final class KubernetesContext extends Context {
   public static final String HERON_EXECUTOR_DOCKER_IMAGE = "heron.executor.docker.image";
 
+  public static final String SCHEDULER_WORKING_DIRECTORY =
+      "heron.scheduler.mesos.scheduler.working.directory";
+
+  public static final String HERON_KUBERNETES_SCHEDULER_URI = "heron.kubernetes.scheduler.uri";
+
   private KubernetesContext() {
   }
 
   public static String getExecutorDockerImage(Config config) {
     return config.getStringValue(HERON_EXECUTOR_DOCKER_IMAGE);
+  }
+
+  public static String getSchedulerWorkingDirectory(Config config) {
+    return config.getStringValue(SCHEDULER_WORKING_DIRECTORY);
+  }
+
+  public static String getSchedulerURI(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_SCHEDULER_URI);
   }
 }
