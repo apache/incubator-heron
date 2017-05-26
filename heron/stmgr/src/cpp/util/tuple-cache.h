@@ -47,10 +47,6 @@ class TupleCache {
   void add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
   void add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
 
-  void release(sp_int32 _task_id, proto::system::HeronTupleSet2* set) {
-    get(_task_id)->release(set);
-  }
-
  private:
   void drain(EventLoop::Status);
   void drain_impl();
@@ -73,22 +69,14 @@ class TupleCache {
     void drain(sp_int32 _task_id,
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
 
-    proto::system::HeronTupleSet2* acquire() {
-      return heron_tuple_set_pool_.acquire();
-    }
-
     proto::system::HeronTupleSet2* acquire_clean_set() {
-     proto::system::HeronTupleSet2* set = acquire();
+     proto::system::HeronTupleSet2* set = nullptr;
+     set = __global_protobuf_pool_acquire__(set);
      set->Clear();
      return set;
     }
 
-    void release(proto::system::HeronTupleSet2* set) {
-      heron_tuple_set_pool_.release(set);
-    }
-
    private:
-    BaseMemPool<proto::system::HeronTupleSet2> heron_tuple_set_pool_;
     std::deque<proto::system::HeronTupleSet2*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;

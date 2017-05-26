@@ -665,7 +665,7 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
     clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
   }
 
-  tuple_cache_->release(_task_id, _tuple);
+  __global_protobuf_pool_release__(_tuple);
 }
 
 void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail) {
