@@ -197,6 +197,7 @@ class HeronExecutorTest(unittest.TestCase):
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
     metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
+    is_stateful_enabled ckptmgr_classpath ckgtmgr_port stateful_config_file
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):

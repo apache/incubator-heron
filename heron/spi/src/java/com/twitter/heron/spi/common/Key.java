@@ -109,8 +109,6 @@ public enum Key {
   INSTANCE_DISK             ("heron.resources.instance.disk", ByteAmount.fromBytes(1073741824)),
 
   //keys for checkpoint management
-  IS_STATEFUL_ENABLED                      ("heron.is.stateful.enabled", Boolean.FALSE),
-  IS_CLEAN_STATEFUL_CHECKPOINTS            ("heron.is.clean.stateful.checkpoints", Boolean.FALSE),
   STATEFUL_STORAGE_CLASSNAME               ("heron.statefulstorage.classname", Type.STRING),
   STATEFUL_STORAGE_CONF                    ("heron.statefulstorage.config", Type.MAP),
   STATEFUL_STORAGE_CUSTOM_CLASSPATH        ("heron.statefulstorage.custom.classpath", Type.STRING),
@@ -124,7 +122,7 @@ public enum Key {
   STATEMGR_CLASSPATH         ("heron.classpath.statemgr",             "${HERON_LIB}/statemgr/*"),
   UPLOADER_CLASSPATH         ("heron.classpath.uploader",             "${HERON_LIB}/uploader/*"),
   CKPTMGR_CLASSPATH          ("heron.classpath.ckptmgr",              "${HERON_LIB}/ckptmgr/*"),
-  STATEFULSTORAGES_CLASSPATH ("heron.classpath.statefulstorage",      "${HERON_LIB}/statefulstorages/*"),
+  STATEFULSTORAGE_CLASSPATH  ("heron.classpath.statefulstorage",      "${HERON_LIB}/statefulstorage/*"),
 
   //keys for run time config
   TOPOLOGY_CLASSPATH             ("heron.runtime.topology.class.path",             Type.STRING),

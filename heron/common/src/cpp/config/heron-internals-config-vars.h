@@ -170,6 +170,10 @@ class HeronInternalsConfigVars {
 
   // Low water mark on the num in MB that can be left outstanding on a connection
   static const sp_string HERON_STREAMMGR_NETWORK_BACKPRESSURE_LOWWATERMARK_MB;
+
+  // The size based threshold in MB for buffering data tuples waiting for
+  // checkpoint markers to arrive before giving up
+  static const sp_string HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB;
 };
 }  // namespace config
 }  // namespace heron
