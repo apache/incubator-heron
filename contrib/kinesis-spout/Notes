@@ -1,0 +1,5 @@
+BUILD:
+mvn clean package assembly:single
+
+Run in Local given Kinesis already installed:
+heron submit local target/kinesis-storm-spout-1.1.1-jar-with-dependencies.jar SampleTopology src/main/java/samples/sample.properties LocalMode
