@@ -113,7 +113,7 @@ public abstract class AbstractTupleRoutingTest {
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        HeronServerTester.await(outStreamQueueOfferLatch, Duration.ofSeconds(10));
+        HeronServerTester.await(outStreamQueueOfferLatch, Duration.ofSeconds(3));
         assertNotEquals(0, slaveTester.getOutStreamQueue().size());
 
         while (tupleReceived < expectedTuplesValidated) {
