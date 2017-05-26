@@ -110,7 +110,7 @@ public class BoltInstanceTest {
     dataTupleSet.setStream(streamId);
 
     // We will add 10 tuples to the set
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < expectedTuples; i++) {
       HeronTuples.HeronDataTuple.Builder dataTuple = HeronTuples.HeronDataTuple.newBuilder();
       dataTuple.setKey(19901017 + i);
 
@@ -119,14 +119,8 @@ public class BoltInstanceTest {
       rootId.setTaskid(0);
       dataTuple.addRoots(rootId);
 
-      String s;
-      if ((i & 1) == 0) {
-        s = "A";
-      } else {
-        s = "B";
-      }
-      ByteString byteString = ByteString.copyFrom(serializer.serialize(s));
-      dataTuple.addValues(byteString);
+      String tupleValue = (i & 1) == 0 ? "A" : "B";
+      dataTuple.addValues(ByteString.copyFrom(serializer.serialize(tupleValue)));
 
       dataTupleSet.addTuples(dataTuple);
     }
@@ -136,9 +130,9 @@ public class BoltInstanceTest {
 
     // Wait the bolt's finishing
     HeronServerTester.await(executeLatch);
-    Assert.assertEquals(10, tupleExecutedCount.intValue());
-    Assert.assertEquals(5, ackCount.intValue());
-    Assert.assertEquals(5, failCount.intValue());
+    Assert.assertEquals(expectedTuples, tupleExecutedCount.intValue());
+    Assert.assertEquals(expectedTuples / 2, ackCount.intValue());
+    Assert.assertEquals(expectedTuples / 2, failCount.intValue());
     Assert.assertEquals("ABABABABAB", receivedStrings.toString());
   }
 }

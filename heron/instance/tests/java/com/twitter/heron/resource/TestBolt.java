@@ -71,10 +71,6 @@ public class TestBolt extends BaseRichBolt {
       tupleExecutedCount.getAndIncrement();
     }
 
-    if (tupleExecutedLatch != null) {
-      tupleExecutedLatch.countDown();
-    }
-
     if ((tupleExecuted & 1) == 0) {
       outputCollector.ack(tuple);
       if (ackCount != null) {
@@ -88,6 +84,10 @@ public class TestBolt extends BaseRichBolt {
     }
     tupleExecuted++;
     outputCollector.emit(new Values(tuple.getString(0)));
+
+    if (tupleExecutedLatch != null) {
+      tupleExecutedLatch.countDown();
+    }
   }
 
   @Override
