@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.metricsmgr.LatchedMultiCountMetric;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
@@ -92,7 +93,7 @@ public class MetricsCacheSinkTest {
     metricsCacheSink.startNewMetricsCacheClient(getMetricsCacheLocation(0));
 
     // We wait for a while to let auto recover fully finish.
-    Thread.sleep(RESTART_WAIT_INTERVAL.toMillis());
+    SysUtils.sleep(RESTART_WAIT_INTERVAL);
 
     // Then we check whether the MetricsCacheService has restarted the MetricsCacheClient for
     // several times Take other factors into account, we would check whether the MetricsCacheClient
