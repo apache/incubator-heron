@@ -207,7 +207,10 @@ void StMgr::StartStmgrServer() {
   sops.set_host(IpUtils::getHostName());
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
-  sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
+      1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
