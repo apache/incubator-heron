@@ -74,7 +74,7 @@ memory = "DIVIDE(" \
 
 gc = "RATE(TS({0},{1},__jvm-gc-collection-time-ms))"
 
-bp = "DEFAULT(0, TS(__stmgr__,*,__time_spent_back_pressure_by_compid/{0}))"
+backpressure = "DEFAULT(0, TS(__stmgr__,*,__time_spent_back_pressure_by_compid/{0}))"
 
 queries = dict(
     cpu=cpu,
@@ -82,7 +82,7 @@ queries = dict(
     failures=failures,
     memory=memory,
     gc=gc,
-    bp=bp
+    backpressure=backpressure
 )
 
 
@@ -763,7 +763,7 @@ class HeronQueryHandler(QueryHandler):
     raise tornado.gen.Return(result)
 
   @tornado.gen.coroutine
-  def fetch_bp(self, cluster, metric, topology, component, instance, \
+  def fetch_backpressure(self, cluster, metric, topology, component, instance, \
     timerange, is_max, environ=None):
     '''
     :param cluster:
