@@ -228,7 +228,10 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_host(tmasterLocation->host());
   master_options.set_port(tmasterLocation->master_port());
   master_options.set_socket_family(PF_INET);
-  master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  master_options.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+      1_MB);
   master_options.set_high_watermark(high_watermark_);
   master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
