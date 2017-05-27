@@ -23,7 +23,6 @@
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "network/network.h"
-#include "network/mempool.h"
 
 namespace heron {
 namespace stmgr {

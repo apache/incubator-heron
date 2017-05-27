@@ -77,7 +77,6 @@
 #include "network/networkoptions.h"
 #include "network/network_error.h"
 #include "network/packet.h"
-#include "network/mempool.h"
 
 /*
  * Server class definition

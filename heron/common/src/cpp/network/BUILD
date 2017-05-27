@@ -19,7 +19,6 @@ cc_library(
         "networkoptions.cpp",
         "packet.cpp",
         "server.cpp",
-        "mempool.cpp",
 
         "regevent.h",
         "asyncdns.h",
@@ -37,7 +36,6 @@ cc_library(
         "packet.h",
         "event_loop_impl.h",
         "server.h",
-        "mempool.h",
     ],
     hdrs = [
         "network.h",
