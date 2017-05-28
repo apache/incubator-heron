@@ -43,7 +43,7 @@ class QueryHandler(object):
     '''
     pass
 
-  def fetch_bp(self, cluster, metric, topology, component, instance, \
+  def fetch_backpressure(self, cluster, metric, topology, component, instance, \
     timerange, is_max, environ=None):
     '''
     :param cluster:
