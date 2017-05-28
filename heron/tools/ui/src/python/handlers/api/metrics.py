@@ -76,10 +76,10 @@ class MetricsTimelineHandler(base.BaseHandler):
 
     # fetch the metrics
     futures = {}
-    if metric == "bp":
+    if metric == "backpressure":
       for comp in compnames:
-        future = query_handler.fetch_bp(cluster, metric, topology, component,
-                                        instances, timerange, maxquery, environ)
+        future = query_handler.fetch_backpressure(cluster, metric, topology, component,
+                                                  instances, timerange, maxquery, environ)
         futures[comp] = future
     else:
       fetch = query_handler.fetch_max if maxquery else query_handler.fetch
