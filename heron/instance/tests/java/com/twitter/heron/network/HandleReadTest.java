@@ -19,7 +19,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.time.Duration;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -28,14 +27,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.network.IncomingPacket;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
-import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.HeronTuples;
-import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
 
 /**
@@ -53,58 +49,33 @@ public class HandleReadTest extends AbstractNetworkTest {
   @Test
   public void testHandleRead() throws IOException {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-    serverSocketChannel.socket().bind(new InetSocketAddress(HOST, serverPort));
+    serverSocketChannel.socket().bind(new InetSocketAddress(HOST, getServerPort()));
 
     SocketChannel socketChannel = null;
     try {
       runStreamManagerClient();
 
-      socketChannel = serverSocketChannel.accept();
-      configure(socketChannel);
-      socketChannel.configureBlocking(false);
-      close(serverSocketChannel);
+      socketChannel = acceptSocketChannel(serverSocketChannel);
 
       // Receive request
-      IncomingPacket incomingPacket = new IncomingPacket();
-      while (incomingPacket.readFromChannel(socketChannel) != 0) {
-        // 1ms sleep to mitigate busy looping
-        SysUtils.sleep(Duration.ofMillis(1));
-      }
-
-      // Send back response
-      // Though we do not use typeName, we need to unpack it first,
-      // since the order is required
-      String typeName = incomingPacket.unpackString();
-      REQID rid = incomingPacket.unpackREQID();
+      REQID rid = readIncomingPacket(socketChannel).unpackREQID();
 
       OutgoingPacket outgoingPacket
           = new OutgoingPacket(rid, UnitTestHelper.getRegisterInstanceResponse());
       outgoingPacket.writeToChannel(socketChannel);
 
-      for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-        InstanceControlMsg instanceControlMsg = getInControlQueue().poll();
-        if (instanceControlMsg != null) {
-          break;
-        } else {
-          SysUtils.sleep(Constants.RETRY_INTERVAL);
-        }
-      }
+      HeronServerTester.await(getInControlQueueOfferLatch());
 
       outgoingPacket = new OutgoingPacket(REQID.zeroREQID, constructMockMessage());
       outgoingPacket.writeToChannel(socketChannel);
 
-      for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-        if (!getInStreamQueue().isEmpty()) {
-          break;
-        }
-        SysUtils.sleep(Constants.RETRY_INTERVAL);
-      }
+      HeronServerTester.await(getInStreamQueueOfferLatch());
+
       getNIOLooper().exitLoop();
 
       Assert.assertEquals(1, getInStreamQueue().size());
-      HeronTuples.HeronTupleSet msg = getInStreamQueue().poll();
 
-      HeronTuples.HeronTupleSet heronTupleSet = msg;
+      HeronTuples.HeronTupleSet heronTupleSet = getInStreamQueue().poll();
 
       Assert.assertTrue(heronTupleSet.hasData());
       Assert.assertFalse(heronTupleSet.hasControl());
@@ -114,13 +85,13 @@ public class HandleReadTest extends AbstractNetworkTest {
       Assert.assertEquals("test-spout", heronDataTupleSet.getStream().getComponentName());
       Assert.assertEquals("default", heronDataTupleSet.getStream().getId());
 
-      String res = "";
+      StringBuilder response = new StringBuilder();
       for (HeronTuples.HeronDataTuple heronDataTuple : heronDataTupleSet.getTuplesList()) {
-        res += heronDataTuple.getValues(0).toStringUtf8();
+        response.append(heronDataTuple.getValues(0).toStringUtf8());
         Assert.assertEquals(1, heronDataTuple.getRootsCount());
       }
 
-      Assert.assertEquals("ABABABABAB", res);
+      Assert.assertEquals("ABABABABAB", response.toString());
     } catch (ClosedChannelException ignored) {
     } finally {
       close(socketChannel);
