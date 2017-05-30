@@ -165,8 +165,6 @@ INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC = "heron.instance.metrics.system.sam
 # The spout instance will check whether there are timeout tuples every 3 seconds
 INSTANCE_ACKNOWLEDGEMENT_NBUCKETS = "heron.instance.acknowledgement.nbuckets"
 
-# The interval for different threads to attempt to fetch physical plan from SingletonRegistry
-INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC = "heron.instance.slave.fetch.pplan.interval.sec"
 # The expected size on read queue in bolt
 INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE \
   = "heron.instance.tuning.expected.bolt.read.queue.size"
