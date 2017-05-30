@@ -362,6 +362,16 @@ public class AuroraSchedulerTest {
         case METRICSCACHEMGR_CLASSPATH:
           expected = expectedLib + "/metricscachemgr/*";
           break;
+        case CKPTMGR_CLASSPATH:
+          expected =
+              expectedLib + "/ckptmgr/*:" + expectedLib + "/statefulstorage/*:";
+          break;
+        case IS_STATEFUL_ENABLED:
+          expected = Boolean.FALSE.toString();
+          break;
+        case STATEFUL_CONFIG_YAML:
+          expected = expectedConf + "/stateful.yaml";
+          break;
         default:
           fail(String.format(
               "Expected value for Aurora field %s not found in test (found=%s)", field, found));

@@ -204,6 +204,7 @@ public class MarathonScheduler implements IScheduler {
       port.put(MarathonConstants.DOCKER_CONTAINER_PORT, 0);
       port.put(MarathonConstants.PROTOCOL, MarathonConstants.TCP);
       port.put(MarathonConstants.HOST_PORT, 0);
+      port.put(MarathonConstants.PORT_NAME, portName);
 
       ports.add(port);
     }

@@ -9,6 +9,7 @@ java_library(
     srcs = glob(["**/basics/*.java"]),
     deps = [
         "@com_google_guava_guava//jar",
+        "//third_party/java:mockito",
     ]
 )
 
@@ -26,6 +27,7 @@ java_library(
     srcs = glob(["**/network/*.java"]),
     deps = [
         ":basics-java",
+        "//third_party/java:junit4",
         "@com_google_protobuf_protobuf_java//jar",
     ],
 )

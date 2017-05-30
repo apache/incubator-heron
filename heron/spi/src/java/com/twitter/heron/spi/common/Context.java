@@ -14,6 +14,8 @@
 
 package com.twitter.heron.spi.common;
 
+import java.util.Map;
+
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.PackageType;
@@ -105,6 +107,10 @@ public class Context {
 
   public static String clusterFile(Config cfg) {
     return cfg.getStringValue(Key.CLUSTER_YAML);
+  }
+
+  public static String statefulConfigFile(Config cfg) {
+    return cfg.getStringValue(Key.STATEFUL_YAML);
   }
 
   public static String clientFile(Config cfg) {
@@ -239,6 +245,14 @@ public class Context {
     return cfg.getStringValue(Key.SCHEDULER_CLASSPATH);
   }
 
+  public static String ckptmgrClassPath(Config cfg) {
+    return cfg.getStringValue(Key.CKPTMGR_CLASSPATH);
+  }
+
+  public static String statefulStoragesClassPath(Config cfg) {
+    return cfg.getStringValue(Key.STATEFULSTORAGE_CLASSPATH);
+  }
+
   public static String stateManagerClassPath(Config cfg) {
     return cfg.getStringValue(Key.STATEMGR_CLASSPATH);
   }
@@ -277,5 +291,16 @@ public class Context {
 
   public static String pythonInstanceBinary(Config cfg) {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static final String statefulStorageCustomClassPath(Config cfg) {
+    Map<String, Object> statefulStorageConfig =
+        (Map<String, Object>) cfg.get(Key.STATEFUL_STORAGE_CONF);
+    if (statefulStorageConfig == null) {
+      return "";
+    }
+    Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CUSTOM_CLASSPATH.value());
+    return o == null ? "" : (String) o;
   }
 }

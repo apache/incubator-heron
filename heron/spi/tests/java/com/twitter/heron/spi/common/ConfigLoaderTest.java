@@ -82,12 +82,12 @@ public class ConfigLoaderTest {
                                    String heronConfigPath) {
     // assert that the config filenames passed to loadConfig are never null. If they are, the
     // configs defaults are not producing the config files.
-    PowerMockito.verifyStatic(times(8));
+    PowerMockito.verifyStatic(times(9));
     ConfigLoader.loadConfig(isNotNull(String.class));
     PowerMockito.verifyStatic(never());
     ConfigLoader.loadConfig(isNull(String.class));
 
-    // addFromFile with an empty map means that the config file was not found. Of the 8 files that
+    // addFromFile with an empty map means that the config file was not found. Of the 9 files that
     // are attempted to be loaded, all but 3 should be found (clientConfig, overrideConfigFile and
     // releaseFile do not exist)
     PowerMockito.verifyStatic(times(3));
