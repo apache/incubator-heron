@@ -67,10 +67,6 @@ public final class SystemConfig {
     return getDuration(SystemConfigKey.INSTANCE_FORCE_EXIT_TIMEOUT);
   }
 
-  public Duration getInstanceStateCheckInterval() {
-    return getDuration(SystemConfigKey.INSTANCE_STATE_CHECK_INTERVAL);
-  }
-
   public int getInstanceInternalBoltReadQueueCapacity() {
     return getInteger(SystemConfigKey.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY);
   }

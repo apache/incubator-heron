@@ -176,13 +176,6 @@ public enum SystemConfigKey {
   INSTANCE_EXECUTE_BATCH_SIZE("heron.instance.execute.batch.size.bytes", Type.BYTE_AMOUNT),
 
   /**
-   * The time interval for an instance to check the state change, for instance,
-   * the interval a spout using to check whether activate/deactivate is invoked
-   * Slated for removal, see https://github.com/twitter/heron/issues/1712
-   */
-  INSTANCE_STATE_CHECK_INTERVAL("heron.instance.state.check.interval.sec", ChronoUnit.SECONDS),
-
-  /**
    * The time to wait before the instance exits forcibly when uncaught exception happens
    */
   INSTANCE_FORCE_EXIT_TIMEOUT("heron.instance.force.exit.timeout.ms", ChronoUnit.MILLIS),
