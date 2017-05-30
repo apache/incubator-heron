@@ -72,7 +72,10 @@ int main(int argc, char* argv[]) {
   sops.set_host("localhost");  // this is mostly ignored
   sops.set_port(myport);
   sops.set_socket_family(PF_INET);
-  sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
+      1_MB);
 
   heron::stmgr::StMgr mgr(&ss, sops, topology_name, myid, spout_workers, bolt_workers,
                           zkhostportlist, topdir);

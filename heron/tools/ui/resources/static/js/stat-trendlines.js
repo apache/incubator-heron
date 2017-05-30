@@ -76,14 +76,21 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
         .attr('height', rowHeight - 3);
 
     rows.append('text')
-        .attr('y', rowHeight / 2 + 5)
+        .attr('y', (rowHeight / 2) + 3)
         .attr('x', -5)
         .attr('text-anchor', 'end')
         .text(function (d) {
           var name = instance === '*' ? 'Max ' + d.name : d.name;
-          return name;
+          return extractWrappedWord(name, true);
+        })
+        .append('tspan')
+        .attr('y', (rowHeight / 2) + 14)
+        .attr('x', -5)
+        .attr('text-anchor', 'end')
+        .text(function (d) {
+          var name = instance === '*' ? 'Max ' + d.name : d.name;
+          return extractWrappedWord(name, false);
         });
-
     rows.append('rect')
         .style('fill', 'none')
         .attr('width', width)
@@ -198,6 +205,27 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
         ].join(' '));
     }
   };
+
+  // In case input name contains more than 2 words, then
+  // only first 2 words are printed in one line and all
+  // the other words in next line. Used to solve text-wrap issue.
+  function extractWrappedWord(name, isFirstLine) {
+    if (name == null || name.trim().length == 0){
+      return name;
+    }
+    var words = name.split(' ');
+    if(words.length >= 3 && isFirstLine){
+      return words[0] + ' ' + words[1];
+    }
+    if(words.length >= 3){
+      var remainingWords = words.slice(2, words.length);
+      return remainingWords.join(' ');
+    }
+    if(isFirstLine){
+      return name;
+    }
+    return '';
+  }
 
   function makeTrendlineQuery(metric, name, instance, start, end, callback) {
     var minuteToIndex = {};

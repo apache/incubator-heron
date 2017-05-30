@@ -62,6 +62,11 @@ environments on AWS, this will be available at `<core.dcos_url>/service/marathon
 `core.dcos_url` by executing `dcos config show` from your terminal if you have the DC/OS CLI 
 installed.
 
+* `heron.marathon.scheduler.auth.token` --- Provides an auth token to use when submitting a topology
+to a marathon instance that requires authentication. One can retrieve an auth token by logging in
+to the cluster via the DC/OS CLI (`dcos auth login`) and then copying the token (`dcos_acs_token`)
+that is stored in `~/.dcos/dcos.toml`
+
 * `heron.scheduler.is.service` --- This config indicates whether the scheduler
 is a service. In the case of Marathon, it should be set to `False`.
 
@@ -95,11 +100,14 @@ heron.directory.conf:                       "./heron-conf/"
 # The URI of marathon scheduler
 heron.marathon.scheduler.uri: "<core.dcos_url>/service/marathon"
 
+# The token of the marathon scheduler
+heron.marathon.scheduler.auth.token: "<auth_token>"
+
 # Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
 
 # location of the core package
-heron.package.core.uri:                      https://github.com/twitter/heron/releases/download/0.14.7/heron-core-0.14.7-ubuntu.tar.gz
+heron.package.core.uri:  https://github.com/twitter/heron/releases/download/0.14.7/heron-core-0.14.7-ubuntu.tar.gz
 
 # docker repo for executor
 heron.executor.docker.image: 'ndustrialio/heron-executor:jre8'
