@@ -1,16 +1,17 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.kubernetes;
 
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
+import com.google.common.primitives.Ints;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -33,9 +35,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
-/**
- * Created by john on 5/20/17.
- */
 public class KubernetesScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(KubernetesScheduler.class.getName());
 
@@ -51,9 +50,9 @@ public class KubernetesScheduler implements IScheduler {
   }
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
+  public void initialize(Config aConfig, Config aRuntime) {
+    this.config = aConfig;
+    this.runtime = aRuntime;
     this.controller = getController();
   }
 
@@ -71,7 +70,7 @@ public class KubernetesScheduler implements IScheduler {
 
     LOG.info("Submitting topology to Kubernetes");
 
-    String topologyConf = getTopologyConf(packing);
+    String[] topologyConf = getTopologyConf(packing);
 
     return controller.submitTopology(topologyConf);
   }
@@ -82,7 +81,9 @@ public class KubernetesScheduler implements IScheduler {
   }
 
   @Override
-  public boolean onKill(Scheduler.KillTopologyRequest request) { return controller.killTopology(); }
+  public boolean onKill(Scheduler.KillTopologyRequest request) {
+    return controller.killTopology();
+  }
 
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
@@ -95,7 +96,7 @@ public class KubernetesScheduler implements IScheduler {
     return false;
   }
 
-  protected String getTopologyConf(PackingPlan packing) {
+  protected String[] getTopologyConf(PackingPlan packing) {
 
     config = Config.newBuilder()
         .putAll(config)
@@ -114,31 +115,30 @@ public class KubernetesScheduler implements IScheduler {
         .iterator().next().getRequiredResource();
 
     // Create app conf list for each container
-    ArrayNode instances = mapper.createArrayNode();
+
+    String[] deploymentConfs = new String[Ints.checkedCast(Runtime.numContainers(runtime))];
     for (int i = 0; i < Runtime.numContainers(runtime); i++) {
       ObjectNode instance = mapper.createObjectNode();
 
       instance.put("apiVersion", "extensions/v1beta1");
       instance.put("kind", "Deployment");
       instance.set("metadata", getMetadata(mapper, i));
-      instance.set("spec", getPodTemplateSpec(mapper, i, containerResource));
 
-      instances.add(instance);
+      ObjectNode templateSpec = mapper.createObjectNode();
+      templateSpec.set("template", getPodTemplateSpec(mapper, i, containerResource));
+
+      instance.set("spec", templateSpec);
+      deploymentConfs[i] = instance.toString();
     }
 
-    // Create kubernetes deployment for a topology
-    ObjectNode deploymentConf = mapper.createObjectNode();
-    deploymentConf.put(KubernetesConstants.ID, Runtime.topologyName(runtime));
-    deploymentConf.set(KubernetesConstants.APPS, instances);
-
-    return deploymentConf.toString();
+    return deploymentConfs;
   }
 
   // build the metadata for a deployment
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
     metadataNode.put("name", Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
-    metadataNode.put("namespace", Runtime.topologyName(runtime));
+    metadataNode.put("namespace", "default");
 
     return metadataNode;
   }
@@ -166,18 +166,23 @@ public class KubernetesScheduler implements IScheduler {
     containerInfo.put("name", Joiner.on("-").join("executor", Integer.toString(containerIndex)));
 
     // Image information for this container
-    containerInfo.put("image", KubernetesConstants.DOCKER_IMAGE);
+    containerInfo.put("image", KubernetesContext.getExecutorDockerImage(config));
 
     // Port information for this container
     containerInfo.set("ports", getPorts(mapper));
 
     // Heron command for the container
-    containerInfo.set("command", getExecutorCommand(mapper, containerIndex));
+    String[] command = getExecutorCommand(containerIndex);
+    ArrayNode commandsArray = mapper.createArrayNode();
+    for (int i = 0; i < command.length; i++) {
+      commandsArray.add(command[i]);
+    }
+    containerInfo.set("command", commandsArray);
 
     // Requested resource info
     ObjectNode requestedResourceInfo = mapper.createObjectNode();
     requestedResourceInfo.put("memory", containerResource.getRam().asMegabytes());
-    requestedResourceInfo.put("cpu", containerResource.getCpu());
+    //requestedResourceInfo.put("cpu", containerResource.getCpu());
 
     // Wrap it up into a resources dictionary
     ObjectNode resourceInfo = mapper.createObjectNode();
@@ -219,9 +224,10 @@ public class KubernetesScheduler implements IScheduler {
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
 
-    for (int i=0; i < KubernetesConstants.PORT_NAMES.length; i++) {
+    for (int i = 0; i < KubernetesConstants.PORT_NAMES.length; i++) {
       ObjectNode port = mapper.createObjectNode();
-      port.put(KubernetesConstants.DOCKER_CONTAINER_PORT, KubernetesConstants.PORT_LIST[i]);
+      port.put(KubernetesConstants.DOCKER_CONTAINER_PORT,
+          Integer.parseInt(KubernetesConstants.PORT_LIST[i], 10));
       port.put(KubernetesConstants.PORT_NAME, KubernetesConstants.PORT_NAMES[i]);
       ports.add(port);
     }
@@ -229,14 +235,10 @@ public class KubernetesScheduler implements IScheduler {
     return ports;
   }
 
-  protected ArrayNode getExecutorCommand(ObjectMapper mapper, int containerIndex) {
-    String[] commands = SchedulerUtils.getExecutorCommand(config, runtime,
+  protected String[] getExecutorCommand(int containerIndex) {
+    return SchedulerUtils.getExecutorCommand(config, runtime,
         containerIndex, Arrays.asList(KubernetesConstants.PORT_LIST));
 
-    ArrayNode commandsArray = mapper.createArrayNode();
-    for (int i=0; i < commands.length; i++) {
-      commandsArray.add(commands[i]);
-    }
-    return commandsArray;
+
   }
 }

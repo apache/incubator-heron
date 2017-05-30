@@ -26,7 +26,7 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 /**
- * Submit topology to Marathon.
+ * Submit topology to Kubernetes.
  */
 public class KubernetesLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(KubernetesLauncher.class.getName());

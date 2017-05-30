@@ -251,6 +251,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-conf-kubernetes",
+    package_dir = "conf/kubernetes",
+    files = [
+        "//heron/config/src/yaml:conf-kubernetes-yaml",
+    ]
+)
+
+pkg_tar(
     name = "heron-client-conf",
     package_dir = "conf",
     files = heron_client_conf_files(),
@@ -275,6 +283,7 @@ pkg_tar(
         ":heron-client-conf-yarn",
         ":heron-client-conf-mesos",
         ":heron-client-conf-marathon",
+        ":heron-client-conf-kubernetes",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-third_party",
