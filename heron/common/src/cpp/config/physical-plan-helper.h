@@ -50,6 +50,19 @@ class PhysicalPlanHelper {
   static void GetLocalSpouts(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
                              std::unordered_set<sp_int32>& _return);
 
+  // Return the list of all task_ids that are serviced by the stmgr
+  static void GetTasks(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
+                       std::unordered_set<sp_int32>& _return);
+
+  // Return the list of all task_ids that belong to this component
+  static void GetComponentTasks(const proto::system::PhysicalPlan& _pplan,
+                                const sp_string& _component,
+                                std::unordered_set<sp_int32>& _return);
+
+  // Return the set of all task_ids across the entire topology
+  static void GetAllTasks(const proto::system::PhysicalPlan& _pplan,
+                          std::unordered_set<sp_int32>& _return);
+
   static void LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 };
 }  // namespace config

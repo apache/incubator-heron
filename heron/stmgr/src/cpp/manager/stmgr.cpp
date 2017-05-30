@@ -207,7 +207,10 @@ void StMgr::StartStmgrServer() {
   sops.set_host(IpUtils::getHostName());
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
-  sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
+      1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
@@ -225,7 +228,10 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_host(tmasterLocation->host());
   master_options.set_port(tmasterLocation->master_port());
   master_options.set_socket_family(PF_INET);
-  master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  master_options.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+      1_MB);
   master_options.set_high_watermark(high_watermark_);
   master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
