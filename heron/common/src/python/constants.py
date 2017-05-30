@@ -151,9 +151,6 @@ INSTANCE_EXECUTE_BATCH_TIME_MS = "heron.instance.execute.batch.time.ms"
 # The maximum batch size in bytes for an bolt instance to execute tuples per attempt
 INSTANCE_EXECUTE_BATCH_SIZE_BYTES = "heron.instance.execute.batch.size.bytes"
 
-# The time interval for an instance to check the state change, for instance,
-# the interval a spout using to check whether activate/deactivate is invoked
-INSTANCE_STATE_CHECK_INTERVAL_SEC = "heron.instance.state.check.interval.sec"
 # The time to wait before the instance exits forcibly when uncaught exception happens
 INSTANCE_FORCE_EXIT_TIMEOUT_MS = "heron.instance.force.exit.timeout.ms"
 # Interval in seconds to reconnect to the stream manager
