@@ -25,7 +25,7 @@ public class PackageTypeTest {
    * Method: isOriginalPackageJar(String packageFilename)
    */
   @Test
-  public void testPackageType() throws Exception {
+  public void testPackageType() {
     String jarFile = "a.jar";
     Assert.assertEquals(PackageType.getPackageType(jarFile), PackageType.JAR);
 

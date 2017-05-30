@@ -29,7 +29,7 @@ public class CommunicatorTest {
   private WakeableLooper consumer;
 
   @Before
-  public void before() throws Exception {
+  public void before() {
     producer = new SlaveLooper();
     consumer = new SlaveLooper();
     communicator = new Communicator<Integer>(producer, consumer);
@@ -37,7 +37,7 @@ public class CommunicatorTest {
   }
 
   @After
-  public void after() throws Exception {
+  public void after() {
     communicator = null;
     producer = null;
     consumer = null;
@@ -47,7 +47,7 @@ public class CommunicatorTest {
    * Method: size()
    */
   @Test
-  public void testSize() throws Exception {
+  public void testSize() {
     for (int i = 0; i < 1024 * 1024; i++) {
       if (i % QUEUE_BUFFER_SIZE == 0) {
         communicator = new Communicator<Integer>(producer, consumer);
@@ -62,7 +62,7 @@ public class CommunicatorTest {
    * Method: remainingCapacity()
    */
   @Test
-  public void testRemainingCapacity() throws Exception {
+  public void testRemainingCapacity() {
     for (int i = 0; i < 1024 * 1024; i++) {
       if (i % QUEUE_BUFFER_SIZE == 0) {
         communicator = new Communicator<Integer>(producer, consumer);
@@ -78,7 +78,7 @@ public class CommunicatorTest {
    * Method: poll()
    */
   @Test
-  public void testPoll() throws Exception {
+  public void testPoll() {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
@@ -93,7 +93,7 @@ public class CommunicatorTest {
    * Method: offer(E e)
    */
   @Test
-  public void testOffer() throws Exception {
+  public void testOffer() {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
@@ -108,7 +108,7 @@ public class CommunicatorTest {
    * Method: peek()
    */
   @Test
-  public void testPeek() throws Exception {
+  public void testPeek() {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
@@ -122,7 +122,7 @@ public class CommunicatorTest {
    * Method: isEmpty()
    */
   @Test
-  public void testIsEmpty() throws Exception {
+  public void testIsEmpty() {
     Assert.assertTrue(communicator.isEmpty());
     communicator.offer(1);
     Assert.assertFalse(communicator.isEmpty());
@@ -134,7 +134,7 @@ public class CommunicatorTest {
    * Method: getCapacity()
    */
   @Test
-  public void testGetCapacity() throws Exception {
+  public void testGetCapacity() {
     Assert.assertEquals(QUEUE_BUFFER_SIZE, communicator.getCapacity());
   }
 }
