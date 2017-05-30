@@ -25,10 +25,10 @@ import org.junit.Test;
 
 
 public class SysUtilsTest {
-  public static final int NUM_ATTEMPTS = 100;
+  private static final int NUM_ATTEMPTS = 100;
 
   @Test
-  public void testFreePort() throws Exception {
+  public void testFreePort() throws IOException {
     // Randomized test
     for (int i = 0; i < NUM_ATTEMPTS; ++i) {
       int port = SysUtils.getFreePort();
@@ -39,7 +39,7 @@ public class SysUtilsTest {
   }
 
   @Test
-  public void testSleep() throws Exception {
+  public void testSleep() {
     for (int i = 0; i < NUM_ATTEMPTS; i++) {
       // The value can not be negative
       Duration expectedSleepTime = Duration.ofMillis(new Random().nextInt(100));
@@ -51,7 +51,7 @@ public class SysUtilsTest {
   }
 
   @Test
-  public void testCloseIgnoringException() throws Exception {
+  public void testCloseIgnoringException() {
     Closeable closeable = new Closeable() {
       @Override
       public void close() throws IOException {
