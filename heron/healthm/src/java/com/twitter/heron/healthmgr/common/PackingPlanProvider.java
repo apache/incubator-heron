@@ -19,8 +19,8 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TOPOLOGY_UPDATE;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -34,7 +34,6 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
  * A topology's packing plan may get updated after initial deployment. This provider is used to
  * fetch the latest version from the state manager and provide to any dependent components.
  */
-@Singleton
 public class PackingPlanProvider implements Provider<PackingPlan> {
   private static final Logger LOG = Logger.getLogger(PackingPlanProvider.class.getName());
 
@@ -45,7 +44,7 @@ public class PackingPlanProvider implements Provider<PackingPlan> {
 
   @Inject
   public PackingPlanProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
-                             String topologyName) {
+                             @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
   }

@@ -27,8 +27,6 @@ import com.microsoft.dhalion.api.MetricsProvider;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
-import com.twitter.heron.healthmgr.policy.ThroughputSLAPolicy;
 import com.twitter.heron.proto.scheduler.Scheduler.SchedulerLocation;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Config;
@@ -60,13 +58,8 @@ public class HealthManagerTest {
 
     HealthManager healthManager = new HealthManager(config, "localhost");
 
-    HashMap policyConfig = new HashMap<>();
-    policyConfig.put(HealthMgrConstants.HEALTH_POLICY_CLASS, ThroughputSLAPolicy.class.getName());
-
     String[] policyIds = {"policy"};
     Map policy = new HashMap<>();
-    policy.put(HealthMgrConstants.HEALTH_POLICY_CLASS, ThroughputSLAPolicy.class.getName());
-
     HealthPolicyConfigProvider policyConfigProvider = mock(HealthPolicyConfigProvider.class);
     when(policyConfigProvider.getPolicyIds()).thenReturn(Arrays.asList(policyIds));
     when(policyConfigProvider.getPolicyClass("policy")).thenReturn(TestPolicy.class.getName());
