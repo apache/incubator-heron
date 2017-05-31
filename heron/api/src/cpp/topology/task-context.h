@@ -18,7 +18,7 @@
 #define HERON_API_TOPOLOGY_TASK_CONTEXT_H_
 
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <string>
 #include <utility>
 
@@ -54,7 +54,7 @@ class TaskContext : public TopologyContext {
   /**
    * Gets the set of streams declared for the component of this task.
    */
-  virtual void getThisStreams(std::set<std::string>& retval) = 0;
+  virtual void getThisStreams(std::unordered_set<std::string>& retval) = 0;
 
   /**
    * Gets the index of this task id in getComponentTasks(getThisComponentId()).

@@ -19,7 +19,7 @@
 
 #include <list>
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <string>
 #include <utility>
 
@@ -55,7 +55,7 @@ class TopologyContext {
    * Gets the set of streams declared for the specified component.
    */
   virtual void getComponentStreams(const std::string& componentName,
-                                   std::set<std::string>& retval) = 0;
+                                   std::unordered_set<std::string>& retval) = 0;
 
   /**
    * Gets the task ids allocated for the given component id. The task ids are
@@ -95,7 +95,7 @@ class TopologyContext {
   /**
    * Gets a list of all component ids in this topology
    */
-  virtual void getAllComponentNames(std::set<std::string>& retval) = 0;
+  virtual void getAllComponentNames(std::unordered_set<std::string>& retval) = 0;
 
   /**
    * Gets the metrics registrar with whom you can register metrics
