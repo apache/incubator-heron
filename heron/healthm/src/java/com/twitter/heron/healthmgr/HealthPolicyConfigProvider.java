@@ -31,7 +31,7 @@ import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public class HealthPolicyConfigProvider {
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfigProvider.class.getName());
-  private final Map<String, Map<String, Object>> configs = new HashMap<>();
+  private final Map<String, Map<String, String>> configs = new HashMap<>();
 
   public HealthPolicyConfigProvider(String filename) throws FileNotFoundException {
     this(new Yaml(), new FileInputStream(new File(filename)));
@@ -51,7 +51,7 @@ public class HealthPolicyConfigProvider {
     }
 
     for (String id : TypeUtils.getListOfStrings(ret.get(HealthMgrConstants.HEALTH_POLICIES))) {
-      configs.put(id, (Map<String, Object>) ret.get(id));
+      configs.put(id, (Map<String, String>) ret.get(id));
     }
 
     LOG.info("Loading Health Policies configuration:" + configs);
@@ -66,11 +66,11 @@ public class HealthPolicyConfigProvider {
     return new ArrayList<>(configs.keySet());
   }
 
-  public Map<String, Object> getPolicyConfig(String policyId) {
+  public Map<String, String> getPolicyConfig(String policyId) {
     return configs.get(policyId);
   }
 
   public String getPolicyClass(String policyId) {
-    return (String) configs.get(policyId).get(HealthMgrConstants.HEALTH_POLICY_CLASS);
+    return configs.get(policyId).get(HealthMgrConstants.HEALTH_POLICY_CLASS);
   }
 }
