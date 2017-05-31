@@ -13,6 +13,7 @@ cc_library(
         "ridgen.cpp",
         "sockutils.cpp",
         "strutils.cpp",
+        "mempool.cpp",
 
         "callback.h",
         "callback1.h",
@@ -33,6 +34,7 @@ cc_library(
         "sptest.h",
         "sptypes.h",
         "strutils.h",
+        "mempool.h",
     ],
     hdrs = [ 
         "basics.h",

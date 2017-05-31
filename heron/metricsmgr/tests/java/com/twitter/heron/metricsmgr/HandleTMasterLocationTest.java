@@ -19,9 +19,6 @@ import java.lang.reflect.Field;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
@@ -32,17 +29,17 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
-import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.StatusCode;
-import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+
+import static com.twitter.heron.common.network.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
+import static org.mockito.Mockito.spy;
 
 /**
  * Test whether MetricsManagerServer could handle TMasterLocationRefreshMessage correctly.
@@ -58,12 +55,6 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
  */
 
 public class HandleTMasterLocationTest {
-
-  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
-      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
-      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
-      ByteAmount.fromMegabytes(5),
-      ByteAmount.fromMegabytes(5));
 
   // Two TMasterLocationRefreshMessage to verify
   private static final Metrics.TMasterLocationRefreshMessage TMASTERLOCATIONREFRESHMESSAGE0 =
@@ -84,45 +75,33 @@ public class HandleTMasterLocationTest {
   private static final String TMASTER_LOCATION_BEAN_NAME =
       TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
 
-  private static final String SERVER_HOST = "127.0.0.1";
-  private static int serverPort;
-
+  private LatchedMultiCountMetric serverMetrics;
   private MetricsManagerServer metricsManagerServer;
-  private SimpleTMasterLocationPublisher simpleLocationPublisher;
-  private NIOLooper serverLooper;
-
-  private ExecutorService threadsPool;
+  private HeronServerTester heronServerTester;
 
   @Before
-  public void before() throws Exception {
-    // Get an available port
-    serverPort = SysUtils.getFreePort();
-
-    threadsPool = Executors.newFixedThreadPool(2);
-
-    serverLooper = new NIOLooper();
+  public void before() throws IOException {
+    // MetricsManagerServer increments this counter every time a location refresh message is
+    // received, so we can await this counter getting to 4 before proceeding with the test
+    serverMetrics = new LatchedMultiCountMetric("tmaster-location-received", 4L);
 
     // Spy it for unit test
     metricsManagerServer =
-        Mockito.spy(new MetricsManagerServer(serverLooper, SERVER_HOST,
-            serverPort, TEST_SOCKET_OPTIONS, new MultiCountMetric()));
+        spy(new MetricsManagerServer(new NIOLooper(), HeronServerTester.SERVER_HOST,
+            SysUtils.getFreePort(), HeronServerTester.TEST_SOCKET_OPTIONS, serverMetrics));
+
+    heronServerTester = new HeronServerTester(metricsManagerServer,
+        new TestRequestHandler(),
+        new HeronServerTester.SuccessResponseHandler(
+            Metrics.MetricPublisherRegisterResponse.class, new TestResponseHandler()),
+        RESPONSE_RECEIVED_TIMEOUT);
+    heronServerTester.start();
   }
 
   @After
   @SuppressWarnings("unchecked")
-  public void after() throws Exception {
-    threadsPool.shutdownNow();
-
-    metricsManagerServer.stop();
-    metricsManagerServer = null;
-
-    simpleLocationPublisher.stop();
-
-    simpleLocationPublisher.getNIOLooper().exitLoop();
-    serverLooper.exitLoop();
-    serverLooper = null;
-
-    threadsPool = null;
+  public void after() throws NoSuchFieldException, IllegalAccessException {
+    heronServerTester.stop();
 
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
@@ -133,19 +112,8 @@ public class HandleTMasterLocationTest {
   }
 
   @Test
-  public void testHandleTMasterLocation() throws Exception {
-    // First run Server
-    runServer();
-
-    // Wait a while for server fully starting
-    Thread.sleep(3 * 1000);
-
-    // Then run Client
-    runClient();
-
-
-    // Wait some while to let message fully send out
-    Thread.sleep(10 * 1000);
+  public void testHandleTMasterLocation() throws InterruptedException {
+    serverMetrics.await(Duration.ofSeconds(10));
 
     // Verification
     TopologyMaster.TMasterLocation tMasterLocation = (TopologyMaster.TMasterLocation)
@@ -172,74 +140,9 @@ public class HandleTMasterLocationTest {
     Assert.assertEquals(1, tMasterLocation.getMasterPort());
   }
 
-  private void runServer() {
-
-    Runnable runServer = new Runnable() {
-      @Override
-      public void run() {
-        metricsManagerServer.start();
-        metricsManagerServer.getNIOLooper().loop();
-      }
-    };
-    threadsPool.execute(runServer);
-  }
-
-  private void runClient() {
-
-    Runnable runClient = new Runnable() {
-      private NIOLooper looper;
-
-      @Override
-      public void run() {
-        try {
-          looper = new NIOLooper();
-          simpleLocationPublisher =
-              new SimpleTMasterLocationPublisher(looper, SERVER_HOST, serverPort);
-          simpleLocationPublisher.start();
-          looper.loop();
-
-        } catch (IOException e) {
-          throw new RuntimeException("Some error instantiating client");
-        } finally {
-          simpleLocationPublisher.stop();
-          if (looper != null) {
-            looper.exitLoop();
-          }
-        }
-      }
-    };
-    threadsPool.execute(runClient);
-  }
-
-  private static class SimpleTMasterLocationPublisher extends HeronClient {
-    private static final Logger LOG = Logger.getLogger(
-        SimpleTMasterLocationPublisher.class.getName());
-
-    SimpleTMasterLocationPublisher(NIOLooper looper, String host, int port) {
-      super(looper, host, port, TEST_SOCKET_OPTIONS);
-    }
-
+  private static final class TestRequestHandler implements HeronServerTester.TestRequestHandler {
     @Override
-    public void onConnect(StatusCode status) {
-      if (status != StatusCode.OK) {
-        org.junit.Assert.fail("Connection with server failed");
-      } else {
-        LOG.info("Connected with Metrics Manager Server");
-        sendRequest();
-      }
-    }
-
-    @Override
-    public void onError() {
-      org.junit.Assert.fail("Error in client while talking to server");
-    }
-
-    @Override
-    public void onClose() {
-
-    }
-
-    private void sendRequest() {
+    public Message getRequestMessage() {
       Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
           setHostname("hostname").
           setPort(0).
@@ -248,43 +151,30 @@ public class HandleTMasterLocationTest {
           setInstanceIndex(1).
           build();
 
-      Metrics.MetricPublisherRegisterRequest request =
-          Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
-
-      sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
+      return Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
     }
 
-    // We send two TMasterLocationRefreshMessage twice each
-    // Then we check:
-    // 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
-    // 2. Finally the TMasterLocation in SingletonRegistry should be the latest one.
-    private void sendMessage() {
+    @Override
+    public Message.Builder getResponseBuilder() {
+      return Metrics.MetricPublisherRegisterResponse.newBuilder();
+    }
+  }
+
+  private static final class TestResponseHandler implements HeronServerTester.TestResponseHandler {
+    @Override
+    public void handleResponse(HeronClient client, StatusCode status,
+                               Object ctx, Message response) {
+      // We send two TMasterLocationRefreshMessage twice each
+      // Then we check:
+      // 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
+      // 2. Finally the TMasterLocation in SingletonRegistry should be the latest one.
       // First send TMASTERLOCATIONREFRESHMESSAGE0 twice
-      sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
-      sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
+      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
+      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
 
       // Then send TMASTERLOCATIONREFRESHMESSAGE1 twice
-      sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
-      sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
-    }
-
-    @Override
-    public void onResponse(StatusCode status, Object ctx, Message response) {
-      if (response instanceof Metrics.MetricPublisherRegisterResponse) {
-        Assert.assertEquals(Common.StatusCode.OK,
-            ((Metrics.MetricPublisherRegisterResponse) response).getStatus().getStatus());
-
-        // Start sending the TMasterLocation
-        sendMessage();
-
-      } else {
-        org.junit.Assert.fail("Unknown type of response received");
-      }
-    }
-
-    @Override
-    public void onIncomingMessage(Message request) {
-      org.junit.Assert.fail("Expected message from client");
+      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
+      client.sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
     }
   }
 }

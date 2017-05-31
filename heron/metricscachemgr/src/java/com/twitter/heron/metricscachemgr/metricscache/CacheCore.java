@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionDatum;
 import com.twitter.heron.metricscachemgr.metricscache.query.ExceptionRequest;
@@ -82,23 +84,30 @@ public class CacheCore {
   private final Duration interval;
   // exception limit
   private final long maxExceptionCount;
+  private final Ticker ticker;
 
   /**
    * constructor: CacheCore needs two intervals to configure metrics time window
    * and one number to limit exception count
    *
-   * @param maxInterval metric: cache how long time? in seconds
-   * @param interval metric: purge how often? in seconds
+   * @param maxInterval metric: cache how long time?
+   * @param interval metric: purge how often?
    * @param maxException exception: cache how many?
    */
   public CacheCore(Duration maxInterval, Duration interval, long maxException) {
+    this(maxInterval, interval, maxException, new Ticker());
+  }
+
+  @VisibleForTesting
+  CacheCore(Duration maxInterval, Duration interval, long maxException, Ticker ticker) {
     this.maxInterval = maxInterval;
     this.interval = interval;
     this.maxExceptionCount = maxException;
+    this.ticker = ticker;
 
     cacheException = new HashMap<>();
     cacheMetric = new TreeMap<>();
-    long now = System.currentTimeMillis();
+    long now = ticker.read();
     for (long i = now - this.maxInterval.toMillis(); i < now; i += this.interval.toMillis()) {
       cacheMetric.put(i, new HashMap<Long, LinkedList<MetricDatapoint>>());
     }
@@ -480,7 +489,7 @@ public class CacheCore {
   }
 
   public void purge() {
-    long now = System.currentTimeMillis();
+    long now = ticker.read();
     synchronized (CacheCore.class) {
       // remove old
       while (!cacheMetric.isEmpty()) {
@@ -551,5 +560,11 @@ public class CacheCore {
     }
     sb.append("}");
     return sb.toString();
+  }
+
+  static class Ticker {
+    long read() {
+      return System.currentTimeMillis();
+    }
   }
 }

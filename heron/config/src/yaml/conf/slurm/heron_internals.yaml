@@ -55,6 +55,10 @@ heron.streammgr.packet.maximum.size.bytes: 102400
 # The frequency in ms to drain the tuple cache in stream manager
 heron.streammgr.cache.drain.frequency.ms: 10 
 
+# The sized based threshold in MB for buffering data tuples
+# waiting for checkpoint markers before giving up
+heron.streammgr.stateful.buffer.size.mb: 100
+
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100 
 
@@ -223,10 +227,6 @@ heron.instance.execute.batch.time.ms: 16
 # The maximum batch size in bytes for an bolt instance to execute tuples per attempt
 heron.instance.execute.batch.size.bytes: 32768 
 
-# The time interval for an instance to check the state change, 
-# for example, the interval a spout uses to check whether activate/deactivate is invoked
-heron.instance.state.check.interval.sec: 5 
-
 # The time to wait before the instance exits forcibly when uncaught exception happens
 heron.instance.force.exit.timeout.ms: 2000 
 
@@ -240,8 +240,6 @@ heron.instance.reconnect.metricsmgr.times: 60
 
 # The interval in second for an instance to sample its system metrics, for instance, cpu load.
 heron.instance.metrics.system.sample.interval.sec: 10
-
-heron.instance.slave.fetch.pplan.interval.sec: 1
 
 # For efficient acknowledgement
 heron.instance.acknowledgement.nbuckets: 10 

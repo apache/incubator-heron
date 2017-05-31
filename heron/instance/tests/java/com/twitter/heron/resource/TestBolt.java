@@ -15,6 +15,7 @@
 package com.twitter.heron.resource;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
@@ -56,9 +57,11 @@ public class TestBolt extends BaseRichBolt {
     AtomicInteger failCount =
         (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
     AtomicInteger tupleExecutedCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton("execute-count");
+        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.EXECUTE_COUNT);
+    CountDownLatch tupleExecutedLatch =
+        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.EXECUTE_LATCH);
     StringBuilder receivedStrings =
-        (StringBuilder) SingletonRegistry.INSTANCE.getSingleton("received-string-list");
+        (StringBuilder) SingletonRegistry.INSTANCE.getSingleton(Constants.RECEIVED_STRING_LIST);
 
     if (receivedStrings != null) {
       receivedStrings.append(tuple.getString(0));
@@ -67,6 +70,7 @@ public class TestBolt extends BaseRichBolt {
     if (tupleExecutedCount != null) {
       tupleExecutedCount.getAndIncrement();
     }
+
     if ((tupleExecuted & 1) == 0) {
       outputCollector.ack(tuple);
       if (ackCount != null) {
@@ -80,6 +84,10 @@ public class TestBolt extends BaseRichBolt {
     }
     tupleExecuted++;
     outputCollector.emit(new Values(tuple.getString(0)));
+
+    if (tupleExecutedLatch != null) {
+      tupleExecutedLatch.countDown();
+    }
   }
 
   @Override
