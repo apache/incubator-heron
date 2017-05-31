@@ -181,8 +181,10 @@ void Client::OnNewPacket(IncomingPacket* _ipkt) {
 
   if (_ipkt->UnPackString(&typname) != 0) {
     Connection* conn = static_cast<Connection*>(conn_);
-    LOG(FATAL) << "UnPackString failed from connection " << conn << " from hostport "
+    LOG(ERROR) << "UnPackString failed from connection " << conn << " from hostport "
                << conn->getIPAddress() << ":" << conn->getPort();
+    delete _ipkt;
+    return;
   }
 
   if (messageHandlers.count(typname) > 0) {
