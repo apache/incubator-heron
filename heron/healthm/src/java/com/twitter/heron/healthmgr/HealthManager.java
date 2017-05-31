@@ -15,8 +15,10 @@
 package com.twitter.heron.healthmgr;
 
 import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -38,6 +40,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
@@ -118,7 +121,12 @@ public class HealthManager {
     LOG.info("Starting Health Manager");
 
     PoliciesExecutor policyExecutor = new PoliciesExecutor(healthManager.healthPolicies);
-    policyExecutor.start();
+    ScheduledFuture<?> future = policyExecutor.start();
+    try {
+      future.get();
+    } finally {
+      policyExecutor.destroy();
+    }
   }
 
   public void initialize() throws ReflectiveOperationException, FileNotFoundException {
@@ -126,6 +134,7 @@ public class HealthManager {
 
     this.runtime = Config.newBuilder()
         .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, stateMgrAdaptor)
+        .put(Key.TOPOLOGY_NAME, Context.topologyName(config))
         .build();
 
     this.schedulerClient = createSchedulerClient();
@@ -153,7 +162,8 @@ public class HealthManager {
 
   @VisibleForTesting
   HealthPolicyConfigProvider createPolicyConfigProvider() throws FileNotFoundException {
-    String policyConfigFile = Context.heronConf(config) + HealthMgrConstants.CONF_FILE_NAME;
+    String policyConfigFile
+        = Paths.get(Context.heronConf(config), HealthMgrConstants.CONF_FILE_NAME).toString();
     return new HealthPolicyConfigProvider(policyConfigFile);
   }
 
@@ -178,6 +188,7 @@ public class HealthManager {
         bind(SchedulerStateManagerAdaptor.class).toInstance(stateMgrAdaptor);
         bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
         bind(HealthPolicyConfigProvider.class).toInstance(policyConfigProvider);
+        bind(PackingPlanProvider.class).in(Singleton.class);
       }
     };
   }
