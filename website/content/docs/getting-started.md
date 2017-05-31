@@ -178,6 +178,8 @@ You can open Heron UI in your browser at [http://localhost:8889](http://localhos
 and see something like this upon successful submission of the topology:
 ![alt tag](/img/heron-ui.png)
 
+Note: ``heron-tracker`` (in Step 4) should be running at the same time so that Heron UI can work properly. 
+
 To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
 ## Step 5 --- Explore topology management commands
 
