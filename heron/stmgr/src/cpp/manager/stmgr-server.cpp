@@ -303,7 +303,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
   } else {
     stmgr_->HandleStreamManagerData(iter->second, *_message);
   }
-  release(_message);
+  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
@@ -388,7 +388,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping..";
-    release(_message);
+    __global_protobuf_pool_release__(_message);
     return;
   }
   if (_message->has_data()) {
@@ -401,7 +401,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
-  release(_message);
+  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
@@ -550,7 +550,7 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr() << " " << _message->message_id();
 
-    release(_message);
+    __global_protobuf_pool_release__(_message);
     return;
   }
   auto iter = rstmgrs_.find(_conn);
@@ -560,7 +560,7 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
 
   StartBackPressureOnSpouts();
 
-  release(_message);
+  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
@@ -571,7 +571,7 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr();
 
-    release(_message);
+    __global_protobuf_pool_release__(_message);
     return;
   }
   auto iter = rstmgrs_.find(_conn);
@@ -585,7 +585,7 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
     AttemptStopBackPressureFromSpouts();
   }
 
-  release(_message);
+  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::SendStartBackPressureToOtherStMgrs() {

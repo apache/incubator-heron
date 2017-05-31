@@ -36,7 +36,6 @@ cc_library(
         "packet.h",
         "event_loop_impl.h",
         "server.h",
-        "mempool.h",
     ],
     hdrs = [
         "network.h",
