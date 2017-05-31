@@ -206,12 +206,6 @@ public enum SystemConfigKey {
   INSTANCE_ACKNOWLEDGEMENT_NBUCKETS("heron.instance.acknowledgement.nbuckets", Type.INTEGER),
 
   /**
-   * The interval for different threads to attempt to fetch physical plan from SingletonRegistry
-   */
-  INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL(
-      "heron.instance.slave.fetch.pplan.interval.sec", ChronoUnit.SECONDS),
-
-  /**
    * The expected size on read queue in bolt
    */
   INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE(

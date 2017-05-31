@@ -175,10 +175,6 @@ public final class SystemConfig {
     return getInteger(SystemConfigKey.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS);
   }
 
-  public Duration getInstanceSlaveFetchPplanInterval() {
-    return getDuration(SystemConfigKey.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL);
-  }
-
   public Duration getInstanceTuningInterval() {
     return getDuration(SystemConfigKey.INSTANCE_TUNING_INTERVAL);
   }

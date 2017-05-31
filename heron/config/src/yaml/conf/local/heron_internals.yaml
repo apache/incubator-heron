@@ -241,8 +241,6 @@ heron.instance.reconnect.metricsmgr.times: 60
 # The interval in second for an instance to sample its system metrics, for instance, cpu load.
 heron.instance.metrics.system.sample.interval.sec: 10
 
-heron.instance.slave.fetch.pplan.interval.sec: 1
-
 # For efficient acknowledgement
 heron.instance.acknowledgement.nbuckets: 10
 
