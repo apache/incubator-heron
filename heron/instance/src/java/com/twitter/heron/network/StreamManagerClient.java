@@ -298,6 +298,7 @@ public class StreamManagerClient extends HeronClient {
     }
 
     HeronTuples.HeronTupleSet s = toFeed.build();
+    LOG.info(s.toString());
     inStreamQueue.offer(s);
   }
 
