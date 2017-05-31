@@ -24,6 +24,7 @@
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
+#include "basics/spmultimap.h"
 
 namespace heron {
 namespace common {
@@ -57,9 +58,9 @@ class StMgrServer : public Server {
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
   // Do back pressure
-  void StartBackPressureClientCb(const sp_string& _other_stmgr_id);
+  void StartBackPressureClientCb(const sp_string& _other_stmgr_id, sp_int32 task_id);
   // Relieve back pressure
-  void StopBackPressureClientCb(const sp_string& _other_stmgr_id);
+  void StopBackPressureClientCb(const sp_string& _other_stmgr_id, sp_int32 task_id);
 
   bool HaveAllInstancesConnectedToUs() const {
     return active_instances_.size() == expected_instances_.size();
@@ -97,8 +98,8 @@ class StMgrServer : public Server {
                                       proto::stmgr::StartBackPressureMessage* _message);
   void HandleStopBackPressureMessage(Connection* _conn,
                                      proto::stmgr::StopBackPressureMessage* _message);
-  void SendStartBackPressureToOtherStMgrs();
-  void SendStopBackPressureToOtherStMgrs();
+  void SendStartBackPressureToOtherStMgrs(const sp_int32 _task_id);
+  void SendStopBackPressureToOtherStMgrs(const sp_int32 _task_id);
 
   // Back pressure related connection callbacks
   // Do back pressure
@@ -106,10 +107,10 @@ class StMgrServer : public Server {
   // Relieve back pressure
   void StopBackPressureConnectionCb(Connection* _connection);
 
-  // Can we free the back pressure on the spouts?
-  void AttemptStopBackPressureFromSpouts();
-  // Start back pressure on the spouts
-  void StartBackPressureOnSpouts();
+  // Can we free the back pressure on the instances?
+  void AttemptStopBackPressureFromInstances(const sp_int32 _task_id, bool initiated);
+  // Start back pressure on the instances
+  void StartBackPressureOnInstances(const sp_int32 _task_id, bool initiated);
 
   // Compute the LocalSpouts from Physical Plan
   void ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan);
@@ -153,8 +154,8 @@ class StMgrServer : public Server {
 
   // instances/stream mgrs causing back pressure
   std::unordered_set<sp_string> remote_ends_who_caused_back_pressure_;
-  // stream managers that have announced back pressure
-  std::unordered_set<sp_string> stmgrs_who_announced_back_pressure_;
+  // (stream manager, task id) pairs who have announced back pressure
+  sp_multimap<sp_string, sp_int32> stmgrs_who_announced_back_pressure_;
 
   sp_string topology_name_;
   sp_string topology_id_;
@@ -168,7 +169,7 @@ class StMgrServer : public Server {
   heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
-  bool spouts_under_back_pressure_;
+  sp_int32 instances_under_back_pressure_;
 };
 
 }  // namespace stmgr

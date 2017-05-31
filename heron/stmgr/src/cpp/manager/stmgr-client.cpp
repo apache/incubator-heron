@@ -148,9 +148,6 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
     Stop();
   }
   delete _response;
-  if (client_manager_->DidAnnounceBackPressure()) {
-    SendStartBackPressureMessage();
-  }
 }
 
 void StMgrClient::OnReConnectTimer() { Start(); }
@@ -195,7 +192,7 @@ void StMgrClient::StopBackPressureConnectionCb(Connection* _connection) {
   client_manager_->StopBackPressureOnServer(other_stmgr_id_);
 }
 
-void StMgrClient::SendStartBackPressureMessage() {
+void StMgrClient::SendStartBackPressureMessage(const sp_int32 _task_id) {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
@@ -205,12 +202,13 @@ void StMgrClient::SendStartBackPressureMessage() {
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
+  message->set_task_id(_task_id);
   SendMessage(*message);
 
   release(message);
 }
 
-void StMgrClient::SendStopBackPressureMessage() {
+void StMgrClient::SendStopBackPressureMessage(const sp_int32 _task_id) {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
@@ -220,6 +218,7 @@ void StMgrClient::SendStopBackPressureMessage() {
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
+  message->set_task_id(_task_id);
   SendMessage(*message);
 
   release(message);

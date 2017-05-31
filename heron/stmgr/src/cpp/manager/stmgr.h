@@ -17,13 +17,14 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_H_
 
-#include <list>
 #include <map>
+#include <queue>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 #include <chrono>
 #include <typeindex>
+#include <unordered_set>
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
@@ -74,12 +75,13 @@ class StMgr {
   virtual void StopBackPressureOnServer(const sp_string& _other_stmgr_id);
   // Used by the server to tell the client to send the back pressure related
   // messages
-  void SendStartBackPressureToOtherStMgrs();
-  void SendStopBackPressureToOtherStMgrs();
+  void SendStartBackPressureToOtherStMgrs(const sp_int32 _task_id);
+  void SendStopBackPressureToOtherStMgrs(const sp_int32 _task_id);
   void StartTMasterClient();
-  bool DidAnnounceBackPressure();
+  std::unordered_set<sp_int32> GetUpstreamInstances(const sp_int32 _task_id);
 
  private:
+  void _GetUpstreamInstances(const sp_int32 _task_id, std::unordered_set<sp_int32>& result);
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
   void OnMetricsCacheLocationFetch(
          proto::tmaster::MetricsCacheLocation* _tmaster, proto::system::StatusCode);
@@ -93,6 +95,7 @@ class StMgr {
   void PopulateStreamConsumers(
       proto::api::Topology* _topology,
       const std::map<sp_string, std::vector<sp_int32> >& _component_to_task_ids);
+  void PopulateUpstreamTasks(proto::system::PhysicalPlan* _pplan);
   void PopulateXorManagers(
       const proto::api::Topology& _topology, sp_int32 _message_timeout,
       const std::map<sp_string, std::vector<sp_int32> >& _component_to_task_ids);
@@ -138,6 +141,8 @@ class StMgr {
   std::unordered_map<sp_int32, sp_string> task_id_to_stmgr_;
   // map of <component, streamid> to its consumers
   std::unordered_map<std::pair<sp_string, sp_string>, StreamConsumers*> stream_consumers_;
+  // The graph of all the tasks
+  std::unordered_map<sp_int32, std::unordered_set<sp_int32>> tasks_mapping_;
   // xor managers
   XorManager* xor_mgrs_;
   // Tuple Cache to optimize message building
@@ -171,6 +176,7 @@ class StMgr {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+  std::queue<sp_int32> backpressure_starters_;
 };
 
 }  // namespace stmgr

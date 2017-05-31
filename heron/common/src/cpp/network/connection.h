@@ -102,7 +102,7 @@ class Connection : public BaseConnection {
   void setCausedBackPressure() { mCausedBackPressure = true; }
   void unsetCausedBackPressure() { mCausedBackPressure = false; }
   bool hasCausedBackPressure() const { return mCausedBackPressure; }
-  bool isUnderBackPressure() const { return mUnderBackPressure; }
+  bool isUnderBackPressure() const { return mUnderBackPressure > 0; }
 
   sp_int32 putBackPressure();
   sp_int32 removeBackPressure();
@@ -153,7 +153,7 @@ class Connection : public BaseConnection {
   // Have we caused back pressure?
   bool mCausedBackPressure;
   // Are our reads being throttled?
-  bool mUnderBackPressure;
+  sp_int32 mUnderBackPressure;
   // How many times have we enqueued data and found that we had outstanding bytes >
   // HWM of back pressure threshold
   sp_uint8 mNumEnqueuesWithBufferFull;

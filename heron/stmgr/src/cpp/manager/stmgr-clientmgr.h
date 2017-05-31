@@ -53,9 +53,9 @@ class StMgrClientMgr {
   void StopBackPressureOnServer(const sp_string& _other_stmgr_id);
   // Used by the server to tell the client to send the back pressure related
   // messages
-  void SendStartBackPressureToOtherStMgrs();
-  void SendStopBackPressureToOtherStMgrs();
-  bool DidAnnounceBackPressure();
+  void SendStartBackPressureToOtherStMgrs(const sp_int32 _task_id);
+  void SendStopBackPressureToOtherStMgrs(const sp_int32 _task_id);
+  sp_int32 FindBusiestTaskOnStmgr(const sp_string& _stmgr_id);
 
  private:
   StMgrClient* CreateClient(const sp_string& _other_stmgr_id, const sp_string& _host_name,
@@ -76,6 +76,10 @@ class StMgrClientMgr {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  // Counters for the traffic per remote instance on per stmgr since the last back pressure,
+  // this is used by back pressure algorithm to decide which instance to blame
+  std::unordered_map<sp_string, std::unordered_map<sp_int32, sp_int64>> instance_stats_;
 };
 
 }  // namespace stmgr

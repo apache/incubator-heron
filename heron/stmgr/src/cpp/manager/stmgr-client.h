@@ -44,8 +44,8 @@ class StMgrClient : public Client {
   void Quit();
 
   void SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
-  void SendStartBackPressureMessage();
-  void SendStopBackPressureMessage();
+  void SendStartBackPressureMessage(const sp_int32 _task_id);
+  void SendStopBackPressureMessage(const sp_int32 _task_id);
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);

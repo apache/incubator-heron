@@ -77,6 +77,7 @@ void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) 
         // This stmgr has actually moved to a different host/port
         clients_[s.id()]->Quit();  // this will delete itself.
         clients_[s.id()] = CreateClient(s.id(), s.host_name(), s.data_port());
+        instance_stats_[s.id()].clear();
       } else {
         // This stmgr has remained the same. Don't do anything
       }
@@ -101,11 +102,8 @@ void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) 
     LOG(INFO) << "Stmgr " << *iter << " no longer required";
     clients_[*iter]->Quit();  // This will delete itself.
     clients_.erase(*iter);
+    instance_stats_.erase(*iter);
   }
-}
-
-bool StMgrClientMgr::DidAnnounceBackPressure() {
-  return stream_manager_->DidAnnounceBackPressure();
 }
 
 StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
@@ -125,11 +123,27 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   return client;
 }
 
+sp_int32 StMgrClientMgr::FindBusiestTaskOnStmgr(const sp_string& _stmgr_id) {
+  CHECK(instance_stats_.find(_stmgr_id) != instance_stats_.end());
+  sp_int32 task_id;
+  sp_int64 max = 0;
+  for (auto iter = instance_stats_[_stmgr_id].begin();
+       iter!= instance_stats_[_stmgr_id].end();
+       iter++) {
+    if (iter->second > max) {
+      task_id = iter->first;
+      max = iter->second;
+    }
+  }
+  return task_id;
+}
+
 void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
                                             const proto::system::HeronTupleSet2& _msg) {
   auto iter = clients_.find(_stmgr_id);
   CHECK(iter != clients_.end());
 
+  instance_stats_[_stmgr_id][_task_id] += _msg.GetCachedSize();
   // Acquire the message
   proto::stmgr::TupleStreamMessage2* out = nullptr;
   out = clients_[_stmgr_id]->acquire(out);
@@ -149,17 +163,18 @@ void StMgrClientMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id)
 void StMgrClientMgr::StopBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Call the StMgrServers removeBackPressure method
   stream_manager_->StopBackPressureOnServer(_other_stmgr_id);
+  instance_stats_.clear();
 }
 
-void StMgrClientMgr::SendStartBackPressureToOtherStMgrs() {
+void StMgrClientMgr::SendStartBackPressureToOtherStMgrs(const sp_int32 _task_id) {
   for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
-    iter->second->SendStartBackPressureMessage();
+    iter->second->SendStartBackPressureMessage(_task_id);
   }
 }
 
-void StMgrClientMgr::SendStopBackPressureToOtherStMgrs() {
+void StMgrClientMgr::SendStopBackPressureToOtherStMgrs(const sp_int32 _task_id) {
   for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
-    iter->second->SendStopBackPressureMessage();
+    iter->second->SendStopBackPressureMessage(_task_id);
   }
 }
 
