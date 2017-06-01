@@ -120,14 +120,11 @@ public class KubernetesScheduler implements IScheduler {
     for (int i = 0; i < Runtime.numContainers(runtime); i++) {
       ObjectNode instance = mapper.createObjectNode();
 
-      instance.put("apiVersion", "extensions/v1beta1");
-      instance.put("kind", "Deployment");
+      instance.put("apiVersion", "v1");
+      instance.put("kind", "Pod");
       instance.set("metadata", getMetadata(mapper, i));
 
-      ObjectNode templateSpec = mapper.createObjectNode();
-      templateSpec.set("template", getPodTemplateSpec(mapper, i, containerResource));
-
-      instance.set("spec", templateSpec);
+      instance.set("spec", getContainerSpec(mapper, i, containerResource));
       deploymentConfs[i] = instance.toString();
     }
 
@@ -138,7 +135,11 @@ public class KubernetesScheduler implements IScheduler {
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
     metadataNode.put("name", Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
-    metadataNode.put("namespace", "default");
+
+    ObjectNode labels = mapper.createObjectNode();
+    labels.put("topology", Runtime.topologyName(runtime));
+
+    metadataNode.set("labels", labels);
 
     return metadataNode;
   }
@@ -235,10 +236,20 @@ public class KubernetesScheduler implements IScheduler {
     return ports;
   }
 
+  protected String getFetchCommand() {
+    return "cd /opt/heron/ && curl " + Runtime.topologyPackageUri(runtime).toString()
+            + " | tar xvz";
+  }
+
   protected String[] getExecutorCommand(int containerIndex) {
-    return SchedulerUtils.getExecutorCommand(config, runtime,
+    String[] executorCommand = SchedulerUtils.getExecutorCommand(config, runtime,
         containerIndex, Arrays.asList(KubernetesConstants.PORT_LIST));
+    String[] command = {
+        "sh",
+        "-c",
+        getFetchCommand() + " && " + Joiner.on(" ").join(executorCommand)
+    };
 
-
+    return command;
   }
 }
