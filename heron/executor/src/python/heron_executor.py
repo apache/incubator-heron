@@ -37,6 +37,7 @@ from functools import partial
 
 
 from heron.common.src.python.utils import log
+from heron.common.src.python.utils import proc
 # pylint: disable=unused-import
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.statemgrs.src.python import statemanagerfactory
@@ -678,7 +679,7 @@ class HeronExecutor(object):
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
     ''' Wait for the termination of a process and log its stdout & stderr '''
-    log.stream_process_stdout(process, stdout_log_fn(name))
+    proc.stream_process_stdout(process, stdout_log_fn(name))
     process.wait()
 
   def _run_process(self, name, cmd, env_to_exec=None):
@@ -689,7 +690,7 @@ class HeronExecutor(object):
       process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  env=env_to_exec, bufsize=1)
 
-      log.async_stream_process_stdout(process, stdout_log_fn(name))
+      proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
       Log.info("Exception running command %:", cmd)
       traceback.print_exc()
