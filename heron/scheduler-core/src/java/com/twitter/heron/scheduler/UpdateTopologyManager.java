@@ -307,10 +307,9 @@ public class UpdateTopologyManager implements Closeable {
     }
   }
 
-  @VisibleForTesting
-  TopologyAPI.Topology getUpdatedTopology(String topologyName,
-                                          PackingPlan proposedPackingPlan,
-                                          SchedulerStateManagerAdaptor stateManager) {
+  private TopologyAPI.Topology getUpdatedTopology(String topologyName,
+                                                  PackingPlan proposedPackingPlan,
+                                                  SchedulerStateManagerAdaptor stateManager) {
     TopologyAPI.Topology updatedTopology = getTopology(stateManager, topologyName);
     Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
     return mergeTopology(updatedTopology, proposedComponentCounts);
