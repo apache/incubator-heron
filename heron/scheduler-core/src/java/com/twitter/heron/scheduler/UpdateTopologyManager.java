@@ -321,6 +321,11 @@ public class UpdateTopologyManager implements Closeable {
     return stateManager.getPackingPlan(topologyName);
   }
 
+  /**
+   * Returns the topology. It's key that we get the topology from the physical plan to reflect any
+   * state changes since launch. The stateManager.getTopology(name) method returns the topology from
+   * the time of submission. See additional commentary in topology.proto and physical_plan.proto.
+   */
   @VisibleForTesting
   TopologyAPI.Topology getTopology(SchedulerStateManagerAdaptor stateManager, String topologyName) {
     return stateManager.getPhysicalPlan(topologyName).getTopology();
