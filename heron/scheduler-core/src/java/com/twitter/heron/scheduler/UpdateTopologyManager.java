@@ -142,7 +142,7 @@ public class UpdateTopologyManager implements Closeable {
     Preconditions.checkState(newContainerCount + removableContainerCount == 0
         || scalableScheduler.isPresent(), message);
 
-    TopologyAPI.Topology topology = stateManager.getTopology(topologyName);
+    TopologyAPI.Topology topology = getTopology(stateManager, topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
 
     // fetch the topology, which will need to be updated
@@ -311,7 +311,7 @@ public class UpdateTopologyManager implements Closeable {
   TopologyAPI.Topology getUpdatedTopology(String topologyName,
                                           PackingPlan proposedPackingPlan,
                                           SchedulerStateManagerAdaptor stateManager) {
-    TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
+    TopologyAPI.Topology updatedTopology = getTopology(stateManager, topologyName);
     Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
     return mergeTopology(updatedTopology, proposedComponentCounts);
   }
@@ -320,6 +320,11 @@ public class UpdateTopologyManager implements Closeable {
   PackingPlans.PackingPlan getPackingPlan(SchedulerStateManagerAdaptor stateManager,
                                           String topologyName) {
     return stateManager.getPackingPlan(topologyName);
+  }
+
+  @VisibleForTesting
+  TopologyAPI.Topology getTopology(SchedulerStateManagerAdaptor stateManager, String topologyName) {
+    return stateManager.getPhysicalPlan(topologyName).getTopology();
   }
 
   /**

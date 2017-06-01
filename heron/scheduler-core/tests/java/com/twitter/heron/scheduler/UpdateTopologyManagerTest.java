@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -121,14 +122,13 @@ public class UpdateTopologyManagerTest {
 
   private UpdateTopologyManager spyUpdateManager(SchedulerStateManagerAdaptor stateManager,
                                                  IScalable scheduler,
-                                                 TopologyAPI.Topology updatedTopology) {
+                                                 TopologyAPI.Topology topology) {
     Config mockRuntime = mockRuntime(stateManager);
     UpdateTopologyManager spyUpdateManager = spy(new UpdateTopologyManager(
         mock(Config.class), mockRuntime, Optional.of(scheduler))
     );
 
-    when(spyUpdateManager.getUpdatedTopology(TOPOLOGY_NAME, this.proposedPacking, stateManager))
-        .thenReturn(updatedTopology);
+    doReturn(topology).when(spyUpdateManager).getTopology(stateManager, TOPOLOGY_NAME);
     return spyUpdateManager;
   }
 
