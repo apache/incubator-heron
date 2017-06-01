@@ -94,7 +94,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_bin", topology_file   # pex file if pex specified
+      "--topology_bin", os.path.basename(topology_file)   # pex file if pex specified
   ]
 
   if Log.getEffectiveLevel() == logging.DEBUG:
