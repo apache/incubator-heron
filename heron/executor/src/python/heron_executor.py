@@ -34,8 +34,6 @@ import traceback
 
 from functools import partial
 
-
-
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
 # pylint: disable=unused-import
