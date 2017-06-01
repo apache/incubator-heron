@@ -166,6 +166,24 @@ public class KubernetesScheduler implements IScheduler {
     ObjectNode containerInfo = mapper.createObjectNode();
     containerInfo.put("name", Joiner.on("-").join("executor", Integer.toString(containerIndex)));
 
+    // set the host for this container
+    ArrayNode envList = mapper.createArrayNode();
+    ObjectNode envVar = mapper.createObjectNode();
+    envVar.put("name", "HOST");
+
+    ObjectNode fieldRef = mapper.createObjectNode();
+
+    ObjectNode fieldPath = mapper.createObjectNode();
+    fieldPath.put("fieldPath", "status.podIP");
+
+    fieldRef.set("fieldRef", fieldPath);
+
+    envVar.set("valueFrom", fieldRef);
+
+    envList.add(envVar);
+
+    containerInfo.set("env", envList);
+
     // Image information for this container
     containerInfo.put("image", KubernetesContext.getExecutorDockerImage(config));
 
