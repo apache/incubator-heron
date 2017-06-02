@@ -17,7 +17,6 @@ package com.twitter.heron.healthmgr.policy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -27,7 +26,8 @@ import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
 
-import com.twitter.heron.healthmgr.HealthPolicyConfigProvider;
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
+import com.twitter.heron.healthmgr.HealthPolicyConfigReader;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
@@ -35,50 +35,31 @@ import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 
 public class DynamicResourceAllocationPolicy implements IHealthPolicy {
-
-  private final HealthPolicyConfigProvider policyConfigProvider;
-
+  private HealthPolicyConfig policyConfig;
   private final BackPressureDetector backPressureDetector;
 
   private final UnderProvisioningDiagnoser underProvisioningDiagnoser;
   private final DataSkewDiagnoser dataSkewDiagnoser;
   private final SlowInstanceDiagnoser slowInstanceDiagnoser;
-  private Map<String, String> policyConfig;
 
   @Inject
-  DynamicResourceAllocationPolicy(BackPressureDetector backPressureDetector,
+  DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
+                                  BackPressureDetector backPressureDetector,
                                   UnderProvisioningDiagnoser underProvisioningDiagnoser,
                                   DataSkewDiagnoser dataSkewDiagnoser,
-                                  SlowInstanceDiagnoser slowInstanceDiagnoser,
-                                  HealthPolicyConfigProvider policyConfigProvider) {
+                                  SlowInstanceDiagnoser slowInstanceDiagnoser) {
+    this.policyConfig = policyConfig;
 
     this.backPressureDetector = backPressureDetector;
 
-    this.policyConfigProvider = policyConfigProvider;
     this.underProvisioningDiagnoser = underProvisioningDiagnoser;
     this.dataSkewDiagnoser = dataSkewDiagnoser;
     this.slowInstanceDiagnoser = slowInstanceDiagnoser;
   }
 
   @Override
-  public void initialize() {
-    List<String> policyIds = policyConfigProvider.getPolicyIds();
-    for (String id : policyIds) {
-      String policyClassName = policyConfigProvider.getPolicyClass(id);
-      if (!policyClassName.equals(this.getClass().getName())) {
-        continue;
-      }
-
-      policyConfig = policyConfigProvider.getPolicyConfig(id);
-    }
-
-    backPressureDetector.initialize();
-  }
-
-  @Override
   public List<Symptom> executeDetectors() {
-    List<Symptom> symptoms = backPressureDetector.detect();
-    return symptoms;
+    return backPressureDetector.detect();
   }
 
   @Override
@@ -91,7 +72,7 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
 
   @Override
   public long getInterval() {
-    return Long.valueOf(policyConfig.get(HealthMgrConstants.HEALTH_POLICY_INTERVAL));
+    return Long.valueOf(policyConfig.getConfig(HealthMgrConstants.HEALTH_POLICY_INTERVAL));
   }
 
   @Override

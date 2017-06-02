@@ -27,8 +27,7 @@ import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 public abstract class BaseDiagnoser implements IDiagnoser {
   protected static final String EXE_COUNT = HealthMgrConstants.METRIC_EXE_COUNT;
   protected static final String BUFFER_SIZE = HealthMgrConstants.METRIC_BUFFER_SIZE;
-  protected static final String BACK_PRESSURE =
-      HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
+  protected static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
 
   @Override
   public void close() {

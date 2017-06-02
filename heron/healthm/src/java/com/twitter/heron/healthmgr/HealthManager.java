@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Logger;
 
@@ -67,7 +68,7 @@ public class HealthManager {
   private ISchedulerClient schedulerClient;
 
   private List<IHealthPolicy> healthPolicies = new ArrayList<>();
-  private HealthPolicyConfigProvider policyConfigProvider;
+  private HealthPolicyConfigReader policyConfigReader;
 
   public HealthManager(Config config, String trackerURL) {
     this.config = config;
@@ -139,7 +140,7 @@ public class HealthManager {
 
     this.schedulerClient = createSchedulerClient();
 
-    this.policyConfigProvider = createPolicyConfigProvider();
+    this.policyConfigReader = createPolicyConfigReader();
 
     AbstractModule module = constructConfigModule(trackerURL);
     injector = Guice.createInjector(module);
@@ -149,22 +150,29 @@ public class HealthManager {
 
   @SuppressWarnings("unchecked") // we don't know what T is until runtime
   private void initializePolicies() throws ClassNotFoundException {
-    List<String> policyIds = policyConfigProvider.getPolicyIds();
+    List<String> policyIds = policyConfigReader.getPolicyIds();
     for (String policyId : policyIds) {
-      String policyClassName = policyConfigProvider.getPolicyClass(policyId);
+      Map<String, String> policyConfigMap = policyConfigReader.getPolicyConfig(policyId);
+      HealthPolicyConfig policyConfig = new HealthPolicyConfig(policyConfigMap);
+
+      String policyClassName = policyConfig.getPolicyClass(policyId);
       LOG.info(String.format("Initializing %s with class %s", policyId, policyClassName));
-      Class<?> policyClass = ClassLoader.getSystemClassLoader().loadClass(policyClassName);
-      IHealthPolicy policy = (IHealthPolicy) injector.getInstance(policyClass);
+      Class<IHealthPolicy> policyClass
+          = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
+
+      AbstractModule module = constructPolicySpecificModule(policyConfig);
+      IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
       policy.initialize();
+
       healthPolicies.add(policy);
     }
   }
 
   @VisibleForTesting
-  HealthPolicyConfigProvider createPolicyConfigProvider() throws FileNotFoundException {
+  HealthPolicyConfigReader createPolicyConfigReader() throws FileNotFoundException {
     String policyConfigFile
         = Paths.get(Context.heronConf(config), HealthMgrConstants.CONF_FILE_NAME).toString();
-    return new HealthPolicyConfigProvider(policyConfigFile);
+    return new HealthPolicyConfigReader(policyConfigFile);
   }
 
   private AbstractModule constructConfigModule(final String trackerURL) {
@@ -183,12 +191,21 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(HealthMgrConstants.CONF_ENVIRON))
             .toInstance(Context.environ(config));
+        bind(Config.class).toInstance(config);
 
         bind(ISchedulerClient.class).toInstance(schedulerClient);
         bind(SchedulerStateManagerAdaptor.class).toInstance(stateMgrAdaptor);
         bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
-        bind(HealthPolicyConfigProvider.class).toInstance(policyConfigProvider);
         bind(PackingPlanProvider.class).in(Singleton.class);
+      }
+    };
+  }
+
+  private AbstractModule constructPolicySpecificModule(final HealthPolicyConfig policyConfig) {
+    return new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(HealthPolicyConfig.class).toInstance(policyConfig);
       }
     };
   }
