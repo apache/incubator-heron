@@ -33,11 +33,6 @@ public abstract class BaseDiagnoser implements IDiagnoser {
   public void close() {
   }
 
-  @Override
-  public void initialize() {
-  }
-
-
   protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
     List<Symptom> result = new ArrayList<>();
     for (Symptom symptom : symptoms) {

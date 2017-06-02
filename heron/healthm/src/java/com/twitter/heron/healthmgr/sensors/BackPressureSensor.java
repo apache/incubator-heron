@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
@@ -35,9 +34,9 @@ public class BackPressureSensor extends BaseSensor {
   private final TopologyProvider topologyProvider;
 
   @Inject
-  BackPressureSensor(PackingPlanProvider packingPlanProvider,
-                     TopologyProvider topologyProvider,
-                     MetricsProvider metricsProvider) {
+  public BackPressureSensor(PackingPlanProvider packingPlanProvider,
+                            TopologyProvider topologyProvider,
+                            MetricsProvider metricsProvider) {
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -48,6 +47,9 @@ public class BackPressureSensor extends BaseSensor {
     return get();
   }
 
+  /**
+   * @return the average (millis/sec) back-pressure caused by instances in the configured window
+   */
   public Map<String, ComponentMetrics> get() {
     Map<String, ComponentMetrics> result = new HashMap<>();
 
@@ -57,10 +59,10 @@ public class BackPressureSensor extends BaseSensor {
 
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE + boltInstanceName;
+        String metric = BACK_PRESSURE + boltInstanceName;
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
-            HealthMgrConstants.DEFAULT_METRIC_DURATION,
+            METRIC_DURATION,
             HealthMgrConstants.COMPONENT_STMGR);
 
         HashMap<String, InstanceMetrics> streamManagerResult =
@@ -71,9 +73,9 @@ public class BackPressureSensor extends BaseSensor {
         InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
         InstanceMetrics boltInstanceMetric = new InstanceMetrics(boltInstanceName);
-
-        boltInstanceMetric.addMetric(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE,
-            stmgrInstanceResult.getMetricValue(metric));
+        double averageBp = stmgrInstanceResult.getMetricValue(metric) / METRIC_DURATION;
+        averageBp = averageBp > 1000 ? 1000 : averageBp;
+        boltInstanceMetric.addMetric(BACK_PRESSURE, averageBp);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }

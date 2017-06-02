@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.healthmgr.sensors;
+package com.twitter.heron.healthmgr.detectors;
 
-import com.microsoft.dhalion.api.ISensor;
+import com.microsoft.dhalion.api.IDetector;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
-public abstract class BaseSensor implements ISensor {
-  protected static final String EXE_COUNT = HealthMgrConstants.METRIC_EXE_COUNT;
-  protected static final String BUFFER_SIZE = HealthMgrConstants.METRIC_BUFFER_SIZE;
+public abstract class BaseDetector implements IDetector {
   protected static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
-  protected static final int METRIC_DURATION = HealthMgrConstants.DEFAULT_METRIC_DURATION;
 
   @Override
   public void close() {

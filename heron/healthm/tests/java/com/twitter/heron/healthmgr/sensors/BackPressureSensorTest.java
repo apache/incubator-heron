@@ -49,8 +49,11 @@ public class BackPressureSensorTest {
 
     for (String boltId : boltIds) {
       String metric = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE + boltId;
+      // the back pressure sensor will return average bp per second, so multiply by duration
       BufferSizeSensorTest
-          .registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
+          .registerStMgrInstanceMetricResponse(metricsProvider,
+              metric,
+              boltId.length() * BaseSensor.METRIC_DURATION);
     }
 
     BackPressureSensor backPressureSensor =
