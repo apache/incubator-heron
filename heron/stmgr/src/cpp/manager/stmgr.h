@@ -99,12 +99,14 @@ class StMgr {
   void CleanupXorManagers();
 
   void SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void ProcessAcksAndFails(sp_int32 _task_id, const proto::system::HeronControlTupleSet& _control);
+  void ProcessAcksAndFails(sp_int32 _src_task_id,
+                           sp_int32 _task_id, const proto::system::HeronControlTupleSet& _control);
   void CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                         const proto::api::StreamId& _streamid,
                         proto::system::HeronDataTuple* _tuple,
                         const std::vector<sp_int32>& _out_tasks);
-  void CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail);
+  void CopyControlOutBound(sp_int32 _src_task_id,
+                           const proto::system::AckTuple& _control, bool _is_fail);
 
   sp_int32 ExtractTopologyTimeout(const proto::api::Topology& _topology);
 
