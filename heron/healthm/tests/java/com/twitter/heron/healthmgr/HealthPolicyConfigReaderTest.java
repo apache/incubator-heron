@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class HealthPolicyConfigProviderTest {
+public class HealthPolicyConfigReaderTest {
   @Test
   public void testPolicyConfigurationInitialization() throws Exception {
     List<String> policyIds = new ArrayList<>();
@@ -52,7 +52,7 @@ public class HealthPolicyConfigProviderTest {
     Yaml yaml = mock(Yaml.class);
     when(yaml.load(fin)).thenReturn(yamlContent);
 
-    HealthPolicyConfigProvider policiesConfig = new HealthPolicyConfigProvider(yaml, fin);
+    HealthPolicyConfigReader policiesConfig = new HealthPolicyConfigReader(yaml, fin);
     assertEquals(policyIds, policiesConfig.getPolicyIds());
 
     assertEquals(policy1, policiesConfig.getPolicyConfig("p1"));

@@ -27,6 +27,7 @@ import com.microsoft.dhalion.api.MetricsProvider;
 
 import org.junit.Test;
 
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.proto.scheduler.Scheduler.SchedulerLocation;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Config;
@@ -58,16 +59,19 @@ public class HealthManagerTest {
 
     HealthManager healthManager = new HealthManager(config, "localhost");
 
-    String[] policyIds = {"policy"};
     Map policy = new HashMap<>();
-    HealthPolicyConfigProvider policyConfigProvider = mock(HealthPolicyConfigProvider.class);
+    policy.put(HealthMgrConstants.HEALTH_POLICY_CLASS, TestPolicy.class.getName());
+    policy.put("test-config", "test-value");
+
+    String[] policyIds = {"policy"};
+
+    HealthPolicyConfigReader policyConfigProvider = mock(HealthPolicyConfigReader.class);
     when(policyConfigProvider.getPolicyIds()).thenReturn(Arrays.asList(policyIds));
-    when(policyConfigProvider.getPolicyClass("policy")).thenReturn(TestPolicy.class.getName());
     when(policyConfigProvider.getPolicyConfig("policy")).thenReturn(policy);
 
     HealthManager spyHealthMgr = spy(healthManager);
     doReturn(adaptor).when(spyHealthMgr).createStateMgrAdaptor();
-    doReturn(policyConfigProvider).when(spyHealthMgr).createPolicyConfigProvider();
+    doReturn(policyConfigProvider).when(spyHealthMgr).createPolicyConfigReader();
 
     spyHealthMgr.initialize();
 
@@ -77,27 +81,27 @@ public class HealthManagerTest {
     assertNotNull(healthPolicy.schedulerClient);
     assertEquals(healthPolicy.stateMgrAdaptor, adaptor);
     assertNotNull(healthPolicy.metricsProvider);
-    assertEquals(healthPolicy.policyConfigProvider, policyConfigProvider);
+    assertEquals(healthPolicy.config.getConfig("test-config"), "test-value");
     assertEquals(1, healthPolicy.initialized.get());
   }
 
   static class TestPolicy implements IHealthPolicy {
+    private HealthPolicyConfig config;
     private final ISchedulerClient schedulerClient;
     private final SchedulerStateManagerAdaptor stateMgrAdaptor;
     private final MetricsProvider metricsProvider;
-    private final HealthPolicyConfigProvider policyConfigProvider;
 
     AtomicInteger initialized = new AtomicInteger(0);
 
     @Inject
-    public TestPolicy(ISchedulerClient schedulerClient,
+    public TestPolicy(HealthPolicyConfig config,
+                      ISchedulerClient schedulerClient,
                       SchedulerStateManagerAdaptor stateMgrAdaptor,
-                      MetricsProvider metricsProvider,
-                      HealthPolicyConfigProvider policyConfigProvider) {
+                      MetricsProvider metricsProvider) {
+      this.config = config;
       this.schedulerClient = schedulerClient;
       this.stateMgrAdaptor = stateMgrAdaptor;
       this.metricsProvider = metricsProvider;
-      this.policyConfigProvider = policyConfigProvider;
     }
 
     @Override

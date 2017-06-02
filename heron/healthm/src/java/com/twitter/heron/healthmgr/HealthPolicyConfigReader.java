@@ -29,16 +29,16 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
-public class HealthPolicyConfigProvider {
-  private static final Logger LOG = Logger.getLogger(HealthPolicyConfigProvider.class.getName());
+public class HealthPolicyConfigReader {
+  private static final Logger LOG = Logger.getLogger(HealthPolicyConfigReader.class.getName());
   private final Map<String, Map<String, String>> configs = new HashMap<>();
 
-  public HealthPolicyConfigProvider(String filename) throws FileNotFoundException {
+  public HealthPolicyConfigReader(String filename) throws FileNotFoundException {
     this(new Yaml(), new FileInputStream(new File(filename)));
   }
 
   @SuppressWarnings("unchecked")
-  public HealthPolicyConfigProvider(Yaml yaml, FileInputStream fin) throws FileNotFoundException {
+  public HealthPolicyConfigReader(Yaml yaml, FileInputStream fin) throws FileNotFoundException {
     Map<Object, Object> ret;
     try {
       ret = (Map<Object, Object>) yaml.load(fin);
@@ -68,9 +68,5 @@ public class HealthPolicyConfigProvider {
 
   public Map<String, String> getPolicyConfig(String policyId) {
     return configs.get(policyId);
-  }
-
-  public String getPolicyClass(String policyId) {
-    return configs.get(policyId).get(HealthMgrConstants.HEALTH_POLICY_CLASS);
   }
 }
