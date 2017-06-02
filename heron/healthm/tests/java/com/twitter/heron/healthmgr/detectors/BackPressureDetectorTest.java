@@ -20,7 +20,6 @@ import java.util.Map;
 
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,11 +36,8 @@ public class BackPressureDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(BackPressureDetector.CONF_NOISE_FILTER, "20")).thenReturn("50");
 
-    InstanceMetrics instanceMetrics = new InstanceMetrics("i1");
-    instanceMetrics.addMetric(BaseDetector.BACK_PRESSURE, 55);
-    Map<String, InstanceMetrics> instanceMetricsMap = new HashMap<>();
-    instanceMetricsMap.put("i1", instanceMetrics);
-    ComponentMetrics compMetrics = new ComponentMetrics("bolt", instanceMetricsMap);
+    ComponentMetrics compMetrics =
+        new ComponentMetrics("bolt", "i1", BaseDetector.BACK_PRESSURE, 55);
     Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
     topologyMetrics.put("bolt", compMetrics);
 
@@ -53,10 +49,7 @@ public class BackPressureDetectorTest {
 
     Assert.assertEquals(1, symptoms.size());
 
-    instanceMetrics = new InstanceMetrics("i1");
-    instanceMetrics.addMetric(BaseDetector.BACK_PRESSURE, 45);
-    instanceMetricsMap.put("i1", instanceMetrics);
-    compMetrics = new ComponentMetrics("bolt", instanceMetricsMap);
+    compMetrics = new ComponentMetrics("bolt", "i1", BaseDetector.BACK_PRESSURE, 45);
     topologyMetrics.put("bolt", compMetrics);
 
     sensor = mock(BackPressureSensor.class);

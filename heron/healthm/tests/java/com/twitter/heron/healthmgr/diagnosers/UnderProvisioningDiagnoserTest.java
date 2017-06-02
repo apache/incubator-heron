@@ -69,7 +69,7 @@ public class UnderProvisioningDiagnoserTest {
 
   private void validateDiagnosis(Diagnosis result) {
     assertEquals(1, result.getSymptoms().size());
-    ComponentMetrics data = result.getSymptoms().iterator().next().getMetrics();
+    ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0", BaseDiagnoser.BACK_PRESSURE).intValue());
   }

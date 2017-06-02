@@ -54,7 +54,7 @@ public class DataSkewDiagnoserTest {
     DataSkewDiagnoser diagnoser = new DataSkewDiagnoser(exeSensor);
     Diagnosis result = diagnoser.diagnose(symptoms);
     assertEquals(1, result.getSymptoms().size());
-    ComponentMetrics data = result.getSymptoms().iterator().next().getMetrics();
+    ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0", BaseDiagnoser.BACK_PRESSURE).intValue());
   }
@@ -62,10 +62,9 @@ public class DataSkewDiagnoserTest {
   public static Symptom createBPSymptom(int... bpValues) {
     ComponentMetrics bpMetrics = new ComponentMetrics("bolt");
     for (int i = 0; i < bpValues.length; i++) {
-      addInstanceMetric(bpMetrics, i, bpValues[i],
-          HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE);
+      addInstanceMetric(bpMetrics, i, bpValues[i], BaseDiagnoser.BACK_PRESSURE);
     }
-    return Symptom.from(bpMetrics);
+    return new Symptom(BaseDiagnoser.BACK_PRESSURE, bpMetrics);
   }
 
   public static ExecuteCountSensor createMockExecuteCountSensor(double... exeCounts) {
@@ -77,7 +76,7 @@ public class DataSkewDiagnoserTest {
     ComponentMetrics metrics = new ComponentMetrics("bolt");
 
     for (int i = 0; i < values.length; i++) {
-      DataSkewDiagnoserTest.addInstanceMetric(metrics, i, values[i], metric);
+      addInstanceMetric(metrics, i, values[i], metric);
     }
 
     Map<String, ComponentMetrics> resultMap = new HashMap<>();
@@ -87,9 +86,7 @@ public class DataSkewDiagnoserTest {
   }
 
   static void addInstanceMetric(ComponentMetrics metrics, int i, double value, String metric) {
-    String instanceName = "container_1_bolt_" + i;
-    InstanceMetrics instanceMetric = new InstanceMetrics(instanceName);
-    instanceMetric.addMetric(metric, value);
+    InstanceMetrics instanceMetric = new InstanceMetrics("container_1_bolt_" + i, metric, value);
     metrics.addInstanceMetric(instanceMetric);
   }
 }

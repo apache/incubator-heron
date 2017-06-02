@@ -21,7 +21,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.app.ComponentInfo;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -51,7 +50,7 @@ public class BackPressureDetector extends BaseDetector {
     Map<String, ComponentMetrics> backpressureMetrics = bpSensor.get();
     for (ComponentMetrics compMetrics : backpressureMetrics.values()) {
       if (compMetrics.anyInstanceAboveLimit(BACK_PRESSURE, noiseFilterMillis)) {
-        result.add(new Symptom(new ComponentInfo(compMetrics.getName()), compMetrics));
+        result.add(new Symptom(BACK_PRESSURE, compMetrics));
       }
     }
 
