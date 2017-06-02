@@ -21,24 +21,27 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.app.ComponentInfo;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
-public class BackPressureDetector implements IDetector {
+public class BackPressureDetector extends BaseDetector {
+  public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
   private final BackPressureSensor bpSensor;
+  private final int noiseFilterMillis;
 
   @Inject
-  BackPressureDetector(BackPressureSensor bpSensor) {
+  BackPressureDetector(BackPressureSensor bpSensor,
+                       HealthPolicyConfig policyConfig) {
     this.bpSensor = bpSensor;
+    noiseFilterMillis = Integer.valueOf(policyConfig.getConfig(CONF_NOISE_FILTER, "20"));
   }
 
   /**
-   * @return A collection of all components with any instance starting backpressure. Normally there
+   * @return A collection of all components with any instance causing backpressure. Normally there
    * will be only one component
    */
   @Override
@@ -47,16 +50,11 @@ public class BackPressureDetector implements IDetector {
 
     Map<String, ComponentMetrics> backpressureMetrics = bpSensor.get();
     for (ComponentMetrics compMetrics : backpressureMetrics.values()) {
-      if (compMetrics
-          .anyInstanceAboveLimit(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE, 20)) {
+      if (compMetrics.anyInstanceAboveLimit(BACK_PRESSURE, noiseFilterMillis)) {
         result.add(new Symptom(new ComponentInfo(compMetrics.getName()), compMetrics));
       }
     }
 
     return result;
-  }
-
-  @Override
-  public void close() {
   }
 }
