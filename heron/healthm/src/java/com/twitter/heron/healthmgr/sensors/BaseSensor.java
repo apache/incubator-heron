@@ -16,9 +16,16 @@ package com.twitter.heron.healthmgr.sensors;
 
 import com.microsoft.dhalion.api.ISensor;
 
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+
 public abstract class BaseSensor implements ISensor {
+  protected static final String EXE_COUNT = HealthMgrConstants.METRIC_EXE_COUNT;
+  protected static final String BUFFER_SIZE = HealthMgrConstants.METRIC_BUFFER_SIZE;
+  protected static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
+  protected static final int METRIC_DURATION = HealthMgrConstants.DEFAULT_METRIC_DURATION;
+  protected static final String BUFFER_SIZE_SUFFIX = HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
+
   @Override
   public void close() {
-
   }
 }

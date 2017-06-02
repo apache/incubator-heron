@@ -43,8 +43,7 @@ public class ExecuteCountSensor extends BaseSensor {
   }
 
   public Map<String, ComponentMetrics> get(String ... boltNames) {
-    return metricsProvider.getComponentMetrics(
-        HealthMgrConstants.METRIC_EXE_COUNT,
+    return metricsProvider.getComponentMetrics(EXE_COUNT,
         HealthMgrConstants.DEFAULT_METRIC_DURATION,
         boltNames);
   }

@@ -37,7 +37,15 @@ public class HealthPolicyConfig {
   }
 
   public String getConfig(String configName) {
-    return configs.get(configName);
+    return getConfig(configName, null);
+  }
+
+  public String getConfig(String configName, String defaultValue) {
+    String value = configs.get(configName);
+    if (value == null) {
+      value = defaultValue;
+    }
+    return value;
   }
 
   @Override

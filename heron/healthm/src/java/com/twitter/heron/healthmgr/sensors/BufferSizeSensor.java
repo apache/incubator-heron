@@ -65,11 +65,9 @@ public class BufferSizeSensor extends BaseSensor {
 
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
 
-      Map<String, InstanceMetrics> InstanceMetrics = new HashMap<>();
+      Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = HealthMgrConstants.METRIC_BUFFER_SIZE
-            + boltInstanceName
-            + HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
+        String metric = BUFFER_SIZE + boltInstanceName + BUFFER_SIZE_SUFFIX;
 
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
@@ -81,17 +79,16 @@ public class BufferSizeSensor extends BaseSensor {
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
-        InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
+        double stmgrInstanceResult =
+            streamManagerResult.values().iterator().next().getMetricValue(metric);
 
-        InstanceMetrics boltInstanceMetric = new InstanceMetrics(boltInstanceName);
+        InstanceMetrics boltInstanceMetric =
+            new InstanceMetrics(boltInstanceName, BUFFER_SIZE, stmgrInstanceResult);
 
-        boltInstanceMetric.addMetric(HealthMgrConstants.METRIC_BUFFER_SIZE,
-            stmgrInstanceResult.getMetricValue(metric));
-
-        InstanceMetrics.put(boltInstanceName, boltInstanceMetric);
+        instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
 
-      ComponentMetrics ComponentMetrics = new ComponentMetrics(boltComponent, InstanceMetrics);
+      ComponentMetrics ComponentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
       result.put(boltComponent, ComponentMetrics);
     }
 

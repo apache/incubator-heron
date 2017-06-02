@@ -18,7 +18,7 @@ public interface HealthMgrConstants {
   int DEFAULT_METRIC_DURATION = 300;
 
   String METRIC_EXE_COUNT = "__execute-count/default";
-  String METRIC_INSTANCE_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
+  String METRIC_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
   String METRIC_BUFFER_SIZE = "__connection_buffer_by_instanceid/";
   String METRIC_BUFFER_SIZE_SUFFIX = "/packets";
 
