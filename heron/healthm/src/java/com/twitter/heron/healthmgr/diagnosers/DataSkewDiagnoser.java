@@ -15,7 +15,6 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -44,40 +43,46 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
     if (bpSymptoms.isEmpty()) {
-      // Since there is no back pressure, any more capacity is not needed
+      // Since there is no back pressure, no action is needed
+      return null;
+    } else if (bpSymptoms.size() > 1) {
+      // TODO handle cases where multiple detectors create back pressure symptom
+      throw new IllegalStateException("Multiple back-pressure symptoms case");
+    }
+
+    Symptom backPressureSymptom = bpSymptoms.iterator().next();
+
+    ComponentMetrics bpMetricsData = backPressureSymptom.getComponent();
+    if (bpMetricsData.getMetrics().size() <= 1) {
+      // Need more than one instance for comparison
       return null;
     }
 
-    List<Symptom> resultSymptoms = new ArrayList<>();
-    for (Symptom backPressureSymptom : bpSymptoms) {
-      ComponentMetrics bpMetricsData = backPressureSymptom.getMetrics();
-      if (bpMetricsData.getMetrics().size() <= 1) {
-        // Need more than one instance for comparison
-        continue;
-      }
+    Map<String, ComponentMetrics> result = exeCountSensor.get(bpMetricsData.getName());
+    ComponentMetrics exeCountData = result.get(bpMetricsData.getName());
+    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, exeCountData);
 
-      Map<String, ComponentMetrics> result = exeCountSensor.get(bpMetricsData.getName());
-      ComponentMetrics exeCountData = result.get(bpMetricsData.getName());
-      ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, exeCountData);
+    ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+    compStats.computeExeCountStats();
 
-      ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
-      compStats.computeExeCountStats();
-
-      if (compStats.exeCountMax > limit * compStats.exeCountMin) {
-        // there is wide gap between max and min executionCount, potential skew if the instances
-        // who are starting back pressures are also executing majority of the tuples
-        for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
-          double exeCount = boltMetrics.getMetricValue(EXE_COUNT);
-          double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
-          if (compStats.exeCountMax < 1.10 * exeCount) {
-            LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
-                boltMetrics.getName(), bpValue, exeCount));
-            resultSymptoms.add(Symptom.from(mergedData));
-          }
+    Symptom resultSymptom = null;
+    if (compStats.exeCountMax > limit * compStats.exeCountMin) {
+      // there is wide gap between max and min executionCount, potential skew if the instances
+      // who are starting back pressures are also executing majority of the tuples
+      for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
+        double exeCount = boltMetrics.getMetricValue(EXE_COUNT);
+        double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
+        if (compStats.exeCountMax < 1.10 * exeCount) {
+          LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
+              boltMetrics.getName(), bpValue, exeCount));
+          resultSymptom = backPressureSymptom;
+          // TODO add other symptoms applicable to this diagnosis
         }
       }
     }
 
-    return resultSymptoms.size() > 0 ? new Diagnosis(resultSymptoms) : null;
+    return resultSymptom != null ?
+        new Diagnosis(this.getClass().getSimpleName(), resultSymptom)
+        : null;
   }
 }

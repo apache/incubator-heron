@@ -36,7 +36,7 @@ public abstract class BaseDiagnoser implements IDiagnoser {
   protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
     List<Symptom> result = new ArrayList<>();
     for (Symptom symptom : symptoms) {
-      if (symptom.getMetrics().anyInstanceAboveLimit(BACK_PRESSURE, 0)) {
+      if (symptom.getName().equals(BACK_PRESSURE)) {
         result.add(symptom);
       }
     }

@@ -15,7 +15,6 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,30 +42,35 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
     if (bpSymptoms.isEmpty()) {
-      // Since there is no back pressure, any more capacity is not needed
+      // Since there is no back pressure, no action is needed
       return null;
+    } else if (bpSymptoms.size() > 1) {
+      // TODO handle cases where multiple detectors create back pressure symptom
+      throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
 
-    List<Symptom> resultSymptoms = new ArrayList<>();
-    for (Symptom backPressureSymptom : bpSymptoms) {
-      ComponentMetrics bpMetricsData = backPressureSymptom.getMetrics();
+    Symptom backPressureSymptom = bpSymptoms.iterator().next();
 
-      Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
-      ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
+    ComponentMetrics bpMetricsData = backPressureSymptom.getComponent();
+    Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
+    ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
 
-      ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
+    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
+    ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+    compStats.computeBufferSizeStats();
 
-      ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
-      compStats.computeBufferSizeStats();
-
-      // if all instances are reporting backpressure or if all instances have large pending buffers
-      if (compStats.bufferSizeMin > limit
-          && compStats.bufferSizeMin * 5 > compStats.bufferSizeMax) {
-        LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
-            mergedData.getName(), compStats.totalBackpressure, compStats.bufferSizeMin));
-        resultSymptoms.add(Symptom.from(mergedData));
-      }
+    Symptom resultSymptom = null;
+    // if all instances are reporting backpressure or if all instances have large pending buffers
+    if (compStats.bufferSizeMin > limit
+        && compStats.bufferSizeMin * 5 > compStats.bufferSizeMax) {
+      LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
+          mergedData.getName(), compStats.totalBackpressure, compStats.bufferSizeMin));
+      resultSymptom = backPressureSymptom;
+      // TODO add other symptoms applicable to this diagnosis
     }
-    return resultSymptoms.size() > 0 ? new Diagnosis(resultSymptoms) : null;
+
+    return resultSymptom != null ?
+        new Diagnosis(this.getClass().getSimpleName(), resultSymptom)
+        : null;
   }
 }

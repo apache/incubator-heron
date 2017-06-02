@@ -72,10 +72,10 @@ public class BackPressureSensor extends BaseSensor {
         // manager instance in the result
         InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
-        InstanceMetrics boltInstanceMetric = new InstanceMetrics(boltInstanceName);
         double averageBp = stmgrInstanceResult.getMetricValue(metric) / METRIC_DURATION;
         averageBp = averageBp > 1000 ? 1000 : averageBp;
-        boltInstanceMetric.addMetric(BACK_PRESSURE, averageBp);
+        InstanceMetrics boltInstanceMetric
+            = new InstanceMetrics(boltInstanceName, BACK_PRESSURE, averageBp);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }

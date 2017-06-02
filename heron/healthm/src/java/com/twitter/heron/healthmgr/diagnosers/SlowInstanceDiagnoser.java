@@ -14,7 +14,6 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,41 +42,48 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
     if (bpSymptoms.isEmpty()) {
-      // Since there is no back pressure, any more capacity is not needed
+      // Since there is no back pressure, no action is needed
+      return null;
+    } else if (bpSymptoms.size() > 1) {
+      // TODO handle cases where multiple detectors create back pressure symptom
+      throw new IllegalStateException("Multiple back-pressure symptoms case");
+    }
+
+    Symptom backPressureSymptom = bpSymptoms.iterator().next();
+
+
+    ComponentMetrics bpMetricsData = backPressureSymptom.getComponent();
+    if (bpMetricsData.getMetrics().size() <= 1) {
+      // Need more than one instance for comparison
       return null;
     }
 
-    List<Symptom> resultSymptoms = new ArrayList<>();
-    for (Symptom backPressureSymptom : bpSymptoms) {
-      ComponentMetrics bpMetricsData = backPressureSymptom.getMetrics();
-      if (bpMetricsData.getMetrics().size() <= 1) {
-        // Need more than one instance for comparison
-        continue;
-      }
+    Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
+    ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
+    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
 
-      Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
-      ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
-      ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
+    ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+    compStats.computeBufferSizeStats();
 
-      ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
-      compStats.computeBufferSizeStats();
+    Symptom resultSymptom = null;
+    if (compStats.bufferSizeMax > limit * compStats.bufferSizeMin) {
+      // there is wide gap between max and min bufferSize, potential slow instance if the
+      // instances who are starting back pressure are also executing less tuples
 
-      if (compStats.bufferSizeMax > limit * compStats.bufferSizeMin) {
-        // there is wide gap between max and min bufferSize, potential slow instance if the
-        // instances who are starting back pressure are also executing less tuples
-
-        for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
-          double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
-          double bufferSize = boltMetrics.getMetricValue(BUFFER_SIZE);
-          if (compStats.bufferSizeMax < bufferSize * 2) {
-            LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s",
-                boltMetrics.getName(), bpValue, bufferSize));
-            resultSymptoms.add(Symptom.from(mergedData));
-          }
+      for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
+        double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
+        double bufferSize = boltMetrics.getMetricValue(BUFFER_SIZE);
+        if (compStats.bufferSizeMax < bufferSize * 2) {
+          LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s",
+              boltMetrics.getName(), bpValue, bufferSize));
+          resultSymptom = backPressureSymptom;
+          // TODO add other symptoms applicable to this diagnosis
         }
       }
     }
 
-    return resultSymptoms.size() > 0 ? new Diagnosis(resultSymptoms) : null;
+    return resultSymptom != null ?
+        new Diagnosis(this.getClass().getSimpleName(), resultSymptom)
+        : null;
   }
 }
