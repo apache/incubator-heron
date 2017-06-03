@@ -20,28 +20,33 @@ public final class KubernetesConstants {
   }
 
   public static final String ID = "id";
-  public static final String COMMAND = "cmd";
-  public static final String INSTANCES = "instances";
-  public static final String LABELS = "labels";
-  public static final String FETCH = "fetch";
-  public static final String USER = "user";
-  public static final String APPS = "apps";
-  public static final String ENVIRONMENT = "environment";
+  public static final String COMMAND = "command";
+  public static final String APP = "app";
+  public static final String NAME = "name";
+  public static final String ENV = "env";
   public static final String URI = "uri";
-  public static final String EXECUTABLE = "executable";
-  public static final String EXTRACT = "extract";
-  public static final String CACHE = "cache";
-  public static final String PORT = "port";
-  public static final String PROTOCOL = "protocol";
+  public static final String TOPOLOGY_LABEL = "topology";
+  public static final String PORTS = "ports";
   public static final String PORT_NAME = "name";
-  public static final String TCP = "tcp";
-  public static final String CONTAINER = "container";
-  public static final String CONTAINER_TYPE = "type";
+  public static final String CONTAINERS = "containers";
   public static final String DOCKER_IMAGE = "image";
-  public static final String DOCKER_NETWORK = "network";
-  public static final String DOCKER_PORT_MAPPINGS = "portMappings";
   public static final String DOCKER_CONTAINER_PORT = "containerPort";
-  public static final String HOST_PORT = "hostPort";
+  public static final String API_VERSION = "apiVersion";
+  public static final String API_VERSION_1 = "v1";
+  public static final String API_POD = "Pod";
+  public static final String API_METADATA = "metadata";
+  public static final String API_KIND = "kind";
+  public static final String METADATA_LABELS = "labels";
+  public static final String MEMORY = "memory";
+  public static final String CPU = "cpu";
+  public static final String REQUESTS = "requests";
+  public static final String RESOURCES = "resources";
+  public static final String API_SPEC = "spec";
+  public static final String HOST = "HOST";
+  public static final String FIELD_PATH = "fieldPath";
+  public static final String FIELD_REF = "fieldRef";
+  public static final String VALUE_FROM = "valueFrom";
+  public static final String POD_IP = "status.podIP";
 
   public static final String[] PORT_NAMES = new String[]{
       "master", "tmaster-ctlr", "tmaster-stats", "shell", "metricsmgr", "scheduler",

@@ -1,0 +1,11 @@
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:                            com.twitter.heron.uploader.s3.S3Uploader
+
+# S3 bucket to put the jar file into
+heron.uploader.s3.bucket: <s3_bucket>
+
+# AWS access key
+heron.uploader.s3.access_key: <aws_access_key>
+
+# AWS secret access key
+heron.uploader.s3.secret_key: <aws_secret_key>

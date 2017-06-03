@@ -120,11 +120,11 @@ public class KubernetesScheduler implements IScheduler {
     for (int i = 0; i < Runtime.numContainers(runtime); i++) {
       ObjectNode instance = mapper.createObjectNode();
 
-      instance.put("apiVersion", "v1");
-      instance.put("kind", "Pod");
-      instance.set("metadata", getMetadata(mapper, i));
+      instance.put(KubernetesConstants.API_VERSION, KubernetesConstants.API_VERSION_1);
+      instance.put(KubernetesConstants.API_KIND, KubernetesConstants.API_POD);
+      instance.set(KubernetesConstants.API_METADATA, getMetadata(mapper, i));
 
-      instance.set("spec", getContainerSpec(mapper, i, containerResource));
+      instance.set(KubernetesConstants.API_SPEC, getContainerSpec(mapper, i, containerResource));
       deploymentConfs[i] = instance.toString();
     }
 
@@ -134,12 +134,12 @@ public class KubernetesScheduler implements IScheduler {
   // build the metadata for a deployment
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
-    metadataNode.put("name", Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
+    metadataNode.put(KubernetesConstants.NAME, Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
 
     ObjectNode labels = mapper.createObjectNode();
-    labels.put("topology", Runtime.topologyName(runtime));
+    labels.put(KubernetesConstants.TOPOLOGY_LABEL, Runtime.topologyName(runtime));
 
-    metadataNode.set("labels", labels);
+    metadataNode.set(KubernetesConstants.METADATA_LABELS, labels);
 
     return metadataNode;
   }
@@ -149,8 +149,8 @@ public class KubernetesScheduler implements IScheduler {
     ObjectNode podMetadata = mapper.createObjectNode();
     ObjectNode labelData = mapper.createObjectNode();
 
-    labelData.put("app", Integer.toString(containerIndex));
-    podMetadata.set("labels", labelData);
+    labelData.put(KubernetesConstants.APP, Integer.toString(containerIndex));
+    podMetadata.set(KubernetesConstants.METADATA_LABELS, labelData);
 
     return podMetadata;
   }
@@ -164,31 +164,28 @@ public class KubernetesScheduler implements IScheduler {
     ArrayNode containerList = mapper.createArrayNode();
 
     ObjectNode containerInfo = mapper.createObjectNode();
-    containerInfo.put("name", Joiner.on("-").join("executor", Integer.toString(containerIndex)));
+    containerInfo.put(KubernetesConstants.NAME, Joiner.on("-").join("executor", Integer.toString(containerIndex)));
 
     // set the host for this container
     ArrayNode envList = mapper.createArrayNode();
     ObjectNode envVar = mapper.createObjectNode();
-    envVar.put("name", "HOST");
+    envVar.put(KubernetesConstants.NAME, KubernetesConstants.HOST);
 
+    // build the JSON to attach the Pod IP as the "HOST" environment variable
     ObjectNode fieldRef = mapper.createObjectNode();
-
     ObjectNode fieldPath = mapper.createObjectNode();
-    fieldPath.put("fieldPath", "status.podIP");
-
-    fieldRef.set("fieldRef", fieldPath);
-
-    envVar.set("valueFrom", fieldRef);
-
+    fieldPath.put(KubernetesConstants.FIELD_PATH, KubernetesConstants.POD_IP);
+    fieldRef.set(KubernetesConstants.FIELD_REF, fieldPath);
+    envVar.set(KubernetesConstants.VALUE_FROM, fieldRef);
     envList.add(envVar);
 
-    containerInfo.set("env", envList);
+    containerInfo.set(KubernetesConstants.ENV, envList);
 
     // Image information for this container
-    containerInfo.put("image", KubernetesContext.getExecutorDockerImage(config));
+    containerInfo.put(KubernetesConstants.DOCKER_IMAGE, KubernetesContext.getExecutorDockerImage(config));
 
     // Port information for this container
-    containerInfo.set("ports", getPorts(mapper));
+    containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
 
     // Heron command for the container
     String[] command = getExecutorCommand(containerIndex);
@@ -196,47 +193,24 @@ public class KubernetesScheduler implements IScheduler {
     for (int i = 0; i < command.length; i++) {
       commandsArray.add(command[i]);
     }
-    containerInfo.set("command", commandsArray);
+    containerInfo.set(KubernetesConstants.COMMAND, commandsArray);
 
     // Requested resource info
     ObjectNode requestedResourceInfo = mapper.createObjectNode();
-    requestedResourceInfo.put("memory", containerResource.getRam().asMegabytes());
-    //requestedResourceInfo.put("cpu", containerResource.getCpu());
+    requestedResourceInfo.put(KubernetesConstants.MEMORY, containerResource.getRam().asMegabytes());
+    requestedResourceInfo.put(KubernetesConstants.CPU, containerResource.getCpu());
 
     // Wrap it up into a resources dictionary
     ObjectNode resourceInfo = mapper.createObjectNode();
-    resourceInfo.set("requests", requestedResourceInfo);
+    resourceInfo.set(KubernetesConstants.REQUESTS, requestedResourceInfo);
 
-    containerInfo.set("resources", resourceInfo);
+    containerInfo.set(KubernetesConstants.RESOURCES, resourceInfo);
 
     containerList.add(containerInfo);
 
-    containerSpec.set("containers", containerList);
+    containerSpec.set(KubernetesConstants.CONTAINERS, containerList);
 
     return containerSpec;
-  }
-
-  // build the pod template spec for the deployment
-  protected ObjectNode getPodTemplateSpec(ObjectMapper mapper,
-                                          int containerIndex,
-                                          Resource containerResource) {
-    ObjectNode templateNode = mapper.createObjectNode();
-
-    // Pod metadata
-    ObjectNode podMetadata = getPodMetadata(mapper, containerIndex);
-    templateNode.set("metadata", podMetadata);
-
-    // Container spec
-    templateNode.set("spec", getContainerSpec(mapper, containerIndex, containerResource));
-
-    return templateNode;
-  }
-
-
-  protected ObjectNode getLabels(ObjectMapper mapper) {
-    ObjectNode labelNode = mapper.createObjectNode();
-    labelNode.put(KubernetesConstants.ENVIRONMENT, Context.environ(config));
-    return labelNode;
   }
 
 

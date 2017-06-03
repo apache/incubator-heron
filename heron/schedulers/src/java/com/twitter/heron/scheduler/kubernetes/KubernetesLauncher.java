@@ -40,9 +40,6 @@ public class KubernetesLauncher implements ILauncher {
   public void initialize(Config aConfig, Config aRuntime) {
     this.config = aConfig;
     this.runtime = aRuntime;
-
-    // get the scheduler working directory
-    this.schedulerWorkingDirectory = KubernetesContext.getSchedulerWorkingDirectory(config);
   }
 
   @Override
@@ -52,13 +49,6 @@ public class KubernetesLauncher implements ILauncher {
 
   @Override
   public boolean launch(PackingPlan packing) {
-
-    // setup the working directory -- mainly just need to go and grab the topology jar
-    if (!setupWorkingDirectory()) {
-      LOG.severe("Failed to setup working directory");
-      return false;
-    }
-
     LauncherUtils launcherUtils = LauncherUtils.getInstance();
     Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packing);
     return launcherUtils.onScheduleAsLibrary(config, ytruntime, getScheduler(), packing);
@@ -67,16 +57,5 @@ public class KubernetesLauncher implements ILauncher {
   // Get KubernetesScheduler
   protected IScheduler getScheduler() {
     return new KubernetesScheduler();
-  }
-
-  // Setup the working directory -- pull down the topology jar
-  protected boolean setupWorkingDirectory() {
-    String topologyPackageURL = String.format("file://%s", Context.topologyPackageFile(config));
-    String topologyPackageDestination = Paths.get(
-        schedulerWorkingDirectory, "topology.tar.gz").toString();
-
-    return SchedulerUtils.curlAndExtractPackage(
-        schedulerWorkingDirectory, topologyPackageURL,
-        topologyPackageDestination, true, Context.verbose(config));
   }
 }
