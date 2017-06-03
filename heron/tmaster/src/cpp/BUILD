@@ -10,6 +10,7 @@ cc_library(
         "manager/tmasterserver.cpp",
         "manager/tmetrics-collector.cpp",
         "manager/ckptmgr-client.cpp",
+        "manager/stateful-checkpointer.cpp",
 
         "processor/stmgr-heartbeat-processor.cpp",
         "processor/stmgr-register-processor.cpp",
@@ -21,6 +22,7 @@ cc_library(
         "manager/tmasterserver.h",
         "manager/tmetrics-collector.h",
         "manager/ckptmgr-client.h",
+        "manager/stateful-checkpointer.h",
 
         "processor/stmgr-heartbeat-processor.h",
         "processor/stmgr-register-processor.h",
