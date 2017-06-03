@@ -54,11 +54,12 @@ public class AbstractOutputCollector {
       this.ackEnabled = false;
     }
 
-    this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
+    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
   }
 
   public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
     this.helper = physicalPlanHelper;
+    this.outputter.updatePhysicalPlanHelper(physicalPlanHelper);
   }
 
   public PhysicalPlanHelper getPhysicalPlanHelper() {

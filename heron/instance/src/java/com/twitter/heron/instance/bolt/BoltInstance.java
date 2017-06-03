@@ -191,6 +191,7 @@ public class BoltInstance implements IInstance {
       TopologyAPI.StreamId stream = tuples.getData().getStream();
       int nValues = topologyContext.getComponentOutputFields(
           stream.getComponentName(), stream.getId()).size();
+      int sourceTaskId = tuples.getSrcTaskId();
 
       // We would reuse the System.nanoTime()
       long currentTime = startOfCycle;
@@ -203,7 +204,7 @@ public class BoltInstance implements IInstance {
 
         // Decode the tuple
         TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
-            dataTuple.getRootsList(), values, currentTime, false);
+            dataTuple.getRootsList(), values, currentTime, false, sourceTaskId);
 
         // Delegate to the use defined bolt
         bolt.execute(t);
