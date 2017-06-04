@@ -19,7 +19,6 @@
 #include <sstream>
 #include <chrono>
 #include <string>
-#include <vector>
 #include "config/physical-plan-helper.h"
 #include "manager/tmaster.h"
 #include "manager/stmgrstate.h"
@@ -56,6 +55,10 @@ void StatefulCheckpointer::StartCheckpoint(const StMgrMap& _stmgrs) {
     request.set_checkpoint_id(checkpoint_id);
     iter->second->NewStatefulCheckpoint(request);
   }
+}
+
+void StatefulCheckpointer::RegisterNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
+  config::PhysicalPlanHelper::GetAllTasks(_pplan, all_tasks_);
 }
 
 bool StatefulCheckpointer::HandleInstanceStateStored(const std::string& _checkpoint_id,

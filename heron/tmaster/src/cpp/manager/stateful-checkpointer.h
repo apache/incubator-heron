@@ -17,8 +17,8 @@
 #ifndef __TMASTER_STATEFUL_CHECKPOINTER_H_
 #define __TMASTER_STATEFUL_CHECKPOINTER_H_
 
-#include <set>
 #include <string>
+#include <unordered_set>
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
 #include "manager/tmaster.h"
@@ -58,12 +58,12 @@ class StatefulCheckpointer {
   std::string current_partial_checkpoint_;
 
   // The set of all tasks
-  std::set<sp_int32> all_tasks_;
+  std::unordered_set<sp_int32> all_tasks_;
 
   // The set of tasks from which we still need confirmation
   // of state storage before we can declare it a globally
   // consistent checkpoint
-  std::set<sp_int32> partial_checkpoint_remaining_tasks_;
+  std::unordered_set<sp_int32> partial_checkpoint_remaining_tasks_;
 };
 }  // namespace tmaster
 }  // namespace heron
