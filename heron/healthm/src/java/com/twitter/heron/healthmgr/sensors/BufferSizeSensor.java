@@ -37,7 +37,7 @@ public class BufferSizeSensor extends BaseSensor {
   private final TopologyProvider topologyProvider;
 
   @Inject
-  BufferSizeSensor(PackingPlanProvider packingPlanProvider,
+  public BufferSizeSensor(PackingPlanProvider packingPlanProvider,
                    TopologyProvider topologyProvider,
                    MetricsProvider metricsProvider) {
     this.packingPlanProvider = packingPlanProvider;
