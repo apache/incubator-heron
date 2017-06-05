@@ -17,10 +17,12 @@ with open(release_yaml, 'r') as f:
     if 'version' in split_line[0]:
       version =  split_line[1].strip("'")
 release_version = version.replace("/", "_")
+print release_version
 
 # if it is being build out of a branch, we give 0.0.0 version
 if re.search('[a-zA-Z]', release_version):
   release_version = dummy_release_version
+print release_version
 
 # read the requirements file
 requirement_file = os.path.join(here, 'requirements.txt')

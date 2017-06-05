@@ -62,6 +62,13 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "pypkgs",
+    srcs = [
+        ":generate-pyheron-package",
+    ],
+)
+
 ################################################################################
 # Heron core packaging
 ################################################################################
@@ -314,6 +321,7 @@ genrule(
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
+        'export RELEASE_FILE_DIR=$$(pwd)',
         'export TMP_DIR=$$(mktemp -d -t pyheron.XXXXX)',
         'echo $$TMP_DIR',
         'export PYHERON_DIR=$$TMP_DIR/pyheron',
@@ -325,6 +333,7 @@ genrule(
         'rm -rf $$PYHERON_UNZIP/heron/pyheron',
         'mv $$PYHERON_UNZIP/heron $$PYHERON_DIR/heron',
         'cp $(SRCS) $$PYHERON_DIR',
+        'ls -l',
         'echo "PyHeron toplevel directory: $$PYHERON_DIR"',
         'cd $$PYHERON_DIR',
         '/usr/bin/env python2.7 setup.py bdist_wheel',
