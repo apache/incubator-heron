@@ -46,7 +46,7 @@ public class DataSkewDiagnoserTest {
   }
 
   @Test
-  public void Diagnosis1DataSkewInstance() {
+  public void diagnosis1DataSkewInstance() {
     List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123, 0, 0);
     // set execute count above 100%, hence diagnosis should be under provisioning
     ExecuteCountSensor exeSensor = createMockExecuteCountSensor(5000, 2000, 2000);
