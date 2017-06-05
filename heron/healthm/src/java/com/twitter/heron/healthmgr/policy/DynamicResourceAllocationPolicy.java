@@ -16,7 +16,12 @@
 package com.twitter.heron.healthmgr.policy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -27,27 +32,36 @@ import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.HealthPolicyConfigReader;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
+import com.twitter.heron.healthmgr.resolvers.ScaleUpResolver;
 
 public class DynamicResourceAllocationPolicy implements IHealthPolicy {
-  private HealthPolicyConfig policyConfig;
-  private final BackPressureDetector backPressureDetector;
+  private static final Logger LOG
+      = Logger.getLogger(DynamicResourceAllocationPolicy.class.getName());
 
-  private final UnderProvisioningDiagnoser underProvisioningDiagnoser;
-  private final DataSkewDiagnoser dataSkewDiagnoser;
-  private final SlowInstanceDiagnoser slowInstanceDiagnoser;
+  public static final String CONF_WAIT_INTERVAL_MILLIS =
+      "DynamicResourceAllocationPolicy.conf_post_action_wait_interval_min";
+
+  private HealthPolicyConfig policyConfig;
+  private BackPressureDetector backPressureDetector;
+  private UnderProvisioningDiagnoser underProvisioningDiagnoser;
+  private DataSkewDiagnoser dataSkewDiagnoser;
+  private SlowInstanceDiagnoser slowInstanceDiagnoser;
+  private ScaleUpResolver scaleUpResolver;
+
+  private ArrayList<Diagnosis> diagnosis;
 
   @Inject
   DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
                                   BackPressureDetector backPressureDetector,
                                   UnderProvisioningDiagnoser underProvisioningDiagnoser,
                                   DataSkewDiagnoser dataSkewDiagnoser,
-                                  SlowInstanceDiagnoser slowInstanceDiagnoser) {
+                                  SlowInstanceDiagnoser slowInstanceDiagnoser,
+                                  ScaleUpResolver scaleUpResolver) {
     this.policyConfig = policyConfig;
 
     this.backPressureDetector = backPressureDetector;
@@ -55,6 +69,7 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
     this.underProvisioningDiagnoser = underProvisioningDiagnoser;
     this.dataSkewDiagnoser = dataSkewDiagnoser;
     this.slowInstanceDiagnoser = slowInstanceDiagnoser;
+    this.scaleUpResolver = scaleUpResolver;
   }
 
   @Override
@@ -64,10 +79,42 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
 
   @Override
   public List<Diagnosis> executeDiagnosers(List<Symptom> symptoms) {
+    diagnosis = new ArrayList<>();
+
     Diagnosis diagnoses = underProvisioningDiagnoser.diagnose(symptoms);
-    List<Diagnosis> diagnosis = new ArrayList<>();
-    diagnosis.add(diagnoses);
+    if (diagnoses != null) {
+      diagnosis.add(diagnoses);
+    }
+
+    diagnoses = slowInstanceDiagnoser.diagnose(symptoms);
+    if (diagnoses != null) {
+      diagnosis.add(diagnoses);
+    }
+
+    diagnoses = dataSkewDiagnoser.diagnose(symptoms);
+    if (diagnoses != null) {
+      diagnosis.add(diagnoses);
+    }
+
     return diagnosis;
+  }
+
+  @Override
+  public IResolver selectResolver(List<Diagnosis> diagnosis) {
+    Map<String, Diagnosis> diagnosisMap = new HashMap<>();
+    for (Diagnosis diagnoses : diagnosis) {
+      diagnosisMap.put(diagnoses.getName(), diagnoses);
+    }
+
+    if (diagnosisMap.containsKey(DataSkewDiagnoser.class.getName())) {
+      LOG.warning("Data Skew diagnoses. This diagnosis does not have any resolver.");
+    } else if (diagnosisMap.containsKey(SlowInstanceDiagnoser.class.getName())) {
+      LOG.warning("Slow Instance diagnoses. This diagnosis does not have any resolver.");
+    } else if (diagnosisMap.containsKey(UnderProvisioningDiagnoser.class.getSimpleName())) {
+      return scaleUpResolver;
+    }
+
+    return null;
   }
 
   @Override
@@ -77,7 +124,22 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
 
   @Override
   public List<Action> executeResolvers(IResolver resolver) {
-    return null;
+    if (resolver == null) {
+      return null;
+    }
+
+    // TODO wait after returning actions
+    List<Action> actions = resolver.resolve(diagnosis);
+    if (actions != null && !actions.isEmpty()) {
+      int interval = Integer.valueOf(policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, "180000"));
+      try {
+        TimeUnit.MILLISECONDS.sleep(interval);
+      } catch (InterruptedException e) {
+        LOG.log(Level.WARNING, "Interrupted while waiting for policy stabilization", e);
+      }
+    }
+
+    return actions;
   }
 
   @Override
