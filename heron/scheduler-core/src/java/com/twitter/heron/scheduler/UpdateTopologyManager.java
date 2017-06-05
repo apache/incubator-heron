@@ -216,7 +216,7 @@ public class UpdateTopologyManager implements Closeable {
         topologyConfig, TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 10 * 60L);
     long delaySeconds = 10;
 
-    logInfo("Waiting for packing plan to be set before re-activating topology %s. "
+    logInfo("Waiting for physical plan to be set before re-activating topology %s. "
             + "Will wait up to %s seconds for packing plan to be reset",
         topology.getName(), waitSeconds);
     Enabler enabler = new Enabler(stateManager, topology, waitSeconds, removableContainerCount);
