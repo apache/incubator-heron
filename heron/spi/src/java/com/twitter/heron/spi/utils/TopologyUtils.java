@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 
 /**
  * Utility to process TopologyAPI.Topology proto
@@ -49,7 +50,7 @@ public final class TopologyUtils {
 
       return topology;
     } catch (IOException e) {
-      throw new RuntimeException("Failed to read/parse content of " + topologyDefnFile);
+      throw new RuntimeException("Failed to read/parse content of " + topologyDefnFile, e);
     }
   }
 
@@ -76,6 +77,17 @@ public final class TopologyUtils {
   public static Double getConfigWithDefault(
       List<TopologyAPI.Config.KeyValue> config, String key, Double defaultValue) {
     return Double.parseDouble(getConfigWithDefault(config, key, Double.toString(defaultValue)));
+  }
+
+  public static ByteAmount getConfigWithDefault(
+      List<TopologyAPI.Config.KeyValue> config, String key, ByteAmount defaultValue) {
+    long defaultBytes = defaultValue.asBytes();
+    return ByteAmount.fromBytes(getConfigWithDefault(config, key, defaultBytes));
+  }
+
+  public static Boolean getConfigWithDefault(
+      List<TopologyAPI.Config.KeyValue> config, String key, boolean defaultValue) {
+    return Boolean.parseBoolean(getConfigWithDefault(config, key, Boolean.toString(defaultValue)));
   }
 
   public static String getConfigWithException(
@@ -182,9 +194,9 @@ public final class TopologyUtils {
    * @param topology the topology def
    * @return a map (componentName -&gt; ram required)
    */
-  public static Map<String, Long> getComponentRamMapConfig(TopologyAPI.Topology topology) {
+  public static Map<String, ByteAmount> getComponentRamMapConfig(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    Map<String, Long> ramMap = new HashMap<>();
+    Map<String, ByteAmount> ramMap = new HashMap<>();
 
     // Get the set of component names to make sure the config only specifies valid component name
     Set<String> componentNames = getComponentParallelism(topology).keySet();
@@ -207,12 +219,13 @@ public final class TopologyUtils {
         }
         long requiredRam = Long.parseLong(componentAndRam[1]);
 
-        ramMap.put(componentAndRam[0], requiredRam);
+        ramMap.put(componentAndRam[0], ByteAmount.fromBytes(requiredRam));
       }
     }
     return ramMap;
   }
 
+  // TODO: in a PR of it's own rename this to getNumStreamManagers to be correct
   public static int getNumContainers(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return Integer.parseInt(TopologyUtils.getConfigWithDefault(

@@ -101,7 +101,8 @@ public class HeronExecutorTaskTest {
         Mockito.eq(testCmd),
         Mockito.any(File.class),
         Mockito.eq(env),
-        Mockito.any(String.class));
+        Mockito.any(String.class),
+        Mockito.any(Boolean.class));
     spyTask.call(null);
     Mockito.verify(mockProcess).waitFor();
   }
@@ -115,7 +116,7 @@ public class HeronExecutorTaskTest {
         "env",
         "package",
         "core",
-        "jar",
+        "topology.jar",
         "componentRamMap",
         false);
     return Mockito.spy(task);

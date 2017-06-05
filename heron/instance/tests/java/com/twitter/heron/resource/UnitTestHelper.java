@@ -25,6 +25,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.config.SystemConfigKey;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -48,7 +49,7 @@ public final class UnitTestHelper {
    *
    * @param ackEnabled whether the acking system is enabled
    * @param messageTimeout the seconds for a tuple to be time-out. -1 means the timeout is not enabled.
-   * @param topologyState the Topology State inside this PhysicaPlan, for intance, RUNNING.
+   * @param topologyState the Topology State inside this PhysicalPlan, for instance, RUNNING.
    * @return the corresponding Physical Plan
    */
   public static PhysicalPlans.PhysicalPlan getPhysicalPlan(
@@ -140,7 +141,7 @@ public final class UnitTestHelper {
   }
 
   @SuppressWarnings("unchecked")
-  public static void clearSingletonRegistry() throws Exception {
+  public static void clearSingletonRegistry() throws IllegalAccessException, NoSuchFieldException {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
     field.setAccessible(true);
@@ -173,8 +174,10 @@ public final class UnitTestHelper {
 
     String filePath =
         Paths.get(runFiles, Constants.BUILD_TEST_HERON_INTERNALS_CONFIG_PATH).toString();
-    SystemConfig systemConfig = new SystemConfig(filePath);
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+    SystemConfig.Builder sb = SystemConfig.newBuilder(true)
+        .putAll(filePath, true)
+        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 1);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, sb.build());
   }
 
   public static StreamManager.RegisterInstanceResponse getRegisterInstanceResponse() {

@@ -28,7 +28,9 @@ Server::Server(EventLoop* eventLoop, const NetworkOptions& _options)
   request_rid_gen_ = new REQID_Generator();
 }
 
-Server::~Server() { delete request_rid_gen_; }
+Server::~Server() {
+  delete request_rid_gen_;
+}
 
 sp_int32 Server::Start() { return Start_Base(); }
 
@@ -43,6 +45,25 @@ void Server::SendResponse(REQID _id, Connection* _connection,
   CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(_id), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(_response, byte_size), 0);
+  InternalSendResponse(_connection, opkt);
+  return;
+}
+
+void Server::SendMessage(Connection* _connection,
+                         sp_int32 _byte_size,
+                         const sp_string _type_name,
+                         const char* _message) {
+  // Generate a zero reqid
+  REQID rid = REQID_Generator::generate_zero_reqid();
+
+  sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_type_name) +
+                          REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(_byte_size);
+
+  OutgoingPacket* opkt = new OutgoingPacket(data_size);
+
+  CHECK_EQ(opkt->PackString(_type_name), 0);
+  CHECK_EQ(opkt->PackREQID(rid), 0);
+  CHECK_EQ(opkt->PackProtocolBuffer(_message, _byte_size), 0);
   InternalSendResponse(_connection, opkt);
   return;
 }
@@ -89,11 +110,6 @@ BaseConnection* Server::CreateConnection(ConnectionEndPoint* _endpoint, Connecti
   conn->registerForBackPressure(std::move(backpressure_starter_),
                                 std::move(backpressure_reliever_));
 
-  auto buffer_size_change_ = [this](Connection* conn) {
-    this->ConnectionBufferChangeCb(conn);
-  };
-
-  conn->registerForBufferChange(std::move(buffer_size_change_));
   return conn;
 }
 
@@ -159,7 +175,7 @@ void Server::InternalSendResponse(Connection* _connection, OutgoingPacket* _pack
     delete _packet;
     return;
   }
-  if (_connection->sendPacket(_packet, NULL) != 0) {
+  if (_connection->sendPacket(_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping... " << std::endl;
     delete _packet;
     return;
@@ -200,7 +216,7 @@ void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _
   // delete the request
   delete _request;
 
-  if (_conn->sendPacket(opkt, NULL) != 0) {
+  if (_conn->sendPacket(opkt) != 0) {
     context_map_.erase(rid);
     delete opkt;
     auto cb = [_response_placeholder, _ctx, this]() {
@@ -239,8 +255,4 @@ void Server::StartBackPressureConnectionCb(Connection* conn) {
 
 void Server::StopBackPressureConnectionCb(Connection* conn) {
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
-}
-
-void Server::ConnectionBufferChangeCb(Connection* conn) {
-  // Nothing to be done here. Should be handled by inheritors if they care about buffer size change
 }

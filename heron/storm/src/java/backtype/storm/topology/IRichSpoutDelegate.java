@@ -19,8 +19,10 @@
 package backtype.storm.topology;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.topology.IUpdatable;
 
 import backtype.storm.spout.SpoutOutputCollectorImpl;
 import backtype.storm.task.TopologyContext;
@@ -29,7 +31,9 @@ import backtype.storm.task.TopologyContext;
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
  * to use to implement components of the topology.
  */
-public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout {
+public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout, IUpdatable {
+  private static final Logger LOG = Logger.getLogger(IRichSpoutDelegate.class.getName());
+
   private static final long serialVersionUID = -4310232227720592316L;
   private IRichSpout delegate;
   private TopologyContext topologyContextImpl;
@@ -40,7 +44,8 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   }
 
   @Override
-  public void open(Map<String, Object> conf, com.twitter.heron.api.topology.TopologyContext context,
+  @SuppressWarnings("rawtypes")
+  public void open(Map conf, com.twitter.heron.api.topology.TopologyContext context,
                    SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
@@ -86,5 +91,15 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return delegate.getComponentConfiguration();
+  }
+
+  @Override
+  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+    if (delegate instanceof IUpdatable) {
+      ((IUpdatable) delegate).update(topologyContext);
+    } else {
+      LOG.warning(String.format("Update() event received but can not call update() on delegate "
+          + "because it does not implement %s: %s", IUpdatable.class.getName(), delegate));
+    }
   }
 }

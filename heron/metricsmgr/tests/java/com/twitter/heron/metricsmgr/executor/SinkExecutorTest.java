@@ -15,12 +15,15 @@
 package com.twitter.heron.metricsmgr.executor;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -38,9 +41,13 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class SinkExecutorTest {
-  private static final int FLUSH_INTERVAL_MS = 100;
-  private static final int N = 100;
+  private static final long FLUSH_INTERVAL_MS = 100;
+  private static final int EXPECTED_RECORDS = 100;
+  private static final int EXPECTED_FLUSHES = 2;
   private static final String METRICS_NAME = "metrics_name";
   private static final String METRICS_VALUE = "metrics_value";
   private static final String EXCEPTION_STACK_TRACE = "stackTrace";
@@ -53,7 +60,7 @@ public class SinkExecutorTest {
   private volatile int processRecordInvoked = 0;
   private volatile int flushInvoked = 0;
   private volatile int initInvoked = 0;
-  private IMetricsSink metricsSink;
+  private DummyMetricsSink metricsSink;
   private SlaveLooper slaveLooper;
   private Communicator<MetricsRecord> communicator;
   private SinkExecutor sinkExecutor;
@@ -61,7 +68,7 @@ public class SinkExecutorTest {
 
   @Before
   public void before() throws Exception {
-    metricsSink = new DummyMetricsSink();
+    metricsSink = new DummyMetricsSink(EXPECTED_RECORDS, EXPECTED_FLUSHES);
     slaveLooper = new SlaveLooper();
     communicator = new Communicator<>(null, slaveLooper);
 
@@ -94,7 +101,7 @@ public class SinkExecutorTest {
     field.setAccessible(true);
 
     Map<String, Object> map = (Map<String, Object>) field.get(sinkExecutor);
-    Assert.assertEquals(map.get(key), value);
+    assertEquals(map.get(key), value);
   }
 
   /**
@@ -113,7 +120,7 @@ public class SinkExecutorTest {
     field.setAccessible(true);
 
     Map<String, Object> map = (Map<String, Object>) field.get(sinkExecutor);
-    Assert.assertEquals(map.get(key), value);
+    assertEquals(map.get(key), value);
   }
 
   /**
@@ -125,20 +132,23 @@ public class SinkExecutorTest {
     runSinkExecutor();
 
     // Push MetricsRecord
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < EXPECTED_RECORDS; i++) {
       communicator.offer(constructMetricsRecord());
     }
 
-    // Sleep for a while to let the SinkExecutor fully process the MetricsRecord
-    Thread.sleep(5 * 1000);
+    // wait for the SinkExecutor to fully process the MetricsRecord
+    metricsSink.awaitRecordsProcessed(Duration.ofSeconds(5));
 
-    Assert.assertEquals(1, initInvoked);
-    // Totally we offer N MetricsRecord
-    Assert.assertEquals(N, processRecordInvoked);
-    // We sleep for 5000ms while the flush interval is 100ms
-    // So the flushInvoked should be nearly 50
-    // We claim it is bigger than 25
-    Assert.assertTrue(flushInvoked > 25);
+    assertEquals(1, initInvoked);
+    // Totally we offer EXPECTED_RECORDS MetricsRecord
+    assertEquals(EXPECTED_RECORDS, processRecordInvoked);
+
+    // the flush interval is 100ms, so wait up to 220 ms for 2 flushes to occur
+    metricsSink.awaitFlushes(
+        Duration.ofMillis(FLUSH_INTERVAL_MS).multipliedBy(EXPECTED_FLUSHES).plusMillis(20));
+
+    Assert.assertTrue(String.format("metrics flush invocations expected: %d, found: %d",
+        EXPECTED_FLUSHES, flushInvoked), flushInvoked >= EXPECTED_FLUSHES);
 
     threadsPool.shutdownNow();
     threadsPool = null;
@@ -151,15 +161,15 @@ public class SinkExecutorTest {
 
   private MetricsRecord constructMetricsRecord() {
     List<MetricsInfo> metricsInfos = new ArrayList<>();
-    // We add N MetricsInfo into a MetricsRecord
-    for (int i = 0; i < N; i++) {
+    // We add EXPECTED_RECORDS MetricsInfo into a MetricsRecord
+    for (int i = 0; i < EXPECTED_RECORDS; i++) {
       MetricsInfo metricsInfo = new MetricsInfo(METRICS_NAME + i, METRICS_VALUE + i);
       metricsInfos.add(metricsInfo);
     }
 
-    // We add N ExceptionInfo into a MetricsRecord
+    // We add EXPECTED_RECORDS ExceptionInfo into a MetricsRecord
     List<ExceptionInfo> exceptionInfos = new ArrayList<>();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < EXPECTED_RECORDS; i++) {
       String stackTrace = EXCEPTION_STACK_TRACE + i;
       String lastTime = EXCEPTION_LAST_TIME + i;
       String firstTime = EXCEPTION_FIRST_TIME + i;
@@ -171,50 +181,76 @@ public class SinkExecutorTest {
     return new MetricsRecord(RECORD_SOURCE, metricsInfos, exceptionInfos, RECORD_CONTEXT);
   }
 
-  private class DummyMetricsSink implements IMetricsSink {
+  private final class DummyMetricsSink implements IMetricsSink {
+
+    private final CountDownLatch recordProcessedLatch;
+    private final CountDownLatch flushesLatch;
+
+    private DummyMetricsSink(int expectedRecords, int expectedFlushes) {
+      this.recordProcessedLatch = new CountDownLatch(expectedRecords);
+      this.flushesLatch = new CountDownLatch(expectedFlushes);
+    }
+
+    void awaitRecordsProcessed(Duration timeout) {
+      await(recordProcessedLatch, timeout);
+    }
+
+    void awaitFlushes(Duration timeout) {
+      await(flushesLatch, timeout);
+    }
+
+    void await(CountDownLatch latch, Duration timeout) {
+      try {
+        latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        fail(String.format(
+            "latch failed to release until timeout of %s was reached.", timeout));
+      }
+    }
 
     @Override
     public void init(Map<String, Object> map, SinkContext context) {
       initInvoked++;
-      Assert.assertEquals(
-          map.get(MetricsSinksConfig.CONFIG_KEY_FLUSH_FREQUENCY_MS), FLUSH_INTERVAL_MS);
+      assertEquals(map.get(MetricsSinksConfig.CONFIG_KEY_FLUSH_FREQUENCY_MS), FLUSH_INTERVAL_MS);
 
-      Assert.assertEquals("topology-name", context.getTopologyName());
-      Assert.assertEquals("sink-id", context.getSinkId());
+      assertEquals("topology-name", context.getTopologyName());
+      assertEquals("sink-id", context.getSinkId());
     }
 
     @Override
     public void processRecord(MetricsRecord record) {
-      Assert.assertEquals(record.getContext(), RECORD_CONTEXT);
-      Assert.assertEquals(record.getSource(), RECORD_SOURCE);
+      assertEquals(record.getContext(), RECORD_CONTEXT);
+      assertEquals(record.getSource(), RECORD_SOURCE);
 
       int metrics = 0;
       for (MetricsInfo metricsInfo : record.getMetrics()) {
-        Assert.assertEquals(metricsInfo.getName(), METRICS_NAME + metrics);
-        Assert.assertEquals(metricsInfo.getValue(), METRICS_VALUE + metrics);
+        assertEquals(metricsInfo.getName(), METRICS_NAME + metrics);
+        assertEquals(metricsInfo.getValue(), METRICS_VALUE + metrics);
         metrics++;
       }
-      // Every time we added N MetricsInfo
-      Assert.assertEquals(metrics, N);
+      // Every time we added EXPECTED_RECORDS MetricsInfo
+      assertEquals(metrics, EXPECTED_RECORDS);
 
       int exceptions = 0;
       for (ExceptionInfo exceptionInfo : record.getExceptions()) {
-        Assert.assertEquals(exceptionInfo.getCount(), exceptions);
-        Assert.assertEquals(exceptionInfo.getFirstTime(), EXCEPTION_FIRST_TIME + exceptions);
-        Assert.assertEquals(exceptionInfo.getLastTime(), EXCEPTION_LAST_TIME + exceptions);
-        Assert.assertEquals(exceptionInfo.getLogging(), EXCEPTION_LOGGING + exceptions);
-        Assert.assertEquals(exceptionInfo.getStackTrace(), EXCEPTION_STACK_TRACE + exceptions);
+        assertEquals(exceptionInfo.getCount(), exceptions);
+        assertEquals(exceptionInfo.getFirstTime(), EXCEPTION_FIRST_TIME + exceptions);
+        assertEquals(exceptionInfo.getLastTime(), EXCEPTION_LAST_TIME + exceptions);
+        assertEquals(exceptionInfo.getLogging(), EXCEPTION_LOGGING + exceptions);
+        assertEquals(exceptionInfo.getStackTrace(), EXCEPTION_STACK_TRACE + exceptions);
         exceptions++;
       }
-      // Every time we added N ExceptionInfo
-      Assert.assertEquals(exceptions, N);
+      // Every time we added EXPECTED_RECORDS ExceptionInfo
+      assertEquals(exceptions, EXPECTED_RECORDS);
 
       processRecordInvoked++;
+      recordProcessedLatch.countDown();
     }
 
     @Override
     public void flush() {
       flushInvoked++;
+      flushesLatch.countDown();
     }
 
     @Override

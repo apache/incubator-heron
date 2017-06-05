@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
@@ -146,6 +147,50 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
+   * Is this topology stateful? The format of this flag is boolean
+   * When set to true, Heron will try to take the snapshots of
+   * all of the components of the topology every
+   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure of
+   * any component, its state is recovered to the last checkpoint saved. The
+   * spouts/bolts of the topology have to implement IStatefulComponent for state
+   * to be actually captured.
+   * Setting this flag to false does not initiate any checkpointing
+   * mechanism. This means that even if the components themselves are
+   * IStatefulComponents their state is not saved/recovered.
+   */
+  public static final String TOPOLOGY_STATEFUL_ENABLED = "topology.stateful.enabled";
+  /**
+   * What's the checkpoint interval for stateful topologies in seconds
+   */
+  public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
+                             "topology.stateful.checkpoint.interval.seconds";
+  /**
+   * Boolean flag that says that the stateful topology should start from
+   * clean state, i.e. ignore any checkpoint state
+   */
+  public static final String TOPOLOGY_STATEFUL_START_CLEAN =
+                             "topology.stateful.start.clean";
+  /**
+   * Do we want to run this topology in exactly once semantics?
+   * The format of this flag is boolean.
+   * When set to true, Heron will try to do a distributed checkpoint
+   * based on Lamport's idea of distributed snapshotting every
+   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. When any component
+   * of the topology dies, Heron initiates a recovery mechanism to restart
+   * the topology from the last globally consistent checkpoint.
+   * Heron topologies can be run in many modes.
+   * 1. When TOPOLOGY_ENABLE_ACKING is enabled, Heron will run the topology
+   * in the classic atleast-once semantics.
+   * 2. When TOPOLOGY_EXACTLYONCE_ENABLED is enabled, Heron will run the
+   * topology in exactly once sematics. Note that the spouts/bolts have to
+   * implement IStatefulComponents for them to really save/restore their state.
+   * 3. When neither is enabled, the topology is run in atmost-once semantics
+   * 4. If both TOPOLOGY_ENABLE_ACKING and TOPOLOGY_EXACTLYONCE_ENABLED are set
+   * then the TOPOLOGY_EXACTLYONCE_ENABLED semantics has preference and the
+   * topology is run in exactly once semantics
+   */
+  public static final String TOPOLOGY_EXACTLYONCE_ENABLED = "topology.exactlyonce.enabled";
+  /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
   public static final String TOPOLOGY_NAME = "topology.name";
@@ -172,6 +217,18 @@ public class Config extends HashMap<String, Object> {
    * through this key. The value will be of the format "cp1:cp2:cp3..."
    */
   public static final String TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath";
+
+  /**
+   * Amount of time to wait after deactivating a topology before updating it
+   */
+  public static final String TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS =
+      "topology.update.deactivate.wait.secs";
+  /**
+   * After updating a topology, amount of time to wait for it to come back up before reactivating it
+   */
+  public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
+      "topology.update.reactivate.wait.secs";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -196,12 +253,18 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
+    apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
+    apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
+    apiVars.add(TOPOLOGY_STATEFUL_ENABLED);
+    apiVars.add(TOPOLOGY_EXACTLYONCE_ENABLED);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);
     apiVars.add(TOPOLOGY_CAP_TICKET);
     apiVars.add(TOPOLOGY_PROJECT_NAME);
     apiVars.add(TOPOLOGY_ADDITIONAL_CLASSPATH);
+    apiVars.add(TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS);
+    apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
   }
 
   public Config() {
@@ -264,24 +327,44 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
   }
 
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setContainerDiskRequested(Map&lt;String, Object&gt; conf, ByteAmount nbytes)
+   */
+  @Deprecated
   public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes));
+    setContainerDiskRequested(conf, ByteAmount.fromBytes(nbytes));
   }
 
+  public static void setContainerDiskRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes.asBytes()));
+  }
+
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setContainerRamRequested(Map&lt;String, Object&gt; conf, ByteAmount nbytes)
+   */
+  @Deprecated
   public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes));
+    setContainerRamRequested(conf, ByteAmount.fromBytes(nbytes));
+  }
+
+  public static void setContainerRamRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes.asBytes()));
   }
 
   public static void setContainerMaxCpuHint(Map<String, Object> conf, float ncpus) {
     conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
   }
 
-  public static void setContainerMaxDiskHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes));
+  public static void setContainerMaxDiskHint(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes.asBytes()));
   }
 
-  public static void setContainerMaxRamHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes));
+  public static void setContainerMaxRamHint(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes.asBytes()));
   }
 
   public static void setContainerPaddingPercentage(Map<String, Object> conf, int percentage) {
@@ -300,13 +383,25 @@ public class Config extends HashMap<String, Object> {
     return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
   }
 
-  public static void setComponentRam(Map<String, Object> conf, String component, long ramInBytes) {
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setComponentRam(Map&lt;String, Object&gt; conf, String component, ByteAmount ramInBytes)
+   */
+  @Deprecated
+  public static void setComponentRam(Map<String, Object> conf,
+                                     String component, long ramInBytes) {
+    setComponentRam(conf, component, ByteAmount.fromBytes(ramInBytes));
+  }
+
+  public static void setComponentRam(Map<String, Object> conf,
+                                     String component, ByteAmount ramInBytes) {
     if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
       String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
-      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes.asBytes());
       conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     } else {
-      String newEntry = String.format("%s:%d", component, ramInBytes);
+      String newEntry = String.format("%s:%d", component, ramInBytes.asBytes());
       conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     }
   }
@@ -339,6 +434,22 @@ public class Config extends HashMap<String, Object> {
     //  }
     conf.put(Config.TOPOLOGY_COMPONENT_JVMOPTS, newEntry);
 
+  }
+
+  public static void setTopologyStatefulEnabled(Map<String, Object> conf, boolean stateful) {
+    conf.put(Config.TOPOLOGY_STATEFUL_ENABLED, String.valueOf(stateful));
+  }
+
+  public static void setTopologyStatefulCheckpointIntervalSecs(Map<String, Object> conf, int secs) {
+    conf.put(Config.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS, Integer.toString(secs));
+  }
+
+  public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
+    conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
+  }
+
+  public static void setTopologyExactlyOnceEnabled(Map<String, Object> conf, boolean exactOnce) {
+    conf.put(Config.TOPOLOGY_EXACTLYONCE_ENABLED, String.valueOf(exactOnce));
   }
 
   public void setDebug(boolean isOn) {
@@ -393,11 +504,11 @@ public class Config extends HashMap<String, Object> {
     setContainerCpuRequested(this, ncpus);
   }
 
-  public void setContainerDiskRequested(long nbytes) {
+  public void setContainerDiskRequested(ByteAmount nbytes) {
     setContainerDiskRequested(this, nbytes);
   }
 
-  public void setContainerRamRequested(long nbytes) {
+  public void setContainerRamRequested(ByteAmount nbytes) {
     setContainerRamRequested(this, nbytes);
   }
 
@@ -405,11 +516,11 @@ public class Config extends HashMap<String, Object> {
     setContainerMaxCpuHint(this, ncpus);
   }
 
-  public void setContainerMaxDiskHint(long nbytes) {
+  public void setContainerMaxDiskHint(ByteAmount nbytes) {
     setContainerMaxDiskHint(this, nbytes);
   }
 
-  public void setContainerMaxRamHint(long nbytes) {
+  public void setContainerMaxRamHint(ByteAmount nbytes) {
     setContainerMaxRamHint(this, nbytes);
   }
 
@@ -421,8 +532,16 @@ public class Config extends HashMap<String, Object> {
     setComponentRamMap(this, ramMap);
   }
 
-  public void setComponentRam(String component, long ramInBytes) {
+  public void setComponentRam(String component, ByteAmount ramInBytes) {
     setComponentRam(this, component, ramInBytes);
+  }
+
+  public void setUpdateDeactivateWaitDuration(int seconds) {
+    put(Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS, Integer.toString(seconds));
+  }
+
+  public void setUpdateReactivateWaitDuration(int seconds) {
+    put(Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, Integer.toString(seconds));
   }
 
   public List<String> getAutoTaskHooks() {
@@ -453,5 +572,21 @@ public class Config extends HashMap<String, Object> {
 
   public Set<String> getApiVars() {
     return apiVars;
+  }
+
+  public void setTopologyStatefulEnabled(boolean stateful) {
+    setTopologyStatefulEnabled(this, stateful);
+  }
+
+  public void setTopologyStatefulCheckpointIntervalSecs(int secs) {
+    setTopologyStatefulCheckpointIntervalSecs(this, secs);
+  }
+
+  public void setTopologyStatefulStartClean(boolean clean) {
+    setTopologyStatefulStartClean(this, clean);
+  }
+
+  public void setTopologyExactlyOnceEnabled(boolean exactOnce) {
+    setTopologyExactlyOnceEnabled(this, exactOnce);
   }
 }

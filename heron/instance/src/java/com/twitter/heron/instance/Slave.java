@@ -31,9 +31,9 @@ import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 
 /**
- * The slave, which in fact is a InstanceFactory, will new a spout or bolt according to the PhysicalPlan.
+ * The slave, which in fact is a InstanceFactory, creates a new spout or bolt according to the PhysicalPlan.
  * First, if the instance is null, it will wait for the PhysicalPlan from inQueue and, if it receives one,
- * we will instantiate a new instance (spout or bolt) according to the PhysicalPlanHelper in SingletonRegistry.
+ * will instantiate a new instance (spout or bolt) according to the PhysicalPlanHelper in SingletonRegistry.
  * It is a Runnable so it could be executed in a Thread. During run(), it will begin the SlaveLooper's loop().
  */
 
@@ -81,25 +81,34 @@ public class Slave implements Runnable, AutoCloseable {
           if (instanceControlMsg.isNewPhysicalPlanHelper()) {
             PhysicalPlanHelper newHelper = instanceControlMsg.getNewPhysicalPlanHelper();
 
+            // Bind the MetricsCollector with topologyContext
+            newHelper.setTopologyContext(metricsCollector);
+
             if (helper == null) {
               handleNewAssignment(newHelper);
             } else {
+
+              instance.update(newHelper);
+
               // Handle the state changing
               if (!helper.getTopologyState().equals(newHelper.getTopologyState())) {
-                if (newHelper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
-                  if (!isInstanceStarted) {
-                    // Start the instance if it has not yet started
-                    startInstance();
-                  }
-                  instance.activate();
-                } else if (newHelper.getTopologyState().equals(TopologyAPI.TopologyState.PAUSED)) {
-                  instance.deactivate();
-                } else {
-                  throw new RuntimeException("Unexpected TopologyState is updated for spout: "
-                      + newHelper.getTopologyState());
+                switch (newHelper.getTopologyState()) {
+                  case RUNNING:
+                    if (!isInstanceStarted) {
+                      // Start the instance if it has not yet started
+                      startInstance();
+                    }
+                    instance.activate();
+                    break;
+                  case PAUSED:
+                    instance.deactivate();
+                    break;
+                  default:
+                    throw new RuntimeException("Unexpected TopologyState is updated for spout: "
+                        + newHelper.getTopologyState());
                 }
               } else {
-                LOG.info("Topology state remains the same in Slave.");
+                LOG.info("Topology state remains the same in Slave: " + helper.getTopologyState());
               }
             }
 
@@ -121,17 +130,11 @@ public class Slave implements Runnable, AutoCloseable {
         "Incarnating ourselves as {0} with task id {1}",
         new Object[]{newHelper.getMyComponent(), newHelper.getMyTaskId()});
 
-    // Bind the MetricsCollector with topologyContext
-    newHelper.setTopologyContext(metricsCollector);
-
     // During the initiation of instance,
     // we would add a bunch of tasks to slaveLooper's tasksOnWakeup
     if (newHelper.getMySpout() != null) {
       instance =
-          new SpoutInstance(newHelper,
-              streamInCommunicator,
-              streamOutCommunicator,
-              slaveLooper);
+          new SpoutInstance(newHelper, streamInCommunicator, streamOutCommunicator, slaveLooper);
 
       streamInCommunicator.init(systemConfig.getInstanceInternalSpoutReadQueueCapacity(),
           systemConfig.getInstanceTuningExpectedSpoutReadQueueSize(),
@@ -141,10 +144,7 @@ public class Slave implements Runnable, AutoCloseable {
           systemConfig.getInstanceTuningCurrentSampleWeight());
     } else {
       instance =
-          new BoltInstance(newHelper,
-              streamInCommunicator,
-              streamOutCommunicator,
-              slaveLooper);
+          new BoltInstance(newHelper, streamInCommunicator, streamOutCommunicator, slaveLooper);
 
       streamInCommunicator.init(systemConfig.getInstanceInternalBoltReadQueueCapacity(),
           systemConfig.getInstanceTuningExpectedBoltReadQueueSize(),
@@ -179,6 +179,8 @@ public class Slave implements Runnable, AutoCloseable {
     LOG.info("Closing the Slave Thread");
     this.metricsCollector.forceGatherAllMetrics();
     LOG.info("Cleaning up the instance");
-    instance.stop();
+    if (instance != null) {
+      instance.stop();
+    }
   }
 }

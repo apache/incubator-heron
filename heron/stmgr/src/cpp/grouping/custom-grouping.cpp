@@ -34,7 +34,7 @@ CustomGrouping::CustomGrouping(const std::vector<sp_int32>& _task_ids) : Groupin
 
 CustomGrouping::~CustomGrouping() {}
 
-void CustomGrouping::GetListToSend(const proto::system::HeronDataTuple&, std::list<sp_int32>&) {
+void CustomGrouping::GetListToSend(const proto::system::HeronDataTuple&, std::vector<sp_int32>&) {
   // Stmgr does not do the custom grouping.
   // That is done by the instance
   return;

@@ -14,15 +14,17 @@
 
 package com.twitter.heron.api.hooks.info;
 
-public class SpoutFailInfo {
-  private Object messageId;
-  private int spoutTaskId;
-  private Long failLatencyMs; // null if it wasn't sampled
+import java.time.Duration;
 
-  public SpoutFailInfo(Object messageId, int spoutTaskId, Long failLatencyMs) {
+public class SpoutFailInfo {
+  private final Object messageId;
+  private final int spoutTaskId;
+  private final Duration failLatency; // null if it wasn't sampled
+
+  public SpoutFailInfo(Object messageId, int spoutTaskId, Duration failLatency) {
     this.messageId = messageId;
     this.spoutTaskId = spoutTaskId;
-    this.failLatencyMs = failLatencyMs;
+    this.failLatency = failLatency;
   }
 
   public Object getMessageId() {
@@ -33,7 +35,7 @@ public class SpoutFailInfo {
     return spoutTaskId;
   }
 
-  public Long getFailLatencyMs() {
-    return failLatencyMs;
+  public Duration getFailLatency() {
+    return failLatency;
   }
 }

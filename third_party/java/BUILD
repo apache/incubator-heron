@@ -13,6 +13,7 @@ java_library(
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
         "//third_party/java:joda_time",
+        "@commons_codec//jar",
         "@commons_logging_commons_logging//jar",
         "@org_apache_httpcomponents_http_client//jar",
         "@org_apache_httpcomponents_http_core//jar",
@@ -35,6 +36,20 @@ java_library(
         "@commons_logging_commons_logging//jar",
         "@com_google_guava_guava//jar",
     ]
+)
+
+java_library(
+    name = "cli",
+    srcs = [ "Empty.java" ],
+    exports = [ "@commons_cli_commons_cli//jar" ],
+    deps = [ "@commons_cli_commons_cli//jar" ],
+)
+
+java_library(
+    name = "guava",
+    srcs = [ "Empty.java" ],
+    exports = [ "@com_google_guava_guava//jar" ],
+    deps = [ "@com_google_guava_guava//jar" ],
 )
 
 java_library(
@@ -82,6 +97,19 @@ java_library(
         "@com_esotericsoftware_minlog//jar",
         "@org_objenesis_objenesis//jar",
     ],
+)
+
+# This version is needed for dependents that don't want
+# kryo to be included in the generated binary
+# (e.g. //heron/storm/src/java:heron-storm)
+java_library(
+    name = "kryo-neverlink",
+    srcs = [ "Empty.java" ],
+    exports = [ "@com_esotericsoftware_kryo//jar" ],
+    deps = [
+        "@com_esotericsoftware_kryo//jar",
+    ],
+    neverlink = 1,
 )
 
 java_library(

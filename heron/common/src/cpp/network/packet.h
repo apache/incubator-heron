@@ -172,6 +172,8 @@ class OutgoingPacket {
   // pack a proto buffer
   sp_int32 PackProtocolBuffer(const google::protobuf::Message& _proto, sp_int32 _byte_size);
 
+  sp_int32 PackProtocolBuffer(const char* _message, sp_int32 _byte_size);
+
   // pack a request id
   sp_int32 PackREQID(const REQID& _rid);
 

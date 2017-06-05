@@ -47,19 +47,22 @@ def get_all_zk_state_managers(conf):
   for location in state_locations:
     name = location['name']
     hostport = location['hostport']
-    host = None
-    port = None
-    if ':' in hostport:
-      hostportlist = hostport.split(':')
-      if len(hostportlist) == 2:
-        host = hostportlist[0]
-        port = int(hostportlist[1])
-    if not host or not port:
-      raise Exception("Hostport for %s must be of the format 'host:port'." % (name))
+    hostportlist = []
+    for hostportpair in hostport.split(','):
+      host = None
+      port = None
+      if ':' in hostport:
+        hostandport = hostportpair.split(':')
+        if len(hostandport) == 2:
+          host = hostandport[0]
+          port = int(hostandport[1])
+      if not host or not port:
+        raise Exception("Hostport for %s must be of the format 'host:port'." % (name))
+      hostportlist.append((host, port))
     tunnelhost = location['tunnelhost']
     rootpath = location['rootpath']
-    LOG.info("Connecting to zk hostport: " + host + ":" + str(port) + " rootpath: " + rootpath)
-    state_manager = ZkStateManager(name, host, port, rootpath, tunnelhost)
+    LOG.info("Connecting to zk hostports: " + str(hostportlist) + " rootpath: " + rootpath)
+    state_manager = ZkStateManager(name, hostportlist, rootpath, tunnelhost)
     try:
       state_manager.start()
     except Exception:

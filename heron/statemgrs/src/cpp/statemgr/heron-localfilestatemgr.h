@@ -46,12 +46,18 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
   void InitTree();
 
   void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
+  void SetMetricsCacheLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
 
   // implement the functions
   void GetTMasterLocation(const std::string& _topology_name,
                           proto::tmaster::TMasterLocation* _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
+                          VCallback<proto::system::StatusCode> _cb);
+  void GetMetricsCacheLocation(const std::string& _topology_name,
+                          proto::tmaster::MetricsCacheLocation* _return,
+                          VCallback<proto::system::StatusCode> _cb);
+  void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
 
   void CreateTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
@@ -78,6 +84,18 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
   void SetExecutionState(const proto::system::ExecutionState& _state,
                          VCallback<proto::system::StatusCode> _cb);
 
+  void CreateStatefulCheckpoints(const std::string& _topology_name,
+                      const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                      VCallback<proto::system::StatusCode> _cb);
+  void DeleteStatefulCheckpoints(const std::string& _topology_name,
+                            VCallback<proto::system::StatusCode> _cb);
+  void GetStatefulCheckpoints(const std::string& _topology_name,
+                      proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                      VCallback<proto::system::StatusCode> _cb);
+  void SetStatefulCheckpoints(const std::string& _topology_name,
+                      const proto::ckptmgr::StatefulConsistentCheckpoints& _state,
+                      VCallback<proto::system::StatusCode> _cb);
+
   void ListTopologies(std::vector<sp_string>* _return, VCallback<proto::system::StatusCode> _cb);
   void ListExecutionStateTopologies(std::vector<sp_string>* _return,
                                     VCallback<proto::system::StatusCode> _cb);
@@ -101,6 +119,8 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
   // helper function to see if the tmaster location has changed
   void CheckTMasterLocation(std::string _topology_name, time_t _last_change, VCallback<> _watcher,
                             EventLoop::Status);
+  void CheckMetricsCacheLocation(std::string _topology_name, time_t _last_change,
+                                 VCallback<> _watcher, EventLoop::Status);
 
   // Hold the EventLoop for scheduling callbacks
   EventLoop* eventLoop_;

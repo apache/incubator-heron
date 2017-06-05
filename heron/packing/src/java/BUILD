@@ -7,11 +7,9 @@ packing_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/spi/src/java:packing-spi-java",
     "@com_google_guava_guava//jar",
+    ":builder",
+    ":utils",
 ]
-
-nullpacking_deps_files = \
-    heron_java_proto_files() + \
-    packing_deps_files
 
 roundrobin_deps_files = \
     heron_java_proto_files() + \
@@ -30,22 +28,26 @@ binpacking_deps_files = \
     ]
 
 java_library(
-    name = 'null-packing',
-    srcs = glob(["**/NullPacking.java"]),
-    deps = nullpacking_deps_files,
+    name='utils',
+    srcs = glob(["**/utils/*.java"]),
+    deps = heron_java_proto_files() + [
+        "//heron/common/src/java:basics-java",
+        "//heron/spi/src/java:common-spi-java",
+        "//heron/spi/src/java:packing-spi-java",
+        "//heron/spi/src/java:utils-spi-java",
+    ],
 )
 
-java_binary(
-    name = 'null-packing-unshaded',
-    srcs = glob(["**/NullPacking.java"]),
-    deps = nullpacking_deps_files,
-)
-
-genrule(
-    name = "heron-null-packing",
-    srcs = [":null-packing-unshaded_deploy.jar"],
-    outs = ["heron-null-packing.jar"],
-    cmd  = "cp $< $@",
+java_library(
+    name='builder',
+    srcs = glob(["**/packing/builder/*.java","**/packing/ResourceExceededException.java"]),
+    deps = heron_java_proto_files() + [
+        "@com_google_guava_guava//jar",
+        "//heron/api/src/java:classification",
+        "//heron/common/src/java:basics-java",
+        "//heron/spi/src/java:packing-spi-java",
+        ":utils",
+    ],
 )
 
 java_library(

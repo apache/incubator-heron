@@ -20,11 +20,11 @@ import tempfile
 import traceback
 
 from heron.common.src.python.utils.log import Log
+from heron.tools.cli.src.python.result import SimpleResult, ProcessResult, Status
 import heron.common.src.python.pex_loader as pex_loader
-
 import heron.tools.cli.src.python.opts as opts
-import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.jars as jars
+import heron.tools.common.src.python.utils.config as config
 
 ################################################################################
 def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=None):
@@ -63,15 +63,15 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   heron_env['HERON_OPTIONS'] = opts.get_heron_config()
 
   # print the verbose message
-  Log.debug('$> %s' % ' '.join(all_args))
-  Log.debug('Heron options: %s' % str(heron_env["HERON_OPTIONS"]))
+  Log.debug("Invoking class using command: ``%s''", ' '.join(all_args))
+  Log.debug("Heron options: {%s}", str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
-  status = subprocess.call(all_args, env=heron_env)
-  if status != 0:
-    err_str = "User main failed with status %d. Bailing out..." % status
-    raise RuntimeError(err_str)
-
+  process = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, bufsize=1)
+  # stdout message has the information Java program sends back
+  # stderr message has extra information, such as debugging message
+  return ProcessResult(process)
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   '''
@@ -104,42 +104,39 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   lib_jars = config.get_heron_libs(jars.topology_jars())
 
   # Now execute the class
-  heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
+  return heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
 
 def heron_pex(topology_pex, topology_class_name, args=None):
-  Log.debug("Importing %s from %s" % (topology_class_name, topology_pex))
+  Log.debug("Importing %s from %s", topology_class_name, topology_pex)
   if topology_class_name == '-':
     # loading topology by running its main method (if __name__ == "__main__")
     heron_env = os.environ.copy()
     heron_env['HERON_OPTIONS'] = opts.get_heron_config()
-
     cmd = [topology_pex]
     if args is not None:
       cmd.extend(args)
-    Log.debug('$> %s' % ' '.join(cmd))
-    Log.debug('Heron options: %s' % str(heron_env['HERON_OPTIONS']))
-
+    Log.debug("Invoking class using command: ``%s''", ' '.join(cmd))
+    Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
     # invoke the command with subprocess and print error message, if any
-    status = subprocess.call(cmd, env=heron_env)
-    if status != 0:
-      err_str = "Topology failed to be loaded from the given pex, with status: %d. Bailing out..." \
-                % status
-      raise RuntimeError(err_str)
+    process = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, bufsize=1)
+    # todo(rli): improve python topology submission workflow
+    return ProcessResult(process)
   else:
     try:
       # loading topology from Topology's subclass (no main method)
-
       # to support specifying the name of topology
-      Log.debug("args: %s" % args)
+      Log.debug("args: %s", args)
       if args is not None and isinstance(args, (list, tuple)) and len(args) > 0:
         opts.set_config('cmdline.topology.name', args[0])
-
       os.environ["HERON_OPTIONS"] = opts.get_heron_config()
-      Log.debug("Heron options: %s" % os.environ["HERON_OPTIONS"])
+      Log.debug("Heron options: {%s}", os.environ["HERON_OPTIONS"])
       pex_loader.load_pex(topology_pex)
       topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
       topology_class.write()
-    except Exception:
+      return SimpleResult(Status.Ok)
+    except Exception as ex:
       Log.debug(traceback.format_exc())
-      err_str = "Topology failed to be loaded from the given pex. Bailing out..."
-      raise RuntimeError(err_str)
+      err_context = "Topology %s failed to be loaded from the given pex: %s" %\
+                (topology_class_name, ex)
+      return SimpleResult(Status.HeronError, err_context)

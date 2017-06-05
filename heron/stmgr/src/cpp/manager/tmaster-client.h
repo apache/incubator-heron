@@ -29,7 +29,7 @@ namespace stmgr {
 class TMasterClient : public Client {
  public:
   TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
-                sp_int32 _stmgr_port, sp_int32 _shell_port,
+                const sp_string& _stmgr_host, sp_int32 _stmgr_port, sp_int32 _shell_port,
                 VCallback<proto::system::PhysicalPlan*> _pplan_watch);
   virtual ~TMasterClient();
 

@@ -18,8 +18,11 @@ load("/tools/rules/heron_core", "heron_core_conf_files")
 load("/tools/rules/heron_core", "heron_core_lib_instance_files")
 load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
 load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
+load("/tools/rules/heron_core", "heron_core_lib_metricscachemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_packing_files")
 load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
+load("/tools/rules/heron_core", "heron_core_lib_ckptmgr_files")
+load("/tools/rules/heron_core", "heron_core_lib_statefulstorage_files")
 
 load("/tools/rules/heron_tools", "heron_tools_files")
 load("/tools/rules/heron_tools", "heron_tools_bin_files")
@@ -34,6 +37,11 @@ generated_release_files = [
 generated_pyheron_egg_file = [
     "pyheron.whl",
 ]
+
+filegroup(
+    name = "release_files",
+    srcs = generated_release_files,
+)
 
 filegroup(
     name = "tarpkgs",
@@ -66,8 +74,11 @@ pkg_tar(
         ":heron-core-lib-scheduler",
         ":heron-core-lib-packing",
         ":heron-core-lib-metricsmgr",
+        ":heron-core-lib-metricscachemgr",
         ":heron-core-lib-statemgr",
         ":heron-core-lib-instance",
+        ":heron-core-lib-ckptmgr",
+        ":heron-core-lib-statefulstorage",
     ],
 )
 
@@ -96,6 +107,12 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-core-lib-metricscachemgr",
+    package_dir = "heron-core/lib/metricscachemgr",
+    files = heron_core_lib_metricscachemgr_files(),
+)
+
+pkg_tar(
     name = "heron-core-lib-statemgr",
     package_dir = "heron-core/lib/statemgr",
     files = heron_core_lib_statemgr_files(),
@@ -105,6 +122,18 @@ pkg_tar(
     name = "heron-core-lib-instance",
     package_dir = "heron-core/lib/instance",
     files = heron_core_lib_instance_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-ckptmgr",
+    package_dir = "heron-core/lib/ckptmgr",
+    files = heron_core_lib_ckptmgr_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-statefulstorage",
+    package_dir = "heron-core/lib/statefulstorage",
+    files = heron_core_lib_statefulstorage_files(),
 )
 
 ################################################################################
@@ -317,7 +346,7 @@ sh_binary(
 genrule(
     name = "generate-package-info",
     outs = generated_release_files,
-    cmd = "$(location :package-info-generator) $$(find . -name '*status*.txt') >$@",
+    cmd = "$(location :package-info-generator) $$(find -L . -name '*status*.txt') >$@",
     stamp = 1,
     tools = [":package-info-generator"],
 )

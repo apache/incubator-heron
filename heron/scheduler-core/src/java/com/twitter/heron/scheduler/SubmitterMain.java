@@ -14,9 +14,13 @@
 
 package com.twitter.heron.scheduler;
 
+import java.io.PrintStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -27,19 +31,26 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.DryRunFormatType;
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
+import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.packing.PackingException;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.LauncherException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
-import com.twitter.heron.spi.utils.LauncherUtils;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -60,58 +71,16 @@ public class SubmitterMain {
   protected static Config topologyConfigs(
       String topologyPackage, String topologyBinaryFile, String topologyDefnFile,
       TopologyAPI.Topology topology) {
+    PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
 
-    String pkgType;
-    String basename = FileUtils.getBaseName(topologyBinaryFile);
-    if (FileUtils.isOriginalPackagePex(basename)) {
-      pkgType = "pex";
-    } else if (FileUtils.isOriginalPackageJar(basename)) {
-      pkgType = "jar";
-    } else {
-      pkgType = "tar";
-    }
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyPackageFile(), topologyPackage)
-        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
-        .put(Keys.topologyPackageType(), pkgType)
+    return Config.newBuilder()
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
+        .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage)
+        .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
         .build();
-    return config;
-  }
-
-  /**
-   * Load the defaults config
-   *
-   * @param heronHome, directory of heron home
-   * @param configPath, directory containing the config
-   * @param releaseFile, release file containing build information
-   * <p>
-   * return config, the defaults config
-   */
-  protected static Config defaultConfigs(String heronHome, String configPath, String releaseFile) {
-    Config config = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile))
-        .build();
-    return config;
-  }
-
-  /**
-   * Load the override config from cli
-   *
-   * @param overrideConfigPath, override config file path
-   * <p>
-   * @return config, the override config
-   */
-  protected static Config overrideConfigs(String overrideConfigPath) {
-    Config config = Config.newBuilder()
-        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath))
-        .build();
-    return config;
   }
 
   /**
@@ -126,15 +95,17 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
+                                             Boolean dryRun,
+                                             DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
-    Config config = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.verbose(), verbose)
+    return Config.newBuilder()
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.DRY_RUN, dryRun)
+        .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
+        .put(Key.VERBOSE, verbose)
         .build();
-
-    return config;
   }
 
   // Print usage options
@@ -225,6 +196,19 @@ public class SubmitterMain {
         .required()
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("run in dry-run mode")
+        .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
+        .hasArg()
+        .required(false)
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -240,6 +224,8 @@ public class SubmitterMain {
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
+    options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -255,6 +241,48 @@ public class SubmitterMain {
 
     options.addOption(help);
     return options;
+  }
+
+  private static boolean isVerbose(CommandLine cmd) {
+    return cmd.hasOption("v");
+  }
+
+  @VisibleForTesting
+  public static Config loadConfig(CommandLine cmd, TopologyAPI.Topology topology) {
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String heronHome = cmd.getOptionValue("heron_home");
+    String configPath = cmd.getOptionValue("config_path");
+    String overrideConfigFile = cmd.getOptionValue("override_config_file");
+    String releaseFile = cmd.getOptionValue("release_file");
+    String topologyPackage = cmd.getOptionValue("topology_package");
+    String topologyDefnFile = cmd.getOptionValue("topology_defn");
+    String topologyBinaryFile = cmd.getOptionValue("topology_bin");
+
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+    }
+
+    // Default dry-run output format type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (dryRun && cmd.hasOption("t")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
+    }
+
+    // first load the defaults, then the config from files to override it
+    // next add config parameters from the command line
+    // load the topology configs
+
+    // build the final config by expanding all the variables
+    return Config.toLocalMode(Config.newBuilder()
+        .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
+        .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
+        .build());
   }
 
   public static void main(String[] args) throws Exception {
@@ -277,56 +305,54 @@ public class SubmitterMain {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    Boolean verbose = false;
     Level logLevel = Level.INFO;
-    if (cmd.hasOption("v")) {
+    if (isVerbose(cmd)) {
       logLevel = Level.ALL;
-      verbose = true;
     }
 
     // init log
     LoggingHelper.loggerInit(logLevel, false);
 
-    String cluster = cmd.getOptionValue("cluster");
-    String role = cmd.getOptionValue("role");
-    String environ = cmd.getOptionValue("environment");
-    String heronHome = cmd.getOptionValue("heron_home");
-    String configPath = cmd.getOptionValue("config_path");
-    String overrideConfigFile = cmd.getOptionValue("override_config_file");
-    String releaseFile = cmd.getOptionValue("release_file");
-    String topologyPackage = cmd.getOptionValue("topology_package");
-    String topologyDefnFile = cmd.getOptionValue("topology_defn");
-    String topologyBinaryFile = cmd.getOptionValue("topology_bin");
-
     // load the topology definition into topology proto
-    TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
+    TopologyAPI.Topology topology = TopologyUtils.getTopology(cmd.getOptionValue("topology_defn"));
+    Config config = loadConfig(cmd, topology);
 
-    // first load the defaults, then the config from files to override it
-    // next add config parameters from the command line
-    // load the topology configs
-
-    // build the final config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
-            .putAll(defaultConfigs(heronHome, configPath, releaseFile))
-            .putAll(overrideConfigs(overrideConfigFile))
-            .putAll(commandLineConfigs(cluster, role, environ, verbose))
-            .putAll(topologyConfigs(
-                topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
-            .build());
-
-    LOG.fine("Static config loaded successfully ");
+    LOG.fine("Static config loaded successfully");
     LOG.fine(config.toString());
 
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
-    boolean isSuccessful = submitterMain.submitTopology();
-
-    // Log the result and exit
-    if (!isSuccessful) {
-      throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
-    } else {
-      LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
+    /* Meaning of exit status code:
+       - status code = 0:
+         program exits without error
+       - 0 < status code < 100:
+         program fails to execute before program execution. For example,
+         JVM cannot find or load main class
+       - 100 <= status code < 200:
+         program fails to launch after program execution. For example,
+         topology definition file fails to be loaded
+       - status code >= 200
+         program sends out dry-run response */
+    try {
+      submitterMain.submitTopology();
+    } catch (SubmitDryRunResponse response) {
+      LOG.log(Level.FINE, "Sending out dry-run response");
+      // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
+      PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
+      out.print(submitterMain.renderDryRunResponse(response));
+      // Exit with status code 200 to indicate dry-run response is sent out
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(200);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      /* Since only stderr is used (by logging), we use stdout here to
+         propagate error message back to Python's executor.py (invoke site). */
+      LOG.log(Level.FINE, "Exception when submitting topology", e);
+      System.out.println(e.getMessage());
+      // Exit with status code 100 to indicate that error has happened on user-land
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(100);
     }
+    LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
   }
 
   // holds all the config read
@@ -335,9 +361,7 @@ public class SubmitterMain {
   // topology definition
   private final TopologyAPI.Topology topology;
 
-  public SubmitterMain(
-      Config config,
-      TopologyAPI.Topology topology) {
+  public SubmitterMain(Config config, TopologyAPI.Topology topology) {
     // initialize the options
     this.config = config;
     this.topology = topology;
@@ -349,9 +373,16 @@ public class SubmitterMain {
    * 2. Valid whether it is legal to submit a topology
    * 3. Call LauncherRunner
    *
-   * @return true if the topology is submitted successfully
    */
-  public boolean submitTopology() {
+  public void submitTopology() throws TopologySubmissionException {
+    // build primary runtime config first
+    Config primaryRuntime = Config.newBuilder()
+          .putAll(LauncherUtils.getInstance().createPrimaryRuntime(topology)).build();
+    // call launcher directly here if in dry-run mode
+    if (Context.dryRun(config)) {
+      callLauncherRunner(primaryRuntime);
+      return;
+    }
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
@@ -365,22 +396,30 @@ public class SubmitterMain {
     String uploaderClass = Context.uploaderClass(config);
     IUploader uploader;
 
+    // create an instance of state manager
     try {
-      // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
-
-      // create an instance of launcher
-      launcher = ReflectionUtils.newInstance(launcherClass);
-
-      // create an instance of uploader
-      uploader = ReflectionUtils.newInstance(uploaderClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
-      return false;
+      throw new TopologySubmissionException(
+          String.format("Failed to instantiate state manager class '%s'", statemgrClass), e);
     }
 
-    boolean isSuccessful = false;
-    URI packageURI = null;
+    // create an instance of launcher
+    try {
+      launcher = ReflectionUtils.newInstance(launcherClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      throw new LauncherException(
+          String.format("Failed to instantiate launcher class '%s'", launcherClass), e);
+    }
+
+    // create an instance of uploader
+    try {
+      uploader = ReflectionUtils.newInstance(uploaderClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      throw new UploaderException(
+          String.format("Failed to instantiate uploader class '%s'", uploaderClass), e);
+    }
+
     // Put it in a try block so that we can always clean resources
     try {
       // initialize the state manager
@@ -389,80 +428,144 @@ public class SubmitterMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateSubmit(adaptor, topology.getName());
+      // Check if topology is already running
+      validateSubmit(adaptor, topology.getName());
 
-      // 2. Try to submit topology if valid
-      if (isValid) {
-        // invoke method to submit the topology
-        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
+      LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
-        // Firstly, try to upload necessary packages
-        packageURI = uploadPackage(uploader);
-        if (packageURI == null) {
-          LOG.severe("Failed to upload package.");
-          return false;
-        } else {
-          // Secondly, try to submit a topology
-          // build the runtime config
-          Config runtime = Config.newBuilder()
-              .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
-              .put(Keys.topologyPackageUri(), packageURI)
-              .put(Keys.launcherClassInstance(), launcher)
-              .build();
+      Config runtimeWithoutPackageURI = Config.newBuilder()
+          .putAll(primaryRuntime)
+          .putAll(LauncherUtils.getInstance().createAdaptorRuntime(adaptor))
+          .put(Key.LAUNCHER_CLASS_INSTANCE, launcher)
+          .build();
 
-          isSuccessful = callLauncherRunner(runtime);
-        }
-      }
+      PackingPlan packingPlan = LauncherUtils.getInstance()
+          .createPackingPlan(config, runtimeWithoutPackageURI);
+
+      // The packing plan might call for a number of containers different than the config
+      // settings. If that's the case we need to modify the configs to match.
+      runtimeWithoutPackageURI =
+          updateNumContainersIfNeeded(runtimeWithoutPackageURI, topology, packingPlan);
+
+      // If the packing plan is valid we will upload necessary packages
+      URI packageURI = uploadPackage(uploader);
+
+      // Update the runtime config with the packageURI
+      Config runtimeAll = Config.newBuilder()
+          .putAll(runtimeWithoutPackageURI)
+          .put(Key.TOPOLOGY_PACKAGE_URI, packageURI)
+          .build();
+
+      callLauncherRunner(runtimeAll);
+
+    } catch (LauncherException | PackingException e) {
+      // we undo uploading of topology package only if launcher fails to
+      // launch topology, which will throw LauncherException or PackingException
+      uploader.undo();
+      throw e;
     } finally {
-      // 3. Do post work basing on the result
-      if (!isSuccessful) {
-        // Undo the upload if failed to submit && the upload is successful
-        if (packageURI != null) {
-          uploader.undo();
-        }
-      }
-
-      // 4. Close the resources
       SysUtils.closeIgnoringExceptions(uploader);
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
-
-    return isSuccessful;
   }
 
-  protected boolean validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName) {
+  /**
+   * Checks that the number of containers specified in the topology matches the number of containers
+   * called for in the packing plan. If they are different, returns a new config with settings
+   * updated to align with the packing plan. The new config will include an updated
+   * Key.TOPOLOGY_DEFINITION containing a cloned Topology with it's settings also updated.
+   *
+   * @param initialConfig initial config to clone and update (if necessary)
+   * @param initialTopology topology to check and clone/update (if necessary)
+   * @param packingPlan packing plan to compare settings with
+   * @return a new Config cloned from initialConfig and modified as needed to align with packedPlan
+   */
+  @VisibleForTesting
+  Config updateNumContainersIfNeeded(Config initialConfig,
+                                     TopologyAPI.Topology initialTopology,
+                                     PackingPlan packingPlan) {
+
+    int configNumStreamManagers = TopologyUtils.getNumContainers(initialTopology);
+    int packingNumStreamManagers = packingPlan.getContainers().size();
+
+    if (configNumStreamManagers == packingNumStreamManagers) {
+      return initialConfig;
+    }
+
+    Config.Builder newConfigBuilder = Config.newBuilder()
+        .putAll(initialConfig)
+        .put(Key.NUM_CONTAINERS, packingNumStreamManagers + 1)
+        .put(Key.TOPOLOGY_DEFINITION,
+            cloneWithNewNumContainers(initialTopology, packingNumStreamManagers));
+
+    String packingClass = Context.packingClass(initialConfig);
+    LOG.warning(String.format("The packing plan (generated by %s) calls for a different number of "
+            + "containers (%d) than what was explicitly set in the topology configs (%d). "
+            + "Overriding the configs to specify %d containers. When using %s do not explicitly "
+            + "call config.setNumStmgrs(..) or config.setNumWorkers(..).",
+        packingClass, packingNumStreamManagers, configNumStreamManagers,
+        packingNumStreamManagers, packingClass));
+
+    return newConfigBuilder.build();
+  }
+
+  private TopologyAPI.Topology cloneWithNewNumContainers(TopologyAPI.Topology initialTopology,
+                                                         int numStreamManagers) {
+    TopologyAPI.Topology.Builder topologyBuilder = TopologyAPI.Topology.newBuilder(initialTopology);
+    TopologyAPI.Config.Builder configBuilder = TopologyAPI.Config.newBuilder();
+
+    for (TopologyAPI.Config.KeyValue keyValue : initialTopology.getTopologyConfig().getKvsList()) {
+
+      // override TOPOLOGY_STMGRS value once we find it
+      if (com.twitter.heron.api.Config.TOPOLOGY_STMGRS.equals(keyValue.getKey())) {
+        TopologyAPI.Config.KeyValue.Builder kvBuilder = TopologyAPI.Config.KeyValue.newBuilder();
+        kvBuilder.setKey(keyValue.getKey());
+        kvBuilder.setValue(Integer.toString(numStreamManagers));
+        configBuilder.addKvs(kvBuilder.build());
+      } else {
+        configBuilder.addKvs(keyValue);
+      }
+    }
+
+    return topologyBuilder.setTopologyConfig(configBuilder).build();
+  }
+
+  protected void validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName)
+      throws TopologySubmissionException {
     // Check whether the topology has already been running
+    // TODO(rli): anti-pattern is too nested on this path to be refactored
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
-      LOG.severe("Topology already exists");
-      return false;
+      throw new TopologySubmissionException(
+          String.format("Topology '%s' already exists", topologyName));
     }
-
-    return true;
   }
 
-  protected URI uploadPackage(IUploader uploader) {
+  protected URI uploadPackage(IUploader uploader) throws UploaderException {
     // initialize the uploader
     uploader.initialize(config);
 
     // upload the topology package to the storage
-    URI uploaderRet = uploader.uploadPackage();
-
-    return uploaderRet;
+    return uploader.uploadPackage();
   }
 
-  protected boolean callLauncherRunner(Config runtime) {
+  protected void callLauncherRunner(Config runtime)
+      throws LauncherException, PackingException, SubmitDryRunResponse {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
-    boolean result = launchRunner.call();
+    launchRunner.call();
+  }
 
-    // if failed, undo the uploaded package
-    if (!result) {
-      LOG.severe("Failed to launch topology. Attempting to roll back upload.");
-      return false;
+  protected String renderDryRunResponse(SubmitDryRunResponse resp) {
+    DryRunFormatType formatType = Context.dryRunFormatType(config);
+    switch (formatType) {
+      case RAW : return new SubmitRawDryRunRenderer(resp).render();
+      case TABLE: return new SubmitTableDryRunRenderer(resp, false).render();
+      case COLORED_TABLE: return new SubmitTableDryRunRenderer(resp, true).render();
+      default: throw new IllegalArgumentException(
+          String.format("Unexpected rendering format: %s", formatType));
     }
-    return true;
   }
 }

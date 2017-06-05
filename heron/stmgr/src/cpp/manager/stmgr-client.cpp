@@ -136,7 +136,7 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
     LOG(ERROR) << "NonOK network code " << _status << " for register response from stmgr "
                << other_stmgr_id_ << " running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
-    delete _response;
+    __global_protobuf_pool_release__(_response);
     Stop();
     return;
   }
@@ -145,9 +145,11 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
     LOG(ERROR) << "NonOK register response " << status << " from stmgr " << other_stmgr_id_
                << " running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
+    __global_protobuf_pool_release__(_response);
     Stop();
+    return;
   }
-  delete _response;
+  __global_protobuf_pool_release__(_response);
   if (client_manager_->DidAnnounceBackPressure()) {
     SendStartBackPressureMessage();
   }
@@ -165,40 +167,19 @@ void StMgrClient::SendHelloRequest() {
   return;
 }
 
-void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage* _msg) {
+void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
   if (IsConnected()) {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg->ByteSize());
-    if (_msg->set().has_data()) {
-      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS)
-          ->incr_by(_msg->set().data().tuples_size());
-    } else if (_msg->set().has_control()) {
-      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS)
-          ->incr_by(_msg->set().control().acks_size());
-      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS)
-          ->incr_by(_msg->set().control().fails_size());
-    }
     SendMessage(_msg);
   } else {
-    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS_LOST)->incr_by(_msg->ByteSize());
-    if (_msg->set().has_data()) {
-      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg->set().data().tuples_size());
-    } else if (_msg->set().has_control()) {
-      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg->set().control().acks_size());
-      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS_LOST)
-          ->incr_by(_msg->set().control().fails_size());
-    }
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << other_stmgr_id_ << " because it is not connected";
     }
-    delete _msg;
   }
 }
 
-void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
-  delete _message;
+void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
+  __global_protobuf_pool_release__(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 
@@ -220,24 +201,30 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  auto message = new proto::stmgr::StartBackPressureMessage();
+  proto::stmgr::StartBackPressureMessage* message = nullptr;
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
-  SendMessage(message);
+  SendMessage(*message);
+
+  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendStopBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  auto message = new proto::stmgr::StopBackPressureMessage();
+  proto::stmgr::StopBackPressureMessage* message = nullptr;
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
-  SendMessage(message);
+  SendMessage(*message);
+
+  __global_protobuf_pool_release__(message);
 }
 
 }  // namespace stmgr

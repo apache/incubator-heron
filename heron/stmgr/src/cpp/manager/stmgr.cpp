@@ -33,6 +33,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 #include "config/heron-internals-config-reader.h"
+#include "config/helper.h"
 #include "statemgr/heron-statemgr.h"
 #include "metrics/metrics.h"
 #include "metrics/metrics-mgr-st.h"
@@ -48,18 +49,21 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
-const sp_int64 PROCESS_METRICS_FREQUENCY = 10 * 1000 * 1000;
-const sp_int64 TMASTER_RETRY_FREQUENCY = 10 * 1000 * 1000;  // in micro seconds
+const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
+const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
-StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-             const sp_string& _topology_id, proto::api::Topology* _hydrated_topology,
-             const sp_string& _stmgr_id, const std::vector<sp_string>& _instances,
-             const sp_string& _zkhostport, const sp_string& _zkroot, sp_int32 _metricsmgr_port,
-             sp_int32 _shell_port)
+StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
+             const sp_string& _topology_name, const sp_string& _topology_id,
+             proto::api::Topology* _hydrated_topology, const sp_string& _stmgr_id,
+             const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
+             const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+             sp_int64 _high_watermark, sp_int64 _low_watermark)
+
     : pplan_(NULL),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
+      stmgr_host_(_myhost),
       stmgr_port_(_myport),
       instances_(_instances),
       server_(NULL),
@@ -73,7 +77,9 @@ StMgr::StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_
       zkhostport_(_zkhostport),
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
-      shell_port_(_shell_port) {}
+      shell_port_(_shell_port),
+      high_watermark_(_high_watermark),
+      low_watermark_(_low_watermark) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -82,19 +88,21 @@ void StMgr::Init() {
 
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
-      IpUtils::getHostName(), stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
+      stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
       metrics_export_interval_sec, eventLoop_);
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
-
+  state_mgr_->SetMetricsCacheLocationWatch(
+                       topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
   FetchTMasterLocation();
+  FetchMetricsCacheLocation();
 
   CHECK_GT(
       eventLoop_->registerTimer(
           [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
           config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
-              1000 * 1000),
+              1_s),
       0);  // fire only once
 
   // Create and start StmgrServer
@@ -106,20 +114,25 @@ void StMgr::Init() {
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingPruneIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Check for log flushing every 10 seconds
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::FlushLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingFlushIntervalSec() *
-                   1000 * 1000),
+                   1_s),
            0);
 
   // Update Process related metrics every 10 seconds
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateProcessMetrics(status);
   }, true, PROCESS_METRICS_FREQUENCY), 0);
+
+  is_acking_enabled =
+    heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
+
+  tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
 }
 
 StMgr::~StMgr() {
@@ -135,13 +148,15 @@ StMgr::~StMgr() {
   CleanupXorManagers();
   delete hydrated_topology_;
   delete metrics_manager_client_;
+
+  delete tuple_set_from_other_stmgr_;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
-    LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. " << std::endl;
+    LOG(FATAL) << "Could not fetch the TMaster location in time. Exiting. ";
   }
 }
 
@@ -155,9 +170,9 @@ void StMgr::UpdateProcessMetrics(EventLoop::Status) {
   struct rusage usage;
   ProcessUtils::getResourceUsage(&usage);
   stmgr_process_metrics_->scope(METRIC_CPU_USER)
-      ->SetValue((usage.ru_utime.tv_sec * 1000 * 1000) + usage.ru_utime.tv_usec);
+      ->SetValue((usage.ru_utime.tv_sec * 1_s) + usage.ru_utime.tv_usec);
   stmgr_process_metrics_->scope(METRIC_CPU_SYSTEM)
-      ->SetValue((usage.ru_stime.tv_sec * 1000 * 1000) + usage.ru_stime.tv_usec);
+      ->SetValue((usage.ru_stime.tv_sec * 1_s) + usage.ru_stime.tv_usec);
   // Memory
   size_t totalmemory = ProcessUtils::getTotalMemoryUsed();
   stmgr_process_metrics_->scope(METRIC_MEM_USED)->SetValue(totalmemory);
@@ -174,6 +189,17 @@ void StMgr::FetchTMasterLocation() {
   state_mgr_->GetTMasterLocation(topology_name_, tmaster, std::move(cb));
 }
 
+void StMgr::FetchMetricsCacheLocation() {
+  LOG(INFO) << "Fetching MetricsCache Location";
+  auto metricscache = new proto::tmaster::MetricsCacheLocation();
+
+  auto cb = [metricscache, this](proto::system::StatusCode status) {
+    this->OnMetricsCacheLocationFetch(metricscache, status);
+  };
+
+  state_mgr_->GetMetricsCacheLocation(topology_name_, metricscache, std::move(cb));
+}
+
 void StMgr::StartStmgrServer() {
   CHECK(!server_);
   LOG(INFO) << "Creating StmgrServer" << std::endl;
@@ -181,7 +207,12 @@ void StMgr::StartStmgrServer() {
   sops.set_host(IpUtils::getHostName());
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
-  sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
+      1_MB);
+  sops.set_high_watermark(high_watermark_);
+  sops.set_low_watermark(low_watermark_);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
                             this, metrics_manager_client_);
 
@@ -192,24 +223,28 @@ void StMgr::StartStmgrServer() {
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
   CHECK(!tmaster_client_);
   LOG(INFO) << "Creating Tmaster Client at " << tmasterLocation->host() << ":"
-            << tmasterLocation->master_port() << std::endl;
+            << tmasterLocation->master_port();
   NetworkOptions master_options;
   master_options.set_host(tmasterLocation->host());
   master_options.set_port(tmasterLocation->master_port());
   master_options.set_socket_family(PF_INET);
-  master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  master_options.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+      1_MB);
+  master_options.set_high_watermark(high_watermark_);
+  master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
 
-  tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_port_,
-                                      shell_port_, std::move(pplan_watch));
+  tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_host_,
+                                      stmgr_port_, shell_port_, std::move(pplan_watch));
 }
 
 void StMgr::CreateTupleCache() {
   CHECK(!tuple_cache_);
-  LOG(INFO) << "Creating tuple cache " << std::endl;
+  LOG(INFO) << "Creating tuple cache ";
   sp_uint32 drain_threshold_bytes_ =
-      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1024 *
-      1024;
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1_MB;
   tuple_cache_ = new TupleCache(eventLoop_, drain_threshold_bytes_);
 
   tuple_cache_->RegisterDrainer(&StMgr::DrainInstanceData, this);
@@ -218,7 +253,7 @@ void StMgr::CreateTupleCache() {
 void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation) {
   // Lets delete the existing tmaster if we have one.
   if (tmaster_client_) {
-    LOG(INFO) << "Destroying existing tmasterClient" << std::endl;
+    LOG(INFO) << "Destroying existing tmasterClient";
     tmaster_client_->Die();
     tmaster_client_ = NULL;
   }
@@ -237,7 +272,7 @@ void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation
   // in the constructor rather than here.
   if (!clientmgr_) {
     clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
-                                    metrics_manager_client_);
+                                    metrics_manager_client_, high_watermark_, low_watermark_);
   }
 }
 
@@ -245,6 +280,13 @@ void StMgr::BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLoc
   // Notify metrics manager of the tmaster location changes
   // TODO(vikasr): What if the refresh fails?
   metrics_manager_client_->RefreshTMasterLocation(*tmasterLocation);
+}
+
+void StMgr::BroadcastMetricsCacheLocation(proto::tmaster::MetricsCacheLocation* tmasterLocation) {
+  // Notify metrics manager of the metricscache location changes
+  // TODO(huijun): What if the refresh fails?
+  LOG(INFO) << "BroadcastMetricsCacheLocation";
+  metrics_manager_client_->RefreshMetricsCacheLocation(*tmasterLocation);
 }
 
 void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLocation,
@@ -263,7 +305,7 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
       LOG(FATAL) << "Topology name/id mismatch between stmgr and TMaster "
                  << "We expected " << topology_name_ << " : " << topology_id_ << " but tmaster had "
                  << newTmasterLocation->topology_name() << " : "
-                 << newTmasterLocation->topology_id() << std::endl;
+                 << newTmasterLocation->topology_id();
     }
 
     LOG(INFO) << "Fetched TMasterLocation to be " << newTmasterLocation->host() << ":"
@@ -278,12 +320,12 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
 
       if (currentTmasterHostPort == newTmasterHostPort) {
         LOG(INFO) << "New tmaster location same as the current one. "
-                  << "Nothing to do here... " << std::endl;
+                  << "Nothing to do here... ";
         isNewTmaster = false;
       } else {
         LOG(INFO) << "New tmaster location different from the current one."
                   << " Current one at " << currentTmasterHostPort << " and New one at "
-                  << newTmasterHostPort << std::endl;
+                  << newTmasterHostPort;
         isNewTmaster = true;
       }
     }
@@ -301,20 +343,51 @@ void StMgr::OnTMasterLocationFetch(proto::tmaster::TMasterLocation* newTmasterLo
   delete newTmasterLocation;
 }
 
+void StMgr::OnMetricsCacheLocationFetch(proto::tmaster::MetricsCacheLocation* newTmasterLocation,
+                                   proto::system::StatusCode _status) {
+  if (_status != proto::system::OK) {
+    LOG(INFO) << "MetricsCache Location Fetch failed with status " << _status;
+    LOG(INFO) << "Retrying after " << TMASTER_RETRY_FREQUENCY << " micro seconds ";
+    CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status) {
+      this->FetchMetricsCacheLocation();
+    }, false, TMASTER_RETRY_FREQUENCY), 0);
+  } else {
+    // We got a new metricscache location.
+    // Just verify that we are talking to the right entity
+    if (newTmasterLocation->topology_name() != topology_name_ ||
+        newTmasterLocation->topology_id() != topology_id_) {
+      LOG(FATAL) << "Topology name/id mismatch between stmgr and MetricsCache "
+                 << "We expected " << topology_name_ << " : " << topology_id_
+                 << " but MetricsCache had "
+                 << newTmasterLocation->topology_name() << " : "
+                 << newTmasterLocation->topology_id() << std::endl;
+    }
+
+    LOG(INFO) << "Fetched MetricsCacheLocation to be " << newTmasterLocation->host() << ":"
+              << newTmasterLocation->master_port();
+
+    // Stmgr doesn't know what other things might have changed, so it is important
+    // to broadcast the location, even though we know its the same metricscache.
+    BroadcastMetricsCacheLocation(newTmasterLocation);
+  }
+
+  // Delete the tmasterLocation Proto
+  delete newTmasterLocation;
+}
+
 // Start the tmaster client
 void StMgr::StartTMasterClient() {
   if (!tmaster_client_) {
     LOG(INFO) << "We haven't received tmaster location yet"
               << ", so tmaster_client_ hasn't been created"
-              << "Once we get the location, it will be started" << std::endl;
+              << "Once we get the location, it will be started";
     // Nothing else to do here
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
     server_->GetInstanceInfo(all_instance_info);
     tmaster_client_->SetInstanceInfo(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
-      LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us"
-                << std::endl;
+      LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();
     }
   }
@@ -332,7 +405,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   }
 
   if (!found) {
-    LOG(FATAL) << "We have no role in this topology!!" << std::endl;
+    LOG(FATAL) << "We have no role in this topology!!";
   }
 
   // The Topology structure here is not hydrated.
@@ -394,7 +467,7 @@ sp_int32 StMgr::ExtractTopologyTimeout(const proto::api::Topology& _topology) {
       return atoi(_topology.topology_config().kvs(i).value().c_str());
     }
   }
-  LOG(FATAL) << "topology.message.timeout.secs does not exist" << std::endl;
+  LOG(FATAL) << "topology.message.timeout.secs does not exist";
   return 0;
 }
 
@@ -427,9 +500,9 @@ void StMgr::PopulateStreamConsumers(
       std::pair<sp_string, sp_string> p = make_pair(is.stream().component_name(), is.stream().id());
       proto::api::StreamSchema* schema = schema_map[p];
       const sp_string& component_name = _topology->bolts(i).comp().name();
-      CHECK(_component_to_task_ids.find(component_name) != _component_to_task_ids.end());
-      const std::vector<sp_int32>& component_task_ids =
-          _component_to_task_ids.find(component_name)->second;
+      auto iter = _component_to_task_ids.find(component_name);
+      CHECK(iter != _component_to_task_ids.end());
+      const std::vector<sp_int32>& component_task_ids = iter->second;
       if (stream_consumers_.find(p) == stream_consumers_.end()) {
         stream_consumers_[p] = new StreamConsumers(is, *schema, component_task_ids);
       } else {
@@ -459,17 +532,25 @@ void StMgr::PopulateXorManagers(
 
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
-void StMgr::HandleStreamManagerData(const sp_string&, proto::stmgr::TupleStreamMessage* _message) {
+void StMgr::HandleStreamManagerData(const sp_string&,
+                                    const proto::stmgr::TupleStreamMessage2& _message) {
   // We received message from another stream manager
-  sp_int32 task_id = _message->task_id();
-  SendInBound(task_id, _message->mutable_set());
+  sp_int32 _task_id = _message.task_id();
+
+  // We have a shortcut for non-acking case
+  if (!is_acking_enabled) {
+    server_->SendToInstance2(_task_id, _message.set().size(),
+                             heron_tuple_set_2_, _message.set().c_str());
+  } else {
+    tuple_set_from_other_stmgr_->ParsePartialFromString(_message.set());
+
+    SendInBound(_task_id, tuple_set_from_other_stmgr_);
+  }
 }
 
-void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet* _message) {
+void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   if (_message->has_data()) {
-    proto::stmgr::TupleMessage out;
-    out.mutable_set()->set_allocated_data(_message->release_data());  // avoids copying
-    server_->SendToInstance(_task_id, out);
+    server_->SendToInstance2(_task_id, *_message);
   }
   if (_message->has_control()) {
     // We got a bunch of acks/fails
@@ -479,8 +560,7 @@ void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet* _messag
 
 void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
-  // prepare in case we want to send it out
-  proto::stmgr::TupleMessage out;
+  current_control_tuple_set_.Clear();
 
   // First go over emits. This makes sure that new emits makes
   // a tuples stay alive before we process its acks
@@ -499,7 +579,8 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       CHECK_EQ(_task_id, ack_tuple.roots(j).taskid());
       if (xor_mgrs_->anchor(_task_id, ack_tuple.roots(j).key(), ack_tuple.ackedtuple())) {
         // This tuple tree is all over
-        proto::system::AckTuple* a = out.mutable_set()->mutable_control()->add_acks();
+        proto::system::AckTuple* a;
+        a = current_control_tuple_set_.mutable_control()->add_acks();
         proto::system::RootId* r = a->add_roots();
         r->set_key(ack_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -516,7 +597,8 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       CHECK_EQ(_task_id, fail_tuple.roots(j).taskid());
       if (xor_mgrs_->remove(_task_id, fail_tuple.roots(j).key())) {
         // This tuple tree is failed
-        proto::system::AckTuple* f = out.mutable_set()->mutable_control()->add_fails();
+        proto::system::AckTuple* f;
+        f = current_control_tuple_set_.mutable_control()->add_fails();
         proto::system::RootId* r = f->add_roots();
         r->set_key(fail_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -526,47 +608,49 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
   }
 
   // Check if we need to send this out
-  if (out.has_set()) {
-    server_->SendToInstance(_task_id, out);
+  if (current_control_tuple_set_.has_control()) {
+    server_->SendToInstance2(_task_id, current_control_tuple_set_);
   }
 }
 
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
-                               proto::stmgr::TupleMessage* _message) {
+                               proto::system::HeronTupleSet* _message) {
   // Note:- Process data before control
   // This is to make sure that anchored emits are sent out
   // before any acks/fails
 
-  if (_message->set().has_data()) {
-    proto::system::HeronDataTupleSet* d = _message->mutable_set()->mutable_data();
+  if (_message->has_data()) {
+    proto::system::HeronDataTupleSet* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =
         make_pair(d->stream().component_name(), d->stream().id());
-    if (stream_consumers_.find(stream) != stream_consumers_.end()) {
-      StreamConsumers* s_consumer = stream_consumers_.find(stream)->second;
+    auto s = stream_consumers_.find(stream);
+    if (s != stream_consumers_.end()) {
+      StreamConsumers* s_consumer = s->second;
       for (sp_int32 i = 0; i < d->tuples_size(); ++i) {
+        proto::system::HeronDataTuple* _tuple = d->mutable_tuples(i);
         // just to make sure that instances do not set any key
-        CHECK_EQ(d->tuples(i).key(), 0);
-        std::list<sp_int32> out_tasks;
-        s_consumer->GetListToSend(d->tuples(i), out_tasks);
-        // In addition to out_tasks, the instance might have asked
+        CHECK_EQ(_tuple->key(), 0);
+        out_tasks_.clear();
+        s_consumer->GetListToSend(*_tuple, out_tasks_);
+        // In addition to out_tasks_, the instance might have asked
         // us to send the tuple to some more tasks
-        for (sp_int32 j = 0; j < d->tuples(i).dest_task_ids_size(); ++j) {
-          out_tasks.push_back(d->tuples(i).dest_task_ids(j));
+        for (sp_int32 j = 0; j < _tuple->dest_task_ids_size(); ++j) {
+          out_tasks_.push_back(_tuple->dest_task_ids(j));
         }
-        if (out_tasks.empty()) {
+        if (out_tasks_.empty()) {
           LOG(ERROR) << "Nobody to send the tuple to";
         }
         // TODO(vikasr) Do a fast path that does not involve copying
-        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), d->tuples(i), out_tasks);
+        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), _tuple, out_tasks_);
       }
     } else {
       LOG(ERROR) << "Nobody consumes stream " << stream.second << " from component "
                  << stream.first;
     }
   }
-  if (_message->set().has_control()) {
-    proto::system::HeronControlTupleSet* c = _message->mutable_set()->mutable_control();
+  if (_message->has_control()) {
+    proto::system::HeronControlTupleSet* c = _message->mutable_control();
     CHECK_EQ(c->emits_size(), 0);
     for (sp_int32 i = 0; i < c->acks_size(); ++i) {
       CopyControlOutBound(c->acks(i), false);
@@ -578,19 +662,16 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
 }
 
 // Called to drain cached instance data
-void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet* _tuple) {
+void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple) {
   const sp_string& dest_stmgr_id = task_id_to_stmgr_[_task_id];
   if (dest_stmgr_id == stmgr_id_) {
     // Our own loopback
     SendInBound(_task_id, _tuple);
-    delete _tuple;
   } else {
-    auto out = new proto::stmgr::TupleStreamMessage();
-    out->set_task_id(_task_id);
-    out->set_allocated_set(_tuple);
-    clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
-    // Note :- We dont delete _tuple
+    clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
   }
+
+  __global_protobuf_pool_release__(_tuple);
 }
 
 void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail) {
@@ -608,28 +689,28 @@ void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _i
 
 void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                              const proto::api::StreamId& _streamid,
-                             const proto::system::HeronDataTuple& _tuple,
-                             const std::list<sp_int32>& _out_tasks) {
+                             proto::system::HeronDataTuple* _tuple,
+                             const std::vector<sp_int32>& _out_tasks) {
   bool first_iteration = true;
-  for (auto iter = _out_tasks.begin(); iter != _out_tasks.end(); ++iter) {
-    sp_int64 tuple_key = tuple_cache_->add_data_tuple(*iter, _streamid, _tuple);
-    if (_tuple.roots_size() > 0) {
+  for (auto& i : _out_tasks) {
+    sp_int64 tuple_key = tuple_cache_->add_data_tuple(i, _streamid, _tuple);
+    if (_tuple->roots_size() > 0) {
       // Anchored tuple
       if (_local_spout) {
         // This is a local spout. We need to maintain xors
-        CHECK_EQ(_tuple.roots_size(), 1);
+        CHECK_EQ(_tuple->roots_size(), 1);
         if (first_iteration) {
-          xor_mgrs_->create(_src_task_id, _tuple.roots(0).key(), tuple_key);
+          xor_mgrs_->create(_src_task_id, _tuple->roots(0).key(), tuple_key);
         } else {
-          CHECK(!xor_mgrs_->anchor(_src_task_id, _tuple.roots(0).key(), tuple_key));
+          CHECK(!xor_mgrs_->anchor(_src_task_id, _tuple->roots(0).key(), tuple_key));
         }
       } else {
         // Anchored emits from local bolt
-        for (sp_int32 i = 0; i < _tuple.roots_size(); ++i) {
+        for (sp_int32 i = 0; i < _tuple->roots_size(); ++i) {
           proto::system::AckTuple t;
-          t.add_roots()->CopyFrom(_tuple.roots(i));
+          t.add_roots()->CopyFrom(_tuple->roots(i));
           t.set_ackedtuple(tuple_key);
-          tuple_cache_->add_emit_tuple(_tuple.roots(i).taskid(), t);
+          tuple_cache_->add_emit_tuple(_tuple->roots(i).taskid(), t);
         }
       }
     }

@@ -25,7 +25,9 @@ def heron_core_lib_files():
         heron_core_lib_packing_files() + \
         heron_core_lib_metricsmgr_files() + \
         heron_core_lib_statemgr_files() + \
-        heron_core_lib_instance_files()
+        heron_core_lib_instance_files() + \
+        heron_core_lib_ckptmgr_files() + \
+        heron_core_lib_statefulstorage_files()
 
 def heron_core_lib_scheduler_files():
     return [
@@ -47,6 +49,11 @@ def heron_core_lib_metricsmgr_files():
         "//heron/metricsmgr/src/java:heron-metricsmgr",
     ]
 
+def heron_core_lib_metricscachemgr_files():
+    return [
+        "//heron/metricscachemgr/src/java:heron-metricscachemgr",
+    ]
+
 def heron_core_lib_statemgr_files():
     return [
         "//heron/statemgrs/src/java:heron-localfs-statemgr",
@@ -56,4 +63,15 @@ def heron_core_lib_statemgr_files():
 def heron_core_lib_instance_files():
     return [
         "//heron/instance/src/java:heron-instance",
+    ]
+
+def heron_core_lib_ckptmgr_files():
+    return [
+        "//heron/ckptmgr/src/java:heron-ckptmgr",
+    ]
+
+def heron_core_lib_statefulstorage_files():
+    return [
+        "//heron/statefulstorages/src/java:heron-localfs-statefulstorage",
+        "//heron/statefulstorages/src/java:heron-hdfs-statefulstorage",
     ]

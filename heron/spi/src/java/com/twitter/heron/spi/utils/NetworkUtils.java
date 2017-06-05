@@ -20,10 +20,14 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,21 +35,111 @@ import com.sun.net.httpserver.HttpExchange;
 
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.spi.common.Config;
 
 /**
  * Utilities related to network.
  */
 public final class NetworkUtils {
-  public static final String CONTENT_LENGTH = "Content-Length";
-  public static final String CONTENT_TYPE = "Content-Type";
-  public static final String LOCAL_HOST = "localhost";
+  private static final String CONTENT_LENGTH = "Content-Length";
+  private static final String CONTENT_TYPE = "Content-Type";
+  static final String LOCAL_HOST = "localhost";
 
   public static final String JSON_TYPE = "application/json";
   public static final String URL_ENCODE_TYPE = "application/x-www-form-urlencoded";
 
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
+  public enum TunnelType {
+    PORT_FORWARD,
+    SOCKS_PROXY,
+  }
+
+  public enum HeronSystem {
+    STATE_MANAGER("statemgr"),
+    SCHEDULER("scheduler");
+
+    private String shortName;
+
+    HeronSystem(String shortName) {
+      this.shortName = shortName;
+    }
+
+    public String getShortName() {
+      return shortName;
+    }
+  }
+
   private NetworkUtils() {
+  }
+
+  public static class TunnelConfig {
+    private static final String IS_TUNNEL_NEEDED = "heron.%s.is.tunnel.needed";
+    private static final String TUNNEL_CONNECTION_TIMEOUT_MS =
+        "heron.%s.tunnel.connection.timeout.ms";
+    private static final String TUNNEL_CONNECTION_RETRY_COUNT =
+        "heron.%s.tunnel.connection.retryCount.count";
+    private static final String TUNNEL_VERIFY_COUNT = "heron.%s.tunnel.verify.count";
+    private static final String TUNNEL_RETRY_INTERVAL_MS = "heron.%s.tunnel.retryCount.interval.ms";
+    private static final String TUNNEL_HOST = "heron.%s.tunnel.host";
+
+    private final boolean isTunnelNeeded;
+    private final String tunnelHost;
+    private final Duration timeout;
+    private final int retryCount;
+    private final Duration retryInterval;
+    private final int verifyCount;
+
+    TunnelConfig(boolean isTunnelNeeded, String tunnelHost, Duration timeout, int retryCount,
+                 Duration retryInterval, int verifyCount) {
+      this.isTunnelNeeded = isTunnelNeeded;
+      this.tunnelHost = tunnelHost;
+      this.timeout = timeout;
+      this.retryCount = retryCount;
+      this.retryInterval = retryInterval;
+      this.verifyCount = verifyCount;
+    }
+
+    public boolean isTunnelNeeded() {
+      return isTunnelNeeded;
+    }
+
+    public String getTunnelHost() {
+      return tunnelHost;
+    }
+
+    private Duration getTimeout() {
+      return timeout;
+    }
+
+    public int getRetryCount() {
+      return retryCount;
+    }
+
+    private Duration getRetryInterval() {
+      return retryInterval;
+    }
+
+    private int getVerifyCount() {
+      return verifyCount;
+    }
+
+    public static TunnelConfig build(Config config, HeronSystem heronSystem) {
+      return new TunnelConfig(
+          config.getBooleanValue(getConfigKey(IS_TUNNEL_NEEDED, heronSystem), false),
+          config.getStringValue(getConfigKey(TUNNEL_HOST, heronSystem), "no.tunnel.host.specified"),
+          config.getDurationValue(getConfigKey(TUNNEL_CONNECTION_TIMEOUT_MS, heronSystem),
+              ChronoUnit.MILLIS, Duration.ofSeconds(1)),
+          config.getIntegerValue(getConfigKey(TUNNEL_CONNECTION_RETRY_COUNT, heronSystem), 2),
+          config.getDurationValue(getConfigKey(TUNNEL_RETRY_INTERVAL_MS, heronSystem),
+              ChronoUnit.MILLIS, Duration.ofSeconds(1)),
+          config.getIntegerValue(getConfigKey(TUNNEL_VERIFY_COUNT, heronSystem), 10)
+      );
+    }
+
+    private static String getConfigKey(String keyTemplate, HeronSystem heronSystem) {
+      return String.format(keyTemplate, heronSystem.getShortName());
+    }
   }
 
   /**
@@ -251,13 +345,45 @@ public final class NetworkUtils {
   }
 
   public static HttpURLConnection getHttpConnection(String endpoint) {
+    try {
+      return getHttpConnection(new URL(endpoint), null);
+    } catch (MalformedURLException e) {
+      LOG.log(Level.SEVERE, "Invalid URL received: " + endpoint, e);
+      return null;
+    }
+  }
+
+  public static HttpURLConnection getProxiedHttpConnectionIfNeeded(URL endpoint,
+                                                                   TunnelConfig tunnelConfig) {
+    int endpointPort = endpoint.getPort() > 0 ? endpoint.getPort() : endpoint.getDefaultPort();
+
+    if (tunnelConfig != null && tunnelConfig.isTunnelNeeded()) {
+      InetSocketAddress socketEndpoint = new InetSocketAddress(endpoint.getHost(), endpointPort);
+
+      Pair<InetSocketAddress, Process> tunnelInfo =
+          establishSSHTunnelIfNeeded(socketEndpoint, tunnelConfig, TunnelType.SOCKS_PROXY);
+      InetSocketAddress proxyEndpoint = tunnelInfo.first;
+
+      if (socketEndpoint != proxyEndpoint) {
+        Proxy proxy = new Proxy(Proxy.Type.SOCKS,
+            new InetSocketAddress(proxyEndpoint.getHostName(), proxyEndpoint.getPort()));
+        LOG.fine(String.format("setting up proxy. endpoint=%s proxy=%s", socketEndpoint, proxy));
+        return getHttpConnection(endpoint, proxy);
+      }
+    }
+    return getHttpConnection(endpoint, null);
+  }
+
+  private static HttpURLConnection getHttpConnection(URL endpoint, Proxy proxy) {
     // construct the http url connection
     try {
-      URL url = new URL(endpoint);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      return connection;
+      if (proxy != null) {
+        return (HttpURLConnection) endpoint.openConnection(proxy);
+      } else {
+        return (HttpURLConnection) endpoint.openConnection();
+      }
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
+      LOG.log(Level.SEVERE, "Failed to connect to http endpoint " + endpoint, e);
       return null;
     }
   }
@@ -288,24 +414,24 @@ public final class NetworkUtils {
    * not reachable.
    *
    * @param endpoint the endpoint to connect to
-   * @param timeout Open connection will wait for this timeout in ms.
-   * @param retryCount In case of connection timeout try retry times.
-   * @param retryIntervalMs the interval in ms to retry
+   * @param timeout Open connection will wait for this timeout.
+   * @param retryCount In case of connection timeout try retryCount times.
+   * @param retryInterval the interval to retryCount
    * @return true if the network location is reachable
    */
   public static boolean isLocationReachable(
       InetSocketAddress endpoint,
-      int timeout,
+      Duration timeout,
       int retryCount,
-      int retryIntervalMs) {
+      Duration retryInterval) {
     int retryLeft = retryCount;
     while (retryLeft > 0) {
       try (Socket s = new Socket()) {
-        s.connect(endpoint, timeout);
+        s.connect(endpoint, (int) timeout.toMillis());
         return true;
       } catch (IOException e) {
       } finally {
-        SysUtils.sleep(retryIntervalMs);
+        SysUtils.sleep(retryInterval);
         retryLeft--;
       }
     }
@@ -313,32 +439,39 @@ public final class NetworkUtils {
     return false;
   }
 
+  public static Pair<InetSocketAddress, Process> establishSSHTunnelIfNeeded(
+      InetSocketAddress endpoint, TunnelConfig tunnelConfig, TunnelType tunnelType) {
+    return establishSSHTunnelIfNeeded(endpoint, tunnelConfig.getTunnelHost(), tunnelType,
+        tunnelConfig.getTimeout(), tunnelConfig.getRetryCount(),
+        tunnelConfig.getRetryInterval(), tunnelConfig.getVerifyCount());
+  }
+
   /**
    * Tests if a network location is reachable. This is best effort and may give false
    * not reachable.
    *
    * @param endpoint the endpoint to connect to
-   * @param timeout Open connection will wait for this timeout in ms.
-   * @param retryCount In case of connection timeout try retry times.
-   * @param retryIntervalMs the interval in ms to retry
    * @param tunnelHost the host used to tunnel
+   * @param tunnelType what type of tunnel should be established
+   * @param timeout Open connection will wait for this timeout in ms.
+   * @param retryCount In case of connection timeout try retryCount times.
+   * @param retryInterval the interval in ms to retryCount
    * @param verifyCount In case of longer tunnel setup, try verify times to wait
-   * @param isVerbose prints verbose info or not
    * @return a &lt;new_reachable_endpoint, tunnelProcess&gt; pair.
    * If the endpoint already reachable, then new_reachable_endpoint equals to original endpoint, and
    * tunnelProcess is null.
    * If no way to reach even through ssh tunneling,
    * then both new_reachable_endpoint and tunnelProcess are null.
    */
-  public static Pair<InetSocketAddress, Process> establishSSHTunnelIfNeeded(
+  private static Pair<InetSocketAddress, Process> establishSSHTunnelIfNeeded(
       InetSocketAddress endpoint,
       String tunnelHost,
-      int timeout,
+      TunnelType tunnelType,
+      Duration timeout,
       int retryCount,
-      int retryIntervalMs,
-      int verifyCount,
-      boolean isVerbose) {
-    if (NetworkUtils.isLocationReachable(endpoint, timeout, retryCount, retryIntervalMs)) {
+      Duration retryInterval,
+      int verifyCount) {
+    if (NetworkUtils.isLocationReachable(endpoint, timeout, retryCount, retryInterval)) {
 
       // Already reachable, return original endpoint directly
       return new Pair<InetSocketAddress, Process>(endpoint, null);
@@ -351,13 +484,30 @@ public final class NetworkUtils {
           new Object[]{endpoint.toString(), newEndpoint.toString()});
 
       // Set up the tunnel process
-      Process tunnelProcess = ShellUtils.establishSSHTunnelProcess(
-          tunnelHost, localFreePort, endpoint.getHostString(), endpoint.getPort(), isVerbose);
+      final Process tunnelProcess;
+      switch (tunnelType) {
+        case PORT_FORWARD:
+          tunnelProcess = ShellUtils.establishSSHTunnelProcess(
+              tunnelHost, localFreePort, endpoint.getHostString(), endpoint.getPort());
+          break;
+        case SOCKS_PROXY:
+          tunnelProcess = ShellUtils.establishSocksProxyProcess(tunnelHost, localFreePort);
+          break;
+        default:
+          throw new IllegalArgumentException("Unrecognized TunnelType passed: " + tunnelType);
+      }
 
       // Tunnel can take time to setup.
       // Verify whether the tunnel process is working fine.
-      if (tunnelProcess != null && tunnelProcess.isAlive()
-          && NetworkUtils.isLocationReachable(newEndpoint, timeout, verifyCount, retryIntervalMs)) {
+      if (tunnelProcess != null && tunnelProcess.isAlive() && NetworkUtils.isLocationReachable(
+          newEndpoint, timeout, verifyCount, retryInterval)) {
+
+        java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
+          @Override
+          public void run() {
+            tunnelProcess.destroy();
+          }
+        });
 
         // Can reach the destination via ssh tunnel
         return new Pair<InetSocketAddress, Process>(newEndpoint, tunnelProcess);

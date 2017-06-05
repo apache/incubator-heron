@@ -36,13 +36,14 @@ MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname, sp_int32 _port,
       component_id_(_component_id),
       task_id_(_task_id),
       tmaster_location_(NULL),
+      metricscache_location_(NULL),
       registered_(false) {
   InstallResponseHandler(new proto::system::MetricPublisherRegisterRequest(),
                          &MetricsMgrClient::HandleRegisterResponse);
   Start();
 }
 
-MetricsMgrClient::~MetricsMgrClient() { delete tmaster_location_; }
+MetricsMgrClient::~MetricsMgrClient() { delete tmaster_location_; delete metricscache_location_; }
 
 void MetricsMgrClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
@@ -94,6 +95,13 @@ void MetricsMgrClient::HandleRegisterResponse(
   } else {
     LOG(INFO) << "Do not have a TMasterLocation yet";
   }
+  // Check if we need to send metricscache location
+  if (metricscache_location_) {
+    LOG(INFO) << "Sending MetricsCache Location to metricsmgr";
+    InternalSendMetricsCacheLocation();
+  } else {
+    LOG(INFO) << "Do not have a MetricsCacheLocation yet";
+  }
 }
 
 void MetricsMgrClient::SendTMasterLocation(const proto::tmaster::TMasterLocation& location) {
@@ -110,8 +118,25 @@ void MetricsMgrClient::SendTMasterLocation(const proto::tmaster::TMasterLocation
   }
 }
 
+void MetricsMgrClient::SendMetricsCacheLocation(
+    const proto::tmaster::MetricsCacheLocation& location) {
+  if (metricscache_location_) {
+    delete metricscache_location_;
+  }
+  metricscache_location_ = new proto::tmaster::MetricsCacheLocation(location);
+  if (registered_) {
+    LOG(INFO) << "Sending MetricsCache Location to metricsmgr";
+    InternalSendMetricsCacheLocation();
+  } else {
+    LOG(INFO) << "We have not yet registered to metricsmgr."
+              << " Holding off sending MetricsCacheLocation";
+  }
+}
+
 void MetricsMgrClient::SendMetrics(proto::system::MetricPublisherPublishMessage* _message) {
-  SendMessage(_message);
+  SendMessage(*_message);
+
+  delete _message;
 }
 
 void MetricsMgrClient::InternalSendTMasterLocation() {
@@ -119,7 +144,20 @@ void MetricsMgrClient::InternalSendTMasterLocation() {
   proto::system::TMasterLocationRefreshMessage* m =
       new proto::system::TMasterLocationRefreshMessage();
   m->mutable_tmaster()->CopyFrom(*tmaster_location_);
-  SendMessage(m);
+  SendMessage(*m);
+
+  delete m;
 }
+
+void MetricsMgrClient::InternalSendMetricsCacheLocation() {
+  CHECK(metricscache_location_);
+  proto::system::MetricsCacheLocationRefreshMessage* m =
+      new proto::system::MetricsCacheLocationRefreshMessage();
+  m->mutable_metricscache()->CopyFrom(*metricscache_location_);
+  SendMessage(*m);
+
+  delete m;
+}
+
 }  // namespace common
 }  // namespace heron

@@ -31,10 +31,10 @@ containers are allocated for each topology.
 ### Configuring the Heron client classpath
 
 **Under 0.14.2 version (including 0.14.2)**
+
   1. Command `hadoop classpath` provides a list of jars needed to submit a hadoop job. Copy all jars to `HERON_INSTALL_DIR/lib/scheduler`.
-   * Do not copy commons-cli jar if it is older than version 1.3.1.
-  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
- -`HERON_INSTALL_DIR/lib/scheduler` too.
+     * Do not copy commons-cli jar if it is older than version 1.3.1.
+  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to `HERON_INSTALL_DIR/lib/scheduler` too.
 
 **After 0.14.3 version released**
 
@@ -84,11 +84,13 @@ deployment on a multi-node YARN cluster.
 
 >**Tips**
 >
->More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
+>1. More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
+>2. if you want to submit a topology to a specific YARN queue, you can set the `heron.scheduler.yarn.queue` argument in `--config-property`. For instance, `--config-property heron.scheduler.yarn.queue=test`. This configuration could be found in the [conf/yarn/scheduler]
+(https://github.com/twitter/heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml) file too. `default` would be the YARN default queue as YARN provided.
 
 **Sample Output**
 
-```
+```bash
 INFO: Launching topology 'AckingTopology'
 ...
 ...
@@ -109,7 +111,7 @@ com.twitter.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTo
 
 Visit the YARN http console or execute command `yarn application -list` on a yarn client host.
 
-```
+```bash
 Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
                 Application-Id	    Application-Name	    Application-Type	      User	     Queue	             State	       Final-State	       Progress	                       Tracking-URL
 application_1466548964728_0004	      AckingTopology	                YARN	     heron	   default	           RUNNING	         UNDEFINED	             0%	                                N/A

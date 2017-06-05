@@ -19,12 +19,13 @@
 package org.apache.storm.spout;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.apache.storm.tuple.Fields;
 
 public interface MultiScheme extends Serializable {
-  Iterable<List<Object>> deserialize(byte[] ser);
+  Iterable<List<Object>> deserialize(ByteBuffer ser);
 
   Fields getOutputFields();
 }

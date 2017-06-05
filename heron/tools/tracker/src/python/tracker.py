@@ -201,6 +201,44 @@ class Tracker(object):
     executionState["viz"] = viz_url
     return executionState
 
+  def extract_metadata(self, topology):
+    """
+    Returns metadata that will
+    be returned from Tracker.
+    """
+    execution_state = topology.execution_state
+    metadata = {
+        "cluster": execution_state.cluster,
+        "environ": execution_state.environ,
+        "role": execution_state.role,
+        "jobname": topology.name,
+        "submission_time": execution_state.submission_time,
+        "submission_user": execution_state.submission_user,
+        "release_username": execution_state.release_state.release_username,
+        "release_tag": execution_state.release_state.release_tag,
+        "release_version": execution_state.release_state.release_version,
+    }
+    # refactor get_formatteed_viz_url
+    viz_url = self.config.get_formatted_viz_url(metadata)
+    metadata["viz"] = viz_url
+    return metadata
+
+  @staticmethod
+  def extract_runtime_state(topology):
+    runtime_state = {}
+    runtime_state["has_physical_plan"] = \
+      True if topology.physical_plan else False
+    runtime_state["has_tmaster_location"] = \
+      True if topology.tmaster else False
+    runtime_state["has_scheduler_location"] = \
+      True if topology.scheduler_location else False
+    # "stmgrs" listed runtime state for each stream manager
+    # however it is possible that physical plan is not complete
+    # yet and we do not know how many stmgrs there are. That said,
+    # we should not set any key below (stream manager name)
+    runtime_state["stmgrs"] = {}
+    return runtime_state
+
   # pylint: disable=no-self-use
   def extract_scheduler_location(self, topology):
     """
@@ -264,11 +302,11 @@ class Tracker(object):
       spoutConfigs = spout.comp.config.kvs
       for kvs in spoutConfigs:
         if kvs.key == "spout.type":
-          spoutType = kvs.value
+          spoutType = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.source":
-          spoutSource = kvs.value
+          spoutSource = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.version":
-          spoutVersion = kvs.value
+          spoutVersion = javaobj.loads(kvs.serialized_value)
       spoutPlan = {
           "type": spoutType,
           "source": spoutSource,
@@ -349,8 +387,10 @@ class Tracker(object):
                                      indent=2),
                 'raw' : utils.hex_escape(kvs.serialized_value)}
           except Exception:
+            Log.exception("Failed to parse data as java object")
             physicalPlan["config"][kvs.key] = {
-                'value' : 'A Java Object',
+                # The value should be a valid json object
+                'value' : '{}',
                 'raw' : utils.hex_escape(kvs.serialized_value)}
     for spout in spouts:
       spout_name = spout.comp.name
@@ -428,7 +468,7 @@ class Tracker(object):
     if not topology.scheduler_location:
       has_scheduler_location = False
 
-    top = {
+    topologyInfo = {
         "name": topology.name,
         "id": topology.id,
         "logical_plan": None,
@@ -442,14 +482,18 @@ class Tracker(object):
     executionState["has_physical_plan"] = has_physical_plan
     executionState["has_tmaster_location"] = has_tmaster_location
     executionState["has_scheduler_location"] = has_scheduler_location
+    executionState["status"] = topology.get_status()
 
-    top["execution_state"] = executionState
-    top["logical_plan"] = self.extract_logical_plan(topology)
-    top["physical_plan"] = self.extract_physical_plan(topology)
-    top["tmaster_location"] = self.extract_tmaster(topology)
-    top["scheduler_location"] = self.extract_scheduler_location(topology)
+    topologyInfo["metadata"] = self.extract_metadata(topology)
+    topologyInfo["runtime_state"] = self.extract_runtime_state(topology)
 
-    self.topologyInfos[(topology.name, topology.state_manager_name)] = top
+    topologyInfo["execution_state"] = executionState
+    topologyInfo["logical_plan"] = self.extract_logical_plan(topology)
+    topologyInfo["physical_plan"] = self.extract_physical_plan(topology)
+    topologyInfo["tmaster_location"] = self.extract_tmaster(topology)
+    topologyInfo["scheduler_location"] = self.extract_scheduler_location(topology)
+
+    self.topologyInfos[(topology.name, topology.state_manager_name)] = topologyInfo
 
   def getTopologyInfo(self, topologyName, cluster, role, environ):
     """

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
@@ -30,11 +29,16 @@ import com.twitter.heron.api.topology.SpoutDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 
 public class TestTopologyBuilder extends TopologyBuilder {
-  private static final Logger LOG = Logger.getLogger(TestTopologyBuilder.class.getName());
+  private static final int DEFAULT_EXECUTION_COUNT = 10;
+
   // This variable will be used as input variable for constructor of our aggregator bolt
   // This will determine the location of where our output is directed
   // Could be URL, file location, etc.
   private final String outputLocation;
+  private final String stateLocation;
+  private final String stateUpdateToken;
+  private final SpoutWrapperType spoutWrapperType;
+
   // The structure of the topologyBlr - a graph directed from children to parents
   private final Map<String, TopologyAPI.Bolt.Builder> bolts = new HashMap<>();
   private final Map<String, TopologyAPI.Spout.Builder> spouts = new HashMap<>();
@@ -42,40 +46,67 @@ public class TestTopologyBuilder extends TopologyBuilder {
   // By default, terminalBoltClass will be AggregatorBolt, which writes to specified HTTP server
   private String terminalBoltClass = "com.twitter.heron.integration_test.core.AggregatorBolt";
 
-  public TestTopologyBuilder(String outputLocation) {
-    this.outputLocation = outputLocation;
+  public enum SpoutWrapperType {
+    DEFAULT,
+    TWO_PHASE,
+    EMIT_UNTIL
   }
 
-  public TestTopologyBuilder(String topologyName, String httpServerUrl) {
-    this.outputLocation = httpServerUrl + "/" + topologyName;
+  public TestTopologyBuilder(String outputLocation) {
+    this(outputLocation, null, null, SpoutWrapperType.DEFAULT);
+  }
+
+  public TestTopologyBuilder(String outputLocation,
+                             String stateLocation,
+                             String stateUpdateToken,
+                             SpoutWrapperType spoutWrapperType) {
+    this.outputLocation = outputLocation;
+    this.stateLocation = stateLocation;
+    this.stateUpdateToken = stateUpdateToken;
+    this.spoutWrapperType = spoutWrapperType;
   }
 
   @Override
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
-    // Wrap bolt
-    IntegrationTestBolt itBolt = new IntegrationTestBolt(bolt);
-    // Call super
-    return super.setBolt(id, itBolt, parallelismHint);
+    return super.setBolt(id, new IntegrationTestBolt(bolt), parallelismHint);
   }
 
   @Override
   public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
-    // Wrap Spout
-    IntegrationTestSpout itSpout = new IntegrationTestSpout(spout);
-    return setSpout(id, itSpout, parallelismHint);
+    return setSpout(id, spout, parallelismHint, DEFAULT_EXECUTION_COUNT);
   }
 
   // A method allows user to define the maxExecutionCount of the spout
   // To be compatible with earlier Integration Test Framework
   public SpoutDeclarer setSpout(String id, IRichSpout spout,
                                 Number parallelismHint, int maxExecutionCount) {
-    // Wrap Spout
-    IntegrationTestSpout itSpout = new IntegrationTestSpout(spout, maxExecutionCount);
-    return setSpout(id, itSpout, parallelismHint);
+    String topologyStartedUrl = null;
+    String tuplesEmittedUrl = null;
+    String topologyUpdateUrl = null;
+    if (stateLocation != null) {
+      topologyStartedUrl = stateLocation + "_topology_started";
+      tuplesEmittedUrl = stateLocation + "_tuples_emitted";
+      topologyUpdateUrl = stateLocation + "_" + stateUpdateToken;
+    }
+    IntegrationTestSpout wrappedSpout;
+    switch (spoutWrapperType) {
+      case TWO_PHASE:
+        wrappedSpout = new MultiPhaseTestSpout(spout, maxExecutionCount, 2,
+            new HttpGetCondition(topologyUpdateUrl), topologyStartedUrl);
+        break;
+      case EMIT_UNTIL:
+        wrappedSpout = new EmitUntilConditionTestSpout(spout,
+            new HttpGetCondition(topologyUpdateUrl), topologyStartedUrl, tuplesEmittedUrl);
+        break;
+      case DEFAULT:
+      default:
+        wrappedSpout = new IntegrationTestSpout(spout, maxExecutionCount, topologyStartedUrl);
+    }
+
+    return setSpout(id, wrappedSpout, parallelismHint);
   }
 
   private SpoutDeclarer setSpout(String id, IntegrationTestSpout itSpout, Number parallelismHint) {
-    // Call super
     return super.setSpout(id, itSpout, parallelismHint);
   }
 

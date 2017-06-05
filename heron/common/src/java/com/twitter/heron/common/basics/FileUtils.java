@@ -19,9 +19,10 @@ import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,14 +68,13 @@ public final class FileUtils {
   }
 
   public static boolean writeToFile(String filename, byte[] contents, boolean overwrite) {
-    File f = new File(filename);
-    if (!overwrite && f.exists()) {
-      LOG.severe("File exists. Topology exists: " + filename);
-      return false;
-    }
+    // default Files behavior is to overwrite. If we specify no overwrite then CREATE_NEW fails
+    // if the file exist. This operation is atomic.
+    OpenOption[] options = overwrite
+        ? new OpenOption[]{} : new OpenOption[]{StandardOpenOption.CREATE_NEW};
 
     try {
-      Files.write(new File(filename).toPath(), contents);
+      Files.write(new File(filename).toPath(), contents, options);
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to write content to file. ", e);
       return false;
@@ -108,19 +108,30 @@ public final class FileUtils {
     return Files.exists(new File(file).toPath());
   }
 
-  public static boolean isOriginalPackageJar(String packageFilename) {
-    return packageFilename.endsWith(".jar");
-  }
-
-  public static boolean isOriginalPackagePex(String packageFilename) {
-    return packageFilename.endsWith(".pex");
+  public static boolean hasChildren(String file) {
+    return isDirectoryExists(file) && new File(file).list().length > 0;
   }
 
   public static String getBaseName(String file) {
     return new File(file).getName();
   }
 
-  public static String combinePaths(String path1, String path2) {
-    return Paths.get(path1, path2).toString();
+  public static boolean deleteDir(String dir) {
+    return deleteDir(new File(dir));
+  }
+
+  public static boolean deleteDir(File dir) {
+    if (dir.isDirectory()) {
+      String[] children = dir.list();
+
+      for (String child : children) {
+        boolean success = deleteDir(new File(dir, child));
+        if (!success) {
+          return false;
+        }
+      }
+    }
+
+    return dir.delete();
   }
 }

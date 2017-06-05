@@ -27,16 +27,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.mesos.framework.BaseContainer;
 import com.twitter.heron.scheduler.mesos.framework.MesosFramework;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 
 public class MesosSchedulerTest {
@@ -48,27 +47,25 @@ public class MesosSchedulerTest {
 
   private MesosScheduler scheduler;
   private MesosFramework mesosFramework;
-  private SchedulerDriver driver;
 
   private BaseContainer baseContainer;
-
 
   @Before
   public void before() throws Exception {
 
     Config config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
-    Mockito.when(config.getStringValue(Keys.role())).thenReturn(ROLE);
-    Mockito.when(config.getStringValue(Keys.corePackageUri())).thenReturn(CORE_PACKAGE_URI);
+    Mockito.when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
+    Mockito.when(config.getStringValue(Key.CORE_PACKAGE_URI)).thenReturn(CORE_PACKAGE_URI);
 
     Config runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.getLongValue(Keys.numContainers())).thenReturn(NUM_CONTAINER);
+    Mockito.when(runtime.getLongValue(Key.NUM_CONTAINERS)).thenReturn(NUM_CONTAINER);
     Properties properties = new Properties();
-    properties.put(Keys.topologyPackageUri(), TOPOLOGY_PACKAGE_URI);
-    Mockito.when(runtime.get(Keys.SCHEDULER_PROPERTIES)).thenReturn(properties);
+    properties.put(Key.TOPOLOGY_PACKAGE_URI.value(), TOPOLOGY_PACKAGE_URI);
+    Mockito.when(runtime.get(Key.SCHEDULER_PROPERTIES)).thenReturn(properties);
 
     mesosFramework = Mockito.mock(MesosFramework.class);
-    driver = Mockito.mock(SchedulerDriver.class);
+    SchedulerDriver driver = Mockito.mock(SchedulerDriver.class);
     baseContainer = Mockito.mock(BaseContainer.class);
 
     scheduler = Mockito.spy(MesosScheduler.class);
@@ -122,8 +119,8 @@ public class MesosSchedulerTest {
   @Test
   public void testGetBaseContainer() throws Exception {
     final double CPU = 0.5;
-    final long MEM = 100 * Constants.MB;
-    final long DISK = 100 * Constants.MB;
+    final ByteAmount MEM = ByteAmount.fromMegabytes(100);
+    final ByteAmount DISK = ByteAmount.fromMegabytes(100);
 
     Resource containerResources = new Resource(CPU, MEM, DISK);
     PackingPlan.ContainerPlan containerPlan =
@@ -139,8 +136,8 @@ public class MesosSchedulerTest {
     // Assert we have constructed the correct BaseContainer structure
     Assert.assertEquals(ROLE, container.runAsUser);
     Assert.assertEquals(CPU, container.cpu, 0.01);
-    Assert.assertEquals(MEM, container.memInMB * Constants.MB, 0.01);
-    Assert.assertEquals(DISK, container.diskInMB * Constants.MB, 0.01);
+    Assert.assertEquals(MEM, ByteAmount.fromMegabytes(((Double) container.memInMB).longValue()));
+    Assert.assertEquals(DISK, ByteAmount.fromMegabytes(((Double) container.diskInMB).longValue()));
     Assert.assertEquals(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR, container.ports);
     Assert.assertEquals(2, container.dependencies.size());
     Assert.assertTrue(container.dependencies.contains(CORE_PACKAGE_URI));

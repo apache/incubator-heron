@@ -14,10 +14,9 @@
 
 package com.twitter.heron.scheduler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -27,20 +26,22 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.spi.common.Command;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IRepacking;
+import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TMasterException;
 import com.twitter.heron.spi.utils.TMasterUtils;
 
-
-public class RuntimeManagerRunner implements Callable<Boolean> {
+public class RuntimeManagerRunner {
   static final String NEW_COMPONENT_PARALLELISM_KEY = "NEW_COMPONENT_PARALLELISM";
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
   private final Config config;
@@ -58,58 +59,60 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     this.schedulerClient = schedulerClient;
   }
 
-  @Override
-  public Boolean call() {
+  public void call()
+      throws TMasterException, TopologyRuntimeManagementException,
+      PackingException, UpdateDryRunResponse {
     // execute the appropriate command
     String topologyName = Context.topologyName(config);
-    boolean result = false;
     switch (command) {
       case ACTIVATE:
-        result = activateTopologyHandler(topologyName);
+        activateTopologyHandler(topologyName);
         break;
       case DEACTIVATE:
-        result = deactivateTopologyHandler(topologyName);
+        deactivateTopologyHandler(topologyName);
         break;
       case RESTART:
-        result = restartTopologyHandler(topologyName);
+        restartTopologyHandler(topologyName);
         break;
       case KILL:
-        result = killTopologyHandler(topologyName);
+        killTopologyHandler(topologyName);
         break;
       case UPDATE:
-        result = updateTopologyHandler(topologyName,
+        updateTopologyHandler(topologyName,
             config.getStringValue(NEW_COMPONENT_PARALLELISM_KEY));
         break;
       default:
         LOG.severe("Unknown command for topology: " + command);
     }
-
-    return result;
   }
 
   /**
    * Handler to activate a topology
    */
-  private boolean activateTopologyHandler(String topologyName) {
-    return TMasterUtils.transitionTopologyState(topologyName,
+  private void activateTopologyHandler(String topologyName) throws TMasterException {
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
+    TMasterUtils.transitionTopologyState(topologyName,
         TMasterUtils.TMasterCommand.ACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
-        TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING);
+        TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
   }
 
   /**
    * Handler to deactivate a topology
    */
-  private boolean deactivateTopologyHandler(String topologyName) {
-    return TMasterUtils.transitionTopologyState(topologyName,
+  private void deactivateTopologyHandler(String topologyName) throws TMasterException {
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
+    TMasterUtils.transitionTopologyState(topologyName,
         TMasterUtils.TMasterCommand.DEACTIVATE, Runtime.schedulerStateManagerAdaptor(runtime),
-        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED);
+        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
   }
 
   /**
    * Handler to restart a topology
    */
   @VisibleForTesting
-  boolean restartTopologyHandler(String topologyName) {
+  void restartTopologyHandler(String topologyName) throws TopologyRuntimeManagementException {
     Integer containerId = Context.topologyContainerId(config);
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
@@ -124,58 +127,67 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
       Boolean result = stateManager.deleteTMasterLocation(topologyName);
       if (result == null || !result) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-        return false;
+        throw new TopologyRuntimeManagementException(
+            "Failed to clear TMaster location. Check whether TMaster set it correctly.");
       }
     }
 
     if (!schedulerClient.restartTopology(restartTopologyRequest)) {
-      LOG.log(Level.SEVERE, "Failed to restart with Scheduler: ");
-      return false;
+      throw new TopologyRuntimeManagementException(String.format(
+          "Failed to restart topology '%s'", topologyName));
     }
     // Clean the connection when we are done.
     LOG.fine("Scheduler restarted topology successfully.");
-    return true;
   }
 
   /**
    * Handler to kill a topology
    */
   @VisibleForTesting
-  boolean killTopologyHandler(String topologyName) {
+  void killTopologyHandler(String topologyName) throws TopologyRuntimeManagementException {
     Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
         .setTopologyName(topologyName).build();
 
     if (!schedulerClient.killTopology(killTopologyRequest)) {
-      LOG.log(Level.SEVERE, "Failed to kill with Scheduler.");
-      return false;
+      throw new TopologyRuntimeManagementException(
+          String.format("Failed to kill topology '%s' with scheduler", topologyName));
     }
 
     // clean up the state of the topology in state manager
-    if (!cleanState(topologyName, Runtime.schedulerStateManagerAdaptor(runtime))) {
-      LOG.severe("Failed to clean topology state");
-      return false;
-    }
+    cleanState(topologyName, Runtime.schedulerStateManagerAdaptor(runtime));
 
     // Clean the connection when we are done.
     LOG.fine("Scheduler killed topology successfully.");
-    return true;
   }
 
   /**
    * Handler to update a topology
    */
   @VisibleForTesting
-  boolean updateTopologyHandler(String topologyName, String newParallelism) {
+  void updateTopologyHandler(String topologyName, String newParallelism)
+      throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = manager.getTopology(topologyName);
     Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
+
+    if (!changeDetected(currentPlan, changeRequests)) {
+      throw new TopologyRuntimeManagementException(
+          String.format("The component parallelism request (%s) is the same as the "
+          + "current topology parallelism. Not taking action.", newParallelism));
+    }
+
     PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
         topology);
+
+    if (Context.dryRun(config)) {
+      PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
+      PackingPlan oldPlan = deserializer.fromProto(currentPlan);
+      PackingPlan newPlan = deserializer.fromProto(proposedPlan);
+      throw new UpdateDryRunResponse(topology, config, newPlan, oldPlan, changeRequests);
+    }
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
@@ -183,16 +195,15 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
             .setProposedPackingPlan(proposedPlan)
             .build();
 
-    LOG.info("Sending Updating topology request: " + updateTopologyRequest);
+    LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-      LOG.log(Level.SEVERE, "Failed to update topology with Scheduler, updateTopologyRequest="
-          + updateTopologyRequest);
-      return false;
+      throw new TopologyRuntimeManagementException(String.format(
+          "Failed to update topology with Scheduler, updateTopologyRequest="
+          + updateTopologyRequest));
     }
 
     // Clean the connection when we are done.
     LOG.fine("Scheduler updated topology successfully.");
-    return true;
   }
 
   /**
@@ -200,57 +211,74 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * 1. Topology def and ExecutionState are required to exist to delete
    * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
    */
-  protected boolean cleanState(
+  protected void cleanState(
       String topologyName,
-      SchedulerStateManagerAdaptor statemgr) {
+      SchedulerStateManagerAdaptor statemgr) throws TopologyRuntimeManagementException {
     LOG.fine("Cleaning up topology state");
 
     Boolean result;
 
-    // It is possible that TMasterLocation, PackingPlan, PhysicalPlan and SchedulerLocation are not
-    // set. Just log but don't consider it a failure and don't return false
+    // It is possible that TMasterLocation, MetricsCacheLocation, PackingPlan, PhysicalPlan and
+    // SchedulerLocation are not set. Just log but don't consider it a failure and don't return
+    // false
     result = statemgr.deleteTMasterLocation(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear TMaster location. Check whether TMaster set it correctly.");
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear TMaster location. Check whether TMaster set it correctly.");
+    }
+
+    result = statemgr.deleteMetricsCacheLocation(topologyName);
+    if (result == null || !result) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear MetricsCache location. Check whether MetricsCache set it correctly.");
     }
 
     result = statemgr.deletePackingPlan(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear packing plan. Check whether Launcher set it correctly.");
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear packing plan. Check whether Launcher set it correctly.");
     }
 
     result = statemgr.deletePhysicalPlan(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear physical plan. Check whether TMaster set it correctly.");
+      throw new TopologyRuntimeManagementException(
+        "Failed to clear physical plan. Check whether TMaster set it correctly.");
     }
 
     result = statemgr.deleteSchedulerLocation(topologyName);
     if (result == null || !result) {
-      LOG.warning("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
+      throw new TopologyRuntimeManagementException(
+        "Failed to clear scheduler location. Check whether Scheduler set it correctly.");
+    }
+
+    result = statemgr.deleteLocks(topologyName);
+    if (result == null || !result) {
+      throw new TopologyRuntimeManagementException(
+        "Failed to delete locks. It's possible that the topology never created any.");
     }
 
     result = statemgr.deleteExecutionState(topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to clear execution state");
-      return false;
+      throw new TopologyRuntimeManagementException(
+        "Failed to clear execution state");
     }
 
     // Set topology def at last since we determine whether a topology is running
     // by checking the existence of topology def
     result = statemgr.deleteTopology(topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to clear topology definition");
-      return false;
+      throw new TopologyRuntimeManagementException(
+        "Failed to clear topology definition");
     }
 
     LOG.fine("Cleaned up topology state");
-    return true;
   }
 
   @VisibleForTesting
   PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
                                                Map<String, Integer> changeRequests,
-                                               TopologyAPI.Topology topology) {
+                                               TopologyAPI.Topology topology)
+      throws PackingException {
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     PackingPlan currentPackingPlan = deserializer.fromProto(currentProtoPlan);
@@ -258,14 +286,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentCounts = currentPackingPlan.getComponentCounts();
     Map<String, Integer> componentChanges = parallelismDelta(componentCounts, changeRequests);
 
-    for (String componentName : componentChanges.keySet()) {
-      Integer change = componentChanges.get(componentName);
-      if (change < 0) {
-        throw new IllegalArgumentException(String.format(
-            "Request made to change component %s parallelism by %d. Scaling component "
-                + "parallelism down is not currently supported.", componentName, change));
-      }
-    }
     // Create an instance of the packing class
     String repackingClass = Context.repackingClass(config);
     IRepacking packing;
@@ -276,6 +296,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       throw new IllegalArgumentException(
           "Failed to instantiate packing instance: " + repackingClass, e);
     }
+
+    LOG.info("Updating packing plan using " + repackingClass);
     try {
       packing.initialize(config, topology);
       PackingPlan packedPlan = packing.repack(currentPackingPlan, componentChanges);
@@ -291,8 +313,10 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentDeltas = new HashMap<>();
     for (String component : changeRequests.keySet()) {
       if (!componentCounts.containsKey(component)) {
-        throw new IllegalArgumentException(
-            "Invalid component name in update request: " + component);
+        throw new IllegalArgumentException(String.format(
+            "Invalid component name in update request: %s. Valid components include: %s",
+            component, Arrays.toString(
+                componentCounts.keySet().toArray(new String[componentCounts.keySet().size()]))));
       }
       Integer newValue = changeRequests.get(component);
       Integer delta = newValue - componentCounts.get(component);
@@ -319,5 +343,17 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
           + "<component>:<parallelism>[,<component>:<parallelism>], Found: " + newParallelism);
     }
     return changes;
+  }
+
+  private static boolean changeDetected(PackingPlans.PackingPlan currentProtoPlan,
+                                 Map<String, Integer> changeRequests) {
+    PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
+    PackingPlan currentPlan = deserializer.fromProto(currentProtoPlan);
+    for (String component : changeRequests.keySet()) {
+      if (changeRequests.get(component) != currentPlan.getComponentCounts().get(component)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -17,6 +17,7 @@
  */
 package org.apache.storm.kafka;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,8 +31,10 @@ public class StringScheme implements Scheme {
   public static final String STRING_SCHEME_KEY = "str";
   private static final long serialVersionUID = -1806461122261145598L;
 
-  public List<Object> deserialize(byte[] bytes) {
-    return new Values(deserializeString(bytes));
+  public List<Object> deserialize(ByteBuffer bytes) {
+    byte[] bytearray = new byte[bytes.remaining()];
+    bytes.get(bytearray);
+    return new Values(deserializeString(bytearray));
   }
 
   public static String deserializeString(byte[] bytes) {

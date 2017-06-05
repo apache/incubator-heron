@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
@@ -149,7 +151,6 @@ public final class WordCountTopology {
         Integer val = countMap.get(key);
         countMap.put(key, ++val);
       }
-      collector.ack(tuple);
     }
 
     @Override
@@ -161,20 +162,27 @@ public final class WordCountTopology {
    * Main method
    */
   public static void main(String[] args) throws AlreadyAliveException, InvalidTopologyException {
-    if (args.length != 1) {
+    if (args.length < 1) {
       throw new RuntimeException("Specify topology name");
     }
 
-    int parallelism = 80;
+    int parallelism = 1;
+    if (args.length > 1) {
+      parallelism = Integer.parseInt(args[1]);
+    }
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
     builder.setBolt("consumer", new ConsumerBolt(), parallelism)
         .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
-    conf.setNumStmgrs(parallelism);
+    conf.setNumWorkers(parallelism);
+
     /*
     Set config here
     */
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setComponentRam(conf, "consumer", ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 6);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

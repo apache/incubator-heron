@@ -70,8 +70,7 @@ void DummyTMasterClient::CreateAndSendRegisterRequest() {
   stmgr->set_cwd(cwd);
   stmgr->set_pid((sp_int32)ProcessUtils::getPid());
   stmgr->set_shell_port(shell_port_);
-  for (std::vector<heron::proto::system::Instance*>::iterator iter = instances_.begin();
-       iter != instances_.end(); ++iter) {
+  for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
     request->add_instances()->CopyFrom(**iter);
   }
   SendRequest(request, NULL);
@@ -86,7 +85,7 @@ DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const s
   NetworkOptions tmaster_options;
   tmaster_options.set_host(tmaster_host);
   tmaster_options.set_port(tmaster_port);
-  tmaster_options.set_max_packet_size(1024 * 1024);
+  tmaster_options.set_max_packet_size(1_MB);
   tmaster_options.set_socket_family(PF_INET);
 
   tmaster_client_ = new DummyTMasterClient(ss, tmaster_options, stmgr_id, stmgr_host, stmgr_port,

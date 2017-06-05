@@ -24,14 +24,6 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
@@ -51,7 +43,6 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   private final List<String> result;
 
   public AggregatorBolt(String httpPostUrl) {
-    LOG.info("HttpPostUrl : " + httpPostUrl);
     this.httpPostUrl = httpPostUrl;
     this.result = new ArrayList<String>();
   }
@@ -86,44 +77,21 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
     // The last bolt we append, nothing to emit.
   }
 
-  private int postResultToHttpServer(String newHttpPostUrl, String resultJson) throws
-      IOException, ParseException {
-    HttpClient client = HttpClientBuilder.create().build();
-    HttpPost post = new HttpPost(newHttpPostUrl);
-
-    StringEntity requestEntity = new StringEntity(resultJson, ContentType.APPLICATION_JSON);
-
-    post.setEntity(requestEntity);
-    HttpResponse response = client.execute(post);
-
-    int responseCode = response.getStatusLine().getStatusCode();
-
-    if (responseCode == 200) {
-      LOG.info("Http post successful");
-    } else {
-      LOG.severe(String.format("Http post failed, response code: %d, response: %s",
-              responseCode,
-              EntityUtils.toString(response.getEntity()))
-      );
-    }
-
-    return responseCode;
-  }
-
   public void writeFinishedData() {
     String resultJson = result.toString();
-    LOG.info("Actual result: " + resultJson);
-    LOG.info("Posting actual result to " + httpPostUrl);
+    LOG.info(String.format("Posting actual result to %s: %s",  httpPostUrl, resultJson));
     try {
-      int responseCode = postResultToHttpServer(httpPostUrl, resultJson);
-      if (responseCode != 200) {
-        responseCode = postResultToHttpServer(httpPostUrl, resultJson);
-        if (responseCode != 200) {
-          throw new RuntimeException(" ResponseCode " + responseCode);
+      int responseCode = -1;
+      for (int attempts = 0; attempts < 2; attempts++) {
+        responseCode = HttpUtils.httpJsonPost(httpPostUrl, resultJson);
+        if (responseCode == 200) {
+          return;
         }
       }
+      throw new RuntimeException(
+          String.format("Failed to post actual result to %s: %s",  httpPostUrl, responseCode));
     } catch (IOException | ParseException e) {
-      throw new RuntimeException("Posting result to server failed with : " + e.getMessage(), e);
+      throw new RuntimeException(String.format("Posting result to %s failed",  httpPostUrl), e);
     }
   }
 }

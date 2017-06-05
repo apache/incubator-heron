@@ -28,27 +28,26 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
+import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.Shutdown;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerConfig;
-import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -134,7 +133,8 @@ public class SchedulerMain {
         .required()
         .build();
 
-    Option property = Option.builder(Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION)
+    Option property = Option.builder(
+        SchedulerUtils.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION)
         .desc("use value for given property")
         .longOpt("property_override")
         .hasArgs()
@@ -198,7 +198,7 @@ public class SchedulerMain {
     // It returns a new empty Properties instead of null,
     // if no properties passed from command line. So no need for null check.
     Properties schedulerProperties =
-        cmd.getOptionProperties(Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION);
+        cmd.getOptionProperties(SchedulerUtils.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION);
 
     // initialize the scheduler with the options
     String topologyName = cmd.getOptionValue("topology_name");
@@ -208,7 +208,7 @@ public class SchedulerMain {
         cmd.getOptionValue("topology_bin"),
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
-        (Boolean) cmd.hasOption("verbose"),
+        cmd.hasOption("verbose"),
         schedulerProperties);
 
     LOG.info("Scheduler command line properties override: " + schedulerProperties.toString());
@@ -252,7 +252,7 @@ public class SchedulerMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     // build the config by expanding all the variables
-    Config schedulerConfig = SchedulerConfig.loadConfig(
+    Config schedulerConfig = SchedulerConfigUtils.loadConfig(
         cluster,
         role,
         env,
@@ -274,9 +274,11 @@ public class SchedulerMain {
 
   // Set up logging based on the Config
   private static void setupLogging(Config config) throws IOException {
-    String systemConfigFilename = Context.systemConfigSandboxFile(config);
+    String systemConfigFilename = Context.systemConfigFile(config);
 
-    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .build();
 
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.
@@ -299,7 +301,7 @@ public class SchedulerMain {
         String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(processId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
 
     LOG.info("Logging setup done.");
@@ -338,7 +340,7 @@ public class SchedulerMain {
       // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
+      LOG.log(Level.SEVERE, "Failed to instantiate instances using config: " + config, e);
       return false;
     }
 
@@ -366,9 +368,10 @@ public class SchedulerMain {
       // build the runtime config
       LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
-          .putAll(launcherUtils.getPrimaryRuntime(topology, adaptor))
-          .put(Keys.schedulerShutdown(), getShutdown())
-          .put(Keys.SCHEDULER_PROPERTIES, properties)
+          .putAll(launcherUtils.createPrimaryRuntime(topology))
+          .putAll(launcherUtils.createAdaptorRuntime(adaptor))
+          .put(Key.SCHEDULER_SHUTDOWN, getShutdown())
+          .put(Key.SCHEDULER_PROPERTIES, properties)
           .build();
 
       Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packedPlan);

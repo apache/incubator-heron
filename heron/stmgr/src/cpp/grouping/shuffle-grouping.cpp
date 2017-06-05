@@ -36,7 +36,7 @@ ShuffleGrouping::ShuffleGrouping(const std::vector<sp_int32>& _task_ids) : Group
 ShuffleGrouping::~ShuffleGrouping() {}
 
 void ShuffleGrouping::GetListToSend(const proto::system::HeronDataTuple&,
-                                    std::list<sp_int32>& _return) {
+                                    std::vector<sp_int32>& _return) {
   _return.push_back(task_ids_[next_index_]);
   next_index_ = (next_index_ + 1) % task_ids_.size();
 }

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' version.py '''
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.common.src.python.utils.config as config
 
@@ -25,7 +26,7 @@ def create_parser(subparsers):
       'version',
       help='Print version of heron-cli',
       usage="%(prog)s",
-      add_help=False)
+      add_help=True)
 
   cli_args.add_titles(parser)
 
@@ -42,9 +43,5 @@ def run(command, parser, args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  release_file = config.get_heron_release_file()
-  with open(release_file) as release_info:
-    for line in release_info:
-      print line,
-
-  return True
+  config.print_build_info()
+  return SimpleResult(Status.Ok)

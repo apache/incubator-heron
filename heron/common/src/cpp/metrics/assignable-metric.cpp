@@ -22,7 +22,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "metrics/assignable-metric.h"
-#include <sstream>
+#include <string>
 #include "metrics/imetric.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -40,11 +40,9 @@ AssignableMetric::~AssignableMetric() {}
 void AssignableMetric::SetValue(sp_int64 _value) { value_ = _value; }
 void AssignableMetric::GetAndReset(const sp_string& _prefix,
                                    proto::system::MetricPublisherPublishMessage* _message) {
-  std::ostringstream o;
-  o << value_;
   proto::system::MetricDatum* d = _message->add_metrics();
   d->set_name(_prefix);
-  d->set_value(o.str());
+  d->set_value(std::to_string(value_));
 }
 }  // namespace common
 }  // namespace heron

@@ -16,43 +16,39 @@ package com.twitter.heron.common.utils.misc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
 
-public class CustomStreamGroupingHelper {
+class CustomStreamGroupingHelper {
   // Mapping from steamid to a List of Targets
   private final Map<String, List<Target>> targets;
 
-  public CustomStreamGroupingHelper() {
+  CustomStreamGroupingHelper() {
     targets = new HashMap<>();
   }
 
-  public void add(
-      String streamId,
-      List<Integer> taskIds,
-      CustomStreamGrouping grouping,
-      String sourceComponentName) {
+  public void add(String streamId,
+                  List<Integer> taskIds,
+                  CustomStreamGrouping grouping,
+                  String sourceComponentName) {
     if (!targets.containsKey(streamId)) {
       targets.put(streamId, new ArrayList<Target>());
     }
     targets.get(streamId).add(new Target(taskIds, grouping, sourceComponentName));
   }
 
-  public void prepare(TopologyContext context) {
-    Iterator<Map.Entry<String, List<Target>>> iterator = targets.entrySet().iterator();
-    while (iterator.hasNext()) {
-      Map.Entry<String, List<Target>> entry = iterator.next();
-      for (Target target : entry.getValue()) {
-        target.prepare(context, entry.getKey());
+  void prepare(TopologyContext context) {
+    for (String streamId : targets.keySet()) {
+      for (Target target : targets.get(streamId)) {
+        target.prepare(context, streamId);
       }
     }
   }
 
-  public List<Integer> chooseTasks(String streamId, List<Object> values) {
+  List<Integer> chooseTasks(String streamId, List<Object> values) {
     List<Target> targetList = targets.get(streamId);
     if (targetList != null) {
       List<Integer> res = new ArrayList<>();
@@ -63,6 +59,10 @@ public class CustomStreamGroupingHelper {
       return res;
     }
     return null;
+  }
+
+  boolean isCustomGroupingEmpty() {
+    return targets.isEmpty();
   }
 
   private static class Target {
@@ -92,7 +92,7 @@ public class CustomStreamGroupingHelper {
       grouping.prepare(context, componentName, streamId, taskIds);
     }
 
-    public List<Integer> chooseTasks(List<Object> values) {
+    private List<Integer> chooseTasks(List<Object> values) {
       return grouping.chooseTasks(values);
     }
   }

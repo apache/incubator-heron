@@ -14,7 +14,11 @@
 
 package com.twitter.heron.examples;
 
+import java.util.List;
 import java.util.Map;
+
+import com.twitter.heron.api.topology.IUpdatable;
+import com.twitter.heron.common.basics.ByteAmount;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -38,25 +42,27 @@ public final class ExclamationTopology {
 
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
+    int parallelism = 2;
 
-    builder.setSpout("word", new TestWordSpout(), 1);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 1)
+    builder.setSpout("word", new TestWordSpout(), parallelism);
+    builder.setBolt("exclaim1", new ExclamationBolt(), 2 * parallelism)
         .shuffleGrouping("word");
 
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
+    conf.setMessageTimeoutSecs(600);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 512L * 1024 * 1024);
-    conf.setComponentRam("exclaim1", 512L * 1024 * 1024);
-    conf.setContainerDiskRequested(1024L * 1024 * 1024);
-    conf.setContainerCpuRequested(1);
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(5));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 5);
 
     if (args != null && args.length > 0) {
-      conf.setNumStmgrs(1);
+      conf.setNumWorkers(parallelism);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
-      System.out.println("Toplogy name not provided as an argument, running in simulator mode.");
+      System.out.println("Topology name not provided as an argument, running in simulator mode.");
       LocalCluster cluster = new LocalCluster();
       cluster.submitTopology("test", conf, builder.createTopology());
       Utils.sleep(10000);
@@ -65,7 +71,7 @@ public final class ExclamationTopology {
     }
   }
 
-  public static class ExclamationBolt extends BaseRichBolt {
+  public static class ExclamationBolt extends BaseRichBolt implements IUpdatable {
 
     private static final long serialVersionUID = 1184860508880121352L;
     private long nItems;
@@ -73,10 +79,7 @@ public final class ExclamationTopology {
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void prepare(
-        Map conf,
-        TopologyContext context,
-        OutputCollector collector) {
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
@@ -94,6 +97,29 @@ public final class ExclamationTopology {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
       // declarer.declare(new Fields("word"));
+    }
+
+    /**
+     * Implementing this method is optional and only necessary if BOTH of the following are true:
+     *
+     * a.) you plan to dynamically scale your bolt/spout at runtime using 'heron update'.
+     * b.) you need to take action based on a runtime change to the component parallelism.
+     *
+     * Most bolts and spouts should be written to be unaffected by changes in their parallelism,
+     * but some must be aware of it. An example would be a spout that consumes a subset of queue
+     * partitions, which must be algorithmically divided amongst the total number of spouts.
+     * <P>
+     * Note that this method is from the IUpdatable Heron interface which does not exist in Storm.
+     * It is fine to implement IUpdatable along with other Storm interfaces, but implementing it
+     * will bind an otherwise generic Storm implementation to Heron.
+     *
+     * @param heronTopologyContext Heron topology context.
+     */
+    @Override
+    public void update(com.twitter.heron.api.topology.TopologyContext heronTopologyContext) {
+      List<Integer> newTaskIds =
+          heronTopologyContext.getComponentTasks(heronTopologyContext.getThisComponentId());
+      System.out.println("Bolt updated with new topologyContext. New taskIds: " + newTaskIds);
     }
   }
 }

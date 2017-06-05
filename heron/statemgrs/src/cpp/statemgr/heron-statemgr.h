@@ -74,12 +74,19 @@ class HeronStateMgr {
   // will be called. Users dont need to be bothered about
   // registering the watcher again as that will be done by us.
   virtual void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
+  virtual void SetMetricsCacheLocationWatch(
+               const std::string& _topology_name, VCallback<> _watcher) = 0;
 
   // Sets/Gets the Tmaster
   virtual void GetTMasterLocation(const std::string& _topology_name,
                                   proto::tmaster::TMasterLocation* _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
+                                  VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void GetMetricsCacheLocation(const std::string& _topology_name,
+                                  proto::tmaster::MetricsCacheLocation* _return,
+                                  VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets the Topology
@@ -117,6 +124,19 @@ class HeronStateMgr {
                                   std::vector<proto::system::ExecutionState*>* _return,
                                   VCallback<proto::system::StatusCode> _cb);
 
+  // Gets/Sets Stateful Checkpoint
+  virtual void CreateStatefulCheckpoints(const std::string& _topology_name,
+                           const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                           VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void DeleteStatefulCheckpoints(const std::string& _topology_name,
+                                  VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void SetStatefulCheckpoints(const std::string& _topology_name,
+                           const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                            VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void GetStatefulCheckpoints(const std::string& _topology_name,
+                               proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                               VCallback<proto::system::StatusCode> _cb) = 0;
+
   // Calls to list the topologies and physical plans
   virtual void ListTopologies(std::vector<sp_string>* _return,
                               VCallback<proto::system::StatusCode> _cb) = 0;
@@ -132,14 +152,18 @@ class HeronStateMgr {
   // We define methods of where the records have to be placed
   //
   std::string GetTMasterLocationPath(const std::string& _topology_name);
+  std::string GetMetricsCacheLocationPath(const std::string& _topology_name);
   std::string GetTopologyPath(const std::string& _topology_name);
   std::string GetPhysicalPlanPath(const std::string& _topology_name);
   std::string GetExecutionStatePath(const std::string& _topology_name);
+  std::string GetStatefulCheckpointsPath(const std::string& _topology_name);
 
   std::string GetTMasterLocationDir();
+  std::string GetMetricsCacheLocationDir();
   std::string GetTopologyDir();
   std::string GetPhysicalPlanDir();
   std::string GetExecutionStateDir();
+  std::string GetStatefulCheckpointsDir();
 
  private:
   void ListExecutionStateDone(std::vector<proto::system::ExecutionState*>* _return,

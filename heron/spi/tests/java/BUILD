@@ -42,8 +42,6 @@ java_tests(
     test_classes = [
         "com.twitter.heron.spi.utils.ShellUtilsTest",
         "com.twitter.heron.spi.utils.NetworkUtilsTest",
-        "com.twitter.heron.spi.utils.SchedulerUtilsTest",
-        "com.twitter.heron.spi.utils.LauncherUtilsTest",
         "com.twitter.heron.spi.utils.TopologyUtilsTest",
         "com.twitter.heron.spi.utils.UploaderUtilsTest",
     ],
@@ -57,6 +55,14 @@ java_test(
     deps = packing_deps_files,
     size = "small",
 )
+
+java_test(
+    name = "ResourceTest",
+    srcs = glob(["**/packing/ResourceTest.java"]),
+    deps = packing_deps_files,
+    size = "small",
+)
+
 
 java_library(
     name = "metrics-tests",
@@ -85,12 +91,11 @@ java_library(
 
 java_tests(
     test_classes = [
-        "com.twitter.heron.spi.common.ConfigKeysTest",
-        "com.twitter.heron.spi.common.ConfigDefaultsTest",
-        "com.twitter.heron.spi.common.ConfigKeysDefaultsTest",
-        "com.twitter.heron.spi.common.MiscTest",
-        "com.twitter.heron.spi.common.ClusterDefaultsTest",
-        "com.twitter.heron.spi.common.ClusterConfigTest",
+        "com.twitter.heron.spi.common.ConfigLoaderTest",
+        "com.twitter.heron.spi.common.ConfigTest",
+        "com.twitter.heron.spi.common.ContextTest",
+        "com.twitter.heron.spi.common.KeysTest",
+        "com.twitter.heron.spi.common.TokenSubTest",
     ],
     runtime_deps = [ ":common-tests" ],
     data = glob(["**/testdata/**/*.yaml"]),

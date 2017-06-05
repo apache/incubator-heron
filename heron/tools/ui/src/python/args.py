@@ -81,6 +81,12 @@ def add_arguments(parser):
       type=int,
       default=consts.DEFAULT_PORT)
 
+  parser.add_argument(
+      '--base_url',
+      metavar='(a string; the base url path if operating behind proxy; default: '
+      + str(consts.DEFAULT_BASE_URL) + ')',
+      default=consts.DEFAULT_BASE_URL)
+
   return parser
 
 
@@ -111,5 +117,11 @@ def create_parsers():
       help='Prints help',
       add_help=False)
 
+  version_parser = subparsers.add_parser(
+      'version',
+      help='Prints version',
+      add_help=True)
+
   help_parser.set_defaults(help=True)
+  version_parser.set_defaults(version=True)
   return (parser, child_parser)

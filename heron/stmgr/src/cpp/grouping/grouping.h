@@ -17,7 +17,6 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_GROUPING_GROUPING_H_
 #define SRC_CPP_SVCS_STMGR_SRC_GROUPING_GROUPING_H_
 
-#include <list>
 #include <vector>
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -35,7 +34,7 @@ class Grouping {
                           const std::vector<sp_int32>& _task_ids);
 
   virtual void GetListToSend(const proto::system::HeronDataTuple& _tuple,
-                             std::list<sp_int32>& _return) = 0;
+                             std::vector<sp_int32>& _return) = 0;
 
  protected:
   std::vector<sp_int32> task_ids_;

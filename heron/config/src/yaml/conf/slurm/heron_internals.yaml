@@ -38,6 +38,9 @@ heron.logging.err.threshold: 3
 # The interval in seconds for different components to export metrics to metrics manager
 heron.metrics.export.interval.sec: 60
 
+# The maximum count of exceptions in one MetricPublisherPublishMessage protobuf
+heron.metrics.max.exceptions.per.message.count: 1024
+
 ################################################################################
 # Configs related to Stream Manager, starts with heron.streammgr.*
 ################################################################################
@@ -51,6 +54,10 @@ heron.streammgr.packet.maximum.size.bytes: 102400
 
 # The frequency in ms to drain the tuple cache in stream manager
 heron.streammgr.cache.drain.frequency.ms: 10 
+
+# The sized based threshold in MB for buffering data tuples
+# waiting for checkpoint markers before giving up
+heron.streammgr.stateful.buffer.size.mb: 100
 
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100 
@@ -81,10 +88,10 @@ heron.streammgr.connection.write.batch.size.mb: 1
 heron.streammgr.network.backpressure.threshold: 3
 
 # High water mark on the num in MB that can be left outstanding on a connection
-heron.streammgr.network.backpressure.highwatermark.mb: 50
+heron.streammgr.network.backpressure.highwatermark.mb: 100
 
 # Low water mark on the num in MB that can be left outstanding on a connection
-heron.streammgr.network.backpressure.lowwatermark.mb: 30
+heron.streammgr.network.backpressure.lowwatermark.mb: 50
 
 ################################################################################
 # Configs related to Topology Master, starts with heron.tmaster.*
@@ -220,10 +227,6 @@ heron.instance.execute.batch.time.ms: 16
 # The maximum batch size in bytes for an bolt instance to execute tuples per attempt
 heron.instance.execute.batch.size.bytes: 32768 
 
-# The time interval for an instance to check the state change, 
-# for example, the interval a spout uses to check whether activate/deactivate is invoked
-heron.instance.state.check.interval.sec: 5 
-
 # The time to wait before the instance exits forcibly when uncaught exception happens
 heron.instance.force.exit.timeout.ms: 2000 
 
@@ -237,8 +240,6 @@ heron.instance.reconnect.metricsmgr.times: 60
 
 # The interval in second for an instance to sample its system metrics, for instance, cpu load.
 heron.instance.metrics.system.sample.interval.sec: 10
-
-heron.instance.slave.fetch.pplan.interval.sec: 1
 
 # For efficient acknowledgement
 heron.instance.acknowledgement.nbuckets: 10 

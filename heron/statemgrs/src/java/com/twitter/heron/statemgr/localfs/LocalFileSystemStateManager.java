@@ -14,7 +14,9 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -24,18 +26,56 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
+
+  /**
+   * Local filesystem implementation of a lock that mimics the file system behavior of the
+   * distributed lock.
+   */
+  private final class FileSystemLock implements Lock {
+    private String path;
+
+    private FileSystemLock(String path) {
+      this.path = path;
+    }
+
+    @Override
+    public boolean tryLock(long timeout, TimeUnit unit) throws InterruptedException {
+      long giveUpAtMillis = System.currentTimeMillis() + unit.toMillis(timeout);
+      byte[] fileContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
+      while (true) {
+        try {
+          if (setData(this.path, fileContents, false).get()) {
+            return true;
+          } else if (System.currentTimeMillis() >= giveUpAtMillis) {
+            return false;
+          } else {
+            TimeUnit.SECONDS.sleep(2); // need to pole the filesystem for availability
+          }
+        } catch (ExecutionException e) {
+          // this is thrown when the file exists, which means the lock can't be obtained
+        }
+      }
+    }
+
+    @Override
+    public void unlock() {
+      deleteNode(this.path, false);
+    }
+  }
 
   @Override
   public void initialize(Config ipconfig) {
@@ -89,9 +129,18 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  protected ListenableFuture<Boolean> deleteNode(String path) {
+  protected ListenableFuture<Boolean> deleteNode(String path, boolean deleteChildrenIfNecessary) {
     final SettableFuture<Boolean> future = SettableFuture.create();
-    boolean ret = FileUtils.deleteFile(path);
+    boolean ret = true;
+    if (FileUtils.isFileExists(path)) {
+      if (!deleteChildrenIfNecessary && FileUtils.hasChildren(path)) {
+        LOG.severe("delete called on a path with children but deleteChildrenIfNecessary is false: "
+            + path);
+        ret = false;
+      } else {
+        ret = FileUtils.deleteFile(path);
+      }
+    }
     future.set(ret);
 
     return future;
@@ -139,6 +188,16 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location, String topologyName) {
+    // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+    // This is because when running in simulator we control when a tmaster dies and
+    // comes up deterministically.
+    LOG.info("setMetricsCacheLocation: ");
+    return setData(StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
     return setData(StateLocation.TOPOLOGY, topologyName, topology.toByteArray(), false);
   }
@@ -165,6 +224,17 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName) {
+    return setData(StateLocation.STATEFUL_CHECKPOINT, topologyName, checkpoint.toByteArray(), true);
+  }
+
+  @Override
+  protected Lock getLock(String path) {
+    return new FileSystemLock(path);
+  }
+
+  @Override
   public void close() {
     // We would not clear anything here
     // Scheduler kill interface should take care of the cleaning
@@ -173,7 +243,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(),
+        .put(Key.STATEMGR_ROOT_PATH,
             System.getProperty("user.home") + "/.herondata/repository/state/local")
         .build();
     LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();

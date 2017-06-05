@@ -6,7 +6,9 @@ java_library(
     srcs = glob(["**/*.java"]),
     deps =  heron_java_proto_files() + [
         "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:config-java",
+        "//heron/common/src/java:utils-java",
         "//heron/simulator/src/java:simulator-java",
         "//third_party/java:mockito",
         "//third_party/java:junit4",

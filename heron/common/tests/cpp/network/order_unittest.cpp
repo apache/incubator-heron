@@ -17,6 +17,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <future>
 #include <chrono>
 #include "network/unittests.pb.h"
 #include "network/host_unittest.h"
@@ -26,13 +27,14 @@
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
+#include "threads/spcountdownlatch.h"
 #include "network/network.h"
 #include "basics/modinit.h"
 #include "errors/modinit.h"
 #include "threads/modinit.h"
 #include "network/modinit.h"
 
-static const sp_uint32 SERVER_PORT = 59000;
+const sp_int64 timeout_sec_ = 5;
 
 class Terminate : public Client {
  public:
@@ -49,7 +51,7 @@ class Terminate : public Client {
 
   virtual void HandleConnect(NetworkErrorCode _status) {
     if (_status == OK) {
-      TerminateMessage* message = new TerminateMessage();
+      TerminateMessage message;
       SendMessage(message);
       return;
     }
@@ -68,16 +70,20 @@ class Terminate : public Client {
 
 static OrderServer* server_;
 
-void start_server(sp_uint32 port) {
+void start_server(sp_uint32* port, CountDownLatch* latch) {
   NetworkOptions options;
   options.set_host(LOCALHOST);
-  options.set_port(port);
+  options.set_port(*port);
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
   EventLoopImpl ss;
   server_ = new OrderServer(&ss, options);
+  EXPECT_EQ(0, server_->get_serveroptions().get_port());
   if (server_->Start() != 0) GTEST_FAIL();
+  *port = server_->get_serveroptions().get_port();
+  EXPECT_GT(*port, 0);
+  latch->countDown();
   ss.loop();
 }
 
@@ -108,27 +114,38 @@ void terminate_server(sp_uint32 port) {
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {
+  sp_uint32 server_port = 0;
+  CountDownLatch* latch = new CountDownLatch(1);
+
   // start the server thread
-  std::thread sthread(start_server, SERVER_PORT);
+  std::future<void> sthread(std::async(std::launch::async, start_server, &server_port, latch));
+
+  latch->wait();
+  std::cout << "server port " << server_port << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
 
   // start the client threads
-  std::vector<std::thread> cthreads;
+  std::vector<std::future<void>> cthreads;
   for (sp_int32 i = 0; i < nclients; i++) {
-    cthreads.push_back(std::thread(start_client, SERVER_PORT, requests));
+    cthreads.push_back(std::async(std::launch::async, start_client, server_port, requests));
   }
 
   // wait for the client threads to terminate
   for (auto& thread : cthreads) {
-    thread.join();
+    if (thread.wait_for(std::chrono::seconds(timeout_sec_)) == std::future_status::timeout) {
+      GTEST_FAIL() << "timeout for client thread to join in " << timeout_sec_ << " seconds";
+    }
   }
 
   auto stop = std::chrono::high_resolution_clock::now();
 
   // now send a terminate message to server
-  terminate_server(SERVER_PORT);
-  sthread.join();
+  terminate_server(server_port);
+  if (sthread.wait_for(std::chrono::seconds(timeout_sec_)) == std::future_status::timeout) {
+    GTEST_FAIL() << "server recv " << server_->recv_pkts()
+        << "; server sent " << server_->sent_pkts();
+  }
 
   ASSERT_TRUE(server_->sent_pkts() == server_->recv_pkts());
   ASSERT_TRUE(server_->sent_pkts() == nclients * requests);
@@ -138,6 +155,7 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
             << std::endl;
 
   delete server_;
+  delete latch;
 }
 
 // Test ordering with 1 client and 1 server

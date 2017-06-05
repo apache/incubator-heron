@@ -15,6 +15,8 @@
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,20 +28,25 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
-import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Command;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
+import com.twitter.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.packing.PackingException;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.TMasterException;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -138,6 +145,19 @@ public class RuntimeManagerMain {
         .argName("container id")
         .build();
 
+    Option dryRun = Option.builder("u")
+        .desc("run in dry-run mode")
+        .longOpt("dry_run")
+        .required(false)
+        .build();
+
+    Option dryRunFormat = Option.builder("t")
+        .desc("dry-run format")
+        .longOpt("dry_run_format")
+        .hasArg()
+        .required(false)
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
@@ -154,6 +174,8 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(dryRun);
+    options.addOption(dryRunFormat);
     options.addOption(verbose);
 
     return options;
@@ -222,20 +244,30 @@ public class RuntimeManagerMain {
       containerId = cmd.getOptionValue("container_id");
     }
 
-    Command command = Command.makeCommand(commandOption);
+    Boolean dryRun = false;
+    if (cmd.hasOption("u")) {
+      dryRun = true;
+    }
 
-    // first load the defaults, then the config from files to override it
-    Config.Builder defaultsConfig = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile));
+    // Default dry-run output format type
+    DryRunFormatType dryRunFormat = DryRunFormatType.TABLE;
+    if (dryRun && cmd.hasOption("t")) {
+      String format = cmd.getOptionValue("dry_run_format");
+      dryRunFormat = DryRunFormatType.getDryRunFormatType(format);
+      LOG.fine(String.format("Running dry-run mode using format %s", format));
+    }
+
+    Command command = Command.makeCommand(commandOption);
 
     // add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .put(Keys.verbose(), verbose)
-        .put(Keys.topologyContainerId(), containerId);
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.DRY_RUN, dryRun)
+        .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
+        .put(Key.VERBOSE, verbose)
+        .put(Key.TOPOLOGY_CONTAINER_ID, containerId);
 
     // This is a command line option, but not a valid config key. Hence we don't use Keys
     if (componentParallelism != null) {
@@ -244,32 +276,51 @@ public class RuntimeManagerMain {
     }
 
     Config.Builder topologyConfig = Config.newBuilder()
-        .put(Keys.topologyName(), topologyName);
-
-    Config.Builder overrideConfig = Config.newBuilder()
-        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigFile));
+        .put(Key.TOPOLOGY_NAME, topologyName);
 
     // build the final config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
-            .putAll(defaultsConfig.build())
-            .putAll(overrideConfig.build())
-            .putAll(commandLineConfig.build())
-            .putAll(topologyConfig.build())
-            .build());
+    Config config = Config.toLocalMode(Config.newBuilder()
+        .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(commandLineConfig.build())
+        .putAll(topologyConfig.build())
+        .build());
 
     LOG.fine("Static config loaded successfully ");
     LOG.fine(config.toString());
 
+    /* Meaning of exit status code:
+      - status code = 0:
+        program exits without error
+      - 0 < status code < 100:
+        program fails to execute before program execution. For example,
+        JVM cannot find or load main class
+      - 100 <= status code < 200:
+        program fails to launch after program execution. For example,
+        topology definition file fails to be loaded
+      - status code == 200
+        program sends out dry-run response */
+    /* Since only stderr is used (by logging), we use stdout here to
+       propagate any message back to Python's executor.py (invoke site). */
     // Create a new instance of RuntimeManagerMain
     RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, command);
-    boolean isSuccessful = runtimeManagerMain.manageTopology();
-
-    // Log the result and exit
-    if (!isSuccessful) {
-      throw new RuntimeException(String.format("Failed to %s topology %s", command, topologyName));
-    } else {
-      LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+    try {
+      runtimeManagerMain.manageTopology();
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (UpdateDryRunResponse response) {
+      LOG.log(Level.FINE, "Sending out dry-run response");
+      // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
+      PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
+      out.print(runtimeManagerMain.renderDryRunResponse(response));
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      // Exit with status code 200 to indicate dry-run response is sent out
+      System.exit(200);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      LOG.log(Level.FINE, "Exception when submitting topology", e);
+      System.out.println(e.getMessage());
+      // Exit with status code 100 to indicate that error has happened on user-land
+      // SUPPRESS CHECKSTYLE RegexpSinglelineJava
+      System.exit(100);
     }
   }
 
@@ -293,9 +344,9 @@ public class RuntimeManagerMain {
    * 2. Valid whether the runtime management is legal
    * 3. Complete the runtime management for a specific command
    *
-   * @return true if run runtimeManager successfully
    */
-  public boolean manageTopology() {
+  public void manageTopology()
+      throws TopologyRuntimeManagementException, TMasterException, PackingException {
     String topologyName = Context.topologyName(config);
     // 1. Do prepare work
     // create an instance of state manager
@@ -304,11 +355,10 @@ public class RuntimeManagerMain {
     try {
       statemgr = ReflectionUtils.newInstance(statemgrClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
-      return false;
+      throw new TopologyRuntimeManagementException(String.format(
+          "Failed to instantiate state manager class '%s'",
+          statemgrClass), e);
     }
-
-    boolean isSuccessful = false;
 
     // Put it in a try block so that we can always clean resources
     try {
@@ -318,28 +368,22 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateRuntimeManage(adaptor, topologyName);
+      validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
-      if (isValid) {
-        // invoke the appropriate command to manage the topology
-        LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
+      // invoke the appropriate command to manage the topology
+      LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-        // build the runtime config
-        Config runtime = Config.newBuilder()
-            .put(Keys.topologyName(), Context.topologyName(config))
-            .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-            .build();
+      // build the runtime config
+      Config runtime = Config.newBuilder()
+          .put(Key.TOPOLOGY_NAME, Context.topologyName(config))
+          .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, adaptor)
+          .build();
 
-        // Create a ISchedulerClient basing on the config
-        ISchedulerClient schedulerClient = getSchedulerClient(runtime);
-        if (schedulerClient == null) {
-          LOG.severe("Failed to initialize scheduler client");
-          return false;
-        }
+      // Create a ISchedulerClient basing on the config
+      ISchedulerClient schedulerClient = getSchedulerClient(runtime);
 
-        isSuccessful = callRuntimeManagerRunner(runtime, schedulerClient);
-      }
+      callRuntimeManagerRunner(runtime, schedulerClient);
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
@@ -347,43 +391,69 @@ public class RuntimeManagerMain {
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(statemgr);
     }
-    return isSuccessful;
   }
 
-  protected boolean validateRuntimeManage(
+  protected void validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
-      String topologyName) {
+      String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
-      LOG.severe("No such topology exists");
-      return false;
+      throw new TopologyRuntimeManagementException(
+          String.format("Topology '%s' does not exist", topologyName));
     }
 
     // Check whether cluster/role/environ matched
     ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
-    if (executionState == null
-        || !executionState.getCluster().equals(Context.cluster(config))
-        || !executionState.getRole().equals(Context.role(config))
-        || !executionState.getEnviron().equals(Context.environ(config))) {
-      LOG.severe("cluster/role/environ not matched");
-      return false;
+    if (executionState == null) {
+      throw new TopologyRuntimeManagementException(
+          String.format("Failed to get execution state for topology %s", topologyName));
     }
 
-    return true;
+    String stateCluster = executionState.getCluster();
+    String stateRole = executionState.getRole();
+    String stateEnv = executionState.getEnviron();
+    String configCluster = Context.cluster(config);
+    String configRole = Context.role(config);
+    String configEnv = Context.environ(config);
+    if (!stateCluster.equals(configCluster)
+        || !stateRole.equals(configRole)
+        || !stateEnv.equals(configEnv)) {
+      String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
+      String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
+      throw new TopologyRuntimeManagementException(String.format(
+          "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
+          topologyName, currentState, configState));
+    }
   }
 
-  protected boolean callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient) {
+  protected void callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient)
+    throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
 
     // invoke the appropriate handlers based on command
-    return runtimeManagerRunner.call();
+    runtimeManagerRunner.call();
   }
 
-  protected ISchedulerClient getSchedulerClient(Config runtime) {
+  protected ISchedulerClient getSchedulerClient(Config runtime)
+      throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
+  }
+
+  protected String renderDryRunResponse(UpdateDryRunResponse resp) {
+    DryRunFormatType formatType = Context.dryRunFormatType(config);
+    switch (formatType) {
+      case RAW :
+        return new UpdateRawDryRunRenderer(resp).render();
+      case TABLE:
+        return new UpdateTableDryRunRenderer(resp, false).render();
+      case COLORED_TABLE:
+        return new UpdateTableDryRunRenderer(resp, true).render();
+      default: throw new IllegalArgumentException(
+          String.format("Unexpected rendering format: %s", formatType));
+    }
   }
 }

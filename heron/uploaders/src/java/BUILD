@@ -11,6 +11,7 @@ uploader_spi_files = [
 s3_deps_files = \
     uploader_spi_files + [
         "//third_party/java:aws-java-sdk",
+        "//third_party/java:guava",
     ]
 
 java_library(
@@ -35,14 +36,12 @@ genrule(
 java_library(
     name = 'localfs-uploader-java',
     srcs = glob(["**/localfs/**/*.java"]),
-    resources = glob(["**/localfs/**/*.yaml"]),
     deps = uploader_spi_files,
 )
 
 java_binary(
     name = 'localfs-uploader-unshaded',
     srcs = glob(["**/localfs/**/*.java"]),
-    resources = glob(["**/localfs/**/*.yaml"]),
     deps = uploader_spi_files,
 )
 

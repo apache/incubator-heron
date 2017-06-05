@@ -18,7 +18,6 @@
 #define SRC_CPP_SVCS_STMGR_SRC_GROUPING_FIELDS_GROUPING_H_
 
 #include <functional>
-#include <list>
 #include <vector>
 #include "grouping/grouping.h"
 #include "proto/messages.h"
@@ -34,10 +33,10 @@ class FieldsGrouping : public Grouping {
   virtual ~FieldsGrouping();
 
   virtual void GetListToSend(const proto::system::HeronDataTuple& _tuple,
-                             std::list<sp_int32>& _return);
+                             std::vector<sp_int32>& _return);
 
  private:
-  std::list<sp_int32> fields_grouping_indices_;
+  std::vector<sp_int32> fields_grouping_indices_;
   std::hash<sp_string> str_hash_fn;
 };
 

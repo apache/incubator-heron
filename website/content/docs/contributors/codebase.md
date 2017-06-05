@@ -7,7 +7,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 [github]({{% githubMaster %}}).
 
 If you're looking for documentation about developing topologies for a Heron
-cluster, see [Building Topologies](../../developers/topologies) instead.
+cluster, see [Building Topologies](../../developers/java/topologies) instead.
 
 ## Languages
 
@@ -20,7 +20,7 @@ The primary programming languages for Heron are C++, Java, and Python.
 * **Java 8** is used primarily for Heron's [topology
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found
-in [Building Topologies](../../developers/topologies), while documentation for the Java
+in [Building Topologies](../../developers/java/topologies), while documentation for the Java
 API can be found [here](/api/com/twitter/heron/api/topology/package-summary.html). Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.
 
@@ -113,7 +113,7 @@ Heron's API for writing topologies is written in Java. The code for this API can
 be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
-Topologies](../../developers/topologies), while API documentation can be found
+Topologies](../../developers/java/topologies), while API documentation can be found
 [here](/api/com/twitter/heron/api/topology/package-summary.html).
 
 ### Simulator
@@ -139,7 +139,7 @@ Heron has a tool called `heron` that is used to both provide a CLI interface
 for [managing topologies](../../operators/heron-cli) and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 The Python code for `heron` can be found in
-[`heron/cli`]({{% githubMaster %}}/heron/cli).
+[`heron/tools/cli`]({{% githubMaster %}}/heron/tools/cli).
 
 Sample configurations for different Heron schedulers
 
@@ -149,19 +149,19 @@ Sample configurations for different Heron schedulers
 ### Heron Tracker
 
 The Python code for the [Heron Tracker](../../operators/heron-tracker) can be
-found in [`heron/tracker`]({{% githubMaster %}}/heron/tracker).
+found in [`heron/tools/tracker`]({{% githubMaster %}}/heron/tools/tracker).
 
 The Tracker is a web server written in Python. It relies on the
 [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new HTTP
 routes to the Tracker in
-[`main.py`]({{% githubMaster %}}/heron/tracker/src/python/main.py) and
+[`main.py`]({{% githubMaster %}}/heron/tools/tracker/src/python/main.py) and
 corresponding handlers in the
-[`handlers`]({{% githubMaster %}}/heron/tracker/src/python/handlers) directory.
+[`handlers`]({{% githubMaster %}}/heron/tools/tracker/src/python/handlers) directory.
 
 ### Heron UI
 
 The Python code for the [Heron UI](../../operators/heron-ui) can be found in
-[`heron/ui`]({{% githubMaster %}}/heron/ui).
+[`heron/tools/ui`]({{% githubMaster %}}/heron/tools/ui).
 
 Like Heron Tracker, Heron UI is a web server written in Python that relies on
 the [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new

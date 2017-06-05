@@ -23,16 +23,18 @@ import time
 import traceback
 
 import heron.common.src.python.utils.log as log
-import heron.tools.common.src.python.utils.heronparser as hrc_parse
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.cli.src.python.help as cli_help
 import heron.tools.cli.src.python.activate as activate
 import heron.tools.cli.src.python.deactivate as deactivate
 import heron.tools.cli.src.python.kill as kill
+import heron.tools.cli.src.python.result as result
 import heron.tools.cli.src.python.restart as restart
 import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
+
+from heron.tools.cli.src.python.opts import cleaned_up_files
 
 Log = log.Log
 
@@ -68,12 +70,11 @@ def create_parser():
   Main parser
   :return:
   '''
-  parser = hrc_parse.HeronArgumentParser(
+  parser = argparse.ArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
       formatter_class=config.SubcommandHelpFormatter,
-      add_help=False,
-      fromfile_prefix_chars='@')
+      add_help=True)
 
   subparsers = parser.add_subparsers(
       title="Available commands",
@@ -115,8 +116,8 @@ def run(command, parser, command_args, unknown_args):
   if command in runners:
     return runners[command].run(command, parser, command_args, unknown_args)
   else:
-    Log.error('Unknown subcommand: %s' % command)
-    return 1
+    err_context = 'Unknown subcommand: %s' % command
+    return result.SimpleResult(result.Status.InvocationError, err_context)
 
 def cleanup(files):
   '''
@@ -124,7 +125,10 @@ def cleanup(files):
   :return:
   '''
   for cur_file in files:
-    shutil.rmtree(os.path.dirname(cur_file))
+    if os.path.isdir(cur_file):
+      shutil.rmtree(cur_file)
+    else:
+      shutil.rmtree(os.path.dirname(cur_file))
 
 
 ################################################################################
@@ -214,9 +218,6 @@ def main():
   # command to be execute
   command = command_line_args['subcommand']
 
-  # file resources to be cleaned when exit
-  files = []
-
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
@@ -224,23 +225,24 @@ def main():
     if not command_line_args:
       return 1
     # register dirs cleanup function during exit
-    files.append(command_line_args['override_config_file'])
+    cleaned_up_files.append(command_line_args['override_config_file'])
 
-  atexit.register(cleanup, files)
+  atexit.register(cleanup, cleaned_up_files)
 
   # print the input parameters, if verbose is enabled
   Log.debug(command_line_args)
 
   start = time.time()
-  retcode = run(command, parser, command_line_args, unknown_args)
+  results = run(command, parser, command_line_args, unknown_args)
+  if command not in ('help', 'version'):
+    result.render(results)
   end = time.time()
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
     Log.info('Elapsed time: %.3fs.', (end - start))
 
-  return 0 if retcode else 1
-
+  return 0 if result.isAllSuccessful(results) else 1
 
 if __name__ == "__main__":
   sys.exit(main())

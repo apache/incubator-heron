@@ -15,12 +15,14 @@
 package com.twitter.heron.spi.packing;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+
+import com.twitter.heron.common.basics.ByteAmount;
 
 public class PackingPlan {
   private final String id;
@@ -37,28 +39,40 @@ public class PackingPlan {
   }
 
   /**
+   * Computes the maximum of all the resources required by the containers in the packing plan. If
+   * the PackingPlan has already been scheduled, the scheduled resources will be used over the
+   * required resources.
+   *
+   * @return maximum Resources found in all containers.
+   */
+  public Resource getMaxContainerResources() {
+    double maxCpu = 0;
+    ByteAmount maxRam = ByteAmount.ZERO;
+    ByteAmount maxDisk = ByteAmount.ZERO;
+    for (ContainerPlan containerPlan : getContainers()) {
+      Resource containerResource =
+          containerPlan.getScheduledResource().or(containerPlan.getRequiredResource());
+      maxCpu = Math.max(maxCpu, containerResource.getCpu());
+      maxRam = maxRam.max(containerResource.getRam());
+      maxDisk = maxDisk.max(containerResource.getDisk());
+    }
+
+    return new Resource(maxCpu, maxRam, maxDisk);
+  }
+
+  /**
    * Creates a clone of {@link PackingPlan}. It also computes the maximum of all the resources
    * required by containers in the packing plan and updates the containers of the clone with the
    * max resource information
    */
   public PackingPlan cloneWithHomogeneousScheduledResource() {
-    double maxCpu = 0;
-    long maxRam = 0;
-    long maxDisk = 0;
-    for (ContainerPlan containerPlan : getContainers()) {
-      maxCpu = Math.max(maxCpu, containerPlan.getRequiredResource().getCpu());
-      maxRam = Math.max(maxRam, containerPlan.getRequiredResource().getRam());
-      maxDisk = Math.max(maxDisk, containerPlan.getRequiredResource().getDisk());
-    }
-
-    Resource maxResource = new Resource(maxCpu, maxRam, maxDisk);
-    Set<ContainerPlan> updatedContainers = new HashSet<>();
+    Resource maxResource = getMaxContainerResources();
+    Set<ContainerPlan> updatedContainers = new LinkedHashSet<>();
     for (ContainerPlan container : getContainers()) {
       updatedContainers.add(container.cloneWithScheduledResource(maxResource));
     }
 
-    PackingPlan updatedPackingPlan = new PackingPlan(getId(), updatedContainers);
-    return updatedPackingPlan;
+    return new PackingPlan(getId(), updatedContainers);
   }
 
   public String getId() {
@@ -67,6 +81,10 @@ public class PackingPlan {
 
   public Set<ContainerPlan> getContainers() {
     return containers;
+  }
+
+  public Map<Integer, ContainerPlan> getContainersMap() {
+    return containersMap;
   }
 
   public Optional<ContainerPlan> getContainer(int containerId) {
@@ -105,7 +123,7 @@ public class PackingPlan {
    * @return String describing component ram distribution
    */
   public String getComponentRamDistribution() {
-    Map<String, Long> ramMap = new HashMap<>();
+    Map<String, ByteAmount> ramMap = new HashMap<>();
     // The implementation assumes instances for the same component require same ram
     for (ContainerPlan containerPlan : this.getContainers()) {
       for (InstancePlan instancePlan : containerPlan.getInstances()) {
@@ -116,7 +134,7 @@ public class PackingPlan {
     // Convert it into a formatted String
     StringBuilder ramMapBuilder = new StringBuilder();
     for (String component : ramMap.keySet()) {
-      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component)));
+      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component).asBytes()));
     }
 
     // Remove the duplicated "," at the end

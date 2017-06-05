@@ -16,9 +16,12 @@ package com.twitter.heron.spi.utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -40,32 +43,44 @@ public final class TMasterUtils {
    * Communicate with TMaster with command
    *
    * @param command the command requested to TMaster, activate or deactivate.
-   * @return true if the requested command is processed successfully by tmaster
    */
-  public static boolean sendToTMaster(String command, String topologyName,
-                                      SchedulerStateManagerAdaptor stateManager) {
+  @VisibleForTesting
+  public static void sendToTMaster(String command, String topologyName,
+                                      SchedulerStateManagerAdaptor stateManager,
+                                      NetworkUtils.TunnelConfig tunnelConfig)
+      throws TMasterException {
     // fetch the TMasterLocation for the topology
     LOG.fine("Fetching TMaster location for topology: " + topologyName);
 
     TopologyMaster.TMasterLocation location = stateManager.getTMasterLocation(topologyName);
     if (location == null) {
-      LOG.severe("Failed to fetch TMaster Location for topology: " + topologyName);
-      return false;
+      throw new TMasterException("Failed to fetch TMaster location for topology: "
+        + topologyName);
     }
+
     LOG.fine("Fetched TMaster location for topology: " + topologyName);
 
     // for the url request to be sent to TMaster
-    String endpoint = String.format("http://%s:%d/%s?topologyid=%s",
+    String url = String.format("http://%s:%d/%s?topologyid=%s",
         location.getHost(), location.getControllerPort(), command, location.getTopologyId());
-    LOG.fine("HTTP URL for TMaster: " + endpoint);
-
-    // create a URL connection
-    HttpURLConnection connection = null;
     try {
-      connection = (HttpURLConnection) new URL(endpoint).openConnection();
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to get a HTTP connection to TMaster: ", e);
-      return false;
+      URL endpoint = new URL(url);
+      LOG.fine("HTTP URL for TMaster: " + endpoint);
+      sendGetRequest(endpoint, command, tunnelConfig);
+    } catch (MalformedURLException e) {
+      throw new TMasterException("Invalid URL for TMaster endpoint: " + url, e);
+    }
+  }
+
+  private static void sendGetRequest(URL endpoint, String command,
+                                        NetworkUtils.TunnelConfig tunnelConfig)
+      throws TMasterException {
+    // create a URL connection
+    HttpURLConnection connection =
+        NetworkUtils.getProxiedHttpConnectionIfNeeded(endpoint, tunnelConfig);
+    if (connection == null) {
+      throw new TMasterException(String.format(
+          "Failed to get a HTTP connection to TMaster: %s", endpoint));
     }
     LOG.fine("Successfully opened HTTP connection to TMaster");
 
@@ -73,75 +88,69 @@ public final class TMasterUtils {
     NetworkUtils.sendHttpGetRequest(connection);
     LOG.fine("Sent the HTTP payload to TMaster");
 
-    boolean success = false;
     // get the response and check if it is successful
     try {
       int responseCode = connection.getResponseCode();
       if (responseCode == HttpURLConnection.HTTP_OK) {
-        LOG.fine("Successfully got a HTTP response from TMaster for " + command);
-        success = true;
+        LOG.fine("Successfully got a HTTP response from TMaster using command: " + command);
       } else {
-        LOG.fine(String.format("Non OK HTTP response %d from TMaster for command %s",
+        throw new TMasterException(
+            String.format("Non OK HTTP response %d from TMaster for command %s",
             responseCode, command));
       }
     } catch (IOException e) {
-      LOG.log(Level.SEVERE,
-          "Failed to receive HTTP response from TMaster for " + command + " :", e);
+      throw new TMasterException(String.format(
+          "Failed to receive HTTP response from TMaster using command: `%s`", command), e);
     } finally {
       connection.disconnect();
     }
-
-    return success;
   }
-
 
   /**
    * Get current running TopologyState
    */
-  public static TopologyAPI.TopologyState getRuntimeTopologyState(
+  private static TopologyAPI.TopologyState getRuntimeTopologyState(
       String topologyName,
-      SchedulerStateManagerAdaptor statemgr) {
+      SchedulerStateManagerAdaptor statemgr) throws TMasterException {
     PhysicalPlans.PhysicalPlan plan = statemgr.getPhysicalPlan(topologyName);
 
     if (plan == null) {
-      LOG.log(Level.SEVERE, "Failed to get physical plan for topology {0}", topologyName);
-      return null;
+      throw new TMasterException(String.format(
+        "Failed to get physical plan for topology '%s'", topologyName));
     }
 
     return plan.getTopology().getState();
   }
 
-  public static boolean transitionTopologyState(String topologyName,
-                                                TMasterCommand topologyStateControlCommand,
-                                                SchedulerStateManagerAdaptor statemgr,
-                                                TopologyAPI.TopologyState startState,
-                                                TopologyAPI.TopologyState expectedState) {
+  public static void transitionTopologyState(String topologyName,
+                                             TMasterCommand topologyStateControlCommand,
+                                             SchedulerStateManagerAdaptor statemgr,
+                                             TopologyAPI.TopologyState startState,
+                                             TopologyAPI.TopologyState expectedState,
+                                             NetworkUtils.TunnelConfig tunnelConfig)
+      throws TMasterException {
     TopologyAPI.TopologyState state = TMasterUtils.getRuntimeTopologyState(topologyName, statemgr);
     if (state == null) {
-      LOG.severe("Topology still not initialized.");
-      return false;
+      throw new TMasterException(String.format(
+          "Topology '%s' is not initialized yet", topologyName));
     }
 
     if (state == expectedState) {
-      LOG.log(Level.SEVERE, "Topology {0} command received topology {1} but already in {2} state",
-          new Object[] {topologyStateControlCommand, topologyName, state});
-      return true;
+      LOG.warning(String.format(
+          "Topology %s command received but topology '%s' already in state %s",
+          topologyStateControlCommand, topologyName, state));
+      return;
     }
 
     if (state != startState) {
-      LOG.log(Level.SEVERE, "Topology not in {0} state", startState);
-      return false;
+      throw new TMasterException(String.format(
+          "Topology '%s' is not in state '%s'", topologyName, startState));
     }
 
-    if (!TMasterUtils.sendToTMaster(
-        topologyStateControlCommand.name().toLowerCase(), topologyName, statemgr)) {
-      LOG.log(Level.SEVERE, "Failed to {0} topology: {1} ",
-          new Object[]{topologyStateControlCommand, topologyName});
-      return false;
-    }
+    TMasterUtils.sendToTMaster(
+        topologyStateControlCommand.name().toLowerCase(), topologyName, statemgr, tunnelConfig);
 
     LOG.log(Level.INFO,
         "Topology command {0} completed successfully.", topologyStateControlCommand);
-    return true;
   }
 }

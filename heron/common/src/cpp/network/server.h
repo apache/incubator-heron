@@ -66,6 +66,8 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <typeindex>
+#include <list>
 #include "basics/basics.h"
 #include "glog/logging.h"
 #include "network/connection.h"
@@ -128,6 +130,11 @@ class Server : public BaseServer {
   // message is now owned by the Server class
   void SendMessage(Connection* connection, const google::protobuf::Message& message);
 
+  void SendMessage(Connection* _connection,
+                   sp_int32 _byte_size,
+                   const sp_string _type_name,
+                   const char* _message);
+
   // Close a connection. This function doesn't return anything.
   // When the connection is attempted to be closed(which can happen
   // at a later time if using thread pool), The HandleConnectionClose
@@ -167,9 +174,6 @@ class Server : public BaseServer {
   virtual void StartBackPressureConnectionCb(Connection* connection);
   // Backpressure Reliever
   virtual void StopBackPressureConnectionCb(Connection* _connection);
-
-  // Connection buffer size monitor
-  virtual void ConnectionBufferChangeCb(Connection* _connection);
 
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
@@ -211,11 +215,12 @@ class Server : public BaseServer {
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
+    M* m = nullptr;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      __global_protobuf_pool_release__(m);
       CloseConnection(_conn);
       return;
     }
@@ -231,15 +236,15 @@ class Server : public BaseServer {
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
+    M* m = nullptr;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      __global_protobuf_pool_release__(m);
       CloseConnection(_conn);
       return;
     }
-    CHECK(m->IsInitialized());
 
     std::function<void()> cb = std::bind(method, _t, _conn, m);
 

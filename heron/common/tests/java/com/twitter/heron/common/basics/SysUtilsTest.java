@@ -17,6 +17,7 @@ package com.twitter.heron.common.basics;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.time.Duration;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -24,10 +25,10 @@ import org.junit.Test;
 
 
 public class SysUtilsTest {
-  public static final int NUM_ATTEMPTS = 100;
+  private static final int NUM_ATTEMPTS = 100;
 
   @Test
-  public void testFreePort() throws Exception {
+  public void testFreePort() throws IOException {
     // Randomized test
     for (int i = 0; i < NUM_ATTEMPTS; ++i) {
       int port = SysUtils.getFreePort();
@@ -38,19 +39,19 @@ public class SysUtilsTest {
   }
 
   @Test
-  public void testSleep() throws Exception {
+  public void testSleep() {
     for (int i = 0; i < NUM_ATTEMPTS; i++) {
       // The value can not be negative
-      long expectedSleepTimeMs = new Random().nextInt(100);
+      Duration expectedSleepTime = Duration.ofMillis(new Random().nextInt(100));
       long start = System.currentTimeMillis();
-      SysUtils.sleep(expectedSleepTimeMs);
+      SysUtils.sleep(expectedSleepTime);
       long end = System.currentTimeMillis();
-      Assert.assertTrue((end - start) >= expectedSleepTimeMs);
+      Assert.assertTrue((end - start) >= expectedSleepTime.toMillis());
     }
   }
 
   @Test
-  public void testCloseIgnoringException() throws Exception {
+  public void testCloseIgnoringException() {
     Closeable closeable = new Closeable() {
       @Override
       public void close() throws IOException {

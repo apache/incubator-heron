@@ -35,6 +35,8 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <list>
+#include <typeindex>
 #include "basics/basics.h"
 #include "glog/logging.h"
 #include "network/connection.h"
@@ -106,7 +108,7 @@ class Client : public BaseClient {
 
   // This interface is used if you want to communicate with the other end
   // on a non-request-response based communication.
-  void SendMessage(google::protobuf::Message* _message);
+  void SendMessage(const google::protobuf::Message& _message);
 
   // Add a timer to be invoked after msecs microseconds. Returns the timer id.
   sp_int64 AddTimer(VCallback<> cb, sp_int64 msecs);
@@ -130,16 +132,6 @@ class Client : public BaseClient {
     requestResponseMap_[_request->GetTypeName()] = m->GetTypeName();
     delete m;
     delete _request;
-  }
-
-  // Register a handler for a particular request type
-  template <typename T, typename M>
-  void InstallRequestHandler(void (T::*method)(REQID id, M*)) {
-    google::protobuf::Message* m = new M();
-    T* t = static_cast<T*>(this);
-    requestHandlers[m->GetTypeName()] =
-        std::bind(&Client::dispatchRequest<T, M>, this, t, method, std::placeholders::_1);
-    delete m;
   }
 
   // Register a handler for a particular message type
@@ -208,7 +200,7 @@ class Client : public BaseClient {
   void Init();
 
   void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
-  void InternalSendMessage(google::protobuf::Message* _request);
+  void InternalSendMessage(const google::protobuf::Message& _message);
   void InternalSendResponse(OutgoingPacket* _packet);
 
   // Internal method to be called by the Connection class
@@ -231,7 +223,7 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = new M();
+        m = __global_protobuf_pool_acquire__(m);
         context_map_.erase(rid);
         _ipkt->UnPackProtocolBuffer(m);
       } else {
@@ -249,30 +241,13 @@ class Client : public BaseClient {
   }
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t, void (T::*method)(REQID id, M*), IncomingPacket* _ipkt) {
-    REQID rid;
-    CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
-      // We could not decode the pb properly
-      std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
-      return;
-    }
-    CHECK(m->IsInitialized());
-
-    std::function<void()> cb = std::bind(method, _t, rid, m);
-
-    cb();
-  }
-
-  template <typename T, typename M>
   void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
-    M* m = new M();
+    M* m = nullptr;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      __global_protobuf_pool_release__(m);
       return;
     }
     CHECK(m->IsInitialized());
@@ -286,7 +261,6 @@ class Client : public BaseClient {
   std::unordered_map<REQID, std::pair<sp_string, void*> > context_map_;
 
   typedef std::function<void(IncomingPacket*)> handler;
-  std::unordered_map<std::string, handler> requestHandlers;
   std::unordered_map<std::string, handler> messageHandlers;
   typedef std::function<void(IncomingPacket*, NetworkErrorCode)> res_handler;
   std::unordered_map<std::string, res_handler> responseHandlers;

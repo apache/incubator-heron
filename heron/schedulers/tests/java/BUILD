@@ -6,6 +6,7 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
+    "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:junit4",
     "//third_party/java:mockito",
 ]
@@ -29,11 +30,13 @@ aurora_deps_files = [
 ]
 
 yarn_deps_files = [
+    "//heron/packing/src/java:roundrobin-packing",
     "//heron/schedulers/src/java:yarn-scheduler-java",
     "@org_apache_reef_reef_common//jar",
     "@org_apache_reef_tang//jar",
     "@org_apache_reef_wake//jar",
     "@org_apache_reef_reef_runtime_local//jar",
+    "@org_apache_reef_reef_runtime_yarn//jar",
     "@javax_inject_javax_inject//jar",
     "@org_apache_avro_avro//jar",
     "@commons_lang_commons_lang//jar",
@@ -62,14 +65,15 @@ marathon_deps_files = [
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
-  deps = scheduler_deps_files + aurora_deps_files,
+  deps = scheduler_deps_files + aurora_deps_files + ["@commons_cli_commons_cli//jar"],
 )
 
 java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.aurora.AuroraSchedulerTest",
     "com.twitter.heron.scheduler.aurora.AuroraLauncherTest",
-    "com.twitter.heron.scheduler.aurora.AuroraControllerTest",
+    "com.twitter.heron.scheduler.aurora.AuroraCLIControllerTest",
+    "com.twitter.heron.scheduler.aurora.AuroraContextTest",
   ],
   runtime_deps = [ ":aurora-tests" ],
   size = "small",
@@ -85,8 +89,8 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.yarn.YarnSchedulerTest",
     "com.twitter.heron.scheduler.yarn.HeronMasterDriverTest",
-    "com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest",
     "com.twitter.heron.scheduler.yarn.HeronExecutorTaskTest",
+    "com.twitter.heron.scheduler.yarn.YarnLauncherTest",
   ],
   runtime_deps = [ ":yarn-tests" ],
   size = "small",

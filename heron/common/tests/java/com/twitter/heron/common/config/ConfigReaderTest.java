@@ -14,27 +14,58 @@
 
 package com.twitter.heron.common.config;
 
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ConfigReaderTest {
-  private static final Logger LOG = Logger.getLogger(ConfigReaderTest.class.getName());
+  private static final String ROLE_KEY = "role";
+  private static final String ENVIRON_KEY = "environ";
+  private static final String USER_KEY = "user";
+
+  private static final String LAUNCHER_CLASS_KEY = "heron.launcher.class";
+
+  private static final String RESOURCE_LOC = "/heron/common/tests/resources/defaults.yaml";
+
+  private void testProperty(Map<String, Object> props) {
+    Assert.assertEquals("role", props.get(ROLE_KEY));
+    Assert.assertEquals("environ", props.get(ENVIRON_KEY));
+    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher",
+        props.get(LAUNCHER_CLASS_KEY));
+    Assert.assertNull(props.get(USER_KEY));
+  }
+
+  private InputStream loadResource() {
+    InputStream inputStream  = getClass().getResourceAsStream(RESOURCE_LOC);
+    if (inputStream == null) {
+      throw new RuntimeException("Sample output file not found");
+    }
+    return inputStream;
+  }
 
   @Test
-  public void testLoadFile() throws Exception {
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"),
-        Constants.TEST_DATA_PATH, "defaults.yaml").toString();
-    Map<String, Object> props = ConfigReader.loadFile(file);
+  public void testLoadFile() throws IOException {
+    InputStream inputStream = loadResource();
+    File file = File.createTempFile("defaults_temp", "yaml");
+    file.deleteOnExit();
+    OutputStream outputStream = new FileOutputStream(file);
+    IOUtils.copy(inputStream, outputStream);
+    outputStream.close();
+    Map<String, Object> props = ConfigReader.loadFile(file.getAbsolutePath());
+    testProperty(props);
+  }
 
-    Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
-    Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
-    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher",
-        props.get(Constants.LAUNCHER_CLASS_KEY));
-
-    Assert.assertNull(props.get(Constants.USER_KEY));
+  @Test
+  public void testLoadStream() {
+    InputStream inputStream = loadResource();
+    Map<String, Object> props = ConfigReader.loadStream(inputStream);
+    testProperty(props);
   }
 }

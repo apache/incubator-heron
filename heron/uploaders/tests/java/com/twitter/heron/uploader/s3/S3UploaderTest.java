@@ -16,17 +16,19 @@ package com.twitter.heron.uploader.s3;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.services.s3.AmazonS3;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -36,23 +38,21 @@ import static org.mockito.Mockito.when;
 
 public class S3UploaderTest {
   private S3Uploader uploader;
-  private AmazonS3Client mockS3Client;
+  private AmazonS3 mockS3Client;
   private Config.Builder configBuilder;
   private File tempFile;
 
   @Before
   public void setUp() throws Exception {
-    mockS3Client = mock(AmazonS3Client.class);
+    mockS3Client = mock(AmazonS3.class);
 
     tempFile = File.createTempFile("temp-file-name", ".tmp");
     tempFile.deleteOnExit();
 
     configBuilder = Config.newBuilder()
         .put(S3Context.HERON_UPLOADER_S3_BUCKET, "bucket")
-        .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, "access_key")
-        .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, "secret_key")
-        .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
-        .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), "topology.tar.gz");
+        .put(Key.TOPOLOGY_NAME, "test-topology")
+        .put(Key.TOPOLOGY_PACKAGE_FILE, "topology.tar.gz");
 
     uploader = new S3Uploader();
     uploader.initialize(configBuilder.build());
@@ -77,8 +77,8 @@ public class S3UploaderTest {
         .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, accessKey)
         .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, secretKey)
         .put(S3Context.HERON_UPLOADER_S3_URI, s3Url)
-        .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
-        .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), tempFile.getAbsolutePath());
+        .put(Key.TOPOLOGY_NAME, "test-topology")
+        .put(Key.TOPOLOGY_PACKAGE_FILE, tempFile.getAbsolutePath());
 
     S3Uploader s3Uploader = new S3Uploader();
     s3Uploader.initialize(s3Config.build());
@@ -93,14 +93,14 @@ public class S3UploaderTest {
     String expectedBucket = "bucket";
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(false);
-    when(mockS3Client.getResourceUrl(expectedBucket, expectedRemotePath)).thenReturn("http://url");
+    when(mockS3Client.getUrl(expectedBucket, expectedRemotePath)).thenReturn(new URL("http://url"));
 
     URI uri = uploader.uploadPackage();
 
     verify(mockS3Client).putObject(Mockito.eq(expectedBucket),
         Mockito.eq(expectedRemotePath), Mockito.any(File.class));
 
-    verify(mockS3Client).getResourceUrl(expectedBucket, expectedRemotePath);
+    verify(mockS3Client).getUrl(expectedBucket, expectedRemotePath);
 
     assertEquals(new URI("http://url"), uri);
   }
@@ -112,7 +112,7 @@ public class S3UploaderTest {
     String expectedBucket = "bucket";
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
-    when(mockS3Client.getResourceUrl(expectedBucket, expectedRemotePath)).thenReturn("http://url");
+    when(mockS3Client.getUrl(expectedBucket, expectedRemotePath)).thenReturn(new URL("http://url"));
 
     URI uri = uploader.uploadPackage();
 
@@ -122,12 +122,12 @@ public class S3UploaderTest {
     verify(mockS3Client).putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
         Mockito.any(File.class));
 
-    verify(mockS3Client).getResourceUrl(expectedBucket, expectedRemotePath);
+    verify(mockS3Client).getUrl(expectedBucket, expectedRemotePath);
 
     assertEquals(new URI("http://url"), uri);
   }
 
-  @Test
+  @Test(expected = UploaderException.class)
   @SuppressWarnings("unchecked")
   public void handlePutObjectExceptionOnUpload() throws Exception {
     String expectedRemotePath = "test-topology/topology.tar.gz";
@@ -135,10 +135,8 @@ public class S3UploaderTest {
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
     when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
-        Mockito.any(File.class))).thenThrow(AmazonClientException.class);
-
-    URI uri = uploader.uploadPackage();
-    assertEquals(null, uri);
+        Mockito.any(File.class))).thenThrow(SdkClientException.class);
+    uploader.uploadPackage();
   }
 
   @Test
@@ -189,7 +187,7 @@ public class S3UploaderTest {
     String expectedRemotePath = "path/prefix/test-topology/topology.tar.gz";
     String expectedBucket = "bucket";
 
-    when(mockS3Client.getResourceUrl(expectedBucket, expectedRemotePath)).thenReturn("http://url");
+    when(mockS3Client.getUrl(expectedBucket, expectedRemotePath)).thenReturn(new URL("http://url"));
 
     uploader.uploadPackage();
 

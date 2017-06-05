@@ -44,7 +44,7 @@ import org.apache.storm.serialization.IKryoFactory;
  * Spouts. .</p>
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class Config extends com.twitter.heron.api.Config {
+public class Config extends HashMap<String, Object> {
   private static final long serialVersionUID = 4781760255471579334L;
 
   /**
@@ -315,81 +315,82 @@ public class Config extends com.twitter.heron.api.Config {
   public static final String STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS =
       "stormcompat.topology.auto.task.hooks";
 
-  public static void setDebug(Map<String, Object> conf, boolean isOn) {
+  public static void setDebug(Map conf, boolean isOn) {
     conf.put(Config.TOPOLOGY_DEBUG, isOn);
   }
 
-  public static void setTeamName(Map<String, Object> conf, String teamName) {
+  public static void setTeamName(Map conf, String teamName) {
     conf.put(Config.TOPOLOGY_TEAM_NAME, teamName);
   }
 
-  public static void setTeamEmail(Map<String, Object> conf, String teamEmail) {
+  public static void setTeamEmail(Map conf, String teamEmail) {
     conf.put(Config.TOPOLOGY_TEAM_EMAIL, teamEmail);
   }
 
-  public static void setTopologyCapTicket(Map<String, Object> conf, String ticket) {
+  public static void setTopologyCapTicket(Map conf, String ticket) {
     conf.put(Config.TOPOLOGY_CAP_TICKET, ticket);
   }
 
-  public static void setTopologyProjectName(Map<String, Object> conf, String project) {
+  public static void setTopologyProjectName(Map conf, String project) {
     conf.put(Config.TOPOLOGY_PROJECT_NAME, project);
   }
 
-  public static void setNumWorkers(Map<String, Object> conf, int workers) {
+  public static void setNumWorkers(Map conf, int workers) {
     conf.put(Config.TOPOLOGY_WORKERS, workers);
   }
 
-  public static void setNumAckers(Map<String, Object> conf, int numExecutors) {
+  public static void setNumAckers(Map conf, int numExecutors) {
     conf.put(Config.TOPOLOGY_ACKER_EXECUTORS, numExecutors);
   }
 
-  public static void setMessageTimeoutSecs(Map<String, Object> conf, int secs) {
+  public static void setMessageTimeoutSecs(Map conf, int secs) {
     conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, secs);
   }
 
-  public static void registerSerialization(Map<String, Object> conf, Class klass) {
+  public static void registerSerialization(Map conf, Class klass) {
     getRegisteredSerializations(conf).add(klass.getName());
   }
 
   public static void registerSerialization(
-      Map<String, Object> conf, Class klass, Class<? extends Serializer> serializerClass) {
+      Map conf, Class klass, Class<? extends Serializer> serializerClass) {
     Map<String, String> register = new HashMap<>();
     register.put(klass.getName(), serializerClass.getName());
     getRegisteredSerializations(conf).add(register);
   }
 
+  @SuppressWarnings("rawtypes")
   public static void registerDecorator(
-      Map<String, Object> conf,
+      Map conf,
       Class<? extends IKryoDecorator> klass) {
     getRegisteredDecorators(conf).add(klass.getName());
   }
 
-  public static void setKryoFactory(Map<String, Object> conf, Class<? extends IKryoFactory> klass) {
+  public static void setKryoFactory(Map conf, Class<? extends IKryoFactory> klass) {
     conf.put(Config.TOPOLOGY_KRYO_FACTORY, klass.getName());
   }
 
-  public static void setSkipMissingKryoRegistrations(Map<String, Object> conf, boolean skip) {
+  public static void setSkipMissingKryoRegistrations(Map conf, boolean skip) {
     conf.put(Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, skip);
   }
 
-  public static void setMaxTaskParallelism(Map<String, Object> conf, int max) {
+  public static void setMaxTaskParallelism(Map conf, int max) {
     conf.put(Config.TOPOLOGY_MAX_TASK_PARALLELISM, max);
   }
 
-  public static void setMaxSpoutPending(Map<String, Object> conf, int max) {
+  public static void setMaxSpoutPending(Map conf, int max) {
     conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, max);
   }
 
-  public static void setStatsSampleRate(Map<String, Object> conf, double rate) {
+  public static void setStatsSampleRate(Map conf, double rate) {
     conf.put(Config.TOPOLOGY_STATS_SAMPLE_RATE, rate);
   }
 
-  public static void setFallBackOnJavaSerialization(Map<String, Object> conf, boolean fallback) {
+  public static void setFallBackOnJavaSerialization(Map conf, boolean fallback) {
     conf.put(Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION, fallback);
   }
 
   @SuppressWarnings("rawtypes") // List can contain strings or maps
-  private static List getRegisteredSerializations(Map<String, Object> conf) {
+  private static List getRegisteredSerializations(Map conf) {
     List ret;
     if (!conf.containsKey(Config.TOPOLOGY_KRYO_REGISTER)) {
       ret = new ArrayList();
@@ -400,7 +401,8 @@ public class Config extends com.twitter.heron.api.Config {
     return ret;
   }
 
-  private static List<String> getRegisteredDecorators(Map<String, Object> conf) {
+  @SuppressWarnings("rawtypes")
+  private static List<String> getRegisteredDecorators(Map conf) {
     List<String> ret;
     if (!conf.containsKey(Config.TOPOLOGY_KRYO_DECORATORS)) {
       ret = new ArrayList<>();
@@ -462,13 +464,12 @@ public class Config extends com.twitter.heron.api.Config {
   }
 
   public void registerMetricsConsumer(Class klass, Object argument, long parallelismHint) {
-    HashMap<String, Object> m = new HashMap<>();
+    HashMap m = new HashMap<>();
     m.put("class", klass.getCanonicalName());
     m.put("parallelism.hint", parallelismHint);
     m.put("argument", argument);
 
-    List<Map<String, Object>> l =
-        (List<Map<String, Object>>) this.get(TOPOLOGY_METRICS_CONSUMER_REGISTER);
+    List l = (List) this.get(TOPOLOGY_METRICS_CONSUMER_REGISTER);
     if (l == null) {
       l = new ArrayList<>();
     }

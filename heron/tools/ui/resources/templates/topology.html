@@ -107,6 +107,7 @@
     <table class="table">
       <thead>
         <th>Topology name</th>
+        <th>Status</th>
         <th>DC</th>
         <th>Role</th>
         <th>Environment</th>
@@ -118,15 +119,16 @@
       <tbody>
         <tr>
           <td>{{topology}}</td>
+          <td>{{execution_state['status']}}</td>
           <td>{{cluster}}</td>
-          <td>{{estate['role']}}</td>
+          <td>{{execution_state['role']}}</td>
           <td>{{environ}}</td>
           <td>{{launched}}</td>
-          <td>{{estate['submission_user']}}</td>
+          <td>{{execution_state['submission_user']}}</td>
           <td>
-            <a class="btn btn-primary btn-xs" href="/topologies/{{cluster}}/{{environ}}/{{topology}}/config" target="_blank">Config</a>
+            <a class="btn btn-primary btn-xs" href="./{{topology}}/config" target="_blank">Config</a>
             <a id="jobPageLink" class="btn btn-primary btn-xs" href={{job_page_link}} target="_blank">Job</a>
-            <a id="vizLink" class="btn btn-primary btn-xs" href="{{estate['viz']}}" target="_blank">Viz</a>
+            <a id="vizLink" class="btn btn-primary btn-xs" href="{{execution_state['viz']}}" target="_blank">Viz</a>
           </td>
         </tr>
       </tbody>
@@ -146,12 +148,12 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.3/d3-tip.min.js"></script>
-<script src="/static/js/stat-trendlines.js"></script>
-<script src="/static/js/plan-controller.js"></script>
-<script src="/static/js/physical-plan.js"></script>
-<script src="/static/js/logical-plan.js"></script>
-<script src="/static/js/plan-stats.js"></script>
-<script src="/static/js/colors.js"></script>
+<script src="{{ static_url('js/stat-trendlines.js') }}"></script>
+<script src="{{ static_url('js/plan-controller.js') }}"></script>
+<script src="{{ static_url('js/physical-plan.js') }}"></script>
+<script src="{{ static_url('js/logical-plan.js') }}"></script>
+<script src="{{ static_url('js/plan-stats.js') }}"></script>
+<script src="{{ static_url('js/colors.js') }}"></script>
 <script type="text/jsx" src="{{ static_url('js/topologies.js') }}" ></script>
 <script type="application/javascript">
 
@@ -179,7 +181,7 @@
     }
 
     // hide viz link if it is not there
-    if ("{{estate['viz']}}" === "") {
+    if ("{{execution_state['viz']}}" === "") {
       document.getElementById("vizLink").style.display = "none";
     }
 
@@ -190,7 +192,7 @@
 
     var logicalPlan, physicalPlan;
 
-    d3.json("/topologies/{{cluster}}/{{environ}}/{{topology}}/logicalplan.json",
+    d3.json("./{{topology}}/logicalplan.json",
       function(data) {
         // if there are any errors display using dialog box
         if (data.status != "success") {
@@ -203,7 +205,7 @@
       }
     );
 
-    d3.json("/topologies/{{cluster}}/{{environ}}/{{topology}}/physicalplan.json",
+    d3.json("./{{topology}}/physicalplan.json",
       function(data) {
         // if there are any errors display using dialog box
         if (data.status != "success" ) {
@@ -217,21 +219,21 @@
     );
 
     function render(planController) {
-      drawLogicalPlan(planController, logicalPlan, "#logical-plan", $("#logical-plan").width(), 400,
+      drawLogicalPlan(planController, logicalPlan, "#logical-plan", $("#logical-plan").width(), 400, "{{baseUrl}}",
           "{{cluster}}", "{{environ}}", "{{topology}}");
       planController.planResized();
-      drawPhysicalPlan(planController, physicalPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{cluster}}",
+      drawPhysicalPlan(planController, physicalPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{baseUrl}}", "{{cluster}}",
           "{{environ}}", "{{topology}}");
       planController.planResized();
     }
 
     function startRendering() {
-      var planController = new PlanController("{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
+      var planController = new PlanController("{{baseUrl}}", "{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
       $(window).on('resize', _.debounce(function () {
         render(planController);
       }, 100));
       render(planController);
-      drawStatsTable(planController, "{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
+      drawStatsTable(planController, "{{baseUrl}}", "{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
       planController.planDrawn();
     }
   };
@@ -239,7 +241,7 @@
 <script type="text/jsx">
   /** @jsx React.DOM */
     React.renderComponent(
-      <AllMetrics cluster="{{cluster}}" environ="{{environ}}" topology="{{topology}}"/>,
+      <AllMetrics baseUrl="{{baseUrl}}" cluster="{{cluster}}" environ="{{environ}}" topology="{{topology}}"/>,
       document.getElementById('display-counters')
     );
 </script>

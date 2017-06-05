@@ -13,8 +13,14 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.core;
 
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.spout.IRichSpout;
@@ -27,24 +33,33 @@ import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestSpout implements IRichSpout {
   private static final long serialVersionUID = 6068686695658877942L;
-  // The times of execution
-  private static final int DEFAULT_EXECUTION_COUNT = 10;
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
+  static final Values TERMINAL_TUPLE = new Values(Constants.INTEGRATION_TEST_TERMINAL);
+
   private final IRichSpout delegateSpout;
-  private boolean isDone = false;
-  private long tuplesToComplete = 0;
+  private final String topologyStartedStateUrl;
+  private long tuplesToAck = 0;
   private SpoutOutputCollector spoutOutputCollector;
-
+  private boolean hasSetStarted = false;
   private int maxExecutions;
+  private Map<Object, List<Object>> pendingMessages;
 
-  public IntegrationTestSpout(IRichSpout delegateSpout) {
-    this(delegateSpout, DEFAULT_EXECUTION_COUNT);
-  }
-
-  public IntegrationTestSpout(IRichSpout delegateSpout, int maxExecutions) {
+  public IntegrationTestSpout(IRichSpout delegateSpout,
+                              int maxExecutions,
+                              String topologyStartedStateUrl) {
     assert maxExecutions > 0;
     this.delegateSpout = delegateSpout;
     this.maxExecutions = maxExecutions;
+    this.topologyStartedStateUrl = topologyStartedStateUrl;
+    this.pendingMessages = new HashMap<>();
+  }
+
+  protected void resetMaxExecutions(int resetExecutions) {
+    if (!doneEmitting() || !doneAcking()) {
+      throw new RuntimeException(
+          "Can not reset resetMaxExecutions while tuples are still bing emitted or acked");
+    }
+    this.maxExecutions = resetExecutions;
   }
 
   @Override
@@ -67,7 +82,6 @@ public class IntegrationTestSpout implements IRichSpout {
   @Override
   public void activate() {
     delegateSpout.activate();
-
   }
 
   @Override
@@ -84,13 +98,15 @@ public class IntegrationTestSpout implements IRichSpout {
     this.spoutOutputCollector = outputCollector;
     delegateSpout.open(map, topologyContext,
         new SpoutOutputCollector(new IntegrationTestSpoutCollector(outputCollector)));
-
   }
 
   @Override
   public void nextTuple() {
-    if (maxExecutions <= 0) {
+    if (doneEmitting()) {
       return;
+    } else if (!this.hasSetStarted) {
+      setStateToStarted();
+      this.hasSetStarted = true;
     }
     maxExecutions--;
 
@@ -100,49 +116,85 @@ public class IntegrationTestSpout implements IRichSpout {
     // We need a double check here rather than set the isDone == true in nextTuple()
     // Since it is possible before nextTuple we get all the acks and the topology is done
     // However, since the isDone is not set to true, we may not emit terminals; it will cause bug.
-    if (maxExecutions <= 0) {
-      isDone = true;
-      // This is needed if all the tuples have been emited and acked
+    if (doneEmitting()) {
+      // This is needed if all the tuples have been emitted and acked
       // before maxExecutions becomes 0
       emitTerminalIfNeeded();
       LOG.fine("The topology is done.");
+    } else {
+      if (getPostEmitSleepTime() > 0) {
+        try {
+          getPostEmitSleepTimeUnit().sleep(getPostEmitSleepTime());
+        } catch (InterruptedException e) {
+          LOG.log(Level.SEVERE, "Thread interrupted while trying to sleep post-emit", e);
+        }
+      }
     }
   }
 
   @Override
-  public void ack(Object o) {
-    LOG.fine("Received a ack with MessageId: " + o);
+  public void ack(Object messageId) {
+    LOG.fine("Received a ack with MessageId: " + messageId);
 
-    tuplesToComplete--;
-    if (!o.equals(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID)) {
-      delegateSpout.ack(o);
+    tuplesToAck--;
+    if (!isTestMessageId(messageId)) {
+      delegateSpout.ack(messageId);
+    } else {
+      handleAckedMessage(messageId, pendingMessages.get(messageId));
     }
     emitTerminalIfNeeded();
+  }
+
+  protected void handleAckedMessage(Object messageId, List<Object> tuple) {
+    pendingMessages.remove(messageId);
   }
 
   @Override
-  public void fail(Object o) {
-    LOG.fine("Received a fail with MessageId: " + o);
+  public void fail(Object messageId) {
+    LOG.info("Received a fail with MessageId: " + messageId);
 
-    tuplesToComplete--;
-    if (!o.equals(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID)) {
-      delegateSpout.fail(o);
+    if (!isTestMessageId(messageId)) {
+      delegateSpout.fail(messageId);
+    } else {
+      if (pendingMessages.containsKey(messageId)) {
+        LOG.info("Re-emitting failed tuple with messageId " + messageId);
+        spoutOutputCollector.emit(pendingMessages.get(messageId), messageId);
+      }
     }
     emitTerminalIfNeeded();
   }
 
-  private void emitTerminalIfNeeded() {
-    LOG.fine(String.format("isDone = %s, tuplesToComplete = %s", isDone, tuplesToComplete));
+  private static boolean isTestMessageId(Object messageId) {
+    return ((String) messageId).startsWith(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID);
+  }
 
-    if (isDone && tuplesToComplete == 0) {
+  protected boolean doneEmitting() {
+    return maxExecutions <= 0;
+  }
+
+  protected boolean doneAcking() {
+    return tuplesToAck == 0;
+  }
+
+  protected TimeUnit getPostEmitSleepTimeUnit() {
+    return TimeUnit.MILLISECONDS;
+  }
+
+  protected long getPostEmitSleepTime() {
+    return 0;
+  }
+
+  protected void emitTerminalIfNeeded() {
+    LOG.fine(String.format("doneEmitting = %s, tuplesToAck = %s", doneEmitting(), tuplesToAck));
+
+    if (doneEmitting() && doneAcking()) {
       LOG.info("Emitting terminals to downstream.");
-      spoutOutputCollector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID,
-          new Values(Constants.INTEGRATION_TEST_TERMINAL));
+      spoutOutputCollector.emit(Constants.INTEGRATION_TEST_CONTROL_STREAM_ID, TERMINAL_TUPLE);
     }
     // Else, do nothing
   }
 
-  private class IntegrationTestSpoutCollector implements ISpoutOutputCollector {
+  protected class IntegrationTestSpoutCollector implements ISpoutOutputCollector {
     private final ISpoutOutputCollector delegate;
 
     IntegrationTestSpoutCollector(ISpoutOutputCollector delegate) {
@@ -150,31 +202,44 @@ public class IntegrationTestSpout implements IRichSpout {
     }
 
     @Override
-    public List<Integer> emit(String s, List<Object> objects, Object o) {
-      tuplesToComplete++;
-      Object messageId = o;
-      if (o == null) {
-        LOG.fine("Add MessageId for tuple: " + objects);
-        messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
-      }
-
-      return delegate.emit(s, objects, messageId);
+    public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
+      tuplesToAck++;
+      LOG.info("Emitting tuple: " + tuple);
+      return delegate.emit(streamId, tuple, getMessageId(tuple, messageId));
     }
 
     @Override
-    public void emitDirect(int i, String s, List<Object> objects, Object o) {
-      tuplesToComplete++;
-      Object messageId = o;
-      if (o == null) {
-        messageId = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID;
-      }
-
-      delegate.emitDirect(i, s, objects, messageId);
+    public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
+      tuplesToAck++;
+      LOG.info("Emitting tuple: " + tuple);
+      delegate.emitDirect(taskId, streamId, tuple, getMessageId(tuple, messageId));
     }
 
     @Override
     public void reportError(Throwable throwable) {
       delegate.reportError(throwable);
+    }
+
+    private Object getMessageId(List<Object> tuple, Object messageId) {
+      Object id = messageId;
+      if (id == null) {
+        LOG.fine("Add MessageId for tuple: " + tuple);
+        id = Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID + "_" + UUID.randomUUID();
+      }
+      pendingMessages.put(id, tuple);
+      return id;
+    }
+  }
+
+  private void setStateToStarted() {
+    if (topologyStartedStateUrl == null) {
+      return;
+    }
+    try {
+      HttpUtils.httpJsonPost(topologyStartedStateUrl, "\"true\"");
+    } catch (IOException | ParseException e) {
+      throw new RuntimeException(
+          "Failure posting topology_started state to " + topologyStartedStateUrl, e);
     }
   }
 }

@@ -70,11 +70,19 @@ public class SchedulerStateManagerAdaptor {
   protected <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
     try {
       return future.get(time, unit);
-    } catch (InterruptedException | TimeoutException | ExecutionException e) {
+    } catch (ExecutionException e) {
+      LOG.log(Level.WARNING, "Exception processing future: " + e.getMessage());
+      future.cancel(true);
+      return null;
+    } catch (InterruptedException | TimeoutException e) {
       LOG.log(Level.SEVERE, "Exception processing future ", e);
       future.cancel(true);
       return null;
     }
+  }
+
+  public Lock getLock(String topologyName, IStateManager.LockName lockName) {
+    return delegate.getLock(topologyName, lockName);
   }
 
   /**
@@ -107,6 +115,20 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
+   * Update the topology definition for the given topology. If the topology doesn't exist,
+   * create it. If it does, update it.
+   *
+   * @param topologyName the name of the topology
+   * @return Boolean - Success or Failure
+   */
+  public Boolean updateTopology(TopologyAPI.Topology topology, String topologyName) {
+    if (getTopology(topologyName) != null) {
+      deleteTopology(topologyName);
+    }
+    return setTopology(topology, topologyName);
+  }
+
+  /**
    * Set the scheduler location for the given topology
    *
    * @return Boolean - Success or Failure
@@ -128,12 +150,35 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
+   * Update the packing plan for the given topology. If the packing plan doesn't exist, create it.
+   * If it does, update it.
+   *
+   * @param packingPlan the packing plan of the topology
+   * @return Boolean - Success or Failure
+   */
+  public Boolean updatePackingPlan(PackingPlans.PackingPlan packingPlan, String topologyName) {
+    if (getPackingPlan(topologyName) != null) {
+      deletePackingPlan(topologyName);
+    }
+    return setPackingPlan(packingPlan, topologyName);
+  }
+
+  /**
    * Delete the tmaster location for the given topology
    *
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTMasterLocation(String topologyName) {
     return awaitResult(delegate.deleteTMasterLocation(topologyName));
+  }
+
+  /**
+   * Delete the metricscache location for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  public Boolean deleteMetricsCacheLocation(String topologyName) {
+    return awaitResult(delegate.deleteMetricsCacheLocation(topologyName));
   }
 
   /**
@@ -181,6 +226,14 @@ public class SchedulerStateManagerAdaptor {
     return awaitResult(delegate.deleteSchedulerLocation(topologyName));
   }
 
+  public Boolean deleteLocks(String topologyName) {
+    return awaitResult(delegate.deleteLocks(topologyName));
+  }
+
+  public Boolean deleteStatefulCheckpoint(String topologyName) {
+    return awaitResult(delegate.deleteStatefulCheckpoints(topologyName));
+  }
+
   /**
    * Get the tmaster location for the given topology
    *
@@ -199,7 +252,7 @@ public class SchedulerStateManagerAdaptor {
     return awaitResult(delegate.getSchedulerLocation(null, topologyName));
   }
 
- /**
+  /**
    * Get the topology definition for the given topology
    *
    * @return Topology

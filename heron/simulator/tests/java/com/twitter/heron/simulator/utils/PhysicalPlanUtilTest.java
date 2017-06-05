@@ -15,6 +15,7 @@
 package com.twitter.heron.simulator.utils;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -39,6 +40,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
 
@@ -110,8 +112,8 @@ public class PhysicalPlanUtilTest implements Serializable {
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 500 * 1024 * 1024);
-    conf.setComponentRam("exclaim", 1024 * 1024 * 1024);
+    conf.setComponentRam("word", ByteAmount.fromMegabytes(500));
+    conf.setComponentRam("exclaim",  ByteAmount.fromGigabytes(1));
     conf.setMessageTimeoutSecs(1);
 
     return topologyBuilder.createTopology().
@@ -194,6 +196,6 @@ public class PhysicalPlanUtilTest implements Serializable {
    */
   @Test
   public void testExtractTopologyTimeout() throws Exception {
-    Assert.assertEquals(1, PhysicalPlanUtil.extractTopologyTimeout(topology));
+    Assert.assertEquals(Duration.ofSeconds(1), PhysicalPlanUtil.extractTopologyTimeout(topology));
   }
 }

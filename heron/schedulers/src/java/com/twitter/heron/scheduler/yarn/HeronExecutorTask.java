@@ -33,6 +33,8 @@ import org.apache.reef.wake.EventHandler;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMap;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
@@ -44,9 +46,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.utils.SchedulerConfig;
-import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.ShellUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -105,6 +105,11 @@ public class HeronExecutorTask implements Task {
     HeronReefUtils.extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
     HeronReefUtils.extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
+    startExecutor();
+    return null;
+  }
+
+  public void startExecutor() {
     LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
     String[] executorCmd = getExecutorCommand();
 
@@ -131,7 +136,6 @@ public class HeronExecutorTask implements Task {
       LOG.log(Level.INFO, "Destroy heron executor-id: {0}", heronExecutorId);
       regularExecutor.destroy();
     }
-    return null;
   }
 
   HashMap<String, String> getEnvironment(String cwdPath) {
@@ -143,7 +147,7 @@ public class HeronExecutorTask implements Task {
   String[] getExecutorCommand() {
     String topologyDefFile = getTopologyDefnFile();
     Topology topology = getTopology(topologyDefFile);
-    Config config = SchedulerConfig.loadConfig(cluster,
+    Config config = SchedulerConfigUtils.loadConfig(cluster,
         role,
         env,
         topologyJar,
@@ -157,8 +161,8 @@ public class HeronExecutorTask implements Task {
     }
 
     Config runtime = Config.newBuilder()
-        .put(Keys.componentRamMap(), componentRamMap)
-        .put(Keys.topologyDefinition(), topology)
+        .put(Key.COMPONENT_RAMMAP, componentRamMap)
+        .put(Key.TOPOLOGY_DEFINITION, topology)
         .build();
 
     String[] executorCmd = SchedulerUtils.executorCommand(config,

@@ -17,6 +17,8 @@ package com.twitter.heron.network;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.Communicator;
@@ -65,6 +67,8 @@ public class StreamManagerClient extends HeronClient {
 
   private PhysicalPlanHelper helper;
 
+  private long lastNotConnectedLogTime = 0;
+
   public StreamManagerClient(NIOLooper s, String streamManagerHost, int streamManagerPort,
                              String topologyName, String topologyId,
                              PhysicalPlans.Instance instance,
@@ -105,6 +109,7 @@ public class StreamManagerClient extends HeronClient {
   private void registerMessagesToHandle() {
     registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
     registerOnMessage(StreamManager.TupleMessage.newBuilder());
+    registerOnMessage(HeronTuples.HeronTupleSet2.newBuilder());
   }
 
 
@@ -132,8 +137,8 @@ public class StreamManagerClient extends HeronClient {
           start();
         }
       };
-      getNIOLooper().registerTimerEventInSeconds(
-          systemConfig.getInstanceReconnectStreammgrIntervalSec(), r);
+      getNIOLooper().registerTimerEvent(
+          systemConfig.getInstanceReconnectStreammgrInterval(), r);
       return;
     }
 
@@ -155,7 +160,7 @@ public class StreamManagerClient extends HeronClient {
     // The timeout would be the reconnect-interval-seconds
     sendRequest(request, null,
         StreamManager.RegisterInstanceResponse.newBuilder(),
-        systemConfig.getInstanceReconnectStreammgrIntervalSec());
+        systemConfig.getInstanceReconnectStreammgrInterval());
   }
 
   @Override
@@ -184,6 +189,8 @@ public class StreamManagerClient extends HeronClient {
       handleAssignmentMessage(m.getPplan());
     } else if (message instanceof StreamManager.TupleMessage) {
       handleNewTuples((StreamManager.TupleMessage) message);
+    } else if (message instanceof HeronTuples.HeronTupleSet2) {
+      handleNewTuples2((HeronTuples.HeronTupleSet2) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -213,18 +220,15 @@ public class StreamManagerClient extends HeronClient {
 
   private void sendStreamMessageIfNeeded() {
     if (isStreamMgrReadyReceiveTuples()) {
-      if (getOutstandingPackets() == 0) {
+      if (getOutstandingPackets() <= 0) {
         // In order to avoid packets back up in Client side,
         // We would poll message from queue and send them only when there are no outstanding packets
         while (!outStreamQueue.isEmpty()) {
           HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
-          StreamManager.TupleMessage msg = StreamManager.TupleMessage.newBuilder()
-              .setSet(tupleSet).build();
 
           gatewayMetrics.updateSentPacketsCount(1);
-          gatewayMetrics.updateSentPacketsSize(msg.getSerializedSize());
-
-          sendMessage(msg);
+          gatewayMetrics.updateSentPacketsSize(tupleSet.getSerializedSize());
+          sendMessage(tupleSet);
         }
       }
 
@@ -238,6 +242,8 @@ public class StreamManagerClient extends HeronClient {
   }
 
   private void readStreamMessageIfNeeded() {
+    final long lastNotConnectedLogThrottleSeconds = 5;
+
     // If client is not connected, just return
     if (isConnected()) {
       if (isInQueuesAvailable() || helper == null) {
@@ -247,7 +253,13 @@ public class StreamManagerClient extends HeronClient {
         stopReading();
       }
     } else {
-      LOG.info("Stop reading due to not yet connected to Stream Manager.");
+      long now = System.currentTimeMillis();
+      if (now - lastNotConnectedLogTime > lastNotConnectedLogThrottleSeconds * 1000) {
+        LOG.info(String.format("Stop reading due to not yet connected to Stream Manager. This "
+            + "message is throttled to emit no more than once every %d seconds.",
+            lastNotConnectedLogThrottleSeconds));
+        lastNotConnectedLogTime = now;
+      }
     }
   }
 
@@ -265,6 +277,28 @@ public class StreamManagerClient extends HeronClient {
 
   private void handleNewTuples(StreamManager.TupleMessage message) {
     inStreamQueue.offer(message.getSet());
+  }
+
+  private void handleNewTuples2(HeronTuples.HeronTupleSet2 set) {
+    HeronTuples.HeronTupleSet.Builder toFeed = HeronTuples.HeronTupleSet.newBuilder();
+    if (set.hasControl()) {
+      toFeed.setControl(set.getControl());
+    } else {
+      // Either control or data
+      HeronTuples.HeronDataTupleSet.Builder builder = HeronTuples.HeronDataTupleSet.newBuilder();
+      builder.setStream(set.getData().getStream());
+      try {
+        for (ByteString bs : set.getData().getTuplesList()) {
+          builder.addTuples(HeronTuples.HeronDataTuple.parseFrom(bs));
+        }
+      } catch (InvalidProtocolBufferException e) {
+        LOG.log(Level.SEVERE, "Failed to parse protobuf", e);
+      }
+      toFeed.setData(builder);
+    }
+
+    HeronTuples.HeronTupleSet s = toFeed.build();
+    inStreamQueue.offer(s);
   }
 
   private void handleAssignmentMessage(PhysicalPlans.PhysicalPlan pplan) {

@@ -52,7 +52,7 @@ TEST(FieldsGrouping, test_sametuple) {
 
   std::set<sp_int32> all_dests;
   for (sp_int32 i = 0; i < 1000; ++i) {
-    std::list<sp_int32> dests;
+    std::vector<sp_int32> dests;
     g->GetListToSend(tuple, dests);
     EXPECT_EQ(dests.size(), (sp_uint32)1);
     all_dests.insert(dests.front());
@@ -94,7 +94,7 @@ TEST(FieldsGrouping, test_hashonlyrelavant) {
     o << "this doesnt " << i;
     tuple.add_values(o.str());
 
-    std::list<sp_int32> dest;
+    std::vector<sp_int32> dest;
     g->GetListToSend(tuple, dest);
     EXPECT_EQ(dest.size(), (sp_uint32)1);
     all_dests.insert(dest.front());
@@ -109,7 +109,7 @@ TEST(FieldsGrouping, test_hashonlyrelavant) {
     tuple.add_values(o.str());
     tuple.add_values("this doesnt");
 
-    std::list<sp_int32> dest;
+    std::vector<sp_int32> dest;
     g->GetListToSend(tuple, dest);
     EXPECT_EQ(dest.size(), (sp_uint32)1);
     all_dests.insert(dest.front());

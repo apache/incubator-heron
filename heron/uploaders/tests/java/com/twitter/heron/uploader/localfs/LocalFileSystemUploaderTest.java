@@ -23,8 +23,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.uploader.UploaderException;
 
 public class LocalFileSystemUploaderTest {
 
@@ -44,11 +46,11 @@ public class LocalFileSystemUploaderTest {
 
     // Create the minimum config for tests
     config = Config.newBuilder()
-        .put(Keys.cluster(), "cluster")
-        .put(Keys.role(), "role")
-        .put(Keys.topologyName(), "topology")
-        .put(Keys.topologyPackageType(), "tar")
-        .put(LocalFileSystemKeys.fileSystemDirectory(), fileSystemDirectory)
+        .put(Key.CLUSTER, "cluster")
+        .put(Key.ROLE, "role")
+        .put(Key.TOPOLOGY_NAME, "topology")
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, PackageType.TAR)
+        .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), fileSystemDirectory)
         .build();
   }
 
@@ -64,7 +66,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
+        .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
@@ -76,7 +78,7 @@ public class LocalFileSystemUploaderTest {
     Assert.assertTrue(new File(destFile).isFile());
   }
 
-  @Test
+  @Test(expected = UploaderException.class)
   public void testSourceNotExists() throws Exception {
 
     // identify the location of the test topology tar file
@@ -84,14 +86,12 @@ public class LocalFileSystemUploaderTest {
         testTopologyDirectory, "doesnot-exist-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
+        .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newconfig);
-
-    // Assert that the file does not exist
-    Assert.assertNull(uploader.uploadPackage());
+    uploader.uploadPackage();
   }
 
   @Test
@@ -101,7 +101,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
+        .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();

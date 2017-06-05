@@ -11,4 +11,7 @@ pex_binary(
     reqs = [
         "tornado==4.0.2",
     ],
+    deps = [
+        "//heron/common/src/python:common-py",
+    ],
 )

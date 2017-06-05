@@ -47,14 +47,14 @@ class BaseMetricsHelper(object):
     :param key: specifies a key for MultiCountMetric. Needs to be `None` for updating CountMetric.
     """
     if name not in self.metrics:
-      Log.error("In update_count(): %s is not registered in the metric" % name)
+      Log.error("In update_count(): %s is not registered in the metric", name)
 
     if key is None and isinstance(self.metrics[name], CountMetric):
       self.metrics[name].incr(incr_by)
     elif key is not None and isinstance(self.metrics[name], MultiCountMetric):
       self.metrics[name].incr(key, incr_by)
     else:
-      Log.error("In update_count(): %s is registered but not supported with this method" % name)
+      Log.error("In update_count(): %s is registered but not supported with this method", name)
 
   def update_reduced_metric(self, name, value, key=None):
     """Update the value of ReducedMetric or MultiReducedMetric
@@ -67,14 +67,14 @@ class BaseMetricsHelper(object):
                 ReducedMetric.
     """
     if name not in self.metrics:
-      Log.error("In update_reduced_metric(): %s is not registered in the metric" % name)
+      Log.error("In update_reduced_metric(): %s is not registered in the metric", name)
 
     if key is None and isinstance(self.metrics[name], ReducedMetric):
       self.metrics[name].update(value)
     elif key is not None and isinstance(self.metrics[name], MultiReducedMetric):
       self.metrics[name].update(key, value)
     else:
-      Log.error("In update_count(): %s is registered but not supported with this method" % name)
+      Log.error("In update_count(): %s is registered but not supported with this method", name)
 
 
 class GatewayMetrics(BaseMetricsHelper):
@@ -118,10 +118,15 @@ class GatewayMetrics(BaseMetricsHelper):
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
 
-  def received_packet(self, received_pkt_size_bytes):
-    """Apply updates to received packet metrics"""
+  def update_received_packet(self, received_pkt_size_bytes):
+    """Update received packet metrics"""
     self.update_count(self.RECEIVED_PKT_COUNT)
     self.update_count(self.RECEIVED_PKT_SIZE, incr_by=received_pkt_size_bytes)
+
+  def update_sent_packet(self, sent_pkt_size_bytes):
+    """Update sent packet metrics"""
+    self.update_count(self.SENT_PKT_COUNT)
+    self.update_count(self.SENT_PKT_SIZE, incr_by=sent_pkt_size_bytes)
 
   def update_sent_metrics_size(self, size):
     self.update_count(self.SENT_METRICS_SIZE, size)
@@ -333,7 +338,7 @@ class MetricsCollector(object):
     if name in self.metrics_map:
       raise RuntimeError("Another metric has already been registered with name: %s" % name)
 
-    Log.debug("Register metric: %s, with interval: %s" % (name, str(time_bucket_in_sec)))
+    Log.debug("Register metric: %s, with interval: %s", name, str(time_bucket_in_sec))
     self.metrics_map[name] = metric
 
     if time_bucket_in_sec in self.time_bucket_in_sec_to_metrics_name:
@@ -346,7 +351,7 @@ class MetricsCollector(object):
     if time_bucket_in_sec in self.time_bucket_in_sec_to_metrics_name:
       message = metrics_pb2.MetricPublisherPublishMessage()
       for name in self.time_bucket_in_sec_to_metrics_name[time_bucket_in_sec]:
-        Log.debug("Will call gather_one_metric with %s" % name)
+        Log.debug("Will call gather_one_metric with %s", name)
         self._gather_one_metric(name, message)
 
       assert message.IsInitialized()
@@ -361,7 +366,7 @@ class MetricsCollector(object):
 
   def _gather_one_metric(self, name, message):
     metric_value = self.metrics_map[name].get_value_and_reset()
-    Log.debug("In gather_one_metric with name: %s, and value: %s" % (name, str(metric_value)))
+    Log.debug("In gather_one_metric with name: %s, and value: %s", name, str(metric_value))
 
     if metric_value is None:
       return
@@ -372,8 +377,7 @@ class MetricsCollector(object):
           self._add_data_to_message(message, "%s/%s" % (name, str(key)), value)
         else:
           Log.info("When gathering metric: %s, <%s:%s> is not a valid key-value to output "
-                   "as metric. Skipping..." % (name, str(key), str(value)))
-
+                   "as metric. Skipping...", name, str(key), str(value))
           continue
     else:
       self._add_data_to_message(message, name, metric_value)

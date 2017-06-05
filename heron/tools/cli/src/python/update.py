@@ -12,16 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
-from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
-import heron.tools.cli.src.python.execute as execute
+import heron.tools.cli.src.python.cli_helper as cli_helper
 import heron.tools.cli.src.python.jars as jars
-import heron.tools.common.src.python.utils.config as config
 
 import argparse
-import logging
 import re
-import traceback
 
 def create_parser(subparsers):
   """ Create the parse for the update command """
@@ -30,7 +26,7 @@ def create_parser(subparsers):
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
       + "--component-parallelism <name:value>",
-      add_help=False)
+      add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
@@ -52,6 +48,7 @@ def create_parser(subparsers):
       + 'colon-delimited: [component_name]:[parallelism]')
 
   args.add_config(parser)
+  args.add_dry_run(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='update')
@@ -61,37 +58,12 @@ def create_parser(subparsers):
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
   """ run the update command """
-  topology_name = cl_args['topology-name']
-  try:
-    new_args = [
-        "--cluster", cl_args['cluster'],
-        "--role", cl_args['role'],
-        "--environment", cl_args['environ'],
-        "--heron_home", config.get_heron_dir(),
-        "--config_path", cl_args['config_path'],
-        "--override_config_file", cl_args['override_config_file'],
-        "--release_file", config.get_heron_release_file(),
-        "--topology_name", topology_name,
-        "--command", command,
-        "--component_parallelism", ','.join(cl_args['component_parallelism']),
-    ]
+  extra_args = ["--component_parallelism", ','.join(cl_args['component_parallelism'])]
+  extra_lib_jars = jars.packing_jars()
+  action = "update topology%s" % (' in dry-run mode' if cl_args["dry_run"] else '')
+  if cl_args["dry_run"]:
+    extra_args.append('--dry_run')
+    if "dry_run_format" in cl_args:
+      extra_args += ["--dry_run_format", cl_args["dry_run_format"]]
 
-    if Log.getEffectiveLevel() == logging.DEBUG:
-      new_args.append("--verbose")
-
-    lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
-
-    # invoke the runtime manager to kill the topology
-    execute.heron_class(
-        'com.twitter.heron.scheduler.RuntimeManagerMain',
-        lib_jars,
-        extra_jars=[],
-        args=new_args
-    )
-
-  except Exception as ex:
-    Log.error('Failed to update topology \'%s\': %s', topology_name, traceback.format_exc(ex))
-    return False
-
-  Log.info('Successfully updated topology \'%s\'' % topology_name)
-  return True
+  return cli_helper.run(command, cl_args, action, extra_args, extra_lib_jars)

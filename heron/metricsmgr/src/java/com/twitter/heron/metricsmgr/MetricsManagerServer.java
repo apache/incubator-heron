@@ -46,6 +46,8 @@ public class MetricsManagerServer extends HeronServer {
   // Bean name to register the TMasterLocation object into SingletonRegistry
   private static final String TMASTER_LOCATION_BEAN_NAME =
       TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
+  public static final String METRICSCACHE_LOCATION_BEAN_NAME =
+      TopologyMaster.MetricsCacheLocation.newBuilder().getDescriptorForType().getFullName();
 
   // Metrics Counter Name
   private static final String SERVER_CLOSE_PUBLISHER = "close-publisher";
@@ -109,6 +111,7 @@ public class MetricsManagerServer extends HeronServer {
     // TODO -- Reading TMasterLocationRefreshMessage from StreamMgr is more a temp solution
     // TODO -- It adds dependencies on internal broadcast service
     registerOnMessage(Metrics.TMasterLocationRefreshMessage.newBuilder());
+    registerOnMessage(Metrics.MetricsCacheLocationRefreshMessage.newBuilder());
   }
 
   public void addSinkCommunicator(Communicator<MetricsRecord> communicator) {
@@ -148,6 +151,12 @@ public class MetricsManagerServer extends HeronServer {
 
     if (message instanceof Metrics.MetricPublisherPublishMessage) {
       handlePublisherPublishMessage(request, (Metrics.MetricPublisherPublishMessage) message);
+    } else if (message instanceof Metrics.MetricsCacheLocationRefreshMessage) {
+      // LOG down where the MetricsCache Location comes from
+      LOG.info("MetricsCache Location is refresh from: "
+          + channel.socket().getRemoteSocketAddress());
+      handleMetricsCacheLocationRefreshMessage(
+          request, (Metrics.MetricsCacheLocationRefreshMessage) message);
     } else if (message instanceof Metrics.TMasterLocationRefreshMessage) {
       // LOG down where the TMaster Location comes from
       LOG.info("TMaster Location is refresh from: " + channel.socket().getRemoteSocketAddress());
@@ -308,6 +317,48 @@ public class MetricsManagerServer extends HeronServer {
     }
 
     LOG.info("Current TMaster location: " + newLocation);
+
+    // Update Metrics
+    serverMetricsCounters.scope(SERVER_TMASTER_LOCATION_RECEIVED).incr();
+  }
+
+  private void handleMetricsCacheLocationRefreshMessage(
+      Metrics.MetricPublisher request,
+      Metrics.MetricsCacheLocationRefreshMessage tMasterLocationRefreshMessage) {
+    TopologyMaster.MetricsCacheLocation oldLocation =
+        (TopologyMaster.MetricsCacheLocation)
+            SingletonRegistry.INSTANCE.getSingleton(METRICSCACHE_LOCATION_BEAN_NAME);
+
+    TopologyMaster.MetricsCacheLocation newLocation =
+        tMasterLocationRefreshMessage.getMetricscache();
+
+    if (oldLocation == null) {
+      // The first time to get TMasterLocation
+
+      // Register to the SingletonRegistry
+      LOG.info("We received a new MetricsCacheLocation. Register it into SingletonRegistry");
+      SingletonRegistry.INSTANCE.registerSingleton(METRICSCACHE_LOCATION_BEAN_NAME, newLocation);
+
+      // Update Metrics
+      serverMetricsCounters.scope(SERVER_NEW_TMASTER_LOCATION).incr();
+
+    } else if (oldLocation.equals(newLocation)) {
+      // The new one is the same as old one.
+
+      // Just Log. Do nothing
+      LOG.info("We received a new MetricsCacheLocation the same as the old one "
+          + newLocation + " . Do nothing.");
+    } else {
+      // Have received TMasterLocation earlier, but it changed.
+
+      // We need update the SingletonRegistry
+      LOG.info("We received a new MetricsCacheLocation " + newLocation
+          + ". Replace the old one" + oldLocation + ".");
+      SingletonRegistry.INSTANCE.updateSingleton(METRICSCACHE_LOCATION_BEAN_NAME, newLocation);
+
+      // Update Metrics
+      serverMetricsCounters.scope(SERVER_NEW_TMASTER_LOCATION).incr();
+    }
 
     // Update Metrics
     serverMetricsCounters.scope(SERVER_TMASTER_LOCATION_RECEIVED).incr();

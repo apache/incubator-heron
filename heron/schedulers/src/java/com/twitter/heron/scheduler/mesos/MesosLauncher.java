@@ -23,19 +23,18 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
  * Launch a topology to mesos cluster
  */
-
 public class MesosLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(MesosLauncher.class.getName());
 
@@ -108,8 +107,8 @@ public class MesosLauncher implements ILauncher {
     // Add default scheduler properties override
     // Add the topology package uri as a String and pass the SchedulerMain as a property
     commands.add(String.format("-%s%s=%s",
-        Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION,
-        Keys.topologyPackageUri(),
+        SchedulerUtils.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION,
+        Key.TOPOLOGY_PACKAGE_URI.value(),
         Runtime.topologyPackageUri(runtime).toString()));
 
     String[] commandArgs = schedulerCommandArgs(freePorts);

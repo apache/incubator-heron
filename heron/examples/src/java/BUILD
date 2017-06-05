@@ -4,6 +4,8 @@ java_binary(
     name='examples-unshaded',
     srcs = glob(["**/*.java"]),
     deps = [
+        "//heron/api/src/java:api-java",
+        "//heron/common/src/java:basics-java",
         "//heron/storm/src/java:storm-compatibility-java",
     ],
     create_executable = 0,

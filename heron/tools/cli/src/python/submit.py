@@ -15,17 +15,16 @@
 import glob
 import logging
 import os
-import shutil
 import tempfile
-import traceback
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
-
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
+import heron.tools.cli.src.python.result as result
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.common.src.python.utils.classpath as classpath
 
@@ -43,7 +42,7 @@ def create_parser(subparsers):
       help='Submit a topology',
       usage="%(prog)s [options] cluster/[role]/[env] " + \
             "topology-file-name topology-class-name [topology-args]",
-      add_help=False
+      add_help=True
   )
 
   cli_args.add_titles(parser)
@@ -54,6 +53,7 @@ def create_parser(subparsers):
   cli_args.add_deactive_deploy(parser)
   cli_args.add_extra_launch_classpath(parser)
   cli_args.add_system_property(parser)
+  cli_args.add_dry_run(parser)
   cli_args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -61,7 +61,7 @@ def create_parser(subparsers):
 
 
 ################################################################################
-def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
+def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topology_name):
   '''
   Launch a topology given topology jar, its definition file and configurations
   :param cl_args:
@@ -100,20 +100,32 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
+  if cl_args["dry_run"]:
+    args.append("--dry_run")
+    if "dry_run_format" in cl_args:
+      args += ["--dry_run_format", cl_args["dry_run_format"]]
+
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
   extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
-  execute.heron_class(
-      class_name='com.twitter.heron.scheduler.SubmitterMain',
+  main_class = 'com.twitter.heron.scheduler.SubmitterMain'
+  res = execute.heron_class(
+      class_name=main_class,
       lib_jars=lib_jars,
       extra_jars=extra_jars,
       args=args,
-      java_defines=[]
-  )
-
+      java_defines=[])
+  err_context = "Failed to launch topology '%s'" % topology_name
+  if cl_args["dry_run"]:
+    err_context += " in dry-run mode"
+  succ_context = "Successfully launched topology '%s'" % topology_name
+  if cl_args["dry_run"]:
+    succ_context += " in dry-run mode"
+  res.add_context(err_context, succ_context)
+  return res
 
 ################################################################################
 def launch_topologies(cl_args, topology_file, tmp_dir):
@@ -122,45 +134,38 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   :param cl_args:
   :param topology_file:
   :param tmp_dir:
-  :return:
+  :return: list(Responses)
   '''
   # the submitter would have written the .defn file to the tmp_dir
   defn_files = glob.glob(tmp_dir + '/*.defn')
 
   if len(defn_files) == 0:
-    raise Exception("No topologies found")
+    return SimpleResult(Status.HeronError, "No topologies found under %s" % tmp_dir)
 
-  try:
-    for defn_file in defn_files:
-
-      # load the topology definition from the file
-      topology_defn = topology_pb2.Topology()
-      try:
-        handle = open(defn_file, "rb")
-        topology_defn.ParseFromString(handle.read())
-        handle.close()
-
-      except:
-        raise Exception("Could not open and parse topology defn file %s" % defn_file)
-
-      # launch the topology
-      try:
-        Log.info("Launching topology \'%s\'" % topology_defn.name)
-        launch_a_topology(cl_args, tmp_dir, topology_file, defn_file)
-        Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
-
-      except Exception as ex:
-        Log.exception('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
-        raise
-
-  except:
-    raise
+  results = []
+  for defn_file in defn_files:
+    # load the topology definition from the file
+    topology_defn = topology_pb2.Topology()
+    try:
+      handle = open(defn_file, "rb")
+      topology_defn.ParseFromString(handle.read())
+      handle.close()
+    except Exception as e:
+      err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
+      return SimpleResult(Status.HeronError, err_context)
+    # launch the topology
+    mode = " in dry-run mode" if cl_args['dry_run'] else ''
+    Log.info("Launching topology: \'%s\'%s", topology_defn.name, mode)
+    res = launch_a_topology(
+        cl_args, tmp_dir, topology_file, defn_file, topology_defn.name)
+    results.append(res)
+  return results
 
 
 ################################################################################
 def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
-   We use the packer to make a package for the jar and dump it
+  We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
   with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
@@ -176,27 +181,27 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
-  try:
-    execute.heron_class(
-        class_name=cl_args['topology-class-name'],
-        lib_jars=config.get_heron_libs(jars.topology_jars()),
-        extra_jars=[topology_file],
-        args=tuple(unknown_args),
-        java_defines=cl_args['topology_main_jvm_property'])
 
-  except Exception as ex:
-    Log.debug(traceback.format_exc(ex))
-    Log.error("Unable to execute topology main class")
-    return False
+  main_class = cl_args['topology-class-name']
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
-  except Exception as ex:
-    return False
-  finally:
-    shutil.rmtree(tmp_dir)
+  res = execute.heron_class(
+      class_name=main_class,
+      lib_jars=config.get_heron_libs(jars.topology_jars()),
+      extra_jars=[topology_file],
+      args=tuple(unknown_args),
+      java_defines=cl_args['topology_main_jvm_property'])
 
-  return True
+  result.render(res)
+
+  if not res.is_successful():
+    err_context = ("Failed to create topology definition " \
+      "file when executing class '%s' of file '%s'") % (main_class, topology_file)
+    res.add_context(err_context)
+    return res
+
+  results = launch_topologies(cl_args, topology_file, tmp_dir)
+
+  return results
 
 
 ################################################################################
@@ -222,23 +227,23 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
   java_defines = cl_args['topology_main_jvm_property']
-  execute.heron_tar(
-      cl_args['topology-class-name'],
+  main_class = cl_args['topology-class-name']
+  res = execute.heron_tar(
+      main_class,
       topology_file,
       tuple(unknown_args),
       tmp_dir,
       java_defines)
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
+  result.render(res)
 
-  except Exception:
-    return False
+  if not res.is_successful():
+    err_context = ("Failed to create topology definition " \
+      "file when executing class '%s' of file '%s'") % (main_class, topology_file)
+    res.add_context(err_context)
+    return res
 
-  finally:
-    shutil.rmtree(tmp_dir)
-
-  return True
+  return launch_topologies(cl_args, topology_file, tmp_dir)
 
 ################################################################################
 #  Execute the pex file to create topology definition file by running
@@ -249,22 +254,17 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
-  try:
-    execute.heron_pex(topology_file, topology_class_name, tuple(unknown_args))
-  except Exception as ex:
-    Log.error("Error when loading a topology: %s" % str(ex))
-    return False
+  res = execute.heron_pex(
+      topology_file, topology_class_name, tuple(unknown_args))
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
+  result.render(res)
+  if not res.is_successful():
+    err_context = ("Failed to create topology definition " \
+      "file when executing class '%s' of file '%s'") % (topology_class_name, topology_file)
+    res.add_context(err_context)
+    return res
 
-  except Exception as ex:
-    return False
-
-  finally:
-    shutil.rmtree(tmp_dir)
-
-  return True
+  return launch_topologies(cl_args, topology_file, tmp_dir)
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -287,26 +287,30 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar|pex file %s does not exist" % topology_file)
-    return False
+    err_context = "Topology file '%s' does not exist" % topology_file
+    return SimpleResult(Status.InvocationError, err_context)
 
   # check if it is a valid file type
   jar_type = topology_file.endswith(".jar")
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
   pex_type = topology_file.endswith(".pex")
   if not jar_type and not tar_type and not pex_type:
-    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar or .pex file")
-    return False
+    ext_name = os.path.splitext(topology_file)
+    err_context = "Unknown file type '%s'. Please use .tar or .tar.gz or .jar or .pex file"\
+                  % ext_name
+    return SimpleResult(Status.InvocationError, err_context)
 
   # check if extra launch classpath is provided and if it is validate
   if cl_args['extra_launch_classpath']:
     valid_classpath = classpath.valid_java_classpath(cl_args['extra_launch_classpath'])
     if not valid_classpath:
-      Log.error("One of jar or directory in extra launch classpath does not exist")
-      return False
+      err_context = "One of jar or directory in extra launch classpath does not exist: %s" % \
+        cl_args['extra_launch_classpath']
+      return SimpleResult(Status.InvocationError, err_context)
 
   # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
+  opts.cleaned_up_files.append(tmp_dir)
 
   # if topology needs to be launched in deactivated state, do it so
   if cl_args['deploy_deactivated']:
@@ -321,11 +325,7 @@ def run(command, parser, cl_args, unknown_args):
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
     return submit_fatjar(cl_args, unknown_args, tmp_dir)
-
   elif tar_type:
     return submit_tar(cl_args, unknown_args, tmp_dir)
-
-  elif pex_type:
+  else:
     return submit_pex(cl_args, unknown_args, tmp_dir)
-
-  return False

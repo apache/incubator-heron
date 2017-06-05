@@ -25,8 +25,10 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.config.SystemConfigKey;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.executors.InstanceExecutor;
 import com.twitter.heron.simulator.executors.MetricsExecutor;
@@ -183,18 +185,18 @@ public class Simulator {
   }
 
   protected SystemConfig getSystemConfig() {
-    SystemConfig sysConfig = new SystemConfig();
-    sysConfig.put(SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256);
-    sysConfig.put(SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256);
-    sysConfig.put(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC, 60);
-    sysConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_TIME_MS, 16);
-    sysConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_SIZE_BYTES, 32768);
-    sysConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_TIME_MS, 16);
-    sysConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_SIZE_BYTES, 32768);
-    sysConfig.put(SystemConfig.INSTANCE_ACK_BATCH_TIME_MS, 128);
-    sysConfig.put(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
+    SystemConfig.Builder builder = SystemConfig.newBuilder(true)
+        .put(SystemConfigKey.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256)
+        .put(SystemConfigKey.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256)
+        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 60)
+        .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_TIME, 16)
+        .put(SystemConfigKey.INSTANCE_EXECUTE_BATCH_SIZE, ByteAmount.fromBytes(32768))
+        .put(SystemConfigKey.INSTANCE_EMIT_BATCH_TIME, 16)
+        .put(SystemConfigKey.INSTANCE_EMIT_BATCH_SIZE, ByteAmount.fromBytes(32768))
+        .put(SystemConfigKey.INSTANCE_ACK_BATCH_TIME, 128)
+        .put(SystemConfigKey.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
 
-    return sysConfig;
+    return builder.build();
   }
 
   /**
@@ -206,6 +208,20 @@ public class Simulator {
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable exception) {
+      // Add try and catch block to prevent new exceptions stop the handling thread
+      try {
+        // Delegate to the actual one
+        handleException(thread, exception);
+
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Throwable t) {
+        LOG.log(Level.SEVERE, "Failed to handle exception. Process halting", t);
+        Runtime.getRuntime().halt(1);
+      }
+    }
+
+    // The actual uncaught exceptions handing logic
+    private void handleException(Thread thread, Throwable exception) {
       LOG.severe("Local Mode Process exiting.");
       LOG.log(Level.SEVERE,
           "Exception caught in thread: " + thread.getName() + " with id: " + thread.getId(),
@@ -218,7 +234,6 @@ public class Simulator {
       // thread in the pool. Threads may implement a clean Interrupt logic.
       threadsPool.shutdownNow();
 
-      // TODO : It is not clear if this signal should be sent to all the threads (including threads
       // not owned by HeronInstance). To be safe, not sending these interrupts.
       Runtime.getRuntime().halt(1);
     }

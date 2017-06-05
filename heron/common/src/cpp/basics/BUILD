@@ -12,8 +12,8 @@ cc_library(
         "randutils.cpp",
         "ridgen.cpp",
         "sockutils.cpp",
-        "sptime.cpp",
         "strutils.cpp",
+        "mempool.cpp",
 
         "callback.h",
         "callback1.h",
@@ -32,9 +32,9 @@ cc_library(
         "sphash.h",
         "sprcodes.h",
         "sptest.h",
-        "sptime.h",
         "sptypes.h",
         "strutils.h",
+        "mempool.h",
     ],
     hdrs = [ 
         "basics.h",
@@ -51,6 +51,9 @@ cc_library(
         "//third_party/jansson:jansson-cxx",
         "//third_party/kashmir:kashmir-cxx",
         "//third_party/protobuf:protobuf-cxx",
-    ],
+    ] + select({
+        "//tools/platform:darwin": [], 
+        "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
+    }),
     linkstatic = 1,
 )

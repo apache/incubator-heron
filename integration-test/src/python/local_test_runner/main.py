@@ -25,6 +25,9 @@ import subprocess
 import sys
 from collections import namedtuple
 
+from ..common import status
+from heron.common.src.python.utils import log
+
 # import test_kill_bolt
 import test_kill_metricsmgr
 import test_kill_stmgr
@@ -44,7 +47,7 @@ TEST_CLASSES = [
 ]
 
 # The location of default configure file
-DEFAULT_TEST_CONF_FILE = "resources/test.conf"
+DEFAULT_TEST_CONF_FILE = "integration-test/src/python/local_test_runner/resources/test.conf"
 
 ProcessTuple = namedtuple('ProcessTuple', 'pid cmd')
 
@@ -60,10 +63,19 @@ def run_tests(test_classes, args):
       logging.info("==== Starting test %s of %s: %s ====",
                    len(successes) + len(failures) + 1, len(test_classes), testname)
       template = test_class(testname, args)
-      if template.run_test(): # testcase passed
-        successes += [testname]
-      else:
+      try:
+        result = template.run_test()
+        if isinstance(result, status.TestSuccess): # testcase passed
+          successes += [testname]
+        elif isinstance(result, status.TestFailure):
+          failures += [testname]
+        else:
+          logging.error(
+              "Unrecognized test response returned for test %s: %s", testname, str(result))
+          failures += [testname]
+      except status.TestFailure:
         failures += [testname]
+
   except Exception as e:
     logging.error("Exception thrown while running tests: %s", str(e))
   finally:
@@ -89,8 +101,7 @@ def _random_port():
 
 def main():
   """ main """
-  root = logging.getLogger()
-  root.setLevel(logging.DEBUG)
+  log.configure(level=logging.DEBUG)
 
   # Read the configuration file from package
   conf_file = DEFAULT_TEST_CONF_FILE
@@ -99,9 +110,6 @@ def main():
 
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)
-
-  # Get the directory of the heron root, which should be the directory that the script is run from
-  heron_repo_directory = os.getcwd()
 
   args = dict()
   home_directory = os.path.expanduser("~")
@@ -121,16 +129,26 @@ def main():
   args['trackerPort'] = _random_port()
   args['outputFile'] = os.path.join(args['workingDirectory'], conf['topology']['outputFile'])
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
-  args['testJarPath'] = os.path.join(heron_repo_directory, conf['testJarPath'])
+  args['testJarPath'] = conf['testJarPath']
 
   test_classes = TEST_CLASSES
   if len(sys.argv) > 1:
     first_arg = sys.argv[1]
-    class_name = first_arg.split(".")
-    if first_arg == "-h" or len(class_name) < 2:
+    class_tokens = first_arg.split(".")
+    if first_arg == "-h" or len(class_tokens) < 2:
       usage()
+
     import importlib
-    test_classes = [getattr(importlib.import_module(class_name[0]), class_name[1])]
+    package_tokens = class_tokens[:-1]
+    test_class = class_tokens[-1]
+    if len(package_tokens) == 1: # prepend base packages for convenience
+      test_module = "integration-test.src.python.local_test_runner." + package_tokens[0]
+    else:
+      test_module = '.'.join(package_tokens)
+
+    logging.info("test_module %s", test_module)
+    logging.info("test_class %s", test_class)
+    test_classes = [getattr(importlib.import_module(test_module), test_class)]
 
   start_time = time.time()
   (successes, failures) = run_tests(test_classes, args)

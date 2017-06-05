@@ -16,6 +16,7 @@ package com.twitter.heron.common.basics;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,17 +27,15 @@ public final class SysUtils {
   }
 
   /**
-   * Causes the currently executing thread to sleep (temporarily cease
-   * execution) for the specified number of milliseconds, subject to
-   * the precision and accuracy of system timers and schedulers. The thread
-   * does not lose ownership of any monitors.
+   * Wrapper around Thread.sleep() that throws RuntimeException if the thread is interrupted. Only
+   * use this method if you don't care to be notified of interruptions via InterruptedException.
    *
-   * @param millis the length of time to sleep in milliseconds
-   * @throws IllegalArgumentException if the value of {@code millis} is negative
+   * @param duration the length of time to sleep
+   * @throws IllegalArgumentException if the value of {@code duration} is negative
    */
-  public static void sleep(long millis) {
+  public static void sleep(Duration duration) {
     try {
-      Thread.sleep(millis);
+      Thread.sleep(duration.toMillis());
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -49,8 +48,7 @@ public final class SysUtils {
    */
   public static int getFreePort() {
     try (ServerSocket socket = new ServerSocket(0)) {
-      int port = socket.getLocalPort();
-      return port;
+      return socket.getLocalPort();
     } catch (IOException ioe) {
       return -1;
     }

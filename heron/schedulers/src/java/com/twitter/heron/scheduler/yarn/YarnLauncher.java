@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.reef.client.ClientConfiguration;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.REEF;
 import org.apache.reef.runtime.yarn.client.YarnClientConfiguration;
+import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
 import org.apache.reef.tang.Configuration;
 import org.apache.reef.tang.Injector;
 import org.apache.reef.tang.Tang;
@@ -59,6 +62,8 @@ public class YarnLauncher implements ILauncher {
   private String cluster;
   private String role;
   private String env;
+  private String queue;
+  private int driverMemory;
   private ArrayList<String> libJars = new ArrayList<>();
 
   @Override
@@ -69,19 +74,18 @@ public class YarnLauncher implements ILauncher {
     cluster = Context.cluster(config);
     role = Context.role(config);
     env = Context.environ(config);
+    queue = YarnContext.heronYarnQueue(config);
+    driverMemory = YarnContext.heronDriverMemoryMb(config);
 
     try {
-      Class<?> packingClass = Class.forName(Context.packingClass(config));
-      Class<?> stateMgrClass = Class.forName(Context.stateManagerClass(config));
-
       // In addition to jar for REEF's driver implementation, jar for packing and state manager
       // classes is also needed on the server classpath. Upload these libraries in the global cache.
       // TODO Although these jars will be available in heron-core/lib directory when core package
       // TODO is extracted. So copying these jars can be skipped if these jars can be put in
       // TODO classpath of SchedulerMain.
-      libJars.add(this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile());
-      libJars.add(packingClass.getProtectionDomain().getCodeSource().getLocation().getFile());
-      libJars.add(stateMgrClass.getProtectionDomain().getCodeSource().getLocation().getFile());
+      addLibraryToClasspathSet(this.getClass().getName());
+      addLibraryToClasspathSet(Context.packingClass(config));
+      addLibraryToClasspathSet(Context.stateManagerClass(config));
 
       coreReleasePackage = new URI(Context.corePackageUri(config)).getPath();
     } catch (URISyntaxException | ClassNotFoundException e) {
@@ -91,6 +95,12 @@ public class YarnLauncher implements ILauncher {
     LOG.log(Level.INFO,
         "Initializing topology: {0}, core: {1}",
         new Object[]{topologyName, coreReleasePackage});
+  }
+
+  @VisibleForTesting
+  void addLibraryToClasspathSet(String className) throws ClassNotFoundException {
+    Class<?> referenceClass = Class.forName(className);
+    libJars.add(referenceClass.getProtectionDomain().getCodeSource().getLocation().getFile());
   }
 
   @Override
@@ -120,7 +130,8 @@ public class YarnLauncher implements ILauncher {
    * Creates configuration required by driver code to successfully construct heron's configuration
    * and launch heron's scheduler
    */
-  private Configuration getHMDriverConf() {
+  @VisibleForTesting
+  Configuration getHMDriverConf() {
     String topologyPackageName = new File(topologyPackageLocation).getName();
     String corePackageName = new File(coreReleasePackage).getName();
 
@@ -149,6 +160,8 @@ public class YarnLauncher implements ILauncher {
         .set(HeronDriverConfiguration.CLUSTER, cluster)
         .set(HeronDriverConfiguration.HTTP_PORT, 0)
         .set(HeronDriverConfiguration.VERBOSE, false)
+        .set(YarnDriverConfiguration.QUEUE, queue)
+        .set(DriverConfiguration.DRIVER_MEMORY, driverMemory)
         .build();
   }
 
