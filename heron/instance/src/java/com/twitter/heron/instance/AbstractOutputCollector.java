@@ -44,7 +44,7 @@ public class AbstractOutputCollector {
     this.serializer = serializer;
     this.metrics = metrics;
     this.totalTuplesEmitted = 0;
-    updatePhysicalPlanHelper(helper);
+    this.helper = helper;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
