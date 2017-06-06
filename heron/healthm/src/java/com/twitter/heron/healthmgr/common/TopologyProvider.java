@@ -23,8 +23,12 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import com.microsoft.dhalion.core.EventHandler;
+import com.microsoft.dhalion.core.EventManager;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 /**
@@ -32,7 +36,7 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
  * version to any dependent components.
  */
 @Singleton
-public class TopologyProvider implements Provider<Topology> {
+public class TopologyProvider implements Provider<Topology>, EventHandler<TopologyUpdate> {
   private static final Logger LOG = Logger.getLogger(TopologyProvider.class.getName());
   private final SchedulerStateManagerAdaptor stateManagerAdaptor;
   private final String topologyName;
@@ -41,9 +45,11 @@ public class TopologyProvider implements Provider<Topology> {
 
   @Inject
   public TopologyProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
+                          EventManager eventManager,
                           @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
+    eventManager.addEventListener(TopologyUpdate.class, this);
   }
 
   @Override
@@ -65,7 +71,8 @@ public class TopologyProvider implements Provider<Topology> {
   /**
    * Invalidates cached topology instance on receiving update notification
    */
-  public synchronized void onNext(HealthManagerEvents.TOPOLOGY_UPDATE event) {
+  @Override
+  public synchronized void onEvent(TopologyUpdate event) {
     LOG.info("Received topology update event, invalidating cached topology: " + event);
     this.topology = null;
   }

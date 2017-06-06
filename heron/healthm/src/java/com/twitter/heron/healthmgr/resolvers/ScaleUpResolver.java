@@ -18,13 +18,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.core.EventManager;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
@@ -33,6 +33,7 @@ import com.microsoft.dhalion.resolver.Action;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
@@ -53,16 +54,19 @@ public class ScaleUpResolver implements IResolver {
   private TopologyProvider topologyProvider;
   private PackingPlanProvider packingPlanProvider;
   private ISchedulerClient schedulerClient;
+  private EventManager eventManager;
   private Config config;
 
   @Inject
   public ScaleUpResolver(TopologyProvider topologyProvider,
                          PackingPlanProvider packingPlanProvider,
                          ISchedulerClient schedulerClient,
+                         EventManager eventManager,
                          Config config) {
     this.topologyProvider = topologyProvider;
     this.packingPlanProvider = packingPlanProvider;
     this.schedulerClient = schedulerClient;
+    this.eventManager = eventManager;
     this.config = config;
   }
 
@@ -102,10 +106,14 @@ public class ScaleUpResolver implements IResolver {
             "updateTopologyRequest=%s", updateTopologyRequest));
       }
 
+      TopologyUpdate action = new TopologyUpdate();
+      LOG.info("Broadcasting topology update event");
+      eventManager.onEvent(action);
+
       LOG.info("Scheduler updated topology successfully.");
 
       List<Action> actions = new ArrayList<>();
-      actions.add(new Action());
+      actions.add(action);
       return actions;
     }
 

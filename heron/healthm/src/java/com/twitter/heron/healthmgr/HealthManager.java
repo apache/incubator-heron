@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.MetricsProvider;
+import com.microsoft.dhalion.core.EventManager;
 import com.microsoft.dhalion.core.PoliciesExecutor;
 
 import org.apache.commons.cli.CommandLine;
@@ -192,6 +193,7 @@ public class HealthManager {
             .annotatedWith(Names.named(HealthMgrConstants.CONF_ENVIRON))
             .toInstance(Context.environ(config));
         bind(Config.class).toInstance(config);
+        bind(EventManager.class).in(Singleton.class);
 
         bind(ISchedulerClient.class).toInstance(schedulerClient);
         bind(SchedulerStateManagerAdaptor.class).toInstance(stateMgrAdaptor);

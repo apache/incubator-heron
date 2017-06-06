@@ -16,10 +16,12 @@ package com.twitter.heron.healthmgr.common;
 
 import java.util.HashSet;
 
+import com.microsoft.dhalion.core.EventManager;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthManagerEvents.TOPOLOGY_UPDATE;
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.*;
 
 public class PackingPlanProviderTest {
   String topologyName = "topologyName";
+  private EventManager eventManager = new EventManager();
 
   @Test
   public void fetchesAndCachesPackingFromStateMgr() {
@@ -40,7 +43,7 @@ public class PackingPlanProviderTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     when(adaptor.getPackingPlan(topologyName)).thenReturn(proto);
 
-    PackingPlanProvider provider = new PackingPlanProvider(adaptor, topologyName);
+    PackingPlanProvider provider = new PackingPlanProvider(adaptor, eventManager, topologyName);
     PackingPlan packing = provider.get();
     Assert.assertEquals(1, packing.getContainers().size());
 
@@ -57,11 +60,11 @@ public class PackingPlanProviderTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     when(adaptor.getPackingPlan(topologyName)).thenReturn(proto);
 
-    PackingPlanProvider provider = new PackingPlanProvider(adaptor, topologyName);
+    PackingPlanProvider provider = new PackingPlanProvider(adaptor, eventManager, topologyName);
     PackingPlan packing = provider.get();
     Assert.assertEquals(1, packing.getContainers().size());
 
-    provider.onNext(new TOPOLOGY_UPDATE());
+    provider.onEvent(new TopologyUpdate());
     provider.get();
     verify(adaptor, times(2)).getPackingPlan(topologyName);
   }
@@ -74,9 +77,9 @@ public class PackingPlanProviderTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     when(adaptor.getPackingPlan(topologyName)).thenReturn(proto);
 
-    PackingPlanProvider packingPlanProvider = new PackingPlanProvider(adaptor, topologyName);
+    PackingPlanProvider packing = new PackingPlanProvider(adaptor, eventManager, topologyName);
 
-    String[] boltNames = packingPlanProvider.getBoltInstanceNames("testBolt");
+    String[] boltNames = packing.getBoltInstanceNames("testBolt");
     assertEquals(3, boltNames.length);
 
     HashSet<String> expectedBoltNames = new HashSet<>();
