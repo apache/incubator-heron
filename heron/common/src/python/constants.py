@@ -151,9 +151,6 @@ INSTANCE_EXECUTE_BATCH_TIME_MS = "heron.instance.execute.batch.time.ms"
 # The maximum batch size in bytes for an bolt instance to execute tuples per attempt
 INSTANCE_EXECUTE_BATCH_SIZE_BYTES = "heron.instance.execute.batch.size.bytes"
 
-# The time interval for an instance to check the state change, for instance,
-# the interval a spout using to check whether activate/deactivate is invoked
-INSTANCE_STATE_CHECK_INTERVAL_SEC = "heron.instance.state.check.interval.sec"
 # The time to wait before the instance exits forcibly when uncaught exception happens
 INSTANCE_FORCE_EXIT_TIMEOUT_MS = "heron.instance.force.exit.timeout.ms"
 # Interval in seconds to reconnect to the stream manager
@@ -168,8 +165,6 @@ INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC = "heron.instance.metrics.system.sam
 # The spout instance will check whether there are timeout tuples every 3 seconds
 INSTANCE_ACKNOWLEDGEMENT_NBUCKETS = "heron.instance.acknowledgement.nbuckets"
 
-# The interval for different threads to attempt to fetch physical plan from SingletonRegistry
-INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC = "heron.instance.slave.fetch.pplan.interval.sec"
 # The expected size on read queue in bolt
 INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE \
   = "heron.instance.tuning.expected.bolt.read.queue.size"

@@ -14,8 +14,11 @@
 
 package com.twitter.heron.examples;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Random;
+
+import com.twitter.heron.common.basics.SysUtils;
 
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -30,6 +33,15 @@ public class TestWordSpout extends BaseRichSpout {
   private SpoutOutputCollector collector;
   private String[] words;
   private Random rand;
+  private final Duration throttleDuration;
+
+  public TestWordSpout() {
+    this(Duration.ZERO);
+  }
+
+  public TestWordSpout(Duration throttleDuration) {
+    this.throttleDuration = throttleDuration;
+  }
 
   @SuppressWarnings("rawtypes")
   public void open(
@@ -47,6 +59,9 @@ public class TestWordSpout extends BaseRichSpout {
   public void nextTuple() {
     final String word = words[rand.nextInt(words.length)];
     collector.emit(new Values(word));
+    if (!throttleDuration.isZero()) {
+      SysUtils.sleep(throttleDuration); // sleep to throttle back cpu usage
+    }
   }
 
   public void ack(Object msgId) {

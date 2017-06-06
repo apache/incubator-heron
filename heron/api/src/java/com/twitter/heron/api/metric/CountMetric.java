@@ -28,6 +28,10 @@ public class CountMetric implements IMetric<Long> {
     value += incrementBy;
   }
 
+  public Long getValue() {
+    return value;
+  }
+
   @Override
   public Long getValueAndReset() {
     long ret = value;

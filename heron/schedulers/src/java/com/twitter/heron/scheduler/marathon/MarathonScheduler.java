@@ -53,6 +53,7 @@ public class MarathonScheduler implements IScheduler {
   protected MarathonController getController() {
     return new MarathonController(
         MarathonContext.getSchedulerURI(config),
+        MarathonContext.getSchedulerAuthToken(config),
         Runtime.topologyName(runtime),
         Context.verbose(config));
   }

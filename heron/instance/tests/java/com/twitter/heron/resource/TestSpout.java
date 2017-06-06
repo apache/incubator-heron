@@ -73,16 +73,12 @@ public class TestSpout implements IRichSpout {
 
   @Override
   public void activate() {
-    CountDownLatch latch =
-        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.ACTIVATE_COUNT_LATCH);
-    latch.countDown();
+    countDownLatch(Constants.ACTIVATE_COUNT_LATCH);
   }
 
   @Override
   public void deactivate() {
-    CountDownLatch latch =
-        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.DEACTIVATE_COUNT_LATCH);
-    latch.countDown();
+    countDownLatch(Constants.DEACTIVATE_COUNT_LATCH);
   }
 
   @Override
@@ -101,19 +97,27 @@ public class TestSpout implements IRichSpout {
 
   @Override
   public void ack(Object o) {
-    AtomicInteger ackCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
-    if (ackCount != null) {
-      ackCount.getAndIncrement();
-    }
+    incrementCount(Constants.ACK_COUNT);
+    countDownLatch(Constants.ACK_LATCH);
   }
 
   @Override
   public void fail(Object o) {
-    AtomicInteger failCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
-    if (failCount != null) {
-      failCount.getAndIncrement();
+    incrementCount(Constants.FAIL_COUNT);
+    countDownLatch(Constants.FAIL_LATCH);
+  }
+
+  private void countDownLatch(String singletonKey) {
+    CountDownLatch latch = (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(singletonKey);
+    if (latch != null) {
+      latch.countDown();
+    }
+  }
+
+  private void incrementCount(String singletonKey) {
+    AtomicInteger count = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(singletonKey);
+    if (count != null) {
+      count.getAndIncrement();
     }
   }
 }
