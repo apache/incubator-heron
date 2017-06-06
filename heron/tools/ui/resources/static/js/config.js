@@ -7,6 +7,8 @@ var ConfigTable = React.createClass({
   getTopologyConfig: function() {
     urlTokens = [  this.props.baseUrl,
                    'topologies',
+                   this.props.cluster,
+                   this.props.environ,
                    this.props.topology,
                    'physicalplan.json'];
     fetchUrl = urlTokens.join('/');

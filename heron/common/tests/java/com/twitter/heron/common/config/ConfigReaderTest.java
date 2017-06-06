@@ -16,6 +16,7 @@ package com.twitter.heron.common.config;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
@@ -25,15 +26,20 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ConfigReaderTest {
+  private static final String ROLE_KEY = "role";
+  private static final String ENVIRON_KEY = "environ";
+  private static final String USER_KEY = "user";
+
+  private static final String LAUNCHER_CLASS_KEY = "heron.launcher.class";
 
   private static final String RESOURCE_LOC = "/heron/common/tests/resources/defaults.yaml";
 
   private void testProperty(Map<String, Object> props) {
-    Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
-    Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
+    Assert.assertEquals("role", props.get(ROLE_KEY));
+    Assert.assertEquals("environ", props.get(ENVIRON_KEY));
     Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher",
-        props.get(Constants.LAUNCHER_CLASS_KEY));
-    Assert.assertNull(props.get(Constants.USER_KEY));
+        props.get(LAUNCHER_CLASS_KEY));
+    Assert.assertNull(props.get(USER_KEY));
   }
 
   private InputStream loadResource() {
@@ -45,7 +51,7 @@ public class ConfigReaderTest {
   }
 
   @Test
-  public void testLoadFile() throws Exception {
+  public void testLoadFile() throws IOException {
     InputStream inputStream = loadResource();
     File file = File.createTempFile("defaults_temp", "yaml");
     file.deleteOnExit();
@@ -57,7 +63,7 @@ public class ConfigReaderTest {
   }
 
   @Test
-  public void testLoadStream() throws Exception {
+  public void testLoadStream() {
     InputStream inputStream = loadResource();
     Map<String, Object> props = ConfigReader.loadStream(inputStream);
     testProperty(props);

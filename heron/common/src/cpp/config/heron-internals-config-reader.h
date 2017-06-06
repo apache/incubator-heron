@@ -152,6 +152,10 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The sized based threshold in MB for draining the tuple cache
   sp_int32 GetHeronStreammgrCacheDrainSizeMb();
 
+  // The size based threshold in MB for buffering data tuples waiting for
+  // checkpoint markers to arrive before giving up
+  sp_int32 GetHeronStreammgrStatefulBufferSizeMb();
+
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
 
