@@ -22,7 +22,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
-import com.twitter.heron.healthmgr.common.HealthManagerEvents.TOPOLOGY_UPDATE;
+import com.microsoft.dhalion.core.EventHandler;
+import com.microsoft.dhalion.core.EventManager;
+
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
@@ -34,7 +37,7 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
  * A topology's packing plan may get updated after initial deployment. This provider is used to
  * fetch the latest version from the state manager and provide to any dependent components.
  */
-public class PackingPlanProvider implements Provider<PackingPlan> {
+public class PackingPlanProvider implements Provider<PackingPlan>, EventHandler<TopologyUpdate> {
   private static final Logger LOG = Logger.getLogger(PackingPlanProvider.class.getName());
 
   private final SchedulerStateManagerAdaptor stateManagerAdaptor;
@@ -44,9 +47,11 @@ public class PackingPlanProvider implements Provider<PackingPlan> {
 
   @Inject
   public PackingPlanProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
+                             EventManager eventManager,
                              @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
+    eventManager.addEventListener(TopologyUpdate.class, this);
   }
 
   public String[] getBoltInstanceNames(String... boltComponents) {
@@ -84,7 +89,7 @@ public class PackingPlanProvider implements Provider<PackingPlan> {
   /**
    * Invalidates cached packing plan on receiving update notification
    */
-  public synchronized void onNext(TOPOLOGY_UPDATE event) {
+  public synchronized void onEvent(TopologyUpdate event) {
     LOG.info("Received topology update event, invalidating cached PackingPlan: " + event);
     this.packingPlan = null;
   }

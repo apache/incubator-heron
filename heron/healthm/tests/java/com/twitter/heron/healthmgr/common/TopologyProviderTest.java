@@ -17,11 +17,14 @@ package com.twitter.heron.healthmgr.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.microsoft.dhalion.core.EventManager;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.TopologyTests;
 
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.*;
 
 public class TopologyProviderTest {
   String topology = "topology";
+  private EventManager eventManager = new EventManager();
 
   @Test
   public void fetchesAndCachesPackingFromStateMgr() {
@@ -38,7 +42,7 @@ public class TopologyProviderTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     when(adaptor.getTopology(topology)).thenReturn(testTopology);
 
-    TopologyProvider provider = new TopologyProvider(adaptor, topology);
+    TopologyProvider provider = new TopologyProvider(adaptor, eventManager, topology);
     Assert.assertEquals(2, provider.get().getBoltsCount());
 
     // once fetched it is cached
@@ -53,11 +57,11 @@ public class TopologyProviderTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     when(adaptor.getTopology(topology)).thenReturn(testTopology);
 
-    TopologyProvider provider = new TopologyProvider(adaptor, topology);
+    TopologyProvider provider = new TopologyProvider(adaptor, eventManager, topology);
     Assert.assertEquals(2, provider.get().getBoltsCount());
 
     // once fetched it is cached
-    provider.onNext(new HealthManagerEvents.TOPOLOGY_UPDATE());
+    provider.onEvent(new TopologyUpdate());
     provider.get();
     verify(adaptor, times(2)).getTopology(topology);
   }
@@ -72,7 +76,7 @@ public class TopologyProviderTest {
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     when(adaptor.getTopology(topology)).thenReturn(testTopology);
 
-    TopologyProvider topologyProvider = new TopologyProvider(adaptor, topology);
+    TopologyProvider topologyProvider = new TopologyProvider(adaptor, eventManager, topology);
 
     assertEquals(2, bolts.size());
     String[] boltNames = topologyProvider.getBoltNames();

@@ -14,11 +14,16 @@
 
 package com.twitter.heron.healthmgr.common;
 
+import com.microsoft.dhalion.resolver.Action;
+
 public class HealthManagerEvents {
 
   /**
    * This event is created when a resolver executes topology update action
    */
-  public static class TOPOLOGY_UPDATE {
+  public static class TopologyUpdate extends Action {
+    public TopologyUpdate() {
+      super(TopologyUpdate.class.getSimpleName());
+    }
   }
 }
