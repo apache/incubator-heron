@@ -27,11 +27,14 @@ import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.core.EventHandler;
+import com.microsoft.dhalion.core.EventManager;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
@@ -39,7 +42,9 @@ import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.ScaleUpResolver;
 
-public class DynamicResourceAllocationPolicy implements IHealthPolicy {
+public class DynamicResourceAllocationPolicy
+    implements IHealthPolicy, EventHandler<TopologyUpdate> {
+
   private static final Logger LOG
       = Logger.getLogger(DynamicResourceAllocationPolicy.class.getName());
 
@@ -57,6 +62,7 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
 
   @Inject
   DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
+                                  EventManager eventManager,
                                   BackPressureDetector backPressureDetector,
                                   UnderProvisioningDiagnoser underProvisioningDiagnoser,
                                   DataSkewDiagnoser dataSkewDiagnoser,
@@ -70,6 +76,7 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
     this.dataSkewDiagnoser = dataSkewDiagnoser;
     this.slowInstanceDiagnoser = slowInstanceDiagnoser;
     this.scaleUpResolver = scaleUpResolver;
+    eventManager.addEventListener(TopologyUpdate.class, this);
   }
 
   @Override
@@ -140,6 +147,11 @@ public class DynamicResourceAllocationPolicy implements IHealthPolicy {
     }
 
     return actions;
+  }
+
+  @Override
+  public void onEvent(TopologyUpdate event) {
+    LOG.info("Received topology update action event: " + event);
   }
 
   @Override

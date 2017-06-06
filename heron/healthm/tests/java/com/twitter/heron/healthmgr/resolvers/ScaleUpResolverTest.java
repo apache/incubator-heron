@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.microsoft.dhalion.core.EventManager;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
@@ -45,6 +46,7 @@ import static org.mockito.Mockito.*;
 
 public class ScaleUpResolverTest {
   static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
+  private EventManager eventManager = new EventManager();
 
   @Test
   public void testResolve() {
@@ -64,7 +66,7 @@ public class ScaleUpResolverTest {
     diagnosis.add(new Diagnosis("test", symptom));
 
     ScaleUpResolver resolver
-        = new ScaleUpResolver(null, packingPlanProvider, scheduler, null);
+        = new ScaleUpResolver(null, packingPlanProvider, scheduler, eventManager, null);
     ScaleUpResolver spyResolver = spy(resolver);
 
     doReturn(2).when(spyResolver).computeScaleUpFactor(metrics);
@@ -91,7 +93,8 @@ public class ScaleUpResolverTest {
     IRepacking repacking = mock(IRepacking.class);
     when(repacking.repack(currentPlan, deltaChange)).thenReturn(currentPlan);
 
-    ScaleUpResolver resolver = new ScaleUpResolver(topologyProvider, null, null, config);
+    ScaleUpResolver resolver =
+        new ScaleUpResolver(topologyProvider, null, null, eventManager, config);
     ScaleUpResolver spyResolver = spy(resolver);
     doReturn(repacking).when(spyResolver).getRepackingClass("Repacking");
 
@@ -130,7 +133,7 @@ public class ScaleUpResolverTest {
 
   @Test
   public void testScaleUpFactorComputation() {
-    ScaleUpResolver resolver = new ScaleUpResolver(null, null, null, null);
+    ScaleUpResolver resolver = new ScaleUpResolver(null, null, null, eventManager, null);
 
     ComponentMetrics metrics = new ComponentMetrics("bolt");
     metrics.addInstanceMetric(new InstanceMetrics("i1", BACK_PRESSURE, 500));
