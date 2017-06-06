@@ -1,5 +1,7 @@
 FROM ubuntu:16.04
 
+ARG heronVersion
+
 RUN apt-get update && apt-get -y install \
       curl \
       git \
@@ -27,6 +29,11 @@ ADD artifacts /heron
 WORKDIR /heron
 
 #run heron installers
-RUN /heron/heron-client-install-*-ubuntu16.04.sh && \
-    /heron/heron-tools-install-*-ubuntu16.04.sh
+RUN /heron/heron-client-install-$heronVersion-ubuntu16.04.sh && \
+    /heron/heron-tools-install-$heronVersion-ubuntu16.04.sh
 
+RUN mkdir -p /opt/heron && \
+    tar --strip-components=1 -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron
+
+ENV HERON_HOME /opt/heron/heron-core/
+RUN export HERON_HOME
