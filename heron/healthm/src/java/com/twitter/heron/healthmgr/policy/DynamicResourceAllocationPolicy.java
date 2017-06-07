@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -60,6 +58,8 @@ public class DynamicResourceAllocationPolicy
 
   private ArrayList<Diagnosis> diagnosis;
 
+  private long newTopologyEventTimeMills = 0;
+
   @Inject
   DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
                                   EventManager eventManager,
@@ -76,13 +76,26 @@ public class DynamicResourceAllocationPolicy
     this.dataSkewDiagnoser = dataSkewDiagnoser;
     this.slowInstanceDiagnoser = slowInstanceDiagnoser;
     this.scaleUpResolver = scaleUpResolver;
+
     eventManager.addEventListener(TopologyUpdate.class, this);
+    newTopologyEventTimeMills = System.currentTimeMillis();
   }
 
   @Override
   public List<Symptom> executeDetectors() {
+    long delay = getDelay();
+    if (delay > 0) {
+      LOG.info("Skip detector execution to let topology stabilize, wait=" + delay);
+      return new ArrayList<>();
+    }
     return backPressureDetector.detect();
   }
+
+  private long getDelay() {
+    int interval = Integer.valueOf(policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, "180000"));
+    return System.currentTimeMillis() - newTopologyEventTimeMills - interval;
+  }
+
 
   @Override
   public List<Diagnosis> executeDiagnosers(List<Symptom> symptoms) {
@@ -135,15 +148,8 @@ public class DynamicResourceAllocationPolicy
       return null;
     }
 
-    // TODO wait after returning actions
     List<Action> actions = resolver.resolve(diagnosis);
     if (actions != null && !actions.isEmpty()) {
-      int interval = Integer.valueOf(policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, "180000"));
-      try {
-        TimeUnit.MILLISECONDS.sleep(interval);
-      } catch (InterruptedException e) {
-        LOG.log(Level.WARNING, "Interrupted while waiting for policy stabilization", e);
-      }
     }
 
     return actions;
@@ -152,6 +158,7 @@ public class DynamicResourceAllocationPolicy
   @Override
   public void onEvent(TopologyUpdate event) {
     LOG.info("Received topology update action event: " + event);
+    newTopologyEventTimeMills = System.currentTimeMillis();
   }
 
   @Override
