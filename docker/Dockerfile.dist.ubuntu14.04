@@ -30,8 +30,7 @@ WORKDIR /heron
 
 #run heron installers
 RUN /heron/heron-tools-install-$heronVersion-ubuntu14.04.sh && \
-    /heron/heron-client-install-$heronVersion-ubuntu14.04.sh && \
-    /heron/heron-tools-install-$heronVersion-ubuntu14.04.sh
+    /heron/heron-client-install-$heronVersion-ubuntu14.04.sh
 
 RUN mkdir -p /opt/heron && \
     tar --strip-components=1 -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron

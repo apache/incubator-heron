@@ -12,12 +12,6 @@
 # e.g. ./docker/build-docker.sh ubuntu14.04 testbuild ~/heron-release
 ```
 
-# To compile source and build a docker image for running heron daemons:
-```
-./docker/build-docker.sh <platform> <version_string> <output-directory>
-# e.g. ./docker/build-heron-docker.sh ubuntu14.04 testbuild ~/heron-release
-```
-
 ### To run docker containers for local dev work:
 ```
 ./docker/start-docker.sh heron:<version_string>-<platform>
