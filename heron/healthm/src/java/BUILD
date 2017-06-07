@@ -47,6 +47,7 @@ healthmgr_deps_files = [
     "@com_google_inject_extensions_guice_assistedinject//jar",
     "@com_microsoft_dhalion//jar",
     "@aopalliance_aopalliance//jar",
+    "@org_apache_commons_commons_math3//jar",
 ]
 
 java_library(

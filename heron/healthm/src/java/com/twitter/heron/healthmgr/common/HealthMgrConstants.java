@@ -15,6 +15,7 @@
 package com.twitter.heron.healthmgr.common;
 
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
+import com.twitter.heron.healthmgr.detectors.GrowingWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.DataSkewDetector;
 import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
@@ -29,6 +30,7 @@ public interface HealthMgrConstants {
   String METRIC_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
   String METRIC_BUFFER_SIZE = "__connection_buffer_by_instanceid/";
   String METRIC_BUFFER_SIZE_SUFFIX = "/packets";
+  String METRIC_WAIT_Q_GROWTH_RATE = "BUFFER_GROWTH_RATE";
 
   String COMPONENT_STMGR = "__stmgr__";
 
@@ -50,6 +52,7 @@ public interface HealthMgrConstants {
   String SYMPTOM_LARGE_WAIT_Q = LargeWaitQueueDetector.class.getSimpleName();
   String SYMPTOM_UNDER_PROVISIONING = UnderProvisioningDiagnoser.class.getSimpleName();
   String SYMPTOM_SLOW_INSTANCE = SlowInstanceDiagnoser.class.getSimpleName();
+  String SYMPTOM_GROWING_WAIT_Q = GrowingWaitQueueDetector.class.getSimpleName();
 
   // diagnosis names
   String DIAGNOSIS_UNDER_PROVISIONING = UnderProvisioningDiagnoser.class.getSimpleName();
