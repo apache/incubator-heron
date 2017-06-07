@@ -99,7 +99,7 @@ setup_output_dir() {
   mkdir -p $1
 }
 
-run_build_docker() {
+build_docker_image() {
   DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="heron:$HERON_VERSION-$TARGET_PLATFORM"
 
@@ -150,7 +150,7 @@ run_build() {
     docker/compile-platform.sh
   else
     docker/compile-docker.sh
-    run_build_docker
+    build_docker_image
   fi
 }
 
