@@ -51,7 +51,7 @@ public class HeronServerTester {
       ByteAmount.fromMegabytes(5));
   private static final Duration DEFAULT_LATCH_TIMEOUT = Duration.ofSeconds(2);
   private static final Duration SERVER_START_TIMEOUT = Duration.ofSeconds(2);
-  public static final Duration RESPONSE_RECEIVED_TIMEOUT = Duration.ofSeconds(10);
+  public static final Duration RESPONSE_RECEIVED_TIMEOUT = Duration.ofSeconds(4);
 
   private final HeronServer server;
   private final ExecutorService threadsPool;
@@ -176,13 +176,9 @@ public class HeronServerTester {
     Runnable runClient = new Runnable() {
       @Override
       public void run() {
-        try {
-          await(serverStartedSignal, SERVER_START_TIMEOUT);
-          client.start();
-          client.getNIOLooper().loop();
-        } finally {
-          client.stop();
-        }
+        await(serverStartedSignal, SERVER_START_TIMEOUT);
+        client.start();
+        client.getNIOLooper().loop();
       }
     };
     threadsPool.execute(runClient);

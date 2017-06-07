@@ -9,7 +9,7 @@ pex_library(
         exclude = ["main.py"]
     ),
     deps = [
-        "//heron/common/src/python:common-log-py",
+        "//heron/common/src/python:common-py",
     ],
     reqs = [
         "requests==2.11.1",

@@ -16,8 +16,10 @@
 #ifndef MEM_POOL_H
 #define MEM_POOL_H
 
+#include <google/protobuf/message.h>
 #include <vector>
 #include <unordered_map>
+#include <mutex>
 #include <typeindex>
 
 template<typename T>
@@ -87,6 +89,21 @@ class MemPool {
  private:
   std::unordered_map<std::type_index, std::vector<B*>> map_;
 };
+
+extern MemPool<google::protobuf::Message>* __global_protobuf_pool__;
+extern std::mutex __global_protobuf_pool_mutex__;
+
+template<typename T>
+T* __global_protobuf_pool_acquire__(T* _m) {
+  std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
+  return __global_protobuf_pool__->acquire(_m);
+}
+
+template<typename T>
+void __global_protobuf_pool_release__(T* _m) {
+  std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
+  __global_protobuf_pool__->release(_m);
+}
 
 #endif
 

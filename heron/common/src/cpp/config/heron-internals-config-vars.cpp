@@ -108,5 +108,7 @@ const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_H
     "heron.streammgr.network.backpressure.highwatermark.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_LOWWATERMARK_MB =
     "heron.streammgr.network.backpressure.lowwatermark.mb";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB =
+    "heron.streammgr.stateful.buffer.size.mb";
 }  // namespace config
 }  // namespace heron

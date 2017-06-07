@@ -41,5 +41,6 @@
 #include "basics/sphash.h"
 #include "basics/spfuncs.h"
 #include "basics/sptest.h"
+#include "basics/mempool.h"
 
 #endif  // HERON_BASICS_H_
