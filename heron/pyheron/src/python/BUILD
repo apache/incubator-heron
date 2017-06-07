@@ -11,3 +11,12 @@ pex_library(
     ],
     reqs = ['colorlog==2.6.1', 'pyyaml==3.10'],
 )
+
+# for pyheron egg production
+pex_binary(
+    name = "pyheron-package",
+    srcs = glob(["**/*.py"]),
+    deps = [
+        ":pyheron-py",
+    ]
+)
