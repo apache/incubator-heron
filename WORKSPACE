@@ -432,4 +432,7 @@ http_jar(
   url = "https://github.com/ashvina/dhalion/releases/download/v0.0.1/dhalion-0.0.1.jar",
 )
 
-
+maven_jar(
+  name = "org_apache_commons_commons_math3",
+  artifact = "org.apache.commons:commons-math3:3.6.1"
+)
