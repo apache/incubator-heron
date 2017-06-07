@@ -42,6 +42,7 @@ import com.twitter.heron.resource.UnitTestHelper;
  * Stream manager.
  */
 public class HandleReadTest extends AbstractNetworkTest {
+  private static final int SRC_TASK_ID = 1;
 
   /**
    * Test reading from network
@@ -101,6 +102,7 @@ public class HandleReadTest extends AbstractNetworkTest {
   private Message constructMockMessage() {
     StreamManager.TupleMessage.Builder message = StreamManager.TupleMessage.newBuilder();
     HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
+    heronTupleSet.setSrcTaskId(SRC_TASK_ID);
     HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
     TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
     streamId.setComponentName("test-spout");
