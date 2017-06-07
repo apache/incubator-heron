@@ -108,7 +108,11 @@ heron.marathon.scheduler.auth.token: "<auth_token>"
 heron.scheduler.is.service:                  False
 
 # docker repo for heron with core packages installed
+<<<<<<< HEAD
 heron.executor.docker.image: 'streamlio/heron:latest-ubuntu14.04'
+=======
+heron.executor.docker.image: 'streamlio/heron:latest-ubunut14.04'
+>>>>>>> a4a61d628c06ec68e8cfaee5fe67b7510694cc21
 ```
 
 
