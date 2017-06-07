@@ -108,7 +108,7 @@ public class MarathonScheduler implements IScheduler {
     config = Config.newBuilder()
         .putAll(config)
         .put(Key.TOPOLOGY_BINARY_FILE,
-            FileUtils.getBaseName(Context.topologyBinaryFile(config)))
+            Context.topologyBinaryFile(config))
         .build();
 
     ObjectMapper mapper = new ObjectMapper();

@@ -189,7 +189,7 @@ public class SubmitterMain {
         .build();
 
     Option topologyJar = Option.builder("j")
-        .desc("user heron topology jar/pex file path")
+        .desc("user heron topology jar/tar/pex file")
         .longOpt("topology_bin")
         .hasArgs()
         .argName("topology binary file")
