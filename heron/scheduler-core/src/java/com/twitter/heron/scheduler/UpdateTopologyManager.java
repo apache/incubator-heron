@@ -152,6 +152,9 @@ public class UpdateTopologyManager implements Closeable {
     // deactivate and sleep
     if (initiallyRunning) {
       deactivateTopology(stateManager, updatedTopology);
+      // Update the topology since the state should have changed from RUNNING to PAUSED
+      updatedTopology =
+        getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
     }
 
     // request new resources if necessary. Once containers are allocated we should make the changes
