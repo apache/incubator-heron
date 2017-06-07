@@ -44,6 +44,7 @@ sp_string StatefulCheckpointer::GenerateCheckpointId() {
 }
 
 void StatefulCheckpointer::StartCheckpoint(const StMgrMap& _stmgrs) {
+  // TODO(nlu) we should avoid checkpointer starvation problem when the interval is small
   // Generate the checkpoint id
   sp_string checkpoint_id = GenerateCheckpointId();
 
