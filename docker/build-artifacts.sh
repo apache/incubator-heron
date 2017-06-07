@@ -8,7 +8,6 @@ realpath() {
 DOCKER_DIR=$(dirname $(realpath $0))
 PROJECT_DIR=$(dirname $DOCKER_DIR )
 SCRATCH_DIR="$HOME/.heron-compile"
-DOCKER_SCRATCH_DIR="$HOME/.heron-docker"
 SRC_TAR="$SCRATCH_DIR/src.tar.gz"
 
 heron_git_release() {
@@ -74,11 +73,6 @@ cleanup() {
     echo "Cleaning up scratch dir"
     rm -rf $SCRATCH_DIR
   fi
-
-  if [ -d $DOCKER_SCRATCH_DIR ]; then
-    echo "Cleaning up docker scratch dir"
-    rm -rf $DOCKER_SCRATCH_DIR
-  fi
 }
 
 trap cleanup EXIT
@@ -96,16 +90,6 @@ verify_source_exists() {
 }
 
 setup_scratch_dir() {
-  mkdir -p $1
-  cp $DOCKER_DIR/* $1
-}
-
-setup_output_dir() {
-  echo "Creating output directory $1"
-  mkdir -p $1
-}
-
-setup_docker_scratch_dir() {
   if [ ! -f "$1" ]; then
     mkdir $1
     mkdir $1/artifacts
@@ -114,42 +98,26 @@ setup_docker_scratch_dir() {
   cp $DOCKER_DIR/* $1
 }
 
-declare -a docker_platforms=("ubuntu14.04" "ubuntu16.04")
-
-is_platform_supported() {
-  PLATFORM=$1
-  for i in "${docker_platforms[@]}"
-   do
-    if [ "$PLATFORM" == "$i" ]; then
-      return 0
-    fi
-  done
-
-  return 1
+setup_output_dir() {
+  echo "Creating output directory $1"
+  mkdir -p $1
 }
 
 run_build_docker() {
-  if ! is_platform_supported $TARGET_PLATFORM; then
-    echo -e "\nfailed to build docker image"
-    echo -e "only the follow platforms are supported:"
-    for i in "${docker_platforms[@]}"
-    do
-      echo -e "\t$i"
-    done
-    echo -e "\n"
-  fi
-
-  echo "building docker image heron:$HERON_VERSION-$TARGET_PLATFORM"
-
-  DOCKER_FILE="$DOCKER_SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
+  DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="heron:$HERON_VERSION-$TARGET_PLATFORM"
 
-  setup_docker_scratch_dir $DOCKER_SCRATCH_DIR
-
   #need to copy artifacts locally
-  cp -pr "$OUTPUT_DIRECTORY"/*$HERON_VERSION* "$DOCKER_SCRATCH_DIR/artifacts"
+  cp "$OUTPUT_DIRECTORY"/heron-tools-install*$HERON_VERSION*.sh "$SCRATCH_DIR/artifacts"
+  cp "$OUTPUT_DIRECTORY"/heron-client-install*$HERON_VERSION*.sh "$SCRATCH_DIR/artifacts"
 
-  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$DOCKER_SCRATCH_DIR"
+  echo "building docker image heron:$DOCKER_TAG"
+
+  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+
+  DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
+  echo "saving docker image to $DOCKER_IMAGE_FILE"
+  docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
 }
 
 run_build() {
@@ -185,7 +153,7 @@ run_build() {
   if [ $TARGET_PLATFORM = "darwin" ]; then
     docker/compile-platform.sh
   else
-    #docker/compile-docker.sh
+    docker/compile-docker.sh
     run_build_docker
   fi
 }
