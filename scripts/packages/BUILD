@@ -322,6 +322,7 @@ genrule(
     srcs = [
         "pyheron/requirements.txt", 
         "pyheron/setup.py.template",
+        "pyheron/README.txt",
     ] + generated_release_files,
     outs = generated_pyheron_egg_file,
     stamp = 1,
