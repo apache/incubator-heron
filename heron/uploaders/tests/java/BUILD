@@ -73,3 +73,10 @@ java_test(
     deps = scp_deps_files,
     size = "small",
 )
+
+java_test (
+    name = "DockerUploaderTest",
+    srcs = glob(["**/docker/DockerUploaderTest.java"]),
+    deps = common_deps_files + spi_deps_files + ["//heron/uploaders/src/java:docker-uploader-java"],
+    size = "small",
+)
