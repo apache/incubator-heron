@@ -28,7 +28,7 @@ class StatefulRestorer {
  public:
   StatefulRestorer();
   virtual ~StatefulRestorer();
-  // Start a new 2PC with this checkpoint_id
+  // Start a new 2 Phase Commit with this checkpoint_id
   void StartRestore(const std::string& _ckeckpoint_id,
                     const StMgrMap& _stmgrs);
   void HandleStMgrRestored(const std::string& _stmgr_id,
@@ -44,7 +44,7 @@ class StatefulRestorer {
   const std::string& GetCheckpointIdInProgress() const { return checkpoint_id_in_progress_; }
 
  private:
-  void Finish2PC(const StMgrMap& _stmgrs);
+  void Finish2PhaseCommit(const StMgrMap& _stmgrs);
   bool in_progress_;
   int64_t restore_txid_;
   std::string checkpoint_id_in_progress_;

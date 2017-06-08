@@ -38,7 +38,7 @@ void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, const StM
   checkpoint_id_in_progress_ = _checkpoint_id;
   unreplied_stmgrs_.clear();
   ++restore_txid_;
-  LOG(INFO) << "Starting a 2PC Restore for checkpoint "
+  LOG(INFO) << "Starting a 2 phase commit Restore for checkpoint "
             << _checkpoint_id << " and restore txid "
             << restore_txid_;
   proto::ckptmgr::RestoreTopologyStateRequest request;
@@ -63,12 +63,12 @@ void StatefulRestorer::HandleStMgrRestored(const std::string& _stmgr_id,
   CHECK(_restore_txid == restore_txid_);
   unreplied_stmgrs_.erase(_stmgr_id);
   if (unreplied_stmgrs_.empty()) {
-    Finish2PC(_stmgrs);
+    Finish2PhaseCommit(_stmgrs);
   }
 }
 
-void StatefulRestorer::Finish2PC(const StMgrMap& _stmgrs) {
-  LOG(INFO) << "Finishing Stateful 2PC since all stmgrs have replied back";
+void StatefulRestorer::Finish2PhaseCommit(const StMgrMap& _stmgrs) {
+  LOG(INFO) << "Finishing Stateful 2 Phase Commit since all stmgrs have replied back";
   CHECK(unreplied_stmgrs_.empty());
   for (auto kv : _stmgrs) {
     kv.second->SendStartStatefulProcessingMessage(checkpoint_id_in_progress_);
