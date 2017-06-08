@@ -139,6 +139,7 @@ class SingleThreadHeronInstance(object):
     """Send messages in out_stream to the Stream Manager"""
     while not self.out_stream.is_empty():
       tuple_set = self.out_stream.poll()
+      tuple_set.src_task_id = self.my_pplan_helper.my_task_id
       self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
       self._stmgr_client.send_message(tuple_set)
 
