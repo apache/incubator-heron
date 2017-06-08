@@ -34,6 +34,10 @@ generated_release_files = [
     "release.yaml",
 ]
 
+generated_pyheron_egg_file = [
+    "pyheron.whl",
+]
+
 filegroup(
     name = "release_files",
     srcs = generated_release_files,
@@ -55,6 +59,13 @@ filegroup(
         ":heron-api-install.sh",
         ":heron-client-install.sh",
         ":heron-tools-install.sh",
+    ],
+)
+
+filegroup(
+    name = "pypkgs",
+    srcs = [
+        ":generate-pyheron-package",
     ],
 )
 
@@ -292,6 +303,54 @@ pkg_tar(
     name = "heron-api",
     extension = "tar.gz",
     files = generated_release_files + heron_api_files(),
+)
+
+################################################################################
+# Heron python packaging
+################################################################################
+genrule(
+    name = "generate-pyheron-package",
+    srcs = [
+        "pyheron/requirements.txt", 
+        "pyheron/setup.py.template",
+    ] + generated_release_files,
+    outs = generated_pyheron_egg_file,
+    stamp = 1,
+    tools = [
+        "//heron/pyheron/src/python:pyheron-package"
+    ],
+    cmd = "\n".join([
+        'export OUTPUT_DIR=$$(pwd)/$(@D)',
+        'export RELEASE_FILE_DIR=$$(pwd)',
+        'export TMP_DIR=$$(mktemp -d -t pyheron.XXXXX)',
+        'echo $$TMP_DIR',
+        'export PYHERON_DIR=$$TMP_DIR/pyheron',
+        'export PYHERON_UNZIP=$$TMP_DIR/unzipped',
+        'export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk \'{print $$3}\')',
+        'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
+        'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
+        'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
+        'echo $$HERON_VERSION',
+        'mkdir -p $$TMP_DIR $$PYHERON_DIR',
+        'unzip -qd $$PYHERON_UNZIP $(location //heron/pyheron/src/python:pyheron-package)',
+        'find $$PYHERON_UNZIP -name "*.pyc" -exec rm {} \;',
+        'mv $$PYHERON_UNZIP/heron/pyheron/src/python $$PYHERON_DIR/pyheron',
+        'rm -rf $$PYHERON_UNZIP/heron/pyheron',
+        'mv $$PYHERON_UNZIP/heron $$PYHERON_DIR/heron',
+        'cp $(SRCS) $$PYHERON_DIR',
+        'echo "PyHeron toplevel directory: $$PYHERON_DIR"',
+        'cd $$PYHERON_DIR',
+        'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
+        'rm setup.py.template',
+        'tree $$PYHERON_DIR',
+        '/usr/bin/env python2.7 setup.py sdist',
+        '/usr/bin/env python2.7 setup.py bdist_wheel',
+        'ls -l $$PYHERON_DIR/dist',
+        'cp $$PYHERON_DIR/dist/pyheron-*-py2-*.whl $$OUTPUT_DIR',
+        'cp $$PYHERON_DIR/dist/pyheron-*.tar.gz $$OUTPUT_DIR',
+        'touch $$OUTPUT_DIR/pyheron.whl',
+        'rm -rf $$TMP_DIR',
+    ]),
 )
 
 ################################################################################
