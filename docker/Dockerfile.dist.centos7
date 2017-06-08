@@ -1,30 +1,32 @@
-FROM ubuntu:14.04
+FROM centos:centos7
 
 ARG heronVersion
 
-RUN apt-get update && apt-get -y install \
+RUN yum -y upgrade
+RUN yum -y install \
       curl \
       git \
-      libssl-dev \
+      openssl-devel \
       libtool \
       python \
       software-properties-common \
       unzip \
       wget \
+      which \
+      unzip \
       zip
 
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
-RUN apt-get -y install openjdk-8-jdk
+RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0 
 
 ADD artifacts /heron
 
 WORKDIR /heron
 
 #run heron installers
-RUN /heron/heron-tools-install-$heronVersion-ubuntu14.04.sh && \
-    /heron/heron-client-install-$heronVersion-ubuntu14.04.sh
+RUN /heron/heron-client-install-$heronVersion-centos7.sh && \
+    /heron/heron-tools-install-$heronVersion-centos7.sh
 
 RUN mkdir -p /opt/heron && \
     tar --strip-components=1 -m -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron

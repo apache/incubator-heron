@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 ARG heronVersion
 
@@ -13,7 +13,6 @@ RUN apt-get update && apt-get -y install \
       wget \
       zip
 
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
 RUN apt-get -y install openjdk-8-jdk
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -23,8 +22,8 @@ ADD artifacts /heron
 WORKDIR /heron
 
 #run heron installers
-RUN /heron/heron-tools-install-$heronVersion-ubuntu14.04.sh && \
-    /heron/heron-client-install-$heronVersion-ubuntu14.04.sh
+RUN /heron/heron-client-install-$heronVersion-ubuntu15.10.sh && \
+    /heron/heron-tools-install-$heronVersion-ubuntu15.10.sh
 
 RUN mkdir -p /opt/heron && \
     tar --strip-components=1 -m -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron
