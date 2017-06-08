@@ -175,7 +175,8 @@ java_library(
 java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
-    "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest"
+    "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest",
+    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest"
   ],
   runtime_deps = [ ":kubernetes-tests" ],
   size = "small",
