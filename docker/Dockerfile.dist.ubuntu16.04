@@ -7,22 +7,15 @@ RUN apt-get update && apt-get -y install \
       git \
       libssl-dev \
       libtool \
-      libunwind8 \
-      libunwind-setjmp0-dev \
       python \
       software-properties-common \
       unzip \
       wget \
       zip
 
-RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+RUN apt-get -y install openjdk-8-jdk
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 ADD artifacts /heron
 
@@ -33,7 +26,7 @@ RUN /heron/heron-client-install-$heronVersion-ubuntu16.04.sh && \
     /heron/heron-tools-install-$heronVersion-ubuntu16.04.sh
 
 RUN mkdir -p /opt/heron && \
-    tar --strip-components=1 -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron
+    tar --strip-components=1 -m -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron
 
 ENV HERON_HOME /opt/heron/heron-core/
 RUN export HERON_HOME
