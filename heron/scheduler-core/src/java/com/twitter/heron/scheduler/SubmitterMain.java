@@ -189,10 +189,10 @@ public class SubmitterMain {
         .build();
 
     Option topologyJar = Option.builder("j")
-        .desc("user heron topology jar/tar/pex file")
+        .desc("The filename of the heron topology jar/tar/pex file to be run by the executor")
         .longOpt("topology_bin")
         .hasArgs()
-        .argName("topology binary file")
+        .argName("topology binary filename on the cluster")
         .required()
         .build();
 
