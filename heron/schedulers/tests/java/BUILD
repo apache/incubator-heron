@@ -62,6 +62,10 @@ marathon_deps_files = [
     "//heron/schedulers/src/java:marathon-scheduler-java",
 ]
 
+kubernetes_deps_files = [
+    "//heron/schedulers/src/java:kubernetes-scheduler-java",
+]
+
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
@@ -159,5 +163,20 @@ java_tests(
     "com.twitter.heron.scheduler.marathon.MarathonControllerTest",
   ],
   runtime_deps = [ ":marathon-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "kubernetes-tests",
+  srcs = glob(["**/kubernetes/*.java"]),
+  deps = scheduler_deps_files + kubernetes_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
+    "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest"
+  ],
+  runtime_deps = [ ":kubernetes-tests" ],
   size = "small",
 )

@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.kubernetes;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -77,7 +78,11 @@ public class KubernetesScheduler implements IScheduler {
 
   @Override
   public List<String> getJobLinks() {
-    return null;
+    List<String> jobLinks = new LinkedList<>();
+    String kubernetesPodsLink = KubernetesContext.getSchedulerURI(config)
+        + KubernetesConstants.JOB_LINK;
+    jobLinks.add(kubernetesPodsLink);
+    return jobLinks;
   }
 
   @Override
@@ -87,7 +92,8 @@ public class KubernetesScheduler implements IScheduler {
 
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
-    return false;
+    int appId = request.getContainerIndex();
+    return controller.restartApp(appId);
   }
 
   @Override
@@ -134,7 +140,8 @@ public class KubernetesScheduler implements IScheduler {
   // build the metadata for a deployment
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
-    metadataNode.put(KubernetesConstants.NAME, Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
+    metadataNode.put(KubernetesConstants.NAME,
+        Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
 
     ObjectNode labels = mapper.createObjectNode();
     labels.put(KubernetesConstants.TOPOLOGY_LABEL, Runtime.topologyName(runtime));
@@ -164,7 +171,8 @@ public class KubernetesScheduler implements IScheduler {
     ArrayNode containerList = mapper.createArrayNode();
 
     ObjectNode containerInfo = mapper.createObjectNode();
-    containerInfo.put(KubernetesConstants.NAME, Joiner.on("-").join("executor", Integer.toString(containerIndex)));
+    containerInfo.put(KubernetesConstants.NAME, Joiner.on("-").join("executor",
+        Integer.toString(containerIndex)));
 
     // set the host for this container
     ArrayNode envList = mapper.createArrayNode();
@@ -182,7 +190,8 @@ public class KubernetesScheduler implements IScheduler {
     containerInfo.set(KubernetesConstants.ENV, envList);
 
     // Image information for this container
-    containerInfo.put(KubernetesConstants.DOCKER_IMAGE, KubernetesContext.getExecutorDockerImage(config));
+    containerInfo.put(KubernetesConstants.DOCKER_IMAGE,
+        KubernetesContext.getExecutorDockerImage(config));
 
     // Port information for this container
     containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));

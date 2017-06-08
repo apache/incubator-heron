@@ -84,7 +84,10 @@ public class KubernetesController {
   }
 
   public boolean restartApp(int appId) {
-    return true;
+    String message = "Restarting the whole topology is not supported yet. "
+        + "Please kill and resubmit the topology.";
+    LOG.log(Level.SEVERE, message);
+    return false;
   }
 
   /**
@@ -93,9 +96,7 @@ public class KubernetesController {
    * @return success
    */
   public boolean submitTopology(String[] appConfs) {
-    //LOG.log(Level.INFO, "Topology configuration is: " + appConf);
 
-    // Marathon atleast till 1.4.x does not allow upper case jobids
     if (!this.topologyName.equals(this.topologyName.toLowerCase())) {
       LOG.log(Level.SEVERE, "K8s scheduler does not allow upper case topologies");
       return false;

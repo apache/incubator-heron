@@ -66,4 +66,7 @@ public final class KubernetesConstants {
       SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT, METRICS_CACHE_MASTER_PORT,
       METRICS_CACHE_STATS_PORT};
 
+  public static final String JOB_LINK =
+      "/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/pod";
+
 }

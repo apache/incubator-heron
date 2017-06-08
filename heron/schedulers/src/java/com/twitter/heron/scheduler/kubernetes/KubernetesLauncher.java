@@ -14,13 +14,10 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import com.twitter.heron.scheduler.utils.LauncherUtils;
-import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -33,8 +30,6 @@ public class KubernetesLauncher implements ILauncher {
 
   private Config config;
   private Config runtime;
-
-  private String schedulerWorkingDirectory;
 
   @Override
   public void initialize(Config aConfig, Config aRuntime) {
