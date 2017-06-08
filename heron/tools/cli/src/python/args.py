@@ -35,7 +35,7 @@ def add_verbose(parser):
   :return:
   '''
   parser.add_argument(
-      '--verbose',
+      '--heron-verbose',
       default=False,
       help='Verbose mode. Increases logging level to show debug messages')
   return parser
@@ -107,12 +107,12 @@ def add_config(parser):
   default_config_path = config.get_heron_conf_dir()
 
   parser.add_argument(
-      '--config-path',
+      '--heron-config-path',
       default=os.path.join(config.get_heron_dir(), default_config_path),
       help='Path to cluster configuration files')
 
   parser.add_argument(
-      '--config-property',
+      '--heron-config-property',
       metavar='PROPERTY=VALUE',
       action='append',
       default=[],
@@ -126,7 +126,7 @@ def add_system_property(parser):
   :return:
   '''
   parser.add_argument(
-      '--topology-main-jvm-property',
+      '--heron-topology-main-jvm-property',
       metavar='PROPERTY=VALUE',
       action="append",
       default=[],
@@ -141,7 +141,7 @@ def add_deactive_deploy(parser):
   :return:
   '''
   parser.add_argument(
-      '--deploy-deactivated',
+      '--heron-deploy-deactivated',
       default=False,
       help='Deploy topology in deactivated mode')
   return parser
@@ -153,7 +153,7 @@ def add_extra_launch_classpath(parser):
   :return:
   '''
   parser.add_argument(
-      '--extra-launch-classpath',
+      '--heron-extra-launch-classpath',
       metavar='CLASS_PATH',
       default="",
       help='Additional JVM class path for launching topology')
@@ -176,14 +176,14 @@ def add_dry_run(parser):
     return value
 
   parser.add_argument(
-      '--dry-run',
+      '--heron-dry-run',
       default=False,
       action='store_true',
       help='Enable dry-run mode. Information about '
            'the command will print but no action will be taken on the topology')
 
   parser.add_argument(
-      '--dry-run-format',
+      '--heron-dry-run-format',
       metavar='DRY_RUN_FORMAT',
       default='table',
       type=dry_run_resp_format,
