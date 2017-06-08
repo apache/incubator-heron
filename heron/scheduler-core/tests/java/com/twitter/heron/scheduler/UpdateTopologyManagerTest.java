@@ -166,7 +166,8 @@ public class UpdateTopologyManagerTest {
 
     spyUpdateManager.updateTopology(currentProtoPlan, proposedProtoPlan);
 
-    verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(testTopology));
+    verify(spyUpdateManager).deactivateTopology(eq(mockStateMgr), eq(testTopology),
+        eq(proposedPacking));
     verify(spyUpdateManager).reactivateTopology(eq(mockStateMgr), eq(testTopology), eq(2));
     verify(mockScheduler).addContainers(expectedContainersToAdd);
     verify(mockScheduler).removeContainers(expectedContainersToRemove);
