@@ -50,7 +50,7 @@ public final class KubernetesConstants {
 
   public static final String[] PORT_NAMES = new String[]{
       "master", "tmaster-ctlr", "tmaster-stats", "shell", "metricsmgr", "scheduler",
-      "metrics-cache-m", "metrics-cache-s"};
+      "metrics-cache-m", "metrics-cache-s", "ckptmgr"};
 
   public static final String MASTER_PORT = "6001";
   public static final String TMASTER_CONTROLLER_PORT = "6002";
@@ -60,11 +60,12 @@ public final class KubernetesConstants {
   public static final String SCHEDULER_PORT = "6006";
   public static final String METRICS_CACHE_MASTER_PORT = "6007";
   public static final String METRICS_CACHE_STATS_PORT = "6008";
+  public static final String CHECKPOINT_MGR_PORT = "6009";
 
   public static final String[] PORT_LIST = new String[]{
       MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,
       SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT, METRICS_CACHE_MASTER_PORT,
-      METRICS_CACHE_STATS_PORT};
+      METRICS_CACHE_STATS_PORT, CHECKPOINT_MGR_PORT };
 
   public static final String JOB_LINK =
       "/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/pod";
