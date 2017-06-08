@@ -14,13 +14,13 @@
 
 package com.twitter.heron.common.network;
 
+import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -32,7 +32,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.testing.Tests;
@@ -41,16 +40,9 @@ import com.twitter.heron.proto.testing.Tests;
  * HeronServer Tester.
  */
 public class HeronServerTest {
-  private static final int N = 10;
-  private static final int WAIT_TIME_MS = 2 * 1000;
+  private static final int TOTAL_MESSAGES = 10;
   private static final String MESSAGE = "message";
   private static final Logger LOG = Logger.getLogger(HeronServerTest.class.getName());
-  private static final String SERVER_HOST = "127.0.0.1";
-  private static final HeronSocketOptions TEST_SOCKET_OPTIONS = new HeronSocketOptions(
-      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
-      ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
-      ByteAmount.fromMegabytes(5),
-      ByteAmount.fromMegabytes(5));
   // Following are state variable to test correctness
   private volatile boolean isOnConnectedInvoked = false;
   private volatile boolean isOnRequestInvoked = false;
@@ -58,15 +50,21 @@ public class HeronServerTest {
   private volatile boolean isOnCloseInvoked = false;
   private volatile boolean isTimerEventInvoked = false;
   private volatile boolean isClientReceivedResponse = false;
+
   private HeronServer heronServer;
-  private NIOLooper serverLooper;
   private HeronClient heronClient;
-  private NIOLooper clientLooper;
-  private ExecutorService threadsPool;
+
   // Control whether we need to send request & response
   private volatile boolean isRequestNeed = false;
   private volatile boolean isMessageNeed = false;
-  private volatile int messagesReceieved = 0;
+  private volatile int messagesReceived = 0;
+
+  private CountDownLatch serverOnConnectSignal;
+  private CountDownLatch serverOnMessageSignal;
+  private CountDownLatch serverOnRequestSignal;
+  private CountDownLatch clientOnConnectSignal;
+  private CountDownLatch clientOnResponseSignal;
+  private HeronServerTester heronServerTester;
 
   /**
    * JUnit rule for expected exception
@@ -75,50 +73,33 @@ public class HeronServerTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Before
-  public void before() throws Exception {
+  public void before() throws IOException {
     // Get an available port
     int serverPort = SysUtils.getFreePort();
 
-    serverLooper = new NIOLooper();
-    heronServer = new SimpleHeronServer(serverLooper, SERVER_HOST, serverPort);
+    serverOnConnectSignal = new CountDownLatch(1);
+    serverOnMessageSignal = new CountDownLatch(TOTAL_MESSAGES);
+    serverOnRequestSignal = new CountDownLatch(1);
+    clientOnConnectSignal = new CountDownLatch(1);
+    clientOnResponseSignal = new CountDownLatch(1);
+    heronServer = new SimpleHeronServer(new NIOLooper(), HeronServerTester.SERVER_HOST, serverPort,
+        serverOnConnectSignal, serverOnMessageSignal, serverOnRequestSignal);
+    heronClient = new SimpleHeronClient(new NIOLooper(), HeronServerTester.SERVER_HOST, serverPort,
+        clientOnConnectSignal, clientOnResponseSignal);
 
-    clientLooper = new NIOLooper();
-    heronClient = new SimpleHeronClient(clientLooper, SERVER_HOST, serverPort);
-
-    threadsPool = Executors.newFixedThreadPool(2);
+    heronServerTester = new HeronServerTester(heronServer, heronClient);
   }
 
   @After
-  public void after() throws Exception {
-    threadsPool.shutdownNow();
-
-    heronServer.stop();
-    heronServer = null;
-
-    heronClient.stop();
-    heronClient = null;
-
-    serverLooper.exitLoop();
-    serverLooper = null;
-    clientLooper.exitLoop();
-    clientLooper = null;
-
-    threadsPool = null;
-
-    // Reset the state
-    isOnConnectedInvoked = false;
-    isOnRequestInvoked = false;
-    isOnMessageInvoked = false;
-    isOnCloseInvoked = false;
-    isTimerEventInvoked = false;
-    isClientReceivedResponse = false;
+  public void after() {
+    heronServerTester.stop();
   }
 
   /**
    * Method: registerOnMessage(Message.Builder builder)
    */
   @Test
-  public void testRegisterOnMessage() throws Exception {
+  public void testRegisterOnMessage() {
     Message.Builder m = Tests.EchoServerResponse.newBuilder();
     heronServer.registerOnMessage(m);
     for (Map.Entry<String, Message.Builder> message : heronServer.getMessageMap().entrySet()) {
@@ -131,7 +112,7 @@ public class HeronServerTest {
    * Method: registerOnRequest(Message.Builder builder)
    */
   @Test
-  public void testRegisterOnRequest() throws Exception {
+  public void testRegisterOnRequest() {
     Message.Builder r = Tests.EchoServerRequest.newBuilder();
     heronServer.registerOnRequest(r);
     for (Map.Entry<String, Message.Builder> request : heronServer.getRequestMap().entrySet()) {
@@ -144,7 +125,7 @@ public class HeronServerTest {
    * Method: start()
    */
   @Test
-  public void testStart() throws Exception {
+  public void testStart() {
     Assert.assertTrue(heronServer.start());
   }
 
@@ -152,7 +133,7 @@ public class HeronServerTest {
    * Method: stop()
    */
   @Test
-  public void testClose() throws Exception {
+  public void testClose() {
     runBase();
 
     heronServer.stop();
@@ -170,7 +151,7 @@ public class HeronServerTest {
    * Method: handleAccept(SelectableChannel channel)
    */
   @Test
-  public void testHandleAccept() throws Exception {
+  public void testHandleAccept() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -186,7 +167,7 @@ public class HeronServerTest {
    * Method: handleRead(SelectableChannel channel)
    */
   @Test
-  public void testHandleRead() throws Exception {
+  public void testHandleRead() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -201,7 +182,7 @@ public class HeronServerTest {
    * Method: handleWrite(SelectableChannel channel)
    */
   @Test
-  public void testHandleWrite() throws Exception {
+  public void testHandleWrite() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -213,7 +194,7 @@ public class HeronServerTest {
    * Method: handleConnect(SelectableChannel channel)
    */
   @Test
-  public void testHandleConnect() throws Exception {
+  public void testHandleConnect() {
     exception.expect(RuntimeException.class);
     heronServer.handleConnect(null);
   }
@@ -222,7 +203,7 @@ public class HeronServerTest {
    * Method: handleError(SelectableChannel channel)
    */
   @Test
-  public void testHandleError() throws Exception {
+  public void testHandleError() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -236,7 +217,7 @@ public class HeronServerTest {
    * Method: getNIOLooper()
    */
   @Test
-  public void testGetNIOLooper() throws Exception {
+  public void testGetNIOLooper() {
     Assert.assertNotNull(heronServer.getNIOLooper());
   }
 
@@ -244,16 +225,19 @@ public class HeronServerTest {
    * Method: registerTimerEventInSeconds(long timerInSeconds, Runnable task)
    */
   @Test
-  public void testRegisterTimerEventInSeconds() throws Exception {
+  public void testRegisterTimerEventInSeconds() {
+    final CountDownLatch timerEventLatch = new CountDownLatch(1);
     Runnable r = new Runnable() {
       @Override
       public void run() {
         isTimerEventInvoked = true;
+        timerEventLatch.countDown();
       }
     };
     heronServer.registerTimerEvent(Duration.ofSeconds(1), r);
 
     runBase();
+    HeronServerTester.await(timerEventLatch);
 
     Assert.assertTrue(isTimerEventInvoked);
   }
@@ -262,10 +246,12 @@ public class HeronServerTest {
    * Method: sendResponse(REQID rid, SocketChannel channel, Message response)
    */
   @Test
-  public void testSendResponse() throws Exception {
+  public void testSendResponse() {
     isRequestNeed = true;
 
     runBase();
+    HeronServerTester.await(serverOnRequestSignal);
+    HeronServerTester.await(clientOnResponseSignal);
 
     Assert.assertTrue(isOnRequestInvoked);
     Assert.assertTrue(isClientReceivedResponse);
@@ -277,25 +263,26 @@ public class HeronServerTest {
    * Method: sendMessage(SocketChannel channel, Message message)
    */
   @Test
-  public void testSendMessage() throws Exception {
+  public void testSendMessage() {
     isRequestNeed = true;
     isMessageNeed = true;
 
     runBase();
+    HeronServerTester.await(serverOnMessageSignal);
 
     Assert.assertTrue(isOnMessageInvoked);
-    Assert.assertEquals(N, messagesReceieved);
+    Assert.assertEquals(TOTAL_MESSAGES, messagesReceived);
 
     isRequestNeed = false;
     isMessageNeed = false;
-    messagesReceieved = 0;
+    messagesReceived = 0;
   }
 
   /**
    * Method: registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task)
    */
   @Test
-  public void testRegisterTimerEventInNanoSeconds() throws Exception {
+  public void testRegisterTimerEventInNanoSeconds() {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -313,7 +300,7 @@ public class HeronServerTest {
    * Method: onConnect(SocketChannel channel)
    */
   @Test
-  public void testOnConnect() throws Exception {
+  public void testOnConnect() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -326,7 +313,7 @@ public class HeronServerTest {
    * Method: onRequest(REQID rid, SocketChannel channel, Message request)
    */
   @Test
-  public void testOnRequest() throws Exception {
+  public void testOnRequest() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -339,7 +326,7 @@ public class HeronServerTest {
    * Method: onMessage(SocketChannel channel, Message message)
    */
   @Test
-  public void testOnMessage() throws Exception {
+  public void testOnMessage() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
@@ -352,24 +339,13 @@ public class HeronServerTest {
    * Method: onClose(SocketChannel channel)
    */
   @Test
-  public void testOnClose() throws Exception {
+  public void testOnClose() {
     runBase();
 
     Map<SocketChannel, SocketChannelHelper> activeConnections = heronServer.getActiveConnections();
     heronServer.onClose(activeConnections.keySet().iterator().next());
 
     Assert.assertTrue(isOnCloseInvoked);
-  }
-
-  private void runServer() {
-    Runnable runServer = new Runnable() {
-      @Override
-      public void run() {
-        heronServer.start();
-        heronServer.getNIOLooper().loop();
-      }
-    };
-    threadsPool.execute(runServer);
   }
 
   private void runClient() {
@@ -380,27 +356,25 @@ public class HeronServerTest {
         heronClient.getNIOLooper().loop();
       }
     };
-    threadsPool.execute(runClient);
   }
 
-  private void runBase() throws Exception {
-    // First run Server
-    runServer();
-
-    // Wait a while for server fully starting
-    Thread.sleep(WAIT_TIME_MS);
-
-    // Then run Client
-    runClient();
-
-    // Should be connected
-    Thread.sleep(WAIT_TIME_MS);
+  private void runBase() {
+    heronServerTester.start();
+    HeronServerTester.await(clientOnConnectSignal);
+    HeronServerTester.await(serverOnConnectSignal);
   }
 
   private class SimpleHeronServer extends HeronServer {
+    private final CountDownLatch onConnectSignal;
+    private final CountDownLatch onMessageSignal;
+    private final CountDownLatch onRequestSignal;
 
-    SimpleHeronServer(NIOLooper s, String host, int port) {
-      super(s, host, port, TEST_SOCKET_OPTIONS);
+    SimpleHeronServer(NIOLooper s, String host, int port, CountDownLatch onConnectSignal,
+                      CountDownLatch onMessageSignal, CountDownLatch onRequestSignal) {
+      super(s, host, port, HeronServerTester.TEST_SOCKET_OPTIONS);
+      this.onConnectSignal = onConnectSignal;
+      this.onMessageSignal = onMessageSignal;
+      this.onRequestSignal = onRequestSignal;
     }
 
     @Override
@@ -418,11 +392,13 @@ public class HeronServerTest {
       if (isMessageNeed) {
         registerOnMessage(Tests.EchoServerResponse.newBuilder());
       }
+      onConnectSignal.countDown();
     }
 
     @Override
     public void onRequest(REQID rid, SocketChannel channel, Message request) {
       isOnRequestInvoked = true;
+      onRequestSignal.countDown();
 
       if (request == null) {
         // We just want to see whether we could invoke onRequest() normally
@@ -454,11 +430,12 @@ public class HeronServerTest {
       }
 
       if (message instanceof Tests.EchoServerResponse) {
-        messagesReceieved++;
+        messagesReceived++;
         Assert.assertEquals(MESSAGE, ((Tests.EchoServerResponse) message).getEchoResponse());
       } else {
         Assert.fail("Unknown message received");
       }
+      onMessageSignal.countDown();
     }
 
     @Override
@@ -467,19 +444,15 @@ public class HeronServerTest {
     }
   }
 
-  private class SimpleHeronClient extends HeronClient {
-    SimpleHeronClient(NIOLooper looper, String host, int port) {
-      super(looper, host, port, TEST_SOCKET_OPTIONS);
-    }
+  private class SimpleHeronClient extends HeronServerTester.AbstractTestClient {
+    private final CountDownLatch onConnectSignal;
+    private final CountDownLatch onResponseSignal;
 
-    @Override
-    public void onError() {
-
-    }
-
-    @Override
-    public void onClose() {
-
+    SimpleHeronClient(NIOLooper looper, String host, int port,
+                      CountDownLatch onConnectSignal, CountDownLatch onResponseSignal) {
+      super(looper, host, port, HeronServerTester.TEST_SOCKET_OPTIONS);
+      this.onConnectSignal = onConnectSignal;
+      this.onResponseSignal = onResponseSignal;
     }
 
     @Override
@@ -494,6 +467,7 @@ public class HeronServerTest {
           sendRequest();
         }
       }
+      onConnectSignal.countDown();
     }
 
     private void sendRequest() {
@@ -513,18 +487,14 @@ public class HeronServerTest {
         if (isMessageNeed) {
           Tests.EchoServerResponse.Builder message =
               Tests.EchoServerResponse.newBuilder().setEchoResponse(MESSAGE);
-          for (int i = 0; i < N; i++) {
+          for (int i = 0; i < TOTAL_MESSAGES; i++) {
             sendMessage(message.build());
           }
         }
       } else {
         Assert.fail("Unknown type of response received");
       }
-    }
-
-    @Override
-    public void onIncomingMessage(Message message) {
-      LOG.info("OnIncoming Message: " + message);
+      onResponseSignal.countDown();
     }
   }
 }

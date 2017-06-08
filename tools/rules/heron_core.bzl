@@ -27,7 +27,7 @@ def heron_core_lib_files():
         heron_core_lib_statemgr_files() + \
         heron_core_lib_instance_files() + \
         heron_core_lib_ckptmgr_files() + \
-        heron_core_lib_statefulstorages_files()
+        heron_core_lib_statefulstorage_files()
 
 def heron_core_lib_scheduler_files():
     return [
@@ -71,7 +71,7 @@ def heron_core_lib_ckptmgr_files():
         "//heron/ckptmgr/src/java:heron-ckptmgr",
     ]
 
-def heron_core_lib_statefulstorages_files():
+def heron_core_lib_statefulstorage_files():
     return [
         "//heron/statefulstorages/src/java:heron-localfs-statefulstorage",
         "//heron/statefulstorages/src/java:heron-hdfs-statefulstorage",

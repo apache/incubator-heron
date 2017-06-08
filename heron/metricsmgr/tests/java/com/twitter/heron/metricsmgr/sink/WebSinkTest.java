@@ -16,11 +16,15 @@ package com.twitter.heron.metricsmgr.sink;
 
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import com.google.common.base.Ticker;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,9 +41,16 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
  */
 public class WebSinkTest {
 
-  private class WebTestSink extends WebSink {
-    public String servicePath;
-    public int servicePort;
+  private final class WebTestSink extends WebSink {
+    private String servicePath;
+    private int servicePort;
+
+    private WebTestSink() {
+    }
+
+    private WebTestSink(Ticker cacheTicker) {
+      super(cacheTicker);
+    }
 
     @Override
     protected void startHttpServer(String path, int port) {
@@ -51,7 +62,7 @@ public class WebSinkTest {
       return super.metricsCache.asMap();
     }
 
-    public void syncCache() {
+    void syncCache() {
       super.metricsCache.cleanUp();
     }
   }
@@ -80,7 +91,6 @@ public class WebSinkTest {
     records = Arrays.asList(
         new MetricsRecord("machine/stuff/record_1", infos, Collections.<ExceptionInfo>emptyList()),
         new MetricsRecord("record_2", infos, Collections.<ExceptionInfo>emptyList()));
-
   }
 
   /**
@@ -194,7 +204,7 @@ public class WebSinkTest {
 
 
   /**
-   * Testinging max metics size, and oldest keys get expired
+   * Testing max metrics size, and oldest keys get expired
    */
   @Test
   public void testMaxMetrics() {
@@ -213,23 +223,38 @@ public class WebSinkTest {
   }
 
   /**
-   * Testinging TTL
+   * Testing TTL
    */
   @Test
   public void testTTLMetrics() throws InterruptedException {
+    Duration cacheTTL = Duration.ofSeconds(1);
     Map<String, Object> conf = new HashMap<>(defaultConf);
-    conf.put("metrics-cache-ttl-sec", "1");
-    WebTestSink sink = new WebTestSink();
+    conf.put("metrics-cache-ttl-sec", cacheTTL.getSeconds());
+
+    FakeTicker ticker = new FakeTicker();
+    WebTestSink sink = new WebTestSink(ticker);
     sink.init(conf, context);
     for (MetricsRecord r : records) {
       sink.processRecord(r);
     }
 
-    Thread.sleep(1100);
+    Assert.assertEquals(records.size() * 2, sink.getMetrics().size());
+    ticker.advance(cacheTTL.plusMillis(1));
     sink.syncCache();
 
-    Map<String, Object> results = sink.getMetrics();
-    Assert.assertEquals(0, results.size());
+    Assert.assertEquals(0, sink.getMetrics().size());
   }
 
+  private class FakeTicker extends Ticker {
+    private final AtomicLong nanos = new AtomicLong();
+
+    void advance(Duration duration) {
+      nanos.addAndGet(duration.toNanos());
+    }
+
+    @Override
+    public long read() {
+      return nanos.getAndAdd(0);
+    }
+  }
 }

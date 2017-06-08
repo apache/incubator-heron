@@ -22,6 +22,8 @@ import subprocess
 from datetime import datetime
 from xml.sax.saxutils import escape
 
+from heron.common.src.python.utils import proc
+
 def format_mode(sres):
   """
   Format a line in the directory list based on the file's type and other attributes.
@@ -141,34 +143,29 @@ def read_chunk(filename, offset=None, length=None):
 
   return dict(offset=offset, length=0)
 
-def stream_to_string(stream):
-  """
-  Converts stream to string. Blocks until end of stream
-  """
-  str_builder = ''
-  while True:
-    line = stream.readline()
-    if not line:
-      break
-    str_builder += line
-  return str_builder
 
-def pipe(in_stream, to_cmd):
+def pipe(prev_proc, to_cmd):
   """
-  Pipes in_stream from output of previous pipe into to_cmd.
-  Returns stdout stream of to_cmd
+  Pipes output of prev_proc into to_cmd.
+  Returns piped process
   """
-  p = subprocess.Popen(to_cmd,
-                       stdout=subprocess.PIPE,
-                       stdin=in_stream)
-  return p.stdout
+  stdin = None if prev_proc is None else prev_proc.stdout
+  process = subprocess.Popen(to_cmd,
+                             stdout=subprocess.PIPE,
+                             stdin=stdin)
+  if prev_proc is not None:
+    prev_proc.stdout.close() # Allow prev_proc to receive a SIGPIPE
+  return process
 
-def str_cmd(cmd):
+def str_cmd(cmd, cwd, env):
   """
   Runs the command and returns its stdout and stderr.
   """
-  p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  (stdout, stderr) = (stream_to_string(p.stdout), stream_to_string(p.stderr))
+  process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, cwd=cwd, env=env)
+  stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
+  process.wait()
+  stdout, stderr = stdout_builder.result(), stderr_builder.result()
   return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
 
 # pylint: disable=unnecessary-lambda
@@ -177,9 +174,13 @@ def chain(cmd_list):
   Feed output of one command to the next and return final output
   Returns string output of chained application of commands.
   """
+  command = ' | '.join(map(lambda x: ' '.join(x), cmd_list))
+  chained_proc = reduce(pipe, [None] + cmd_list)
+  stdout_builder = proc.async_stdout_builder(chained_proc)
+  chained_proc.wait()
   return {
-      'command' : ' | '.join(map(lambda x: ' '.join(x), cmd_list)),
-      'stdout' : stream_to_string(reduce(pipe, [None] + cmd_list))
+      'command': command,
+      'stdout': stdout_builder.result()
   }
 
 def get_container_id(instance_id):

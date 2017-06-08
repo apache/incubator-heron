@@ -60,6 +60,16 @@
         scaleTicks: [0, 500, 1000, 1500, 2000],
         format: function (d) { return d.toFixed(0); }
       },
+      {
+        name: 'Back Pressure',
+        metricName: 'backpressure',
+        get: getAndRenderStats,
+        tooltip: 'Milliseconds spent in back pressure per minute.',
+        legendDescription: 'ms in back pressure per minute',
+        loMedHi: [3000, 12000, 30000],
+        scaleTicks: [0, 7500, 15000, 22500, 30000],
+        format: function (d) { return d.toFixed(0); }
+      }
     ];
 
     var colData = [
