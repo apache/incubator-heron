@@ -118,7 +118,7 @@ public class KubernetesScheduler implements IScheduler {
         updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtime));
 
     Resource containerResource = updatedPackingPlan.getContainers()
-        .iterator().next().getRequiredResource();
+        .iterator().next().getScheduledResource().get();
 
     // Create app conf list for each container
 
