@@ -88,9 +88,8 @@ heron.kubernetes.scheduler.uri: "http://localhost:8001"
 heron.scheduler.is.service:                  False
 
 # docker repo for executor
-heron.executor.docker.image: 'ndustrialio/heron-core:latest'
+heron.executor.docker.image: 'streamlio/heron:0.14.8-ubuntu14.04'
 ```
-
 
 ## State Manager Configuration
 
