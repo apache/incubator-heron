@@ -18,12 +18,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.MetricsProvider;
+import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.junit.Test;
 
@@ -82,16 +82,13 @@ public class HealthManagerTest {
     assertEquals(healthPolicy.stateMgrAdaptor, adaptor);
     assertNotNull(healthPolicy.metricsProvider);
     assertEquals(healthPolicy.config.getConfig("test-config"), "test-value");
-    assertEquals(1, healthPolicy.initialized.get());
   }
 
-  static class TestPolicy implements IHealthPolicy {
+  static class TestPolicy extends HealthPolicyImpl {
     private HealthPolicyConfig config;
     private final ISchedulerClient schedulerClient;
     private final SchedulerStateManagerAdaptor stateMgrAdaptor;
     private final MetricsProvider metricsProvider;
-
-    AtomicInteger initialized = new AtomicInteger(0);
 
     @Inject
     public TestPolicy(HealthPolicyConfig config,
@@ -102,15 +99,6 @@ public class HealthManagerTest {
       this.schedulerClient = schedulerClient;
       this.stateMgrAdaptor = stateMgrAdaptor;
       this.metricsProvider = metricsProvider;
-    }
-
-    @Override
-    public void initialize() {
-      initialized.incrementAndGet();
-    }
-
-    @Override
-    public void close() throws Exception {
     }
   }
 }

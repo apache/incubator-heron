@@ -17,7 +17,7 @@ package com.twitter.heron.healthmgr.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.microsoft.dhalion.core.EventManager;
+import com.microsoft.dhalion.events.EventManager;
 
 import org.junit.Assert;
 import org.junit.Test;

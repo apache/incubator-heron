@@ -22,8 +22,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
-import com.microsoft.dhalion.core.EventHandler;
-import com.microsoft.dhalion.core.EventManager;
+import com.microsoft.dhalion.events.EventHandler;
+import com.microsoft.dhalion.events.EventManager;
 
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.proto.system.PackingPlans;
