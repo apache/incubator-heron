@@ -23,8 +23,8 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import com.microsoft.dhalion.core.EventHandler;
-import com.microsoft.dhalion.core.EventManager;
+import com.microsoft.dhalion.events.EventHandler;
+import com.microsoft.dhalion.events.EventManager;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
