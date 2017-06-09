@@ -30,8 +30,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.core.EventManager;
-import com.microsoft.dhalion.core.PoliciesExecutor;
+import com.microsoft.dhalion.events.EventManager;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -163,7 +163,6 @@ public class HealthManager {
 
       AbstractModule module = constructPolicySpecificModule(policyConfig);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
-      policy.initialize();
 
       healthPolicies.add(policy);
     }

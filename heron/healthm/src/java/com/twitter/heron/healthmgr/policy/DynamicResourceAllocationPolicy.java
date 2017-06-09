@@ -15,33 +15,32 @@
 
 package com.twitter.heron.healthmgr.policy;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.core.EventHandler;
-import com.microsoft.dhalion.core.EventManager;
-import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.events.EventHandler;
+import com.microsoft.dhalion.events.EventManager;
+import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.ScaleUpResolver;
 
-public class DynamicResourceAllocationPolicy
-    implements IHealthPolicy, EventHandler<TopologyUpdate> {
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.HEALTH_POLICY_INTERVAL;
+
+public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
+    implements EventHandler<TopologyUpdate> {
 
   private static final Logger LOG
       = Logger.getLogger(DynamicResourceAllocationPolicy.class.getName());
@@ -50,15 +49,7 @@ public class DynamicResourceAllocationPolicy
       "DynamicResourceAllocationPolicy.conf_post_action_wait_interval_min";
 
   private HealthPolicyConfig policyConfig;
-  private BackPressureDetector backPressureDetector;
-  private UnderProvisioningDiagnoser underProvisioningDiagnoser;
-  private DataSkewDiagnoser dataSkewDiagnoser;
-  private SlowInstanceDiagnoser slowInstanceDiagnoser;
   private ScaleUpResolver scaleUpResolver;
-
-  private ArrayList<Diagnosis> diagnosis;
-
-  private long newTopologyEventTimeMills = 0;
 
   @Inject
   DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
@@ -69,54 +60,15 @@ public class DynamicResourceAllocationPolicy
                                   SlowInstanceDiagnoser slowInstanceDiagnoser,
                                   ScaleUpResolver scaleUpResolver) {
     this.policyConfig = policyConfig;
-
-    this.backPressureDetector = backPressureDetector;
-
-    this.underProvisioningDiagnoser = underProvisioningDiagnoser;
-    this.dataSkewDiagnoser = dataSkewDiagnoser;
-    this.slowInstanceDiagnoser = slowInstanceDiagnoser;
     this.scaleUpResolver = scaleUpResolver;
 
+    registerDetectors(backPressureDetector);
+    registerDiagnosers(underProvisioningDiagnoser, dataSkewDiagnoser, slowInstanceDiagnoser);
+
+    setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
+        Long.valueOf(policyConfig.getConfig(HEALTH_POLICY_INTERVAL, "60000")));
+
     eventManager.addEventListener(TopologyUpdate.class, this);
-    newTopologyEventTimeMills = System.currentTimeMillis();
-  }
-
-  @Override
-  public List<Symptom> executeDetectors() {
-    long delay = getDelay();
-    if (delay > 0) {
-      LOG.info("Skip detector execution to let topology stabilize, wait=" + delay);
-      return new ArrayList<>();
-    }
-    return backPressureDetector.detect();
-  }
-
-  private long getDelay() {
-    int interval = Integer.valueOf(policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, "180000"));
-    return System.currentTimeMillis() - newTopologyEventTimeMills - interval;
-  }
-
-
-  @Override
-  public List<Diagnosis> executeDiagnosers(List<Symptom> symptoms) {
-    diagnosis = new ArrayList<>();
-
-    Diagnosis diagnoses = underProvisioningDiagnoser.diagnose(symptoms);
-    if (diagnoses != null) {
-      diagnosis.add(diagnoses);
-    }
-
-    diagnoses = slowInstanceDiagnoser.diagnose(symptoms);
-    if (diagnoses != null) {
-      diagnosis.add(diagnoses);
-    }
-
-    diagnoses = dataSkewDiagnoser.diagnose(symptoms);
-    if (diagnoses != null) {
-      diagnosis.add(diagnoses);
-    }
-
-    return diagnosis;
   }
 
   @Override
@@ -138,30 +90,9 @@ public class DynamicResourceAllocationPolicy
   }
 
   @Override
-  public long getInterval() {
-    return Long.valueOf(policyConfig.getConfig(HealthMgrConstants.HEALTH_POLICY_INTERVAL));
-  }
-
-  @Override
-  public List<Action> executeResolvers(IResolver resolver) {
-    if (resolver == null) {
-      return null;
-    }
-
-    List<Action> actions = resolver.resolve(diagnosis);
-    if (actions != null && !actions.isEmpty()) {
-    }
-
-    return actions;
-  }
-
-  @Override
   public void onEvent(TopologyUpdate event) {
+    int interval = Integer.valueOf(policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, "180000"));
     LOG.info("Received topology update action event: " + event);
-    newTopologyEventTimeMills = System.currentTimeMillis();
-  }
-
-  @Override
-  public void close() {
+    setOneTimeDelay(TimeUnit.MILLISECONDS, interval);
   }
 }
