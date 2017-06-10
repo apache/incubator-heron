@@ -99,23 +99,6 @@ setup_output_dir() {
   mkdir -p $1
 }
 
-build_docker_image() {
-  DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
-  DOCKER_TAG="heron:$HERON_VERSION-$TARGET_PLATFORM"
-
-  #need to copy artifacts locally
-  cp "$OUTPUT_DIRECTORY"/heron-tools-install*$HERON_VERSION*.sh "$SCRATCH_DIR/artifacts"
-  cp "$OUTPUT_DIRECTORY"/heron-client-install*$HERON_VERSION*.sh "$SCRATCH_DIR/artifacts"
-
-  echo "building docker image heron:$DOCKER_TAG"
-
-  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
-
-  DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
-  echo "saving docker image to $DOCKER_IMAGE_FILE"
-  docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
-}
-
 run_build() {
   TARGET_PLATFORM=$1
   HERON_VERSION=$2
@@ -150,7 +133,6 @@ run_build() {
     docker/compile-platform.sh
   else
     docker/compile-docker.sh
-    build_docker_image
   fi
 }
 
