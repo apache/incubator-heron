@@ -3,20 +3,11 @@ FROM centos:centos7
 ARG heronVersion
 
 RUN yum -y upgrade
-RUN yum -y install \
-      curl \
-      git \
-      openssl-devel \
-      libtool \
-      python \
-      software-properties-common \
-      unzip \
-      wget \
-      which \
-      unzip \
-      zip
+RUN yum -y install python; yum clean all
+RUN yum -y install unzip; yum clean all 
+RUN yum -y install which; yum clean all
 
-RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel
+RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel; yum clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0 
 
@@ -24,12 +15,14 @@ ADD artifacts /heron
 
 WORKDIR /heron
 
-#run heron installers
-RUN /heron/heron-client-install-$heronVersion-centos7.sh && \
-    /heron/heron-tools-install-$heronVersion-centos7.sh
+# run heron installers
+RUN /heron/heron-tools-install.sh
 
 RUN mkdir -p /opt/heron && \
-    tar --strip-components=1 -m -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron
+    tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /opt/heron
+
+RUN rm -f /heron/heron-tools-install.sh
+RUN rm -f /heron/heron-core.tar.gz
 
 ENV HERON_HOME /opt/heron/heron-core/
 RUN export HERON_HOME
