@@ -71,6 +71,7 @@ public class TrackerMetricsProviderTest {
         "\"message\": \"\", \"version\": \"\", " +
         "\"result\": {\"metrics\": {\"count\": {\"container_1_bolt-1_2\": \"496\"}}, " +
         "\"interval\": 60, \"component\": \"bolt-1\"}}";
+
     doReturn(response1).when(spyMetricsProvider).getMetricsFromTracker(metric, comp1, 60);
 
     String comp2 = "bolt-2";
@@ -143,5 +144,29 @@ public class TrackerMetricsProviderTest {
     assertEquals(1, metrics.size());
     assertNotNull(metrics.get(component));
     assertEquals(0, metrics.get(component).getMetrics().size());
+  }
+
+  @Test
+  public void testTimelineParsing() {
+    TrackerMetricsProvider metricsProvider
+        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
+
+    TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
+
+    String metric = "dummy";
+    String component = "stmgr-1";
+    String response = "{\"status\":\"success\",\"executiontime\":0.0010," +
+        "\"message\":\"\",\"version\":\"v1\", \"result\":{\"timeline\":" +
+        "{\"dummy\":{\"stmgr-1\":{\"1497046904\":\"123\",\"1497046964\":\"234\"}}}," +
+        "\"endtime\":1497046967,\"component\":\"__stmgr__\",\"starttime\":1497046907}}";
+
+    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60, 60);
+    Map<String, InstanceMetrics> metrics = spyMetricsProvider.parse(response, component, metric);
+
+    assertEquals(1, metrics.size());
+    assertNotNull(metrics.get(component));
+    assertEquals(1, metrics.get(component).getMetrics().size());
+    assertEquals(2, metrics.get(component).getMetricValues(metric).size());
+    assertEquals(234, metrics.get(component).getMetricValues(metric).get(new Long(1497046964)).intValue());
   }
 }
