@@ -542,7 +542,7 @@ TEST(StMgr, test_activate_deactivate) {
 
 int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
-  std::cerr << "Current working directory (to find tmaster logs) "
+  std::cout << "Current working directory (to find tmaster logs) "
       << ProcessUtils::getCurrentWorkingDirectory() << std::endl;
   testing::InitGoogleTest(&argc, argv);
   if (argc > 1) {
