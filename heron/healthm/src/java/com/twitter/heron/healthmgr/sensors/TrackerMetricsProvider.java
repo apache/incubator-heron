@@ -15,7 +15,6 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -28,11 +27,14 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
+
+import net.minidev.json.JSONArray;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
@@ -70,45 +72,47 @@ public class TrackerMetricsProvider implements MetricsProvider {
     return result;
   }
 
-  private Map<String, InstanceMetrics> parse(String response, String component, String metric) {
+  @VisibleForTesting
+  Map<String, InstanceMetrics> parse(String response, String component, String metric) {
     Map<String, InstanceMetrics> metricsData = new HashMap<>();
 
-    Map<String, Map<String, String>> metricsMap = parseMetrics(response);
-    if (metricsMap == null || metricsMap.get(metric) == null) {
+    if (response == null || response.isEmpty()) {
+      return metricsData;
+    }
+
+    DocumentContext result = JsonPath.parse(response);
+    JSONArray jsonArray = result.read("$.." + metric);
+    if (jsonArray.size() != 1) {
       LOG.info(String.format("Did not get any metrics from tracker for %s:%s ", component, metric));
       return metricsData;
     }
 
-    Map<String, String> instanceMetrics = metricsMap.get(metric);
-    for (String instanceName : instanceMetrics.keySet()) {
-      double value = Double.parseDouble(instanceMetrics.get(instanceName));
-      InstanceMetrics instanceMetric = new InstanceMetrics(instanceName);
-      instanceMetric.addMetric(metric, value);
+    Map<String, Object> metricsMap = (Map<String, Object>) jsonArray.get(0);
+    if (metricsMap == null || metricsMap.isEmpty()) {
+      LOG.info(String.format("Did not get any metrics from tracker for %s:%s ", component, metric));
+      return metricsData;
+    }
 
-      metricsData.put(instanceName, instanceMetric);
+    for (String instanceName : metricsMap.keySet()) {
+      Object tmpValue = metricsMap.get(instanceName);
+      if (tmpValue instanceof String) {
+        // response for a single metric request
+        double value = Double.parseDouble((String) tmpValue);
+        metricsData.put(instanceName, new InstanceMetrics(instanceName, metric, value));
+      } else if (tmpValue instanceof Map) {
+        // response for the timeline request
+        Map<String, String> tmpValues = (Map<String, String>) tmpValue;
+        Map<Long, Double> values = new HashMap<>();
+        for (String timeStamp : tmpValues.keySet()) {
+          values.put(Long.parseLong(timeStamp), Double.parseDouble(tmpValues.get(timeStamp)));
+        }
+        InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
+        instanceMetrics.addMetric(metric, values);
+        metricsData.put(instanceName, instanceMetrics);
+      }
     }
 
     return metricsData;
-  }
-
-  private Map<String, Map<String, String>> parseMetrics(String response) {
-    if (response == null || response.isEmpty()) {
-      return null;
-    }
-
-    ObjectMapper mapper = new ObjectMapper();
-    TrackerOutput output;
-    try {
-      output = mapper.readValue(response, TrackerOutput.class);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to parse tracker response.", e);
-    }
-
-    if (output == null || output.getResult() == null || output.getResult().getMetrics() == null) {
-      return null;
-    }
-
-    return output.getResult().getMetrics();
   }
 
   @Override
@@ -118,6 +122,22 @@ public class TrackerMetricsProvider implements MetricsProvider {
 
   @VisibleForTesting
   String getMetricsFromTracker(String metric, String component, int durationSec) {
+    WebTarget target = baseTarget
+        .queryParam("metricname", metric)
+        .queryParam("component", component)
+        .queryParam("interval", durationSec);
+//    if (instance != null) {
+//      target.queryParam("instance", instance.getName());
+//    }
+
+    LOG.fine("Tracker Query URI: " + target.getUri());
+
+    Response r = target.request(MediaType.APPLICATION_JSON_TYPE).get();
+    return r.readEntity(String.class);
+  }
+
+  @VisibleForTesting
+  String getMetricsFromTracker(String metric, String component, int startTimeSec, int durationSec) {
     WebTarget target = baseTarget
         .queryParam("metricname", metric)
         .queryParam("component", component)
