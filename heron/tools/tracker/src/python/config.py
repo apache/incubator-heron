@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' config.py '''
-#import os
-#import yaml
 
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
@@ -34,17 +32,6 @@ class Config(object):
     self.configs = config
 
     self.load_configs()
-
-#  def parse_config_file(self, conf_file):
-#    """parse config files"""
-#    expanded_conf_file_path = os.path.expanduser(conf_file)
-# assert os.path.lexists(expanded_conf_file_path), "Config file does not exists: %s" % (conf_file)
-#
-#    # Read the configuration file
-#    with open(expanded_conf_file_path, 'r') as f:
-#      self.configs = yaml.load(f)
-#
-#    self.load_configs()
 
   def load_configs(self):
     """load config files"""
