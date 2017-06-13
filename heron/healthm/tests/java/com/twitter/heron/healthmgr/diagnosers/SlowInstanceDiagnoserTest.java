@@ -23,32 +23,25 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.TestUtils;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 
 public class SlowInstanceDiagnoserTest {
   @Test
-  public void failsIfOnly1of1InstanceInBP() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
-    BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000);
-
-    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+  public void failsIfNoBufferSizeDiaparity() {
+    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser();
+    Diagnosis result = diagnoser.diagnose(TestUtils.createBpSymptomList(123));
     assertNull(result);
   }
 
   @Test
   public void diagnosis1of3SlowInstances() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
-    BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000, 20, 20);
+    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(1000, 20, 20));
 
-    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+    Diagnosis result = new SlowInstanceDiagnoser().diagnose(symptoms);
     assertEquals(1, result.getSymptoms().size());
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
@@ -56,19 +49,11 @@ public class SlowInstanceDiagnoserTest {
   }
 
   @Test
-  public void failDiagnosisIfBufferSizeDoNotDifferMuch() {
+  public void failIfInstanceWithBpHasSmallBuffer() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
-    BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000, 500, 500);
+    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(100, 500, 500));
 
-    SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+    Diagnosis result = new SlowInstanceDiagnoser().diagnose(symptoms);
     assertNull(result);
-  }
-
-  static BufferSizeSensor createMockBufferSizeSensor(double... values) {
-    BufferSizeSensor exeSensor = mock(BufferSizeSensor.class);
-    return DataSkewDiagnoserTest.getMockSensor(HealthMgrConstants.METRIC_BUFFER_SIZE,
-        exeSensor,
-        values);
   }
 }
