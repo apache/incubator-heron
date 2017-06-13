@@ -25,6 +25,7 @@ import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
+import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 public class UnderProvisioningDiagnoser extends BaseDiagnoser {
@@ -56,15 +57,16 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
     ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
 
     ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
-    ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+    ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
+    compStats.computeBpStats();
     compStats.computeBufferSizeStats();
 
     Symptom resultSymptom = null;
     // if all instances are reporting backpressure or if all instances have large pending buffers
-    if (compStats.bufferSizeMin > limit
-        && compStats.bufferSizeMin * 5 > compStats.bufferSizeMax) {
+    if (compStats.getBufferSizeMin() > limit
+        && compStats.getBufferSizeMin() * 5 > compStats.getBufferSizeMax()) {
       LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
-          mergedData.getName(), compStats.totalBackpressure, compStats.bufferSizeMin));
+          mergedData.getName(), compStats.getTotalBackpressure(), compStats.getBufferSizeMin()));
       resultSymptom = backPressureSymptom;
       // TODO add other symptoms applicable to this diagnosis
     }

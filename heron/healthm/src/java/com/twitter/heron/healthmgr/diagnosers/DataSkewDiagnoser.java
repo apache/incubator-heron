@@ -16,68 +16,61 @@
 package com.twitter.heron.healthmgr.diagnosers;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.inject.Inject;
 
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
+import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
+
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 
 public class DataSkewDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(DataSkewDiagnoser.class.getName());
 
-  private final ExecuteCountSensor exeCountSensor;
-  private double limit = 1.5;
-
-  @Inject
-  DataSkewDiagnoser(ExecuteCountSensor exeCountSensor) {
-    this.exeCountSensor = exeCountSensor;
-  }
-
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    if (bpSymptoms.isEmpty()) {
-      // Since there is no back pressure, no action is needed
+    List<Symptom> loadDisparitySymptoms = getLoadDisparitySymptoms(symptoms);
+
+    // verify execute count disparity and back pressure for the same component exists
+    if (bpSymptoms.isEmpty() || loadDisparitySymptoms.isEmpty()) {
+      // Since there is no back pressure or disparate execute count, no action is needed
       return null;
     } else if (bpSymptoms.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
+    ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    Symptom backPressureSymptom = bpSymptoms.iterator().next();
-
-    ComponentMetrics bpMetricsData = backPressureSymptom.getComponent();
-    if (bpMetricsData.getMetrics().size() <= 1) {
-      // Need more than one instance for comparison
+    ComponentMetrics exeCountMetrics = null;
+    for (Symptom symptom : loadDisparitySymptoms) {
+      if (symptom.getComponent().getName().equals(bpMetrics.getName())) {
+        exeCountMetrics = symptom.getComponent();
+        break;
+      }
+    }
+    if (exeCountMetrics == null) {
+      // no execute count disparity for the component with back pressure. This is not skew
       return null;
     }
 
-    Map<String, ComponentMetrics> result = exeCountSensor.get(bpMetricsData.getName());
-    ComponentMetrics exeCountData = result.get(bpMetricsData.getName());
-    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, exeCountData);
-
-    ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetrics, exeCountMetrics);
+    ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
+    compStats.computeBpStats();
     compStats.computeExeCountStats();
 
     Symptom resultSymptom = null;
-    if (compStats.exeCountMax > limit * compStats.exeCountMin) {
-      // there is wide gap between max and min executionCount, potential skew if the instances
-      // who are starting back pressures are also executing majority of the tuples
-      for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
-        double exeCount = boltMetrics.getMetricValue(EXE_COUNT);
-        double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
-        if (compStats.exeCountMax < 1.10 * exeCount) {
-          LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
-              boltMetrics.getName(), bpValue, exeCount));
-          resultSymptom = backPressureSymptom;
-          // TODO add other symptoms applicable to this diagnosis
-        }
+    for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
+      double exeCount = boltMetrics.getMetricValue(METRIC_EXE_COUNT);
+      double bpValue = boltMetrics.getMetricValue(METRIC_BACK_PRESSURE);
+      if (compStats.getExeCountMax() < 1.10 * exeCount) {
+        LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
+            boltMetrics.getName(), bpValue, exeCount));
+        resultSymptom = new Symptom(this.getClass().getSimpleName(), mergedData);
       }
     }
 

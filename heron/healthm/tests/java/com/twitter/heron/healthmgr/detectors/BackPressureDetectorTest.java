@@ -27,6 +27,8 @@ import org.junit.Test;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BackPressureDetector.CONF_NOISE_FILTER;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,10 +36,10 @@ public class BackPressureDetectorTest {
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(BackPressureDetector.CONF_NOISE_FILTER, "20")).thenReturn("50");
+    when(config.getConfig(CONF_NOISE_FILTER, "20")).thenReturn("50");
 
     ComponentMetrics compMetrics =
-        new ComponentMetrics("bolt", "i1", BaseDetector.BACK_PRESSURE, 55);
+        new ComponentMetrics("bolt", "i1", METRIC_BACK_PRESSURE, 55);
     Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
     topologyMetrics.put("bolt", compMetrics);
 
@@ -49,7 +51,7 @@ public class BackPressureDetectorTest {
 
     Assert.assertEquals(1, symptoms.size());
 
-    compMetrics = new ComponentMetrics("bolt", "i1", BaseDetector.BACK_PRESSURE, 45);
+    compMetrics = new ComponentMetrics("bolt", "i1", METRIC_BACK_PRESSURE, 45);
     topologyMetrics.put("bolt", compMetrics);
 
     sensor = mock(BackPressureSensor.class);

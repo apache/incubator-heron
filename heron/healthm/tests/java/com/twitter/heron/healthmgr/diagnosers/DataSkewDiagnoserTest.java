@@ -22,71 +22,46 @@ import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
+import com.twitter.heron.healthmgr.TestUtils;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DataSkewDiagnoserTest {
   @Test
-  public void failsIfOnly1of1InstanceInBP() {
-    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123);
-    ExecuteCountSensor exeSensor = createMockExecuteCountSensor(5000);
-
-    DataSkewDiagnoser diagnoser = new DataSkewDiagnoser(exeSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+  public void failsIfNoExeCountDisparity() {
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
+    Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
     assertNull(result);
   }
 
   @Test
-  public void Diagnosis1DataSkewInstance() {
-    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123, 0, 0);
-    // set execute count above 100%, hence diagnosis should be under provisioning
-    ExecuteCountSensor exeSensor = createMockExecuteCountSensor(5000, 2000, 2000);
+  public void diagnosis1DataSkewInstance() {
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
+    symptoms.add(TestUtils.createExeCountSymptom(5000, 2000, 2000));
 
-    DataSkewDiagnoser diagnoser = new DataSkewDiagnoser(exeSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+    Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
     assertEquals(1, result.getSymptoms().size());
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
-        data.getMetricValue("container_1_bolt_0", BaseDiagnoser.BACK_PRESSURE).intValue());
-  }
-
-  public static Symptom createBPSymptom(int... bpValues) {
-    ComponentMetrics bpMetrics = new ComponentMetrics("bolt");
-    for (int i = 0; i < bpValues.length; i++) {
-      addInstanceMetric(bpMetrics, i, bpValues[i], BaseDiagnoser.BACK_PRESSURE);
-    }
-    return new Symptom(BaseDiagnoser.BACK_PRESSURE, bpMetrics);
-  }
-
-  public static ExecuteCountSensor createMockExecuteCountSensor(double... exeCounts) {
-    ExecuteCountSensor exeSensor = mock(ExecuteCountSensor.class);
-    return getMockSensor(HealthMgrConstants.METRIC_EXE_COUNT, exeSensor, exeCounts);
+        data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
   }
 
   static <T extends ISensor> T getMockSensor(String metric, T sensor, double... values) {
     ComponentMetrics metrics = new ComponentMetrics("bolt");
 
     for (int i = 0; i < values.length; i++) {
-      addInstanceMetric(metrics, i, values[i], metric);
+      TestUtils.addInstanceMetric(metrics, i, values[i], metric);
     }
 
     Map<String, ComponentMetrics> resultMap = new HashMap<>();
     resultMap.put("bolt", metrics);
     when(sensor.get("bolt")).thenReturn(resultMap);
     return sensor;
-  }
-
-  static void addInstanceMetric(ComponentMetrics metrics, int i, double value, String metric) {
-    InstanceMetrics instanceMetric = new InstanceMetrics("container_1_bolt_" + i, metric, value);
-    metrics.addInstanceMetric(instanceMetric);
   }
 }

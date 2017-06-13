@@ -14,6 +14,9 @@
 
 package com.twitter.heron.healthmgr.common;
 
+import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
+import com.twitter.heron.healthmgr.detectors.LoadDisparityDetector;
+
 public interface HealthMgrConstants {
   int DEFAULT_METRIC_DURATION = 300;
 
@@ -35,5 +38,9 @@ public interface HealthMgrConstants {
   String HEALTH_POLICY_CLASS = "health.policy.class";
   String HEALTH_POLICY_INTERVAL = "health.policy.interval.ms";
 
+  // symtom names
+  String SYMPTOM_BACK_PRESSURE = BackPressureDetector.class.getSimpleName();
+  String SYMPTOM_LOAD_DISPARITY = LoadDisparityDetector.class.getSimpleName();
+  
   void getType();
 }

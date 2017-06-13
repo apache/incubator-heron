@@ -25,7 +25,12 @@ import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
+import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
+
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
 
 public class SlowInstanceDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
@@ -62,18 +67,19 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
     ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
     ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
 
-    ComponentBackpressureStats compStats = new ComponentBackpressureStats(mergedData);
+    ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
+    compStats.computeBpStats();
     compStats.computeBufferSizeStats();
 
     Symptom resultSymptom = null;
-    if (compStats.bufferSizeMax > limit * compStats.bufferSizeMin) {
+    if (compStats.getBufferSizeMax() > limit * compStats.getBufferSizeMin()) {
       // there is wide gap between max and min bufferSize, potential slow instance if the
       // instances who are starting back pressure are also executing less tuples
 
-      for (InstanceMetrics boltMetrics : compStats.boltsWithBackpressure) {
-        double bpValue = boltMetrics.getMetricValue(BACK_PRESSURE);
-        double bufferSize = boltMetrics.getMetricValue(BUFFER_SIZE);
-        if (compStats.bufferSizeMax < bufferSize * 2) {
+      for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
+        double bpValue = boltMetrics.getMetricValue(METRIC_BACK_PRESSURE);
+        double bufferSize = boltMetrics.getMetricValue(METRIC_BUFFER_SIZE);
+        if (compStats.getBufferSizeMax() < bufferSize * 2) {
           LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s",
               boltMetrics.getName(), bpValue, bufferSize));
           resultSymptom = backPressureSymptom;

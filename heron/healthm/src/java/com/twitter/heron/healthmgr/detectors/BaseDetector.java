@@ -19,9 +19,4 @@ import com.microsoft.dhalion.api.IDetector;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public abstract class BaseDetector implements IDetector {
-  protected static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
-
-  @Override
-  public void close() {
-  }
 }
