@@ -28,12 +28,12 @@ public class TestUtils {
     return createListFromSymptom(createBPSymptom(bpValues));
   }
 
-  public static List<Symptom> createExeCountSymptomList(int... exeCounts) {
-    return createListFromSymptom(createExeCountSymptom(exeCounts));
-  }
-
   public static Symptom createExeCountSymptom(int... exeCounts) {
     return createSymptom(SYMPTOM_LOAD_DISPARITY, METRIC_EXE_COUNT, exeCounts);
+  }
+
+  public static Symptom createWaitQueueDisparitySymptom(int... bufferSizes) {
+    return createSymptom(SYMPTOM_WAIT_Q_DISPARITY, METRIC_BUFFER_SIZE, bufferSizes);
   }
 
   public static Symptom createBPSymptom(int... bpValues) {

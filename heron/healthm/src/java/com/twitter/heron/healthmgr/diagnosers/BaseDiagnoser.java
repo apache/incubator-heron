@@ -22,6 +22,7 @@ import com.microsoft.dhalion.detector.Symptom;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LOAD_DISPARITY;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
 
 public abstract class BaseDiagnoser implements IDiagnoser {
   protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
@@ -30,6 +31,10 @@ public abstract class BaseDiagnoser implements IDiagnoser {
 
   protected List<Symptom> getLoadDisparitySymptoms(List<Symptom> symptoms) {
     return getFilteredSymptoms(symptoms, SYMPTOM_LOAD_DISPARITY);
+  }
+
+  protected List<Symptom> getWaitQDisparitySymptoms(List<Symptom> symptoms) {
+    return getFilteredSymptoms(symptoms, SYMPTOM_WAIT_Q_DISPARITY);
   }
 
   private List<Symptom> getFilteredSymptoms(List<Symptom> symptoms, String type) {
