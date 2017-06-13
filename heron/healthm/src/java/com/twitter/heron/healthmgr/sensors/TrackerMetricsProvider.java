@@ -73,6 +73,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
   }
 
   @VisibleForTesting
+  @SuppressWarnings("unchecked")
   Map<String, InstanceMetrics> parse(String response, String component, String metric) {
     Map<String, InstanceMetrics> metricsData = new HashMap<>();
 
