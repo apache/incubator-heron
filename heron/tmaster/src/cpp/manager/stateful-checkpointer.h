@@ -34,6 +34,12 @@ class PhysicalPlan;
 namespace heron {
 namespace tmaster {
 
+/**
+ * A StatefulCheckpointer is responsible for sending NewStatefulCheckpoint
+ * requests to stmgrs to start checkpoints and keep tracking of the ongoing
+ * checkpointing progress.
+ *
+ */
 class StatefulCheckpointer {
  public:
   explicit StatefulCheckpointer(std::chrono::high_resolution_clock::time_point _tmaster_start_time);
@@ -42,7 +48,7 @@ class StatefulCheckpointer {
 
   void StartCheckpoint(const StMgrMap& _stmgrs);
 
-  // Called when a InstanceStateStored message is received
+  // Called by tmaster when a InstanceStateStored message is received
   // Return true if this completes a globally consistent checkpoint
   // for this _checkpoint_id
   bool HandleInstanceStateStored(const std::string& _checkpoint_id,
