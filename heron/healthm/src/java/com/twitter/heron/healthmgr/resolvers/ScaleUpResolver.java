@@ -48,7 +48,7 @@ import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 public class ScaleUpResolver implements IResolver {
-  private static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
+  private static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
   private static final Logger LOG = Logger.getLogger(ScaleUpResolver.class.getName());
 
   private TopologyProvider topologyProvider;

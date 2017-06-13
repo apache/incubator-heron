@@ -45,7 +45,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class ScaleUpResolverTest {
-  static final String BACK_PRESSURE = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE;
+  static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
   private EventManager eventManager = new EventManager();
 
   @Test

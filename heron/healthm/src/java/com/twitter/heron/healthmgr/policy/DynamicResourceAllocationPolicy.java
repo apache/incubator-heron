@@ -32,6 +32,9 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
+import com.twitter.heron.healthmgr.detectors.DataSkewDetector;
+import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
+import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
@@ -55,6 +58,9 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
   DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
                                   EventManager eventManager,
                                   BackPressureDetector backPressureDetector,
+                                  LargeWaitQueueDetector largeWaitQueueDetector,
+                                  DataSkewDetector dataSkewDetector,
+                                  WaitQueueDisparityDetector waitQueueDisparityDetector,
                                   UnderProvisioningDiagnoser underProvisioningDiagnoser,
                                   DataSkewDiagnoser dataSkewDiagnoser,
                                   SlowInstanceDiagnoser slowInstanceDiagnoser,
@@ -62,7 +68,8 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     this.policyConfig = policyConfig;
     this.scaleUpResolver = scaleUpResolver;
 
-    registerDetectors(backPressureDetector);
+    registerDetectors(backPressureDetector, largeWaitQueueDetector,
+        waitQueueDisparityDetector, dataSkewDetector);
     registerDiagnosers(underProvisioningDiagnoser, dataSkewDiagnoser, slowInstanceDiagnoser);
 
     setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
