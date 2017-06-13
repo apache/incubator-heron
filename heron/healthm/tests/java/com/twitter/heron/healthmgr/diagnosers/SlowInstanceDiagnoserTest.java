@@ -20,13 +20,13 @@ import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+import com.twitter.heron.healthmgr.TestUtils;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
-import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 public class SlowInstanceDiagnoserTest {
   @Test
   public void failsIfOnly1of1InstanceInBP() {
-    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
     BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000);
 
     SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
@@ -44,7 +44,7 @@ public class SlowInstanceDiagnoserTest {
 
   @Test
   public void diagnosis1of3SlowInstances() {
-    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123, 0, 0);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
     BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000, 20, 20);
 
     SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);
@@ -52,12 +52,12 @@ public class SlowInstanceDiagnoserTest {
     assertEquals(1, result.getSymptoms().size());
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
-        data.getMetricValue("container_1_bolt_0", BaseDiagnoser.BACK_PRESSURE).intValue());
+        data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
   }
 
   @Test
   public void failDiagnosisIfBufferSizeDoNotDifferMuch() {
-    List<Symptom> symptoms = UnderProvisioningDiagnoserTest.createBpSymptom(123, 0, 0);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
     BufferSizeSensor bufferSizeSensor = createMockBufferSizeSensor(1000, 500, 500);
 
     SlowInstanceDiagnoser diagnoser = new SlowInstanceDiagnoser(bufferSizeSensor);

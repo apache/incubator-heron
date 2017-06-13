@@ -48,7 +48,7 @@ public class BackPressureSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE + boltId;
+      String metric = HealthMgrConstants.METRIC_BACK_PRESSURE + boltId;
       // the back pressure sensor will return average bp per second, so multiply by duration
       BufferSizeSensorTest
           .registerStMgrInstanceMetricResponse(metricsProvider,
@@ -64,13 +64,13 @@ public class BackPressureSensorTest {
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+        .getMetricValue(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+        .getMetricValue(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricValue(HealthMgrConstants.METRIC_INSTANCE_BACK_PRESSURE).intValue());
+        .getMetricValue(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
   }
 
   //TODO

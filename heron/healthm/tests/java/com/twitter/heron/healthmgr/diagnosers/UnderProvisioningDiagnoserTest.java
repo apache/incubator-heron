@@ -14,7 +14,6 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.microsoft.dhalion.detector.Symptom;
@@ -23,15 +22,17 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import org.junit.Test;
 
+import com.twitter.heron.healthmgr.TestUtils;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class UnderProvisioningDiagnoserTest {
   @Test
   public void diagnosisWhen1Of1InstanceInBP() {
-    List<Symptom> symptoms = createBpSymptom(123);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
     BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000);
     UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
     Diagnosis result = diagnoser.diagnose(symptoms);
@@ -40,7 +41,7 @@ public class UnderProvisioningDiagnoserTest {
 
   @Test
   public void DiagnosisSucceedsAllInstanceFullBuffers() {
-    List<Symptom> symptoms = createBpSymptom(123, 0, 0);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
     // set execute count within 20%, hence diagnosis should be under provisioning
     BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000, 4000, 3500);
 
@@ -51,7 +52,7 @@ public class UnderProvisioningDiagnoserTest {
 
   @Test
   public void diagnosisFailsIfBuffersDifferALot() {
-    List<Symptom> symptoms = createBpSymptom(123, 0, 0);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
     BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5500, 1001, 1001);
     UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
     Diagnosis result = diagnoser.diagnose(symptoms);
@@ -60,7 +61,7 @@ public class UnderProvisioningDiagnoserTest {
 
   @Test
   public void DiagnosisSucceedsIfBufferSizeIsNotKnown() {
-    List<Symptom> symptoms = createBpSymptom(123, 0);
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0);
     BufferSizeSensor bufferSensor = createMockBufferSizeSensor();
     UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
     Diagnosis result = diagnoser.diagnose(symptoms);
@@ -71,17 +72,10 @@ public class UnderProvisioningDiagnoserTest {
     assertEquals(1, result.getSymptoms().size());
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
-        data.getMetricValue("container_1_bolt_0", BaseDiagnoser.BACK_PRESSURE).intValue());
+        data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
   }
 
   public static BufferSizeSensor createMockBufferSizeSensor(double... bufferSizes) {
     return SlowInstanceDiagnoserTest.createMockBufferSizeSensor(bufferSizes);
-  }
-
-  public static List<Symptom> createBpSymptom(int... bpValues) {
-    Symptom bpSymptom = DataSkewDiagnoserTest.createBPSymptom(bpValues);
-    List<Symptom> symptoms = new ArrayList<>();
-    symptoms.add(bpSymptom);
-    return symptoms;
   }
 }

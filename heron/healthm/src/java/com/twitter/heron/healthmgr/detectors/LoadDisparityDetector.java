@@ -26,36 +26,35 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
+import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LOAD_DISPARITY;
 
-public class BackPressureDetector extends BaseDetector {
-  public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
-  private final BackPressureSensor bpSensor;
-  private final int noiseFilterMillis;
+public class LoadDisparityDetector extends BaseDetector {
+  public static final String CONF_DISPARITY_RATIO = "LoadDisparityDetector.disparityRatio";
+  private final ExecuteCountSensor exeCountSensor;
+  private final double disparityRatio;
 
   @Inject
-  BackPressureDetector(BackPressureSensor bpSensor,
-                       HealthPolicyConfig policyConfig) {
-    this.bpSensor = bpSensor;
-    noiseFilterMillis = Integer.valueOf(policyConfig.getConfig(CONF_NOISE_FILTER, "20"));
+  LoadDisparityDetector(ExecuteCountSensor exeCountSensor,
+                        HealthPolicyConfig policyConfig) {
+    this.exeCountSensor = exeCountSensor;
+    disparityRatio = Double.valueOf(policyConfig.getConfig(CONF_DISPARITY_RATIO, "1.5"));
   }
 
   /**
-   * @return A collection of all components with any instance causing backpressure. Normally there
-   * will be only one component
+   * @return A collection of all components with instances with vastly different execute counts.
    */
   @Override
   public List<Symptom> detect() {
     ArrayList<Symptom> result = new ArrayList<>();
 
-    Map<String, ComponentMetrics> backpressureMetrics = bpSensor.get();
-    for (ComponentMetrics compMetrics : backpressureMetrics.values()) {
+    Map<String, ComponentMetrics> exeCountMetrics = exeCountSensor.get();
+    for (ComponentMetrics compMetrics : exeCountMetrics.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      compStats.computeBpStats();
-      if (compStats.getTotalBackpressure() > noiseFilterMillis) {
-        result.add(new Symptom(SYMPTOM_BACK_PRESSURE, compMetrics));
+      compStats.computeExeCountStats();
+      if (compStats.getExeCountMax() > disparityRatio * compStats.getExeCountMin()) {
+        result.add(new Symptom(SYMPTOM_LOAD_DISPARITY, compMetrics));
       }
     }
 

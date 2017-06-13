@@ -14,11 +14,14 @@
 
 package com.twitter.heron.healthmgr.common;
 
+import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
+import com.twitter.heron.healthmgr.detectors.LoadDisparityDetector;
+
 public interface HealthMgrConstants {
   int DEFAULT_METRIC_DURATION = 60;
 
   String METRIC_EXE_COUNT = "__execute-count/default";
-  String METRIC_INSTANCE_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
+  String METRIC_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";
   String METRIC_BUFFER_SIZE = "__connection_buffer_by_instanceid/";
   String METRIC_BUFFER_SIZE_SUFFIX = "/packets";
 
@@ -34,4 +37,8 @@ public interface HealthMgrConstants {
   String HEALTH_POLICIES = "heron.class.health.policies";
   String HEALTH_POLICY_CLASS = "health.policy.class";
   String HEALTH_POLICY_INTERVAL = "health.policy.interval.ms";
+
+  // symtom names
+  String SYMPTOM_BACK_PRESSURE = BackPressureDetector.class.getSimpleName();
+  String SYMPTOM_LOAD_DISPARITY = LoadDisparityDetector.class.getSimpleName();
 }
