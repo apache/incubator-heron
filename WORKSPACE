@@ -142,6 +142,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "com_jayway_jsonpath",
+  artifact = "com.jayway.jsonpath:json-path:2.1.0",
+)
+
+maven_jar(
   name = "com_fasterxml_jackson_core_jackson_annotations",
   artifact = "com.fasterxml.jackson.core:jackson-annotations:" + jackson_version,
 )
@@ -154,6 +159,11 @@ maven_jar(
 maven_jar(
   name = "com_fasterxml_jackson_core_jackson_databind",
   artifact = "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
+)
+
+maven_jar(
+  name = "net_minidev_json_smart",
+  artifact = "net.minidev:json-smart:2.2"
 )
 
 maven_jar(
