@@ -21,7 +21,7 @@ import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-from tornado.options import define, options
+from tornado.options import define
 from tornado.httpclient import AsyncHTTPClient
 
 import heron.tools.common.src.python.utils.config as common_config
@@ -36,10 +36,9 @@ Log = log.Log
 
 class Application(tornado.web.Application):
   """ Tornado server application """
-  def __init__(self):
+  def __init__(self, config):
 
     AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
-    config = Config(options.config_file)
     self.tracker = Tracker(config)
     self.tracker.synch_topologies()
     tornadoHandlers = [
@@ -125,13 +124,43 @@ def add_titles(parser):
 
 def add_arguments(parser):
   """ add arguments """
-  default_config_file = os.path.join(
-      utils.get_heron_tracker_conf_dir(), constants.DEFAULT_CONFIG_FILE)
 
   parser.add_argument(
       '--config-file',
-      metavar='(a string; path to config file; default: "' + default_config_file + '")',
-      default=default_config_file)
+      metavar="""(a string; path to config file;)
+      if a config file is provided the following args are ignored:
+      [--type, --name, --rootpath, --tunnelhost, --hostport]
+      """)
+
+  parser.add_argument(
+      '--type',
+      metavar='(an string; type of state manager (zookeeper or file, etc.); default: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_TYPE) + ')',
+      default=constants.DEFAULT_STATE_MANAGER_TYPE,
+      choices=["file", "zookeeper"])
+
+  parser.add_argument(
+      '--name',
+      metavar='(an string; name to be used for the state manager; default: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_NAME) + ')',
+      default=constants.DEFAULT_STATE_MANAGER_NAME)
+
+  parser.add_argument(
+      '--rootpath',
+      metavar='(an string; where all the states are stored; default: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_ROOTPATH) + ')',
+      default=constants.DEFAULT_STATE_MANAGER_ROOTPATH)
+
+  parser.add_argument(
+      '--tunnelhost',
+      metavar='(an string; if ssh tunneling needs to be established to connect to it; default: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_TUNNELHOST) + ')',
+      default=constants.DEFAULT_STATE_MANAGER_TUNNELHOST)
+
+  parser.add_argument(
+      '--hostport',
+      metavar='(an string; only used to connect to zk, must be of the form \'host:port\';'\
+      ' default: ' + str(constants.DEFAULT_STATE_MANAGER_HOSTPORT) + ')')
 
   parser.add_argument(
       '--port',
@@ -182,6 +211,23 @@ def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
 
+
+def create_tracker_config(namespace):
+  if namespace["config_file"]:
+    config = utils.parse_config_file(namespace["config_file"])
+    Log.info("Parsed config: %s", str(config))
+    return config
+  else:
+    config = dict(
+        type=namespace["type"],
+        name=namespace["name"],
+        rootpath=namespace["rootpath"],
+        tunnelhost=namespace["tunnelhost"])
+    if namespace["hostport"]:
+      config["hostport"] = namespace["hostport"]
+
+    return dict(statemgrs=[config])
+
 def main():
   """ main """
   # create the parser and parse the arguments
@@ -207,8 +253,10 @@ def main():
   # set Tornado global option
   define_options(namespace['port'], namespace['config_file'])
 
+  config = Config(create_tracker_config(namespace))
+
   # create Tornado application
-  application = Application()
+  application = Application(config)
 
   # pylint: disable=unused-argument
   # SIGINT handler:
@@ -225,7 +273,9 @@ def main():
   signal.signal(signal.SIGTERM, signal_handler)
 
   Log.info("Running on port: %d", namespace['port'])
-  Log.info("Using config file: %s", namespace['config_file'])
+  if namespace["config_file"]:
+    Log.info("Using config file: %s", namespace['config_file'])
+  Log.info("Using state manager:\n" + str(config))
 
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(namespace['port'])

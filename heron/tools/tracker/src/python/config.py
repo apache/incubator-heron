@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' config.py '''
-import os
-import yaml
+#import os
+#import yaml
 
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
@@ -27,23 +27,24 @@ class Config(object):
   exposing various tracker configs.
   """
 
-  def __init__(self, conf_file):
+  def __init__(self, config):
     self.configs = None
     self.statemgr_config = StateMgrConfig()
     self.viz_url_format = None
-
-    self.parse_config_file(conf_file)
-
-  def parse_config_file(self, conf_file):
-    """parse config files"""
-    expanded_conf_file_path = os.path.expanduser(conf_file)
-    assert os.path.lexists(expanded_conf_file_path), "Config file does not exists: %s" % (conf_file)
-
-    # Read the configuration file
-    with open(expanded_conf_file_path, 'r') as f:
-      self.configs = yaml.load(f)
+    self.configs = config
 
     self.load_configs()
+
+#  def parse_config_file(self, conf_file):
+#    """parse config files"""
+#    expanded_conf_file_path = os.path.expanduser(conf_file)
+# assert os.path.lexists(expanded_conf_file_path), "Config file does not exists: %s" % (conf_file)
+#
+#    # Read the configuration file
+#    with open(expanded_conf_file_path, 'r') as f:
+#      self.configs = yaml.load(f)
+#
+#    self.load_configs()
 
   def load_configs(self):
     """load config files"""
@@ -98,3 +99,13 @@ class Config(object):
       formatted_viz_url = formatted_viz_url.replace(key, value)
 
     return formatted_viz_url
+
+  def __str__(self):
+    return "".join((self.config_str(c) for c in self.configs[STATEMGRS_KEY]))
+
+  def config_str(self, config):
+    keys = ("type", "name", "hostport", "rootpath", "tunnelhost")
+    return "".join("\t{}: {}\n".format(k, config[k]) for k in keys if k in config).rstrip()
+
+
+

@@ -100,11 +100,17 @@ dashboards with topology UI page.
 ### Heron Tracker Args
 
 * `--port` - Port to run the heron-tracker on. Default port is `8888`.
-* `--config-file` - The location of the config file for tracker. Default config
-  file is `~/.herontools/conf/heron_tracker.yaml`.
+* `--config-file` - The location of the config file for tracker.  
+* `--type` (an string; type of state manager (zookeeper or file, etc.); default: file)
+* `--name` (an string; name to be used for the state manager; default: local)
+* `--rootpath` (an string; where all the states are stored; default: ~/.herondata/repository/state/local)
+* `--tunnelhost` (an string; if ssh tunneling needs to be established to connect to it; default: localhost)
+* `--hostport` (an string; only used to connect to zk, must be of the form 'host:port'; default: localhost:2181)
+
+**Note:** If a config file is provided the following args are ignored; --type, --name, --rootpath, --tunnelhost, --hostport
 
 ```bash
 $ heron-tracker
 # is equivalent to
-$ heron-ui --port=8888 --config-file=~/.herontools/conf/heron_tracker.yaml
+$ heron-ui --port=8888 --type=file --name=local --rootpath=~/.herondata/repository/state/local
 ```
