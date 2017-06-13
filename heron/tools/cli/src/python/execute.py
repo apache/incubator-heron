@@ -67,11 +67,11 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   Log.debug("Heron options: {%s}", str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
-  proc = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, bufsize=1)
+  process = subprocess.Popen(all_args, env=heron_env, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, bufsize=1)
   # stdout message has the information Java program sends back
   # stderr message has extra information, such as debugging message
-  return ProcessResult(proc)
+  return ProcessResult(process)
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   '''
@@ -118,10 +118,10 @@ def heron_pex(topology_pex, topology_class_name, args=None):
     Log.debug("Invoking class using command: ``%s''", ' '.join(cmd))
     Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
     # invoke the command with subprocess and print error message, if any
-    proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, bufsize=1)
+    process = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, bufsize=1)
     # todo(rli): improve python topology submission workflow
-    return ProcessResult(proc)
+    return ProcessResult(process)
   else:
     try:
       # loading topology from Topology's subclass (no main method)

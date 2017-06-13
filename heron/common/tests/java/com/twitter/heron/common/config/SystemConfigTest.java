@@ -16,6 +16,7 @@ package com.twitter.heron.common.config;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
@@ -31,7 +32,7 @@ public class SystemConfigTest {
   private static final String RESOURCE_LOC = "/heron/common/tests/resources/sysconfig.yaml";
 
   @Test
-  public void testReadConfig() throws Exception {
+  public void testReadConfig() throws IOException {
     InputStream inputStream  = getClass().getResourceAsStream(RESOURCE_LOC);
     if (inputStream == null) {
       throw new RuntimeException("Sample output file not found");

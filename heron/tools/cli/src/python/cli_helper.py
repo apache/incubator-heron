@@ -84,7 +84,7 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
       args=new_args
   )
 
-  err_msg = "Failed to %s %s" % (action, topology_name)
-  succ_msg = "Successfully %s %s" % (action, topology_name)
+  err_msg = "Failed to %s: %s" % (action, topology_name)
+  succ_msg = "Successfully %s: %s" % (action, topology_name)
   result.add_context(err_msg, succ_msg)
   return result

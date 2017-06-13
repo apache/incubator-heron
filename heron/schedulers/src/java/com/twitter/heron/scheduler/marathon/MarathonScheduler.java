@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 
-import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
@@ -53,6 +52,7 @@ public class MarathonScheduler implements IScheduler {
   protected MarathonController getController() {
     return new MarathonController(
         MarathonContext.getSchedulerURI(config),
+        MarathonContext.getSchedulerAuthToken(config),
         Runtime.topologyName(runtime),
         Context.verbose(config));
   }
@@ -107,7 +107,7 @@ public class MarathonScheduler implements IScheduler {
     config = Config.newBuilder()
         .putAll(config)
         .put(Key.TOPOLOGY_BINARY_FILE,
-            FileUtils.getBaseName(Context.topologyBinaryFile(config)))
+            Context.topologyBinaryFile(config))
         .build();
 
     ObjectMapper mapper = new ObjectMapper();
@@ -176,12 +176,11 @@ public class MarathonScheduler implements IScheduler {
   }
 
   protected ArrayNode getFetchList(ObjectMapper mapper) {
-    String heronCoreURI = Context.corePackageUri(config);
-    String topologyURI = Runtime.topologyPackageUri(runtime).toString();
+    final String topologyURI = Runtime.topologyPackageUri(runtime).toString();
 
-    String[] uris = new String[]{heronCoreURI, topologyURI};
+    final String[] uris = new String[]{topologyURI};
 
-    ArrayNode urisNode = mapper.createArrayNode();
+    final ArrayNode urisNode = mapper.createArrayNode();
     for (String uri : uris) {
       ObjectNode uriObject = mapper.createObjectNode();
       uriObject.put(MarathonConstants.URI, uri);

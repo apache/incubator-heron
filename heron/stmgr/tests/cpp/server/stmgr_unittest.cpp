@@ -1707,6 +1707,8 @@ TEST(StMgr, test_metricsmgr_reconnect) {
 
 int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
+  std::cout << "Current working directory (to find stmgr logs) "
+      << ProcessUtils::getCurrentWorkingDirectory() << std::endl;
   testing::InitGoogleTest(&argc, argv);
   if (argc > 1) {
     std::cerr << "Using config file " << argv[1] << std::endl;
