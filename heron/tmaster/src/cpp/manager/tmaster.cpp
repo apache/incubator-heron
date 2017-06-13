@@ -211,7 +211,7 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
     }
     // There was an error setting our location
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error setting ourselves as TMaster. Errorcode is " << _code << std::endl;
+               << " Error setting ourselves as TMaster. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
@@ -230,7 +230,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   if (_code != proto::system::OK) {
     // Without Topology we can't do much
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error getting topology Errsettingorcode is " << _code << std::endl;
+               << " Error getting topology. Error code is " << _code << std::endl;
     ::exit(1);
   }
   // Ok things are fine. topology_ contains the result
@@ -241,7 +241,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
     LOG(ERROR) << "Topology invalid" << std::endl;
     ::exit(1);
   }
-  LOG(INFO) << "Topology Read and Validated\n";
+  LOG(INFO) << "Topology read and validated\n";
   // Now see if there is already a pplan
   proto::system::PhysicalPlan* pplan = new proto::system::PhysicalPlan();
   auto cb = [pplan, this](proto::system::StatusCode code) {
@@ -253,23 +253,22 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
 
 void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
-  // Assignment need not exist. First check if some other
-  // error occured.
+  // Physical plan need not exist. First check if some other error occurred.
   if (_code != proto::system::OK && _code != proto::system::PATH_DOES_NOT_EXIST) {
     // Something bad happened. Bail out!
     // TODO(kramasamy): This is not as bad as it seems. Maybe we can delete this assignment
     // and have a new assignment instead.
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error getting assignment Errsettingorcode is " << _code << std::endl;
+               << " Error getting assignment. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
   if (_code == proto::system::PATH_DOES_NOT_EXIST) {
-    LOG(ERROR) << "There was no existing assignment\n";
+    LOG(ERROR) << "There was no existing physical plan\n";
     // We never did assignment in the first place
     delete _pplan;
   } else {
-    LOG(INFO) << "There was an existing assignment\n";
+    LOG(INFO) << "There was an existing physical plan\n";
     CHECK_EQ(_code, proto::system::OK);
     current_pplan_ = _pplan;
     absent_stmgrs_.clear();
@@ -466,7 +465,7 @@ void TMaster::DoPhysicalPlan(EventLoop::Status) {
 void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
   if (_code != proto::system::OK) {
-    LOG(ERROR) << "Error writing assignment to statemgr. Errocode is " << _code << std::endl;
+    LOG(ERROR) << "Error writing assignment to statemgr. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
@@ -491,7 +490,7 @@ void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
 bool TMaster::DistributePhysicalPlan() {
   if (current_pplan_) {
     // First valid the physical plan to distribute
-    LOG(INFO) << "To distribute new pplan:" << std::endl;
+    LOG(INFO) << "To distribute new physical plan:" << std::endl;
     config::PhysicalPlanHelper::LogPhysicalPlan(*current_pplan_);
 
     // Distribute physical plan to all active stmgrs
@@ -502,7 +501,7 @@ bool TMaster::DistributePhysicalPlan() {
     return true;
   }
 
-  LOG(ERROR) << "No valid assignment yet" << std::endl;
+  LOG(ERROR) << "No valid physical plan yet" << std::endl;
   return false;
 }
 
@@ -541,7 +540,7 @@ proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {
 
   // TMaster does not really have any control over who does what.
   // That has already been decided while launching the jobs.
-  // TMaster just stiches the info together to pass to everyone
+  // TMaster just stitches the info together to pass to everyone
 
   // Build the PhysicalPlan structure
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -564,7 +563,7 @@ proto::system::Status* TMaster::UpdateStMgrHeartbeat(Connection* _conn, sp_int64
   proto::system::Status* retval = new proto::system::Status();
   if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
     retval->set_status(proto::system::INVALID_STMGR);
-    retval->set_message("Uknown connection doing stmgr heartbeat");
+    retval->set_message("Unknown connection doing stmgr heartbeat");
     return retval;
   }
   const sp_string& stmgr = connection_to_stmgr_id_[_conn];
@@ -640,7 +639,7 @@ bool TMaster::ValidateTopology(proto::api::Topology _topology) {
 
 bool TMaster::ValidateStMgrsWithTopology(proto::api::Topology _topology) {
   // here we check to see if the total number of instances
-  // accross all stmgrs match up to all the spout/bolt
+  // across all stmgrs match up to all the spout/bolt
   // parallelism the topology has specified
   sp_int32 ntasks = 0;
   for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
