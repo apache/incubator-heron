@@ -32,7 +32,9 @@ void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, const StM
   if (in_progress_) {
     LOG(WARNING) << "Starting a Restore for checkpoint "
                  << _checkpoint_id << " when we are already busy"
-                 << " within Restore of " << checkpoint_id_in_progress_;
+                 << " within Restore of " << checkpoint_id_in_progress_
+                 << ". The Restore result of " << checkpoint_id_in_progress_
+                 << " will be abandoned"
   }
   in_progress_ = true;
   checkpoint_id_in_progress_ = _checkpoint_id;
