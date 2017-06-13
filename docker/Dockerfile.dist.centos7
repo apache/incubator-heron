@@ -1,15 +1,15 @@
-FROM ubuntu:16.04
+FROM centos:centos7
 
 ARG heronVersion
 
-RUN apt-get update
-RUN apt-get -y install python ; apt-get clean all
-RUN apt-get -y install unzip ; apt-get clean all
-RUN apt-get -y install software-properties-common ; apt-get clean all
+RUN yum -y upgrade
+RUN yum -y install python; yum clean all
+RUN yum -y install unzip; yum clean all 
+RUN yum -y install which; yum clean all
 
-RUN apt-get -y install openjdk-8-jdk; apt-get clean all
+RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel; yum clean all
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0 
 
 ADD artifacts /heron
 

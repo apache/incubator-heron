@@ -151,7 +151,8 @@ public class UpdateTopologyManager implements Closeable {
 
     // deactivate and sleep
     if (initiallyRunning) {
-      deactivateTopology(stateManager, updatedTopology);
+      // Update the topology since the state should have changed from RUNNING to PAUSED
+      updatedTopology = deactivateTopology(stateManager, updatedTopology, proposedPackingPlan);
     }
 
     // request new resources if necessary. Once containers are allocated we should make the changes
@@ -179,8 +180,9 @@ public class UpdateTopologyManager implements Closeable {
   }
 
   @VisibleForTesting
-  void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
-                          final TopologyAPI.Topology topology)
+  TopologyAPI.Topology deactivateTopology(SchedulerStateManagerAdaptor stateManager,
+                          final TopologyAPI.Topology topology,
+                          PackingPlan proposedPackingPlan)
       throws InterruptedException, TMasterException {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
@@ -200,6 +202,8 @@ public class UpdateTopologyManager implements Closeable {
     } else {
       logInfo("Deactivated topology %s.", topology.getName());
     }
+
+    return getUpdatedTopology(topology.getName(), proposedPackingPlan, stateManager);
   }
 
   @VisibleForTesting
