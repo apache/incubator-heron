@@ -215,7 +215,6 @@ def define_options(port, config_file):
 def create_tracker_config(namespace):
   if namespace["config_file"]:
     config = utils.parse_config_file(namespace["config_file"])
-    Log.info("Parsed config: %s", str(config))
     return config
   else:
     config = dict(
