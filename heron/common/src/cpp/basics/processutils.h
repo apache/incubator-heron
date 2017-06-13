@@ -20,11 +20,11 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#include <sys/types.h>
-#include "sptypes.h"
-
 #if !defined(__PROCESS_UTILS_H)
 #define __PROCESS_UTILS_H
+
+#include <sys/types.h>
+#include "basics/sptypes.h"
 
 struct rusage;
 
