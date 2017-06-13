@@ -441,6 +441,7 @@ void SetUpCommonResources(CommonResources& common) {
 
 void TearCommonResources(CommonResources& common) {
   delete common.topology_;
+  delete common.packing_plan_;
   delete common.tmaster_thread_;
   delete common.tmaster_;
 
