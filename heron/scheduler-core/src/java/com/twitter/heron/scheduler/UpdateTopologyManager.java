@@ -168,9 +168,6 @@ public class UpdateTopologyManager implements Closeable {
     logFine("Update new PackingPlan: %s",
         stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
 
-    // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
-    logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
-
     // reactivate topology
     if (initiallyRunning) {
       reactivateTopology(stateManager, updatedTopology, removableContainerCount);

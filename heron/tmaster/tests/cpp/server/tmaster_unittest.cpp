@@ -124,8 +124,78 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   return topology;
 }
 
+static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgrs_, int num_spouts,
+    int num_spout_instances, int num_bolts, int num_bolt_instances) {
+  size_t spouts_size = num_spout_instances;
+  size_t bolts_size = num_bolt_instances;
+
+  heron::proto::system::Resource* instanceResource = new heron::proto::system::Resource();
+  instanceResource->set_ram(1);
+  instanceResource->set_cpu(1);
+  instanceResource->set_disk(1);
+
+  heron::proto::system::Resource* containerRequiredResource = new heron::proto::system::Resource();
+  containerRequiredResource->set_ram(10);
+  containerRequiredResource->set_cpu(10);
+  containerRequiredResource->set_disk(10);
+
+  sp_int32 task_id = 0;
+  sp_int32 component_index = 0;
+  sp_int32 container_index = 0;
+
+  heron::proto::system::PackingPlan* packingPlan = new heron::proto::system::PackingPlan();
+  packingPlan->set_id("dummy_packing_plan_id");
+
+  std::map<size_t, heron::proto::system::ContainerPlan*> container_map_;
+  for (size_t i = 0; i < num_stmgrs_; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = packingPlan->add_container_plans();
+    containerPlan->set_id(i);
+    heron::proto::system::Resource* requiredResource = containerPlan->mutable_requiredresource();
+    requiredResource->set_cpu(containerRequiredResource->cpu());
+    requiredResource->set_ram(containerRequiredResource->ram());
+    requiredResource->set_disk(containerRequiredResource->disk());
+    container_map_[i] = containerPlan;
+  }
+
+  // Set spouts
+  for (size_t i = 0; i < spouts_size; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = container_map_[container_index];
+    heron::proto::system::InstancePlan* instancePlan = containerPlan->add_instance_plans();
+    instancePlan->set_component_name("spout_x");
+    instancePlan->set_task_id(task_id++);
+    instancePlan->set_component_index(component_index++);
+    heron::proto::system::Resource* resource = instancePlan->mutable_resource();
+    resource->set_cpu(instanceResource->cpu());
+    resource->set_ram(instanceResource->ram());
+    resource->set_disk(instanceResource->disk());
+    if (++container_index == num_stmgrs_) {
+      container_index = 0;
+    }
+  }
+
+  // Set bolts
+  component_index = 0;
+  for (size_t i = 0; i < bolts_size; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = container_map_[container_index];
+    heron::proto::system::InstancePlan* instancePlan = containerPlan->add_instance_plans();
+    instancePlan->set_component_name("bolt_x");
+    instancePlan->set_task_id(task_id++);
+    instancePlan->set_component_index(component_index++);
+    heron::proto::system::Resource* resource = instancePlan->mutable_resource();
+    resource->set_cpu(instanceResource->cpu());
+    resource->set_ram(instanceResource->ram());
+    resource->set_disk(instanceResource->disk());
+    if (++container_index == num_stmgrs_) {
+      container_index = 0;
+    }
+  }
+
+  return packingPlan;
+}
+
 // Method to create the local zk state on the filesystem
-const sp_string CreateLocalStateOnFS(heron::proto::api::Topology* topology) {
+const sp_string CreateLocalStateOnFS(heron::proto::api::Topology* topology,
+                                     heron::proto::system::PackingPlan* packingPlan) {
   EventLoopImpl ss;
 
   // Create a temporary directory to write out the state
@@ -137,6 +207,7 @@ const sp_string CreateLocalStateOnFS(heron::proto::api::Topology* topology) {
   // via thestate mgr
   heron::common::HeronLocalFileStateMgr state_mgr(dpath, &ss);
   state_mgr.CreateTopology(*topology, NULL);
+  state_mgr.CreatePackingPlan(topology->name(), *packingPlan, NULL);
 
   // Return the root path
   return sp_string(dpath);
@@ -158,7 +229,7 @@ heron::proto::system::Instance* CreateInstanceMap(sp_int8 type, sp_int8 instance
   heron::proto::system::Instance* imap = new heron::proto::system::Instance();
   imap->set_instance_id(CreateInstanceId(type, instance, spout));
 
-  imap->set_stmgr_id(STMGR_NAME + std::to_string(stmgr_id));
+  imap->set_stmgr_id(STMGR_NAME + "-" + std::to_string(stmgr_id));
   heron::proto::system::InstanceInfo* inst = imap->mutable_info();
   inst->set_task_id(global_index);
   inst->set_component_index(instance);
@@ -187,12 +258,10 @@ void StartServer(EventLoopImpl* ss) {
 void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
-                  const sp_string& dpath, const std::vector<sp_string>& stmgrs_id_list,
-                  const sp_string& tmaster_host, sp_int32 tmaster_port,
+                  const sp_string& dpath, const sp_string& tmaster_host, sp_int32 tmaster_port,
                   sp_int32 tmaster_controller_port) {
   ss = new EventLoopImpl();
-  tmaster =
-      new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath, stmgrs_id_list,
+  tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, tmaster_port + 2,
                                   tmaster_port + 3, metrics_sinks_config_filename, LOCALHOST, ss);
   tmaster_thread = new std::thread(StartServer, ss);
@@ -241,6 +310,7 @@ struct CommonResources {
   std::vector<EventLoopImpl*> ss_list_;
   std::vector<sp_string> stmgrs_id_list_;
   heron::proto::api::Topology* topology_;
+  heron::proto::system::PackingPlan* packing_plan_;
 
   heron::tmaster::TMaster* tmaster_;
   std::thread* tmaster_thread_;
@@ -273,13 +343,15 @@ void StartTMaster(CommonResources& common) {
   common.topology_ = GenerateDummyTopology(
       common.topology_name_, common.topology_id_, common.num_spouts_, common.num_spout_instances_,
       common.num_bolts_, common.num_bolt_instances_, common.grouping_);
+  common.packing_plan_ = GenerateDummyPackingPlan(common.num_stmgrs_, common.num_spouts_,
+      common.num_spout_instances_, common.num_bolts_, common.num_bolt_instances_);
 
   // Create the zk state on the local file system
-  common.dpath_ = CreateLocalStateOnFS(common.topology_);
+  common.dpath_ = CreateLocalStateOnFS(common.topology_, common.packing_plan_);
 
-  // Poulate the list of stmgrs
+  // Populate the list of stmgrs
   for (int i = 0; i < common.num_stmgrs_; ++i) {
-    sp_string id = STMGR_NAME;
+    sp_string id = STMGR_NAME + "-";
     id += std::to_string(i);
     common.stmgrs_id_list_.push_back(id);
   }
@@ -288,7 +360,7 @@ void StartTMaster(CommonResources& common) {
   EventLoopImpl* tmaster_eventLoop;
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
-               common.topology_name_, common.topology_id_, common.dpath_, common.stmgrs_id_list_,
+               common.topology_name_, common.topology_id_, common.dpath_,
                common.tmaster_host_, common.tmaster_port_, common.tmaster_controller_port_);
   common.ss_list_.push_back(tmaster_eventLoop);
 }
