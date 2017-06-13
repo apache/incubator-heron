@@ -20,6 +20,7 @@ import os
 import string
 import sys
 import subprocess
+import yaml
 
 # directories for heron tools distribution
 BIN_DIR = "bin"
@@ -150,10 +151,15 @@ def get_heron_tracker_conf_dir():
   conf_path = os.path.join(get_heron_tracker_dir(), CONF_DIR)
   return conf_path
 
-# def get_heron_tracker_lib_dir():
-#   """
-#   This will provide heron tracker lib directory from .pex file.
-#   :return: absolute path of heron lib directory
-#   """
-#   lib_path = os.path.join(get_heron_tools_dir(), LIB_DIR)
-#   return lib_path
+
+def parse_config_file(config_file):
+  expanded_config_file_path = os.path.expanduser(config_file)
+  assert os.path.lexists(expanded_config_file_path), \
+    "Config file does not exists: %s" % (config_file)
+
+  configs = {}
+  # Read the configuration file
+  with open(expanded_config_file_path, 'r') as f:
+    configs = yaml.load(f)
+
+  return configs
