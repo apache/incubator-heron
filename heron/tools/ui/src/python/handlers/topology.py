@@ -260,9 +260,6 @@ class ContainerFileDownloadHandler(base.BaseHandler):
   def initialize(self, baseUrl):
     self.baseUrl = baseUrl
 
-  def initialize(self, baseUrl):
-    self.baseUrl = baseUrl
-
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
     '''
