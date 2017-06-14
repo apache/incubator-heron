@@ -245,7 +245,7 @@ public class AuroraSchedulerTest {
     when(commandLine.getOptionValue("config_path")).thenReturn("/some/config/path");
     when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
     when(commandLine.getOptionValue("topology_defn")).thenReturn("/mock/defnFile.defn");
-    when(commandLine.getOptionValue("topology_bin")).thenReturn("/mock/binaryFile.jar");
+    when(commandLine.getOptionValue("topology_bin")).thenReturn("binaryFile.jar");
     when(commandLine.getOptionValue("auto_heal_window")).thenReturn("0");
     when(commandLine.getOptionValue("auto_heal_interval")).thenReturn("20");
     Config config = Mockito.spy(SubmitterMain.loadConfig(commandLine, topology));
