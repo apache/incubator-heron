@@ -302,11 +302,11 @@ class Tracker(object):
       spoutConfigs = spout.comp.config.kvs
       for kvs in spoutConfigs:
         if kvs.key == "spout.type":
-          spoutType = kvs.value
+          spoutType = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.source":
-          spoutSource = kvs.value
+          spoutSource = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.version":
-          spoutVersion = kvs.value
+          spoutVersion = javaobj.loads(kvs.serialized_value)
       spoutPlan = {
           "type": spoutType,
           "source": spoutSource,

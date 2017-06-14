@@ -66,7 +66,7 @@ class ZKClient {
   virtual void Exists(const std::string& _node, VCallback<sp_int32> _cb);
 
   // creates a node. The node is created at _node. If _is_ephemeral is set,
-  // then the node is created as a ephimeral node. _cb is called with
+  // then the node is created as a ephemeral node. _cb is called with
   // the status code after the Create completes.
   virtual void CreateNode(const std::string& _node, const std::string& _value, bool _is_ephimeral,
                           VCallback<sp_int32> _cb);

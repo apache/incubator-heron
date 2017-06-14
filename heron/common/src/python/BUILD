@@ -13,11 +13,3 @@ pex_library(
         'psutil==4.3.1',
     ]
 )
-
-pex_library(
-    name = 'common-log-py',
-    srcs = ["utils/log.py"],
-    reqs = [
-        "colorlog==2.6.1",
-    ]
-)

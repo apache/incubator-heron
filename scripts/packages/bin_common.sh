@@ -75,7 +75,7 @@ function check_java() {
   if [ -z "${JAVA_HOME-}" ]; then
     case "$(uname -s | tr 'A-Z' 'a-z')" in
       linux)
-        JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
+        JAVA_HOME="$(readlink -f $(which java) 2>/dev/null | sed 's_/bin/java__')" || true
         BASHRC="~/.bashrc"
         ;;
       freebsd)
@@ -88,7 +88,7 @@ function check_java() {
         ;;
     esac
   fi
-  if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
+  if [ ! -x "${JAVA_HOME}/bin/java" ]; then
     echo >&2
     echo "Java not found, please install the corresponding package" >&2
     echo "See $getting_started_url for more information on" >&2

@@ -16,6 +16,7 @@ import abc
 import sys
 from enum import Enum
 
+from heron.common.src.python.utils import proc
 from heron.common.src.python.utils.log import Log
 
 # Meaning of exit status code:
@@ -111,9 +112,12 @@ class SimpleResult(Result):
 
 class ProcessResult(Result):
   """Process result: a wrapper of result class"""
-  def __init__(self, proc):
+  def __init__(self, process):
     super(ProcessResult, self).__init__()
-    self.proc = proc
+    self.process = process
+    self.stdout_builder = proc.async_stdout_builder(process)
+    # start redirect stderr in initialization, before render() gets called
+    proc.async_stream_process_stderr(self.process, self.renderProcessStdErr)
 
   def renderProcessStdErr(self, stderr_line):
     """ render stderr of shelled-out process
@@ -127,7 +131,7 @@ class ProcessResult(Result):
     :param stderr_line: one line from shelled-out process
     :return:
     """
-    retcode = self.proc.poll()
+    retcode = self.process.poll()
     if retcode is not None and status_type(retcode) == Status.InvocationError:
       self._do_log(Log.error, stderr_line)
     else:
@@ -160,21 +164,10 @@ class ProcessResult(Result):
           (self.status.value, list(Status)))
 
   def render(self):
-    while True:
-      stderr_line = self.proc.stderr.readline()
-      if not stderr_line:
-        if self.proc.poll() is None:
-          continue
-        else:
-          break
-      else:
-        self.renderProcessStdErr(stderr_line)
-    self.proc.wait()
-    self.status = status_type(self.proc.returncode)
-    stdout = "".join(self.proc.stdout.readlines())
-    self.renderProcessStdOut(stdout)
+    self.process.wait()
+    self.status = status_type(self.process.returncode)
+    self.renderProcessStdOut(self.stdout_builder.result())
     self._log_context()
-
 
 def render(results):
   if isinstance(results, Result):

@@ -95,7 +95,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_bin", topology_file,   # pex file if pex specified
+      "--topology_bin", os.path.basename(topology_file),   # pex file if pex specified
       "--auto_heal_window", cl_args["auto_heal_window"],
       "--auto_heal_interval", cl_args["auto_heal_interval"]
   ]
@@ -157,7 +157,8 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
       err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
       return SimpleResult(Status.HeronError, err_context)
     # launch the topology
-    Log.info("Launching topology: \'%s\'", topology_defn.name)
+    mode = " in dry-run mode" if cl_args['dry_run'] else ''
+    Log.info("Launching topology: \'%s\'%s", topology_defn.name, mode)
     res = launch_a_topology(
         cl_args, tmp_dir, topology_file, defn_file, topology_defn.name)
     results.append(res)
