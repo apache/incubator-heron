@@ -35,39 +35,25 @@ public class UnderProvisioningDiagnoserTest {
   @Test
   public void diagnosisWhen1Of1InstanceInBP() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
-    BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000);
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+    symptoms.add(TestUtils.createLargeWaitQSymptom(5000));
+    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
     validateDiagnosis(result);
   }
 
   @Test
-  public void DiagnosisSucceedsAllInstanceFullBuffers() {
+  public void diagnosisSucceedsAllInstanceFullBuffers() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
     // set execute count within 20%, hence diagnosis should be under provisioning
-    BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5000, 4000, 3500);
-
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
+    symptoms.add(TestUtils.createLargeWaitQSymptom(5000, 4000, 3500));
+    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
     validateDiagnosis(result);
   }
 
   @Test
-  public void diagnosisFailsIfBuffersDifferALot() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
-    BufferSizeSensor bufferSensor = createMockBufferSizeSensor(5500, 1001, 1001);
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
-    assertNull(result);
-  }
-
-  @Test
-  public void DiagnosisSucceedsIfBufferSizeIsNotKnown() {
+  public void diagnosisFailsIfBufferSizeIsNotKnown() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0);
-    BufferSizeSensor bufferSensor = createMockBufferSizeSensor();
-    UnderProvisioningDiagnoser diagnoser = new UnderProvisioningDiagnoser(bufferSensor);
-    Diagnosis result = diagnoser.diagnose(symptoms);
-    validateDiagnosis(result);
+    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
+    assertNull(result);
   }
 
   private void validateDiagnosis(Diagnosis result) {
@@ -75,12 +61,5 @@ public class UnderProvisioningDiagnoserTest {
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
-  }
-
-  public static BufferSizeSensor createMockBufferSizeSensor(double... bufferSizes) {
-    BufferSizeSensor exeSensor = mock(BufferSizeSensor.class);
-    return DataSkewDiagnoserTest.getMockSensor(HealthMgrConstants.METRIC_BUFFER_SIZE,
-        exeSensor,
-        bufferSizes);
   }
 }

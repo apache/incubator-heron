@@ -15,6 +15,7 @@
 package com.twitter.heron.healthmgr.diagnosers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.microsoft.dhalion.detector.Symptom;
@@ -33,10 +34,9 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    List<Symptom> waitQDisparitySymptoms = getWaitQDisparitySymptoms(symptoms);
+    Map<String, ComponentMetrics> waitQDisparityComponents = getWaitQDisparityComponents(symptoms);
 
-    // verify wait Q disparity and back pressure for the same component exists
-    if (bpSymptoms.isEmpty() || waitQDisparitySymptoms.isEmpty()) {
+    if (bpSymptoms.isEmpty() || waitQDisparityComponents.isEmpty()) {
       // Since there is no back pressure or disparate execute count, no action is needed
       return null;
     } else if (bpSymptoms.size() > 1) {
@@ -45,13 +45,8 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
     }
     ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    ComponentMetrics pendingBufferMetrics = null;
-    for (Symptom symptom : waitQDisparitySymptoms) {
-      if (symptom.getComponent().getName().equals(bpMetrics.getName())) {
-        pendingBufferMetrics = symptom.getComponent();
-        break;
-      }
-    }
+    // verify wait Q disparity and back pressure for the same component exists
+    ComponentMetrics pendingBufferMetrics = waitQDisparityComponents.get(bpMetrics.getName());
     if (pendingBufferMetrics == null) {
       // no wait Q disparity for the component with back pressure. There is no slow instance
       return null;

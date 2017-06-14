@@ -19,60 +19,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.inject.Inject;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 public class UnderProvisioningDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
-  private final BufferSizeSensor bufferSizeSensor;
-  private final double limit = 1000;
-
-  @Inject
-  UnderProvisioningDiagnoser(BufferSizeSensor bufferSizeSensor) {
-    this.bufferSizeSensor = bufferSizeSensor;
-  }
-
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    if (bpSymptoms.isEmpty()) {
-      // Since there is no back pressure, no action is needed
+    Map<String, ComponentMetrics> largeWaitQComponents = getLargeWaitQComponents(symptoms);
+
+    if (bpSymptoms.isEmpty() || largeWaitQComponents.isEmpty()) {
+      // Since there is no back pressure or large pending queue, no action is needed
       return null;
     } else if (bpSymptoms.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
+    ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    Symptom backPressureSymptom = bpSymptoms.iterator().next();
+    // verify large buffer queue and back pressure for the same component exists
+    ComponentMetrics pendingBufferMetrics = largeWaitQComponents.get(bpMetrics.getName());
+    if (pendingBufferMetrics == null) {
+      // wait Q for the component with back pressure is small. There is no under provisioning
+      return null;
+    }
 
-    ComponentMetrics bpMetricsData = backPressureSymptom.getComponent();
-    Map<String, ComponentMetrics> result = bufferSizeSensor.get(bpMetricsData.getName());
-    ComponentMetrics bufferSizeData = result.get(bpMetricsData.getName());
-
-    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetricsData, bufferSizeData);
+    // all instances have large pending buffers and this comp is initiating back pressure.
+    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetrics, pendingBufferMetrics);
     ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
     compStats.computeBpStats();
     compStats.computeBufferSizeStats();
+    LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
+        mergedData.getName(), compStats.getTotalBackpressure(), compStats.getBufferSizeMin()));
 
-    Symptom resultSymptom = null;
-    // if all instances are reporting backpressure or if all instances have large pending buffers
-    if (compStats.getBufferSizeMin() > limit
-        && compStats.getBufferSizeMin() * 5 > compStats.getBufferSizeMax()) {
-      LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
-          mergedData.getName(), compStats.getTotalBackpressure(), compStats.getBufferSizeMin()));
-      resultSymptom = backPressureSymptom;
-      // TODO add other symptoms applicable to this diagnosis
-    }
 
-    return resultSymptom != null ?
-        new Diagnosis(this.getClass().getSimpleName(), resultSymptom)
-        : null;
+    Symptom resultSymptom = new Symptom(this.getClass().getSimpleName(), mergedData);
+    return new Diagnosis(this.getClass().getSimpleName(), resultSymptom);
   }
 }

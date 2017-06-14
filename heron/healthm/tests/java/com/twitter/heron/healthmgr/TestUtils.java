@@ -29,11 +29,15 @@ public class TestUtils {
   }
 
   public static Symptom createExeCountSymptom(int... exeCounts) {
-    return createSymptom(SYMPTOM_LOAD_DISPARITY, METRIC_EXE_COUNT, exeCounts);
+    return createSymptom(SYMPTOM_DATA_SKEW, METRIC_EXE_COUNT, exeCounts);
   }
 
   public static Symptom createWaitQueueDisparitySymptom(int... bufferSizes) {
     return createSymptom(SYMPTOM_WAIT_Q_DISPARITY, METRIC_BUFFER_SIZE, bufferSizes);
+  }
+
+  public static Symptom createLargeWaitQSymptom(int... bufferSizes) {
+    return createSymptom(SYMPTOM_LARGE_WAIT_Q, METRIC_BUFFER_SIZE, bufferSizes);
   }
 
   public static Symptom createBPSymptom(int... bpValues) {

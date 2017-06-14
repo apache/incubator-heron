@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 public class DataSkewDiagnoserTest {
   @Test
-  public void failsIfNoExeCountDisparity() {
+  public void failsIfNoDataSkewSymptom() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
     Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
     assertNull(result);
@@ -50,18 +50,5 @@ public class DataSkewDiagnoserTest {
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
         data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
-  }
-
-  static <T extends ISensor> T getMockSensor(String metric, T sensor, double... values) {
-    ComponentMetrics metrics = new ComponentMetrics("bolt");
-
-    for (int i = 0; i < values.length; i++) {
-      TestUtils.addInstanceMetric(metrics, i, values[i], metric);
-    }
-
-    Map<String, ComponentMetrics> resultMap = new HashMap<>();
-    resultMap.put("bolt", metrics);
-    when(sensor.get("bolt")).thenReturn(resultMap);
-    return sensor;
   }
 }

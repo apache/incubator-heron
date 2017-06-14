@@ -18,6 +18,7 @@ package com.twitter.heron.healthmgr.detectors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -28,18 +29,20 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LOAD_DISPARITY;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_DATA_SKEW;
 
-public class LoadDisparityDetector extends BaseDetector {
-  public static final String CONF_DISPARITY_RATIO = "LoadDisparityDetector.disparityRatio";
+public class DataSkewDetector extends BaseDetector {
+  public static final String CONF_SKEW_RATIO = "DataSkewDetector.skewRatio";
+
+  private static final Logger LOG = Logger.getLogger(DataSkewDetector.class.getName());
   private final ExecuteCountSensor exeCountSensor;
-  private final double disparityRatio;
+  private final double skewRatio;
 
   @Inject
-  LoadDisparityDetector(ExecuteCountSensor exeCountSensor,
-                        HealthPolicyConfig policyConfig) {
+  DataSkewDetector(ExecuteCountSensor exeCountSensor,
+                   HealthPolicyConfig policyConfig) {
     this.exeCountSensor = exeCountSensor;
-    disparityRatio = Double.valueOf(policyConfig.getConfig(CONF_DISPARITY_RATIO, "1.5"));
+    skewRatio = Double.valueOf(policyConfig.getConfig(CONF_SKEW_RATIO, "1.5"));
   }
 
   /**
@@ -53,8 +56,10 @@ public class LoadDisparityDetector extends BaseDetector {
     for (ComponentMetrics compMetrics : exeCountMetrics.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
       compStats.computeExeCountStats();
-      if (compStats.getExeCountMax() > disparityRatio * compStats.getExeCountMin()) {
-        result.add(new Symptom(SYMPTOM_LOAD_DISPARITY, compMetrics));
+      if (compStats.getExeCountMax() > skewRatio * compStats.getExeCountMin()) {
+        LOG.info(String.format("Detected data skew for %s, min = %f, max = %f",
+            compMetrics.getName(), compStats.getExeCountMin(), compStats.getExeCountMax()));
+        result.add(new Symptom(SYMPTOM_DATA_SKEW, compMetrics));
       }
     }
 

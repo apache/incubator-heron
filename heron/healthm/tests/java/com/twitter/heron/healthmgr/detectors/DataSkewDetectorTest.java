@@ -28,18 +28,18 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
-import static com.twitter.heron.healthmgr.detectors.LoadDisparityDetector.CONF_DISPARITY_RATIO;
+import static com.twitter.heron.healthmgr.detectors.DataSkewDetector.CONF_SKEW_RATIO;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class LoadDisparityDetectorTest {
+public class DataSkewDetectorTest {
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_DISPARITY_RATIO, "1.5")).thenReturn("2.5");
+    when(config.getConfig(CONF_SKEW_RATIO, "1.5")).thenReturn("2.5");
 
     ComponentMetrics compMetrics = new ComponentMetrics("bolt");
     compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT, 1000));
@@ -51,7 +51,7 @@ public class LoadDisparityDetectorTest {
     ExecuteCountSensor sensor = mock(ExecuteCountSensor.class);
     when(sensor.get()).thenReturn(topologyMetrics);
 
-    LoadDisparityDetector detector = new LoadDisparityDetector(sensor, config);
+    DataSkewDetector detector = new DataSkewDetector(sensor, config);
     List<Symptom> symptoms = detector.detect();
 
     assertEquals(1, symptoms.size());
@@ -64,7 +64,7 @@ public class LoadDisparityDetectorTest {
     sensor = mock(ExecuteCountSensor.class);
     when(sensor.get()).thenReturn(topologyMetrics);
 
-    detector = new LoadDisparityDetector(sensor, config);
+    detector = new DataSkewDetector(sensor, config);
     symptoms = detector.detect();
 
     assertEquals(0, symptoms.size());
@@ -73,7 +73,7 @@ public class LoadDisparityDetectorTest {
   @Test
   public void testReturnsMultipleComponents() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_DISPARITY_RATIO, "1.5")).thenReturn("2.5");
+    when(config.getConfig(CONF_SKEW_RATIO, "1.5")).thenReturn("2.5");
 
     ComponentMetrics compMetrics1 = new ComponentMetrics("bolt-1");
     compMetrics1.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT, 1000));
@@ -95,7 +95,7 @@ public class LoadDisparityDetectorTest {
     ExecuteCountSensor sensor = mock(ExecuteCountSensor.class);
     when(sensor.get()).thenReturn(topologyMetrics);
 
-    LoadDisparityDetector detector = new LoadDisparityDetector(sensor, config);
+    DataSkewDetector detector = new DataSkewDetector(sensor, config);
     List<Symptom> symptoms = detector.detect();
 
     assertEquals(2, symptoms.size());
