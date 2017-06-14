@@ -180,6 +180,11 @@ def run_test(topology_name, classpath, results_checker,
       # update state server to trigger more emits from the topology
       logging.info("Topology successfully updated, updating state server")
       update_state_server(http_server_host_port, topology_name, "topology_updated", "true")
+    elif autoRestartBackpressureContainerArgs:
+      # wait for the topology to be started before triggering an checking
+      poll_state_server(http_server_host_port, topology_name, "topology_started")
+      logging.info("Verified topology successfully started, proceeding to update it")
+      # wait for a backpressure cycle, which is 1 minute
 
     return results_checker.check_results()
 
