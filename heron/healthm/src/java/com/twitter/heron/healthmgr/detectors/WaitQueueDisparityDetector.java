@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -31,7 +32,7 @@ import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
 
-public class WaitQueueDisparityDetector extends BaseDetector {
+public class WaitQueueDisparityDetector implements IDetector {
   public static final String CONF_DISPARITY_RATIO = "WaitQueueDisparityDetector.disparityRatio";
 
   private static final Logger LOG = Logger.getLogger(WaitQueueDisparityDetector.class.getName());
@@ -46,8 +47,9 @@ public class WaitQueueDisparityDetector extends BaseDetector {
   }
 
   /**
-   * @return A collection of all components with instances with vastly different pending buffer
-   * sizes.
+   * A collection of all components where sizes of the pending buffers of instances of the component
+   * differ a lot.
+   * @return A collection of all components with disparate wait queue sizes
    */
   @Override
   public List<Symptom> detect() {

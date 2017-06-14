@@ -26,8 +26,10 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DIAGNOSIS_SLOW_INSTANCE;
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_SLOW_INSTANCE;
 
 public class DataSkewDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(DataSkewDiagnoser.class.getName());
@@ -65,12 +67,10 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
       if (compStats.getExeCountMax() < 1.10 * exeCount) {
         LOG.info(String.format("DataSkew: %s back-pressure(%s) and high execution count: %s",
             boltMetrics.getName(), bpValue, exeCount));
-        resultSymptom = new Symptom(this.getClass().getSimpleName(), mergedData);
+        resultSymptom = new Symptom(SYMPTOM_SLOW_INSTANCE, mergedData);
       }
     }
 
-    return resultSymptom != null ?
-        new Diagnosis(this.getClass().getSimpleName(), resultSymptom)
-        : null;
+    return resultSymptom != null ? new Diagnosis(DIAGNOSIS_SLOW_INSTANCE, resultSymptom) : null;
   }
 }

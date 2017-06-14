@@ -15,9 +15,12 @@
 package com.twitter.heron.healthmgr.common;
 
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.DataSkewDetector;
+import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
+import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
+import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
+import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 
 public interface HealthMgrConstants {
   int DEFAULT_METRIC_DURATION = 300;
@@ -45,6 +48,13 @@ public interface HealthMgrConstants {
   String SYMPTOM_DATA_SKEW = DataSkewDetector.class.getSimpleName();
   String SYMPTOM_WAIT_Q_DISPARITY = WaitQueueDisparityDetector.class.getSimpleName();
   String SYMPTOM_LARGE_WAIT_Q = LargeWaitQueueDetector.class.getSimpleName();
+  String SYMPTOM_UNDER_PROVISIONING = UnderProvisioningDiagnoser.class.getSimpleName();
+  String SYMPTOM_SLOW_INSTANCE = SlowInstanceDiagnoser.class.getSimpleName();
+
+  // diagnosis names
+  String DIAGNOSIS_UNDER_PROVISIONING = UnderProvisioningDiagnoser.class.getSimpleName();
+  String DIAGNOSIS_SLOW_INSTANCE = SlowInstanceDiagnoser.class.getSimpleName();
+  String DIAGNOSIS_DATA_SKEW = DataSkewDiagnoser.class.getSimpleName();
 
   void getType();
 }

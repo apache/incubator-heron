@@ -25,6 +25,9 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DIAGNOSIS_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_UNDER_PROVISIONING;
+
 public class UnderProvisioningDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
@@ -58,7 +61,7 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
         mergedData.getName(), compStats.getTotalBackpressure(), compStats.getBufferSizeMin()));
 
 
-    Symptom resultSymptom = new Symptom(this.getClass().getSimpleName(), mergedData);
-    return new Diagnosis(this.getClass().getSimpleName(), resultSymptom);
+    Symptom resultSymptom = new Symptom(SYMPTOM_UNDER_PROVISIONING, mergedData);
+    return new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING, resultSymptom);
   }
 }

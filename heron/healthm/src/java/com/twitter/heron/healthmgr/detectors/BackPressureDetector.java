@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -31,7 +32,7 @@ import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
 
-public class BackPressureDetector extends BaseDetector {
+public class BackPressureDetector implements IDetector {
   public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
 
   private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
@@ -46,8 +47,9 @@ public class BackPressureDetector extends BaseDetector {
   }
 
   /**
-   * @return A collection of all components with any instance causing backpressure. Normally there
+   * Detects all components initiating backpressure above the configured limit. Normally there
    * will be only one component
+   * @return A collection of all components causing backpressure.
    */
   @Override
   public List<Symptom> detect() {

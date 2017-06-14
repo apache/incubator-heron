@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -31,7 +32,7 @@ import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LARGE_WAIT_Q;
 
-public class LargeWaitQueueDetector extends BaseDetector {
+public class LargeWaitQueueDetector implements IDetector {
   public static final String CONF_SIZE_LIMIT = "LargeWaitQueueDetector.limit";
 
   private static final Logger LOG = Logger.getLogger(LargeWaitQueueDetector.class.getName());
@@ -46,7 +47,9 @@ public class LargeWaitQueueDetector extends BaseDetector {
   }
 
   /**
-   * @return A collection of all components with instances with large pending buffer queues.
+   * Detects all components unable to keep up with input load, hence having a large pending buffer
+   * or wait queue
+   * @return A collection of all components executing slower than input rate.
    */
   @Override
   public List<Symptom> detect() {
