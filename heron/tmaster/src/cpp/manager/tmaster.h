@@ -39,7 +39,6 @@ class TMetricsCollector;
 
 typedef std::map<std::string, StMgrState*> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
-typedef StMgrMap::const_iterator StMgrMapConstIter;
 
 class TMaster {
  public:

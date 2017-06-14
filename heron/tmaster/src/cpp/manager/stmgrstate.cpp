@@ -112,6 +112,11 @@ void StMgrState::NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   server_->SendMessage(connection_, message);
 }
 
+void StMgrState::NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request) {
+  LOG(INFO) << "Sending a new stateful checkpoint request to stmgr" << stmgr_->id();
+  server_->SendMessage(connection_, _request);
+}
+
 /*
 void
 StMgrState::AddAssignment(const std::vector<pair<string, sp_int32> >& _assignments,
