@@ -30,9 +30,9 @@ StatefulRestorer::~StatefulRestorer() { }
 
 void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, const StMgrMap& _stmgrs) {
   if (in_progress_) {
-    LOG(WARNING) << "Starting a Restore for checkpoint "
+    LOG(WARNING) << "Starting a restore for checkpoint "
                  << _checkpoint_id << " when we are already busy"
-                 << " within Restore of " << checkpoint_id_in_progress_
+                 << " within restore of " << checkpoint_id_in_progress_
                  << ". The restore result of " << checkpoint_id_in_progress_
                  << " will be abandoned";
   }
