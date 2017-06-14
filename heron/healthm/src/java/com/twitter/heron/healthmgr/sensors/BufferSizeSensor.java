@@ -45,10 +45,16 @@ public class BufferSizeSensor extends BaseSensor {
     this.metricsProvider = metricsProvider;
   }
 
+  @Override
   public Map<String, ComponentMetrics> get() {
-    return get(new String[0]);
+    return get(topologyProvider.getBoltNames());
   }
 
+  /**
+   * The buffer size as provided by tracker
+   * @param desiredBoltNames
+   * @return buffer size
+   */
   public Map<String, ComponentMetrics> get(String... desiredBoltNames) {
     Map<String, ComponentMetrics> result = new HashMap<>();
 
@@ -88,8 +94,8 @@ public class BufferSizeSensor extends BaseSensor {
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
 
-      ComponentMetrics ComponentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
-      result.put(boltComponent, ComponentMetrics);
+      ComponentMetrics componentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
+      result.put(boltComponent, componentMetrics);
     }
 
     return result;

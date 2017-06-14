@@ -48,7 +48,8 @@ public class BackPressureSensor extends BaseSensor {
   }
 
   /**
-   * @return the average (millis/sec) back-pressure caused by instances in the configured window
+   * Computes the average (millis/sec) back-pressure caused by instances in the configured window
+   * @return the average value
    */
   public Map<String, ComponentMetrics> get() {
     Map<String, ComponentMetrics> result = new HashMap<>();
@@ -80,8 +81,8 @@ public class BackPressureSensor extends BaseSensor {
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
 
-      ComponentMetrics ComponentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
-      result.put(boltComponent, ComponentMetrics);
+      ComponentMetrics componentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
+      result.put(boltComponent, componentMetrics);
     }
 
     return result;

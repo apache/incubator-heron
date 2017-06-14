@@ -19,7 +19,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -42,7 +41,7 @@ public class ExecuteCountSensor extends BaseSensor {
     return get(boltNames);
   }
 
-  public Map<String, ComponentMetrics> get(String ... boltNames) {
+  public Map<String, ComponentMetrics> get(String... boltNames) {
     return metricsProvider.getComponentMetrics(EXE_COUNT,
         HealthMgrConstants.DEFAULT_METRIC_DURATION,
         boltNames);
