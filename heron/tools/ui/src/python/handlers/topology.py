@@ -21,6 +21,9 @@ import tornado.gen
 import base
 import common
 import heron.tools.common.src.python.access as access
+import heron.common.src.python.utils.log as log
+
+Log = log.Log
 
 ################################################################################
 # pylint: disable=abstract-method
@@ -257,6 +260,9 @@ class ContainerFileDownloadHandler(base.BaseHandler):
   def initialize(self, baseUrl):
     self.baseUrl = baseUrl
 
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
     '''
@@ -284,19 +290,18 @@ class ContainerFileDownloadHandler(base.BaseHandler):
 
     # 4 MB gives good enough chunk size giving good speed for small files.
     # If files are large, a single threaded download may not be enough.
-    length = 4 * 1024 * 1024
-    offset = 0
-    while True:
-      response = yield access.get_container_file_data(cluster, environ, topology, container,
-                                                      path, offset, length)
-      if self.connection_closed or 'data' not in response or len(response['data']) < length:
-        break
-      offset += length
-      self.write(response['data'])
+    file_download_url = access.get_container_file_download_url(cluster, environ,
+                                                               topology, container, path)
+
+    Log.debug("file download url: %s", str(file_download_url))
+    def streaming_callback(chunk):
+      self.write(chunk)
       self.flush()
 
-    self.write(response['data'])
+    http_client = tornado.httpclient.AsyncHTTPClient()
+    yield http_client.fetch(file_download_url, streaming_callback=streaming_callback)
     self.finish()
+
 
   def on_connection_close(self):
     '''
