@@ -34,4 +34,6 @@ public interface HealthMgrConstants {
   String HEALTH_POLICIES = "heron.class.health.policies";
   String HEALTH_POLICY_CLASS = "health.policy.class";
   String HEALTH_POLICY_INTERVAL = "health.policy.interval.ms";
+
+  void getType();
 }

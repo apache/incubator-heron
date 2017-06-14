@@ -1,4 +1,4 @@
-// Copyright 2016 Microsoft. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,9 +71,9 @@ public class HealthManager {
   private List<IHealthPolicy> healthPolicies = new ArrayList<>();
   private HealthPolicyConfigReader policyConfigReader;
 
-  public HealthManager(Config config, String trackerURL) {
+  public HealthManager(Config config, String trackerUrl) {
     this.config = config;
-    this.trackerURL = trackerURL;
+    this.trackerURL = trackerUrl;
   }
 
   public static void main(String[] args) throws Exception {
@@ -103,7 +103,7 @@ public class HealthManager {
     String overrideConfigFile = cmd.getOptionValue("override_config_file");
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
-    String trackerURL = cmd.getOptionValue("trackerURL", "http://localhost:8888");
+    String trackerUrl = cmd.getOptionValue("trackerURL", "http://localhost:8888");
     Boolean verbose = cmd.hasOption("verbose");
 
     // build the final config by expanding all the variables
@@ -115,7 +115,7 @@ public class HealthManager {
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
-    HealthManager healthManager = new HealthManager(config, trackerURL);
+    HealthManager healthManager = new HealthManager(config, trackerUrl);
 
     LOG.info("Initializing health manager");
     healthManager.initialize();
@@ -175,13 +175,13 @@ public class HealthManager {
     return new HealthPolicyConfigReader(policyConfigFile);
   }
 
-  private AbstractModule constructConfigModule(final String trackerURL) {
+  private AbstractModule constructConfigModule(final String trackerUrl) {
     return new AbstractModule() {
       @Override
       protected void configure() {
         bind(String.class)
             .annotatedWith(Names.named(HealthMgrConstants.CONF_TRACKER_URL))
-            .toInstance(trackerURL);
+            .toInstance(trackerUrl);
         bind(String.class)
             .annotatedWith(Names.named(HealthMgrConstants.CONF_TOPOLOGY_NAME))
             .toInstance(Context.topologyName(config));
