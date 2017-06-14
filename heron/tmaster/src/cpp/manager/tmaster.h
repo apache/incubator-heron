@@ -37,6 +37,9 @@ class StatsInterface;
 class TMasterServer;
 class TMetricsCollector;
 
+typedef std::map<std::string, StMgrState*> StMgrMap;
+typedef StMgrMap::iterator StMgrMapIter;
+
 class TMaster {
  public:
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
@@ -115,8 +118,6 @@ class TMaster {
   void UpdateProcessMetrics(EventLoop::Status);
 
   // map of active stmgr id to stmgr state
-  typedef std::map<std::string, StMgrState*> StMgrMap;
-  typedef StMgrMap::iterator StMgrMapIter;
   StMgrMap stmgrs_;
 
   // map of connection to stmgr id
