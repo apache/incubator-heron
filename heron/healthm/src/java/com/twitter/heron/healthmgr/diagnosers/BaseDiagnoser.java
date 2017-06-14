@@ -15,26 +15,31 @@
 package com.twitter.heron.healthmgr.diagnosers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LOAD_DISPARITY;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.*;
 
 public abstract class BaseDiagnoser implements IDiagnoser {
   protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
     return getFilteredSymptoms(symptoms, SYMPTOM_BACK_PRESSURE);
   }
 
-  protected List<Symptom> getLoadDisparitySymptoms(List<Symptom> symptoms) {
-    return getFilteredSymptoms(symptoms, SYMPTOM_LOAD_DISPARITY);
+  protected Map<String, ComponentMetrics> getDataSkewComponents(List<Symptom> symptoms) {
+    return getFilteredComponents(symptoms, SYMPTOM_DATA_SKEW);
   }
 
-  protected List<Symptom> getWaitQDisparitySymptoms(List<Symptom> symptoms) {
-    return getFilteredSymptoms(symptoms, SYMPTOM_WAIT_Q_DISPARITY);
+  protected Map<String, ComponentMetrics> getWaitQDisparityComponents(List<Symptom> symptoms) {
+    return getFilteredComponents(symptoms, SYMPTOM_WAIT_Q_DISPARITY);
+  }
+
+  protected Map<String, ComponentMetrics> getLargeWaitQComponents(List<Symptom> symptoms) {
+    return getFilteredComponents(symptoms, SYMPTOM_LARGE_WAIT_Q);
   }
 
   private List<Symptom> getFilteredSymptoms(List<Symptom> symptoms, String type) {
@@ -42,6 +47,16 @@ public abstract class BaseDiagnoser implements IDiagnoser {
     for (Symptom symptom : symptoms) {
       if (symptom.getName().equals(type)) {
         result.add(symptom);
+      }
+    }
+    return result;
+  }
+
+  private Map<String, ComponentMetrics> getFilteredComponents(List<Symptom> symptoms, String type) {
+    Map<String, ComponentMetrics> result = new HashMap<>();
+    for (Symptom symptom : symptoms) {
+      if (symptom.getName().equals(type)) {
+        result.putAll(symptom.getComponents());
       }
     }
     return result;

@@ -18,6 +18,7 @@ package com.twitter.heron.healthmgr.detectors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -32,6 +33,8 @@ import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK
 
 public class BackPressureDetector extends BaseDetector {
   public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
+
+  private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
   private final BackPressureSensor bpSensor;
   private final int noiseFilterMillis;
 
@@ -55,6 +58,8 @@ public class BackPressureDetector extends BaseDetector {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
       compStats.computeBpStats();
       if (compStats.getTotalBackpressure() > noiseFilterMillis) {
+        LOG.info(String.format("Detected back pressure for %s, total back pressure is %f",
+            compMetrics.getName(), compStats.getTotalBackpressure()));
         result.add(new Symptom(SYMPTOM_BACK_PRESSURE, compMetrics));
       }
     }

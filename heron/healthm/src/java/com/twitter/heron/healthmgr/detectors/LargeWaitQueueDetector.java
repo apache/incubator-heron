@@ -29,25 +29,24 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LARGE_WAIT_Q;
 
-public class WaitQueueDisparityDetector extends BaseDetector {
-  public static final String CONF_DISPARITY_RATIO = "WaitQueueDisparityDetector.disparityRatio";
+public class LargeWaitQueueDetector extends BaseDetector {
+  public static final String CONF_SIZE_LIMIT = "LargeWaitQueueDetector.limit";
 
-  private static final Logger LOG = Logger.getLogger(WaitQueueDisparityDetector.class.getName());
+  private static final Logger LOG = Logger.getLogger(LargeWaitQueueDetector.class.getName());
   private final BufferSizeSensor pendingBufferSensor;
-  private final double disparityRatio;
+  private final double sizeLimit;
 
   @Inject
-  WaitQueueDisparityDetector(BufferSizeSensor pendingBufferSensor,
-                             HealthPolicyConfig policyConfig) {
+  LargeWaitQueueDetector(BufferSizeSensor pendingBufferSensor,
+                         HealthPolicyConfig policyConfig) {
     this.pendingBufferSensor = pendingBufferSensor;
-    disparityRatio = Double.valueOf(policyConfig.getConfig(CONF_DISPARITY_RATIO, "20"));
+    sizeLimit = Double.valueOf(policyConfig.getConfig(CONF_SIZE_LIMIT, "1000"));
   }
 
   /**
-   * @return A collection of all components with instances with vastly different pending buffer
-   * sizes.
+   * @return A collection of all components with instances with large pending buffer queues.
    */
   @Override
   public List<Symptom> detect() {
@@ -57,11 +56,10 @@ public class WaitQueueDisparityDetector extends BaseDetector {
     for (ComponentMetrics compMetrics : bufferSizes.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
       compStats.computeBufferSizeStats();
-      if (compStats.getBufferSizeMax() > disparityRatio * compStats.getBufferSizeMin()) {
-        LOG.info(String.format("Detected wait queue disparity for %s, min = %f, max = %f",
-            compMetrics.getName(), compStats.getBufferSizeMin(), compStats.getBufferSizeMax()
-        ));
-        result.add(new Symptom(SYMPTOM_WAIT_Q_DISPARITY, compMetrics));
+      if (compStats.getBufferSizeMin() > sizeLimit) {
+        LOG.info(String.format("Detected large wait queues for %s, smallest queue is %f",
+            compMetrics.getName(), compStats.getBufferSizeMin()));
+        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q, compMetrics));
       }
     }
 

@@ -16,6 +16,7 @@
 package com.twitter.heron.healthmgr.diagnosers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.microsoft.dhalion.detector.Symptom;
@@ -34,10 +35,9 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    List<Symptom> loadDisparitySymptoms = getLoadDisparitySymptoms(symptoms);
+    Map<String, ComponentMetrics> dataSkewComponents = getDataSkewComponents(symptoms);
 
-    // verify execute count disparity and back pressure for the same component exists
-    if (bpSymptoms.isEmpty() || loadDisparitySymptoms.isEmpty()) {
+    if (bpSymptoms.isEmpty() || dataSkewComponents.isEmpty()) {
       // Since there is no back pressure or disparate execute count, no action is needed
       return null;
     } else if (bpSymptoms.size() > 1) {
@@ -46,15 +46,10 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
     }
     ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    ComponentMetrics exeCountMetrics = null;
-    for (Symptom symptom : loadDisparitySymptoms) {
-      if (symptom.getComponent().getName().equals(bpMetrics.getName())) {
-        exeCountMetrics = symptom.getComponent();
-        break;
-      }
-    }
+    // verify data skew and back pressure for the same component exists
+    ComponentMetrics exeCountMetrics = dataSkewComponents.get(bpMetrics.getName());
     if (exeCountMetrics == null) {
-      // no execute count disparity for the component with back pressure. This is not skew
+      // no data skew for the component with back pressure. This is not a data skew case
       return null;
     }
 

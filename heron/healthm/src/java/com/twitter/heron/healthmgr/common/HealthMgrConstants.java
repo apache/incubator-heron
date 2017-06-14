@@ -15,7 +15,8 @@
 package com.twitter.heron.healthmgr.common;
 
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.detectors.LoadDisparityDetector;
+import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
+import com.twitter.heron.healthmgr.detectors.DataSkewDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
 
 public interface HealthMgrConstants {
@@ -41,8 +42,9 @@ public interface HealthMgrConstants {
 
   // symtom names
   String SYMPTOM_BACK_PRESSURE = BackPressureDetector.class.getSimpleName();
-  String SYMPTOM_LOAD_DISPARITY = LoadDisparityDetector.class.getSimpleName();
+  String SYMPTOM_DATA_SKEW = DataSkewDetector.class.getSimpleName();
   String SYMPTOM_WAIT_Q_DISPARITY = WaitQueueDisparityDetector.class.getSimpleName();
+  String SYMPTOM_LARGE_WAIT_Q = LargeWaitQueueDetector.class.getSimpleName();
 
   void getType();
 }
