@@ -47,6 +47,7 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
 
   void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
   void SetMetricsCacheLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
+  void SetPackingPlanWatch(const std::string& _topology_name, VCallback<> _watcher);
 
   // implement the functions
   void GetTMasterLocation(const std::string& _topology_name,
@@ -74,6 +75,12 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
                        VCallback<proto::system::StatusCode> _cb);
   void GetPhysicalPlan(const std::string& _topology_name, proto::system::PhysicalPlan* _return,
                        VCallback<proto::system::StatusCode> _cb);
+
+  void CreatePackingPlan(const std::string& _topology_name,
+                         const proto::system::PackingPlan& _packingPlan,
+                         VCallback<proto::system::StatusCode> _cb);
+  void GetPackingPlan(const std::string& _topology_name, proto::system::PackingPlan* _return,
+                      VCallback<proto::system::StatusCode> _cb);
 
   void CreateExecutionState(const proto::system::ExecutionState& _pplan,
                             VCallback<proto::system::StatusCode> _cb);
@@ -121,6 +128,8 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
                             EventLoop::Status);
   void CheckMetricsCacheLocation(std::string _topology_name, time_t _last_change,
                                  VCallback<> _watcher, EventLoop::Status);
+  void CheckPackingPlan(std::string _topology_name, time_t _last_change,
+                        VCallback<> _watcher, EventLoop::Status);
 
   // Hold the EventLoop for scheduling callbacks
   EventLoop* eventLoop_;
