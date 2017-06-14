@@ -47,6 +47,8 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_UNDER_PROVISIONING;
+
 public class ScaleUpResolver implements IResolver {
   private static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
   private static final Logger LOG = Logger.getLogger(ScaleUpResolver.class.getName());
@@ -73,7 +75,7 @@ public class ScaleUpResolver implements IResolver {
   @Override
   public List<Action> resolve(List<Diagnosis> diagnosis) {
     for (Diagnosis diagnoses : diagnosis) {
-      Symptom bpSymptom = diagnoses.getSymptoms().get(BACK_PRESSURE);
+      Symptom bpSymptom = diagnoses.getSymptoms().get(SYMPTOM_UNDER_PROVISIONING);
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
         // nothing to fix as there is no back pressure
         continue;
@@ -102,8 +104,8 @@ public class ScaleUpResolver implements IResolver {
 
       LOG.info("Sending Updating topology request: " + updateTopologyRequest);
       if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-        throw new RuntimeException(String.format("Failed to update topology with Scheduler, " +
-            "updateTopologyRequest=%s", updateTopologyRequest));
+        throw new RuntimeException(String.format("Failed to update topology with Scheduler, "
+            + "updateTopologyRequest=%s", updateTopologyRequest));
       }
 
       TopologyUpdate action = new TopologyUpdate();
