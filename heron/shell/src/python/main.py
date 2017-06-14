@@ -33,7 +33,7 @@ app = tornado.web.Application([
     (r"^/file/(.*)", handlers.FileHandler),
     (r"^/filedata/(.*)", handlers.FileDataHandler),
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
-    (r"^/download/(.*)", handlers.DownloadHandler, {"path":"."}),
+    (r"^/download/(.*)", handlers.DownloadHandler),
     (r"^/killexecutor", handlers.KillExecutorHandler),
 ])
 
