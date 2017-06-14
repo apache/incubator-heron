@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -31,7 +32,7 @@ import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_DATA_SKEW;
 
-public class DataSkewDetector extends BaseDetector {
+public class DataSkewDetector implements IDetector {
   public static final String CONF_SKEW_RATIO = "DataSkewDetector.skewRatio";
 
   private static final Logger LOG = Logger.getLogger(DataSkewDetector.class.getName());
@@ -46,7 +47,8 @@ public class DataSkewDetector extends BaseDetector {
   }
 
   /**
-   * @return A collection of all components with instances with vastly different execute counts.
+   * Detects components experiencing data skew, instances with vastly different execute counts.
+   * @return A collection of affected components
    */
   @Override
   public List<Symptom> detect() {

@@ -23,7 +23,10 @@ import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.*;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_DATA_SKEW;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LARGE_WAIT_Q;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
 
 public abstract class BaseDiagnoser implements IDiagnoser {
   protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {

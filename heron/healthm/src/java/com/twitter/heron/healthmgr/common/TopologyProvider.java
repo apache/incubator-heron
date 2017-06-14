@@ -1,4 +1,4 @@
-// Copyright 2016 Microsoft. All rights reserved.
+// Copyright 2016 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -83,9 +83,9 @@ public class TopologyProvider implements Provider<Topology>, EventHandler<Topolo
    * @return array of all bolt names
    */
   public String[] getBoltNames() {
-    Topology topology = get();
+    Topology localTopology = get();
     ArrayList<String> boltNames = new ArrayList<>();
-    for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
+    for (TopologyAPI.Bolt bolt : localTopology.getBoltsList()) {
       boltNames.add(bolt.getComp().getName());
     }
 

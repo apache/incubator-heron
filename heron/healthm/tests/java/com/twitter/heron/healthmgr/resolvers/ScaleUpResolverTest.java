@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.microsoft.dhalion.resolver.Action;
@@ -41,8 +41,16 @@ import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.TopologyTests;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_UNDER_PROVISIONING;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ScaleUpResolverTest {
   static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
@@ -61,7 +69,7 @@ public class ScaleUpResolverTest {
     when(scheduler.updateTopology(any(UpdateTopologyRequest.class))).thenReturn(true);
 
     ComponentMetrics metrics = new ComponentMetrics("bolt", "i1", BACK_PRESSURE, 123);
-    Symptom symptom = new Symptom(BACK_PRESSURE, metrics);
+    Symptom symptom = new Symptom(SYMPTOM_UNDER_PROVISIONING, metrics);
     List<Diagnosis> diagnosis = new ArrayList<>();
     diagnosis.add(new Diagnosis("test", symptom));
 
