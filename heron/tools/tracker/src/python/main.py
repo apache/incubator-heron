@@ -51,6 +51,8 @@ class Application(tornado.web.Application):
         (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":self.tracker}),
         (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler,
          {"tracker":self.tracker}),
+        (r"/topologies/containerfiledownload", handlers.ContainerFileDownloadHandler,
+         {"tracker":self.tracker}),
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
         (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
