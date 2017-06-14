@@ -254,6 +254,8 @@ class ContainerFileDownloadHandler(base.BaseHandler):
   """
   Responsible for downloading the file from a container.
   """
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
