@@ -98,6 +98,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
 
   assignment_in_progress_ = false;
   do_reassign_ = false;
+  is_master_ = false;
 
   master_establish_attempts_ = 0;
   tmaster_location_ = new proto::tmaster::TMasterLocation();
@@ -182,12 +183,17 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
       EstablishTMaster(EventLoop::TIMEOUT_EVENT);
     } else {
       if (packing_plan_ != newPackingPlan) {
-        LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TMaster to "
-                  << "reset internal state. Exiting";
-        state_mgr_->DeletePhysicalPlan(tmaster_location_->topology_name(),
-          [this](proto::system::StatusCode status) {
-            ::exit(1);
-          });
+        if (is_master_) {
+          LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TMaster to "
+                    << "reset internal state. Exiting.";
+          state_mgr_->DeletePhysicalPlan(tmaster_location_->topology_name(),
+            [this](proto::system::StatusCode status) {
+              ::exit(1);
+            });
+        } else {
+          LOG(INFO) << "Packing plan changed but this process might not be the master, so not "
+                    << "deleting physical plan. Killing TMaster to reset internal state. Exiting.";
+        }
       } else {
         LOG(INFO) << "New Packing plan matches existing one.";
       }
@@ -277,6 +283,8 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
 
   // We are now the master
   LOG(INFO) << "Successfully set ourselves as master\n";
+  is_master_ = true;
+
   // Lets now read the topology
   auto cb = [this](proto::system::StatusCode code) { this->GetTopologyDone(code); };
 

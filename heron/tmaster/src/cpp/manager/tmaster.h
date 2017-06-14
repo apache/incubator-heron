@@ -150,6 +150,7 @@ class TMaster {
   // we set this to true
   bool assignment_in_progress_;
   bool do_reassign_;
+  bool is_master_;
 
   // State information
   std::string zk_hostport_;
