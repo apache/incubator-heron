@@ -93,6 +93,3 @@ class Config(object):
   def config_str(self, config):
     keys = ("type", "name", "hostport", "rootpath", "tunnelhost")
     return "".join("\t{}: {}\n".format(k, config[k]) for k in keys if k in config).rstrip()
-
-
-

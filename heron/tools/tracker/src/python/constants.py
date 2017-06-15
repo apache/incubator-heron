@@ -20,7 +20,10 @@ import heron.tools.common.src.python.utils.config as common_config
 
 # Version Information
 
-API_VERSION = common_config.get_version_number()
+try:
+  API_VERSION = common_config.get_version_number()
+except:
+  API_VERSION = ""
 
 
 # Handler Constants
@@ -64,6 +67,9 @@ HTTP_TIMEOUT = 5 #seconds
 
 # default parameter - port for the tracker to listen on
 DEFAULT_PORT = 8888
+
+# default config file to read
+DEFAULT_CONFIG_FILE = "heron_tracker.yaml"
 
 # default paramater - type of state manaager
 DEFAULT_STATE_MANAGER_TYPE = "file"

@@ -151,11 +151,14 @@ def get_heron_tracker_conf_dir():
   conf_path = os.path.join(get_heron_tracker_dir(), CONF_DIR)
   return conf_path
 
-
 def parse_config_file(config_file):
+  """
+  This will parse the config file for the tracker
+  :return: the config or None if the file is not found
+  """
   expanded_config_file_path = os.path.expanduser(config_file)
-  assert os.path.lexists(expanded_config_file_path), \
-    "Config file does not exists: %s" % (config_file)
+  if not os.path.lexists(expanded_config_file_path):
+    return None
 
   configs = {}
   # Read the configuration file

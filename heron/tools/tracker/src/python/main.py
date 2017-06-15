@@ -29,7 +29,7 @@ import heron.common.src.python.utils.log as log
 from heron.tools.tracker.src.python import constants
 from heron.tools.tracker.src.python import handlers
 from heron.tools.tracker.src.python import utils
-from heron.tools.tracker.src.python.config import Config
+from heron.tools.tracker.src.python.config import Config, STATEMGRS_KEY
 from heron.tools.tracker.src.python.tracker import Tracker
 
 Log = log.Log
@@ -126,43 +126,39 @@ def add_titles(parser):
 
 def add_arguments(parser):
   """ add arguments """
+  default_config_file = os.path.join(
+      utils.get_heron_tracker_conf_dir(), constants.DEFAULT_CONFIG_FILE)
 
   parser.add_argument(
       '--config-file',
-      metavar="""(a string; path to config file;)
-      if a config file is provided the following args are ignored:
-      [--type, --name, --rootpath, --tunnelhost, --hostport]
-      """)
+      metavar='(a string; path to config file; default: "' + default_config_file + '")',
+      default=default_config_file)
 
   parser.add_argument(
       '--type',
-      metavar='(an string; type of state manager (zookeeper or file, etc.); default: ' \
+      metavar='(an string; type of state manager (zookeeper or file, etc.); example: ' \
         + str(constants.DEFAULT_STATE_MANAGER_TYPE) + ')',
-      default=constants.DEFAULT_STATE_MANAGER_TYPE,
       choices=["file", "zookeeper"])
 
   parser.add_argument(
       '--name',
-      metavar='(an string; name to be used for the state manager; default: ' \
-        + str(constants.DEFAULT_STATE_MANAGER_NAME) + ')',
-      default=constants.DEFAULT_STATE_MANAGER_NAME)
+      metavar='(an string; name to be used for the state manager; example: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_NAME) + ')')
 
   parser.add_argument(
       '--rootpath',
-      metavar='(an string; where all the states are stored; default: ' \
-        + str(constants.DEFAULT_STATE_MANAGER_ROOTPATH) + ')',
-      default=constants.DEFAULT_STATE_MANAGER_ROOTPATH)
+      metavar='(an string; where all the states are stored; example: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_ROOTPATH) + ')')
 
   parser.add_argument(
       '--tunnelhost',
-      metavar='(an string; if ssh tunneling needs to be established to connect to it; default: ' \
-        + str(constants.DEFAULT_STATE_MANAGER_TUNNELHOST) + ')',
-      default=constants.DEFAULT_STATE_MANAGER_TUNNELHOST)
+      metavar='(an string; if ssh tunneling needs to be established to connect to it; example: ' \
+        + str(constants.DEFAULT_STATE_MANAGER_TUNNELHOST) + ')')
 
   parser.add_argument(
       '--hostport',
       metavar='(an string; only used to connect to zk, must be of the form \'host:port\';'\
-      ' default: ' + str(constants.DEFAULT_STATE_MANAGER_HOSTPORT) + ')')
+      ' example: ' + str(constants.DEFAULT_STATE_MANAGER_HOSTPORT) + ')')
 
   parser.add_argument(
       '--port',
@@ -213,21 +209,23 @@ def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
 
-
 def create_tracker_config(namespace):
-  if namespace["config_file"]:
-    config = utils.parse_config_file(namespace["config_file"])
-    return config
-  else:
-    config = dict(
-        type=namespace["type"],
-        name=namespace["name"],
-        rootpath=namespace["rootpath"],
-        tunnelhost=namespace["tunnelhost"])
-    if namespace["hostport"]:
-      config["hostport"] = namespace["hostport"]
+  # try to parse the config file if we find one
+  config_file = namespace["config_file"]
+  config = utils.parse_config_file(config_file)
+  if config is None:
+    Log.debug("Config file does not exists: %s" % config_file)
+    config = {STATEMGRS_KEY:[{}]}
 
-    return dict(statemgrs=[config])
+  # update the config if we have any flags
+  config_flags = ["type", "name", "rootpath", "tunnelhost", "hostport"]
+  config_to_update = config[STATEMGRS_KEY][0]
+  for flag in config_flags:
+    value = namespace.get(flag, None)
+    if value is not None:
+      config_to_update[flag] = value
+
+  return config
 
 def main():
   """ main """
