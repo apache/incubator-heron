@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.integration_test.common.AbstractTestTopology;
 import com.twitter.heron.integration_test.common.bolt.BackpressureBolt;
-import com.twitter.heron.integration_test.common.bolt.IdentityBolt;
 import com.twitter.heron.integration_test.common.spout.ABSpout;
 import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 

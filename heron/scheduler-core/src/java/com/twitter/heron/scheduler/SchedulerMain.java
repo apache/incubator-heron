@@ -222,7 +222,7 @@ public class SchedulerMain {
         cmd.getOptionValue("topology_bin"),
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
-        cmd.hasOption("verbose"),
+        true, // cmd.hasOption("verbose"),
         schedulerProperties,
         cmd.getOptionValue("auto_heal_window"),
         cmd.getOptionValue("auto_heal_interval"));

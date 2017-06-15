@@ -154,16 +154,27 @@ def _frequency_dict(values):
   return frequency
 
 def run_test(topology_name, classpath, results_checker,
-             params, http_server_host_port, update_args, extra_topology_args):
+             params, http_server_host_port, update_args,
+             extra_topology_args, auto_restart_args=None):
   ''' Runs the test for one topology '''
 
   #submit topology
   try:
     args = "-r http://%s/results -t %s %s" %\
            (http_server_host_port, topology_name, extra_topology_args)
+
+    config_property = ""
+    if params.release_package_uri is not None:
+      config_property = "%s --config-property heron.package.core.uri='%s'" %\
+                        (config_property, params.release_package_uri)
+    if auto_restart_args is not None:
+      config_property = "%s --config-property heron.config.auto_heal_window='1'" %\
+                        (config_property)
+      config_property = "%s --config-property heron.config.auto_heal_interval='1'" %\
+                        (config_property)
+
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
-                    params.env, params.tests_bin_path, classpath,
-                    params.release_package_uri, args)
+                    params.env, params.tests_bin_path, classpath, config_property, args)
   except Exception as e:
     raise status.TestFailure("Failed to submit %s topology" % topology_name, e)
 
@@ -180,7 +191,7 @@ def run_test(topology_name, classpath, results_checker,
       # update state server to trigger more emits from the topology
       logging.info("Topology successfully updated, updating state server")
       update_state_server(http_server_host_port, topology_name, "topology_updated", "true")
-    elif autoRestartBackpressureContainerArgs:
+    elif auto_restart_args:
       # wait for the topology to be started before triggering an checking
       poll_state_server(http_server_host_port, topology_name, "topology_started")
       logging.info("Verified topology successfully started, proceeding to update it")
@@ -238,17 +249,14 @@ def cluster_token(cluster, role, env):
   return "%s/%s/%s" % (cluster, role, env)
 
 def submit_topology(heron_cli_path, cli_config_path, cluster, role,
-                    env, jar_path, classpath, pkg_uri, args=None):
+                    env, jar_path, classpath, config_property, args):
   ''' Submit topology using heron-cli '''
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit --config-path=%s %s %s %s %s" %\
-        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
+  cmd = "%s submit %s --config-path=%s %s %s %s %s" %\
+        (heron_cli_path, config_property, cli_config_path, cluster_token(cluster, role, env),
          jar_path, classpath, args)
-
-  if pkg_uri is not None:
-    cmd = "%s --config-property heron.package.core.uri='%s'" %(cmd, pkg_uri)
 
   logging.info("Submitting topology: %s", cmd)
 
@@ -321,10 +329,13 @@ def run_tests(conf, args):
     topology_args = extra_topology_args
     if "updateArgs" in topology_conf:
       update_args = topology_conf["updateArgs"]
+    auto_restart_args = None
+    if "autoRestartBackpressureContainerArgs" in topology_conf:
+      auto_restart_args = topology_conf["autoRestartBackpressureContainerArgs"]
 
     if "topologyArgs" in topology_conf:
-      if topology_conf["topologyArgs"] == "emit_util" and update_args == "" \
-      and ("autoRestartBackpressureContainerArgs" not in topology_conf):
+      if topology_conf["topologyArgs"] == "emit_util" \
+      and update_args == "" and auto_restart_args is None:
         raise ValueError("Specifying a test with emit_until spout wrapper without updateArgs "
                          + "or autoRestartBackpressureContainerArgs "
                          + "will cause the spout to emit indefinitely. Not running topology "
@@ -341,7 +352,7 @@ def run_tests(conf, args):
     start_secs = int(time.time())
     try:
       result = run_test(topology_name, classpath, results_checker,
-                        args, http_server_host_port, update_args, topology_args)
+                        args, http_server_host_port, update_args, topology_args, auto_restart_args)
       test_tuple = (topology_name, int(time.time()) - start_secs)
       if isinstance(result, status.TestSuccess):
         successes += [test_tuple]
