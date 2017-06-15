@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get -y install python ; apt-get clean all
 RUN apt-get -y install unzip ; apt-get clean all
 RUN apt-get -y install software-properties-common ; apt-get clean all
+RUN apt-get -y install curl ; apt-get clean all
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
 RUN apt-get -y install openjdk-8-jdk; apt-get clean all
