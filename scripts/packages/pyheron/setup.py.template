@@ -34,7 +34,6 @@ setup(
     'Development Status :: 3 - Alpha',
 
     'Intended Audience :: Developers',
-    'Topic :: Real Time streaming',
 
     'Programming Language :: Python :: 2.7',
   ],
