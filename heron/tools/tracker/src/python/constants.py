@@ -23,6 +23,7 @@ import heron.tools.common.src.python.utils.config as common_config
 API_VERSION = common_config.get_version_number()
 
 
+
 # Handler Constants
 
 # Parameter Names
@@ -67,3 +68,18 @@ DEFAULT_PORT = 8888
 
 # default config file to read
 DEFAULT_CONFIG_FILE = "heron_tracker.yaml"
+
+# default paramater - type of state manaager
+DEFAULT_STATE_MANAGER_TYPE = "file"
+
+# default parameter - name to be used for the state manager
+DEFAULT_STATE_MANAGER_NAME = "local"
+
+# default parameter - where all the states are stored
+DEFAULT_STATE_MANAGER_ROOTPATH = "~/.herondata/repository/state/local"
+
+# default parameter - if ssh tunneling needs to be established to connect to it
+DEFAULT_STATE_MANAGER_TUNNELHOST = "localhost"
+
+# default parameter - only used to connect to zk, must be of the form host:port
+DEFAULT_STATE_MANAGER_HOSTPORT = "localhost:2181"

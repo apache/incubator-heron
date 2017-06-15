@@ -98,3 +98,10 @@ class Config(object):
       formatted_viz_url = formatted_viz_url.replace(key, value)
 
     return formatted_viz_url
+
+  def __str__(self):
+    return "".join((self.config_str(c) for c in self.configs[STATEMGRS_KEY]))
+
+  def config_str(self, config):
+    keys = ("type", "name", "hostport", "rootpath", "tunnelhost")
+    return "".join("\t{}: {}\n".format(k, config[k]) for k in keys if k in config).rstrip()
