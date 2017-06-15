@@ -23,9 +23,10 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DEFAULT_METRIC_DURATION;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,7 +52,7 @@ public class ExecuteCountSensorTest {
     result.put("bolt-2", metrics);
 
     when(metricsProvider
-        .getComponentMetrics(HealthMgrConstants.METRIC_EXE_COUNT, 60, "bolt-1", "bolt-2"))
+        .getComponentMetrics(METRIC_EXE_COUNT, DEFAULT_METRIC_DURATION, "bolt-1", "bolt-2"))
         .thenReturn(result);
 
     ExecuteCountSensor executeCountSensor = new ExecuteCountSensor(topologyProvider, metricsProvider);
@@ -59,21 +60,21 @@ public class ExecuteCountSensorTest {
     assertEquals(2, componentMetrics.size());
     assertEquals(123, componentMetrics.get("bolt-1")
         .getMetrics("container_1_bolt-1_1")
-        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
+        .getMetricValueSum(METRIC_EXE_COUNT).intValue());
     assertEquals(345, componentMetrics.get("bolt-1")
         .getMetrics("container_1_bolt-1_2")
-        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
+        .getMetricValueSum(METRIC_EXE_COUNT).intValue());
     assertEquals(321, componentMetrics.get("bolt-2")
         .getMetrics("container_1_bolt-2_3")
-        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
+        .getMetricValueSum(METRIC_EXE_COUNT).intValue());
     assertEquals(543, componentMetrics.get("bolt-2")
         .getMetrics("container_1_bolt-2_4")
-        .getMetricValue(HealthMgrConstants.METRIC_EXE_COUNT).intValue());
+        .getMetricValueSum(METRIC_EXE_COUNT).intValue());
   }
 
   private InstanceMetrics createTestInstanceMetric(String name, int value) {
     InstanceMetrics instanceMetrics = new InstanceMetrics(name);
-    instanceMetrics.addMetric(HealthMgrConstants.METRIC_EXE_COUNT, value);
+    instanceMetrics.addMetric(METRIC_EXE_COUNT, value);
     return instanceMetrics;
   }
 }

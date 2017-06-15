@@ -45,7 +45,7 @@ public class ComponentMetricsHelper {
 
   public void computeBpStats() {
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      double bpValue = instanceMetrics.getMetricValue(METRIC_BACK_PRESSURE);
+      double bpValue = instanceMetrics.getMetricValueSum(METRIC_BACK_PRESSURE);
       if (bpValue > 0) {
         boltsWithBackpressure.add(instanceMetrics);
         totalBackpressure += bpValue;
@@ -57,7 +57,7 @@ public class ComponentMetricsHelper {
 
   public void computeBufferSizeStats() {
     for (InstanceMetrics mergedInstance : componentMetrics.getMetrics().values()) {
-      Double bufferSize = mergedInstance.getMetricValue(METRIC_BUFFER_SIZE);
+      Double bufferSize = mergedInstance.getMetricValueSum(METRIC_BUFFER_SIZE);
       if (bufferSize == null) {
         continue;
       }
@@ -68,7 +68,7 @@ public class ComponentMetricsHelper {
 
   public void computeExeCountStats() {
     for (InstanceMetrics instance : componentMetrics.getMetrics().values()) {
-      double exeCount = instance.getMetricValue(METRIC_EXE_COUNT);
+      double exeCount = instance.getMetricValueSum(METRIC_EXE_COUNT);
       exeCountMax = exeCountMax < exeCount ? exeCount : exeCountMax;
       exeCountMin = exeCountMin > exeCount ? exeCount : exeCountMin;
     }

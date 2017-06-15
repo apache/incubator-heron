@@ -16,12 +16,48 @@ package com.twitter.heron.healthmgr.sensors;
 
 import com.microsoft.dhalion.api.ISensor;
 
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DEFAULT_METRIC_DURATION;
+
 public abstract class BaseSensor implements ISensor {
+  public static final String CONF_DURATION = ".duration";
+
   protected static final String EXE_COUNT = HealthMgrConstants.METRIC_EXE_COUNT;
   protected static final String BUFFER_SIZE = HealthMgrConstants.METRIC_BUFFER_SIZE;
   protected static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
-  protected static final int METRIC_DURATION = HealthMgrConstants.DEFAULT_METRIC_DURATION;
+  protected static final int METRIC_DURATION = DEFAULT_METRIC_DURATION;
   protected static final String BUFFER_SIZE_SUFFIX = HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
+
+  protected int duration = -1;
+  protected HealthPolicyConfig config;
+
+  public BaseSensor() {
+  }
+
+  public BaseSensor(HealthPolicyConfig policyConfig) {
+    this.config = policyConfig;
+  }
+
+  /**
+   * Returns the duration for which the metrics need to be collected
+   *
+   * @return duration in seconds
+   */
+  protected synchronized int getDuration(String prefix) {
+    if (duration > 0) {
+      return duration;
+    }
+
+    duration = DEFAULT_METRIC_DURATION;
+    if (config == null) {
+      return duration;
+    }
+
+    String configName = prefix + CONF_DURATION;
+    String defaultValue = String.valueOf(DEFAULT_METRIC_DURATION);
+    duration = Integer.parseInt(config.getConfig(configName, defaultValue));
+    return duration;
+  }
 }

@@ -23,7 +23,7 @@ import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 
 public interface HealthMgrConstants {
-  int DEFAULT_METRIC_DURATION = 60;
+  int DEFAULT_METRIC_DURATION = 300;
 
   String METRIC_EXE_COUNT = "__execute-count/default";
   String METRIC_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";

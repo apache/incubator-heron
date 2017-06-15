@@ -127,7 +127,7 @@ public class ScaleUpResolver implements IResolver {
     double totalCompBpTime = 0;
     String compName = componentMetrics.getName();
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      double instanceBp = instanceMetrics.getMetricValue(BACK_PRESSURE);
+      double instanceBp = instanceMetrics.getMetricValueSum(BACK_PRESSURE);
       LOG.info(String.format("Instance:%s, bpTime:%.0f", instanceMetrics.getName(), instanceBp));
       totalCompBpTime += instanceBp;
     }
