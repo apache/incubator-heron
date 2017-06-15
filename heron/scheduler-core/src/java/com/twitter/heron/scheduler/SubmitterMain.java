@@ -97,9 +97,7 @@ public class SubmitterMain {
                                              String environ,
                                              Boolean dryRun,
                                              DryRunFormatType dryRunFormat,
-                                             Boolean verbose,
-                                             String autoHealWindow,
-                                             String autoHealInterval) {
+                                             Boolean verbose) {
     return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
@@ -107,8 +105,6 @@ public class SubmitterMain {
         .put(Key.DRY_RUN, dryRun)
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
-        .put(Key.AUTO_HEAL_WINDOW, autoHealWindow)
-        .put(Key.AUTO_HEAL_INTERVAL, autoHealInterval)
         .build();
   }
 
@@ -218,18 +214,6 @@ public class SubmitterMain {
         .longOpt("verbose")
         .build();
 
-    Option autoHeal = Option.builder("a")
-        .desc("Auto restart backpressure container monitor time window")
-        .longOpt("auto_heal_window")
-        .hasArgs()
-        .build();
-
-    Option autoHealInterval = Option.builder("i")
-        .desc("Auto restart backpressure container restart min interval")
-        .longOpt("auto_heal_interval")
-        .hasArgs()
-        .build();
-
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -243,8 +227,6 @@ public class SubmitterMain {
     options.addOption(dryRun);
     options.addOption(dryRunFormat);
     options.addOption(verbose);
-    options.addOption(autoHeal);
-    options.addOption(autoHealInterval);
 
     return options;
   }
@@ -277,8 +259,6 @@ public class SubmitterMain {
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyBinaryFile = cmd.getOptionValue("topology_bin");
-    String autoHealWindow = cmd.getOptionValue("auto_heal_window");
-    String autoHealInterval = cmd.getOptionValue("auto_heal_interval");
 
     Boolean dryRun = false;
     if (cmd.hasOption("u")) {
@@ -300,8 +280,7 @@ public class SubmitterMain {
     // build the final config by expanding all the variables
     return Config.toLocalMode(Config.newBuilder()
         .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
-        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd),
-             autoHealWindow, autoHealInterval))
+        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
         .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
         .build());
   }
