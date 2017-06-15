@@ -15,7 +15,7 @@
 package com.twitter.heron.healthmgr.common;
 
 public interface HealthMgrConstants {
-  int DEFAULT_METRIC_DURATION = 60;
+  int DEFAULT_METRIC_DURATION = 300;
 
   String METRIC_EXE_COUNT = "__execute-count/default";
   String METRIC_INSTANCE_BACK_PRESSURE = "__time_spent_back_pressure_by_compid/";

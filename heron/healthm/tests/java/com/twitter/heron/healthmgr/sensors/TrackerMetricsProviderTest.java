@@ -30,22 +30,23 @@ import static org.mockito.Mockito.spy;
 
 public class TrackerMetricsProviderTest {
   @Test
-  public void providesOneComponentMetricsFromTracker() {
-    TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
-
-    TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
+  public void provides1Comp2InstanceMetricsFromTracker() {
+    TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "count";
     String component = "bolt";
-    String response = "{\"status\": \"\", " + "\"executiontime\": 0.0026040077209472656, " +
-        "\"message\": \"\", \"version\": \"\", " +
-        "\"result\": {\"metrics\": {\"count\": {\"container_1_bolt_2\": \"496\"" +
-        ", \"container_1_bolt_1\": \"104\"}}, " +
-        "\"interval\": 60, \"component\": \"bolt\"}}";
+    String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
+        "\"message\": \"\", \"version\": \"ver\", \"result\": " +
+        "{\"timeline\": {\"count\": " +
+        "{\"container_1_bolt_1\": {\"1497481288\": \"104\"}, " +
+        "\"container_1_bolt_2\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
+        "\"1497481168\": \"3\"}}}, " +
+        "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60);
-    Map<String, ComponentMetrics> metrics = spyMetricsProvider.getComponentMetrics(metric, 60, component);
+    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 10, 60);
+
+    Map<String, ComponentMetrics> metrics =
+        spyMetricsProvider.getComponentMetrics(metric, 60, component);
 
     assertEquals(1, metrics.size());
     assertNotNull(metrics.get(component));
@@ -53,33 +54,34 @@ public class TrackerMetricsProviderTest {
 
     HashMap<String, InstanceMetrics> componentMetrics = metrics.get(component).getMetrics();
     assertEquals(104,
-        componentMetrics.get("container_1_bolt_1").getMetricValue("count").intValue());
-    assertEquals(496,
-        componentMetrics.get("container_1_bolt_2").getMetricValue("count").intValue());
+        componentMetrics.get("container_1_bolt_1").getMetricValueSum(metric).intValue());
+    assertEquals(17,
+        componentMetrics.get("container_1_bolt_2").getMetricValueSum(metric).intValue());
   }
 
   @Test
   public void providesMultipleComponentMetricsFromTracker() {
-    TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
-
-    TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
+    TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "count";
     String comp1 = "bolt-1";
-    String response1 = "{\"status\": \"\", " + "\"executiontime\": 0.0026040077209472656, " +
-        "\"message\": \"\", \"version\": \"\", " +
-        "\"result\": {\"metrics\": {\"count\": {\"container_1_bolt-1_2\": \"496\"}}, " +
-        "\"interval\": 60, \"component\": \"bolt-1\"}}";
+    String response1 = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
+        "\"message\": \"\", \"version\": \"ver\", \"result\": " +
+        "{\"timeline\": {\"count\": " +
+        "{\"container_1_bolt-1_2\": {\"1497481288\": \"104\"}" +
+        "}}, " +
+        "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
-    doReturn(response1).when(spyMetricsProvider).getMetricsFromTracker(metric, comp1, 60);
+    doReturn(response1).when(spyMetricsProvider).getMetricsFromTracker(metric, comp1, 10, 60);
 
     String comp2 = "bolt-2";
     String response2 = "{\"status\": \"\", " + "\"executiontime\": 0.0026040077209472656, " +
         "\"message\": \"\", \"version\": \"\", " +
-        "\"result\": {\"metrics\": {\"count\": {\"container_1_bolt-2_1\": \"123\"}}, " +
+        "\"result\": {\"timeline\": {\"count\": " +
+        "{\"container_1_bolt-2_1\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
+        "\"1497481168\": \"3\"}}}, " +
         "\"interval\": 60, \"component\": \"bolt-2\"}}";
-    doReturn(response2).when(spyMetricsProvider).getMetricsFromTracker(metric, comp2, 60);
+    doReturn(response2).when(spyMetricsProvider).getMetricsFromTracker(metric, comp2, 10, 60);
 
     Map<String, ComponentMetrics> metrics
         = spyMetricsProvider.getComponentMetrics(metric, 60, comp1, comp2);
@@ -87,21 +89,18 @@ public class TrackerMetricsProviderTest {
     assertEquals(2, metrics.size());
     assertNotNull(metrics.get(comp1));
     assertEquals(1, metrics.get(comp1).getMetrics().size());
-    assertEquals(496,
-        metrics.get(comp1).getMetricValue("container_1_bolt-1_2", "count").intValue());
+    assertEquals(104,
+        metrics.get(comp1).getMetricValueSum("container_1_bolt-1_2", metric).intValue());
 
     assertNotNull(metrics.get(comp2));
     assertEquals(1, metrics.get(comp2).getMetrics().size());
-    assertEquals(123,
-        metrics.get(comp2).getMetricValue("container_1_bolt-2_1", "count").intValue());
+    assertEquals(17,
+        metrics.get(comp2).getMetricValueSum("container_1_bolt-2_1", metric).intValue());
   }
 
   @Test
   public void parsesBackPressureMetric() {
-    TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
-
-    TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
+    TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "__time_spent_back_pressure_by_compid/container_1_split_1";
     String component = "__stmgr__";
@@ -109,10 +108,10 @@ public class TrackerMetricsProviderTest {
         "\"executiontime\": 0.30, \"message\": \"\", \"version\": \"v\", " +
         "\"result\": " +
         "{\"metrics\": {\"__time_spent_back_pressure_by_compid/container_1_split_1\": " +
-        "{\"stmgr-1\": \"601\"}}, " +
+        "{\"stmgr-1\": {\"00\" : \"601\"}}}, " +
         "\"interval\": 60, \"component\": \"__stmgr__\"}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60);
+    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 10, 60);
     Map<String, ComponentMetrics> metrics
         = spyMetricsProvider.getComponentMetrics(metric, 60, component);
 
@@ -121,15 +120,12 @@ public class TrackerMetricsProviderTest {
     assertEquals(1, metrics.get(component).getMetrics().size());
 
     HashMap<String, InstanceMetrics> componentMetrics = metrics.get(component).getMetrics();
-    assertEquals(601, componentMetrics.get("stmgr-1").getMetricValue(metric).intValue());
+    assertEquals(601, componentMetrics.get("stmgr-1").getMetricValueSum(metric).intValue());
   }
 
   @Test
   public void handleMissingData() {
-    TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
-
-    TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
+    TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "dummy";
     String component = "split";
@@ -137,7 +133,7 @@ public class TrackerMetricsProviderTest {
         "\"message\": \"\", \"version\": \"v\", \"result\": " +
         "{\"metrics\": {}, \"interval\": 0, \"component\": \"split\"}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60);
+    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 10, 60);
     Map<String, ComponentMetrics> metrics
         = spyMetricsProvider.getComponentMetrics(metric, 60, component);
 
@@ -146,27 +142,68 @@ public class TrackerMetricsProviderTest {
     assertEquals(0, metrics.get(component).getMetrics().size());
   }
 
-  @Test
-  public void testTimelineParsing() {
+  private TrackerMetricsProvider createMetricsProviderSpy() {
     TrackerMetricsProvider metricsProvider
         = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
 
     TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
+    spyMetricsProvider.setClock(new TestClock(70000));
+    return spyMetricsProvider;
+  }
 
-    String metric = "dummy";
-    String component = "stmgr-1";
-    String response = "{\"status\":\"success\",\"executiontime\":0.0010," +
-        "\"message\":\"\",\"version\":\"v1\", \"result\":{\"timeline\":" +
-        "{\"dummy\":{\"stmgr-1\":{\"1497046904\":\"123\",\"1497046964\":\"234\"}}}," +
-        "\"endtime\":1497046967,\"component\":\"__stmgr__\",\"starttime\":1497046907}}";
+  @Test
+  public void testGetTimeLineMetrics() {
+    TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 60, 60);
-    Map<String, InstanceMetrics> metrics = spyMetricsProvider.parse(response, component, metric);
+    String metric = "count";
+    String comp = "bolt";
+    String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
+        "\"message\": \"\", \"version\": \"ver\", \"result\": " +
+        "{\"timeline\": {\"count\": " +
+        "{\"container_1_bolt_1\": {\"1497481288\": \"104\"}, " +
+        "\"container_1_bolt_2\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
+        "\"1497481168\": \"3\"}}}, " +
+        "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
+
+    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, comp, 10, 60);
+
+    Map<String, ComponentMetrics> metrics =
+        spyMetricsProvider.getComponentMetrics(metric, 10, 60, comp);
 
     assertEquals(1, metrics.size());
-    assertNotNull(metrics.get(component));
-    assertEquals(1, metrics.get(component).getMetrics().size());
-    assertEquals(2, metrics.get(component).getMetricValues(metric).size());
-    assertEquals(234, metrics.get(component).getMetricValues(metric).get(new Long(1497046964)).intValue());
+    ComponentMetrics componentMetrics = metrics.get(comp);
+    assertNotNull(componentMetrics);
+    assertEquals(2, componentMetrics.getMetrics().size());
+
+    InstanceMetrics instanceMetrics = componentMetrics.getMetrics("container_1_bolt_1");
+    assertNotNull(instanceMetrics);
+    assertEquals(1, instanceMetrics.getMetrics().size());
+
+    Map<Long, Double> metricValues = instanceMetrics.getMetrics().get(metric);
+    assertEquals(1, metricValues.size());
+    assertEquals(104, metricValues.get(1497481288L).intValue());
+
+    instanceMetrics = componentMetrics.getMetrics("container_1_bolt_2");
+    assertNotNull(instanceMetrics);
+    assertEquals(1, instanceMetrics.getMetrics().size());
+
+    metricValues = instanceMetrics.getMetrics().get(metric);
+    assertEquals(3, metricValues.size());
+    assertEquals(12, metricValues.get(1497481228L).intValue());
+    assertEquals(2, metricValues.get(1497481348L).intValue());
+    assertEquals(3, metricValues.get(1497481168L).intValue());
+  }
+
+  private class TestClock extends TrackerMetricsProvider.Clock {
+    long timeStamp;
+
+    TestClock(long timeStamp) {
+      this.timeStamp = timeStamp;
+    }
+
+    @Override
+    long currentTime() {
+      return timeStamp;
+    }
   }
 }
