@@ -27,6 +27,7 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
@@ -37,9 +38,11 @@ public class BufferSizeSensor extends BaseSensor {
   private final TopologyProvider topologyProvider;
 
   @Inject
-  BufferSizeSensor(PackingPlanProvider packingPlanProvider,
-                   TopologyProvider topologyProvider,
-                   MetricsProvider metricsProvider) {
+  public BufferSizeSensor(HealthPolicyConfig policyConfig,
+                          PackingPlanProvider packingPlanProvider,
+                          TopologyProvider topologyProvider,
+                          MetricsProvider metricsProvider) {
+    super(policyConfig);
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -52,7 +55,7 @@ public class BufferSizeSensor extends BaseSensor {
 
   /**
    * The buffer size as provided by tracker
-   * @param desiredBoltNames
+   *
    * @return buffer size
    */
   public Map<String, ComponentMetrics> get(String... desiredBoltNames) {
@@ -77,7 +80,7 @@ public class BufferSizeSensor extends BaseSensor {
 
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
-            HealthMgrConstants.DEFAULT_METRIC_DURATION,
+            getDuration(BufferSizeSensor.class.getSimpleName()),
             HealthMgrConstants.COMPONENT_STMGR);
 
         HashMap<String, InstanceMetrics> streamManagerResult =
@@ -86,7 +89,7 @@ public class BufferSizeSensor extends BaseSensor {
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
         double stmgrInstanceResult =
-            streamManagerResult.values().iterator().next().getMetricValue(metric);
+            streamManagerResult.values().iterator().next().getMetricValueSum(metric);
 
         InstanceMetrics boltInstanceMetric =
             new InstanceMetrics(boltInstanceName, BUFFER_SIZE, stmgrInstanceResult);

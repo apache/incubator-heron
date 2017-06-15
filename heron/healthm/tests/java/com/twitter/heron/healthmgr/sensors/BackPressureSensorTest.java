@@ -50,10 +50,9 @@ public class BackPressureSensorTest {
     for (String boltId : boltIds) {
       String metric = HealthMgrConstants.METRIC_BACK_PRESSURE + boltId;
       // the back pressure sensor will return average bp per second, so multiply by duration
-      BufferSizeSensorTest
-          .registerStMgrInstanceMetricResponse(metricsProvider,
-              metric,
-              boltId.length() * BaseSensor.METRIC_DURATION);
+      BufferSizeSensorTest.registerStMgrInstanceMetricResponse(metricsProvider,
+          metric,
+          boltId.length() * BaseSensor.METRIC_DURATION);
     }
 
     BackPressureSensor backPressureSensor =
@@ -64,17 +63,12 @@ public class BackPressureSensorTest {
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValue(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
+        .getMetricValueSum(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricValue(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
+        .getMetricValueSum(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricValue(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
-  }
-
-  //TODO
-  void emptyMetricTest() {
-//    {"status": "success", "executiontime": 0.30780792236328125, "message": "", "version": "delayedTopology", "result": {"metrics": {}, "interval": 0, "component": "split"}}
+        .getMetricValueSum(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
   }
 }

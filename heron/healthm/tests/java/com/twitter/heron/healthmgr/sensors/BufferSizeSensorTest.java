@@ -27,6 +27,7 @@ import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DEFAULT_METRIC_DURATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -56,20 +57,20 @@ public class BufferSizeSensorTest {
     }
 
     BufferSizeSensor bufferSizeSensor =
-        new BufferSizeSensor(packingPlanProvider, topologyProvider, metricsProvider);
+        new BufferSizeSensor(null, packingPlanProvider, topologyProvider, metricsProvider);
 
     Map<String, ComponentMetrics> componentMetrics = bufferSizeSensor.get();
     assertEquals(2, componentMetrics.size());
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValue(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
+        .getMetricValueSum(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-            .getMetricValue(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
+        .getMetricValueSum(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-            .getMetricValue(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
+        .getMetricValueSum(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
   }
 
   public static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
@@ -82,7 +83,7 @@ public class BufferSizeSensorTest {
     metrics.addInstanceMetric(instanceMetrics);
     result.put("__stmgr__", metrics);
 
-    when(metricsProvider.getComponentMetrics(metric, 60, "__stmgr__"))
+    when(metricsProvider.getComponentMetrics(metric, DEFAULT_METRIC_DURATION, "__stmgr__"))
         .thenReturn(result);
   }
 }
