@@ -14,23 +14,20 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.TestUtils;
+import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.when;
 
 public class DataSkewDiagnoserTest {
   @Test
@@ -46,9 +43,12 @@ public class DataSkewDiagnoserTest {
     symptoms.add(TestUtils.createExeCountSymptom(5000, 2000, 2000));
 
     Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
+    assertNotNull(result);
+    assertEquals(HealthMgrConstants.DIAGNOSIS_DATA_SKEW, result.getName());
     assertEquals(1, result.getSymptoms().size());
-    ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
-    assertEquals(123,
-        data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
+    Symptom symptom = result.getSymptoms().values().iterator().next();
+
+    assertEquals(123, symptom.getComponent()
+        .getMetricValueSum("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
   }
 }

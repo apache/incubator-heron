@@ -61,8 +61,8 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
 
     Symptom resultSymptom = null;
     for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
-      double bufferSize = boltMetrics.getMetricValue(METRIC_BUFFER_SIZE);
-      double bpValue = boltMetrics.getMetricValue(METRIC_BACK_PRESSURE);
+      double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE);
+      double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE);
       if (compStats.getBufferSizeMax() < bufferSize * 2) {
         LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s",
             boltMetrics.getName(), bpValue, bufferSize));

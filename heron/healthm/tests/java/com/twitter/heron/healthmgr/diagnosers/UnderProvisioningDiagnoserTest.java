@@ -23,13 +23,10 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.TestUtils;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 
 public class UnderProvisioningDiagnoserTest {
   @Test
@@ -60,6 +57,6 @@ public class UnderProvisioningDiagnoserTest {
     assertEquals(1, result.getSymptoms().size());
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
-        data.getMetricValue("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
+        data.getMetricValueSum("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
   }
 }
