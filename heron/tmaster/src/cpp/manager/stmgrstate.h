@@ -55,8 +55,16 @@ class StMgrState {
   // Send messages to the stmgr
   void NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
+
+  // Send RestoreTopologyStateMessage to stmgr
+  void SendRestoreTopologyStateMessage(const proto::ckptmgr::RestoreTopologyStateRequest& _message);
+
+  // Send StartStatefulProcessingMessage to stmgr
+  void SendStartStatefulProcessingMessage(const std::string& _checkpoint_id);
+
   // Send stateful checkpoint message to the stmgr
   void NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request);
+
 
   bool TimedOut() const;
 
