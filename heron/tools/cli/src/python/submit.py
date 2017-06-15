@@ -55,7 +55,6 @@ def create_parser(subparsers):
   cli_args.add_system_property(parser)
   cli_args.add_dry_run(parser)
   cli_args.add_verbose(parser)
-  cli_args.add_auto_heal(parser)
 
   parser.set_defaults(subcommand='submit')
   return parser
@@ -95,9 +94,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_bin", os.path.basename(topology_file),   # pex file if pex specified
-      "--auto_heal_window", cl_args["auto_heal_window"],
-      "--auto_heal_interval", cl_args["auto_heal_interval"]
+      "--topology_bin", os.path.basename(topology_file)   # pex file if pex specified
   ]
 
   if Log.getEffectiveLevel() == logging.DEBUG:
