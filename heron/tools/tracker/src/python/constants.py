@@ -20,7 +20,10 @@ import heron.tools.common.src.python.utils.config as common_config
 
 # Version Information
 
-API_VERSION = common_config.get_version_number()
+try:
+  API_VERSION = common_config.get_version_number()
+except:
+  API_VERSION = ""
 
 
 

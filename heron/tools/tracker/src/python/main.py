@@ -21,7 +21,7 @@ import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-from tornado.options import define, options
+from tornado.options import define
 from tornado.httpclient import AsyncHTTPClient
 
 import heron.tools.common.src.python.utils.config as common_config
@@ -36,10 +36,9 @@ Log = log.Log
 
 class Application(tornado.web.Application):
   """ Tornado server application """
-  def __init__(self):
+  def __init__(self, config):
 
     AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
-    config = Config(options.config_file)
     self.tracker = Tracker(config)
     self.tracker.synch_topologies()
     tornadoHandlers = [
@@ -210,8 +209,6 @@ def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
 
-<<<<<<< HEAD
-=======
 def create_tracker_config(namespace):
   # try to parse the config file if we find one
   config_file = namespace["config_file"]
@@ -230,7 +227,6 @@ def create_tracker_config(namespace):
 
   return config
 
->>>>>>> c2369777a... Try to read the config first before setting command line args.
 def main():
   """ main """
   # create the parser and parse the arguments
@@ -256,8 +252,10 @@ def main():
   # set Tornado global option
   define_options(namespace['port'], namespace['config_file'])
 
+  config = Config(create_tracker_config(namespace))
+
   # create Tornado application
-  application = Application()
+  application = Application(config)
 
   # pylint: disable=unused-argument
   # SIGINT handler:
@@ -274,7 +272,9 @@ def main():
   signal.signal(signal.SIGTERM, signal_handler)
 
   Log.info("Running on port: %d", namespace['port'])
-  Log.info("Using config file: %s", namespace['config_file'])
+  if namespace["config_file"]:
+    Log.info("Using config file: %s", namespace['config_file'])
+  Log.info("Using state manager:\n" + str(config))
 
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(namespace['port'])

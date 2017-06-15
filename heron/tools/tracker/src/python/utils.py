@@ -20,6 +20,7 @@ import os
 import string
 import sys
 import subprocess
+import yaml
 
 # directories for heron tools distribution
 BIN_DIR = "bin"
