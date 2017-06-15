@@ -126,13 +126,13 @@ def add_titles(parser):
 
 def add_arguments(parser):
   """ add arguments """
-  default_config_file = os.path.join(
-      utils.get_heron_tracker_conf_dir(), constants.DEFAULT_CONFIG_FILE)
 
   parser.add_argument(
       '--config-file',
-      metavar='(a string; path to config file; default: "' + default_config_file + '")',
-      default=default_config_file)
+      metavar="""(a string; path to config file;)
+      if a config file is provided the following args are ignored:
+      [--type, --name, --rootpath, --tunnelhost, --hostport]
+      """)
 
   parser.add_argument(
       '--type',

@@ -19,7 +19,6 @@ import heron.tools.common.src.python.utils.config as common_config
 # across the tracker service.
 
 # Version Information
-
 try:
   API_VERSION = common_config.get_version_number()
 except:
@@ -62,7 +61,6 @@ RESPONSE_STATUS_FAILURE = "failure"
 RESPONSE_STATUS_SUCCESS = "success"
 
 # Timeout for HTTP requests.
-
 HTTP_TIMEOUT = 5 #seconds
 
 # default parameter - port for the tracker to listen on
