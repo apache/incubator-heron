@@ -98,7 +98,6 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
 
   assignment_in_progress_ = false;
   do_reassign_ = false;
-  is_master_ = false;
 
   master_establish_attempts_ = 0;
   tmaster_location_ = new proto::tmaster::TMasterLocation();
@@ -109,7 +108,8 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
-  EstablishPackingPlan(EventLoop::TIMEOUT_EVENT);
+  FetchPackingPlan();
+  EstablishTMaster(EventLoop::TIMEOUT_EVENT);
 
   // Send tmaster location to metrics mgr
   mMetricsMgrClient->RefreshTMasterLocation(*tmaster_location_);
@@ -134,21 +134,13 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   }, true, PROCESS_METRICS_FREQUENCY), 0);
 }
 
-void TMaster::EstablishPackingPlan(EventLoop::Status) {
-  state_mgr_->SetPackingPlanWatch(tmaster_location_->topology_name(), [this]() {
-    this->FetchPackingPlan();
-  });
-  FetchPackingPlan();
-}
-
 void TMaster::FetchPackingPlan() {
   auto packing_plan = new proto::system::PackingPlan();
 
-  auto cb = [packing_plan, this](proto::system::StatusCode status) {
+  state_mgr_->GetPackingPlan(tmaster_location_->topology_name(), packing_plan,
+                             [packing_plan, this](proto::system::StatusCode status) {
     this->OnPackingPlanFetch(packing_plan, status);
-  };
-
-  state_mgr_->GetPackingPlan(tmaster_location_->topology_name(), packing_plan, std::move(cb));
+  });
 }
 
 void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
@@ -178,22 +170,19 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
         // physical plan prepends "stmgr-" to the integer and represents it as a string.
         absent_stmgrs_.insert("stmgr-" + std::to_string(packing_plan_->container_plans(i).id()));
       }
-
-      // chain TMaster location setting to the completion of packing plan info above
-      EstablishTMaster(EventLoop::TIMEOUT_EVENT);
     } else {
+      // We must know for sure that we are TMaster before potentially deleting the physical plan
+      // in state manager. We know this to be the case here because we initially fetch
+      // packing_plan_ before becoming master, but we register the packing plan watcher only after
+      // becoming master. That guarantees that if packing_plan_ is already set and this method is
+      // invoked, it's due to the watch and we're master here.
       if (packing_plan_ != newPackingPlan) {
-        if (is_master_) {
-          LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TMaster to "
-                    << "reset internal state. Exiting.";
-          state_mgr_->DeletePhysicalPlan(tmaster_location_->topology_name(),
-            [this](proto::system::StatusCode status) {
-              ::exit(1);
-            });
-        } else {
-          LOG(INFO) << "Packing plan changed but this process might not be the master, so not "
-                    << "deleting physical plan. Killing TMaster to reset internal state. Exiting.";
-        }
+        LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TMaster to "
+                  << "reset internal state. Exiting.";
+        state_mgr_->DeletePhysicalPlan(tmaster_location_->topology_name(),
+          [this](proto::system::StatusCode status) {
+            ::exit(1);
+          });
       } else {
         LOG(INFO) << "New Packing plan matches existing one.";
       }
@@ -283,13 +272,18 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
 
   // We are now the master
   LOG(INFO) << "Successfully set ourselves as master\n";
-  is_master_ = true;
 
   // Lets now read the topology
-  auto cb = [this](proto::system::StatusCode code) { this->GetTopologyDone(code); };
-
   topology_ = new proto::api::Topology();
-  state_mgr_->GetTopology(tmaster_location_->topology_name(), topology_, std::move(cb));
+  state_mgr_->GetTopology(tmaster_location_->topology_name(), topology_,
+                          [this](proto::system::StatusCode code) {
+    this->GetTopologyDone(code);
+  });
+
+  // and register packing plan watcher to pick up changes
+  state_mgr_->SetPackingPlanWatch(tmaster_location_->topology_name(), [this]() {
+    this->FetchPackingPlan();
+  });
 }
 
 void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
