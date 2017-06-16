@@ -24,6 +24,18 @@
 #include "threads/threads.h"
 #include "network/network.h"
 #include "config/heron-internals-config-reader.h"
+#include "config/override-config-reader.h"
+
+void string_replace(sp_string & strBig, const sp_string & strsrc, const sp_string &strdst) {
+    sp_string::size_type pos=0;
+    sp_string::size_type srclen=strsrc.size();
+    sp_string::size_type dstlen=strdst.size();
+    while( (pos=strBig.find(strsrc, pos)) != sp_string::npos)
+    {
+        strBig.replace(pos, srclen, strdst);
+        pos += dstlen;
+    }
+}
 
 int main(int argc, char* argv[]) {
   if (argc != 15) {
@@ -53,11 +65,6 @@ int main(int argc, char* argv[]) {
   sp_string heron_internals_config_filename = argv[10];
   sp_string metrics_sinks_yaml = argv[11];
   sp_int32 metrics_manager_port = atoi(argv[12]);
-  // feature: auto restart backpressure sandbox
-  // backpressue_window > 0: the time window size in minutes
-  // backpressue_window <= 0: disable the feature
-  sp_int32 backpressue_window = atoi(argv[13]);
-  sp_int32 backpressue_interval = atoi(argv[14]);
 
   EventLoopImpl ss;
 
@@ -71,10 +78,20 @@ int main(int argc, char* argv[]) {
             << topology_id << " zkhostport " << zkhostportlist << " zkroot " << topdir
             << " and nstmgrs " << stmgrs.size() << std::endl;
 
+  sp_string override_config_filename = new sp_string(heron_internals_config_filename);
+  string_replace(override_config_filename, "heron_internals.yaml", "override.yaml");
+  heron::config::OverrideConfigReader::Create(override_config_filename);
+  // feature: auto restart backpressure container
+  // backpressue_window > 0: the time window size in minutes
+  // backpressue_window <= 0: disable the feature
+  sp_int32 backpressue_window = heron::config::OverrideConfigReader::Instance()->GetHeronAutoHealWindow();
+  sp_int32 backpressue_interval = heron::config::OverrideConfigReader::Instance()->GetHeronAutoHealInterval();
+
   heron::tmaster::TMaster tmaster(zkhostportlist, topology_name, topology_id, topdir, stmgrs,
                                   controller_port, master_port, stats_port, metrics_manager_port,
                                   metrics_sinks_yaml, myhost, &ss, backpressue_window,
                                   backpressue_interval);
   ss.loop();
+  delete override_config_filename;
   return 0;
 }
