@@ -224,6 +224,10 @@ class HeronExecutor(object):
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
+    [self.auto_restart_backpressure_container_time_window, \
+     self.auto_restart_backpressure_container_min_interval] = \
+        self._load_auto_restart_backpressure_container_config( \
+            self.heron_internals_config_file.replace("heron_internals.yaml", "override.yaml"))
 
     # these get set when we call update_packing_plan
     self.packing_plan = None
@@ -334,6 +338,15 @@ class HeronExecutor(object):
     with open(heron_internals_config_file, 'r') as stream:
       heron_internals_config = yaml.load(stream)
     return heron_internals_config['heron.logging.directory']
+
+  def _load_auto_restart_backpressure_container_config(self, override_config_file):
+    try:
+      with open(override_config_file, 'r') as stream:
+        override_config = yaml.load(stream)
+      return (override_config['heron.config.auto_heal_window'], \
+              override_config['heron.config.auto_heal_interval'])
+    except:
+        return (0, 0)
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
@@ -667,6 +680,9 @@ class HeronExecutor(object):
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
         '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
+
+    if self.auto_restart_backpressure_sandbox_time_window > 0:
+        retval[self.heron_shell_ids[self.shard]].append('--secret=%s' % self.topology_id)
 
     return retval
 
