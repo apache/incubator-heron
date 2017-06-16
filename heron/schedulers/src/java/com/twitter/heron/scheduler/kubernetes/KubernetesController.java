@@ -14,10 +14,14 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -79,8 +83,128 @@ public class KubernetesController {
       // Disconnect to release resources
       conn.disconnect();
     }
+  }
 
+  /**
+   * Get information about a pod
+   *
+   * @return json object for pod
+   */
+  public JsonNode getBasePod(String podId) {
 
+    String podURI = String.format(
+        "%s/api/v1/namespaces/default/pods/%s",
+        this.kubernetesURI,
+        podId);
+
+    // Get a connection
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(podURI);
+    if (conn == null) {
+      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
+      return null;
+    }
+
+    try {
+      // send get request
+      if (!NetworkUtils.sendHttpGetRequest(conn)) {
+        LOG.log(Level.SEVERE, "Failed to send GET to k8s deployment API");
+        return null;
+      }
+
+      // check the response
+      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
+
+      if (success) {
+        LOG.log(Level.INFO, "Pulled existing pod from k8s");
+        byte[] bytes = NetworkUtils.readHttpResponse(conn);
+
+        // read the pod definition
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode podDefinition = mapper.readTree(bytes);
+        return podDefinition;
+      } else {
+        LOG.log(Level.SEVERE, "Failure to receive existing pod from k8s");
+        return null;
+      }
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Unable to parse pod JSON");
+      return null;
+    } finally {
+      conn.disconnect();
+    }
+  }
+
+  public boolean deployContainer(String deployConf) {
+    String deploymentURI = String.format(
+        "%s/api/v1/namespaces/default/pods",
+        this.kubernetesURI);
+
+    // Get a connection
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
+    if (conn == null) {
+      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
+      return false;
+    }
+
+    try {
+      // send post request with json body for the topology
+      if (!NetworkUtils.sendHttpPostRequest(conn,
+          NetworkUtils.JSON_TYPE,
+          deployConf.getBytes())) {
+        LOG.log(Level.SEVERE, "Failed to send post to k8s deployment api");
+        return false;
+      }
+
+      // check the response
+      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
+
+      if (success) {
+        LOG.log(Level.INFO, "Topology Deployment submitted to k8s deployment API successfully");
+      } else {
+        LOG.log(Level.SEVERE, "Failed to submit Deployment to k8s");
+        byte[] bytes = NetworkUtils.readHttpResponse(conn);
+        LOG.log(Level.INFO, Arrays.toString(bytes));
+        return false;
+      }
+    } finally {
+      conn.disconnect();
+    }
+    return true;
+  }
+
+  public boolean removeContainer(String podId) {
+    String podURI = String.format(
+        "%s/api/v1/namespaces/default/pods/%s",
+        this.kubernetesURI,
+        podId);
+
+    // Get a connection
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(podURI);
+    if (conn == null) {
+      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
+      return false;
+    }
+
+    try {
+      // send get request
+      if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
+        LOG.log(Level.SEVERE, "Failed to send DELETE to k8s deployment API");
+        return false;
+      }
+
+      // check the response
+      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
+
+      if (success) {
+        LOG.log(Level.INFO, "Deleted existing pod from k8s");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Failure to delete existing pod from k8s");
+        return false;
+      }
+    } finally {
+      conn.disconnect();
+    }
   }
 
   public boolean restartApp(int appId) {
@@ -109,43 +233,12 @@ public class KubernetesController {
     boolean allSuccessful = true;
 
     for (int i = 0; i < appConfs.length; i++) {
-      LOG.log(Level.INFO, "Topology configuration is: " + appConfs[i]);
 
-      // Get a connection
-      HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
-      if (conn == null) {
-        LOG.log(Level.SEVERE, "Fauled to find k8s deployment API");
-        return false;
+      allSuccessful = deployContainer(appConfs[i]);
+      if (!allSuccessful) {
+        break;
       }
-
-      try {
-        // send post request with json body for the topology
-        if (!NetworkUtils.sendHttpPostRequest(conn,
-                                              NetworkUtils.JSON_TYPE,
-                                              appConfs[i].getBytes())) {
-          LOG.log(Level.SEVERE, "Failed to send post to k8s deployment api");
-          allSuccessful = false;
-          break;
-        }
-
-        // check the response
-        boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
-
-        if (success) {
-          LOG.log(Level.INFO, "Topology Deployment submitted to k8s deployment API successfully");
-        } else {
-          LOG.log(Level.SEVERE, "Failed to submit Deployment to k8s");
-          byte[] bytes = NetworkUtils.readHttpResponse(conn);
-          LOG.log(Level.INFO, Arrays.toString(bytes));
-          allSuccessful = false;
-          break;
-        }
-      } finally {
-        conn.disconnect();
-      }
-
     }
-
 
     return allSuccessful;
   }
