@@ -168,10 +168,7 @@ def run_test(topology_name, classpath, results_checker,
       config_property = "%s --config-property heron.package.core.uri='%s'" %\
                         (config_property, params.release_package_uri)
     if auto_restart_args is not None:
-      config_property = "%s --config-property heron.config.auto_heal_window='1'" %\
-                        (config_property)
-      config_property = "%s --config-property heron.config.auto_heal_interval='1'" %\
-                        (config_property)
+      config_property = "%s %s" % (config_property, auto_restart_args)
 
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
                     params.env, params.tests_bin_path, classpath, config_property, args)
@@ -194,8 +191,9 @@ def run_test(topology_name, classpath, results_checker,
     elif auto_restart_args:
       # wait for the topology to be started before triggering an checking
       poll_state_server(http_server_host_port, topology_name, "topology_started")
-      logging.info("Verified topology successfully started, proceeding to update it")
-      # wait for a backpressure cycle, which is 1 minute
+      logging.info("Verified topology successfully started")
+      # wait for a backpressure cycle, which is 2 minutes
+      time.sleep(60*2)
 
     return results_checker.check_results()
 

@@ -11,7 +11,7 @@
     {
       "topologyName" : "IntegrationTest_AutoRestartBackpressureContainer",
       "classPath"    : "auto_restart_backpressre_container.BackpressureBoltTask",
-      "autoRestartBackpressureContainerArgs"   : "--auto-heal-window 1 --auto-heal-interval 1",
+      "autoRestartBackpressureContainerArgs"   : "--config-property heron.config.auto_heal_window=1 --config-property heron.config.auto_heal_interval=1",
       "topologyArgs" : "-S emit_until",
       "expectedResultRelativePath" : "auto_restart_backpressre_container/resources/BackpressureBoltTask.json"
     }
