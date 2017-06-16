@@ -26,15 +26,14 @@
 #include "config/heron-internals-config-reader.h"
 #include "config/override-config-reader.h"
 
-void string_replace(sp_string & strBig, const sp_string & strsrc, const sp_string &strdst) {
-    sp_string::size_type pos=0;
-    sp_string::size_type srclen=strsrc.size();
-    sp_string::size_type dstlen=strdst.size();
-    while( (pos=strBig.find(strsrc, pos)) != sp_string::npos)
-    {
-        strBig.replace(pos, srclen, strdst);
-        pos += dstlen;
-    }
+void string_replace(sp_string & strBig, const sp_string & strsrc, const sp_string & strdst) {
+  sp_string::size_type pos=0;
+  sp_string::size_type srclen=strsrc.size();
+  sp_string::size_type dstlen=strdst.size();
+  while( (pos=strBig.find(strsrc, pos)) != sp_string::npos) {
+    strBig.replace(pos, srclen, strdst);
+    pos += dstlen;
+  }
 }
 
 int main(int argc, char* argv[]) {
