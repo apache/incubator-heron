@@ -346,7 +346,7 @@ class HeronExecutor(object):
       return (override_config['heron.config.auto_heal_window'], \
               override_config['heron.config.auto_heal_interval'])
     except:
-        return (0, 0)
+      return (0, 0)
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
@@ -683,8 +683,8 @@ class HeronExecutor(object):
         '--port=%s' % self.shell_port,
         '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
 
-    if self.auto_restart_backpressure_sandbox_time_window > 0:
-        retval[self.heron_shell_ids[self.shard]].append('--secret=%s' % self.topology_id)
+    if self.auto_restart_backpressure_container_time_window > 0:
+      retval[self.heron_shell_ids[self.shard]].append('--secret=%s' % self.topology_id)
 
     return retval
 
