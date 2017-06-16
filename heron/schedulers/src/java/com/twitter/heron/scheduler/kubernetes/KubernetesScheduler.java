@@ -135,10 +135,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
         updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtime));
 
     Resource containerResource = updatedPackingPlan.getContainers()
-        .iterator().next().getRequiredResource();
-
-    //Resource containerResource = updatedPackingPlan.getContainers()
-    //    .iterator().next().getScheduledResource().get();
+        .iterator().next().getScheduledResource().get();
 
     // Create app conf list for each container
 
@@ -263,9 +260,9 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       // Requested resource info
       ObjectNode requestedResourceInfo = mapper.createObjectNode();
       requestedResourceInfo.put(KubernetesConstants.MEMORY,
-          containerPlan.getRequiredResource().getRam().asMegabytes());
+          containerPlan.getScheduledResource().get().getRam().asMegabytes());
       requestedResourceInfo.put(KubernetesConstants.CPU,
-          containerPlan.getRequiredResource().getCpu());
+          containerPlan.getScheduledResource().get().getCpu());
 
       // Wrap it up into a resources dictionary
       ObjectNode resourceInfo = mapper.createObjectNode();
