@@ -40,6 +40,7 @@ public class BackpressureBolt extends BaseBasicBolt {
       // send marker only once
       collector.emit(new Values("BackpressureBolt"));
       alreadyEmitMarker = true;
+      LOG.info("emit:BackpressureBolt. mark done");
     } else {
       // sleep forever to trigger backpressure
       while (true) {

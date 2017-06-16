@@ -8,12 +8,17 @@
   "topologyClasspathPrefix" : "com.twitter.heron.integration_test.topology.",
   "releasePackageUri" : "scheme://role/name/version",
   "javaTopologies": [
-    {
+     {		
+      "topologyName" : "IntegrationTest_ShuffleGrouping",		
+      "classPath"    : "shuffle_grouping.ShuffleGrouping",		
+      "expectedResultRelativePath" : "shuffle_grouping/resources/ShuffleGrouping.json"		
+     },
+     {
       "topologyName" : "IntegrationTest_AutoRestartBackpressureContainer",
       "classPath"    : "auto_restart_backpressre_container.BackpressureBoltTask",
-      "autoRestartBackpressureContainerArgs"   : "--config-property heron.config.auto_heal_window=1 --config-property heron.config.auto_heal_interval=1",
+      "expectedResultRelativePath" : "auto_restart_backpressre_container/resources/BackpressureBoltTask.json",
       "topologyArgs" : "-S emit_until",
-      "expectedResultRelativePath" : "auto_restart_backpressre_container/resources/BackpressureBoltTask.json"
+      "autoRestartBackpressureContainerArgs" : "--config-property heron.config.auto_heal_window=1 --config-property heron.config.auto_heal_interval=1"
     }
   ],
   "pythonTopologies": [

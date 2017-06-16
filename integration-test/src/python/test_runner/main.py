@@ -193,7 +193,9 @@ def run_test(topology_name, classpath, results_checker,
       poll_state_server(http_server_host_port, topology_name, "topology_started")
       logging.info("Verified topology successfully started")
       # wait for a backpressure cycle, which is 2 minutes
-      time.sleep(60*2)
+      for _ in range(4):
+        logging.info("Sleep for 30 seconds waiting for backpressure occurring")
+        time.sleep(30)
 
     return results_checker.check_results()
 
