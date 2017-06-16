@@ -16,6 +16,7 @@ cc_library(
         "topology-config-reader.cpp",
         "topology-config-vars.cpp",
         "yaml-file-reader.cpp",
+        "override-config-reader.cpp",
 
         "cluster-config-reader.h",
         "cluster-config-vars.h",
@@ -31,6 +32,7 @@ cc_library(
         "topology-config-helper.h",
         "topology-config-reader.h",
         "topology-config-vars.h",
+        "override-config-reader.h",
     ],
     hdrs = [ 
         "metrics-sinks-reader.h",

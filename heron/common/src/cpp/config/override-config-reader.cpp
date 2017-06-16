@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include "config/heron-internals-config-reader.h"
+#include "config/override-config-reader.h"
 #include <string>
-#include "config/heron-internals-config-vars.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "proto/messages.h"
