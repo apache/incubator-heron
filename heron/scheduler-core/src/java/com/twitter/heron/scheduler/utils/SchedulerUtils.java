@@ -116,10 +116,6 @@ public final class SchedulerUtils {
     commands.add(Context.topologyBinaryFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
-    commands.add("--auto_heal_window");
-    commands.add(Context.autoRestartBackpressureContainerTimeWindow(config));
-    commands.add("--auto_heal_interval");
-    commands.add(Context.autoRestartBackpressureContainerMinInterval(config));
 
     return commands.toArray(new String[0]);
   }
@@ -244,8 +240,6 @@ public final class SchedulerUtils {
     commands.add(Context.metricsCacheManagerClassPath(config));
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
-    commands.add(Context.autoRestartBackpressureContainerTimeWindow(config));
-    commands.add(Context.autoRestartBackpressureContainerMinInterval(config));
 
     Boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
         topology.getTopologyConfig().getKvsList(),
