@@ -6,6 +6,7 @@ RUN yum -y upgrade
 RUN yum -y install python; yum clean all
 RUN yum -y install unzip; yum clean all 
 RUN yum -y install which; yum clean all
+RUN yum -y install curl; yum clean all
 
 RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel; yum clean all
 
