@@ -191,22 +191,3 @@ def add_dry_run(parser):
            'Ignored when dry-run mode is not enabled' % ('|'.join(resp_formats), default_format))
 
   return parser
-
-def add_auto_heal(parser):
-  '''
-  :param parser:
-  :return:
-  '''
-  parser.add_argument(
-      '--auto-heal-window',
-      default="0",
-      help='Auto restart backpressure container monitor time window, integer in minutes. '
-           'Default =0 (disabled). Example value is 10 (minutes).')
-
-  parser.add_argument(
-      '--auto-heal-interval',
-      default="20",
-      help='Auto restart backpressure container restart min interval, integer in minutes. '
-           'Default =20 (max 3 containers per hour). Ignored when "--auto-heal" is not enabled.')
-
-  return parser

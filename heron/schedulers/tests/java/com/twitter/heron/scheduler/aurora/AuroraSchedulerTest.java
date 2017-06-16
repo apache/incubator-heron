@@ -246,8 +246,6 @@ public class AuroraSchedulerTest {
     when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
     when(commandLine.getOptionValue("topology_defn")).thenReturn("/mock/defnFile.defn");
     when(commandLine.getOptionValue("topology_bin")).thenReturn("binaryFile.jar");
-    when(commandLine.getOptionValue("auto_heal_window")).thenReturn("0");
-    when(commandLine.getOptionValue("auto_heal_interval")).thenReturn("20");
     Config config = Mockito.spy(SubmitterMain.loadConfig(commandLine, topology));
 
     AuroraScheduler testScheduler = new AuroraScheduler();
@@ -373,12 +371,6 @@ public class AuroraSchedulerTest {
           break;
         case STATEFUL_CONFIG_YAML:
           expected = expectedConf + "/stateful.yaml";
-          break;
-        case AUTO_HEAL_TIME_WINDOW:
-          expected = "0";
-          break;
-        case AUTO_HEAL_MIN_INTERVAL:
-          expected = "20";
           break;
         default:
           fail(String.format(

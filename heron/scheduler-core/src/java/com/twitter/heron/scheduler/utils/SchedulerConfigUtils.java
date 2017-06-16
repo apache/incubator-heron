@@ -58,15 +58,12 @@ public final class SchedulerConfigUtils {
    * @return config, the command line config
    */
   private static Config commandLineConfigs(String cluster, String role,
-                                           String environ, Boolean verbose,
-                                           String autoHeal, String autoHealInterval) {
+                                           String environ, Boolean verbose) {
     return Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
         .put(Key.ENVIRON, environ)
         .put(Key.VERBOSE, verbose)
-        .put(Key.AUTO_HEAL_WINDOW, autoHeal)
-        .put(Key.AUTO_HEAL_INTERVAL, autoHealInterval)
         .build();
   }
 
@@ -78,15 +75,12 @@ public final class SchedulerConfigUtils {
       String topologyBinaryFile,
       String topologyDefnFile,
       Boolean verbose,
-      TopologyAPI.Topology topology,
-      String autoHeal,
-      String autoHealInterval) {
+      TopologyAPI.Topology topology) {
 
     return Config.toClusterMode(
         Config.newBuilder()
             .putAll(ConfigLoader.loadClusterConfig())
-            .putAll(commandLineConfigs(
-                    cluster, role, environ, verbose, autoHeal, autoHealInterval))
+            .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(topologyBinaryFile, topologyDefnFile, topology))
             .build());
   }
