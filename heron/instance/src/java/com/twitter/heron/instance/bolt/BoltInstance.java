@@ -177,6 +177,7 @@ public class BoltInstance implements IInstance {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
     Duration instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
 
+    long startOfCycle = System.nanoTime();
     // Read data from in Queues
     while (!inQueue.isEmpty()) {
       HeronTuples.HeronTupleSet tuples = inQueue.poll();
@@ -191,10 +192,8 @@ public class BoltInstance implements IInstance {
       int nValues = topologyContext.getComponentOutputFields(
           stream.getComponentName(), stream.getId()).size();
 
-      // We would reuse the System.nanoTime()
-      long startOfCycle = System.nanoTime();
-
-      long currentTime = startOfCycle;
+      // Record current time at the start of processing a set of tuples
+      long currentTime = System.nanoTime();
       for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
         // Create the value list and fill the value
         List<Object> values = new ArrayList<>(nValues);
