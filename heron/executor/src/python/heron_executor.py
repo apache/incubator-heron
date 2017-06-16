@@ -442,7 +442,9 @@ class HeronExecutor(object):
         ','.join(self.stmgr_ids.values()),
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
-        self.metricsmgr_port]
+        self.metricsmgr_port,
+        self.auto_restart_backpressure_container_time_window,
+        self.auto_restart_backpressure_container_min_interval]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()
