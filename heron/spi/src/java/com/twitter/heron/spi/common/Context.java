@@ -293,14 +293,6 @@ public class Context {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
   }
 
-  public static String autoRestartBackpressureContainerTimeWindow(Config cfg) {
-    return cfg.getStringValue(Key.AUTO_HEAL_WINDOW);
-  }
-
-  public static String autoRestartBackpressureContainerMinInterval(Config cfg) {
-    return cfg.getStringValue(Key.AUTO_HEAL_INTERVAL);
-  }
-
   @SuppressWarnings("unchecked")
   public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =
