@@ -12,6 +12,7 @@ cc_library(
         "manager/ckptmgr-client.cpp",
         "manager/stateful-restorer.cpp",
         "manager/stateful-checkpointer.cpp",
+        "manager/stateful-helper.cpp",
 
         "processor/stmgr-heartbeat-processor.cpp",
         "processor/stmgr-register-processor.cpp",
@@ -25,6 +26,7 @@ cc_library(
         "manager/ckptmgr-client.h",
         "manager/stateful-restorer.h",
         "manager/stateful-checkpointer.h",
+        "manager/stateful-helper.h",
 
         "processor/stmgr-heartbeat-processor.h",
         "processor/stmgr-register-processor.h",
