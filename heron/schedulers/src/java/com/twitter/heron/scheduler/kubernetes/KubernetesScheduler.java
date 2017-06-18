@@ -54,6 +54,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   protected KubernetesController getController() {
     return new KubernetesController(
         KubernetesContext.getSchedulerURI(config),
+        KubernetesContext.getKubernetesNamespace(config),
         Runtime.topologyName(runtime),
         Context.verbose(config));
   }

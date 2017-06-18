@@ -29,15 +29,18 @@ public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
 
   private final String kubernetesURI;
+  private final String kubernetesNamespace;
   private final String topologyName;
   private final boolean isVerbose;
 
   public KubernetesController(
       String kubernetesURI,
+      String kubernetesNamespace,
       String topologyName,
       boolean isVerbose
   ) {
     this.kubernetesURI = kubernetesURI;
+    this.kubernetesNamespace = kubernetesNamespace;
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
   }
@@ -51,8 +54,9 @@ public class KubernetesController {
 
     // Setup connection
     String deploymentURI = String.format(
-        "%s/api/v1/namespaces/default/pods?labelSelector=topology%%3D%s",
+        "%s/api/v1/namespaces/%s/pods?labelSelector=topology%%3D%s",
         this.kubernetesURI,
+        this.kubernetesNamespace,
         this.topologyName);
 
     LOG.log(Level.INFO, deploymentURI);
@@ -93,8 +97,9 @@ public class KubernetesController {
   protected JsonNode getBasePod(String podId) {
 
     String podURI = String.format(
-        "%s/api/v1/namespaces/default/pods/%s",
+        "%s/api/v1/namespaces/%s/pods/%s",
         this.kubernetesURI,
+        this.kubernetesNamespace,
         podId);
 
     // Get a connection
@@ -136,8 +141,9 @@ public class KubernetesController {
 
   protected boolean deployContainer(String deployConf) {
     String deploymentURI = String.format(
-        "%s/api/v1/namespaces/default/pods",
-        this.kubernetesURI);
+        "%s/api/v1/namespaces/%s/pods",
+        this.kubernetesURI,
+        this.kubernetesNamespace);
 
     // Get a connection
     HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
@@ -174,8 +180,9 @@ public class KubernetesController {
 
   protected boolean removeContainer(String podId) {
     String podURI = String.format(
-        "%s/api/v1/namespaces/default/pods/%s",
+        "%s/api/v1/namespaces/%s/pods/%s",
         this.kubernetesURI,
+        this.kubernetesNamespace,
         podId);
 
     // Get a connection
@@ -227,8 +234,9 @@ public class KubernetesController {
     }
 
     String deploymentURI = String.format(
-        "%s/api/v1/namespaces/default/pods",
-        this.kubernetesURI);
+        "%s/api/v1/namespaces/%s/pods",
+        this.kubernetesURI,
+        this.kubernetesNamespace);
 
     boolean allSuccessful = true;
 
