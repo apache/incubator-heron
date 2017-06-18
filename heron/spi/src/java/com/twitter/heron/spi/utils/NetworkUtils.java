@@ -397,6 +397,15 @@ public final class NetworkUtils {
     }
   }
 
+  public static Integer getHttpResponseCode(HttpURLConnection connection) {
+    try {
+      return connection.getResponseCode();
+    } catch (IOException ex) {
+      LOG.log(Level.SEVERE, "Failed to get response code");
+      return null;
+    }
+  }
+
   public static String getHostName() {
     String hostName;
     try {

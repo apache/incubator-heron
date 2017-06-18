@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
+import com.twitter.heron.scheduler.TopologySubmissionException;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 public class KubernetesController {
@@ -45,6 +47,96 @@ public class KubernetesController {
     this.isVerbose = isVerbose;
   }
 
+  private HttpURLConnection getUrlConnection(String uri) {
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(uri);
+    if (conn == null) {
+      throw new TopologyRuntimeManagementException("Failed to initialize connection to " + uri);
+    }
+    return conn;
+  }
+
+  private JsonNode schedulerGetRequest(String uri, Integer expectedResponseCode) {
+    HttpURLConnection conn = getUrlConnection(uri);
+    byte[] responseData;
+    try {
+      if (!NetworkUtils.sendHttpGetRequest(conn)) {
+        throw new TopologyRuntimeManagementException("Failed to send delete request to " + uri);
+      }
+
+      // Check the response code
+      if (!NetworkUtils.checkHttpResponseCode(conn, expectedResponseCode)) {
+        throw new TopologyRuntimeManagementException("Unexpected response from connection. Expected"
+            + expectedResponseCode + " but received " + NetworkUtils.getHttpResponseCode(conn));
+      }
+
+      responseData = NetworkUtils.readHttpResponse(conn);
+
+    } finally {
+      conn.disconnect();
+    }
+
+    // parse of the json
+    JsonNode podDefinition;
+
+    try {
+      // read the json data
+      ObjectMapper mapper = new ObjectMapper();
+      podDefinition = mapper.readTree(responseData);
+    } catch (IOException ioe) {
+      throw new TopologyRuntimeManagementException("Failed to parse JSON response from "
+          + "Scheduler API");
+    }
+
+    return podDefinition;
+  }
+
+  private void schedulerDeleteRequest(String uri, Integer expectedResponseCode) {
+    HttpURLConnection conn = getUrlConnection(uri);
+    try {
+      if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
+        throw new TopologyRuntimeManagementException("Failed to send delete request to " + uri);
+      }
+
+      // Check the response code
+      if (!NetworkUtils.checkHttpResponseCode(conn, expectedResponseCode)) {
+        throw new TopologyRuntimeManagementException("Unexpected response from connection. Expected"
+            + expectedResponseCode + " but received "
+            + NetworkUtils.getHttpResponseCode(conn));
+      }
+
+
+    } finally {
+      conn.disconnect();
+    }
+  }
+
+  private void schedulerPostRequest(String uri, String jsonBody, Integer expectedResponseCode) {
+    HttpURLConnection conn = getUrlConnection(uri);
+
+    try {
+      // send post request with json body for the topology
+      if (!NetworkUtils.sendHttpPostRequest(conn,
+          NetworkUtils.JSON_TYPE,
+          jsonBody.getBytes())) {
+        throw new TopologyRuntimeManagementException("Failed to send POST to " + uri);
+      }
+
+      // check the response
+      if(NetworkUtils.checkHttpResponseCode(conn, expectedResponseCode)) {
+        LOG.log(Level.INFO, "Topology submitted to scheduler API");
+      } else {
+        byte[] bytes = NetworkUtils.readHttpResponse(conn);
+        LOG.log(Level.SEVERE, "Failed to send POST request to scheduler");
+        LOG.log(Level.SEVERE, Arrays.toString(bytes));
+        throw new TopologyRuntimeManagementException("Unexpected response from connection. Expected"
+            + expectedResponseCode + " but received "
+            + NetworkUtils.getHttpResponseCode(conn));
+      }
+    } finally {
+      conn.disconnect();
+    }
+  }
+
   /**
    * Kill a topology in kubernetes based on a configuration
    *
@@ -59,34 +151,9 @@ public class KubernetesController {
         this.kubernetesNamespace,
         this.topologyName);
 
-    LOG.log(Level.INFO, deploymentURI);
-    HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
-    if (conn == null) {
-      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
-      return false;
-    }
-
-    try {
-      if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
-        LOG.log(Level.SEVERE, "Failed to send delete request to k8s deployment API");
-        return false;
-      }
-
-      // check response
-      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
-
-      if (success) {
-        LOG.log(Level.SEVERE, "Successfully killed topology deployments");
-        return true;
-      } else {
-        LOG.log(Level.SEVERE, "Failure to delete topology deployments");
-        return false;
-      }
-
-    } finally {
-      // Disconnect to release resources
-      conn.disconnect();
-    }
+    // send the delete request to the scheduler
+    schedulerDeleteRequest(deploymentURI, HttpURLConnection.HTTP_OK);
+    return true;
   }
 
   /**
@@ -102,41 +169,7 @@ public class KubernetesController {
         this.kubernetesNamespace,
         podId);
 
-    // Get a connection
-    HttpURLConnection conn = NetworkUtils.getHttpConnection(podURI);
-    if (conn == null) {
-      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
-      return null;
-    }
-
-    try {
-      // send get request
-      if (!NetworkUtils.sendHttpGetRequest(conn)) {
-        LOG.log(Level.SEVERE, "Failed to send GET to k8s deployment API");
-        return null;
-      }
-
-      // check the response
-      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
-
-      if (success) {
-        LOG.log(Level.INFO, "Pulled existing pod from k8s");
-        byte[] bytes = NetworkUtils.readHttpResponse(conn);
-
-        // read the pod definition
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode podDefinition = mapper.readTree(bytes);
-        return podDefinition;
-      } else {
-        LOG.log(Level.SEVERE, "Failure to receive existing pod from k8s");
-        return null;
-      }
-    } catch (IOException ioe) {
-      LOG.log(Level.SEVERE, "Unable to parse pod JSON");
-      return null;
-    } finally {
-      conn.disconnect();
-    }
+    return schedulerGetRequest(podURI, HttpURLConnection.HTTP_OK);
   }
 
   protected boolean deployContainer(String deployConf) {
@@ -145,36 +178,7 @@ public class KubernetesController {
         this.kubernetesURI,
         this.kubernetesNamespace);
 
-    // Get a connection
-    HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
-    if (conn == null) {
-      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
-      return false;
-    }
-
-    try {
-      // send post request with json body for the topology
-      if (!NetworkUtils.sendHttpPostRequest(conn,
-          NetworkUtils.JSON_TYPE,
-          deployConf.getBytes())) {
-        LOG.log(Level.SEVERE, "Failed to send post to k8s deployment api");
-        return false;
-      }
-
-      // check the response
-      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
-
-      if (success) {
-        LOG.log(Level.INFO, "Topology Deployment submitted to k8s deployment API successfully");
-      } else {
-        LOG.log(Level.SEVERE, "Failed to submit Deployment to k8s");
-        byte[] bytes = NetworkUtils.readHttpResponse(conn);
-        LOG.log(Level.INFO, Arrays.toString(bytes));
-        return false;
-      }
-    } finally {
-      conn.disconnect();
-    }
+    schedulerPostRequest(deploymentURI, deployConf, HttpURLConnection.HTTP_OK);
     return true;
   }
 
@@ -185,33 +189,8 @@ public class KubernetesController {
         this.kubernetesNamespace,
         podId);
 
-    // Get a connection
-    HttpURLConnection conn = NetworkUtils.getHttpConnection(podURI);
-    if (conn == null) {
-      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
-      return false;
-    }
-
-    try {
-      // send get request
-      if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
-        LOG.log(Level.SEVERE, "Failed to send DELETE to k8s deployment API");
-        return false;
-      }
-
-      // check the response
-      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
-
-      if (success) {
-        LOG.log(Level.INFO, "Deleted existing pod from k8s");
-        return true;
-      } else {
-        LOG.log(Level.SEVERE, "Failure to delete existing pod from k8s");
-        return false;
-      }
-    } finally {
-      conn.disconnect();
-    }
+    schedulerDeleteRequest(podURI, HttpURLConnection.HTTP_OK);
+    return true;
   }
 
   protected boolean restartApp(int appId) {
@@ -229,26 +208,15 @@ public class KubernetesController {
   protected boolean submitTopology(String[] appConfs) {
 
     if (!this.topologyName.equals(this.topologyName.toLowerCase())) {
-      LOG.log(Level.SEVERE, "K8s scheduler does not allow upper case topologies");
-      return false;
+      throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
     }
 
-    String deploymentURI = String.format(
-        "%s/api/v1/namespaces/%s/pods",
-        this.kubernetesURI,
-        this.kubernetesNamespace);
-
-    boolean allSuccessful = true;
-
-    for (int i = 0; i < appConfs.length; i++) {
-
-      allSuccessful = deployContainer(appConfs[i]);
-      if (!allSuccessful) {
-        break;
+    for (String appConf : appConfs) {
+      if(!deployContainer(appConf)) {
+        return false;
       }
     }
-
-    return allSuccessful;
+    return true;
   }
 
 }
