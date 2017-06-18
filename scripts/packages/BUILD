@@ -352,7 +352,6 @@ genrule(
         'cd $$PYHERON_DIR',
         'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
         'rm setup.py.template',
-        'tree $$PYHERON_DIR',
         '/usr/bin/env python2.7 setup.py sdist',
         '/usr/bin/env python2.7 setup.py bdist_wheel',
         'ls -l $$PYHERON_DIR/dist',
