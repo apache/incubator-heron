@@ -10,5 +10,5 @@ pex_library(
        "//heron/pyheron/src/python:pyheron-py",
        "//heron/proto:proto-py",
    ],
-   reqs = ['colorlog==2.6.1', 'pyyaml==3.10'],
+   reqs = ['colorlog==2.6.1', 'PyYAML==3.10'],
 )
