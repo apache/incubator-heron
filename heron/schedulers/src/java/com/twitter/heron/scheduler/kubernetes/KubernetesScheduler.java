@@ -60,7 +60,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config aConfig, Config aRuntime) {
-    LOG.log(Level.INFO, aRuntime.toString());
     this.config = aConfig;
     this.runtime = aRuntime;
     this.controller = getController();

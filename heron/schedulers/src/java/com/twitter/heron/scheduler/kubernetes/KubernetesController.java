@@ -47,7 +47,7 @@ public class KubernetesController {
    *
    * @return success
    */
-  public boolean killTopology() {
+  protected boolean killTopology() {
 
     // Setup connection
     String deploymentURI = String.format(
@@ -90,7 +90,7 @@ public class KubernetesController {
    *
    * @return json object for pod
    */
-  public JsonNode getBasePod(String podId) {
+  protected JsonNode getBasePod(String podId) {
 
     String podURI = String.format(
         "%s/api/v1/namespaces/default/pods/%s",
@@ -134,7 +134,7 @@ public class KubernetesController {
     }
   }
 
-  public boolean deployContainer(String deployConf) {
+  protected boolean deployContainer(String deployConf) {
     String deploymentURI = String.format(
         "%s/api/v1/namespaces/default/pods",
         this.kubernetesURI);
@@ -172,7 +172,7 @@ public class KubernetesController {
     return true;
   }
 
-  public boolean removeContainer(String podId) {
+  protected boolean removeContainer(String podId) {
     String podURI = String.format(
         "%s/api/v1/namespaces/default/pods/%s",
         this.kubernetesURI,
@@ -207,7 +207,7 @@ public class KubernetesController {
     }
   }
 
-  public boolean restartApp(int appId) {
+  protected boolean restartApp(int appId) {
     String message = "Restarting the whole topology is not supported yet. "
         + "Please kill and resubmit the topology.";
     LOG.log(Level.SEVERE, message);
@@ -219,7 +219,7 @@ public class KubernetesController {
    *
    * @return success
    */
-  public boolean submitTopology(String[] appConfs) {
+  protected boolean submitTopology(String[] appConfs) {
 
     if (!this.topologyName.equals(this.topologyName.toLowerCase())) {
       LOG.log(Level.SEVERE, "K8s scheduler does not allow upper case topologies");
@@ -242,8 +242,5 @@ public class KubernetesController {
 
     return allSuccessful;
   }
-
-
-
 
 }
