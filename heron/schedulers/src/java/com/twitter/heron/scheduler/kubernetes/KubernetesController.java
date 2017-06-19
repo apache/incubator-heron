@@ -28,7 +28,6 @@ public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
 
   private final String kubernetesURI;
-  private final String kubernetesNamespace;
   private final String topologyName;
   private final String baseUriPath;
   private final boolean isVerbose;
@@ -38,13 +37,11 @@ public class KubernetesController {
     this.kubernetesURI = kubernetesURI;
 
     if (kubernetesNamespace == null) {
-      LOG.log(Level.INFO, "Namespace not provided in configuration. Using default.");
-      this.kubernetesNamespace = "default";
+      this.baseUriPath = String.format("%s/api/v1/namespaces/default/pods", this.kubernetesURI);
     } else {
-      this.kubernetesNamespace = kubernetesNamespace;
+      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", this.kubernetesURI,
+          kubernetesNamespace);
     }
-    this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", this.kubernetesURI,
-        this.kubernetesNamespace);
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
   }
