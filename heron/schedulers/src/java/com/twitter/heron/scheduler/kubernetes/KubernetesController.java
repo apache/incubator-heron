@@ -30,9 +30,10 @@ public class KubernetesController {
   private final String kubernetesURI;
   private final String kubernetesNamespace;
   private final String topologyName;
+  private final String baseUriPath;
   private final boolean isVerbose;
 
-  public KubernetesController( String kubernetesURI, String kubernetesNamespace,
+  public KubernetesController(String kubernetesURI, String kubernetesNamespace,
                                String topologyName, boolean isVerbose) {
     this.kubernetesURI = kubernetesURI;
 
@@ -42,6 +43,8 @@ public class KubernetesController {
     } else {
       this.kubernetesNamespace = kubernetesNamespace;
     }
+    this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", this.kubernetesURI,
+        this.kubernetesNamespace);
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
   }
@@ -55,9 +58,8 @@ public class KubernetesController {
 
     // Setup connection
     String deploymentURI = String.format(
-        "%s/api/v1/namespaces/%s/pods?labelSelector=topology%%3D%s",
-        this.kubernetesURI,
-        this.kubernetesNamespace,
+        "%s?labelSelector=topology%%3D%s",
+        this.baseUriPath,
         this.topologyName);
 
     // send the delete request to the scheduler
@@ -79,9 +81,8 @@ public class KubernetesController {
   protected JsonNode getBasePod(String podId) throws IOException {
 
     String podURI = String.format(
-        "%s/api/v1/namespaces/%s/pods/%s",
-        this.kubernetesURI,
-        this.kubernetesNamespace,
+        "%s/%s",
+        this.baseUriPath,
         podId);
 
     // send the delete request to the scheduler
@@ -102,16 +103,12 @@ public class KubernetesController {
    * @param deployConf, the json body as a string
    */
   protected void deployContainer(String deployConf) throws IOException {
-    String podURI = String.format(
-        "%s/api/v1/namespaces/%s/pods",
-        this.kubernetesURI,
-        this.kubernetesNamespace);
 
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(this.baseUriPath);
     try {
       jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
     } catch (IOException ioe) {
-      LOG.log(Level.SEVERE, "Problem making call to get deploy Pod: " + podURI, ioe);
+      LOG.log(Level.SEVERE, "Problem making call to get deploy Pod: " + this.baseUriPath, ioe);
       throw ioe;
     }
 
@@ -123,9 +120,8 @@ public class KubernetesController {
    */
   protected void removeContainer(String podId) throws IOException {
     String podURI = String.format(
-        "%s/api/v1/namespaces/%s/pods/%s",
-        this.kubernetesURI,
-        this.kubernetesNamespace,
+        "%s/%s",
+        this.baseUriPath,
         podId);
 
     HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
