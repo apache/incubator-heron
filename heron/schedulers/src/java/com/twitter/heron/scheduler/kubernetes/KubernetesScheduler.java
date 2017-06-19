@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.google.common.primitives.Ints;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
@@ -373,7 +375,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     // grab the base pod so we can copy and modify some stuff
     String basePodName = Runtime.topologyName(runtime) + "-0";
-    JsonNode podConfig = controller.getBasePod(basePodName);
+    JsonNode podConfig;
+    try {
+      podConfig = controller.getBasePod(basePodName);
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Problem retrieving base pod configuration", ioe);
+      throw new TopologyRuntimeManagementException("Unable to add containers for update");
+    }
 
     // iterate over the containers we need to add and rebuild the spec based on the new plan
     ObjectMapper mapper = new ObjectMapper();
@@ -381,7 +389,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       String newContainer = rebuildKubernetesPodSpec(podConfig, mapper, containerPlan, 0);
 
       // deploy this new container
-      controller.deployContainer(newContainer);
+      try {
+        controller.deployContainer(newContainer);
+      } catch (IOException ioe) {
+        LOG.log(Level.SEVERE, "Problem deploying new container", ioe);
+        throw new TopologyRuntimeManagementException("Unable to add container for update");
+      }
+
     }
 
   }
@@ -390,7 +404,12 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     for (PackingPlan.ContainerPlan container : containersToRemove) {
       String podName = Runtime.topologyName(runtime) + "-" + container.getId();
-      controller.removeContainer(podName);
+      try {
+        controller.removeContainer(podName);
+      } catch (IOException ioe) {
+        LOG.log(Level.SEVERE, "Problem removing a container", ioe);
+        throw new TopologyRuntimeManagementException("Unable to remove container for update");
+      }
     }
   }
 }

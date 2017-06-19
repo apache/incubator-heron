@@ -14,14 +14,15 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import com.twitter.heron.common.network.HttpJsonClient;
 import com.twitter.heron.scheduler.TopologySubmissionException;
-import com.twitter.heron.scheduler.utils.SchedulerJsonAPIUtils;
 
 public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
@@ -38,6 +39,8 @@ public class KubernetesController {
       boolean isVerbose
   ) {
     this.kubernetesURI = kubernetesURI;
+
+
 
     if (kubernetesNamespace == null) {
       LOG.log(Level.INFO, "Namespace not provided in configuration. Using default.");
@@ -64,7 +67,13 @@ public class KubernetesController {
         this.topologyName);
 
     // send the delete request to the scheduler
-    SchedulerJsonAPIUtils.schedulerDeleteRequest(deploymentURI, HttpURLConnection.HTTP_OK);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(deploymentURI);
+    try {
+      jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Problem sending delete request: " + deploymentURI, ioe);
+      return false;
+    }
     return true;
   }
 
@@ -73,7 +82,7 @@ public class KubernetesController {
    *
    * @return json object for pod
    */
-  protected JsonNode getBasePod(String podId) {
+  protected JsonNode getBasePod(String podId) throws IOException {
 
     String podURI = String.format(
         "%s/api/v1/namespaces/%s/pods/%s",
@@ -81,7 +90,16 @@ public class KubernetesController {
         this.kubernetesNamespace,
         podId);
 
-    return SchedulerJsonAPIUtils.schedulerGetRequest(podURI, HttpURLConnection.HTTP_OK);
+    // send the delete request to the scheduler
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    JsonNode result;
+    try {
+      result = jsonAPIClient.get(HttpURLConnection.HTTP_OK);
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Problem making call to get Base Pod Configuration: " + podURI, ioe);
+      throw ioe;
+    }
+    return result;
   }
 
   /**
@@ -89,29 +107,35 @@ public class KubernetesController {
    *
    * @param deployConf, the json body as a string
    */
-  protected void deployContainer(String deployConf) {
-    String deploymentURI = String.format(
+  protected void deployContainer(String deployConf) throws IOException {
+    String podURI = String.format(
         "%s/api/v1/namespaces/%s/pods",
         this.kubernetesURI,
         this.kubernetesNamespace);
 
-    SchedulerJsonAPIUtils.schedulerPostRequest(deploymentURI,
-        deployConf,
-        HttpURLConnection.HTTP_CREATED);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    try {
+      jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Problem making call to get deploy Pod: " + podURI, ioe);
+      throw ioe;
+    }
+
   }
 
   /**
    * Remove a single container (Pod)
    * @param podId, the pod id (<topology_name>-<container_index>
    */
-  protected void removeContainer(String podId) {
+  protected void removeContainer(String podId) throws IOException {
     String podURI = String.format(
         "%s/api/v1/namespaces/%s/pods/%s",
         this.kubernetesURI,
         this.kubernetesNamespace,
         podId);
 
-    SchedulerJsonAPIUtils.schedulerDeleteRequest(podURI, HttpURLConnection.HTTP_OK);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
   }
 
   /**
@@ -138,7 +162,12 @@ public class KubernetesController {
     }
 
     for (String appConf : appConfs) {
-      deployContainer(appConf);
+      try {
+        deployContainer(appConf);
+      } catch (IOException ioe) {
+        LOG.log(Level.SEVERE, "Problem deploying container");
+        return false;
+      }
     }
     return true;
   }
