@@ -109,7 +109,6 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
   FetchPackingPlan();
-  EstablishTMaster(EventLoop::TIMEOUT_EVENT);
 
   // Send tmaster location to metrics mgr
   mMetricsMgrClient->RefreshTMasterLocation(*tmaster_location_);
@@ -170,6 +169,11 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
         // physical plan prepends "stmgr-" to the integer and represents it as a string.
         absent_stmgrs_.insert("stmgr-" + std::to_string(packing_plan_->container_plans(i).id()));
       }
+
+      // this is part of the initialization process. Since we've got a packing plan we will
+      // register our self as the master
+      EstablishTMaster(EventLoop::TIMEOUT_EVENT);
+
     } else {
       // We must know for sure that we are TMaster before potentially deleting the physical plan
       // in state manager. We know this to be the case here because we initially fetch
