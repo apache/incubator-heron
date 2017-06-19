@@ -32,15 +32,9 @@ public class KubernetesController {
   private final String topologyName;
   private final boolean isVerbose;
 
-  public KubernetesController(
-      String kubernetesURI,
-      String kubernetesNamespace,
-      String topologyName,
-      boolean isVerbose
-  ) {
+  public KubernetesController( String kubernetesURI, String kubernetesNamespace,
+                               String topologyName, boolean isVerbose) {
     this.kubernetesURI = kubernetesURI;
-
-
 
     if (kubernetesNamespace == null) {
       LOG.log(Level.INFO, "Namespace not provided in configuration. Using default.");
