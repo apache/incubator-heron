@@ -38,7 +38,13 @@ public class KubernetesController {
       boolean isVerbose
   ) {
     this.kubernetesURI = kubernetesURI;
-    this.kubernetesNamespace = kubernetesNamespace;
+
+    if (kubernetesNamespace == null) {
+      LOG.log(Level.INFO, "Namespace not provided in configuration. Using default.");
+      this.kubernetesNamespace = "default";
+    } else {
+      this.kubernetesNamespace = kubernetesNamespace;
+    }
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
   }
@@ -89,7 +95,9 @@ public class KubernetesController {
         this.kubernetesURI,
         this.kubernetesNamespace);
 
-    SchedulerJsonAPIUtils.schedulerPostRequest(deploymentURI, deployConf, HttpURLConnection.HTTP_OK);
+    SchedulerJsonAPIUtils.schedulerPostRequest(deploymentURI,
+        deployConf,
+        HttpURLConnection.HTTP_CREATED);
   }
 
   /**
