@@ -49,6 +49,7 @@ public class LargeWaitQueueDetector implements IDetector {
   /**
    * Detects all components unable to keep up with input load, hence having a large pending buffer
    * or wait queue
+   *
    * @return A collection of all components executing slower than input rate.
    */
   @Override
