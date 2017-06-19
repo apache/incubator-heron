@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 package com.twitter.heron.healthmgr.common;
 
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.detectors.GrowingWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.DataSkewDetector;
+import com.twitter.heron.healthmgr.detectors.GrowingWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;

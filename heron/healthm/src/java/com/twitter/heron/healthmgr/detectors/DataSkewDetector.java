@@ -48,6 +48,7 @@ public class DataSkewDetector implements IDetector {
 
   /**
    * Detects components experiencing data skew, instances with vastly different execute counts.
+   *
    * @return A collection of affected components
    */
   @Override
