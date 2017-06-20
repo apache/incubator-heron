@@ -68,10 +68,16 @@ public class GcsUploaderTests {
 
   @Test
   public void verifyObjectBackedUpIfExists() throws IOException {
+    // return an object to simulate that the topology has been uploaded before
     final StorageObject currentObject = createObject(topologyObjectName);
     Mockito.when(mockGcsController
         .getObject(Mockito.matches(topologyObjectName)))
         .thenReturn(currentObject);
+
+    // return an object when we try to create one
+    Mockito.when(mockGcsController
+        .createObject(Mockito.matches(topologyObjectName), Mockito.any(File.class)))
+        .thenReturn(createObject(topologyObjectName));
 
     uploader.initialize(createDefaultBuilder().build());
 
