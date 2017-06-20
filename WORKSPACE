@@ -336,3 +336,30 @@ maven_jar(
   name = "com_101tec_zkclient",
   artifact = "com.101tec:zkclient:0.3"
 )
+
+# Google Cloud
+maven_jar(
+  name = "google_api_services_storage",
+  artifact = "com.google.apis:google-api-services-storage:v1-rev108-1.22.0"
+)
+
+maven_jar(
+  name = "google_api_client",
+  artifact = "com.google.api-client:google-api-client:1.22.0"
+)
+
+maven_jar(
+  name = "google_http_client",
+  artifact = "com.google.http-client:google-http-client:1.22.0"
+)
+
+maven_jar(
+  name = "google_http_client_jackson2",
+  artifact = "com.google.http-client:google-http-client-jackson2:1.22.0"
+)
+
+maven_jar(
+  name = "google_oauth_client",
+  artifact = "com.google.oauth-client:google-oauth-client:1.22.0"
+)
+# end Google Cloud
