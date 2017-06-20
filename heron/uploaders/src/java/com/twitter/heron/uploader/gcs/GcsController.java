@@ -21,11 +21,8 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.StorageObject;
 
-
 public class GcsController {
-
   private static final String MIME_TYPE = "application/x-gzip";
-
   private static final String DEFAULT_PREDEFINED_ACL = "publicRead";
 
   private final Storage storage;
@@ -36,38 +33,40 @@ public class GcsController {
     this.bucket = bucket;
   }
 
-  StorageObject createObject(String objectName, File file) throws IOException {
+  StorageObject createStorageObject(String storageObjectName, File file) throws IOException {
     final InputStreamContent content =
         new InputStreamContent(MIME_TYPE, new FileInputStream(file));
-    final Storage.Objects.Insert insertObject =
+    final Storage.Objects.Insert insertStorageObject =
         storage.objects()
             .insert(bucket, null, content)
-            .setName(objectName)
+            .setName(storageObjectName)
             .setPredefinedAcl(DEFAULT_PREDEFINED_ACL);
 
     // The media uploader gzips content by default, and alters the Content-Encoding accordingly.
     // GCS dutifully stores content as-uploaded. This line disables the media uploader behavior,
     // so the service stores exactly what is in the InputStream, without transformation.
-    insertObject.getMediaHttpUploader().setDisableGZipContent(true);
-    return insertObject.execute();
+    insertStorageObject.getMediaHttpUploader().setDisableGZipContent(true);
+    return insertStorageObject.execute();
   }
 
-  StorageObject getObject(String name) {
+  StorageObject getStorageObject(String storageObjectName) {
     try {
-      return storage.objects().get(bucket, name).execute();
+      return storage.objects().get(bucket, storageObjectName).execute();
     } catch (IOException e) {
       // ignored
     }
     return null;
   }
 
-  void copyObject(String sourceObject, String destinationObject,
-                  StorageObject content) throws IOException {
-    storage.objects().copy(bucket, sourceObject, bucket, destinationObject, content).execute();
+  void copyStorageObject(String sourceStorageObjectName, String destinationStorageObjectName,
+                  StorageObject storageObject) throws IOException {
+    storage.objects()
+        .copy(bucket, sourceStorageObjectName, bucket, destinationStorageObjectName, storageObject)
+        .execute();
   }
 
-  void deleteObject(String objectName) throws IOException {
-    storage.objects().delete(bucket, objectName).execute();
+  void deleteStorageObject(String storageObjectName) throws IOException {
+    storage.objects().delete(bucket, storageObjectName).execute();
   }
 
   static GcsController create(Storage storage, String bucket) {

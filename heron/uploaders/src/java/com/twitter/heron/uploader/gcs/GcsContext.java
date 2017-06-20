@@ -17,10 +17,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
 public class GcsContext extends Context {
-
   static final String HERON_UPLOADER_GCS_CREDENTIALS_PATH =
       "heron.uploader.gcs.credentials_path";
-
   static final String HERON_UPLOADER_GCS_BUCKET = "heron.uploader.gcs.bucket";
 
   static String getBucket(Config configuration) {

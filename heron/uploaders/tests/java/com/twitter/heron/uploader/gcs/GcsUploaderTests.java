@@ -32,31 +32,29 @@ import static org.junit.Assert.assertEquals;
 public class GcsUploaderTests {
 
   private final String topologyName = "test-topology";
-
   private final String topologyPackageName = "topology.tar.gz";
-
   private final String bucket = "topologies-bucket";
-
   private final String topologyObjectName =
       String.format("%s/%s", topologyName, topologyPackageName);
-
   private final String previousTopologyObjectName =
       String.format("%s/previous-%s", topologyName, topologyPackageName);
 
   private GcsUploader uploader;
-
-  private GcsController mockGcsController = Mockito.mock(GcsController.class);
+  private GcsController mockGcsController;
 
   @Before
   public void before() throws Exception {
-    uploader = createUploaderWithMockController();
+    mockGcsController = Mockito.mock(GcsController.class);
+    uploader = Mockito.spy(new GcsUploader());
+    Mockito.doReturn(mockGcsController).when(uploader)
+        .createGcsController(Mockito.any(Config.class), Mockito.anyString());
   }
 
   @Test
   public void uploadTopology() throws IOException, URISyntaxException {
     Mockito.when(mockGcsController
-        .createObject(Mockito.matches(topologyObjectName), Mockito.any(File.class)))
-        .thenReturn(createObject(topologyObjectName));
+        .createStorageObject(Mockito.matches(topologyObjectName), Mockito.any(File.class)))
+        .thenReturn(createStorageObject(topologyObjectName));
 
     uploader.initialize(createDefaultBuilder().build());
 
@@ -69,15 +67,15 @@ public class GcsUploaderTests {
   @Test
   public void verifyObjectBackedUpIfExists() throws IOException {
     // return an object to simulate that the topology has been uploaded before
-    final StorageObject currentObject = createObject(topologyObjectName);
+    final StorageObject currentStorageObject = createStorageObject(topologyObjectName);
     Mockito.when(mockGcsController
-        .getObject(Mockito.matches(topologyObjectName)))
-        .thenReturn(currentObject);
+        .getStorageObject(Mockito.matches(topologyObjectName)))
+        .thenReturn(currentStorageObject);
 
     // return an object when we try to create one
     Mockito.when(mockGcsController
-        .createObject(Mockito.matches(topologyObjectName), Mockito.any(File.class)))
-        .thenReturn(createObject(topologyObjectName));
+        .createStorageObject(Mockito.matches(topologyObjectName), Mockito.any(File.class)))
+        .thenReturn(createStorageObject(topologyObjectName));
 
     uploader.initialize(createDefaultBuilder().build());
 
@@ -85,14 +83,15 @@ public class GcsUploaderTests {
 
     // verify that we copied the old topology before uploading the new one
     Mockito.verify(mockGcsController)
-        .copyObject(topologyObjectName, previousTopologyObjectName, currentObject);
+        .copyStorageObject(topologyObjectName, previousTopologyObjectName,
+            currentStorageObject);
   }
 
   @Test
   public void restorePreviousVersionOnUndo() throws IOException {
-    final StorageObject previousObject = createObject(previousTopologyObjectName);
+    final StorageObject previousObject = createStorageObject(previousTopologyObjectName);
     Mockito.when(mockGcsController
-        .getObject(Mockito.matches(previousTopologyObjectName)))
+        .getStorageObject(Mockito.matches(previousTopologyObjectName)))
         .thenReturn(previousObject);
 
     uploader.initialize(createDefaultBuilder().build());
@@ -101,13 +100,13 @@ public class GcsUploaderTests {
 
     // verify that we restored the previous topology
     Mockito.verify(mockGcsController)
-        .copyObject(previousTopologyObjectName, topologyObjectName, previousObject);
+        .copyStorageObject(previousTopologyObjectName, topologyObjectName, previousObject);
   }
 
   @Test
   public void doNotRestorePreviousVersionIfItDoesNotExist() throws IOException {
     Mockito.when(mockGcsController
-        .getObject(Mockito.matches(previousTopologyObjectName)))
+        .getStorageObject(Mockito.matches(previousTopologyObjectName)))
         .thenReturn(null);
 
     uploader.initialize(createDefaultBuilder().build());
@@ -115,10 +114,11 @@ public class GcsUploaderTests {
     uploader.undo();
 
     Mockito.verify(mockGcsController, Mockito.never())
-        .copyObject(Mockito.anyString(), Mockito.anyString(), Mockito.any(StorageObject.class));
+        .copyStorageObject(Mockito.anyString(), Mockito.anyString(),
+            Mockito.any(StorageObject.class));
   }
 
-  private StorageObject createObject(String name) {
+  private StorageObject createStorageObject(String name) {
     final StorageObject storageObject = new StorageObject();
     storageObject.setName(name);
     return storageObject;
@@ -129,14 +129,5 @@ public class GcsUploaderTests {
         .put(GcsContext.HERON_UPLOADER_GCS_BUCKET, bucket)
         .put(Key.TOPOLOGY_NAME, topologyName)
         .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackageName);
-  }
-
-  private GcsUploader createUploaderWithMockController() {
-    return new GcsUploader() {
-      @Override
-      GcsController createGcsController(Config configuration, String storageBucket) {
-        return mockGcsController;
-      }
-    };
   }
 }

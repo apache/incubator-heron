@@ -47,9 +47,12 @@ import com.twitter.heron.spi.uploader.UploaderException;
  * the topology package in order to run the topology.
  *
  * Clients must have write access to the bucket in order to upload topologies. Authentication
- * can be provided by providing a path the service credentials files or logging in
- * through the gcloud client.
- * https://cloud.google.com/storage/docs/authentication
+ * can be provided in two ways:
+ * 1 - A file path to the service account credentials file (https://cloud.google.com/storage/docs/authentication#service_accounts)
+ * example: heron.uploader.gcs.credentials_path: /Users/username/my-service-account-credentials.json
+ * 2 - through the gcloud client (https://cloud.google.com/storage/docs/authentication#libauth)
+ * example: gcloud auth application-default login
+ * Option 2 is used when a heron.uploader.gcs.credentials_path: is not provided.
  *
  * <p>
  * This class also handles the undo action by copying any existing topology.tar.gz package found
@@ -67,7 +70,6 @@ public class GcsUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(GcsUploader.class.getName());
 
   private static final String BACKUP_PREFIX = "previous-";
-
   private static final String GCS_URL_FORMAT = "https://storage.googleapis.com/%s/%s";
 
   private GcsController gcsController;
@@ -104,10 +106,11 @@ public class GcsUploader implements IUploader {
   @Override
   public URI uploadPackage() throws UploaderException {
     // Backup any existing files incase we need to undo this action
-    final StorageObject previousStorageObject = gcsController.getObject(topologyObjectName);
+    final StorageObject previousStorageObject =
+        gcsController.getStorageObject(topologyObjectName);
     if (previousStorageObject != null) {
       try {
-        gcsController.copyObject(topologyObjectName, previousTopologyObjectName,
+        gcsController.copyStorageObject(topologyObjectName, previousTopologyObjectName,
             previousStorageObject);
       } catch (IOException ioe) {
         throw new UploaderException("Failed to back up previous topology version", ioe);
@@ -116,7 +119,7 @@ public class GcsUploader implements IUploader {
 
     final StorageObject storageObject;
     try {
-      storageObject = gcsController.createObject(topologyObjectName, topologyPackageFile);
+      storageObject = gcsController.createStorageObject(topologyObjectName, topologyPackageFile);
     } catch (IOException ioe) {
       throw new UploaderException(
           String.format("Error writing topology package to %s %s",
@@ -136,10 +139,12 @@ public class GcsUploader implements IUploader {
   @Override
   public boolean undo() {
     // Try to get the previous version. This will be null on the first deploy.
-    final StorageObject previousObject = gcsController.getObject(previousTopologyObjectName);
+    final StorageObject previousObject =
+        gcsController.getStorageObject(previousTopologyObjectName);
     if (previousObject != null) {
       try {
-        gcsController.copyObject(previousTopologyObjectName, topologyObjectName, previousObject);
+        gcsController.copyStorageObject(previousTopologyObjectName, topologyObjectName,
+            previousObject);
       } catch (IOException ioe) {
         LOG.log(Level.SEVERE, "Reverting to previous topology version failed", ioe);
         return false;
@@ -153,7 +158,7 @@ public class GcsUploader implements IUploader {
   public void close() {
     if (!Strings.isNullOrEmpty(previousTopologyObjectName)) {
       try {
-        gcsController.deleteObject(previousTopologyObjectName);
+        gcsController.deleteStorageObject(previousTopologyObjectName);
       } catch (IOException ioe) {
         LOG.info("Failed to delete previous topology " + previousTopologyObjectName);
       }
@@ -165,7 +170,7 @@ public class GcsUploader implements IUploader {
     try {
       credential = createCredentials(configuration);
     } catch (IOException ioe) {
-      throw new RuntimeException("Unable to create credentials", ioe);
+      throw new RuntimeException("Unable to create google cloud credentials", ioe);
     }
 
     final Storage storage;
@@ -219,7 +224,7 @@ public class GcsUploader implements IUploader {
    * @param objectName the name of the object
    * @return a url to download the object
    */
-  static String getDownloadUrl(String bucket, String objectName) {
+  private static String getDownloadUrl(String bucket, String objectName) {
     return String.format(GCS_URL_FORMAT, bucket, objectName);
   }
 }
