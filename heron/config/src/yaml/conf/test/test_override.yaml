@@ -1,0 +1,2 @@
+heron.config.auto_heal_window: 10
+heron.config.auto_heal_interval: 20

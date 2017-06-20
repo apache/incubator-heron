@@ -18,7 +18,10 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <set>
+#include <sstream>
 #include <string>
+#include "manager/tmaster.h"
 #include "metrics/tmaster-metrics.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -28,10 +31,13 @@
 #include "proto/metrics.pb.h"
 #include "proto/tmaster.pb.h"
 #include "proto/topology.pb.h"
+#include "proto/physical_plan.pb.h"
 #include "config/heron-internals-config-reader.h"
 
 namespace {
 typedef heron::common::TMasterMetrics TMasterMetrics;
+typedef heron::proto::system::PhysicalPlan PhysicalPlan;
+typedef heron::proto::system::StMgr StMgr;
 typedef heron::proto::tmaster::ExceptionLogRequest ExceptionLogRequest;
 typedef heron::proto::tmaster::ExceptionLogResponse ExceptionLogResponse;
 typedef heron::proto::tmaster::MetricRequest MetricRequest;
@@ -46,18 +52,29 @@ namespace heron {
 namespace tmaster {
 
 TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
-                                     const std::string& metrics_sinks_yaml)
+                                     const std::string& metrics_sinks_yaml,
+                                     sp_int64 auto_restart_window, sp_int64 auto_restart_interval,
+                                     TMaster* _tmaster)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),
       metrics_sinks_yaml_(metrics_sinks_yaml),
       tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
-      start_time_(time(NULL)) {
+      start_time_(time(NULL)),
+      auto_restart_window_(auto_restart_window * 60 * 1000),
+      auto_restart_interval_(auto_restart_interval * 60 * 1000),
+      auto_restart_last_(0),
+      tmaster_(_tmaster) {
+  LOG(INFO) << "Auto restart backpressure container: window size " << auto_restart_window_
+            << " milliseconds ; min interval " << auto_restart_interval_ << " milliseconds";
   interval_ = config::HeronInternalsConfigReader::Instance()
                   ->GetHeronTmasterMetricsCollectorPurgeIntervalSec();
   CHECK_EQ(max_interval_ % interval_, 0);
   nintervals_ = max_interval_ / interval_;
   auto cb = [this](EventLoop::Status status) { this->Purge(status); };
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, interval_ * 1000000), 0);
+
+  dns_ = new AsyncDNS(eventLoop_);
+  client_ = new HTTPClient(eventLoop_, dns_);
 }
 
 TMetricsCollector::~TMetricsCollector() {
@@ -74,6 +91,64 @@ void TMetricsCollector::Purge(EventLoop::Status) {
   auto cb = [this](EventLoop::Status status) { this->Purge(status); };
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, interval_ * 1000000), 0);
+
+  // auto restart backpressure container feature: share the same timer with Purge
+  if (auto_restart_window_ > 0) {
+    sp_int64 now = time(NULL) * 1000;
+    LOG(INFO) << "Auto restart feature: checkpoint timestamp " << now;
+    if (now - auto_restart_last_ >= auto_restart_interval_) {
+      std::set<sp_string> badSandbox;
+      for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_stmgr.begin();
+          it != last_timestamp_backpressure_stmgr.end(); it++) {
+        LOG(INFO) << "Auto restart feature: checking stmgr pool " << it->first
+            << " " << it->second;
+        if (now-it->second > auto_restart_window_) {
+          badSandbox.insert(it->first);
+        }
+      }
+      for (std::map<sp_string, sp_int64>::iterator it=last_timestamp_backpressure_instance.begin();
+          it != last_timestamp_backpressure_instance.end(); it++) {
+        LOG(INFO) << "Auto restart feature: checking instance pool " << it->first
+            << " " << it->second;
+        if (now-it->second > auto_restart_window_) {
+          badSandbox.insert(it->first);
+        }
+      }
+      LOG(INFO) << "Auto restart feature: pool count " << badSandbox.size();
+      const PhysicalPlan* pplan = tmaster_->getPhysicalPlan();
+      for (int i=0; i < pplan->stmgrs_size(); i++) {
+        StMgr st = pplan->stmgrs(i);
+        if (badSandbox.find(st.id()) != badSandbox.end()) {
+          // send 'kill executor' command to heron-shell
+          HTTPKeyValuePairs kvs;
+          kvs.push_back(make_pair("secret", tmaster_->GetTopologyId()));
+          LOG(INFO) << "Prepare 'Kill heron-executor' " << st.id() << " cmd: "
+              << st.host_name() << " " << st.shell_port() << " " << tmaster_->GetTopologyId();
+          OutgoingHTTPRequest* request =
+              new OutgoingHTTPRequest(st.host_name(), st.shell_port(), "/killexecutor",
+                  BaseHTTPRequest::POST, kvs);
+          auto cb = [](IncomingHTTPResponse* response) {
+            LOG(WARNING) << "Kill heron-executor: " << response->response_code();
+          };
+
+          if (client_->SendRequest(request, std::move(cb)) != SP_OK) {
+            LOG(ERROR) << "Unable to send the request\n";
+          } else {
+            auto_restart_last_ = now;  // set last=now after sending killing cmd
+            // restart only one container each time
+            last_timestamp_backpressure_stmgr.erase(st.id());
+            last_timestamp_backpressure_instance.erase(st.id());
+            return;
+          }
+        } else {
+          LOG(INFO) << "Auto restart feature: not found in badSandbox " << st.id();
+        }
+      }
+    } else {
+      LOG(INFO) << "skip auto-restart-backpressure checking, last " << auto_restart_last_
+          << " interval " << auto_restart_interval_;
+    }
+  }  // auto restart backpressure container feature: end
 }
 
 void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
@@ -83,6 +158,43 @@ void TMetricsCollector::AddMetricsForComponent(const sp_string& component_name,
   const TMasterMetrics::MetricAggregationType& type = tmetrics_info_->GetAggregationType(name);
   component_metrics->AddMetricForInstance(metrics_data.instance_id(), name, type,
                                           metrics_data.value());
+
+  // auto restart backpressure container feature: record the last backpressure timestamp
+  if (name.compare("__time_spent_back_pressure_by_compid") == 0) {
+    sp_double64 val = stod(metrics_data.value());
+    if (val <= 0) {  // backpressure gone
+      last_timestamp_backpressure_stmgr.erase(metrics_data.instance_id());
+      LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure gone "
+          << metrics_data.instance_id() << " val: " << val;
+    } else {  // there is backpressure
+      LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure observed "
+          << metrics_data.instance_id() << " val: " << val;
+      if (last_timestamp_backpressure_stmgr.find(metrics_data.instance_id())
+          == last_timestamp_backpressure_stmgr.end()) {
+        LOG(INFO) << "Auto restart feature (add metrics): stmgr backpressure recorded "
+            << metrics_data.instance_id() << " timestamp: " << metrics_data.timestamp();
+        last_timestamp_backpressure_stmgr.insert(
+            std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
+      }
+    }
+  } else if (name.compare("__server/__time_spent_back_pressure_initiated") == 0) {
+    sp_double64 val = stod(metrics_data.value());
+    if (val <= 0) {  // backpressure gone
+      last_timestamp_backpressure_instance.erase(metrics_data.instance_id());
+      LOG(INFO) << "Auto restart feature (add metrics): instance backpressure gone "
+          << metrics_data.instance_id() << " val: " << val;
+    } else {  // there is backpressure
+      LOG(INFO) << "Auto restart feature (add metrics): instance backpressure observed "
+          << metrics_data.instance_id() << " val: " << val;
+      if (last_timestamp_backpressure_instance.find(metrics_data.instance_id())
+          == last_timestamp_backpressure_instance.end()) {
+        LOG(INFO) << "Auto restart feature (add metrics): instance backpressure recorded "
+            << metrics_data.instance_id() << " timestamp: " << metrics_data.timestamp();
+        last_timestamp_backpressure_instance.insert(
+            std::make_pair(metrics_data.instance_id(), metrics_data.timestamp()));
+      }
+    }
+  }  // auto restart backpressure container feature: end
 }
 
 void TMetricsCollector::AddExceptionsForComponent(const sp_string& component_name,

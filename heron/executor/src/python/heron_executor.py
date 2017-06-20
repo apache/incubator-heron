@@ -224,6 +224,10 @@ class HeronExecutor(object):
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
+    [self.auto_restart_backpressure_container_time_window, \
+     self.auto_restart_backpressure_container_min_interval] = \
+        self._load_auto_restart_backpressure_container_config( \
+            self.heron_internals_config_file.replace("heron_internals.yaml", "override.yaml"))
 
     # these get set when we call update_packing_plan
     self.packing_plan = None
@@ -335,6 +339,15 @@ class HeronExecutor(object):
       heron_internals_config = yaml.load(stream)
     return heron_internals_config['heron.logging.directory']
 
+  def _load_auto_restart_backpressure_container_config(self, override_config_file):
+    try:
+      with open(override_config_file, 'r') as stream:
+        override_config = yaml.load(stream)
+      return (override_config['heron.config.auto_heal_window'], \
+              override_config['heron.config.auto_heal_interval'])
+    except:
+      return (0, 0)
+
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
@@ -429,7 +442,9 @@ class HeronExecutor(object):
         ','.join(self.stmgr_ids.values()),
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
-        self.metricsmgr_port]
+        self.metricsmgr_port,
+        str(self.auto_restart_backpressure_container_time_window),
+        str(self.auto_restart_backpressure_container_min_interval)]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()
@@ -668,6 +683,9 @@ class HeronExecutor(object):
         '--port=%s' % self.shell_port,
         '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
 
+    if self.auto_restart_backpressure_container_time_window > 0:
+      retval[self.heron_shell_ids[self.shard]].append('--secret=%s' % self.topology_id)
+
     return retval
 
   def _untar_if_needed(self):
@@ -894,6 +912,8 @@ def main():
   # PEX_ROOT shell environment before forking the processes
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
+
+  print  sys.argv[1:]
 
   # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)
