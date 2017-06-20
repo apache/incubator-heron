@@ -15,7 +15,12 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
@@ -23,9 +28,12 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
+
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.COMPONENT_STMGR;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
 
 public class BufferSizeSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
@@ -37,11 +45,10 @@ public class BufferSizeSensor extends BaseSensor {
                           PackingPlanProvider packingPlanProvider,
                           TopologyProvider topologyProvider,
                           MetricsProvider metricsProvider) {
-    super(policyConfig);
+    super(policyConfig, METRIC_BUFFER_SIZE);
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
-    this.metricName = BUFFER_SIZE;
   }
 
   @Override
@@ -72,15 +79,15 @@ public class BufferSizeSensor extends BaseSensor {
 
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = this.metricName + boltInstanceName + BUFFER_SIZE_SUFFIX;
+        String metric = this.metricName + boltInstanceName + METRIC_BUFFER_SIZE_SUFFIX;
 
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
             getDuration(BufferSizeSensor.class.getSimpleName()),
-            HealthMgrConstants.COMPONENT_STMGR);
+            COMPONENT_STMGR);
 
         HashMap<String, InstanceMetrics> streamManagerResult =
-            stmgrResult.get(HealthMgrConstants.COMPONENT_STMGR).getMetrics();
+            stmgrResult.get(COMPONENT_STMGR).getMetrics();
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
