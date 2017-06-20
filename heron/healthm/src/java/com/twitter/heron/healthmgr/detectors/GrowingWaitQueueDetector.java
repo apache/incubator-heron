@@ -60,9 +60,9 @@ public class GrowingWaitQueueDetector implements IDetector {
     for (ComponentMetrics compMetrics : bufferSizes.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
       compStats.computeBufferSizeTrend();
-      if (compStats.getBufferChangeRate() > rateLimit) {
-        LOG.info(String.format("Detected growing wait queues for %s, rate %f",
-            compMetrics.getName(), compStats.getBufferChangeRate()));
+      if (compStats.getMaxBufferChangeRate() > rateLimit) {
+        LOG.info(String.format("Detected growing wait queues for %s, max rate %f",
+            compMetrics.getName(), compStats.getMaxBufferChangeRate()));
         result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q, compMetrics));
       }
     }
