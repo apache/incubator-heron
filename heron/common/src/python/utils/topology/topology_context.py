@@ -105,6 +105,11 @@ class TopologyContext(dict):
     """
     return self[self.CONFIG]
 
+  def get_topology_name(self):
+    """Returns the name of the topology
+    """
+    return str(self[self.TOPOLOGY].name)
+
   def get_topology_pex_path(self):
     """Returns the topology's pex file path"""
     return self[self.TOPOLOGY_PEX_PATH]
