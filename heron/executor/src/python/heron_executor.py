@@ -670,9 +670,11 @@ class HeronExecutor(object):
 
     return retval
 
-  def _untar_if_tar(self):
+  def _untar_if_needed(self):
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_bin_file)
+    elif self.pkg_type == "pex":
+      os.system("unzip %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
@@ -785,7 +787,7 @@ class HeronExecutor(object):
     if self.shard == 0:
       commands = self._get_tmaster_processes()
     else:
-      self._untar_if_tar()
+      self._untar_if_needed()
       commands = self._get_streaming_processes()
 
     # Attach daemon processes
