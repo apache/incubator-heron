@@ -71,7 +71,8 @@ class HeronExecutorTest(unittest.TestCase):
   """Unittest for Heron Executor"""
 
   shell_command_expected = 'heron_shell_binary --port=shell-port ' \
-                           '--log_file_prefix=fake_dir/heron-shell.log'
+                           '--log_file_prefix=fake_dir/heron-shell.log ' \
+                           '--secret=topid'
 
   def build_packing_plan(self, instance_distribution):
     packing_plan = PackingPlan()
@@ -134,7 +135,7 @@ class HeronExecutorTest(unittest.TestCase):
                   'tmaster_binary %s master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot stmgr-1,stmgr-7 '
-                  '%s metrics_sinks_config_file metricsmgr_port' % (HOSTNAME, INTERNAL_CONF_PATH )),
+                  '%s metrics_sinks_config_file metricsmgr_port 10 20' % (HOSTNAME, INTERNAL_CONF_PATH )),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
   ]
 
