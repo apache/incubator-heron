@@ -42,7 +42,7 @@ import com.twitter.heron.spi.uploader.UploaderException;
  * Provides a basic uploader class for uploading topology packages to Google Cloud Storage (gcs).
  * <p>
  * This uploader will write topology packages to
- * https://storage.googleapis.com/<bucket>/<topologyName>/topology.tar.gz
+ * https://storage.googleapis.com/bucket-name/topology-name/topology.tar.gz
  * This provides a known package destination location which can be used to download
  * the topology package in order to run the topology.
  *
