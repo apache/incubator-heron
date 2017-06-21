@@ -100,7 +100,11 @@ public class GcsUploader implements IUploader {
     previousTopologyObjectName =
         generateStorageObjectName(topologyName, BACKUP_PREFIX + topologyFilename);
 
-    gcsController = createGcsController(config, bucket);
+    try {
+      gcsController = createGcsController(config, bucket);
+    } catch (IOException | GeneralSecurityException ex) {
+      throw new RuntimeException("Unable to create google storage client", ex);
+    }
   }
 
   @Override
@@ -113,7 +117,7 @@ public class GcsUploader implements IUploader {
         gcsController.copyStorageObject(topologyObjectName, previousTopologyObjectName,
             previousStorageObject);
       } catch (IOException ioe) {
-        throw new UploaderException("Failed to back up previous topology version", ioe);
+        throw new UploaderException("Failed to back up previous topology", ioe);
       }
     }
 
@@ -146,7 +150,7 @@ public class GcsUploader implements IUploader {
         gcsController.copyStorageObject(previousTopologyObjectName, topologyObjectName,
             previousObject);
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Reverting to previous topology version failed", ioe);
+        LOG.log(Level.SEVERE, "Reverting to previous topology failed", ioe);
         return false;
       }
     }
@@ -165,22 +169,10 @@ public class GcsUploader implements IUploader {
     }
   }
 
-  GcsController createGcsController(Config configuration, String storageBucket) {
-    final Credential credential;
-    try {
-      credential = createCredentials(configuration);
-    } catch (IOException ioe) {
-      throw new RuntimeException("Unable to create google cloud credentials", ioe);
-    }
-
-    final Storage storage;
-    try {
-      storage = createStorage(credential);
-    } catch (IOException ioe) {
-      throw new RuntimeException("Unable to create google cloud storage client", ioe);
-    } catch (GeneralSecurityException gse) {
-      throw new RuntimeException("Unable to create google cloud storage client", gse);
-    }
+  GcsController createGcsController(Config configuration, String storageBucket)
+      throws IOException, GeneralSecurityException {
+    final Credential credential = createCredentials(configuration);
+    final Storage storage = createStorage(credential);
 
     return GcsController.create(storage, storageBucket);
   }
