@@ -14,6 +14,7 @@
 package com.twitter.heron.scheduler;
 
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.scheduler.utils.Runtime;
@@ -169,11 +171,12 @@ public class UpdateTopologyManager implements Closeable {
     logFine("Update new PackingPlan: %s",
         stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
 
-    // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
-    logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
-
     // reactivate topology
     if (initiallyRunning) {
+      // wait before reactivating to give the tmaster a chance to receive the packing update and
+      // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
+      // and/or possibly even update the packing plan directly
+      SysUtils.sleep(Duration.ofSeconds(10));
       reactivateTopology(stateManager, updatedTopology, removableContainerCount);
     }
 
