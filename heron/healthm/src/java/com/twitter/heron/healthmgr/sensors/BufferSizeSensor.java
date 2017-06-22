@@ -15,12 +15,7 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
@@ -46,6 +41,7 @@ public class BufferSizeSensor extends BaseSensor {
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
+    this.metricName = BUFFER_SIZE;
   }
 
   @Override
@@ -76,7 +72,7 @@ public class BufferSizeSensor extends BaseSensor {
 
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = BUFFER_SIZE + boltInstanceName + BUFFER_SIZE_SUFFIX;
+        String metric = this.metricName + boltInstanceName + BUFFER_SIZE_SUFFIX;
 
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
@@ -92,7 +88,7 @@ public class BufferSizeSensor extends BaseSensor {
             streamManagerResult.values().iterator().next().getMetricValueSum(metric);
 
         InstanceMetrics boltInstanceMetric =
-            new InstanceMetrics(boltInstanceName, BUFFER_SIZE, stmgrInstanceResult);
+            new InstanceMetrics(boltInstanceName, this.metricName, stmgrInstanceResult);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }

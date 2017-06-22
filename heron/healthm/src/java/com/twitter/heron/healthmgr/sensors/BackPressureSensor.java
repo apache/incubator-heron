@@ -17,7 +17,6 @@ package com.twitter.heron.healthmgr.sensors;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
@@ -37,6 +36,7 @@ public class BackPressureSensor extends BaseSensor {
   public BackPressureSensor(PackingPlanProvider packingPlanProvider,
                             TopologyProvider topologyProvider,
                             MetricsProvider metricsProvider) {
+    super(BACK_PRESSURE);
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -49,6 +49,7 @@ public class BackPressureSensor extends BaseSensor {
 
   /**
    * Computes the average (millis/sec) back-pressure caused by instances in the configured window
+   *
    * @return the average value
    */
   public Map<String, ComponentMetrics> get() {
@@ -60,7 +61,7 @@ public class BackPressureSensor extends BaseSensor {
 
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = BACK_PRESSURE + boltInstanceName;
+        String metric = this.metricName + boltInstanceName;
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
             METRIC_DURATION,

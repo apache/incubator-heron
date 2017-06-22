@@ -32,8 +32,10 @@ public abstract class BaseSensor implements ISensor {
 
   protected int duration = -1;
   protected HealthPolicyConfig config;
+  protected String metricName;
 
-  public BaseSensor() {
+  public BaseSensor(String metricName) {
+    this.metricName = metricName;
   }
 
   public BaseSensor(HealthPolicyConfig policyConfig) {
@@ -59,5 +61,9 @@ public abstract class BaseSensor implements ISensor {
     String defaultValue = String.valueOf(DEFAULT_METRIC_DURATION);
     duration = Integer.parseInt(config.getConfig(configName, defaultValue));
     return duration;
+  }
+
+  public String getMetricName() {
+    return metricName;
   }
 }
