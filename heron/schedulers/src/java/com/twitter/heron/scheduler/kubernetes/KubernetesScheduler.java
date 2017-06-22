@@ -250,7 +250,11 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       // Port info -- all the same
       containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
 
-      // Heron command for the new container
+      // In order for the container to run with the correct index, we're copying the base
+      // configuration for container with index 0, and replacing the container index with
+      // the index for the new container we're going to deploy
+      // Example: " 0 exclamationTopology" will be replaced w/ " <new_cntr_idx> exclamationTopology"
+      // The rest of the command will stay the same
       ArrayNode commandsArray = mapper.createArrayNode();
       for (JsonNode cmd : existingContainer.get("command")) {
         String oldPattern = " " + oldContainerIndex + " " + Runtime.topologyName(runtime);
@@ -385,13 +389,21 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     // iterate over the containers we need to add and rebuild the spec based on the new plan
     ObjectMapper mapper = new ObjectMapper();
+    int totalNewContainerCount = containersToAdd.size();
+    int deployedContainerCount = 0;
     for (PackingPlan.ContainerPlan containerPlan : containersToAdd) {
       String newContainer = rebuildKubernetesPodSpec(podConfig, mapper, containerPlan, 0);
 
       // deploy this new container
       try {
         controller.deployContainer(newContainer);
+        deployedContainerCount++;
+        LOG.log(Level.INFO, "New container " + ++deployedContainerCount + "/"
+            + totalNewContainerCount + " deployed");
       } catch (IOException ioe) {
+        LOG.log(Level.SEVERE, "Issue deploying a container! Previously added container count: "
+            + deployedContainerCount);
+        LOG.log(Level.INFO, "Configuration of problem container: " + newContainer);
         throw new TopologyRuntimeManagementException("Problem adding container with id "
             + containerPlan.getId(), ioe);
       }
