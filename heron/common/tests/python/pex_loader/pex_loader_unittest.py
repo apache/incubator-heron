@@ -50,7 +50,7 @@ class PexLoaderTest(unittest.TestCase):
     for path in test_path:
       pex_loader.load_pex(path, include_deps=False)
       abs_path = os.path.abspath(path)
-      self.assertIn(abs_path, sys.path)
+      self.assertIn(os.path.dirname(abs_path), sys.path)
 
   def test_sample(self):
     path = self.get_path_of_sample(constants.SAMPLE_PEX)

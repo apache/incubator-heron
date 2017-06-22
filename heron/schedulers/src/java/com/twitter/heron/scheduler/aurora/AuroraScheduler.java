@@ -200,7 +200,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_TYPE,
         Context.topologyPackageType(config).name().toLowerCase());
     auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
-        FileUtils.getBaseName(Context.topologyBinaryFile(config)));
+        Context.topologyBinaryFile(config));
     auroraProperties.put(AuroraField.JAVA_HOME, Context.clusterJavaHome(config));
 
     auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));

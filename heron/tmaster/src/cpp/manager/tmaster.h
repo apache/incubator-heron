@@ -37,11 +37,14 @@ class StatsInterface;
 class TMasterServer;
 class TMetricsCollector;
 
+typedef std::map<std::string, StMgrState*> StMgrMap;
+typedef StMgrMap::iterator StMgrMapIter;
+
 class TMaster {
  public:
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
           const std::string& _topology_id, const std::string& _topdir,
-          const std::vector<std::string>& _stmgrs, sp_int32 _controller_port, sp_int32 _master_port,
+          sp_int32 _controller_port, sp_int32 _master_port,
           sp_int32 _stats_port, sp_int32 metricsMgrPort, const std::string& metrics_sinks_yaml,
           const std::string& _myhost_name, EventLoop* eventLoop);
 
@@ -112,11 +115,14 @@ class TMaster {
   // Function called when we want to setup ourselves as tmaster
   void EstablishTMaster(EventLoop::Status);
 
+  void EstablishPackingPlan(EventLoop::Status);
+  void FetchPackingPlan();
+  void OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
+                          proto::system::StatusCode _status);
+
   void UpdateProcessMetrics(EventLoop::Status);
 
   // map of active stmgr id to stmgr state
-  typedef std::map<std::string, StMgrState*> StMgrMap;
-  typedef StMgrMap::iterator StMgrMapIter;
   StMgrMap stmgrs_;
 
   // map of connection to stmgr id
@@ -132,6 +138,8 @@ class TMaster {
   // It shall only be used to construct the physical plan when TMaster first time starts
   // Any runtime changes shall be made to current_pplan_->topology
   proto::api::Topology* topology_;
+
+  proto::system::PackingPlan* packing_plan_;
 
   // The statemgr where we store/retrieve our state
   heron::common::HeronStateMgr* state_mgr_;

@@ -426,7 +426,6 @@ class HeronExecutor(object):
         self.topology_id,
         self.zknode,
         self.zkroot,
-        ','.join(self.stmgr_ids.values()),
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
         self.metricsmgr_port]
@@ -670,9 +669,11 @@ class HeronExecutor(object):
 
     return retval
 
-  def _untar_if_tar(self):
+  def _untar_if_needed(self):
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_bin_file)
+    elif self.pkg_type == "pex":
+      os.system("unzip %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
@@ -785,7 +786,7 @@ class HeronExecutor(object):
     if self.shard == 0:
       commands = self._get_tmaster_processes()
     else:
-      self._untar_if_tar()
+      self._untar_if_needed()
       commands = self._get_streaming_processes()
 
     # Attach daemon processes
@@ -804,11 +805,10 @@ class HeronExecutor(object):
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
     for current_name, current_command in current_commands.iteritems():
-      # Always restart tmaster to pick up new state. The stream manager is also restarted, but
-      # we shouldn't need to do that and work is being done to fix that on the steam manager
+      # We don't restart tmaster since it watches the packing plan and updates itself. The stream
+      # manager is restarted just to reset state, but we could update it to do so without a restart
       if current_name in updated_commands.keys() and \
         current_command == updated_commands[current_name] and \
-        current_name != 'heron-tmaster' and \
         not current_name.startswith('stmgr-'):
         commands_to_keep[current_name] = current_command
       else:
