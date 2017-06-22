@@ -121,6 +121,16 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return true;
   }
 
+  /**
+   * getTopologyConf
+   *
+   * Build all the pod specifications so we can deploy the Heron topology. This will be a list of
+   * JSON strings that contain all the necessary pod specifications we'll need to pass to the
+   * K8S API
+   *
+   * @param packing - PackingPlan of the topology
+   * @return String[]
+   */
   protected String[] getTopologyConf(PackingPlan packing) {
 
     config = Config.newBuilder()
@@ -150,7 +160,17 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return deploymentConfs;
   }
 
-  // build the pod spec for a container
+  /**
+   * buildKubernetesPodSpec
+   *
+   * Build a specification object for a K8S Pod, which will house the Docker image and necessary
+   * setup information about the Pod so we can run a Heron container
+   *
+   * @param mapper - ObjectMapper instance we can use to create new JSON nodes
+   * @param containerIndex - The index of the container
+   * @param containerResource - The Resource object for the new container
+   * @return
+   */
   protected String buildKubernetesPodSpec(ObjectMapper mapper,
                                           Integer containerIndex,
                                           Resource containerResource) {
@@ -167,6 +187,19 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return instance.toString();
   }
 
+  /**
+   * rebuildKubernetesPodSpec
+   *
+   * Build a new container spec based of an existing spec. This is used when we want to copy
+   * an existing spec so we can easily create a new one, while replacing necessary information like
+   * the container index
+   *
+   * @param podSpec - Existing pod specification JSON object
+   * @param mapper - ObjectMapper instance we can use to create new JSON nodes
+   * @param containerPlan - The ContainerPlan for the new container
+   * @param oldContainerIndex - The index of the existing container
+   * @return String
+   */
   protected String rebuildKubernetesPodSpec(JsonNode podSpec,
                                             ObjectMapper mapper,
                                             PackingPlan.ContainerPlan containerPlan,
@@ -189,8 +222,17 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return newContainer.toString();
   }
 
-
-  // build the metadata for a deployment
+  /**
+   * getMetadata
+   *
+   * Build the metadata that we're going to attach to our Pod specification. This metadata
+   * will allow us to query the set of pods that belong to a certain topology so we can easily
+   * retrieve or delete all of them at once.
+   *
+   * @param mapper - ObjectMapper instance we can use to create other JSON nodes
+   * @param containerIndex - Index of the container
+   * @return ObjectNode
+   */
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
     metadataNode.put(KubernetesConstants.NAME,
@@ -204,17 +246,18 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return metadataNode;
   }
 
-  // build the metadata for a pod template
-  protected ObjectNode getPodMetadata(ObjectMapper mapper, int containerIndex) {
-    ObjectNode podMetadata = mapper.createObjectNode();
-    ObjectNode labelData = mapper.createObjectNode();
-
-    labelData.put(KubernetesConstants.APP, Integer.toString(containerIndex));
-    podMetadata.set(KubernetesConstants.METADATA_LABELS, labelData);
-
-    return podMetadata;
-  }
-
+  /**
+   * rebuildContainerSpec
+   *
+   * Based on an existing container spec, rebuild it and replace necessary information for building
+   * a new container (primarily the container index)
+   *
+   * @param existingSpec - Existing container spec
+   * @param mapper - ObjectMapper instance to use for creating new JSON nodes
+   * @param containerPlan - New container's ContainerPlan
+   * @param oldContainerIndex - The index of the old container
+   * @return ObjectNode
+   */
   protected ObjectNode rebuildContainerSpec(JsonNode existingSpec,
                                             ObjectMapper mapper,
                                             PackingPlan.ContainerPlan containerPlan,
@@ -283,7 +326,16 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return containerSpec;
   }
 
-  // build the container spec for the deployment
+  /**
+   * getContainerSpec
+   *
+   * Get the JSON-based specification for the K8S Pod
+   *
+   * @param mapper - An ObjectMapper instance which can be used to create JSON nodes
+   * @param containerIndex - Index of the container
+   * @param containerResource - The containers Resource object
+   * @return ObjectNode
+   */
   protected ObjectNode getContainerSpec(ObjectMapper mapper,
                                         int containerIndex,
                                         Resource containerResource) {
@@ -344,6 +396,14 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
 
+  /**
+   * getPorts
+   *
+   * Get the ports the container will need to expose so other containers can access its services
+   *
+   * @param mapper
+   * @return ArrayNode
+   */
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
 
@@ -358,11 +418,26 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return ports;
   }
 
+  /**
+   * getFetchCommand
+   *
+   * Get the command that will be used to retrieve the topology JAR
+   *
+   * @return String
+   */
   protected String getFetchCommand() {
     return "cd /opt/heron/ && curl " + Runtime.topologyPackageUri(runtime).toString()
             + " | tar xvz";
   }
 
+  /**
+   * getExecutorCommand
+   *
+   * Get the command string needed to start the container
+   *
+   * @param containerIndex
+   * @return String[]
+   */
   protected String[] getExecutorCommand(int containerIndex) {
     String[] executorCommand = SchedulerUtils.getExecutorCommand(config, runtime,
         containerIndex, Arrays.asList(KubernetesConstants.PORT_LIST));
@@ -375,6 +450,17 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return command;
   }
 
+  /**
+   * Add containers for a scale-up event from an update command
+   *
+   * @param containersToAdd, the list of containers that need to be added
+   *
+   * NOTE: Due to the mechanics of Kubernetes pod creation, each container must be created on
+   * a one-by-one basis. If one container out of many containers to be deployed failed, it will
+   * leave the topology in a bad state.
+   *
+   * TODO (jrcrawfo) -- Improve the handling of this issue
+   */
   @Override
   public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     // grab the base pod so we can copy and modify some stuff
@@ -401,15 +487,23 @@ public class KubernetesScheduler implements IScheduler, IScalable {
         LOG.log(Level.INFO, "New container " + ++deployedContainerCount + "/"
             + totalNewContainerCount + " deployed");
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Issue deploying a container! Previously added container count: "
-            + deployedContainerCount);
-        LOG.log(Level.INFO, "Configuration of problem container: " + newContainer);
         throw new TopologyRuntimeManagementException("Problem adding container with id "
-            + containerPlan.getId(), ioe);
+            + containerPlan.getId() + ". Deployed " + deployedContainerCount + " out of " + totalNewContainerCount + " containers", ioe);
       }
     }
   }
 
+  /**
+   * Remove containers for a scale-down event from an update command
+   *
+   * @param containersToRemove, the list of containers that need to be removed
+   *
+   * NOTE: Due to the mechanics of Kubernetes pod removal, each container must be removed on
+   * a one-by-one basis. If one container out of many containers to be removed failed, it will
+   * leave the topology in a bad state.
+   *
+   * TODO (jrcrawfo) -- Improve the handling of this issue
+   */
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     for (PackingPlan.ContainerPlan container : containersToRemove) {
