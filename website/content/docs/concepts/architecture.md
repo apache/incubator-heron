@@ -2,7 +2,7 @@
 title: Heron Architecture
 ---
 
-Heron is the direct successor of [Apache Storm](http://storm.apache.org). From
+Heron provides compatibility with [Apache Storm](http://storm.apache.org). From
 an architectural perspective it is markedly different from Storm but fully
 backwards compatible with it from an API perspective.
 
@@ -24,11 +24,10 @@ in the [Heron Topologies](../topologies) document.
 
 ## Relationship with Apache Storm
 
-Heron is the direct successor of [Apache Storm](http://storm.apache.org) but
-built with two goals in mind:
+Heron was initially developed at Twitter with two goals in mind:
 
-1. Overcoming Storm's performance, reliability, and other shortcomings by
-replacing Storm's thread-based computing model with a process-based model.
+1. Providing performance, reliability and ease of troubleshooting by leveraging a process-based
+computing model. Storm utilizes a thread-based model. 
 2. Retaining full compatibility with Storm's data model and [topology
 API](http://storm.apache.org/about/simple-api.html).
 
