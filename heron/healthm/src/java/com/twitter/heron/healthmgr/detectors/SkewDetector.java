@@ -19,31 +19,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
+import com.twitter.heron.healthmgr.common.MetricsStats;
+import com.twitter.heron.healthmgr.sensors.BaseSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_DATA_SKEW;
+public class SkewDetector implements IDetector {
+  public static final String CONF_SKEW_RATIO = "SkewDetector.skewRatio";
 
-public class DataSkewDetector implements IDetector {
-  public static final String CONF_SKEW_RATIO = "DataSkewDetector.skewRatio";
-
-  private static final Logger LOG = Logger.getLogger(DataSkewDetector.class.getName());
-  private final ExecuteCountSensor exeCountSensor;
+  private static final Logger LOG = Logger.getLogger(SkewDetector.class.getName());
+  private final BaseSensor sensor;
   private final double skewRatio;
+  private final String symptomName;
 
   @Inject
-  DataSkewDetector(ExecuteCountSensor exeCountSensor,
-                   HealthPolicyConfig policyConfig) {
-    this.exeCountSensor = exeCountSensor;
-    skewRatio = Double.valueOf(policyConfig.getConfig(CONF_SKEW_RATIO, "1.5"));
+  SkewDetector(BaseSensor sensor, double skewRatio, String symptomName) {
+    this.sensor = sensor;
+    this.skewRatio = skewRatio;
+    this.symptomName = symptomName;
   }
 
   /**
@@ -55,14 +53,14 @@ public class DataSkewDetector implements IDetector {
   public List<Symptom> detect() {
     ArrayList<Symptom> result = new ArrayList<>();
 
-    Map<String, ComponentMetrics> exeCountMetrics = exeCountSensor.get();
-    for (ComponentMetrics compMetrics : exeCountMetrics.values()) {
+    Map<String, ComponentMetrics> metrics = sensor.get();
+    for (ComponentMetrics compMetrics : metrics.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      compStats.computeExeCountStats();
-      if (compStats.getExeCountMax() > skewRatio * compStats.getExeCountMin()) {
-        LOG.info(String.format("Detected data skew for %s, min = %f, max = %f",
-            compMetrics.getName(), compStats.getExeCountMin(), compStats.getExeCountMax()));
-        result.add(new Symptom(SYMPTOM_DATA_SKEW, compMetrics));
+      MetricsStats stats = compStats.computeMinMaxStats(sensor.getMetricName());
+      if (stats.getMetricMax() > skewRatio * stats.getMetricMin()) {
+        LOG.info(String.format("Detected skew for %s, min = %f, max = %f",
+            compMetrics.getName(), stats.getMetricMin(), stats.getMetricMax()));
+        result.add(new Symptom(symptomName, compMetrics));
       }
     }
 

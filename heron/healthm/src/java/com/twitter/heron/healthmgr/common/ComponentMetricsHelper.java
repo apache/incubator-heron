@@ -25,7 +25,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
 
 
 /**
@@ -35,10 +34,7 @@ public class ComponentMetricsHelper {
   private final ComponentMetrics componentMetrics;
 
   private List<InstanceMetrics> boltsWithBackpressure = new ArrayList<>();
-  private double exeCountMax = 0;
-  private double exeCountMin = Double.MAX_VALUE;
-  private double bufferSizeMax = 0;
-  private double bufferSizeMin = Double.MAX_VALUE;
+
   private double bufferChangeRate = 0;
   private double totalBackpressure = 0;
 
@@ -56,16 +52,6 @@ public class ComponentMetricsHelper {
     }
   }
 
-  public void computeBufferSizeStats() {
-    for (InstanceMetrics mergedInstance : componentMetrics.getMetrics().values()) {
-      Double bufferSize = mergedInstance.getMetricValueSum(METRIC_BUFFER_SIZE);
-      if (bufferSize == null) {
-        continue;
-      }
-      bufferSizeMax = bufferSizeMax < bufferSize ? bufferSize : bufferSizeMax;
-      bufferSizeMin = bufferSizeMin > bufferSize ? bufferSize : bufferSizeMin;
-    }
-  }
 
   public void computeBufferSizeTrend() {
     for (InstanceMetrics mergedInstance : componentMetrics.getMetrics().values()) {
@@ -83,29 +69,22 @@ public class ComponentMetricsHelper {
     }
   }
 
-  public void computeExeCountStats() {
+
+  public MetricsStats computeMinMaxStats(String metric) {
+    double metricMax = 0;
+    double metricMin = Double.MAX_VALUE;
     for (InstanceMetrics instance : componentMetrics.getMetrics().values()) {
-      double exeCount = instance.getMetricValueSum(METRIC_EXE_COUNT);
-      exeCountMax = exeCountMax < exeCount ? exeCount : exeCountMax;
-      exeCountMin = exeCountMin > exeCount ? exeCount : exeCountMin;
+
+      Double metricValue = instance.getMetricValueSum(metric);
+      if (metricValue == null) {
+        continue;
+      }
+      metricMax = metricMax < metricValue ? metricValue : metricMax;
+      metricMin = metricMin > metricValue ? metricValue : metricMin;
     }
+    return new MetricsStats(metricMin, metricMax);
   }
 
-  public double getExeCountMax() {
-    return exeCountMax;
-  }
-
-  public double getExeCountMin() {
-    return exeCountMin;
-  }
-
-  public double getBufferSizeMax() {
-    return bufferSizeMax;
-  }
-
-  public double getBufferSizeMin() {
-    return bufferSizeMin;
-  }
 
   public double getTotalBackpressure() {
     return totalBackpressure;

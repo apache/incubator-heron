@@ -14,18 +14,16 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
-
-import org.junit.Test;
-
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
 import static com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector.CONF_DISPARITY_RATIO;
@@ -48,6 +46,7 @@ public class WaitQueueDisparityDetectorTest {
 
     BufferSizeSensor sensor = mock(BufferSizeSensor.class);
     when(sensor.get()).thenReturn(topologyMetrics);
+    when(sensor.getMetricName()).thenReturn(METRIC_BUFFER_SIZE);
 
     WaitQueueDisparityDetector detector = new WaitQueueDisparityDetector(sensor, config);
     List<Symptom> symptoms = detector.detect();
