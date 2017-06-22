@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -49,6 +48,7 @@ public class BackPressureDetector implements IDetector {
   /**
    * Detects all components initiating backpressure above the configured limit. Normally there
    * will be only one component
+   *
    * @return A collection of all components causing backpressure.
    */
   @Override

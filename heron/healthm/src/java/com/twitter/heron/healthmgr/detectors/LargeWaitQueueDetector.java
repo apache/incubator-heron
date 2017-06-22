@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -28,8 +27,10 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
+import com.twitter.heron.healthmgr.common.MetricsStats;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LARGE_WAIT_Q;
 
 public class LargeWaitQueueDetector implements IDetector {
@@ -59,10 +60,10 @@ public class LargeWaitQueueDetector implements IDetector {
     Map<String, ComponentMetrics> bufferSizes = pendingBufferSensor.get();
     for (ComponentMetrics compMetrics : bufferSizes.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      compStats.computeBufferSizeStats();
-      if (compStats.getBufferSizeMin() > sizeLimit) {
+      MetricsStats stats = compStats.computeMinMaxStats(METRIC_BUFFER_SIZE);
+      if (stats.getMetricMin() > sizeLimit) {
         LOG.info(String.format("Detected large wait queues for %s, smallest queue is %f",
-            compMetrics.getName(), compStats.getBufferSizeMin()));
+            compMetrics.getName(), stats.getMetricMin()));
         result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q, compMetrics));
       }
     }
