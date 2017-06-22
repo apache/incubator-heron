@@ -60,7 +60,7 @@ public class HttpJsonClient {
       // Check the response code
       if (!NetworkUtils.checkHttpResponseCode(conn, expectedResponseCode)) {
         throw new IOException("Unexpected response from connection. Expected "
-            + expectedResponseCode + " but received " + NetworkUtils.getHttpResponseCode(conn));
+            + expectedResponseCode + " but received " + conn.getResponseCode());
       }
 
       responseData = NetworkUtils.readHttpResponse(conn);
@@ -98,7 +98,7 @@ public class HttpJsonClient {
       // Check the response code
       if (!NetworkUtils.checkHttpResponseCode(conn, expectedResponseCode)) {
         throw new IOException("Unexpected response from connection. Expected "
-            + expectedResponseCode + " but received " + NetworkUtils.getHttpResponseCode(conn));
+            + expectedResponseCode + " but received " + conn.getResponseCode());
       }
     } finally {
       conn.disconnect();
@@ -126,7 +126,7 @@ public class HttpJsonClient {
         LOG.log(Level.SEVERE, "Failed to send POST request to endpoint");
         LOG.log(Level.SEVERE, Arrays.toString(bytes));
         throw new IOException("Unexpected response from connection. Expected "
-            + expectedResponseCode + " but received " + NetworkUtils.getHttpResponseCode(conn));
+            + expectedResponseCode + " but received " + conn.getResponseCode());
       }
     } finally {
       conn.disconnect();

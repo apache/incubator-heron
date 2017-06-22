@@ -397,10 +397,6 @@ public final class NetworkUtils {
     }
   }
 
-  public static Integer getHttpResponseCode(HttpURLConnection connection) throws IOException {
-    return connection.getResponseCode();
-  }
-
   public static String getHostName() {
     String hostName;
     try {
