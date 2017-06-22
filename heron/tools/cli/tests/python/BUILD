@@ -13,3 +13,18 @@ pex_test(
     ],
     size = "small",
 )
+
+pex_test(
+    name = "parse_unittest",
+    srcs = ["parse_unittest.py"],
+    deps = [
+        "//heron/tools/cli/src/python:cli-py",
+    ],
+    reqs = [
+        "mock==1.0.1",
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
+    ],
+    size = "small",
+)
