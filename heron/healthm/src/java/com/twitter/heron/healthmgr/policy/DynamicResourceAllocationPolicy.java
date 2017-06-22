@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IResolver;
@@ -32,8 +31,8 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.detectors.DataSkewDetector;
 import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
+import com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
 import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
@@ -45,12 +44,10 @@ import static com.twitter.heron.healthmgr.common.HealthMgrConstants.HEALTH_POLIC
 public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     implements EventHandler<TopologyUpdate> {
 
-  private static final Logger LOG
-      = Logger.getLogger(DynamicResourceAllocationPolicy.class.getName());
-
   public static final String CONF_WAIT_INTERVAL_MILLIS =
       "DynamicResourceAllocationPolicy.conf_post_action_wait_interval_min";
-
+  private static final Logger LOG
+      = Logger.getLogger(DynamicResourceAllocationPolicy.class.getName());
   private HealthPolicyConfig policyConfig;
   private ScaleUpResolver scaleUpResolver;
 
@@ -59,7 +56,7 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
                                   EventManager eventManager,
                                   BackPressureDetector backPressureDetector,
                                   LargeWaitQueueDetector largeWaitQueueDetector,
-                                  DataSkewDetector dataSkewDetector,
+                                  ProcessingRateSkewDetector dataSkewDetector,
                                   WaitQueueDisparityDetector waitQueueDisparityDetector,
                                   UnderProvisioningDiagnoser underProvisioningDiagnoser,
                                   DataSkewDiagnoser dataSkewDiagnoser,
