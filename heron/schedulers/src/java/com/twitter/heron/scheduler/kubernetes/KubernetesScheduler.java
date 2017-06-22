@@ -122,14 +122,12 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * getTopologyConf
-   *
    * Build all the pod specifications so we can deploy the Heron topology. This will be a list of
    * JSON strings that contain all the necessary pod specifications we'll need to pass to the
    * K8S API
    *
    * @param packing - PackingPlan of the topology
-   * @return String[]
+   * @return
    */
   protected String[] getTopologyConf(PackingPlan packing) {
 
@@ -161,8 +159,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * buildKubernetesPodSpec
-   *
    * Build a specification object for a K8S Pod, which will house the Docker image and necessary
    * setup information about the Pod so we can run a Heron container
    *
@@ -188,8 +184,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * rebuildKubernetesPodSpec
-   *
    * Build a new container spec based of an existing spec. This is used when we want to copy
    * an existing spec so we can easily create a new one, while replacing necessary information like
    * the container index
@@ -198,7 +192,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param mapper - ObjectMapper instance we can use to create new JSON nodes
    * @param containerPlan - The ContainerPlan for the new container
    * @param oldContainerIndex - The index of the existing container
-   * @return String
+   * @return
    */
   protected String rebuildKubernetesPodSpec(JsonNode podSpec,
                                             ObjectMapper mapper,
@@ -223,15 +217,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * getMetadata
-   *
    * Build the metadata that we're going to attach to our Pod specification. This metadata
    * will allow us to query the set of pods that belong to a certain topology so we can easily
    * retrieve or delete all of them at once.
    *
    * @param mapper - ObjectMapper instance we can use to create other JSON nodes
    * @param containerIndex - Index of the container
-   * @return ObjectNode
+   * @return
    */
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
@@ -247,8 +239,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * rebuildContainerSpec
-   *
    * Based on an existing container spec, rebuild it and replace necessary information for building
    * a new container (primarily the container index)
    *
@@ -256,7 +246,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param mapper - ObjectMapper instance to use for creating new JSON nodes
    * @param containerPlan - New container's ContainerPlan
    * @param oldContainerIndex - The index of the old container
-   * @return ObjectNode
+   * @return
    */
   protected ObjectNode rebuildContainerSpec(JsonNode existingSpec,
                                             ObjectMapper mapper,
@@ -327,14 +317,12 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * getContainerSpec
-   *
    * Get the JSON-based specification for the K8S Pod
    *
    * @param mapper - An ObjectMapper instance which can be used to create JSON nodes
    * @param containerIndex - Index of the container
    * @param containerResource - The containers Resource object
-   * @return ObjectNode
+   * @return
    */
   protected ObjectNode getContainerSpec(ObjectMapper mapper,
                                         int containerIndex,
@@ -397,12 +385,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
 
   /**
-   * getPorts
-   *
    * Get the ports the container will need to expose so other containers can access its services
    *
    * @param mapper
-   * @return ArrayNode
+   * @return
    */
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
@@ -419,11 +405,9 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * getFetchCommand
-   *
    * Get the command that will be used to retrieve the topology JAR
    *
-   * @return String
+   * @return
    */
   protected String getFetchCommand() {
     return "cd /opt/heron/ && curl " + Runtime.topologyPackageUri(runtime).toString()
@@ -431,12 +415,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * getExecutorCommand
-   *
    * Get the command string needed to start the container
    *
    * @param containerIndex
-   * @return String[]
+   * @return
    */
   protected String[] getExecutorCommand(int containerIndex) {
     String[] executorCommand = SchedulerUtils.getExecutorCommand(config, runtime,
@@ -459,7 +441,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * a one-by-one basis. If one container out of many containers to be deployed failed, it will
    * leave the topology in a bad state.
    *
-   * TODO (jrcrawfo) -- Improve the handling of this issue
+   * TODO (jrcrawfo) -- (https://github.com/twitter/heron/issues/1981)
    */
   @Override
   public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
@@ -494,15 +476,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * Remove containers for a scale-down event from an update command
-   *
    * @param containersToRemove, the list of containers that need to be removed
    *
    * NOTE: Due to the mechanics of Kubernetes pod removal, each container must be removed on
    * a one-by-one basis. If one container out of many containers to be removed failed, it will
    * leave the topology in a bad state.
    *
-   * TODO (jrcrawfo) -- Improve the handling of this issue
+   * TODO (jrcrawfo) -- (https://github.com/twitter/heron/issues/1981)
    */
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {

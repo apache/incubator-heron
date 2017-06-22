@@ -47,7 +47,7 @@ public class KubernetesController {
   /**
    * Kill a topology in kubernetes based on a configuration
    *
-   * @return success
+   * @return
    */
   protected boolean killTopology() {
 
@@ -71,7 +71,7 @@ public class KubernetesController {
   /**
    * Get information about a pod
    *
-   * @return json object for pod
+   * @return
    */
   protected JsonNode getBasePod(String podId) throws IOException {
 
@@ -136,7 +136,7 @@ public class KubernetesController {
   /**
    * Submit a topology to kubernetes based on a set of pod configurations
    *
-   * @return success
+   * @return
    */
   protected boolean submitTopology(String[] appConfs) {
 
