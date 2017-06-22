@@ -379,8 +379,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     try {
       podConfig = controller.getBasePod(basePodName);
     } catch (IOException ioe) {
-      LOG.log(Level.SEVERE, "Problem retrieving base pod configuration", ioe);
-      throw new TopologyRuntimeManagementException("Unable to add containers for update");
+      throw new TopologyRuntimeManagementException("Unable to retrieve base pod configuration from "
+          + basePodName, ioe);
     }
 
     // iterate over the containers we need to add and rebuild the spec based on the new plan
@@ -392,12 +392,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       try {
         controller.deployContainer(newContainer);
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Problem deploying new container", ioe);
-        throw new TopologyRuntimeManagementException("Unable to add container for update");
+        throw new TopologyRuntimeManagementException("Problem adding container with id "
+            + containerPlan.getId(), ioe);
       }
-
     }
-
   }
 
   @Override
@@ -407,8 +405,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       try {
         controller.removeContainer(podName);
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Problem removing a container", ioe);
-        throw new TopologyRuntimeManagementException("Unable to remove container for update");
+        throw new TopologyRuntimeManagementException("Problem removing container with id "
+            + container.getId(), ioe);
       }
     }
   }

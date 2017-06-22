@@ -86,7 +86,6 @@ public class KubernetesController {
     try {
       result = jsonAPIClient.get(HttpURLConnection.HTTP_OK);
     } catch (IOException ioe) {
-      LOG.log(Level.SEVERE, "Problem making call to get Base Pod Configuration: " + podURI, ioe);
       throw ioe;
     }
     return result;
@@ -103,7 +102,6 @@ public class KubernetesController {
     try {
       jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
     } catch (IOException ioe) {
-      LOG.log(Level.SEVERE, "Problem making call to get deploy Pod: " + this.baseUriPath, ioe);
       throw ioe;
     }
 
@@ -150,7 +148,7 @@ public class KubernetesController {
       try {
         deployContainer(appConf);
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Problem deploying container");
+        LOG.log(Level.SEVERE, "Problem deploying container with config: " + appConf);
         return false;
       }
     }
