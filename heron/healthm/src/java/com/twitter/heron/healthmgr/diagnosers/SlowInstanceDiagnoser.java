@@ -24,6 +24,7 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
+import com.twitter.heron.healthmgr.common.MetricsStats;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DIAGNOSIS_SLOW_INSTANCE;
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
@@ -36,10 +37,14 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
+    Map<String, ComponentMetrics> processingRateSkewComponents =
+        getProcessingRateSkewComponents(symptoms);
     Map<String, ComponentMetrics> waitQDisparityComponents = getWaitQDisparityComponents(symptoms);
 
-    if (bpSymptoms.isEmpty() || waitQDisparityComponents.isEmpty()) {
-      // Since there is no back pressure or disparate execute count, no action is needed
+    if (bpSymptoms.isEmpty() || waitQDisparityComponents.isEmpty()
+        || !processingRateSkewComponents.isEmpty()) {
+      // Since there is no back pressure or disparate wait count or similar
+      // execution count, no action is needed
       return null;
     } else if (bpSymptoms.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
@@ -57,14 +62,15 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
     ComponentMetrics mergedData = ComponentMetrics.merge(bpMetrics, pendingBufferMetrics);
     ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
     compStats.computeBpStats();
-    compStats.computeBufferSizeStats();
+    MetricsStats bufferStats = compStats.computeMinMaxStats(METRIC_BUFFER_SIZE);
 
     Symptom resultSymptom = null;
     for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
       double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE);
       double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE);
-      if (compStats.getBufferSizeMax() < bufferSize * 2) {
-        LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s",
+      if (bufferStats.getMetricMax() < bufferSize * 2) {
+        LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s "
+            + "and similar processing rates",
             boltMetrics.getName(), bpValue, bufferSize));
         resultSymptom = new Symptom(SYMPTOM_SLOW_INSTANCE, mergedData);
       }

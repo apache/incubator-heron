@@ -14,12 +14,12 @@
 
 package com.twitter.heron.healthmgr;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.*;
 
@@ -29,7 +29,7 @@ public class TestUtils {
   }
 
   public static Symptom createExeCountSymptom(int... exeCounts) {
-    return createSymptom(SYMPTOM_DATA_SKEW, METRIC_EXE_COUNT, exeCounts);
+    return createSymptom(SYMPTOM_PROCESSING_RATE_SKEW, METRIC_EXE_COUNT, exeCounts);
   }
 
   public static Symptom createWaitQueueDisparitySymptom(int... bufferSizes) {

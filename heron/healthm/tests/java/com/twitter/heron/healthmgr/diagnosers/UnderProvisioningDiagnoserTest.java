@@ -14,15 +14,13 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.List;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
-
+import com.twitter.heron.healthmgr.TestUtils;
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.TestUtils;
+import java.util.List;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
@@ -31,24 +29,25 @@ import static org.junit.Assert.assertNull;
 public class UnderProvisioningDiagnoserTest {
   @Test
   public void diagnosisWhen1Of1InstanceInBP() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123);
-    symptoms.add(TestUtils.createLargeWaitQSymptom(5000));
-    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
-    validateDiagnosis(result);
-  }
-
-  @Test
-  public void diagnosisSucceedsAllInstanceFullBuffers() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
-    // set execute count within 20%, hence diagnosis should be under provisioning
-    symptoms.add(TestUtils.createLargeWaitQSymptom(5000, 4000, 3500));
-    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
-    validateDiagnosis(result);
-  }
-
-  @Test
-  public void diagnosisFailsIfBufferSizeIsNotKnown() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0);
+    //symptoms.add(TestUtils.createLargeWaitQSymptom(5000));
+    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
+    validateDiagnosis(result);
+  }
+
+  @Test
+  public void diagnosisFailsNotSimilarQueueSizes() {
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
+    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(100, 500, 500));
+    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
+    assertNull(result);
+  }
+
+  @Test
+  public void diagnosisFailsNotSimilarProcessingRates() {
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
+    symptoms.add(TestUtils.createExeCountSymptom(100, 500, 500));
+
     Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
     assertNull(result);
   }

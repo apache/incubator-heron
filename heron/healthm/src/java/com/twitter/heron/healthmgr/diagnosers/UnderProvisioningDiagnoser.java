@@ -34,10 +34,14 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    Map<String, ComponentMetrics> largeWaitQComponents = getLargeWaitQComponents(symptoms);
+    Map<String, ComponentMetrics> processingRateSkewComponents =
+        getProcessingRateSkewComponents(symptoms);
+    Map<String, ComponentMetrics> waitQDisparityComponents = getWaitQDisparityComponents(symptoms);
 
-    if (bpSymptoms.isEmpty() || largeWaitQComponents.isEmpty()) {
-      // Since there is no back pressure or large pending queue, no action is needed
+    if (bpSymptoms.isEmpty() || !processingRateSkewComponents.isEmpty()
+        || !waitQDisparityComponents.isEmpty()) {
+      // Since there is no back pressure or similar processing rates
+      // and buffer sizes, no action is needed
       return null;
     } else if (bpSymptoms.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
@@ -45,23 +49,14 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
     }
     ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    // verify large buffer queue and back pressure for the same component exists
-    ComponentMetrics pendingBufferMetrics = largeWaitQComponents.get(bpMetrics.getName());
-    if (pendingBufferMetrics == null) {
-      // wait Q for the component with back pressure is small. There is no under provisioning
-      return null;
-    }
-
-    // all instances have large pending buffers and this comp is initiating back pressure.
-    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetrics, pendingBufferMetrics);
-    ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
+    ComponentMetricsHelper compStats = new ComponentMetricsHelper(bpMetrics);
     compStats.computeBpStats();
-    compStats.computeBufferSizeStats();
-    LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and min buffer size: %s",
-        mergedData.getName(), compStats.getTotalBackpressure(), compStats.getBufferSizeMin()));
+    LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and similar processing rates "
+            + "and buffer sizes",
+        bpMetrics.getName(), compStats.getTotalBackpressure()));
 
 
-    Symptom resultSymptom = new Symptom(SYMPTOM_UNDER_PROVISIONING, mergedData);
+    Symptom resultSymptom = new Symptom(SYMPTOM_UNDER_PROVISIONING, bpMetrics);
     return new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING, resultSymptom);
   }
 }
