@@ -46,8 +46,6 @@ public class KubernetesController {
 
   /**
    * Kill a topology in kubernetes based on a configuration
-   *
-   * @return
    */
   protected boolean killTopology() {
 
@@ -70,8 +68,6 @@ public class KubernetesController {
 
   /**
    * Get information about a pod
-   *
-   * @return
    */
   protected JsonNode getBasePod(String podId) throws IOException {
 
@@ -109,6 +105,7 @@ public class KubernetesController {
 
   /**
    * Remove a single container (Pod)
+   *
    * @param podId, the pod id (TOPOLOGY_NAME-CONTAINER_INDEX)
    */
   protected void removeContainer(String podId) throws IOException {
@@ -124,7 +121,6 @@ public class KubernetesController {
   /**
    * Restart the topology (current unimplemented)
    * @param appId, id of the topology
-   * @return
    */
   protected boolean restartApp(int appId) {
     String message = "Restarting the whole topology is not supported yet. "
@@ -135,8 +131,6 @@ public class KubernetesController {
 
   /**
    * Submit a topology to kubernetes based on a set of pod configurations
-   *
-   * @return
    */
   protected boolean submitTopology(String[] appConfs) {
 

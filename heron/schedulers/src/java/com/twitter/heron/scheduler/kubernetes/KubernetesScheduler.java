@@ -127,7 +127,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * K8S API
    *
    * @param packing - PackingPlan of the topology
-   * @return
    */
   protected String[] getTopologyConf(PackingPlan packing) {
 
@@ -165,7 +164,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param mapper - ObjectMapper instance we can use to create new JSON nodes
    * @param containerIndex - The index of the container
    * @param containerResource - The Resource object for the new container
-   * @return
    */
   protected String buildKubernetesPodSpec(ObjectMapper mapper,
                                           Integer containerIndex,
@@ -192,7 +190,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param mapper - ObjectMapper instance we can use to create new JSON nodes
    * @param containerPlan - The ContainerPlan for the new container
    * @param oldContainerIndex - The index of the existing container
-   * @return
    */
   protected String rebuildKubernetesPodSpec(JsonNode podSpec,
                                             ObjectMapper mapper,
@@ -223,7 +220,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    *
    * @param mapper - ObjectMapper instance we can use to create other JSON nodes
    * @param containerIndex - Index of the container
-   * @return
    */
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
@@ -246,7 +242,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param mapper - ObjectMapper instance to use for creating new JSON nodes
    * @param containerPlan - New container's ContainerPlan
    * @param oldContainerIndex - The index of the old container
-   * @return
    */
   protected ObjectNode rebuildContainerSpec(JsonNode existingSpec,
                                             ObjectMapper mapper,
@@ -322,7 +317,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param mapper - An ObjectMapper instance which can be used to create JSON nodes
    * @param containerIndex - Index of the container
    * @param containerResource - The containers Resource object
-   * @return
    */
   protected ObjectNode getContainerSpec(ObjectMapper mapper,
                                         int containerIndex,
@@ -388,7 +382,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * Get the ports the container will need to expose so other containers can access its services
    *
    * @param mapper
-   * @return
    */
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
@@ -406,8 +399,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
   /**
    * Get the command that will be used to retrieve the topology JAR
-   *
-   * @return
    */
   protected String getFetchCommand() {
     return "cd /opt/heron/ && curl " + Runtime.topologyPackageUri(runtime).toString()
@@ -418,7 +409,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * Get the command string needed to start the container
    *
    * @param containerIndex
-   * @return
    */
   protected String[] getExecutorCommand(int containerIndex) {
     String[] executorCommand = SchedulerUtils.getExecutorCommand(config, runtime,
