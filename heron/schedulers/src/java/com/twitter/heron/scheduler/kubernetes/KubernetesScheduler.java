@@ -425,7 +425,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   /**
    * Add containers for a scale-up event from an update command
    *
-   * @param containersToAdd, the list of containers that need to be added
+   * @param containersToAdd the list of containers that need to be added
    *
    * NOTE: Due to the mechanics of Kubernetes pod creation, each container must be created on
    * a one-by-one basis. If one container out of many containers to be deployed failed, it will
@@ -460,13 +460,16 @@ public class KubernetesScheduler implements IScheduler, IScalable {
             + totalNewContainerCount + " deployed");
       } catch (IOException ioe) {
         throw new TopologyRuntimeManagementException("Problem adding container with id "
-            + containerPlan.getId() + ". Deployed " + deployedContainerCount + " out of " + totalNewContainerCount + " containers", ioe);
+            + containerPlan.getId() + ". Deployed " + deployedContainerCount + " out of "
+            + totalNewContainerCount + " containers", ioe);
       }
     }
   }
 
   /**
-   * @param containersToRemove, the list of containers that need to be removed
+   * Remove containers for a scale-dowp event from an update command
+   *
+   * @param containersToRemove the list of containers that need to be removed
    *
    * NOTE: Due to the mechanics of Kubernetes pod removal, each container must be removed on
    * a one-by-one basis. If one container out of many containers to be removed failed, it will
