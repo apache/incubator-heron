@@ -109,7 +109,7 @@ public class KubernetesController {
 
   /**
    * Remove a single container (Pod)
-   * @param podId, the pod id (<topology_name>-<container_index>
+   * @param podId, the pod id (TOPOLOGY_NAME-CONTAINER_INDEX)
    */
   protected void removeContainer(String podId) throws IOException {
     String podURI = String.format(
