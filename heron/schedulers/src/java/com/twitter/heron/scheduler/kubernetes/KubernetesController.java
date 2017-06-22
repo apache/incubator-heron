@@ -27,19 +27,17 @@ import com.twitter.heron.scheduler.TopologySubmissionException;
 public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
 
-  private final String kubernetesURI;
   private final String topologyName;
   private final String baseUriPath;
   private final boolean isVerbose;
 
   public KubernetesController(String kubernetesURI, String kubernetesNamespace,
                                String topologyName, boolean isVerbose) {
-    this.kubernetesURI = kubernetesURI;
 
     if (kubernetesNamespace == null) {
-      this.baseUriPath = String.format("%s/api/v1/namespaces/default/pods", this.kubernetesURI);
+      this.baseUriPath = String.format("%s/api/v1/namespaces/default/pods", kubernetesURI);
     } else {
-      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", this.kubernetesURI,
+      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", kubernetesURI,
           kubernetesNamespace);
     }
     this.topologyName = topologyName;
