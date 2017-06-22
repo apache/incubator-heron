@@ -2,9 +2,8 @@
 title: Heron Architecture
 ---
 
-Heron provides compatibility with [Apache Storm](http://storm.apache.org). From
-an architectural perspective it is markedly different from Storm but fully
-backwards compatible with it from an API perspective.
+Heron is a general purpose streaming engine designed for performance, low latency, isolation and
+reliability. It also provides API compatibility with [Apache Storm](http://storm.apache.org).
 
 The sections below clarify the distinction between [Heron and
 Storm]({{< ref "#relationship-with-apache-storm" >}}), describe the [design
@@ -24,10 +23,10 @@ in the [Heron Topologies](../topologies) document.
 
 ## Relationship with Apache Storm
 
-Heron was initially developed at Twitter with two goals in mind:
+Heron was initially developed at Twitter with two main goals in mind:
 
 1. Providing performance, reliability and ease of troubleshooting by leveraging a process-based
-computing model. Storm utilizes a thread-based model. 
+computing model and full topology isolation.
 2. Retaining full compatibility with Storm's data model and [topology
 API](http://storm.apache.org/about/simple-api.html).
 
