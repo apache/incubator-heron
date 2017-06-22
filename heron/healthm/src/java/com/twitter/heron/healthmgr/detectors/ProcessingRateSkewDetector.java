@@ -19,22 +19,20 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
+import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_PROCESSING_RATE_SKEW;
 
-public class WaitQueueDisparityDetector extends SkewDetector {
-  public static final String CONF_DISPARITY_RATIO = "WaitQueueDisparityDetector.disparityRatio";
+public class ProcessingRateSkewDetector extends SkewDetector {
+  public static final String CONF_SKEW_RATIO = "ProcessingRateSkewDetector.skewRatio";
 
-  private static final Logger LOG = Logger.getLogger(WaitQueueDisparityDetector.class.getName());
+  private static final Logger LOG = Logger.getLogger(ProcessingRateSkewDetector.class.getName());
 
   @Inject
-  WaitQueueDisparityDetector(BufferSizeSensor pendingBufferSensor,
+  ProcessingRateSkewDetector(ExecuteCountSensor exeCountSensor,
                              HealthPolicyConfig policyConfig) {
-    super(pendingBufferSensor, Double.valueOf(policyConfig.getConfig(CONF_DISPARITY_RATIO, "20")),
-        SYMPTOM_WAIT_Q_DISPARITY);
-
+    super(exeCountSensor, Double.valueOf(policyConfig.getConfig(CONF_SKEW_RATIO, "1.5")),
+        SYMPTOM_PROCESSING_RATE_SKEW);
   }
-
 
 }
