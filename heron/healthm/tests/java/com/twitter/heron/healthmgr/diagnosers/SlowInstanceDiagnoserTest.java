@@ -14,15 +14,13 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.List;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
-
+import com.twitter.heron.healthmgr.TestUtils;
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.TestUtils;
+import java.util.List;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;

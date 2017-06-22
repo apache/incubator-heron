@@ -14,20 +14,16 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.List;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
-
-import org.junit.Test;
-
 import com.twitter.heron.healthmgr.TestUtils;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import org.junit.Test;
+
+import java.util.List;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class DataSkewDiagnoserTest {
   @Test
@@ -41,6 +37,7 @@ public class DataSkewDiagnoserTest {
   public void diagnosis1DataSkewInstance() {
     List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
     symptoms.add(TestUtils.createExeCountSymptom(5000, 2000, 2000));
+    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(10000, 500, 500));
 
     Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
     assertNotNull(result);
@@ -50,5 +47,25 @@ public class DataSkewDiagnoserTest {
 
     assertEquals(123, symptom.getComponent()
         .getMetricValueSum("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
+  }
+
+  @Test
+  public void diagnosisNoDataSkewLowBufferSize() {
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
+    symptoms.add(TestUtils.createExeCountSymptom(5000, 2000, 2000));
+    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(1, 500, 500));
+
+    Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
+    assertNull(result);
+  }
+
+  @Test
+  public void diagnosisNoDataSkewLowRate() {
+    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
+    symptoms.add(TestUtils.createExeCountSymptom(100, 2000, 2000));
+    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(10000, 500, 500));
+
+    Diagnosis result = new DataSkewDiagnoser().diagnose(symptoms);
+    assertNull(result);
   }
 }
