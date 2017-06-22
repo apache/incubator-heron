@@ -429,7 +429,7 @@ maven_jar(
 
 http_jar(
   name = "com_microsoft_dhalion",
-  url = "https://github.com/ashvina/dhalion/releases/download/v0.0.1/dhalion-0.0.1.jar",
+  url = "https://github.com/Microsoft/Dhalion/releases/download/0.0.1/dhalion-0.0.1.jar",
 )
 
 
