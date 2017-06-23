@@ -10,14 +10,8 @@ __all__ = ['bolt', 'spout', 'stream', 'component', 'topology']
 from heron.common.src.python.utils.tuple import HeronTuple
 from heron.common.src.python.utils.misc import PythonSerializer, IHeronSerializer
 from heron.common.src.python.utils.topology import TopologyContext, ICustomGrouping, ITaskHook
-from heron.common.src.python.utils.metrics import IMetric, CountMetric, MultiCountMetric
-from heron.common.src.python.utils.metrics import IReducer, MeanReducer
-from heron.common.src.python.utils.metrics import ReducedMetric, MultiReducedMetric
-from heron.common.src.python.utils.metrics import AssignableMetrics, MultiAssignableMetrics
-from heron.common.src.python.utils.metrics import MeanReducedMetric, MultiMeanReducedMetric
 
 import heron.common.src.python.constants as constants
-import heron.common.src.python.utils.metrics.global_metrics as global_metrics
 
 # Load basic topology modules
 from .stream import Stream, Grouping

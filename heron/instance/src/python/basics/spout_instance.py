@@ -17,9 +17,9 @@ import Queue
 import time
 import collections
 
+from heron.api.src.python.metrics import global_metrics, SpoutMetrics
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
-from heron.common.src.python.utils.metrics import global_metrics, SpoutMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import topology_pb2, tuple_pb2
 from heron.pyheron.src.python import Stream
