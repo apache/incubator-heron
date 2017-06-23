@@ -17,7 +17,8 @@ import Queue
 import time
 import collections
 
-from heron.api.src.python.metrics import global_metrics, SpoutMetrics
+import heron.api.src.python.metrics.global_metrics
+from heron.api.src.python.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.misc import SerializerHelper
