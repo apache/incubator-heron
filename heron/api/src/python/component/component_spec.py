@@ -14,7 +14,7 @@
 '''component_spec.py'''
 import uuid
 
-from .serializer import default_serializer
+from ..serializer import default_serializer
 from ..api_constants import TOPOLOGY_COMPONENT_PARALLELISM
 from heron.proto import topology_pb2
 

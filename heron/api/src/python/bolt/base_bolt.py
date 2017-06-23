@@ -14,7 +14,7 @@
 '''base_bolt.py'''
 import copy
 
-from .tuple import TupleHelper
+from ..tuple import TupleHelper
 
 from ..component import HeronComponentSpec, BaseComponent
 from ..stream import Stream
