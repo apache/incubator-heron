@@ -50,27 +50,38 @@ class ClientCommandTest(unittest.TestCase):
     os.path.isdir = MagicMock(return_value=True)
     os.path.isfile = MagicMock(return_value=True)
 
+  def run_test(self, command, issued_commands, environ):
+    calls = []
+    for cmd in issued_commands:
+      calls.append(call(cmd.split(' '), env=environ, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE, bufsize=1))
+    subprocess.Popen = MagicMock()
+    with patch.object(sys, 'argv', command.split(' ')):
+      main.main()
+      for called, expect in zip(subprocess.Popen.call_args_list, calls):
+        self.assertEqual(called, expect)
+
+class SubmitTest(ClientCommandTest):
+
   def test(self):
     subprocess.Popen = MagicMock()
-    args = ["heron", "submit", "local", "~/.heron/examples/heron-examples.jar",
-            "com.twitter.heron.examples.ExclamationTopology", "EX"]
-    all_args_defn = ['/usr/lib/bin/java', '-client', '-Xmx1g', '-cp',
-                '~/.heron/examples/heron-examples.jar:/heron/lib/jars/third_party/*',
-                'com.twitter.heron.examples.ExclamationTopology', 'EX']
-    all_args_submit = ['/usr/lib/bin/java', '-client', '-Xmx1g', '-cp',
-                  ':/heron/lib/jars/scheduler/*:/heron/lib/jars/uploader/*:/heron/lib/jars/statemgr/*:/heron/lib/jars/packing/*',
-                  'com.twitter.heron.scheduler.SubmitterMain', '--cluster', 'local', '--role',
-                  'user', '--environment', 'default', '--heron_home', '/heron/home',
-                  '--config_path', '/heron/home/conf/local', '--override_config_file',
-                  '/heron/home/override.yaml', '--release_file', '/heron/home/release.yaml',
-                  '--topology_package', '/tmp/heron_tmp/topology.tar.gz', '--topology_defn',
-                  'T.defn', '--topology_bin', 'heron-examples.jar']
+
+    command = 'heron submit local ~/.heron/examples/heron-examples.jar ' + \
+              'com.twitter.heron.examples.ExclamationTopology EX'
+
+    create_defn_commands = '/usr/lib/bin/java -client -Xmx1g -cp ' \
+    '~/.heron/examples/heron-examples.jar:/heron/lib/jars/third_party/* ' \
+    'com.twitter.heron.examples.ExclamationTopology EX'
+
+    submit_commands = '/usr/lib/bin/java -client -Xmx1g -cp ' \
+                      ':/heron/lib/jars/scheduler/*:/heron/lib/jars/uploader/*:' \
+                      '/heron/lib/jars/statemgr/*:/heron/lib/jars/packing/* ' \
+                      'com.twitter.heron.scheduler.SubmitterMain --cluster local ' \
+                      '--role user --environment default --heron_home /heron/home ' \
+                      '--config_path /heron/home/conf/local --override_config_file ' \
+                      '/heron/home/override.yaml --release_file /heron/home/release.yaml ' \
+                      '--topology_package /tmp/heron_tmp/topology.tar.gz --topology_defn T.defn ' \
+                      '--topology_bin heron-examples.jar'
     env = {'HERON_OPTIONS':
            'cmdline.topologydefn.tmpdirectory=/tmp/heron_tmp,cmdline.topology.initial.state=RUNNING'}
-
-    call_defn = call(all_args_defn, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
-    call_submit = call(all_args_submit, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
-    with patch.object(sys, 'argv', args):
-      main.main()
-      self.assertEqual(subprocess.Popen.call_args_list[0], call_defn)
-      self.assertEqual(subprocess.Popen.call_args_list[1], call_submit)
+    ClientCommandTest.run_test(self, command, [create_defn_commands, submit_commands], env)
