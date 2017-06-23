@@ -20,10 +20,10 @@ import traceback
 import signal
 import yaml
 
-from heron.api.src.python.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
+from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
