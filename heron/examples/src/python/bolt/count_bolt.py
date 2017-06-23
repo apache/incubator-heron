@@ -13,7 +13,7 @@
 # limitations under the License.
 """module for example bolt: CountBolt"""
 from collections import Counter
-import heron.api.src.python.global_metrics
+from heron.api.src.python import global_metrics
 from heron.pyheron.src.python import Bolt
 
 # pylint: disable=unused-argument
