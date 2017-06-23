@@ -18,7 +18,7 @@ import Queue
 
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
-from heron.api.src.python.metrics import BoltMetrics
+from heron.common.src.python.utils.metrics import BoltMetrics
 from heron.api.src.python import global_metrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import tuple_pb2
