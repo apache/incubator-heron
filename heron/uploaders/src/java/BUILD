@@ -14,6 +14,12 @@ s3_deps_files = \
         "//third_party/java:guava",
     ]
 
+gcs_deps_files = \
+    uploader_spi_files + [
+        "//third_party/java:google-api-services-storage",
+        "//third_party/java:guava",
+    ]
+
 java_library(
     name = 'null-uploader-java',
     srcs = glob(["**/NullUploader.java"]),
@@ -104,5 +110,23 @@ genrule(
     name = "heron-scp-uploader",
     srcs = [":scp-uploader-unshaded_deploy.jar"],
     outs = ["heron-scp-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name = 'gcs-uploader-java',
+    srcs = glob(["**/gcs/**/*.java"]),
+    deps = gcs_deps_files,
+)
+
+java_binary(
+    name = 'gcs-uploader-unshaded',
+    srcs = glob(["**/gcs/**/*.java"]),
+    deps = gcs_deps_files)
+
+genrule(
+    name = "heron-gcs-uploader",
+    srcs = [":gcs-uploader-unshaded_deploy.jar"],
+    outs = ["heron-gcs-uploader.jar"],
     cmd  = "cp $< $@",
 )
