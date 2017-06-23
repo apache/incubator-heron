@@ -24,13 +24,9 @@ import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.result as result
 import heron.tools.common.src.python.utils.config as config
 
-class OptsTest(unittest.TestCase):
+class ClientCommandTest(unittest.TestCase):
 
   def setUp(self):
-    tempfile.mkdtemp = MagicMock(return_value='/tmp/heron_tmp')
-    main.check_environment = MagicMock(return_value=True)
-    os.path.isdir = MagicMock(return_value=True)
-    os.path.isfile = MagicMock(return_value=True)
     # Mock config calls
     config.parse_cluster_role_env = MagicMock(return_value=('local', 'user', 'default'))
     config.get_heron_release_file = MagicMock(return_value=None)
@@ -45,10 +41,14 @@ class OptsTest(unittest.TestCase):
     result.is_successful = MagicMock(return_value=True)
     result.SimpleResult.__init__ = Mock(return_value=None)
     result.ProcessResult.__init__ = Mock(return_value=None)
+    # mock others
     def launch(cl_args, topology_file, tmp_dir):
       return submit.launch_a_topology(cl_args, tmp_dir, topology_file, 'T.defn', 'WordCount')
     submit.launch_topologies = Mock(side_effect=launch)
-    pass
+    tempfile.mkdtemp = MagicMock(return_value='/tmp/heron_tmp')
+    main.check_environment = MagicMock(return_value=True)
+    os.path.isdir = MagicMock(return_value=True)
+    os.path.isfile = MagicMock(return_value=True)
 
   def test(self):
     subprocess.Popen = MagicMock()
@@ -64,7 +64,7 @@ class OptsTest(unittest.TestCase):
                   '--config_path', '/heron/home/conf/local', '--override_config_file',
                   '/heron/home/override.yaml', '--release_file', '/heron/home/release.yaml',
                   '--topology_package', '/tmp/heron_tmp/topology.tar.gz', '--topology_defn',
-                  'T.defn', '--topology_bin', '~/.heron/examples/heron-examples.jar']
+                  'T.defn', '--topology_bin', 'heron-examples.jar']
     env = {'HERON_OPTIONS':
            'cmdline.topologydefn.tmpdirectory=/tmp/heron_tmp,cmdline.topology.initial.state=RUNNING'}
 
@@ -72,4 +72,5 @@ class OptsTest(unittest.TestCase):
     call_submit = call(all_args_submit, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     with patch.object(sys, 'argv', args):
       main.main()
-      self.assertEqual(subprocess.Popen.call_args_list, [call_defn, call_submit])
+      self.assertEqual(subprocess.Popen.call_args_list[0], call_defn)
+      self.assertEqual(subprocess.Popen.call_args_list[1], call_submit)

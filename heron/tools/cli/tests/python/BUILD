@@ -15,8 +15,8 @@ pex_test(
 )
 
 pex_test(
-    name = "parse_unittest",
-    srcs = ["parse_unittest.py"],
+    name = "client_command_unittest",
+    srcs = ["client_command_unittest.py"],
     deps = [
         "//heron/tools/cli/src/python:cli-py",
     ],
