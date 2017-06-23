@@ -17,7 +17,7 @@
 import os
 import unittest
 
-from heron.api.src.python.metrics import default_serializer
+from heron.api.src.python.serializer import default_serializer
 from heron.pyheron.src.python import Topology, Stream, Grouping, TopologyBuilder
 from heron.pyheron.src.python.component import HeronComponentSpec
 from heron.pyheron.src.python.topology import TopologyType
