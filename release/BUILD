@@ -10,6 +10,7 @@ load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
 load("/tools/rules/heron_client", "heron_client_lib_uploader_files")
+load("/tools/rules/heron_client", "heron_client_lib_healthmgr_files")
 
 load("/tools/rules/heron_core", "heron_core_files")
 load("/tools/rules/heron_core", "heron_core_bin_files")
@@ -128,6 +129,12 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-lib-healthmgr",
+    package_dir = "lib/healthmgr",
+    files = heron_client_lib_healthmgr_files(),
+)
+
+pkg_tar(
     name = "heron-client-examples",
     package_dir = "examples",
     files = heron_examples_files(),
@@ -162,10 +169,10 @@ pkg_tar(
         ":heron-client-conf-local",
         ":heron-client-dist",
         ":heron-client-examples",
-        # ":heron-client-lib",
         ":heron-client-lib-scheduler",
         ":heron-client-lib-packing",
         ":heron-client-lib-statemgr",
         ":heron-client-lib-uploader",
+        ":heron-client-lib-healthmgr",
     ],
 )
