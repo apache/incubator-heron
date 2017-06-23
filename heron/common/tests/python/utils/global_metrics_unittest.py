@@ -17,7 +17,7 @@
 import unittest
 import threading
 
-import heron.api.src.python.metrics.global_metrics
+from heron.api.src.python import global_metrics
 import heron.common.tests.python.utils.mock_generator as mock_generator
 
 class GlobalMetricsTest(unittest.TestCase):
