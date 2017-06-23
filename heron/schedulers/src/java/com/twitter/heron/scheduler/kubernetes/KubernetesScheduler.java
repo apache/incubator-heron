@@ -467,7 +467,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * Remove containers for a scale-dowp event from an update command
+   * Remove containers for a scale-down event from an update command
    *
    * @param containersToRemove the list of containers that need to be removed
    *
