@@ -49,6 +49,7 @@ class ClientCommandTest(unittest.TestCase):
     main.check_environment = MagicMock(return_value=True)
     os.path.isdir = MagicMock(return_value=True)
     os.path.isfile = MagicMock(return_value=True)
+    os.environ.copy = MagicMock(return_value={})
 
   def run_test(self, command, issued_commands, environ):
     calls = []

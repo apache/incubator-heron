@@ -59,7 +59,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   all_args += [class_name] + list(args)
 
   # set heron_config environment variable
-  heron_env = {}
+  heron_env = os.environ.copy()
   heron_env['HERON_OPTIONS'] = opts.get_heron_config()
 
   # print the verbose message
