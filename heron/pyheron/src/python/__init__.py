@@ -7,9 +7,11 @@ __all__ = ['bolt', 'spout', 'stream', 'component', 'topology']
 #########################################################################################
 
 # from heron's common module
+from heron.api.src.python.task_hook import ITaskHook
+from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.common.src.python.utils.tuple import HeronTuple
 from heron.common.src.python.utils.misc import PythonSerializer, IHeronSerializer
-from heron.common.src.python.utils.topology import TopologyContext, ICustomGrouping, ITaskHook
+from heron.common.src.python.utils.topology import TopologyContext
 from heron.common.src.python.utils.metrics import IMetric, CountMetric, MultiCountMetric
 from heron.common.src.python.utils.metrics import IReducer, MeanReducer
 from heron.common.src.python.utils.metrics import ReducedMetric, MultiReducedMetric
