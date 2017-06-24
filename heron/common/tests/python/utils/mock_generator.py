@@ -19,12 +19,13 @@
 import random
 from mock import patch
 
+<<<<<<< HEAD
 from heron.api.src.python.task_hook import ITaskHook
 from heron.api.src.python.custom_grouping import ICustomGrouping
+from heron.api.src.python.serializer import PythonSerializer
 from heron.common.src.python.utils.metrics import MetricsCollector
 from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
-                                                HeronCommunicator, PythonSerializer)
-from heron.common.src.python.utils.topology import ITaskHook
+                                                HeronCommunicator)
 from heron.proto import tuple_pb2
 
 import heron.common.src.python.constants as constants

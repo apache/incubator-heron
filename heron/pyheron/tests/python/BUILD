@@ -38,6 +38,7 @@ pex_test(
     deps = [
       "//heron/common/tests/python:pytest-py",
       "//heron/pyheron/src/python:pyheron-py",
+      "//heron/api/src/python:heron-python-py",
     ],
     reqs = [
       "py==1.4.27",

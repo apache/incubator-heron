@@ -73,3 +73,13 @@ java_test(
     deps = scp_deps_files,
     size = "small",
 )
+
+java_test(
+    name = "GcsUploaderTests",
+    srcs = glob(["**/gcs/GcsUploaderTests.java"]),
+    size = "small",
+    deps = common_deps_files + spi_deps_files + [
+        "//heron/uploaders/src/java:gcs-uploader-java",
+        "//third_party/java:google-api-services-storage"
+    ],
+)

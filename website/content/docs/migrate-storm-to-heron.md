@@ -1,5 +1,5 @@
 ---
-title: Upgrade Storm Topologies to Heron
+title: Migrate Storm Topologies to Heron
 ---
 
 Heron is designed to be fully backward compatible with existing [Apache

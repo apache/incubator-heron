@@ -193,7 +193,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   result.render(res)
 
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
@@ -237,7 +237,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   result.render(res)
 
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
@@ -258,7 +258,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
       topology_file, topology_class_name, tuple(unknown_args))
 
   result.render(res)
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (topology_class_name, topology_file)
     res.add_context(err_context)

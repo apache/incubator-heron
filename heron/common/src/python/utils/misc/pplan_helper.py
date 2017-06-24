@@ -15,6 +15,7 @@
 import socket
 
 from heron.api.src.python.custom_grouping import ICustomGrouping
+from heron.api.src.python.serializer import default_serializer
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.topology import TopologyContext
@@ -22,7 +23,6 @@ from heron.common.src.python.utils.topology import TopologyContext
 import heron.common.src.python.pex_loader as pex_loader
 
 from .custom_grouping_helper import CustomGroupingHelper
-from .serializer import default_serializer
 
 # pylint: disable=too-many-instance-attributes
 class PhysicalPlanHelper(object):
