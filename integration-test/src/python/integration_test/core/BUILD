@@ -6,6 +6,7 @@ pex_library(
     name = "pyheron-integration-core-py",
     srcs = glob(["**/*.py"]),
     deps = [
+        "//heron/api/src/python:heron-python-py"
         "//heron/pyheron/src/python:pyheron-py"
     ],
 )
