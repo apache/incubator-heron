@@ -19,7 +19,6 @@
 import random
 from mock import patch
 
-<<<<<<< HEAD
 from heron.api.src.python.task_hook import ITaskHook
 from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.api.src.python.serializer import PythonSerializer
