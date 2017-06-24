@@ -16,7 +16,7 @@ import os
 import uuid
 
 from heron.api.src.python.serializer import default_serializer
-import heron.common.src.python.constants as constants
+import heron.api.src.python.api_constants as constants
 from heron.proto import topology_pb2
 
 from .component import HeronComponentSpec

@@ -27,7 +27,7 @@ from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPla
                                                 HeronCommunicator)
 from heron.proto import tuple_pb2
 
-import heron.common.src.python.constants as constants
+import heron.common.src.python.system_constants as constants
 import heron.common.tests.python.mock_protobuf as mock_protobuf
 
 prim_list = [1000, -234, 0.00023, "string",
