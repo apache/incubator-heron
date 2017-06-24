@@ -7,6 +7,7 @@ pex_library(
     srcs = glob(['bolt/*.py', 'spout/*.py', 'misc/*.py']),
     deps = [
       '//heron/pyheron/src/python:pyheron-py',
+      '//heron/api/src/python:heron-python-py',
     ],
 )
 
