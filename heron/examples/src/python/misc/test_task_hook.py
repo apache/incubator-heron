@@ -15,7 +15,7 @@
 from collections import Counter
 
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.topology import ITaskHook
+from heron.api.src.python.task_hook import ITaskHook
 
 # pylint: disable=unused-argument
 class TestTaskHook(ITaskHook):

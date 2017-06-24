@@ -15,13 +15,14 @@
 import os
 from collections import namedtuple
 
+from heron.api.src.python.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
+                                            SpoutFailInfo, BoltExecuteInfo,
+                                            BoltAckInfo, BoltFailInfo)
+
 from heron.common.src.python.utils.metrics import MetricsCollector
 
 import heron.common.src.python.constants as constants
 import heron.common.src.python.pex_loader as pex_loader
-
-from .task_hook import (ITaskHook, EmitInfo, SpoutAckInfo, SpoutFailInfo, BoltExecuteInfo,
-                        BoltAckInfo, BoltFailInfo)
 
 class TopologyContext(dict):
   """Helper Class for Topology Context, inheriting from dict
