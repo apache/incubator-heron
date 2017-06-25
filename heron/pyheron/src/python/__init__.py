@@ -12,8 +12,6 @@ from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.common.src.python.utils.tuple import HeronTuple
 from heron.common.src.python.utils.topology import TopologyContext
 
-import heron.common.src.python.constants as constants
-
 # Load basic topology modules
 from .stream import Stream, Grouping
 from .topology import Topology, TopologyBuilder

@@ -18,7 +18,7 @@ from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import common_pb2, stmgr_pb2, tuple_pb2
 
-import heron.common.src.python.constants as constants
+import heron.common.src.python.system_constants as constants
 
 # pylint: disable=too-many-arguments
 class SingleThreadStmgrClient(HeronClient):
