@@ -294,9 +294,9 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       // Requested resource info
       ObjectNode requestedResourceInfo = mapper.createObjectNode();
       requestedResourceInfo.put(KubernetesConstants.MEMORY,
-          containerPlan.getScheduledResource().get().getRam().asMegabytes());
+          containerPlan.getRequiredResource().getRam().asMegabytes());
       requestedResourceInfo.put(KubernetesConstants.CPU,
-          containerPlan.getScheduledResource().get().getCpu());
+          containerPlan.getRequiredResource().getCpu());
 
       // Wrap it up into a resources dictionary
       ObjectNode resourceInfo = mapper.createObjectNode();
@@ -455,7 +455,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       // deploy this new container
       try {
         controller.deployContainer(newContainer);
-        deployedContainerCount++;
         LOG.log(Level.INFO, "New container " + ++deployedContainerCount + "/"
             + totalNewContainerCount + " deployed");
       } catch (IOException ioe) {
