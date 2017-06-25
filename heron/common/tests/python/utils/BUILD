@@ -88,8 +88,8 @@ pex_test(
 )
 
 pex_test(
-    name = "topology_context_unittest",
-    srcs = ["topology_context_unittest.py"],
+    name = "topology_context_impl_unittest",
+    srcs = ["topology_context_impl_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
         "//heron/common/tests/python/utils:common-utils-mock"
