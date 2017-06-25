@@ -40,7 +40,7 @@ class Bolt(BaseBolt):
                    Note that types of string values in the config have been automatically converted,
                    meaning that number strings and boolean strings are converted to the appropriate
                    types.
-    :type context: :class:`pyheron.TopologyContext`
+    :type context: :class:`TopologyContext`
     :param context: This object can be used to get information about this task's place within the
                     topology, including the task id and component id of this task, input and output
                     information, etc.
