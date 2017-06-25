@@ -18,6 +18,7 @@ from collections import namedtuple
 from heron.api.src.python.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
                                             SpoutFailInfo, BoltExecuteInfo,
                                             BoltAckInfo, BoltFailInfo)
+from heron.api.src.python.topology_context import TopologyContext
 
 import heron.api.src.python.api_constants as api_constants
 from heron.common.src.python.utils.metrics import MetricsCollector
@@ -25,103 +26,54 @@ from heron.common.src.python.utils.metrics import MetricsCollector
 import heron.common.src.python.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
-class TopologyContext(dict):
-  """Helper Class for Topology Context, inheriting from dict
+class TopologyContextImpl(TopologyContext):
+  """Implemention of TopologyContext
 
-  This is automatically created by Heron Instance and topology writers never need to create
-  an instance by themselves.
+  This is created by Heron Instance and passed on to the topology spouts/bolts
+  as the topology context
 
-  The following keys are present by default.
-
-  :key CONFIG: contains cluster configuration
-               (topology-wide config overriden by component-specific config)
-  :key TOPOLOGY: contains Topology protobuf message
-  :key TASK_TO_COMPONENT_MAP: contains dictionary mapping from task_id to component-id
-  :key TASK_ID: contains task id for this component
-  :key INPUTS: contains dictionary mapping from component_id to list of its inputs
-               as protobuf InputStream messages
-  :key OUTPUTS: contains dictionary mapping from component_id to list of its outputs
-                as protobuf OutputStream messages
-  :key COMPONENT_TO_OUT_FIELDS: contains nested dictionary mapping from component_id to
-                                map <stream_id -> a list of output fields>
-  :key TASK_HOOKS: list of registered ITaskHook classes
-  :key METRICS_COLLECTOR: contains MetricsCollector object that is responsible for this component
-  :key TOPOLOGY_PEX_PATH: contains the absolute path to the topology PEX file
   """
-  # topology as supplied by the cluster overloaded by any component specific config
-  CONFIG = 'config'
-  # topology protobuf
-  TOPOLOGY = 'topology'
-  # dict <task_id -> component_id>
-  TASK_TO_COMPONENT_MAP = 'task_to_component'
-  # my task_id
-  TASK_ID = 'task_id'
-  # dict <component_id -> list of its inputs>
-  INPUTS = 'inputs'
-  # dict <component_id -> list of its outputs>
-  OUTPUTS = 'outputs'
-  # dict <component_id -> <stream_id -> fields>>
-  COMPONENT_TO_OUT_FIELDS = 'comp_to_out_fields'
-  # list of ITaskHook
-  TASK_HOOKS = 'task_hooks'
-  # path to topology pex file
-  TOPOLOGY_PEX_PATH = 'topology_pex_path'
-
-  METRICS_COLLECTOR = 'metrics_collector'
+  # pylint: disable=too-many-instance-attributes
 
   def __init__(self, config, topology, task_to_component, my_task_id, metrics_collector,
-               topo_pex_path, **kwargs):
-    super(TopologyContext, self).__init__(**kwargs)
-    self[self.CONFIG] = config
-    self[self.TOPOLOGY] = topology
-    self[self.TASK_TO_COMPONENT_MAP] = task_to_component
-    self[self.TASK_ID] = my_task_id
-    self[self.METRICS_COLLECTOR] = metrics_collector
-    self[self.TOPOLOGY_PEX_PATH] = os.path.abspath(topo_pex_path)
+               topo_pex_path):
+    self.config = config
+    self.topology = topology
+    self.task_to_component_map = task_to_component
+    self.task_id = my_task_id
+    self.metrics_collector = metrics_collector
+    self.topology_pex_path = os.path.abspath(topo_pex_path)
 
     inputs, outputs, out_fields = self._get_inputs_and_outputs_and_outfields(topology)
-    self[self.INPUTS] = inputs
-    self[self.OUTPUTS] = outputs
-    self[self.COMPONENT_TO_OUT_FIELDS] = out_fields
+    self.inputs = inputs
+    self.outputs = outputs
+    self.component_to_out_fields = out_fields
 
     # init task hooks
-    self[self.TASK_HOOKS] = []
+    self.task_hooks = []
     self._init_task_hooks()
 
-  ##### Helper method for common use #####
+  ##### Implementation of interface methods #####
 
-  @property
-  def task_id(self):
+  def get_task_id(self):
     """Property to get the task id of this component"""
-    return self[self.TASK_ID]
+    return self.task_id
 
-  @property
-  def component_id(self):
+  def get_component_id(self):
     """Property to get the component id of this component"""
-    return self[self.TASK_TO_COMPONENT_MAP].get(self.task_id)
+    return self.task_to_component_map.get(self.get_task_id())
 
   def get_cluster_config(self):
     """Returns the cluster config for this component
 
     Note that the returned config is auto-typed map: <str -> any Python object>.
     """
-    return self[self.CONFIG]
+    return self.config
 
   def get_topology_name(self):
     """Returns the name of the topology
     """
-    return str(self[self.TOPOLOGY].name)
-
-  def get_topology_pex_path(self):
-    """Returns the topology's pex file path"""
-    return self[self.TOPOLOGY_PEX_PATH]
-
-  def get_metrics_collector(self):
-    """Returns this context's metrics collector"""
-    if TopologyContext.METRICS_COLLECTOR not in self or \
-        not isinstance(self.get(TopologyContext.METRICS_COLLECTOR), MetricsCollector):
-      raise RuntimeError("Metrics collector is not registered in this context")
-    return self.get(TopologyContext.METRICS_COLLECTOR)
+    return str(self.topology.name)
 
   def register_metric(self, name, metric, time_bucket_in_sec):
     """Registers a new metric to this context"""
@@ -136,9 +88,9 @@ class TopologyContext(dict):
     """
     # this is necessary because protobuf message is not hashable
     StreamId = namedtuple('StreamId', 'id, component_name')
-    if component_id in self[self.INPUTS]:
+    if component_id in self.inputs:
       ret = {}
-      for istream in self[self.INPUTS].get(component_id):
+      for istream in self.inputs.get(component_id):
         key = StreamId(id=istream.stream.id, component_name=istream.stream.component_name)
         ret[key] = istream.gtype
       return ret
@@ -146,15 +98,37 @@ class TopologyContext(dict):
       return None
 
   def get_this_sources(self):
-    return self.get_sources(self.component_id)
+    return self.get_sources(self.get_component_id())
 
   def get_component_tasks(self, component_id):
     """Returns the task ids allocated for the given component id"""
     ret = []
-    for task_id, comp_id in self[self.TASK_TO_COMPONENT_MAP].iteritems():
+    for task_id, comp_id in self.task_to_component_map.iteritems():
       if comp_id == component_id:
         ret.append(task_id)
     return ret
+
+  def add_task_hook(self, task_hook):
+    """Registers a specified task hook to this context
+
+    :type task_hook: heron.common.src.python.utils.topology.ITaskHook
+    :param task_hook: Implementation of ITaskHook
+    """
+    if not isinstance(task_hook, ITaskHook):
+      raise TypeError("In add_task_hook(): attempt to add non ITaskHook instance, given: %s"
+                      % str(type(task_hook)))
+    self.task_hooks.append(task_hook)
+
+  ##### Other exposed implementation specific methods #####
+  def get_topology_pex_path(self):
+    """Returns the topology's pex file path"""
+    return self.topology_pex_path
+
+  def get_metrics_collector(self):
+    """Returns this context's metrics collector"""
+    if self.metrics_collector is None or not isinstance(self.metrics_collector, MetricsCollector):
+      raise RuntimeError("Metrics collector is not registered in this context")
+    return self.metrics_collector
 
   ########################################
 
@@ -210,37 +184,21 @@ class TopologyContext(dict):
         task_hook_cls = pex_loader.import_and_get_class(topo_pex_path, class_name)
         task_hook_instance = task_hook_cls()
         assert isinstance(task_hook_instance, ITaskHook)
-        self[self.TASK_HOOKS].append(task_hook_instance)
+        self.task_hooks.append(task_hook_instance)
       except AssertionError:
         raise RuntimeError("Auto-registered task hook not instance of ITaskHook")
       except Exception as e:
         raise RuntimeError("Error with loading task hook class: %s, with error message: %s"
                            % (class_name, e.message))
 
-  def add_task_hook(self, task_hook):
-    """Registers a specified task hook to this context
-
-    :type task_hook: heron.common.src.python.utils.topology.ITaskHook
-    :param task_hook: Implementation of ITaskHook
-    """
-    if not isinstance(task_hook, ITaskHook):
-      raise TypeError("In add_task_hook(): attempt to add non ITaskHook instance, given: %s"
-                      % str(type(task_hook)))
-    self[self.TASK_HOOKS].append(task_hook)
-
-  @property
-  def hook_exists(self):
-    """Returns whether Task Hook is registered"""
-    return len(self[self.TASK_HOOKS]) != 0
-
   def invoke_hook_prepare(self):
     """invoke task hooks for after the spout/bolt's initialize() method"""
-    for task_hook in self[self.TASK_HOOKS]:
+    for task_hook in self.task_hooks:
       task_hook.prepare(self.get_cluster_config(), self)
 
   def invoke_hook_cleanup(self):
     """invoke task hooks for just before the spout/bolt's cleanup method"""
-    for task_hook in self[self.TASK_HOOKS]:
+    for task_hook in self.task_hooks:
       task_hook.clean_up()
 
   def invoke_hook_emit(self, values, stream_id, out_tasks):
@@ -253,10 +211,10 @@ class TopologyContext(dict):
     :type out_tasks: list
     :param out_tasks: list of custom grouping target task id
     """
-    if self.hook_exists:
+    if len(self.task_hooks) > 0:
       emit_info = EmitInfo(values=values, stream_id=stream_id,
-                           task_id=self.task_id, out_tasks=out_tasks)
-      for task_hook in self[self.TASK_HOOKS]:
+                           task_id=self.get_task_id(), out_tasks=out_tasks)
+      for task_hook in self.task_hooks:
         task_hook.emit(emit_info)
 
   def invoke_hook_spout_ack(self, message_id, complete_latency_ns):
@@ -267,12 +225,12 @@ class TopologyContext(dict):
     :type complete_latency_ns: float
     :param complete_latency_ns: complete latency in nano seconds
     """
-    if self.hook_exists:
+    if len(self.task_hooks) > 0:
       spout_ack_info = SpoutAckInfo(message_id=message_id,
-                                    spout_task_id=self.task_id,
+                                    spout_task_id=self.get_task_id(),
                                     complete_latency_ms=complete_latency_ns *
                                     system_constants.NS_TO_MS)
-      for task_hook in self[self.TASK_HOOKS]:
+      for task_hook in self.task_hooks:
         task_hook.spout_ack(spout_ack_info)
 
   def invoke_hook_spout_fail(self, message_id, fail_latency_ns):
@@ -283,11 +241,11 @@ class TopologyContext(dict):
     :type fail_latency_ns: float
     :param fail_latency_ns: fail latency in nano seconds
     """
-    if self.hook_exists:
+    if len(self.task_hooks) > 0:
       spout_fail_info = SpoutFailInfo(message_id=message_id,
-                                      spout_task_id=self.task_id,
+                                      spout_task_id=self.get_task_id(),
                                       fail_latency_ms=fail_latency_ns * system_constants.NS_TO_MS)
-      for task_hook in self[self.TASK_HOOKS]:
+      for task_hook in self.task_hooks:
         task_hook.spout_fail(spout_fail_info)
 
   def invoke_hook_bolt_execute(self, heron_tuple, execute_latency_ns):
@@ -298,12 +256,12 @@ class TopologyContext(dict):
     :type execute_latency_ns: float
     :param execute_latency_ns: execute latency in nano seconds
     """
-    if self.hook_exists:
+    if len(self.task_hooks) > 0:
       bolt_execute_info = \
         BoltExecuteInfo(heron_tuple=heron_tuple,
-                        executing_task_id=self.task_id,
+                        executing_task_id=self.get_task_id(),
                         execute_latency_ms=execute_latency_ns * system_constants.NS_TO_MS)
-      for task_hook in self[self.TASK_HOOKS]:
+      for task_hook in self.task_hooks:
         task_hook.bolt_execute(bolt_execute_info)
 
   def invoke_hook_bolt_ack(self, heron_tuple, process_latency_ns):
@@ -314,11 +272,11 @@ class TopologyContext(dict):
     :type process_latency_ns: float
     :param process_latency_ns: process latency in nano seconds
     """
-    if self.hook_exists:
+    if len(self.task_hooks) > 0:
       bolt_ack_info = BoltAckInfo(heron_tuple=heron_tuple,
-                                  acking_task_id=self.task_id,
+                                  acking_task_id=self.get_task_id(),
                                   process_latency_ms=process_latency_ns * system_constants.NS_TO_MS)
-      for task_hook in self[self.TASK_HOOKS]:
+      for task_hook in self.task_hooks:
         task_hook.bolt_ack(bolt_ack_info)
 
   def invoke_hook_bolt_fail(self, heron_tuple, fail_latency_ns):
@@ -329,9 +287,9 @@ class TopologyContext(dict):
     :type fail_latency_ns: float
     :param fail_latency_ns: fail latency in nano seconds
     """
-    if self.hook_exists:
+    if len(self.task_hooks) > 0:
       bolt_fail_info = BoltFailInfo(heron_tuple=heron_tuple,
-                                    failing_task_id=self.task_id,
+                                    failing_task_id=self.get_task_id(),
                                     fail_latency_ms=fail_latency_ns * system_constants.NS_TO_MS)
-      for task_hook in self[self.TASK_HOOKS]:
+      for task_hook in self.task_hooks:
         task_hook.bolt_fail(bolt_fail_info)

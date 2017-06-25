@@ -10,7 +10,7 @@ __all__ = ['bolt', 'spout', 'stream', 'component', 'topology']
 from heron.api.src.python.task_hook import ITaskHook
 from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.common.src.python.utils.tuple import HeronTuple
-from heron.common.src.python.utils.topology import TopologyContext
+from heron.api.src.python.topology_context import TopologyContext
 
 # Load basic topology modules
 from .stream import Stream, Grouping
