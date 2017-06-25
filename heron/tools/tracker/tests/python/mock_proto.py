@@ -1,5 +1,5 @@
 ''' mock_proto.py '''
-from heron.common.src.python import constants
+from heron.api.src.python import api_constants
 import heron.proto.execution_state_pb2 as protoEState
 import heron.proto.physical_plan_pb2 as protoPPlan
 import heron.proto.tmaster_pb2 as protoTmaster
@@ -20,7 +20,7 @@ class MockProto(object):
     spout = protoTopology.Spout()
     spout.comp.name = spout_name
     kv = spout.comp.config.kvs.add()
-    kv.key = constants.TOPOLOGY_COMPONENT_PARALLELISM
+    kv.key = api_constants.TOPOLOGY_COMPONENT_PARALLELISM
     kv.type = protoTopology.ConfigValueType.Value('STRING_VALUE')
     kv.value = str(spout_parallelism)
     for stream in output_streams:
@@ -35,7 +35,7 @@ class MockProto(object):
     bolt = protoTopology.Bolt()
     bolt.comp.name = bolt_name
     kv = bolt.comp.config.kvs.add()
-    kv.key = constants.TOPOLOGY_COMPONENT_PARALLELISM
+    kv.key = api_constants.TOPOLOGY_COMPONENT_PARALLELISM
     kv.type = protoTopology.ConfigValueType.Value('STRING_VALUE')
     kv.value = str(bolt_parallelism)
     for stream in input_streams:

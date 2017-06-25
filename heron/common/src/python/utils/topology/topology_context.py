@@ -19,9 +19,10 @@ from heron.api.src.python.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
                                             SpoutFailInfo, BoltExecuteInfo,
                                             BoltAckInfo, BoltFailInfo)
 
+import heron.api.src.python.api_constants as api_constants
 from heron.common.src.python.utils.metrics import MetricsCollector
 
-import heron.common.src.python.constants as constants
+import heron.common.src.python.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
 class TopologyContext(dict):
@@ -196,7 +197,8 @@ class TopologyContext(dict):
   ######### Task hook related ##########
 
   def _init_task_hooks(self):
-    task_hooks_cls_list = self.get_cluster_config().get(constants.TOPOLOGY_AUTO_TASK_HOOKS, None)
+    task_hooks_cls_list = self.get_cluster_config().get(api_constants.TOPOLOGY_AUTO_TASK_HOOKS,
+                                                        None)
     if task_hooks_cls_list is None:
       return
 
@@ -268,7 +270,8 @@ class TopologyContext(dict):
     if self.hook_exists:
       spout_ack_info = SpoutAckInfo(message_id=message_id,
                                     spout_task_id=self.task_id,
-                                    complete_latency_ms=complete_latency_ns * constants.NS_TO_MS)
+                                    complete_latency_ms=complete_latency_ns *
+                                    system_constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.spout_ack(spout_ack_info)
 
@@ -283,7 +286,7 @@ class TopologyContext(dict):
     if self.hook_exists:
       spout_fail_info = SpoutFailInfo(message_id=message_id,
                                       spout_task_id=self.task_id,
-                                      fail_latency_ms=fail_latency_ns * constants.NS_TO_MS)
+                                      fail_latency_ms=fail_latency_ns * system_constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.spout_fail(spout_fail_info)
 
@@ -299,7 +302,7 @@ class TopologyContext(dict):
       bolt_execute_info = \
         BoltExecuteInfo(heron_tuple=heron_tuple,
                         executing_task_id=self.task_id,
-                        execute_latency_ms=execute_latency_ns * constants.NS_TO_MS)
+                        execute_latency_ms=execute_latency_ns * system_constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.bolt_execute(bolt_execute_info)
 
@@ -314,7 +317,7 @@ class TopologyContext(dict):
     if self.hook_exists:
       bolt_ack_info = BoltAckInfo(heron_tuple=heron_tuple,
                                   acking_task_id=self.task_id,
-                                  process_latency_ms=process_latency_ns * constants.NS_TO_MS)
+                                  process_latency_ms=process_latency_ns * system_constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.bolt_ack(bolt_ack_info)
 
@@ -329,6 +332,6 @@ class TopologyContext(dict):
     if self.hook_exists:
       bolt_fail_info = BoltFailInfo(heron_tuple=heron_tuple,
                                     failing_task_id=self.task_id,
-                                    fail_latency_ms=fail_latency_ns * constants.NS_TO_MS)
+                                    fail_latency_ms=fail_latency_ns * system_constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.bolt_fail(bolt_fail_info)
