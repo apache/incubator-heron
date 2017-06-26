@@ -29,6 +29,8 @@ java_library(
         ":basics-java",
         "//third_party/java:junit4",
         "@com_google_protobuf_protobuf_java//jar",
+        "//heron/spi/src/java:utils-spi-java",
+         "//third_party/java:jackson",
     ],
 )
 
