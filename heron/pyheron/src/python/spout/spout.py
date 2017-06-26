@@ -86,7 +86,7 @@ class Spout(BaseSpout):
 
     *Should be implemented by a subclass.*
 
-    :param tup_id: the ID of the HeronTuple that has been fully acknowledged.
+    :param tup_id: the ID of the Tuple that has been fully acknowledged.
     """
     pass
 
@@ -102,7 +102,7 @@ class Spout(BaseSpout):
 
     *Should be implemented by a subclass.*
 
-    :param tup_id: the ID of the HeronTuple that has failed either due to a bolt calling ``fail()``
+    :param tup_id: the ID of the Tuple that has failed either due to a bolt calling ``fail()``
                    or timeout
     """
     pass

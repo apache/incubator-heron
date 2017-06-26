@@ -60,8 +60,8 @@ class Bolt(BaseBolt):
 
     **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
 
-    :type tup: :class:`pyheron.HeronTuple`
-    :param tup: HeronTuple to process
+    :type tup: :class:`heron.api.src.python.tuple.Tuple`
+    :param tup: Tuple to process
     """
     raise NotImplementedError("Bolt not implementing process() method.")
 
@@ -79,7 +79,7 @@ class Bolt(BaseBolt):
     Default behavior is to ignore tick tuples. This method should be overridden by subclasses
     if you want to react to timer events via tick tuples.
 
-    :type tup: :class:`pyheron.HeronTuple`
+    :type tup: :class:`heron.api.src.python.tuple.Tuple`
     :param tup: the tick tuple to be processed
     """
     pass
