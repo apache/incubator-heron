@@ -7,7 +7,7 @@ container:
   resources:
     mem_mib: 4000
     cpu_cores: 1.5
-  image: get.applatix.io/heron-build:v1.0
+  image: streamlio/build:latest-heron-ubuntu14.04
   docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%" 
   command: bash -c '/heron/scripts/applatix/prepare.sh && /heron/scripts/applatix/ci.sh'
 inputs:
