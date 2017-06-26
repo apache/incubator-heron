@@ -15,6 +15,7 @@
 package com.twitter.heron.simulator.instance;
 
 import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -27,8 +28,8 @@ import com.twitter.heron.proto.system.HeronTuples;
  */
 public class OutgoingTupleCollection extends com.twitter.heron.instance.OutgoingTupleCollection {
 
-  public OutgoingTupleCollection(String componentName,
+  public OutgoingTupleCollection(PhysicalPlanHelper helper,
                                  Communicator<HeronTuples.HeronTupleSet> outQueue) {
-    super(componentName, outQueue);
+    super(helper, outQueue);
   }
 }

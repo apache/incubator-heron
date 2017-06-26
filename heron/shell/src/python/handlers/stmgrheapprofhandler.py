@@ -14,32 +14,29 @@
 
 ''' stmgrheapprofhandler.py '''
 import glob
-import json
 import os
 import signal
 import tornado.web
 
-from heron.shell.src.python import utils
-
 class StmgrHeapProfHandler(tornado.web.RequestHandler):
-    """
-    Responsible for getting the process ID for an instance.
-    """
+  """
+  Responsible for getting the process ID for an instance.
+  """
 
-    # pylint: disable=attribute-defined-outside-init
-    @tornado.web.asynchronous
-    def get(self):
-        ''' get method '''
-        self.content_type = 'application/json'
-        stmgr_pid_files = glob.glob('stmgr*.pid')
-        try:
-          pid_file = stmgr_pid_files[0]
-          with open(pid_file, 'r') as f:
-            pid = f.read()
-            os.kill(int(pid), signal.SIGUSR1)
-          self.write('Performing heap profiling on stream manager...')
-          self.finish()
-        except:
-          self.write("Not stream manager found")
-          self.set_status(404)
-          self.finish()
+  # pylint: disable=attribute-defined-outside-init
+  @tornado.web.asynchronous
+  def get(self):
+    ''' get method '''
+    self.content_type = 'application/json'
+    stmgr_pid_files = glob.glob('stmgr*.pid')
+    try:
+      pid_file = stmgr_pid_files[0]
+      with open(pid_file, 'r') as f:
+        pid = f.read()
+        os.kill(int(pid), signal.SIGUSR1)
+      self.write('Performing heap profiling on stream manager...')
+      self.finish()
+    except:
+      self.write("Not stream manager found")
+      self.set_status(404)
+      self.finish()

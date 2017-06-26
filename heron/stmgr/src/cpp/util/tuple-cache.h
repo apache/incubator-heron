@@ -40,11 +40,15 @@ class TupleCache {
   }
 
   // returns tuple key
-  sp_int64 add_data_tuple(sp_int32 _task_id, const proto::api::StreamId& _streamid,
+  sp_int64 add_data_tuple(sp_int32 _src_task_id,
+                          sp_int32 _task_id, const proto::api::StreamId& _streamid,
                           proto::system::HeronDataTuple* _tuple);
-  void add_ack_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
-  void add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
-  void add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
+  void add_ack_tuple(sp_int32 _src_task_id,
+                     sp_int32 _task_id, const proto::system::AckTuple& _tuple);
+  void add_fail_tuple(sp_int32 _src_task_id,
+                      sp_int32 _task_id, const proto::system::AckTuple& _tuple);
+  void add_emit_tuple(sp_int32 _src_task_id,
+                      sp_int32 _task_id, const proto::system::AckTuple& _tuple);
 
  private:
   void drain(EventLoop::Status);
@@ -58,12 +62,16 @@ class TupleCache {
     TupleList();
     ~TupleList();
 
-    sp_int64 add_data_tuple(const proto::api::StreamId& _streamid,
+    sp_int64 add_data_tuple(sp_int32 _src_task_id,
+                            const proto::api::StreamId& _streamid,
                             proto::system::HeronDataTuple* _tuple, sp_uint64* total_size_,
                             sp_uint64* _tuples_cache_max_tuple_size);
-    void add_ack_tuple(const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
-    void add_fail_tuple(const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
-    void add_emit_tuple(const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
+    void add_ack_tuple(sp_int32 _src_task_id,
+                       const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
+    void add_fail_tuple(sp_int32 _src_task_id,
+                        const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
+    void add_emit_tuple(sp_int32 _src_task_id,
+                        const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
 
     void drain(sp_int32 _task_id,
                std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
