@@ -14,37 +14,45 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.net.HttpURLConnection;
+import java.io.IOException;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.spi.utils.NetworkUtils;
-
-import static org.mockito.Mockito.times;
+import com.twitter.heron.common.network.HttpJsonClient;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(NetworkUtils.class)
+@PrepareForTest(KubernetesController.class)
 public class KubernetesControllerTest {
 
-  private static final String K8S_URI = "http://k8sapi.uri:8080";
+  private static final String K8S_URI = "http://k8s.uri:8080";
+  private static final String NAMESPACE = "default";
   private static final String TOPOLOGY_NAME = "topology_name";
   private static final boolean IS_VERBOSE = true;
+  private static final String[] DEPLOY_CONFS = {"test1", "test2"};
 
   private static KubernetesController controller;
 
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
   @Before
   public void setUp() throws Exception {
-    controller = Mockito.spy(new KubernetesController(K8S_URI, TOPOLOGY_NAME, IS_VERBOSE));
+    controller = Mockito.spy(new KubernetesController(K8S_URI,
+        NAMESPACE,
+        TOPOLOGY_NAME,
+        IS_VERBOSE));
   }
 
   @After
@@ -65,56 +73,55 @@ public class KubernetesControllerTest {
    */
   @Test
   public void testKillTopology() throws Exception {
-    HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
 
-    // Failed to get connection
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(null).when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
+    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
+    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+
+    // Test a bad DELETE
+    PowerMockito.doThrow(new IOException()).when(httpJsonClient,  "delete", Mockito.anyInt());
     Assert.assertFalse(controller.killTopology());
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
 
-    // Failed to send request
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(false)
-        .when(NetworkUtils.class, "sendHttpDeleteRequest", Mockito.any(HttpURLConnection.class));
-    Assert.assertFalse(controller.killTopology());
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
-    NetworkUtils.sendHttpDeleteRequest(Mockito.any(HttpURLConnection.class));
-
-    // Failed to get response
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "sendHttpDeleteRequest", Mockito.any(HttpURLConnection.class));
-    PowerMockito.doReturn(false)
-        .when(NetworkUtils.class, "checkHttpResponseCode",
-            Mockito.any(HttpURLConnection.class), Mockito.anyInt());
-    Assert.assertFalse(controller.killTopology());
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
-    NetworkUtils.sendHttpDeleteRequest(Mockito.any(HttpURLConnection.class));
-    NetworkUtils.checkHttpResponseCode(Mockito.any(HttpURLConnection.class), Mockito.anyInt());
-
-    // Success
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "sendHttpDeleteRequest", Mockito.any(HttpURLConnection.class));
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "checkHttpResponseCode",
-            Mockito.any(HttpURLConnection.class), Mockito.anyInt());
+    // Test a good path
+    PowerMockito.doNothing().when(httpJsonClient).delete(Mockito.anyInt());
     Assert.assertTrue(controller.killTopology());
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
-    NetworkUtils.sendHttpDeleteRequest(Mockito.any(HttpURLConnection.class));
-    NetworkUtils.checkHttpResponseCode(Mockito.any(HttpURLConnection.class), Mockito.anyInt());
   }
+
+  @Test
+  public void testGetBasePod() throws Exception {
+    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
+    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+
+    // Test a bad GET
+    PowerMockito.doThrow(new IOException()).when(httpJsonClient).get(Mockito.anyInt());
+    exception.expect(IOException.class);
+    controller.getBasePod(Mockito.anyString());
+
+  }
+
+  @Test
+  public void testDeployContainer() throws Exception {
+    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
+    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+
+    // Test a bad POST
+    PowerMockito.doThrow(new IOException()).when(httpJsonClient).post(Mockito.anyString(),
+        Mockito.anyInt());
+    exception.expect(IOException.class);
+    controller.deployContainer(Mockito.anyString());
+
+  }
+
+  @Test
+  public void testRemoveContainer() throws Exception {
+    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
+    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+
+    // Test a bad DELETE
+    PowerMockito.doThrow(new IOException()).when(httpJsonClient).delete(Mockito.anyInt());
+    exception.expect(IOException.class);
+    controller.removeContainer(Mockito.anyString());
+  }
+
 
   /***
    * Test KubernetesController's submitTopology method
@@ -122,90 +129,18 @@ public class KubernetesControllerTest {
    */
   @Test
   public void testSubmitTopology() throws Exception {
-    HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
-    final String[] appConf = {"{pod1: conf}", "{pod2: conf}"};
 
-    // Failed to get connection
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(null).when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    Assert.assertFalse(controller.submitTopology(appConf));
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
+    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
+    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
 
-    // Failed to send request
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(false)
-        .when(NetworkUtils.class, "sendHttpPostRequest",
-            Mockito.any(HttpURLConnection.class),
-            Mockito.anyString(),
-            Mockito.any(byte[].class));
-    Assert.assertFalse(controller.submitTopology(appConf));
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
-    NetworkUtils.sendHttpPostRequest(
-        Mockito.any(HttpURLConnection.class),
-        Mockito.anyString(),
-        Mockito.any(byte[].class));
+    // Test a bad POST
+    PowerMockito.doThrow(new IOException()).when(httpJsonClient).post(Mockito.anyString(),
+        Mockito.anyInt());
+    Assert.assertFalse(controller.submitTopology(DEPLOY_CONFS));
 
-    // Failed to get response
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "sendHttpPostRequest",
-            Mockito.any(HttpURLConnection.class),
-            Mockito.anyString(),
-            Mockito.any(byte[].class));
-    PowerMockito.doReturn(false)
-        .when(NetworkUtils.class, "checkHttpResponseCode",
-            Mockito.any(HttpURLConnection.class), Mockito.anyInt());
-    Assert.assertFalse(controller.submitTopology(appConf));
-    PowerMockito.verifyStatic();
-    NetworkUtils.getHttpConnection(Mockito.anyString());
-    NetworkUtils.sendHttpPostRequest(
-        Mockito.any(HttpURLConnection.class),
-        Mockito.anyString(),
-        Mockito.any(byte[].class));
-    NetworkUtils.checkHttpResponseCode(Mockito.any(HttpURLConnection.class), Mockito.anyInt());
+    // Test a good path
+    PowerMockito.doNothing().when(httpJsonClient).post(Mockito.anyString(), Mockito.anyInt());
+    Assert.assertTrue(controller.submitTopology(DEPLOY_CONFS));
 
-    // Success
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "sendHttpPostRequest",
-            Mockito.any(HttpURLConnection.class),
-            Mockito.anyString(),
-            Mockito.any(byte[].class));
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "checkHttpResponseCode",
-            Mockito.any(HttpURLConnection.class), Mockito.anyInt());
-
-    // Sample app conf with 2 pods -- verify it ran twice
-    PowerMockito.spy(NetworkUtils.class);
-    PowerMockito.doReturn(httpURLConnection)
-        .when(NetworkUtils.class, "getHttpConnection", Mockito.anyString());
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "sendHttpPostRequest",
-            Mockito.any(HttpURLConnection.class),
-            Mockito.anyString(),
-            Mockito.any(byte[].class));
-    PowerMockito.doReturn(true)
-        .when(NetworkUtils.class, "checkHttpResponseCode",
-            Mockito.any(HttpURLConnection.class), Mockito.anyInt());
-
-    Assert.assertTrue(controller.submitTopology(appConf));
-
-    // Verify 2 times
-    PowerMockito.verifyStatic(times(2));
-    NetworkUtils.getHttpConnection(Mockito.anyString());
-    NetworkUtils.sendHttpPostRequest(
-        Mockito.any(HttpURLConnection.class),
-        Mockito.anyString(),
-        Mockito.any(byte[].class));
-    NetworkUtils.checkHttpResponseCode(Mockito.any(HttpURLConnection.class), Mockito.anyInt());
   }
-
 }

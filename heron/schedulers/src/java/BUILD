@@ -49,6 +49,7 @@ marathon_deps_files = \
 kubernetes_deps_files = \
     scheduler_deps_files + [
        "//third_party/java:jackson",
+       "//heron/common/src/java:network-java",
     ]
 
 java_library(
