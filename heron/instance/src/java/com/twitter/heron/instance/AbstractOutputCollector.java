@@ -44,7 +44,7 @@ public class AbstractOutputCollector {
     this.serializer = serializer;
     this.metrics = metrics;
     this.totalTuplesEmitted = 0;
-    updatePhysicalPlanHelper(helper);
+    this.helper = helper;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
@@ -54,11 +54,12 @@ public class AbstractOutputCollector {
       this.ackEnabled = false;
     }
 
-    this.outputter = new OutgoingTupleCollection(helper.getMyComponent(), streamOutQueue);
+    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
   }
 
   public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
     this.helper = physicalPlanHelper;
+    this.outputter.updatePhysicalPlanHelper(physicalPlanHelper);
   }
 
   public PhysicalPlanHelper getPhysicalPlanHelper() {

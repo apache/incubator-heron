@@ -50,7 +50,8 @@ public class BoltInstance
   }
 
   private void handleDataTuple(HeronTuples.HeronDataTuple dataTuple,
-                               TopologyAPI.StreamId stream) {
+                               TopologyAPI.StreamId stream,
+                               int srcTaskId) {
     long startTime = System.nanoTime();
 
     List<Object> values = new ArrayList<>();
@@ -60,7 +61,7 @@ public class BoltInstance
 
     // Decode the tuple
     TupleImpl t = new TupleImpl(helper.getTopologyContext(), stream, dataTuple.getKey(),
-        dataTuple.getRootsList(), values);
+        dataTuple.getRootsList(), values, srcTaskId);
 
     long deserializedTime = System.nanoTime();
 
@@ -96,7 +97,7 @@ public class BoltInstance
       TopologyAPI.StreamId stream = tuples.getData().getStream();
 
       for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
-        handleDataTuple(dataTuple, stream);
+        handleDataTuple(dataTuple, stream, tuples.getSrcTaskId());
       }
 
       // To avoid spending too much time
