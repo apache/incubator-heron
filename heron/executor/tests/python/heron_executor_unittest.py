@@ -133,7 +133,7 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'heron-tmaster',
                   'tmaster_binary %s master_port '
                   'tmaster_controller_port tmaster_stats_port '
-                  'topname topid zknode zkroot stmgr-1,stmgr-7 '
+                  'topname topid zknode zkroot '
                   '%s metrics_sinks_config_file metricsmgr_port' % (HOSTNAME, INTERNAL_CONF_PATH )),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
   ]

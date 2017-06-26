@@ -2,38 +2,29 @@ FROM ubuntu:14.04
 
 ARG heronVersion
 
-RUN apt-get update && apt-get -y install \
-      curl \
-      git \
-      libssl-dev \
-      libtool \
-      libunwind8 \
-      libunwind-setjmp0-dev \
-      python \
-      software-properties-common \
-      unzip \
-      wget \
-      zip
+RUN apt-get update 
+RUN apt-get -y install python ; apt-get clean all
+RUN apt-get -y install unzip ; apt-get clean all
+RUN apt-get -y install software-properties-common ; apt-get clean all
+RUN apt-get -y install curl ; apt-get clean all
 
-RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
+RUN apt-get -y install openjdk-8-jdk; apt-get clean all
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 ADD artifacts /heron
 
 WORKDIR /heron
 
-#run heron installers
-RUN /heron/heron-tools-install-$heronVersion-ubuntu14.04.sh && \
-    /heron/heron-client-install-$heronVersion-ubuntu14.04.sh
+# run heron installers
+RUN /heron/heron-tools-install.sh
 
 RUN mkdir -p /opt/heron && \
-    tar --strip-components=1 -zxvf /usr/local/heron/dist/heron-core.tar.gz -C /opt/heron
+    tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /opt/heron
+
+RUN rm -f /heron/heron-tools-install.sh
+RUN rm -f /heron/heron-core.tar.gz
 
 ENV HERON_HOME /opt/heron/heron-core/
 RUN export HERON_HOME

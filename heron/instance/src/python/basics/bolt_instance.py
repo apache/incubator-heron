@@ -16,14 +16,16 @@
 import time
 import Queue
 
+from heron.api.src.python import global_metrics
+from heron.api.src.python import api_constants
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
-from heron.common.src.python.utils.metrics import global_metrics, BoltMetrics
+from heron.common.src.python.utils.metrics import BoltMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import tuple_pb2
 from heron.pyheron.src.python import Stream
 
-import heron.common.src.python.constants as constants
+import heron.common.src.python.system_constants as system_constants
 
 from .base_instance import BaseInstance
 
@@ -42,7 +44,8 @@ class BoltInstance(BaseInstance):
     self.serializer = SerializerHelper.get_serializer(context)
 
     # acking related
-    self.acking_enabled = context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_ACKING, False)
+    self.acking_enabled = context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_ACKING,
+                                                           False)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
 
     # load user's bolt class
@@ -56,7 +59,7 @@ class BoltInstance(BaseInstance):
     context.invoke_hook_prepare()
 
     # prepare global metrics
-    interval = float(self.sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+    interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     collector = context.get_metrics_collector()
     global_metrics.init(collector, interval)
 
@@ -135,7 +138,7 @@ class BoltInstance(BaseInstance):
       serialized = self.serializer.serialize(obj)
       data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
-    serialize_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+    serialize_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
     self.bolt_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
     super(BoltInstance, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
@@ -166,8 +169,8 @@ class BoltInstance(BaseInstance):
     start_cycle_time = time.time()
     total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
     exec_batch_time = \
-      self.sys_config[constants.INSTANCE_EXECUTE_BATCH_TIME_MS] * constants.MS_TO_SEC
-    exec_batch_size = self.sys_config[constants.INSTANCE_EXECUTE_BATCH_SIZE_BYTES]
+      self.sys_config[system_constants.INSTANCE_EXECUTE_BATCH_TIME_MS] * system_constants.MS_TO_SEC
+    exec_batch_size = self.sys_config[system_constants.INSTANCE_EXECUTE_BATCH_SIZE_BYTES]
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
@@ -205,8 +208,8 @@ class BoltInstance(BaseInstance):
 
     deserialized_time = time.time()
     self.bolt_impl.process(tup)
-    execute_latency_ns = (time.time() - deserialized_time) * constants.SEC_TO_NS
-    deserialize_latency_ns = (deserialized_time - start_time) * constants.SEC_TO_NS
+    execute_latency_ns = (time.time() - deserialized_time) * system_constants.SEC_TO_NS
+    deserialize_latency_ns = (deserialized_time - start_time) * system_constants.SEC_TO_NS
 
     self.pplan_helper.context.invoke_hook_bolt_execute(tup, execute_latency_ns)
 
@@ -216,15 +219,15 @@ class BoltInstance(BaseInstance):
 
   def _prepare_tick_tup_timer(self):
     cluster_config = self.pplan_helper.context.get_cluster_config()
-    if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in cluster_config:
-      tick_freq_sec = cluster_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
+    if api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in cluster_config:
+      tick_freq_sec = cluster_config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
       Log.debug("Tick Tuple Frequency: %s sec." % str(tick_freq_sec))
 
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
         start_time = time.time()
         self.bolt_impl.process_tick(tick)
-        tick_execute_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+        tick_execute_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
         self.bolt_metrics.execute_tuple(tick.id, tick.component, tick_execute_latency_ns)
         self.output_helper.send_out_tuples()
         self.looper.wake_up() # so emitted tuples would be added to buffer now
@@ -252,7 +255,7 @@ class BoltInstance(BaseInstance):
         tuple_size_in_bytes += rt.ByteSize()
       super(BoltInstance, self).admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
 
-    process_latency_ns = (time.time() - tup.creation_time) * constants.SEC_TO_NS
+    process_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_ack(tup, process_latency_ns)
     self.bolt_metrics.acked_tuple(tup.stream, tup.component, process_latency_ns)
 
@@ -276,7 +279,7 @@ class BoltInstance(BaseInstance):
         tuple_size_in_bytes += rt.ByteSize()
       super(BoltInstance, self).admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
 
-    fail_latency_ns = (time.time() - tup.creation_time) * constants.SEC_TO_NS
+    fail_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_fail(tup, fail_latency_ns)
     self.bolt_metrics.failed_tuple(tup.stream, tup.component, fail_latency_ns)
 

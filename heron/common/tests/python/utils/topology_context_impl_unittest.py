@@ -15,21 +15,21 @@
 # pylint: disable=missing-docstring
 import unittest
 
-from heron.common.src.python.utils.topology import TopologyContext
+from heron.common.src.python.utils.topology import TopologyContextImpl
 
 import heron.common.tests.python.utils.mock_generator as mock_generator
 import heron.common.tests.python.mock_protobuf as mock_protobuf
 
-class TopologyContextTest(unittest.TestCase):
+class TopologyContextImplTest(unittest.TestCase):
   def setUp(self):
-    self.context = TopologyContext(config={}, topology=mock_protobuf.get_mock_topology(),
-                                   task_to_component={}, my_task_id="task_id",
-                                   metrics_collector=None, topo_pex_path="path.to.pex")
+    self.context = TopologyContextImpl(config={}, topology=mock_protobuf.get_mock_topology(),
+                                       task_to_component={}, my_task_id="task_id",
+                                       metrics_collector=None, topo_pex_path="path.to.pex")
   def test_task_hook(self):
     task_hook = mock_generator.MockTaskHook()
-    self.assertFalse(self.context.hook_exists)
+    self.assertFalse(len(self.context.task_hooks) > 0)
     self.context.add_task_hook(task_hook)
-    self.assertTrue(self.context.hook_exists)
+    self.assertTrue(len(self.context.task_hooks) > 0)
 
     self.context.invoke_hook_prepare()
 

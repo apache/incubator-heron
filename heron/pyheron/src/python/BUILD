@@ -9,7 +9,7 @@ pex_library(
         "//heron/common/src/python:common-py",
         "//heron/proto:proto-py",
     ],
-    reqs = ['colorlog==2.6.1', 'pyyaml==3.10'],
+    reqs = ['colorlog==2.6.1', 'PyYAML==3.10'],
 )
 
 # for pyheron egg production

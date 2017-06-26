@@ -77,6 +77,13 @@ heron.build.git.status : Clean
 
 ## Step 2 --- Launch an example topology
 
+> **Note for MacOS users**
+
+> If you want to run topologies locally on MacOS, you may need to add your
+> hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
+> `127.0.0.1 localhost <hostname>`. You can fetch your hostname by simply
+> running `hostname` in your shell.
+
 If you set the `--user` flag when running the installation scripts, some example
 topologies will be installed in your `~/.heron/examples` directory. You can
 launch an example [topology](../concepts/topologies) locally (on your machine)
@@ -262,7 +269,7 @@ In case of any issues, please refer to [Quick Start Troubleshooting](../getting-
 
 ### Next Steps
 
-* [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
+* [Migrate Storm topologies](../migrate-storm-to-heron) with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
   environments (such as on [Aurora](../operators/deployment/schedulers/aurora)

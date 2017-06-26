@@ -92,9 +92,6 @@ class Result(object):
     self.err_context = err_context
     self.succ_context = succ_context
 
-  def is_successful(self):
-    return self.status == Status.Ok
-
   @abc.abstractmethod
   def render(self):
     pass
@@ -179,10 +176,10 @@ def render(results):
     raise RuntimeError("Unknown result instance: %s", str(results.__class__))
 
 # check if all results are successful
-def isAllSuccessful(results):
+def is_successful(results):
   if isinstance(results, list):
-    return all([result.is_successful() for result in results])
+    return all([result.status == Status.Ok for result in results])
   elif isinstance(results, Result):
-    return results.is_successful()
+    return results.status == Status.Ok
   else:
     raise RuntimeError("Unknown result instance: %s", str(results.__class__))

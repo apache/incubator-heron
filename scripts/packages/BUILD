@@ -262,6 +262,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-conf-kubernetes",
+    package_dir = "conf/kubernetes",
+    files = [
+        "//heron/config/src/yaml:conf-kubernetes-yaml",
+    ]
+)
+
+pkg_tar(
     name = "heron-client-conf",
     package_dir = "conf",
     files = heron_client_conf_files(),
@@ -286,6 +294,7 @@ pkg_tar(
         ":heron-client-conf-yarn",
         ":heron-client-conf-mesos",
         ":heron-client-conf-marathon",
+        ":heron-client-conf-kubernetes",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-third_party",
@@ -313,6 +322,7 @@ genrule(
     srcs = [
         "pyheron/requirements.txt", 
         "pyheron/setup.py.template",
+        "pyheron/README.txt",
     ] + generated_release_files,
     outs = generated_pyheron_egg_file,
     stamp = 1,
@@ -342,7 +352,6 @@ genrule(
         'cd $$PYHERON_DIR',
         'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
         'rm setup.py.template',
-        'tree $$PYHERON_DIR',
         '/usr/bin/env python2.7 setup.py sdist',
         '/usr/bin/env python2.7 setup.py bdist_wheel',
         'ls -l $$PYHERON_DIR/dist',

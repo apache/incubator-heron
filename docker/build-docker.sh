@@ -37,7 +37,7 @@ run_build() {
 
   setup_scratch_dir $SCRATCH_DIR
 
-  echo "building docker image with tag:$DOCKER_TAG"
+  echo "Building docker image with tag:$DOCKER_TAG"
   #need to copy artifacts locally
   cp -pr "$OUTPUT_DIRECTORY"/*$HERON_VERSION* "$SCRATCH_DIR/artifacts"
 

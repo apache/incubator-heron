@@ -104,13 +104,10 @@ def get_stat(path, filename):
   ''' get stat '''
   return os.stat(os.path.join(path, filename))
 
-def read_chunk(filename, offset=None, length=None):
+def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   """
   Read a chunk of a file from an offset upto the length.
   """
-  offset = offset or -1
-  length = length or -1
-
   try:
     length = long(length)
     offset = long(offset)
@@ -139,10 +136,13 @@ def read_chunk(filename, offset=None, length=None):
       return {}
 
   if data:
-    return dict(offset=offset, length=len(data), data=escape(data.decode('utf8', 'replace')))
+    data = _escape_data(data) if escape_data else data
+    return dict(offset=offset, length=len(data), data=data)
 
   return dict(offset=offset, length=0)
 
+def _escape_data(data):
+  return escape(data.decode('utf8', 'replace'))
 
 def pipe(prev_proc, to_cmd):
   """

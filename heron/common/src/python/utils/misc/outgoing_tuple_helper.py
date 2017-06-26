@@ -18,7 +18,7 @@ from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.proto import tuple_pb2, topology_pb2
 
-import heron.common.src.python.constants as constants
+import heron.common.src.python.system_constants as constants
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=no-value-for-parameter

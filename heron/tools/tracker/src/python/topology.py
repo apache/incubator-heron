@@ -15,7 +15,7 @@
 import traceback
 import uuid
 
-from heron.common.src.python import constants
+from heron.api.src.python import api_constants
 from heron.common.src.python.utils.log import Log
 
 # pylint: disable=too-many-instance-attributes
@@ -166,7 +166,7 @@ class Topology(object):
     for component in components:
       config = component.comp.config
       for kvs in config.kvs:
-        if kvs.key == constants.TOPOLOGY_COMPONENT_PARALLELISM:
+        if kvs.key == api_constants.TOPOLOGY_COMPONENT_PARALLELISM:
           num += int(kvs.value)
           break
 

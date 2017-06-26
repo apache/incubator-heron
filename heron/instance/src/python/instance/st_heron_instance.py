@@ -31,7 +31,7 @@ from heron.proto import physical_plan_pb2, tuple_pb2
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
-import heron.common.src.python.constants as constants
+import heron.common.src.python.system_constants as constants
 
 Log = log.Log
 AssignedInstance = collections.namedtuple('AssignedInstance', 'is_spout, protobuf, py_class')

@@ -14,14 +14,15 @@
 '''pplan_helper.py'''
 import socket
 
+from heron.api.src.python.custom_grouping import ICustomGrouping
+from heron.api.src.python.serializer import default_serializer
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.topology import TopologyContext, ICustomGrouping
+from heron.common.src.python.utils.topology import TopologyContextImpl
 
 import heron.common.src.python.pex_loader as pex_loader
 
 from .custom_grouping_helper import CustomGroupingHelper
-from .serializer import default_serializer
 
 # pylint: disable=too-many-instance-attributes
 class PhysicalPlanHelper(object):
@@ -152,8 +153,9 @@ class PhysicalPlanHelper(object):
     cluster_config = self.get_topology_config()
     cluster_config.update(self._get_dict_from_config(self.my_component.config))
     task_to_component_map = self._get_task_to_comp_map()
-    self.context = TopologyContext(cluster_config, self.pplan.topology, task_to_component_map,
-                                   self.my_task_id, metrics_collector, self.topology_pex_abs_path)
+    self.context = TopologyContextImpl(cluster_config, self.pplan.topology, task_to_component_map,
+                                       self.my_task_id, metrics_collector,
+                                       self.topology_pex_abs_path)
 
   @staticmethod
   def _get_dict_from_config(topology_config):
