@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <gperftools/heap-profiler.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -55,6 +56,8 @@ int main(int argc, char* argv[]) {
   sp_int32 shell_port = atoi(argv[11]);
   sp_string heron_internals_config_filename = argv[12];
 
+  HeapProfilerStart("stmgr");
+
   EventLoopImpl ss;
 
   // Read heron internals config from local file
@@ -82,5 +85,6 @@ int main(int argc, char* argv[]) {
                           high_watermark, low_watermark);
   mgr.Init();
   ss.loop();
+  HeapProfilerStop();
   return 0;
 }
