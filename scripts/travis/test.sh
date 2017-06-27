@@ -8,15 +8,7 @@ DIR=`dirname $0`
 source ${DIR}/common.sh
 
 # Autodiscover the platform
-DISCOVER=`python -mplatform`
-if [[ "$DISCOVER" =~ "^.*centos.*$" ]]; then
-  PLATFORM="centos"
-elif [[ "$DISCOVER" =~ "^.*Ubuntu.*$" ]]; then
-  PLATFORM="ubuntu"
-else
-  echo "$DISCOVER not supported"
-  exit 1
-fi
+PLATFORM=discover_platform
 
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration-test/src/java/integration-tests.jar"
