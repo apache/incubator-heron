@@ -13,7 +13,7 @@
 # limitations under the License.
 '''double tuples bolt'''
 
-from heron.pyheron.src.python import Bolt
+from heron.api.src.python import Bolt
 
 class DoubleTuplesBolt(Bolt):
   """Double tuples bolt

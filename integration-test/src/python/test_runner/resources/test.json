@@ -90,67 +90,67 @@
   ],
   "pythonTopologies": [
     {
-      "topologyName" : "PyHeron_IntegrationTest_AllGrouping",
+      "topologyName" : "Heron_IntegrationTest_AllGrouping",
       "classPath"    : "-",
       "expectedResultRelativePath" : "all_grouping/resources/all_grouping_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_BasicOneTask",
+      "topologyName" : "Heron_IntegrationTest_BasicOneTask",
       "classPath"    : "-",
       "expectedResultRelativePath" : "basic_one_task/resources/basic_one_task_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_NoneGrouping",
+      "topologyName" : "Heron_IntegrationTest_NoneGrouping",
       "classPath"    : "-",
       "expectedResultRelativePath" : "none_grouping/resources/none_grouping_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_OneBoltMultiTasks",
+      "topologyName" : "Heron_IntegrationTest_OneBoltMultiTasks",
       "classPath"    : "-",
       "expectedResultRelativePath" : "one_bolt_multi_tasks/resources/one_bolt_multi_tasks_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_OneSpoutBoltMultiTasks",
+      "topologyName" : "Heron_IntegrationTest_OneSpoutBoltMultiTasks",
       "classPath"    : "-",
       "expectedResultRelativePath" : "one_spout_bolt_multi_tasks/resources/one_spout_bolt_multi_tasks_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_ShuffleGrouping",
+      "topologyName" : "Heron_IntegrationTest_ShuffleGrouping",
       "classPath"    : "-",
       "expectedResultRelativePath" : "shuffle_grouping/resources/shuffle_grouping_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_OneSpoutTwoBolts",
+      "topologyName" : "Heron_IntegrationTest_OneSpoutTwoBolts",
       "classPath"    : "-",
       "expectedResultRelativePath" : "one_spout_two_bolts/resources/one_spout_two_bolts_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_OneSpoutTwoBolts",
+      "topologyName" : "Heron_IntegrationTest_OneSpoutTwoBolts",
       "classPath"    : "-",
       "expectedResultRelativePath" : "one_spout_two_bolts/resources/one_spout_two_bolts_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_OneSpoutMultiTasks",
+      "topologyName" : "Heron_IntegrationTest_OneSpoutMultiTasks",
       "classPath"    : "-",
       "expectedResultRelativePath" : "one_spout_multi_tasks/resources/one_spout_multi_tasks_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_MultiSpoutsMultiTasks",
+      "topologyName" : "Heron_IntegrationTest_MultiSpoutsMultiTasks",
       "classPath"    : "-",
       "expectedResultRelativePath" : "multi_spouts_multi_tasks/resources/multi_spouts_multi_tasks_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_FieldsGrouping",
+      "topologyName" : "Heron_IntegrationTest_FieldsGrouping",
       "classPath"    : "-",
       "expectedResultRelativePath" : "fields_grouping/resources/fields_grouping_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_BoltDoubleEmitTuples",
+      "topologyName" : "Heron_IntegrationTest_BoltDoubleEmitTuples",
       "classPath"    : "-",
       "expectedResultRelativePath" : "bolt_double_emit_tuples/resources/bolt_double_emit_tuples_result.json"
     },
     {
-      "topologyName" : "PyHeron_IntegrationTest_GlobalGrouping",
+      "topologyName" : "Heron_IntegrationTest_GlobalGrouping",
       "classPath"    : "-",
       "expectedResultRelativePath" : "global_grouping/resources/global_grouping_result.json"
     }
