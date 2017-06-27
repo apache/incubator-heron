@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' constants.py: defines constants for generic purposes and for topology and system config'''
+''' system_constants.py: defines constants for generic purposes and system config'''
 
 ##### Generic constants #####
 
@@ -26,66 +26,6 @@ NS_TO_MS = 0.000001
 RAM_FOR_STMGR = 1 * GB
 DEFAULT_RAM_FOR_INSTANCE = 1 * GB
 DEFAULT_DISK_PADDING_PER_CONTAINER = 12 * GB
-
-####################################################################################################
-###########################  Constants for topology configuration ##################################
-####################################################################################################
-
-# Topology-specific options for the worker child process.
-TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
-# Per component jvm options.
-TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts"
-# How often a tick tuple from the "__system" component and "__tick" stream should be sent to tasks.
-TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
-# True if Heron should timeout messages or not. Default true. Meant to be used in unit tests.
-TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS = "topology.enable.message.timeouts"
-# When true, Heron will log every message that's emitted
-TOPOLOGY_DEBUG = "topology.debug"
-# The number of stmgr instances that should spin up to service this topology.
-TOPOLOGY_STMGRS = "topology.stmgrs"
-# The max amount of time given to the topology to fully process a message emitted by a spout.
-TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs"
-# The per component parallelism for a component in this topology.
-TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism"
-# The maximum number of tuples that can be pending on a spout task at any given time.
-TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending"
-# A list of task hooks that are automatically added to every spout and bolt in the topology.
-TOPOLOGY_AUTO_TASK_HOOKS = "topology.auto.task.hooks"
-# The serialization class that is used to serialize/deserialize tuples
-TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname"
-# How many executors to spawn for ackers.
-TOPOLOGY_ENABLE_ACKING = "topology.acking"
-
-# Number of cpu cores per container to be reserved for this topology.
-TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
-# Amount of ram per container to be reserved for this topology, in bytes.
-TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram"
-# Amount of disk per container to be reserved for this topology, in bytes.
-TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk"
-# Hint for max amount of ram per container to be reserved for this topology, in bytes.
-TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint"
-# Hint for max amount of disk per container to be reserved for this topology, in bytes.
-TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint"
-# Padding percentage for this container.
-TOPOLOGY_CONTAINER_PADDING_PERCENTAGE = "topology.container.padding.percentage"
-
-# Per component ram requirement.
-TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"
-# Name of the topology, automatically set by Heron when the topology is submitted.
-TOPOLOGY_NAME = "topology.name"
-# Name of the team which owns this topology.
-TOPOLOGY_TEAM_NAME = "topology.team.name"
-# Email of the team which owns this topology.
-TOPOLOGY_TEAM_EMAIL = "topology.team.email"
-# Cap ticket (if filed) for the topology. If the topology is in prod, this has to be set or it
-# cannot be deployed.
-TOPOLOGY_CAP_TICKET = "topology.cap.ticket"
-# Project name of the topology, to help us with tagging which topologies are part of which project.
-TOPOLOGY_PROJECT_NAME = "topology.project.name"
-# Any user defined classpath that needs to be passed to instances should be set in to config
-# through this key.
-TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
-
 
 ####################################################################################################
 #############################  Constants for System configuration ##################################

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''task_hook.py: modules for supporting task hooks for topology'''
-from abc import abstractmethod
 from collections import namedtuple
+from abc import abstractmethod
 
 class ITaskHook(object):
   """ITaskHook is an interface for defining task hooks for a topology"""

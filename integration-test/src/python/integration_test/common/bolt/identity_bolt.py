@@ -13,7 +13,7 @@
 # limitations under the License.
 '''identity bolt'''
 
-from heron.pyheron.src.python import Bolt
+from heron.api.src.python import Bolt
 
 class IdentityBolt(Bolt):
   """Identity Bolt

@@ -31,18 +31,18 @@ from .bolt_double_emit_tuples import bolt_double_emit_tuples_builder
 from .global_grouping import global_grouping_builder
 
 TOPOLOGY_BUILDERS = {
-    'PyHeron_IntegrationTest_BasicOneTask': basic_one_task_builder,
-    'PyHeron_IntegrationTest_AllGrouping': all_grouping_buidler,
-    'PyHeron_IntegrationTest_NoneGrouping': none_grouping_builder,
-    'PyHeron_IntegrationTest_OneBoltMultiTasks': one_bolt_multi_tasks_builder,
-    'PyHeron_IntegrationTest_OneSpoutBoltMultiTasks': one_spout_bolt_multi_tasks_builder,
-    'PyHeron_IntegrationTest_ShuffleGrouping': shuffle_grouping_builder,
-    'PyHeron_IntegrationTest_OneSpoutTwoBolts': one_spout_two_bolts_builder,
-    'PyHeron_IntegrationTest_OneSpoutMultiTasks': one_spout_multi_tasks_builder,
-    'PyHeron_IntegrationTest_MultiSpoutsMultiTasks': multi_spouts_multi_tasks_builder,
-    'PyHeron_IntegrationTest_FieldsGrouping': fields_grouping_builder,
-    'PyHeron_IntegrationTest_BoltDoubleEmitTuples': bolt_double_emit_tuples_builder,
-    'PyHeron_IntegrationTest_GlobalGrouping': global_grouping_builder,
+    'Heron_IntegrationTest_BasicOneTask': basic_one_task_builder,
+    'Heron_IntegrationTest_AllGrouping': all_grouping_buidler,
+    'Heron_IntegrationTest_NoneGrouping': none_grouping_builder,
+    'Heron_IntegrationTest_OneBoltMultiTasks': one_bolt_multi_tasks_builder,
+    'Heron_IntegrationTest_OneSpoutBoltMultiTasks': one_spout_bolt_multi_tasks_builder,
+    'Heron_IntegrationTest_ShuffleGrouping': shuffle_grouping_builder,
+    'Heron_IntegrationTest_OneSpoutTwoBolts': one_spout_two_bolts_builder,
+    'Heron_IntegrationTest_OneSpoutMultiTasks': one_spout_multi_tasks_builder,
+    'Heron_IntegrationTest_MultiSpoutsMultiTasks': multi_spouts_multi_tasks_builder,
+    'Heron_IntegrationTest_FieldsGrouping': fields_grouping_builder,
+    'Heron_IntegrationTest_BoltDoubleEmitTuples': bolt_double_emit_tuples_builder,
+    'Heron_IntegrationTest_GlobalGrouping': global_grouping_builder,
 }
 
 # pylint: disable=missing-docstring
@@ -57,8 +57,8 @@ def main():
 
   http_server_url = args.results_url
 
-  # 1470884422_PyHeron_IntegrationTest_BasicOneTask_dca9bb1c-dd3b-4ea6-97dc-ea0cea265adc
-  # --> PyHeron_IntegrationTest_BasicOneTask
+  # 1470884422_Heron_IntegrationTest_BasicOneTask_dca9bb1c-dd3b-4ea6-97dc-ea0cea265adc
+  # --> Heron_IntegrationTest_BasicOneTask
   topology_name_with_uuid = args.topology_name
   topology_name = '_'.join(topology_name_with_uuid.split('_')[1:-1])
 

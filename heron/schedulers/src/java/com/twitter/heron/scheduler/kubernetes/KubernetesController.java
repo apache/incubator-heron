@@ -14,76 +14,115 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.utils.NetworkUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import com.twitter.heron.common.network.HttpJsonClient;
+import com.twitter.heron.scheduler.TopologySubmissionException;
 
 public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
 
-  private final String kubernetesURI;
   private final String topologyName;
+  private final String baseUriPath;
   private final boolean isVerbose;
 
-  public KubernetesController(
-      String kubernetesURI,
-      String topologyName,
-      boolean isVerbose
-  ) {
-    this.kubernetesURI = kubernetesURI;
+  public KubernetesController(String kubernetesURI, String kubernetesNamespace,
+                               String topologyName, boolean isVerbose) {
+
+    if (kubernetesNamespace == null) {
+      this.baseUriPath = String.format("%s/api/v1/namespaces/default/pods", kubernetesURI);
+    } else {
+      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", kubernetesURI,
+          kubernetesNamespace);
+    }
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
   }
 
   /**
    * Kill a topology in kubernetes based on a configuration
-   *
-   * @return success
    */
-  public boolean killTopology() {
+  protected boolean killTopology() {
 
     // Setup connection
     String deploymentURI = String.format(
-        "%s/api/v1/namespaces/default/pods?labelSelector=topology%%3D%s",
-        this.kubernetesURI,
+        "%s?labelSelector=topology%%3D%s",
+        this.baseUriPath,
         this.topologyName);
 
-    LOG.log(Level.INFO, deploymentURI);
-    HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
-    if (conn == null) {
-      LOG.log(Level.SEVERE, "Failed to find k8s deployment API");
+    // send the delete request to the scheduler
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(deploymentURI);
+    try {
+      jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Problem sending delete request: " + deploymentURI, ioe);
       return false;
     }
+    return true;
+  }
 
+  /**
+   * Get information about a pod
+   */
+  protected JsonNode getBasePod(String podId) throws IOException {
+
+    String podURI = String.format(
+        "%s/%s",
+        this.baseUriPath,
+        podId);
+
+    // send the delete request to the scheduler
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    JsonNode result;
     try {
-      if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
-        LOG.log(Level.SEVERE, "Failed to send delete request to k8s deployment API");
-        return false;
-      }
-
-      // check response
-      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
-
-      if (success) {
-        LOG.log(Level.SEVERE, "Successfully killed topology deployments");
-        return true;
-      } else {
-        LOG.log(Level.SEVERE, "Failure to delete topology deployments");
-        return false;
-      }
-
-    } finally {
-      // Disconnect to release resources
-      conn.disconnect();
+      result = jsonAPIClient.get(HttpURLConnection.HTTP_OK);
+    } catch (IOException ioe) {
+      throw ioe;
     }
+    return result;
+  }
 
+  /**
+   * Deploy a single container (Pod)
+   *
+   * @param deployConf, the json body as a string
+   */
+  protected void deployContainer(String deployConf) throws IOException {
+
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(this.baseUriPath);
+    try {
+      jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
+    } catch (IOException ioe) {
+      throw ioe;
+    }
 
   }
 
-  public boolean restartApp(int appId) {
+  /**
+   * Remove a single container (Pod)
+   *
+   * @param podId, the pod id (TOPOLOGY_NAME-CONTAINER_INDEX)
+   */
+  protected void removeContainer(String podId) throws IOException {
+    String podURI = String.format(
+        "%s/%s",
+        this.baseUriPath,
+        podId);
+
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
+  }
+
+  /**
+   * Restart the topology (current unimplemented)
+   * @param appId, id of the topology
+   */
+  protected boolean restartApp(int appId) {
     String message = "Restarting the whole topology is not supported yet. "
         + "Please kill and resubmit the topology.";
     LOG.log(Level.SEVERE, message);
@@ -91,66 +130,23 @@ public class KubernetesController {
   }
 
   /**
-   * Submit a topology to kubernetes based on a configuration
-   *
-   * @return success
+   * Submit a topology to kubernetes based on a set of pod configurations
    */
-  public boolean submitTopology(String[] appConfs) {
+  protected boolean submitTopology(String[] appConfs) {
 
     if (!this.topologyName.equals(this.topologyName.toLowerCase())) {
-      LOG.log(Level.SEVERE, "K8s scheduler does not allow upper case topologies");
-      return false;
+      throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
     }
 
-    String deploymentURI = String.format(
-        "%s/api/v1/namespaces/default/pods",
-        this.kubernetesURI);
-
-    boolean allSuccessful = true;
-
-    for (int i = 0; i < appConfs.length; i++) {
-      LOG.log(Level.INFO, "Topology configuration is: " + appConfs[i]);
-
-      // Get a connection
-      HttpURLConnection conn = NetworkUtils.getHttpConnection(deploymentURI);
-      if (conn == null) {
-        LOG.log(Level.SEVERE, "Fauled to find k8s deployment API");
+    for (String appConf : appConfs) {
+      try {
+        deployContainer(appConf);
+      } catch (IOException ioe) {
+        LOG.log(Level.SEVERE, "Problem deploying container with config: " + appConf);
         return false;
       }
-
-      try {
-        // send post request with json body for the topology
-        if (!NetworkUtils.sendHttpPostRequest(conn,
-                                              NetworkUtils.JSON_TYPE,
-                                              appConfs[i].getBytes())) {
-          LOG.log(Level.SEVERE, "Failed to send post to k8s deployment api");
-          allSuccessful = false;
-          break;
-        }
-
-        // check the response
-        boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
-
-        if (success) {
-          LOG.log(Level.INFO, "Topology Deployment submitted to k8s deployment API successfully");
-        } else {
-          LOG.log(Level.SEVERE, "Failed to submit Deployment to k8s");
-          byte[] bytes = NetworkUtils.readHttpResponse(conn);
-          LOG.log(Level.INFO, Arrays.toString(bytes));
-          allSuccessful = false;
-          break;
-        }
-      } finally {
-        conn.disconnect();
-      }
-
     }
-
-
-    return allSuccessful;
+    return true;
   }
-
-
-
 
 }

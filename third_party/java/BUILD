@@ -196,3 +196,26 @@ java_library(
     exports = [ "@org_mockito_mockito_all//jar" ],
     deps = [ "@org_mockito_mockito_all//jar" ],
 )
+
+java_library(
+    name = "google-api-services-storage",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@google_api_services_storage//jar",
+        "@google_api_client//jar",
+        "@google_http_client//jar",
+        "@google_http_client_jackson2//jar",
+        "@google_oauth_client//jar",
+    ],
+    deps = [ 
+        "@google_api_client//jar",
+        "@google_http_client//jar",
+        "@google_http_client_jackson2//jar",
+        "@google_oauth_client//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@commons_codec//jar",
+        "@commons_logging_commons_logging//jar",
+        "@org_apache_httpcomponents_http_client//jar",
+        "@org_apache_httpcomponents_http_core//jar",
+    ],
+)

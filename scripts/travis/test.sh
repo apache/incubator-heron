@@ -7,26 +7,30 @@ set -e
 DIR=`dirname $0`
 source ${DIR}/common.sh
 
+# Autodiscover the platform
+PLATFORM=$(discover_platform)
+echo "Using $PLATFORM platform"
+
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration-test/src/java/integration-tests.jar"
-PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integration_test/topology/pyheron_integ_topology.pex"
+PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integration_test/topology/heron_integ_topology.pex"
 
 # build test related jar
 T="heron build integration-test"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu integration-test/src/...
+python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build --config=$PLATFORM integration-test/src/...
 end_timer "$T"
 
 # install client
 T="heron client install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=ubuntu -- scripts/packages:heron-client-install.sh --user
+python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-client-install.sh --user
 end_timer "$T"
 
 # install tools
 T="heron tools install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=ubuntu -- scripts/packages:heron-tools-install.sh --user
+python ${DIR}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-tools-install.sh --user
 end_timer "$T"
 
 # run local integration test
