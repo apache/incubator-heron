@@ -28,15 +28,15 @@ import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public class HealthPolicyConfigReader {
   private final Map<String, Map<String, String>> configs = new HashMap<>();
-  private String filename;
+  private String configFilename;
 
   public HealthPolicyConfigReader(String filename) throws FileNotFoundException {
-    this.filename = filename;
+    this.configFilename = filename;
   }
 
   @SuppressWarnings("unchecked")
   public void loadConfig() {
-    Map<String, Object> ret = readConfigFromFile(filename);
+    Map<String, Object> ret = readConfigFromFile(configFilename);
     for (String id : TypeUtils.getListOfStrings(ret.get(HealthMgrConstants.HEALTH_POLICIES))) {
       configs.put(id, (Map<String, String>) ret.get(id));
     }
@@ -57,8 +57,8 @@ public class HealthPolicyConfigReader {
 
   @Override
   public String toString() {
-    return "HealthPolicyConfigReader{" +
-        "filename='" + filename + '\'' +
-        '}';
+    return "HealthPolicyConfigReader{"
+        + "configFilename='" + configFilename + '\''
+        + '}';
   }
 }
