@@ -1,37 +1,13 @@
 ---
 type: service_template
 subtype: container
-name: heron-build-base-ubuntu14.04
-description: This is the base template for building Heron in Ubuntu14.04.
+name: heron-build-base
+description: This is the base template for building Heron
 container:
   resources:
     mem_mib: 4000
     cpu_cores: 1.5
-  image: streamlio/build:latest-heron-ubuntu14.04
-  docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%" 
-  command: bash -c '/heron/scripts/applatix/build.sh'
-inputs:
-  artifacts:
-  - from: "%%checkout_artifact%%"
-    path: "/heron"
-  parameters:
-    checkout_artifact:
-    build_env_cc:
-    build_env_cxx:
-    build_env_cpp:
-    build_env_cxxcpp:
-outputs:
-
----
-type: service_template
-subtype: container
-name: heron-build-base-centos7
-description: This is the base template for building heron component.
-container:
-  resources:
-    mem_mib: 4000
-    cpu_cores: 1.5
-  image: streamlio/build:latest-heron-centos7
+  image: streamlio/build:latest-heron-%%os%%
   docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%" 
   command: bash -c '/heron/scripts/applatix/build.sh'
 inputs:
@@ -70,13 +46,10 @@ steps:
     checkout:
       template: axscm-checkout
   - 
-    heron-build-ubuntu14.04:
-      template: heron-build-base-ubuntu14.04
+    heron-build:
+      template: heron-build-base
       parameters:
-        checkout_artifact: "%%steps.checkout.code%%"
-    heron-build-centos7:
-      template: heron-build-base-centos7
-      parameters:
+        os: $$[ubuntu14.04, centos7]$$
         checkout_artifact: "%%steps.checkout.code%%"
 
 termination_policy:
