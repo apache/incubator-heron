@@ -14,20 +14,18 @@
 
 package com.twitter.heron.healthmgr;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.yaml.snakeyaml.Yaml;
 
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 public class HealthPolicyConfigReaderTest {
   @Test
@@ -48,14 +46,14 @@ public class HealthPolicyConfigReaderTest {
     yamlContent.put("p1", policy1);
     yamlContent.put("p2", policy2);
 
-    FileInputStream fin = mock(FileInputStream.class);
-    Yaml yaml = mock(Yaml.class);
-    when(yaml.load(fin)).thenReturn(yamlContent);
+    HealthPolicyConfigReader policyConfigReader = new HealthPolicyConfigReader("configFile");
+    HealthPolicyConfigReader spyConfigReader = spy(policyConfigReader);
+    doReturn(yamlContent).when(spyConfigReader).readConfigFromFile("configFile");
 
-    HealthPolicyConfigReader policiesConfig = new HealthPolicyConfigReader(yaml, fin);
-    assertEquals(policyIds, policiesConfig.getPolicyIds());
+    spyConfigReader.loadConfig();
+    assertEquals(policyIds, spyConfigReader.getPolicyIds());
 
-    assertEquals(policy1, policiesConfig.getPolicyConfig("p1"));
-    assertEquals(policy2, policiesConfig.getPolicyConfig("p2"));
+    assertEquals(policy1, spyConfigReader.getPolicyConfig("p1"));
+    assertEquals(policy2, spyConfigReader.getPolicyConfig("p2"));
   }
 }

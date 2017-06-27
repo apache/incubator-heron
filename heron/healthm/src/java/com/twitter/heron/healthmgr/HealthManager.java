@@ -44,7 +44,6 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.classification.InterfaceStability.Evolving;
 import com.twitter.heron.classification.InterfaceStability.Unstable;
-import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
@@ -210,7 +209,9 @@ public class HealthManager {
   HealthPolicyConfigReader createPolicyConfigReader() throws FileNotFoundException {
     String policyConfigFile
         = Paths.get(Context.heronConf(config), HealthMgrConstants.CONF_FILE_NAME).toString();
-    return new HealthPolicyConfigReader(policyConfigFile);
+    HealthPolicyConfigReader configReader = new HealthPolicyConfigReader(policyConfigFile);
+    configReader.loadConfig();
+    return configReader;
   }
 
   private AbstractModule constructConfigModule(final String trackerUrl) {
