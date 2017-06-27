@@ -16,7 +16,6 @@
 import logging
 import os
 import signal
-import urlparse
 import tornado.web
 
 from tornado.options import options
