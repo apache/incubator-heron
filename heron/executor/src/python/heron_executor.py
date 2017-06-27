@@ -895,8 +895,8 @@ def main():
   # Refer to https://gperftools.github.io/gperftools/heapprofile.html
   # for details of settings of gperftools heap profiler
   shell_env["HEAPPROFILE"] = "stmgr.hprof"
-  shell_env["HEAP_PROFILE_ALLOCATION_INTERVAL"] = "2147483648"
-  shell_env["HEAP_PROFILE_INUSE_INTERVAL"] = "1073741824"
+  shell_env["HEAP_PROFILE_ALLOCATION_INTERVAL"] = "0"
+  shell_env["HEAP_PROFILE_INUSE_INTERVAL"] = "0"
   shell_env["HEAPPROFILESIGNAL"] = str(signal.SIGUSR1)
 
 
