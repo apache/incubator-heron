@@ -47,7 +47,8 @@ fi
 set +x
 
 # Autodiscover the platform
-PLATFORM=discover_platform
+PLATFORM=$(discover_platform)
+echo "Using $PLATFORM platform"
 
 # Run this manually, since if it fails when run
 # as -workspace_status_command we don't get good output

@@ -8,7 +8,8 @@ DIR=`dirname $0`
 source ${DIR}/common.sh
 
 # Autodiscover the platform
-PLATFORM=discover_platform
+PLATFORM=$(discover_platform)
+echo "Using $PLATFORM platform"
 
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration-test/src/java/integration-tests.jar"
