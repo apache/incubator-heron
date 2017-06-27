@@ -17,24 +17,10 @@ import time
 import random
 
 from collections import namedtuple
+from heron.api.src.python.tuple import Tuple
 
-StreamParseTuple = namedtuple('Tuple', 'id component stream task values')
-"""Storm's primitive data type passed around via streams.
-
-:ivar id: the ID of the Tuple
-:type id: str
-:ivar component: component that the Tuple was generated from.
-:type component: str
-:ivar stream: the stream that the Tuple was emitted into.
-:type stream: str
-:ivar task: the task the Tuple was generated from.
-:type task: int
-:ivar values: the payload of the Tuple where data is stored.
-:type values: tuple
-"""
-
-HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation_time', 'roots'))
-"""StreamParse compatible Heron Tuple
+HeronTuple = namedtuple('Tuple', Tuple._fields + ('creation_time', 'roots'))
+"""Internal manifestation of the Heron Tuple
 
 :ivar id: the ID of the Tuple
 :type id: str
@@ -58,7 +44,7 @@ class RootTupleInfo(namedtuple('RootTupleInfo', 'stream_id tuple_id insertion_ti
     return self.insertion_time + timeout_sec - current_time <= 0
 
 class TupleHelper(object):
-  """Tuple generator, returns StreamParse compatible tuple"""
+  """Tuple Helper, returns Heron Tuple compatible tuple"""
   TICK_TUPLE_ID = "__tick"
   TICK_SOURCE_COMPONENT = "__system"
 

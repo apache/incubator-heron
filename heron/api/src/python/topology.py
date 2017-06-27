@@ -250,7 +250,7 @@ class Topology(object):
   :Example: A sample WordCountTopology can be defined as follows:
   ::
 
-    from pyheron import Topology
+    from heron.api.src.python import Topology
     from heron.examples.src.python import WordSpout, CountBolt
 
     class WordCount(Topology):
@@ -280,7 +280,7 @@ class Topology(object):
       f.write(cls.protobuf_topology.SerializeToString())
 
 class TopologyBuilder(object):
-  """Builder for pyheron topology
+  """Builder for heron.api.src.python topology
 
   This class dynamically creates a subclass of Topology with given spouts and bolts and
   writes its definition files when ``build_and_submit()`` is called.
@@ -288,7 +288,7 @@ class TopologyBuilder(object):
   :Example: A sample WordCountTopology can be defined as follows:
   ::
     import sys
-    from pyheron import TopologyBuilder
+    from heron.api.src.python import TopologyBuilder
     from heron.examples.spout import WordSpout
     from heron.examples.bolt import CountBolt
 
