@@ -7,7 +7,7 @@ container:
   resources:
     mem_mib: 512
     cpu_cores: 0.4
-  image: streamlio/build:latest-heron-ubuntu14.04
+  image: get.applatix.io/heron-build:v1.0
   docker_options: ''
   command: "axscm clone %%repo%% /src --commit %%commit%%"
 inputs:
