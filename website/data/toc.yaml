@@ -3,15 +3,21 @@ sections:
     sublinks:
       - name: Local (Single Node)
         url: /docs/getting-started
-      - name: Migrate Storm Topologies
-        url: /docs/migrate-storm-to-heron
+      - name: Upgrade Storm Topologies
+        url: /docs/upgrade-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
+  - name: Client API docs
+    sublinks:
+      - name: Java
+        url: /api/java
+      - name: Python
+        url: /api/python
   - name: Heron Concepts
     sublinks:
       - name: Heron Design Goals
         url: /docs/concepts/design-goals
-      - name: Heron Topology
+      - name: Heron Topologies
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture

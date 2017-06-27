@@ -44,8 +44,7 @@ Suggested targets for the scripted dashboard include:
 **Component Backpressure**:
 
 ```python
-'aliasByNode(sortByMaxima(highestAverage(heron.' + topology_name + '.stmgr.stmgr-*.
-time_spent_back_pressure_by_compid.*, 5)), 5)'
+'aliasByNode(sortByMaxima(highestAverage(heron.' + topology_name + '.stmgr.stmgr-*.time_spent_back_pressure_by_compid.*, 5)), 5)'
 ```
 
 **Fail Count by Component**:
@@ -57,22 +56,19 @@ time_spent_back_pressure_by_compid.*, 5)), 5)'
 **CPU Throttling periods**:
 
 ```python
-aliasByNode(nonNegativeDerivative(mesos.tasks.prod.*.' + topology_name + '.*.cpu.
-nr_throttled), 4,5)
+aliasByNode(nonNegativeDerivative(mesos.tasks.prod.*.' + topology_name + '.*.cpu.nr_throttled), 4,5)
 ```
 
 **JVM Deaths**:
 
 ```python
-'aliasByNode(drawAsInfinite(maximumAbove(removeAboveValue(heron.' + topology_name + '.*.*.jvm.
-uptime-secs, 60),1)),2,3)'
+'aliasByNode(drawAsInfinite(maximumAbove(removeAboveValue(heron.' + topology_name + '.*.*.jvm.uptime-secs, 60),1)),2,3)'
 ```
 
 **Top 5 worst GC components**:
 
 ```python
-'aliasByNode(highestMax(nonNegativeDerivative(heron.' + topology_name + '.*.*.jvm.gc-time-ms.
-PS-*),5), 2,3,6)'
+'aliasByNode(highestMax(nonNegativeDerivative(heron.' + topology_name + '.*.*.jvm.gc-time-ms.PS-*),5), 2,3,6)'
 ```
 
 ### Configuring The Heron UI Link To Grafana

@@ -77,7 +77,7 @@ heron.build.git.status : Clean
 
 ## Step 2 --- Launch an example topology
 
-> **Note for MacOS users**
+> #### Note for MacOS users
 
 > If you want to run topologies locally on MacOS, you may need to add your
 > hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
@@ -269,7 +269,7 @@ In case of any issues, please refer to [Quick Start Troubleshooting](../getting-
 
 ### Next Steps
 
-* [Migrate Storm topologies](../migrate-storm-to-heron) with simple `pom.xml`
+* [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
   environments (such as on [Aurora](../operators/deployment/schedulers/aurora)
