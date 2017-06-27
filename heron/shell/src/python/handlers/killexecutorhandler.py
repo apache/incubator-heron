@@ -18,8 +18,6 @@ import os
 import signal
 import tornado.web
 
-from tornado.options import options
-
 class KillExecutorHandler(tornado.web.RequestHandler):
   """
   Responsible for killing heron-executor process.
