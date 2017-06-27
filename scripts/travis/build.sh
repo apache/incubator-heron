@@ -46,6 +46,17 @@ fi
 
 set +x
 
+# Autodiscover the platform
+DISCOVER=`python -mplatform`
+if [[ "$DISCOVER" =~ "^.*centos.*$" ]]; then
+  PLATFORM="centos"
+elif [[ "$DISCOVER" =~ "^.*Ubuntu.*$" ]]; then
+  PLATFORM="ubuntu"
+else
+  echo "$DISCOVER not supported"
+  exit 1
+fi
+
 # Run this manually, since if it fails when run
 # as -workspace_status_command we don't get good output
 ./scripts/release/status.sh
@@ -59,7 +70,7 @@ set +x
 T="heron build"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_build.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
+  --bazelrc=tools/travis-ci/bazel.rc build --config=$PLATFORM heron/...
 end_timer "$T"
 
 # run heron unit tests
@@ -68,7 +79,7 @@ start_timer "$T"
 python ${DIR}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/travis-ci/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=ubuntu --test_tag_filters=-flaky heron/...
+  --config=$PLATFORM --test_tag_filters=-flaky heron/...
 end_timer "$T"
 
 # flaky tests are often due to test port race conditions,
@@ -78,7 +89,7 @@ start_timer "$T"
 python ${DIR}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/travis-ci/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=ubuntu --test_tag_filters=flaky --jobs=0 heron/...
+  --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/...
 end_timer "$T"
 
 # build packages
@@ -86,14 +97,14 @@ T="heron build tarpkgs"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_build_tarpkgs.txt" bazel\
   --bazelrc=tools/travis-ci/bazel.rc build\
-  --config=ubuntu scripts/packages:tarpkgs
+  --config=$PLATFORM scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/travis-ci/bazel.rc build\
-  --config=ubuntu scripts/packages:binpkgs
+  --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
 print_timer_summary
