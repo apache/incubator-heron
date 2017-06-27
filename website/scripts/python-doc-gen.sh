@@ -1,7 +1,7 @@
 #!/bin/bash
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
-INPUT=pyheron
+INPUT=heron-py
 TMP_DIR=$(mktemp -d)
 
 rm -rf static/api/python

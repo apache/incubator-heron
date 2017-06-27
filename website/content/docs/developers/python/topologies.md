@@ -214,3 +214,39 @@ $ heron submit local \
   topology.word_count.WordCount \ # Specifies the class definition
   WordCountTopology
 ```
+
+## Example topologies
+
+There are a number of example topologies that you can peruse in the [`heron/examples/src/python`]({{% githubMaster %}}/heron/examples/src/python):
+
+* [Word count]({{% githubMaster %}}/heron/examples/src/python/word_count_topology.py)
+* [Multi stream]({{% githubMaster %}}/heron/examples/src/python/multi_stream_topology.py)
+* [Half acking]({{% githubMaster %}}/heron/examples/src/python/half_acking_topology.py)
+* [Custom grouping]({{% githubMaster %}}/heron/examples/src/python/custom_grouping_topology.py)
+
+You can build the respective PEXes for these topologies using the following commands:
+
+```shell
+$ bazel build heron/examples/src/python:word_count
+$ bazel build heron/examples/src/python:multi_stream
+$ bazel build heron/examples/src/python:half_acking
+$ bazel build heron/examples/src/python:custom_grouping
+```
+
+All built PEXes will be stored in `bazel-bin/heron/examples/src/python`. You can submit them to Heron like so:
+
+```shell
+$ heron submit local \
+  bazel-bin/heron/examples/src/python/word_count.pex \
+  - WordCount
+$ heron submit local \
+  bazel-bin/heron/examples/src/python/multi_stream.pex \
+  heron.examples.src.python.multi_stream_topology.MultiStream MultiStream
+$ heron submit local \
+  bazel-bin/heron/examples/src/python/half_acking.pex \
+  - HalfAcking
+$ heron submit local \
+  bazel-bin/heron/examples/src/python/custom_grouping.pex \
+  heron.examples.src.python.custom_grouping_topology.CustomGrouping \
+  CustomGrouping
+```
