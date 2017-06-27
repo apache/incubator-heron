@@ -34,6 +34,10 @@ div[class^="landing-feature"] {
   }
 }
 
+section.main-page-lower-section {
+  width: 95%;
+}
+
 // Set global attributes
 html, body {
   font-family: $font-family-sans-serif;
