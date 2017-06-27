@@ -50,7 +50,7 @@ steps:
     heron-build:
       template: heron-build-base
       parameters:
-        os: $$[ubuntu14.04, centos7]$$
+        os: $$[ubuntu14.04,centos7]$$
         checkout_artifact: "%%steps.checkout.code%%"
 
 termination_policy:
