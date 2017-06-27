@@ -86,7 +86,7 @@ build_heron() {
         export PATH=/sbin:$PATH
         ~/bin/bazel clean
         ./bazel_configure.py
-        ~/bin/bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
+        ~/bin/bazel --bazelrc=tools/travis/bazel.rc build --config=ubuntu heron/...
     popd
 }
 
