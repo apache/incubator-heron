@@ -7,7 +7,7 @@ pex_test(
     srcs = ["bolt_instance_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
-        "//heron/instance/src/python/basics:pyheron-basics-py",
+        "//heron/instance/src/python/basics:heron-basics-py",
     ],
     reqs = [
         "py==1.4.27",

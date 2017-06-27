@@ -15,6 +15,7 @@ inputs:
   - from: "%%checkout_artifact%%"
     path: "/heron"
   parameters:
+    os:
     checkout_artifact:
     build_env_cc:
     build_env_cxx:

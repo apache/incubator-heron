@@ -19,12 +19,12 @@ import collections
 
 from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
+from heron.api.src.python import Stream
 from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import topology_pb2, tuple_pb2
-from heron.pyheron.src.python import Stream
 
 import heron.common.src.python.system_constants as system_constants
 
