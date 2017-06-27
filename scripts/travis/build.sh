@@ -62,7 +62,7 @@ CIENV=$(ci_environ $1)
 # as -workspace_status_command we don't get good output
 ./scripts/release/status.sh
 
-# append the bazel default bazelrc to travis-ci/bazel.rc
+# append the bazel default bazelrc to $CIENV/bazel.rc
 # for using rules provided by bazel
 # cat ~/.bazelrc >> tools/$CIENV/bazel.rc
 ./bazel_configure.py
