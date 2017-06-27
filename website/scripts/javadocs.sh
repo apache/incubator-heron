@@ -16,7 +16,7 @@ OVERVIEW_HTML_FILE=$HERON_ROOT_DIR/website/scripts/javadocs-overview.html
 
 # Check if this script is run with Travis flag
 if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
-    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis-ci/bazel.rc build"
+    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis/bazel.rc build"
 else
     BAZEL_CMD="bazel build"
 fi

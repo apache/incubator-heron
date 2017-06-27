@@ -1,11 +1,12 @@
 #!/bin/bash
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
-INPUT=pyheron #$HERON_ROOT_DIR/heron/api/src/python
+INPUT=$HERON_ROOT_DIR/heron/api/src/python/__init__.py
 
 rm -rf static/api/python
 
+export PYTHONPATH=$HERON_ROOT_DIR/heron/api/src/python
+
 pdoc $INPUT \
-  --all-submodules \
   --html \
   --html-dir static/api/python
