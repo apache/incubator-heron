@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -41,6 +42,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.classification.InterfaceStability.Evolving;
+import com.twitter.heron.classification.InterfaceStability.Unstable;
+import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
@@ -55,9 +60,38 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 /**
- * e.g. options
- * -d ~/.heron -p ~/.heron/conf/local -c local -e default -r userName -t AckingTopology
+ * {@link HealthManager} makes a topology dynamic and self-regulating. This is implemented using
+ * Dhalion library. The {@link HealthManager} will perform the following functions to achieve its
+ * goal:
+ * <ul>
+ * <li>loads heron configuration including health policy configuration from
+ * <code>healthmgr.yaml</code>
+ * <li>initializing guice injector with metrics collection module from <code>tracker</code> or
+ * <code>metrics cache</code>, <code>scheduler client</code> and <code>state client</code>
+ * <li>initializes health policies instances and starts policy execution using
+ * {@link PoliciesExecutor}
+ * </ul>
+ * The {@link HealthManager} is executed as a process. It is recommended that it is started on
+ * container 0, colocated with the metrics provider and the scheduler service.
+ * <p>
+ * Required command line options for the {@link HealthManager} include
+ * <ul>
+ * <li>cluster name: <code>-c local</code>
+ * <li>role: <code> -r dev</code>
+ * <li>environment: <code> -e default</code>
+ * <li>heron home directory: <code> -d ~/.heron</code>
+ * <li>config directory: <code> -p ~/.heron/conf</code>
+ * <li>topology name: <code> -n AckingTopology</code>
+ * </ul>
+ * <p>
+ * Optional command line options for the {@link HealthManager} include
+ * <ul>
+ * <li>tracker url: <code>-t http://host:port</code>, default: <code>http://localhost:8888</code>
+ * <li>enable verbose mode: <code> -v</code>
+ * </ul>
  */
+@Unstable
+@Evolving
 public class HealthManager {
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
@@ -100,15 +134,19 @@ public class HealthManager {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String overrideConfigFile = cmd.getOptionValue("override_config_file");
-    String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String trackerUrl = cmd.getOptionValue("trackerURL", "http://localhost:8888");
     Boolean verbose = cmd.hasOption("verbose");
 
+    Level loggingLevel = Level.INFO;
+    if (verbose) {
+      loggingLevel = Level.FINE;
+    }
+    LoggingHelper.loggerInit(loggingLevel, false);
+
     // build the final config by expanding all the variables
     Config config = Config.toLocalMode(Config.newBuilder()
-        .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
+        .putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
         .putAll(commandLineConfigs(cluster, role, environ, topologyName, verbose))
         .build());
 
@@ -308,13 +346,6 @@ public class HealthManager {
         .required()
         .build();
 
-    Option configOverrides = Option.builder("o")
-        .desc("Command line override config path")
-        .longOpt("override_config_file")
-        .hasArgs()
-        .argName("override config file")
-        .build();
-
     Option topologyName = Option.builder("n")
         .desc("Name of the topology")
         .longOpt("topology_name")
@@ -340,7 +371,6 @@ public class HealthManager {
     options.addOption(environment);
     options.addOption(heronHome);
     options.addOption(configFile);
-    options.addOption(configOverrides);
     options.addOption(topologyName);
     options.addOption(trackerURL);
     options.addOption(verbose);
