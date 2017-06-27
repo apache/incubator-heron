@@ -18,12 +18,12 @@ import Queue
 
 from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
+from heron.api.src.python import Stream
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import tuple_pb2
-from heron.pyheron.src.python import Stream
 
 import heron.common.src.python.system_constants as system_constants
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''module for example bolt: Consume Bolt'''
-from heron.pyheron.src.python import Bolt
+from heron.api.src.python import Bolt
 
 # pylint: disable=unused-argument
 class ConsumeBolt(Bolt):

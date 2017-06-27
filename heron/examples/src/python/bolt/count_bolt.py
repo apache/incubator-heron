@@ -14,7 +14,7 @@
 """module for example bolt: CountBolt"""
 from collections import Counter
 from heron.api.src.python import global_metrics
-from heron.pyheron.src.python import Bolt
+from heron.api.src.python import Bolt
 
 # pylint: disable=unused-argument
 class CountBolt(Bolt):
