@@ -13,7 +13,7 @@
 # limitations under the License.
 '''none grouping topology'''
 
-from heron.pyheron.src.python import Grouping
+from heron.api.src.python import Grouping
 
 from ...core import TestTopologyBuilder
 from ...common.bolt import IdentityBolt

@@ -14,52 +14,37 @@
 
 package com.twitter.heron.healthmgr;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
-import org.yaml.snakeyaml.Yaml;
+import com.google.common.annotations.VisibleForTesting;
 
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.ConfigReader;
 import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public class HealthPolicyConfigReader {
-  private static final Logger LOG = Logger.getLogger(HealthPolicyConfigReader.class.getName());
   private final Map<String, Map<String, String>> configs = new HashMap<>();
+  private String configFilename;
 
   public HealthPolicyConfigReader(String filename) throws FileNotFoundException {
-    this(new Yaml(), new FileInputStream(new File(filename)));
+    this.configFilename = filename;
   }
 
   @SuppressWarnings("unchecked")
-  public HealthPolicyConfigReader(Yaml yaml, FileInputStream fin) throws FileNotFoundException {
-    Map<Object, Object> ret;
-    try {
-      ret = (Map<Object, Object>) yaml.load(fin);
-
-      if (ret == null) {
-        throw new RuntimeException("Could not parse health policy config file");
-      }
-    } finally {
-      SysUtils.closeIgnoringExceptions(fin);
-    }
-
+  public void loadConfig() {
+    Map<String, Object> ret = readConfigFromFile(configFilename);
     for (String id : TypeUtils.getListOfStrings(ret.get(HealthMgrConstants.HEALTH_POLICIES))) {
       configs.put(id, (Map<String, String>) ret.get(id));
     }
-
-    LOG.info("Loading Health Policies configuration:" + configs);
   }
 
-  @Override
-  public String toString() {
-    return configs.toString();
+  @VisibleForTesting
+  protected Map<String, Object> readConfigFromFile(String filename) {
+    return ConfigReader.loadFile(filename);
   }
 
   public List<String> getPolicyIds() {
@@ -68,5 +53,12 @@ public class HealthPolicyConfigReader {
 
   public Map<String, String> getPolicyConfig(String policyId) {
     return configs.get(policyId);
+  }
+
+  @Override
+  public String toString() {
+    return "HealthPolicyConfigReader{"
+        + "configFilename='" + configFilename + '\''
+        + '}';
   }
 }

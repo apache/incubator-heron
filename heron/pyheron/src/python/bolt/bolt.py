@@ -40,7 +40,7 @@ class Bolt(BaseBolt):
                    Note that types of string values in the config have been automatically converted,
                    meaning that number strings and boolean strings are converted to the appropriate
                    types.
-    :type context: :class:`pyheron.TopologyContext`
+    :type context: :class:`TopologyContext`
     :param context: This object can be used to get information about this task's place within the
                     topology, including the task id and component id of this task, input and output
                     information, etc.
@@ -60,8 +60,8 @@ class Bolt(BaseBolt):
 
     **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
 
-    :type tup: :class:`pyheron.HeronTuple`
-    :param tup: HeronTuple to process
+    :type tup: :class:`heron.api.src.python.tuple.Tuple`
+    :param tup: Tuple to process
     """
     raise NotImplementedError("Bolt not implementing process() method.")
 
@@ -79,7 +79,7 @@ class Bolt(BaseBolt):
     Default behavior is to ignore tick tuples. This method should be overridden by subclasses
     if you want to react to timer events via tick tuples.
 
-    :type tup: :class:`pyheron.HeronTuple`
+    :type tup: :class:`heron.api.src.python.tuple.Tuple`
     :param tup: the tick tuple to be processed
     """
     pass

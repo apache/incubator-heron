@@ -6,7 +6,7 @@ pex_test(
     name = "component_unittest",
     srcs = ["component_unittest.py"],
     deps = [
-      "//heron/common/tests/python:pytest-py",
+      "//heron/api/src/python:heron-python-py",
       "//heron/pyheron/src/python:pyheron-py",
     ],
     reqs = [
@@ -21,7 +21,7 @@ pex_test(
     name = "stream_unittest",
     srcs = ["stream_unittest.py"],
     deps = [
-      "//heron/common/tests/python:pytest-py",
+      "//heron/api/src/python:heron-python-py",
       "//heron/pyheron/src/python:pyheron-py",
     ],
     reqs = [
@@ -36,8 +36,8 @@ pex_test(
     name = "topology_unittest",
     srcs = ["topology_unittest.py"],
     deps = [
-      "//heron/common/tests/python:pytest-py",
       "//heron/pyheron/src/python:pyheron-py",
+      "//heron/api/src/python:heron-python-py",
     ],
     reqs = [
       "py==1.4.27",

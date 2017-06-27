@@ -11,7 +11,7 @@ PYTHON_TESTS_DIR="integration-test/src/python/integration_test/topology/"
 
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration-test/src/java/integration-tests.jar"
-PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integration_test/topology/pyheron_integ_topology.pex"
+PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integration_test/topology/heron_integ_topology.pex"
 
 CORE_PKG="file://${PWD}/bazel-bin/scripts/packages/heron-core.tar.gz"
 

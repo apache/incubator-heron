@@ -49,29 +49,34 @@ TupleCache::~TupleCache() {
   }
 }
 
-sp_int64 TupleCache::add_data_tuple(sp_int32 _task_id, const proto::api::StreamId& _streamid,
+sp_int64 TupleCache::add_data_tuple(sp_int32 _src_task_id,
+                                    sp_int32 _task_id, const proto::api::StreamId& _streamid,
                                     proto::system::HeronDataTuple* _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
-  return l->add_data_tuple(_streamid, _tuple, &total_size_, &tuples_cache_max_tuple_size_);
+  return l->add_data_tuple(_src_task_id, _streamid, _tuple, &total_size_,
+                           &tuples_cache_max_tuple_size_);
 }
 
-void TupleCache::add_ack_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
+void TupleCache::add_ack_tuple(sp_int32 _src_task_id,
+                               sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
-  return l->add_ack_tuple(_tuple, &total_size_);
+  return l->add_ack_tuple(_src_task_id, _tuple, &total_size_);
 }
 
-void TupleCache::add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
+void TupleCache::add_fail_tuple(sp_int32 _src_task_id,
+                                sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
-  return l->add_fail_tuple(_tuple, &total_size_);
+  return l->add_fail_tuple(_src_task_id, _tuple, &total_size_);
 }
 
-void TupleCache::add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
+void TupleCache::add_emit_tuple(sp_int32 _src_task_id,
+                                sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
-  return l->add_emit_tuple(_tuple, &total_size_);
+  return l->add_emit_tuple(_src_task_id, _tuple, &total_size_);
 }
 
 TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
@@ -105,11 +110,13 @@ TupleCache::TupleList::~TupleList() {
   CHECK(tuples_.empty());
 }
 
-sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _streamid,
+sp_int64 TupleCache::TupleList::add_data_tuple(sp_int32 _src_task_id,
+                                               const proto::api::StreamId& _streamid,
                                                proto::system::HeronDataTuple* _tuple,
                                                sp_uint64* _total_size,
                                                sp_uint64* _tuples_cache_max_tuple_size) {
-  if (!current_ || current_->has_control() || current_->data().stream().id() != _streamid.id() ||
+  if (!current_ || current_->has_control() || current_->src_task_id() != _src_task_id ||
+      current_->data().stream().id() != _streamid.id() ||
       current_->data().stream().component_name() != _streamid.component_name() ||
       current_size_ > *_tuples_cache_max_tuple_size) {
     if (current_) {
@@ -117,6 +124,7 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
     }
     current_ = acquire_clean_set();
     current_->mutable_data()->mutable_stream()->MergeFrom(_streamid);
+    current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
 
@@ -136,13 +144,16 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
   return tuple_key;
 }
 
-void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
+void TupleCache::TupleList::add_ack_tuple(sp_int32 _src_task_id,
+                                          const proto::system::AckTuple& _tuple,
                                           sp_uint64* _total_size) {
-  if (!current_ || current_->has_data() || current_->control().emits_size() > 0) {
+  if (!current_ || current_->src_task_id() != _src_task_id ||
+      current_->has_data() || current_->control().emits_size() > 0) {
     if (current_) {
       tuples_.push_front(current_);
     }
     current_ = acquire_clean_set();
+    current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -151,13 +162,16 @@ void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
   current_->mutable_control()->add_acks()->CopyFrom(_tuple);
 }
 
-void TupleCache::TupleList::add_fail_tuple(const proto::system::AckTuple& _tuple,
+void TupleCache::TupleList::add_fail_tuple(sp_int32 _src_task_id,
+                                           const proto::system::AckTuple& _tuple,
                                            sp_uint64* _total_size) {
-  if (!current_ || current_->has_data() || current_->control().emits_size() > 0) {
+  if (!current_ || current_->src_task_id() != _src_task_id ||
+      current_->has_data() || current_->control().emits_size() > 0) {
     if (current_) {
       tuples_.push_front(current_);
     }
     current_ = acquire_clean_set();
+    current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -166,14 +180,17 @@ void TupleCache::TupleList::add_fail_tuple(const proto::system::AckTuple& _tuple
   current_->mutable_control()->add_fails()->CopyFrom(_tuple);
 }
 
-void TupleCache::TupleList::add_emit_tuple(const proto::system::AckTuple& _tuple,
+void TupleCache::TupleList::add_emit_tuple(sp_int32 _src_task_id,
+                                           const proto::system::AckTuple& _tuple,
                                            sp_uint64* _total_size) {
-  if (!current_ || current_->has_data() || current_->control().acks_size() > 0 ||
+  if (!current_ || current_->src_task_id() != _src_task_id ||
+      current_->has_data() || current_->control().acks_size() > 0 ||
       current_->control().fails_size() > 0) {
     if (current_) {
       tuples_.push_front(current_);
     }
     current_ = acquire_clean_set();
+    current_->set_src_task_id(_src_task_id);
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();

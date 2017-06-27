@@ -16,8 +16,11 @@
 
 import unittest
 
-from heron.common.src.python.utils.misc import PythonSerializer
-import heron.common.tests.python.utils.mock_generator as mock_generator
+from heron.api.src.python.serializer import PythonSerializer
+
+prim_list = [1000, -234, 0.00023, "string",
+             ["abc", "def", "ghi"], True, False,
+             ("tuple", 123, True), None, {}]
 
 class SerializerTest(unittest.TestCase):
   def setUp(self):
@@ -27,7 +30,7 @@ class SerializerTest(unittest.TestCase):
     serializer = PythonSerializer()
     serializer.initialize()
     # Test with a list of primitive types
-    for obj in mock_generator.prim_list:
+    for obj in prim_list:
       serialized = serializer.serialize(obj)
       self.assertIsInstance(serialized, str)
       deserialized = serializer.deserialize(serialized)

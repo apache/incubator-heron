@@ -269,7 +269,7 @@ In case of any issues, please refer to [Quick Start Troubleshooting](../getting-
 
 ### Next Steps
 
-* [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
+* [Migrate Storm topologies](../migrate-storm-to-heron) with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
   environments (such as on [Aurora](../operators/deployment/schedulers/aurora)

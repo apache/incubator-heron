@@ -242,7 +242,7 @@ def main():
     sys.stdout.flush()
     Log.info('Elapsed time: %.3fs.', (end - start))
 
-  return 0 if result.isAllSuccessful(results) else 1
+  return 0 if result.is_successful(results) else 1
 
 if __name__ == "__main__":
   sys.exit(main())

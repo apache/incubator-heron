@@ -13,7 +13,7 @@
 # limitations under the License.
 '''ABSpout for integration test'''
 
-from heron.pyheron.src.python import Spout
+from heron.api.src.python import Spout
 
 #pylint: disable=unused-argument
 class ABSpout(Spout):

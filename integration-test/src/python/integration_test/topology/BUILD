@@ -6,14 +6,14 @@ pex_library(
     name = "integration-topologies-py",
     srcs = glob(["**/*.py"]),
     deps = [
-        "//heron/pyheron/src/python:pyheron-py",
-        "//integration-test/src/python/integration_test/common:pyheron-integration-common-py",
-        "//integration-test/src/python/integration_test/core:pyheron-integration-core-py",
+        "//heron/api/src/python:heron-python-py",
+        "//integration-test/src/python/integration_test/common:heron-integration-common-py",
+        "//integration-test/src/python/integration_test/core:heron-integration-core-py",
     ],
 )
 
 pex_binary(
-    name = "pyheron_integ_topology",
+    name = "heron_integ_topology",
     srcs = ["test_topology_main.py"],
     main = "test_topology_main.py",
     resources = glob(["**/resources/*.json"]),

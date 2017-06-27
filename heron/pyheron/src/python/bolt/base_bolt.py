@@ -14,7 +14,7 @@
 '''base_bolt.py'''
 import copy
 
-from heron.common.src.python.utils.tuple import TupleHelper
+from heron.api.src.python.tuple import TupleHelper
 
 from ..component import HeronComponentSpec, BaseComponent, NotCompatibleError
 from ..stream import Stream
@@ -100,7 +100,7 @@ class BaseBolt(BaseComponent):
     :param stream: the ID of the stream to emit this Tuple to.
                    Leave empty to emit to the default stream.
     :type anchors: list
-    :param anchors: a list of HeronTuples to which the emitted Tuples should be anchored.
+    :param anchors: a list of Tuple to which the emitted Tuples should be anchored.
     :type direct_task: int
     :param direct_task: the task to send the Tuple to if performing a direct emit.
     :type need_task_ids: bool
@@ -110,7 +110,7 @@ class BaseBolt(BaseComponent):
 
   @staticmethod
   def is_tick(tup):
-    """Returns whether or not a given HeronTuple is a tick Tuple
+    """Returns whether or not a given Tuple is a tick Tuple
 
     It is compatible with StreamParse API.
     """

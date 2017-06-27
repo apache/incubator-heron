@@ -3,8 +3,8 @@ sections:
     sublinks:
       - name: Local (Single Node)
         url: /docs/getting-started
-      - name: Upgrade Storm Topologies
-        url: /docs/upgrade-storm-to-heron
+      - name: Migrate Storm Topologies
+        url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
   - name: Heron Concepts

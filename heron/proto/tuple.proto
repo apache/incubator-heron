@@ -41,6 +41,7 @@ message HeronControlTupleSet {
 message HeronTupleSet {
   optional HeronDataTupleSet data = 1;
   optional HeronControlTupleSet control = 2;
+  required int32 src_task_id = 3;
 }
 
 message HeronDataTupleSet2 {
@@ -51,4 +52,5 @@ message HeronDataTupleSet2 {
 message HeronTupleSet2 {
   optional HeronDataTupleSet2 data = 1;
   optional HeronControlTupleSet control = 2;
+  required int32 src_task_id = 3;
 }
