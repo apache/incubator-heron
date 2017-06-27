@@ -2,7 +2,10 @@
 
 export PATH=$PATH:/root/bin
 
-which gcc-4.8
-which g++-4.8
+which gcc
+gcc --version
+which g++
+g++ --version
 which python
+python --version
 cd /heron && USER=abc scripts/travis/test.sh 
