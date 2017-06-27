@@ -1,5 +1,5 @@
 ---
-title: Writing and Launching Python Topologies
+title: Python Topologies
 ---
 
 > #### Python API docs

@@ -5,6 +5,11 @@ html lang={{.Site.LanguageCode}}
     {{partial "docs/page-meta.html" .}}
     title {{.Site.Title}} Documentation - {{.Title}}
     {{partial "css.includes.html" .}}
+    = javascript
+      var shiftWindow = function() { scrollBy(0, -108) };
+      window.addEventListener("hashchange", shiftWindow);
+      //window.addEventListener("pageshow", shiftWindow);
+      function load() { if (window.location.hash) shiftWindow(); }
   body.body
     main.main
       {{partial "navbar.html" .}}
