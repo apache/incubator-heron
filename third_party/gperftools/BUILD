@@ -100,6 +100,7 @@ cc_library(
         "lib/libprofiler.a",
     ],
     hdrs = [
+        "include/gperftools/heap-profiler.h",
         "include/gperftools/profiler.h",
     ],
     includes = ["include"],

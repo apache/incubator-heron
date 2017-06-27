@@ -8,3 +8,4 @@ from jmaphandler import JmapHandler
 from jstackhandler import JstackHandler
 from memoryhistogramhandler import MemoryHistogramHandler
 from pidhandler import PidHandler
+from stmgrheapprofhandler import StmgrHeapProfHandler

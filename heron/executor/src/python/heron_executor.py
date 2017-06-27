@@ -770,7 +770,7 @@ class HeronExecutor(object):
               Log.info("%s exited too many times" % name)
               sys.exit(1)
             time.sleep(self.interval_between_runs)
-            p = self._run_process(name, command)
+            p = self._run_process(name, command, self.shell_env)
             del self.processes_to_monitor[pid]
             self.processes_to_monitor[p.pid] =\
               ProcessInfo(p, name, command, old_process_info.attempts + 1)
@@ -892,6 +892,13 @@ def main():
   # PEX_ROOT shell environment before forking the processes
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
+  # Refer to https://gperftools.github.io/gperftools/heapprofile.html
+  # for details of settings of gperftools heap profiler
+  shell_env["HEAPPROFILE"] = "stmgr.hprof"
+  shell_env["HEAP_PROFILE_ALLOCATION_INTERVAL"] = "2147483648"
+  shell_env["HEAP_PROFILE_INUSE_INTERVAL"] = "1073741824"
+  shell_env["HEAPPROFILESIGNAL"] = str(signal.SIGUSR1)
+
 
   # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)
