@@ -16,7 +16,7 @@
 import logging
 
 from heron.api.src.python.custom_grouping import ICustomGrouping
-import heron.api.src.python.constants as constants
+import heron.api.src.python.api_constants as constants
 from heron.api.src.python import Topology, Grouping
 
 from heron.examples.src.python.spout import WordSpout

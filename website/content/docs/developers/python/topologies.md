@@ -238,10 +238,12 @@ All built PEXes will be stored in `bazel-bin/heron/examples/src/python`. You can
 ```shell
 $ heron submit local \
   bazel-bin/heron/examples/src/python/word_count.pex \
-  - WordCount
+  - \
+  WordCount
 $ heron submit local \
   bazel-bin/heron/examples/src/python/multi_stream.pex \
-  heron.examples.src.python.multi_stream_topology.MultiStream MultiStream
+  heron.examples.src.python.multi_stream_topology.MultiStream \
+  MultiStream
 $ heron submit local \
   bazel-bin/heron/examples/src/python/half_acking.pex \
   - HalfAcking
