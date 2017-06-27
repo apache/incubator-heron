@@ -92,7 +92,7 @@ function discover_platform {
 function ci_environ {
   environ=$1
   if [[ $environ =~ travis ]]; then
-    echo "travis-ci"
+    echo "travis"
   elif [[ $environ =~ applatix ]]; then
     echo "applatix"
   else
