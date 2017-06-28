@@ -35,7 +35,7 @@
 #include "config/topology-config-vars.h"
 #include "config/topology-config-helper.h"
 #include "config/physical-plan-helper.h"
-#include "manager/neighbour-calculator.h"
+#include "util/neighbour-calculator.h"
 
 const sp_string SPOUT_NAME = "spout";
 const sp_string BOLT_NAME = "bolt";

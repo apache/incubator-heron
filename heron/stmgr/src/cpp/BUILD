@@ -42,10 +42,12 @@ cc_library(
         "util/rotating-map.cpp",
         "util/tuple-cache.cpp",
         "util/xor-manager.cpp",
+        "util/neighbour-calculator.cpp",
 
         "util/rotating-map.h",
         "util/tuple-cache.h",
         "util/xor-manager.h",
+        "util/neighbour-calculator.h",
     ],
     copts = [
         "-Iheron",
@@ -74,7 +76,6 @@ cc_library(
         "manager/stream-consumers.cpp",
         "manager/tmaster-client.cpp",
         "manager/ckptmgr-client.cpp",
-        "manager/neighbour-calculator.cpp",
 
         "manager/stmgr-client.h",
         "manager/stmgr-clientmgr.h",
@@ -83,7 +84,6 @@ cc_library(
         "manager/stream-consumers.h",
         "manager/tmaster-client.h",
         "manager/ckptmgr-client.h",
-        "manager/neighbour-calculator.h",
     ],
     copts = [
         "-Iheron",

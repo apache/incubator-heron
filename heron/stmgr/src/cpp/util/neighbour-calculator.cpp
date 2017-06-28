@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "manager/neighbour-calculator.h"
+#include "util/neighbour-calculator.h"
 #include <functional>
 #include <iostream>
 #include <map>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_NEIGHBOUR_CALCULATOR_H_
-#define SRC_CPP_SVCS_STMGR_SRC_MANAGER_NEIGHBOUR_CALCULATOR_H_
+#ifndef SRC_CPP_SVCS_STMGR_SRC_UTIL_NEIGHBOUR_CALCULATOR_H_
+#define SRC_CPP_SVCS_STMGR_SRC_UTIL_NEIGHBOUR_CALCULATOR_H_
 
 #include <ostream>
 #include <map>
@@ -64,4 +64,4 @@ std::ostream& operator<<(std::ostream& os, const NeighbourCalculator& obj);
 }  // namespace stmgr
 }  // namespace heron
 
-#endif  // SRC_CPP_SVCS_STMGR_SRC_MANAGER_NEIGHBOUR_CALCULATOR_H_
+#endif  // SRC_CPP_SVCS_STMGR_SRC_UTIL_NEIGHBOUR_CALCULATOR_H_
