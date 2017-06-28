@@ -20,7 +20,7 @@ from ..stream import Stream
 class BaseSpout(BaseComponent):
   """BaseSpout class
 
-  This is the base for pyheron spout, which wraps the implementation of publicly available methods.
+  This is the base for heron spout, which wraps the implementation of publicly available methods.
   This includes:
     - <classmethod> spec()
     - emit()

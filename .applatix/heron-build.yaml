@@ -35,13 +35,13 @@ inputs:
     repo:
       default: "%%session.repo%%"
     build_env_cc:
-      default: "gcc-4.8"
+      default: "gcc"
     build_env_cxx:
-      default: "g++-4.8"
+      default: "g++"
     build_env_cpp:
-      default: "cpp-4.8"
+      default: "cpp"
     build_env_cxxcpp:
-      default: "cpp-4.8"
+      default: "cpp"
 steps:
   -
     checkout:
@@ -50,7 +50,7 @@ steps:
     heron-build:
       template: heron-build-base
       parameters:
-        os: $$[ubuntu14.04, centos7]$$
+        os: $$[ubuntu14.04,centos7]$$
         checkout_artifact: "%%steps.checkout.code%%"
 
 termination_policy:

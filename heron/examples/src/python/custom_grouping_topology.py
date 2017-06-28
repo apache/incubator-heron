@@ -13,7 +13,8 @@
 # limitations under the License.
 '''module for example topology: CustomGroupingTopology'''
 
-from heron.common.src.python.utils.log import Log
+import logging
+
 from heron.api.src.python.custom_grouping import ICustomGrouping
 import heron.api.src.python.constants as constants
 from heron.api.src.python import Topology, Grouping
@@ -24,11 +25,11 @@ from heron.examples.src.python.bolt import ConsumeBolt
 # pylint: disable=unused-argument
 class SampleCustomGrouping(ICustomGrouping):
   def prepare(self, context, component, stream, target_tasks):
-    Log.info("In prepare of SampleCustomGrouping, "
-             "with src component: %s, "
-             "with stream id: %s, "
-             "with target tasks: %s"
-             % (component, stream, str(target_tasks)))
+    logging.getLogger().info("In prepare of SampleCustomGrouping, "
+                             "with src component: %s, "
+                             "with stream id: %s, "
+                             "with target tasks: %s"
+                             , component, stream, str(target_tasks))
     self.target_tasks = target_tasks
 
   def choose_tasks(self, values):

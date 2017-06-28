@@ -22,7 +22,7 @@ from ..stream import Stream
 class BaseBolt(BaseComponent):
   """BaseBolt class
 
-  This is the base for pyheron bolt, which wraps the implementation of publicly available methods.
+  This is the base for heron bolt, which wraps the implementation of publicly available methods.
   This includes:
     - <classmethod> spec()
     - emit()

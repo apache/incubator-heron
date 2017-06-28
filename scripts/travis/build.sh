@@ -9,6 +9,11 @@ set -e
 DIR=`dirname $0`
 source ${DIR}/common.sh
 
+# check if the ci environ argument is provided
+if [ $# -eq 0 ]; then
+  echo "ci environ arg not provided (travis|applatix)"
+fi
+
 # verify that jars have not been added to the repo
 JARS=`find . -name "*.jar"`
 if [ "$JARS" ]; then
@@ -46,29 +51,36 @@ fi
 
 set +x
 
+# Autodiscover the platform
+PLATFORM=$(discover_platform)
+echo "Using $PLATFORM platform"
+
+# Get the CI environment
+CIENV=$(ci_environ $1)
+
 # Run this manually, since if it fails when run
 # as -workspace_status_command we don't get good output
 ./scripts/release/status.sh
 
-# append the bazel default bazelrc to travis-ci/bazel.rc
+# append the bazel default bazelrc to $CIENV/bazel.rc
 # for using rules provided by bazel
-# cat ~/.bazelrc >> tools/travis-ci/bazel.rc
+# cat ~/.bazelrc >> tools/$CIENV/bazel.rc
 ./bazel_configure.py
 
 # build heron
 T="heron build"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_build.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
+  --bazelrc=tools/$CIENV/bazel.rc build --config=$PLATFORM heron/...
 end_timer "$T"
 
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc test\
+  --bazelrc=tools/$CIENV/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=ubuntu --test_tag_filters=-flaky heron/...
+  --config=$PLATFORM --test_tag_filters=-flaky heron/...
 end_timer "$T"
 
 # flaky tests are often due to test port race conditions,
@@ -76,24 +88,24 @@ end_timer "$T"
 T="heron test flaky"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_test_flaky.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc test\
+  --bazelrc=tools/$CIENV/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=ubuntu --test_tag_filters=flaky --jobs=0 heron/...
+  --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/...
 end_timer "$T"
 
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_build_tarpkgs.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc build\
-  --config=ubuntu scripts/packages:tarpkgs
+  --bazelrc=tools/$CIENV/bazel.rc build\
+  --config=$PLATFORM scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
 python ${DIR}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  --bazelrc=tools/travis-ci/bazel.rc build\
-  --config=ubuntu scripts/packages:binpkgs
+  --bazelrc=tools/$CIENV/bazel.rc build\
+  --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
 print_timer_summary

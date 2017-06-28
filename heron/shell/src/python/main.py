@@ -27,6 +27,7 @@ AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
 app = tornado.web.Application([
     (r"^/jmap/([0-9]+$)", handlers.JmapHandler),
     (r"^/histo/([0-9]+$)", handlers.MemoryHistogramHandler),
+    (r"^/pmap/([0-9]+$)", handlers.PmapHandler),
     (r"^/jstack/([0-9]+$)", handlers.JstackHandler),
     (r"^/pid/(.*)", handlers.PidHandler),
     (r"^/browse/(.*)", handlers.BrowseHandler),
@@ -34,6 +35,7 @@ app = tornado.web.Application([
     (r"^/filedata/(.*)", handlers.FileDataHandler),
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
     (r"^/download/(.*)", handlers.DownloadHandler),
+    (r"^/killexecutor", handlers.KillExecutorHandler),
 ])
 
 

@@ -74,6 +74,33 @@ function print_timer_summary {
   done
 }
 
+# Discover the platform that we are running on
+function discover_platform {
+  discover=`python -mplatform`
+  if [[ $discover =~ ^.*centos.*$ ]]; then
+    echo "centos"
+  elif [[ $discover =~ ^.*Ubuntu.*$ ]]; then
+    echo "ubuntu"
+  else
+    mysterious=`echo $discover | awk -F- '{print $6}'`
+    echo "$mysterious platform not supported"
+    exit 1
+  fi
+}
+
+# Check the ci environment is valid
+function ci_environ {
+  environ=$1
+  if [[ $environ =~ travis ]]; then
+    echo "travis"
+  elif [[ $environ =~ applatix ]]; then
+    echo "applatix"
+  else
+    echo "$environ ci not supported"
+    exit 1
+  fi
+}
+
 # Uncomment below to test changes:
 #T="task one"
 #start_timer "$T"
