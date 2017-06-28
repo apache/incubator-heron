@@ -30,8 +30,6 @@ java_library(
     deps = [
         ":basics-java",
         "@com_google_protobuf_protobuf_java//jar",
-        "//heron/spi/src/java:utils-spi-java",
-         "//third_party/java:jackson",
     ],
 )
 

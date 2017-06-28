@@ -30,8 +30,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.common.network.HttpJsonClient;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(KubernetesController.class)
 public class KubernetesControllerTest {
