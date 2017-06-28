@@ -22,6 +22,56 @@ inputs:
     build_env_cpp:
     build_env_cxxcpp:
 outputs:
+  artifacts:
+    build_output:
+      path: "/heron"
+
+---
+type: service_template
+subtype: container
+name: heron-test-base
+description: This is the base template for testing Heron
+container:
+  resources:
+    mem_mib: 4000
+    cpu_cores: 1.5
+  image: streamlio/build:latest-heron-%%os%%
+  docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%"
+  command: bash -c 'ls -lrt /test_input'
+inputs:
+  artifacts:
+  - from: "%%test_artifact_input%%"
+    path: "/test_input"
+  parameters:
+    os:
+    test_artifact_input:
+    build_env_cc:
+    build_env_cxx:
+    build_env_cpp:
+    build_env_cxxcpp:
+outputs:
+
+---
+type: service_template
+subtype: workflow
+name: heron-build-test-base
+description: This is the base template for build-test Heron
+steps:
+  - build:
+      template: heron-build-base
+  - test:
+      template: heron-test-base
+      parameters:
+        test_artifact_input: "%%steps.build.build_output%%"
+inputs:
+  parameters:
+    os:
+    checkout_artifact:
+    build_env_cc:
+    build_env_cxx:
+    build_env_cpp:
+    build_env_cxxcpp:
+outputs:
 
 ---
 type: service_template
@@ -48,7 +98,7 @@ steps:
       template: axscm-checkout
   - 
     heron-build:
-      template: heron-build-base
+      template: heron-build-test-base
       parameters:
         os: $$[ubuntu14.04,centos7]$$
         checkout_artifact: "%%steps.checkout.code%%"
