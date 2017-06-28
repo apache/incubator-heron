@@ -2,12 +2,9 @@
 title: Python Topologies
 ---
 
-Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy). Python topologies written using Storm's [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) API are also compatible with Heron, which enables you to seamlessly [upgrade from Storm to Heron](/docs/upgrade-storm-to-heron) and keep your old topologies.
-
 > The current version of `py_heron` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
 
-This page describes how to [write](#writing-topologies-in-python) and [launch](#launching-python-topologies) Heron [topologies](../../../concepts/topologies) in Python, as well as
-how to convert a Storm [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) topology to a `heronpy` topology.
+Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy).
 
 > #### Python API docs
 > You can find API docs for the `heronpy` library [here](/api/python).
@@ -35,7 +32,7 @@ Heron [topologies](../../../concepts/topologies) are networks of [spouts](../spo
 
 Once you've defined spouts and bolts for a topology, you can then compose the topology in one of two ways:
 
-* You can use the [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder) class inside of a main function. **This method is *not* compatible with the streamparse API**.
+* You can use the [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder) class inside of a main function.
 
     Here's an example:
 
@@ -48,7 +45,7 @@ Once you've defined spouts and bolts for a topology, you can then compose the to
         builder.build_and_submit()
     ```
 
-* You can subclass the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class. **This method *is* compatible with Storm's streamparse API**.
+* You can subclass the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class.
 
     Here's an example:
 
@@ -69,8 +66,6 @@ If you create a Python topology using a [`TopologyBuilder`](/api/python/topology
 if __name__ == '__main__':
     builder = TopologyBuilder("MyTopology")
 ```
-
-> Topologies composed using `TopologyBuilder` are *not* compatible with Storm's streamparse API. To create topologies compatible with streamparse, see [below](#defining-a-topology-by-subclassing-the-topology-class).
 
 Once you've created a `TopologyBuilder` object, you can add [bolts](../bolts) using the [`add_bolt`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_bolt) method and [spouts](../spouts) using the [`add_spout`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_spout) method. Here's an example:
 
@@ -177,7 +172,7 @@ class MyTopology(Topology):
     my_bolt = MyBolt.spec(par=3, inputs=my_bolt_inputs)
 ```
 
-This way of defining a topology is compatible with the streamparse API. All you need to do is place [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec)s as the class attributes
+All you need to do is place [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec)s as the class attributes
 of your topology class, which are returned by the `spec()` method of
 your spout or bolt class. You do *not* need to run a `build` method or anything like that; the `Topology` class will automatically detect which spouts and bolts are included in the topology.
 
@@ -268,18 +263,11 @@ class MultiStreamTopology(Topology):
   consume_bolt = ConsumeBolt.spec(inputs={spout: Grouping.SHUFFLE})
 ```
 
-For further information about the API, refer to the streamparse API documentation,
-although there are some methods and functionalities that are not supported or
-are invalid in Heron.
-
 ## Declaring output fields using the `spec()` method
 
-In Python topologies, so the output fields of your spout and bolt
-need to be declared by placing`outputs` class attributes, as there is
-no `declareOutputFields()` method. This is compatible with the streamparse
-API, but dynamically declaring output fields is more complicated in this way.
-
-heronpy enables you to dynamically declare output fields as a list using the
+In Python topologies, the output fields of your spouts and bolts
+need to be declared by placing `outputs` class attributes, as there is
+no `declareOutputFields()` method. `heronpy` enables you to dynamically declare output fields as a list using the
 `optional_outputs` argument in the `spec()` method.
 
 This is useful in a situation like below.
