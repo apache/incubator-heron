@@ -57,5 +57,4 @@ cc_test(
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
     linkstatic = 1,
-    flaky = 1,
 )
