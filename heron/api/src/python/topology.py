@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''topology.py: module for defining python topologies'''
+"""
+topology.py: module for defining Heron topologies in Python
+"""
+
 import os
 import uuid
 
@@ -58,7 +61,7 @@ class TopologyType(type):
 
   @classmethod
   def class_dict_to_specs(mcs, class_dict):
-    """Takes a class ``__dict__`` and returns the ``HeronComponentSpec`` entries"""
+    """Takes a class `__dict__` and returns `HeronComponentSpec` entries"""
     specs = {}
 
     for name, spec in class_dict.iteritems():
@@ -74,13 +77,11 @@ class TopologyType(type):
 
   @classmethod
   def class_dict_to_topo_config(mcs, class_dict):
-    """Takes a class ``__dict__`` and returns a map containing topology-wide configuration
+    """Takes a class `__dict__` and returns a map containing topology-wide configuration.
 
-    Returned dictionary is a sanitized dict <str -> (str|object)>
+    The returned dictionary is a sanitized `dict` of type `<str -> (str|object)>`.
 
-    This classmethod firsts insert default topology configuration, and then override them
-    with a given topology-wide configuration.
-    Note that this configuration will be overriden by a component-specific configuration at
+    This classmethod firsts insert default topology configuration and then overrides it with a given topology-wide configuration. Note that this configuration will be overriden by a component-specific configuration at
     runtime.
     """
     topo_config = {}
