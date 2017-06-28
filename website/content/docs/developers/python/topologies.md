@@ -2,21 +2,23 @@
 title: Python Topologies
 ---
 
-> #### Python API docs
-> You can find API docs for the [PyHeron](https://pypi.python.org/pypi/pyheron) library [here](/api/python).
+> The current version of `py_heron` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
 
-Support for developing Heron topologies in Python is provided by a Python library called [PyHeron](https://pypi.python.org/pypi/pyheron). Heron topology support in Python is compatible with Storm's [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) API, which enables you to seamlessly deploy Python Storm topologies in Heron.
+Support for developing Heron topologies in Python is provided by a Python library called [heron_py](https://pypi.python.org/pypi/heron_py). Python topologies written using Storm's [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) API are also compatible with Heron, which enables you to seamlessly [upgrade from Storm to Heron](/docs/upgrade-storm-to-heron) and keep your old topologies.
 
 This page describes how to [write](#writing-your-own-topologies-in-python) and [launch](#launching-python-topologies) topologies in Python, as well as
-how to convert a streamparse topology to a PyHeron topology.s
+how to convert a streamparse topology to a `heron_py` topology.
+
+> #### Python API docs
+> You can find API docs for the `heron_py` library [here](/api/python).
 
 ## Setup
 
-First, you need to install the `PyHeron` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
+First, you need to install the `heron_py` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
 
 ```shell
-$ pip install pyheron
-$ easy_install pyheron
+$ pip install heron-py
+$ easy_install heron-py
 ```
 
 Then you can include it in your project files. Here's an example:
@@ -221,7 +223,7 @@ There are a number of example topologies that you can peruse in the [`heron/exam
 
 Topology | File | Description
 :--------|:-----|:-----------
-Word count | [`word_count_topology.py`]({{% githubMaster %}}/heron/examples/src/python/word_count_topology.py) | The [`WordSpout`]({% githubMaster }/heron/examples/src/python/spout/word_spout.py) spout emits random words from a list, while the [`CountBolt`]({{% githubMaster }}/heron/examples/src/python/bolt/count_bolt.py) bolt counts the number of words that have been emitted.
+Word count | [`word_count_topology.py`]({{% githubMaster %}}/heron/examples/src/python/word_count_topology.py) | The [`WordSpout`]({{% githubMaster %}}/heron/examples/src/python/spout/word_spout.py) spout emits random words from a list, while the [`CountBolt`]({{% githubMaster %}}/heron/examples/src/python/bolt/count_bolt.py) bolt counts the number of words that have been emitted.
 Multiple streams | [`multi_stream_topology.py`]({{% githubMaster %}}/heron/examples/src/python/multi_stream_topology.py) |
 Half acking | [`half_acking_topology.py`]({{% githubMaster %}}/heron/examples/src/python/half_acking_topology.py) |
 Custom grouping | [`custom_grouping_topology.py`]({{% githubMaster %}}/heron/examples/src/python/custom_grouping_topology.py)

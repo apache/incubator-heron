@@ -77,7 +77,8 @@ class TopologyType(type):
 
   @classmethod
   def class_dict_to_topo_config(mcs, class_dict):
-    """Takes a class `__dict__` and returns a map containing topology-wide configuration.
+    """
+    Takes a class `__dict__` and returns a map containing topology-wide configuration.
 
     The returned dictionary is a sanitized `dict` of type `<str -> (str|object)>`.
 
@@ -162,21 +163,27 @@ class TopologyType(type):
 
   @staticmethod
   def get_heron_options_from_env():
-    """Retrieves heron options from environment variable HERON_OPTIONS
-    It has the following format:
-    cmdline.topologydefn.tmpdirectory=/var/folders/tmpdir,cmdline.topology.initial.state=PAUSED
+    """Retrieves heron options from the `HERON_OPTIONS` environment variable.
+
+    Heron options have the following format:
+
+        `cmdline.topologydefn.tmpdirectory=/var/folders/tmpdir,cmdline.topology.initial.state=PAUSED`
 
     In this case, the returned map will contain:
-    {"cmdline.topologydefn.tmpdirectory": "/var/folders/tmpdir",
-     "cmdline.topology.initial.state": "PAUSED"}
 
-    Currently supporting the following options natively:
+        #!json
+        {
+          "cmdline.topologydefn.tmpdirectory": "/var/folders/tmpdir",
+          "cmdline.topology.initial.state": "PAUSED"
+        }
 
-    - cmdline.topologydefn.tmpdirectory: directory to which this topology's defn file is written
-    - cmdline.topology.initial.state: initial state of the topology
-    - cmdline.topology.name: topology name on deployment
+    Currently supports the following options natively:
 
-    :return: map mapping from key to value
+    - `cmdline.topologydefn.tmpdirectory`: the directory to which this topology's defn file is written
+    - `cmdline.topology.initial.state`: the initial state of the topology
+    - `cmdline.topology.name`: topology name on deployment
+
+    Returns: map mapping from key to value
     """
     heron_options_raw = os.environ.get("HERON_OPTIONS", None)
     if heron_options_raw is None:
@@ -240,28 +247,27 @@ class Topology(object):
 
   Defining a topology is simple. Topology writers need to create a subclass, in which information
   about the components in their topology and how they connect to each other are specified
-  by placing ``HeronComponentSpec`` as class instances.
-  For more information, refer to ``spec()`` method of both ``Bolt`` and ``Spout`` class.
+  by placing `HeronComponentSpec` as class instances.
+  For more information, refer to `spec()` method of both the `Bolt` and `Spout` classes.
 
   In addition, you can also set a topology-wide configuration, by adding a ``config`` class
   attribute to your topology class, that is dict mapping from option names to their values.
   Note that topology-wide configurations are overridden by component-specific configurations
   that might be specified from ``spec()`` method of ``Bolt`` or ``Spout`` class.
 
-  :Example: A sample WordCountTopology can be defined as follows:
-  ::
+  **Example**: A sample `WordCountTopology` can be defined as follows:
 
+    #!python
     from heron.api.src.python import Topology
     from heron.examples.src.python import WordSpout, CountBolt
 
     class WordCount(Topology):
-      config = {"topology.wide.config": "some value"}
+        config = {"topology.wide.config": "some value"}
 
-      word_spout = WordSpout.spec(par=1)
-      count_bolt = CountBolt.spec(par=1,
-                                  inputs={word_spout: Grouping.fields('word')},
-                                  config={"count_bolt.specific.config": "another value"})
-  ::
+        word_spout = WordSpout.spec(par=1)
+        count_bolt = CountBolt.spec(par=1,
+                                    inputs={word_spout: Grouping.fields('word')},
+                                    config={"count_bolt.specific.config": "another value"})
   """
   __metaclass__ = TopologyType
 
@@ -283,26 +289,25 @@ class Topology(object):
 class TopologyBuilder(object):
   """Builder for heron.api.src.python topology
 
-  This class dynamically creates a subclass of Topology with given spouts and bolts and
-  writes its definition files when ``build_and_submit()`` is called.
+  This class dynamically creates a subclass of `Topology` with given spouts and bolts and writes its definition files when `build_and_submit()` is called.
 
-  :Example: A sample WordCountTopology can be defined as follows:
-  ::
+  **Example**: A sample `WordCountTopology` can be defined as follows:
+
+    #!python
     import sys
     from heron.api.src.python import TopologyBuilder
     from heron.examples.spout import WordSpout
     from heron.examples.bolt import CountBolt
 
     if __name__ == '__main__':
-      builder = TopologyBuilder(name=sys.argv[1])
-      word_spout = builder.add_spout("word-spout", WordSpout, 2)
+        builder = TopologyBuilder(name=sys.argv[1])
+        word_spout = builder.add_spout("word-spout", WordSpout, 2)
 
-      builder.add_bolt("count-bolt", CountBolt, 2,
-                       inputs={word_spout: Grouping.fields('word')},
-                       config={"count_bolt.specific.config": "some value"})
+        builder.add_bolt("count-bolt", CountBolt, 2,
+                         inputs={word_spout: Grouping.fields('word')},
+                         config={"count_bolt.specific.config": "some value"})
 
-      builder.build_and_submit()
-  ::
+        builder.build_and_submit()
   """
   def __init__(self, name):
     """Initialize this TopologyBuilder
