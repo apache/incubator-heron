@@ -74,6 +74,10 @@ article.hn-docs-content {
     p {
       font-size: $base-font-size * 1.1;
     }
+
+    ul {
+      margin-bottom: 0;
+    }
   }
 
   table {
@@ -81,11 +85,11 @@ article.hn-docs-content {
 
 
     thead {
-      font-size: $base-font-size * 1.25;
+      font-size: $base-font-size * 1.1;
       border-bottom: 1px solid black;
 
       tr th {
-        padding-right: 7.5%;
+        padding-right: 5%;
       }
     }
 
