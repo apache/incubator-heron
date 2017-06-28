@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
   logger = logging.getLogger(__file__)
   logger.info("Starting Heron Shell")
-  logger.info("Shared secret %s", options.secret)
+  logger.info("Shared secret for /killexecutor: %s", options.secret)
 
   app.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
