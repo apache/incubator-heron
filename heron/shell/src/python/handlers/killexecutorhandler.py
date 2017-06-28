@@ -30,10 +30,6 @@ class KillExecutorHandler(tornado.web.RequestHandler):
     """ post method """
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing parent executor' request")
-    if not options.secret:
-      self.set_status(404)
-      self.finish()
-      return
     data = dict(urlparse.parse_qsl(self.request.body))
     sharedSecret = data.get('secret')
     if sharedSecret != options.secret:
