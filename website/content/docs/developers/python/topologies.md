@@ -219,10 +219,12 @@ $ heron submit local \
 
 There are a number of example topologies that you can peruse in the [`heron/examples/src/python`]({{% githubMaster %}}/heron/examples/src/python):
 
-* [Word count]({{% githubMaster %}}/heron/examples/src/python/word_count_topology.py)
-* [Multi stream]({{% githubMaster %}}/heron/examples/src/python/multi_stream_topology.py)
-* [Half acking]({{% githubMaster %}}/heron/examples/src/python/half_acking_topology.py)
-* [Custom grouping]({{% githubMaster %}}/heron/examples/src/python/custom_grouping_topology.py)
+Topology | File | Description
+:--------|:-----|:-----------
+Word count | [`word_count_topology.py`]({{% githubMaster %}}/heron/examples/src/python/word_count_topology.py) | The [`WordSpout`]({% githubMaster }/heron/examples/src/python/spout/word_spout.py) spout emits random words from a list, while the [`CountBolt`]({{% githubMaster }}/heron/examples/src/python/bolt/count_bolt.py) bolt counts the number of words that have been emitted.
+Multiple streams | [`multi_stream_topology.py`]({{% githubMaster %}}/heron/examples/src/python/multi_stream_topology.py) |
+Half acking | [`half_acking_topology.py`]({{% githubMaster %}}/heron/examples/src/python/half_acking_topology.py) |
+Custom grouping | [`custom_grouping_topology.py`]({{% githubMaster %}}/heron/examples/src/python/custom_grouping_topology.py)
 
 You can build the respective PEXes for these topologies using the following commands:
 

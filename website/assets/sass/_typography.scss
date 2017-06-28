@@ -78,9 +78,14 @@ article.hn-docs-content {
   table {
     margin: $base-margin 0;
 
+
     thead {
       font-size: $base-font-size * 1.25;
       border-bottom: 1px solid black;
+
+      tr th {
+        padding-right: 7.5%;
+      }
     }
 
     tbody {
@@ -88,10 +93,10 @@ article.hn-docs-content {
         border-bottom: 1px solid $light-gray;
 
         td {
-          padding: 1.5% 5% 1.5% 0;
+          padding: 1.5% 7.5% 1.5% 0;
 
           code {
-            font-size: $base-font-size * .8;
+            font-size: $base-font-size;
           }
         }
 

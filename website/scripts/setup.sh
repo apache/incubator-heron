@@ -26,4 +26,4 @@ fi
 
 npm install
 sudo -H pip uninstall -y pygments
-sudo -H pip install pygments==2.1.3 pyheron
+sudo -H pip install pygments==2.1.3 heron-py==0.0.0

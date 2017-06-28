@@ -6,9 +6,8 @@ html lang={{.Site.LanguageCode}}
     title {{.Site.Title}} Documentation - {{.Title}}
     {{partial "css.includes.html" .}}
     = javascript
-      var shiftWindow = function() { scrollBy(0, -108) };
+      var shiftWindow = function() { scrollBy(0, -100) };
       window.addEventListener("hashchange", shiftWindow);
-      //window.addEventListener("pageshow", shiftWindow);
       function load() { if (window.location.hash) shiftWindow(); }
   body.body
     main.main
