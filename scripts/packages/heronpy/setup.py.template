@@ -1,8 +1,8 @@
-"""Pyheron setuptools based setup module"""
+"""heron setuptools based setup module"""
 import os, re, sys
 from setuptools import setup, find_packages
 
-package_name = "pyheron"
+package_name = "heronpy"
 release_version = "VERSION"
 
 # read the requirements file
@@ -14,9 +14,8 @@ with open(requirement_file, 'r') as f:
 requirements = raw_requirements.split('\n')
 print "Requirements: %s" % requirements
 
-long_description = "Pyheron package allows a developer to write python topology in Heron. " \
-                   "Pyheron is backward compatible with the popular python API called " \
-                   "streamparse. It can be run in various clusters including Mesos/Aurora, " \
+long_description = "heronpy package allows a developer to write python topology in Heron. " \
+                   "It can be run in various clusters including Mesos/Aurora, " \
                    "Mesos/Marathon, YARN, etc."
 
 setup(
