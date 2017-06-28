@@ -71,7 +71,7 @@ class HeronExecutorTest(unittest.TestCase):
   """Unittest for Heron Executor"""
 
   shell_command_expected = 'heron_shell_binary --port=shell-port ' \
-                           '--log_file_prefix=fake_dir/heron-shell.log' \
+                           '--log_file_prefix=fake_dir/heron-shell.log ' \
                            '--secret=topid'
 
   def build_packing_plan(self, instance_distribution):
