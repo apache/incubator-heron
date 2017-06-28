@@ -39,7 +39,7 @@ params:
   github:
     home: https://github.com/twitter/heron
     master: https://github.com/twitter/heron/tree/master
-    issues: https://github.com/twitter/heron/issues[]
+    issues: https://github.com/twitter/heron/issues
   social:
     twitter: https://twitter.com/heronstreaming
     slack: https://heronusers.slack.com
