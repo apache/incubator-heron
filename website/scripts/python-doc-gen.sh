@@ -7,10 +7,12 @@ TMP_DIR=$(mktemp -d)
 
 pip install heronpy==${HERONPY_VERSION}
 
-rm -rf static/api/python
+mkdir -p static/api && rm -rf static/api/python
 
 pdoc $INPUT \
   --html \
   --html-dir $TMP_DIR
+
+ls $TMP_DIR
 
 mv $TMP_DIR/heronpy static/api/python
