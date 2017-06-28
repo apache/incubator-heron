@@ -3,7 +3,7 @@ title: Implementing Python bolts
 ---
 
 > #### Python API docs
-> You can find API docs for the [PyHeron](https://pypi.python.org/pypi/pyheron) library [here](/api/python).
+> You can find API docs for the [`heronpy`](https://pypi.python.org/pypi/heronpy) library [here](/api/python).
 
 Bolts must implement the `Bolt` interface, which has the following methods.
 

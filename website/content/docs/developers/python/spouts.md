@@ -3,7 +3,7 @@ title: Implementing Python Spouts
 ---
 
 > #### Python API docs
-> You can find API docs for the [PyHeron](https://pypi.python.org/pypi/pyheron) library [here](/api/python).
+> You can find API docs for the [`heronpy`](https://pypi.python.org/pypi/heronpy) library [here](/api/python).
 
 To create a spout for a Heron topology, you need to subclass the [`Spout`](/api/python/spout/spout.m.html#pyheron.spout.spout.Spout) class, which has the following methods.
 
