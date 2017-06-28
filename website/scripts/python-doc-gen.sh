@@ -13,6 +13,4 @@ pdoc $INPUT \
   --html \
   --html-dir $TMP_DIR
 
-ls $TMP_DIR
-
 mv $TMP_DIR/heronpy static/api/python
