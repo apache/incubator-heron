@@ -6,6 +6,7 @@ __all__ = ['api_constants', 'bolt', 'component', 'custom_grouping', 'global_metr
 # Load basic topology modules
 from .stream import Stream, Grouping
 from .topology import Topology, TopologyBuilder
+from .topology_context import TopologyContext
 
 # Load spout and bolt
 from .bolt import Bolt
