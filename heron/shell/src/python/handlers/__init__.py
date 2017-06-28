@@ -9,3 +9,4 @@ from jstackhandler import JstackHandler
 from memoryhistogramhandler import MemoryHistogramHandler
 from pmaphandler import PmapHandler
 from pidhandler import PidHandler
+from killexecutorhandler import KillExecutorHandler
