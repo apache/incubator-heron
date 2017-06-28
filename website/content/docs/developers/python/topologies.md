@@ -2,41 +2,64 @@
 title: Python Topologies
 ---
 
+Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy). Python topologies written using Storm's [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) API are also compatible with Heron, which enables you to seamlessly [upgrade from Storm to Heron](/docs/upgrade-storm-to-heron) and keep your old topologies.
+
 > The current version of `py_heron` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
 
-Support for developing Heron topologies in Python is provided by a Python library called [heron_py](https://pypi.python.org/pypi/heron_py). Python topologies written using Storm's [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) API are also compatible with Heron, which enables you to seamlessly [upgrade from Storm to Heron](/docs/upgrade-storm-to-heron) and keep your old topologies.
-
-This page describes how to [write](#writing-your-own-topologies-in-python) and [launch](#launching-python-topologies) topologies in Python, as well as
-how to convert a streamparse topology to a `heron_py` topology.
+This page describes how to [write](#writing-topologies-in-python) and [launch](#launching-python-topologies) Heron [topologies](../../../concepts/topologies) in Python, as well as
+how to convert a Storm [streamparse](https://streamparse.readthedocs.io/en/latest/api.html) topology to a `heronpy` topology.
 
 > #### Python API docs
-> You can find API docs for the `heron_py` library [here](/api/python).
+> You can find API docs for the `heronpy` library [here](/api/python).
 
 ## Setup
 
-First, you need to install the `heron_py` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
+First, you need to install the `heronpy` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
 
 ```shell
-$ pip install heron-py
-$ easy_install heron-py
+$ pip install heronpy
+$ easy_install heronpy
 ```
 
-Then you can include it in your project files. Here's an example:
+Then you can include `heronpy` in your project files. Here's an example:
 
 ```python
 from pyheron import Bolt, Spout, Topology
 ```
 
-# Writing your own topologies in Python
+## Writing topologies in Python
 
-Heron topologies are networks of *spouts* that pull data into a topology and *bolts* that process that ingested data. For a more comprehensive guide, see the [Heron Topology](/docs/concepts/topologies) doc.
+Heron [topologies](../../../concepts/topologies) are networks of [spouts](../spouts) that pull data into a topology and [bolts](../bolts) that process that ingested data.
 
-> You can see how to create spouts in the [Implementing Python Spouts](../spouts) guide and how to create bolts in the [Implementing Python Bolts](../bolts) guide.
+> You can see how to create Python spouts in the [Implementing Python Spouts](../spouts) guide and how to create Python bolts in the [Implementing Python Bolts](../bolts) guide.
 
 Once you've defined spouts and bolts for a topology, you can then compose the topology in one of two ways:
 
-* You can use the [`TopologyBuilder`](/api/python/topology.m.html#pyheron.topology.TopologyBuilder) class, which is *not* compatible with the streamparse API
-* You can subclass the [`Topology`](/api/python/topology.m.html#pyheron.topology.Topology) class, which *is* compatible with the streamparse API
+* You can use the [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder) class inside of a main function. This method is *not* compatible with the streamparse API.
+
+    Here's an example:
+
+    ```python
+    from heronpy import TopologyBuilder
+
+    if __name__ == '__main__':
+        builder = TopologyBuilder("MyTopology")
+        # Add spouts and bolts
+        builder.build_and_submit()
+    ```
+
+* You can subclass the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class. This method *is* compatible with Storm's streamparse API.
+
+    Here's an example:
+
+    ```python
+    class MyTopology(Topology):
+        my_spout = MySpout.spec(par=2)
+        my_bolt = MyBolt.spec(par=3,
+                              inputs={
+                                spout: Grouping.fields('some-input-field')
+                              })
+    ```
 
 ## Defining topologies using the `TopologyBuilder` class
 
@@ -82,7 +105,35 @@ if __name__ == "__main__":
 Note that arguments to the main method can be passed by providing them in the
 `heron submit` command.
 
-## Defining a topology by subclassing Topology class
+### Configuration
+
+### Launching
+
+If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Python topologies to a Heron cluster, they need to be packaged as a [PEX](https://pex.readthedocs.io/en/stable/whatispex.html) file. In order to produce PEX files, we recommend using a build tool like [Pants](http://www.pantsbuild.org/python_readme.html) or [Bazel](https://github.com/benley/bazel_rules_pex).
+
+> #### Example topology using Python and Pants
+> See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
+
+If you defined your topology by subclassing the [`TopologyBuilder`](/api/python/topology.m.html#pyheron.topology.TopologyBuilder) class, your topology's main Python file should have a function like this:
+
+```python
+if __name__ == '__main__':
+    builder = TopologyBuilder("WordCountTopology")
+    # etc.
+```
+
+Let's say that you've used this method (subclassing `TopologyBuilder`) and built a `word_count.pex` file for that topology in the `~/topology/dist` folder. You can submit the topology to a cluster called `local` like this:
+
+```bash
+$ heron submit local \
+  ~/topology/dist/word_count.pex \
+  - \ # No class specified
+  WordCountTopology
+```
+
+Note the `-` in this submission command. If you define a topology by subclassing `TopologyBuilder` you do not need to instruct Heron where your main method is located.
+
+## Defining a topology by subclassing the `Topology` class
 
 This way of defining a topology is compatible with the streamparse API.
 All you need to do is to place `HeronComponentSpec` as the class attributes
@@ -113,17 +164,33 @@ from your_spout import WordSpout
 from your_bolt import CountBolt
 
 class WordCount(Topology):
-  word_spout = WordSpout.spec(par=2)
-  count_bolt = CountBolt.spec(par=2, inputs={word_spout: Grouping.fields('word')})
+    word_spout = WordSpout.spec(par=2)
+    count_bolt = CountBolt.spec(par=2, inputs={word_spout: Grouping.fields('word')})
+```
+
+### Launching
+
+If you defined your topology by subclassing the [`Topology`](/api/python/topology.m.html#pyheron.topology.Topology) class,
+your main Python file should *not* contain a main method. You will, however, need to instruct Heron which class contains your topology definition.
+
+Let's say that you've defined a topology by subclassing `Topology` and built a PEX stored in `~/topology/dist/word_count.pex`. The class containing your topology definition is `topology.word_count.WordCount`. You can submit the topology to a cluster called `local` like this:
+
+```bash
+$ heron submit local \
+  ~/topology/dist/word_count.pex \
+  topology.word_count.WordCount \ # Specifies the class definition
+  WordCountTopology
 ```
 
 ## Topology-wide configuration
+
 Topology-wide configuration can be specified by using `set_config()` method if
 you are using `TopologyBuilder`, or by placing `config` containing `dict`
 as the class attribute of your topology. Note that these configuration will be
-overriden by component-specific configuration at runtime
+overridden by component-specific configuration at runtime
 
 ## Multiple streams
+
 To specify that a component has multiple output streams, instead of using a list of
 strings for `outputs`, you can specify a list of `Stream` objects, in the following manner.
 
@@ -175,51 +242,9 @@ class DynamicOutputField(Topology):
 You can also declare outputs in the `add_spout()` and the `add_bolt()`
 method for the `TopologyBuilder` in the same way.
 
-## Launching Python topologies
-
-If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Python topologies to a Heron cluster, they need to be packaged as a [PEX](https://pex.readthedocs.io/en/stable/whatispex.html) file. In order to produce PEX files, we recommend using a build tool like [Pants](http://www.pantsbuild.org/python_readme.html) or [Bazel](https://github.com/benley/bazel_rules_pex).
-
-> #### Example topology using Python and Pants
-> See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
-
-### Topologies subclassing `TopologyBuilder`
-
-If you defined your topology by subclassing the [`TopologyBuilder`](/api/python/topology.m.html#pyheron.topology.TopologyBuilder) class, your topology's main Python file should have a function like this:
-
-```python
-if __name__ == '__main__':
-    builder = TopologyBuilder("WordCountTopology")
-    # etc.
-```
-
-Let's say that you've used this method (subclassing `TopologyBuilder`) and built a `word_count.pex` file for that topology in the `~/topology/dist` folder. You can submit the topology to a cluster called `local` like this:
-
-```bash
-$ heron submit local \
-  ~/topology/dist/word_count.pex \
-  - \ # No class specified
-  WordCountTopology
-```
-
-Note the `-` in this submission command. If you define a topology by subclassing `TopologyBuilder` you do not need to instruct Heron where your main method is located.
-
-### Topologies subclassing `Topology`
-
-If you defined your topology by subclassing the [`Topology`](/api/python/topology.m.html#pyheron.topology.Topology) class,
-your main Python file should *not* contain a main method. You will, however, need to instruct Heron which class contains your topology definition.
-
-Let's say that you've defined a topology by subclassing `Topology` and built a PEX stored in `~/topology/dist/word_count.pex`. The class containing your topology definition is `topology.word_count.WordCount`. You can submit the topology to a cluster called `local` like this:
-
-```bash
-$ heron submit local \
-  ~/topology/dist/word_count.pex \
-  topology.word_count.WordCount \ # Specifies the class definition
-  WordCountTopology
-```
-
 ## Example topologies
 
-There are a number of example topologies that you can peruse in the [`heron/examples/src/python`]({{% githubMaster %}}/heron/examples/src/python):
+There are a number of example topologies that you can peruse in the [`heron/examples/src/python`]({{% githubMaster %}}/heron/examples/src/python) directory of the [Heron repo]({{% githubMaster %}}):
 
 Topology | File | Description
 :--------|:-----|:-----------
@@ -241,18 +266,12 @@ All built PEXes will be stored in `bazel-bin/heron/examples/src/python`. You can
 
 ```shell
 $ heron submit local \
-  bazel-bin/heron/examples/src/python/word_count.pex \
-  - \
-  WordCount
+  bazel-bin/heron/examples/src/python/word_count.pex -
 $ heron submit local \
   bazel-bin/heron/examples/src/python/multi_stream.pex \
-  heron.examples.src.python.multi_stream_topology.MultiStream \
-  MultiStream
+  heron.examples.src.python.multi_stream_topology.MultiStream
 $ heron submit local \
-  bazel-bin/heron/examples/src/python/half_acking.pex \
-  - HalfAcking
-$ heron submit local \
+  bazel-bin/heron/examples/src/python/half_acking.pex -
   bazel-bin/heron/examples/src/python/custom_grouping.pex \
-  heron.examples.src.python.custom_grouping_topology.CustomGrouping \
-  CustomGrouping
+  heron.examples.src.python.custom_grouping_topology.CustomGrouping
 ```

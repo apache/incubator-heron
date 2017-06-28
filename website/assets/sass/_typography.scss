@@ -59,7 +59,8 @@ article.hn-docs-content {
 
   blockquote {
     margin: $base-margin 0;
-    border-left: .5rem solid $light-gray;
+    padding: 20px;
+    border-left: .5rem solid $heron-blue-green;
     background-color: lighten($light-gray, 22%);
 
     h4 {
@@ -71,7 +72,7 @@ article.hn-docs-content {
     }
 
     p {
-      font-size: $base-font-size;
+      font-size: $base-font-size * 1.1;
     }
   }
 
@@ -132,6 +133,7 @@ article.hn-docs-content {
   }
 
   .highlight {
+    overflow-x: auto;
     margin: $base-margin * .8 0;
 
     pre {
