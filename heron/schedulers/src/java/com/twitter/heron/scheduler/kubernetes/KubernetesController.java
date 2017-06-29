@@ -21,8 +21,8 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import com.twitter.heron.common.network.HttpJsonClient;
 import com.twitter.heron.scheduler.TopologySubmissionException;
+import com.twitter.heron.scheduler.utils.HttpJsonClient;
 
 public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
