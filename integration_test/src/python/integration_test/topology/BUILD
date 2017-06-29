@@ -2,6 +2,11 @@ package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
+filegroup(
+    name = "test-data-files",
+    srcs = glob(["**/*.json"]),
+)
+
 pex_library(
     name = "integration-topologies-py",
     srcs = glob(

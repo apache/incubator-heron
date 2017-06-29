@@ -306,6 +306,55 @@ pkg_tar(
 )
 
 ################################################################################
+# Heron test packaging
+################################################################################
+pkg_tar(
+    name = "heron-tests-bin",
+    package_dir = "bin",
+    files = [
+        "//integration_test/src/python/http_server:http-server",
+        "//integration_test/src/python/test_runner:test-runner",
+    ]
+)
+
+pkg_tar(
+    name = "heron-tests-data-java",
+    package_dir = "data/java",
+    files = [
+        "//integration_test/src/java:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-data-python",
+    package_dir = "data/python",
+    files = [
+        "//integration_test/src/python/integration_test/topology:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-lib",
+    package_dir = "lib",
+    files = [
+       "//integration_test/src/java:integration-tests",
+       "//integration_test/src/python/integration_test/topology:heron_integ_topology",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests",
+    extension = "tar.gz",
+    files = generated_release_files,
+    deps = [
+        ":heron-tests-bin",
+        ":heron-tests-data-java",
+        ":heron-tests-data-python",
+        ":heron-tests-lib",
+    ],
+)
+
+################################################################################
 # Heron API packaging
 ################################################################################
 pkg_tar(

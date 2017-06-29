@@ -2,6 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "test-data-files",
+    srcs = glob(["**/*.json"]),
+)
+
 java_library(
     name = "core",
     srcs = glob(
