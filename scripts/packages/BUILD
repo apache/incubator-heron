@@ -63,6 +63,13 @@ filegroup(
 )
 
 filegroup(
+    name = "testpkgs",
+    srcs = [
+        ":heron-tests-install.sh",
+    ],
+)
+
+filegroup(
     name = "pypkgs",
     srcs = [
         ":generate-heronpy-package",
@@ -463,6 +470,18 @@ genrule(
         """,
 )
 
+genrule(
+    name = "generate-tests-launcher",
+    srcs = ["tests_template_bin.sh", "bin_common.sh"] + generated_release_files,
+    outs = ["tests_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
+        template="$$(cat $(location tests_template_bin.sh))"
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
 load("self_extract_binary", "self_extract_binary")
 
 self_extract_binary(
@@ -489,6 +508,14 @@ self_extract_binary(
     launcher = ":tools_launcher_bin.sh",
 )
 
+self_extract_binary(
+    name = "heron-tests-install.sh",
+    flatten_resources = [
+        ":heron-tests",
+    ],
+    launcher = ":tests_launcher_bin.sh",
+)
+
 filegroup(
     name = "api-template-bin.sh",
     srcs = ["api_template_bin.sh"],
@@ -502,6 +529,11 @@ filegroup(
 filegroup(
     name = "tools-template-bin.sh",
     srcs = ["tools_template_bin.sh"],
+)
+
+filegroup(
+    name = "tests-template-bin.sh",
+    srcs = ["tests_template_bin.sh"],
 )
 
 filegroup(
