@@ -20,7 +20,7 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
-import com.twitter.heron.common.test.CommunicatorTestHelper;
+import com.twitter.heron.common.testhelper.CommunicatorTestHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.resource.Constants;

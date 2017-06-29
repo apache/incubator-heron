@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
-import com.twitter.heron.common.test.HeronServerTester;
+import com.twitter.heron.common.testhelper.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.resource.UnitTestHelper;

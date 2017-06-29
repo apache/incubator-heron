@@ -29,7 +29,7 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
-import com.twitter.heron.common.test.HeronServerTester;
+import com.twitter.heron.common.testhelper.HeronServerTester;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.UnitTestHelper;

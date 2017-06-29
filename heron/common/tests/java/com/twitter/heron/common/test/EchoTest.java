@@ -32,6 +32,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronServer;
 import com.twitter.heron.common.network.REQID;
 import com.twitter.heron.common.network.StatusCode;
+import com.twitter.heron.common.testhelper.HeronServerTester;
 import com.twitter.heron.proto.testing.Tests;
 
 import static org.junit.Assert.assertEquals;

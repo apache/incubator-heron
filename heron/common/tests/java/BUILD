@@ -7,7 +7,7 @@ java_library(
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
-        "//heron/common/src/java:test-java",
+        "//heron/common/src/java:test-helper-java",
         "//heron/proto:proto_networktests_java",
         "//third_party/java:powermock",
         "@commons_io_commons_io//jar",
