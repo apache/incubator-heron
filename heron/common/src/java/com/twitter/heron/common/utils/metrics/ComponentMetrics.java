@@ -13,16 +13,14 @@
 //  limitations under the License.
 package com.twitter.heron.common.utils.metrics;
 
-import com.twitter.heron.classification.InterfaceAudience;
-import com.twitter.heron.classification.InterfaceStability;
-
 /**
- * Interface for common metric actions that both spouts and bolts support
+ * Abstract Class for common metric actions that both spouts and bolts support
  */
-@InterfaceAudience.Private
-@InterfaceStability.Evolving
-public interface ComponentMetrics {
+public abstract class ComponentMetrics {
+  // Metric-name suffix reserved for value aggregating on all different streams
+  public static final String ALL_STREAMS_AGGREGATED = "__all-streams-aggregated";
 
-  void serializeDataTuple(String streamId, long latency);
-  void emittedTuple(String streamId);
+  public abstract void serializeDataTuple(String streamId, long latency);
+
+  public abstract void emittedTuple(String streamId);
 }
