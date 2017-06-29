@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.common.network;
+package com.twitter.heron.scheduler.utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

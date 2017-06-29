@@ -11,13 +11,15 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.common.basics;
+package com.twitter.heron.common.testhelpers;
 
 import java.util.concurrent.CountDownLatch;
 
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import com.twitter.heron.common.basics.Communicator;
 
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
