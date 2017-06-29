@@ -4,7 +4,10 @@ load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
     name = "integration-topologies-py",
-    srcs = glob(["**/*.py"]),
+    srcs = glob(
+        ["**/*.py"],
+        exclude = ["test_topology_main.py"],
+    ),
     deps = [
         "//heron/api/src/python:heron-python-py",
         "//integration-test/src/python/integration_test/common:heron-integration-common-py",
