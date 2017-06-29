@@ -4,6 +4,11 @@ package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
+# The heron/common targets is divided into 3 levels by design:
+# 1. only depends on jdk;
+# 2. depends on jdk and heron internal code;
+# 3. depends on jdk, heron internal code and 3rdparty code.
+
 # basics-java only depends on jdk.
 # No other heron code and 3rdparty dependencies should be added
 java_library(
