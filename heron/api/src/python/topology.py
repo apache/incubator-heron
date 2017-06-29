@@ -26,13 +26,14 @@ from .component import HeronComponentSpec
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""
-  DEFAULT_TOPOLOGY_CONFIG = {api_constants.TOPOLOGY_DEBUG: "false",
-                             api_constants.TOPOLOGY_STMGRS: "1",
-                             api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: "30",
-                             api_constants.TOPOLOGY_COMPONENT_PARALLELISM: "1",
-                             api_constants.TOPOLOGY_MAX_SPOUT_PENDING: "100",
-                             api_constants.TOPOLOGY_ENABLE_ACKING: "false",
-                             api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: "true"}
+  DEFAULT_TOPOLOGY_CONFIG = {
+      api_constants.TOPOLOGY_DEBUG: "false",
+      api_constants.TOPOLOGY_STMGRS: "1",
+      api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: "30",
+      api_constants.TOPOLOGY_COMPONENT_PARALLELISM: "1",
+      api_constants.TOPOLOGY_MAX_SPOUT_PENDING: "100",
+      api_constants.TOPOLOGY_ENABLE_ACKING: "false",
+      api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: "true"}
   def __new__(mcs, classname, bases, class_dict):
     bolt_specs = {}
     spout_specs = {}
@@ -78,11 +79,15 @@ class TopologyType(type):
   @classmethod
   def class_dict_to_topo_config(mcs, class_dict):
     """
-    Takes a class `__dict__` and returns a map containing topology-wide configuration.
+    Takes a class `__dict__` and returns a map containing topology-wide
+    configuration.
 
-    The returned dictionary is a sanitized `dict` of type `<str -> (str|object)>`.
+    The returned dictionary is a sanitized `dict` of type `<str ->
+    (str|object)>`.
 
-    This classmethod firsts insert default topology configuration and then overrides it with a given topology-wide configuration. Note that this configuration will be overriden by a component-specific configuration at
+    This classmethod firsts insert default topology configuration and then
+    overrides it with a given topology-wide configuration. Note that this
+    configuration will be overriden by a component-specific configuration at
     runtime.
     """
     topo_config = {}
@@ -100,15 +105,17 @@ class TopologyType(type):
   @classmethod
   def add_spout_specs(mcs, spec, spout_specs):
     if not spec.outputs:
-      raise ValueError("%s: %s requires at least one output, because it is a spout"
-                       % (spec.python_class_path, spec.name))
+      raise ValueError(
+          "%s: %s requires at least one output, because it is a spout" %
+          (spec.python_class_path, spec.name))
     spout_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
   def add_bolt_specs(mcs, spec, bolt_specs):
     if not spec.inputs:
-      raise ValueError("%s: %s requires at least one input, because it is a bolt"
-                       % (spec.python_class_path, spec.name))
+      raise ValueError(
+          "%s: %s requires at least one input, because it is a bolt" %
+          (spec.python_class_path, spec.name))
     bolt_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
@@ -167,7 +174,8 @@ class TopologyType(type):
 
     Heron options have the following format:
 
-        `cmdline.topologydefn.tmpdirectory=/var/folders/tmpdir,cmdline.topology.initial.state=PAUSED`
+        cmdline.topologydefn.tmpdirectory=/var/folders/tmpdir
+        cmdline.topology.initial.state=PAUSED
 
     In this case, the returned map will contain:
 
@@ -179,7 +187,8 @@ class TopologyType(type):
 
     Currently supports the following options natively:
 
-    - `cmdline.topologydefn.tmpdirectory`: the directory to which this topology's defn file is written
+    - `cmdline.topologydefn.tmpdirectory`: the directory to which this
+    topology's defn file is written
     - `cmdline.topology.initial.state`: the initial state of the topology
     - `cmdline.topology.name`: topology name on deployment
 
@@ -289,7 +298,8 @@ class Topology(object):
 class TopologyBuilder(object):
   """Builder for heron.api.src.python topology
 
-  This class dynamically creates a subclass of `Topology` with given spouts and bolts and writes its definition files when `build_and_submit()` is called.
+  This class dynamically creates a subclass of `Topology` with given spouts and
+  bolts and writes its definition files when `build_and_submit()` is called.
 
   **Example**: A sample `WordCountTopology` can be defined as follows:
 
