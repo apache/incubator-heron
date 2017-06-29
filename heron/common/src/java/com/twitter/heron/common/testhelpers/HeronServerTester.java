@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.common.network;
+package com.twitter.heron.common.testhelpers;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,6 +26,10 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.network.HeronClient;
+import com.twitter.heron.common.network.HeronServer;
+import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.StatusCode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
