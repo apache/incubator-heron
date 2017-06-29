@@ -36,7 +36,7 @@ before_script:
   # required for building the website docs
   - (cd website && npm install && npm install gulp && which gulp)
   - wget -q https://github.com/gohugoio/hugo/releases/download/v0.24.1/hugo_0.24.1_Linux-ARM64.deb
-  - sudo dpkg -i hugo*.deb
+  - sudo dpkg -i hugo_0.24.1_Linux-ARM64.deb
   - hugo version
 
   # install python module for wheel files
