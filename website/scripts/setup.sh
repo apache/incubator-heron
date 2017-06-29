@@ -26,4 +26,4 @@ fi
 
 npm install
 sudo -H pip uninstall -y pygments
-sudo -H pip install pygments==2.1.3
+sudo -H pip install pygments==2.1.3 pdoc==0.3.2
