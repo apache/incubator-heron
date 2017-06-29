@@ -17,9 +17,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Just defines the static member of Mempool class
 ////////////////////////////////////////////////////////////////////////////////
-#include "basics/mempool.h"
 #include "basics/basics.h"
 
+// TODO(nlu): get the pool size limit from config
 MemPool<google::protobuf::Message>* __global_protobuf_pool__ =
-                                   new MemPool<google::protobuf::Message>();
+                                   new MemPool<google::protobuf::Message>(50 * 1024 * 1024);
 std::mutex __global_protobuf_pool_mutex__;
