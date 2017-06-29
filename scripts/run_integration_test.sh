@@ -6,8 +6,8 @@
 HTTP_SERVER="./bazel-bin/integration_test/src/python/http_server/http-server"
 TEST_RUNNER="./bazel-bin/integration_test/src/python/test_runner/test-runner.pex"
 
-JAVA_TESTS_DIR="integration_test/src/java/com/twitter/heron/integration_test/topology/"
-PYTHON_TESTS_DIR="integration_test/src/python/integration_test/topology/"
+JAVA_TESTS_DIR="integration_test/src/java/com/twitter/heron/integration_test/topology"
+PYTHON_TESTS_DIR="integration_test/src/python/integration_test/topology"
 
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration_test/src/java/integration-tests.jar"

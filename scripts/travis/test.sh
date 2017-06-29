@@ -57,7 +57,7 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 ./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
   -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp integration_test/src/java/com/twitter/heron/integration_test/topology/ \
+  -tp integration_test/src/java/com/twitter/heron/integration_test/topology \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
@@ -67,7 +67,7 @@ start_timer "$T"
 ./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
   -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp integration_test/src/python/integration_test/topology/ \
+  -tp integration_test/src/python/integration_test/topology \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 

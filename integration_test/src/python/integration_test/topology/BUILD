@@ -19,7 +19,6 @@ pex_binary(
     name = "heron_integ_topology",
     srcs = ["test_topology_main.py"],
     main = "test_topology_main.py",
-    resources = glob(["**/resources/*.json"]),
     deps = [
         ":integration-topologies-py",
     ],
