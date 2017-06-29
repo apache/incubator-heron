@@ -1,5 +1,3 @@
-HUGO = ${GOPATH}/bin/hugo
-
 setup:
 	scripts/setup.sh
 
@@ -7,7 +5,7 @@ clean:
 	rm -rf public/* static/*
 
 serve:
-	@${HUGO} serve
+	@hugo serve
 
 develop-static-assets:
 	@npm run develop
@@ -17,7 +15,7 @@ build-static-assets:
 	@npm run build
 
 pages:
-	@${HUGO}
+	@hugo
 
 linkchecker:
 	@scripts/linkchecker.sh
