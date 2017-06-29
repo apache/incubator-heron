@@ -42,10 +42,12 @@ cc_library(
         "util/rotating-map.cpp",
         "util/tuple-cache.cpp",
         "util/xor-manager.cpp",
+        "util/neighbour-calculator.cpp",
 
         "util/rotating-map.h",
         "util/tuple-cache.h",
         "util/xor-manager.h",
+        "util/neighbour-calculator.h",
     ],
     copts = [
         "-Iheron",
