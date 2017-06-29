@@ -5,7 +5,7 @@ title: Implementing Python Spouts
 > #### Python API docs
 > You can find API docs for the [`heronpy`](https://pypi.python.org/pypi/heronpy) library [here](/api/python).
 
-To create a spout for a Heron topology, you need to subclass the [`Spout`](/api/python/spout/spout.m.html#pyheron.spout.spout.Spout) class, which has the following methods.
+To create a spout for a Heron topology, you need to subclass the [`Spout`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout) class, which has the following methods.
 
 ```python
 class Spout(BaseSpout):
@@ -20,7 +20,7 @@ class Spout(BaseSpout):
 
 ## `Spout` class methods
 
-The [`Spout`](/api/python/spout/spout.m.html#pyheron.spout.spout.Spout) class provides a number of methods that you should implement when subclassing.
+The [`Spout`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout) class provides a number of methods that you should implement when subclassing.
 
 * The `initialize()` method is called when the spout is first initialized
 and provides the spout with the executing environment. It is equivalent to
@@ -49,7 +49,7 @@ guarantee that this method is called due to how the instance is killed.
 
 ## `BaseSpout` class methods
 
-The `Spout` class inherits from the [`BaseSpout`](/api/python/spout/base_spout.m.html#pyheron.spout.base_spout.BaseSpout) class, which also provides you methods you can use in your spouts.
+The `Spout` class inherits from the [`BaseSpout`](/api/python/spout/base_spout.m.html#heronpy.spout.base_spout.BaseSpout) class, which also provides you methods you can use in your spouts.
 
 ```python
 class BaseSpout:
@@ -89,7 +89,7 @@ The following is an example implementation of a spout in Python.
 
 ```python
 from itertools import cycle
-from pyheron import Spout
+from heronpy import Spout
 
 class WordSpout(Spout):
     outputs = ['word']

@@ -80,7 +80,7 @@ The following is an example implementation of a bolt in Python.
 
 ```python
 from collections import Counter
-from pyheron import Bolt
+from heronpy import Bolt
 
 class CountBolt(Bolt):
   outputs = ["word", "count"]
