@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.common.network;
+package com.twitter.heron.common.test;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
@@ -29,6 +29,10 @@ import org.junit.Test;
 
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.network.HeronServer;
+import com.twitter.heron.common.network.REQID;
+import com.twitter.heron.common.network.StatusCode;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.proto.testing.Tests;
 
 import static org.junit.Assert.assertEquals;

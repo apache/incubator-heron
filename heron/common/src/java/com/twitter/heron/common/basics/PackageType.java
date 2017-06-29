@@ -14,8 +14,6 @@
 
 package com.twitter.heron.common.basics;
 
-import com.google.common.io.Files;
-
 /***
  * This enum defines commands topology package type
  */
@@ -25,7 +23,8 @@ public enum PackageType {
   TAR;
 
   public static PackageType getPackageType(String packageFile) {
-    String extension = Files.getFileExtension(packageFile);
+    int dotIndex = packageFile.lastIndexOf('.');
+    String extension = packageFile.substring(dotIndex + 1);
     return PackageType.valueOf(extension.toUpperCase());
   }
 
