@@ -29,8 +29,8 @@ Download both the `client` and `tools` installation scripts for your platform ei
 Here's an example for MacOS (`darwin`):
 
 ```bash
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-0.14.9-darwin.sh
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-0.14.9-darwin.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-darwin.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-darwin.sh
 ```
 
 Once you've downloaded the scripts, make the scripts executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
