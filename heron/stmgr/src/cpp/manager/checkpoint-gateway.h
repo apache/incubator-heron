@@ -30,7 +30,7 @@ namespace heron {
 namespace common {
 class MetricsMgrSt;
 class AssignableMetric;
-}
+}  // namespace common
 }  // namespace heron
 
 namespace heron {
@@ -48,9 +48,9 @@ class CheckpointGateway {
   explicit CheckpointGateway(sp_uint64 _drain_threshold,
         NeighbourCalculator* _neighbour_calculator,
         common::MetricsMgrSt* _metrics_manager_client,
-        std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1,
-        std::function<void(proto::stmgr::TupleStreamMessage2*)> drainer2,
-        std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> drainer3);
+        std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer,
+        std::function<void(proto::stmgr::TupleStreamMessage2*)> tuplestream_drainer,
+        std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> ckpt_drainer);
   virtual ~CheckpointGateway();
   void SendToInstance(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void SendToInstance(proto::stmgr::TupleStreamMessage2* _message);
@@ -101,9 +101,9 @@ class CheckpointGateway {
   common::MetricsMgrSt* metrics_manager_client_;
   common::AssignableMetric* size_metric_;
   std::unordered_map<sp_int32, CheckpointInfo*> pending_tuples_;
-  std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer1_;
-  std::function<void(proto::stmgr::TupleStreamMessage2*)> drainer2_;
-  std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> drainer3_;
+  std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer_;
+  std::function<void(proto::stmgr::TupleStreamMessage2*)> tuplestream_drainer_;
+  std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> ckpt_drainer_;
 };
 
 }  // namespace stmgr

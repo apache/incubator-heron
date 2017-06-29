@@ -33,18 +33,15 @@ namespace heron {
 namespace stmgr {
 
 CheckpointGateway::CheckpointGateway(sp_uint64 _drain_threshold,
-             NeighbourCalculator* _neighbour_calculator,
-             common::MetricsMgrSt* _metrics_manager_client,
-             std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer1,
-             std::function<void(proto::stmgr::TupleStreamMessage2*)> _drainer2,
-             std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> _drainer3) {
-  drain_threshold_ = _drain_threshold;
-  current_size_ = 0;
-  neighbour_calculator_ = _neighbour_calculator;
-  drainer1_ = _drainer1;
-  drainer2_ = _drainer2;
-  drainer3_ = _drainer3;
-  metrics_manager_client_ = _metrics_manager_client;
+         NeighbourCalculator* _neighbour_calculator,
+         common::MetricsMgrSt* _metrics_manager_client,
+         std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _tupleset_drainer,
+         std::function<void(proto::stmgr::TupleStreamMessage2*)> _tuplestream_drainer,
+         std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> _ckpt_drainer)
+  : drain_threshold_(_drain_threshold), current_size_(0),
+    neighbour_calculator_(_neighbour_calculator),
+    metrics_manager_client_(_metrics_manager_client), tupleset_drainer_(_tupleset_drainer),
+    tuplestream_drainer_(_tuplestream_drainer), ckpt_drainer_(_ckpt_drainer) {
   size_metric_ = new common::AssignableMetric(current_size_);
   metrics_manager_client_->register_metric("__stateful_gateway_size", size_metric_);
 }
@@ -68,7 +65,7 @@ void CheckpointGateway::SendToInstance(sp_int32 _task_id,
   if (!_message) {
     current_size_ += size;
   } else {
-    drainer1_(_task_id, _message);
+    tupleset_drainer_(_task_id, _message);
   }
   size_metric_->SetValue(current_size_);
 }
@@ -84,7 +81,7 @@ void CheckpointGateway::SendToInstance(proto::stmgr::TupleStreamMessage2* _messa
   if (!_message) {
     current_size_ += size;
   } else {
-    drainer2_(_message);
+    tuplestream_drainer_(_message);
   }
   size_metric_->SetValue(current_size_);
 }
@@ -105,11 +102,11 @@ void CheckpointGateway::HandleUpstreamMarker(sp_int32 _src_task_id, sp_int32 _de
 
 void CheckpointGateway::DrainTuple(sp_int32 _dest, Tuple& _tuple) {
   if (std::get<0>(_tuple)) {
-    drainer1_(_dest, std::get<0>(_tuple));
+    tupleset_drainer_(_dest, std::get<0>(_tuple));
   } else if (std::get<1>(_tuple)) {
-    drainer2_(std::get<1>(_tuple));
+    tuplestream_drainer_(std::get<1>(_tuple));
   } else {
-    drainer3_(_dest, std::get<2>(_tuple));
+    ckpt_drainer_(_dest, std::get<2>(_tuple));
   }
 }
 
@@ -172,9 +169,9 @@ CheckpointGateway::CheckpointInfo::SendToInstance(proto::system::HeronTupleSet2*
       // This means that we still are expecting a checkpoint marker from this src task id
       return _tuple;
     } else {
-      add(std::make_tuple(_tuple, (proto::stmgr::TupleStreamMessage2*)NULL,
-                         (proto::ckptmgr::InitiateStatefulCheckpoint*)NULL), _size);
-      return NULL;
+      add(std::make_tuple(_tuple, (proto::stmgr::TupleStreamMessage2*)nullptr,
+                         (proto::ckptmgr::InitiateStatefulCheckpoint*)nullptr), _size);
+      return nullptr;
     }
   }
 }
@@ -190,9 +187,9 @@ CheckpointGateway::CheckpointInfo::SendToInstance(proto::stmgr::TupleStreamMessa
       // This means that we still are expecting a checkpoint marker from this src task id
       return _tuple;
     } else {
-      add(std::make_tuple((proto::system::HeronTupleSet2*)NULL, _tuple,
-                         (proto::ckptmgr::InitiateStatefulCheckpoint*)NULL), _size);
-      return NULL;
+      add(std::make_tuple((proto::system::HeronTupleSet2*)nullptr, _tuple,
+                         (proto::ckptmgr::InitiateStatefulCheckpoint*)nullptr), _size);
+      return nullptr;
     }
   }
 }
@@ -230,8 +227,8 @@ CheckpointGateway::CheckpointInfo::HandleUpstreamMarker(sp_int32 _src_task_id,
     // We need to add Initiate Checkpoint message before the current set
     auto message = new proto::ckptmgr::InitiateStatefulCheckpoint();
     message->set_checkpoint_id(_checkpoint_id);
-    add_front(std::make_tuple((proto::system::HeronTupleSet2*)NULL,
-                              (proto::stmgr::TupleStreamMessage2*)NULL, message),
+    add_front(std::make_tuple((proto::system::HeronTupleSet2*)nullptr,
+                              (proto::stmgr::TupleStreamMessage2*)nullptr, message),
                               message->GetCachedSize());
     return ForceDrain();
   } else {
