@@ -82,10 +82,14 @@ class SlidingWindowBolt(Bolt):
         break
 
   # pylint: disable=unused-argument
+  # pylint: disable=unused-variable
   def process_tick(self, tup):
     """Called every slide_interval
     """
     curtime = int(time.time())
     window_info = WindowInfo(curtime - self.window_duration, curtime)
-    self.processWindow(window_info, list(self.current_tuples))
+    tuple_batch = []
+    for (tup, tm) in self.current_tuples:
+      tuple_batch.append(tup)
+    self.processWindow(window_info, tuple_batch)
     self._expire(curtime)
