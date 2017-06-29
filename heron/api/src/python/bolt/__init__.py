@@ -2,4 +2,4 @@
 __all__ = ['bolt', 'base_bolt', 'window_bolt']
 
 from .bolt import Bolt
-from .window_bolt import SlidingWindowBolt, WindowInfo
+from .window_bolt import SlidingWindowBolt, TumblingWindowBolt, WindowInfo

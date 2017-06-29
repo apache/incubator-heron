@@ -93,3 +93,58 @@ class SlidingWindowBolt(Bolt):
       tuple_batch.append(tup)
     self.processWindow(window_info, tuple_batch)
     self._expire(curtime)
+
+
+class TumblingWindowBolt(Bolt):
+  """TumblingWindowBolt is a higer level bolt for Heron users who want to deal with
+     batches of tuples belonging to a certain time window. This bolt keeps track of
+     managing the window, adding/expiring tuples based on window configuration.
+     This way users will just have to deal with writing processWindow function
+  """
+  WINDOW_DURATION_SECS = 'tumblingwindowbolt_duration_secs'
+
+  @abstractmethod
+  def processWindow(self, window_info, tuples):
+    """The main interface that needs to be implemented.
+
+    This function is called every WINDOW_DURATION_SECS seconds
+    and contains the data in the last WINDOW_DURATION_SECS seconds
+    in a list tuples
+
+    :type window_info: :class:`WindowInfo`
+    :param window_info: The information about the window
+
+    :type tuples: :class:`list of Tuples`
+    :param tuples: The list of tuples in this window
+    """
+    pass
+
+  # pylint: disable=unused-argument
+  def initialize(self, config, context):
+    """We initialize the window duration and slide interval
+    """
+    if TumblingWindowBolt.WINDOW_DURATION_SECS in config:
+      self.window_duration = int(config[TumblingWindowBolt.WINDOW_DURATION_SECS])
+    else:
+      self.logger.fatal("Window Duration has to be specified in the config")
+
+    # By modifying the config, we are able to setup the tick timer
+    config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS] = str(self.window_duration)
+    self.current_tuples = deque()
+
+  def process(self, tup):
+    """Process a single tuple of input
+
+    We simply add the tuple into our current_tuples.
+    """
+    self.current_tuples.append(tup)
+
+  # pylint: disable=unused-argument
+  # pylint: disable=unused-variable
+  def process_tick(self, tup):
+    """Called every window_duration
+    """
+    curtime = int(time.time())
+    window_info = WindowInfo(curtime - self.window_duration, curtime)
+    self.processWindow(window_info, list(self.current_tuples))
+    self.current_tuples.clear()
