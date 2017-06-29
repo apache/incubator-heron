@@ -98,7 +98,7 @@ Argument | Data type | Description | Default
 
 ### Example
 
-The following is an example implementation of a word count topology in Python that subclasses `TopologyBuilder`.
+The following is an example implementation of a word count topology in Python that subclasses [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder).
 
 ```python
 from heronpy import TopologyBuilder
