@@ -52,8 +52,8 @@ java_library(
 )
 
 java_library(
-   name = 'test-helper-java',
-   srcs = glob(["**/testhelper/**/*.java"]),
+   name = 'test-helpers-java',
+   srcs = glob(["**/testhelpers/**/*.java"]),
    deps = [
         ":basics-java",
         ":network-java",

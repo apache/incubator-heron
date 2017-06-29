@@ -34,11 +34,11 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.StatusCode;
-import com.twitter.heron.common.testhelper.HeronServerTester;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
-import static com.twitter.heron.common.testhelper.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
+import static com.twitter.heron.common.testhelpers.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
 import static org.mockito.Mockito.spy;
 
 /**
