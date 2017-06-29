@@ -20,13 +20,13 @@ echo "Using $PLATFORM platform"
 CIENV=$(ci_environ $1)
 
 # integration test binaries have to be specified as absolute path
-JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration-test/src/java/integration-tests.jar"
-PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integration_test/topology/heron_integ_topology.pex"
+JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration_test/src/java/integration-tests.jar"
+PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration_test/src/python/integration_test/topology/heron_integ_topology.pex"
 
 # build test related jar
-T="heron build integration-test"
+T="heron build integration_test"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/$CIENV/bazel.rc build --config=$PLATFORM integration-test/src/...
+python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/$CIENV/bazel.rc build --config=$PLATFORM integration_test/src/...
 end_timer "$T"
 
 # install client
@@ -42,32 +42,32 @@ python ${DIR}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/$CIEN
 end_timer "$T"
 
 # run local integration test
-T="heron integration-test local"
+T="heron integration_test local"
 start_timer "$T"
-python ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner
+python ./bazel-bin/integration_test/src/python/local_test_runner/local-test-runner
 end_timer "$T"
 
 # run the java integration test
-T="heron integration-test java"
+T="heron integration_test java"
 start_timer "$T"
-./bazel-bin/integration-test/src/python/http_server/http-server 8080 &
+./bazel-bin/integration_test/src/python/http_server/http-server 8080 &
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
-./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
+./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
   -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
+  -tp integration_test/src/java/com/twitter/heron/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
 # run the python integration test
-T="heron integration-test python"
+T="heron integration_test python"
 start_timer "$T"
-./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
+./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
   -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp integration-test/src/python/integration_test/topology/ \
+  -tp integration_test/src/python/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 

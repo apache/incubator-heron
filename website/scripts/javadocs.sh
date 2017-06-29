@@ -24,7 +24,7 @@ fi
 (cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'`\
   `bazel query 'kind("java_test", "heron/...")'` \
-  `bazel query 'kind("java_library", "integration-test/...")'`)
+  `bazel query 'kind("java_library", "integration_test/...")'`)
 
 HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/com/twitter/*" -name "*.java"`
 BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.java"`
