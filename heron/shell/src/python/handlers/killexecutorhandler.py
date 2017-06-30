@@ -16,7 +16,10 @@
 import logging
 import os
 import signal
+import urlparse
 import tornado.web
+
+from tornado.options import options
 
 class KillExecutorHandler(tornado.web.RequestHandler):
   """
@@ -27,7 +30,12 @@ class KillExecutorHandler(tornado.web.RequestHandler):
     """ post method """
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing parent executor' request")
-    # todo(huijun): add security check
+    data = dict(urlparse.parse_qsl(self.request.body))
+    sharedSecret = data.get('secret')
+    if sharedSecret != options.secret:
+      self.set_status(403)
+      self.finish()
+      return
     logger.info("Killing parent executor response 200")
     self.set_status(200)
     self.finish()
