@@ -26,7 +26,7 @@ outputs:
     build_output:
       path: "/heron/bazel-bin/scripts/packages"
     build_output_2:
-      path: "/heron/scripts/packages
+      path: "/heron/scripts/packages"
 
 ---
 type: service_template
@@ -49,6 +49,7 @@ inputs:
   parameters:
     os:
     test_artifact_input:
+    test_artifact_input_2:
     build_env_cc:
     build_env_cxx:
     build_env_cpp:
