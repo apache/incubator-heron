@@ -20,8 +20,8 @@ echo "Using $PLATFORM platform"
 CIENV=$(ci_environ $1)
 
 # integration test binaries have to be specified as absolute path
-JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration_test/src/java/integration-tests.jar"
-PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration_test/src/python/integration_test/topology/heron_integ_topology.pex"
+JAVA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/integration-tests.jar"
+PYTHON_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/heron_integ_topology.pex"
 
 # build test related jar
 T="heron build integration_test"
@@ -41,6 +41,12 @@ start_timer "$T"
 python ${DIR}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/$CIENV/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-tools-install.sh --user
 end_timer "$T"
 
+# install tests
+T="heron tests install"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_tests_install.txt" bazel --bazelrc=tools/$CIENV/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-tests-install.sh --user
+end_timer "$T"
+
 # run local integration test
 T="heron integration_test local"
 start_timer "$T"
@@ -50,14 +56,14 @@ end_timer "$T"
 # run the java integration test
 T="heron integration_test java"
 start_timer "$T"
-./bazel-bin/integration_test/src/python/http_server/http-server 8080 &
+${HOME}/bin/http-server 8080 &
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
-./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
+${HOME}/bin/test-runner.pex \
   -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp integration_test/src/java/com/twitter/heron/integration_test/topology \
+  -tp ${HOME}/.herontests/data/java \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
@@ -67,7 +73,7 @@ start_timer "$T"
 ./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
   -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp integration_test/src/python/integration_test/topology \
+  -tp ${HOME}/.herontests/data/python \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
