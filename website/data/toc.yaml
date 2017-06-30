@@ -7,11 +7,37 @@ sections:
         url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
+  - name: Topology Writers
+    sublinks:
+      - name: Java Topologies
+        url: /docs/developers/java/topologies
+      - name: Python Topologies
+        url: /docs/developers/python/topologies
+      - name: Heron Data Model
+        url: /docs/developers/data-model
+      - name: Tuple Serialization
+        url: /docs/developers/serialization
+      - name: Heron UI Guide
+        url: /docs/developers/ui-guide
+      - name: Tuning Guide
+        url: /docs/developers/tuning
+      - name: Packing Algorithms
+        url: /docs/developers/packing/ffdpacking
+      - name: Simulator Mode
+        url: /docs/developers/simulator-mode
+      - name: Troubleshooting Guide
+        url: /docs/developers/troubleshooting
+  - name: Client API docs
+    sublinks:
+      - name: Java
+        url: /api/java
+      - name: Python
+        url: /api/python
   - name: Heron Concepts
     sublinks:
       - name: Heron Design Goals
         url: /docs/concepts/design-goals
-      - name: Heron Topology
+      - name: Heron Topologies
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture
@@ -79,28 +105,6 @@ sections:
         url: /docs/operators/heron-tracker
       - name: Heron UI Runbook
         url: /docs/operators/heron-ui
-  - name: Topology Writers
-    sublinks:
-      - name: Writing Java Topologies
-        url: /docs/developers/java/topologies
-      - name: Writing Python Topologies
-        url: /docs/developers/python/topologies
-      - name: Heron Data Model
-        url: /docs/developers/data-model
-      - name: Tuple Serialization
-        url: /docs/developers/serialization
-      - name: Heron UI Guide
-        url: /docs/developers/ui-guide
-      - name: Tuning Guide
-        url: /docs/developers/tuning
-      - name: Packing Algorithms
-        url: /docs/developers/packing/ffdpacking
-      - name: Simulator Mode
-        url: /docs/developers/simulator-mode
-      - name: Troubleshooting Guide
-        url: /docs/developers/troubleshooting
-      - name: Javadoc
-        url: /api
   - name: Heron Developers
     sublinks:
       - name: Compiling

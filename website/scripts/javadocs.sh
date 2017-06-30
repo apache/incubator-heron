@@ -6,7 +6,7 @@ FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 # for display on GitHub website
-JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
+JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api/java
 # for display on local Hugo server
 JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac

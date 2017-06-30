@@ -35,5 +35,3 @@ pex_binary(
     srcs = ["multi_stream_topology.py"],
     deps = [":example-py"],
 )
-
-
