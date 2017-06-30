@@ -18,7 +18,7 @@ import time
 from .bolt import Bolt
 from heron.api.src.python import api_constants
 
-WindowInfo = namedtuple('WindowInfo', ('start', 'end'))
+WindowContext = namedtuple('WindowContext', ('start', 'end'))
 
 class SlidingWindowBolt(Bolt):
   """SlidingWindowBolt is a higer level bolt for Heron users who want to deal with
@@ -37,7 +37,7 @@ class SlidingWindowBolt(Bolt):
     and contains the data in the last WINDOW_DURATION_SECS seconds
     in a list tuples
 
-    :type window_info: :class:`WindowInfo`
+    :type window_info: :class:`WindowContext`
     :param window_info: The information about the window
 
     :type tuples: :class:`list of Tuples`
@@ -87,7 +87,7 @@ class SlidingWindowBolt(Bolt):
     """Called every slide_interval
     """
     curtime = int(time.time())
-    window_info = WindowInfo(curtime - self.window_duration, curtime)
+    window_info = WindowContext(curtime - self.window_duration, curtime)
     tuple_batch = []
     for (tup, tm) in self.current_tuples:
       tuple_batch.append(tup)
@@ -111,7 +111,7 @@ class TumblingWindowBolt(Bolt):
     and contains the data in the last WINDOW_DURATION_SECS seconds
     in a list tuples
 
-    :type window_info: :class:`WindowInfo`
+    :type window_info: :class:`WindowContext`
     :param window_info: The information about the window
 
     :type tuples: :class:`list of Tuples`
@@ -145,6 +145,6 @@ class TumblingWindowBolt(Bolt):
     """Called every window_duration
     """
     curtime = int(time.time())
-    window_info = WindowInfo(curtime - self.window_duration, curtime)
+    window_info = WindowContext(curtime - self.window_duration, curtime)
     self.processWindow(window_info, list(self.current_tuples))
     self.current_tuples.clear()

@@ -9,5 +9,5 @@ from .topology import Topology, TopologyBuilder
 from .topology_context import TopologyContext
 
 # Load spout and bolt
-from .bolt import Bolt, SlidingWindowBolt, TumblingWindowBolt, WindowInfo
+from .bolt import Bolt, SlidingWindowBolt, TumblingWindowBolt, WindowContext
 from .spout import Spout
