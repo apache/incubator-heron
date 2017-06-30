@@ -24,7 +24,9 @@ inputs:
 outputs:
   artifacts:
     build_output:
-      path: "/heron"
+      path: "/heron/bazel-bin/scripts/packages"
+    build_output_2:
+      path: "/heron/scripts/packages
 
 ---
 type: service_template
@@ -37,11 +39,13 @@ container:
     cpu_cores: 1.5
   image: streamlio/build:latest-heron-%%os%%
   docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%"
-  command: bash -c '/heron/scripts/applatix/test.sh'
+  command: bash -c 'cd /heron && scripts/applatix/test.sh'
 inputs:
   artifacts:
   - from: "%%test_artifact_input%%"
     path: "/heron"
+  - from: "%%test_artifact_input_2%%"
+    path: "/heron/scripts/packages"
   parameters:
     os:
     test_artifact_input:
