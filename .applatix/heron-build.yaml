@@ -39,7 +39,7 @@ container:
     cpu_cores: 1.5
   image: streamlio/build:latest-heron-%%os%%
   docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%"
-  command: bash -c 'cd /heron && scripts/applatix/test.sh'
+  command: bash -c ‘cd /heron && ls -lrt . && ls -lrt scripts && ls -lrt scripts/applatix’
 inputs:
   artifacts:
   - from: "%%test_artifact_input%%"
