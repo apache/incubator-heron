@@ -76,6 +76,7 @@ cc_library(
         "manager/stream-consumers.cpp",
         "manager/tmaster-client.cpp",
         "manager/ckptmgr-client.cpp",
+        "manager/checkpoint-gateway.cpp",
 
         "manager/stmgr-client.h",
         "manager/stmgr-clientmgr.h",
@@ -84,6 +85,7 @@ cc_library(
         "manager/stream-consumers.h",
         "manager/tmaster-client.h",
         "manager/ckptmgr-client.h",
+        "manager/checkpoint-gateway.h",
     ],
     copts = [
         "-Iheron",
