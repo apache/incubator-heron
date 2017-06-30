@@ -28,14 +28,14 @@ import org.junit.Test;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
-import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.StatusCode;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statefulstorage.Checkpoint;
 import com.twitter.heron.spi.statefulstorage.IStatefulStorage;
 
-import static com.twitter.heron.common.network.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
+import static com.twitter.heron.common.testhelpers.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;

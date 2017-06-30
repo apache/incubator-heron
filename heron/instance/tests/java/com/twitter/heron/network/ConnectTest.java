@@ -24,9 +24,9 @@ import java.nio.channels.SocketChannel;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.resource.UnitTestHelper;
