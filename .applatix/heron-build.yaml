@@ -67,6 +67,7 @@ steps:
       template: heron-test-base
       parameters:
         test_artifact_input: "%%steps.build.build_output%%"
+        test_artifact_input_2: "%%steps.build.build_output_2%%"
 inputs:
   parameters:
     os:
