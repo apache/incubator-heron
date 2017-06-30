@@ -72,7 +72,8 @@ class HeronExecutorTest(unittest.TestCase):
 
   def get_expected_shell_command(container_id):
     return 'heron_shell_binary --port=shell-port ' \
-           '--log_file_prefix=fake_dir/heron-shell-%s.log' % container_id
+           '--log_file_prefix=fake_dir/heron-shell-%s.log ' \
+           '--secret=topid' % container_id
 
   def build_packing_plan(self, instance_distribution):
     packing_plan = PackingPlan()

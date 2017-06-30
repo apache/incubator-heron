@@ -41,10 +41,12 @@ app = tornado.web.Application([
 
 if __name__ == '__main__':
   define("port", default=9999, help="Runs on the given port", type=int)
+  define("secret", default='', help="Shared secret for /killexecutor", type=str)
   parse_command_line()
 
   logger = logging.getLogger(__file__)
   logger.info("Starting Heron Shell")
+  logger.info("Shared secret for /killexecutor: %s", options.secret)
 
   app.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
