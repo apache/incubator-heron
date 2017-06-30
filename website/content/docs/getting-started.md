@@ -5,69 +5,70 @@ aliases:
   - /docs/install.html
 ---
 
+> The current version of Heron is **{{% heronVersion %}}**.
+
 The easiest way to get started learning Heron is to install and run pre-compiled
 Heron binaries, which are currently available for:
 
 * Mac OS X
 * Ubuntu >= 14.04
+* CentOS
 
-For other platforms, you need to build from source. Please refer to [Heron Developers]
+For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
 (../developers/compiling/compiling).
 
 ## Step 1 --- Download Heron binaries using installation scripts
 
 Go to the [releases page](https://github.com/twitter/heron/releases) for Heron
-and download two installation scripts for your platform. The names of the
-scripts have this form:
-
-* `heron-client-install-{{% heronVersion %}}-PLATFORM.sh`
-* `heron-tools-install-{{% heronVersion %}}-PLATFORM.sh`
-
-The installation scripts for Mac OS X (`darwin`), for example, would be named
+and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, would be named
 `heron-client-install-{{% heronVersion %}}-darwin.sh` and
 `heron-tools-install-{{% heronVersion %}}-darwin.sh`.
 
-Once you've downloaded the scripts, run the Heron client script with the
-`--user` flag set:
+Download both the `client` and `tools` installation scripts for your platform either from the releases page or using [wget](https://www.gnu.org/software/wget/).
+
+Here's an example for MacOS (`darwin`):
 
 ```bash
-$ chmod +x heron-client-install-VERSION-PLATFORM.sh
-$ ./heron-client-install-VERSION-PLATFORM.sh --user
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-darwin.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-darwin.sh
+```
+
+Once you've downloaded the scripts, make the scripts executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
+
+```bash
+$ chmod +x heron-*.sh
+```
+
+> Both installation scripts will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
+
+Now run the client installation script with the `--user` flag set:
+
+```bash
+$ ./heron-client-install-{{% heronVersion %}}--PLATFORM.sh --user
 Heron client installer
 ----------------------
 
 Uncompressing......
 Heron is now installed!
-
-Make sure you have "${HOME}/bin" in your path.
-...
 ```
 
-To add `~/bin` to your path, run:
+Now run the script for Heron tools (again setting the `--user` flag):
 
 ```bash
-$ export PATH=$PATH:~/bin
-```
-
-Now run the script for Heron tools (setting the `--user` flag):
-
-```bash
-$ chmod +x heron-tools-install-VERSION-PLATFORM.sh
-$ ./heron-tools-install-VERSION-PLATFORM.sh --user
+$ ./heron-tools-install-{{% heronVersion %}}-PLATFORM.sh --user
 Heron tools installer
 ---------------------
 
 Uncompressing......
 Heron Tools is now installed!
-...
 ```
 
-To check Heron is successfully installed, run:
+To check that Heron is successfully installed, run `heron version`:
 
 ```bash
 $ heron version
 heron.build.version : {{% heronVersion %}}
-heron.build.time : Sat Aug  6 12:35:47 PDT 2016
+heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
 heron.build.timestamp : 1470512147000
 heron.build.host : ${HOSTNAME}
 heron.build.user : ${USERNAME}
@@ -77,11 +78,11 @@ heron.build.git.status : Clean
 
 ## Step 2 --- Launch an example topology
 
-> **Note for MacOS users**
+> #### Note for MacOS users
 
 > If you want to run topologies locally on MacOS, you may need to add your
 > hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
-> `127.0.0.1 localhost <hostname>`. You can fetch your hostname by simply
+> `127.0.0.1 localhost My-Mac-Laptop.local`. You can fetch your hostname by simply
 > running `hostname` in your shell.
 
 If you set the `--user` flag when running the installation scripts, some example
@@ -96,21 +97,23 @@ $ heron submit local \
 com.twitter.heron.examples.ExclamationTopology \
 ExclamationTopology \
 --deploy-deactivated
+```
 
+The output should look something like this:
+
+```bash
 INFO: Launching topology 'ExclamationTopology'
+
 ...
-[2016-06-07 16:44:07 -0700] com.twitter.heron.scheduler.local.LocalLauncher INFO: \
-For checking the status and logs of the topology, use the working directory \
-$HOME/.herondata/topologies/local/${ROLE}/ExclamationTopology # working directory
 
 INFO: Topology 'ExclamationTopology' launched successfully
 INFO: Elapsed time: 3.409s.
 ```
 
 This will *submit* the topology to your locally running Heron cluster but it
-won't *activate* the topology. That will be explored in step 5 below.
+won't *activate* the topology because the `--deploy-deactivated` flag was set. Activating the topology will be explored in step 5 below.
 
-Note the output shows if the topology has been launched successfully and the working directory.
+Note that the output shows whether the topology has been launched successfully as well the working directory for the topology.
 
 To check what's under the working directory, run:
 ```bash
@@ -269,7 +272,7 @@ In case of any issues, please refer to [Quick Start Troubleshooting](../getting-
 
 ### Next Steps
 
-* [Migrate Storm topologies](../migrate-storm-to-heron) with simple `pom.xml`
+* [Migrate Storm topologies](../migrate-storm-to-heron) to Heron with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
   environments (such as on [Aurora](../operators/deployment/schedulers/aurora)

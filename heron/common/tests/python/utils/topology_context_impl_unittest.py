@@ -22,9 +22,14 @@ import heron.common.tests.python.mock_protobuf as mock_protobuf
 
 class TopologyContextImplTest(unittest.TestCase):
   def setUp(self):
-    self.context = TopologyContextImpl(config={}, topology=mock_protobuf.get_mock_topology(),
-                                       task_to_component={}, my_task_id="task_id",
-                                       metrics_collector=None, topo_pex_path="path.to.pex")
+    self.context = TopologyContextImpl(
+      config={},
+      topology=mock_protobuf.get_mock_topology(),
+      task_to_component={},
+      my_task_id="task_id",
+      metrics_collector=None,
+      topo_pex_path="path.to.pex")
+
   def test_task_hook(self):
     task_hook = mock_generator.MockTaskHook()
     self.assertFalse(len(self.context.task_hooks) > 0)

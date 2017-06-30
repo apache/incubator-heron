@@ -14,9 +14,9 @@ with open(requirement_file, 'r') as f:
 requirements = raw_requirements.split('\n')
 print "Requirements: %s" % requirements
 
-long_description = "heronpy package allows a developer to write python topology in Heron. " \
-                   "It can be run in various clusters including Mesos/Aurora, " \
-                   "Mesos/Marathon, YARN, etc."
+long_description = "The heronpy package enables you to write Heron topologies in Python. " \
+                   "Topologies can be run using a variety of schedulers, including Mesos/Aurora," \
+                   "Kubernetes, Mesos/Marathon, YARN, etc."
 
 setup(
   name=package_name,
