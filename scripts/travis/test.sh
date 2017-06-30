@@ -60,7 +60,7 @@ ${HOME}/bin/http-server 8080 &
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
-${HOME}/bin/test-runner.pex \
+${HOME}/bin/test-runner \
   -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
   -tp ${HOME}/.herontests/data/java \
@@ -70,7 +70,7 @@ end_timer "$T"
 # run the python integration test
 T="heron integration_test python"
 start_timer "$T"
-./bazel-bin/integration_test/src/python/test_runner/test-runner.pex \
+${HOME}/bin/test-runner \
   -hc heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
   -rh localhost -rp 8080\
   -tp ${HOME}/.herontests/data/python \
