@@ -70,12 +70,6 @@ For further information, refer to [this page](../topologies).
 of this bolt within the topology, as well as to give component-specific configurations.
 For the usage of this method, refer to [this page](../topologies).
 
-
-For further information about the API, refer to the Streamparse API documentation,
-although there are some methods in the Streamparse API that are not supported or are
-invalid in Heron. Additionally, there are a number of example implementations
-under `heron/examples/src/python` directory.
-
 The following is an example implementation of a bolt in Python.
 
 ```python
