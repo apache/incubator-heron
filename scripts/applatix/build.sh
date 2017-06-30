@@ -7,7 +7,7 @@
 set -e
 
 DIR=`dirname $0`
-source ${DIR}/common.sh
+source ${DIR}/../common.sh
 
 # verify that jars have not been added to the repo
 JARS=`find . -name "*.jar"`
