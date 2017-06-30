@@ -1,4 +1,4 @@
-# Copyright 2016 - Parsely, Inc. (d/b/a Parse.ly)
+# Copyright 2016 - Twitter. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
