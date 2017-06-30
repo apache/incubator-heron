@@ -15,6 +15,8 @@ start_timer "$T"
 ${DIR}/build.sh $1
 end_timer "$T"
 
+${DIR}/check.sh
+
 #T="make site"
 #start_timer "$T"
 #(cd website && make travis-site)
