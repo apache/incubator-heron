@@ -1,9 +1,0 @@
-Integration test for testing various heron-cli and process failure scenarios. Runs a local-scheduler
-heron topology. The test creates an input file of test data, which a spout emits. A bolt writes each
-tuple to an output file and the two files are compared.
-
-To run the tests:
-
-  bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
-  bazel build --config=darwin integration-test/src/...
-  ./bazel-bin/integration-test/src/python/local_test_runner/local-test-runner

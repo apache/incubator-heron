@@ -63,6 +63,13 @@ filegroup(
 )
 
 filegroup(
+    name = "testpkgs",
+    srcs = [
+        ":heron-tests-install.sh",
+    ],
+)
+
+filegroup(
     name = "pypkgs",
     srcs = [
         ":generate-heronpy-package",
@@ -306,6 +313,55 @@ pkg_tar(
 )
 
 ################################################################################
+# Heron test packaging
+################################################################################
+pkg_tar(
+    name = "heron-tests-bin",
+    package_dir = "bin",
+    files = [
+        "//integration_test/src/python/http_server:http-server",
+        "//integration_test/src/python/test_runner:test-runner",
+    ]
+)
+
+pkg_tar(
+    name = "heron-tests-data-java",
+    package_dir = "data/java",
+    files = [
+        "//integration_test/src/java:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-data-python",
+    package_dir = "data/python",
+    files = [
+        "//integration_test/src/python/integration_test/topology:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-lib",
+    package_dir = "lib",
+    files = [
+       "//integration_test/src/java:integration-tests",
+       "//integration_test/src/python/integration_test/topology:heron_integ_topology",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests",
+    extension = "tar.gz",
+    files = generated_release_files,
+    deps = [
+        ":heron-tests-bin",
+        ":heron-tests-data-java",
+        ":heron-tests-data-python",
+        ":heron-tests-lib",
+    ],
+)
+
+################################################################################
 # Heron API packaging
 ################################################################################
 pkg_tar(
@@ -414,6 +470,18 @@ genrule(
         """,
 )
 
+genrule(
+    name = "generate-tests-launcher",
+    srcs = ["tests_template_bin.sh", "bin_common.sh"] + generated_release_files,
+    outs = ["tests_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
+        template="$$(cat $(location tests_template_bin.sh))"
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
 load("self_extract_binary", "self_extract_binary")
 
 self_extract_binary(
@@ -440,6 +508,14 @@ self_extract_binary(
     launcher = ":tools_launcher_bin.sh",
 )
 
+self_extract_binary(
+    name = "heron-tests-install.sh",
+    flatten_resources = [
+        ":heron-tests",
+    ],
+    launcher = ":tests_launcher_bin.sh",
+)
+
 filegroup(
     name = "api-template-bin.sh",
     srcs = ["api_template_bin.sh"],
@@ -453,6 +529,11 @@ filegroup(
 filegroup(
     name = "tools-template-bin.sh",
     srcs = ["tools_template_bin.sh"],
+)
+
+filegroup(
+    name = "tests-template-bin.sh",
+    srcs = ["tests_template_bin.sh"],
 )
 
 filegroup(
