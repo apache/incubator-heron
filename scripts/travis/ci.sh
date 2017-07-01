@@ -3,7 +3,7 @@
 set -e
 
 DIR=`dirname $0`
-UTIS=${DIR}/../shutils
+UTILS=${DIR}/../shutils
 source ${UTILS}/common.sh
 
 T="${DIR}/build.sh"
