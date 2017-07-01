@@ -33,11 +33,4 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_tests_install.txt" ./heron-tests-install.sh --user
 end_timer "$T"
 
-# run the java integration test
-T="heron integration_test java"
-start_timer "$T"
-${HOME}/bin/http-server 8080 &
-http_server_id=$!
-trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
-
 print_timer_summary
