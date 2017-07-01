@@ -4,8 +4,9 @@
 #
 set -e
 
-DIR=`dirname $0`/..
-source ${DIR}/common.sh
+DIR=`dirname $0`
+UTILS=${DIR}/../shutils
+source ${UTILS}/common.sh
 
 # Autodiscover the platform
 PLATFORM=$(discover_platform)
@@ -21,19 +22,19 @@ PYTHON_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/heron_integ_topology.pex"
 # install client
 T="heron client install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_client_install.txt" ./heron-client-install.sh --user
+python ${UTILS}/save-logs.py "heron_client_install.txt" ./heron-client-install.sh --user
 end_timer "$T"
 
 # install tools
 T="heron tools install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_tools_install.txt" ./heron-tools-install.sh --user
+python ${UTILS}/save-logs.py "heron_tools_install.txt" ./heron-tools-install.sh --user
 end_timer "$T"
 
 # install tests
 T="heron tests install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_tests_install.txt" ./heron-tests-install.sh --user
+python ${UTILS}/save-logs.py "heron_tests_install.txt" ./heron-tests-install.sh --user
 end_timer "$T"
 
 # run the java integration test
