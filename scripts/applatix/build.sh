@@ -92,9 +92,17 @@ python ${DIR}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
+T="heron build testpkgs"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_build_binpkgs.txt" bazel\
+  --bazelrc=tools/applatix/bazel.rc build\
+  --config=$PLATFORM scripts/packages:testpkgs
+end_timer "$T"
+
 T="heron clear tar and zip files"
 start_timer "$T"
 rm -rf ./bazel-bin/scripts/packages/*.tar 
+rm -rf ./bazel-bin/scripts/packages/*.tar.gz 
 rm -rf ./bazel-bin/scripts/packages/*.args
 rm -rf ./bazel-bin/scripts/packages/*.zip
 end_timer "$T"
