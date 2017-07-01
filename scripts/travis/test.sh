@@ -4,8 +4,8 @@
 #
 set -e
 
-DIR=`dirname $0`
-source ${DIR}/../common.sh
+DIR=`dirname $0`/..
+source ${DIR}/common.sh
 
 # check if the ci environ argument is provided
 if [ $# -eq 0 ]; then

@@ -4,8 +4,8 @@
 #
 set -e
 
-DIR=`dirname $0`
-source ${DIR}/../common.sh
+DIR=`dirname $0`/..
+source ${DIR}/common.sh
 
 # Autodiscover the platform
 PLATFORM=$(discover_platform)
