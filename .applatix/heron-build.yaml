@@ -26,7 +26,7 @@ outputs:
     build_output:
       path: "/heron/bazel-bin/scripts/packages"
     build_output_2:
-      path: "/heron/scripts/applatix"
+      path: "/heron/scripts"
 
 ---
 type: service_template
@@ -45,7 +45,7 @@ inputs:
   - from: "%%test_artifact_input%%"
     path: "/heron"
   - from: "%%test_artifact_input_2%%"
-    path: "/heron/scripts/applatix"
+    path: "/heron/scripts"
   parameters:
     os:
     test_artifact_input:
