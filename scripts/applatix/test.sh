@@ -11,6 +11,9 @@ source ${DIR}/common.sh
 PLATFORM=$(discover_platform)
 echo "Using $PLATFORM platform"
 
+# include HOME directory bin in PATH for heron cli, tools and tests
+export PATH=${HOME}/bin:$PATH
+
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/integration-tests.jar"
 PYTHON_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/heron_integ_topology.pex"
