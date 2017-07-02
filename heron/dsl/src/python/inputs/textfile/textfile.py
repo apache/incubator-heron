@@ -14,10 +14,10 @@
 '''textfile.py: module for defining text file input'''
 import glob
 
-from heron.dsl.src.python import StreamletBuilder, OperationType
+from heron.dsl.src.python import Streamlet, OperationType
 from .textfilespout import TextFileSpout
 
-class TextFileStreamlet(StreamletBuilder):
+class TextFileStreamlet(Streamlet):
   """A TextFileStreamlet is a list of text input files
   """
   def __init__(self, filepattern, stage_name=None, parallelism=None):

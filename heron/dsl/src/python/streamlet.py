@@ -15,7 +15,7 @@
 
 from heron.api.src.python import TopologyBuilder
 
-class StreamletBuilder(object):
+class Streamlet(object):
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
   """
   class OperationType:
@@ -47,50 +47,57 @@ class StreamletBuilder(object):
     self._reduce_function = reduce_function
 
   def map(self, map_function, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self], operation=OperationType.Map,
-                            stage_name=stage_name, parallelism=parallelism,
-                            map_function=map_function)
+    return Streamlet(parents=[self], operation=OperationType.Map,
+                     stage_name=stage_name, parallelism=parallelism,
+                     map_function=map_function)
 
   def flatMap(self, flatmap_function, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self], operation=OperationType.FlatMap,
-                            stage_name=stage_name, parallelism=parallelism,
-                            flatmap_function=flatmap_function)
+    return Streamlet(parents=[self], operation=OperationType.FlatMap,
+                     stage_name=stage_name, parallelism=parallelism,
+                     flatmap_function=flatmap_function)
 
   def filter(self, filter_function, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self], operation=OperationType.Filter,
-                            stage_name=stage_name, parallelism=parallelism,
-                            filter_function=filter_function)
+    return Streamlet(parents=[self], operation=OperationType.Filter,
+                     stage_name=stage_name, parallelism=parallelism,
+                     filter_function=filter_function)
 
   def sample(self, sample_function, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self], operation=OperationType.Sample,
-                            stage_name=stage_name, parallelism=parallelism,
-                            sample_function=sample_function)
+    return Streamlet(parents=[self], operation=OperationType.Sample,
+                     stage_name=stage_name, parallelism=parallelism,
+                     sample_function=sample_function)
 
   def repartition(self, stage_name=None, parallelism):
-    return StreamletBuilder(parents=[self], operation=OperationType.Repartition,
-                            stage_name=stage_name, parallelism=parallelism)
+    return Streamlet(parents=[self], operation=OperationType.Repartition,
+                     stage_name=stage_name, parallelism=parallelism)
 
   def join(self, join_streamlet, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self, join_streamlet], operation=OperationType.Join,
-                            stage_name=stage_name, parallelism=parallelism,
-                            join_streamlet=join_streamlet)
+    return Streamlet(parents=[self, join_streamlet], operation=OperationType.Join,
+                     stage_name=stage_name, parallelism=parallelism,
+                     join_streamlet=join_streamlet)
 
   def reduceByWindow(self, window_config, reduce_function, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self], operation=OperationType.ReduceByWindow,
-                            stage_name=stage_name, parallelism=parallelism,
-                            window_config=window_config,
+    return Streamlet(parents=[self], operation=OperationType.ReduceByWindow,
+                     stage_name=stage_name, parallelism=parallelism,
+                     window_config=window_config,
                             reduce_function=reduce_function)
 
   def reduceByKeyAndWindow(self, window_config, reduce_function, stage_name=None, parallelism=None):
-    return StreamletBuilder(parents=[self], operation=OperationType.ReduceByKeyAndWindow,
-                            stage_name=stage_name, parallelism=parallelism,
-                            window_config=window_config,
-                            reduce_function=reduce_function)
+    return Streamlet(parents=[self], operation=OperationType.ReduceByKeyAndWindow,
+                     stage_name=stage_name, parallelism=parallelism,
+                     window_config=window_config,
+                     reduce_function=reduce_function)
 
-  def build(self, name):
+  def run(self, name, config=None):
+    if name is None or not isinstance(name, str):
+      raise RuntimeError("Job Name has to be a string")
     bldr = TopologyBuilder(name=name)
     stage_names = {}
-    return self._build(bldr, state_names)
+    bldr = self._build(bldr, state_names)
+    if config is not None:
+      if not isinstance(config, dict):
+        raise RuntimeError("config has to be a dict")
+      bldr.set_config(config)
+    bldr.build_and_submit()
 
   def _build(bldr, stage_names):
     for parent in self._parents:
@@ -99,7 +106,7 @@ class StreamletBuilder(object):
     self._calculate_parallelism()
     return _build_this(bldr, stage_names)
 
-  def _build_this(self, bldr, stage_names):
+  def _build_this(self, builder, stage_names):
     if self._operation == OperationType.Input:
       raise RuntimeError("_build_this called from Input. Did the input implement it")
     elif self._operation == OperationType.Map:
@@ -151,7 +158,7 @@ class StreamletBuilder(object):
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
 
-    return bldr
+    return builder
 
   @staticmethod
   def check_callable(func):
