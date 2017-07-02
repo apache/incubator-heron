@@ -16,7 +16,7 @@
 import logging
 
 from heron.api.src.python.custom_grouping import ICustomGrouping
-import heron.api.src.python.constants as constants
+import heron.api.src.python.api_constants as constants
 from heron.api.src.python import Topology, Grouping
 
 from heron.examples.src.python.spout import WordSpout
@@ -37,9 +37,7 @@ class SampleCustomGrouping(ICustomGrouping):
     return [self.target_tasks[0]]
 
 class CustomGrouping(Topology):
-  custom_grouping_path = "heron.examples.src.python.custom_grouping_topology.SampleCustomGrouping"
-
   word_spout = WordSpout.spec(par=1)
   consume_bolt = ConsumeBolt.spec(par=3,
-                                  inputs={word_spout: Grouping.custom(custom_grouping_path)},
+                                  inputs={word_spout: Grouping.custom(SampleCustomGrouping())},
                                   config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})

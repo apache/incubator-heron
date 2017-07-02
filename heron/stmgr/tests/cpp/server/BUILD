@@ -35,3 +35,26 @@ cc_test(
     linkstatic = 1,
     flaky = 1,
 )
+
+cc_test(
+    name = "checkpoint-gateway_unittest",
+    srcs = [
+        "checkpoint-gateway_unittest.cpp",
+    ],
+    deps = [
+        "//heron/stmgr/src/cpp:manager-cxx",
+        "//heron/stmgr/src/cpp:grouping-cxx",
+        "//heron/stmgr/src/cpp:util-cxx",
+        "//third_party/gtest:gtest-cxx",
+    ],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
+        "-Iheron/stmgr/src/cpp",
+        "-Iheron/stmgr/tests/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
+    linkstatic = 1,
+)

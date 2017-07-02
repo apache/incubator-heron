@@ -1,7 +1,7 @@
+@import "variables";
+@import "pygments";
 @import "bootstrap";
-
-// Import Open Sans font
-@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+@import "typography";
 
 // Helpers
 div[class^="landing-feature"] {
@@ -19,9 +19,30 @@ div[class^="landing-feature"] {
   }
 }
 
+section.main-page-lower-section {
+  width: 95%;
+}
+
 // Set global attributes
 html, body {
-  font-family: "Open Sans", sans-serif;
+  font-family: $font-family-sans-serif;
+  font-size: 1rem;
+}
+
+pre, code {
+  font-family: $font-family-monospaced;
+}
+
+// This set of parameters ensures a "sticky" footer at the bottom
+// of the page using flexbox
+body.body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+
+  main.main {
+    flex: 1;
+  }
 }
 
 a:hover {
@@ -147,75 +168,10 @@ aside.hn-sidebar {
 
 // Main content on docs pages
 section.hn-docs-main {
-  padding-bottom: 20px;
-  padding-left: 20px;
-  padding-top: 0;
-
+  margin-bottom: $docs-main-bottom-margin;
   header.hn-docs-header {
     .hn-docs-description {
       font-weight: bolder;
-    }
-  }
-
-  article.hn-docs-content {
-    code {
-      padding: 2px;
-      border-radius: 2px;
-    }
-
-    p {
-      font-size: 1.2em;
-    }
-
-    ul li, ul li p, ol p {
-      font-size: 1.1em;
-    }
-
-    h1 {
-      font-size: 1.8em;
-      padding-bottom: 5px;
-    }
-
-    h2 {
-      font-size: 1.5em;
-      padding-bottom: 5px;
-    }
-
-    h3 {
-      font-size: 1.3em;
-      padding-bottom: 5px;
-    }
-
-    h4 {
-      font-size: 1.2em;
-      padding-bottom: 3px;
-    }
-
-    .highlight {
-      border-radius: 10px;
-
-      pre {
-        color: lighten($light-gray, 15%);
-      }
-    }
-
-    img {
-      max-width: 90%;
-    }
-
-    table {
-      thead {
-        font-size: 16px;
-        border-bottom: 1px solid gray;
-      }
-
-      tr {
-        margin-right: 5px;
-      }
-
-      tbody {
-        font-size: 12px;
-      }
     }
   }
 }
