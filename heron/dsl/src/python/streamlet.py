@@ -13,6 +13,8 @@
 # limitations under the License.
 '''streamlet.py: module for defining the basic concept of the heron python dsl'''
 
+from heron.api.src.python import TopologyBuilder
+
 class StreamletBuilder(object):
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
   """
@@ -148,6 +150,8 @@ class StreamletBuilder(object):
                                ReduceByKeyAndWindowBolt.WINDOW_CONFIG : self._window_config})
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
+
+    return bldr
 
   @staticmethod
   def check_callable(func):
