@@ -176,14 +176,14 @@ class Streamlet(object):
       builder.add_bolt(self._stage_name, ReduceByWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByWindowBolt.WINDOW_CONFIG : self._time_window})
+                               ReduceByWindowBolt.TIMEWINDOW : self._time_window})
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self.check_callable(self._reduce_function)
       self._generate_stage_name(stage_names, self._reduce_function)
       builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByKeyAndWindowBolt.WINDOW_CONFIG : self._time_window})
+                               ReduceByKeyAndWindowBolt.TIMEWINDOW : self._time_window})
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
 
