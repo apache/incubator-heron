@@ -13,7 +13,7 @@
 # limitations under the License.
 '''textfilespout.py: module for defining text file input'''
 
-from heron.api.src.python import Spout, api_constants
+from heron.api.src.python import Spout
 
 class TextFileSpout(Spout):
   """TextFileSpout: reads from a list of files"""
@@ -31,9 +31,9 @@ class TextFileSpout(Spout):
       raise RuntimeError("TextFileSpout's task_id %d not among all TextFileSpout %s" %
                          (context.get_task_id(), str(all_spout_tasks)))
     myindex = all_spout_tasks.index(context.get_task_id())
-    if FILES not in config:
+    if TextFileSpout.FILES not in config:
       raise RuntimeError("TextFileSpout's Files config not setup properly")
-    all_files_to_consume = config[FILES]
+    all_files_to_consume = config[TextFileSpout.FILES]
     if not isinstance(all_files_to_consume, list):
       raise RuntimeError("TextFileSpout's Files config must be a list")
     self.files_to_consume = all_files_to_consume[myindex::len(all_spout_tasks)]
@@ -80,6 +80,7 @@ class TextFileSpout(Spout):
 
   def ack(self, tup_id):
     self.ack_count += 1
+    self.logger.debug("Acked tuple %s" % str(tup_id))
 
   def fail(self, tup_id):
     self.fail_count += 1

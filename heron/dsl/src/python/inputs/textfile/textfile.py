@@ -21,24 +21,25 @@ class TextFileStreamlet(Streamlet):
   """A TextFileStreamlet is a list of text input files
   """
   def __init__(self, filepattern, stage_name=None, parallelism=None):
-    self._files = glob.glob(input)
-    super().__init__(TextFileStreamlet, operation=OperationType.Input,
-                     stage_name=stage_name, parallelism=parallelism)
+    self._files = glob.glob(filepattern)
+    super(TextFileStreamlet, self).__init__(operation=OperationType.Input,
+                                            stage_name=stage_name,
+                                            parallelism=parallelism)
 
   @staticmethod
   def textFile(filepattern, stage_name=None, parallelism=None):
     return TextFileStreamlet(filepattern, stage_name=stage_name, parallelism=parallelism)
 
   def _build(self, bldr, stage_names):
-    self._parallelism = len(self._files)
-    if self._parallelism < 1:
+    Streamlet._parallelism = len(self._files)
+    if Streamlet._parallelism < 1:
       raise RuntimeError("No matching files")
-    if self._stage_name is None:
+    if Streamlet._stage_name is None:
       index = 1
-      self._stage_name = "input"
-      while self._stage_name in stage_names:
+      Streamlet._stage_name = "input"
+      while Streamlet._stage_name in stage_names:
         index = index + 1
-        self._stage_name = "input" + str(index)
-      bldr.add_spout(self._stage_name, TextFileSpout, par=self._parallelism,
+        Streamlet._stage_name = "input" + str(index)
+      bldr.add_spout(Streamlet._stage_name, TextFileSpout, par=Streamlet._parallelism,
                      config={TextFileSpout.FILES : self._files})
     return bldr
