@@ -17,6 +17,8 @@ from heron.api.src.python import TopologyBuilder
 from heron.api.src.python.component import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
+from .mapbolt import MapBolt
+
 class OperationType(object):
   Input = 1
   Map = 2
@@ -36,7 +38,7 @@ class Streamlet(object):
   # pylint: disable=too-many-arguments
   # pylint: disable=too-many-function-args
   def __init__(self, parents=None, operation=None, stage_name=None,
-               parallelism=None, inputs=None, outputs=None,
+               parallelism=None, inputs=None,
                map_function=None, flatmap_function=None,
                filter_function=None, window_config=None,
                sample_function=None, join_streamlet=None,
@@ -54,7 +56,7 @@ class Streamlet(object):
     self._stage_name = stage_name
     self._parallelism = parallelism
     self._inputs = inputs
-    self._outputs = outputs
+    self._output = 'output'
     self._map_function = map_function
     self._flatmap_function = flatmap_function
     self._filter_function = filter_function
@@ -169,7 +171,7 @@ class Streamlet(object):
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self.check_callable(self._reduce_function)
       self._generate_stage_name(stage_names, self._reduce_function)
-      builder.add_bolt(self._stage_name, ReduceByWindowBolt, par=self._parallelism,
+      builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
                                ReduceByKeyAndWindowBolt.WINDOW_CONFIG : self._window_config})
@@ -255,20 +257,20 @@ class Streamlet(object):
          self._operation == OperationType.Filter or \
          self._operation == OperationType.Sample or \
          self._operation == OperationType.Repartition:
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._outputs[0]) :
+      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
                       Grouping.SHUFFLE}
     elif self._operation == OperationType.Join:
       self._inputs = {}
       for parent in self._parents:
-        self._inputs[GlobalStreamId(parent._stage_name, parent._outputs[0])] = JoinGrouping()
+        self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = JoinGrouping()
     elif self._operation == OperationType.ReduceByWindow:
       # Our parallelism is 1. So shuffle grouping will do
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._outputs[0]) :
+      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
                       Grouping.SHUFFLE}
     elif self._operation == OperationType.ReduceByKeyAndWindow:
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._outputs[0]) :
+      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
                       ReduceGrouping()}
     elif self._operation == OperationType.Output:
       # FIXME:- is this correct
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._outputs[0]) :
+      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
                       Grouping.SHUFFLE}
