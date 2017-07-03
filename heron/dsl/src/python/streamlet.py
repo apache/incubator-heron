@@ -18,6 +18,7 @@ from heron.api.src.python.component import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from .mapbolt import MapBolt
+from .flatmapbolt import FlatMapBolt
 
 class OperationType(object):
   Input = 1
