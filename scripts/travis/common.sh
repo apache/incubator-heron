@@ -88,6 +88,19 @@ function discover_platform {
   fi
 }
 
+# Check the ci environment is valid
+function ci_environ {
+  environ=$1
+  if [[ $environ =~ travis ]]; then
+    echo "travis"
+  elif [[ $environ =~ applatix ]]; then
+    echo "applatix"
+  else
+    echo "$environ ci not supported"
+    exit 1
+  fi
+}
+
 # Uncomment below to test changes:
 #T="task one"
 #start_timer "$T"

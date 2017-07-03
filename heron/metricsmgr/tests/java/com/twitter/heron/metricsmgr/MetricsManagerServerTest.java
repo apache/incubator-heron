@@ -26,18 +26,18 @@ import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.CommunicatorTestHelper;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
-import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.StatusCode;
+import com.twitter.heron.common.testhelpers.CommunicatorTestHelper;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
-import static com.twitter.heron.common.network.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
+import static com.twitter.heron.common.testhelpers.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
 
 /**
  * MetricsManagerServer Tester.

@@ -2,7 +2,7 @@
   "private": true,
   "dependencies": {
     "del": "^2.2.2",
-    "gulp": "^3.9.1",
+    "gulp": "github:gulpjs/gulp#4.0",
     "gulp-clean-css": "^3.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-load-plugins": "^1.5.0",
@@ -11,8 +11,8 @@
     "gulp-uglify": "^2.0.1"
   },
   "scripts": {
-    "build": "gulp build",
-    "clean": "gulp clean",
-    "develop": "gulp dev"
+    "build": "node_modules/.bin/gulp build",
+    "clean": "node_modules/.bin/gulp clean",
+    "develop": "node_modules/.bin/gulp dev"
   }
 }
