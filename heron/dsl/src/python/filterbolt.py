@@ -34,7 +34,7 @@ class FilterBolt(Bolt):
       raise RuntimeError("FilterBolt needs to be passed filter function")
 
   def process(self, tup):
-    if self.filter_function(tup.values):
+    if self.filter_function(tup.values[0]):
       self.emit([tup.values], stream='output')
       self.emitted += 1
     self.processed += 1

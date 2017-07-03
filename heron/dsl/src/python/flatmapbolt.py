@@ -35,7 +35,7 @@ class FlatMapBolt(Bolt):
       raise RuntimeError("FlatMapBolt needs to be passed flatMap function")
 
   def process(self, tup):
-    retval = self.flatmap_function(tup.values)
+    retval = self.flatmap_function(tup.values[0])
     if isinstance(retval, collections.Iterable):
       for value in retval:
         self.emit([value], stream='output')

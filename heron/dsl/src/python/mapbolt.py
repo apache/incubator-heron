@@ -34,7 +34,7 @@ class MapBolt(Bolt):
       raise RuntimeError("MapBolt needs to be passed map function")
 
   def process(self, tup):
-    retval = self.map_function(tup.values)
+    retval = self.map_function(tup.values[0])
     self.emit([retval], stream='output')
     self.processed += 1
     self.emitted += 1

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''streamlet.py: module for defining the basic concept of the heron python dsl'''
-
+from collections import namedtuple
 from heron.api.src.python import TopologyBuilder
 from heron.api.src.python.component import GlobalStreamId
 from heron.api.src.python.stream import Grouping
@@ -21,6 +21,7 @@ from .mapbolt import MapBolt
 from .flatmapbolt import FlatMapBolt
 from .filterbolt import FilterBolt
 from .samplebolt import SampleBolt
+from .joinbolt import JoinBolt, JoinGrouping
 
 class OperationType(object):
   Input = 1
@@ -34,6 +35,8 @@ class OperationType(object):
   ReduceByKeyAndWindow = 9
   Output = 10
 
+TimeWindow = namedtuple('TimeWindow', 'duration')
+
 # pylint: disable=too-many-instance-attributes
 class Streamlet(object):
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
@@ -43,9 +46,8 @@ class Streamlet(object):
   def __init__(self, parents=None, operation=None, stage_name=None,
                parallelism=None, inputs=None,
                map_function=None, flatmap_function=None,
-               filter_function=None, window_config=None,
-               sample_fraction=None, join_streamlet=None,
-               reduce_function=None):
+               filter_function=None, time_window=None,
+               sample_fraction=None, reduce_function=None):
     """
     """
     if operation is None:
@@ -64,8 +66,7 @@ class Streamlet(object):
     self._flatmap_function = flatmap_function
     self._filter_function = filter_function
     self._sample_fraction = sample_fraction
-    self._join_streamlet = join_streamlet
-    self._window_config = window_config
+    self._time_window = time_window
     self._reduce_function = reduce_function
 
   def map(self, map_function, stage_name=None, parallelism=None):
@@ -92,21 +93,21 @@ class Streamlet(object):
     return Streamlet(parents=[self], operation=OperationType.Repartition,
                      stage_name=stage_name, parallelism=parallelism)
 
-  def join(self, join_streamlet, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self, join_streamlet], operation=OperationType.Join,
-                     stage_name=stage_name, parallelism=parallelism,
-                     join_streamlet=join_streamlet)
+  def join(self, join_streamlet, time_window, stage_name=None, parallelism=None):
+    return Streamlet(parents=[self, join_streamlet], time_window=time_window,
+                     operation=OperationType.Join,
+                     stage_name=stage_name, parallelism=parallelism)
 
-  def reduceByWindow(self, window_config, reduce_function, stage_name=None, parallelism=None):
+  def reduceByWindow(self, time_window, reduce_function, stage_name=None, parallelism=None):
     return Streamlet(parents=[self], operation=OperationType.ReduceByWindow,
                      stage_name=stage_name, parallelism=parallelism,
-                     window_config=window_config,
+                     time_window=time_window,
                      reduce_function=reduce_function)
 
-  def reduceByKeyAndWindow(self, window_config, reduce_function, stage_name=None, parallelism=None):
+  def reduceByKeyAndWindow(self, time_window, reduce_function, stage_name=None, parallelism=None):
     return Streamlet(parents=[self], operation=OperationType.ReduceByKeyAndWindow,
                      stage_name=stage_name, parallelism=parallelism,
-                     window_config=window_config,
+                     time_window=time_window,
                      reduce_function=reduce_function)
 
   def run(self, name, config=None):
@@ -162,7 +163,8 @@ class Streamlet(object):
     elif self._operation == OperationType.Join:
       self._generate_join_stage_name(stage_names)
       builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
-                       inputs=self._inputs)
+                       inputs=self._inputs,
+                       config={JoinBolt.TIMEWINDOW : self._time_window})
     elif self._operation == OperationType.Repartition:
       self._generate_repartition_stage_name(stage_names)
       builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
@@ -173,14 +175,14 @@ class Streamlet(object):
       builder.add_bolt(self._stage_name, ReduceByWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByWindowBolt.WINDOW_CONFIG : self._window_config})
+                               ReduceByWindowBolt.WINDOW_CONFIG : self._time_window})
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self.check_callable(self._reduce_function)
       self._generate_stage_name(stage_names, self._reduce_function)
       builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByKeyAndWindowBolt.WINDOW_CONFIG : self._window_config})
+                               ReduceByKeyAndWindowBolt.WINDOW_CONFIG : self._time_window})
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
 
