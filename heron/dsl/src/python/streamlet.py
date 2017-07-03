@@ -19,6 +19,7 @@ from heron.api.src.python.stream import Grouping
 
 from .mapbolt import MapBolt
 from .flatmapbolt import FlatMapBolt
+from .filterbolt import FilterBolt
 
 class OperationType(object):
   Input = 1
