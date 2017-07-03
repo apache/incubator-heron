@@ -36,7 +36,7 @@ class OperationType(object):
   ReduceByKeyAndWindow = 9
   Output = 10
 
-TimeWindow = namedtuple('TimeWindow', 'duration')
+TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
 # pylint: disable=too-many-instance-attributes
 class Streamlet(object):
@@ -163,9 +163,12 @@ class Streamlet(object):
                        config={SampleBolt.FRACTION : self._sample_fraction})
     elif self._operation == OperationType.Join:
       self._generate_join_stage_name(stage_names)
+      if not isinstance(self._time_window, TimeWindow):
+        raise RuntimeError("Join's time_window should be TimeWindow")
       builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
                        inputs=self._inputs,
-                       config={JoinBolt.TIMEWINDOW : self._time_window})
+                       config={JoinBolt.WINDOWDURATION : self._time_window.duration,
+                               JoinBolt.SLIDEINTERVAL : self._time_window.slide_interval})
     elif self._operation == OperationType.Repartition:
       self._generate_repartition_stage_name(stage_names)
       builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,

@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for join bolt: JoinBolt"""
-from heron.api.src.python import TumbingWindowBolt, Stream
+from heron.api.src.python import SlidingWindowBolt, Stream
 from heron.api.src.python.custom_grouping import ICustomGrouping
 
 # pylint: disable=unused-argument
-class JoinBolt(TumbingWindowBolt):
+class JoinBolt(SlidingWindowBolt):
   """JoinBolt"""
   # output declarer
   outputs = [Stream('output', ['_output_'])]
-  TIMEWINDOW = TumbingWindowBolt.WINDOW_DURATION_SECS
+  WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
+  SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
 
   @staticmethod
   def _add(key, value, mymap):
@@ -37,7 +38,6 @@ class JoinBolt(TumbingWindowBolt):
       if not isinstance(userdata, list) or len(userdata) != 2:
         raise RuntimeError("Join tuples must be of list type of length 2")
       self._add(userdata[0], userdata[1], mymap)
-      self.ack(tup)
     for (key, values) in mymap.items():
       self.emit([key, values], stream='output')
 
