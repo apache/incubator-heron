@@ -22,6 +22,7 @@ from .flatmapbolt import FlatMapBolt
 from .filterbolt import FilterBolt
 from .samplebolt import SampleBolt
 from .joinbolt import JoinBolt, JoinGrouping
+from .repartitionbolt import RepartitionBolt
 
 class OperationType(object):
   Input = 1
