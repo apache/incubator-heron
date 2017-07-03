@@ -20,6 +20,7 @@ from heron.api.src.python.stream import Grouping
 from .mapbolt import MapBolt
 from .flatmapbolt import FlatMapBolt
 from .filterbolt import FilterBolt
+from .samplebolt import SampleBolt
 
 class OperationType(object):
   Input = 1
@@ -43,7 +44,7 @@ class Streamlet(object):
                parallelism=None, inputs=None,
                map_function=None, flatmap_function=None,
                filter_function=None, window_config=None,
-               sample_function=None, join_streamlet=None,
+               sample_fraction=None, join_streamlet=None,
                reduce_function=None):
     """
     """
@@ -62,7 +63,7 @@ class Streamlet(object):
     self._map_function = map_function
     self._flatmap_function = flatmap_function
     self._filter_function = filter_function
-    self._sample_function = sample_function
+    self._sample_fraction = sample_fraction
     self._join_streamlet = join_streamlet
     self._window_config = window_config
     self._reduce_function = reduce_function
@@ -82,10 +83,10 @@ class Streamlet(object):
                      stage_name=stage_name, parallelism=parallelism,
                      filter_function=filter_function)
 
-  def sample(self, sample_function, stage_name=None, parallelism=None):
+  def sample(self, sample_fraction, stage_name=None, parallelism=None):
     return Streamlet(parents=[self], operation=OperationType.Sample,
                      stage_name=stage_name, parallelism=parallelism,
-                     sample_function=sample_function)
+                     sample_fraction=sample_fraction)
 
   def repartition(self, parallelism, stage_name=None):
     return Streamlet(parents=[self], operation=OperationType.Repartition,
@@ -150,11 +151,14 @@ class Streamlet(object):
                        inputs=self._inputs,
                        config={FilterBolt.FUNCTION : self._filter_function})
     elif self._operation == OperationType.Sample:
-      self.check_callable(self._sample_function)
-      self._generate_stage_name(stage_names, self._sample_function)
+      if not isinstance(self._sample_fraction, float):
+        raise RuntimeError("Sample Fraction has to be a float")
+      if self._sample_fraction > 1.0:
+        raise RuntimeError("Sample Fraction has to be <= 1.0")
+      self._generate_sample_stage_name(stage_names)
       builder.add_bolt(self._stage_name, SampleBolt, par=self._parallelism,
                        inputs=self._inputs,
-                       config={SampleBolt.FUNCTION : self._sample_function})
+                       config={SampleBolt.FRACTION : self._sample_fraction})
     elif self._operation == OperationType.Join:
       self._generate_join_stage_name(stage_names)
       builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
@@ -201,6 +205,18 @@ class Streamlet(object):
     elif self._stage_name in stage_names:
       raise RuntimeError("duplicated stage name %s" % self._stage_name)
     stage_names[self._stage_name] = 1
+
+  def _generate_sample_stage_name(self, stage_names):
+    if self._stage_name is None:
+      self._stage_name = "sample"
+      index = 1
+      while self._stage_name in stage_names:
+        index = index + 1
+        self._stage_name = "sample" + str(index)
+    elif self._stage_name in stage_names:
+      raise RuntimeError("duplicated stage name %s" % self._stage_name)
+    stage_names[self._stage_name] = 1
+
 
   # pylint: disable=protected-access
   def _generate_join_stage_name(self, stage_names):
