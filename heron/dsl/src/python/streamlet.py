@@ -23,7 +23,7 @@ from .filterbolt import FilterBolt
 from .samplebolt import SampleBolt
 from .joinbolt import JoinBolt, JoinGrouping
 from .repartitionbolt import RepartitionBolt
-from .reducebywindowbolt import ReduceByWindowBolt
+from .reducebykeyandwindowbolt import ReduceByKeyAndWindowBolt, ReduceGrouping
 
 class OperationType(object):
   Input = 1
@@ -33,8 +33,7 @@ class OperationType(object):
   Sample = 5
   Join = 6
   Repartition = 7
-  ReduceByWindow = 8
-  ReduceByKeyAndWindow = 9
+  ReduceByKeyAndWindow = 8
   Output = 10
 
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
@@ -100,9 +99,9 @@ class Streamlet(object):
                      operation=OperationType.Join,
                      stage_name=stage_name, parallelism=parallelism)
 
-  def reduceByWindow(self, time_window, reduce_function, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self], operation=OperationType.ReduceByWindow,
-                     stage_name=stage_name, parallelism=parallelism,
+  def reduceByWindow(self, time_window, reduce_function, stage_name=None):
+    return Streamlet(parents=[self], operation=OperationType.ReduceByKeyAndWindow,
+                     stage_name=stage_name, parallelism=1,
                      time_window=time_window,
                      reduce_function=reduce_function)
 
@@ -174,23 +173,16 @@ class Streamlet(object):
       self._generate_repartition_stage_name(stage_names)
       builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
                        inputs=self._inputs)
-    elif self._operation == OperationType.ReduceByWindow:
-      self.check_callable(self._reduce_function)
-      self._generate_stage_name(stage_names, self._reduce_function)
-      if not isinstance(self._time_window, TimeWindow):
-        raise RuntimeError("ReduceByWindow's time_window should be TimeWindow")
-      builder.add_bolt(self._stage_name, ReduceByWindowBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={ReduceByWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByWindowBolt.WINDOWDURATION : self._time_window.duration,
-                               ReduceByWindowBolt.SLIDEINTERVAL : self._time_window.slide_interval})
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self.check_callable(self._reduce_function)
       self._generate_stage_name(stage_names, self._reduce_function)
+      if not isinstance(self._time_window, TimeWindow):
+        raise RuntimeError("ReduceByKeyAndWindow's time_window should be TimeWindow")
       builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByKeyAndWindowBolt.TIMEWINDOW : self._time_window})
+                               ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
+                               ReduceByKeyAndWindowBolt.SLIDEINTERVAL : self._time_window.slide_interval})
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
 
@@ -271,8 +263,6 @@ class Streamlet(object):
         if parent._parallelism > parallelism:
           parallelism = parent._parallelism
       self._parallelism = parallelism
-    elif self._operation == OperationType.ReduceByWindow:
-      self._parallelism = 1
     if self._parallelism is None:
       raise RuntimeError("Missed figuring out parallelism for", self._operation)
 
@@ -291,10 +281,6 @@ class Streamlet(object):
       self._inputs = {}
       for parent in self._parents:
         self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = JoinGrouping()
-    elif self._operation == OperationType.ReduceByWindow:
-      # Our parallelism is 1. So shuffle grouping will do
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-                      Grouping.SHUFFLE}
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
                       ReduceGrouping()}

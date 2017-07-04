@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for join bolt: ReduceByWindowBolt"""
+"""module for join bolt: ReduceByKeyAndWindowBolt"""
 from heron.api.src.python import SlidingWindowBolt, Stream
+from heron.api.src.python.custom_grouping import ICustomGrouping
 
 # pylint: disable=unused-argument
-class ReduceByWindowBolt(SlidingWindowBolt):
-  """ReduceByWindowBolt"""
+class ReduceByKeyAndWindowBolt(SlidingWindowBolt):
+  """ReduceByKeyAndWindowBolt"""
   # output declarer
   outputs = [Stream('output', ['_output_'])]
   FUNCTION = 'function'
@@ -24,10 +25,10 @@ class ReduceByWindowBolt(SlidingWindowBolt):
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
 
   def initialize(self, config, context):
-    super(ReduceByWindowBolt, self).initialize(config, context)
-    if ReduceByWindowBolt.FUNCTION not in config:
+    super(ReduceByKeyAndWindowBolt, self).initialize(config, context)
+    if ReduceByKeyAndWindowBolt.FUNCTION not in config:
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
-    self.reduce_function = config[ReduceByWindowBolt.FUNCTION]
+    self.reduce_function = config[ReduceByKeyAndWindowBolt.FUNCTION]
     if not callable(self.reduce_function):
       raise RuntimeError("Reduce Function has to be callable")
 
@@ -51,3 +52,16 @@ class ReduceByWindowBolt(SlidingWindowBolt):
       for value in values[1:]:
         self.reduce_function(result, value)
       self.emit([key, result], stream='output')
+
+# pylint: disable=unused-argument
+class ReduceGrouping(ICustomGrouping):
+  def prepare(self, context, component, stream, target_tasks):
+    self.target_tasks = target_tasks
+
+  def choose_tasks(self, values):
+    if not isinstance(values, list) or len(values) != 2:
+      raise RuntimeError("Tuples going to map must be of list type of length 2")
+    # only emits to the first task id
+    hashvalue = hash(values[0])
+    target_index = hashvalue % len(self.target_tasks)
+    return [self.target_tasks[target_index]]
