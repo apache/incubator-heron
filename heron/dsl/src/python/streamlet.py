@@ -36,6 +36,13 @@ class OperationType(object):
   ReduceByKeyAndWindow = 8
   Output = 10
 
+  AllOperations = [Input, Map, FlatMap, Filter, Sample, Join,
+                   Repartition, ReduceByKeyAndWindow, Output]
+
+  @staticmethod
+  def valid(typ):
+    return typ in OperationType.AllOperations
+
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
 # pylint: disable=too-many-instance-attributes
@@ -53,9 +60,12 @@ class Streamlet(object):
     """
     if operation is None:
       raise RuntimeError("Streamlet's operation cannot be None")
-    if parents is None:
-      raise RuntimeError("Streamlet's parents cannot be None")
-    if parents is not isinstance(list):
+    if not OperationType.valid(operation):
+      raise RuntimeError("Streamlet's operation must be of type OperationType")
+    if operation == OperationType.Input:
+      if parents is not None:
+        raise RuntimeError("A input Streamlet's parents should be None")
+    elif not isinstance(parents, list):
       raise RuntimeError("Streamlet's parents have to be a list")
     self._parents = parents
     self._operation = operation

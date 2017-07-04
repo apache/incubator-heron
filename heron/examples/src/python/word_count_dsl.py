@@ -21,8 +21,8 @@ if __name__ == '__main__':
     print "Topology's name is not specified"
     sys.exit(1)
 
-  lines = StaticLinesStreamlet.staticLinesGenerator(stage_name=sys.argv[1], parallelism=2)
+  lines = StaticLinesStreamlet.staticLinesGenerator(parallelism=2)
   words = lines.flatMap(lambda line: line.split(), parallelism=2)
   wordcounts = words.map(lambda word: (word, 1), parallelism=2)
   counts = wordcounts.reduceByWindow(TimeWindow(10, 2), lambda x, y: x + y)
-  counts.run()
+  counts.run(sys.argv[1])
