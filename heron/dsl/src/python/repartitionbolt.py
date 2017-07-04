@@ -18,7 +18,7 @@ from heron.api.src.python import Bolt, Stream
 class RepartitionBolt(Bolt):
   """RepartitionBolt"""
   # output declarer
-  outputs = [Stream('output', ['_output_'])]
+  outputs = [Stream(fields=['_output_'], name='output')]
 
   def initialize(self, config, context):
     self.logger.debug("In initialize() of RepartitionBolt")

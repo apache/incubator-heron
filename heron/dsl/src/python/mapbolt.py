@@ -18,7 +18,7 @@ from heron.api.src.python import Bolt, Stream
 class MapBolt(Bolt):
   """MapBolt"""
   # output declarer
-  outputs = [Stream('output', ['_output_'])]
+  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
   def initialize(self, config, context):

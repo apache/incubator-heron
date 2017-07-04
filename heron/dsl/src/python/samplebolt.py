@@ -18,7 +18,7 @@ from heron.api.src.python import Bolt, Stream
 class SampleBolt(Bolt):
   """SampleBolt"""
   # output declarer
-  outputs = [Stream('output', ['_output_'])]
+  outputs = [Stream(fields=['_output_'], name='output')]
   FRACTION = 'fraction'
 
   def initialize(self, config, context):

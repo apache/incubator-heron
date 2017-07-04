@@ -19,7 +19,7 @@ from heron.api.src.python.custom_grouping import ICustomGrouping
 class ReduceByKeyAndWindowBolt(SlidingWindowBolt):
   """ReduceByKeyAndWindowBolt"""
   # output declarer
-  outputs = [Stream('output', ['_output_'])]
+  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
   WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS

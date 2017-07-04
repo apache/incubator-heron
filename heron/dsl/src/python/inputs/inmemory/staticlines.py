@@ -19,7 +19,7 @@ from heron.dsl.src.python import Streamlet, OperationType
 class StaticLinesSpout(Spout):
   """StaticLinesSpout: Generates a line from a set of static lines again and again
   """
-  outputs = [Stream('output', ['_output_'])]
+  outputs = [Stream(fields=['_output_'], name='output')]
 
   # pylint: disable=unused-argument
   def initialize(self, config, context):
