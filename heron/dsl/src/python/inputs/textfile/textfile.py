@@ -18,6 +18,8 @@ from heron.api.src.python import Spout
 
 from heron.dsl.src.python import Streamlet, OperationType
 
+# pylint: disable=access-member-before-definition
+# pylint: disable=attribute-defined-outside-init
 class TextFileSpout(Spout):
   """TextFileSpout: reads from a list of files"""
 
@@ -103,15 +105,15 @@ class TextFileStreamlet(Streamlet):
     return TextFileStreamlet(filepattern, stage_name=stage_name, parallelism=parallelism)
 
   def _build(self, bldr, stage_names):
-    Streamlet._parallelism = len(self._files)
-    if Streamlet._parallelism < 1:
+    self._parallelism = len(self._files)
+    if self._parallelism < 1:
       raise RuntimeError("No matching files")
-    if Streamlet._stage_name is None:
+    if self._stage_name is None:
       index = 1
-      Streamlet._stage_name = "input"
-      while Streamlet._stage_name in stage_names:
+      self._stage_name = "input"
+      while self._stage_name in stage_names:
         index = index + 1
-        Streamlet._stage_name = "input" + str(index)
-      bldr.add_spout(Streamlet._stage_name, TextFileSpout, par=Streamlet._parallelism,
+        self._stage_name = "input" + str(index)
+      bldr.add_spout(self._stage_name, TextFileSpout, par=self._parallelism,
                      config={TextFileSpout.FILES : self._files})
     return bldr

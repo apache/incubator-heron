@@ -179,7 +179,7 @@ class Streamlet(object):
       builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={JoinBolt.WINDOWDURATION : self._time_window.duration,
-                               JoinBolt.SLIDEINTERVAL : self._time_window.slide_interval})
+                               JoinBolt.SLIDEINTERVAL : self._time_window.sliding_interval})
     elif self._operation == OperationType.Repartition:
       self._generate_repartition_stage_name(stage_names)
       builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
@@ -194,7 +194,7 @@ class Streamlet(object):
                        config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
                                ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
                                ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
-                               self._time_window.slide_interval})
+                               self._time_window.sliding_interval})
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
 

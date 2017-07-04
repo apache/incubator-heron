@@ -16,6 +16,8 @@
 from heron.api.src.python import Spout, Stream
 from heron.dsl.src.python import Streamlet, OperationType
 
+# pylint: disable=access-member-before-definition
+# pylint: disable=attribute-defined-outside-init
 class StaticLinesSpout(Spout):
   """StaticLinesSpout: Generates a line from a set of static lines again and again
   """
@@ -67,15 +69,15 @@ class StaticLinesStreamlet(Streamlet):
     return StaticLinesStreamlet(stage_name=stage_name, parallelism=parallelism)
 
   def _build(self, bldr, stage_names):
-    if Streamlet._parallelism is None:
-      Streamlet._parallelism = 1
-    if Streamlet._parallelism < 1:
+    if self._parallelism is None:
+      self._parallelism = 1
+    if self._parallelism < 1:
       raise RuntimeError("StaticLines parallelism has to be >= 1")
-    if Streamlet._stage_name is None:
+    if self._stage_name is None:
       index = 1
-      Streamlet._stage_name = "staticlines"
-      while Streamlet._stage_name in stage_names:
+      self._stage_name = "staticlines"
+      while self._stage_name in stage_names:
         index = index + 1
-        Streamlet._stage_name = "staticlines" + str(index)
-      bldr.add_spout(Streamlet._stage_name, StaticLinesSpout, par=Streamlet._parallelism)
+        self._stage_name = "staticlines" + str(index)
+      bldr.add_spout(self._stage_name, StaticLinesSpout, par=self._parallelism)
     return bldr
