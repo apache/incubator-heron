@@ -17,7 +17,7 @@ from heron.api.src.python import Spout, Stream
 from heron.dsl.src.python import Streamlet, OperationType
 
 class StaticLinesSpout(Spout):
-  """StaticLinesSpout: Generates random words
+  """StaticLinesSpout: Generates a line from a set of static lines again and again
   """
   outputs = [Stream('output', ['_output_'])]
 
@@ -63,7 +63,7 @@ class StaticLinesStreamlet(Streamlet):
                                                parallelism=parallelism)
 
   @staticmethod
-  def randomWordsGenerator(stage_name=None, parallelism=None):
+  def staticLinesGenerator(stage_name=None, parallelism=None):
     return StaticLinesStreamlet(stage_name=stage_name, parallelism=parallelism)
 
   def _build(self, bldr, stage_names):
