@@ -23,6 +23,7 @@ from .filterbolt import FilterBolt
 from .samplebolt import SampleBolt
 from .joinbolt import JoinBolt, JoinGrouping
 from .repartitionbolt import RepartitionBolt
+from .reducebywindowbolt import ReduceByWindowBolt
 
 class OperationType(object):
   Input = 1
@@ -176,10 +177,13 @@ class Streamlet(object):
     elif self._operation == OperationType.ReduceByWindow:
       self.check_callable(self._reduce_function)
       self._generate_stage_name(stage_names, self._reduce_function)
+      if not isinstance(self._time_window, TimeWindow):
+        raise RuntimeError("ReduceByWindow's time_window should be TimeWindow")
       builder.add_bolt(self._stage_name, ReduceByWindowBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={ReduceByWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByWindowBolt.TIMEWINDOW : self._time_window})
+                               ReduceByWindowBolt.WINDOWDURATION : self._time_window.duration,
+                               ReduceByWindowBolt.SLIDEINTERVAL : self._time_window.slide_interval})
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self.check_callable(self._reduce_function)
       self._generate_stage_name(stage_names, self._reduce_function)
