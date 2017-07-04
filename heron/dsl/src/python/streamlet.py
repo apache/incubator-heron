@@ -131,6 +131,7 @@ class Streamlet(object):
     self._calculate_parallelism()
     return self._build_this(bldr, stage_names)
 
+  # pylint: disable=too-many-branches
   def _build_this(self, builder, stage_names):
     if self._operation == OperationType.Input:
       raise RuntimeError("_build_this called from Input. Did the input implement it")
@@ -182,7 +183,8 @@ class Streamlet(object):
                        inputs=self._inputs,
                        config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
                                ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
-                               ReduceByKeyAndWindowBolt.SLIDEINTERVAL : self._time_window.slide_interval})
+                               ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
+                               self._time_window.slide_interval})
     else:
       raise RuntimeError("Unknown type of operator", self._operation)
 
@@ -267,6 +269,7 @@ class Streamlet(object):
       raise RuntimeError("Missed figuring out parallelism for", self._operation)
 
   # pylint: disable=protected-access
+  # pylint: disable=fixme
   def _calculate_inputs(self):
     if self._operation == OperationType.Input:
       self._inputs = None
