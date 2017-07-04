@@ -14,7 +14,7 @@
 '''Example WordCountTopology'''
 import sys
 
-from heron.dsl.src.python import StaticLinesStreamlet
+from heron.dsl.src.python import StaticLinesStreamlet, TimeWindow
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
@@ -24,5 +24,5 @@ if __name__ == '__main__':
   lines = StaticLinesStreamlet.staticLinesGenerator(stage_name=sys.argv[1], parallelism=2)
   words = lines.flatMap(lambda line: line.split(), parallelism=2)
   wordcounts = words.map(lambda word: (word, 1), parallelism=2)
-  counts = wordcounts.reduceByWindow(lambda x, y: x + y)
+  counts = wordcounts.reduceByWindow(TimeWindow(10, 2), lambda x, y: x + y)
   counts.run()
