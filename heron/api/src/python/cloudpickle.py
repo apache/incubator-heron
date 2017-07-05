@@ -50,8 +50,6 @@ import dis
 import traceback
 import weakref
 
-from pyspark.util import _exception_message
-
 if sys.version < '3':
   from pickle import Pickler # pylint: disable=ungrouped-imports
   try:
@@ -149,13 +147,8 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
     except pickle.PickleError:
       raise
     except Exception as e:
-      emsg = _exception_message(e)
-      if "'i' format requires" in emsg:
-        msg = "Object too large to serialize: %s" % emsg
-      else:
-        msg = "Could not serialize object: %s: %s" % (e.__class__.__name__, emsg)
       print_exec(sys.stderr)
-      raise pickle.PicklingError(msg)
+      raise pickle.PicklingError(str(e))
 
   def save_memoryview(self, obj):
     """Fallback to save_string"""
