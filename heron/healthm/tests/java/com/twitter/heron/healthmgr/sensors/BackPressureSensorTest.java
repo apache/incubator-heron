@@ -25,6 +25,7 @@ import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DEFAULT_METRIC_DURATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -52,11 +53,11 @@ public class BackPressureSensorTest {
       // the back pressure sensor will return average bp per second, so multiply by duration
       BufferSizeSensorTest.registerStMgrInstanceMetricResponse(metricsProvider,
           metric,
-          boltId.length() * BaseSensor.METRIC_DURATION);
+          boltId.length() * DEFAULT_METRIC_DURATION);
     }
 
     BackPressureSensor backPressureSensor =
-        new BackPressureSensor(packingPlanProvider, topologyProvider, metricsProvider);
+        new BackPressureSensor(packingPlanProvider, topologyProvider, null, metricsProvider);
 
     Map<String, ComponentMetrics> componentMetrics = backPressureSensor.get();
     assertEquals(2, componentMetrics.size());

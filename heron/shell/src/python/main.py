@@ -27,6 +27,7 @@ AsyncHTTPClient.configure(None, defaults=dict(request_timeout=120.0))
 app = tornado.web.Application([
     (r"^/jmap/([0-9]+$)", handlers.JmapHandler),
     (r"^/histo/([0-9]+$)", handlers.MemoryHistogramHandler),
+    (r"^/pmap/([0-9]+$)", handlers.PmapHandler),
     (r"^/jstack/([0-9]+$)", handlers.JstackHandler),
     (r"^/pid/(.*)", handlers.PidHandler),
     (r"^/browse/(.*)", handlers.BrowseHandler),
@@ -34,15 +35,18 @@ app = tornado.web.Application([
     (r"^/filedata/(.*)", handlers.FileDataHandler),
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
     (r"^/download/(.*)", handlers.DownloadHandler),
+    (r"^/killexecutor", handlers.KillExecutorHandler),
 ])
 
 
 if __name__ == '__main__':
   define("port", default=9999, help="Runs on the given port", type=int)
+  define("secret", default='', help="Shared secret for /killexecutor", type=str)
   parse_command_line()
 
   logger = logging.getLogger(__file__)
   logger.info("Starting Heron Shell")
+  logger.info("Shared secret for /killexecutor: %s", options.secret)
 
   app.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()

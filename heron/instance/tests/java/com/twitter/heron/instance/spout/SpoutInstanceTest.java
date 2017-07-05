@@ -31,7 +31,7 @@ import org.junit.Test;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.network.HeronServerTester;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
