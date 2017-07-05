@@ -21,34 +21,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <typeindex>
-
-template<typename T>
-class BaseMemPool {
- public:
-  template<class... Args>
-  T* acquire(Args&&... args) {
-    if (pool_.empty()) {
-      return new T(std::forward<Args>(args)...);
-    }
-    T* t = pool_.back();
-    pool_.pop_back();
-    return t;
-  }
-  void release(T* t) {
-    pool_.push_back(t);
-  }
-  BaseMemPool() {
-  }
-  ~BaseMemPool() {
-      for (auto& p : pool_) {
-        delete p;
-      }
-      pool_.clear();
-  }
- private:
-  std::vector<T*> pool_;
-};
-
+#include "basics/basics.h"
 
 template<typename B>
 class MemPool {
@@ -56,21 +29,25 @@ class MemPool {
   MemPool() {
   }
 
+  explicit MemPool(sp_int32 _pool_limit) :
+    pool_limit_(_pool_limit) {
+  }
+
   // TODO(cwang): we have a memory leak here.
   ~MemPool() {
-    for (auto& m : map_) {
-      for (auto& n : m.second) {
-        delete n;
+    for (auto& map_iter : mem_pool_map_) {
+      for (auto& mem_pool : map_iter.second) {
+        delete mem_pool;
       }
-      m.second.clear();
+      map_iter.second.clear();
     }
-    map_.clear();
+    mem_pool_map_.clear();
   }
 
   template<typename M>
   M* acquire(M* m) {
     std::type_index type = typeid(M);
-    std::vector<B*>& pool = map_[type];
+    std::vector<B*>& pool = mem_pool_map_[type];
 
     if (pool.empty()) {
       return new M();
@@ -83,11 +60,21 @@ class MemPool {
   template<typename M>
   void release(M* ptr) {
     std::type_index type = typeid(M);
-    map_[type].push_back(static_cast<B*>(ptr));
+    sp_int32 size = mem_pool_map_[type].size() * sizeof(M);
+    // if pool size reaches the limit, release the memory
+    // otherwise put the memory into pool
+    if (size >= pool_limit_) {
+      delete ptr;
+    } else {
+      mem_pool_map_[type].push_back(static_cast<B*>(ptr));
+    }
   }
 
  private:
-  std::unordered_map<std::type_index, std::vector<B*>> map_;
+  // each type has its own separate mem pool entry
+  std::unordered_map<std::type_index, std::vector<B*>> mem_pool_map_;
+  // each mem pool size should not exceed the pool_limit_
+  sp_int32 pool_limit_;
 };
 
 extern MemPool<google::protobuf::Message>* __global_protobuf_pool__;

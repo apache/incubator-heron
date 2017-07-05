@@ -665,7 +665,8 @@ class HeronExecutor(object):
     retval[self.heron_shell_ids[self.shard]] = [
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
-        '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
+        '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
+        '--secret=%s' % self.topology_id]
 
     return retval
 
@@ -770,7 +771,7 @@ class HeronExecutor(object):
               Log.info("%s exited too many times" % name)
               sys.exit(1)
             time.sleep(self.interval_between_runs)
-            p = self._run_process(name, command)
+            p = self._run_process(name, command, self.shell_env)
             del self.processes_to_monitor[pid]
             self.processes_to_monitor[p.pid] =\
               ProcessInfo(p, name, command, old_process_info.attempts + 1)

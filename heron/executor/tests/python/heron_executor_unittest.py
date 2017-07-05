@@ -70,8 +70,10 @@ class MockExecutor(HeronExecutor):
 class HeronExecutorTest(unittest.TestCase):
   """Unittest for Heron Executor"""
 
-  shell_command_expected = 'heron_shell_binary --port=shell-port ' \
-                           '--log_file_prefix=fake_dir/heron-shell.log'
+  def get_expected_shell_command(container_id):
+    return 'heron_shell_binary --port=shell-port ' \
+           '--log_file_prefix=fake_dir/heron-shell-%s.log ' \
+           '--secret=topid' % container_id
 
   def build_packing_plan(self, instance_distribution):
     packing_plan = PackingPlan()
@@ -128,7 +130,7 @@ class HeronExecutorTest(unittest.TestCase):
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
-      ProcessInfo(MockPOpen(), 'heron-shell-0', shell_command_expected),
+      ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
       ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-tmaster',
                   'tmaster_binary %s master_port '
@@ -149,7 +151,7 @@ class HeronExecutorTest(unittest.TestCase):
                   get_expected_instance_command('exclaim1', 1, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_2',
                   get_expected_instance_command('exclaim1', 2, 1)),
-      ProcessInfo(MockPOpen(), 'heron-shell-1', shell_command_expected),
+      ProcessInfo(MockPOpen(), 'heron-shell-1', get_expected_shell_command(1)),
       ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
   ]
 
@@ -163,7 +165,7 @@ class HeronExecutorTest(unittest.TestCase):
                 'container_7_word_11,container_7_exclaim1_210 %s master_port '
                 'metricsmgr_port shell-port %s' % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
-      ProcessInfo(MockPOpen(), 'heron-shell-7', shell_command_expected),
+      ProcessInfo(MockPOpen(), 'heron-shell-7', get_expected_shell_command(7)),
   ]
 
   def setUp(self):

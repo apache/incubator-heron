@@ -214,8 +214,8 @@ class Client : public BaseClient {
   template <typename T, typename M>
   void dispatchResponse(T* _t, void (T::*method)(void* _ctx, M*, NetworkErrorCode),
                         IncomingPacket* _ipkt, NetworkErrorCode _code) {
-    void* ctx = NULL;
-    M* m = NULL;
+    void* ctx = nullptr;
+    M* m = nullptr;
     NetworkErrorCode status = _code;
     if (status == OK && _ipkt) {
       REQID rid;

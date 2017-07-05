@@ -6,7 +6,7 @@ FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 # for display on GitHub website
-JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
+JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api/java
 # for display on local Hugo server
 JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
@@ -16,7 +16,7 @@ OVERVIEW_HTML_FILE=$HERON_ROOT_DIR/website/scripts/javadocs-overview.html
 
 # Check if this script is run with Travis flag
 if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
-    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis-ci/bazel.rc build"
+    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis/bazel.rc build"
 else
     BAZEL_CMD="bazel build"
 fi
@@ -24,7 +24,7 @@ fi
 (cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'`\
   `bazel query 'kind("java_test", "heron/...")'` \
-  `bazel query 'kind("java_library", "integration-test/...")'`)
+  `bazel query 'kind("java_library", "integration_test/...")'`)
 
 HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/com/twitter/*" -name "*.java"`
 BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.java"`
