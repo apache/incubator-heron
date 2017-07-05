@@ -147,19 +147,19 @@ class Streamlet(object):
       raise RuntimeError("_build_this called from Input. Did the input implement it")
     elif self._operation == OperationType.Map:
       self.check_callable(self._map_function)
-      self._generate_stage_name(stage_names, self._map_function)
+      self._generate_stage_name(stage_names, self._map_function, "map")
       builder.add_bolt(self._stage_name, MapBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={MapBolt.FUNCTION : self._map_function})
     elif self._operation == OperationType.FlatMap:
       self.check_callable(self._flatmap_function)
-      self._generate_stage_name(stage_names, self._flatmap_function)
+      self._generate_stage_name(stage_names, self._flatmap_function, "flatmap")
       builder.add_bolt(self._stage_name, FlatMapBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={FlatMapBolt.FUNCTION : self._flatmap_function})
     elif self._operation == OperationType.Filter:
       self.check_callable(self._filter_function)
-      self._generate_stage_name(stage_names, self._filter_function)
+      self._generate_stage_name(stage_names, self._filter_function, "filter")
       builder.add_bolt(self._stage_name, FilterBolt, par=self._parallelism,
                        inputs=self._inputs,
                        config={FilterBolt.FUNCTION : self._filter_function})
@@ -186,7 +186,7 @@ class Streamlet(object):
                        inputs=self._inputs)
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self.check_callable(self._reduce_function)
-      self._generate_stage_name(stage_names, self._reduce_function)
+      self._generate_stage_name(stage_names, self._reduce_function, "reducebykeyandwindow")
       if not isinstance(self._time_window, TimeWindow):
         raise RuntimeError("ReduceByKeyAndWindow's time_window should be TimeWindow")
       builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
@@ -205,16 +205,16 @@ class Streamlet(object):
     if not callable(func):
       raise RuntimeError("dsl functions must be callable")
 
-  def _generate_stage_name(self, stage_names, func):
+  def _generate_stage_name(self, stage_names, func, functype):
     if self._stage_name is None:
-      funcname = func.__name__
+      funcname = functype + "-" + func.__name__
       if funcname not in stage_names:
         self._stage_name = funcname
       else:
         index = 1
         while funcname in stage_names:
           index = index + 1
-          funcname = func.__name__ + str(index)
+          funcname = functype + "-" + func.__name__ + str(index)
         self._stage_name = funcname
     elif self._stage_name in stage_names:
       raise RuntimeError("duplicated stage name %s" % self._stage_name)
@@ -293,7 +293,8 @@ class Streamlet(object):
     elif self._operation == OperationType.Join:
       self._inputs = {}
       for parent in self._parents:
-        self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = Grouping.custom(JoinGrouping())
+        self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = \
+                     Grouping.custom(JoinGrouping())
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
                       Grouping.custom(ReduceGrouping())}
