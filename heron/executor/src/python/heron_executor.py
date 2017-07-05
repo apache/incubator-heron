@@ -898,7 +898,8 @@ def main():
   shell_env["HEAP_PROFILE_ALLOCATION_INTERVAL"] = "0"
   shell_env["HEAP_PROFILE_INUSE_INTERVAL"] = "0"
   shell_env["HEAPPROFILESIGNAL"] = str(signal.SIGUSR1)
-  shell_env["TCMALLOC_HEAP_LIMIT_MB"] = "512"
+  shell_env["TCMALLOC_HEAP_LIMIT_MB"] = "2048"
+  shell_env["TCMALLOC_RELEASE_RATE"] = "10"
 
 
   # Instantiate the executor, bind it to signal handlers and launch it
