@@ -293,10 +293,10 @@ class Streamlet(object):
     elif self._operation == OperationType.Join:
       self._inputs = {}
       for parent in self._parents:
-        self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = JoinGrouping()
+        self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = Grouping.custom(JoinGrouping())
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-                      ReduceGrouping()}
+                      Grouping.custom(ReduceGrouping())}
     elif self._operation == OperationType.Output:
       # FIXME:- is this correct
       self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
