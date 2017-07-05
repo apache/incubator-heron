@@ -131,6 +131,7 @@ cc_binary(
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//third_party/yaml-cpp:yaml-cxx",
         "//third_party/gperftools:profiler-cxx",
+        "//third_party/gperftools:tcmalloc-cxx",
     ],
     linkstatic = 1,
 )

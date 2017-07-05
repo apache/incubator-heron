@@ -15,6 +15,7 @@
  */
 
 #include "manager/stmgr.h"
+#include <gperftools/malloc_extension.h>
 #include <sys/resource.h>
 #include <cstdlib>
 #include <iostream>
@@ -109,6 +110,15 @@ void StMgr::Init() {
   StartStmgrServer();
   // Create and Register Tuple cache
   CreateTupleCache();
+
+  // Output heap stat every 1 min
+  CHECK_GT(eventLoop_->registerTimer(
+               [](EventLoop::Status) {
+                   char buffer[4096];
+                   MallocExtension::instance()->GetStats(buffer, 4096);
+                   LOG(INFO) << buffer;
+               }, true, 60_s),
+           0);
 
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
