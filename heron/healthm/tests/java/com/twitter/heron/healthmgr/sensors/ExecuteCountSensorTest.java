@@ -55,7 +55,8 @@ public class ExecuteCountSensorTest {
         .getComponentMetrics(METRIC_EXE_COUNT, DEFAULT_METRIC_DURATION, "bolt-1", "bolt-2"))
         .thenReturn(result);
 
-    ExecuteCountSensor executeCountSensor = new ExecuteCountSensor(topologyProvider, metricsProvider);
+    ExecuteCountSensor executeCountSensor
+        = new ExecuteCountSensor(topologyProvider, null, metricsProvider);
     Map<String, ComponentMetrics> componentMetrics = executeCountSensor.get();
     assertEquals(2, componentMetrics.size());
     assertEquals(123, componentMetrics.get("bolt-1")

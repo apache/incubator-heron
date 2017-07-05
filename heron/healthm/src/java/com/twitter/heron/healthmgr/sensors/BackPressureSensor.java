@@ -17,15 +17,19 @@ package com.twitter.heron.healthmgr.sensors;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
+
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.COMPONENT_STMGR;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 
 public class BackPressureSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
@@ -35,8 +39,9 @@ public class BackPressureSensor extends BaseSensor {
   @Inject
   public BackPressureSensor(PackingPlanProvider packingPlanProvider,
                             TopologyProvider topologyProvider,
+                            HealthPolicyConfig policyConfig,
                             MetricsProvider metricsProvider) {
-    super(BACK_PRESSURE);
+    super(policyConfig, METRIC_BACK_PRESSURE);
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -59,25 +64,24 @@ public class BackPressureSensor extends BaseSensor {
     for (String boltComponent : boltComponents) {
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
 
+      int duration = getDuration(BackPressureSensor.class.getSimpleName());
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
         String metric = this.metricName + boltInstanceName;
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
-            metric,
-            METRIC_DURATION,
-            HealthMgrConstants.COMPONENT_STMGR);
+            metric, duration, COMPONENT_STMGR);
 
         HashMap<String, InstanceMetrics> streamManagerResult =
-            stmgrResult.get(HealthMgrConstants.COMPONENT_STMGR).getMetrics();
+            stmgrResult.get(COMPONENT_STMGR).getMetrics();
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
         InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
-        double averageBp = stmgrInstanceResult.getMetricValueSum(metric) / METRIC_DURATION;
+        double averageBp = stmgrInstanceResult.getMetricValueSum(metric) / duration;
         averageBp = averageBp > 1000 ? 1000 : averageBp;
         InstanceMetrics boltInstanceMetric
-            = new InstanceMetrics(boltInstanceName, BACK_PRESSURE, averageBp);
+            = new InstanceMetrics(boltInstanceName, this.metricName, averageBp);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }

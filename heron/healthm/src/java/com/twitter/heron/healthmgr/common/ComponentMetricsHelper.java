@@ -25,6 +25,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_WAIT_Q_GROWTH_RATE;
 
 
 /**
@@ -34,8 +35,7 @@ public class ComponentMetricsHelper {
   private final ComponentMetrics componentMetrics;
 
   private List<InstanceMetrics> boltsWithBackpressure = new ArrayList<>();
-
-  private double bufferChangeRate = 0;
+  private double maxBufferChangeRate = 0;
   private double totalBackpressure = 0;
 
   public ComponentMetricsHelper(ComponentMetrics compMetrics) {
@@ -52,10 +52,9 @@ public class ComponentMetricsHelper {
     }
   }
 
-
   public void computeBufferSizeTrend() {
-    for (InstanceMetrics mergedInstance : componentMetrics.getMetrics().values()) {
-      Map<Long, Double> bufferMetrics = mergedInstance.getMetrics().get(METRIC_BUFFER_SIZE);
+    for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
+      Map<Long, Double> bufferMetrics = instanceMetrics.getMetrics().get(METRIC_BUFFER_SIZE);
       if (bufferMetrics == null || bufferMetrics.size() < 3) {
         // missing of insufficient data for creating a trend line
         continue;
@@ -65,7 +64,13 @@ public class ComponentMetricsHelper {
       for (Long timeStampX : bufferMetrics.keySet()) {
         simpleRegression.addData(timeStampX, bufferMetrics.get(timeStampX));
       }
-      bufferChangeRate = simpleRegression.getSlope();
+
+      double slope = simpleRegression.getSlope();
+      instanceMetrics.addMetric(METRIC_WAIT_Q_GROWTH_RATE, slope);
+
+      if (maxBufferChangeRate < slope) {
+        maxBufferChangeRate = slope;
+      }
     }
   }
 
@@ -90,8 +95,8 @@ public class ComponentMetricsHelper {
     return totalBackpressure;
   }
 
-  public double getBufferChangeRate() {
-    return bufferChangeRate;
+  public double getMaxBufferChangeRate() {
+    return maxBufferChangeRate;
   }
 
   public List<InstanceMetrics> getBoltsWithBackpressure() {

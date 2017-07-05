@@ -1,4 +1,0 @@
-colorlog>=2.6.1
-protobuf>=2.5.0,<3
-setuptools>=18.0.1
-psutil>=4.3.1
