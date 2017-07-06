@@ -21,9 +21,9 @@ from .mapbolt import MapBolt
 from .flatmapbolt import FlatMapBolt
 from .filterbolt import FilterBolt
 from .samplebolt import SampleBolt
-from .joinbolt import JoinBolt, JoinGrouping
+from .joinbolt import JoinBolt
 from .repartitionbolt import RepartitionBolt
-from .reducebykeyandwindowbolt import ReduceByKeyAndWindowBolt, ReduceGrouping
+from .reducebykeyandwindowbolt import ReduceByKeyAndWindowBolt
 
 class OperationType(object):
   Input = 1
@@ -294,10 +294,11 @@ class Streamlet(object):
       self._inputs = {}
       for parent in self._parents:
         self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = \
-                     Grouping.custom(JoinGrouping())
+                     Grouping.custom("heron.dsl.src.python.joinbolt.JoinGrouping")
     elif self._operation == OperationType.ReduceByKeyAndWindow:
       self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-                      Grouping.custom(ReduceGrouping())}
+                      Grouping.custom(\
+                      "heron.dsl.src.python.reducebykeyandwindowbolt.ReduceGrouping")}
     elif self._operation == OperationType.Output:
       # FIXME:- is this correct
       self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
