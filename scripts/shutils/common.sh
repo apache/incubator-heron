@@ -81,6 +81,8 @@ function discover_platform {
     echo "centos"
   elif [[ $discover =~ ^.*Ubuntu.*$ ]]; then
     echo "ubuntu"
+  elif [[ $discover =~ ^Darwin.*$ ]]; then
+    echo "darwin"
   else
     mysterious=`echo $discover | awk -F- '{print $6}'`
     echo "$mysterious platform not supported"
