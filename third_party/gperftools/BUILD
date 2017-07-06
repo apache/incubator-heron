@@ -26,7 +26,7 @@ DARWIN_EXECUTE = "\n".join(COMMON_EXECUTE + [
 ])
 
 LINUX_EXECUTE = "\n".join(COMMON_EXECUTE + [
-     './configure --prefix=$$INSTALL_DIR --enable-shared=no CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS="-L$$UNWIND_DIR/lib -lunwind" --enable-frame-pointers',
+     './configure --prefix=$$INSTALL_DIR --enable-shared=no CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS="-L$$UNWIND_DIR/lib -lunwind" --enable-frame-pointers --enable-heap-checker',
      'make install CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS="-L$$UNWIND_DIR/lib -lunwind"',
      'rm -rf $$TMP_DIR',
 ])
@@ -86,6 +86,8 @@ cc_library(
         "include/gperftools/tcmalloc.h",
         "include/gperftools/malloc_extension.h",
         "include/google/malloc_extension.h",
+        "include/gperftools/heap-checker.h",
+        "include/google/heap-checker.h",
     ],
     includes = [
         "include",

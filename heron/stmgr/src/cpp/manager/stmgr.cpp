@@ -16,6 +16,7 @@
 
 #include "manager/stmgr.h"
 #include <gperftools/malloc_extension.h>
+#include <gperftools/heap-checker.h>
 #include <sys/resource.h>
 #include <cstdlib>
 #include <iostream>
@@ -117,6 +118,7 @@ void StMgr::Init() {
                    char buffer[4096];
                    MallocExtension::instance()->GetStats(buffer, 4096);
                    LOG(INFO) << buffer;
+                   HeapLeakChecker::NoGlobalLeaks();
                }, true, 60_s),
            0);
 
