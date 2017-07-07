@@ -413,6 +413,7 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
   } else {
+    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
     SendMessage(iter->second->conn_, _byte_size, _type_name, _message);
   }
 }
