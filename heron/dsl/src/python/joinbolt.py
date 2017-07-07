@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for join bolt: JoinBolt"""
+import collections
+
 from heron.api.src.python import SlidingWindowBolt, Stream
 from heron.api.src.python.custom_grouping import ICustomGrouping
 
@@ -47,9 +49,11 @@ class JoinGrouping(ICustomGrouping):
     self.target_tasks = target_tasks
 
   def choose_tasks(self, values):
-    if not isinstance(values, list) or len(values) != 2:
-      raise RuntimeError("Tuples going to map must be of list type of length 2")
+    assert isinstance(values, list) and len(values) == 1
+    userdata = values[0]
+    if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+      raise RuntimeError("Tuples going to join must be iterable of length 2")
     # only emits to the first task id
-    hashvalue = hash(values[0])
+    hashvalue = hash(userdata[0])
     target_index = hashvalue % len(self.target_tasks)
     return [self.target_tasks[target_index]]
