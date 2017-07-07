@@ -15,6 +15,8 @@
  */
 
 #include "manager/stmgr-server.h"
+#include <gperftools/malloc_extension.h>
+#include <gperftools/heap-checker.h>
 #include <iostream>
 #include <unordered_set>
 #include <vector>
@@ -497,7 +499,7 @@ void StMgrServer::StartBackPressureConnectionCb(Connection* _connection) {
   LOG(INFO) << "We observe back pressure on sending data to instance " << instance_name;
   StartBackPressureOnSpouts();
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -532,7 +534,7 @@ void StMgrServer::StopBackPressureConnectionCb(Connection* _connection) {
   LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
   AttemptStopBackPressureFromSpouts();
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -555,7 +557,7 @@ void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
             << _other_stmgr_id;
   StartBackPressureOnSpouts();
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -582,7 +584,7 @@ void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
             << _other_stmgr_id;
   AttemptStopBackPressureFromSpouts();
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -616,7 +618,7 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
 
   __global_protobuf_pool_release__(_message);
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -653,7 +655,7 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
 
   __global_protobuf_pool_release__(_message);
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -671,7 +673,7 @@ void StMgrServer::SendStartBackPressureToOtherStMgrs() {
   LOG(INFO) << "End stat and check!";
   stmgr_->SendStartBackPressureToOtherStMgrs();
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -689,7 +691,7 @@ void StMgrServer::SendStopBackPressureToOtherStMgrs() {
             << "stream managers";
   stmgr_->SendStopBackPressureToOtherStMgrs();
   LOG(INFO) << "Starts stat and check!";
-  char buffer[4096];
+  memset(buffer, '\0', 4096);
   MallocExtension::instance()->GetStats(buffer, 4096);
   LOG(INFO) << buffer;
   HeapLeakChecker::NoGlobalLeaks();
@@ -714,7 +716,7 @@ void StMgrServer::StartBackPressureOnSpouts() {
     }
     back_pressure_metric_aggr_->Start();
     LOG(INFO) << "Starts stat and check!";
-    char buffer[4096];
+    memset(buffer, '\0', 4096);
     MallocExtension::instance()->GetStats(buffer, 4096);
     LOG(INFO) << buffer;
     HeapLeakChecker::NoGlobalLeaks();
@@ -742,7 +744,7 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
     }
     back_pressure_metric_aggr_->Stop();
     LOG(INFO) << "Starts stat and check!";
-    char buffer[4096];
+    memset(buffer, '\0', 4096);
     MallocExtension::instance()->GetStats(buffer, 4096);
     LOG(INFO) << buffer;
     HeapLeakChecker::NoGlobalLeaks();
