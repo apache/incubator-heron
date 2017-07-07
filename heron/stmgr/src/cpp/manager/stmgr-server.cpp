@@ -301,6 +301,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
   } else {
+    stmgr_server_metrics_->scope(METRIC_BYTES_FROM_STMGRS)->incr_by(_message->ByteSize());
     stmgr_->HandleStreamManagerData(iter->second, *_message);
   }
   __global_protobuf_pool_release__(_message);
