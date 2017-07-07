@@ -53,7 +53,7 @@ class ReduceByKeyAndWindowBolt(SlidingWindowBolt):
       result = values[0]
       for value in values[1:]:
         self.reduce_function(result, value)
-      self.emit([key, result], stream='output')
+      self.emit([(key, result)], stream='output')
 
 # pylint: disable=unused-argument
 class ReduceGrouping(ICustomGrouping):

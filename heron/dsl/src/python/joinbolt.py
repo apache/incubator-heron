@@ -41,7 +41,7 @@ class JoinBolt(SlidingWindowBolt):
         raise RuntimeError("Join tuples must be iterable of length 2")
       self._add(userdata[0], userdata[1], mymap)
     for (key, values) in mymap.items():
-      self.emit([key, values], stream='output')
+      self.emit([(key, values)], stream='output')
 
 # pylint: disable=unused-argument
 class JoinGrouping(ICustomGrouping):
