@@ -37,8 +37,8 @@ class JoinBolt(SlidingWindowBolt):
     mymap = {}
     for tup in tuples:
       userdata = tup.values[0]
-      if not isinstance(userdata, list) or len(userdata) != 2:
-        raise RuntimeError("Join tuples must be of list type of length 2")
+      if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
+        raise RuntimeError("Join tuples must be iterable of length 2")
       self._add(userdata[0], userdata[1], mymap)
     for (key, values) in mymap.items():
       self.emit([key, values], stream='output')
