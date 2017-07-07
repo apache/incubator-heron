@@ -118,7 +118,6 @@ void StMgr::Init() {
                    char buffer[4096];
                    MallocExtension::instance()->GetStats(buffer, 4096);
                    LOG(INFO) << buffer;
-                   HeapLeakChecker::NoGlobalLeaks();
                }, true, 60_s),
            0);
 

@@ -471,6 +471,12 @@ sp_string StMgrServer::GetInstanceName(Connection* _connection) {
 }
 
 void StMgrServer::StartBackPressureConnectionCb(Connection* _connection) {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   // The connection will notify us when we can stop the back pressure
   _connection->setCausedBackPressure();
 
@@ -490,9 +496,21 @@ void StMgrServer::StartBackPressureConnectionCb(Connection* _connection) {
   remote_ends_who_caused_back_pressure_.insert(instance_name);
   LOG(INFO) << "We observe back pressure on sending data to instance " << instance_name;
   StartBackPressureOnSpouts();
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::StopBackPressureConnectionCb(Connection* _connection) {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   _connection->unsetCausedBackPressure();
 
   // Find the instance this connection belongs to
@@ -513,9 +531,21 @@ void StMgrServer::StopBackPressureConnectionCb(Connection* _connection) {
   }
   LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
   AttemptStopBackPressureFromSpouts();
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   if (remote_ends_who_caused_back_pressure_.empty()) {
     SendStartBackPressureToOtherStMgrs();
     back_pressure_metric_initiated_->Start();
@@ -524,9 +554,21 @@ void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
   LOG(INFO) << "We observe back pressure on sending data to remote stream manager "
             << _other_stmgr_id;
   StartBackPressureOnSpouts();
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   CHECK(remote_ends_who_caused_back_pressure_.find(_other_stmgr_id) !=
         remote_ends_who_caused_back_pressure_.end());
   remote_ends_who_caused_back_pressure_.erase(_other_stmgr_id);
@@ -539,10 +581,22 @@ void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
                "stream manager "
             << _other_stmgr_id;
   AttemptStopBackPressureFromSpouts();
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
                                                  proto::stmgr::StartBackPressureMessage* _message) {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   // Close spouts
   LOG(INFO) << "Received start back pressure from str mgr " << _message->stmgr();
   if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
@@ -561,10 +615,22 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
   StartBackPressureOnSpouts();
 
   __global_protobuf_pool_release__(_message);
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
                                                 proto::stmgr::StopBackPressureMessage* _message) {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   LOG(INFO) << "Received stop back pressure from str mgr " << _message->stmgr();
   if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
     LOG(ERROR) << "Received stop back pressure message from unknown stream manager "
@@ -586,24 +652,59 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
   }
 
   __global_protobuf_pool_release__(_message);
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::SendStartBackPressureToOtherStMgrs() {
   LOG(INFO) << "Sending start back pressure notification to all other "
             << "stream managers";
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   stmgr_->SendStartBackPressureToOtherStMgrs();
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::SendStopBackPressureToOtherStMgrs() {
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
   LOG(INFO) << "Sending stop back pressure notification to all other "
             << "stream managers";
   stmgr_->SendStopBackPressureToOtherStMgrs();
+  LOG(INFO) << "Starts stat and check!";
+  char buffer[4096];
+  MallocExtension::instance()->GetStats(buffer, 4096);
+  LOG(INFO) << buffer;
+  HeapLeakChecker::NoGlobalLeaks();
+  LOG(INFO) << "End stat and check!";
 }
 
 void StMgrServer::StartBackPressureOnSpouts() {
   if (!spouts_under_back_pressure_) {
     LOG(WARNING) << "Stopping reading from spouts to do back pressure";
-
+    LOG(INFO) << "Starts stat and check!";
+    char buffer[4096];
+    MallocExtension::instance()->GetStats(buffer, 4096);
+    LOG(INFO) << buffer;
+    HeapLeakChecker::NoGlobalLeaks();
+    LOG(INFO) << "End stat and check!";
     spouts_under_back_pressure_ = true;
     // Put back pressure on all spouts
     for (auto iiter = instance_info_.begin(); iiter != instance_info_.end(); ++iiter) {
@@ -612,12 +713,24 @@ void StMgrServer::StartBackPressureOnSpouts() {
       if (!iiter->second->conn_->isUnderBackPressure()) iiter->second->conn_->putBackPressure();
     }
     back_pressure_metric_aggr_->Start();
+    LOG(INFO) << "Starts stat and check!";
+    char buffer[4096];
+    MallocExtension::instance()->GetStats(buffer, 4096);
+    LOG(INFO) << buffer;
+    HeapLeakChecker::NoGlobalLeaks();
+    LOG(INFO) << "End stat and check!";
   }
 }
 
 void StMgrServer::AttemptStopBackPressureFromSpouts() {
   if (spouts_under_back_pressure_ && remote_ends_who_caused_back_pressure_.empty() &&
       stmgrs_who_announced_back_pressure_.empty()) {
+    LOG(INFO) << "Starts stat and check!";
+    char buffer[4096];
+    MallocExtension::instance()->GetStats(buffer, 4096);
+    LOG(INFO) << buffer;
+    HeapLeakChecker::NoGlobalLeaks();
+    LOG(INFO) << "End stat and check!";
     LOG(INFO) << "Starting reading from spouts to relieve back pressure";
     spouts_under_back_pressure_ = false;
 
@@ -628,6 +741,12 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
       if (iiter->second->conn_->isUnderBackPressure()) iiter->second->conn_->removeBackPressure();
     }
     back_pressure_metric_aggr_->Stop();
+    LOG(INFO) << "Starts stat and check!";
+    char buffer[4096];
+    MallocExtension::instance()->GetStats(buffer, 4096);
+    LOG(INFO) << buffer;
+    HeapLeakChecker::NoGlobalLeaks();
+    LOG(INFO) << "End stat and check!";
   }
 }
 
