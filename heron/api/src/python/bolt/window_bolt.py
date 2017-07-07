@@ -77,7 +77,7 @@ class SlidingWindowBolt(Bolt):
   def _expire(self, tm):
     while len(self.current_tuples) > 0:
       if tm - self.window_duration > self.current_tuples[0][1]:
-        tup = self.current_tuples.popleft()
+        (tup, tm) = self.current_tuples.popleft()
         self.ack(tup)
       else:
         break
