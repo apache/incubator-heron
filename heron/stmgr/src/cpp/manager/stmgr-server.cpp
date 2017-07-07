@@ -391,6 +391,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
     __global_protobuf_pool_release__(_message);
     return;
   }
+  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
   if (_message->has_data()) {
     stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->data().tuples_size());
@@ -429,6 +430,7 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
           ->incr_by(_message.control().fails_size());
     }
   } else {
+    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().acks_size());
