@@ -411,6 +411,7 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
+    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_byte_size);
   } else {
     SendMessage(iter->second->conn_, _byte_size, _type_name, _message);
   }
@@ -420,8 +421,8 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
                                   const proto::system::HeronTupleSet2& _message) {
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
-               << std::endl;
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
+    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.control().acks_size());
