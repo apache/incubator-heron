@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for sample bolt: SampleBolt"""
+"""module for sample bolt: SampleBolt
+   SampleBolt is a more sophisticated FilterBolt which
+   can do sampling of the data that it recieves and emit
+   only sampled tuples"""
 from heron.api.src.python import Bolt, Stream
 
 # pylint: disable=unused-argument
@@ -22,8 +25,7 @@ class SampleBolt(Bolt):
   FRACTION = 'fraction'
 
   def initialize(self, config, context):
-    self.logger.debug("In initialize() of SampleBolt")
-    self.logger.debug("Component-specific config: \n%s" % str(config))
+    self.logger.debug("SampleBolt's Component-specific config: \n%s" % str(config))
     self.processed = 0
     self.emitted = 0
     if SampleBolt.FRACTION in config:

@@ -22,8 +22,7 @@ class MapBolt(Bolt):
   FUNCTION = 'function'
 
   def initialize(self, config, context):
-    self.logger.debug("In initialize() of MapBolt")
-    self.logger.debug("Component-specific config: \n%s" % str(config))
+    self.logger.debug("MapBolt's Component-specific config: \n%s" % str(config))
     self.processed = 0
     self.emitted = 0
     if MapBolt.FUNCTION in config:

@@ -22,8 +22,7 @@ class FilterBolt(Bolt):
   FUNCTION = 'function'
 
   def initialize(self, config, context):
-    self.logger.debug("In initialize() of FilterBolt")
-    self.logger.debug("Component-specific config: \n%s" % str(config))
+    self.logger.debug("FilterBolt's Component-specific config: \n%s" % str(config))
     self.processed = 0
     self.emitted = 0
     if FilterBolt.FUNCTION in config:

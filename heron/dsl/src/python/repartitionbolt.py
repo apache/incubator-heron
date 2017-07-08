@@ -21,8 +21,7 @@ class RepartitionBolt(Bolt):
   outputs = [Stream(fields=['_output_'], name='output')]
 
   def initialize(self, config, context):
-    self.logger.debug("In initialize() of RepartitionBolt")
-    self.logger.debug("Component-specific config: \n%s" % str(config))
+    self.logger.debug("RepartitionBolt's Component-specific config: \n%s" % str(config))
     self.processed = 0
     self.emitted = 0
 
