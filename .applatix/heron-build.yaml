@@ -1,0 +1,145 @@
+---
+type: service_template
+subtype: container
+name: heron-build-base
+description: This is the base template for building Heron
+container:
+  resources:
+    mem_mib: 4000
+    cpu_cores: 1.5
+  image: streamlio/build:latest-heron-%%os%%
+  docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%" 
+  command: bash -c 'cd /heron && USER=abc scripts/applatix/build.sh'
+inputs:
+  artifacts:
+  - from: "%%checkout_artifact%%"
+    path: "/heron"
+  parameters:
+    os:
+    checkout_artifact:
+    build_env_cc:
+    build_env_cxx:
+    build_env_cpp:
+    build_env_cxxcpp:
+outputs:
+  artifacts:
+    build_output:
+      path: "/heron/bazel-bin/scripts/packages"
+    build_output_2:
+      path: "/heron/scripts"
+
+---
+type: service_template
+subtype: container
+name: heron-test-base
+description: This is the base template for testing Heron
+container:
+  resources:
+    mem_mib: 4000
+    cpu_cores: 1.5
+  image: streamlio/build:latest-heron-%%os%%
+  docker_options: "-e CC=%%build_env_cc%% -e CXX=%%build_env_cxx%% -e CPP=%%build_env_cpp%% -e CXXCPP=%%build_env_cxxcpp%%"
+  command: bash -c 'cd /heron && ls -lrt . && ls -lrt scripts && ls -lrt scripts/applatix && scripts/applatix/%%language%%tests.sh'
+inputs:
+  artifacts:
+  - from: "%%test_artifact_input%%"
+    path: "/heron"
+  - from: "%%test_artifact_input_2%%"
+    path: "/heron/scripts"
+  parameters:
+    os:
+    test_artifact_input:
+    test_artifact_input_2:
+    language:
+    build_env_cc:
+    build_env_cxx:
+    build_env_cpp:
+    build_env_cxxcpp:
+outputs:
+
+---
+type: service_template
+subtype: workflow
+name: heron-build-test-base
+description: This is the base template for build-test Heron
+steps:
+  - build:
+      template: heron-build-base
+  - test:
+      template: heron-test-base
+      parameters:
+        test_artifact_input: "%%steps.build.build_output%%"
+        test_artifact_input_2: "%%steps.build.build_output_2%%"
+        language: $$[java,python]$$
+inputs:
+  parameters:
+    os:
+    checkout_artifact:
+    build_env_cc:
+    build_env_cxx:
+    build_env_cpp:
+    build_env_cxxcpp:
+outputs:
+
+---
+type: service_template
+subtype: workflow
+name: heron-build-standalone
+description: This is the workflow for building/testing all heron components.
+inputs:
+  parameters:
+    commit:
+      default: "%%session.commit%%"
+    repo:
+      default: "%%session.repo%%"
+    build_env_cc:
+      default: "gcc"
+    build_env_cxx:
+      default: "g++"
+    build_env_cpp:
+      default: "cpp"
+    build_env_cxxcpp:
+      default: "cpp"
+steps:
+  -
+    checkout:
+      template: axscm-checkout
+  - 
+    heron-build:
+      template: heron-build-test-base
+      parameters:
+        os: $$[ubuntu14.04,centos7]$$
+        checkout_artifact: "%%steps.checkout.code%%"
+
+termination_policy:
+  time_seconds: 7200
+  spending_cents: 100
+
+---
+type: policy
+name: Heron Build Policy
+description: Policy to trigger build for all events
+template: heron-build-standalone
+parameters:
+notifications:
+  -
+    when:
+      - on_success
+      - on_failure
+    whom:
+      - committer
+      - author
+when:
+  -
+    event: on_push
+    target_branches:
+      - ".*"
+  -
+    event: on_pull_request
+    target_branches:
+      - ".*"
+  -
+    event: on_pull_request_merge
+    target_branches:
+      - ".*"
+
