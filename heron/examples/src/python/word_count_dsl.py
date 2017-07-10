@@ -14,14 +14,15 @@
 '''Example WordCountTopology'''
 import sys
 
-from heron.dsl.src.python import StaticLinesStreamlet, TimeWindow
+from heron.dsl.src.python import TimeWindow
+from heron.spouts.src.python import FixedLinesStreamlet
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
     print "Topology's name is not specified"
     sys.exit(1)
 
-  counts = StaticLinesStreamlet.staticLinesGenerator(parallelism=2) \
+  counts = FixedLinesStreamlet.fixedLinesGenerator(parallelism=2) \
            .flatMap(lambda line: line.split(), parallelism=2) \
            .map(lambda word: (word, 1), parallelism=2) \
            .reduceByWindow(TimeWindow(10, 2), lambda x, y: x + y)
