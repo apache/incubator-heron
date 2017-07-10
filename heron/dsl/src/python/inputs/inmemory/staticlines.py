@@ -14,7 +14,7 @@
 '''staticlines.py: module for defining a simple static lines input'''
 
 from heron.api.src.python import Spout, Stream
-from heron.dsl.src.python import Streamlet, OperationType
+from ...streamlet import Streamlet, OperationType
 
 # pylint: disable=access-member-before-definition
 # pylint: disable=attribute-defined-outside-init
