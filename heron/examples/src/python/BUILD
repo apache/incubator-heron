@@ -49,6 +49,7 @@ pex_binary(
     deps = [
       '//heron/api/src/python:heron-python-py',
       '//heron/dsl/src/python:heron-pythondsl-py',
+      '//heron/spouts/src/python:heron-pythonspouts-py',
     ],
 )
 
