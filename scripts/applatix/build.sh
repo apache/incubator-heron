@@ -103,7 +103,9 @@ end_timer "$T"
 T="heron clear tar and zip files"
 start_timer "$T"
 rm -rf ./bazel-bin/scripts/packages/*.tar 
-rm -rf ./bazel-bin/scripts/packages/*.tar.gz 
+rm -rf ./bazel-bin/scripts/packages/heron-api.tar.gz 
+rm -rf ./bazel-bin/scripts/packages/heron-tools.tar.gz 
+rm -rf ./bazel-bin/scripts/packages/heron-client.tar.gz 
 rm -rf ./bazel-bin/scripts/packages/*.args
 rm -rf ./bazel-bin/scripts/packages/*.zip
 end_timer "$T"
