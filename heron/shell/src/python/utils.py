@@ -24,6 +24,20 @@ from xml.sax.saxutils import escape
 
 from heron.common.src.python.utils import proc
 
+urls_to_handlers = [
+  (r"^/jmap/([0-9]+$)", handlers.JmapHandler),
+  (r"^/histo/([0-9]+$)", handlers.MemoryHistogramHandler),
+  (r"^/pmap/([0-9]+$)", handlers.PmapHandler),
+  (r"^/jstack/([0-9]+$)", handlers.JstackHandler),
+  (r"^/pid/(.*)", handlers.PidHandler),
+  (r"^/browse/(.*)", handlers.BrowseHandler),
+  (r"^/file/(.*)", handlers.FileHandler),
+  (r"^/filedata/(.*)", handlers.FileDataHandler),
+  (r"^/filestats/(.*)", handlers.FileStatsHandler),
+  (r"^/download/(.*)", handlers.DownloadHandler),
+  (r"^/killexecutor", handlers.KillExecutorHandler),
+]
+
 def format_mode(sres):
   """
   Format a line in the directory list based on the file's type and other attributes.
