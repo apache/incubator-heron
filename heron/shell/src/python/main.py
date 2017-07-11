@@ -23,7 +23,9 @@ from tornado.options import define, options, parse_command_line
 
 from heron.shell.src.python import utils
 
-def run(extra_handlers=[]):
+def run(extra_handlers=None):
+  if extra_handlers is None:
+    extra_handlers = []
   define("port", default=9999, help="Runs on the given port", type=int)
   define("secret", default='', help="Shared secret for /killexecutor", type=str)
   parse_command_line()
