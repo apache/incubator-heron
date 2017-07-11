@@ -13,5 +13,3 @@ that data as tuples (lists in Python) to
 
 # Load basic dsl modules
 from .streamlet import Streamlet, OperationType, TimeWindow
-from .inputs.textfile import TextFileStreamlet
-from .inputs.inmemory import StaticLinesStreamlet
