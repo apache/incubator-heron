@@ -289,16 +289,19 @@ public class HeronServerTest {
    */
   @Test
   public void testRegisterTimerEventInNanoSeconds() {
+    final CountDownLatch runnableLatch = new CountDownLatch(1);
     Runnable r = new Runnable() {
       @Override
       public void run() {
         isTimerEventInvoked = true;
+        runnableLatch.countDown();
       }
     };
     heronServer.registerTimerEvent(Duration.ZERO, r);
 
     runBase();
 
+    HeronServerTester.await(runnableLatch);
     Assert.assertTrue(isTimerEventInvoked);
   }
 
