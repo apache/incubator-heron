@@ -569,6 +569,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
   proto::system::HeronTupleSet2* current_control_tuple_set = nullptr;
   current_control_tuple_set = __global_protobuf_pool_acquire__(current_control_tuple_set);
+  current_control_tuple_set->Clear();
   current_control_tuple_set->set_src_task_id(_src_task_id);
 
   // First go over emits. This makes sure that new emits makes
