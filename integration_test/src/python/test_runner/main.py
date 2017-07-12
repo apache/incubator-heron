@@ -16,7 +16,7 @@ from heron.common.src.python.utils import log
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration_test/src/python/test_runner/resources/test.json"
 
-RETRY_ATTEMPTS = 30
+RETRY_ATTEMPTS = 15
 #seconds
 RETRY_INTERVAL = 10
 

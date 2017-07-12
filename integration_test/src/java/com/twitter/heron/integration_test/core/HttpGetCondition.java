@@ -24,7 +24,7 @@ import java.net.URL;
 class HttpGetCondition implements Condition {
   private static final long serialVersionUID = -3370730083374050883L;
   private static final long SLEEP_MS = 10 * 1000;
-  private static final int MAX_ATTEMPTS = 10;
+  private static final int MAX_ATTEMPTS = 40;
   private URL url;
 
   HttpGetCondition(String urlString) {
