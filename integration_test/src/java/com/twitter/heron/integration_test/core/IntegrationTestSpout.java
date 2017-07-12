@@ -134,11 +134,12 @@ public class IntegrationTestSpout implements IRichSpout {
 
   @Override
   public void ack(Object messageId) {
+    tuplesToAck--;
+    LOG.info("Received an ack with MessageId: " + messageId + " tuplesToAck=" + tuplesToAck);
+
     if (!isTestMessageId(messageId)) {
       delegateSpout.ack(messageId);
     } else {
-      tuplesToAck--;
-      LOG.info("Received an ack with MessageId: " + messageId + " tuplesToAck=" + tuplesToAck);
       handleAckedMessage(messageId, pendingMessages.get(messageId));
     }
     emitTerminalIfNeeded();
