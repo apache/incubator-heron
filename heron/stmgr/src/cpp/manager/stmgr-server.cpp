@@ -425,14 +425,10 @@ void StMgrServer::SendToInstance2(proto::stmgr::TupleStreamMessage2* _message) {
 
 void StMgrServer::DrainTupleStream(proto::stmgr::TupleStreamMessage2* _message) {
   sp_int32 task_id = _message->task_id();
-  bool drop = false;
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << task_id << " has not yet connected to us. Dropping...";
-    drop = true;
-  }
-
-  if (!drop) {
+  } else {
     SendMessage(iter->second->conn_, _message->set().size(),
                 heron_tuple_set_2_, _message->set().c_str());
   }
