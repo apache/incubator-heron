@@ -6,7 +6,6 @@ pex_library(
     name = "heron-shell-lib",
     srcs = glob(
         ["**/*.py"],
-        exclude = ["main.py"]
     ),
     deps = [
         "//heron/common/src/python:common-py",
