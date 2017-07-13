@@ -6,8 +6,9 @@ pex_library(
     name = "heron-pythonspouts-py",
     srcs = glob(["**/*.py"]),
     deps = [
-        "//heron/proto:proto-py",
-    ]
+        "//heron/api/src/python:heron-python-py",
+    ],
+    reqs = ['pulsar-client==1.19.dev2']
 )
 
 # for egg production
