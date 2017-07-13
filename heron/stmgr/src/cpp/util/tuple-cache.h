@@ -71,7 +71,6 @@ class TupleCache {
     proto::system::HeronTupleSet2* acquire_clean_set() {
      proto::system::HeronTupleSet2* set = nullptr;
      set = __global_protobuf_pool_acquire__(set);
-     set->Clear();
      return set;
     }
 
