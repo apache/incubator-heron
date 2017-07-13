@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Random;
 
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.PackingAlgorithmType;
 
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
@@ -184,7 +183,6 @@ public final class WordCountTopology {
     com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromGigabytes(2));
     com.twitter.heron.api.Config.setComponentRam(conf, "consumer", ByteAmount.fromGigabytes(3));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 6);
-    com.twitter.heron.api.Config.setTopologyPackingAlgorithm(conf, PackingAlgorithmType.FIRST_FIT_DECREASING);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

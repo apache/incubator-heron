@@ -25,6 +25,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.PackingAlgorithmType;
+import com.twitter.heron.common.basics.RepackingAlgorithmType;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
@@ -236,6 +237,32 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_PACKING_ALGORITHM =
       "heron.class.packing.algorithm";
 
+  /**
+   * Repacking algorithm used to recalculate packing plan
+   */
+  public static final String TOPOLOGY_REPACKING_ALGORITHM =
+      "heron.class.repacking.algorithm";
+
+  /**
+   * Amount of RAM per instance to be reserved for this topology.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_INSTANCE_RAM_REQUESTED =
+      "heron.resources.instance.ram";
+
+  /**
+   * Number of cpu cores per instance to be reserved for this topology
+   */
+  public static final String TOPOLOGY_INSTANCE_CPU_REQUESTED =
+      "heron.resources.instance.cpu";
+
+  /**
+   * Amount of disk per instance to be reserved for this topology.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_INSTANCE_DISK_REQUESTED =
+      "heron.resources.instance.disk";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -248,7 +275,6 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_MAX_SPOUT_PENDING);
     apiVars.add(TOPOLOGY_WORKER_CHILDOPTS);
     apiVars.add(TOPOLOGY_COMPONENT_JVMOPTS);
-    apiVars.add(TOPOLOGY_SERIALIZER_CLASSNAME);
     apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_SECS);
     apiVars.add(TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
     apiVars.add(TOPOLOGY_ENABLE_ACKING);
@@ -273,6 +299,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_PACKING_ALGORITHM);
+    apiVars.add(TOPOLOGY_REPACKING_ALGORITHM);
   }
 
   public Config() {
@@ -465,6 +492,23 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_PACKING_ALGORITHM, type.toString());
   }
 
+  public static void setTopologyRepackingAlgorithm(Map<String, Object> conf,
+                                                   RepackingAlgorithmType type) {
+    conf.put(Config.TOPOLOGY_REPACKING_ALGORITHM, type.toString());
+  }
+
+  public static void setInstanceCpuRequested(Map<String, Object> conf, float ncpus) {
+    conf.put(Config.TOPOLOGY_INSTANCE_CPU_REQUESTED, Float.toString(ncpus));
+  }
+
+  public static void setInstanceDiskRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_INSTANCE_DISK_REQUESTED, Long.toString(nbytes.asBytes()));
+  }
+
+  public static void setInstanceRamRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_INSTANCE_RAM_REQUESTED, Long.toString(nbytes.asBytes()));
+  }
+
   public void setDebug(boolean isOn) {
     setDebug(this, isOn);
   }
@@ -605,5 +649,21 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyPackingAlgorithm(PackingAlgorithmType type) {
     setTopologyPackingAlgorithm(this, type);
+  }
+
+  public void setTopologyRepackingAlgorithm(RepackingAlgorithmType type) {
+    setTopologyRepackingAlgorithm(this, type);
+  }
+
+  public void setInstanceCpuRequested(float ncpus) {
+    setInstanceCpuRequested(this, ncpus);
+  }
+
+  public void setInstanceDiskRequested(ByteAmount nbytes) {
+    setInstanceDiskRequested(this, nbytes);
+  }
+
+  public void setInstanceRamRequested(ByteAmount nbytes) {
+    setInstanceRamRequested(this, nbytes);
   }
 }
