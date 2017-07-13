@@ -7,7 +7,7 @@ pex_library(
     srcs = glob(["**/*.py"]),
     deps = [
         "//heron/proto:proto-py",
-    ],
+    ]
 )
 
 # for egg production

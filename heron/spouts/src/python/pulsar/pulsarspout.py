@@ -18,7 +18,7 @@ import tempfile
 
 import pulsar
 
-from heron.api.src.python import Spout, api_constants
+from heron.api.src.python import Spout, api_constants, Stream
 
 def GenerateLogConfContents(logFileName):
   return """
@@ -47,9 +47,11 @@ class PulsarSpout(Spout):
   """PulsarSpout: reads from a pulsar topic"""
 
   # pylint: disable=too-many-instance-attributes
-
   # pylint: disable=no-self-use
-  def deserialize(self, msg):
+
+  outputs = [Stream(fields=['_output_'], name='output')]
+
+  def default_deserializer(self, msg):
     return [str(msg)]
 
   # TopologyBuilder uses these constants to set
@@ -57,6 +59,7 @@ class PulsarSpout(Spout):
   serviceUrl = "PULSAR_SERVICE_URL"
   topicName = "PULSAR_TOPIC"
   receiveTimeoutMs = "PULSAR_RECEIVE_TIMEOUT_MS"
+  deserializer = "PULSAR_MESSAGE_DESERIALIZER"
 
   def initialize(self, config, context):
     """Implements Pulsar Spout's initialize method"""
@@ -81,6 +84,12 @@ class PulsarSpout(Spout):
       self.receive_timeout_ms = config[PulsarSpout.receiveTimeoutMs]
     else:
       self.receive_timeout_ms = 10
+    if PulsarSpout.deserializer in config:
+      self.deserializer = config[PulsarSpout.deserializer]
+      if not callable(self.deserializer):
+        self.logger.fatal("Pulsar Message Deserializer needs to be callable")
+    else:
+      self.deserializer = self.default_deserializer
 
     # First generate the config
     self.logConfFileName = GenerateLogConfig(context)
@@ -109,7 +118,7 @@ class PulsarSpout(Spout):
       return
 
     try:
-      self.emit(self.deserialize(msg.data()), tup_id=msg.message_id())
+      self.emit(self.deserializer(msg.data()), tup_id=msg.message_id())
       self.emit_count += 1
     except Exception as e:
       self.logger.info("Exception during emit: %s" % str(e))
