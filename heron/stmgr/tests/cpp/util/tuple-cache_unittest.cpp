@@ -39,7 +39,8 @@ class Drainer {
           const std::map<sp_int32, sp_int32>& _num_fail_tuples_expected)
       : num_data_tuples_expected_(_num_data_tuples_expected),
         num_ack_tuples_expected_(_num_ack_tuples_expected),
-        num_fail_tuples_expected_(_num_fail_tuples_expected) {}
+        num_fail_tuples_expected_(_num_fail_tuples_expected),
+        ckpt_message_seen_(false) {}
 
   ~Drainer() {}
 
@@ -55,10 +56,15 @@ class Drainer {
     delete _t;
   }
 
-  bool Verify() {
+  void CheckpointDrain(sp_int32 _task_id, heron::proto::ckptmgr::DownstreamStatefulCheckpoint* _t) {
+    ckpt_message_seen_ = true;
+  }
+
+  bool Verify(bool _ckpt) {
     return verify(num_data_tuples_expected_, num_data_tuples_actual_) &&
            verify(num_ack_tuples_expected_, num_ack_tuples_actual_) &&
-           verify(num_fail_tuples_expected_, num_fail_tuples_actual_);
+           verify(num_fail_tuples_expected_, num_fail_tuples_actual_) &&
+           ckpt_message_seen_ == _ckpt;
   }
 
  private:
@@ -88,6 +94,7 @@ class Drainer {
   std::map<sp_int32, sp_int32> num_data_tuples_actual_;
   std::map<sp_int32, sp_int32> num_ack_tuples_actual_;
   std::map<sp_int32, sp_int32> num_fail_tuples_actual_;
+  bool ckpt_message_seen_;
 };
 
 void DoneHandler(EventLoopImpl* _ss, EventLoopImpl::Status) { _ss->loopExit(); }
@@ -120,7 +127,7 @@ TEST(TupleCache, test_simple_data_drain) {
 
   ss.loop();
 
-  EXPECT_EQ(drainer->Verify(), true);
+  EXPECT_EQ(drainer->Verify(false), true);
   delete drainer;
   delete g;
 }
@@ -170,7 +177,7 @@ TEST(TupleCache, test_data_ack_fail_mix) {
 
   ss.loop();
 
-  EXPECT_EQ(drainer->Verify(), true);
+  EXPECT_EQ(drainer->Verify(false), true);
   delete drainer;
   delete g;
 }
@@ -238,7 +245,50 @@ TEST(TupleCache, test_different_stream_mix) {
 
   ss.loop();
 
-  EXPECT_EQ(drainer->Verify(), true);
+  EXPECT_EQ(drainer->Verify(false), true);
+  delete drainer;
+  delete g;
+}
+
+// Test drain with checkpoint marker
+TEST(TupleCache, test_checkpoint_drain) {
+  sp_int32 data_tuples_count = 23354;
+  EventLoopImpl ss;
+  sp_uint32 drain_threshold = 1024 * 1024;
+  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(&ss, drain_threshold);
+  std::map<sp_int32, sp_int32> data_tuples;
+  data_tuples[1] = data_tuples_count;
+  std::map<sp_int32, sp_int32> ack_tuples;
+  std::map<sp_int32, sp_int32> fail_tuples;
+  Drainer* drainer = new Drainer(data_tuples, ack_tuples, fail_tuples);
+  g->RegisterDrainer(&Drainer::Drain, drainer);
+  g->RegisterCheckpointDrainer(&Drainer::CheckpointDrain, drainer);
+
+  heron::proto::api::StreamId dummy;
+  dummy.set_id("stream");
+  dummy.set_component_name("comp");
+  for (sp_int32 i = 0; i < data_tuples_count/2; ++i) {
+    heron::proto::system::HeronDataTuple tuple;
+    tuple.set_key(RandUtils::lrand());
+    g->add_data_tuple(1, 1, dummy, &tuple);
+  }
+
+  heron::proto::ckptmgr::DownstreamStatefulCheckpoint ckpt_message;
+  g->add_checkpoint_tuple(1, &ckpt_message);
+
+  for (sp_int32 i = 0; i < data_tuples_count/2; ++i) {
+    heron::proto::system::HeronDataTuple tuple;
+    tuple.set_key(RandUtils::lrand());
+    g->add_data_tuple(1, 1, dummy, &tuple);
+  }
+
+  // 300 milliseconds second
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
+  ss.registerTimer(std::move(cb), false, 300_ms);
+
+  ss.loop();
+
+  EXPECT_EQ(drainer->Verify(true), true);
   delete drainer;
   delete g;
 }
