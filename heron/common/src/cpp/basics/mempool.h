@@ -83,7 +83,9 @@ extern std::mutex __global_protobuf_pool_mutex__;
 template<typename T>
 T* __global_protobuf_pool_acquire__(T* _m) {
   std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
-  return __global_protobuf_pool__->acquire(_m);
+  T* t = __global_protobuf_pool__->acquire(_m);
+  t->Clear();
+  return t;
 }
 
 template<typename T>
