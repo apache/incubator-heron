@@ -134,9 +134,9 @@ public class IntegrationTestSpout implements IRichSpout {
 
   @Override
   public void ack(Object messageId) {
-    LOG.fine("Received a ack with MessageId: " + messageId);
-
     tuplesToAck--;
+    LOG.info("Received an ack with MessageId: " + messageId + " tuplesToAck=" + tuplesToAck);
+
     if (!isTestMessageId(messageId)) {
       delegateSpout.ack(messageId);
     } else {
@@ -157,7 +157,8 @@ public class IntegrationTestSpout implements IRichSpout {
       delegateSpout.fail(messageId);
     } else {
       if (pendingMessages.containsKey(messageId)) {
-        LOG.info("Re-emitting failed tuple with messageId " + messageId);
+        LOG.info("Re-emitting failed tuple with messageId " + messageId
+            + ", tuple: " + pendingMessages.get(messageId));
         spoutOutputCollector.emit(pendingMessages.get(messageId), messageId);
       }
     }
@@ -204,14 +205,14 @@ public class IntegrationTestSpout implements IRichSpout {
     @Override
     public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
       tuplesToAck++;
-      LOG.info("Emitting tuple: " + tuple);
+      LOG.info("Emitting tuple: " + tuple + ", tuplesToAck=" + tuplesToAck);
       return delegate.emit(streamId, tuple, getMessageId(tuple, messageId));
     }
 
     @Override
     public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
       tuplesToAck++;
-      LOG.info("Emitting tuple: " + tuple);
+      LOG.info("Emitting tuple: " + tuple + ", tuplesToAck=" + tuplesToAck);
       delegate.emitDirect(taskId, streamId, tuple, getMessageId(tuple, messageId));
     }
 
