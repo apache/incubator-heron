@@ -39,20 +39,21 @@ namespace heron {
 namespace stmgr {
 
 class StMgr;
+class NeighbourCalculator;
+class CheckpointGateway;
 
 class StMgrServer : public Server {
  public:
   StMgrServer(EventLoop* eventLoop, const NetworkOptions& options, const sp_string& _topology_name,
               const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
-              heron::common::MetricsMgrSt* _metrics_manager_client);
+              heron::common::MetricsMgrSt* _metrics_manager_client,
+              NeighbourCalculator* _neighbour_calculator);
   virtual ~StMgrServer();
 
-  void SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message);
-  void SendToInstance2(sp_int32 _task_id,
-                       sp_int32 _byte_size,
-                       const sp_string _type_name,
-                       const char* _message);
+  // We own the message
+  void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
+  void SendToInstance2(proto::stmgr::TupleStreamMessage2* _message);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
@@ -75,6 +76,9 @@ class StMgrServer : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
  private:
+  void DrainTupleSet(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
+  void DrainTupleStream(proto::stmgr::TupleStreamMessage2* _message);
+  void DrainCheckpoint(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
@@ -169,6 +173,12 @@ class StMgrServer : public Server {
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
   bool spouts_under_back_pressure_;
+
+  // Stateful processing related member variables
+  NeighbourCalculator* neighbour_calculator_;
+  CheckpointGateway* stateful_gateway_;
+
+  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };
 
 }  // namespace stmgr
