@@ -59,6 +59,8 @@ class TupleCache {
                             proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
   // Clear all data of all task_ids
+  // This is different from the drain because while drain clears the messages
+  // calling the drainer functions, this one just deletes the messages.
   void clear();
 
  private:
