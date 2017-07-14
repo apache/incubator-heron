@@ -13,8 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.common.basics;
 
-import com.google.common.base.Preconditions;
-
 /**
  * Class that encapsulates number of bytes, with helpers to handle units properly.
  */
@@ -118,7 +116,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * @throws IllegalArgumentException if subtraction would overshoot Long.MIN_VALUE
    */
   public ByteAmount minus(ByteAmount other) {
-    Preconditions.checkArgument(Long.MIN_VALUE + other.asBytes() <= asBytes(), String.format(
+    checkArgument(Long.MIN_VALUE + other.asBytes() <= asBytes(), String.format(
         "Subtracting %s from %s would overshoot Long.MIN_LONG", other, this));
     return ByteAmount.fromBytes(asBytes() - other.asBytes());
   }
@@ -130,7 +128,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * @throws IllegalArgumentException if addition would exceed Long.MAX_VALUE
    */
   public ByteAmount plus(ByteAmount other) {
-    Preconditions.checkArgument(Long.MAX_VALUE - asBytes() >= other.asBytes(), String.format(
+    checkArgument(Long.MAX_VALUE - asBytes() >= other.asBytes(), String.format(
         "Adding %s to %s would exceed Long.MAX_LONG", other, this));
     return ByteAmount.fromBytes(asBytes() + other.asBytes());
   }
@@ -142,7 +140,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * @throws IllegalArgumentException if multiplication would exceed Long.MAX_VALUE
    */
   public ByteAmount multiply(int factor) {
-    Preconditions.checkArgument(asBytes() <= Long.MAX_VALUE / factor, String.format(
+    checkArgument(asBytes() <= Long.MAX_VALUE / factor, String.format(
         "Multiplying %s by %d would exceed Long.MAX_LONG", this, factor));
     return ByteAmount.fromBytes(asBytes() * factor);
   }
@@ -155,7 +153,7 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * @return a new ByteValue of this ByteValue divided by factor
    */
   public ByteAmount divide(int factor) {
-    Preconditions.checkArgument(factor != 0, String.format("Can not divide %s by 0", this));
+    checkArgument(factor != 0, String.format("Can not divide %s by 0", this));
     return ByteAmount.fromBytes(Math.round((double) this.asBytes() / (double) factor));
   }
 
@@ -167,11 +165,11 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    * @throws IllegalArgumentException if increase would exceed Long.MAX_VALUE
    */
   public ByteAmount increaseBy(int percentage) {
-    Preconditions.checkArgument(percentage >= 0, String.format(
+    checkArgument(percentage >= 0, String.format(
         "Increasing by negative percent (%d) not supported", percentage));
     double factor = 1.0 + ((double) percentage / 100);
     long max = Math.round(Long.MAX_VALUE / factor);
-    Preconditions.checkArgument(asBytes() <= max, String.format(
+    checkArgument(asBytes() <= max, String.format(
         "Increasing %s by %d percent would exceed Long.MAX_LONG", this, percentage));
     return ByteAmount.fromBytes(Math.round((double) asBytes() * factor));
   }
@@ -234,5 +232,11 @@ public final class ByteAmount implements Comparable<ByteAmount> {
       value = bytes + " bytes";
     }
     return String.format("ByteAmount{%s}", value);
+  }
+
+  private void checkArgument(boolean condition, String errorMessage) {
+    if (!condition) {
+      throw new IllegalArgumentException(errorMessage);
+    }
   }
 }

@@ -24,7 +24,6 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.TypeUtils;
 
 /**
  * Topology configs are specified as a plain old map. This class provides a
@@ -379,8 +378,9 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
 
+  @SuppressWarnings("unchecked")
   public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
-    return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
+    return (List<String>) conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
   }
 
   /**

@@ -13,6 +13,7 @@
 # limitations under the License.
 '''serializer.py: common python serializer for heron'''
 from abc import abstractmethod
+import cloudpickle
 
 try:
   import cPickle as pickle
@@ -50,7 +51,7 @@ class PythonSerializer(IHeronSerializer):
     pass
 
   def serialize(self, obj):
-    return pickle.dumps(obj)
+    return cloudpickle.dumps(obj)
 
   def deserialize(self, input_str):
     return pickle.loads(input_str)

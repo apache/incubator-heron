@@ -63,6 +63,13 @@ filegroup(
 )
 
 filegroup(
+    name = "testpkgs",
+    srcs = [
+        ":heron-tests-install.sh",
+    ],
+)
+
+filegroup(
     name = "pypkgs",
     srcs = [
         ":generate-heronpy-package",
@@ -306,6 +313,55 @@ pkg_tar(
 )
 
 ################################################################################
+# Heron test packaging
+################################################################################
+pkg_tar(
+    name = "heron-tests-bin",
+    package_dir = "bin",
+    files = [
+        "//integration_test/src/python/http_server:http-server",
+        "//integration_test/src/python/test_runner:test-runner",
+    ]
+)
+
+pkg_tar(
+    name = "heron-tests-data-java",
+    package_dir = "data/java",
+    files = [
+        "//integration_test/src/java:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-data-python",
+    package_dir = "data/python",
+    files = [
+        "//integration_test/src/python/integration_test/topology:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-lib",
+    package_dir = "lib",
+    files = [
+       "//integration_test/src/java:integration-tests",
+       "//integration_test/src/python/integration_test/topology:heron_integ_topology",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests",
+    extension = "tar.gz",
+    files = generated_release_files,
+    deps = [
+        ":heron-tests-bin",
+        ":heron-tests-data-java",
+        ":heron-tests-data-python",
+        ":heron-tests-lib",
+    ],
+)
+
+################################################################################
 # Heron API packaging
 ################################################################################
 pkg_tar(
@@ -316,6 +372,16 @@ pkg_tar(
 
 ################################################################################
 # Heron python packaging
+# 
+# When a new python module is being added into the heronpy package, please ensure 
+# that its dependencies are being added into the packaging as well. Sometimes,
+# the dependencies might already exist. For example, 
+#   heron/api depends on proto
+#   heron/dsl depends on proto and heron/api
+#
+# Hence the python package consists of the dependencies proto and heron/api.
+# Note that the heron/api is exported as external API for heronpy and it is
+# duplicated for dependency for heron/dsl.
 ################################################################################
 genrule(
     name = "generate-heronpy-package",
@@ -327,7 +393,8 @@ genrule(
     outs = generated_heronpy_egg_file,
     stamp = 1,
     tools = [
-        "//heron/api/src/python:heron-python-package"
+        "//heron/api/src/python:heron-python-package",
+        "//heron/dsl/src/python:heron-pythondsl-package",
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
@@ -335,18 +402,23 @@ genrule(
         'export TMP_DIR=$$(mktemp -d -t heronpy.XXXXX)',
         'echo $$TMP_DIR',
         'export HERONPY_DIR=$$TMP_DIR/heronpy',
-        'export HERONPY_UNZIP=$$TMP_DIR/unzipped',
+        'export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip',
+        'export HERONPYDSL_UNZIP=$$TMP_DIR/herondslunzip',
         'export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk \'{print $$3}\')',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
         'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
         'echo $$HERON_VERSION',
         'mkdir -p $$TMP_DIR $$HERONPY_DIR',
-        'unzip -qd $$HERONPY_UNZIP $(location //heron/api/src/python:heron-python-package)',
-        'find $$HERONPY_UNZIP -name "*.pyc" -exec rm {} \;',
-        'mv $$HERONPY_UNZIP/heron/api/src/python $$HERONPY_DIR/heronpy',
-        'rm -rf $$HERONPY_UNZIP/heron/api',
-        'mv $$HERONPY_UNZIP/heron $$HERONPY_DIR/heron',
+        'unzip -qd $$HERONPYAPI_UNZIP $(location //heron/api/src/python:heron-python-package)',
+        'unzip -qd $$HERONPYDSL_UNZIP $(location //heron/dsl/src/python:heron-pythondsl-package)',
+        'find $$HERONPYAPI_UNZIP -name "*.pyc" -exec rm {} \;',
+        'find $$HERONPYDSL_UNZIP -name "*.pyc" -exec rm {} \;',
+        'mv $$HERONPYAPI_UNZIP/heron/api/src/python $$HERONPY_DIR/heronpy',
+        'mv $$HERONPYDSL_UNZIP/heron/dsl/src/python $$HERONPY_DIR/heronpy/streamlet',
+        'rm -rf $$HERONPYAPI_UNZIP/heron/api',
+        'rm -rf $$HERONPYDSL_UNZIP/heron/dsl',
+        'mv $$HERONPYDSL_UNZIP/heron $$HERONPY_DIR/heron',
         'cp $(SRCS) $$HERONPY_DIR',
         'echo "Heron Python toplevel directory: $$HERONPY_DIR"',
         'cd $$HERONPY_DIR',
@@ -414,6 +486,18 @@ genrule(
         """,
 )
 
+genrule(
+    name = "generate-tests-launcher",
+    srcs = ["tests_template_bin.sh", "bin_common.sh"] + generated_release_files,
+    outs = ["tests_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
+        template="$$(cat $(location tests_template_bin.sh))"
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
 load("self_extract_binary", "self_extract_binary")
 
 self_extract_binary(
@@ -440,6 +524,14 @@ self_extract_binary(
     launcher = ":tools_launcher_bin.sh",
 )
 
+self_extract_binary(
+    name = "heron-tests-install.sh",
+    flatten_resources = [
+        ":heron-tests",
+    ],
+    launcher = ":tests_launcher_bin.sh",
+)
+
 filegroup(
     name = "api-template-bin.sh",
     srcs = ["api_template_bin.sh"],
@@ -453,6 +545,11 @@ filegroup(
 filegroup(
     name = "tools-template-bin.sh",
     srcs = ["tools_template_bin.sh"],
+)
+
+filegroup(
+    name = "tests-template-bin.sh",
+    srcs = ["tests_template_bin.sh"],
 )
 
 filegroup(

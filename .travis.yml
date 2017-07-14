@@ -35,8 +35,8 @@ before_install:
 before_script:
   # required for building the website docs
   - (cd website && npm install && npm install gulp && which gulp)
-  - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
-  - sudo dpkg -i hugo*.deb
+  - wget -q https://github.com/gohugoio/hugo/releases/download/v0.24.1/hugo_0.24.1_Linux-64bit.deb
+  - sudo dpkg -i hugo_0.24.1_Linux-64bit.deb
   - hugo version
 
   # install python module for wheel files
@@ -50,6 +50,6 @@ script:
   - g++ --version
   - which python
   - python -V
-  - which python2.7 
+  - which python2.7
   - python2.7 -V
-  - scripts/travis/ci.sh travis
+  - scripts/travis/ci.sh

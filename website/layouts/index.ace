@@ -18,10 +18,10 @@ html lang={{.Site.LanguageCode}}
             .hn-button-row.row
               a.btn.btn-default href=docs/getting-started Get Started
               a.btn.btn-default href=docs/migrate-storm-to-heron Migrate From Storm
-        .row
+        section.main-page-lower-section.container
           .col-xs-12.col-sm-9.col-md-9.col-lg-9
             .landing-feature-2.text-left
-              h2 Why Heron?
+              h2.text-center Why Heron?
               br
               .row
                 .col-sm-6
@@ -62,8 +62,8 @@ html lang={{.Site.LanguageCode}}
                   h4 Run Topologies using pre-compiled Heron binaries
                   a.btn.btn-default href=docs/getting-started Get Started
                 .col-sm-6
-                  h4 Upgrade Existing Storm Topologies
-                  a.btn.btn-default href=docs/migrate-storm-to-heron Migrate From Storm
+                  h4 Migrate Existing Storm Topologies
+                  a.btn.btn-default href=docs/migrate-storm-to-heron Migrate Storm topologies
 
           .hn-twitter-feed.hidden-xs.col-sm-3.col-md-3.col-lg-3
             {{partial "index/feed.html" .}}

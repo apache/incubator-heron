@@ -106,7 +106,7 @@ done
 dir_list=`find $DIR/../heron -path "*/src/java" | cut -d '/' -f 3-`
 generate_source_dirs
 
-dir_list=`find $DIR/../integration-test -path "*/src/java" | cut -d '/' -f 3-`
+dir_list=`find $DIR/../integration_test -path "*/src/java" | cut -d '/' -f 3-`
 generate_source_dirs
 
 dir_list=`find $DIR/../heron -path "*/tests/java" | cut -d '/' -f 3-`

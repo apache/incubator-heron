@@ -3,15 +3,15 @@
 # Script to locally run the functional integration test.
 #
 
-HTTP_SERVER="./bazel-bin/integration-test/src/python/http_server/http-server"
-TEST_RUNNER="./bazel-bin/integration-test/src/python/test_runner/test-runner.pex"
+HTTP_SERVER="./bazel-bin/integration_test/src/python/http_server/http-server"
+TEST_RUNNER="./bazel-bin/integration_test/src/python/test_runner/test-runner.pex"
 
-JAVA_TESTS_DIR="integration-test/src/java/com/twitter/heron/integration_test/topology/"
-PYTHON_TESTS_DIR="integration-test/src/python/integration_test/topology/"
+JAVA_TESTS_DIR="integration_test/src/java/com/twitter/heron/integration_test/topology"
+PYTHON_TESTS_DIR="integration_test/src/python/integration_test/topology"
 
 # integration test binaries have to be specified as absolute path
-JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration-test/src/java/integration-tests.jar"
-PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration-test/src/python/integration_test/topology/heron_integ_topology.pex"
+JAVA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration_test/src/java/integration-tests.jar"
+PYTHON_INTEGRATION_TESTS_BIN="${PWD}/bazel-bin/integration_test/src/python/integration_test/topology/heron_integ_topology.pex"
 
 CORE_PKG="file://${PWD}/bazel-bin/scripts/packages/heron-core.tar.gz"
 
@@ -21,7 +21,7 @@ set -e
 DIR=`dirname $0`
 source ${DIR}/detect_os_type.sh
 bazel run --config=`platform` -- scripts/packages:heron-client-install.sh --user
-bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration-test/src/...}
+bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration_test/src/...}
 
 # run the simple http server
 ${HTTP_SERVER} 8080 &

@@ -36,7 +36,13 @@ class TupleCache {
 
   template <class T>
   void RegisterDrainer(void (T::*method)(sp_int32, proto::system::HeronTupleSet2*), T* _t) {
-    drainer_ = std::bind(method, _t, std::placeholders::_1, std::placeholders::_2);
+    tuple_drainer_ = std::bind(method, _t, std::placeholders::_1, std::placeholders::_2);
+  }
+
+  template <class T>
+  void RegisterCheckpointDrainer(void (T::*method)(sp_int32,
+             proto::ckptmgr::DownstreamStatefulCheckpoint*), T* _t) {
+    checkpoint_drainer_ = std::bind(method, _t, std::placeholders::_1, std::placeholders::_2);
   }
 
   // returns tuple key
@@ -49,6 +55,13 @@ class TupleCache {
                       sp_int32 _task_id, const proto::system::AckTuple& _tuple);
   void add_emit_tuple(sp_int32 _src_task_id,
                       sp_int32 _task_id, const proto::system::AckTuple& _tuple);
+  void add_checkpoint_tuple(sp_int32 _task_id,
+                            proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+
+  // Clear all data of all task_ids
+  // This is different from the drain because while drain clears the messages
+  // calling the drainer functions, this one just deletes the messages.
+  void clear();
 
  private:
   void drain(EventLoop::Status);
@@ -72,19 +85,24 @@ class TupleCache {
                         const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
     void add_emit_tuple(sp_int32 _src_task_id,
                         const proto::system::AckTuple& _tuple, sp_uint64* total_size_);
+    void add_checkpoint_tuple(proto::ckptmgr::DownstreamStatefulCheckpoint* _message,
+                              sp_uint64* total_size_);
 
     void drain(sp_int32 _task_id,
-               std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer);
+               std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _tuple_drainer,
+               std::function<void(sp_int32,
+               proto::ckptmgr::DownstreamStatefulCheckpoint*)> _checkpoint_drainer);
 
     proto::system::HeronTupleSet2* acquire_clean_set() {
      proto::system::HeronTupleSet2* set = nullptr;
      set = __global_protobuf_pool_acquire__(set);
-     set->Clear();
      return set;
     }
 
+    void clear();
+
    private:
-    std::deque<proto::system::HeronTupleSet2*> tuples_;
+    std::deque<google::protobuf::Message*> tuples_;
     proto::system::HeronTupleSet2* current_;
     sp_uint64 current_size_;
     sp_int32 last_drained_count_;
@@ -95,7 +113,9 @@ class TupleCache {
   // map from task_id to the TupleList
   std::unordered_map<sp_int32, TupleList*> cache_;
   EventLoop* eventLoop_;
-  std::function<void(sp_int32, proto::system::HeronTupleSet2*)> drainer_;
+  std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tuple_drainer_;
+  std::function<void(sp_int32, proto::ckptmgr::DownstreamStatefulCheckpoint*)>
+                                  checkpoint_drainer_;
   sp_uint64 total_size_;
   sp_uint32 drain_threshold_bytes_;
 

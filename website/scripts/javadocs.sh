@@ -6,7 +6,7 @@ FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 # for display on GitHub website
-JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
+JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api/java
 # for display on local Hugo server
 JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
@@ -24,7 +24,7 @@ fi
 (cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'`\
   `bazel query 'kind("java_test", "heron/...")'` \
-  `bazel query 'kind("java_library", "integration-test/...")'`)
+  `bazel query 'kind("java_library", "integration_test/...")'`)
 
 HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/com/twitter/*" -name "*.java"`
 BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.java"`

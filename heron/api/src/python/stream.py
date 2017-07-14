@@ -16,6 +16,7 @@
 import collections
 
 from .serializer import default_serializer
+from .custom_grouping import ICustomGrouping
 from heron.proto import topology_pb2
 
 class Stream(object):
@@ -114,17 +115,16 @@ class Grouping(object):
                       fields=fields)
 
   @classmethod
-  def custom(cls, classpath):
-    """Custom grouping from a given classpath to an implementation of ICustomGrouping
+  def custom(cls, customgrouper):
+    """Custom grouping from a given implementation of ICustomGrouping
 
-    This method does not exist in the Streamparse API.
-
-    :param classpath: classpath to the ICustomGrouping class to use
+    :param customgrouper: The ICustomGrouping implemention to use
     """
-    if classpath is None or not isinstance(classpath, str):
-      raise TypeError("Argument to custom() must be classpath string to custom grouping, given: "
-                      "%s" % str(classpath))
-    serialized = default_serializer.serialize(classpath)
+    if customgrouper is None:
+      raise TypeError("Argument to custom() must be ICustomGrouping instance or classpath")
+    if not isinstance(customgrouper, ICustomGrouping) and not isinstance(customgrouper, str):
+      raise TypeError("Argument to custom() must be ICustomGrouping instance or classpath")
+    serialized = default_serializer.serialize(customgrouper)
     return cls.custom_serialized(serialized, is_java=False)
 
   @classmethod

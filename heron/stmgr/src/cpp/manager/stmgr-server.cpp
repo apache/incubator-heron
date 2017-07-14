@@ -18,6 +18,8 @@
 #include <iostream>
 #include <unordered_set>
 #include <vector>
+#include "manager/checkpoint-gateway.h"
+#include "util/neighbour-calculator.h"
 #include "manager/stmgr.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -25,6 +27,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 #include "config/helper.h"
+#include "config/heron-internals-config-reader.h"
 #include "metrics/metrics.h"
 
 namespace heron {
@@ -84,14 +87,16 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
                          const sp_string& _stmgr_id,
                          const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
-                         heron::common::MetricsMgrSt* _metrics_manager_client)
+                         heron::common::MetricsMgrSt* _metrics_manager_client,
+                         NeighbourCalculator* _neighbour_calculator)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
       expected_instances_(_expected_instances),
       stmgr_(_stmgr),
-      metrics_manager_client_(_metrics_manager_client) {
+      metrics_manager_client_(_metrics_manager_client),
+      neighbour_calculator_(_neighbour_calculator) {
   // stmgr related handlers
   InstallRequestHandler(&StMgrServer::HandleStMgrHelloRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleStreamMessage);
@@ -116,6 +121,14 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateQueueMetrics(status);
   }, true, SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND), 0);
+
+  sp_uint64 drain_threshold_bytes =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrStatefulBufferSizeMb() * 1_MB;
+  stateful_gateway_ = new CheckpointGateway(drain_threshold_bytes, neighbour_calculator_,
+                                            metrics_manager_client_,
+    std::bind(&StMgrServer::DrainTupleSet, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&StMgrServer::DrainTupleStream, this, std::placeholders::_1),
+    std::bind(&StMgrServer::DrainCheckpoint, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 StMgrServer::~StMgrServer() {
@@ -160,6 +173,8 @@ StMgrServer::~StMgrServer() {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     delete iter->second;
   }
+
+  delete stateful_gateway_;
 }
 
 void StMgrServer::GetInstanceInfo(std::vector<proto::system::Instance*>& _return) {
@@ -300,10 +315,10 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
+    __global_protobuf_pool_release__(_message);
   } else {
-    stmgr_->HandleStreamManagerData(iter->second, *_message);
+    stmgr_->HandleStreamManagerData(iter->second, _message);
   }
-  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
@@ -404,39 +419,60 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
   __global_protobuf_pool_release__(_message);
 }
 
+void StMgrServer::SendToInstance2(proto::stmgr::TupleStreamMessage2* _message) {
+  stateful_gateway_->SendToInstance(_message);
+}
+
+void StMgrServer::DrainTupleStream(proto::stmgr::TupleStreamMessage2* _message) {
+  sp_int32 task_id = _message->task_id();
+  TaskIdInstanceDataMap::iterator iter = instance_info_.find(task_id);
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
+    LOG(ERROR) << "task_id " << task_id << " has not yet connected to us. Dropping...";
+  } else {
+    SendMessage(iter->second->conn_, _message->set().size(),
+                heron_tuple_set_2_, _message->set().c_str());
+  }
+  __global_protobuf_pool_release__(_message);
+}
+
 void StMgrServer::SendToInstance2(sp_int32 _task_id,
-                                  sp_int32 _byte_size,
-                                  const sp_string _type_name,
-                                  const char* _message) {
+                                  proto::system::HeronTupleSet2* _message) {
+  stateful_gateway_->SendToInstance(_task_id, _message);
+}
+
+void StMgrServer::DrainTupleSet(sp_int32 _task_id,
+                                proto::system::HeronTupleSet2* _message) {
+  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
+    if (_message->has_control()) {
+      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
+          ->incr_by(_message->control().acks_size());
+      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
+          ->incr_by(_message->control().fails_size());
+    }
+  } else {
+    if (_message->has_control()) {
+      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
+          ->incr_by(_message->control().acks_size());
+      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
+          ->incr_by(_message->control().fails_size());
+    }
+    SendMessage(iter->second->conn_, *_message);
+  }
+  __global_protobuf_pool_release__(_message);
+}
+
+void StMgrServer::DrainCheckpoint(sp_int32 _task_id,
+                                  proto::ckptmgr::InitiateStatefulCheckpoint* _message) {
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
   } else {
-    SendMessage(iter->second->conn_, _byte_size, _type_name, _message);
+    LOG(INFO) << "Sending Initiate Checkpoint Message to local task " << _task_id;
+    SendMessage(iter->second->conn_, *_message);
   }
-}
-
-void StMgrServer::SendToInstance2(sp_int32 _task_id,
-                                  const proto::system::HeronTupleSet2& _message) {
-  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
-  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
-               << std::endl;
-    if (_message.has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
-          ->incr_by(_message.control().fails_size());
-    }
-  } else {
-    if (_message.has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
-          ->incr_by(_message.control().fails_size());
-    }
-    SendMessage(iter->second->conn_, _message);
-  }
+  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {

@@ -223,11 +223,12 @@ class PhysicalPlanHelper(object):
           in_stream.gtype == topology_pb2.Grouping.Value("CUSTOM"):
           # this bolt takes my output in custom grouping manner
           if in_stream.type == topology_pb2.CustomGroupingObjectType.Value("PYTHON_OBJECT"):
-            grouping_class_path = default_serializer.deserialize(in_stream.custom_grouping_object)
-            pex_loader.load_pex(self.topology_pex_abs_path)
-            grouping_cls = \
-              pex_loader.import_and_get_class(self.topology_pex_abs_path, grouping_class_path)
-            custom_grouping_obj = grouping_cls()
+            custom_grouping_obj = default_serializer.deserialize(in_stream.custom_grouping_object)
+            if isinstance(custom_grouping_obj, str):
+              pex_loader.load_pex(self.topology_pex_abs_path)
+              grouping_cls = \
+                pex_loader.import_and_get_class(self.topology_pex_abs_path, custom_grouping_obj)
+              custom_grouping_obj = grouping_cls()
             assert isinstance(custom_grouping_obj, ICustomGrouping)
             self.custom_grouper.add(in_stream.stream.id,
                                     self._get_taskids_for_component(topology.bolts[i].comp.name),
