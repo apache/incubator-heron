@@ -301,7 +301,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
   } else {
-    stmgr_server_metrics_->scope(METRIC_BYTES_FROM_STMGRS)->incr_by(_message->ByteSize());
+    stmgr_server_metrics_->scope(METRIC_BYTES_FROM_STMGRS)->incr_by(_message->GetCachedSize());
     stmgr_->HandleStreamManagerData(iter->second, *_message);
   }
   __global_protobuf_pool_release__(_message);
@@ -392,7 +392,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
     __global_protobuf_pool_release__(_message);
     return;
   }
-  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
+  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->GetCachedSize());
   if (_message->has_data()) {
     stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->data().tuples_size());
@@ -425,7 +425,7 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
-    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
+    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.GetCachedSize());
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.control().acks_size());
@@ -433,7 +433,7 @@ void StMgrServer::SendToInstance2(sp_int32 _task_id,
           ->incr_by(_message.control().fails_size());
     }
   } else {
-    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
+    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.GetCachedSize());
     if (_message.has_control()) {
       stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message.control().acks_size());
