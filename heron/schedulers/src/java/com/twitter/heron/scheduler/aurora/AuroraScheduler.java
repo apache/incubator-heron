@@ -169,7 +169,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
-  @SuppressWarnings("deprecation") // remove once we remove ISPRODUCTION usage below
   protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
     Map<AuroraField, String> auroraProperties = new HashMap<>();
 
@@ -200,7 +199,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_TYPE,
         Context.topologyPackageType(config).name().toLowerCase());
     auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
-        FileUtils.getBaseName(Context.topologyBinaryFile(config)));
+        Context.topologyBinaryFile(config));
     auroraProperties.put(AuroraField.JAVA_HOME, Context.clusterJavaHome(config));
 
     auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
@@ -221,9 +220,14 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
     auroraProperties.put(AuroraField.ROLE, Context.role(config));
 
-    // TODO (nlu): currently enforce environment to be "prod" for a Production job
-    String isProduction = Boolean.toString("prod".equals(Context.environ(config)));
-    auroraProperties.put(AuroraField.IS_PRODUCTION, isProduction);
+    // Job configuration attribute 'production' is deprecated.
+    // Use 'tier' attribute instead
+    // See: http://aurora.apache.org/documentation/latest/reference/configuration/#job-objects
+    if ("prod".equals(Context.environ(config))) {
+      auroraProperties.put(AuroraField.TIER, "preferred");
+    } else {
+      auroraProperties.put(AuroraField.TIER, "preemptible");
+    }
 
     auroraProperties.put(AuroraField.INSTANCE_CLASSPATH, Context.instanceClassPath(config));
     auroraProperties.put(AuroraField.METRICS_YAML, Context.metricsSinksFile(config));
@@ -243,6 +247,18 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     auroraProperties.put(AuroraField.METRICSCACHEMGR_CLASSPATH,
         Context.metricsCacheManagerClassPath(config));
+
+    boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
+        topology.getTopologyConfig().getKvsList(),
+        com.twitter.heron.api.Config.TOPOLOGY_STATEFUL_ENABLED, false);
+    auroraProperties.put(AuroraField.IS_STATEFUL_ENABLED, Boolean.toString(isStatefulEnabled));
+
+    String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
+        Context.ckptmgrClassPath(config),
+        Context.statefulStoragesClassPath(config),
+        Context.statefulStorageCustomClassPath(config));
+    auroraProperties.put(AuroraField.CKPTMGR_CLASSPATH, completeCkptmgrProcessClassPath);
+    auroraProperties.put(AuroraField.STATEFUL_CONFIG_YAML, Context.statefulConfigFile(config));
 
     return auroraProperties;
   }

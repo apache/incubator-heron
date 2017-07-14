@@ -7,17 +7,10 @@ pex_library(
     srcs = glob(['**/*.py']),
     deps = [
         '//heron/proto:proto-py',
+        '//heron/api/src/python:heron-python-py',
     ],
     reqs = [
         'colorlog==2.6.1',
         'psutil==4.3.1',
-    ]
-)
-
-pex_library(
-    name = 'common-log-py',
-    srcs = ["utils/log.py"],
-    reqs = [
-        "colorlog==2.6.1",
     ]
 )

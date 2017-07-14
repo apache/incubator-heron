@@ -24,7 +24,14 @@ pid_t ProcessUtils::getPid() { return ::getpid(); }
 int ProcessUtils::getResourceUsage(struct rusage *usage) { return ::getrusage(RUSAGE_SELF, usage); }
 
 size_t ProcessUtils::getTotalMemoryUsed() {
-  size_t total;
+  size_t total = 0;
   MallocExtension::instance()->GetNumericProperty("generic.heap_size", &total);
   return total;
+}
+
+sp_string ProcessUtils::getCurrentWorkingDirectory() {
+  char buff[FILENAME_MAX];
+  getcwd(buff, FILENAME_MAX);
+  sp_string current_working_dir(buff);
+  return current_working_dir;
 }

@@ -34,9 +34,8 @@ import traceback
 
 from functools import partial
 
-
-
 from heron.common.src.python.utils import log
+from heron.common.src.python.utils import proc
 # pylint: disable=unused-import
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.statemgrs.src.python import statemanagerfactory
@@ -55,7 +54,8 @@ def print_usage():
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
-      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>")
+      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
+      " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -71,6 +71,9 @@ def stmgr_map(container_plans):
 
 def metricsmgr_map(container_plans):
   return id_map("metricsmgr", container_plans, True)
+
+def ckptmgr_map(container_plans):
+  return id_map("ckptmgr", container_plans, True)
 
 def heron_shell_map(container_plans):
   return id_map("heron-shell", container_plans, True)
@@ -207,6 +210,11 @@ class HeronExecutor(object):
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
 
+    self.is_stateful_topology = (parsed_args.is_stateful.lower() == 'true')
+    self.ckptmgr_classpath = parsed_args.ckptmgr_classpath
+    self.ckptmgr_port = parsed_args.ckptmgr_port
+    self.stateful_config_file = parsed_args.stateful_config_file
+
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
 
@@ -222,6 +230,7 @@ class HeronExecutor(object):
     self.stmgr_ids = {}
     self.metricsmgr_ids = {}
     self.heron_shell_ids = {}
+    self.ckptmgr_ids = {}
 
     # processes_to_monitor gets set once processes are launched. we need to synchronize rw to this
     # dict since is used by multiple threads
@@ -270,6 +279,10 @@ class HeronExecutor(object):
     parser.add_argument("metricscachemgr_classpath")
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
+    parser.add_argument("is_stateful")
+    parser.add_argument("ckptmgr_classpath")
+    parser.add_argument("ckptmgr_port")
+    parser.add_argument("stateful_config_file")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -312,6 +325,7 @@ class HeronExecutor(object):
   def update_packing_plan(self, new_packing_plan):
     self.packing_plan = new_packing_plan
     self.stmgr_ids = stmgr_map(self.packing_plan.container_plans)
+    self.ckptmgr_ids = ckptmgr_map(self.packing_plan.container_plans)
     self.metricsmgr_ids = metricsmgr_map(self.packing_plan.container_plans)
     self.heron_shell_ids = heron_shell_map(self.packing_plan.container_plans)
 
@@ -412,7 +426,6 @@ class HeronExecutor(object):
         self.topology_id,
         self.zknode,
         self.zkroot,
-        ','.join(self.stmgr_ids.values()),
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
         self.metricsmgr_port]
@@ -426,6 +439,9 @@ class HeronExecutor(object):
         self.metricsmgr_ids[0],
         self.metrics_sinks_config_file,
         self.metricsmgr_port)
+
+    if self.is_stateful_topology:
+      retval.update(self._get_ckptmgr_process())
 
     return retval
 
@@ -580,12 +596,53 @@ class HeronExecutor(object):
         self.metricsmgr_port
     )
 
+    if self.is_stateful_topology:
+      retval.update(self._get_ckptmgr_process())
+
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
       retval.update(self._get_java_instance_cmd(instance_info))
     elif self.pkg_type == 'pex':
       retval.update(self._get_python_instance_cmd(instance_info))
     else:
       raise ValueError("Unrecognized package type: %s" % self.pkg_type)
+
+    return retval
+
+  def _get_ckptmgr_process(self):
+    ''' Get the command to start the checkpoint manager process'''
+
+    ckptmgr_main_class = 'com.twitter.heron.ckptmgr.CheckpointManager'
+
+    ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
+                   '-Xmx1024M',
+                   '-XX:+PrintCommandLineFlags',
+                   '-verbosegc',
+                   '-XX:+PrintGCDetails',
+                   '-XX:+PrintGCTimeStamps',
+                   '-XX:+PrintGCDateStamps',
+                   '-XX:+PrintGCCause',
+                   '-XX:+UseGCLogFileRotation',
+                   '-XX:NumberOfGCLogFiles=5',
+                   '-XX:GCLogFileSize=100M',
+                   '-XX:+PrintPromotionFailure',
+                   '-XX:+PrintTenuringDistribution',
+                   '-XX:+PrintHeapAtGC',
+                   '-XX:+HeapDumpOnOutOfMemoryError',
+                   '-XX:+UseConcMarkSweepGC',
+                   '-XX:+UseConcMarkSweepGC',
+                   '-Xloggc:log-files/gc.ckptmgr.log',
+                   '-Djava.net.preferIPv4Stack=true',
+                   '-cp',
+                   self.ckptmgr_classpath,
+                   ckptmgr_main_class,
+                   '-t' + self.topology_name,
+                   '-i' + self.topology_id,
+                   '-c' + self.ckptmgr_ids[self.shard],
+                   '-p' + self.ckptmgr_port,
+                   '-f' + self.stateful_config_file,
+                   '-g' + self.heron_internals_config_file]
+    retval = {}
+    retval[self.ckptmgr_ids[self.shard]] = ckptmgr_cmd
 
     return retval
 
@@ -612,18 +669,21 @@ class HeronExecutor(object):
     retval[self.heron_shell_ids[self.shard]] = [
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
-        '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
+        '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
+        '--secret=%s' % self.topology_id]
 
     return retval
 
-  def _untar_if_tar(self):
+  def _untar_if_needed(self):
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_bin_file)
+    elif self.pkg_type == "pex":
+      os.system("unzip %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
     ''' Wait for the termination of a process and log its stdout & stderr '''
-    log.stream_process_stdout(process, stdout_log_fn(name))
+    proc.stream_process_stdout(process, stdout_log_fn(name))
     process.wait()
 
   def _run_process(self, name, cmd, env_to_exec=None):
@@ -634,7 +694,7 @@ class HeronExecutor(object):
       process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  env=env_to_exec, bufsize=1)
 
-      log.async_stream_process_stdout(process, stdout_log_fn(name))
+      proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
       Log.info("Exception running command %:", cmd)
       traceback.print_exc()
@@ -715,7 +775,7 @@ class HeronExecutor(object):
               Log.info("%s exited too many times" % name)
               sys.exit(1)
             time.sleep(self.interval_between_runs)
-            p = self._run_process(name, command)
+            p = self._run_process(name, command, self.shell_env)
             del self.processes_to_monitor[pid]
             self.processes_to_monitor[p.pid] =\
               ProcessInfo(p, name, command, old_process_info.attempts + 1)
@@ -731,7 +791,7 @@ class HeronExecutor(object):
     if self.shard == 0:
       commands = self._get_tmaster_processes()
     else:
-      self._untar_if_tar()
+      self._untar_if_needed()
       commands = self._get_streaming_processes()
 
     # Attach daemon processes
@@ -750,11 +810,10 @@ class HeronExecutor(object):
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
     for current_name, current_command in current_commands.iteritems():
-      # Always restart tmaster to pick up new state. The stream manager is also restarted, but
-      # we shouldn't need to do that and work is being done to fix that on the steam manager
+      # We don't restart tmaster since it watches the packing plan and updates itself. The stream
+      # manager is restarted just to reset state, but we could update it to do so without a restart
       if current_name in updated_commands.keys() and \
         current_command == updated_commands[current_name] and \
-        current_name != 'heron-tmaster' and \
         not current_name.startswith('stmgr-'):
         commands_to_keep[current_name] = current_command
       else:

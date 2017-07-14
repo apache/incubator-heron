@@ -27,9 +27,10 @@ class JmapHandler(tornado.web.RequestHandler):
   @tornado.web.asynchronous
   def get(self, pid):
     ''' get method '''
-    utils.str_cmd(['rm', '-rf', '/tmp/heap.bin'])
-    body = utils.str_cmd(['jmap', '-dump:format=b,file=/tmp/heap.bin', pid])
-    utils.str_cmd(['chmod', '+r', '/tmp/heap.bin'])
+    utils.str_cmd(['rm', '-rf', '/tmp/heap.bin'], None, None)
+    body = utils.str_cmd(['jmap', '-dump:format=b,file=/tmp/heap.bin',
+                          str(pid)], None, None)
+    utils.str_cmd(['chmod', '+r', '/tmp/heap.bin'], None, None)
     self.content_type = 'application/json'
     self.write(json.dumps(body))
     self.finish()

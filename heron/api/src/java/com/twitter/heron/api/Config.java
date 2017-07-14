@@ -24,7 +24,6 @@ import java.util.Set;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.basics.TypeUtils;
 
 /**
  * Topology configs are specified as a plain old map. This class provides a
@@ -165,16 +164,6 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
                              "topology.stateful.checkpoint.interval.seconds";
   /**
-   * What's the provider for state? i.e. one where state is stored
-   */
-  public static final String TOPOLOGY_STATEFUL_PROVIDER_CLASS =
-                             "topology.stateful.provider.class";
-  /**
-   * What's the config for state provider?
-   */
-  public static final String TOPOLOGY_STATEFUL_PROVIDER_CONFIG_FILE =
-                             "topology.stateful.provider.config.file";
-  /**
    * Boolean flag that says that the stateful topology should start from
    * clean state, i.e. ignore any checkpoint state
    */
@@ -265,8 +254,6 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
-    apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CLASS);
-    apiVars.add(TOPOLOGY_STATEFUL_PROVIDER_CONFIG_FILE);
     apiVars.add(TOPOLOGY_STATEFUL_ENABLED);
     apiVars.add(TOPOLOGY_EXACTLYONCE_ENABLED);
     apiVars.add(TOPOLOGY_NAME);
@@ -391,8 +378,9 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
 
+  @SuppressWarnings("unchecked")
   public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
-    return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
+    return (List<String>) conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
   }
 
   /**
@@ -454,15 +442,6 @@ public class Config extends HashMap<String, Object> {
 
   public static void setTopologyStatefulCheckpointIntervalSecs(Map<String, Object> conf, int secs) {
     conf.put(Config.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS, Integer.toString(secs));
-  }
-
-  public static void setTopologyStatefulProviderClass(Map<String, Object> conf, String provider) {
-    conf.put(Config.TOPOLOGY_STATEFUL_PROVIDER_CLASS, provider);
-  }
-
-  public static void setTopologyStatefulProviderConfigFile(Map<String, Object> conf,
-                                                           String config) {
-    conf.put(Config.TOPOLOGY_STATEFUL_PROVIDER_CONFIG_FILE, config);
   }
 
   public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
@@ -601,14 +580,6 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulCheckpointIntervalSecs(int secs) {
     setTopologyStatefulCheckpointIntervalSecs(this, secs);
-  }
-
-  public void setTopologyStatefulProviderClass(String provider) {
-    setTopologyStatefulProviderClass(this, provider);
-  }
-
-  public void setTopologyStatefulProviderConfigFile(String config) {
-    setTopologyStatefulProviderConfigFile(this, config);
   }
 
   public void setTopologyStatefulStartClean(boolean clean) {

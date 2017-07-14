@@ -38,6 +38,7 @@
 #include "metrics/metrics.h"
 #include "metrics/metrics-mgr-st.h"
 #include "util/xor-manager.h"
+#include "util/neighbour-calculator.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
 
@@ -105,6 +106,11 @@ void StMgr::Init() {
               1_s),
       0);  // fire only once
 
+  is_stateful_ = heron::config::TopologyConfigHelper::IsTopologyStateful(*hydrated_topology_);
+
+  // Instantiate neighbour calculator. Required by stmgr server
+  neighbour_calculator_ = new NeighbourCalculator();
+
   // Create and start StmgrServer
   StartStmgrServer();
   // Create and Register Tuple cache
@@ -131,8 +137,6 @@ void StMgr::Init() {
 
   is_acking_enabled =
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
-
-  tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
 }
 
 StMgr::~StMgr() {
@@ -149,7 +153,7 @@ StMgr::~StMgr() {
   delete hydrated_topology_;
   delete metrics_manager_client_;
 
-  delete tuple_set_from_other_stmgr_;
+  delete neighbour_calculator_;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
@@ -207,11 +211,14 @@ void StMgr::StartStmgrServer() {
   sops.set_host(IpUtils::getHostName());
   sops.set_port(stmgr_port_);
   sops.set_socket_family(PF_INET);
-  sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  sops.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
+      1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
-                            this, metrics_manager_client_);
+                            this, metrics_manager_client_, neighbour_calculator_);
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
@@ -225,7 +232,10 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_host(tmasterLocation->host());
   master_options.set_port(tmasterLocation->master_port());
   master_options.set_socket_family(PF_INET);
-  master_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  master_options.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+      1_MB);
   master_options.set_high_watermark(high_watermark_);
   master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
@@ -439,7 +449,8 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
 
   delete pplan_;
   pplan_ = _pplan;
-  clientmgr_->NewPhysicalPlan(pplan_);
+  neighbour_calculator_->Reconstruct(*pplan_);
+  clientmgr_->StartConnections(pplan_);
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 
@@ -527,34 +538,38 @@ void StMgr::PopulateXorManagers(
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
 void StMgr::HandleStreamManagerData(const sp_string&,
-                                    const proto::stmgr::TupleStreamMessage2& _message) {
+                                    proto::stmgr::TupleStreamMessage2* _message) {
   // We received message from another stream manager
-  sp_int32 _task_id = _message.task_id();
+  sp_int32 _task_id = _message->task_id();
 
   // We have a shortcut for non-acking case
   if (!is_acking_enabled) {
-    server_->SendToInstance2(_task_id, _message.set().size(),
-                             heron_tuple_set_2_, _message.set().c_str());
+    server_->SendToInstance2(_message);
   } else {
-    tuple_set_from_other_stmgr_->ParsePartialFromString(_message.set());
-
-    SendInBound(_task_id, tuple_set_from_other_stmgr_);
+    proto::system::HeronTupleSet2* tuple_set = nullptr;
+    tuple_set = __global_protobuf_pool_acquire__(tuple_set);
+    tuple_set->ParsePartialFromString(_message->set());
+    SendInBound(_task_id, tuple_set);
+    __global_protobuf_pool_release__(_message);
   }
 }
 
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   if (_message->has_data()) {
-    server_->SendToInstance2(_task_id, *_message);
+    server_->SendToInstance2(_task_id, _message);
   }
   if (_message->has_control()) {
     // We got a bunch of acks/fails
-    ProcessAcksAndFails(_task_id, _message->control());
+    ProcessAcksAndFails(_message->src_task_id(), _task_id, _message->control());
+    __global_protobuf_pool_release__(_message);
   }
 }
 
-void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
+void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
-  current_control_tuple_set_.Clear();
+  proto::system::HeronTupleSet2* current_control_tuple_set = nullptr;
+  current_control_tuple_set = __global_protobuf_pool_acquire__(current_control_tuple_set);
+  current_control_tuple_set->set_src_task_id(_src_task_id);
 
   // First go over emits. This makes sure that new emits makes
   // a tuples stay alive before we process its acks
@@ -574,7 +589,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       if (xor_mgrs_->anchor(_task_id, ack_tuple.roots(j).key(), ack_tuple.ackedtuple())) {
         // This tuple tree is all over
         proto::system::AckTuple* a;
-        a = current_control_tuple_set_.mutable_control()->add_acks();
+        a = current_control_tuple_set->mutable_control()->add_acks();
         proto::system::RootId* r = a->add_roots();
         r->set_key(ack_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -592,7 +607,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
       if (xor_mgrs_->remove(_task_id, fail_tuple.roots(j).key())) {
         // This tuple tree is failed
         proto::system::AckTuple* f;
-        f = current_control_tuple_set_.mutable_control()->add_fails();
+        f = current_control_tuple_set->mutable_control()->add_fails();
         proto::system::RootId* r = f->add_roots();
         r->set_key(fail_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -602,8 +617,10 @@ void StMgr::ProcessAcksAndFails(sp_int32 _task_id,
   }
 
   // Check if we need to send this out
-  if (current_control_tuple_set_.has_control()) {
-    server_->SendToInstance2(_task_id, current_control_tuple_set_);
+  if (current_control_tuple_set->has_control()) {
+    server_->SendToInstance2(_task_id, current_control_tuple_set);
+  } else {
+    __global_protobuf_pool_release__(current_control_tuple_set);
   }
 }
 
@@ -647,10 +664,10 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
     proto::system::HeronControlTupleSet* c = _message->mutable_control();
     CHECK_EQ(c->emits_size(), 0);
     for (sp_int32 i = 0; i < c->acks_size(); ++i) {
-      CopyControlOutBound(c->acks(i), false);
+      CopyControlOutBound(_src_task_id, c->acks(i), false);
     }
     for (sp_int32 i = 0; i < c->fails_size(); ++i) {
-      CopyControlOutBound(c->fails(i), true);
+      CopyControlOutBound(_src_task_id, c->fails(i), true);
     }
   }
 }
@@ -663,20 +680,20 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
     SendInBound(_task_id, _tuple);
   } else {
     clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
+    __global_protobuf_pool_release__(_tuple);
   }
-
-  tuple_cache_->release(_task_id, _tuple);
 }
 
-void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail) {
+void StMgr::CopyControlOutBound(sp_int32 _src_task_id,
+                                const proto::system::AckTuple& _control, bool _is_fail) {
   for (sp_int32 i = 0; i < _control.roots_size(); ++i) {
     proto::system::AckTuple t;
     t.add_roots()->CopyFrom(_control.roots(i));
     t.set_ackedtuple(_control.ackedtuple());
     if (!_is_fail) {
-      tuple_cache_->add_ack_tuple(_control.roots(i).taskid(), t);
+      tuple_cache_->add_ack_tuple(_src_task_id, _control.roots(i).taskid(), t);
     } else {
-      tuple_cache_->add_fail_tuple(_control.roots(i).taskid(), t);
+      tuple_cache_->add_fail_tuple(_src_task_id, _control.roots(i).taskid(), t);
     }
   }
 }
@@ -687,7 +704,7 @@ void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                              const std::vector<sp_int32>& _out_tasks) {
   bool first_iteration = true;
   for (auto& i : _out_tasks) {
-    sp_int64 tuple_key = tuple_cache_->add_data_tuple(i, _streamid, _tuple);
+    sp_int64 tuple_key = tuple_cache_->add_data_tuple(_src_task_id, i, _streamid, _tuple);
     if (_tuple->roots_size() > 0) {
       // Anchored tuple
       if (_local_spout) {
@@ -704,7 +721,7 @@ void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
           proto::system::AckTuple t;
           t.add_roots()->CopyFrom(_tuple->roots(i));
           t.set_ackedtuple(tuple_key);
-          tuple_cache_->add_emit_tuple(_tuple->roots(i).taskid(), t);
+          tuple_cache_->add_emit_tuple(_src_task_id, _tuple->roots(i).taskid(), t);
         }
       }
     }
@@ -728,6 +745,16 @@ void StMgr::SendStartBackPressureToOtherStMgrs() {
 }
 
 void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
+
+// Do any actions if a stmgr client connection dies
+void StMgr::HandleDeadStMgrConnection(const sp_string&) {
+  // TODO(srkukarni) For Stateful Topologies, we need to do a restore
+}
+
+void StMgr::HandleAllStMgrClientsRegistered() {
+  // If we are stateful topology, we might want to continue our restore process
+  // TODO(srkukarni) Complete this
+}
 
 }  // namespace stmgr
 }  // namespace heron

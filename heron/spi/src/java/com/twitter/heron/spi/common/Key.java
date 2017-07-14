@@ -109,21 +109,20 @@ public enum Key {
   INSTANCE_DISK             ("heron.resources.instance.disk", ByteAmount.fromBytes(1073741824)),
 
   //keys for checkpoint management
-  IS_STATEFUL                       ("heron.is.stateful", Boolean.FALSE),
-  IS_CLEAN_STATEFUL_CHECKPOINTS     ("heron.is.clean.stateful.checkpoints", Boolean.FALSE),
-  CKPTMGR_STATEFUL_STORAGE          ("heron.statefulstorage.type", Type.STRING),
-  STATEFUL_STORAGE_CONF             ("heron.statefulstorage.config", Type.MAP),
-  STATEFUL_STORAGE_CLASSPATH        ("heron.statefulstorage.classpath", Type.STRING),
+  STATEFUL_STORAGE_CLASSNAME               ("heron.statefulstorage.classname", Type.STRING),
+  STATEFUL_STORAGE_CONF                    ("heron.statefulstorage.config", Type.MAP),
+  STATEFUL_STORAGE_CUSTOM_CLASSPATH        ("heron.statefulstorage.custom.classpath", Type.STRING),
 
   //keys for config provided paths
-  INSTANCE_CLASSPATH        ("heron.classpath.instance",             "${HERON_LIB}/instance/*"),
-  METRICSMGR_CLASSPATH      ("heron.classpath.metrics.manager",      "${HERON_LIB}/metricsmgr/*"),
-  METRICSCACHEMGR_CLASSPATH ("heron.classpath.metricscache.manager", "${HERON_LIB}/metricscachemgr/*"),
-  PACKING_CLASSPATH         ("heron.classpath.packing",              "${HERON_LIB}/packing/*"),
-  SCHEDULER_CLASSPATH       ("heron.classpath.scheduler",            "${HERON_LIB}/scheduler/*"),
-  STATEMGR_CLASSPATH        ("heron.classpath.statemgr",             "${HERON_LIB}/statemgr/*"),
-  UPLOADER_CLASSPATH        ("heron.classpath.uploader",             "${HERON_LIB}/uploader/*"),
-  CKPTMGR_CLASSPATH         ("heron.classpath.ckptmgr",              "${HERON_LIB}/ckptmgr/*"),
+  INSTANCE_CLASSPATH         ("heron.classpath.instance",             "${HERON_LIB}/instance/*"),
+  METRICSMGR_CLASSPATH       ("heron.classpath.metrics.manager",      "${HERON_LIB}/metricsmgr/*"),
+  METRICSCACHEMGR_CLASSPATH  ("heron.classpath.metricscache.manager", "${HERON_LIB}/metricscachemgr/*"),
+  PACKING_CLASSPATH          ("heron.classpath.packing",              "${HERON_LIB}/packing/*"),
+  SCHEDULER_CLASSPATH        ("heron.classpath.scheduler",            "${HERON_LIB}/scheduler/*"),
+  STATEMGR_CLASSPATH         ("heron.classpath.statemgr",             "${HERON_LIB}/statemgr/*"),
+  UPLOADER_CLASSPATH         ("heron.classpath.uploader",             "${HERON_LIB}/uploader/*"),
+  CKPTMGR_CLASSPATH          ("heron.classpath.ckptmgr",              "${HERON_LIB}/ckptmgr/*"),
+  STATEFULSTORAGE_CLASSPATH  ("heron.classpath.statefulstorage",      "${HERON_LIB}/statefulstorage/*"),
 
   //keys for run time config
   TOPOLOGY_CLASSPATH             ("heron.runtime.topology.class.path",             Type.STRING),

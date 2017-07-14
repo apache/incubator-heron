@@ -47,12 +47,13 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
+const sp_int64 STATE_MANAGER_RETRY_FREQUENCY = 10_s;
 const sp_int64 PROCESS_METRICS_FREQUENCY = 60_s;
 const sp_string METRIC_PREFIX = "__process";
 
 TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
                  const std::string& _topology_id, const std::string& _topdir,
-                 const std::vector<std::string>& _stmgrs, sp_int32 _controller_port,
+                 sp_int32 _controller_port,
                  sp_int32 _master_port, sp_int32 _stats_port, sp_int32 metricsMgrPort,
                  const std::string& _metrics_sinks_yaml, const std::string& _myhost_name,
                  EventLoop* eventLoop) {
@@ -86,19 +87,13 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
 
-  // We will keep the list of stmgrs with us.
-  // In case a assignment already exists, we will throw this
-  // list out and re-init with whats in assignment.
-  for (sp_uint32 i = 0; i < _stmgrs.size(); ++i) {
-    absent_stmgrs_.insert(_stmgrs[i]);
-  }
-
   current_pplan_ = NULL;
 
   // The topology as first submitted by the user
   // It shall only be used to construct the physical plan when TMaster first time starts
   // Any runtime changes shall be made to current_pplan_->topology
   topology_ = NULL;
+  packing_plan_ = NULL;
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zk_hostport_, topdir_, eventLoop_);
 
   assignment_in_progress_ = false;
@@ -113,7 +108,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
-  EstablishTMaster(EventLoop::TIMEOUT_EVENT);
+  FetchPackingPlan();
 
   // Send tmaster location to metrics mgr
   mMetricsMgrClient->RefreshTMasterLocation(*tmaster_location_);
@@ -138,6 +133,67 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   }, true, PROCESS_METRICS_FREQUENCY), 0);
 }
 
+void TMaster::FetchPackingPlan() {
+  auto packing_plan = new proto::system::PackingPlan();
+
+  state_mgr_->GetPackingPlan(tmaster_location_->topology_name(), packing_plan,
+                             [packing_plan, this](proto::system::StatusCode status) {
+    this->OnPackingPlanFetch(packing_plan, status);
+  });
+}
+
+void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
+                                 proto::system::StatusCode _status) {
+  if (_status != proto::system::OK) {
+    LOG(INFO) << "PackingPlan Fetch failed with status " << _status;
+    LOG(INFO) << "Retrying after " << STATE_MANAGER_RETRY_FREQUENCY << " micro seconds ";
+    CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status) {
+      this->FetchPackingPlan();
+    }, false, STATE_MANAGER_RETRY_FREQUENCY), 0);
+  } else {
+    // We got a new PackingPlan.
+    LOG(INFO) << "Fetched PackingPlan of " << newPackingPlan->container_plans().size()
+              << " containers.";
+
+    if (!packing_plan_) {
+      LOG(INFO) << "Received initial packing plan. Initializing absent_stmgrs_";
+      packing_plan_ = newPackingPlan;
+      // We will keep the list of stmgrs with us.
+      // In case a assignment already exists, we will throw this
+      // list out and re-init with whats in assignment.
+      absent_stmgrs_.clear();
+      for (sp_uint32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
+        LOG(INFO) << "Adding container id " << packing_plan_->container_plans(i).id()
+                  << " to absent_stmgrs_";
+        // the packing plan represents container ids by the numerical id of the container. The
+        // physical plan prepends "stmgr-" to the integer and represents it as a string.
+        absent_stmgrs_.insert("stmgr-" + std::to_string(packing_plan_->container_plans(i).id()));
+      }
+
+      // this is part of the initialization process. Since we've got a packing plan we will
+      // register our self as the master
+      EstablishTMaster(EventLoop::TIMEOUT_EVENT);
+
+    } else {
+      // We must know for sure that we are TMaster before potentially deleting the physical plan
+      // in state manager. We know this to be the case here because we initially fetch
+      // packing_plan_ before becoming master, but we register the packing plan watcher only after
+      // becoming master. That guarantees that if packing_plan_ is already set and this method is
+      // invoked, it's due to the watch and we're master here.
+      if (packing_plan_ != newPackingPlan) {
+        LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TMaster to "
+                  << "reset internal state. Exiting.";
+        state_mgr_->DeletePhysicalPlan(tmaster_location_->topology_name(),
+          [this](proto::system::StatusCode status) {
+            ::exit(1);
+          });
+      } else {
+        LOG(INFO) << "New Packing plan matches existing one.";
+      }
+    }
+  }
+}
+
 void TMaster::EstablishTMaster(EventLoop::Status) {
   auto cb = [this](proto::system::StatusCode code) { this->SetTMasterLocationDone(code); };
 
@@ -155,6 +211,7 @@ void TMaster::EstablishTMaster(EventLoop::Status) {
 
 TMaster::~TMaster() {
   delete topology_;
+  delete packing_plan_;
   delete current_pplan_;
   delete state_mgr_;
   delete controller_;
@@ -211,7 +268,7 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
     }
     // There was an error setting our location
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error setting ourselves as TMaster. Errorcode is " << _code << std::endl;
+               << " Error setting ourselves as TMaster. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
@@ -219,18 +276,25 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
 
   // We are now the master
   LOG(INFO) << "Successfully set ourselves as master\n";
-  // Lets now read the topology
-  auto cb = [this](proto::system::StatusCode code) { this->GetTopologyDone(code); };
 
+  // Lets now read the topology
   topology_ = new proto::api::Topology();
-  state_mgr_->GetTopology(tmaster_location_->topology_name(), topology_, std::move(cb));
+  state_mgr_->GetTopology(tmaster_location_->topology_name(), topology_,
+                          [this](proto::system::StatusCode code) {
+    this->GetTopologyDone(code);
+  });
+
+  // and register packing plan watcher to pick up changes
+  state_mgr_->SetPackingPlanWatch(tmaster_location_->topology_name(), [this]() {
+    this->FetchPackingPlan();
+  });
 }
 
 void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   if (_code != proto::system::OK) {
     // Without Topology we can't do much
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error getting topology Errsettingorcode is " << _code << std::endl;
+               << " Error getting topology. Error code is " << _code << std::endl;
     ::exit(1);
   }
   // Ok things are fine. topology_ contains the result
@@ -241,7 +305,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
     LOG(ERROR) << "Topology invalid" << std::endl;
     ::exit(1);
   }
-  LOG(INFO) << "Topology Read and Validated\n";
+  LOG(INFO) << "Topology read and validated\n";
   // Now see if there is already a pplan
   proto::system::PhysicalPlan* pplan = new proto::system::PhysicalPlan();
   auto cb = [pplan, this](proto::system::StatusCode code) {
@@ -253,29 +317,24 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
 
 void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
-  // Assignment need not exist. First check if some other
-  // error occured.
+  // Physical plan need not exist. First check if some other error occurred.
   if (_code != proto::system::OK && _code != proto::system::PATH_DOES_NOT_EXIST) {
     // Something bad happened. Bail out!
     // TODO(kramasamy): This is not as bad as it seems. Maybe we can delete this assignment
     // and have a new assignment instead.
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error getting assignment Errsettingorcode is " << _code << std::endl;
+               << " Error getting assignment. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
   if (_code == proto::system::PATH_DOES_NOT_EXIST) {
-    LOG(ERROR) << "There was no existing assignment\n";
+    LOG(ERROR) << "There was no existing physical plan\n";
     // We never did assignment in the first place
     delete _pplan;
   } else {
-    LOG(INFO) << "There was an existing assignment\n";
+    LOG(INFO) << "There was an existing physical plan\n";
     CHECK_EQ(_code, proto::system::OK);
     current_pplan_ = _pplan;
-    absent_stmgrs_.clear();
-    for (sp_int32 i = 0; i < current_pplan_->stmgrs_size(); ++i) {
-      absent_stmgrs_.insert(current_pplan_->stmgrs(i).id());
-    }
   }
 
   // Now that we have our state all setup, its time to start accepting requests
@@ -466,7 +525,7 @@ void TMaster::DoPhysicalPlan(EventLoop::Status) {
 void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
   if (_code != proto::system::OK) {
-    LOG(ERROR) << "Error writing assignment to statemgr. Errocode is " << _code << std::endl;
+    LOG(ERROR) << "Error writing assignment to statemgr. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
@@ -491,7 +550,7 @@ void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
 bool TMaster::DistributePhysicalPlan() {
   if (current_pplan_) {
     // First valid the physical plan to distribute
-    LOG(INFO) << "To distribute new pplan:" << std::endl;
+    LOG(INFO) << "To distribute new physical plan:" << std::endl;
     config::PhysicalPlanHelper::LogPhysicalPlan(*current_pplan_);
 
     // Distribute physical plan to all active stmgrs
@@ -502,7 +561,7 @@ bool TMaster::DistributePhysicalPlan() {
     return true;
   }
 
-  LOG(ERROR) << "No valid assignment yet" << std::endl;
+  LOG(ERROR) << "No valid physical plan yet" << std::endl;
   return false;
 }
 
@@ -541,7 +600,7 @@ proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {
 
   // TMaster does not really have any control over who does what.
   // That has already been decided while launching the jobs.
-  // TMaster just stiches the info together to pass to everyone
+  // TMaster just stitches the info together to pass to everyone
 
   // Build the PhysicalPlan structure
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -564,7 +623,7 @@ proto::system::Status* TMaster::UpdateStMgrHeartbeat(Connection* _conn, sp_int64
   proto::system::Status* retval = new proto::system::Status();
   if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
     retval->set_status(proto::system::INVALID_STMGR);
-    retval->set_message("Uknown connection doing stmgr heartbeat");
+    retval->set_message("Unknown connection doing stmgr heartbeat");
     return retval;
   }
   const sp_string& stmgr = connection_to_stmgr_id_[_conn];
@@ -640,7 +699,7 @@ bool TMaster::ValidateTopology(proto::api::Topology _topology) {
 
 bool TMaster::ValidateStMgrsWithTopology(proto::api::Topology _topology) {
   // here we check to see if the total number of instances
-  // accross all stmgrs match up to all the spout/bolt
+  // across all stmgrs match up to all the spout/bolt
   // parallelism the topology has specified
   sp_int32 ntasks = 0;
   for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {

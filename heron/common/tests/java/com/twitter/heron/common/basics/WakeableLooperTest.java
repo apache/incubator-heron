@@ -28,17 +28,16 @@ import org.junit.Test;
  */
 public class WakeableLooperTest {
   private static int globalValue;
-  private static final long SECONDS_TO_NANOSECONDS = 1000 * 1000 * 1000;
   private WakeableLooper slaveLooper;
 
   @Before
-  public void before() throws Exception {
+  public void before() {
     slaveLooper = new SlaveLooper();
     globalValue = 6;
   }
 
   @After
-  public void after() throws Exception {
+  public void after() {
     slaveLooper = null;
   }
 
@@ -46,7 +45,7 @@ public class WakeableLooperTest {
    * Method: loop()
    */
   @Test
-  public void testLoop() throws Exception {
+  public void testLoop() {
     Runnable r = new Runnable() {
       private int i = 3;
 
@@ -69,7 +68,7 @@ public class WakeableLooperTest {
    * Method: addTasksOnWakeup(Runnable task)
    */
   @Test
-  public void testAddTasksOnWakeup() throws Exception {
+  public void testAddTasksOnWakeup() {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -86,7 +85,7 @@ public class WakeableLooperTest {
    * Method: registerTimerEventInSeconds(long timerInSeconds, Runnable task)
    */
   @Test
-  public void testRegisterTimerEventInSeconds() throws Exception {
+  public void testRegisterTimerEventInSeconds() {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -108,7 +107,7 @@ public class WakeableLooperTest {
    * Method: registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task)
    */
   @Test
-  public void testRegisterTimerEventInNanoSeconds() throws Exception {
+  public void testRegisterTimerEventInNanoSeconds() {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -130,7 +129,7 @@ public class WakeableLooperTest {
    * Method: exitLoop()
    */
   @Test
-  public void testExitLoop() throws Exception {
+  public void testExitLoop() {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -147,7 +146,8 @@ public class WakeableLooperTest {
    * Method: getNextTimeoutInterval()
    */
   @Test
-  public void testGetNextTimeoutIntervalMs() throws Exception {
+  public void testGetNextTimeoutIntervalMs()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -159,20 +159,10 @@ public class WakeableLooperTest {
     Duration interval = Duration.ofSeconds(6);
     slaveLooper.registerTimerEvent(interval, r);
 
-    Duration res = Duration.ofNanos(1000);
-
-    try {
-      Method method =
-          slaveLooper.getClass().getSuperclass().getDeclaredMethod("getNextTimeoutInterval");
-      method.setAccessible(true);
-      res = (Duration) method.invoke(slaveLooper);
-    } catch (NoSuchMethodException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    }
+    Method method =
+        slaveLooper.getClass().getSuperclass().getDeclaredMethod("getNextTimeoutInterval");
+    method.setAccessible(true);
+    Duration res = (Duration) method.invoke(slaveLooper);
 
     Assert.assertNotNull(res);
 
@@ -183,7 +173,8 @@ public class WakeableLooperTest {
    * Method: runOnce()
    */
   @Test
-  public void testRunOnce() throws Exception {
+  public void testRunOnce()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -192,14 +183,9 @@ public class WakeableLooperTest {
     };
     slaveLooper.addTasksOnWakeup(r);
 
-    try {
-      Method method = slaveLooper.getClass().getSuperclass().getDeclaredMethod("runOnce");
-      method.setAccessible(true);
-      method.invoke(slaveLooper);
-    } catch (NoSuchMethodException e) {
-    } catch (IllegalAccessException e) {
-    } catch (InvocationTargetException e) {
-    }
+    Method method = slaveLooper.getClass().getSuperclass().getDeclaredMethod("runOnce");
+    method.setAccessible(true);
+    method.invoke(slaveLooper);
 
     Assert.assertEquals(10, globalValue);
   }
@@ -208,7 +194,8 @@ public class WakeableLooperTest {
    * Method: executeTasksOnWakeup()
    */
   @Test
-  public void testExecuteTasksOnWakeup() throws Exception {
+  public void testExecuteTasksOnWakeup()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -217,15 +204,10 @@ public class WakeableLooperTest {
     };
     slaveLooper.addTasksOnWakeup(r);
 
-    try {
-      Method method =
-          slaveLooper.getClass().getSuperclass().getDeclaredMethod("executeTasksOnWakeup");
-      method.setAccessible(true);
-      method.invoke(slaveLooper);
-    } catch (NoSuchMethodException e) {
-    } catch (IllegalAccessException e) {
-    } catch (InvocationTargetException e) {
-    }
+    Method method =
+        slaveLooper.getClass().getSuperclass().getDeclaredMethod("executeTasksOnWakeup");
+    method.setAccessible(true);
+    method.invoke(slaveLooper);
 
     Assert.assertEquals(10, globalValue);
   }
@@ -234,7 +216,8 @@ public class WakeableLooperTest {
    * Method: triggerExpiredTimers(long currentTime)
    */
   @Test
-  public void testTriggerExpiredTimers() throws Exception {
+  public void testTriggerExpiredTimers()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     Runnable r = new Runnable() {
       @Override
       public void run() {
@@ -245,17 +228,12 @@ public class WakeableLooperTest {
     Duration interval = Duration.ofNanos(1);
     slaveLooper.registerTimerEvent(interval, r);
 
-    try {
-      Method method =
-          slaveLooper.getClass().getSuperclass().getDeclaredMethod(
-              "triggerExpiredTimers", long.class);
-      long current = System.nanoTime();
-      method.setAccessible(true);
-      method.invoke(slaveLooper, current);
-    } catch (NoSuchMethodException e) {
-    } catch (IllegalAccessException e) {
-    } catch (InvocationTargetException e) {
-    }
+    Method method =
+        slaveLooper.getClass().getSuperclass().getDeclaredMethod(
+            "triggerExpiredTimers", long.class);
+    long current = System.nanoTime();
+    method.setAccessible(true);
+    method.invoke(slaveLooper, current);
 
     Assert.assertEquals(10, globalValue);
   }

@@ -245,7 +245,7 @@ public class AuroraSchedulerTest {
     when(commandLine.getOptionValue("config_path")).thenReturn("/some/config/path");
     when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
     when(commandLine.getOptionValue("topology_defn")).thenReturn("/mock/defnFile.defn");
-    when(commandLine.getOptionValue("topology_bin")).thenReturn("/mock/binaryFile.jar");
+    when(commandLine.getOptionValue("topology_bin")).thenReturn("binaryFile.jar");
     Config config = Mockito.spy(SubmitterMain.loadConfig(commandLine, topology));
 
     AuroraScheduler testScheduler = new AuroraScheduler();
@@ -301,8 +301,8 @@ public class AuroraSchedulerTest {
         case JAVA_HOME:
           expected = "/usr/lib/jvm/default-java";
           break;
-        case IS_PRODUCTION:
-          expected = Boolean.FALSE.toString();
+        case TIER:
+          expected = "preemptible";
           break;
         case NUM_CONTAINERS:
           expected = "2";
@@ -361,6 +361,16 @@ public class AuroraSchedulerTest {
           break;
         case METRICSCACHEMGR_CLASSPATH:
           expected = expectedLib + "/metricscachemgr/*";
+          break;
+        case CKPTMGR_CLASSPATH:
+          expected =
+              expectedLib + "/ckptmgr/*:" + expectedLib + "/statefulstorage/*:";
+          break;
+        case IS_STATEFUL_ENABLED:
+          expected = Boolean.FALSE.toString();
+          break;
+        case STATEFUL_CONFIG_YAML:
+          expected = expectedConf + "/stateful.yaml";
           break;
         default:
           fail(String.format(

@@ -35,6 +35,7 @@ public class TupleCacheTest {
   public static final int N = 10;
   public static final int REPEAT = 10;
 
+  private static final int SRC_TASK_ID = 1;
   private static List<Integer> destTaskIds;
   private static HeronTuples.HeronDataTuple dataTuple;
   private static HeronTuples.AckTuple ackTuple;
@@ -85,11 +86,13 @@ public class TupleCacheTest {
     // Test for Batch should apply
 
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addDataTuple(destTaskIds.get(i % destTaskIds.size()), stream0, dataTuple, true);
+      tupleCache.addDataTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), stream0, dataTuple, true);
     }
 
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addDataTuple(destTaskIds.get(i % destTaskIds.size()), stream1, dataTuple, true);
+      tupleCache.addDataTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), stream1, dataTuple, true);
     }
 
     Map<Integer, List<HeronTuples.HeronTupleSet>> cache = tupleCache.getCache();
@@ -113,8 +116,10 @@ public class TupleCacheTest {
   public void testAddDataTupleNoBatch() throws Exception {
     // Test for Batch should not apply
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addDataTuple(destTaskIds.get(i % destTaskIds.size()), stream0, dataTuple, true);
-      tupleCache.addDataTuple(destTaskIds.get(i % destTaskIds.size()), stream1, dataTuple, true);
+      tupleCache.addDataTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), stream0, dataTuple, true);
+      tupleCache.addDataTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), stream1, dataTuple, true);
     }
 
     Map<Integer, List<HeronTuples.HeronTupleSet>> cache = tupleCache.getCache();
@@ -140,9 +145,12 @@ public class TupleCacheTest {
 
     // Test for Batch should apply
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addAckTuple(destTaskIds.get(i % destTaskIds.size()), ackTuple);
-      tupleCache.addFailTuple(destTaskIds.get(i % destTaskIds.size()), ackTuple);
-      tupleCache.addEmitTuple(destTaskIds.get(i % destTaskIds.size()), ackTuple);
+      tupleCache.addAckTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), ackTuple);
+      tupleCache.addFailTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), ackTuple);
+      tupleCache.addEmitTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), ackTuple);
     }
 
     Map<Integer, List<HeronTuples.HeronTupleSet>> cache = tupleCache.getCache();
@@ -161,15 +169,18 @@ public class TupleCacheTest {
   @Test
   public void testAddAckTupleNoBatch() throws Exception {
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addAckTuple(destTaskIds.get(i % destTaskIds.size()), ackTuple);
+      tupleCache.addAckTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), ackTuple);
     }
 
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addFailTuple(destTaskIds.get(i % destTaskIds.size()), ackTuple);
+      tupleCache.addFailTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), ackTuple);
     }
 
     for (int i = 0; i < N * REPEAT; i++) {
-      tupleCache.addEmitTuple(destTaskIds.get(i % destTaskIds.size()), ackTuple);
+      tupleCache.addEmitTuple(SRC_TASK_ID,
+          destTaskIds.get(i % destTaskIds.size()), ackTuple);
     }
 
     Map<Integer, List<HeronTuples.HeronTupleSet>> cache = tupleCache.getCache();

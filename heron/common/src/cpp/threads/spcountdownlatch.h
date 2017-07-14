@@ -16,6 +16,7 @@
 
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 #include "basics/sptypes.h"
 
 #ifndef SRC_CPP_CORE_THREADS_PUBLIC_SPCOUNTDOWNLATCH_H_
@@ -40,8 +41,8 @@ class CountDownLatch {
   CountDownLatch(const CountDownLatch& latch) = delete;
   CountDownLatch& operator=(const CountDownLatch& latch) = delete;
 
-  // Causes the current thread to wait until the latch has counted down to zero
-  void wait();
+  // Causes the current thread to wait until the latch has counted down to target
+  bool wait(sp_uint32 target = 0, const std::chrono::seconds& d = std::chrono::seconds::zero());
 
   // Decrements the count of the latch, releasing all waiting threads if the
   // count reaches zero

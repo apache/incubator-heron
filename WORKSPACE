@@ -1,6 +1,7 @@
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 curator_version = "2.9.0"
+google_client_version = "1.22.0"
 jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
@@ -348,3 +349,30 @@ maven_jar(
   name = "com_101tec_zkclient",
   artifact = "com.101tec:zkclient:0.3"
 )
+
+# Google Cloud
+maven_jar(
+  name = "google_api_services_storage",
+  artifact = "com.google.apis:google-api-services-storage:v1-rev108-" + google_client_version
+)
+
+maven_jar(
+  name = "google_api_client",
+  artifact = "com.google.api-client:google-api-client:" + google_client_version
+)
+
+maven_jar(
+  name = "google_http_client",
+  artifact = "com.google.http-client:google-http-client:" + google_client_version
+)
+
+maven_jar(
+  name = "google_http_client_jackson2",
+  artifact = "com.google.http-client:google-http-client-jackson2:" + google_client_version
+)
+
+maven_jar(
+  name = "google_oauth_client",
+  artifact = "com.google.oauth-client:google-oauth-client:" + google_client_version
+)
+# end Google Cloud
