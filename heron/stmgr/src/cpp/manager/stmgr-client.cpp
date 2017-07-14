@@ -63,7 +63,8 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
       quit_(false),
       client_manager_(_client_manager),
       metrics_manager_client_(_metrics_manager_client),
-      ndropped_messages_(0) {
+      ndropped_messages_(0),
+      is_registered_(false) {
   reconnect_other_streammgrs_interval_sec_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
 
@@ -112,6 +113,7 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
 }
 
 void StMgrClient::HandleClose(NetworkErrorCode _code) {
+  is_registered_ = false;
   if (_code == OK) {
     LOG(INFO) << "We closed our server connection with stmgr " << other_stmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
@@ -124,6 +126,7 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
   if (quit_) {
     delete this;
   } else {
+    client_manager_->HandleDeadStMgrConnection(other_stmgr_id_);
     LOG(INFO) << "Will try to reconnect again after 1 seconds" << std::endl;
     AddTimer([this]() { this->OnReConnectTimer(); },
              reconnect_other_streammgrs_interval_sec_ * 1000 * 1000);
@@ -150,9 +153,11 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
     return;
   }
   __global_protobuf_pool_release__(_response);
+  is_registered_ = true;
   if (client_manager_->DidAnnounceBackPressure()) {
     SendStartBackPressureMessage();
   }
+  client_manager_->HandleStMgrClientRegistered();
 }
 
 void StMgrClient::OnReConnectTimer() { Start(); }
@@ -167,14 +172,16 @@ void StMgrClient::SendHelloRequest() {
   return;
 }
 
-void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
+bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
   if (IsConnected()) {
     SendMessage(_msg);
+    return true;
   } else {
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << other_stmgr_id_ << " because it is not connected";
     }
+    return false;
   }
 }
 
@@ -227,5 +234,14 @@ void StMgrClient::SendStopBackPressureMessage() {
   __global_protobuf_pool_release__(message);
 }
 
+void StMgrClient::SendDownstreamStatefulCheckpoint(
+                  proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  LOG(INFO) << "Sending Downstream Checkpoint message for src_task_id: "
+            << _message->origin_task_id() << " dest_task_id: "
+            << _message->destination_task_id() << " checkpoint: "
+            << _message->checkpoint_id();
+  SendMessage(*_message);
+  __global_protobuf_pool_release__(_message);
+}
 }  // namespace stmgr
 }  // namespace heron
