@@ -364,3 +364,10 @@ maven_jar(
   artifact = "com.google.oauth-client:google-oauth-client:" + google_client_version
 )
 # end Google Cloud
+
+# Pulsar Client
+maven_jar(
+  name = "yahoo_pulsar_client",
+  artifact = "com.yahoo.pulsar:pulsar-client:jar:shaded:1.18"
+)
+# end Pulsar Client
