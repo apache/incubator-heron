@@ -29,7 +29,9 @@ public class RawScheme implements Scheme {
   private static final long serialVersionUID = 6098042939916415521L;
 
   public List<Object> deserialize(ByteBuffer ser) {
-    return tuple(ser);
+    byte[] bytes = new byte[ser.remaining()];
+    ser.get(bytes);
+    return tuple(bytes);
   }
 
   public Fields getOutputFields() {
