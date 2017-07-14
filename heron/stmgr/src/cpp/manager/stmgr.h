@@ -19,6 +19,7 @@
 
 #include <list>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -66,6 +67,10 @@ class StMgr {
                                proto::stmgr::TupleStreamMessage2* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::system::HeronTupleSet* _message);
+  // Called when an instance does checkpoint and sends its checkpoint
+  // to the stmgr to save it
+  void HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint& _message,
+                                          const proto::system::Instance& _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
@@ -81,6 +86,16 @@ class StMgr {
   bool DidAnnounceBackPressure();
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
   void HandleAllStMgrClientsRegistered();
+  void HandleDeadInstance(sp_int32 _task_id);
+  void HandleAllInstancesConnected();
+
+  // Handle checkpoint message coming from an upstream task to a downstream task
+  void HandleDownStreamStatefulCheckpoint(
+                                const proto::ckptmgr::DownstreamStatefulCheckpoint& _message);
+
+  // Handle RestoreInstanceStateResponse message from local instance
+  void HandleRestoreInstanceStateResponse(sp_int32 _task_id, const proto::system::Status& _status,
+                                          const std::string& _checkpoint_id);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
