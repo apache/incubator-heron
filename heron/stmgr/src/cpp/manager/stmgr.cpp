@@ -450,7 +450,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   delete pplan_;
   pplan_ = _pplan;
   neighbour_calculator_->Reconstruct(*pplan_);
-  clientmgr_->NewPhysicalPlan(pplan_);
+  clientmgr_->StartConnections(pplan_);
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 
@@ -745,6 +745,16 @@ void StMgr::SendStartBackPressureToOtherStMgrs() {
 }
 
 void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
+
+// Do any actions if a stmgr client connection dies
+void StMgr::HandleDeadStMgrConnection(const sp_string&) {
+  // TODO(srkukarni) For Stateful Topologies, we need to do a restore
+}
+
+void StMgr::HandleAllStMgrClientsRegistered() {
+  // If we are stateful topology, we might want to continue our restore process
+  // TODO(srkukarni) Complete this
+}
 
 }  // namespace stmgr
 }  // namespace heron
