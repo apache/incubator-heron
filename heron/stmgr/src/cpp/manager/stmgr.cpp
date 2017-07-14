@@ -767,9 +767,8 @@ void StMgr::HandleDeadInstance(sp_int32 _task_id) {
   // TODO(srkukarni) Complete this
 }
 
-void StMgr::HandleStoreInstanceStateCheckpoint(sp_int32,
-                                 const proto::ckptmgr::InstanceStateCheckpoint&,
-                                 proto::system::Instance*) {
+void StMgr::HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint&,
+                                               const proto::system::Instance&) {
   // If we are stateful topology, we might want to take some actions like
   // sending this to ckptmgr for actually saving and propagating markers
   // to downstream tasks

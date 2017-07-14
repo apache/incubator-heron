@@ -684,6 +684,7 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
 
 void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+    // Checkpoint markers originate from spouts.
     if (iter->second->is_local_spout() && iter->second->conn_) {
       LOG(INFO) << "Propagating Initiate Stateful Checkpoint for "
                 << _checkpoint_tag << " to local spout "
@@ -716,8 +717,7 @@ void StMgrServer::HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
   }
 
   // send the checkpoint message to all downstream task ids
-  stmgr_->HandleStoreInstanceStateCheckpoint(task_id, _message->state(),
-                                             it->second->instance_);
+  stmgr_->HandleStoreInstanceStateCheckpoint(_message->state(), *(it->second->instance_));
   __global_protobuf_pool_release__(_message);
 }
 
