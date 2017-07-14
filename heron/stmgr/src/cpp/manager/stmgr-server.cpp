@@ -17,6 +17,7 @@
 #include "manager/stmgr-server.h"
 #include <iostream>
 #include <unordered_set>
+#include <string>
 #include <vector>
 #include "manager/checkpoint-gateway.h"
 #include "util/neighbour-calculator.h"
@@ -102,10 +103,13 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   InstallMessageHandler(&StMgrServer::HandleTupleStreamMessage);
   InstallMessageHandler(&StMgrServer::HandleStartBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleStopBackPressureMessage);
+  InstallMessageHandler(&StMgrServer::HandleDownstreamStatefulCheckpointMessage);
 
   // instance related handlers
   InstallRequestHandler(&StMgrServer::HandleRegisterInstanceRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleSetMessage);
+  InstallMessageHandler(&StMgrServer::HandleStoreInstanceStateCheckpointMessage);
+  InstallMessageHandler(&StMgrServer::HandleRestoreInstanceStateResponse);
 
   stmgr_server_metrics_ = new heron::common::MultiCountMetric();
   back_pressure_metric_aggr_ = new heron::common::TimeSpentMetric();
@@ -180,6 +184,15 @@ StMgrServer::~StMgrServer() {
 void StMgrServer::GetInstanceInfo(std::vector<proto::system::Instance*>& _return) {
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     _return.push_back(iter->second->instance_);
+  }
+}
+
+proto::system::Instance* StMgrServer::GetInstanceInfo(sp_int32 _task_id) {
+  auto iter = instance_info_.find(_task_id);
+  if (iter == instance_info_.end()) {
+    return NULL;
+  } else {
+    return iter->second->instance_;
   }
 }
 
@@ -276,6 +289,8 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
       delete connection_buffer_metric_map_[instance_id];
       connection_buffer_metric_map_.erase(instance_id);
     }
+
+    stmgr_->HandleDeadInstance(task_id);
   }
 }
 
@@ -391,8 +406,8 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
 
     // Have all the instances connected to us?
     if (HaveAllInstancesConnectedToUs()) {
-      // Now we can connect to the tmaster
-      stmgr_->StartTMasterClient();
+      // Notify to stmgr so that it might want to connect to tmaster
+      stmgr_->HandleAllInstancesConnected();
     }
   }
   delete _request;
@@ -667,5 +682,117 @@ void StMgrServer::AttemptStopBackPressureFromSpouts() {
   }
 }
 
+void StMgrServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag) {
+  for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+    if (iter->second->is_local_spout() && iter->second->conn_) {
+      LOG(INFO) << "Propagating Initiate Stateful Checkpoint for "
+                << _checkpoint_tag << " to local spout "
+                << iter->second->instance_->info().component_name()
+                << " with task_id " << iter->second->instance_->info().task_id();
+      proto::ckptmgr::InitiateStatefulCheckpoint* message = nullptr;
+      message = __global_protobuf_pool_acquire__(message);
+      message->set_checkpoint_id(_checkpoint_tag);
+      SendMessage(iter->second->conn_, *message);
+      __global_protobuf_pool_release__(message);
+    }
+  }
+}
+
+void StMgrServer::HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
+                               proto::ckptmgr::StoreInstanceStateCheckpoint* _message) {
+  ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
+  if (iter == active_instances_.end()) {
+    LOG(ERROR) << "Hmm.. Got InstaceStateCheckpoint Message from an unknown connection";
+    __global_protobuf_pool_release__(_message);
+    return;
+  }
+  sp_int32 task_id = iter->second;
+  TaskIdInstanceDataMap::iterator it = instance_info_.find(task_id);
+  if (it == instance_info_.end()) {
+    LOG(ERROR) << "Hmm.. Got InstaceStateCheckpoint Message from unknown task_id "
+               << task_id;
+    __global_protobuf_pool_release__(_message);
+    return;
+  }
+
+  // send the checkpoint message to all downstream task ids
+  stmgr_->HandleStoreInstanceStateCheckpoint(task_id, _message->state(),
+                                             it->second->instance_);
+  __global_protobuf_pool_release__(_message);
+}
+
+void StMgrServer::HandleRestoreInstanceStateResponse(Connection* _conn,
+                               proto::ckptmgr::RestoreInstanceStateResponse* _message) {
+  ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
+  if (iter == active_instances_.end()) {
+    LOG(ERROR) << "Hmm.. Got RestoreInstanceStateResponse Message from an unknown connection";
+    __global_protobuf_pool_release__(_message);
+    return;
+  }
+  sp_int32 task_id = iter->second;
+  TaskIdInstanceDataMap::iterator it = instance_info_.find(task_id);
+  if (it == instance_info_.end()) {
+    LOG(ERROR) << "Hmm.. Got RestoreInstanceStateResponse Message from unknown task_id "
+               << task_id;
+    __global_protobuf_pool_release__(_message);
+    return;
+  }
+
+  // send the checkpoint message to all downstream task ids
+  stmgr_->HandleRestoreInstanceStateResponse(task_id, _message->status(),
+                                             _message->checkpoint_id());
+  __global_protobuf_pool_release__(_message);
+}
+
+void StMgrServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
+                               proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  stmgr_->HandleDownStreamStatefulCheckpoint(*_message);
+  __global_protobuf_pool_release__(_message);
+}
+
+void StMgrServer::HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
+                                         const sp_string& _checkpoint_id) {
+  // So received a checkpoint marker from an upstream task
+  stateful_gateway_->HandleUpstreamMarker(_src_task_id, _destination_task_id, _checkpoint_id);
+}
+
+bool StMgrServer::SendRestoreInstanceStateRequest(sp_int32 _task_id,
+            const proto::ckptmgr::InstanceStateCheckpoint& _state) {
+  LOG(INFO) << "Sending RestoreInstanceState request to task " << _task_id;
+  CHECK(instance_info_.find(_task_id) != instance_info_.end());
+  Connection* conn = instance_info_[_task_id]->conn_;
+  if (conn) {
+    proto::ckptmgr::RestoreInstanceStateRequest* message = nullptr;
+    message = __global_protobuf_pool_acquire__(message);
+    message->mutable_state()->CopyFrom(_state);
+    SendMessage(conn, *message);
+    __global_protobuf_pool_release__(message);
+    return true;
+  } else {
+    LOG(WARNING) << "Cannot send RestoreInstanceState Request to task "
+                 << _task_id << " because it is not connected to us";
+    return false;
+  }
+}
+
+void StMgrServer::SendStartInstanceStatefulProcessing(const std::string& _ckpt_id) {
+  for (auto kv : instance_info_) {
+    Connection* conn = kv.second->conn_;
+    if (conn) {
+      proto::ckptmgr::StartInstanceStatefulProcessing* message = nullptr;
+      message = __global_protobuf_pool_acquire__(message);
+      message->set_checkpoint_id(_ckpt_id);
+      SendMessage(conn, *message);
+      __global_protobuf_pool_release__(message);
+    } else {
+      LOG(WARNING) << "Cannot send StartInstanceStatefulProcessing to task "
+                   << kv.first << " because it is not connected to us";
+    }
+  }
+}
+
+void StMgrServer::ClearCache() {
+  stateful_gateway_->Clear();
+}
 }  // namespace stmgr
 }  // namespace heron
