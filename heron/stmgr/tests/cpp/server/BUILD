@@ -61,6 +61,7 @@ cc_test(
 
 cc_test(
     name = "stateful-restorer_unittest",
+    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
     srcs = [
         "stateful-restorer_unittest.cpp",
         "dummy_ckptmgr_client.cpp",
@@ -76,6 +77,7 @@ cc_test(
         "//heron/stmgr/src/cpp:util-cxx",
         "//third_party/gtest:gtest-cxx",
     ],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
