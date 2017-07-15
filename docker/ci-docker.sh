@@ -81,7 +81,7 @@ publish_exec_image() {
   DOCKER_TAG_PREFIX=$3
   INPUT_DIRECTORY=$(realpath $4)
 
-  if [ "$INPUT_TARGET_PLATFORM" -eq "latest" ]; then 
+  if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then 
     TARGET_PLATFORM="ubuntu14.04"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
