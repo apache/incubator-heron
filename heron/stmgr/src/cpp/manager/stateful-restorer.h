@@ -65,7 +65,7 @@ class StatefulRestorer {
   void HandleCkptMgrRestart();
   // Called when instance responds back with RestoredInstanceStateResponse
   void HandleInstanceRestoredState(sp_int32 _task_id,
-                                   const proto::system::Status& _status,
+                                   const proto::system::StatusCode _status,
                                    const std::string& _checkpoint_id);
   // called when ckptmgr returns with instance state
   void HandleCheckpointState(proto::system::StatusCode _status, sp_int32 _task_id,

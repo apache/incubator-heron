@@ -175,14 +175,14 @@ void StatefulRestorer::HandleCheckpointState(proto::system::StatusCode _status, 
 }
 
 void StatefulRestorer::HandleInstanceRestoredState(sp_int32 _task_id,
-                                                   const proto::system::Status& _status,
+                                                   const proto::system::StatusCode _status,
                                                    const std::string& _checkpoint_id) {
   LOG(INFO) << "Instance " << _task_id << " restored its state for " << _checkpoint_id
-            << " with status " << _status.status();
+            << " with status " << _status;
 
   // We don't handle well if instances are not able to restore
   // TODO(skukarni) Fix this
-  CHECK_EQ(_status.status(), proto::system::OK);
+  CHECK_EQ(_status, proto::system::OK);
 
   multi_count_metric_->scope(METRIC_INSTANCE_RESTORE_RESPONSES)->incr();
   if (!in_progress_) {
