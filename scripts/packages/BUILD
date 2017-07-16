@@ -426,7 +426,6 @@ genrule(
         'find heronpy -type f -name "*.py" -exec sed -i.bak "s/heron.dsl.src.python/heronpy.streamlet/g" {} \;',
         'find heronpy -type f -name "*.py" -exec sed -i.bak "s/heron.proto/heronpy._proto/g" {} \;',
         'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
-        'tree .',
         'find heronpy -type f -name "*.bak" -delete',
         'rm setup.py.template',
         '/usr/bin/env python2.7 setup.py sdist',
