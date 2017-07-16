@@ -46,7 +46,7 @@ import com.twitter.heron.api.tuple.Values;
  *
  * Simple usage:
  *
- * new PulsarSpout().Builder()
+ * new PulsarSpout.Builder()
  *  .setServiceUrl("pulsar://localhost:6650")
  *  .setTopic("persistent://sample/standalone/ns1/my-topic")
  *  .setSubscription("my-subscription")
@@ -202,6 +202,13 @@ public class PulsarSpout extends BaseRichSpout implements IMetric<Map<String, Nu
         (double) messagesReceived / metricsTimeIntervalSeconds);
     metrics.put(METRIC_MESSAGE_BYTES_THROUGHPUT,
         (double) messageBytesReceived / metricsTimeIntervalSeconds);
+
+    // reset pulsar metrics
+    messagesReceived = 0;
+    messagesEmitted = 0;
+    messagesAcknowledged = 0;
+    messagesFailed = 0;
+    messageBytesReceived = 0;
 
     return metrics;
   }
