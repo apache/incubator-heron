@@ -72,6 +72,9 @@ class DummyStMgrServer : public heron::stmgr::StMgrServer {
   bool DidSendRestoreRequest(sp_int32 _task_id) {
     return restore_sent_.find(_task_id) != restore_sent_.end();
   }
+  void ClearSendRestoreRequest(sp_int32 _task_id) {
+    restore_sent_.erase(_task_id);
+  }
 
  private:
   heron::proto::system::PhysicalPlan* pplan_;

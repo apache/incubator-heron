@@ -297,6 +297,95 @@ TEST(StatefulRestorer, normalcase) {
   delete dummyLoop;
 }
 
+// If instances die in the middle of a restore, make sure that
+// they have to be recovered again
+TEST(StatefulRestorer, deadinstances) {
+  auto pplan = CreatePplan(2, 4, 3);
+  EventLoop* dummyLoop = new EventLoopImpl();
+  auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
+  auto tuple_cache = new DummyTupleCache(dummyLoop);
+  auto dummy_metrics_client = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
+                                                               "_stmgr", "_stmgr", 100,
+                                                               dummyLoop);
+  auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
+                                                       GenerateStMgrId(1), pplan);
+  auto dummy_stmgr_server = CreateDummyStMgrServer(dummyLoop, GenerateStMgrId(1),
+                                                   pplan, dummy_metrics_client);
+  bool restore_done = false;
+  std::string ckpt_id = "ckpt1";
+  auto restorer = new heron::stmgr::StatefulRestorer(ckptmgr_client, dummy_stmgr_clientmgr,
+                                                     tuple_cache, dummy_stmgr_server,
+                                                     dummy_metrics_client,
+                                                     std::bind(&RestoreDone, &restore_done));
+  // At the start the restore is not in progress
+  EXPECT_FALSE(restorer->InProgress());
+  restorer->StartRestore(ckpt_id, 1, pplan);
+  // Now we are in restore
+  EXPECT_TRUE(restorer->InProgress());
+  // Just have all stmgrs connected to us
+  restorer->HandleAllStMgrClientsConnected();
+
+  // Responses from ckptmgr
+  std::unordered_set<int32_t> local_tasks;
+  heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_tasks);
+  for (auto task : local_tasks) {
+    heron::proto::ckptmgr::InstanceStateCheckpoint c;
+    c.set_checkpoint_id(ckpt_id);
+    restorer->HandleCheckpointState(heron::proto::system::OK, task, ckpt_id, c);
+  }
+  EXPECT_TRUE(restorer->InProgress());
+
+  // Send notification that some tasks have recovered
+  EXPECT_GT(local_tasks.size(), 1);
+  bool first = true;
+  int32_t troublesome_task;
+  for (auto task : local_tasks) {
+    if (first) {
+      first = false;
+      troublesome_task = task;
+    } else {
+      restorer->HandleInstanceRestoredState(task, heron::proto::system::OK, ckpt_id);
+    }
+  }
+  EXPECT_TRUE(restorer->InProgress());
+
+  // Notify that one instance is dead
+  restorer->HandleDeadInstanceConnection(troublesome_task);
+  dummy_stmgr_server->ClearSendRestoreRequest(troublesome_task);
+  ckptmgr_client->ClearGetCalled(ckpt_id, troublesome_task);
+
+  EXPECT_TRUE(restorer->InProgress());
+  EXPECT_FALSE(ckptmgr_client->GetCalled(ckpt_id, troublesome_task));
+  EXPECT_FALSE(dummy_stmgr_server->DidSendRestoreRequest(troublesome_task));
+
+  // Now it is back on again
+  restorer->HandleAllInstancesConnected();
+  // We are still in progress
+  EXPECT_TRUE(restorer->InProgress());
+  // Make sure that ckpt request is sent again
+  EXPECT_TRUE(ckptmgr_client->GetCalled(ckpt_id, troublesome_task));
+  // The state is fetched from ckptmgr
+  heron::proto::ckptmgr::InstanceStateCheckpoint c;
+  c.set_checkpoint_id(ckpt_id);
+  restorer->HandleCheckpointState(heron::proto::system::OK, troublesome_task, ckpt_id, c);
+  EXPECT_TRUE(restorer->InProgress());
+  // make sure that we sent restore state
+  EXPECT_TRUE(dummy_stmgr_server->DidSendRestoreRequest(troublesome_task));
+  restorer->HandleInstanceRestoredState(troublesome_task, heron::proto::system::OK, ckpt_id);
+
+  // Now everything is done
+  EXPECT_FALSE(restorer->InProgress());
+  EXPECT_TRUE(restore_done);
+
+  delete restorer;
+  delete dummy_stmgr_clientmgr;
+  delete dummy_metrics_client;
+  delete tuple_cache;
+  delete ckptmgr_client;
+  delete pplan;
+  delete dummyLoop;
+}
+
 int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);

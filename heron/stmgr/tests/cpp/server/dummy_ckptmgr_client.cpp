@@ -78,6 +78,14 @@ bool DummyCkptMgrClient::GetCalled(const std::string& _ckpt_id, int32_t _task_id
   return iter->second.find(_task_id) != iter->second.end();
 }
 
+void DummyCkptMgrClient::ClearGetCalled(const std::string& _ckpt_id, int32_t _task_id) {
+  auto iter = gets_.find(_ckpt_id);
+  if (iter == gets_.end()) {
+    LOG(FATAL) << "No such ckpt found";
+  }
+  iter->second.erase(_task_id);
+}
+
 void DummyCkptMgrClient::DummySaveWatcher(const heron::proto::system::Instance&,
                                           const std::string&) {
 }

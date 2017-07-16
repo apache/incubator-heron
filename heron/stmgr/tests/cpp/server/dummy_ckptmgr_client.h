@@ -38,6 +38,7 @@ class DummyCkptMgrClient : public heron::stmgr::CkptMgrClient {
 
   bool SaveCalled(const std::string& _ckpt_id, int32_t _task_id) const;
   bool GetCalled(const std::string& _ckpt_id, int32_t _task_id) const;
+  void ClearGetCalled(const std::string& _ckpt_id, int32_t _task_id);
 
  private:
   void DummySaveWatcher(const heron::proto::system::Instance& _instance,
