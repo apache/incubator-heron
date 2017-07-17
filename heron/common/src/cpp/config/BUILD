@@ -33,7 +33,6 @@ cc_library(
         "topology-config-vars.h",
     ],
     hdrs = [ 
-        "heron-internals-config-reader.h",
         "metrics-sinks-reader.h",
         "yaml-file-reader.h",
     ],
@@ -50,12 +49,4 @@ cc_library(
         "//third_party/yaml-cpp:yaml-cxx",
     ],
     linkstatic = 1,
-)
-
-cc_library(
-  name =  "heron-internal-config-cxx",
-  srcs = [
-      "heron-internals-config-reader.cpp",
-      "heron-internals-config-vars.cpp",
-  ]
 )
