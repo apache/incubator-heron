@@ -60,7 +60,7 @@ class MemPool {
   template<typename M>
   void release(M* ptr) {
     std::type_index type = typeid(M);
-    sp_int32 size = mem_pool_map_[type].size() * sizeof(M);
+    sp_int32 size = mem_pool_map_[type].size();
     // if pool size reaches the limit, release the memory
     // otherwise put the memory into pool
     if (size >= pool_limit_) {
@@ -73,7 +73,7 @@ class MemPool {
  private:
   // each type has its own separate mem pool entry
   std::unordered_map<std::type_index, std::vector<B*>> mem_pool_map_;
-  // each mem pool size should not exceed the pool_limit_
+  // number of message in each mem pool should not exceed the pool_limit_
   sp_int32 pool_limit_;
 };
 
