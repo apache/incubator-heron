@@ -42,8 +42,10 @@ class StMgrClientMgr {
                  sp_int64 _low_watermark);
   virtual ~StMgrClientMgr();
 
-  void NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan);
-  void SendTupleStreamMessage(sp_int32 _task_id,
+  // Start the appropriate clients based on a new physical plan
+  void StartConnections(const proto::system::PhysicalPlan* _pplan);
+  // return true if we are successful in sending the message. false otherwise
+  bool SendTupleStreamMessage(sp_int32 _task_id,
                               const sp_string& _stmgr_id,
                               const proto::system::HeronTupleSet2& _msg);
 
@@ -56,6 +58,18 @@ class StMgrClientMgr {
   void SendStartBackPressureToOtherStMgrs();
   void SendStopBackPressureToOtherStMgrs();
   bool DidAnnounceBackPressure();
+  // Called by StMgrClient when its connection closes
+  void HandleDeadStMgrConnection(const sp_string& _stmgr_id);
+  // Called by StMgrClient when it successfully registers
+  void HandleStMgrClientRegistered();
+  void SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
+                                        proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+
+  // Interface to close all connections
+  void CloseConnectionsAndClear();
+
+  // Check if all clients are registered
+  bool AllStMgrClientsRegistered();
 
  private:
   StMgrClient* CreateClient(const sp_string& _other_stmgr_id, const sp_string& _host_name,

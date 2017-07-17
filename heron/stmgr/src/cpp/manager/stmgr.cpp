@@ -450,7 +450,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   delete pplan_;
   pplan_ = _pplan;
   neighbour_calculator_->Reconstruct(*pplan_);
-  clientmgr_->NewPhysicalPlan(pplan_);
+  clientmgr_->StartConnections(pplan_);
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 
@@ -745,6 +745,51 @@ void StMgr::SendStartBackPressureToOtherStMgrs() {
 }
 
 void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
+
+// Do any actions if a stmgr client connection dies
+void StMgr::HandleDeadStMgrConnection(const sp_string&) {
+  // TODO(srkukarni) For Stateful Topologies, we need to do a restore
+}
+
+void StMgr::HandleAllStMgrClientsRegistered() {
+  // If we are stateful topology, we might want to continue our restore process
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleAllInstancesConnected() {
+  // Now we can connect to the tmaster
+  StartTMasterClient();
+}
+
+void StMgr::HandleDeadInstance(sp_int32 _task_id) {
+  // If we are stateful topology, we might want to take some actions like
+  // asking tmaster to start recovery
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint&,
+                                               const proto::system::Instance&) {
+  // If we are stateful topology, we might want to take some actions like
+  // sending this to ckptmgr for actually saving and propagating markers
+  // to downstream tasks
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleRestoreInstanceStateResponse(sp_int32,
+                                               const proto::system::Status&,
+                                               const std::string&) {
+  // If we are stateful topology, we might want to see how the restore went
+  // and if it was successful and all other local instances have recovered
+  // send back a success response to tmaster saying that we have recovered
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleDownStreamStatefulCheckpoint(
+            const proto::ckptmgr::DownstreamStatefulCheckpoint& _message) {
+  server_->HandleCheckpointMarker(_message.origin_task_id(),
+                                  _message.destination_task_id(),
+                                  _message.checkpoint_id());
+}
 
 }  // namespace stmgr
 }  // namespace heron
