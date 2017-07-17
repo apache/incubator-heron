@@ -87,7 +87,7 @@ void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
   sp_int32 metrics_export_interval_sec =
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
-  __global_protobuf_pool_set_pool_max_size(
+  __global_protobuf_pool_set_pool_max_number_of_messages__(
     heron::config::HeronInternalsConfigReader::Instance()
       ->GetHeronStreammgrMempoolMaxMessageNumber());
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);

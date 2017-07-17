@@ -70,7 +70,7 @@ class MemPool {
     }
   }
 
-  void set_pool_max_size(sp_int32 _pool_limit) {
+  void set_pool_max_number_of_messages(sp_int32 _pool_limit) {
     pool_limit_ = _pool_limit;
   }
 
@@ -98,7 +98,7 @@ void __global_protobuf_pool_release__(T* _m) {
   __global_protobuf_pool__->release(_m);
 }
 
-void __global_protobuf_pool_set_pool_max_size(sp_int32 _pool_limit);
+void __global_protobuf_pool_set_pool_max_number_of_messages__(sp_int32 _pool_limit);
 
 #endif
 
