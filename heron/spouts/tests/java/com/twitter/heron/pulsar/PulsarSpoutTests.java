@@ -26,6 +26,7 @@ import com.yahoo.pulsar.client.api.Message;
 import com.yahoo.pulsar.client.api.MessageId;
 import com.yahoo.pulsar.client.api.PulsarClient;
 import com.yahoo.pulsar.client.api.PulsarClientException;
+import com.yahoo.pulsar.client.api.SubscriptionType;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,7 @@ import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Values;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -130,6 +132,13 @@ public class PulsarSpoutTests {
 
     spout.ack(message.getMessageId());
     Mockito.verify(mockConsumer, Mockito.times(1)).acknowledgeAsync(message.getMessageId());
+  }
+
+  @Test
+  public void testDefaultConsumerConfiguration() {
+    final ConsumerConfiguration configuration = PulsarSpout.getDefaultConsumerConfiguration();
+    assertEquals(configuration.getSubscriptionType(), SubscriptionType.Shared);
+    assertEquals(configuration.getAckTimeoutMillis(), 60000);
   }
 
   private PulsarSpout create(final Iterator<Message> messages,

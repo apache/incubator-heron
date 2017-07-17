@@ -42,6 +42,10 @@ public final class Utils {
     return reference;
   }
 
+  static <T> T defaultIfNull(T reference, T defaultValue) {
+    return reference != null ? reference : defaultValue;
+  }
+
   private Utils() {
   }
 }

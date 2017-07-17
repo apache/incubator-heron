@@ -24,6 +24,7 @@ import com.yahoo.pulsar.client.api.Message;
 import com.yahoo.pulsar.client.api.MessageId;
 import com.yahoo.pulsar.client.api.PulsarClient;
 import com.yahoo.pulsar.client.api.PulsarClientException;
+import com.yahoo.pulsar.client.api.SubscriptionType;
 import com.yahoo.pulsar.client.impl.PulsarClientImpl;
 
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ import com.twitter.heron.api.tuple.Values;
  * https://github.com/apache/incubator-pulsar
  *
  * The following values are required:
- * serviceUrl, topic, subscription and messageToValuesMapper.
+ * serviceUrl, topic, subscription, messageToValuesMapper.
  *
  * Simple usage:
  *
@@ -53,6 +54,11 @@ import com.twitter.heron.api.tuple.Values;
  *  .setMessageToValuesMapper(new MyMessageToValuesMapper()
  *  .build();
  *
+ *  If a ConsumerConfiguration is not provided then the default one is applied.
+ *  The default ConsumerConfiguration has the following properties:
+ *  - the subscription type is shared
+ *  - the acknowledgement timeout is 60 seconds
+ *
  */
 @SuppressWarnings("FinalClass")
 public class PulsarSpout extends BaseRichSpout implements IMetric<Map<String, Number>> {
@@ -61,6 +67,7 @@ public class PulsarSpout extends BaseRichSpout implements IMetric<Map<String, Nu
   private static final Logger LOG = LoggerFactory.getLogger(PulsarSpout.class);
 
   private static final int TIMEOUT_MS = 100;
+  private static final int DEFAULT_ACKNOWLEDGEMENT_TIMEOUT_SECS = 60;
   private static final int DEFAULT_METRICS_TIME_INTERVAL_IN_SECS = 60;
 
   private static final String METRIC_MESSAGES_RECEIVED = "messagesReceived";
@@ -94,21 +101,22 @@ public class PulsarSpout extends BaseRichSpout implements IMetric<Map<String, Nu
   private long messageBytesReceived;
 
   private PulsarSpout(Builder builder) {
-    serviceUrl =
-        Utils.checkNotNull(builder.serviceUrl, "A service url must be provided");
-    topic =
-        Utils.checkNotNull(builder.topic, "A topic must be provided");
-    subscription =
-        Utils.checkNotNull(builder.subscription, "A subscription must be provided");
-    messageToValuesMapper =
-        Utils.checkNotNull(builder.messageToValuesMapper,
-            "A MessageToValuesMapper must be provided");
+    serviceUrl = builder.serviceUrl;
+    topic = builder.topic;
+    subscription = builder.subscription;
+    messageToValuesMapper = builder.messageToValuesMapper;
     clientConfiguration =
-        builder.clientConfiguration != null
-            ? builder.clientConfiguration : new ClientConfiguration();
+        Utils.defaultIfNull(builder.clientConfiguration, getDefaultClientConfiguration());
     consumerConfiguration =
-        builder.consumerConfiguration != null
-            ? builder.consumerConfiguration : new ConsumerConfiguration();
+        Utils.defaultIfNull(builder.consumerConfiguration, getDefaultConsumerConfiguration());
+
+    // we must specify a consumer acknowledgement timeout so messages are replayed
+    // if one is not set then default to 60 seconds
+    if (consumerConfiguration.getAckTimeoutMillis() == 0) {
+      consumerConfiguration
+          .setAckTimeout(DEFAULT_ACKNOWLEDGEMENT_TIMEOUT_SECS, TimeUnit.SECONDS);
+    }
+
     metricsTimeIntervalSeconds =
         builder.metricsTimeIntervalInSeconds > 0
             ? builder.metricsTimeIntervalInSeconds : DEFAULT_METRICS_TIME_INTERVAL_IN_SECS;
@@ -218,6 +226,16 @@ public class PulsarSpout extends BaseRichSpout implements IMetric<Map<String, Nu
     return new PulsarClientImpl(serviceUrl, clientConfiguration);
   }
 
+  public static ConsumerConfiguration getDefaultConsumerConfiguration() {
+    return new ConsumerConfiguration()
+        .setSubscriptionType(SubscriptionType.Shared)
+        .setAckTimeout(DEFAULT_ACKNOWLEDGEMENT_TIMEOUT_SECS, TimeUnit.SECONDS);
+  }
+
+  public static ClientConfiguration getDefaultClientConfiguration() {
+    return new ClientConfiguration();
+  }
+
   public static class Builder {
     private String serviceUrl;
     private String topic;
@@ -272,6 +290,11 @@ public class PulsarSpout extends BaseRichSpout implements IMetric<Map<String, Nu
     }
 
     public PulsarSpout build() {
+      Utils.checkNotNull(serviceUrl, "A service url must be provided");
+      Utils.checkNotNull(topic, "A topic must be provided");
+      Utils.checkNotNull(subscription, "A subscription must be provided");
+      Utils.checkNotNull(messageToValuesMapper,
+          "A MessageToValuesMapper must be provided");
       return new PulsarSpout(this);
     }
   }
