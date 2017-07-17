@@ -70,6 +70,10 @@ class MemPool {
     }
   }
 
+  void set_pool_max_size(sp_int32 _pool_limit) {
+    pool_limit_ = _pool_limit;
+  }
+
  private:
   // each type has its own separate mem pool entry
   std::unordered_map<std::type_index, std::vector<B*>> mem_pool_map_;
@@ -93,6 +97,8 @@ void __global_protobuf_pool_release__(T* _m) {
   std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
   __global_protobuf_pool__->release(_m);
 }
+
+void __global_protobuf_pool_set_pool_max_size(sp_int32 _pool_limit);
 
 #endif
 

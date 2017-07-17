@@ -18,8 +18,15 @@
 // Just defines the static member of Mempool class
 ////////////////////////////////////////////////////////////////////////////////
 #include "basics/basics.h"
+#include "glog/logging.h"
 
 // TODO(nlu): get the pool size limit from config
 MemPool<google::protobuf::Message>* __global_protobuf_pool__ =
                                    new MemPool<google::protobuf::Message>(512);
 std::mutex __global_protobuf_pool_mutex__;
+
+void __global_protobuf_pool_set_pool_max_size(sp_int32 _pool_limit) {
+  std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
+  LOG(INFO) << "Set max size of each memory pool to " << _pool_limit;
+  __global_protobuf_pool__->set_pool_max_size(_pool_limit);
+}

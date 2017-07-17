@@ -205,6 +205,10 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrStatefulBufferSizeMb() {
       .as<int>();
 }
 
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrMempoolSize() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_MEMPOOL_SIZE].as<int>();
+}
+
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS].as<int>();
 }
