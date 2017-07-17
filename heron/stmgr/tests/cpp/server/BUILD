@@ -58,3 +58,34 @@ cc_test(
     ],
     linkstatic = 1,
 )
+
+cc_test(
+    name = "stateful-restorer_unittest",
+    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
+    srcs = [
+        "stateful-restorer_unittest.cpp",
+        "dummy_ckptmgr_client.cpp",
+
+        "dummy_tuple_cache.h",
+        "dummy_ckptmgr_client.h",
+        "dummy_stmgr_clientmgr.h",
+        "dummy_stmgr_server.h",
+    ],
+    deps = [
+        "//heron/stmgr/src/cpp:manager-cxx",
+        "//heron/stmgr/src/cpp:grouping-cxx",
+        "//heron/stmgr/src/cpp:util-cxx",
+        "//third_party/gtest:gtest-cxx",
+    ],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
+        "-Iheron/stmgr/src/cpp",
+        "-Iheron/stmgr/tests/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
+    linkstatic = 1,
+)

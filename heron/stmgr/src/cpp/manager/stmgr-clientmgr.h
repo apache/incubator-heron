@@ -43,7 +43,7 @@ class StMgrClientMgr {
   virtual ~StMgrClientMgr();
 
   // Start the appropriate clients based on a new physical plan
-  void StartConnections(const proto::system::PhysicalPlan* _pplan);
+  virtual void StartConnections(const proto::system::PhysicalPlan* _pplan);
   // return true if we are successful in sending the message. false otherwise
   bool SendTupleStreamMessage(sp_int32 _task_id,
                               const sp_string& _stmgr_id,
@@ -66,10 +66,10 @@ class StMgrClientMgr {
                                         proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
   // Interface to close all connections
-  void CloseConnectionsAndClear();
+  virtual void CloseConnectionsAndClear();
 
   // Check if all clients are registered
-  bool AllStMgrClientsRegistered();
+  virtual bool AllStMgrClientsRegistered();
 
  private:
   StMgrClient* CreateClient(const sp_string& _other_stmgr_id, const sp_string& _host_name,
