@@ -110,7 +110,7 @@ void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, sp_int64 
   checkpoint_id_ = _checkpoint_id;
   restore_txid_ = _restore_txid;
 
-  // Send messages to ckpt
+  // Retreive checkpoints from the ckptmgr.
   GetCheckpoints();
 
   clientmgr_->StartConnections(_pplan);
@@ -139,7 +139,8 @@ void StatefulRestorer::HandleCheckpointState(proto::system::StatusCode _status, 
             << " and checkpoint " << _state.checkpoint_id();
   multi_count_metric_->scope(METRIC_CKPT_RESPONSES)->incr();
   if (!in_progress_) {
-    LOG(INFO) << "Ignoring it because we are not in restore";
+    LOG(INFO) << "Ignoring InstanceState from " << _task_id << " for checkpoint "
+              << _checkpoint_id << " because we are not in restore";
     multi_count_metric_->scope(METRIC_CKPT_RESPONSES_IGNORED)->incr();
     return;
   }
@@ -162,8 +163,9 @@ void StatefulRestorer::HandleCheckpointState(proto::system::StatusCode _status, 
       get_ckpt_pending_.erase(_task_id);
     }
     // Note that if we are unable to send the restore instance state request(i.e. if the
-    // last call returns false, its because of connection issues and we will get back to
-    // restore anyways.
+    // last call returns false, its because of connection issues. When we officially detect
+    // the issue(either in HandleRead/HandleWrite/HandleClose), we will be informed of a
+    // dead instance and we be doing restore
   } else {
     LOG(INFO) << "InstanceState from checkpont mgr contained non ok status " << _status;
     in_progress_ = false;
@@ -186,7 +188,8 @@ void StatefulRestorer::HandleInstanceRestoredState(sp_int32 _task_id,
 
   multi_count_metric_->scope(METRIC_INSTANCE_RESTORE_RESPONSES)->incr();
   if (!in_progress_) {
-    LOG(INFO) << "Ignoring the message because we are not in Restore";
+    LOG(INFO) << "Ignoring the Instance Restored State for task " << _task_id
+              << " and checkpoint " << _checkpoint_id << " because we are not in Restore";
     multi_count_metric_->scope(METRIC_INSTANCE_RESTORE_RESPONSES_IGNORED)->incr();
     return;
   }

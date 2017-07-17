@@ -49,6 +49,27 @@ class TupleCache;
 class StMgrClientMgr;
 class CkptMgrClient;
 
+// For Heron topologies running in exactly once semantics, the tmaster
+// could initiate restore topology to a certain globally consistent checkpoint.
+// This could be triggered either during startup or after failure of certain
+// topology components. StatefulRestorer implements the state machine of this recovery
+// process inside the stmgr. When stmgr receives the request to restore the topology
+// to a specific checkpoint, it starts the statemachine by invoking the
+// StartRestore. The main task of the restore state machine is to:-
+// 1. Clear all internal caches(like tuple cache, checkpoint_gateway buffer, etc)
+// 2. Retreive State of all local instances via the checkpoint manager
+// 3. Sending RestoreState request with the retreived state to all local instances
+// 4. Upon completion of recovery process, calling the _restore_done_watcher
+// Note that while all of this is in process, instances could die, stmgr clients
+// might get disconnected, checkpoint manager could disappear, etc. These events
+// are signalled to the restorer by the stmgr invoking the appopriate methods
+// of the StatefulRestorer(HandleDeadInstanceConnection, HandleAllInstancesConnected,
+// HandleDeadStMgrConnection, HandleAllStMgrClientsConnected, HandleCkptMgrRestart).
+// The restorer will update its state based on these unexpected failures occuring.
+//
+// For more information please refer to the stateful processing design doc at
+// https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit#
+// and in particular the recovery section.
 class StatefulRestorer {
  public:
   explicit StatefulRestorer(CkptMgrClient* _ckptmgr,
@@ -58,24 +79,39 @@ class StatefulRestorer {
                             std::function<void(proto::system::StatusCode,
                                                std::string, sp_int64)> _restore_done_watcher);
   virtual ~StatefulRestorer();
-  // Called when stmgr receives a RestoreTopologyStateRequest message
+  // Called when stmgr receives a RestoreTopologyStateRequest message. This is the
+  // beginning of the restore state machine inside the stmgr. This is a request
+  // to clear all caches and restore the state of all instances to the
+  // _checkpoint_id checkpoint. The _pplan represents the physical plan
+  // at the start of the restore. Upon the completion of the restore process(either
+  // successfully or otherwise), the restorer calls the _restore_done_watcher
+  // callback passing in it the status of the restore along with _checkpoint_id
+  // and the _restore_txid
   void StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,
                     proto::system::PhysicalPlan* _pplan);
   // Called when ckptmgr client restarts
   void HandleCkptMgrRestart();
-  // Called when instance responds back with RestoredInstanceStateResponse
+  // Called when local instance _task_id is done restoring its state at
+  // _checkpoint_id. If the restoration was successful, this means that this
+  // instance is good to go to start processing. After all the local instances
+  // have restored, the _restore_done_watcher callback is invoked signalling
+  // the completion of the recovery
   void HandleInstanceRestoredState(sp_int32 _task_id,
                                    const proto::system::StatusCode _status,
                                    const std::string& _checkpoint_id);
-  // called when ckptmgr returns with instance state
+  // called when ckptmgr retrieves the instance state at _checkpoint_id.
+  // We need to send this state to the local task _task_id to have it
+  // restore its state pointed to by _state.
   void HandleCheckpointState(proto::system::StatusCode _status, sp_int32 _task_id,
                              sp_string _checkpoint_id,
                              const proto::ckptmgr::InstanceStateCheckpoint& _state);
-  // called when a stmgr connection closes
+  // called when a stmgr connection closes. If we are in the middle of a restore,
+  // we cannot complete it until all our stmgr clients are connected
   void HandleDeadStMgrConnection();
-  // called when all clients get connected
+  // called when all the stmgr clients get connected
   void HandleAllStMgrClientsConnected();
-  // called when an instance is dead
+  // called when an instance is dead. If we are in the middle of a restore,
+  // we need to wait till it comes back and is restored to its appropriate state.
   void HandleDeadInstanceConnection(sp_int32 _task_id);
   // called when all instances are connected
   void HandleAllInstancesConnected();
