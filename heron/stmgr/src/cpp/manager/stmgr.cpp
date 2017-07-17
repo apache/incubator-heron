@@ -89,7 +89,7 @@ void StMgr::Init() {
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
   __global_protobuf_pool_set_pool_max_size(
     heron::config::HeronInternalsConfigReader::Instance()
-      ->GetHeronStreammgrMempoolSize());
+      ->GetHeronStreammgrMempoolMaxMessageNumber());
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
