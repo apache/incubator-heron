@@ -47,6 +47,7 @@ class StreamConsumers;
 class XorManager;
 class TupleCache;
 class NeighbourCalculator;
+class CkptMgrClient;
 
 class StMgr {
  public:
@@ -55,6 +56,7 @@ class StMgr {
         proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
         const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+        sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
         sp_int64 _high_watermark, sp_int64 _low_watermark);
   virtual ~StMgr();
 
@@ -88,6 +90,7 @@ class StMgr {
   void HandleAllStMgrClientsRegistered();
   void HandleDeadInstance(sp_int32 _task_id);
   void HandleAllInstancesConnected();
+  void HandleCkptMgrRegistration();
 
   // Handle checkpoint message coming from an upstream task to a downstream task
   void HandleDownStreamStatefulCheckpoint(
@@ -106,6 +109,16 @@ class StMgr {
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
   void CheckTMasterLocation(EventLoop::Status);
   void UpdateProcessMetrics(EventLoop::Status);
+
+  // Utility function to create checkpoint mgr client
+  void CreateCheckpointMgrClient();
+  // Called when ckpt mgr saves the state of an instance
+  void HandleSavedInstanceState(const proto::system::Instance& _instance,
+                                const std::string& _checkpoint_id);
+  // Called when ckpt mgr reteives the state of an instance
+  void HandleGetInstanceState(proto::system::StatusCode _status, sp_int32 _task_id,
+                              sp_string _checkpoint_id,
+                              const proto::ckptmgr::InstanceStateCheckpoint& _msg);
 
   void CleanupStreamConsumers();
   void PopulateStreamConsumers(
@@ -186,6 +199,9 @@ class StMgr {
   // Metrics Manager
   heron::common::MetricsMgrSt* metrics_manager_client_;
 
+  // Checkpoint Manager
+  CkptMgrClient* ckptmgr_client_;
+
   // Process related metrics
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;
 
@@ -195,6 +211,8 @@ class StMgr {
   sp_string zkroot_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
+  sp_int32 ckptmgr_port_;
+  sp_string ckptmgr_id_;
 
   std::vector<sp_int32> out_tasks_;
 
