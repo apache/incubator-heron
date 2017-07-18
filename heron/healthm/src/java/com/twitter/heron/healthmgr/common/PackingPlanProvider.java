@@ -33,6 +33,8 @@ import com.twitter.heron.spi.packing.PackingPlan.InstancePlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
+import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+
 /**
  * A topology's packing plan may get updated after initial deployment. This provider is used to
  * fetch the latest version from the state manager and provide to any dependent components.
@@ -48,7 +50,7 @@ public class PackingPlanProvider implements Provider<PackingPlan>, EventHandler<
   @Inject
   public PackingPlanProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
                              EventManager eventManager,
-                             @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName) {
+                             @Named(CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
     eventManager.addEventListener(TopologyUpdate.class, this);

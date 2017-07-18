@@ -24,9 +24,25 @@ import com.google.common.annotations.VisibleForTesting;
 
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.ConfigReader;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 
 public class HealthPolicyConfigReader {
+  enum POLICY_CONF {
+    CONF_FILE_NAME("healthmgr.yaml"),
+    HEALTH_POLICIES("heron.class.health.policies"),
+    HEALTH_POLICY_CLASS("health.policy.class"),
+    HEALTH_POLICY_INTERVAL("health.policy.interval.ms");
+
+    private String key;
+
+    POLICY_CONF(String name) {
+      this.key = name;
+    }
+
+    public String key() {
+      return key;
+    }
+  }
+
   private final Map<String, Map<String, String>> configs = new HashMap<>();
   private String configFilename;
 
@@ -37,7 +53,7 @@ public class HealthPolicyConfigReader {
   @SuppressWarnings("unchecked")
   public void loadConfig() {
     Map<String, Object> ret = readConfigFromFile(configFilename);
-    for (String id : TypeUtils.getListOfStrings(ret.get(HealthMgrConstants.HEALTH_POLICIES))) {
+    for (String id : TypeUtils.getListOfStrings(ret.get(POLICY_CONF.HEALTH_POLICIES.key))) {
       configs.put(id, (Map<String, String>) ret.get(id));
     }
   }

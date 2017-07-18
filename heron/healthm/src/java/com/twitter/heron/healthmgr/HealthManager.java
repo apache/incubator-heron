@@ -45,7 +45,7 @@ import org.apache.commons.cli.ParseException;
 import com.twitter.heron.classification.InterfaceStability.Evolving;
 import com.twitter.heron.classification.InterfaceStability.Unstable;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import com.twitter.heron.healthmgr.HealthPolicyConfigReader.POLICY_CONF;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
@@ -92,6 +92,8 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 @Unstable
 @Evolving
 public class HealthManager {
+  public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
+
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
   private AbstractModule baseModule;
@@ -210,7 +212,7 @@ public class HealthManager {
   @VisibleForTesting
   HealthPolicyConfigReader createPolicyConfigReader() throws FileNotFoundException {
     String policyConfigFile
-        = Paths.get(Context.heronConf(config), HealthMgrConstants.CONF_FILE_NAME).toString();
+        = Paths.get(Context.heronConf(config), POLICY_CONF.CONF_FILE_NAME.key()).toString();
     HealthPolicyConfigReader configReader = new HealthPolicyConfigReader(policyConfigFile);
     configReader.loadConfig();
     return configReader;
@@ -222,16 +224,16 @@ public class HealthManager {
       @Override
       protected void configure() {
         bind(String.class)
-            .annotatedWith(Names.named(HealthMgrConstants.CONF_TRACKER_URL))
+            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_TRACKER_URL))
             .toInstance(trackerUrl);
         bind(String.class)
-            .annotatedWith(Names.named(HealthMgrConstants.CONF_TOPOLOGY_NAME))
+            .annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
             .toInstance(Context.topologyName(config));
         bind(String.class)
-            .annotatedWith(Names.named(HealthMgrConstants.CONF_CLUSTER))
+            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_CLUSTER))
             .toInstance(Context.cluster(config));
         bind(String.class)
-            .annotatedWith(Names.named(HealthMgrConstants.CONF_ENVIRON))
+            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
         bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
       }

@@ -37,19 +37,23 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import net.minidev.json.JSONArray;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 
 public class TrackerMetricsProvider implements MetricsProvider {
+  public static final String CONF_TRACKER_URL = "TRACKER_URL";
+  public static final String CONF_CLUSTER = "CLUSTER";
+  public static final String CONF_ENVIRON = "ENVIRON";
+
   private static final Logger LOG = Logger.getLogger(TrackerMetricsProvider.class.getName());
   private final WebTarget baseTarget;
 
   private Clock clock = new Clock();
 
   @Inject
-  public TrackerMetricsProvider(@Named(HealthMgrConstants.CONF_TRACKER_URL) String trackerURL,
-                                @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName,
-                                @Named(HealthMgrConstants.CONF_CLUSTER) String cluster,
-                                @Named(HealthMgrConstants.CONF_ENVIRON) String environ) {
+  public TrackerMetricsProvider(@Named(CONF_TRACKER_URL) String trackerURL,
+                                @Named(CONF_TOPOLOGY_NAME) String topologyName,
+                                @Named(CONF_CLUSTER) String cluster,
+                                @Named(CONF_ENVIRON) String environ) {
     LOG.info("Metrics will be provided by tracker at :" + trackerURL);
 
     Client client = ClientBuilder.newClient();

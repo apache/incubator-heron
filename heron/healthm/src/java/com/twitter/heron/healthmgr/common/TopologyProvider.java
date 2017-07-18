@@ -31,6 +31,8 @@ import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
+import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+
 /**
  * A topology may be updated after initial deployment. This provider is used to provide the latest
  * version to any dependent components.
@@ -46,7 +48,7 @@ public class TopologyProvider implements Provider<Topology>, EventHandler<Topolo
   @Inject
   public TopologyProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
                           EventManager eventManager,
-                          @Named(HealthMgrConstants.CONF_TOPOLOGY_NAME) String topologyName) {
+                          @Named(CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
     eventManager.addEventListener(TopologyUpdate.class, this);

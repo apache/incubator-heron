@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
+import com.twitter.heron.healthmgr.HealthPolicyConfigReader.POLICY_CONF;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -42,7 +42,7 @@ public class HealthPolicyConfigReaderTest {
     policy2.put("p2c2", "v2");
 
     Map<String, Object> yamlContent = new HashMap<>();
-    yamlContent.put(HealthMgrConstants.HEALTH_POLICIES, policyIds);
+    yamlContent.put(POLICY_CONF.HEALTH_POLICIES.key(), policyIds);
     yamlContent.put("p1", policy1);
     yamlContent.put("p2", policy2);
 
