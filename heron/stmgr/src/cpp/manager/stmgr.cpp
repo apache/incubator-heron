@@ -113,6 +113,24 @@ void StMgr::Init() {
   // Create and Register Tuple cache
   CreateTupleCache();
 
+  // Output heap stat every 1 min
+  CHECK_GT(eventLoop_->registerTimer(
+               [this](EventLoop::Status) {
+                   char buffer[4096];
+                   MallocExtension::instance()->GetStats(buffer, 4096);
+                   LOG(INFO) << buffer;
+                   std::unordered_map<std::string, std::pair<int, int64_t>> stat =
+                     __global_protobuf_pool_stat__();
+                   LOG(INFO) << "Dump mempool info";
+                   for (auto it = stat.begin(); it != stat.end(); ++it) {
+                     if (it->second.first != 0) {
+                       LOG(INFO) << it->first << " - nums: " << it->second.first <<
+                         " bytes used: " << it->second.second;
+                     }
+                   }
+               }, true, 60_s),
+           0);
+
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,

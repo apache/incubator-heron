@@ -17,6 +17,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Just defines the static member of Mempool class
 ////////////////////////////////////////////////////////////////////////////////
+#include <string>
+#include <utility>
 #include "basics/basics.h"
 #include "glog/logging.h"
 
@@ -33,4 +35,9 @@ void __global_protobuf_pool_set_pool_max_number_of_messages__(sp_int32 _pool_lim
   std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
   LOG(INFO) << "Set max size of each memory pool to " << _pool_limit;
   __global_protobuf_pool__->set_pool_max_number_of_messages(_pool_limit);
+}
+
+std::unordered_map<std::string, std::pair<int, int64_t>> __global_protobuf_pool_stat__() {
+  std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
+  return __global_protobuf_pool__->stat();
 }
