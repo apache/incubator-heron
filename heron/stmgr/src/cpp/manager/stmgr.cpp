@@ -41,6 +41,7 @@
 #include "util/neighbour-calculator.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
+#include "manager/ckptmgr-client.h"
 
 namespace heron {
 namespace stmgr {
@@ -58,6 +59,7 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
              proto::api::Topology* _hydrated_topology, const sp_string& _stmgr_id,
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
              const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+             sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
              sp_int64 _high_watermark, sp_int64 _low_watermark)
 
     : pplan_(NULL),
@@ -79,6 +81,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
       shell_port_(_shell_port),
+      ckptmgr_port_(_ckptmgr_port),
+      ckptmgr_id_(_ckptmgr_id),
       high_watermark_(_high_watermark),
       low_watermark_(_low_watermark) {}
 
@@ -96,6 +100,15 @@ void StMgr::Init() {
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
+
+  is_stateful_ = heron::config::TopologyConfigHelper::IsTopologyStateful(*hydrated_topology_);
+  if (is_stateful_) {
+    // Start checkpoint manager client
+    CreateCheckpointMgrClient();
+  } else {
+    ckptmgr_client_ = nullptr;
+  }
+
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
@@ -105,8 +118,6 @@ void StMgr::Init() {
           config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
               1_s),
       0);  // fire only once
-
-  is_stateful_ = heron::config::TopologyConfigHelper::IsTopologyStateful(*hydrated_topology_);
 
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
@@ -151,6 +162,7 @@ StMgr::~StMgr() {
   CleanupStreamConsumers();
   CleanupXorManagers();
   delete hydrated_topology_;
+  delete ckptmgr_client_;
   delete metrics_manager_client_;
 
   delete neighbour_calculator_;
@@ -222,6 +234,26 @@ void StMgr::StartStmgrServer() {
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
+}
+
+void StMgr::CreateCheckpointMgrClient() {
+  LOG(INFO) << "Creating CheckpointMgr Client at " << stmgr_host_ << ":" << ckptmgr_port_;
+  NetworkOptions client_options;
+  client_options.set_host("localhost");
+  client_options.set_port(ckptmgr_port_);
+  client_options.set_socket_family(PF_INET);
+  client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  auto save_watcher = std::bind(&StMgr::HandleSavedInstanceState, this,
+                           std::placeholders::_1, std::placeholders::_2);
+  auto get_watcher = std::bind(&StMgr::HandleGetInstanceState, this,
+                           std::placeholders::_1, std::placeholders::_2,
+                           std::placeholders::_3, std::placeholders::_4);
+  auto ckpt_watcher = std::bind(&StMgr::HandleCkptMgrRegistration, this);
+  ckptmgr_client_ = new CkptMgrClient(eventLoop_, client_options,
+                                      topology_name_, topology_id_,
+                                      ckptmgr_id_, stmgr_id_,
+                                      save_watcher, get_watcher, ckpt_watcher);
+  ckptmgr_client_->Start();
 }
 
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
@@ -782,6 +814,12 @@ void StMgr::HandleDeadInstance(sp_int32 _task_id) {
   // TODO(srkukarni) Complete this
 }
 
+// Invoked by the CheckpointMgr Client when it gets registered to
+// the ckptmgr.
+void StMgr::HandleCkptMgrRegistration() {
+  // TODO(srkukarni) Complete this
+}
+
 // Initiate the process of stateful checkpointing
 void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
   // We should start sending checkpoint messages to our local instances
@@ -795,6 +833,24 @@ void StMgr::HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceSta
   // to downstream tasks
   // TODO(srkukarni) Complete this
 }
+
+// Invoked by CheckpointMgr Client when it finds out that the ckptmgr
+// saved the state of an instance
+void StMgr::HandleSavedInstanceState(const proto::system::Instance& _instance,
+                                     const std::string& _checkpoint_id) {
+  LOG(INFO) << "Got notification from ckptmgr that we saved instance state for task "
+            << _instance.info().task_id() << " for checkpoint "
+            << _checkpoint_id;
+  tmaster_client_->SavedInstanceState(_instance, _checkpoint_id);
+}
+
+// Invoked by CheckpointMgr Client when it retreives the state of an instance
+void StMgr::HandleGetInstanceState(proto::system::StatusCode _status, sp_int32 _task_id,
+                                   sp_string _checkpoint_id,
+                                   const proto::ckptmgr::InstanceStateCheckpoint& _msg) {
+  // TODO(srkukarni) Complete this
+}
+
 
 void StMgr::HandleRestoreInstanceStateResponse(sp_int32,
                                                const proto::system::Status&,
