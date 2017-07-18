@@ -94,7 +94,7 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 public class HealthManager {
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
-  private final String trackerURL;
+  private AbstractModule baseModule;
 
   private Config runtime;
   private Injector injector;
@@ -104,9 +104,9 @@ public class HealthManager {
   private List<IHealthPolicy> healthPolicies = new ArrayList<>();
   private HealthPolicyConfigReader policyConfigReader;
 
-  public HealthManager(Config config, String trackerUrl) {
+  public HealthManager(Config config, AbstractModule baseModule) {
     this.config = config;
-    this.trackerURL = trackerUrl;
+    this.baseModule = baseModule;
   }
 
   public static void main(String[] args) throws Exception {
@@ -152,7 +152,8 @@ public class HealthManager {
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
-    HealthManager healthManager = new HealthManager(config, trackerUrl);
+    AbstractModule module = buildTrackerModule(config, trackerUrl);
+    HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
     healthManager.initialize();
@@ -180,8 +181,9 @@ public class HealthManager {
 
     this.policyConfigReader = createPolicyConfigReader();
 
-    AbstractModule module = constructConfigModule(trackerURL);
-    injector = Guice.createInjector(module);
+    injector = Guice.createInjector(baseModule);
+    AbstractModule commonModule = buildCommonConfigModule();
+    injector = injector.createChildInjector(commonModule);
 
     initializePolicies();
   }
@@ -214,7 +216,8 @@ public class HealthManager {
     return configReader;
   }
 
-  private AbstractModule constructConfigModule(final String trackerUrl) {
+  @VisibleForTesting
+  static AbstractModule buildTrackerModule(final Config config, final String trackerUrl) {
     return new AbstractModule() {
       @Override
       protected void configure() {
@@ -230,12 +233,19 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(HealthMgrConstants.CONF_ENVIRON))
             .toInstance(Context.environ(config));
+        bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
+      }
+    };
+  }
+
+  private AbstractModule buildCommonConfigModule() {
+    return new AbstractModule() {
+      @Override
+      protected void configure() {
         bind(Config.class).toInstance(config);
         bind(EventManager.class).in(Singleton.class);
-
         bind(ISchedulerClient.class).toInstance(schedulerClient);
         bind(SchedulerStateManagerAdaptor.class).toInstance(stateMgrAdaptor);
-        bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
         bind(PackingPlanProvider.class).in(Singleton.class);
       }
     };

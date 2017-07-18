@@ -36,7 +36,11 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class HealthManagerTest {
   @Test
@@ -57,7 +61,8 @@ public class HealthManagerTest {
         .build();
     when(adaptor.getSchedulerLocation(anyString())).thenReturn(schedulerLocation);
 
-    HealthManager healthManager = new HealthManager(config, "localhost");
+    HealthManager healthManager =
+        new HealthManager(config, HealthManager.buildTrackerModule(config, "localhost"));
 
     Map policy = new HashMap<>();
     policy.put(HealthMgrConstants.HEALTH_POLICY_CLASS, TestPolicy.class.getName());
