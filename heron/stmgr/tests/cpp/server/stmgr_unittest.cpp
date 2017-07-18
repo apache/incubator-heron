@@ -595,8 +595,8 @@ void StartStMgrs(CommonResources& common) {
     StartStMgr(stmgr_ss, mgr, stmgr_thread, common.tmaster_host_, common.stmgr_baseport_ + i,
                common.topology_name_, common.topology_id_, common.topology_,
                common.stmgr_instance_id_list_[i], common.stmgrs_id_list_[i], common.zkhostportlist_,
-               common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-               common.low_watermark_);
+               common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+               common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
 
     common.ss_list_.push_back(stmgr_ss);
     common.stmgrs_list_.push_back(mgr);
@@ -953,8 +953,8 @@ TEST(StMgr, test_back_pressure_instance) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1064,8 +1064,8 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1204,8 +1204,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   StartStMgr(regular_stmgr_ss1, regular_stmgr1, regular_stmgr_thread1, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss1);
 
   EventLoopImpl* regular_stmgr_ss2 = NULL;
@@ -1215,8 +1215,9 @@ TEST(StMgr, test_back_pressure_stmgr) {
   StartStMgr(regular_stmgr_ss2, regular_stmgr2, regular_stmgr_thread2, common.tmaster_host_,
              common.stmgr_baseport_ + 1, common.topology_name_, common.topology_id_,
              common.topology_, common.stmgr_instance_id_list_[1], common.stmgrs_id_list_[1],
-             common.zkhostportlist_, common.dpath_, common.metricsmgr_port_, common.shell_port_,
-             common.high_watermark_, common.low_watermark_);
+             common.zkhostportlist_, common.dpath_, common.metricsmgr_port_,
+             common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
 
   common.ss_list_.push_back(regular_stmgr_ss2);
 
@@ -1319,8 +1320,8 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1438,8 +1439,8 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1572,8 +1573,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1712,8 +1713,8 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
