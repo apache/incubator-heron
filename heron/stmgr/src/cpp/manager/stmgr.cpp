@@ -239,9 +239,24 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_high_watermark(high_watermark_);
   master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
+  auto stateful_checkpoint_watch =
+       [this](sp_string checkpoint_id) {
+    this->InitiateStatefulCheckpoint(checkpoint_id);
+  };
+  auto restore_topology_watch =
+       [this](sp_string checkpoint_id, sp_int64 restore_txid) {
+    this->RestoreTopologyState(checkpoint_id, restore_txid);
+  };
+  auto start_stateful_watch =
+       [this](sp_string checkpoint_id) {
+    this->StartStatefulProcessing(checkpoint_id);
+  };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_host_,
-                                      stmgr_port_, shell_port_, std::move(pplan_watch));
+                                      stmgr_port_, shell_port_, std::move(pplan_watch),
+                                      std::move(stateful_checkpoint_watch),
+                                      std::move(restore_topology_watch),
+                                      std::move(start_stateful_watch));
 }
 
 void StMgr::CreateTupleCache() {
@@ -767,6 +782,12 @@ void StMgr::HandleDeadInstance(sp_int32 _task_id) {
   // TODO(srkukarni) Complete this
 }
 
+// Initiate the process of stateful checkpointing
+void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
+  // We should start sending checkpoint messages to our local instances
+  // TODO(srkukarni) Complete this
+}
+
 void StMgr::HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint&,
                                                const proto::system::Instance&) {
   // If we are stateful topology, we might want to take some actions like
@@ -791,5 +812,16 @@ void StMgr::HandleDownStreamStatefulCheckpoint(
                                   _message.checkpoint_id());
 }
 
+// Called by TmasterClient when it receives directive from tmaster
+// to restore the topology to _checkpoint_id checkpoint
+void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid) {
+  // TODO(srkukarni) Complete this
+}
+
+// Called by TmasterClient when it receives directive from tmaster
+// to restore the topology to _checkpoint_id checkpoint
+void StMgr::StartStatefulProcessing(sp_string _checkpoint_id) {
+  // TODO(srkukarni) Complete this
+}
 }  // namespace stmgr
 }  // namespace heron

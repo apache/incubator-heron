@@ -138,6 +138,20 @@ class StMgr {
   void BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLocation);
   void BroadcastMetricsCacheLocation(proto::tmaster::MetricsCacheLocation* tmasterLocation);
 
+  // Called when TMaster sends a InitiateStatefulCheckpoint message with a checkpoint_id
+  // This will send intiate checkpoint messages to local instances to capture their state.
+  void InitiateStatefulCheckpoint(sp_string checkpoint_id);
+
+  // Invoked when TMaster asks us to restore all our local instances state to
+  // the checkpoint represented by _checkpoint_id. This starts the
+  // Restore state machine
+  void RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid);
+
+  // Invoked when TMaster sends the StartStatefulProcessing request to kick
+  // start the computation. We send the StartStatefulProcessing to all our
+  // local instances so that they can start the processing.
+  void StartStatefulProcessing(sp_string _checkpoint_id);
+
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;
