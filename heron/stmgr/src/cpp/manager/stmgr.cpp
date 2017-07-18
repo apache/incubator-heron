@@ -109,6 +109,13 @@ void StMgr::Init() {
     ckptmgr_client_ = nullptr;
   }
 
+  // Create the client manager
+  clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
+                                  metrics_manager_client_, high_watermark_, low_watermark_);
+
+  // Create and Register Tuple cache
+  CreateTupleCache();
+
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
@@ -124,8 +131,6 @@ void StMgr::Init() {
 
   // Create and start StmgrServer
   StartStmgrServer();
-  // Create and Register Tuple cache
-  CreateTupleCache();
 
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
@@ -317,13 +322,6 @@ void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation
   // connected to all of the instances
   if (server_ && server_->HaveAllInstancesConnectedToUs()) {
     StartTMasterClient();
-  }
-
-  // TODO(vikasr): See if the the creation of StMgrClientMgr can be done
-  // in the constructor rather than here.
-  if (!clientmgr_) {
-    clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
-                                    metrics_manager_client_, high_watermark_, low_watermark_);
   }
 }
 
