@@ -29,6 +29,7 @@
 #include "manager/stream-consumers.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
+#include "basics/mempool.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
@@ -85,7 +86,9 @@ void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
   sp_int32 metrics_export_interval_sec =
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
-
+  __global_protobuf_pool_set_pool_max_number_of_messages__(
+    heron::config::HeronInternalsConfigReader::Instance()
+      ->GetHeronStreammgrMempoolMaxMessageNumber());
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
