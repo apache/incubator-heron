@@ -581,7 +581,9 @@ class HeronExecutor(object):
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
-        self.heron_internals_config_file]
+        self.heron_internals_config_file,
+        self.ckptmgr_port,
+        self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
