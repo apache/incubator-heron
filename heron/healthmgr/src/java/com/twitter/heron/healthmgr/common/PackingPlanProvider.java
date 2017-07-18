@@ -91,6 +91,7 @@ public class PackingPlanProvider implements Provider<PackingPlan>, EventHandler<
   /**
    * Invalidates cached packing plan on receiving update notification
    */
+  @Override
   public synchronized void onEvent(TopologyUpdate event) {
     LOG.info("Received topology update event, invalidating cached PackingPlan: " + event);
     this.packingPlan = null;

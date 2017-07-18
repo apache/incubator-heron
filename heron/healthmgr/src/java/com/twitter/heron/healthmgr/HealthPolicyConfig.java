@@ -14,10 +14,12 @@
 
 package com.twitter.heron.healthmgr;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.POLICY_CONF;
+
 
 public class HealthPolicyConfig {
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
@@ -32,8 +34,8 @@ public class HealthPolicyConfig {
     return configs.get(POLICY_CONF.HEALTH_POLICY_CLASS.key());
   }
 
-  public long getInterval() {
-    return Long.valueOf(configs.get(POLICY_CONF.HEALTH_POLICY_INTERVAL.key()));
+  public Duration getInterval() {
+    return Duration.ofMillis(Long.parseLong(configs.get(POLICY_CONF.HEALTH_POLICY_INTERVAL.key())));
   }
 
   public String getConfig(String configName) {

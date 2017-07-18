@@ -25,6 +25,21 @@ import com.google.common.annotations.VisibleForTesting;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.ConfigReader;
 
+/**
+ * {@link HealthPolicyConfigReader} reads health manager configurations from
+ * <code>healthmgr.yaml</code> file. The config file is expected to have a list of policy ids and
+ * configuration specific to each of the policies.
+ * <p>
+ * Sample configuration
+ * <pre>
+ * heron.class.health.policies:
+ *   - dynamic-resource-allocation
+ *
+ * dynamic-resource-allocation:
+ *   health.policy.class: "com.twitter.heron.healthmgr.policy.DynamicResourceAllocationPolicy"
+ *   health.policy.interval.ms: "120000"
+ * </pre>
+ */
 public class HealthPolicyConfigReader {
   enum POLICY_CONF {
     CONF_FILE_NAME("healthmgr.yaml"),

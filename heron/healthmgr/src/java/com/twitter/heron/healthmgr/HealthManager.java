@@ -130,15 +130,11 @@ public class HealthManager {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    String cluster = cmd.getOptionValue("cluster");
-    String role = cmd.getOptionValue("role");
-    String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String topologyName = cmd.getOptionValue("topology_name");
     String trackerUrl = cmd.getOptionValue("trackerURL", "http://localhost:8888");
-    Boolean verbose = cmd.hasOption("verbose");
 
+    Boolean verbose = cmd.hasOption("verbose");
     Level loggingLevel = Level.INFO;
     if (verbose) {
       loggingLevel = Level.FINE;
@@ -148,7 +144,7 @@ public class HealthManager {
     // build the final config by expanding all the variables
     Config config = Config.toLocalMode(Config.newBuilder()
         .putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
-        .putAll(commandLineConfigs(cluster, role, environ, topologyName, verbose))
+        .putAll(commandLineConfigs(cmd))
         .build());
 
     LOG.info("Static Heron config loaded successfully ");
@@ -277,17 +273,16 @@ public class HealthManager {
   /**
    * Load the config parameters from the command line
    *
-   * @param cluster, name of the cluster
-   * @param role, user role
-   * @param environ, user provided environment/tag
-   * @param verbose, enable verbose logging
+   * @param cmd command line options
    * @return config, the command line config
    */
-  private static Config commandLineConfigs(String cluster,
-                                           String role,
-                                           String environ,
-                                           String topologyName,
-                                           Boolean verbose) {
+  private static Config commandLineConfigs(CommandLine cmd) {
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String topologyName = cmd.getOptionValue("topology_name");
+    Boolean verbose = cmd.hasOption("verbose");
+
     Config.Builder commandLineConfig = Config.newBuilder()
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
