@@ -319,6 +319,15 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
+  // This is deprecated. Please use setReliabilityMode instead
+  public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
+    if (acking) {
+      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATLEAST_ONCE);
+    } else {
+      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATMOST_ONCE);
+    }
+  }
+
   public static void setMessageTimeoutSecs(Map<String, Object> conf, int secs) {
     conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, Integer.toString(secs));
   }
@@ -488,6 +497,11 @@ public class Config extends HashMap<String, Object> {
 
   public void setSerializationClassName(String className) {
     setSerializationClassName(this, className);
+  }
+
+  // This is deprecated. Pleae use setTopologyReliabilityMode instead
+  public void setEnableAcking(boolean acking) {
+    setEnableAcking(this, acking);
   }
 
   public void setMessageTimeoutSecs(int secs) {
