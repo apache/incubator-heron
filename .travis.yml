@@ -63,5 +63,5 @@ script:
   - python -V
   - which python2.7
   - python2.7 -V
-  - scripts/travis/ci.sh
+    #- scripts/travis/ci.sh
   - (cd website && website/scripts/publish-site.sh)
