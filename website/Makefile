@@ -22,8 +22,11 @@ pages:
 linkchecker:
 	@scripts/linkchecker.sh
 
-javadocs:
+javadocs-local:
 	@scripts/javadocs.sh
+
+javadocs-travis:
+	@scripts/javadocs.sh --travis
 
 python-docs:
 	@scripts/python-doc-gen.sh
@@ -32,12 +35,12 @@ site:
 	@make clean
 	@make build-static-assets
 	@make pages
-	@make javadocs
+	@make javadocs-local
 	@make python-docs
 
 travis-site:
 	@make clean
 	@make build-static-assets
 	@make pages
-	@scripts/javadocs.sh --travis
+	@make javadocs-travis
 	@make python-docs
