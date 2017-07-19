@@ -84,10 +84,25 @@ class MemPool {
   void release(M* ptr) {
     std::type_index type = typeid(M);
     map_[type].push_back(static_cast<B*>(ptr));
+    sp_int32 size = mem_pool_map_[type].size();
+    // if pool size reaches the limit, release the memory
+    // otherwise put the memory into pool
+    if (size >= pool_limit_) {
+      delete ptr;
+    } else {
+      mem_pool_map_[type].push_back(static_cast<B*>(ptr));
+    }
+  }
+
+  void set_pool_max_number_of_messages(sp_int32 _pool_limit) {
+    pool_limit_ = _pool_limit;
   }
 
  private:
-  std::unordered_map<std::type_index, std::vector<B*>> map_;
+  // each type has its own separate mem pool entry
+  std::unordered_map<std::type_index, std::vector<B*>> mem_pool_map_;
+  // number of message in each mem pool should not exceed the pool_limit_
+  sp_int32 pool_limit_;
 };
 
 extern MemPool<google::protobuf::Message>* __global_protobuf_pool__;
@@ -104,6 +119,8 @@ void __global_protobuf_pool_release__(T* _m) {
   std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
   __global_protobuf_pool__->release(_m);
 }
+
+void __global_protobuf_pool_set_pool_max_number_of_messages__(sp_int32 _pool_limit);
 
 #endif
 
