@@ -425,6 +425,9 @@ public class SubmitterMain {
       // initialize the state manager
       statemgr.initialize(config);
 
+      // initialize the uploader
+      uploader.initialize(config);
+
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
@@ -544,9 +547,6 @@ public class SubmitterMain {
   }
 
   protected URI uploadPackage(IUploader uploader) throws UploaderException {
-    // initialize the uploader
-    uploader.initialize(config);
-
     // upload the topology package to the storage
     return uploader.uploadPackage();
   }
