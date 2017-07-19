@@ -241,10 +241,8 @@ public final class SchedulerUtils {
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
 
-    Boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
-        topology.getTopologyConfig().getKvsList(),
-        com.twitter.heron.api.Config.TOPOLOGY_STATEFUL_ENABLED, false);
-    commands.add(Boolean.toString(isStatefulEnabled));
+    Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology)
+    commands.add(Boolean.toString(ckptMgrEnabled));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),
         Context.statefulStoragesClassPath(config),

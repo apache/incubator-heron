@@ -63,7 +63,21 @@ void TopologyConfigReader::OnConfigFileLoad() {
   AddIfMissing(TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS, "30");
   AddIfMissing(TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "1");
   AddIfMissing(TopologyConfigVars::TOPOLOGY_MAX_SPOUT_PENDING, "100");
-  AddIfMissing(TopologyConfigVars::TOPOLOGY_ENABLE_ACKING, "false");
+  if (!config_[TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE]) {
+    if (!config_[TopologyConfigVars::TOPOLOGY_ENABLE_ACKING]) {
+      AddIfMissing(TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE,
+                   std::to_string(TopologyConfigVars.TopologyReliabilityMode.ATMOST_ONCE));
+    } else {
+      // For backwards compatibility only.
+      if (config_[TopologyConfigVars::TOPOLOGY_ENABLE_ACKING].as<std::string>() == "true") {
+        AddIfMissing(TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE,
+                     std::to_string(TopologyConfigVars.TopologyReliabilityMode.ATLEAST_ONCE));
+      } else {
+        AddIfMissing(TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE,
+                     std::to_string(TopologyConfigVars.TopologyReliabilityMode.ATMOST_ONCE));
+      }
+    }
+  }
   AddIfMissing(TopologyConfigVars::TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
 }
 }  // namespace config

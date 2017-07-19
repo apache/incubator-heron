@@ -46,7 +46,12 @@ public class SpoutInstance
     this.maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
     this.instanceEmitBatchTime = systemConfig.getInstanceEmitBatchTime();
     this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSize();
-    this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    if (config.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
+      this.ackEnabled = "1".equals((String) config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+    } else {
+      // This is strictly for backwards compatibility
+      this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    }
   }
 
   @Override

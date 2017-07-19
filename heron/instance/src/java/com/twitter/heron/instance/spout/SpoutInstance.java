@@ -79,7 +79,6 @@ public class SpoutInstance implements IInstance {
     this.config = helper.getTopologyContext().getTopologyConfig();
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
-    this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
 
@@ -111,6 +110,7 @@ public class SpoutInstance implements IInstance {
 
     IPluggableSerializer serializer = SerializeDeSerializeHelper.getSerializer(config);
     collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
+    this.ackEnabled = collector.isAckEnabled();
   }
 
   @Override

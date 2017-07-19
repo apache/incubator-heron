@@ -46,8 +46,12 @@ class SpoutInstance(BaseInstance):
     self.serializer = SerializerHelper.get_serializer(context)
 
     # acking related
-    self.acking_enabled = context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_ACKING,
-                                                           False)
+    mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
+                                            api_constants.TopologyReliabilityMode.ATMOST_ONCE)
+    if mode == api_constants.TopologyReliabilityMode.ATMOST_ONCE:
+      self.acking_enabled = True
+    else:
+      self.acking_enabled = False
     self.enable_message_timeouts = \
       context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))

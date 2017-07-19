@@ -41,13 +41,19 @@ class TopologyConfigVars {
   static const sp_string TOPOLOGY_SERIALIZER_CLASSNAME;
   static const sp_string TOPOLOGY_TICK_TUPLE_FREQ_SECS;
   static const sp_string TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS;
+  // This is deprecated. Will be removed from future releases
   static const sp_string TOPOLOGY_ENABLE_ACKING;
+  enum TopologyReliabilityMode {
+    ATMOST_ONCE = 0,
+    ATLEAST_ONCE = 1,
+    STATEFUL = 2,
+    EXACTLY_ONCE = 3
+  };
+  static const sp_string TOPOLOGY_RELIABILITY_MODE;
   static const sp_string TOPOLOGY_CONTAINER_CPU_REQUESTED;
   static const sp_string TOPOLOGY_CONTAINER_RAM_REQUESTED;
-  static const sp_string TOPOLOGY_STATEFUL_ENABLED;
   static const sp_string TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS;
   static const sp_string TOPOLOGY_STATEFUL_START_CLEAN;
-  static const sp_string TOPOLOGY_EXACTLYONCE_ENABLED;
   static const sp_string TOPOLOGY_NAME;
   static const sp_string TOPOLOGY_TEAM_NAME;
   static const sp_string TOPOLOGY_TEAM_EMAIL;

@@ -101,8 +101,9 @@ void StMgr::Init() {
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
 
-  is_stateful_ = heron::config::TopologyConfigHelper::IsTopologyStateful(*hydrated_topology_);
-  if (is_stateful_) {
+  reliability_mode_ = heron::config::TopologyConfigHelper::GetReliabilityMode(*hydrated_topology_);
+  if (reliability_mode_ == heron::config::TopologyConfigHelper::STATEFUL
+      || reliability_mode_ == heron::config::TopologyConfigHelper::EXACTLY_ONCE) {
     // Start checkpoint manager client
     CreateCheckpointMgrClient();
   } else {
@@ -152,7 +153,7 @@ void StMgr::Init() {
   }, true, PROCESS_METRICS_FREQUENCY), 0);
 
   is_acking_enabled =
-    heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
+        reliability_mode_ == TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
 }
 
 StMgr::~StMgr() {
