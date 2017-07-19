@@ -37,6 +37,11 @@ class DummyStMgr : public Client {
   ~DummyStMgr();
 
   proto::system::PhysicalPlan* GetPhysicalPlan();
+  bool GotRestoreMessage() const { return got_restore_message_; }
+  void ResetGotRestoreMessage() { got_restore_message_ = false; }
+  bool GotStartProcessingMessage() const { return got_start_message_; }
+  void ResetGotStartProcessingMessage() { got_start_message_ = false; }
+  const std::string& stmgrid() const { return my_id_; }
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);
@@ -49,6 +54,8 @@ class DummyStMgr : public Client {
                                NetworkErrorCode);
   void HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* message);
   void HandleNewPhysicalPlan(const proto::system::PhysicalPlan& pplan);
+  void HandleRestoreTopologyStateRequest(proto::ckptmgr::RestoreTopologyStateRequest* message);
+  void HandleStartProcessingMessage(proto::ckptmgr::StartStmgrStatefulProcessing* message);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();
@@ -61,6 +68,8 @@ class DummyStMgr : public Client {
   std::vector<proto::system::Instance*> instances_;
 
   proto::system::PhysicalPlan* pplan_;
+  bool got_restore_message_;
+  bool got_start_message_;
 };
 }  // namespace testing
 }  // namespace heron

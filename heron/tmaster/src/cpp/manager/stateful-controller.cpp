@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "tmaster/src/cpp/manager/stateful-helper.h"
+#include "manager/stateful-controller.h"
 #include <iostream>
 #include <sstream>
 #include <chrono>
