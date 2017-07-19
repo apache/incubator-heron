@@ -9,10 +9,5 @@
     "gulp-sass": "^3.1.0",
     "gulp-task-listing": "^1.0.1",
     "gulp-uglify": "^2.0.1"
-  },
-  "scripts": {
-    "build": "node_modules/.bin/gulp build",
-    "clean": "node_modules/.bin/gulp clean",
-    "develop": "node_modules/.bin/gulp dev"
   }
 }
