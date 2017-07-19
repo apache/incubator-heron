@@ -156,6 +156,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // checkpoint markers to arrive before giving up
   sp_int32 GetHeronStreammgrStatefulBufferSizeMb();
 
+  // The max number of messages in the memory pool for each message type
+  sp_int32 GetHeronStreammgrMempoolMaxMessageNumber();
+
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
 

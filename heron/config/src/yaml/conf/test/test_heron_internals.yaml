@@ -50,6 +50,9 @@ heron.streammgr.stateful.buffer.size.mb: 100
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100
 
+# The max number of messages in the memory pool for each message type
+heron.streammgr.mempool.max.message.number: 512
+
 # For efficient acknowledgement
 heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 
