@@ -33,6 +33,6 @@ public class BasicConfig extends Config {
     super.setTopologyProjectName("heron-integration-test");
     super.setDebug(isDebug);
     super.setNumStmgrs(numStmgrs);
-    super.setEnableAcking(true);
+    super.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
   }
 }
