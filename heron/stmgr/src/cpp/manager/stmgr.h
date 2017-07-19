@@ -218,7 +218,7 @@ class StMgr {
   std::vector<sp_int32> out_tasks_;
 
   bool is_acking_enabled;
-  config::TopologyConfigVars::TopologyRelabilityMode reliability_mode_;
+  config::TopologyConfigVars::TopologyReliabilityMode reliability_mode_;
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;

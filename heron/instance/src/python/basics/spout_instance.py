@@ -48,10 +48,7 @@ class SpoutInstance(BaseInstance):
     # acking related
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
-    if mode == api_constants.TopologyReliabilityMode.ATMOST_ONCE:
-      self.acking_enabled = True
-    else:
-      self.acking_enabled = False
+    self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
     self.enable_message_timeouts = \
       context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))

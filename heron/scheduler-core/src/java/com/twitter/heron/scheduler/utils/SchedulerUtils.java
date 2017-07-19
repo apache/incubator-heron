@@ -241,7 +241,7 @@ public final class SchedulerUtils {
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
 
-    Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology)
+    Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
     commands.add(Boolean.toString(ckptMgrEnabled));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),

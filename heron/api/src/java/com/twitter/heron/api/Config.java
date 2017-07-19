@@ -107,7 +107,7 @@ public class Config extends HashMap<String, Object> {
    * This is deprecated. Please use TOPOLOGY_RELIABILITY_MODE instead.
    * This config parameter will be removed in future releases
    */
-  private static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
+  public static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
   /**
    * What is the reliability mode under which we are running this topology
    * Topology writers must set TOPOLOGY_RELIABILITY_MODE to one
@@ -150,16 +150,16 @@ public class Config extends HashMap<String, Object> {
      * mechanism to revert the topology to the last globally consistent checkpoint
      */
     EXACTLY_ONCE(3);
-    
+
     private final int mode;
-    private TopologyReliabilityMode(int mde) {
-      mode = mde;
+    TopologyReliabilityMode(int mde) {
+      this.mode = mde;
     }
     public boolean equalsName(int otherMode) {
-      return mode == otherMode;
+      return this.mode == otherMode;
     }
     public String toString() {
-      return String.valueOf(mode);
+      return String.valueOf(this.mode);
     }
   }
   /**
@@ -168,7 +168,7 @@ public class Config extends HashMap<String, Object> {
    * underlying TopologyReliabilityMode value.
    */
   public static final String TOPOLOGY_RELIABILITY_MODE = "topology.relability.mode";
-  
+
   /**
    * Number of cpu cores per container to be reserved for this topology
    */

@@ -137,12 +137,15 @@ public final class TopologyUtils {
   }
 
   public static boolean shouldStartCkptMgr(TopologyAPI.Topology topology) {
-    String mode = getConfigWithDefault(topologyConfig, Config.TOPOLOGY_RELIABILITY_MODE, "");
+    String mode = getConfigWithDefault(topology.getTopologyConfig().getKvsList(),
+                                       Config.TOPOLOGY_RELIABILITY_MODE, "");
     if (mode.isEmpty()) {
       return false;
     } else {
-      return Config.TopologyReliabilityMode.valueOf(mode) == Config.TopologyReliabilityMode.STATEFUL
-      || Config.TopologyReliabilityMode.valueOf(mode) == Config.TopologyReliabilityMode.EXACTLY_ONCE
+      return Config.TopologyReliabilityMode.valueOf(mode)
+             == Config.TopologyReliabilityMode.STATEFUL
+             || Config.TopologyReliabilityMode.valueOf(mode)
+             == Config.TopologyReliabilityMode.EXACTLY_ONCE;
     }
   }
 
