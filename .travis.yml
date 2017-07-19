@@ -23,6 +23,7 @@ addons:
       - zip
       - zlib1g-dev
 
+# Use Yarn caching to speed up the website build process
 cache: yarn
 
 env:
@@ -39,15 +40,17 @@ before_script:
   # required for python packaging
   - sudo pip install wheel
 
+  # the rest of these before_script items are
   # required for building the website docs
-  # Install Hugo (for generating the website)
+
+  # install Hugo (for generating the website)
   - wget -q https://github.com/gohugoio/hugo/releases/download/v0.24.1/hugo_0.24.1_Linux-64bit.deb
   - sudo dpkg -i hugo_0.24.1_Linux-64bit.deb
   - hugo version
 
-
-  # Install Python packages necessary for the website
+  # delete any current version of Pygments, just to be safe
   - sudo pip uninstall -y pygments
+  # install Python packages necessary for the website
   - sudo pip install pygments==2.1.3 pdoc==0.3.2
 
   # Install Node.js dependencies for the website
