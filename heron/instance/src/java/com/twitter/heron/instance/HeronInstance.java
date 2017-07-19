@@ -235,11 +235,14 @@ public class HeronInstance {
     private void handleException(Thread thread, Throwable exception) {
       // We would fail fast when errors occur to avoid unexpected bad situations
       if (exception instanceof Error) {
-        LOG.log(Level.SEVERE,
-            "Error caught in thread: " + thread.getName()
-                + " with thread id: " + thread.getId() + ". Process halting...",
-            exception);
-        Runtime.getRuntime().halt(1);
+        try {
+          LOG.log(Level.SEVERE, "Error caught in thread: " + thread.getName()
+                + " with thread id: " + thread.getId() + ". Process halting...", exception);
+        } finally {
+          // If an OOM happens, it is likely that logging above will
+          // cause another OOM.
+          Runtime.getRuntime().halt(1);
+        }
       }
 
       LOG.log(Level.SEVERE,
