@@ -44,10 +44,10 @@ class TopologyConfigVars {
   // This is deprecated. Will be removed from future releases
   static const sp_string TOPOLOGY_ENABLE_ACKING;
   enum TopologyReliabilityMode {
-    ATMOST_ONCE = 0,
-    ATLEAST_ONCE = 1,
-    STATEFUL = 2,
-    EXACTLY_ONCE = 3
+    ATMOST_ONCE,
+    ATLEAST_ONCE,
+    STATEFUL,
+    EXACTLY_ONCE
   };
   static const sp_string TOPOLOGY_RELIABILITY_MODE;
   static const sp_string TOPOLOGY_CONTAINER_CPU_REQUESTED;

@@ -30,13 +30,13 @@ namespace heron {
 namespace config {
 
 TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::string& _mode) {
-  if (_mode == "0") {
+  if (_mode == "ATMOST_ONCE") {
     return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
-  } else if (_mode == "1") {
+  } else if (_mode == "ATLEAST_ONCE") {
     return TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
-  } else if (_mode == "2") {
+  } else if (_mode == "STATEFUL") {
     return TopologyConfigVars::TopologyReliabilityMode::STATEFUL;
-  } else if (_mode == "3") {
+  } else if (_mode == "EXACTLY_ONCE") {
     return TopologyConfigVars::TopologyReliabilityMode::EXACTLY_ONCE;
   } else {
     LOG(FATAL) << "Unknown Topology Reliability Mode " << _mode;

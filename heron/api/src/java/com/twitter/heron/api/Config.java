@@ -119,14 +119,14 @@ public class Config extends HashMap<String, Object> {
      * components can get lost for any reason(network issues, component failures,
      * overloaded downstream component, etc).
      */
-    ATMOST_ONCE(0),
+    ATMOST_ONCE,
     /**
      * Heron guarantees that each emitted tuple is seen by the downstream components
      * atleast once. This is achieved via the anchoring process where emitted tuples
      * are anchored based on input tuples. Note that in failure scenarios, downstream
      * components can see the same tuple multiple times.
      */
-    ATLEAST_ONCE(1),
+    ATLEAST_ONCE,
     /**
      * In this mode Heron will try to take the snapshots of
      * all of the components of the topology every
@@ -138,7 +138,7 @@ public class Config extends HashMap<String, Object> {
      * upon their death, it does not guard against tuple losses that can happen because
      * of network partitions and other reasons.
      */
-    STATEFUL(2),
+    STATEFUL,
     /**
      * Heron guarantees that each emitted tuple is seen by the downstream components
      * exactly once. This is achieved via distributed snapshotting approach is described at
@@ -149,18 +149,7 @@ public class Config extends HashMap<String, Object> {
      * any component or detection of any network failure, Heron will initiate a recovery
      * mechanism to revert the topology to the last globally consistent checkpoint
      */
-    EXACTLY_ONCE(3);
-
-    private final int mode;
-    TopologyReliabilityMode(int mde) {
-      this.mode = mde;
-    }
-    public boolean equalsName(int otherMode) {
-      return this.mode == otherMode;
-    }
-    public String toString() {
-      return String.valueOf(this.mode);
-    }
+    EXACTLY_ONCE;
   }
   /**
    * A Heron topology can be run in any one of the TopologyReliabilityMode

@@ -18,8 +18,8 @@
 ####################################################################################################
 
 class TopologyReliabilityMode(object):
-  ATMOST_ONCE = "0"
-  ATLEAST_ONCE = "1"
+  ATMOST_ONCE = "ATMOST_ONCE"
+  ATLEAST_ONCE = "ATLEAST_ONCE"
 
 # Topology-specific options for the worker child process.
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
