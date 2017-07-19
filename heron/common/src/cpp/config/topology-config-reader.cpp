@@ -36,27 +36,6 @@ TopologyConfigReader::TopologyConfigReader(EventLoop* eventLoop, const sp_string
 
 TopologyConfigReader::~TopologyConfigReader() {}
 
-void TopologyConfigReader::BackFillTopologyConfig(proto::api::Topology* _topology) {
-  // Construct a temporary set
-  std::set<sp_string> topology_config;
-  if (_topology->has_topology_config()) {
-    const proto::api::Config& cfg = _topology->topology_config();
-    for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-      topology_config.insert(cfg.kvs(i).key());
-    }
-  }
-
-  // Fill in the user variables
-  for (YAML::const_iterator iter = config_.begin(); iter != config_.end(); ++iter) {
-    if (topology_config.find(iter->first.as<sp_string>()) == topology_config.end()) {
-      // We need to backfill this variable
-      proto::api::Config::KeyValue* kv = _topology->mutable_topology_config()->add_kvs();
-      kv->set_key(iter->first.as<sp_string>());
-      kv->set_value(iter->second.as<sp_string>());
-    }
-  }
-}
-
 void TopologyConfigReader::OnConfigFileLoad() {
   AddIfMissing(TopologyConfigVars::TOPOLOGY_DEBUG, "false");
   AddIfMissing(TopologyConfigVars::TOPOLOGY_STMGRS, "1");

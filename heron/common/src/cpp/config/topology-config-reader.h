@@ -36,10 +36,6 @@ class TopologyConfigReader : public YamlFileReader {
   TopologyConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file);
   virtual ~TopologyConfigReader();
 
-  // Fill topology config with default values in case
-  // things are not specified
-  void BackFillTopologyConfig(proto::api::Topology* _topology);
-
   virtual void OnConfigFileLoad();
 };
 }  // namespace config
