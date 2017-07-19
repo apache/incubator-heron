@@ -2,10 +2,13 @@ group: edge
 
 sudo: required
 
-language: java
+language: java node_js
 
 jdk:
   - oraclejdk8
+
+node_js:
+  - "7"
 
 addons:
   apt:
@@ -20,28 +23,35 @@ addons:
       - zip
       - zlib1g-dev
 
+cache: yarn
+
 env:
   - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
 
 before_install:
-  - . $HOME/.nvm/nvm.sh
-  - nvm install stable
-  - nvm use stable
   # download and install bazel
   - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh'
   - chmod +x bazel-0.3.1-installer-linux-x86_64.sh
   - ./bazel-0.3.1-installer-linux-x86_64.sh --user
 
 before_script:
+  # install python module for wheel files
+  # required for python packaging
+  - sudo pip install wheel
+
   # required for building the website docs
-  # - (cd website && npm install && npm install gulp && which gulp)
+  # Install Hugo (for generating the website)
   - wget -q https://github.com/gohugoio/hugo/releases/download/v0.24.1/hugo_0.24.1_Linux-64bit.deb
   - sudo dpkg -i hugo_0.24.1_Linux-64bit.deb
   - hugo version
 
-  # install python module for wheel files
-  # required for python packaging
-  - sudo pip install wheel
+
+  # Install Python packages necessary for the website
+  - sudo pip uninstall -y pygments
+  - sudo pip install pygments==2.1.3 pdoc==0.3.2
+
+  # Install Node.js dependencies for the website
+  - (cd website && yarn)
 
 script:
   - which gcc-4.8
@@ -53,3 +63,4 @@ script:
   - which python2.7
   - python2.7 -V
   - scripts/travis/ci.sh
+  - (cd website && make site)

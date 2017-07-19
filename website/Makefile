@@ -1,3 +1,5 @@
+GULP = node_modules/.bin/gulp
+
 setup:
 	scripts/setup.sh
 
@@ -8,11 +10,11 @@ serve:
 	@hugo serve
 
 develop-static-assets:
-	@npm run develop
+	@${GULP} dev
 
 build-static-assets:
-	@npm run clean
-	@npm run build
+	@${GULP} clean
+	@${GULP} build
 
 pages:
 	@hugo
