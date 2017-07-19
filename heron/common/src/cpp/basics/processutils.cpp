@@ -50,7 +50,7 @@ int ProcessUtils::getResourceUsage(struct rusage *usage) { return ::getrusage(RU
  *            8192              Tcmalloc page size
  *
  * In this example, ``generic.heap_size'' is 541.5 MiB, and
- * ``tcmalloc.pageheap_unmapped_bytes'' is 391.1 MiB. Acutal memory
+ * ``tcmalloc.pageheap_unmapped_bytes'' is 39.1 MiB. Actual memory
  * usage would be 502.4 MiB.
  *
  */
