@@ -48,8 +48,6 @@ before_script:
   - sudo dpkg -i hugo_0.24.1_Linux-64bit.deb
   - hugo version
 
-  # delete any current version of Pygments, just to be safe
-  - sudo pip uninstall -y pygments
   # install Python packages necessary for the website
   - sudo pip install pygments==2.1.3 pdoc==0.3.2
 
