@@ -30,7 +30,8 @@ class TestTopologyBuilder(TopologyBuilder):
   TERMINAL_BOLT_NAME = '__integration_test_aggregator_bolt'
   TERMINAL_BOLT_CLASS = AggregatorBolt
   DEFAULT_CONFIG = {api_constants.TOPOLOGY_DEBUG: True,
-                    api_constants.TOPOLOGY_ENABLE_ACKING: True,
+                    api_constants.TOPOLOGY_RELIABILITY_MODE:
+                    api_constants.TopologyReliabilityMode.ATLEAST_ONCE,
                     api_constants.TOPOLOGY_PROJECT_NAME: "heron-integration-test"}
   def __init__(self, name, http_server_url):
     super(TestTopologyBuilder, self).__init__(name)
