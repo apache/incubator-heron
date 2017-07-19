@@ -24,9 +24,6 @@ env:
   - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
 
 before_install:
-  - . $HOME/.nvm/nvm.sh
-  - nvm install stable
-  - nvm use stable
   # download and install bazel
   - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh'
   - chmod +x bazel-0.3.1-installer-linux-x86_64.sh
