@@ -47,7 +47,8 @@ public class SpoutInstance
     this.instanceEmitBatchTime = systemConfig.getInstanceEmitBatchTime();
     this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSize();
     if (config.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
-      this.ackEnabled = "1".equals((String) config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+      this.ackEnabled = Config.TopologyReliabilityMode.ATLEAST_ONCE.equals(
+                              config.get(Config.TOPOLOGY_RELIABILITY_MODE).toString());
     } else {
       // This is strictly for backwards compatibility
       this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));

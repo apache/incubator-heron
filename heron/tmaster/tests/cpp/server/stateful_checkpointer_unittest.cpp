@@ -102,7 +102,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   // Make topology stateful
   heron::proto::api::Config::KeyValue* kv = topology_config->add_kvs();
   kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE);
-  kv->set_value("2");
+  kv->set_value("ATLEAST_ONCE");
 
   // Set state
   topology->set_state(heron::proto::api::RUNNING);
