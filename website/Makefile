@@ -43,7 +43,8 @@ site:
 
 travis-ruby-setup:
 	NOKOGIRI_USE_SYSTEM_LIBRARIES=true bundle install \
-		--path vendor/bundle
+		--path vendor/bundle \
+		--jobs=3
 
 travis-python-setup:
 	sudo -H pip uninstall -y pygments

@@ -7,11 +7,8 @@ language: java ruby node_js
 jdk:
   - oraclejdk8
 
-node_js:
-  - "7"
-
-ruby:
-  - 
+rvm:
+  - 2.2
 
 addons:
   apt:
@@ -36,12 +33,14 @@ before_install:
   - ./bazel-0.3.1-installer-linux-x86_64.sh --user
 
 before_script:
+  - (cd website && make travis-website-setup)
   # install python module for wheel files
   # required for python packaging
-  - sudo pip install wheel
-  - (cd website && make travis-website-setup)
+  #- sudo pip install wheel
 
 script:
+  - (cd website && make travis-website-check)
+  - exit 0
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
