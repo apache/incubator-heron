@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <string>
 #include <vector>
 #include <iostream>
 #include "manager/stmgr.h"
@@ -34,7 +35,10 @@ namespace stmgr {
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, const sp_string& _stmgr_host,
                              sp_int32 _stmgr_port, sp_int32 _shell_port,
-                             VCallback<proto::system::PhysicalPlan*> _pplan_watch)
+                             VCallback<proto::system::PhysicalPlan*> _pplan_watch,
+                             VCallback<sp_string> _stateful_checkpoint_watch,
+                             VCallback<sp_string, sp_int64> _restore_topology_watch,
+                             VCallback<sp_string> _start_stateful_watch)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_host_(_stmgr_host),
@@ -42,6 +46,9 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
       shell_port_(_shell_port),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
+      stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
+      restore_topology_watch_(std::move(_restore_topology_watch)),
+      start_stateful_watch_(std::move(_start_stateful_watch)),
       reconnect_timer_id(0),
       heartbeat_timer_id(0) {
   reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
@@ -57,6 +64,9 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   InstallResponseHandler(new proto::tmaster::StMgrHeartbeatRequest(),
                          &TMasterClient::HandleHeartbeatResponse);
   InstallMessageHandler(&TMasterClient::HandleNewAssignmentMessage);
+  InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointMessage);
+  InstallMessageHandler(&TMasterClient::HandleRestoreTopologyStateRequest);
+  InstallMessageHandler(&TMasterClient::HandleStartStmgrStatefulProcessing);
 }
 
 TMasterClient::~TMasterClient() {}
@@ -175,6 +185,14 @@ void TMasterClient::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMess
   delete _message;
 }
 
+void TMasterClient::HandleStatefulCheckpointMessage(
+                                        proto::ckptmgr::StartStatefulCheckpoint* _message) {
+  LOG(INFO) << "Got a new start stateful checkpoint message from tmaster with id "
+            << _message->checkpoint_id();
+  stateful_checkpoint_watch_(_message->checkpoint_id());
+  __global_protobuf_pool_release__(_message);
+}
+
 void TMasterClient::OnReConnectTimer() {
   // The timer has triggered the callback, so reset the timer_id;
   reconnect_timer_id = 0;
@@ -217,5 +235,48 @@ void TMasterClient::SendHeartbeatRequest() {
   return;
 }
 
+void TMasterClient::SavedInstanceState(const proto::system::Instance& _instance,
+                                       const std::string& _checkpoint_id) {
+  proto::ckptmgr::InstanceStateStored message;
+  message.set_checkpoint_id(_checkpoint_id);
+  message.mutable_instance()->CopyFrom(_instance);
+  SendMessage(message);
+}
+
+void TMasterClient::SendRestoreTopologyStateResponse(proto::system::StatusCode _status,
+                                                     const std::string& _ckpt_id,
+                                                     sp_int64 _txid) {
+  proto::ckptmgr::RestoreTopologyStateResponse message;
+  message.mutable_status()->set_status(_status);
+  message.set_checkpoint_id(_ckpt_id);
+  message.set_restore_txid(_txid);
+  SendMessage(message);
+}
+
+void TMasterClient::HandleRestoreTopologyStateRequest(
+              proto::ckptmgr::RestoreTopologyStateRequest* _message) {
+  restore_topology_watch_(_message->checkpoint_id(), _message->restore_txid());
+  __global_protobuf_pool_release__(_message);
+}
+
+void TMasterClient::HandleStartStmgrStatefulProcessing(
+              proto::ckptmgr::StartStmgrStatefulProcessing* _message) {
+  start_stateful_watch_(_message->checkpoint_id());
+  __global_protobuf_pool_release__(_message);
+}
+
+void TMasterClient::SendResetTopologyState(const std::string& _dead_stmgr,
+                                           int32_t _dead_task,
+                                           const std::string& _reason) {
+  proto::ckptmgr::ResetTopologyState message;
+  message.set_reason(_reason);
+  if (!_dead_stmgr.empty()) {
+    message.set_dead_stmgr(_dead_stmgr);
+  }
+  if (_dead_task >= 0) {
+    message.set_dead_taskid(_dead_task);
+  }
+  SendMessage(message);
+}
 }  // namespace stmgr
 }  // namespace heron

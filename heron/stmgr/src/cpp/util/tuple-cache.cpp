@@ -41,8 +41,8 @@ TupleCache::TupleCache(EventLoop* eventLoop, sp_uint32 _drain_threshold)
 }
 
 TupleCache::~TupleCache() {
-  // Drain the cache first
-  drain_impl();
+  // Clear the cache first
+  clear();
 
   for (auto iter = cache_.begin(); iter != cache_.end(); ++iter) {
     delete iter->second;
@@ -79,6 +79,13 @@ void TupleCache::add_emit_tuple(sp_int32 _src_task_id,
   return l->add_emit_tuple(_src_task_id, _tuple, &total_size_);
 }
 
+void TupleCache::add_checkpoint_tuple(sp_int32 _task_id,
+                                      proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  if (total_size_ >= drain_threshold_bytes_) drain_impl();
+  TupleList* l = get(_task_id);
+  return l->add_checkpoint_tuple(_message, &total_size_);
+}
+
 TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
   TupleList* l = NULL;
   auto iter = cache_.find(_task_id);
@@ -91,11 +98,20 @@ TupleCache::TupleList* TupleCache::get(sp_int32 _task_id) {
   return l;
 }
 
+void TupleCache::clear() {
+  for (auto kv : cache_) {
+    kv.second->clear();
+    delete kv.second;
+  }
+  cache_.clear();
+  total_size_ = 0;
+}
+
 void TupleCache::drain(EventLoop::Status) { drain_impl(); }
 
 void TupleCache::drain_impl() {
   for (auto iter = cache_.begin(); iter != cache_.end(); ++iter) {
-    iter->second->drain(iter->first, drainer_);
+    iter->second->drain(iter->first, tuple_drainer_, checkpoint_drainer_);
   }
   total_size_ = 0;
 }
@@ -108,6 +124,20 @@ TupleCache::TupleList::TupleList() {
 
 TupleCache::TupleList::~TupleList() {
   CHECK(tuples_.empty());
+  CHECK(!current_);
+}
+
+void TupleCache::TupleList::clear() {
+  if (current_) {
+    __global_protobuf_pool_release__(current_);
+    current_ = NULL;
+  }
+  while (!tuples_.empty()) {
+    __global_protobuf_pool_release__(tuples_.front());
+    tuples_.pop_front();
+  }
+  current_size_ = 0;
+  last_drained_count_ = 0;
 }
 
 sp_int64 TupleCache::TupleList::add_data_tuple(sp_int32 _src_task_id,
@@ -199,19 +229,40 @@ void TupleCache::TupleList::add_emit_tuple(sp_int32 _src_task_id,
   current_->mutable_control()->add_emits()->CopyFrom(_tuple);
 }
 
+void TupleCache::TupleList::add_checkpoint_tuple(
+                 proto::ckptmgr::DownstreamStatefulCheckpoint* _message,
+                 sp_uint64* _total_size) {
+  if (current_) {
+    tuples_.push_front(current_);
+    current_ = NULL;
+    current_size_ = 0;
+  }
+  sp_int64 tuple_size = _message->ByteSize();
+  *_total_size += tuple_size;
+  tuples_.push_front(_message);
+}
+
 void TupleCache::TupleList::drain(
-    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _drainer) {
+    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _tuple_drainer,
+    std::function<void(sp_int32, proto::ckptmgr::DownstreamStatefulCheckpoint*)>
+     _checkpoint_drainer) {
   sp_int32 drained = 0;
   // we have to drain from back
   while (!tuples_.empty()) {
-    _drainer(_task_id, tuples_.back());  // Drain cleans up the structure
+    if (tuples_.back()->GetTypeName() == "heron.proto.system.HeronTupleSet2") {
+      auto t = static_cast<proto::system::HeronTupleSet2*>(tuples_.back());
+      _tuple_drainer(_task_id, t);  // Drain cleans up the structure
+    } else {
+      auto t = static_cast<proto::ckptmgr::DownstreamStatefulCheckpoint*>(tuples_.back());
+      _checkpoint_drainer(_task_id, t);  // Drain cleans up the structure
+    }
     tuples_.pop_back();
     drained++;
   }
   if (current_ && drained == 0 && last_drained_count_ == 0) {
     // We didn;t drain anything last time. Better do it now
     // TODO(vikasr) : Add metric
-    _drainer(_task_id, current_);
+    _tuple_drainer(_task_id, current_);
     drained++;
     current_ = NULL;
     current_size_ = 0;

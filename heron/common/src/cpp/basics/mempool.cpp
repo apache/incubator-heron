@@ -18,8 +18,19 @@
 // Just defines the static member of Mempool class
 ////////////////////////////////////////////////////////////////////////////////
 #include "basics/basics.h"
+#include "glog/logging.h"
 
-// TODO(nlu): get the pool size limit from config
+/* The initial value of pool size limit is 512. This value will
+   be overridden by value read from config during initialization
+   of stream manager. The reason why we do this is to avoid
+   circular dependency problem. See https://github.com/twitter/heron/pull/2073
+   for details */
 MemPool<google::protobuf::Message>* __global_protobuf_pool__ =
-                                   new MemPool<google::protobuf::Message>(50 * 1024 * 1024);
+                                   new MemPool<google::protobuf::Message>(512);
 std::mutex __global_protobuf_pool_mutex__;
+
+void __global_protobuf_pool_set_pool_max_number_of_messages__(sp_int32 _pool_limit) {
+  std::lock_guard<std::mutex> guard(__global_protobuf_pool_mutex__);
+  LOG(INFO) << "Set max size of each memory pool to " << _pool_limit;
+  __global_protobuf_pool__->set_pool_max_number_of_messages(_pool_limit);
+}

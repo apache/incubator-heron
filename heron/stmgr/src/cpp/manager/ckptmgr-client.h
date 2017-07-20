@@ -41,9 +41,9 @@ class CkptMgrClient : public Client {
   void Quit();
 
   // TODO(nlu): add requests methods
-  void SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request);
-  void GetInstanceState(const proto::system::Instance& _instance,
-                        const std::string& _checkpoint_id);
+  virtual void SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request);
+  virtual void GetInstanceState(const proto::system::Instance& _instance,
+                                const std::string& _checkpoint_id);
 
  protected:
   void GetInstanceState(const proto::system::Instance& _instance,

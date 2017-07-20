@@ -41,3 +41,15 @@ pex_binary(
     srcs = ["multi_stream_topology.py"],
     deps = [":example-py"],
 )
+
+# dsl examples
+pex_binary(
+    name = "word_count_dsl",
+    srcs = ["word_count_dsl.py"],
+    deps = [
+      '//heron/api/src/python:heron-python-py',
+      '//heron/dsl/src/python:heron-pythondsl-py',
+      '//heron/spouts/src/python:heron-pythonspouts-py',
+    ],
+)
+

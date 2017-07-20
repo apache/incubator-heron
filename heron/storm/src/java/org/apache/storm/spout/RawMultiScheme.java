@@ -31,7 +31,9 @@ public class RawMultiScheme implements MultiScheme {
 
   @Override
   public Iterable<List<Object>> deserialize(ByteBuffer ser) {
-    return asList(tuple(ser));
+    byte[] bytes = new byte[ser.remaining()];
+    ser.get(bytes);
+    return asList(tuple(bytes));
   }
 
   @Override
