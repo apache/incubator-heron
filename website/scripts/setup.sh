@@ -1,9 +1,22 @@
 #!/bin/bash
 
-DIR=`dirname $0`
-source ${DIR}/../../scripts/detect_os_type.sh
+HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 BUNDLER_VERSION=1.15.1
-BUNDLE="bundle _${BUNDLER_VERSION}_"
+HUGO_VERSION=0.25.1
+
+gem install bundler \
+  -v $BUNDLER_VERSION \
+  --no-rdoc \
+  --no-ri
+NOKOGIRI_USE_SYSTEM_LIBRARIES=true bundle _${BUNDLER_VERSION}_ install \
+  --path vendor/bundle
+
+npm install
+sudo -H pip uninstall -y pygments
+sudo -H pip install pygments==2.1.3 pdoc==0.3.2
+
+
+source $HERON_ROOT_DIR/scripts/detect_os_type.sh
 
 PLATFORM=`platform`
 if [ $PLATFORM = darwin ]; then
@@ -25,10 +38,3 @@ elif [ $PLATFORM = centos ]; then
   export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
   go get -u -v github.com/spf13/hugo
 fi
-
-NOKOGIRI_USE_SYSTEM_LIBRARIES=true $BUNDLE install \
-  --path vendor/bundle
-
-npm install
-sudo -H pip uninstall -y pygments
-sudo -H pip install pygments==2.1.3 pdoc==0.3.2

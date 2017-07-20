@@ -1,9 +1,11 @@
 #!/bin/bash
 
-HERONPY_VERSION=0.0.3
+echo $HERONPY_VERSION
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 INPUT=heronpy
 TMP_DIR=$(mktemp -d)
+
+source $HERON_ROOT_DIR/website/scripts/common.sh
 
 pip install heronpy==${HERONPY_VERSION}
 
