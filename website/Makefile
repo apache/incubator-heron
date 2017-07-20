@@ -47,7 +47,6 @@ travis-ruby-setup:
 		--jobs=3
 
 travis-python-setup:
-	sudo -H pip uninstall -y pygments
 	sudo -H pip install pygments==2.1.3 pdoc==0.3.2
 
 travis-install-hugo:
