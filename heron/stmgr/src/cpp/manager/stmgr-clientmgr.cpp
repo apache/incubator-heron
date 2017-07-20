@@ -57,7 +57,7 @@ StMgrClientMgr::~StMgrClientMgr() {
   delete stmgr_clientmgr_metrics_;
 }
 
-void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) {
+void StMgrClientMgr::StartConnections(const proto::system::PhysicalPlan* _pplan) {
   // TODO(vikasr) : Currently we establish connections with all streammanagers
   // In the next iteration we might want to make it better
   std::unordered_set<sp_string> all_stmgrs;
@@ -125,7 +125,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   return client;
 }
 
-void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
+bool StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
                                             const proto::system::HeronTupleSet2& _msg) {
   auto iter = clients_.find(_stmgr_id);
   CHECK(iter != clients_.end());
@@ -134,12 +134,22 @@ void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& 
   proto::stmgr::TupleStreamMessage2* out = nullptr;
   out = __global_protobuf_pool_acquire__(out);
   out->set_task_id(_task_id);
+  out->set_src_task_id(_msg.src_task_id());
   _msg.SerializePartialToString(out->mutable_set());
 
-  clients_[_stmgr_id]->SendTupleStreamMessage(*out);
+  bool retval = clients_[_stmgr_id]->SendTupleStreamMessage(*out);
 
   // Release the message
   __global_protobuf_pool_release__(out);
+
+  return retval;
+}
+
+void StMgrClientMgr::SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
+                           proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  auto iter = clients_.find(_stmgr_id);
+  CHECK(iter != clients_.end());
+  iter->second->SendDownstreamStatefulCheckpoint(_message);
 }
 
 void StMgrClientMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {
@@ -163,5 +173,33 @@ void StMgrClientMgr::SendStopBackPressureToOtherStMgrs() {
   }
 }
 
+void StMgrClientMgr::HandleDeadStMgrConnection(const sp_string& _dead_stmgr) {
+  stream_manager_->HandleDeadStMgrConnection(_dead_stmgr);
+}
+
+void StMgrClientMgr::HandleStMgrClientRegistered() {
+  if (AllStMgrClientsRegistered()) {
+    stream_manager_->HandleAllStMgrClientsRegistered();
+  }
+}
+
+void StMgrClientMgr::CloseConnectionsAndClear() {
+  for (auto kv : clients_) {
+    kv.second->Quit();  // It will delete itself
+  }
+  clients_.clear();
+}
+
+bool StMgrClientMgr::AllStMgrClientsRegistered() {
+  for (auto kv : clients_) {
+    if (!kv.second->IsConnected()) {
+      return false;
+    }
+    if (!kv.second->IsRegistered()) {
+      return false;
+    }
+  }
+  return true;
+}
 }  // namespace stmgr
 }  // namespace heron

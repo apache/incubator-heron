@@ -13,10 +13,11 @@
 # limitations under the License.
 '''module for example topology: CustomGroupingTopology'''
 
-from heron.common.src.python.utils.log import Log
+import logging
+
 from heron.api.src.python.custom_grouping import ICustomGrouping
-import heron.api.src.python.constants as constants
-from heron.pyheron.src.python import Topology, Grouping
+import heron.api.src.python.api_constants as constants
+from heron.api.src.python import Topology, Grouping
 
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import ConsumeBolt
@@ -24,11 +25,11 @@ from heron.examples.src.python.bolt import ConsumeBolt
 # pylint: disable=unused-argument
 class SampleCustomGrouping(ICustomGrouping):
   def prepare(self, context, component, stream, target_tasks):
-    Log.info("In prepare of SampleCustomGrouping, "
-             "with src component: %s, "
-             "with stream id: %s, "
-             "with target tasks: %s"
-             % (component, stream, str(target_tasks)))
+    logging.getLogger().info("In prepare of SampleCustomGrouping, "
+                             "with src component: %s, "
+                             "with stream id: %s, "
+                             "with target tasks: %s"
+                             , component, stream, str(target_tasks))
     self.target_tasks = target_tasks
 
   def choose_tasks(self, values):
@@ -36,9 +37,7 @@ class SampleCustomGrouping(ICustomGrouping):
     return [self.target_tasks[0]]
 
 class CustomGrouping(Topology):
-  custom_grouping_path = "heron.examples.src.python.custom_grouping_topology.SampleCustomGrouping"
-
   word_spout = WordSpout.spec(par=1)
   consume_bolt = ConsumeBolt.spec(par=3,
-                                  inputs={word_spout: Grouping.custom(custom_grouping_path)},
+                                  inputs={word_spout: Grouping.custom(SampleCustomGrouping())},
                                   config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})

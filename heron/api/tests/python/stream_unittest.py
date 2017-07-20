@@ -17,7 +17,14 @@
 import unittest
 
 from heron.api.src.python.stream import Stream, Grouping
+from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.proto import topology_pb2
+
+class DummyCustomGrouping(ICustomGrouping):
+  def prepare(self, context, component, stream, target_tasks):
+    pass
+  def choose_tasks(self, values):
+    pass
 
 class StreamTest(unittest.TestCase):
   def test_default_stream_id(self):
@@ -63,7 +70,7 @@ class GroupingTest(unittest.TestCase):
     self.assertTrue(Grouping.is_grouping_sane(sane_fields))
 
     self.assertFalse(Grouping.is_grouping_sane(Grouping.CUSTOM))
-    sane_custom = Grouping.custom("class.path")
+    sane_custom = Grouping.custom(DummyCustomGrouping())
     self.assertTrue(Grouping.is_grouping_sane(sane_custom))
 
   def test_sparse_compatibility(self):
@@ -94,7 +101,7 @@ class GroupingTest(unittest.TestCase):
 
   def test_custom(self):
     # sane
-    sane = Grouping.custom("class.path")
+    sane = Grouping.custom(DummyCustomGrouping())
     self.assertEqual(sane.gtype, topology_pb2.Grouping.Value("CUSTOM"))
     self.assertTrue(isinstance(sane.python_serialized, bytes))
 

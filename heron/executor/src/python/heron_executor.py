@@ -581,7 +581,9 @@ class HeronExecutor(object):
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
-        self.heron_internals_config_file]
+        self.heron_internals_config_file,
+        self.ckptmgr_port,
+        self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -665,7 +667,8 @@ class HeronExecutor(object):
     retval[self.heron_shell_ids[self.shard]] = [
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
-        '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
+        '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
+        '--secret=%s' % self.topology_id]
 
     return retval
 
