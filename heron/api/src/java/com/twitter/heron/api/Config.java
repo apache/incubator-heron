@@ -104,9 +104,9 @@ public class Config extends HashMap<String, Object> {
    * <p>
    * <p>If this is set to false, then Heron will immediately ack tuples as soon
    * as they come off the spout, effectively disabling reliability.</p>
-   * This is deprecated. Please use TOPOLOGY_RELIABILITY_MODE instead.
-   * This config parameter will be removed in future releases
+   * @deprecated use {@link #TOPOLOGY_RELIABILITY_MODE} instead.
    */
+  @Deprecated
   public static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
   /**
    * What is the reliability mode under which we are running this topology
@@ -319,7 +319,11 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
-  // This is deprecated. Please use setReliabilityMode instead
+  /**
+   * Is topology running with acking enabled?
+   * @deprecated use {@link #setTopologyReliabilityMode()} instead.
+   */
+  @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
     if (acking) {
       setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATLEAST_ONCE);
@@ -499,7 +503,12 @@ public class Config extends HashMap<String, Object> {
     setSerializationClassName(this, className);
   }
 
-  // This is deprecated. Pleae use setTopologyReliabilityMode instead
+  /**
+   * Is topology running with acking enabled?
+   * @deprecated use {@link #setTopologyReliabilityMode()} instead
+   */
+  @Deprecated
+  @SuppressWarnings("deprecation")
   public void setEnableAcking(boolean acking) {
     setEnableAcking(this, acking);
   }

@@ -37,6 +37,7 @@ public class AbstractOutputCollector {
   private long totalTuplesEmitted;
   private PhysicalPlanHelper helper;
 
+  @SuppressWarnings("deprecation")
   public AbstractOutputCollector(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
                                  Communicator<HeronTuples.HeronTupleSet> streamOutQueue,

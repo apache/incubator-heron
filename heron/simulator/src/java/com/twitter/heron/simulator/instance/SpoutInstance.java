@@ -35,6 +35,7 @@ public class SpoutInstance
   private final Duration instanceEmitBatchTime;
   private final ByteAmount instanceEmitBatchSize;
 
+  @SuppressWarnings("deprecation")
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<HeronTuples.HeronTupleSet> streamInQueue,
                        Communicator<HeronTuples.HeronTupleSet> streamOutQueue, SlaveLooper looper) {
