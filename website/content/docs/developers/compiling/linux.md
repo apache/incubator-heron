@@ -21,8 +21,8 @@ $ sudo apt-get upgrade -y
 ### Step 2 --- Install required libraries
 
 ```bash
-$ sudo apt-get install git build-essential automake cmake libtool zip \
-  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config -y
+$ sudo apt-get install git build-essential automake cmake libtool-bin zip \
+  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python-setuptools -y
 ```
 
 #### Step 3 --- Set the following environment variables
