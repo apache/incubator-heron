@@ -35,6 +35,9 @@ public class SpoutInstance
   private final Duration instanceEmitBatchTime;
   private final ByteAmount instanceEmitBatchSize;
 
+  /**
+   * The SuppressWarnings should go away once TOPOLOGY_ENABLE_ACKING is removed
+   */
   @SuppressWarnings("deprecation")
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<HeronTuples.HeronTupleSet> streamInQueue,

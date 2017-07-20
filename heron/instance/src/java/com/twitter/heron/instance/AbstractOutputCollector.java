@@ -37,6 +37,10 @@ public class AbstractOutputCollector {
   private long totalTuplesEmitted;
   private PhysicalPlanHelper helper;
 
+  /**
+   * The SuppressWarnings is only until TOPOLOGY_ENABLE_ACKING exists.
+   * This warning will be removed once it is removed.
+   */
   @SuppressWarnings("deprecation")
   public AbstractOutputCollector(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
