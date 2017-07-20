@@ -128,18 +128,6 @@ public class Config extends HashMap<String, Object> {
      */
     ATLEAST_ONCE,
     /**
-     * In this mode Heron will try to take the snapshots of
-     * all of the components of the topology every
-     * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure of
-     * any component, its state is recovered to the last checkpoint saved. The
-     * spouts/bolts of the topology have to implement IStatefulComponent for state
-     * to be actually captured.
-     * While this mode provides a way for topology components to recover their state
-     * upon their death, it does not guard against tuple losses that can happen because
-     * of network partitions and other reasons.
-     */
-    STATEFUL,
-    /**
      * Heron guarantees that each emitted tuple is seen by the downstream components
      * exactly once. This is achieved via distributed snapshotting approach is described at
      * https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit

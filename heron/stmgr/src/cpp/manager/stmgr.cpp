@@ -105,8 +105,7 @@ void StMgr::Init() {
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
 
   reliability_mode_ = heron::config::TopologyConfigHelper::GetReliabilityMode(*hydrated_topology_);
-  if (reliability_mode_ == config::TopologyConfigVars::STATEFUL
-      || reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
+  if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Start checkpoint manager client
     CreateCheckpointMgrClient();
   } else {

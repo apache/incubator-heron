@@ -46,7 +46,6 @@ class TopologyConfigVars {
   enum TopologyReliabilityMode {
     ATMOST_ONCE,
     ATLEAST_ONCE,
-    STATEFUL,
     EXACTLY_ONCE
   };
   static const sp_string TOPOLOGY_RELIABILITY_MODE;
