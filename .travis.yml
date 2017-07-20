@@ -33,6 +33,7 @@ before_script:
   # install python module for wheel files
   # required for python packaging
   - sudo pip install wheel
+  - (cd website && make travis-website-setup)
 
 script:
   - which gcc-4.8
@@ -44,3 +45,4 @@ script:
   - which python2.7
   - python2.7 -V
   - scripts/travis/ci.sh
+  - (cd website && make travis-website-check)
