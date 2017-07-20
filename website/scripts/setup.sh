@@ -2,6 +2,8 @@
 
 DIR=`dirname $0`
 source ${DIR}/../../scripts/detect_os_type.sh
+BUNDLER_VERSION=1.15.1
+BUNDLE="bundle _${BUNDLER_VERSION}_"
 
 PLATFORM=`platform`
 if [ $PLATFORM = darwin ]; then
@@ -23,6 +25,9 @@ elif [ $PLATFORM = centos ]; then
   export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
   go get -u -v github.com/spf13/hugo
 fi
+
+NOKOGIRI_USE_SYSTEM_LIBRARIES=true $BUNDLE install \
+  --path vendor/bundle
 
 npm install
 sudo -H pip uninstall -y pygments

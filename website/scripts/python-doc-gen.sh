@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HERONPY_VERSION=0.0.1
+HERONPY_VERSION=0.0.3
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 INPUT=heronpy
 TMP_DIR=$(mktemp -d)

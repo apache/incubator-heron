@@ -1,5 +1,7 @@
 # Generated artifacts for the website
+.bundle/
 package-lock.json
 node_modules/
 public/
 static/
+vendor/
