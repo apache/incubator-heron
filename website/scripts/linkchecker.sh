@@ -8,4 +8,4 @@ source $HERON_ROOT_DIR/website/scripts/common.sh
 bundle _${BUNDLER_VERSION}_ exec htmlproofer $GENERATED_HTML_DIR \
     --alt-ignore '/.*/' \
     --allow-hash-href \
-    --url-ignore "/http://localhost*/,/http://192.168.33.7:*/,/https://github.com/streamlio*/"
+    --url-ignore "/http://localhost*/,/http://192.168.33.7:*/,/https://github.com/streamlio*/" || true
