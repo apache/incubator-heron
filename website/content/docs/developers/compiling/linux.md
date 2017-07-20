@@ -4,8 +4,8 @@ title: Building on Linux Platforms
 
 Heron can currently be built on the following Linux platforms:
 
-* [Ubuntu 14.04]({{< ref "#building-on-ubuntu-14.04" >}})
-* [CentOS 7]({{< ref "#building-on-centos-7" >}})
+* [Ubuntu 14.04](#building-on-ubuntu-14-04)
+* [CentOS 7](#building-on-centos-7)
 
 ## Building on Ubuntu 14.04
 

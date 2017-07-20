@@ -18,7 +18,7 @@ Heron Resources outside this documentation:
 * [Twitter Heron: Stream Processing at
   Scale - @Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (Sep, 2015)
 * [Stream Processing and Anomaly Detection - Velocity O'Reilly - Note: requires O'Reilly login ](
-https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
+https://player.oreilly.com/videos/9781491927977?login=true) (Jun, 2015)
 
 ## Official Blog Posts
 
@@ -35,7 +35,7 @@ https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 
 * [Real-Time Analytics: Algorithms and Systems - Twitter University ](
 http://www.slideshare.net/arunkejariwal/real-time-analytics-algorithms-and-systems) (May, 2016)
-* [Stream Processing and Anomaly Detection - Velocity O'Reilly ](http://www.slideshare.net/arunkejariwal/velocity-2015final)(Jun, 2015)
+* [Stream Processing and Anomaly Detection - Velocity O'Reilly ](http://www.slideshare.net/arunkejariwal/velocity-2015final) (Jun, 2015)
 
 ## Press 
 

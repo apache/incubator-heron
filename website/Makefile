@@ -37,10 +37,11 @@ site:
 	@make pages
 	@make javadocs
 	@make python-docs
+	@make linkchecker
 
 travis-site:
 	@make clean
-	@make build-static-assets
 	@make pages
 	@make javadocs-travis
 	@make python-docs
+	@make linkchecker

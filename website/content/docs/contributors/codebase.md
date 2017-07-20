@@ -33,7 +33,7 @@ Tracker](../../operators/heron-tracker).
 
 * **Build tool** --- Heron uses [Bazel](http://bazel.io/) as its build tool.
 Information on setting up and using Bazel for Heron can be found in [Compiling
-Heron](../../developers/compiling/compiling).
+Heron](../../developers/compiling).
 
 * **Inter-component communication** --- Heron uses [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
@@ -70,10 +70,10 @@ Deployment](../../operators/deployment/schedulers/local).
 
 The parts of Heron's codebase related to
 [ZooKeeper](http://zookeeper.apache.org/) are mostly contained in
-[`heron/state`]({{% githubMaster %}}/heron/state). There are ZooKeeper-facing
-interfaces for [C++]({{% githubMaster %}}/heron/state/src/cpp),
-[Java]({{% githubMaster %}}/heron/state/src/java), and
-[Python]({{% githubMaster %}}/heron/state/src/python) that are used in a variety of
+[`heron/state`]({{% githubMaster %}}/heron/statemgrs). There are ZooKeeper-facing
+interfaces for [C++]({{% githubMaster %}}/heron/statemgrs/src/cpp),
+[Java]({{% githubMaster %}}/heron/statemgrs/src/java), and
+[Python]({{% githubMaster %}}/heron/statemgrs/src/python) that are used in a variety of
 Heron components.
 
 ## Topology Components
@@ -166,8 +166,8 @@ The Python code for the [Heron UI](../../operators/heron-ui) can be found in
 Like Heron Tracker, Heron UI is a web server written in Python that relies on
 the [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new
 HTTP routes to Heron UI in
-[`main.py`]({{% githubMaster %}}/heron/web/source/python/main.py) and corresponding
-handlers in the [`handlers`]({{% githubMaster %}}/heron/web/source/python/handlers)
+[`main.py`]({{% githubMaster %}}/heron/tools/ui/src/python/main.py) and corresponding
+handlers in the [`handlers`]({{% githubMaster %}}/heron/tools/ui/src/python/handlers)
 directory.
 
 ### Heron Shell

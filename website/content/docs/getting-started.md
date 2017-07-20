@@ -15,7 +15,7 @@ Heron binaries, which are currently available for:
 * CentOS
 
 For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
-(../developers/compiling/compiling).
+(../developers/compiling).
 
 ## Step 1 --- Download Heron binaries using installation scripts
 

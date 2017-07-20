@@ -23,7 +23,7 @@ Heron core binary, which can be hosted wherever you'd like, so long as
 it's accessible to all agents (for example in [Amazon
 S3](https://aws.amazon.com/s3/) or using a local blob storage solution). You
 can download the core binary from Github or build it using the instructions
-in [Creating a New Heron Release](../../../../developers/compiling#building-a-full-release-package).
+in [Creating a New Heron Release](../../../../developers/compiling#building-all-components).
 
 The only method for fetching the binaries currently is via fetching them from a URI. Fetching them
 via an S3 bucket or any other URI is supported, as long as it is accessible from every agent in the 

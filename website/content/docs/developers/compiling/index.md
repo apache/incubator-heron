@@ -2,20 +2,19 @@
 title: Compiling Heron
 ---
 
-Heron is currently available for [Mac OS X 10.10](../../../developers/compiling/mac),
-[Ubuntu 14.04](../../../developers/compiling/linux), and [CentOS
-7](../../../developers/compiling/linux). This guide describes the basics of the
+Heron is currently available for [Mac OS X 10.10](../../developers/compiling/mac),
+[Ubuntu 14.04](../../developers/compiling/linux), and [CentOS
+7](../../developers/compiling/linux). This guide describes the basics of the
 Heron build system. For step-by-step build instructions for a specific platform,
 the following guides are available:
 
-* [Building on Linux Platforms](../../../developers/compiling/linux)
-* [Building on Mac OS X](../../../developers/compiling/mac)
+* [Building on Linux Platforms](../../developers/compiling/linux)
+* [Building on Mac OS X](../../developers/compiling/mac)
 
-Heron can be built either [in its entirety]({{< ref "#building-all-components"
->}}), as [individual components]({{< ref "#building-specific-components" >}}),
-or as a [release package]({{< ref "#building-a-full-release-package" >}}).
+You can either build Heron [in its entirety](#building-all-components) or you can build
+[individual components](#building-specific-components).
 
-Instructions on running unit tests for Heron can also be found in [Testing Heron](../../../contributors/testing).
+Instructions on running unit tests for Heron can also be found in [Testing Heron](../../contributors/testing).
 
 ## Requirements
 
@@ -27,7 +26,7 @@ You must have the following installed to compile Heron:
 * [Java
   8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   is required by Bazel but Heron does not use Java 8 features; Heron
-  [topologies](../../../concepts/topologies) can be written in Java 7 or above
+  [topologies](../../concepts/topologies) can be written in Java 7 or above
   and all Heron jars are compatible with Java 7.
 * [Autoconf](http://www.gnu.org/software/autoconf/autoconf.html) >=
   2.6.3
@@ -113,8 +112,8 @@ directory. The `heron-tracker` executable, for example, can be found at
 
 As an alternative to building a full release, you can build Heron executables
 for a single Heron component (such as the [Heron
-Tracker](../../../operators/heron-tracker)) by passing a target to the `bazel
-build` command. For example, the following command would build the [Heron Tracker](../../../operators/heron-tracker):
+Tracker](../../operators/heron-tracker)) by passing a target to the `bazel
+build` command. For example, the following command would build the [Heron Tracker](../../operators/heron-tracker):
 
 ```bash
 $ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
@@ -123,4 +122,4 @@ $ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
 ## Testing Heron
 
 Instructions for running Heron unit tests can be found at [Testing
-Heron](../../../contributors/testing).
+Heron](../../contributors/testing).

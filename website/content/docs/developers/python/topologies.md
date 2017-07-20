@@ -152,8 +152,8 @@ $ heron submit local \
 Note the `-` in this submission command. If you define a topology by subclassing `TopologyBuilder` you do not need to instruct Heron where your main method is located.
 
 > #### Example topologies buildable as PEXes
-> * See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
-> * See [this repo](https://github.com/streamlio/bazel-dev-environment) for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.
+> * See [this repo](https://github.com/streamlio/pants-dev) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
+> * See [this repo](https://github.com/streamlio/bazel-dev) for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.
 
 ## Defining a topology by subclassing the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class
 

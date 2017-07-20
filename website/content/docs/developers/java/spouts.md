@@ -2,7 +2,7 @@
 title: Implementing a Spout
 ---
 
-Spouts must implement the [`ISpout`](/api/com/twitter/heron/api/spout/ISpout.html) interface.
+Spouts must implement the [`ISpout`](/api/java/com/twitter/heron/api/spout/ISpout.html) interface.
 
 ```java
 public interface ISpout extends Serializable {
@@ -29,7 +29,7 @@ state.
 state.
 
 * The `nextTuple` method is used to fetch tuples from input source and emit it
-to [`OutputCollector`](/api/com/twitter/heron/api/bolt/).
+to [`OutputCollector`](/api/java/com/twitter/heron/api/bolt/OutputCollector.html).
 
 * The `ack` method is called when the `Tuple` with the `msgId` emitted by this
 spout is successfully processed.

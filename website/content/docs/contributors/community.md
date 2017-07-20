@@ -20,7 +20,7 @@ You can first read the following pages to have a basic understanding
 of Heron:
 
 * [Heron Architecture](../../concepts/architecture/)
-* [Compiling Heron](../../developers/compiling/compiling/)
+* [Compiling Heron](../../developers/compiling)
 * [Heron Codebase](../codebase/)
 
 Heron includes a script to bootstrap an IntelliJ IDEA project. The project includes support for Heron

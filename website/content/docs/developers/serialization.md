@@ -22,8 +22,7 @@ documentation](https://github.com/EsotericSoftware/kryo#serializers).
 
 Once you've created a custom Kryo serializer for a type:
 
-1. Make sure that the code for the serializer is on Heron's
-[classpath](../compiling/compiling/#classpath).
+1. Make sure that the code for the serializer is on Heron's classpath.
 2. Register the class with Kryo using the `topology.kryo.register` parameter for
 your topology. Here's an example:
 
@@ -34,4 +33,4 @@ your topology. Here's an example:
   ```
 
 Once your custom serializer is on Heron's classpath and Heron is aware of its
-existence, you must [re-compile](../compiling/compiling) Heron.
+existence, you must [re-compile](../compiling) Heron.

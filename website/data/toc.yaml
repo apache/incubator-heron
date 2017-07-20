@@ -108,7 +108,7 @@ sections:
   - name: Heron Developers
     sublinks:
       - name: Compiling
-        url: /docs/developers/compiling/compiling
+        url: /docs/developers/compiling
       - name: Compiling on Linux
         url: /docs/developers/compiling/linux
       - name: Compiling on Mac OS X

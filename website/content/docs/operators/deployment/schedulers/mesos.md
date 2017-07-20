@@ -24,7 +24,8 @@ In order to deploy Heron, your Mesos cluster will need to have access to a
 variety of Heron binaries, which can be hosted wherever you'd like, so long as
 it's accessible to Mesos (for example in [Amazon S3](https://aws.amazon.com/s3/)
 or using a local blog storage solution). You can build those binaries using the
-instructions in [Creating a New Heron Release](../../../../developers/compiling#building-a-full-release-package).
+instructions in [Creating a New Heron
+Release](../../../../developers/compiling#building-all-components).
 
 Once your Heron binaries are hosted somewhere that's accessible to Mesos, you
 should run tests to ensure that Mesos can successfully fetch them.

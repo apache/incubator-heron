@@ -27,7 +27,7 @@ Heron core binary, which can be hosted wherever you'd like, so long as
 it's accessible to Aurora (for example in [Amazon
 S3](https://aws.amazon.com/s3/) or using a local blob storage solution). You
 can download the core binary from github or build it using the instructions
-in [Creating a New Heron Release](../../../../developers/compiling#building-a-full-release-package).
+in [Creating a New Heron Release](../../../../developers/compiling#building-all-components).
 
 Command for fetching the binary is in the `heron.aurora` config file. By default it is 
 using a `curl` command to fetch the binary. For example, if the binary is hosted in 

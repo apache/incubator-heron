@@ -11,7 +11,7 @@ More on the role of the Tracker can be found
 ## Building Heron Tracker
 
 Heron uses [bazel](http://bazel.io/) for compiling.
-[Compiling](../../developers/compiling/compiling) describes how to setup bazel
+[Compiling](../../developers/compiling) describes how to setup bazel
 for heron.
 
 ```bash

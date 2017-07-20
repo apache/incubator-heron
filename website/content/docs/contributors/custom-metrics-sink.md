@@ -81,7 +81,7 @@ interface, which requires you to implement the following methods:
 
 Your implementation of those interfaces will need to be packaged into a JAR file
 and distributed to the `heron-core/lib/metricsmgr` folder of your [Heron
-release](../../developers/compiling/compiling).
+release](../../developers/compiling).
 
 ## Example Implementation
 

@@ -13,7 +13,7 @@ various elements that UI exposes.
 ### Building Heron UI
 
 Heron uses [bazel](http://bazel.io/) for compiling.
-[This page](../../developers/compiling/compiling) describes how to setup bazel
+[This page](../../developers/compiling) describes how to setup bazel
 for heron.
 
 ```bash
