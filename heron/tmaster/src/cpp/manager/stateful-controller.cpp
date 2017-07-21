@@ -45,7 +45,7 @@ const sp_string METRIC_GLOBAL_CONSISTENT_CKPT = "__globally_consistent_ckpt";
 // TODO(nlu): make this number from config
 const int32_t MOST_CHECKPOINTS_NUMBER = 5;
 
-StatefulHelper::StatefulHelper(const std::string& _topology_name,
+StatefulController::StatefulController(const std::string& _topology_name,
                proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
                heron::common::HeronStateMgr* _state_mgr,
                std::chrono::high_resolution_clock::time_point _tmaster_start_time,
@@ -60,7 +60,7 @@ StatefulHelper::StatefulHelper(const std::string& _topology_name,
   ckpt_save_watcher_ = _ckpt_save_watcher;
 }
 
-StatefulHelper::~StatefulHelper() {
+StatefulController::~StatefulController() {
   delete ckpt_record_;
   delete checkpointer_;
   delete restorer_;
@@ -68,7 +68,7 @@ StatefulHelper::~StatefulHelper() {
   delete count_metrics_;
 }
 
-void StatefulHelper::StartRestore(const StMgrMap& _stmgrs, bool _ignore_prev_state) {
+void StatefulController::StartRestore(const StMgrMap& _stmgrs, bool _ignore_prev_state) {
   count_metrics_->scope(METRIC_RESTORE_START)->incr();
   // TODO(sanjeev): Do we really need to start from most_recent_checkpoint?
   if (_ignore_prev_state) {
@@ -78,7 +78,7 @@ void StatefulHelper::StartRestore(const StMgrMap& _stmgrs, bool _ignore_prev_sta
   }
 }
 
-void StatefulHelper::HandleStMgrRestored(const std::string& _stmgr_id,
+void StatefulController::HandleStMgrRestored(const std::string& _stmgr_id,
                                          const std::string& _checkpoint_id,
                                          int64_t _restore_txid,
                                          proto::system::StatusCode _status,
@@ -120,11 +120,11 @@ void StatefulHelper::HandleStMgrRestored(const std::string& _stmgr_id,
   }
 }
 
-void StatefulHelper::RegisterNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
+void StatefulController::RegisterNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   checkpointer_->RegisterNewPhysicalPlan(_pplan);
 }
 
-void StatefulHelper::StartCheckpoint(const StMgrMap& _stmgrs) {
+void StatefulController::StartCheckpoint(const StMgrMap& _stmgrs) {
   if (restorer_->IsInProgress()) {
     LOG(INFO) << "Will not send checkpoint messages to stmgr because "
               << "we are in restore";
@@ -135,7 +135,7 @@ void StatefulHelper::StartCheckpoint(const StMgrMap& _stmgrs) {
   checkpointer_->StartCheckpoint(_stmgrs);
 }
 
-void StatefulHelper::HandleInstanceStateStored(const std::string& _checkpoint_id,
+void StatefulController::HandleInstanceStateStored(const std::string& _checkpoint_id,
                                                const std::string& _packing_plan_id,
                                                const proto::system::Instance& _instance) {
   count_metrics_->scope(METRIC_INSTANCE_CKPT_SAVED)->incr();
@@ -149,12 +149,13 @@ void StatefulHelper::HandleInstanceStateStored(const std::string& _checkpoint_id
     count_metrics_->scope(METRIC_GLOBAL_CONSISTENT_CKPT)->incr();
     auto new_ckpt_record = AddNewConsistentCheckpoint(_checkpoint_id, _packing_plan_id);
     state_mgr_->SetStatefulCheckpoints(topology_name_, *new_ckpt_record,
-           std::bind(&StatefulHelper::HandleCheckpointSave, this,
+           std::bind(&StatefulController::HandleCheckpointSave, this,
                     new_ckpt_record, std::placeholders::_1));
   }
 }
 
-void StatefulHelper::HandleCheckpointSave(proto::ckptmgr::StatefulConsistentCheckpoints* _new_ckpt,
+void StatefulController::HandleCheckpointSave(
+                                    proto::ckptmgr::StatefulConsistentCheckpoints* _new_ckpt,
                                     proto::system::StatusCode _status) {
   if (_status == proto::system::OK) {
     LOG(INFO) << "Successfully saved " << _new_ckpt->consistent_checkpoints(0).checkpoint_id()
@@ -173,7 +174,7 @@ void StatefulHelper::HandleCheckpointSave(proto::ckptmgr::StatefulConsistentChec
   }
 }
 
-const std::string& StatefulHelper::GetNextInLineCheckpointId(const std::string& _ckpt_id) {
+const std::string& StatefulController::GetNextInLineCheckpointId(const std::string& _ckpt_id) {
   if (_ckpt_id.empty()) {
     // There cannot be any checkpoints that are older than empty checkpoint
     LOG(FATAL) << "Could not recover even from the empty state";
@@ -191,7 +192,7 @@ const std::string& StatefulHelper::GetNextInLineCheckpointId(const std::string& 
 }
 
 proto::ckptmgr::StatefulConsistentCheckpoints*
-StatefulHelper::AddNewConsistentCheckpoint(const std::string& _new_checkpoint,
+StatefulController::AddNewConsistentCheckpoint(const std::string& _new_checkpoint,
                                            const std::string& _packing_plan) {
   auto new_record = new proto::ckptmgr::StatefulConsistentCheckpoints();
   auto new_consistent_checkpoint = new_record->add_consistent_checkpoints();
@@ -209,12 +210,12 @@ StatefulHelper::AddNewConsistentCheckpoint(const std::string& _new_checkpoint,
   return new_record;
 }
 
-bool StatefulHelper::GotRestoreResponse(const std::string& _stmgr) const {
+bool StatefulController::GotRestoreResponse(const std::string& _stmgr) const {
   CHECK(restorer_->IsInProgress());
   return restorer_->GotResponse(_stmgr);
 }
 
-bool StatefulHelper::RestoreInProgress() const {
+bool StatefulController::RestoreInProgress() const {
   return restorer_->IsInProgress();
 }
 }  // namespace tmaster
