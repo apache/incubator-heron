@@ -310,7 +310,6 @@ public class Config extends HashMap<String, Object> {
   /**
    * Is topology running with acking enabled?
    * @deprecated use {{@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)}}
-   * or {@link #setTopologyReliabilityMode(TopologyReliabilityMode)} instead.
    */
   @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
