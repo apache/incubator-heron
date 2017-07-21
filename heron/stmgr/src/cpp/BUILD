@@ -77,6 +77,7 @@ cc_library(
         "manager/tmaster-client.cpp",
         "manager/ckptmgr-client.cpp",
         "manager/checkpoint-gateway.cpp",
+        "manager/stateful-restorer.cpp",
 
         "manager/stmgr-client.h",
         "manager/stmgr-clientmgr.h",
@@ -86,6 +87,7 @@ cc_library(
         "manager/tmaster-client.h",
         "manager/ckptmgr-client.h",
         "manager/checkpoint-gateway.h",
+        "manager/stateful-restorer.h",
     ],
     copts = [
         "-Iheron",

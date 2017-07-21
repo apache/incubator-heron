@@ -61,7 +61,7 @@ class TupleCache {
   // Clear all data of all task_ids
   // This is different from the drain because while drain clears the messages
   // calling the drainer functions, this one just deletes the messages.
-  void clear();
+  virtual void clear();
 
  private:
   void drain(EventLoop::Status);
