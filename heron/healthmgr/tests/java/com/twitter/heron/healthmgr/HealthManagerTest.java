@@ -27,7 +27,7 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.HealthPolicyConfigReader.POLICY_CONF;
+import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 import com.twitter.heron.proto.scheduler.Scheduler.SchedulerLocation;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Config;
@@ -65,7 +65,7 @@ public class HealthManagerTest {
         new HealthManager(config, HealthManager.buildTrackerModule(config, "localhost"));
 
     Map policy = new HashMap<>();
-    policy.put(POLICY_CONF.HEALTH_POLICY_CLASS.key(), TestPolicy.class.getName());
+    policy.put(PolicyConfigKey.HEALTH_POLICY_CLASS.key(), TestPolicy.class.getName());
     policy.put("test-config", "test-value");
 
     String[] policyIds = {"policy"};

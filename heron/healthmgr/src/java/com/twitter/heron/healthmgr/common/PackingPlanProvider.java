@@ -102,7 +102,7 @@ public class PackingPlanProvider implements Provider<PackingPlan>, EventHandler<
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
     this.packingPlan = deserializer.fromProto(protoPackingPlan);
     if (packingPlan == null) {
-      throw new RuntimeException("Failed to fetch packing plan from the State Manager");
+      throw new InvalidStateException(topologyName, "Failed to fetch the packing plan");
     }
   }
 }

@@ -18,27 +18,27 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.twitter.heron.healthmgr.HealthPolicyConfigReader.POLICY_CONF;
+import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 
 
 public class HealthPolicyConfig {
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
-  private final Map<String, String> configs;
+  private final Map<String, Object> configs;
 
-  public HealthPolicyConfig(Map<String, String> configs) {
+  public HealthPolicyConfig(Map<String, Object> configs) {
     this.configs = configs;
     LOG.info("Health Policy Configuration:" + configs);
   }
 
-  public String getPolicyClass(String policyId) {
-    return configs.get(POLICY_CONF.HEALTH_POLICY_CLASS.key());
+  public String getPolicyClass() {
+    return (String) configs.get(PolicyConfigKey.HEALTH_POLICY_CLASS.key());
   }
 
   public Duration getInterval() {
-    return Duration.ofMillis(Long.parseLong(configs.get(POLICY_CONF.HEALTH_POLICY_INTERVAL.key())));
+    return Duration.ofMillis((int) configs.get(PolicyConfigKey.HEALTH_POLICY_INTERVAL.key()));
   }
 
-  public String getConfig(String configName) {
+  public Object getConfig(String configName) {
     return configs.get(configName);
   }
 

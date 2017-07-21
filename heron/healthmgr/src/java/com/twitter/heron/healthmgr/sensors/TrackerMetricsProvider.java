@@ -15,9 +15,10 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -67,12 +68,12 @@ public class TrackerMetricsProvider implements MetricsProvider {
 
   @Override
   public Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                           int startTimeSec,
-                                                           int durationSec,
+                                                           Instant startTime,
+                                                           Duration duration,
                                                            String... components) {
     Map<String, ComponentMetrics> result = new HashMap<>();
     for (String component : components) {
-      String response = getMetricsFromTracker(metric, component, startTimeSec, durationSec);
+      String response = getMetricsFromTracker(metric, component, startTime, duration);
       Map<String, InstanceMetrics> metrics = parse(response, component, metric);
       ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
       result.put(component, componentMetric);
@@ -80,14 +81,12 @@ public class TrackerMetricsProvider implements MetricsProvider {
     return result;
   }
 
-
   @Override
   public Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                           int durationSec,
+                                                           Duration duration,
                                                            String... components) {
-    int start = (int) TimeUnit.MILLISECONDS.toSeconds(clock.currentTime()) - durationSec;
-
-    return getComponentMetrics(metric, start, durationSec, components);
+    Instant start = Instant.ofEpochMilli(clock.currentTime() - duration.toMillis());
+    return getComponentMetrics(metric, start, duration, components);
   }
 
   @VisibleForTesting
@@ -114,9 +113,10 @@ public class TrackerMetricsProvider implements MetricsProvider {
 
     for (String instanceName : metricsMap.keySet()) {
       Map<String, String> tmpValues = (Map<String, String>) metricsMap.get(instanceName);
-      Map<Long, Double> values = new HashMap<>();
+      Map<Instant, Double> values = new HashMap<>();
       for (String timeStamp : tmpValues.keySet()) {
-        values.put(Long.parseLong(timeStamp), Double.parseDouble(tmpValues.get(timeStamp)));
+        values.put(Instant.ofEpochSecond(Long.parseLong(timeStamp)),
+            Double.parseDouble(tmpValues.get(timeStamp)));
       }
       InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
       instanceMetrics.addMetric(metric, values);
@@ -127,12 +127,12 @@ public class TrackerMetricsProvider implements MetricsProvider {
   }
 
   @VisibleForTesting
-  String getMetricsFromTracker(String metric, String component, int startTimeSec, int durationSec) {
+  String getMetricsFromTracker(String metric, String component, Instant start, Duration duration) {
     WebTarget target = baseTarget
         .queryParam("metricname", metric)
         .queryParam("component", component)
-        .queryParam("starttime", startTimeSec)
-        .queryParam("endtime", startTimeSec + durationSec);
+        .queryParam("starttime", start.getEpochSecond())
+        .queryParam("endtime", start.getEpochSecond() + duration.getSeconds());
 
     LOG.info("Tracker Query URI: " + target.getUri());
 

@@ -45,7 +45,7 @@ import org.apache.commons.cli.ParseException;
 import com.twitter.heron.classification.InterfaceStability.Evolving;
 import com.twitter.heron.classification.InterfaceStability.Unstable;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.healthmgr.HealthPolicyConfigReader.POLICY_CONF;
+import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
@@ -190,10 +190,10 @@ public class HealthManager {
   private void initializePolicies() throws ClassNotFoundException {
     List<String> policyIds = policyConfigReader.getPolicyIds();
     for (String policyId : policyIds) {
-      Map<String, String> policyConfigMap = policyConfigReader.getPolicyConfig(policyId);
+      Map<String, Object> policyConfigMap = policyConfigReader.getPolicyConfig(policyId);
       HealthPolicyConfig policyConfig = new HealthPolicyConfig(policyConfigMap);
 
-      String policyClassName = policyConfig.getPolicyClass(policyId);
+      String policyClassName = policyConfig.getPolicyClass();
       LOG.info(String.format("Initializing %s with class %s", policyId, policyClassName));
       Class<IHealthPolicy> policyClass
           = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
@@ -208,7 +208,7 @@ public class HealthManager {
   @VisibleForTesting
   HealthPolicyConfigReader createPolicyConfigReader() throws FileNotFoundException {
     String policyConfigFile
-        = Paths.get(Context.heronConf(config), POLICY_CONF.CONF_FILE_NAME.key()).toString();
+        = Paths.get(Context.heronConf(config), PolicyConfigKey.CONF_FILE_NAME.key()).toString();
     HealthPolicyConfigReader configReader = new HealthPolicyConfigReader(policyConfigFile);
     configReader.loadConfig();
     return configReader;

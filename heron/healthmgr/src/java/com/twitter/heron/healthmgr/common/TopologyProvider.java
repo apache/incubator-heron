@@ -64,9 +64,9 @@ public class TopologyProvider implements Provider<Topology>, EventHandler<Topolo
 
   private synchronized void fetchLatestTopology() {
     LOG.log(Level.INFO, "Fetching topology from state manager: {0}", topologyName);
-    this.topology = stateManagerAdaptor.getTopology(topologyName);
+    this.topology = stateManagerAdaptor.getPhysicalPlan(topologyName).getTopology();
     if (topology == null) {
-      throw new RuntimeException("Failed to fetch topology from the State Manager");
+      throw new InvalidStateException(topologyName, "Failed to fetch topology info");
     }
   }
 

@@ -25,37 +25,34 @@ import org.junit.Test;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.TopologyTests;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TopologyProviderTest {
-  String topology = "topology";
+  private String topology = "topology";
   private EventManager eventManager = new EventManager();
 
   @Test
   public void fetchesAndCachesPackingFromStateMgr() {
-    Topology testTopology
-        = TopologyTests.createTopology(topology, new Config(), getSpouts(), getBolts());
-    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    when(adaptor.getTopology(topology)).thenReturn(testTopology);
-
+    SchedulerStateManagerAdaptor adaptor = getMockSchedulerStateManagerAdaptor();
     TopologyProvider provider = new TopologyProvider(adaptor, eventManager, topology);
     Assert.assertEquals(2, provider.get().getBoltsCount());
 
     // once fetched it is cached
     provider.get();
-    verify(adaptor, times(1)).getTopology(topology);
+    verify(adaptor, times(1)).getPhysicalPlan(topology);
   }
 
   @Test
   public void refreshesPackingPlanOnUpdate() {
-    Topology testTopology
-        = TopologyTests.createTopology(topology, new Config(), getSpouts(), getBolts());
-    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    when(adaptor.getTopology(topology)).thenReturn(testTopology);
+    SchedulerStateManagerAdaptor adaptor = getMockSchedulerStateManagerAdaptor();
 
     TopologyProvider provider = new TopologyProvider(adaptor, eventManager, topology);
     Assert.assertEquals(2, provider.get().getBoltsCount());
@@ -63,21 +60,25 @@ public class TopologyProviderTest {
     // once fetched it is cached
     provider.onEvent(new TopologyUpdate());
     provider.get();
-    verify(adaptor, times(2)).getTopology(topology);
+    verify(adaptor, times(2)).getPhysicalPlan(topology);
+  }
+
+  private SchedulerStateManagerAdaptor getMockSchedulerStateManagerAdaptor() {
+    Topology testTopology
+        = TopologyTests.createTopology(topology, new Config(), getSpouts(), getBolts());
+    PhysicalPlans.PhysicalPlan plan =
+        PhysicalPlans.PhysicalPlan.newBuilder().setTopology(testTopology).build();
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    when(adaptor.getPhysicalPlan(topology)).thenReturn(plan);
+    return adaptor;
   }
 
   @Test
   public void providesBoltNames() {
-    Map<String, Integer> bolts = getBolts();
-
-    String topology = "topology";
-    Topology testTopology =
-        TopologyTests.createTopology(topology, new Config(), getSpouts(), bolts);
-    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
-    when(adaptor.getTopology(topology)).thenReturn(testTopology);
-
+    SchedulerStateManagerAdaptor adaptor = getMockSchedulerStateManagerAdaptor();
     TopologyProvider topologyProvider = new TopologyProvider(adaptor, eventManager, topology);
 
+    Map<String, Integer> bolts = getBolts();
     assertEquals(2, bolts.size());
     String[] boltNames = topologyProvider.getBoltNames();
     assertEquals(bolts.size(), boltNames.length);

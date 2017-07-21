@@ -15,6 +15,8 @@
 package com.twitter.heron.healthmgr.sensors;
 
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +36,7 @@ public class TrackerMetricsProviderTest {
     TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "count";
-    String component = "bolt";
+    String comp = "bolt";
     String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
         "\"message\": \"\", \"version\": \"ver\", \"result\": " +
         "{\"timeline\": {\"count\": " +
@@ -43,16 +45,17 @@ public class TrackerMetricsProviderTest {
         "\"1497481168\": \"3\"}}}, " +
         "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 10, 60);
+    doReturn(response).when(spyMetricsProvider)
+        .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     Map<String, ComponentMetrics> metrics =
-        spyMetricsProvider.getComponentMetrics(metric, 60, component);
+        spyMetricsProvider.getComponentMetrics(metric, Duration.ofSeconds(60), comp);
 
     assertEquals(1, metrics.size());
-    assertNotNull(metrics.get(component));
-    assertEquals(2, metrics.get(component).getMetrics().size());
+    assertNotNull(metrics.get(comp));
+    assertEquals(2, metrics.get(comp).getMetrics().size());
 
-    HashMap<String, InstanceMetrics> componentMetrics = metrics.get(component).getMetrics();
+    HashMap<String, InstanceMetrics> componentMetrics = metrics.get(comp).getMetrics();
     assertEquals(104,
         componentMetrics.get("container_1_bolt_1").getMetricValueSum(metric).intValue());
     assertEquals(17,
@@ -72,7 +75,8 @@ public class TrackerMetricsProviderTest {
         "}}, " +
         "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
-    doReturn(response1).when(spyMetricsProvider).getMetricsFromTracker(metric, comp1, 10, 60);
+    doReturn(response1).when(spyMetricsProvider)
+        .getMetricsFromTracker(metric, comp1, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     String comp2 = "bolt-2";
     String response2 = "{\"status\": \"\", " + "\"executiontime\": 0.0026040077209472656, " +
@@ -81,10 +85,11 @@ public class TrackerMetricsProviderTest {
         "{\"container_1_bolt-2_1\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
         "\"1497481168\": \"3\"}}}, " +
         "\"interval\": 60, \"component\": \"bolt-2\"}}";
-    doReturn(response2).when(spyMetricsProvider).getMetricsFromTracker(metric, comp2, 10, 60);
+    doReturn(response2).when(spyMetricsProvider)
+        .getMetricsFromTracker(metric, comp2, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     Map<String, ComponentMetrics> metrics
-        = spyMetricsProvider.getComponentMetrics(metric, 60, comp1, comp2);
+        = spyMetricsProvider.getComponentMetrics(metric, Duration.ofSeconds(60), comp1, comp2);
 
     assertEquals(2, metrics.size());
     assertNotNull(metrics.get(comp1));
@@ -103,7 +108,7 @@ public class TrackerMetricsProviderTest {
     TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "__time_spent_back_pressure_by_compid/container_1_split_1";
-    String component = "__stmgr__";
+    String comp = "__stmgr__";
     String response = "{\"status\": \"success\", " +
         "\"executiontime\": 0.30, \"message\": \"\", \"version\": \"v\", " +
         "\"result\": " +
@@ -111,15 +116,16 @@ public class TrackerMetricsProviderTest {
         "{\"stmgr-1\": {\"00\" : \"601\"}}}, " +
         "\"interval\": 60, \"component\": \"__stmgr__\"}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 10, 60);
+    doReturn(response).when(spyMetricsProvider)
+        .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
     Map<String, ComponentMetrics> metrics
-        = spyMetricsProvider.getComponentMetrics(metric, 60, component);
+        = spyMetricsProvider.getComponentMetrics(metric, Duration.ofSeconds(60), comp);
 
     assertEquals(1, metrics.size());
-    assertNotNull(metrics.get(component));
-    assertEquals(1, metrics.get(component).getMetrics().size());
+    assertNotNull(metrics.get(comp));
+    assertEquals(1, metrics.get(comp).getMetrics().size());
 
-    HashMap<String, InstanceMetrics> componentMetrics = metrics.get(component).getMetrics();
+    HashMap<String, InstanceMetrics> componentMetrics = metrics.get(comp).getMetrics();
     assertEquals(601, componentMetrics.get("stmgr-1").getMetricValueSum(metric).intValue());
   }
 
@@ -128,18 +134,19 @@ public class TrackerMetricsProviderTest {
     TrackerMetricsProvider spyMetricsProvider = createMetricsProviderSpy();
 
     String metric = "dummy";
-    String component = "split";
+    String comp = "split";
     String response = "{\"status\": \"success\", \"executiontime\": 0.30780792236328125, " +
         "\"message\": \"\", \"version\": \"v\", \"result\": " +
         "{\"metrics\": {}, \"interval\": 0, \"component\": \"split\"}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, component, 10, 60);
+    doReturn(response).when(spyMetricsProvider)
+        .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
     Map<String, ComponentMetrics> metrics
-        = spyMetricsProvider.getComponentMetrics(metric, 60, component);
+        = spyMetricsProvider.getComponentMetrics(metric, Duration.ofSeconds(60), comp);
 
     assertEquals(1, metrics.size());
-    assertNotNull(metrics.get(component));
-    assertEquals(0, metrics.get(component).getMetrics().size());
+    assertNotNull(metrics.get(comp));
+    assertEquals(0, metrics.get(comp).getMetrics().size());
   }
 
   private TrackerMetricsProvider createMetricsProviderSpy() {
@@ -165,10 +172,12 @@ public class TrackerMetricsProviderTest {
         "\"1497481168\": \"3\"}}}, " +
         "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
-    doReturn(response).when(spyMetricsProvider).getMetricsFromTracker(metric, comp, 10, 60);
+    doReturn(response).when(spyMetricsProvider)
+        .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     Map<String, ComponentMetrics> metrics =
-        spyMetricsProvider.getComponentMetrics(metric, 10, 60, comp);
+        spyMetricsProvider
+            .getComponentMetrics(metric, Instant.ofEpochSecond(10), Duration.ofSeconds(60), comp);
 
     assertEquals(1, metrics.size());
     ComponentMetrics componentMetrics = metrics.get(comp);
@@ -179,9 +188,9 @@ public class TrackerMetricsProviderTest {
     assertNotNull(instanceMetrics);
     assertEquals(1, instanceMetrics.getMetrics().size());
 
-    Map<Long, Double> metricValues = instanceMetrics.getMetrics().get(metric);
+    Map<Instant, Double> metricValues = instanceMetrics.getMetrics().get(metric);
     assertEquals(1, metricValues.size());
-    assertEquals(104, metricValues.get(1497481288L).intValue());
+    assertEquals(104, metricValues.get(Instant.ofEpochSecond(1497481288)).intValue());
 
     instanceMetrics = componentMetrics.getMetrics("container_1_bolt_2");
     assertNotNull(instanceMetrics);
@@ -189,9 +198,9 @@ public class TrackerMetricsProviderTest {
 
     metricValues = instanceMetrics.getMetrics().get(metric);
     assertEquals(3, metricValues.size());
-    assertEquals(12, metricValues.get(1497481228L).intValue());
-    assertEquals(2, metricValues.get(1497481348L).intValue());
-    assertEquals(3, metricValues.get(1497481168L).intValue());
+    assertEquals(12, metricValues.get(Instant.ofEpochSecond(1497481228L)).intValue());
+    assertEquals(2, metricValues.get(Instant.ofEpochSecond(1497481348L)).intValue());
+    assertEquals(3, metricValues.get(Instant.ofEpochSecond(1497481168L)).intValue());
   }
 
   private class TestClock extends TrackerMetricsProvider.Clock {
