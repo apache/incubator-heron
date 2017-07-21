@@ -309,7 +309,7 @@ public class Config extends HashMap<String, Object> {
 
   /**
    * Is topology running with acking enabled?
-   * @deprecated use {{@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)}} 
+   * @deprecated use {{@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)}}
    * or {@link #setTopologyReliabilityMode(TopologyReliabilityMode)} instead.
    */
   @Deprecated
