@@ -72,8 +72,8 @@ class PulsarSpout(Spout):
       self.logger.fatal("Need to specify both serviceUrl and topicName")
     self.pulsar_cluster = str(config[PulsarSpout.serviceUrl])
     self.topic = str(config[PulsarSpout.topicName])
-    self.acking = config[api_constants.TOPOLOGY_ENABLE_ACKING]
-    if self.acking:
+    mode = config[api_constants.TOPOLOGY_RELIABILITY_MODE]
+    if mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE:
       self.acking_timeout = 1000 * int(config[api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS])
     else:
       self.acking_timeout = 30000
