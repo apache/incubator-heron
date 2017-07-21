@@ -40,6 +40,7 @@
 #include "metrics/metrics-mgr-st.h"
 #include "util/xor-manager.h"
 #include "util/neighbour-calculator.h"
+#include "manager/stateful-restorer.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
 #include "manager/ckptmgr-client.h"
@@ -100,6 +101,8 @@ void StMgr::Init() {
       metrics_export_interval_sec, eventLoop_);
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
+  restore_initiated_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric("__restore_initiated", restore_initiated_metrics_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
@@ -135,6 +138,17 @@ void StMgr::Init() {
   // Create and start StmgrServer
   StartStmgrServer();
 
+  if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
+    // Now start the stateful restorer
+    stateful_restorer_ = new StatefulRestorer(ckptmgr_client_, clientmgr_,
+                               tuple_cache_, server_, metrics_manager_client_,
+                               std::bind(&StMgr::HandleStatefulRestoreDone, this,
+                                         std::placeholders::_1, std::placeholders::_2,
+                                         std::placeholders::_3));
+  } else {
+    stateful_restorer_ = nullptr;
+  }
+
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,
@@ -160,7 +174,9 @@ void StMgr::Init() {
 
 StMgr::~StMgr() {
   metrics_manager_client_->unregister_metric("__process");
+  metrics_manager_client_->unregister_metric("__restore_initiated");
   delete stmgr_process_metrics_;
+  delete restore_initiated_metrics_;
   delete tuple_cache_;
   delete state_mgr_;
   delete pplan_;
@@ -171,6 +187,7 @@ StMgr::~StMgr() {
   CleanupXorManagers();
   delete hydrated_topology_;
   delete ckptmgr_client_;
+  delete stateful_restorer_;
   delete metrics_manager_client_;
 
   delete neighbour_calculator_;
@@ -307,6 +324,7 @@ void StMgr::CreateTupleCache() {
   tuple_cache_ = new TupleCache(eventLoop_, drain_threshold_bytes_);
 
   tuple_cache_->RegisterDrainer(&StMgr::DrainInstanceData, this);
+  tuple_cache_->RegisterCheckpointDrainer(&StMgr::DrainDownstreamCheckpoint, this);
 }
 
 void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation) {
@@ -498,7 +516,12 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   delete pplan_;
   pplan_ = _pplan;
   neighbour_calculator_->Reconstruct(*pplan_);
-  clientmgr_->StartConnections(pplan_);
+  // For exactly once topologies, we only start connecting after we have recovered
+  // from a globally consistent checkpoint. The act of starting connections is initiated
+  // by the restorer
+  if (!stateful_restorer_) {
+    clientmgr_->StartConnections(pplan_);
+  }
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 
@@ -587,6 +610,11 @@ const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan
 
 void StMgr::HandleStreamManagerData(const sp_string&,
                                     proto::stmgr::TupleStreamMessage2* _message) {
+  if (stateful_restorer_ && stateful_restorer_->InProgress()) {
+    LOG(INFO) << "Dropping data received from stmgr because we are in Restore";
+    __global_protobuf_pool_release__(_message);
+    return;
+  }
   // We received message from another stream manager
   sp_int32 _task_id = _message->task_id();
 
@@ -675,6 +703,11 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
                                proto::system::HeronTupleSet* _message) {
+  if (stateful_restorer_ && stateful_restorer_->InProgress()) {
+    LOG(INFO) << "Dropping data received from instance " << _src_task_id
+              << " because we are in Restore";
+    return;
+  }
   // Note:- Process data before control
   // This is to make sure that anchored emits are sent out
   // before any acks/fails
@@ -727,7 +760,14 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
     // Our own loopback
     SendInBound(_task_id, _tuple);
   } else {
-    clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
+    bool dropped = !(clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple));
+    if (dropped && stateful_restorer_ && !stateful_restorer_->InProgress()) {
+      LOG(INFO) << "We dropped some messages because we are not yet connected with stmgr "
+                << dest_stmgr_id << " and we are not in restore. Hence sending Reset "
+                << "message to TMaster";
+      tmaster_client_->SendResetTopologyState("", _task_id, "Dropped Instance Tuples");
+      restore_initiated_metrics_->incr();
+    }
     __global_protobuf_pool_release__(_tuple);
   }
 }
@@ -795,44 +835,113 @@ void StMgr::SendStartBackPressureToOtherStMgrs() {
 void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
 
 // Do any actions if a stmgr client connection dies
-void StMgr::HandleDeadStMgrConnection(const sp_string&) {
-  // TODO(srkukarni) For Stateful Topologies, we need to do a restore
+void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {
+  // If we are stateful topology, we need to send a resetTopology message
+  // in case we are not in 2pc
+  if (stateful_restorer_) {
+    if (!stateful_restorer_->InProgress() && tmaster_client_) {
+      LOG(INFO) << "We lost connection withi stmgr " << _stmgr_id
+                << " and hence sending ResetTopology message to tmaster";
+      tmaster_client_->SendResetTopologyState(_stmgr_id, -1, "Dead Stmgr");
+      restore_initiated_metrics_->incr();
+    } else {
+      // We are in restore
+      stateful_restorer_->HandleDeadStMgrConnection();
+    }
+  }
 }
 
 void StMgr::HandleAllStMgrClientsRegistered() {
   // If we are stateful topology, we might want to continue our restore process
-  // TODO(srkukarni) Complete this
+  if (stateful_restorer_) {
+    stateful_restorer_->HandleAllStMgrClientsConnected();
+  }
 }
 
 void StMgr::HandleAllInstancesConnected() {
-  // Now we can connect to the tmaster
-  StartTMasterClient();
+  // StmgrServer told us that all instances are connected to us
+  if (stateful_restorer_) {
+    if (stateful_restorer_->InProgress()) {
+      // We are in the middle of a restore
+      stateful_restorer_->HandleAllInstancesConnected();
+    } else if (tmaster_client_ && tmaster_client_->IsConnected()) {
+      LOG(INFO) << "All instances have connected to us and we are already "
+                << "connected to tmaster and we got intimation that All instances connected"
+                << " to us. Sending ResetMessage to tmaster";
+      tmaster_client_->SendResetTopologyState("", -1, "All Instances connected");
+      restore_initiated_metrics_->incr();
+    } else {
+      // This is the first time we came up when we haven't even connected to tmaster
+      // Now that all instances are connected to us, we should connect to tmaster
+      StartTMasterClient();
+    }
+  } else {
+    // Now we can connect to the tmaster
+    StartTMasterClient();
+  }
 }
 
 void StMgr::HandleDeadInstance(sp_int32 _task_id) {
-  // If we are stateful topology, we might want to take some actions like
-  // asking tmaster to start recovery
-  // TODO(srkukarni) Complete this
+  if (stateful_restorer_) {
+    if (stateful_restorer_->InProgress()) {
+      stateful_restorer_->HandleDeadInstanceConnection(_task_id);
+    } else {
+      LOG(INFO) << "An instance " << _task_id << " died while we are not "
+                << "in restore. Sending ResetMessage to tmaster";
+      tmaster_client_->SendResetTopologyState("", _task_id, "Dead Instance");
+      restore_initiated_metrics_->incr();
+    }
+  }
 }
 
 // Invoked by the CheckpointMgr Client when it gets registered to
 // the ckptmgr.
 void StMgr::HandleCkptMgrRegistration() {
-  // TODO(srkukarni) Complete this
+  if (stateful_restorer_) {
+    stateful_restorer_->HandleCkptMgrRestart();
+  }
 }
 
-// Initiate the process of stateful checkpointing
 void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
-  // We should start sending checkpoint messages to our local instances
-  // TODO(srkukarni) Complete this
+  // Initiate the process of stateful checkpointing by sending a request
+  // to checkpoint to all local spouts
+  server_->InitiateStatefulCheckpoint(_checkpoint_id);
 }
 
-void StMgr::HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint&,
-                                               const proto::system::Instance&) {
-  // If we are stateful topology, we might want to take some actions like
-  // sending this to ckptmgr for actually saving and propagating markers
-  // to downstream tasks
-  // TODO(srkukarni) Complete this
+// We just recieved a InstanceStateCheckpoint message from one of our instances
+// We need to propagate it to all downstream tasks
+// We also need to send the checkpoint to ckptmgr
+void StMgr::HandleStoreInstanceStateCheckpoint(
+            const proto::ckptmgr::InstanceStateCheckpoint& _message,
+            const proto::system::Instance& _instance) {
+  CHECK(stateful_restorer_);
+  int32_t task_id = _instance.info().task_id();
+  LOG(INFO) << "Got a checkpoint state message from " << task_id
+            << " for checkpoint " << _message.checkpoint_id();
+  if (stateful_restorer_->InProgress()) {
+    LOG(INFO) << "Ignoring the message because we are in progress";
+    return;
+  }
+  std::unordered_set<sp_int32> downstream_receivers =
+                    neighbour_calculator_->get_downstreamers(task_id);
+  for (auto downstream_receiver : downstream_receivers) {
+    LOG(INFO) << "Adding a DownstreamCheckpointMessage triplet "
+              << _message.checkpoint_id() << " "
+              << task_id << " " << downstream_receiver;
+    proto::ckptmgr::DownstreamStatefulCheckpoint* message =
+      new proto::ckptmgr::DownstreamStatefulCheckpoint();
+    message->set_origin_task_id(task_id);
+    message->set_destination_task_id(downstream_receiver);
+    message->set_checkpoint_id(_message.checkpoint_id());
+    tuple_cache_->add_checkpoint_tuple(downstream_receiver, message);
+  }
+
+  // save the checkpoint
+  proto::ckptmgr::SaveInstanceStateRequest* message =
+         new proto::ckptmgr::SaveInstanceStateRequest();
+  message->mutable_instance()->CopyFrom(_instance);
+  message->mutable_checkpoint()->CopyFrom(_message);
+  ckptmgr_client_->SaveInstanceState(message);
 }
 
 // Invoked by CheckpointMgr Client when it finds out that the ckptmgr
@@ -849,17 +958,21 @@ void StMgr::HandleSavedInstanceState(const proto::system::Instance& _instance,
 void StMgr::HandleGetInstanceState(proto::system::StatusCode _status, sp_int32 _task_id,
                                    sp_string _checkpoint_id,
                                    const proto::ckptmgr::InstanceStateCheckpoint& _msg) {
-  // TODO(srkukarni) Complete this
+  if (stateful_restorer_) {
+    stateful_restorer_->HandleCheckpointState(_status, _task_id, _checkpoint_id, _msg);
+  }
 }
 
-
-void StMgr::HandleRestoreInstanceStateResponse(sp_int32,
-                                               const proto::system::Status&,
-                                               const std::string&) {
-  // If we are stateful topology, we might want to see how the restore went
-  // and if it was successful and all other local instances have recovered
-  // send back a success response to tmaster saying that we have recovered
-  // TODO(srkukarni) Complete this
+// Send checkpoint message to this task_id
+void StMgr::DrainDownstreamCheckpoint(sp_int32 _task_id,
+                                      proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  sp_string stmgr = task_id_to_stmgr_[_task_id];
+  if (stmgr == stmgr_id_) {
+    HandleDownStreamStatefulCheckpoint(*_message);
+    delete _message;
+  } else {
+    clientmgr_->SendDownstreamStatefulCheckpoint(stmgr, _message);
+  }
 }
 
 void StMgr::HandleDownStreamStatefulCheckpoint(
@@ -872,13 +985,42 @@ void StMgr::HandleDownStreamStatefulCheckpoint(
 // Called by TmasterClient when it receives directive from tmaster
 // to restore the topology to _checkpoint_id checkpoint
 void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid) {
-  // TODO(srkukarni) Complete this
+  LOG(INFO) << "Got a Restore Topology State message from Tmaster for checkpoint "
+            << _checkpoint_id << " and txid " << _restore_txid;
+  CHECK(stateful_restorer_);
+
+  // Start the restore process
+  stateful_restorer_->StartRestore(_checkpoint_id, _restore_txid, pplan_);
 }
 
 // Called by TmasterClient when it receives directive from tmaster
 // to restore the topology to _checkpoint_id checkpoint
 void StMgr::StartStatefulProcessing(sp_string _checkpoint_id) {
-  // TODO(srkukarni) Complete this
+  LOG(INFO) << "Received StartProcessing message from tmaster for "
+            << _checkpoint_id;
+  CHECK(stateful_restorer_);
+  if (stateful_restorer_->InProgress()) {
+    LOG(FATAL) << "StartProcessing received from Tmaster for "
+               << _checkpoint_id << " when we are still in Restore";
+  }
+  server_->SendStartInstanceStatefulProcessing(_checkpoint_id);
+}
+
+void StMgr::HandleRestoreInstanceStateResponse(sp_int32 _task_id,
+                                               const proto::system::Status& _status,
+                                               const std::string& _checkpoint_id) {
+  // If we are stateful topology, we might want to see how the restore went
+  // and if it was successful and all other local instances have recovered
+  // send back a success response to tmaster saying that we have recovered
+  CHECK(stateful_restorer_);
+  stateful_restorer_->HandleInstanceRestoredState(_task_id, _status.status(), _checkpoint_id);
+}
+
+// Called after we have recovered our state(either successfully or unsuccessfully)
+// We need to let our tmaster know
+void StMgr::HandleStatefulRestoreDone(proto::system::StatusCode _status,
+                                      std::string _checkpoint_id, sp_int64 _restore_txid) {
+  tmaster_client_->SendRestoreTopologyStateResponse(_status, _checkpoint_id, _restore_txid);
 }
 }  // namespace stmgr
 }  // namespace heron
