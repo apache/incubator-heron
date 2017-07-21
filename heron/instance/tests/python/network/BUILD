@@ -7,7 +7,7 @@ pex_library(
     srcs = ["mock_generator.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
-        "//heron/instance/src/python/network:pyheron-network-py",
+        "//heron/instance/src/python/network:heron-network-py",
     ],
     reqs = [
         "mock==1.0.1"
@@ -19,7 +19,7 @@ pex_test(
     srcs = ["st_stmgr_client_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
-        "//heron/instance/src/python/network:pyheron-network-py",
+        "//heron/instance/src/python/network:heron-network-py",
         "//heron/instance/tests/python/network:instance-network-mock",
     ],
     reqs = [
@@ -35,7 +35,7 @@ pex_test(
     srcs = ["metricsmgr_client_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
-        "//heron/instance/src/python/network:pyheron-network-py",
+        "//heron/instance/src/python/network:heron-network-py",
         "//heron/instance/tests/python/network:instance-network-mock",
     ],
     reqs = [

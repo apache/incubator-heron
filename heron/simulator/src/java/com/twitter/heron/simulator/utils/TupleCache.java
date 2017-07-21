@@ -36,23 +36,24 @@ public class TupleCache {
     return list;
   }
 
-  public long addDataTuple(int destTaskId,
+  public long addDataTuple(int srcTaskId,
+                           int destTaskId,
                            TopologyAPI.StreamId streamId,
                            HeronTuples.HeronDataTuple tuple,
                            boolean isAnchored) {
-    return get(destTaskId).addDataTuple(streamId, tuple, isAnchored);
+    return get(destTaskId).addDataTuple(srcTaskId, streamId, tuple, isAnchored);
   }
 
-  public void addAckTuple(int taskId, HeronTuples.AckTuple tuple) {
-    get(taskId).addAckTuple(tuple);
+  public void addAckTuple(int srcTaskId, int taskId, HeronTuples.AckTuple tuple) {
+    get(taskId).addAckTuple(srcTaskId, tuple);
   }
 
-  public void addFailTuple(int taskId, HeronTuples.AckTuple tuple) {
-    get(taskId).addFailTuple(tuple);
+  public void addFailTuple(int srcTaskId, int taskId, HeronTuples.AckTuple tuple) {
+    get(taskId).addFailTuple(srcTaskId, tuple);
   }
 
-  public void addEmitTuple(int taskId, HeronTuples.AckTuple tuple) {
-    get(taskId).addEmitTuple(tuple);
+  public void addEmitTuple(int srcTaskId, int taskId, HeronTuples.AckTuple tuple) {
+    get(taskId).addEmitTuple(srcTaskId, tuple);
   }
 
   // Construct a new Map from current cache
@@ -87,19 +88,22 @@ public class TupleCache {
     }
 
     // returns the tuple key used for XOR
-    public long addDataTuple(TopologyAPI.StreamId streamId,
+    public long addDataTuple(int srcTaskId,
+                             TopologyAPI.StreamId streamId,
                              HeronTuples.HeronDataTuple tuple,
                              boolean isAnchored) {
       if (current == null
           || current.hasControl()
+          || current.getSrcTaskId() != srcTaskId
           || !current.getDataBuilder().getStream().getComponentName().equals(
-              streamId.getComponentName())
+          streamId.getComponentName())
           || !current.getDataBuilder().getStream().getId().equals(streamId.getId())) {
         if (current != null) {
           tuples.add(current.build());
         }
         current = HeronTuples.HeronTupleSet.newBuilder();
         current.getDataBuilder().setStream(streamId);
+        current.setSrcTaskId(srcTaskId);
       }
 
       long tupleKey = -1;
@@ -116,9 +120,10 @@ public class TupleCache {
       return tupleKey;
     }
 
-    public void addAckTuple(HeronTuples.AckTuple tuple) {
+    public void addAckTuple(int srcTaskId, HeronTuples.AckTuple tuple) {
       if (current == null
           || current.hasData()
+          || current.getSrcTaskId() != srcTaskId
           || current.getControlBuilder().getFailsCount() > 0
           || current.getControlBuilder().getEmitsCount() > 0) {
         if (current != null) {
@@ -126,14 +131,16 @@ public class TupleCache {
         }
 
         current = HeronTuples.HeronTupleSet.newBuilder();
+        current.setSrcTaskId(srcTaskId);
       }
 
       current.getControlBuilder().addAcks(tuple);
     }
 
-    public void addFailTuple(HeronTuples.AckTuple tuple) {
+    public void addFailTuple(int srcTaskId, HeronTuples.AckTuple tuple) {
       if (current == null
           || current.hasData()
+          || current.getSrcTaskId() != srcTaskId
           || current.getControlBuilder().getAcksCount() > 0
           || current.getControlBuilder().getEmitsCount() > 0) {
         if (current != null) {
@@ -141,14 +148,16 @@ public class TupleCache {
         }
 
         current = HeronTuples.HeronTupleSet.newBuilder();
+        current.setSrcTaskId(srcTaskId);
       }
 
       current.getControlBuilder().addFails(tuple);
     }
 
-    public void addEmitTuple(HeronTuples.AckTuple tuple) {
+    public void addEmitTuple(int srcTaskId, HeronTuples.AckTuple tuple) {
       if (current == null
           || current.hasData()
+          || current.getSrcTaskId() != srcTaskId
           || current.getControlBuilder().getAcksCount() > 0
           || current.getControlBuilder().getFailsCount() > 0) {
         if (current != null) {
@@ -156,6 +165,7 @@ public class TupleCache {
         }
 
         current = HeronTuples.HeronTupleSet.newBuilder();
+        current.setSrcTaskId(srcTaskId);
       }
 
       current.getControlBuilder().addEmits(tuple);

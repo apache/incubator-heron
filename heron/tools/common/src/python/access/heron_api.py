@@ -43,6 +43,7 @@ JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 
 FILE_DATA_URL_FMT           = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
+FILE_DOWNLOAD_URL_FMT       = "%s/containerfiledownload"  % TOPOLOGIES_URL_FMT
 FILESTATS_URL_FMT           = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
 
 capacity = "DIVIDE(" \
@@ -635,6 +636,33 @@ def run_instance_jmap(cluster, environ, topology, instance, role=None):
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
+# Get a url to download a file from the container
+def get_container_file_download_url(cluster, environ, topology, container,
+                                    path, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param container:
+  :param path:
+  :param role:
+  :return:
+  '''
+  params = dict(
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      container=container,
+      path=path)
+  if role is not None:
+    params['role'] = role
+
+  request_url = tornado.httputil.url_concat(
+      create_url(FILE_DOWNLOAD_URL_FMT), params)
+
+  if role is not None:
+    request_url = tornado.httputil.url_concat(request_url, dict(role=role))
+  return request_url
 
 # Get file data from the container
 @tornado.gen.coroutine

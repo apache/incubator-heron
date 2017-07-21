@@ -46,6 +46,12 @@ marathon_deps_files = \
        "//third_party/java:jackson",
     ]
 
+kubernetes_deps_files = \
+    scheduler_deps_files + [
+        ":scheduler-utils-java",
+        "//third_party/java:jackson",
+    ]
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -186,4 +192,32 @@ genrule(
     srcs = [":marathon-scheduler-unshaded_deploy.jar"],
     outs = ["heron-marathon-scheduler.jar"],
     cmd  = "cp $< $@",
+)
+
+java_library(
+    name='kubernetes-scheduler-java',
+    srcs = glob(["com/twitter/heron/scheduler/kubernetes/**/*.java"]),
+    deps = kubernetes_deps_files,
+)
+
+java_binary(
+    name='kubernetes-scheduler-unshaded',
+    srcs=glob(["com/twitter/heron/scheduler/kubernetes/**/*.java"]),
+    deps = kubernetes_deps_files,
+)
+
+genrule(
+    name = "heron-kubernetes-scheduler",
+    srcs = [":kubernetes-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-kubernetes-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name = 'scheduler-utils-java',
+    srcs = glob(["com/twitter/heron/scheduler/utils/**/*.java"]),
+    deps = [
+        "//third_party/java:jackson",
+        "//heron/spi/src/java:network-utils-java",
+    ]
 )

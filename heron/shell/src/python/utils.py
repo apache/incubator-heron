@@ -22,7 +22,7 @@ import subprocess
 from datetime import datetime
 from xml.sax.saxutils import escape
 
-from heron.common.src.python.utils import log
+from heron.common.src.python.utils import proc
 
 def format_mode(sres):
   """
@@ -104,13 +104,10 @@ def get_stat(path, filename):
   ''' get stat '''
   return os.stat(os.path.join(path, filename))
 
-def read_chunk(filename, offset=None, length=None):
+def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   """
   Read a chunk of a file from an offset upto the length.
   """
-  offset = offset or -1
-  length = length or -1
-
   try:
     length = long(length)
     offset = long(offset)
@@ -139,19 +136,13 @@ def read_chunk(filename, offset=None, length=None):
       return {}
 
   if data:
-    return dict(offset=offset, length=len(data), data=escape(data.decode('utf8', 'replace')))
+    data = _escape_data(data) if escape_data else data
+    return dict(offset=offset, length=len(data), data=data)
 
   return dict(offset=offset, length=0)
 
-class StringBuilder(object):
-  def __init__(self):
-    self.str = ""
-
-  def add(self, line):
-    self.str += line
-
-  def result(self):
-    return self.str
+def _escape_data(data):
+  return escape(data.decode('utf8', 'replace'))
 
 def pipe(prev_proc, to_cmd):
   """
@@ -159,23 +150,21 @@ def pipe(prev_proc, to_cmd):
   Returns piped process
   """
   stdin = None if prev_proc is None else prev_proc.stdout
-  proc = subprocess.Popen(to_cmd,
-                          stdout=subprocess.PIPE,
-                          stdin=stdin)
+  process = subprocess.Popen(to_cmd,
+                             stdout=subprocess.PIPE,
+                             stdin=stdin)
   if prev_proc is not None:
     prev_proc.stdout.close() # Allow prev_proc to receive a SIGPIPE
-  return proc
+  return process
 
 def str_cmd(cmd, cwd, env):
   """
   Runs the command and returns its stdout and stderr.
   """
-  proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, cwd=cwd, env=env)
-  stdout_builder, stderr_builder = StringBuilder(), StringBuilder()
-  log.async_stream_process_stdout(proc, stdout_builder.add)
-  log.async_stream_process_stderr(proc, stderr_builder.add)
-  proc.wait()
+  process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, cwd=cwd, env=env)
+  stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
+  process.wait()
   stdout, stderr = stdout_builder.result(), stderr_builder.result()
   return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
 
@@ -187,8 +176,7 @@ def chain(cmd_list):
   """
   command = ' | '.join(map(lambda x: ' '.join(x), cmd_list))
   chained_proc = reduce(pipe, [None] + cmd_list)
-  stdout_builder = StringBuilder()
-  log.async_stream_process_stdout(chained_proc, stdout_builder.add)
+  stdout_builder = proc.async_stdout_builder(chained_proc)
   chained_proc.wait()
   return {
       'command': command,

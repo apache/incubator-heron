@@ -40,24 +40,27 @@ public class TupleImpl implements Tuple {
   private final long tupleKey;
   private final List<HeronTuples.RootId> roots;
   private final long creationTime;
+  private final int sourceTaskId;
 
   private List<Object> values;
 
   public TupleImpl(TopologyContext context, TopologyAPI.StreamId stream,
                    long tupleKey, List<HeronTuples.RootId> roots,
-                   List<Object> values) {
-    this(context, stream, tupleKey, roots, values, System.nanoTime(), true);
+                   List<Object> values, int sourceTaskId) {
+    this(context, stream, tupleKey, roots, values, System.nanoTime(), true, sourceTaskId);
   }
 
   public TupleImpl(TopologyContext context, TopologyAPI.StreamId stream,
                    long tupleKey, List<HeronTuples.RootId> roots,
-                   List<Object> values, long creationTime, boolean isCheckRequired) {
+                   List<Object> values, long creationTime, boolean isCheckRequired,
+                   int sourceTaskId) {
     this.context = context;
     this.stream = stream;
     this.tupleKey = tupleKey;
     this.roots = roots;
     this.values = values;
     this.creationTime = creationTime;
+    this.sourceTaskId = sourceTaskId;
 
     if (isCheckRequired) {
       Fields schema = context.getComponentOutputFields(stream.getComponentName(),
@@ -223,10 +226,9 @@ public class TupleImpl implements Tuple {
     return stream.getComponentName();
   }
 
-  // TODO:- Is this needed
   @Override
   public int getSourceTask() {
-    throw new RuntimeException("Tuple no longer supports getSourceTask");
+    return sourceTaskId;
   }
 
   @Override

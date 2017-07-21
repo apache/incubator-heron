@@ -14,6 +14,7 @@
 
 package com.twitter.heron.examples;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public final class ExclamationTopology {
     TopologyBuilder builder = new TopologyBuilder();
     int parallelism = 2;
 
-    builder.setSpout("word", new TestWordSpout(), parallelism);
+    builder.setSpout("word", new TestWordSpout(Duration.ofMillis(50)), parallelism);
     builder.setBolt("exclaim1", new ExclamationBolt(), 2 * parallelism)
         .shuffleGrouping("word");
 

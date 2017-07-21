@@ -27,9 +27,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.network.HeronServerTester;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.UnitTestHelper;
@@ -42,6 +42,7 @@ import com.twitter.heron.resource.UnitTestHelper;
  * Stream manager.
  */
 public class HandleReadTest extends AbstractNetworkTest {
+  private static final int SRC_TASK_ID = 1;
 
   /**
    * Test reading from network
@@ -101,6 +102,7 @@ public class HandleReadTest extends AbstractNetworkTest {
   private Message constructMockMessage() {
     StreamManager.TupleMessage.Builder message = StreamManager.TupleMessage.newBuilder();
     HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
+    heronTupleSet.setSrcTaskId(SRC_TASK_ID);
     HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
     TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
     streamId.setComponentName("test-spout");

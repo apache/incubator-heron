@@ -79,12 +79,8 @@ public class SpoutInstance implements IInstance {
     this.config = helper.getTopologyContext().getTopologyConfig();
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
-    this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
-
-    LOG.info("Enable Ack: " + this.ackEnabled);
-    LOG.info("EnableMessageTimeouts: " + this.enableMessageTimeouts);
 
     if (helper.getMySpout() == null) {
       throw new RuntimeException("HeronSpoutInstance has no spout in physical plan");
@@ -111,6 +107,10 @@ public class SpoutInstance implements IInstance {
 
     IPluggableSerializer serializer = SerializeDeSerializeHelper.getSerializer(config);
     collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
+    this.ackEnabled = collector.isAckEnabled();
+
+    LOG.info("Enable Ack: " + this.ackEnabled);
+    LOG.info("EnableMessageTimeouts: " + this.enableMessageTimeouts);
   }
 
   @Override

@@ -19,7 +19,8 @@ relevant for dealing with the topology structure
 
 import sets
 
-from heron.common.src.python import constants
+from heron.api.src.python import api_constants
+from heron.common.src.python import system_constants
 from heron.proto import topology_pb2
 
 def get_topology_config(topology, key):
@@ -42,7 +43,7 @@ def get_component_parallelism(topology):
   for component in components:
     component_name = component.comp.name
     for kv in component.comp.config.kvs:
-      if kv.key == constants.TOPOLOGY_COMPONENT_PARALLELISM:
+      if kv.key == api_constants.TOPOLOGY_COMPONENT_PARALLELISM:
         cmap[component_name] = int(kv.value)
   return cmap
 
@@ -53,7 +54,7 @@ def get_nstmgrs(topology):
   This is equal to the number of containers.
   If not present, return 1 as default.
   """
-  return int(get_topology_config(topology, constants.TOPOLOGY_STMGRS) or 1)
+  return int(get_topology_config(topology, api_constants.TOPOLOGY_STMGRS) or 1)
 
 def get_instance_opts(topology):
   """
@@ -61,7 +62,7 @@ def get_instance_opts(topology):
   Returns the topology worker child options.
   If not present, return empty string.
   """
-  return str(get_topology_config(topology, constants.TOPOLOGY_WORKER_CHILDOPTS) or "")
+  return str(get_topology_config(topology, api_constants.TOPOLOGY_WORKER_CHILDOPTS) or "")
 
 def get_total_instances(topology):
   """
@@ -77,7 +78,7 @@ def get_additional_classpath(topology):
   Returns an empty string if no additional classpath specified
   """
   additional_classpath = str(get_topology_config(
-      topology, constants.TOPOLOGY_ADDITIONAL_CLASSPATH) or "")
+      topology, api_constants.TOPOLOGY_ADDITIONAL_CLASSPATH) or "")
   return additional_classpath
 
 def get_cpus_per_container(topology):
@@ -88,7 +89,7 @@ def get_cpus_per_container(topology):
       1. It is passed in config.
       2. Allocate 1 CPU per instance in a container, and 1 extra for stmrs.
   """
-  cpus = get_topology_config(topology, constants.TOPOLOGY_CONTAINER_CPU_REQUESTED)
+  cpus = get_topology_config(topology, api_constants.TOPOLOGY_CONTAINER_CPU_REQUESTED)
   if not cpus:
     ninstances = get_total_instances(topology)
     nstmgrs = get_nstmgrs(topology)
@@ -103,14 +104,15 @@ def get_disk_per_container(topology):
       1. It is passed in config.
       2. Allocate 1 GB per instance in a container, and 12 GB extra for the rest.
   """
-  disk = get_topology_config(topology, constants.TOPOLOGY_CONTAINER_DISK_REQUESTED)
+  disk = get_topology_config(topology, api_constants.TOPOLOGY_CONTAINER_DISK_REQUESTED)
   if not disk:
     ninstances = get_total_instances(topology)
     nstmgrs = get_nstmgrs(topology)
     # Round to the ceiling
     maxInstanceInOneContainer = (ninstances + nstmgrs - 1) / nstmgrs
 
-    disk = maxInstanceInOneContainer * constants.GB + constants.DEFAULT_DISK_PADDING_PER_CONTAINER
+    disk = maxInstanceInOneContainer * system_constants.GB + \
+           system_constants.DEFAULT_DISK_PADDING_PER_CONTAINER
   return disk
 
 def get_ram_per_container(topology):
@@ -129,7 +131,7 @@ def get_ram_per_container(topology):
       ramsize += int(rammap[component_name])
     if ramsize > maxsize:
       maxsize = ramsize
-  return maxsize + constants.RAM_FOR_STMGR
+  return maxsize + system_constants.RAM_FOR_STMGR
 
 def get_component_rammap(topology):
   """
@@ -157,7 +159,7 @@ def get_component_rammap(topology):
     for component in components:
       component_name = component.comp.name
       if component_name not in rammap:
-        rammap[component_name] = constants.DEFAULT_RAM_FOR_INSTANCE
+        rammap[component_name] = system_constants.DEFAULT_RAM_FOR_INSTANCE
     return rammap
 
   max_instances_in_a_container = max(map(lambda x: len(x[1]), component_distribution.items()))
@@ -167,7 +169,7 @@ def get_component_rammap(topology):
   # memory equally
   requested_ram_per_container = get_container_ram_requested(topology)
   if requested_ram_per_container != None:
-    ram_for_jvms = requested_ram_per_container - constants.RAM_FOR_STMGR
+    ram_for_jvms = requested_ram_per_container - system_constants.RAM_FOR_STMGR
     ram_per_instance = int(ram_for_jvms / max_instances_in_a_container)
     rammap = {}
     for component in components:
@@ -177,7 +179,7 @@ def get_component_rammap(topology):
 
   # Nothing was specified.
   # The default is to allocate one 1gb per instance of all components
-  ram_per_instance = int(constants.DEFAULT_RAM_FOR_INSTANCE)
+  ram_per_instance = int(system_constants.DEFAULT_RAM_FOR_INSTANCE)
   rammap = {}
   for component in components:
     component_name = component.comp.name
@@ -233,7 +235,7 @@ def get_user_rammap(topology):
   where 42 and 24 represents the ram requested in bytes.
   Returns None if nothing is specified.
   """
-  rammap = get_topology_config(topology, constants.TOPOLOGY_COMPONENT_RAMMAP)
+  rammap = get_topology_config(topology, api_constants.TOPOLOGY_COMPONENT_RAMMAP)
   if rammap:
     rmap = {}
     for component_ram in rammap.split(","):
@@ -248,7 +250,7 @@ def get_container_ram_requested(topology):
   Returns the container ram as requested by the user.
   Returns None if not specified.
   """
-  ram = get_topology_config(topology, constants.TOPOLOGY_CONTAINER_RAM_REQUESTED)
+  ram = get_topology_config(topology, api_constants.TOPOLOGY_CONTAINER_RAM_REQUESTED)
   return int(ram) if ram else None
 
 def get_component_jvmopts(topology):
@@ -256,7 +258,7 @@ def get_component_jvmopts(topology):
   The argument is the proto object for topology.
   Returns the jvm options if specified by user.
   """
-  return str(get_topology_config(topology, constants.TOPOLOGY_COMPONENT_JVMOPTS) or "")
+  return str(get_topology_config(topology, api_constants.TOPOLOGY_COMPONENT_JVMOPTS) or "")
 
 def get_topology_state_string(topology):
   """
@@ -300,7 +302,7 @@ def sane(topology):
     return False
 
   for kv in topology.topology_config.kvs:
-    if kv.key == constants.TOPOLOGY_COMPONENT_RAMMAP:
+    if kv.key == api_constants.TOPOLOGY_COMPONENT_RAMMAP:
       rammap = str(kv.value).split(',')
       for component_ram in rammap:
         component_and_ram = component_ram.split(':')

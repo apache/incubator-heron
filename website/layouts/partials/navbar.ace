@@ -14,8 +14,6 @@ nav.hn-top-navbar.navbar.navbar-inverse.navbar-fixed-top role=navigation
         li
           a href=/docs/getting-started Docs
         li
-          a href=/api API
-        li
           a href=/docs/resources Resources
         li
           a href=/docs/contributors/community Community

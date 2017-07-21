@@ -31,7 +31,7 @@ import org.junit.Test;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.network.HeronServerTester;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
@@ -64,6 +64,7 @@ import com.twitter.heron.resource.UnitTestHelper;
  */
 public class SpoutInstanceTest {
   private static final String SPOUT_INSTANCE_ID = "spout-id";
+  private static final int SRC_TASK_ID = 1;
   private static IPluggableSerializer serializer = new JavaSerializer();
 
   // Singleton to be changed globally for testing
@@ -282,6 +283,7 @@ public class SpoutInstanceTest {
     // We will construct the ack&fail tuples
     // We will construct 5 acks and 5 fails
     HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+    bldr.setSrcTaskId(SRC_TASK_ID);
     HeronTuples.HeronControlTupleSet.Builder controlTupleSet
         = HeronTuples.HeronControlTupleSet.newBuilder();
 

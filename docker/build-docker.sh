@@ -37,12 +37,12 @@ run_build() {
 
   setup_scratch_dir $SCRATCH_DIR
 
-  echo "building docker image with tag:$DOCKER_TAG"
+  echo "Building docker image with tag:$DOCKER_TAG"
   #need to copy artifacts locally
-  cp -pr "$OUTPUT_DIRECTORY"/* "$SCRATCH_DIR/artifacts"
+  cp -pr "$OUTPUT_DIRECTORY"/*$HERON_VERSION* "$SCRATCH_DIR/artifacts"
 
   export HERON_VERSION
-  docker build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 
 }
 

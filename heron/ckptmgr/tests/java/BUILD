@@ -7,6 +7,7 @@ test_deps_files = \
     "//heron/spi/src/java:statefulstorage-spi-java",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:network-java",
+    "//heron/common/src/java:test-helpers-java",
     "//third_party/java:powermock",
     "//third_party/java:mockito",
     "//third_party/java:junit4"

@@ -96,6 +96,14 @@ void HeronZKStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_n
   SetMetricsCacheLocationWatchInternal();
 }
 
+void HeronZKStateMgr::SetPackingPlanWatch(const std::string& topology_name, VCallback<> watcher) {
+  CHECK(watcher);
+  CHECK(!topology_name.empty());
+
+  packing_plan_watcher_info_ = new TMasterLocationWatchInfo(std::move(watcher), topology_name);
+  SetPackingPlanWatchInternal();
+}
+
 void HeronZKStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                                          VCallback<proto::system::StatusCode> cb) {
   // Just try to create an ephimeral node
@@ -216,6 +224,18 @@ void HeronZKStateMgr::GetPhysicalPlan(const std::string& _topology_name,
   std::string* contents = new std::string();
   auto wCb = [contents, _return, cb, this](sp_int32 rc) {
     this->GetPhysicalPlanDone(contents, _return, std::move(cb), rc);
+  };
+
+  zkclient_->Get(path, contents, std::move(wCb));
+}
+
+void HeronZKStateMgr::GetPackingPlan(const std::string& _topology_name,
+                                      proto::system::PackingPlan* _return,
+                                      VCallback<proto::system::StatusCode> cb) {
+  std::string path = GetPackingPlanPath(_topology_name);
+  std::string* contents = new std::string();
+  auto wCb = [contents, _return, cb, this](sp_int32 rc) {
+    this->GetPackingPlanDone(contents, _return, std::move(cb), rc);
   };
 
   zkclient_->Get(path, contents, std::move(wCb));
@@ -413,7 +433,7 @@ void HeronZKStateMgr::GetMetricsCacheLocationDone(std::string* _contents,
       code = proto::system::STATE_CORRUPTED;
     }
   } else if (_rc == ZNONODE) {
-    LOG(ERROR) << "Error getting metricscache location because the tmaster does not exist"
+    LOG(ERROR) << "Error getting metricscache location because the metricscache does not exist"
                << std::endl;
     code = proto::system::PATH_DOES_NOT_EXIST;
   } else {
@@ -529,6 +549,24 @@ void HeronZKStateMgr::GetPhysicalPlanDone(std::string* _contents,
     code = proto::system::PATH_DOES_NOT_EXIST;
   } else {
     LOG(ERROR) << "Getting PhysicalPlan failed with error " << _rc << std::endl;
+    code = proto::system::STATE_READ_ERROR;
+  }
+  delete _contents;
+  cb(code);
+}
+
+void HeronZKStateMgr::GetPackingPlanDone(std::string* _contents,
+                                          proto::system::PackingPlan* _return,
+                                          VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
+  proto::system::StatusCode code = proto::system::OK;
+  if (_rc == ZOK) {
+    if (!_return->ParseFromString(*_contents)) {
+      code = proto::system::STATE_CORRUPTED;
+    }
+  } else if (_rc == ZNONODE) {
+    code = proto::system::PATH_DOES_NOT_EXIST;
+  } else {
+    LOG(ERROR) << "Getting PackingPlan failed with error " << _rc << std::endl;
     code = proto::system::STATE_READ_ERROR;
   }
   delete _contents;
@@ -682,6 +720,12 @@ bool HeronZKStateMgr::IsMetricsCacheWatchDefined() {
           !metricscache_location_watcher_info_->topology_name.empty());
 }
 
+bool HeronZKStateMgr::IsPackingPlanWatchDefined() {
+  return (packing_plan_watcher_info_ != NULL &&
+          packing_plan_watcher_info_->watcher_cb &&
+          !packing_plan_watcher_info_->topology_name.empty());
+}
+
 // 2 seconds
 const int HeronZKStateMgr::SET_WATCH_RETRY_INTERVAL_S = 2;
 
@@ -734,12 +778,35 @@ void HeronZKStateMgr::SetMetricsCacheWatchCompletionHandler(sp_int32 rc) {
   }
 }
 
+void HeronZKStateMgr::SetPackingPlanWatchCompletionHandler(sp_int32 rc) {
+  if (rc == ZOK || rc == ZNONODE) {
+    // NoNode is when there is no packingplan up yet, but the watch is set.
+    LOG(INFO) << "Setting watch on packing plan succeeded: " << zerror(rc) << std::endl;
+  } else {
+    // Any other return code should be treated as warning, since ideally
+    // we shouldn't be in this state.
+    LOG(WARNING) << "Setting watch on packing plan returned: " << zerror(rc) << std::endl;
+
+    if (ShouldRetrySetWatch(rc)) {
+      LOG(INFO) << "Retrying after " << SET_WATCH_RETRY_INTERVAL_S << " seconds" << std::endl;
+
+      auto cb = [this](EventLoop::Status status) { this->CallSetPackingPlanWatch(status);};
+
+      eventLoop_->registerTimer(std::move(cb), false, SET_WATCH_RETRY_INTERVAL_S * 1000 * 1000);
+    }
+  }
+}
+
 void HeronZKStateMgr::CallSetTMasterLocationWatch(EventLoop::Status) {
   SetTMasterLocationWatchInternal();
 }
 
 void HeronZKStateMgr::CallSetMetricsCacheLocationWatch(EventLoop::Status) {
   SetMetricsCacheLocationWatchInternal();
+}
+
+void HeronZKStateMgr::CallSetPackingPlanWatch(EventLoop::Status) {
+  SetPackingPlanWatchInternal();
 }
 
 void HeronZKStateMgr::SetTMasterLocationWatchInternal() {
@@ -763,6 +830,16 @@ void HeronZKStateMgr::SetMetricsCacheLocationWatchInternal() {
                     [this](sp_int32 rc) { this->SetMetricsCacheWatchCompletionHandler(rc); });
 }
 
+void HeronZKStateMgr::SetPackingPlanWatchInternal() {
+  CHECK(IsPackingPlanWatchDefined());
+
+  LOG(INFO) << "Setting watch on packing plan " << std::endl;
+  std::string path = GetPackingPlanPath(packing_plan_watcher_info_->topology_name);
+
+  zkclient_->Exists(path, [this]() { this->PackingPlanWatch(); },
+                    [this](sp_int32 rc) { this->SetPackingPlanWatchCompletionHandler(rc); });
+}
+
 void HeronZKStateMgr::TMasterLocationWatch() {
   // First setup watch again
   SetTMasterLocationWatchInternal();
@@ -775,6 +852,13 @@ void HeronZKStateMgr::MetricsCacheLocationWatch() {
   SetMetricsCacheLocationWatchInternal();
   // Then run the watcher
   metricscache_location_watcher_info_->watcher_cb();
+}
+
+void HeronZKStateMgr::PackingPlanWatch() {
+  // First setup watch again
+  SetPackingPlanWatchInternal();
+  // Then run the watcher
+  packing_plan_watcher_info_->watcher_cb();
 }
 }  // namespace common
 }  // namespace heron

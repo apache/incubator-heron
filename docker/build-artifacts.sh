@@ -90,7 +90,7 @@ verify_source_exists() {
 }
 
 setup_scratch_dir() {
-  mkdir -p $1
+  mkdir -p $1/artifacts
   cp $DOCKER_DIR/* $1
 }
 
