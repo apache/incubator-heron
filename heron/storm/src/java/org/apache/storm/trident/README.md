@@ -1,7 +1,7 @@
 Hackweek prototype to get a sample trident topology working.
 
 tl;dr; TridentWordCountTopologyHeron runs and tuples are being transmitted. Bolt b-1 receives
-sentances and splits them into words and counts. Bolt b-0 does not seem to receive and aggregate
+sentences and splits them into words and counts. Bolt b-0 does not seem to receive and aggregate
 them. We need to understand why.
 
 To run:
@@ -14,6 +14,11 @@ $ bazel run --config=darwin --verbose_failures -- scripts/packages/heron-client-
   com.twitter.heron.examples.TridentWordCountTopology TridentWordCountTopology
 $ less ~/.herondata/topologies/local/billg/TridentWordCountTopology/log-files/container_1_b-1_4.log.0
 ```
+
+Notes:
+- spout-spout1 emits sentences via FixedBatchSpout on stream s1 to bolt b1
+- b1 receives sentences on SubtopologyBolt and delegates to EachProcessor to Split to output words
+  to AppendCollector to AggregateProcessor to GroupedAggregator
 
 Current status:
 - Topology compiles and can be submitted
