@@ -35,7 +35,8 @@ if __name__ == '__main__':
                                 config={SlidingWindowBolt.WINDOW_DURATION_SECS: 10,
                                         SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS: 2})
 
-  topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True}
+  topology_config = {constants.TOPOLOGY_RELIABILITY_MODE:
+                         constants.TopologyReliabilityMode.ATLEAST_ONCE}
   builder.set_config(topology_config)
 
   builder.build_and_submit()

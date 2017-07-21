@@ -136,6 +136,17 @@ public final class TopologyUtils {
     return numInstances;
   }
 
+  public static boolean shouldStartCkptMgr(TopologyAPI.Topology topology) {
+    String mode = getConfigWithDefault(topology.getTopologyConfig().getKvsList(),
+                                       Config.TOPOLOGY_RELIABILITY_MODE, "");
+    if (mode.isEmpty()) {
+      return false;
+    } else {
+      return Config.TopologyReliabilityMode.valueOf(mode)
+             == Config.TopologyReliabilityMode.EXACTLY_ONCE;
+    }
+  }
+
   /**
    * Verify if the given topology has all the necessary information
    */
