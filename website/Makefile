@@ -47,7 +47,7 @@ travis-ruby-setup:
 		--jobs=3
 
 travis-python-setup:
-	sudo -H pip install pygments==2.1.3 pdoc==0.3.2
+	sudo -H pip install pygments==2.1.3 pdoc==0.3.2 pyopenssl
 
 travis-install-hugo:
 	wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.deb

@@ -31,8 +31,8 @@ BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.jav
 APACHE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/storm/*" -name "*.java"`
 GEN_FILES=`find $GEN_PROTO_DIR -name "*.java"`
 
-rm -rf $JAVADOC_OUTPUT_DIR
-mkdir -p $JAVADOC_OUTPUT_DIR
+rm -rf $JAVADOC_OUTPUT_DIR $JAVADOC_OUTPUT_LOCAL_DIR
+mkdir -p $JAVADOC_OUTPUT_DIR $JAVADOC_OUTPUT_LOCAL_DIR
 
 BIN_JARS=`find $HERON_ROOT_DIR/bazel-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
 GEN_JARS=`find $HERON_ROOT_DIR/bazel-genfiles/external/. -name "*\.jar" | tr '\n' ':'`
