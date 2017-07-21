@@ -28,6 +28,7 @@
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
+#include "config/topology-config-vars.h"
 
 namespace heron {
 namespace common {
@@ -217,7 +218,7 @@ class StMgr {
   std::vector<sp_int32> out_tasks_;
 
   bool is_acking_enabled;
-  bool is_stateful_;
+  config::TopologyConfigVars::TopologyReliabilityMode reliability_mode_;
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;

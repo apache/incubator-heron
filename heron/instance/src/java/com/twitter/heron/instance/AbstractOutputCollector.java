@@ -37,6 +37,11 @@ public class AbstractOutputCollector {
   private long totalTuplesEmitted;
   private PhysicalPlanHelper helper;
 
+  /**
+   * The SuppressWarnings is only until TOPOLOGY_ENABLE_ACKING exists.
+   * This warning will be removed once it is removed.
+   */
+  @SuppressWarnings("deprecation")
   public AbstractOutputCollector(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
                                  Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
@@ -47,11 +52,20 @@ public class AbstractOutputCollector {
     this.helper = helper;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
-        && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
-      this.ackEnabled = Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
+    if (config.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)
+        && config.get(Config.TOPOLOGY_RELIABILITY_MODE) != null) {
+      this.ackEnabled =
+     Config.TopologyReliabilityMode.valueOf(config.get(Config.TOPOLOGY_RELIABILITY_MODE).toString())
+                        == Config.TopologyReliabilityMode.ATLEAST_ONCE;
     } else {
-      this.ackEnabled = false;
+      // This is strictly for backwards compatiblity
+      if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
+          && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
+        this.ackEnabled =
+              Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
+      } else {
+        this.ackEnabled = false;
+      }
     }
 
     this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);

@@ -165,7 +165,7 @@ public abstract class AbstractTupleRoutingTest {
     conf.setTopologyProjectName("heron-integration-test");
     conf.setNumStmgrs(1);
     conf.setMaxSpoutPending(100);
-    conf.setEnableAcking(false);
+    conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATMOST_ONCE);
 
     TopologyAPI.Topology topology = topologyBuilder.createTopology()
         .setName("topology-name")
