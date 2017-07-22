@@ -230,3 +230,70 @@ java_library(
         "@yahoo_pulsar_client//jar",
     ],
 )
+
+java_library(
+    name = "jetty-jersey-java",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@org_eclipse_jetty_server//jar",
+        "@org_eclipse_jetty_http//jar",
+        "@org_eclipse_jetty_util//jar",
+        "@org_eclipse_jetty_io//jar",
+        "@org_eclipse_jetty_security//jar",
+        "@org_eclipse_jetty_continuation//jar",
+        "@org_eclipse_jetty_servlet//jar",
+        "@org_eclipse_jetty_servlets//jar",
+        "@javax_servlet_api//jar",
+        "@jersey_container_servlet_core//jar",
+        "@jersey_container_servlet//jar",
+        "@jersey_server//jar",
+        "@jersey_client//jar",
+        "@jersey_common//jar",
+        "@jersey_guava//jar",
+        "@jersey_media_jaxb//jar",
+        "@javax_inject//jar",
+        "@javax_annotation//jar",
+        "@javax_validation//jar",
+        "@javax_ws_rs_api//jar",
+        "@hk2_api//jar",
+        "@hk2_utils//jar",
+        "@hk2_locator//jar",
+        "@hk2_aopalliance_repackaged//jar",
+        "@hk2_osgi_resource_locator//jar",
+        "@org_javassit//jar"
+
+    ],
+    deps = [ 
+        "@org_eclipse_jetty_server//jar",
+        "@org_eclipse_jetty_http//jar",
+        "@org_eclipse_jetty_util//jar",
+        "@org_eclipse_jetty_io//jar",
+        "@org_eclipse_jetty_security//jar",
+        "@org_eclipse_jetty_continuation//jar",
+        "@org_eclipse_jetty_servlet//jar",
+        "@org_eclipse_jetty_servlets//jar",
+        "@javax_servlet_api//jar",
+        "@jersey_container_servlet_core//jar",
+        "@jersey_container_servlet//jar",
+        "@jersey_server//jar",
+        "@jersey_client//jar",
+        "@jersey_common//jar",
+        "@jersey_guava//jar",
+        "@jersey_media_jaxb//jar",
+        "@javax_inject//jar",
+        "@javax_annotation//jar",
+        "@javax_validation//jar",
+        "@javax_ws_rs_api//jar",
+        "@hk2_api//jar",
+        "@hk2_utils//jar",
+        "@hk2_locator//jar",
+        "@hk2_aopalliance_repackaged//jar",
+        "@hk2_osgi_resource_locator//jar",
+        "@org_javassit//jar"
+    ],   
+)
+
+
+
+
+

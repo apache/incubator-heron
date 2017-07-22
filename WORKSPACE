@@ -371,3 +371,146 @@ maven_jar(
   artifact = "com.yahoo.pulsar:pulsar-client:jar:shaded:1.18"
 )
 # end Pulsar Client
+
+
+# heron api server
+# jetty
+jetty_version = "9.4.6.v20170531"
+
+maven_jar(
+  name = "org_eclipse_jetty_server",
+  artifact = "org.eclipse.jetty:jetty-server:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_http",
+  artifact = "org.eclipse.jetty:jetty-http:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_util",
+  artifact = "org.eclipse.jetty:jetty-util:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_io",
+  artifact = "org.eclipse.jetty:jetty-io:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_security",
+  artifact = "org.eclipse.jetty:jetty-security:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_servlet",
+  artifact = "org.eclipse.jetty:jetty-servlet:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_servlets",
+  artifact = "org.eclipse.jetty:jetty-servlets:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_continuation",
+  artifact = "org.eclipse.jetty:jetty-continuation:" + jetty_version
+)
+
+maven_jar(
+  name = "javax_servlet_api",
+  artifact = "javax.servlet:javax.servlet-api:3.1.0"
+)
+# end jetty
+
+# jersey
+jersey_verion = "2.25.1"
+
+maven_jar(
+  name = "jersey_container_servlet_core",
+  artifact = "org.glassfish.jersey.containers:jersey-container-servlet-core:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_container_servlet",
+  artifact = "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_server",
+  artifact = "org.glassfish.jersey.core:jersey-server:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_client",
+  artifact = "org.glassfish.jersey.core:jersey-client:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_media_jaxb",
+  artifact = "org.glassfish.jersey.media:jersey-media-jaxb:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_common",
+  artifact = "org.glassfish.jersey.core:jersey-common:jar:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_guava",
+  artifact = "org.glassfish.jersey.bundles.repackaged:jersey-guava:" + jersey_verion
+)
+# end jersey
+
+maven_jar(
+  name = "javax_inject",
+  artifact = "org.glassfish.hk2.external:javax.inject:2.5.0-b32"
+)
+
+maven_jar(
+  name = "javax_annotation",
+  artifact = "javax.annotation:javax.annotation-api:1.2"
+)
+
+maven_jar(
+  name = "javax_validation",
+  artifact = "javax.validation:validation-api:1.1.0.Final"
+)
+
+maven_jar(
+  name = "javax_ws_rs_api",
+  artifact = "javax.ws.rs:javax.ws.rs-api:2.0.1"
+)
+
+hk2_api = "2.5.0-b32"
+
+maven_jar(
+  name = "hk2_api",
+  artifact = "org.glassfish.hk2:hk2-api:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_utils",
+  artifact = "org.glassfish.hk2:hk2-utils:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_aopalliance_repackaged",
+  artifact = "org.glassfish.hk2.external:aopalliance-repackaged:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_locator",
+  artifact = "org.glassfish.hk2:hk2-locator:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_osgi_resource_locator",
+  artifact = "org.glassfish.hk2:osgi-resource-locator:1.0.1"
+)
+
+maven_jar(
+  name = "org_javassit",
+  artifact = "org.javassist:javassist:3.20.0-GA"
+)
+# end heron api server
