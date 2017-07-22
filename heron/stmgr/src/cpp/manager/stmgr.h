@@ -36,6 +36,7 @@ class HeronStateMgr;
 class MetricsMgrSt;
 class MultiAssignableMetric;
 class CountMetric;
+class MultiCountMetric;
 }
 }
 
@@ -220,6 +221,7 @@ class StMgr {
 
   // Stateful Restore metric
   heron::common::CountMetric* restore_initiated_metrics_;
+  heron::common::MultiCountMetric* dropped_during_restore_metrics_;
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;

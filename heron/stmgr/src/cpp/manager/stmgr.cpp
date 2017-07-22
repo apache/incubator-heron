@@ -53,6 +53,8 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
+const sp_string RESTORE_DROPPED_STMGR_BYTES = "__stmgr_dropped_bytes";
+const sp_string RESTORE_DROPPED_INSTANCE_TUPLES = "__instance_dropped_tuples";
 const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
 const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
@@ -103,6 +105,9 @@ void StMgr::Init() {
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   restore_initiated_metrics_ = new heron::common::CountMetric();
   metrics_manager_client_->register_metric("__restore_initiated", restore_initiated_metrics_);
+  dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
+  metrics_manager_client_->register_metric("__dropped_during_restore",
+                                           dropped_during_restore_metrics_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
@@ -175,8 +180,10 @@ void StMgr::Init() {
 StMgr::~StMgr() {
   metrics_manager_client_->unregister_metric("__process");
   metrics_manager_client_->unregister_metric("__restore_initiated");
+  metrics_manager_client_->unregister_metric("__dropped_during_restore");
   delete stmgr_process_metrics_;
   delete restore_initiated_metrics_;
+  delete dropped_during_restore_metrics_;
   delete tuple_cache_;
   delete state_mgr_;
   delete pplan_;
@@ -612,6 +619,8 @@ void StMgr::HandleStreamManagerData(const sp_string&,
                                     proto::stmgr::TupleStreamMessage2* _message) {
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from stmgr because we are in Restore";
+    dropped_during_restore_metrics_->scope(RESTORE_DROPPED_STMGR_BYTES)
+           ->incr_by(_message->set().size());
     __global_protobuf_pool_release__(_message);
     return;
   }
@@ -706,6 +715,8 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from instance " << _src_task_id
               << " because we are in Restore";
+    dropped_during_restore_metrics_->scope(RESTORE_DROPPED_INSTANCE_TUPLES)
+           ->incr_by(_message->data().tuples_size());
     return;
   }
   // Note:- Process data before control
@@ -840,7 +851,7 @@ void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {
   // in case we are not in 2pc
   if (stateful_restorer_) {
     if (!stateful_restorer_->InProgress() && tmaster_client_) {
-      LOG(INFO) << "We lost connection withi stmgr " << _stmgr_id
+      LOG(INFO) << "We lost connection with stmgr " << _stmgr_id
                 << " and hence sending ResetTopology message to tmaster";
       tmaster_client_->SendResetTopologyState(_stmgr_id, -1, "Dead Stmgr");
       restore_initiated_metrics_->incr();
@@ -865,9 +876,11 @@ void StMgr::HandleAllInstancesConnected() {
       // We are in the middle of a restore
       stateful_restorer_->HandleAllInstancesConnected();
     } else if (tmaster_client_ && tmaster_client_->IsConnected()) {
-      LOG(INFO) << "All instances have connected to us and we are already "
-                << "connected to tmaster and we got intimation that All instances connected"
-                << " to us. Sending ResetMessage to tmaster";
+      LOG(INFO) << "We are already connected to tmaster(which means we are not in"
+                << " initial startup), and we are not in the middle of restore."
+                << " This means that while running normally, some instances"
+                << " got reconnected to us and thus we might have lost some tuples in middle"
+                << " We must reset the topology";
       tmaster_client_->SendResetTopologyState("", -1, "All Instances connected");
       restore_initiated_metrics_->incr();
     } else {
@@ -994,7 +1007,7 @@ void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txi
 }
 
 // Called by TmasterClient when it receives directive from tmaster
-// to restore the topology to _checkpoint_id checkpoint
+// to start processing after having previously recovered the state at _checkpoint_id
 void StMgr::StartStatefulProcessing(sp_string _checkpoint_id) {
   LOG(INFO) << "Received StartProcessing message from tmaster for "
             << _checkpoint_id;
