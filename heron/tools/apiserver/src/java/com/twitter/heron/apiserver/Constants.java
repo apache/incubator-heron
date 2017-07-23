@@ -13,7 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver;
 
-public class Constants {
+public final class Constants {
 
   static final int DEFAULT_PORT = 9000;
 

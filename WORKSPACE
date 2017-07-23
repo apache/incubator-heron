@@ -7,6 +7,12 @@ powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 
+# heron api server
+jetty_version = "9.4.6.v20170531"
+jersey_verion = "2.25.1"
+hk2_api = "2.5.0-b32"
+
+
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
@@ -375,8 +381,6 @@ maven_jar(
 
 # heron api server
 # jetty
-jetty_version = "9.4.6.v20170531"
-
 maven_jar(
   name = "org_eclipse_jetty_server",
   artifact = "org.eclipse.jetty:jetty-server:" + jetty_version
@@ -424,8 +428,6 @@ maven_jar(
 # end jetty
 
 # jersey
-jersey_verion = "2.25.1"
-
 maven_jar(
   name = "jersey_container_servlet_core",
   artifact = "org.glassfish.jersey.containers:jersey-container-servlet-core:" + jersey_verion
@@ -481,8 +483,6 @@ maven_jar(
   name = "javax_ws_rs_api",
   artifact = "javax.ws.rs:javax.ws.rs-api:2.0.1"
 )
-
-hk2_api = "2.5.0-b32"
 
 maven_jar(
   name = "hk2_api",

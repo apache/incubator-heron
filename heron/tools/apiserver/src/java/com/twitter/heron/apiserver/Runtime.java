@@ -28,12 +28,12 @@ public final class Runtime {
 
   private static final String API_BASE_PATH = "/api/v1/*";
 
-  private Runtime() {}
+  private Runtime() {
+  }
 
   public static void main(String[] args) throws Exception {
     final ResourceConfig config = new ResourceConfig(Resources.get());
     final Server server = new Server(Constants.DEFAULT_PORT);
-
 
     final ServletContextHandler contextHandler =
         new ServletContextHandler(ServletContextHandler.NO_SESSIONS);

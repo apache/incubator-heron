@@ -21,7 +21,10 @@ import java.util.Set;
 import com.twitter.heron.apiserver.resources.NotFoundExceptionHandler;
 import com.twitter.heron.apiserver.resources.TopologyResource;
 
-public class Resources {
+public final class Resources {
+
+  private Resources() {
+  }
 
   static Set<Class<?>> get() {
     return new HashSet<>(getClasses());
