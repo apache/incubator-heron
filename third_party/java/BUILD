@@ -219,3 +219,14 @@ java_library(
         "@org_apache_httpcomponents_http_core//jar",
     ],
 )
+
+java_library(
+    name = "yahoo-pulsar-client",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@yahoo_pulsar_client//jar" 
+    ],
+    deps = [ 
+        "@yahoo_pulsar_client//jar",
+    ],
+)

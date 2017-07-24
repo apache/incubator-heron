@@ -24,16 +24,5 @@ public interface HealthMgrConstants {
 
   String COMPONENT_STMGR = "__stmgr__";
 
-  String CONF_TRACKER_URL = "TRACKER_URL";
   String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
-  String CONF_CLUSTER = "CLUSTER";
-  String CONF_ENVIRON = "ENVIRON";
-
-  // health policy configuration related keys
-  String CONF_FILE_NAME = "healthmgr.yaml";
-  String HEALTH_POLICIES = "heron.class.health.policies";
-  String HEALTH_POLICY_CLASS = "health.policy.class";
-  String HEALTH_POLICY_INTERVAL = "health.policy.interval.ms";
-
-  void getType();
 }

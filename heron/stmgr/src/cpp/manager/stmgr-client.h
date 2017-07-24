@@ -43,9 +43,12 @@ class StMgrClient : public Client {
 
   void Quit();
 
-  void SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
+  // Return true if successful in sending the message. false otherwise
+  bool SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
   void SendStartBackPressureMessage();
   void SendStopBackPressureMessage();
+  void SendDownstreamStatefulCheckpoint(proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+  bool IsRegistered() const { return is_registered_; }
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);
@@ -78,6 +81,9 @@ class StMgrClient : public Client {
 
   // Counters
   sp_int64 ndropped_messages_;
+
+  // Have we registered ourselves
+  bool is_registered_;
 };
 
 }  // namespace stmgr

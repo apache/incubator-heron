@@ -77,7 +77,8 @@ class SlidingWindowBolt(Bolt):
   def _expire(self, tm):
     while len(self.current_tuples) > 0:
       if tm - self.window_duration > self.current_tuples[0][1]:
-        self.current_tuples.popleft()
+        (tup, _) = self.current_tuples.popleft()
+        self.ack(tup)
       else:
         break
 
@@ -147,4 +148,6 @@ class TumblingWindowBolt(Bolt):
     curtime = int(time.time())
     window_info = WindowContext(curtime - self.window_duration, curtime)
     self.processWindow(window_info, list(self.current_tuples))
+    for tup in self.current_tuples:
+      self.ack(tup)
     self.current_tuples.clear()

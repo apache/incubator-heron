@@ -66,7 +66,7 @@ def heron_client_lib_uploader_files():
 
 def heron_client_lib_healthmgr_files():
     return [
-        "//heron/healthm/src/java:heron-healthmgr",
+        "//heron/healthmgr/src/java:heron-healthmgr",
     ]
 
 def heron_client_lib_third_party_files():

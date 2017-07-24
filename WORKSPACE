@@ -428,10 +428,10 @@ maven_jar(
   artifact = "com.101tec:zkclient:0.3"
 )
 
-http_jar(
-  name = "com_microsoft_dhalion",
-  url = "https://github.com/Microsoft/Dhalion/releases/download/0.0.1/dhalion-0.0.1.jar",
-)
+#http_jar(
+#  name = "com_microsoft_dhalion",
+#  url = "https://github.com/Microsoft/Dhalion/releases/download/0.0.1_2/dhalion-0.0.1_2.jar",
+#)
 
 # Google Cloud
 maven_jar(
@@ -459,3 +459,10 @@ maven_jar(
   artifact = "com.google.oauth-client:google-oauth-client:" + google_client_version
 )
 # end Google Cloud
+
+# Pulsar Client
+maven_jar(
+  name = "yahoo_pulsar_client",
+  artifact = "com.yahoo.pulsar:pulsar-client:jar:shaded:1.18"
+)
+# end Pulsar Client

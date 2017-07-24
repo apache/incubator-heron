@@ -301,8 +301,8 @@ public class AuroraSchedulerTest {
         case JAVA_HOME:
           expected = "/usr/lib/jvm/default-java";
           break;
-        case IS_PRODUCTION:
-          expected = Boolean.FALSE.toString();
+        case TIER:
+          expected = "preemptible";
           break;
         case NUM_CONTAINERS:
           expected = "2";

@@ -19,6 +19,7 @@
 
 #include <list>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -45,6 +46,8 @@ class TMasterClient;
 class StreamConsumers;
 class XorManager;
 class TupleCache;
+class NeighbourCalculator;
+class CkptMgrClient;
 
 class StMgr {
  public:
@@ -53,6 +56,7 @@ class StMgr {
         proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
         const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+        sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
         sp_int64 _high_watermark, sp_int64 _low_watermark);
   virtual ~StMgr();
 
@@ -62,9 +66,13 @@ class StMgr {
   // Called by tmaster client when a new physical plan is available
   void NewPhysicalPlan(proto::system::PhysicalPlan* pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
-                               const proto::stmgr::TupleStreamMessage2& _message);
+                               proto::stmgr::TupleStreamMessage2* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::system::HeronTupleSet* _message);
+  // Called when an instance does checkpoint and sends its checkpoint
+  // to the stmgr to save it
+  void HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint& _message,
+                                          const proto::system::Instance& _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
@@ -78,6 +86,19 @@ class StMgr {
   void SendStopBackPressureToOtherStMgrs();
   void StartTMasterClient();
   bool DidAnnounceBackPressure();
+  void HandleDeadStMgrConnection(const sp_string& _stmgr);
+  void HandleAllStMgrClientsRegistered();
+  void HandleDeadInstance(sp_int32 _task_id);
+  void HandleAllInstancesConnected();
+  void HandleCkptMgrRegistration();
+
+  // Handle checkpoint message coming from an upstream task to a downstream task
+  void HandleDownStreamStatefulCheckpoint(
+                                const proto::ckptmgr::DownstreamStatefulCheckpoint& _message);
+
+  // Handle RestoreInstanceStateResponse message from local instance
+  void HandleRestoreInstanceStateResponse(sp_int32 _task_id, const proto::system::Status& _status,
+                                          const std::string& _checkpoint_id);
 
  private:
   void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
@@ -88,6 +109,16 @@ class StMgr {
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
   void CheckTMasterLocation(EventLoop::Status);
   void UpdateProcessMetrics(EventLoop::Status);
+
+  // Utility function to create checkpoint mgr client
+  void CreateCheckpointMgrClient();
+  // Called when ckpt mgr saves the state of an instance
+  void HandleSavedInstanceState(const proto::system::Instance& _instance,
+                                const std::string& _checkpoint_id);
+  // Called when ckpt mgr reteives the state of an instance
+  void HandleGetInstanceState(proto::system::StatusCode _status, sp_int32 _task_id,
+                              sp_string _checkpoint_id,
+                              const proto::ckptmgr::InstanceStateCheckpoint& _msg);
 
   void CleanupStreamConsumers();
   void PopulateStreamConsumers(
@@ -120,6 +151,20 @@ class StMgr {
   void BroadcastTmasterLocation(proto::tmaster::TMasterLocation* tmasterLocation);
   void BroadcastMetricsCacheLocation(proto::tmaster::MetricsCacheLocation* tmasterLocation);
 
+  // Called when TMaster sends a InitiateStatefulCheckpoint message with a checkpoint_id
+  // This will send intiate checkpoint messages to local instances to capture their state.
+  void InitiateStatefulCheckpoint(sp_string checkpoint_id);
+
+  // Invoked when TMaster asks us to restore all our local instances state to
+  // the checkpoint represented by _checkpoint_id. This starts the
+  // Restore state machine
+  void RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid);
+
+  // Invoked when TMaster sends the StartStatefulProcessing request to kick
+  // start the computation. We send the StartStatefulProcessing to all our
+  // local instances so that they can start the processing.
+  void StartStatefulProcessing(sp_string _checkpoint_id);
+
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;
@@ -144,6 +189,8 @@ class StMgr {
   XorManager* xor_mgrs_;
   // Tuple Cache to optimize message building
   TupleCache* tuple_cache_;
+  // Neighbour Calculator for stateful processing
+  NeighbourCalculator* neighbour_calculator_;
 
   // This is the topology structure
   // that contains the full component objects
@@ -151,6 +198,9 @@ class StMgr {
 
   // Metrics Manager
   heron::common::MetricsMgrSt* metrics_manager_client_;
+
+  // Checkpoint Manager
+  CkptMgrClient* ckptmgr_client_;
 
   // Process related metrics
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;
@@ -161,15 +211,13 @@ class StMgr {
   sp_string zkroot_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
+  sp_int32 ckptmgr_port_;
+  sp_string ckptmgr_id_;
 
-  proto::system::HeronTupleSet2 current_control_tuple_set_;
   std::vector<sp_int32> out_tasks_;
 
   bool is_acking_enabled;
-
-  proto::system::HeronTupleSet2* tuple_set_from_other_stmgr_;
-
-  sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
+  bool is_stateful_;
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;

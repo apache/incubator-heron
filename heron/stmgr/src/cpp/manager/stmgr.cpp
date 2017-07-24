@@ -29,6 +29,7 @@
 #include "manager/stream-consumers.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
+#include "basics/mempool.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
@@ -38,8 +39,10 @@
 #include "metrics/metrics.h"
 #include "metrics/metrics-mgr-st.h"
 #include "util/xor-manager.h"
+#include "util/neighbour-calculator.h"
 #include "manager/tmaster-client.h"
 #include "util/tuple-cache.h"
+#include "manager/ckptmgr-client.h"
 
 namespace heron {
 namespace stmgr {
@@ -57,6 +60,7 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
              proto::api::Topology* _hydrated_topology, const sp_string& _stmgr_id,
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
              const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
+             sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
              sp_int64 _high_watermark, sp_int64 _low_watermark)
 
     : pplan_(NULL),
@@ -78,6 +82,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
       zkroot_(_zkroot),
       metricsmgr_port_(_metricsmgr_port),
       shell_port_(_shell_port),
+      ckptmgr_port_(_ckptmgr_port),
+      ckptmgr_id_(_ckptmgr_id),
       high_watermark_(_high_watermark),
       low_watermark_(_low_watermark) {}
 
@@ -85,7 +91,9 @@ void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
   sp_int32 metrics_export_interval_sec =
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
-
+  __global_protobuf_pool_set_pool_max_number_of_messages__(
+    heron::config::HeronInternalsConfigReader::Instance()
+      ->GetHeronStreammgrMempoolMaxMessageNumber());
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
@@ -95,6 +103,22 @@ void StMgr::Init() {
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
+
+  is_stateful_ = heron::config::TopologyConfigHelper::IsTopologyStateful(*hydrated_topology_);
+  if (is_stateful_) {
+    // Start checkpoint manager client
+    CreateCheckpointMgrClient();
+  } else {
+    ckptmgr_client_ = nullptr;
+  }
+
+  // Create the client manager
+  clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
+                                  metrics_manager_client_, high_watermark_, low_watermark_);
+
+  // Create and Register Tuple cache
+  CreateTupleCache();
+
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
@@ -105,10 +129,11 @@ void StMgr::Init() {
               1_s),
       0);  // fire only once
 
+  // Instantiate neighbour calculator. Required by stmgr server
+  neighbour_calculator_ = new NeighbourCalculator();
+
   // Create and start StmgrServer
   StartStmgrServer();
-  // Create and Register Tuple cache
-  CreateTupleCache();
 
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
@@ -131,8 +156,6 @@ void StMgr::Init() {
 
   is_acking_enabled =
     heron::config::TopologyConfigHelper::IsAckingEnabled(*hydrated_topology_);
-
-  tuple_set_from_other_stmgr_ = new proto::system::HeronTupleSet2();
 }
 
 StMgr::~StMgr() {
@@ -147,9 +170,10 @@ StMgr::~StMgr() {
   CleanupStreamConsumers();
   CleanupXorManagers();
   delete hydrated_topology_;
+  delete ckptmgr_client_;
   delete metrics_manager_client_;
 
-  delete tuple_set_from_other_stmgr_;
+  delete neighbour_calculator_;
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
@@ -214,10 +238,30 @@ void StMgr::StartStmgrServer() {
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
   server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
-                            this, metrics_manager_client_);
+                            this, metrics_manager_client_, neighbour_calculator_);
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
+}
+
+void StMgr::CreateCheckpointMgrClient() {
+  LOG(INFO) << "Creating CheckpointMgr Client at " << stmgr_host_ << ":" << ckptmgr_port_;
+  NetworkOptions client_options;
+  client_options.set_host("localhost");
+  client_options.set_port(ckptmgr_port_);
+  client_options.set_socket_family(PF_INET);
+  client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
+  auto save_watcher = std::bind(&StMgr::HandleSavedInstanceState, this,
+                           std::placeholders::_1, std::placeholders::_2);
+  auto get_watcher = std::bind(&StMgr::HandleGetInstanceState, this,
+                           std::placeholders::_1, std::placeholders::_2,
+                           std::placeholders::_3, std::placeholders::_4);
+  auto ckpt_watcher = std::bind(&StMgr::HandleCkptMgrRegistration, this);
+  ckptmgr_client_ = new CkptMgrClient(eventLoop_, client_options,
+                                      topology_name_, topology_id_,
+                                      ckptmgr_id_, stmgr_id_,
+                                      save_watcher, get_watcher, ckpt_watcher);
+  ckptmgr_client_->Start();
 }
 
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
@@ -235,9 +279,24 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   master_options.set_high_watermark(high_watermark_);
   master_options.set_low_watermark(low_watermark_);
   auto pplan_watch = [this](proto::system::PhysicalPlan* pplan) { this->NewPhysicalPlan(pplan); };
+  auto stateful_checkpoint_watch =
+       [this](sp_string checkpoint_id) {
+    this->InitiateStatefulCheckpoint(checkpoint_id);
+  };
+  auto restore_topology_watch =
+       [this](sp_string checkpoint_id, sp_int64 restore_txid) {
+    this->RestoreTopologyState(checkpoint_id, restore_txid);
+  };
+  auto start_stateful_watch =
+       [this](sp_string checkpoint_id) {
+    this->StartStatefulProcessing(checkpoint_id);
+  };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_host_,
-                                      stmgr_port_, shell_port_, std::move(pplan_watch));
+                                      stmgr_port_, shell_port_, std::move(pplan_watch),
+                                      std::move(stateful_checkpoint_watch),
+                                      std::move(restore_topology_watch),
+                                      std::move(start_stateful_watch));
 }
 
 void StMgr::CreateTupleCache() {
@@ -266,13 +325,6 @@ void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation
   // connected to all of the instances
   if (server_ && server_->HaveAllInstancesConnectedToUs()) {
     StartTMasterClient();
-  }
-
-  // TODO(vikasr): See if the the creation of StMgrClientMgr can be done
-  // in the constructor rather than here.
-  if (!clientmgr_) {
-    clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
-                                    metrics_manager_client_, high_watermark_, low_watermark_);
   }
 }
 
@@ -445,7 +497,8 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
 
   delete pplan_;
   pplan_ = _pplan;
-  clientmgr_->NewPhysicalPlan(pplan_);
+  neighbour_calculator_->Reconstruct(*pplan_);
+  clientmgr_->StartConnections(pplan_);
   server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 
@@ -533,35 +586,38 @@ void StMgr::PopulateXorManagers(
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
 void StMgr::HandleStreamManagerData(const sp_string&,
-                                    const proto::stmgr::TupleStreamMessage2& _message) {
+                                    proto::stmgr::TupleStreamMessage2* _message) {
   // We received message from another stream manager
-  sp_int32 _task_id = _message.task_id();
+  sp_int32 _task_id = _message->task_id();
 
   // We have a shortcut for non-acking case
   if (!is_acking_enabled) {
-    server_->SendToInstance2(_task_id, _message.set().size(),
-                             heron_tuple_set_2_, _message.set().c_str());
+    server_->SendToInstance2(_message);
   } else {
-    tuple_set_from_other_stmgr_->ParsePartialFromString(_message.set());
-
-    SendInBound(_task_id, tuple_set_from_other_stmgr_);
+    proto::system::HeronTupleSet2* tuple_set = nullptr;
+    tuple_set = __global_protobuf_pool_acquire__(tuple_set);
+    tuple_set->ParsePartialFromString(_message->set());
+    SendInBound(_task_id, tuple_set);
+    __global_protobuf_pool_release__(_message);
   }
 }
 
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   if (_message->has_data()) {
-    server_->SendToInstance2(_task_id, *_message);
+    server_->SendToInstance2(_task_id, _message);
   }
   if (_message->has_control()) {
     // We got a bunch of acks/fails
     ProcessAcksAndFails(_message->src_task_id(), _task_id, _message->control());
+    __global_protobuf_pool_release__(_message);
   }
 }
 
 void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
                                 const proto::system::HeronControlTupleSet& _control) {
-  current_control_tuple_set_.Clear();
-  current_control_tuple_set_.set_src_task_id(_src_task_id);
+  proto::system::HeronTupleSet2* current_control_tuple_set = nullptr;
+  current_control_tuple_set = __global_protobuf_pool_acquire__(current_control_tuple_set);
+  current_control_tuple_set->set_src_task_id(_src_task_id);
 
   // First go over emits. This makes sure that new emits makes
   // a tuples stay alive before we process its acks
@@ -581,7 +637,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
       if (xor_mgrs_->anchor(_task_id, ack_tuple.roots(j).key(), ack_tuple.ackedtuple())) {
         // This tuple tree is all over
         proto::system::AckTuple* a;
-        a = current_control_tuple_set_.mutable_control()->add_acks();
+        a = current_control_tuple_set->mutable_control()->add_acks();
         proto::system::RootId* r = a->add_roots();
         r->set_key(ack_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -599,7 +655,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
       if (xor_mgrs_->remove(_task_id, fail_tuple.roots(j).key())) {
         // This tuple tree is failed
         proto::system::AckTuple* f;
-        f = current_control_tuple_set_.mutable_control()->add_fails();
+        f = current_control_tuple_set->mutable_control()->add_fails();
         proto::system::RootId* r = f->add_roots();
         r->set_key(fail_tuple.roots(j).key());
         r->set_taskid(_task_id);
@@ -609,8 +665,10 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
   }
 
   // Check if we need to send this out
-  if (current_control_tuple_set_.has_control()) {
-    server_->SendToInstance2(_task_id, current_control_tuple_set_);
+  if (current_control_tuple_set->has_control()) {
+    server_->SendToInstance2(_task_id, current_control_tuple_set);
+  } else {
+    __global_protobuf_pool_release__(current_control_tuple_set);
   }
 }
 
@@ -670,9 +728,8 @@ void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* 
     SendInBound(_task_id, _tuple);
   } else {
     clientmgr_->SendTupleStreamMessage(_task_id, dest_stmgr_id, *_tuple);
+    __global_protobuf_pool_release__(_tuple);
   }
-
-  __global_protobuf_pool_release__(_tuple);
 }
 
 void StMgr::CopyControlOutBound(sp_int32 _src_task_id,
@@ -737,5 +794,91 @@ void StMgr::SendStartBackPressureToOtherStMgrs() {
 
 void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
 
+// Do any actions if a stmgr client connection dies
+void StMgr::HandleDeadStMgrConnection(const sp_string&) {
+  // TODO(srkukarni) For Stateful Topologies, we need to do a restore
+}
+
+void StMgr::HandleAllStMgrClientsRegistered() {
+  // If we are stateful topology, we might want to continue our restore process
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleAllInstancesConnected() {
+  // Now we can connect to the tmaster
+  StartTMasterClient();
+}
+
+void StMgr::HandleDeadInstance(sp_int32 _task_id) {
+  // If we are stateful topology, we might want to take some actions like
+  // asking tmaster to start recovery
+  // TODO(srkukarni) Complete this
+}
+
+// Invoked by the CheckpointMgr Client when it gets registered to
+// the ckptmgr.
+void StMgr::HandleCkptMgrRegistration() {
+  // TODO(srkukarni) Complete this
+}
+
+// Initiate the process of stateful checkpointing
+void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
+  // We should start sending checkpoint messages to our local instances
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint&,
+                                               const proto::system::Instance&) {
+  // If we are stateful topology, we might want to take some actions like
+  // sending this to ckptmgr for actually saving and propagating markers
+  // to downstream tasks
+  // TODO(srkukarni) Complete this
+}
+
+// Invoked by CheckpointMgr Client when it finds out that the ckptmgr
+// saved the state of an instance
+void StMgr::HandleSavedInstanceState(const proto::system::Instance& _instance,
+                                     const std::string& _checkpoint_id) {
+  LOG(INFO) << "Got notification from ckptmgr that we saved instance state for task "
+            << _instance.info().task_id() << " for checkpoint "
+            << _checkpoint_id;
+  tmaster_client_->SavedInstanceState(_instance, _checkpoint_id);
+}
+
+// Invoked by CheckpointMgr Client when it retreives the state of an instance
+void StMgr::HandleGetInstanceState(proto::system::StatusCode _status, sp_int32 _task_id,
+                                   sp_string _checkpoint_id,
+                                   const proto::ckptmgr::InstanceStateCheckpoint& _msg) {
+  // TODO(srkukarni) Complete this
+}
+
+
+void StMgr::HandleRestoreInstanceStateResponse(sp_int32,
+                                               const proto::system::Status&,
+                                               const std::string&) {
+  // If we are stateful topology, we might want to see how the restore went
+  // and if it was successful and all other local instances have recovered
+  // send back a success response to tmaster saying that we have recovered
+  // TODO(srkukarni) Complete this
+}
+
+void StMgr::HandleDownStreamStatefulCheckpoint(
+            const proto::ckptmgr::DownstreamStatefulCheckpoint& _message) {
+  server_->HandleCheckpointMarker(_message.origin_task_id(),
+                                  _message.destination_task_id(),
+                                  _message.checkpoint_id());
+}
+
+// Called by TmasterClient when it receives directive from tmaster
+// to restore the topology to _checkpoint_id checkpoint
+void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid) {
+  // TODO(srkukarni) Complete this
+}
+
+// Called by TmasterClient when it receives directive from tmaster
+// to restore the topology to _checkpoint_id checkpoint
+void StMgr::StartStatefulProcessing(sp_string _checkpoint_id) {
+  // TODO(srkukarni) Complete this
+}
 }  // namespace stmgr
 }  // namespace heron
