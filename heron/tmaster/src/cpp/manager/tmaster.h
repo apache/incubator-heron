@@ -65,6 +65,9 @@ class TMaster {
   // When stmgr disconnects from us
   proto::system::StatusCode RemoveStMgrConnection(Connection* _conn);
 
+  // Called by http server upon receiving a user message to cleanup the state
+  void CleanAllStatefulCheckpoint();
+
   // Get stream managers registration summary
   proto::tmaster::StmgrsRegistrationSummaryResponse* GetStmgrsRegSummary();
 
