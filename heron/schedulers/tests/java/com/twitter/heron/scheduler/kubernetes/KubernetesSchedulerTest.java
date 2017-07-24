@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,14 +24,18 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class KubernetesSchedulerTest {
   private static final String[] TOPOLOGY_CONF = {"topology_conf"};
@@ -40,6 +45,9 @@ public class KubernetesSchedulerTest {
   private static final String[] EXECUTOR_CMD = {"executor_cmd"};
 
   private static KubernetesScheduler scheduler;
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
@@ -136,6 +144,49 @@ public class KubernetesSchedulerTest {
     Mockito.doReturn(true).when(controller).killTopology();
     Assert.assertTrue(scheduler.onKill(Mockito.any(Scheduler.KillTopologyRequest.class)));
     Mockito.verify(controller, Mockito.times(2)).killTopology();
+  }
+
+  @Test
+  public void testAddContainers() throws Exception {
+    KubernetesController controller = Mockito.mock(KubernetesController.class);
+    Mockito.doReturn(controller).when(scheduler).getController();
+    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+
+    // Fail to retrieve base pod
+    Mockito.doThrow(new IOException()).when(controller).getBasePod(Mockito.anyString());
+    exception.expect(TopologyRuntimeManagementException.class);
+    scheduler.addContainers(containers);
+
+    // Failure to deploy a container
+    Mockito.doReturn(Mockito.anyString()).when(controller).getBasePod(Mockito.anyString());
+    Mockito.doThrow(new IOException()).when(controller).deployContainer(Mockito.anyString());
+    exception.expect(TopologyRuntimeManagementException.class);
+    scheduler.addContainers(containers);
+
+    // Successful deployment
+    Mockito.doReturn(Mockito.anyString()).when(controller).getBasePod(Mockito.anyString());
+    Mockito.doNothing().when(controller).deployContainer(Mockito.anyString());
+    scheduler.addContainers(containers);
+
+  }
+
+  @Test
+  public void testRemoveContainers() throws Exception {
+    KubernetesController controller = Mockito.mock(KubernetesController.class);
+    Mockito.doReturn(controller).when(scheduler).getController();
+    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(PackingTestUtils.testContainerPlan(0));
+
+    // Failure to remove container
+    Mockito.doThrow(new IOException()).when(controller).removeContainer(Mockito.anyString());
+    exception.expect(TopologyRuntimeManagementException.class);
+    scheduler.removeContainers(containers);
+
+    // Successful removal
+    Mockito.doNothing().when(controller).removeContainer(Mockito.anyString());
+    scheduler.removeContainers(containers);
   }
 
   @Test

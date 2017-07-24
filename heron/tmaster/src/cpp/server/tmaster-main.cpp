@@ -26,11 +26,11 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 13) {
+  if (argc != 12) {
     std::cout << "Usage: " << argv[0] << " "
               << "<master-host> <master-port> <controller-port> <stats-port> "
               << "<topology_name> <topology_id> <zk_hostportlist> "
-              << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
+              << "<topdir> <heron_internals_config_filename> "
               << "<metrics_sinks_filename> <metrics-manager-port>" << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
@@ -47,10 +47,9 @@ int main(int argc, char* argv[]) {
     zkhostportlist = "";
   }
   sp_string topdir = argv[8];
-  std::vector<std::string> stmgrs = StrUtils::split(argv[9], ",");
-  sp_string heron_internals_config_filename = argv[10];
-  sp_string metrics_sinks_yaml = argv[11];
-  sp_int32 metrics_manager_port = atoi(argv[12]);
+  sp_string heron_internals_config_filename = argv[9];
+  sp_string metrics_sinks_yaml = argv[10];
+  sp_int32 metrics_manager_port = atoi(argv[11]);
 
   EventLoopImpl ss;
 
@@ -61,10 +60,10 @@ int main(int argc, char* argv[]) {
   heron::common::Initialize(argv[0], topology_id.c_str());
 
   LOG(INFO) << "Starting tmaster for topology " << topology_name << " with topology id "
-            << topology_id << " zkhostport " << zkhostportlist << " zkroot " << topdir
-            << " and nstmgrs " << stmgrs.size() << std::endl;
+            << topology_id << " zkhostport " << zkhostportlist << " and zkroot " << topdir
+            << std::endl;
 
-  heron::tmaster::TMaster tmaster(zkhostportlist, topology_name, topology_id, topdir, stmgrs,
+  heron::tmaster::TMaster tmaster(zkhostportlist, topology_name, topology_id, topdir,
                                   controller_port, master_port, stats_port, metrics_manager_port,
                                   metrics_sinks_yaml, myhost, &ss);
   ss.loop();

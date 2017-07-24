@@ -14,7 +14,7 @@
 """module for example spout: WordSpout"""
 
 from itertools import cycle
-from heron.pyheron.src.python import Spout
+from heron.api.src.python import Spout
 
 class WordSpout(Spout):
   """WordSpout: emits a set of words repeatedly"""

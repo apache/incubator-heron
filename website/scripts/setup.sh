@@ -8,7 +8,7 @@ if [ $PLATFORM = darwin ]; then
   brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
   nvm install node
   curl -L https://www.npmjs.com/install.sh | sh
-  brew list hugo || brew install hugo
+  go get -v github.com/gohugoio/hugo
   which wget || brew install wget
 elif [ $PLATFORM = ubuntu ]; then
   sudo apt-get install golang git mercurial -y
@@ -26,4 +26,4 @@ fi
 
 npm install
 sudo -H pip uninstall -y pygments
-sudo -H pip install pygments==2.1.3
+sudo -H pip install pygments==2.1.3 pdoc==0.3.2

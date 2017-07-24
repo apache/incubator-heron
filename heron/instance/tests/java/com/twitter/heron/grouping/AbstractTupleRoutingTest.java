@@ -25,7 +25,7 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.network.HeronServerTester;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
@@ -165,7 +165,7 @@ public abstract class AbstractTupleRoutingTest {
     conf.setTopologyProjectName("heron-integration-test");
     conf.setNumStmgrs(1);
     conf.setMaxSpoutPending(100);
-    conf.setEnableAcking(false);
+    conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATMOST_ONCE);
 
     TopologyAPI.Topology topology = topologyBuilder.createTopology()
         .setName("topology-name")

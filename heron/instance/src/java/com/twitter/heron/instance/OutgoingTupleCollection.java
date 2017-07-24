@@ -19,6 +19,7 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -30,7 +31,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * In fact, when talking about to send out tuples, we mean we push them to the out queues.
  */
 public class OutgoingTupleCollection {
-  protected final String componentName;
+  protected PhysicalPlanHelper helper;
   // We have just one outQueue responsible for both control tuples and data tuples
   private final Communicator<HeronTuples.HeronTupleSet> outQueue;
 
@@ -49,10 +50,10 @@ public class OutgoingTupleCollection {
   private long currentDataTupleSizeInBytes;
 
   public OutgoingTupleCollection(
-      String componentName,
+      PhysicalPlanHelper helper,
       Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
-    this.componentName = componentName;
+    this.helper = helper;
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
@@ -118,7 +119,7 @@ public class OutgoingTupleCollection {
 
     TopologyAPI.StreamId.Builder sbldr = TopologyAPI.StreamId.newBuilder();
     sbldr.setId(streamId);
-    sbldr.setComponentName(componentName);
+    sbldr.setComponentName(helper.getMyComponent());
     currentDataTuple = HeronTuples.HeronDataTupleSet.newBuilder();
     currentDataTuple.setStream(sbldr);
   }
@@ -131,6 +132,7 @@ public class OutgoingTupleCollection {
   private void flushRemaining() {
     if (currentDataTuple != null) {
       HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+      bldr.setSrcTaskId(helper.getMyTaskId());
       bldr.setData(currentDataTuple);
 
       pushTupleToQueue(bldr, outQueue);
@@ -139,7 +141,9 @@ public class OutgoingTupleCollection {
     }
     if (currentControlTuple != null) {
       HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+      bldr.setSrcTaskId(helper.getMyTaskId());
       bldr.setControl(currentControlTuple);
+
       pushTupleToQueue(bldr, outQueue);
 
       currentControlTuple = null;
@@ -167,5 +171,9 @@ public class OutgoingTupleCollection {
     currentDataTuple = null;
 
     outQueue.clear();
+  }
+
+  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+    this.helper = physicalPlanHelper;
   }
 }

@@ -1,1 +1,5 @@
+# Generated artifacts for the website
 package-lock.json
+node_modules/
+public/
+static/

@@ -128,14 +128,84 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   return topology;
 }
 
+static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgrs_, int num_spouts,
+    int num_spout_instances, int num_bolts, int num_bolt_instances) {
+  size_t spouts_size = num_spout_instances;
+  size_t bolts_size = num_bolt_instances;
+
+  heron::proto::system::Resource* instanceResource = new heron::proto::system::Resource();
+  instanceResource->set_ram(1);
+  instanceResource->set_cpu(1);
+  instanceResource->set_disk(1);
+
+  heron::proto::system::Resource* containerRequiredResource = new heron::proto::system::Resource();
+  containerRequiredResource->set_ram(10);
+  containerRequiredResource->set_cpu(10);
+  containerRequiredResource->set_disk(10);
+
+  sp_int32 task_id = 0;
+  sp_int32 component_index = 0;
+  sp_int32 container_index = 0;
+
+  heron::proto::system::PackingPlan* packingPlan = new heron::proto::system::PackingPlan();
+  packingPlan->set_id("dummy_packing_plan_id");
+
+  std::map<size_t, heron::proto::system::ContainerPlan*> container_map_;
+  for (size_t i = 0; i < num_stmgrs_; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = packingPlan->add_container_plans();
+    containerPlan->set_id(i);
+    heron::proto::system::Resource* requiredResource = containerPlan->mutable_requiredresource();
+    requiredResource->set_cpu(containerRequiredResource->cpu());
+    requiredResource->set_ram(containerRequiredResource->ram());
+    requiredResource->set_disk(containerRequiredResource->disk());
+    container_map_[i] = containerPlan;
+  }
+
+  // Set spouts
+  for (size_t i = 0; i < spouts_size; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = container_map_[container_index];
+    heron::proto::system::InstancePlan* instancePlan = containerPlan->add_instance_plans();
+    instancePlan->set_component_name("spout_x");
+    instancePlan->set_task_id(task_id++);
+    instancePlan->set_component_index(component_index++);
+    heron::proto::system::Resource* resource = instancePlan->mutable_resource();
+    resource->set_cpu(instanceResource->cpu());
+    resource->set_ram(instanceResource->ram());
+    resource->set_disk(instanceResource->disk());
+    if (++container_index == num_stmgrs_) {
+      container_index = 0;
+    }
+  }
+
+  // Set bolts
+  component_index = 0;
+  for (size_t i = 0; i < bolts_size; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = container_map_[container_index];
+    heron::proto::system::InstancePlan* instancePlan = containerPlan->add_instance_plans();
+    instancePlan->set_component_name("bolt_x");
+    instancePlan->set_task_id(task_id++);
+    instancePlan->set_component_index(component_index++);
+    heron::proto::system::Resource* resource = instancePlan->mutable_resource();
+    resource->set_cpu(instanceResource->cpu());
+    resource->set_ram(instanceResource->ram());
+    resource->set_disk(instanceResource->disk());
+    if (++container_index == num_stmgrs_) {
+      container_index = 0;
+    }
+  }
+
+  return packingPlan;
+}
+
 // Method to create the local zk state on the filesystem
-void CreateLocalStateOnFS(heron::proto::api::Topology* topology, sp_string dpath) {
+void CreateLocalStateOnFS(heron::proto::api::Topology* topology,
+                          heron::proto::system::PackingPlan* packingPlan, sp_string dpath) {
   EventLoopImpl ss;
 
-  // Write the dummy topology/tmaster location out to the local file system
-  // via thestate mgr
+  // Write the dummy topology/tmaster location out to the local file system via the state mgr
   heron::common::HeronLocalFileStateMgr state_mgr(dpath, &ss);
   state_mgr.CreateTopology(*topology, NULL);
+  state_mgr.CreatePackingPlan(topology->name(), *packingPlan, NULL);
 }
 
 const sp_string CreateInstanceId(sp_int8 type, sp_int8 instance, bool spout) {
@@ -154,7 +224,7 @@ heron::proto::system::Instance* CreateInstanceMap(sp_int8 type, sp_int8 instance
   heron::proto::system::Instance* imap = new heron::proto::system::Instance();
   imap->set_instance_id(CreateInstanceId(type, instance, spout));
 
-  imap->set_stmgr_id(STMGR_NAME + std::to_string(stmgr_id));
+  imap->set_stmgr_id(STMGR_NAME + "-" + std::to_string(stmgr_id));
   heron::proto::system::InstanceInfo* inst = imap->mutable_info();
   inst->set_task_id(global_index);
   inst->set_component_index(instance);
@@ -183,12 +253,11 @@ void StartServer(EventLoopImpl* ss) {
 void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
-                  const sp_string& dpath, const std::vector<sp_string>& stmgrs_id_list,
+                  const sp_string& dpath,
                   sp_int32 tmaster_port, sp_int32 tmaster_controller_port,
                   sp_int32 tmaster_stats_port, sp_int32 metrics_mgr_port) {
   ss = new EventLoopImpl();
-  tmaster =
-      new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath, stmgrs_id_list,
+  tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, tmaster_stats_port,
                                   metrics_mgr_port, metrics_sinks_config_filename, LOCALHOST, ss);
   tmaster_thread = new std::thread(StartServer, ss);
@@ -199,15 +268,17 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
                 const sp_string& topology_id, const heron::proto::api::Topology* topology,
                 const std::vector<sp_string>& workers, const sp_string& stmgr_id,
                 const sp_string& zkhostportlist, const sp_string& dpath, sp_int32 metricsmgr_port,
-                sp_int32 shell_port, sp_int64 _high_watermark, sp_int64 _low_watermark) {
+                sp_int32 shell_port, sp_int32 ckptmgr_port, const sp_string& ckptmgr_id,
+                sp_int64 _high_watermark, sp_int64 _low_watermark) {
   // The topology will be owned and deleted by the strmgr
   heron::proto::api::Topology* stmgr_topology = new heron::proto::api::Topology();
   stmgr_topology->CopyFrom(*topology);
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
   mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, topology_name, topology_id,
-                              stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
-                              metricsmgr_port, shell_port, _high_watermark, _low_watermark);
+                                stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
+                                metricsmgr_port, shell_port, ckptmgr_port, ckptmgr_id,
+                                _high_watermark, _low_watermark);
   mgr->Init();
   stmgr_thread = new std::thread(StartServer, ss);
 }
@@ -302,6 +373,8 @@ struct CommonResources {
   sp_int32 stmgr_baseport_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
+  sp_int32 ckptmgr_port_;
+  sp_string ckptmgr_id_;
   sp_string zkhostportlist_;
   sp_string topology_name_;
   sp_string topology_id_;
@@ -318,6 +391,7 @@ struct CommonResources {
   std::vector<EventLoopImpl*> ss_list_;
   std::vector<sp_string> stmgrs_id_list_;
   heron::proto::api::Topology* topology_;
+  heron::proto::system::PackingPlan* packing_plan_;
 
   heron::tmaster::TMaster* tmaster_;
   std::thread* tmaster_thread_;
@@ -374,13 +448,15 @@ void StartTMaster(CommonResources& common) {
   common.topology_ = GenerateDummyTopology(
       common.topology_name_, common.topology_id_, common.num_spouts_, common.num_spout_instances_,
       common.num_bolts_, common.num_bolt_instances_, common.grouping_);
+  common.packing_plan_ = GenerateDummyPackingPlan(common.num_stmgrs_, common.num_spouts_,
+      common.num_spout_instances_, common.num_bolts_, common.num_bolt_instances_);
 
   // Create the zk state on the local file system
-  CreateLocalStateOnFS(common.topology_, common.dpath_);
+  CreateLocalStateOnFS(common.topology_, common.packing_plan_, common.dpath_);
 
-  // Poulate the list of stmgrs
+  // Populate the list of stmgrs
   for (int i = 0; i < common.num_stmgrs_; ++i) {
-    sp_string id = STMGR_NAME;
+    sp_string id = STMGR_NAME + "-";
     id += std::to_string(i);
     common.stmgrs_id_list_.push_back(id);
   }
@@ -389,7 +465,7 @@ void StartTMaster(CommonResources& common) {
   EventLoopImpl* tmaster_eventLoop;
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
-               common.topology_name_, common.topology_id_, common.dpath_, common.stmgrs_id_list_,
+               common.topology_name_, common.topology_id_, common.dpath_,
                common.tmaster_port_, common.tmaster_controller_port_, common.tmaster_stats_port_,
                common.metricsmgr_port_ + 1);
   common.ss_list_.push_back(tmaster_eventLoop);
@@ -519,8 +595,8 @@ void StartStMgrs(CommonResources& common) {
     StartStMgr(stmgr_ss, mgr, stmgr_thread, common.tmaster_host_, common.stmgr_baseport_ + i,
                common.topology_name_, common.topology_id_, common.topology_,
                common.stmgr_instance_id_list_[i], common.stmgrs_id_list_[i], common.zkhostportlist_,
-               common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-               common.low_watermark_);
+               common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+               common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
 
     common.ss_list_.push_back(stmgr_ss);
     common.stmgrs_list_.push_back(mgr);
@@ -544,6 +620,7 @@ void StartMetricsMgr(CommonResources& common) { StartMetricsMgr(common, NULL, NU
 
 void TearCommonResources(CommonResources& common) {
   delete common.topology_;
+  delete common.packing_plan_;
   delete common.tmaster_thread_;
   delete common.tmaster_;
   delete common.metrics_mgr_thread_;
@@ -596,6 +673,8 @@ TEST(StMgr, test_pplan_decode) {
   common.stmgr_baseport_ = 20000;
   common.metricsmgr_port_ = 30000;
   common.shell_port_ = 40000;
+  common.ckptmgr_port_ = 50000;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -674,6 +753,8 @@ TEST(StMgr, test_tuple_route) {
   common.stmgr_baseport_ = 25000;
   common.metricsmgr_port_ = 35000;
   common.shell_port_ = 45000;
+  common.ckptmgr_port_ = 55000;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -752,6 +833,8 @@ TEST(StMgr, test_custom_grouping_route) {
   common.stmgr_baseport_ = 25500;
   common.metricsmgr_port_ = 35500;
   common.shell_port_ = 45500;
+  common.ckptmgr_port_ = 55500;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -838,6 +921,8 @@ TEST(StMgr, test_back_pressure_instance) {
   common.stmgr_baseport_ = 27000;
   common.metricsmgr_port_ = 37000;
   common.shell_port_ = 47000;
+  common.ckptmgr_port_ = 57000;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -868,8 +953,8 @@ TEST(StMgr, test_back_pressure_instance) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -947,6 +1032,8 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   common.stmgr_baseport_ = 27300;
   common.metricsmgr_port_ = 37300;
   common.shell_port_ = 47300;
+  common.ckptmgr_port_ = 57300;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -977,8 +1064,8 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1081,6 +1168,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   common.stmgr_baseport_ = 28000;
   common.metricsmgr_port_ = 38000;
   common.shell_port_ = 48000;
+  common.ckptmgr_port_ = 58000;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 3;
@@ -1115,8 +1204,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   StartStMgr(regular_stmgr_ss1, regular_stmgr1, regular_stmgr_thread1, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss1);
 
   EventLoopImpl* regular_stmgr_ss2 = NULL;
@@ -1126,8 +1215,9 @@ TEST(StMgr, test_back_pressure_stmgr) {
   StartStMgr(regular_stmgr_ss2, regular_stmgr2, regular_stmgr_thread2, common.tmaster_host_,
              common.stmgr_baseport_ + 1, common.topology_name_, common.topology_id_,
              common.topology_, common.stmgr_instance_id_list_[1], common.stmgrs_id_list_[1],
-             common.zkhostportlist_, common.dpath_, common.metricsmgr_port_, common.shell_port_,
-             common.high_watermark_, common.low_watermark_);
+             common.zkhostportlist_, common.dpath_, common.metricsmgr_port_,
+             common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
 
   common.ss_list_.push_back(regular_stmgr_ss2);
 
@@ -1198,6 +1288,8 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   common.stmgr_baseport_ = 28500;
   common.metricsmgr_port_ = 39000;
   common.shell_port_ = 49000;
+  common.ckptmgr_port_ = 59000;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -1228,8 +1320,8 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1310,6 +1402,8 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   common.stmgr_baseport_ = 28510;
   common.metricsmgr_port_ = 39001;
   common.shell_port_ = 49001;
+  common.ckptmgr_port_ = 59001;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -1345,8 +1439,8 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1442,6 +1536,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   common.stmgr_baseport_ = 28520;
   common.metricsmgr_port_ = 39002;
   common.shell_port_ = 49002;
+  common.ckptmgr_port_ = 59002;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -1477,8 +1573,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
@@ -1578,6 +1674,8 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   common.stmgr_baseport_ = 29000;
   common.metricsmgr_port_ = 39500;
   common.shell_port_ = 49500;
+  common.ckptmgr_port_ = 59500;
+  common.ckptmgr_id_ = "ckptmgr";
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
   common.num_stmgrs_ = 2;
@@ -1615,8 +1713,8 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
              common.stmgr_baseport_, common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
-             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.high_watermark_,
-             common.low_watermark_);
+             common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
+             common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr

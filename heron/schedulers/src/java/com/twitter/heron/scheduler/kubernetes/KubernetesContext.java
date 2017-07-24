@@ -22,6 +22,9 @@ public final class KubernetesContext extends Context {
 
   public static final String HERON_KUBERNETES_SCHEDULER_URI = "heron.kubernetes.scheduler.uri";
 
+  public static final String HERON_KUBERNETES_SCHEDULER_NAMESPACE =
+      "heron.kubernetes.scheduler.namespace";
+
   private KubernetesContext() {
   }
 
@@ -31,5 +34,9 @@ public final class KubernetesContext extends Context {
 
   public static String getSchedulerURI(Config config) {
     return config.getStringValue(HERON_KUBERNETES_SCHEDULER_URI);
+  }
+
+  public static String getKubernetesNamespace(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_SCHEDULER_NAMESPACE);
   }
 }

@@ -16,9 +16,9 @@
 
 import unittest
 
-from heron.common.src.python.utils.metrics import (CountMetric, MultiCountMetric,
-                                                   MeanReducedMetric, MultiMeanReducedMetric,
-                                                   BaseMetricsHelper)
+from heron.api.src.python.metrics import (CountMetric, MultiCountMetric,
+                                          MeanReducedMetric, MultiMeanReducedMetric)
+from heron.common.src.python.utils.metrics import BaseMetricsHelper
 from heron.proto import metrics_pb2
 import heron.common.tests.python.utils.mock_generator as mock_generator
 

@@ -161,11 +161,11 @@ public class StreamExecutor implements Runnable {
         if (tupleSet.hasControl()) {
           HeronTuples.HeronControlTupleSet c = tupleSet.getControl();
           for (HeronTuples.AckTuple ack : c.getAcksList()) {
-            copyControlOutBound(ack, true);
+            copyControlOutBound(tupleSet.getSrcTaskId(), ack, true);
           }
 
           for (HeronTuples.AckTuple fail : c.getFailsList()) {
-            copyControlOutBound(fail, false);
+            copyControlOutBound(tupleSet.getSrcTaskId(), fail, false);
           }
         }
       }
@@ -193,7 +193,7 @@ public class StreamExecutor implements Runnable {
     boolean isAnchored = tuple.getRootsCount() > 0;
 
     for (Integer outTask : outTasks) {
-      long tupleKey = tupleCache.addDataTuple(outTask, streamId, tuple, isAnchored);
+      long tupleKey = tupleCache.addDataTuple(sourceTaskId, outTask, streamId, tuple, isAnchored);
       if (isAnchored) {
         // Anchored tuple
 
@@ -213,7 +213,7 @@ public class StreamExecutor implements Runnable {
                     setAckedtuple(tupleKey).
                     build();
 
-            tupleCache.addEmitTuple(rootId.getTaskid(), t);
+            tupleCache.addEmitTuple(sourceTaskId, rootId.getTaskid(), t);
           }
         }
       }
@@ -223,7 +223,8 @@ public class StreamExecutor implements Runnable {
   }
 
   // Process HeronAckTuple and insert it into cache
-  protected void copyControlOutBound(HeronTuples.AckTuple control,
+  protected void copyControlOutBound(int srcTaskId,
+                                     HeronTuples.AckTuple control,
                                      boolean isSuccess) {
     for (HeronTuples.RootId rootId : control.getRootsList()) {
       HeronTuples.AckTuple t =
@@ -233,9 +234,9 @@ public class StreamExecutor implements Runnable {
               build();
 
       if (isSuccess) {
-        tupleCache.addAckTuple(rootId.getTaskid(), t);
+        tupleCache.addAckTuple(srcTaskId, rootId.getTaskid(), t);
       } else {
-        tupleCache.addFailTuple(rootId.getTaskid(), t);
+        tupleCache.addFailTuple(srcTaskId, rootId.getTaskid(), t);
       }
     }
   }
