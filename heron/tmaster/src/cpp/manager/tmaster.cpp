@@ -419,6 +419,10 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
   state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
 }
 
+void TMaster::CleanAllStatefulCheckpoint() {
+  // TODO(nlu): to be implemented later
+}
+
 proto::system::Status* TMaster::RegisterStMgr(
     const proto::system::StMgr& _stmgr, const std::vector<proto::system::Instance*>& _instances,
     Connection* _conn, proto::system::PhysicalPlan*& _pplan) {
