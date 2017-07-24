@@ -44,7 +44,7 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
     this->HandleCleanStatefulCheckpointRequest(request);
   };
 
-  http_server_->InstallCallBack("/cleanstatefulcheckpoint", std::move(cbCleanState));
+  http_server_->InstallCallBack("/clean_all_stateful_checkpoints", std::move(cbCleanState));
 }
 
 TController::~TController() { delete http_server_; }
