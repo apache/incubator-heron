@@ -23,11 +23,11 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
+import com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DEFAULT_METRIC_DURATION;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,8 +51,8 @@ public class BufferSizeSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = HealthMgrConstants.METRIC_BUFFER_SIZE
-          + boltId + HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
+      String metric = MetricName.METRIC_BUFFER_SIZE
+          + boltId + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
       registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
     }
 
@@ -64,18 +64,18 @@ public class BufferSizeSensorTest {
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValueSum(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
+        .getMetricValueSum(MetricName.METRIC_BUFFER_SIZE.text()).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricValueSum(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
+        .getMetricValueSum(MetricName.METRIC_BUFFER_SIZE.text()).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricValueSum(HealthMgrConstants.METRIC_BUFFER_SIZE).intValue());
+        .getMetricValueSum(MetricName.METRIC_BUFFER_SIZE.text()).intValue());
   }
 
-  public static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
-                                                         String metric,
-                                                         int value) {
+  static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
+                                                  String metric,
+                                                  long value) {
     Map<String, ComponentMetrics> result = new HashMap<>();
     ComponentMetrics metrics = new ComponentMetrics("__stmgr__");
     InstanceMetrics instanceMetrics = new InstanceMetrics("stmgr-1");

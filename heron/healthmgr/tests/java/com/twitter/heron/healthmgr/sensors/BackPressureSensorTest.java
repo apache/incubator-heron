@@ -21,11 +21,11 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
+import com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DEFAULT_METRIC_DURATION;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,11 +49,11 @@ public class BackPressureSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = HealthMgrConstants.METRIC_BACK_PRESSURE + boltId;
+      String metric = MetricName.METRIC_BACK_PRESSURE + boltId;
       // the back pressure sensor will return average bp per second, so multiply by duration
       BufferSizeSensorTest.registerStMgrInstanceMetricResponse(metricsProvider,
           metric,
-          boltId.length() * DEFAULT_METRIC_DURATION);
+          boltId.length() * DEFAULT_METRIC_DURATION.getSeconds());
     }
 
     BackPressureSensor backPressureSensor =
@@ -64,12 +64,12 @@ public class BackPressureSensorTest {
 
     assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
     assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValueSum(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
+        .getMetricValueSum(MetricName.METRIC_BACK_PRESSURE.text()).intValue());
 
     assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
     assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricValueSum(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
+        .getMetricValueSum(MetricName.METRIC_BACK_PRESSURE.text()).intValue());
     assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricValueSum(HealthMgrConstants.METRIC_BACK_PRESSURE).intValue());
+        .getMetricValueSum(MetricName.METRIC_BACK_PRESSURE.text()).intValue());
   }
 }

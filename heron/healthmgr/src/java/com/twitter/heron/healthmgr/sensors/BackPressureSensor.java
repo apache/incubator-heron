@@ -15,11 +15,9 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -31,71 +29,57 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.COMPONENT_STMGR;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE_SUFFIX;
-
-public class BufferSizeSensor extends BaseSensor {
+public class BackPressureSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
   private final TopologyProvider topologyProvider;
 
   @Inject
-  public BufferSizeSensor(HealthPolicyConfig policyConfig,
-                          PackingPlanProvider packingPlanProvider,
-                          TopologyProvider topologyProvider,
-                          MetricsProvider metricsProvider) {
-    super(policyConfig, METRIC_BUFFER_SIZE);
+  public BackPressureSensor(PackingPlanProvider packingPlanProvider,
+                            TopologyProvider topologyProvider,
+                            HealthPolicyConfig policyConfig,
+                            MetricsProvider metricsProvider) {
+    super(policyConfig, MetricName.METRIC_BACK_PRESSURE.text());
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
   }
 
   @Override
-  public Map<String, ComponentMetrics> get() {
-    return get(topologyProvider.getBoltNames());
+  public Map<String, ComponentMetrics> get(String... components) {
+    return get();
   }
 
   /**
-   * The buffer size as provided by tracker
+   * Computes the average (millis/sec) back-pressure caused by instances in the configured window
    *
-   * @return buffer size
+   * @return the average value
    */
-  public Map<String, ComponentMetrics> get(String... desiredBoltNames) {
+  public Map<String, ComponentMetrics> get() {
     Map<String, ComponentMetrics> result = new HashMap<>();
-
-    Set<String> boltNameFilter = new HashSet<>();
-    if (desiredBoltNames.length > 0) {
-      boltNameFilter.addAll(Arrays.asList(desiredBoltNames));
-    }
 
     String[] boltComponents = topologyProvider.getBoltNames();
     for (String boltComponent : boltComponents) {
-      if (!boltNameFilter.isEmpty() && !boltNameFilter.contains(boltComponent)) {
-        continue;
-      }
-
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
 
+      Duration duration = getDuration(BackPressureSensor.class.getSimpleName());
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = this.metricName + boltInstanceName + METRIC_BUFFER_SIZE_SUFFIX;
-
+        String metric = this.metricName + boltInstanceName;
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
-            metric,
-            getDuration(BufferSizeSensor.class.getSimpleName()),
-            COMPONENT_STMGR);
+            metric, duration, COMPONENT_STMGR);
 
         HashMap<String, InstanceMetrics> streamManagerResult =
             stmgrResult.get(COMPONENT_STMGR).getMetrics();
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
-        double stmgrInstanceResult =
-            streamManagerResult.values().iterator().next().getMetricValueSum(metric);
+        InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
-        InstanceMetrics boltInstanceMetric =
-            new InstanceMetrics(boltInstanceName, this.metricName, stmgrInstanceResult);
+        double averageBp = stmgrInstanceResult.getMetricValueSum(metric) / duration.getSeconds();
+        averageBp = averageBp > 1000 ? 1000 : averageBp;
+        InstanceMetrics boltInstanceMetric
+            = new InstanceMetrics(boltInstanceName, this.metricName, averageBp);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
