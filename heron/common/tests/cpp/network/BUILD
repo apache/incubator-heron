@@ -103,3 +103,21 @@ cc_test(
     size = "small",
     linkstatic = 1,
 )
+
+cc_test(
+    name = "piper_unittest",
+    srcs = [
+        "piper_unittest.cpp"
+    ],
+    deps = [
+        "//heron/common/src/cpp/network:network-cxx",
+        "//third_party/gtest:gtest-cxx",
+    ],
+    copts = [
+        "-Iheron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/tests/cpp",
+    ],
+    size = "small",
+    linkstatic = 1,
+)

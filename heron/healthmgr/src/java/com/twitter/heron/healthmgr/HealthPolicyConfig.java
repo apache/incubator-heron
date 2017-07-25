@@ -24,12 +24,12 @@ public class HealthPolicyConfig {
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
   private final Map<String, Object> configs;
 
-  public HealthPolicyConfig(Map<String, Object> configs) {
+  HealthPolicyConfig(Map<String, Object> configs) {
     this.configs = configs;
     LOG.info("Health Policy Configuration:" + configs);
   }
 
-  public String getPolicyClass() {
+  String getPolicyClass() {
     return (String) configs.get(PolicyConfigKey.HEALTH_POLICY_CLASS.key());
   }
 

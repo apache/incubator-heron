@@ -96,6 +96,10 @@ public class SpoutOutputCollectorImpl
     LOG.log(Level.SEVERE, "Reporting an error in topology code ", error);
   }
 
+  public boolean isAckEnabled() {
+    return ackEnabled;
+  }
+
 
   /////////////////////////////////////////////////////////
   // Following public methods are used for querying or

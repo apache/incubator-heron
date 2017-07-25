@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
@@ -88,9 +89,8 @@ public class TrackerMetricsProvider implements MetricsProvider {
     return getComponentMetrics(metric, start, duration, components);
   }
 
-  @VisibleForTesting
   @SuppressWarnings("unchecked")
-  Map<String, InstanceMetrics> parse(String response, String component, String metric) {
+  private Map<String, InstanceMetrics> parse(String response, String component, String metric) {
     Map<String, InstanceMetrics> metricsData = new HashMap<>();
 
     if (response == null || response.isEmpty()) {

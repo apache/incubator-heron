@@ -62,7 +62,7 @@ public class HealthPolicyConfigReader {
   private final Map<String, Map<String, Object>> configs = new HashMap<>();
   private String configFilename;
 
-  public HealthPolicyConfigReader(String filename) throws FileNotFoundException {
+  HealthPolicyConfigReader(String filename) throws FileNotFoundException {
     this.configFilename = filename;
   }
 
@@ -75,15 +75,15 @@ public class HealthPolicyConfigReader {
   }
 
   @VisibleForTesting
-  protected Map<String, Object> readConfigFromFile(String filename) {
+  Map<String, Object> readConfigFromFile(String filename) {
     return ConfigReader.loadFile(filename);
   }
 
-  public List<String> getPolicyIds() {
+  List<String> getPolicyIds() {
     return new ArrayList<>(configs.keySet());
   }
 
-  public Map<String, Object> getPolicyConfig(String policyId) {
+  Map<String, Object> getPolicyConfig(String policyId) {
     return configs.get(policyId);
   }
 

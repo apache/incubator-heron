@@ -28,12 +28,15 @@
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
+#include "config/topology-config-vars.h"
 
 namespace heron {
 namespace common {
 class HeronStateMgr;
 class MetricsMgrSt;
 class MultiAssignableMetric;
+class CountMetric;
+class MultiCountMetric;
 }
 }
 
@@ -47,6 +50,7 @@ class StreamConsumers;
 class XorManager;
 class TupleCache;
 class NeighbourCalculator;
+class StatefulRestorer;
 class CkptMgrClient;
 
 class StMgr {
@@ -74,6 +78,10 @@ class StMgr {
   void HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint& _message,
                                           const proto::system::Instance& _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
+  // Send checkpoint message to this task_id
+  void DrainDownstreamCheckpoint(sp_int32 _task_id,
+                                proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
   // Forward the call to the StmgrServer
@@ -165,6 +173,10 @@ class StMgr {
   // local instances so that they can start the processing.
   void StartStatefulProcessing(sp_string _checkpoint_id);
 
+  // Called when Stateful Restorer restores the instance state
+  void HandleStatefulRestoreDone(proto::system::StatusCode _status,
+                                 std::string _checkpoint_id, sp_int64 _restore_txid);
+
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;
@@ -191,6 +203,8 @@ class StMgr {
   TupleCache* tuple_cache_;
   // Neighbour Calculator for stateful processing
   NeighbourCalculator* neighbour_calculator_;
+  // Stateful Restorer
+  StatefulRestorer* stateful_restorer_;
 
   // This is the topology structure
   // that contains the full component objects
@@ -205,6 +219,10 @@ class StMgr {
   // Process related metrics
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;
 
+  // Stateful Restore metric
+  heron::common::CountMetric* restore_initiated_metrics_;
+  heron::common::MultiCountMetric* dropped_during_restore_metrics_;
+
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;
   sp_string zkhostport_;
@@ -217,7 +235,7 @@ class StMgr {
   std::vector<sp_int32> out_tasks_;
 
   bool is_acking_enabled;
-  bool is_stateful_;
+  config::TopologyConfigVars::TopologyReliabilityMode reliability_mode_;
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
