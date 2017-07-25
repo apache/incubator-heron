@@ -78,6 +78,30 @@ public class IncomingPacket {
     return retval;
   }
 
+  public int readFromChannel(SocketChannel channel, long limit) {
+    if (!headerRead) {
+      int retval = readFromChannel(channel, header);
+      if (retval != 0) {
+        // either we didnt read fully or we had an error
+        return retval;
+      }
+      // We read the header fully
+      headerRead = true;
+      header.flip();
+      int size = header.getInt();
+      if (size > limit) {
+        LOG.log(Level.SEVERE, "packet size " + size + " exceeds limit " + limit);
+        return -1;
+      }
+      data = ByteBuffer.allocate(size);
+    }
+    int retval = readFromChannel(channel, data);
+    if (retval == 0) {
+      data.flip();
+    }
+    return retval;
+  }
+
   private int readFromChannel(SocketChannel channel, ByteBuffer buffer) {
     int remaining = buffer.remaining();
     int wrote = 0;
