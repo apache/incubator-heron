@@ -339,6 +339,23 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   state_mgr_->GetPhysicalPlan(tmaster_location_->topology_name(), pplan, std::move(cb));
 }
 
+void TMaster::ResetTopologyState(Connection*, const std::string&,
+                                 int32_t, const std::string&) {
+  // TODO(srkukarni): Implement this
+}
+
+void TMaster::HandleInstanceStateStored(const std::string&,
+                                        const proto::system::Instance&) {
+  // TODO(srkukarni): Implement this
+}
+
+void TMaster::HandleRestoreTopologyStateResponse(Connection*,
+                                                 const std::string&,
+                                                 int64_t,
+                                                 proto::system::StatusCode) {
+  // TODO(srkukarni): Implement this
+}
+
 void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
   // Physical plan need not exist. First check if some other error occurred.
