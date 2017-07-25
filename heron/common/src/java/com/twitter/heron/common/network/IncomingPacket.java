@@ -78,6 +78,7 @@ public class IncomingPacket {
     return retval;
   }
 
+  // overloading: add packet size limit check
   public int readFromChannel(SocketChannel channel, long limit) {
     if (!headerRead) {
       int retval = readFromChannel(channel, header);
