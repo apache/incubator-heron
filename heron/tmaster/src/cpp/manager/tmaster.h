@@ -83,6 +83,20 @@ class TMaster {
   // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
 
+  // Called by tmaster server when it gets InstanceStateStored message
+  void HandleInstanceStateStored(const std::string& _checkpoint_id,
+                                 const proto::system::Instance& _instance);
+
+  // Called by tmaster server when it gets RestoreTopologyStateResponse message
+  void HandleRestoreTopologyStateResponse(Connection* _conn,
+                                          const std::string& _checkpoint_id,
+                                          int64_t _restore_txid,
+                                          proto::system::StatusCode _status);
+
+  // Called by tmaster server when it gets ResetTopologyState message
+  void ResetTopologyState(Connection* _conn, const std::string& _dead_stmgr,
+                          int32_t _dead_instance, const std::string& _reason);
+
  private:
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
