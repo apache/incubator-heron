@@ -56,7 +56,7 @@ StatefulController::StatefulController(const std::string& _topology_name,
   checkpointer_ = new StatefulCheckpointer(_tmaster_start_time);
   restorer_ = new StatefulRestorer();
   count_metrics_ = new common::MultiCountMetric();
-  metrics_manager_client_->register_metric("__stateful_helper", count_metrics_);
+  metrics_manager_client_->register_metric("__stateful_controller", count_metrics_);
   ckpt_save_watcher_ = _ckpt_save_watcher;
 }
 
@@ -64,7 +64,7 @@ StatefulController::~StatefulController() {
   delete ckpt_record_;
   delete checkpointer_;
   delete restorer_;
-  metrics_manager_client_->unregister_metric("__stateful_helper");
+  metrics_manager_client_->unregister_metric("__stateful_controller");
   delete count_metrics_;
 }
 
