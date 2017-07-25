@@ -36,6 +36,7 @@ class TController;
 class StatsInterface;
 class TMasterServer;
 class TMetricsCollector;
+class StatefulController;
 class CkptMgrClient;
 
 typedef std::map<std::string, StMgrState*> StMgrMap;
@@ -83,6 +84,9 @@ class TMaster {
   // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
 
+  // Timer function to start the stateful checkpoint process
+  void SendCheckpointMarker();
+
   // Called by tmaster server when it gets InstanceStateStored message
   void HandleInstanceStateStored(const std::string& _checkpoint_id,
                                  const proto::system::Instance& _instance);
@@ -98,6 +102,9 @@ class TMaster {
                           int32_t _dead_instance, const std::string& _reason);
 
  private:
+  // Helper function to fetch physical plan
+  void FetchPhysicalPlan();
+
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
 
@@ -127,6 +134,15 @@ class TMaster {
   // Function called after we get the topology
   void GetTopologyDone(proto::system::StatusCode _code);
 
+  // Function called after we get StatefulConsistentCheckpoints
+  void GetStatefulCheckpointDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
+                                 proto::system::StatusCode _code);
+  // Function called after we set an initial StatefulConsistentCheckpoints
+  void SetStatefulCheckpointDone(proto::system::StatusCode _code,
+                            proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
+  // Helper function to setup stateful coordinator
+  void SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
+
   // Function called after we try to get assignment
   void GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan, proto::system::StatusCode _code);
 
@@ -142,6 +158,9 @@ class TMaster {
                           proto::system::StatusCode _status);
 
   void UpdateProcessMetrics(EventLoop::Status);
+
+  // Function called when a new stateful ckpt record is saved
+  void HandleStatefulCkptSave(std::string _oldest_ckpt);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;
@@ -206,6 +225,9 @@ class TMaster {
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;
+
+  // Stateful Controller
+  StatefulController* stateful_controller_;
 
   // Copy of the EventLoop
   EventLoop* eventLoop_;
