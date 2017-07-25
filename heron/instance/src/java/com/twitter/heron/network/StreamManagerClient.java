@@ -55,9 +55,9 @@ public class StreamManagerClient extends HeronClient {
   private final PhysicalPlans.Instance instance;
 
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
 
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   private final Communicator<InstanceControlMsg> inControlQueue;
 
@@ -72,8 +72,8 @@ public class StreamManagerClient extends HeronClient {
   public StreamManagerClient(NIOLooper s, String streamManagerHost, int streamManagerPort,
                              String topologyName, String topologyId,
                              PhysicalPlans.Instance instance,
-                             Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
-                             Communicator<HeronTuples.HeronTupleSet> outStreamQueue,
+                             Communicator<Message> inStreamQueue,
+                             Communicator<Message> outStreamQueue,
                              Communicator<InstanceControlMsg> inControlQueue,
                              HeronSocketOptions options,
                              GatewayMetrics gatewayMetrics) {
@@ -211,10 +211,9 @@ public class StreamManagerClient extends HeronClient {
     // Collect all tuples in queue
     int size = outStreamQueue.size();
     for (int i = 0; i < size; i++) {
-      HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
-      StreamManager.TupleMessage msg = StreamManager.TupleMessage.newBuilder()
-          .setSet(tupleSet).build();
-      sendMessage(msg);
+      Message streamMessage = outStreamQueue.poll();
+
+      sendMessage(streamMessage);
     }
   }
 
@@ -224,7 +223,7 @@ public class StreamManagerClient extends HeronClient {
         // In order to avoid packets back up in Client side,
         // We would poll message from queue and send them only when there are no outstanding packets
         while (!outStreamQueue.isEmpty()) {
-          HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
+          Message tupleSet = outStreamQueue.poll();
 
           gatewayMetrics.updateSentPacketsCount(1);
           gatewayMetrics.updateSentPacketsSize(tupleSet.getSerializedSize());

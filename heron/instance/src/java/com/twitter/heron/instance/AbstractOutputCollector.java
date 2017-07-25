@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
@@ -44,7 +45,7 @@ public class AbstractOutputCollector {
   @SuppressWarnings("deprecation")
   public AbstractOutputCollector(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
-                                 Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                 Communicator<Message> streamOutQueue,
                                  ComponentMetrics metrics) {
     this.serializer = serializer;
     this.metrics = metrics;

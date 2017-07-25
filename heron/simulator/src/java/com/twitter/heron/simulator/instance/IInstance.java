@@ -14,8 +14,9 @@
 
 package com.twitter.heron.simulator.instance;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.proto.system.HeronTuples;
 
 /**
  * Implementing this interface allows an object to be target of HeronInstance
@@ -40,7 +41,7 @@ public interface IInstance {
    *
    * @param inQueue the queue to read tuples from
    */
-  void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
+  void readTuplesAndExecute(Communicator<Message> inQueue);
 
   /**
    * Activate the instance

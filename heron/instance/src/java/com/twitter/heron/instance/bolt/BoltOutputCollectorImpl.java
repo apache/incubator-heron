@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.tuple.Tuple;
@@ -58,7 +60,7 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
 
   protected BoltOutputCollectorImpl(IPluggableSerializer serializer,
                                     PhysicalPlanHelper helper,
-                                    Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                    Communicator<Message> streamOutQueue,
                                     BoltMetrics boltMetrics) {
     super(serializer, helper, streamOutQueue, boltMetrics);
     this.boltMetrics = boltMetrics;
