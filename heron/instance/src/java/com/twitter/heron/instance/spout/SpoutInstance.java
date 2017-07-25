@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
@@ -39,6 +41,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class SpoutInstance implements IInstance {
@@ -48,7 +51,7 @@ public class SpoutInstance implements IInstance {
   protected final SpoutOutputCollectorImpl collector;
   protected final SpoutMetrics spoutMetrics;
   // The spout will read Control tuples from streamInQueue
-  private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
+  private final Communicator<Message> streamInQueue;
 
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
@@ -68,8 +71,8 @@ public class SpoutInstance implements IInstance {
    * Construct a SpoutInstance basing on given arguments
    */
   public SpoutInstance(PhysicalPlanHelper helper,
-                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
-                       Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                       Communicator<Message> streamInQueue,
+                       Communicator<Message> streamOutQueue,
                        SlaveLooper looper) {
     this.helper = helper;
     this.looper = looper;
@@ -124,6 +127,11 @@ public class SpoutInstance implements IInstance {
     physicalPlanHelper.prepareForCustomStreamGrouping();
     // Reset the helper
     helper = physicalPlanHelper;
+  }
+
+  @Override
+  public void persistState(String checkpointId) {
+    // TODO(nlu): impelment this
   }
 
   @Override
@@ -345,30 +353,40 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+  public void readTuplesAndExecute(Communicator<Message> inQueue) {
     // Read data from in Queues
     long startOfCycle = System.nanoTime();
     Duration spoutAckBatchTime = systemConfig.getInstanceAckBatchTime();
 
     while (!inQueue.isEmpty()) {
-      HeronTuples.HeronTupleSet tuples = inQueue.poll();
-      // For spout, it should read only control tuples(ack&fail)
-      if (tuples.hasData()) {
-        throw new RuntimeException("Spout cannot get incoming data tuples from other components");
+      Message msg = inQueue.poll();
+
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        String checkpintId = ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
+        LOG.info("Persisting state for checkpoint: " + checkpintId);
+        persistState(checkpintId);
       }
 
-      if (tuples.hasControl()) {
-        for (HeronTuples.AckTuple aT : tuples.getControl().getAcksList()) {
-          handleAckTuple(aT, true);
+      if (msg instanceof HeronTuples.HeronTupleSet) {
+        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
+        // For spout, it should read only control tuples(ack&fail)
+        if (tuples.hasData()) {
+          throw new RuntimeException("Spout cannot get incoming data tuples from other components");
         }
-        for (HeronTuples.AckTuple aT : tuples.getControl().getFailsList()) {
-          handleAckTuple(aT, false);
-        }
-      }
 
-      // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - spoutAckBatchTime.toNanos() > 0) {
-        break;
+        if (tuples.hasControl()) {
+          for (HeronTuples.AckTuple aT : tuples.getControl().getAcksList()) {
+            handleAckTuple(aT, true);
+          }
+          for (HeronTuples.AckTuple aT : tuples.getControl().getFailsList()) {
+            handleAckTuple(aT, false);
+          }
+        }
+
+        // To avoid spending too much time
+        if (System.nanoTime() - startOfCycle - spoutAckBatchTime.toNanos() > 0) {
+          break;
+        }
       }
     }
   }
