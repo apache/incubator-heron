@@ -136,7 +136,8 @@ class HeronExecutorTest(unittest.TestCase):
                   'tmaster_binary %s master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot '
-                  '%s metrics_sinks_config_file metricsmgr_port' % (HOSTNAME, INTERNAL_CONF_PATH )),
+                  '%s metrics_sinks_config_file metricsmgr_port '
+                  'ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH )),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
   ]
 

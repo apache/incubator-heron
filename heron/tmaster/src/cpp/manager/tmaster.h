@@ -36,6 +36,7 @@ class TController;
 class StatsInterface;
 class TMasterServer;
 class TMetricsCollector;
+class CkptMgrClient;
 
 typedef std::map<std::string, StMgrState*> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
@@ -45,7 +46,8 @@ class TMaster {
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
           const std::string& _topology_id, const std::string& _topdir,
           sp_int32 _controller_port, sp_int32 _master_port,
-          sp_int32 _stats_port, sp_int32 metricsMgrPort, const std::string& metrics_sinks_yaml,
+          sp_int32 _stats_port, sp_int32 metricsMgrPort, sp_int32 _ckptmgr_port,
+          const std::string& metrics_sinks_yaml,
           const std::string& _myhost_name, EventLoop* eventLoop);
 
   virtual ~TMaster();
@@ -67,6 +69,8 @@ class TMaster {
 
   // Called by http server upon receiving a user message to cleanup the state
   void CleanAllStatefulCheckpoint();
+  // Called by ckptmgr client upon receiving CleanStatefulCheckpointResponse
+  void HandleCleanStatefulCheckpointResponse(proto::system::StatusCode);
 
   // Get stream managers registration summary
   proto::tmaster::StmgrsRegistrationSummaryResponse* GetStmgrsRegSummary();
@@ -178,6 +182,10 @@ class TMaster {
   sp_int32 mMetricsMgrPort;
   // Metrics Manager
   heron::common::MetricsMgrSt* mMetricsMgrClient;
+
+  // Ckpt Manager
+  CkptMgrClient* ckptmgr_client_;
+  sp_int32 ckptmgr_port_;
 
   // Process related metrics
   heron::common::MultiAssignableMetric* tmasterProcessMetrics;
