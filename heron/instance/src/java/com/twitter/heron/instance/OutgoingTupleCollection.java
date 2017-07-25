@@ -14,6 +14,8 @@
 
 package com.twitter.heron.instance;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
@@ -33,7 +35,7 @@ import com.twitter.heron.proto.system.HeronTuples;
 public class OutgoingTupleCollection {
   protected PhysicalPlanHelper helper;
   // We have just one outQueue responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outQueue;
+  private final Communicator<Message> outQueue;
 
   // Maximum data tuple size in bytes we can put in one HeronTupleSet
   private final ByteAmount maxDataTupleSize;
@@ -51,7 +53,7 @@ public class OutgoingTupleCollection {
 
   public OutgoingTupleCollection(
       PhysicalPlanHelper helper,
-      Communicator<HeronTuples.HeronTupleSet> outQueue) {
+      Communicator<Message> outQueue) {
     this.outQueue = outQueue;
     this.helper = helper;
     SystemConfig systemConfig =
@@ -151,7 +153,7 @@ public class OutgoingTupleCollection {
   }
 
   private void pushTupleToQueue(HeronTuples.HeronTupleSet.Builder bldr,
-                                Communicator<HeronTuples.HeronTupleSet> out) {
+                                Communicator<Message> out) {
     // The Communicator has un-bounded capacity so the offer will always be successful
     out.offer(bldr.build());
   }

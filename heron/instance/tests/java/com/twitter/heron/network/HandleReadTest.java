@@ -76,7 +76,10 @@ public class HandleReadTest extends AbstractNetworkTest {
 
       Assert.assertEquals(1, getInStreamQueue().size());
 
-      HeronTuples.HeronTupleSet heronTupleSet = getInStreamQueue().poll();
+      Message msg = getInStreamQueue().poll();
+      Assert.assertTrue(msg instanceof HeronTuples.HeronTupleSet);
+
+      HeronTuples.HeronTupleSet heronTupleSet = (HeronTuples.HeronTupleSet) msg;
 
       Assert.assertTrue(heronTupleSet.hasData());
       Assert.assertFalse(heronTupleSet.hasControl());
