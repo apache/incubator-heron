@@ -59,26 +59,9 @@ public class IncomingPacket {
   }
 
   public int readFromChannel(SocketChannel channel) {
-    if (!headerRead) {
-      int retval = readFromChannel(channel, header);
-      if (retval != 0) {
-        // either we didnt read fully or we had an error
-        return retval;
-      }
-      // We read the header fully
-      headerRead = true;
-      header.flip();
-      // TODO:- sanitize header.getInteger()
-      data = ByteBuffer.allocate(header.getInt());
-    }
-    int retval = readFromChannel(channel, data);
-    if (retval == 0) {
-      data.flip();
-    }
-    return retval;
+    return readFromChannel(channel, Integer.MAX_VALUE);
   }
 
-  // overloading: add packet size limit check
   public int readFromChannel(SocketChannel channel, long limit) {
     if (!headerRead) {
       int retval = readFromChannel(channel, header);
