@@ -1,0 +1,10 @@
+## list of policies to be executed for self regulation
+#heron.class.health.policies:
+#  - dynamic-resource-allocation
+#
+## configuration specific to individual policies listed above
+#dynamic-resource-allocation:
+#  health.policy.class: com.twitter.heron.healthmgr.policy.DynamicResourceAllocationPolicy
+#  health.policy.interval.ms: 120000
+#  BackPressureDetector.noiseFilterMillis: 20
+#  GrowingWaitQueueDetector.limit: 5
