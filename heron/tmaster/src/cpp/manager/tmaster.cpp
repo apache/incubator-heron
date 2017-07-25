@@ -27,6 +27,7 @@
 #include "manager/stats-interface.h"
 #include "manager/tmasterserver.h"
 #include "manager/stmgrstate.h"
+#include "manager/ckptmgr-client.h"
 #include "processor/processor.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -55,6 +56,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
                  const std::string& _topology_id, const std::string& _topdir,
                  sp_int32 _controller_port,
                  sp_int32 _master_port, sp_int32 _stats_port, sp_int32 metricsMgrPort,
+                 sp_int32 _ckptmgr_port,
                  const std::string& _metrics_sinks_yaml, const std::string& _myhost_name,
                  EventLoop* eventLoop) {
   start_time_ = std::chrono::high_resolution_clock::now();
@@ -86,6 +88,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
+
+  ckptmgr_port_ = _ckptmgr_port;
+  ckptmgr_client_ = nullptr;
 
   current_pplan_ = NULL;
 
@@ -230,6 +235,7 @@ TMaster::~TMaster() {
   mMetricsMgrClient->unregister_metric(METRIC_PREFIX);
   delete mMetricsMgrClient;
   delete tmasterProcessMetrics;
+  delete ckptmgr_client_;
 }
 
 void TMaster::UpdateProcessMetrics(EventLoop::Status) {
@@ -306,6 +312,24 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
     ::exit(1);
   }
   LOG(INFO) << "Topology read and validated\n";
+
+  if (heron::config::TopologyConfigHelper::GetReliabilityMode(*topology_)
+      == config::TopologyConfigVars::EXACTLY_ONCE) {
+    // Establish connection to ckptmgr
+    NetworkOptions ckpt_options;
+    ckpt_options.set_host("localhost");
+    ckpt_options.set_port(ckptmgr_port_);
+    ckpt_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
+                                           ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+                                       1024 * 1024);
+    ckptmgr_client_ = new CkptMgrClient(eventLoop_, ckpt_options,
+                                        topology_->name(), topology_->id(),
+                                        std::bind(&TMaster::HandleCleanStatefulCheckpointResponse,
+                                        this, std::placeholders::_1));
+    // Start the client
+    ckptmgr_client_->Start();
+  }
+
   // Now see if there is already a pplan
   proto::system::PhysicalPlan* pplan = new proto::system::PhysicalPlan();
   auto cb = [pplan, this](proto::system::StatusCode code) {
@@ -420,6 +444,11 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
 }
 
 void TMaster::CleanAllStatefulCheckpoint() {
+  // TODO(nlu): to be implemented later
+}
+
+// Called when ckptmgr completes the clean stateful checkpoint request
+void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status) {
   // TODO(nlu): to be implemented later
 }
 
