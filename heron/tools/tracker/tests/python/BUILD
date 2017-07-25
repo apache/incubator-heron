@@ -1,5 +1,10 @@
-load("/tools/rules/pex_rules", "pex_test")
-load("/tools/rules/pex_rules", "pex_library")
+load(
+    "@io_bazel_rules_pex//pex:pex_rules.bzl",
+    "pex_binary",
+    "pex_library",
+    "pex_test",
+    "pex_pytest",
+)
 
 pex_library(
   name = 'mock_proto',
@@ -14,6 +19,7 @@ pex_test(
     name = "topology_helpers_unittest",
     srcs = ["topology_helpers_unittest.py"],
     deps = [
+        ":mock_proto",
         "//heron/tools/tracker/src/python:tracker-py",
         "//heron/api/src/python:heron-python-py",
     ],
@@ -30,6 +36,7 @@ pex_test(
     name = "topology_unittest",
     srcs = ["topology_unittest.py"],
     deps = [
+        ":mock_proto",
         "//heron/tools/tracker/src/python:tracker-py",
     ],
     reqs = [

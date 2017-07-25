@@ -1,4 +1,10 @@
-load("pex_rules", "pex_library")
+load(
+    "@io_bazel_rules_pex//pex:pex_rules.bzl",
+    "pex_binary",
+    "pex_library",
+    "pex_test",
+    "pex_pytest",
+)
 
 def proto_package_impl(ctx):
   return struct(proto_src = ctx.file.src)

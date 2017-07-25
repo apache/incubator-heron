@@ -1,7 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "@io_bazel_rules_pex//pex:pex_rules.bzl",
+    "pex_binary",
+    "pex_library",
+    "pex_test",
+    "pex_pytest",
+)
+
 load("/tools/rules/genproto",  "proto_library")
-load("/tools/rules/pex_rules", "pex_library")
 
 proto_library(
     name = "proto_common",
