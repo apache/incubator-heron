@@ -46,7 +46,7 @@ class TMaster {
  public:
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
           const std::string& _topology_id, const std::string& _topdir,
-          sp_int32 _controller_port, sp_int32 _master_port,
+          sp_int32 _tmaster_controller_port, sp_int32 _master_port,
           sp_int32 _stats_port, sp_int32 metricsMgrPort, sp_int32 _ckptmgr_port,
           const std::string& metrics_sinks_yaml,
           const std::string& _myhost_name, EventLoop* eventLoop);
@@ -197,8 +197,8 @@ class TMaster {
   std::string topdir_;
 
   // Servers that implement our services
-  TController* controller_;
-  sp_int32 controller_port_;
+  TController* tmaster_controller_;
+  sp_int32 tmaster_controller_port_;
   TMasterServer* master_;
   sp_int32 master_port_;
   StatsInterface* stats_;

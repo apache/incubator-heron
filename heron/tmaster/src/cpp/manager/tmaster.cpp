@@ -55,7 +55,7 @@ const sp_string METRIC_PREFIX = "__process";
 
 TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
                  const std::string& _topology_id, const std::string& _topdir,
-                 sp_int32 _controller_port,
+                 sp_int32 _tmaster_controller_port,
                  sp_int32 _master_port, sp_int32 _stats_port, sp_int32 metricsMgrPort,
                  sp_int32 _ckptmgr_port,
                  const std::string& _metrics_sinks_yaml, const std::string& _myhost_name,
@@ -63,8 +63,8 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   start_time_ = std::chrono::high_resolution_clock::now();
   zk_hostport_ = _zk_hostport;
   topdir_ = _topdir;
-  controller_ = NULL;
-  controller_port_ = _controller_port;
+  tmaster_controller_ = NULL;
+  tmaster_controller_port_ = _tmaster_controller_port;
   master_ = NULL;
   master_port_ = _master_port;
   stats_ = NULL;
@@ -110,7 +110,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_topology_name(_topology_name);
   tmaster_location_->set_topology_id(_topology_id);
   tmaster_location_->set_host(myhost_name_);
-  tmaster_location_->set_controller_port(controller_port_);
+  tmaster_location_->set_controller_port(tmaster_controller_port_);
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
@@ -222,7 +222,7 @@ TMaster::~TMaster() {
   delete packing_plan_;
   delete current_pplan_;
   delete state_mgr_;
-  delete controller_;
+  delete tmaster_controller_;
   if (master_) {
     master_->Stop();
   }
@@ -519,15 +519,15 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
   // Port for the scheduler to connect to
   NetworkOptions controller_options;
   controller_options.set_host(myhost_name_);
-  controller_options.set_port(controller_port_);
+  controller_options.set_port(tmaster_controller_port_);
   controller_options.set_max_packet_size(
       config::HeronInternalsConfigReader::Instance()
           ->GetHeronTmasterNetworkControllerOptionsMaximumPacketMb() *
       1_MB);
   controller_options.set_socket_family(PF_INET);
-  controller_ = new TController(eventLoop_, controller_options, this);
+  tmaster_controller_ = new TController(eventLoop_, controller_options, this);
 
-  retval = controller_->Start();
+  retval = tmaster_controller_->Start();
   if (retval != SP_OK) {
     LOG(FATAL) << "Failed to start TMaster Controller Server with rcode: " << retval;
   }
@@ -592,7 +592,7 @@ void TMaster::HandleStatefulCheckpointSave(std::string _oldest_ckpt) {
 
 // Called when ckptmgr completes the clean stateful checkpoint request
 void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status) {
-  controller_->HandleCleanStatefulCheckpointResponse(_status);
+  tmaster_controller_->HandleCleanStatefulCheckpointResponse(_status);
 }
 
 proto::system::Status* TMaster::RegisterStMgr(
