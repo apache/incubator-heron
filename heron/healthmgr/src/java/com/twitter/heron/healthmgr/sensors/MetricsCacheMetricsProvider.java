@@ -38,27 +38,22 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import net.minidev.json.JSONArray;
 
-import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static com.twitter.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
+import static com.twitter.heron.metricscachemgr.MetricsCacheManagerHttpServer.PATH_STATS;
 
 public class MetricsCacheMetricsProvider implements MetricsProvider {
-  public static final String CONF_TRACKER_URL = "TRACKER_URL";
-
   private static final Logger LOG = Logger.getLogger(MetricsCacheMetricsProvider.class.getName());
   private final WebTarget baseTarget;
 
   private Clock clock = new Clock();
 
   @Inject
-  public MetricsCacheMetricsProvider(@Named(CONF_TRACKER_URL) String metricsCacheURL) {
+  public MetricsCacheMetricsProvider(@Named(CONF_METRICS_SOURCE_URL) String metricsCacheURL) {
     LOG.info("Metrics will be provided by MetricsCache at :" + metricsCacheURL);
 
     Client client = ClientBuilder.newClient();
 
-    this.baseTarget = client.target(metricsCacheURL)
-        .path("topologies/metricstimeline")
-        .queryParam("cluster", cluster)
-        .queryParam("environ", environ)
-        .queryParam("topology", topologyName);
+    this.baseTarget = client.target(metricsCacheURL).path(PATH_STATS);
   }
 
   @Override

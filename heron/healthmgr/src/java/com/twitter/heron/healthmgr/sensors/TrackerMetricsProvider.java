@@ -39,9 +39,9 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 import net.minidev.json.JSONArray;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static com.twitter.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
 
 public class TrackerMetricsProvider implements MetricsProvider {
-  public static final String CONF_TRACKER_URL = "TRACKER_URL";
   public static final String CONF_CLUSTER = "CLUSTER";
   public static final String CONF_ENVIRON = "ENVIRON";
 
@@ -51,7 +51,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
   private Clock clock = new Clock();
 
   @Inject
-  public TrackerMetricsProvider(@Named(CONF_TRACKER_URL) String trackerURL,
+  public TrackerMetricsProvider(@Named(CONF_METRICS_SOURCE_URL) String trackerURL,
                                 @Named(CONF_TOPOLOGY_NAME) String topologyName,
                                 @Named(CONF_CLUSTER) String cluster,
                                 @Named(CONF_ENVIRON) String environ) {
