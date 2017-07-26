@@ -63,7 +63,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   start_time_ = std::chrono::high_resolution_clock::now();
   zk_hostport_ = _zk_hostport;
   topdir_ = _topdir;
-  tmaster_controller_ = NULL;
+  tmaster_controller_ = nullptr;
   tmaster_controller_port_ = _tmaster_controller_port;
   master_ = NULL;
   master_port_ = _master_port;
