@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
-import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
@@ -250,7 +249,7 @@ public class StreamExecutor implements Runnable {
   // Do the XOR control and send the ack tuples to instance if necessary
   protected void processAcksAndFails(int taskId,
                                      HeronTuples.HeronControlTupleSet controlTupleSet) {
-    StreamManager.TupleMessage.Builder out = StreamManager.TupleMessage.newBuilder();
+    HeronTuples.HeronTupleSet.Builder out = HeronTuples.HeronTupleSet.newBuilder();
 
     // First go over emits. This makes sure that new emits makes
     // a tuples stay alive before we process its acks
@@ -266,7 +265,7 @@ public class StreamExecutor implements Runnable {
         if (xorManager.anchor(taskId, rootId.getKey(), ackTuple.getAckedtuple())) {
           // This tuple tree is all over
 
-          HeronTuples.AckTuple.Builder a = out.getSetBuilder().getControlBuilder().addAcksBuilder();
+          HeronTuples.AckTuple.Builder a = out.getControlBuilder().addAcksBuilder();
           HeronTuples.RootId.Builder r = a.addRootsBuilder();
 
           r.setKey(rootId.getKey());
@@ -286,7 +285,7 @@ public class StreamExecutor implements Runnable {
           // This tuple tree is failed
 
           HeronTuples.AckTuple.Builder f =
-              out.getSetBuilder().getControlBuilder().addFailsBuilder();
+              out.getControlBuilder().addFailsBuilder();
           HeronTuples.RootId.Builder r = f.addRootsBuilder();
 
           r.setKey(rootId.getKey());
@@ -297,7 +296,7 @@ public class StreamExecutor implements Runnable {
     }
 
     // Check if we need to send ack tuples to spout task
-    if (out.hasSet()) {
+    if (out.hasControl()) {
       sendMessageToInstance(taskId, out.build());
     }
   }
@@ -326,10 +325,7 @@ public class StreamExecutor implements Runnable {
   // Send Stream to instance
   protected void sendInBound(int taskId, HeronTuples.HeronTupleSet message) {
     if (message.hasData()) {
-      StreamManager.TupleMessage.Builder out = StreamManager.TupleMessage.newBuilder();
-      out.getSetBuilder().setData(message.getData());
-
-      sendMessageToInstance(taskId, out.build());
+      sendMessageToInstance(taskId, message);
     }
 
     if (message.hasControl()) {
@@ -338,8 +334,8 @@ public class StreamExecutor implements Runnable {
   }
 
   // Send one message to target task
-  protected void sendMessageToInstance(int taskId, StreamManager.TupleMessage message) {
-    taskIdToInstanceExecutor.get(taskId).getStreamInQueue().offer(message.getSet());
+  protected void sendMessageToInstance(int taskId, HeronTuples.HeronTupleSet message) {
+    taskIdToInstanceExecutor.get(taskId).getStreamInQueue().offer(message);
   }
 
   protected WakeableLooper createWakeableLooper() {
