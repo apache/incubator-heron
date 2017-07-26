@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -112,32 +113,35 @@ public class SpoutInstanceTest {
       public void run() {
         for (int i = 0; i < Constants.RETRY_TIMES; i++) {
           if (slaveTester.getOutStreamQueue().size() != 0) {
-            HeronTuples.HeronTupleSet set = slaveTester.getOutStreamQueue().poll();
+            Message msg = slaveTester.getOutStreamQueue().poll();
+            if (msg instanceof HeronTuples.HeronTupleSet) {
+              HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
 
-            Assert.assertTrue(set.isInitialized());
-            Assert.assertFalse(set.hasControl());
-            Assert.assertTrue(set.hasData());
+              Assert.assertTrue(set.isInitialized());
+              Assert.assertFalse(set.hasControl());
+              Assert.assertTrue(set.hasData());
 
-            HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
-            streamId = dataTupleSet.getStream().getId();
-            componentName = dataTupleSet.getStream().getComponentName();
-            Assert.assertEquals(streamId, "default");
-            Assert.assertEquals(componentName, "test-spout");
+              HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+              streamId = dataTupleSet.getStream().getId();
+              componentName = dataTupleSet.getStream().getComponentName();
+              Assert.assertEquals(streamId, "default");
+              Assert.assertEquals(componentName, "test-spout");
 
-            Assert.assertEquals(streamId, "default");
-            Assert.assertEquals(componentName, "test-spout");
+              Assert.assertEquals(streamId, "default");
+              Assert.assertEquals(componentName, "test-spout");
 
-            for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
-              for (ByteString b : dataTuple.getValuesList()) {
-                receivedTupleStrings += serializer.deserialize(b.toByteArray());
+              for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
+                for (ByteString b : dataTuple.getValuesList()) {
+                  receivedTupleStrings += serializer.deserialize(b.toByteArray());
+                }
               }
+              tupleReceived += dataTupleSet.getTuplesCount();
             }
-            tupleReceived += dataTupleSet.getTuplesCount();
-          }
-          if (tupleReceived == 10) {
-            Assert.assertEquals("ABABABABAB", receivedTupleStrings);
-            slaveTester.getTestLooper().exitLoop();
-            break;
+            if (tupleReceived == 10) {
+              Assert.assertEquals("ABABABABAB", receivedTupleStrings);
+              slaveTester.getTestLooper().exitLoop();
+              break;
+            }
           }
         }
       }
@@ -315,15 +319,18 @@ public class SpoutInstanceTest {
 
   private void drainOutStream() {
     while (slaveTester.getOutStreamQueue().size() != 0) {
-      HeronTuples.HeronTupleSet set = slaveTester.getOutStreamQueue().poll();
+      Message msg = slaveTester.getOutStreamQueue().poll();
+      if (msg instanceof HeronTuples.HeronTupleSet) {
+        HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
 
-      Assert.assertTrue(set.isInitialized());
-      Assert.assertTrue(set.hasData());
+        Assert.assertTrue(set.isInitialized());
+        Assert.assertTrue(set.hasData());
 
-      HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+        HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
 
-      tupleReceived += dataTupleSet.getTuplesCount();
-      heronDataTupleList.addAll(dataTupleSet.getTuplesList());
+        tupleReceived += dataTupleSet.getTuplesCount();
+        heronDataTupleList.addAll(dataTupleSet.getTuplesList());
+      }
     }
   }
 

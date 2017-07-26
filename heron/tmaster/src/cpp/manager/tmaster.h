@@ -36,6 +36,8 @@ class TController;
 class StatsInterface;
 class TMasterServer;
 class TMetricsCollector;
+class StatefulController;
+class CkptMgrClient;
 
 typedef std::map<std::string, StMgrState*> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
@@ -45,7 +47,8 @@ class TMaster {
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
           const std::string& _topology_id, const std::string& _topdir,
           sp_int32 _controller_port, sp_int32 _master_port,
-          sp_int32 _stats_port, sp_int32 metricsMgrPort, const std::string& metrics_sinks_yaml,
+          sp_int32 _stats_port, sp_int32 metricsMgrPort, sp_int32 _ckptmgr_port,
+          const std::string& metrics_sinks_yaml,
           const std::string& _myhost_name, EventLoop* eventLoop);
 
   virtual ~TMaster();
@@ -67,6 +70,8 @@ class TMaster {
 
   // Called by http server upon receiving a user message to cleanup the state
   void CleanAllStatefulCheckpoint();
+  // Called by ckptmgr client upon receiving CleanStatefulCheckpointResponse
+  void HandleCleanStatefulCheckpointResponse(proto::system::StatusCode);
 
   // Get stream managers registration summary
   proto::tmaster::StmgrsRegistrationSummaryResponse* GetStmgrsRegSummary();
@@ -79,7 +84,27 @@ class TMaster {
   // Now used in GetMetrics function in tmetrics-collector
   const proto::api::Topology* getInitialTopology() const { return topology_; }
 
+  // Timer function to start the stateful checkpoint process
+  void SendCheckpointMarker();
+
+  // Called by tmaster server when it gets InstanceStateStored message
+  void HandleInstanceStateStored(const std::string& _checkpoint_id,
+                                 const proto::system::Instance& _instance);
+
+  // Called by tmaster server when it gets RestoreTopologyStateResponse message
+  void HandleRestoreTopologyStateResponse(Connection* _conn,
+                                          const std::string& _checkpoint_id,
+                                          int64_t _restore_txid,
+                                          proto::system::StatusCode _status);
+
+  // Called by tmaster server when it gets ResetTopologyState message
+  void ResetTopologyState(Connection* _conn, const std::string& _dead_stmgr,
+                          int32_t _dead_instance, const std::string& _reason);
+
  private:
+  // Helper function to fetch physical plan
+  void FetchPhysicalPlan();
+
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
 
@@ -109,6 +134,15 @@ class TMaster {
   // Function called after we get the topology
   void GetTopologyDone(proto::system::StatusCode _code);
 
+  // Function called after we get StatefulConsistentCheckpoints
+  void GetStatefulCheckpointsDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
+                                  proto::system::StatusCode _code);
+  // Function called after we set an initial StatefulConsistentCheckpoints
+  void SetStatefulCheckpointsDone(proto::system::StatusCode _code,
+                            proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
+  // Helper function to setup stateful coordinator
+  void SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
+
   // Function called after we try to get assignment
   void GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan, proto::system::StatusCode _code);
 
@@ -124,6 +158,9 @@ class TMaster {
                           proto::system::StatusCode _status);
 
   void UpdateProcessMetrics(EventLoop::Status);
+
+  // Function called when a new stateful ckpt record is saved
+  void HandleStatefulCheckpointSave(std::string _oldest_ckpt);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;
@@ -179,11 +216,18 @@ class TMaster {
   // Metrics Manager
   heron::common::MetricsMgrSt* mMetricsMgrClient;
 
+  // Ckpt Manager
+  CkptMgrClient* ckptmgr_client_;
+  sp_int32 ckptmgr_port_;
+
   // Process related metrics
   heron::common::MultiAssignableMetric* tmasterProcessMetrics;
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;
+
+  // Stateful Controller
+  StatefulController* stateful_controller_;
 
   // Copy of the EventLoop
   EventLoop* eventLoop_;
