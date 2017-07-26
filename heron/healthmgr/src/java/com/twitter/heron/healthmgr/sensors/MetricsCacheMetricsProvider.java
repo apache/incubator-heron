@@ -15,6 +15,7 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
+import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -35,6 +36,11 @@ import com.jayway.jsonpath.JsonPath;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.twitter.heron.proto.system.Common.StatusCode;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.proto.tmaster.TopologyMaster.MetricInterval;
+import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
+import com.twitter.heron.spi.utils.NetworkUtils;
 
 import net.minidev.json.JSONArray;
 
@@ -43,7 +49,7 @@ import static com.twitter.heron.metricscachemgr.MetricsCacheManagerHttpServer.PA
 
 public class MetricsCacheMetricsProvider implements MetricsProvider {
   private static final Logger LOG = Logger.getLogger(MetricsCacheMetricsProvider.class.getName());
-  private final WebTarget baseTarget;
+  private HttpURLConnection con;
 
   private Clock clock = new Clock();
 
@@ -51,9 +57,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   public MetricsCacheMetricsProvider(@Named(CONF_METRICS_SOURCE_URL) String metricsCacheURL) {
     LOG.info("Metrics will be provided by MetricsCache at :" + metricsCacheURL);
 
-    Client client = ClientBuilder.newClient();
-
-    this.baseTarget = client.target(metricsCacheURL).path(PATH_STATS);
+    String url = metricsCacheURL + PATH_STATS;
+    con = NetworkUtils.getHttpConnection(url);
   }
 
   @Override
@@ -81,16 +86,15 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
 
   @VisibleForTesting
   @SuppressWarnings("unchecked")
-  Map<String, InstanceMetrics> parse(String response, String component, String metric) {
+  Map<String, InstanceMetrics> parse(
+      TopologyMaster.MetricResponse response, String component, String metric) {
     Map<String, InstanceMetrics> metricsData = new HashMap<>();
 
-    if (response == null || response.isEmpty()) {
+    if (response == null || !response.getStatus().getStatus().equals(StatusCode.OK)) {
       return metricsData;
     }
 
-    DocumentContext result = JsonPath.parse(response);
-    JSONArray jsonArray = result.read("$.." + metric);
-    if (jsonArray.size() != 1) {
+    if (response.getMetricCount() == 0) {
       LOG.info(String.format("Did not get any metrics from tracker for %s:%s ", component, metric));
       return metricsData;
     }
@@ -101,33 +105,44 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
       return metricsData;
     }
 
-    for (String instanceName : metricsMap.keySet()) {
-      Map<String, String> tmpValues = (Map<String, String>) metricsMap.get(instanceName);
-      Map<Instant, Double> values = new HashMap<>();
-      for (String timeStamp : tmpValues.keySet()) {
-        values.put(Instant.ofEpochSecond(Long.parseLong(timeStamp)),
-            Double.parseDouble(tmpValues.get(timeStamp)));
-      }
-      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
-      instanceMetrics.addMetric(metric, values);
-      metricsData.put(instanceName, instanceMetrics);
+    for (TaskMetric tm :response.getMetricList()) {
+      // TODO(huijun): convert heron.protobuf.taskMetrics to dhalion.InstanceMetrics
     }
+//    for (String instanceName : metricsMap.keySet()) {
+//      Map<String, String> tmpValues = (Map<String, String>) metricsMap.get(instanceName);
+//      Map<Instant, Double> values = new HashMap<>();
+//      for (String timeStamp : tmpValues.keySet()) {
+//        values.put(Instant.ofEpochSecond(Long.parseLong(timeStamp)),
+//            Double.parseDouble(tmpValues.get(timeStamp)));
+//      }
+//      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
+//      instanceMetrics.addMetric(metric, values);
+//      metricsData.put(instanceName, instanceMetrics);
+//    }
 
     return metricsData;
   }
 
   @VisibleForTesting
-  String getMetricsFromMetricsCache(String metric, String component, Instant start, Duration duration) {
-    WebTarget target = baseTarget
-        .queryParam("metricname", metric)
-        .queryParam("component", component)
-        .queryParam("starttime", start.getEpochSecond())
-        .queryParam("endtime", start.getEpochSecond() + duration.getSeconds());
+  TopologyMaster.MetricResponse getMetricsFromMetricsCache(String metric, String component, Instant start, Duration duration) {
+    TopologyMaster.MetricRequest request = TopologyMaster.MetricRequest.newBuilder()
+        .setComponentName(component)
+        .setExplicitInterval(
+            MetricInterval.newBuilder()
+            .setStart(start.getEpochSecond())
+            .setEnd(start.plus(duration).getEpochSecond())
+            .build())
+        .addMetric(metric)
+        .build();
+    LOG.info("MetricsCache Query request: " + request.toString());
 
-    LOG.info("Tracker Query URI: " + target.getUri());
-
-    Response r = target.request(MediaType.APPLICATION_JSON_TYPE).get();
-    return r.readEntity(String.class);
+    NetworkUtils.sendHttpPostRequest(con, "X", request.toByteArray());
+    byte[] responseData = NetworkUtils.readHttpResponse(con);
+    
+    TopologyMaster.MetricResponse response = 
+      TopologyMaster.MetricResponse.parseFrom(responseData);
+    LOG.info("MetricsCache Query response: " + response.toString());
+    return response;
   }
 
   @VisibleForTesting
