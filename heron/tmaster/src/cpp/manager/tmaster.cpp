@@ -336,7 +336,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
     // We also need to load latest checkpoint state
     auto ckpt = new proto::ckptmgr::StatefulConsistentCheckpoints();
     auto cb = [ckpt, this](proto::system::StatusCode code) {
-      this->GetStatefulCheckpointDone(ckpt, code);
+      this->GetStatefulCheckpointsDone(ckpt, code);
     };
 
     state_mgr_->GetStatefulCheckpoints(tmaster_location_->topology_name(), ckpt, std::move(cb));
@@ -346,8 +346,8 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   }
 }
 
-void TMaster::GetStatefulCheckpointDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
-                                        proto::system::StatusCode _code) {
+void TMaster::GetStatefulCheckpointsDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
+                                         proto::system::StatusCode _code) {
   if (_code != proto::system::OK && _code != proto::system::PATH_DOES_NOT_EXIST) {
     LOG(FATAL) << "For topology " << tmaster_location_->topology_name()
                << " Getting Stateful Checkpoint failed with error " << _code;
@@ -363,7 +363,7 @@ void TMaster::GetStatefulCheckpointDone(proto::ckptmgr::StatefulConsistentCheckp
     ckpt->set_checkpoint_id("");
     ckpt->set_packing_plan_id(packing_plan_->id());
     auto cb = [this, ckpts](proto::system::StatusCode code) {
-      this->SetStatefulCheckpointDone(code, ckpts);
+      this->SetStatefulCheckpointsDone(code, ckpts);
     };
 
     state_mgr_->CreateStatefulCheckpoints(tmaster_location_->topology_name(),
@@ -377,7 +377,7 @@ void TMaster::GetStatefulCheckpointDone(proto::ckptmgr::StatefulConsistentCheckp
   }
 }
 
-void TMaster::SetStatefulCheckpointDone(proto::system::StatusCode _code,
+void TMaster::SetStatefulCheckpointsDone(proto::system::StatusCode _code,
                              proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt) {
   if (_code != proto::system::OK) {
     LOG(FATAL) << "For topology " << tmaster_location_->topology_name()
@@ -393,7 +393,7 @@ void TMaster::SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoi
   CHECK_GT(stateful_checkpoint_interval, 0);
 
   auto cb = [this](std::string _oldest_ckptid) {
-    this->HandleStatefulCkptSave(_oldest_ckptid);
+    this->HandleStatefulCheckpointSave(_oldest_ckptid);
   };
   // Instantiate the stateful restorer/coordinator
   stateful_controller_ = new StatefulController(topology_->name(), _ckpt, state_mgr_, start_time_,
@@ -586,7 +586,7 @@ void TMaster::CleanAllStatefulCheckpoint() {
   ckptmgr_client_->SendCleanStatefulCheckpointRequest("", true);
 }
 
-void TMaster::HandleStatefulCkptSave(std::string _oldest_ckpt) {
+void TMaster::HandleStatefulCheckpointSave(std::string _oldest_ckpt) {
   ckptmgr_client_->SendCleanStatefulCheckpointRequest(_oldest_ckpt, false);
 }
 
@@ -715,7 +715,7 @@ void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
     auto cb = [this](EventLoop::Status status) { this->DoPhysicalPlan(status); };
     CHECK_GE(eventLoop_->registerTimer(std::move(cb), false, 0), 0);
   } else {
-    bool first_time_pplan = current_pplan_ == NULL;
+    bool first_time_pplan = current_pplan_ == nullptr;
     delete current_pplan_;
     current_pplan_ = _pplan;
     assignment_in_progress_ = false;

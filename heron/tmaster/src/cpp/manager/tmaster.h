@@ -135,10 +135,10 @@ class TMaster {
   void GetTopologyDone(proto::system::StatusCode _code);
 
   // Function called after we get StatefulConsistentCheckpoints
-  void GetStatefulCheckpointDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
-                                 proto::system::StatusCode _code);
+  void GetStatefulCheckpointsDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
+                                  proto::system::StatusCode _code);
   // Function called after we set an initial StatefulConsistentCheckpoints
-  void SetStatefulCheckpointDone(proto::system::StatusCode _code,
+  void SetStatefulCheckpointsDone(proto::system::StatusCode _code,
                             proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
   // Helper function to setup stateful coordinator
   void SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
@@ -160,7 +160,7 @@ class TMaster {
   void UpdateProcessMetrics(EventLoop::Status);
 
   // Function called when a new stateful ckpt record is saved
-  void HandleStatefulCkptSave(std::string _oldest_ckpt);
+  void HandleStatefulCheckpointSave(std::string _oldest_ckpt);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;
