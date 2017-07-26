@@ -142,11 +142,11 @@ public abstract class AbstractTupleRoutingTest {
             assertEquals((Integer) tupleReceived, destTaskIds.get(0));
             tupleReceived++;
           }
-
-          assertEquals(expectedTuplesValidated, tupleReceived);
-          assertEquals(getExpectedComponentInitInfo(), groupingInitInfo.toString());
-          slaveTester.getTestLooper().exitLoop();
         }
+
+        assertEquals(expectedTuplesValidated, tupleReceived);
+        assertEquals(getExpectedComponentInitInfo(), groupingInitInfo.toString());
+        slaveTester.getTestLooper().exitLoop();
       }
     };
 
