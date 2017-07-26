@@ -96,19 +96,6 @@ class SingleThreadHeronInstance(object):
     self.looper.add_wakeup_task(self.send_buffered_messages)
     self.looper.loop()
 
-  def handle_new_tuple_set(self, tuple_msg_set):
-    """Called when new TupleMessage arrives
-
-    :param tuple_msg_set: HeronTupleSet type
-    """
-    if self.my_pplan_helper is None or self.my_instance is None:
-      Log.error("Got tuple set when no instance assigned yet")
-    else:
-      # First add message to the in_stream
-      self.in_stream.offer(tuple_msg_set)
-      if self.my_pplan_helper.is_topology_running():
-        self.my_instance.py_class.process_incoming_tuples()
-
   def handle_new_tuple_set_2(self, hts2):
     """Called when new HeronTupleSet2 arrives
        Convert(Assemble) HeronTupleSet2(raw byte array) to HeronTupleSet
