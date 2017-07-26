@@ -16,6 +16,7 @@ package com.twitter.heron.instance;
 
 import com.google.protobuf.Message;
 
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.classification.InterfaceAudience;
 import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.common.basics.Communicator;
@@ -30,7 +31,7 @@ public interface IInstance {
   /**
    * Do the basic setup for HeronInstance
    */
-  void start();
+  void start(State<byte[], byte[]> state);
 
   /**
    * Do the basic clean for HeronInstance
