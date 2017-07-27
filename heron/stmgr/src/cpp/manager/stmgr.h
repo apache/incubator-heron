@@ -72,7 +72,7 @@ class StMgr {
   void HandleStreamManagerData(const sp_string& _stmgr_id,
                                proto::stmgr::TupleStreamMessage* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
-                          proto::system::HeronTupleSet* _message);
+                          proto::system::HeronTupleSet2* _message);
   // Called when an instance does checkpoint and sends its checkpoint
   // to the stmgr to save it
   void HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint& _message,

@@ -414,7 +414,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
 }
 
 void StMgrServer::HandleTupleSetMessage(Connection* _conn,
-                                        proto::system::HeronTupleSet* _message) {
+                                        proto::system::HeronTupleSet2* _message) {
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping..";

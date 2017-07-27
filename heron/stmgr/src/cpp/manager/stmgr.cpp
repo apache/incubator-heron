@@ -711,7 +711,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
-                               proto::system::HeronTupleSet* _message) {
+                               proto::system::HeronTupleSet2* _message) {
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from instance " << _src_task_id
               << " because we are in Restore";
@@ -724,7 +724,7 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
   // before any acks/fails
 
   if (_message->has_data()) {
-    proto::system::HeronDataTupleSet* d = _message->mutable_data();
+    proto::system::HeronDataTupleSet2* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =
         make_pair(d->stream().component_name(), d->stream().id());
     auto s = stream_consumers_.find(stream);
