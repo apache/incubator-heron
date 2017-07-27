@@ -460,18 +460,17 @@ maven_jar(
 )
 # end Google Cloud
 
-# Pulsar Client
+# for pulsar Client
 maven_jar(
   name = "yahoo_pulsar_client",
   artifact = "com.yahoo.pulsar:pulsar-client:jar:shaded:1.18"
 )
-# end Pulsar Client
 
 # for pex rules
 git_repository(
     name = "io_bazel_rules_pex",
     remote = "https://github.com/streamlio/bazel_rules_pex.git",
-    tag = "0.3.3",
+    tag = "0.3.8",
 )
 load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_repositories")
 pex_repositories()
