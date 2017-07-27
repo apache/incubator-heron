@@ -245,7 +245,9 @@ public class Slave implements Runnable, AutoCloseable {
     }
 
     // Restore the state
-    instanceState.clear();
+    if (instanceState != null) {
+      instanceState.clear();
+    }
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<? extends Serializable, ? extends Serializable> stateToRestore =
