@@ -14,12 +14,13 @@
 
 package com.twitter.heron.simulator.instance;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.proto.system.HeronTuples;
 
 /**
  * BoltOutputCollectorImpl is used by bolt to emit tuples, it contains:
@@ -45,7 +46,7 @@ public class BoltOutputCollectorImpl
 
   public BoltOutputCollectorImpl(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
-                                 Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                 Communicator<Message> streamOutQueue,
                                  BoltMetrics boltMetrics) {
     super(serializer, helper, streamOutQueue, boltMetrics);
   }

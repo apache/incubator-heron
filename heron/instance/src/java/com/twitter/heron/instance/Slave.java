@@ -17,6 +17,8 @@ package com.twitter.heron.instance;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -27,7 +29,6 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 
 /**
@@ -43,8 +44,8 @@ public class Slave implements Runnable, AutoCloseable {
   private final SlaveLooper slaveLooper;
   private final MetricsCollector metricsCollector;
   // Communicator
-  private final Communicator<HeronTuples.HeronTupleSet> streamInCommunicator;
-  private final Communicator<HeronTuples.HeronTupleSet> streamOutCommunicator;
+  private final Communicator<Message> streamInCommunicator;
+  private final Communicator<Message> streamOutCommunicator;
   private final Communicator<InstanceControlMsg> inControlQueue;
   private IInstance instance;
   private PhysicalPlanHelper helper;
@@ -53,8 +54,8 @@ public class Slave implements Runnable, AutoCloseable {
   private boolean isInstanceStarted = false;
 
   public Slave(SlaveLooper slaveLooper,
-               final Communicator<HeronTuples.HeronTupleSet> streamInCommunicator,
-               final Communicator<HeronTuples.HeronTupleSet> streamOutCommunicator,
+               final Communicator<Message> streamInCommunicator,
+               final Communicator<Message> streamOutCommunicator,
                final Communicator<InstanceControlMsg> inControlQueue,
                final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutCommunicator) {
     this.slaveLooper = slaveLooper;

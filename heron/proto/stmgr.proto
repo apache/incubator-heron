@@ -36,11 +36,6 @@ message NewInstanceAssignmentMessage {
   required heron.proto.system.PhysicalPlan pplan = 1;
 }
 
-// Tuples exchanged between stream managers and instances
-message TupleMessage {
-  required heron.proto.system.HeronTupleSet set = 1;
-}
-
 // messages exchanged between stream managers
 message StrMgrHelloRequest {
   required string topology_name = 1;
