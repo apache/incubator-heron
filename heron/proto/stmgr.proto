@@ -47,12 +47,6 @@ message StrMgrHelloResponse {
   required heron.proto.system.Status status = 1;
 }
 
-// Tuples exchanged between stream managers
-message TupleStreamMessage {
-  required int32 task_id = 1;
-  required heron.proto.system.HeronTupleSet set = 2;
-}
-
 message StartBackPressureMessage {
   required string topology_name = 1;
   required string topology_id = 2;
