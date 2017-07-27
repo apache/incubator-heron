@@ -70,7 +70,7 @@ class StMgr {
   // Called by tmaster client when a new physical plan is available
   void NewPhysicalPlan(proto::system::PhysicalPlan* pplan);
   void HandleStreamManagerData(const sp_string& _stmgr_id,
-                               proto::stmgr::TupleStreamMessage2* _message);
+                               proto::stmgr::TupleStreamMessage* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::system::HeronTupleSet* _message);
   // Called when an instance does checkpoint and sends its checkpoint
