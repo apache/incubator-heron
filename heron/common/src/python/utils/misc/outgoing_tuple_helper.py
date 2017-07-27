@@ -37,9 +37,9 @@ class OutgoingTupleHelper(object):
   :ivar current_data_tuple_set: (HeronDataTupleSet) currently buffered data tuple
   :ivar current_control_tuple_set: (HeronControlTupleSet) currently buffered control tuple
   """
-  make_data_tuple_set = lambda _: tuple_pb2.HeronDataTupleSet()
+  make_data_tuple_set = lambda _: tuple_pb2.HeronDataTupleSet2()
   make_control_tuple_set = lambda _: tuple_pb2.HeronControlTupleSet()
-  make_tuple_set = lambda _: tuple_pb2.HeronTupleSet()
+  make_tuple_set = lambda _: tuple_pb2.HeronTupleSet2()
   make_stream_id = lambda _: topology_pb2.StreamId()
 
   def __init__(self, pplan_helper, out_stream):
@@ -72,8 +72,7 @@ class OutgoingTupleHelper(object):
         (self.current_data_tuple_size_in_bytes >= self.max_data_tuple_size_in_bytes):
       self._init_new_data_tuple(stream_id)
 
-    added_tuple = self.current_data_tuple_set.tuples.add()
-    added_tuple.CopyFrom(new_data_tuple)
+    self.current_data_tuple_set.tuples.append(new_data_tuple.SerializeToString())
 
     self.current_data_tuple_size_in_bytes += tuple_size_in_bytes
     self.total_data_emitted_in_bytes += tuple_size_in_bytes
