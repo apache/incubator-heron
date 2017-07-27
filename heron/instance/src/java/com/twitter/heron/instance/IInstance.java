@@ -14,6 +14,8 @@
 
 package com.twitter.heron.instance;
 
+import java.io.Serializable;
+
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.state.State;
@@ -31,7 +33,7 @@ public interface IInstance {
   /**
    * Do the basic setup for HeronInstance
    */
-  void start(State<byte[], byte[]> state);
+  void start(State<? extends Serializable, ? extends Serializable> state);
 
   /**
    * Do the basic clean for HeronInstance

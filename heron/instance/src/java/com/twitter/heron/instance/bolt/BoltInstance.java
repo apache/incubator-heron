@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class BoltInstance implements IInstance {
   // The bolt will read Data tuples from streamInQueue
   private final Communicator<Message> streamInQueue;
 
-  private State<byte[], byte[]> instanceState;
+  private State<? extends Serializable, ? extends Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -143,7 +144,7 @@ public class BoltInstance implements IInstance {
   }
 
   @Override
-  public void start(State<byte[], byte[]> state) {
+  public void start(State<? extends Serializable, ? extends Serializable> state) {
     this.instanceState = state;
     start();
   }

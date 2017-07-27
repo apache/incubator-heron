@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,7 +63,7 @@ public class Slave implements Runnable, AutoCloseable {
 
   private boolean isInstanceStarted = false;
 
-  private final State<byte[], byte[]> instanceState;
+  private State<? extends Serializable, ? extends Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
 
   public Slave(SlaveLooper slaveLooper,
@@ -247,10 +248,11 @@ public class Slave implements Runnable, AutoCloseable {
     instanceState.clear();
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
-      Map<byte[], byte[]> stateToRestore = (Map<byte[], byte[]>) serializer.deserialize(
-          request.getState().getState().toByteArray());
+      State<? extends Serializable, ? extends Serializable> stateToRestore =
+          (State<? extends Serializable, ? extends Serializable>) serializer.deserialize(
+              request.getState().getState().toByteArray());
 
-      instanceState.putAll(stateToRestore);
+      instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
     }

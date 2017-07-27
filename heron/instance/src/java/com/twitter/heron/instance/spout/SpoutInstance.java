@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.spout;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -57,7 +58,7 @@ public class SpoutInstance implements IInstance {
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
 
-  private State<byte[], byte[]> instanceState;
+  private State<? extends Serializable, ? extends Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -161,7 +162,7 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
-  public void start(State<byte[], byte[]> state) {
+  public void start(State<? extends Serializable, ? extends Serializable> state) {
     this.instanceState = state;
     start();
   }
