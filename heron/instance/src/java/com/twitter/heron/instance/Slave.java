@@ -55,7 +55,7 @@ public class Slave implements Runnable, AutoCloseable {
   private final Communicator<Message> streamOutCommunicator;
   private final Communicator<InstanceControlMsg> inControlQueue;
   private final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutCommunicator;
-  private final IPluggableSerializer serializer;
+  private IPluggableSerializer serializer;
   private IInstance instance;
   private PhysicalPlanHelper helper;
   private SystemConfig systemConfig;
@@ -75,8 +75,6 @@ public class Slave implements Runnable, AutoCloseable {
     this.streamOutCommunicator = streamOutCommunicator;
     this.inControlQueue = inControlQueue;
     this.metricsOutCommunicator = metricsOutCommunicator;
-    this.serializer =
-        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // TODO (nlu): Create the state with corresponding type according to config
     instanceState = new HashMapState<>();
@@ -136,6 +134,10 @@ public class Slave implements Runnable, AutoCloseable {
     LOG.log(Level.INFO,
         "Incarnating ourselves as {0} with task id {1}",
         new Object[]{helper.getMyComponent(), helper.getMyTaskId()});
+
+    // Initialize serializer once we got the new physical plan
+    this.serializer =
+        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // During the initiation of instance,
     // we would add a bunch of tasks to slaveLooper's tasksOnWakeup
