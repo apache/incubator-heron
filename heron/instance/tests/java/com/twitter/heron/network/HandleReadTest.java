@@ -30,7 +30,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.network.OutgoingPacket;
 import com.twitter.heron.common.network.REQID;
 import com.twitter.heron.common.testhelpers.HeronServerTester;
-import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.UnitTestHelper;
 
@@ -103,10 +102,10 @@ public class HandleReadTest extends AbstractNetworkTest {
   }
 
   private Message constructMockMessage() {
-    StreamManager.TupleMessage.Builder message = StreamManager.TupleMessage.newBuilder();
-    HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
+    HeronTuples.HeronTupleSet2.Builder heronTupleSet = HeronTuples.HeronTupleSet2.newBuilder();
     heronTupleSet.setSrcTaskId(SRC_TASK_ID);
-    HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
+    HeronTuples.HeronDataTupleSet2.Builder dataTupleSet =
+                                  HeronTuples.HeronDataTupleSet2.newBuilder();
     TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
     streamId.setComponentName("test-spout");
     streamId.setId("default");
@@ -125,12 +124,12 @@ public class HandleReadTest extends AbstractNetworkTest {
       String tupleData = ((i & 1) == 0) ? "A" : "B";
       dataTuple.addValues(ByteString.copyFrom(tupleData.getBytes()));
 
-      dataTupleSet.addTuples(dataTuple);
+      byte[] bytes = dataTuple.build().toByteArray();
+      dataTupleSet.addTuples(ByteString.copyFrom(bytes));
     }
 
     heronTupleSet.setData(dataTupleSet);
-    message.setSet(heronTupleSet);
 
-    return message.build();
+    return heronTupleSet.build();
   }
 }
