@@ -77,8 +77,8 @@ public class Slave implements Runnable, AutoCloseable {
     this.inControlQueue = inControlQueue;
     this.metricsOutCommunicator = metricsOutCommunicator;
 
-    // TODO (nlu): Create the state with corresponding type according to config
-    instanceState = new HashMapState<>();
+    // The instance state will be provided by stream manager with RestoreInstanceStateRequests
+    instanceState = null;
     isStatefulProcessingStarted = false;
 
     this.systemConfig =

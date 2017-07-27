@@ -31,6 +31,7 @@ import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -260,6 +261,21 @@ public class StreamManagerClient extends HeronClient {
         lastNotConnectedLogTime = now;
       }
     }
+  }
+
+  private void handleStartStatefulRequest(
+      CheckpointManager.StartInstanceStatefulProcessing startRequest) {
+    LOG.info("Received a StartInstanceStatefulProcessing: " + startRequest);
+
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setStartInstanceStatefulProcessing(startRequest)
+        .build();
+    inControlQueue.offer(instanceControlMsg);
+  }
+
+  private void handleRestoreInstanceStateRequest(
+      CheckpointManager.RestoreInstanceStateRequest restoreInstanceStateRequest) {
+
   }
 
   private void handleRegisterResponse(StreamManager.RegisterInstanceResponse response) {
