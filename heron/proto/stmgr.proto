@@ -62,7 +62,7 @@ message StopBackPressureMessage {
 }
 
 // Tuples exchanged between stream managers
-message TupleStreamMessage2 {
+message TupleStreamMessage {
   // The src_task of this message
   required int32 src_task_id = 3;
   // This is actually the destination task_id
