@@ -280,12 +280,15 @@ public class Slave implements Runnable, AutoCloseable {
       helper = newHelper;
       handleNewAssignment();
     } else {
+      TopologyAPI.TopologyState oldTopologyState = helper.getTopologyState();
+      // Update the PhysicalPlanHelper
+      helper = newHelper;
 
-      instance.update(newHelper);
+      instance.update(helper);
 
       // Handle the state changing
-      if (!helper.getTopologyState().equals(newHelper.getTopologyState())) {
-        switch (newHelper.getTopologyState()) {
+      if (!oldTopologyState.equals(helper.getTopologyState())) {
+        switch (helper.getTopologyState()) {
           case RUNNING:
             if (!isInstanceStarted) {
               // Start the instance if it has not yet started
@@ -298,14 +301,11 @@ public class Slave implements Runnable, AutoCloseable {
             break;
           default:
             throw new RuntimeException("Unexpected TopologyState is updated for spout: "
-                + newHelper.getTopologyState());
+                + helper.getTopologyState());
         }
       } else {
-        LOG.info("Topology state remains the same in Slave: " + helper.getTopologyState());
+        LOG.info("Topology state remains the same in Slave: " + oldTopologyState);
       }
-
-      // update the PhysicalPlanHelper in Slave
-      helper = newHelper;
     }
   }
 }
