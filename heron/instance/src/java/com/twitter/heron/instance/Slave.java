@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
-import com.twitter.heron.api.state.HashMapState;
 import com.twitter.heron.api.state.State;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
