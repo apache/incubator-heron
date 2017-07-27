@@ -61,11 +61,6 @@ message StopBackPressureMessage {
   required string message_id = 4;
 }
 
-// Tuples exchanged between stream managers and instances
-message TupleMessage2 {
-  required heron.proto.system.HeronTupleSet2 set = 1;
-}
-
 // Tuples exchanged between stream managers
 message TupleStreamMessage2 {
   // The src_task of this message
