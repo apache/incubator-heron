@@ -22,6 +22,7 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.state.HashMapState;
 import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.utils.Utils;
@@ -31,6 +32,7 @@ import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
@@ -54,6 +56,7 @@ public class Slave implements Runnable, AutoCloseable {
   private final Communicator<Message> streamOutCommunicator;
   private final Communicator<InstanceControlMsg> inControlQueue;
   private final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutCommunicator;
+  private final IPluggableSerializer serializer;
   private IInstance instance;
   private PhysicalPlanHelper helper;
   private SystemConfig systemConfig;
@@ -73,6 +76,8 @@ public class Slave implements Runnable, AutoCloseable {
     this.streamOutCommunicator = streamOutCommunicator;
     this.inControlQueue = inControlQueue;
     this.metricsOutCommunicator = metricsOutCommunicator;
+    this.serializer =
+        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // TODO (nlu): Create the state with corresponding type according to config
     instanceState = new HashMapState<>();
@@ -240,10 +245,10 @@ public class Slave implements Runnable, AutoCloseable {
     // Restore the state
     instanceState.clear();
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
-      // TODO(nlu): Add interface to allow customized serialization
       @SuppressWarnings("unchecked")
-      Map<byte[], byte[]> stateToRestore = (Map<byte[], byte[]>) Utils.deserialize(
+      Map<byte[], byte[]> stateToRestore = (Map<byte[], byte[]>) serializer.deserialize(
           request.getState().getState().toByteArray());
+
       instanceState.putAll(stateToRestore);
     } else {
       LOG.info("The restore request does not have an actual state");
