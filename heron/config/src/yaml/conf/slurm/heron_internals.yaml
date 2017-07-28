@@ -168,7 +168,7 @@ heron.metricsmgr.network.options.maximum.packetsize.bytes: 1048576
 ################################################################################
 
 # The maximum size of packets that instance can read
-heron.instance.network.options.maximum.packet.bytes: 10485760
+heron.instance.network.options.maximum.packetsize.bytes: 10485760
 
 # The queue capacity (num of items) in bolt for buffer packets to read from stream manager
 heron.instance.internal.bolt.read.queue.capacity: 128 
