@@ -142,20 +142,22 @@ void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
 void DummySpoutInstance::CreateAndSendTupleMessages() {
   for (int i = 0; (i < batch_size_) && (total_msgs_sent_ < max_msgs_to_send_);
        ++total_msgs_sent_, ++i) {
-    heron::proto::system::HeronTupleSet tuple_set;
-    heron::proto::system::HeronDataTupleSet* data_set = tuple_set.mutable_data();
+    heron::proto::system::HeronTupleSet2 tuple_set;
+    heron::proto::system::HeronDataTupleSet2* data_set = tuple_set.mutable_data();
     heron::proto::api::StreamId* tstream = data_set->mutable_stream();
     tstream->set_id(stream_id_);
     tstream->set_component_name(component_name_);
-    heron::proto::system::HeronDataTuple* tuple = data_set->add_tuples();
-    tuple->set_key(0);
+    heron::proto::system::HeronDataTuple tuple;
+    tuple.set_key(0);
     // Add lots of data
-    for (size_t i = 0; i < 500; ++i) *(tuple->add_values()) = "dummy data";
+    for (size_t i = 0; i < 500; ++i) *(tuple.add_values()) = "dummy data";
 
     // Add custom grouping if need be
     if (do_custom_grouping_) {
-      tuple->add_dest_task_ids(custom_grouping_dest_task_);
+      tuple.add_dest_task_ids(custom_grouping_dest_task_);
     }
+    std::string* tup = data_set->add_tuples();
+    tuple.SerializeToString(tup);
     SendMessage(tuple_set);
   }
   if (total_msgs_sent_ != max_msgs_to_send_) {

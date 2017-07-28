@@ -46,6 +46,7 @@ message HeronTupleSet {
 
 message HeronDataTupleSet2 {
   required heron.proto.api.StreamId stream = 1;
+  // serialized bytes of HeronDataTuple
   repeated bytes tuples = 2;
 }
 

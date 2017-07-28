@@ -103,9 +103,10 @@ public class BoltInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.RECEIVED_STRING_LIST, receivedStrings);
 
     // Send tuples to bolt instance
-    HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
+    HeronTuples.HeronTupleSet2.Builder heronTupleSet = HeronTuples.HeronTupleSet2.newBuilder();
     heronTupleSet.setSrcTaskId(SRC_TASK_ID);
-    HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
+    HeronTuples.HeronDataTupleSet2.Builder dataTupleSet =
+                                           HeronTuples.HeronDataTupleSet2.newBuilder();
     TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
     streamId.setComponentName("test-spout");
     streamId.setId("default");
@@ -124,7 +125,7 @@ public class BoltInstanceTest {
       String tupleValue = (i & 1) == 0 ? "A" : "B";
       dataTuple.addValues(ByteString.copyFrom(serializer.serialize(tupleValue)));
 
-      dataTupleSet.addTuples(dataTuple);
+      dataTupleSet.addTuples(dataTuple.build().toByteString());
     }
 
     heronTupleSet.setData(dataTupleSet);

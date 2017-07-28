@@ -117,7 +117,7 @@ class StMgrServer : public Server {
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
                                      proto::stmgr::RegisterInstanceRequest* _request);
-  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
+  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet2* _message);
   void HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
                                          proto::ckptmgr::StoreInstanceStateCheckpoint* _message);
   void HandleRestoreInstanceStateResponse(Connection* _conn,

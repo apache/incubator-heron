@@ -17,6 +17,8 @@ import unittest
 
 import heron.common.tests.python.utils.mock_generator as mock_generator
 
+from heron.proto import tuple_pb2
+
 class OutgoingTupleHelperTest(unittest.TestCase):
   DEFAULT_STREAM_ID = "stream_id"
   def setUp(self):
@@ -43,4 +45,6 @@ class OutgoingTupleHelperTest(unittest.TestCase):
 
     sent_data_tuple_set = out_helper.out_stream.poll().data
     self.assertEqual(sent_data_tuple_set.stream.id, self.DEFAULT_STREAM_ID)
-    self.assertEqual(sent_data_tuple_set.tuples[0], prim_data_tuple)
+    dtuple = tuple_pb2.HeronDataTuple()
+    dtuple.ParseFromString(sent_data_tuple_set.tuples[0])
+    self.assertEqual(dtuple, prim_data_tuple)

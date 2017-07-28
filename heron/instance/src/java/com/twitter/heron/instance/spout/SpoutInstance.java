@@ -376,8 +376,8 @@ public class SpoutInstance implements IInstance {
         persistState(checkpintId);
       }
 
-      if (msg instanceof HeronTuples.HeronTupleSet) {
-        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
+      if (msg instanceof HeronTuples.HeronTupleSet2) {
+        HeronTuples.HeronTupleSet2 tuples = (HeronTuples.HeronTupleSet2) msg;
         // For spout, it should read only control tuples(ack&fail)
         if (tuples.hasData()) {
           throw new RuntimeException("Spout cannot get incoming data tuples from other components");

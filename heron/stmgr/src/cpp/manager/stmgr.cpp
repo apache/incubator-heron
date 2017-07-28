@@ -711,7 +711,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
-                               proto::system::HeronTupleSet* _message) {
+                               proto::system::HeronTupleSet2* _message) {
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from instance " << _src_task_id
               << " because we are in Restore";
@@ -724,28 +724,30 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
   // before any acks/fails
 
   if (_message->has_data()) {
-    proto::system::HeronDataTupleSet* d = _message->mutable_data();
+    proto::system::HeronDataTupleSet2* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =
         make_pair(d->stream().component_name(), d->stream().id());
     auto s = stream_consumers_.find(stream);
     if (s != stream_consumers_.end()) {
       StreamConsumers* s_consumer = s->second;
+      proto::system::HeronDataTuple _tuple;
       for (sp_int32 i = 0; i < d->tuples_size(); ++i) {
-        proto::system::HeronDataTuple* _tuple = d->mutable_tuples(i);
+        _tuple.Clear();
+        _tuple.ParsePartialFromString(d->tuples(i));
         // just to make sure that instances do not set any key
-        CHECK_EQ(_tuple->key(), 0);
+        CHECK_EQ(_tuple.key(), 0);
         out_tasks_.clear();
-        s_consumer->GetListToSend(*_tuple, out_tasks_);
+        s_consumer->GetListToSend(_tuple, out_tasks_);
         // In addition to out_tasks_, the instance might have asked
         // us to send the tuple to some more tasks
-        for (sp_int32 j = 0; j < _tuple->dest_task_ids_size(); ++j) {
-          out_tasks_.push_back(_tuple->dest_task_ids(j));
+        for (sp_int32 j = 0; j < _tuple.dest_task_ids_size(); ++j) {
+          out_tasks_.push_back(_tuple.dest_task_ids(j));
         }
         if (out_tasks_.empty()) {
           LOG(ERROR) << "Nobody to send the tuple to";
         }
         // TODO(vikasr) Do a fast path that does not involve copying
-        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), _tuple, out_tasks_);
+        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), &_tuple, out_tasks_);
       }
     } else {
       LOG(ERROR) << "Nobody consumes stream " << stream.second << " from component "

@@ -42,7 +42,7 @@ public class OutgoingTupleCollection {
   private final int dataTupleSetCapacity;
   private final int controlTupleSetCapacity;
 
-  private HeronTuples.HeronDataTupleSet.Builder currentDataTuple;
+  private HeronTuples.HeronDataTupleSet2.Builder currentDataTuple;
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
 
   // Total data emitted in bytes for the entire life
@@ -83,7 +83,7 @@ public class OutgoingTupleCollection {
         || currentDataTupleSizeInBytes >= maxDataTupleSize.asBytes()) {
       initNewDataTuple(streamId);
     }
-    currentDataTuple.addTuples(newTuple);
+    currentDataTuple.addTuples(newTuple.build().toByteString());
 
     currentDataTupleSizeInBytes += tupleSizeInBytes;
     totalDataEmittedInBytes += tupleSizeInBytes;
@@ -122,7 +122,7 @@ public class OutgoingTupleCollection {
     TopologyAPI.StreamId.Builder sbldr = TopologyAPI.StreamId.newBuilder();
     sbldr.setId(streamId);
     sbldr.setComponentName(helper.getMyComponent());
-    currentDataTuple = HeronTuples.HeronDataTupleSet.newBuilder();
+    currentDataTuple = HeronTuples.HeronDataTupleSet2.newBuilder();
     currentDataTuple.setStream(sbldr);
   }
 
@@ -133,7 +133,7 @@ public class OutgoingTupleCollection {
 
   private void flushRemaining() {
     if (currentDataTuple != null) {
-      HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+      HeronTuples.HeronTupleSet2.Builder bldr = HeronTuples.HeronTupleSet2.newBuilder();
       bldr.setSrcTaskId(helper.getMyTaskId());
       bldr.setData(currentDataTuple);
 
@@ -142,7 +142,7 @@ public class OutgoingTupleCollection {
       currentDataTuple = null;
     }
     if (currentControlTuple != null) {
-      HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+      HeronTuples.HeronTupleSet2.Builder bldr = HeronTuples.HeronTupleSet2.newBuilder();
       bldr.setSrcTaskId(helper.getMyTaskId());
       bldr.setControl(currentControlTuple);
 
@@ -152,7 +152,7 @@ public class OutgoingTupleCollection {
     }
   }
 
-  private void pushTupleToQueue(HeronTuples.HeronTupleSet.Builder bldr,
+  private void pushTupleToQueue(HeronTuples.HeronTupleSet2.Builder bldr,
                                 Communicator<Message> out) {
     // The Communicator has un-bounded capacity so the offer will always be successful
     out.offer(bldr.build());

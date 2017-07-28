@@ -17,6 +17,8 @@ package com.twitter.heron.grouping;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import org.junit.After;
@@ -123,24 +125,29 @@ public abstract class AbstractTupleRoutingTest {
           }
 
           Message msg = slaveTester.getOutStreamQueue().poll();
-          assertTrue(msg instanceof HeronTuples.HeronTupleSet);
+          assertTrue(msg instanceof HeronTuples.HeronTupleSet2);
 
-          HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
+          HeronTuples.HeronTupleSet2 set = (HeronTuples.HeronTupleSet2) msg;
 
           assertTrue(set.isInitialized());
           assertFalse(set.hasControl());
           assertTrue(set.hasData());
 
-          HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+          HeronTuples.HeronDataTupleSet2 dataTupleSet = set.getData();
           assertEquals(dataTupleSet.getStream().getId(), "default");
           assertEquals(dataTupleSet.getStream().getComponentName(),
               getComponentToVerify().getName());
 
-          for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
-            List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
-            assertEquals(1, destTaskIds.size());
-            assertEquals((Integer) tupleReceived, destTaskIds.get(0));
-            tupleReceived++;
+          for (ByteString bs : dataTupleSet.getTuplesList()) {
+            try {
+              HeronTuples.HeronDataTuple dataTuple = HeronTuples.HeronDataTuple.parseFrom(bs);
+              List<Integer> destTaskIds = dataTuple.getDestTaskIdsList();
+              assertEquals(1, destTaskIds.size());
+              assertEquals((Integer) tupleReceived, destTaskIds.get(0));
+              tupleReceived++;
+            } catch (InvalidProtocolBufferException e) {
+              assertTrue(false);
+            }
           }
         }
 

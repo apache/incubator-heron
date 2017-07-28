@@ -21,6 +21,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import org.junit.Assert;
@@ -76,22 +77,27 @@ public class HandleReadTest extends AbstractNetworkTest {
       Assert.assertEquals(1, getInStreamQueue().size());
 
       Message msg = getInStreamQueue().poll();
-      Assert.assertTrue(msg instanceof HeronTuples.HeronTupleSet);
+      Assert.assertTrue(msg instanceof HeronTuples.HeronTupleSet2);
 
-      HeronTuples.HeronTupleSet heronTupleSet = (HeronTuples.HeronTupleSet) msg;
+      HeronTuples.HeronTupleSet2 heronTupleSet = (HeronTuples.HeronTupleSet2) msg;
 
       Assert.assertTrue(heronTupleSet.hasData());
       Assert.assertFalse(heronTupleSet.hasControl());
 
-      HeronTuples.HeronDataTupleSet heronDataTupleSet = heronTupleSet.getData();
+      HeronTuples.HeronDataTupleSet2 heronDataTupleSet = heronTupleSet.getData();
 
       Assert.assertEquals("test-spout", heronDataTupleSet.getStream().getComponentName());
       Assert.assertEquals("default", heronDataTupleSet.getStream().getId());
 
       StringBuilder response = new StringBuilder();
-      for (HeronTuples.HeronDataTuple heronDataTuple : heronDataTupleSet.getTuplesList()) {
-        response.append(heronDataTuple.getValues(0).toStringUtf8());
-        Assert.assertEquals(1, heronDataTuple.getRootsCount());
+      for (ByteString bs : heronDataTupleSet.getTuplesList()) {
+        try {
+          HeronTuples.HeronDataTuple heronDataTuple = HeronTuples.HeronDataTuple.parseFrom(bs);
+          response.append(heronDataTuple.getValues(0).toStringUtf8());
+          Assert.assertEquals(1, heronDataTuple.getRootsCount());
+        } catch (InvalidProtocolBufferException e) {
+          Assert.assertTrue(false);
+        }
       }
 
       Assert.assertEquals("ABABABABAB", response.toString());

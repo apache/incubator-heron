@@ -186,7 +186,7 @@ class SpoutInstance(BaseInstance):
       except Queue.Empty:
         break
 
-      if isinstance(tuples, tuple_pb2.HeronTupleSet):
+      if isinstance(tuples, tuple_pb2.HeronTupleSet2):
         if tuples.HasField("data"):
           raise RuntimeError("Spout cannot get incoming data tuples from other components")
         elif tuples.HasField("control"):
