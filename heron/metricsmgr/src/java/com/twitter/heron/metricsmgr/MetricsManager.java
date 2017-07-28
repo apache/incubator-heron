@@ -145,7 +145,8 @@ public class MetricsManager {
             systemConfig.getMetricsMgrNetworkReadBatchSize(),
             systemConfig.getMetricsMgrNetworkReadBatchTime(),
             systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSize(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize());
+            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize(),
+            systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
     // Set the MultiCountMetric for MetricsManagerServer
     MultiCountMetric serverCounters = new MultiCountMetric();

@@ -166,7 +166,8 @@ public abstract class AbstractNetworkTest {
          systemConfig.getInstanceNetworkReadBatchSize(),
          systemConfig.getInstanceNetworkReadBatchTime(),
          systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
-         systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize());
+         systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize(),
+         systemConfig.getInstanceNetworkOptionsMaximumPacketSize());
 
     final NIOLooper nioLooper = (NIOLooper) communicatorTester.getTestLooper();
     streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,

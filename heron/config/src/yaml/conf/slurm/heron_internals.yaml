@@ -160,9 +160,15 @@ heron.metricsmgr.network.options.socket.send.buffer.size.bytes: 6553600
 # The maximum socket's received buffer size in bytes of metricsmgr's network options
 heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 8738000 
 
+# The maximum packet size that metrics mgr can read
+heron.metricsmgr.network.options.maximum.packetsize.bytes: 1048576
+
 ################################################################################
 # Configs related to Heron Instance, starts with heron.instance.*
 ################################################################################
+
+# The maximum size of packets that instance can read
+heron.instance.network.options.maximum.packet.bytes: 10485760
 
 # The queue capacity (num of items) in bolt for buffer packets to read from stream manager
 heron.instance.internal.bolt.read.queue.capacity: 128 
