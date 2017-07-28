@@ -17,8 +17,6 @@ package com.twitter.heron.network;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.Communicator;
@@ -272,28 +270,7 @@ public class StreamManagerClient extends HeronClient {
   }
 
   private void handleNewTuples2(HeronTuples.HeronTupleSet2 set) {
-    HeronTuples.HeronTupleSet.Builder toFeed = HeronTuples.HeronTupleSet.newBuilder();
-    // Set the source task id
-    toFeed.setSrcTaskId(set.getSrcTaskId());
-
-    if (set.hasControl()) {
-      toFeed.setControl(set.getControl());
-    } else {
-      // Either control or data
-      HeronTuples.HeronDataTupleSet.Builder builder = HeronTuples.HeronDataTupleSet.newBuilder();
-      builder.setStream(set.getData().getStream());
-      try {
-        for (ByteString bs : set.getData().getTuplesList()) {
-          builder.addTuples(HeronTuples.HeronDataTuple.parseFrom(bs));
-        }
-      } catch (InvalidProtocolBufferException e) {
-        LOG.log(Level.SEVERE, "Failed to parse protobuf", e);
-      }
-      toFeed.setData(builder);
-    }
-
-    HeronTuples.HeronTupleSet s = toFeed.build();
-    inStreamQueue.offer(s);
+    inStreamQueue.offer(set);
   }
 
   private void handleAssignmentMessage(PhysicalPlans.PhysicalPlan pplan) {

@@ -19,8 +19,11 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
@@ -208,8 +211,8 @@ public class BoltInstance implements IInstance {
         persistState(checkpointId);
       }
 
-      if (msg instanceof HeronTuples.HeronTupleSet) {
-        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
+      if (msg instanceof HeronTuples.HeronTupleSet2) {
+        HeronTuples.HeronTupleSet2 tuples = (HeronTuples.HeronTupleSet2) msg;
         // Handle the tuples
         if (tuples.hasControl()) {
           throw new RuntimeException("Bolt cannot get acks/fails from other components");
@@ -221,31 +224,36 @@ public class BoltInstance implements IInstance {
             stream.getComponentName(), stream.getId()).size();
         int sourceTaskId = tuples.getSrcTaskId();
 
-        for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
-          long startExecuteTuple = System.nanoTime();
-          // Create the value list and fill the value
-          List<Object> values = new ArrayList<>(nValues);
-          for (int i = 0; i < nValues; i++) {
-            values.add(serializer.deserialize(dataTuple.getValues(i).toByteArray()));
+        for (ByteString bs : tuples.getData().getTuplesList()) {
+          try {
+            HeronTuples.HeronDataTuple dataTuple = HeronTuples.HeronDataTuple.parseFrom(bs);
+            long startExecuteTuple = System.nanoTime();
+            // Create the value list and fill the value
+            List<Object> values = new ArrayList<>(nValues);
+            for (int i = 0; i < nValues; i++) {
+              values.add(serializer.deserialize(dataTuple.getValues(i).toByteArray()));
+            }
+
+            // Decode the tuple
+            TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
+                dataTuple.getRootsList(), values, startExecuteTuple, false, sourceTaskId);
+
+            // Delegate to the use defined bolt
+            bolt.execute(t);
+
+            // record the end of a tuple execution
+            long endExecuteTuple = System.nanoTime();
+
+            long executeLatency = endExecuteTuple - startExecuteTuple;
+
+            // Invoke user-defined execute task hook
+            topologyContext.invokeHookBoltExecute(t, Duration.ofNanos(executeLatency));
+
+            // Update metrics
+            boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
+          } catch (InvalidProtocolBufferException e) {
+            LOG.log(Level.SEVERE, "Failed to parse protobuf", e);
           }
-
-          // Decode the tuple
-          TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
-              dataTuple.getRootsList(), values, startExecuteTuple, false, sourceTaskId);
-
-          // Delegate to the use defined bolt
-          bolt.execute(t);
-
-          // record the end of a tuple execution
-          long endExecuteTuple = System.nanoTime();
-
-          long executeLatency = endExecuteTuple - startExecuteTuple;
-
-          // Invoke user-defined execute task hook
-          topologyContext.invokeHookBoltExecute(t, Duration.ofNanos(executeLatency));
-
-          // Update metrics
-          boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
         }
 
         // To avoid spending too much time
