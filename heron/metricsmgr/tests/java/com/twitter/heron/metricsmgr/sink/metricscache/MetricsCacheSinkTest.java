@@ -15,16 +15,20 @@
 package com.twitter.heron.metricsmgr.sink.metricscache;
 
 import java.lang.reflect.Field;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.config.SystemConfigKey;
 import com.twitter.heron.metricsmgr.LatchedMultiCountMetric;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
@@ -67,6 +71,23 @@ public class MetricsCacheSinkTest {
     return TopologyMaster.MetricsCacheLocation.newBuilder().
         setTopologyName("topology-name").setTopologyId("topology-id").setHost("host").
         setControllerPort(0).setMasterPort(masterPort).setStatsPort(0).build();
+  }
+
+  @Before
+  public void before() {
+    String runFiles = System.getenv("TEST_SRCDIR");
+    if (runFiles == null) {
+      throw new RuntimeException("Failed to fetch run files resources from built jar");
+    }
+
+    String filePath =
+        Paths.get(runFiles,
+                  "/__main__/heron/config/src/yaml/conf/test/test_heron_internals.yaml").toString();
+    SystemConfig.Builder sb = SystemConfig.newBuilder(true)
+        .putAll(filePath, true)
+        .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 1);
+    SingletonRegistry.INSTANCE.registerSingleton("com.twitter.heron.common.config.SystemConfig",
+                                                 sb.build());
   }
 
   @After

@@ -100,7 +100,8 @@ public class Gateway implements Runnable, AutoCloseable {
         systemConfig.getInstanceNetworkReadBatchSize(),
         systemConfig.getInstanceNetworkReadBatchTime(),
         systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
-        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
+        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize(),
+        systemConfig.getInstanceNetworkOptionsMaximumPacketSize()
     );
     this.streamManagerClient =
         new StreamManagerClient(gatewayLooper, STREAM_MGR_HOST, streamPort,
