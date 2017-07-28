@@ -30,6 +30,7 @@ import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
@@ -58,6 +59,7 @@ public class SpoutInstance implements IInstance {
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
 
+  private final boolean isTopologyStateful;
   private State<? extends Serializable, ? extends Serializable> instanceState;
 
   private final SlaveLooper looper;
@@ -88,6 +90,11 @@ public class SpoutInstance implements IInstance {
         SystemConfig.HERON_SYSTEM_CONFIG);
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
+
+    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EXACTLY_ONCE)
+        .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+
+    LOG.info("Is this topology stateful: " + isTopologyStateful);
 
     if (helper.getMySpout() == null) {
       throw new RuntimeException("HeronSpoutInstance has no spout in physical plan");
@@ -135,7 +142,18 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
-    // TODO(nlu): impelment this
+    if (!isTopologyStateful) {
+      throw new RuntimeException("Could not save a non-stateful topology's state");
+    }
+
+    if (spout instanceof IStatefulComponent) {
+      LOG.info("Starting checkpoint");
+      ((IStatefulComponent) spout).preSave(checkpointId);
+    } else {
+      LOG.info("Trying to checkponit a non stateful component. Send empty state");
+    }
+
+    collector.sendOutState(instanceState, checkpointId);
   }
 
   public void start() {
