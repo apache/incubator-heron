@@ -178,14 +178,19 @@ class BoltInstance(BaseInstance):
       except Queue.Empty:
         break
 
-      if isinstance(tuples, tuple_pb2.HeronTupleSet):
+      if isinstance(tuples, tuple_pb2.HeronTupleSet2):
         if tuples.HasField("control"):
           raise RuntimeError("Bolt cannot get acks/fails from other components")
         elif tuples.HasField("data"):
           stream = tuples.data.stream
 
-          for data_tuple in tuples.data.tuples:
-            self._handle_data_tuple(data_tuple, stream)
+          try:
+            for trunk in tuples.data.tuples:
+              data_tuple = tuple_pb2.HeronDataTuple()
+              data_tuple.ParseFromString(trunk)
+              self._handle_data_tuple(data_tuple, stream)
+          except Exception:
+            Log.exception('Fail to deserialize HeronDataTuple')
         else:
           Log.error("Received tuple neither data nor control")
       else:

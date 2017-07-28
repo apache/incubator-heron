@@ -27,7 +27,7 @@ from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, Met
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
-from heron.proto import physical_plan_pb2, tuple_pb2
+from heron.proto import physical_plan_pb2
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
@@ -105,20 +105,7 @@ class SingleThreadHeronInstance(object):
     if self.my_pplan_helper is None or self.my_instance is None:
       Log.error("Got tuple set when no instance assigned yet")
     else:
-      hts = tuple_pb2.HeronTupleSet()
-      if hts2.HasField('control'):
-        hts.control.CopyFrom(hts2.control)
-      else:
-        hdts = tuple_pb2.HeronDataTupleSet()
-        hdts.stream.CopyFrom(hts2.data.stream)
-        try:
-          for trunk in hts2.data.tuples:
-            added_tuple = hdts.tuples.add()
-            added_tuple.ParseFromString(trunk)
-        except Exception:
-          Log.exception('Fail to deserialize HeronDataTuple')
-        hts.data.CopyFrom(hdts)
-      self.in_stream.offer(hts)
+      self.in_stream.offer(hts2)
       if self.my_pplan_helper.is_topology_running():
         self.my_instance.py_class.process_incoming_tuples()
 
