@@ -172,7 +172,7 @@ void StMgrClient::SendHelloRequest() {
   return;
 }
 
-bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
+bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg) {
   if (IsConnected()) {
     SendMessage(_msg);
     return true;
@@ -185,7 +185,7 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg
   }
 }
 
-void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
+void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
   __global_protobuf_pool_release__(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }

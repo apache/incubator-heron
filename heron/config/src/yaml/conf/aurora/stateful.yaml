@@ -17,3 +17,5 @@ heron.ckptmgr.network.read.batch.time.ms: 16
 heron.ckptmgr.network.options.socket.send.buffer.size.bytes: 655360
 
 heron.ckptmgr.network.options.socket.receive.buffer.size.bytes: 655360
+
+heron.ckptmgr.network.options.maximum.packetsize.bytes: 10485760

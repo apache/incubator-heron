@@ -5,7 +5,7 @@ realpath() {
   echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
-DOCKER_DIR=$(dirname $(realpath $0))
+DOCKER_DIR=$(dirname $(dirname $(realpath $0)))
 PROJECT_DIR=$(dirname $DOCKER_DIR )
 SCRATCH_DIR="$HOME/.heron-docker"
 
@@ -25,7 +25,7 @@ setup_scratch_dir() {
     mkdir $1/artifacts
   fi
 
-  cp $DOCKER_DIR/* $1
+  cp -r $DOCKER_DIR/* $1
 }
 
 build_exec_image() {
@@ -46,7 +46,7 @@ build_exec_image() {
     DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$TARGET_PLATFORM-$HERON_VERSION.tar"
   fi
 
-  DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
+  DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
 
   setup_scratch_dir $SCRATCH_DIR
 

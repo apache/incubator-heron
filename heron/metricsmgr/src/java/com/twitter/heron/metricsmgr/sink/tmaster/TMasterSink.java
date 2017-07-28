@@ -33,6 +33,7 @@ import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
@@ -333,6 +334,8 @@ public class TMasterSink implements IMetricsSink {
         throw new RuntimeException("Could not create the NIOLooper", e);
       }
 
+      SystemConfig systemConfig =
+          (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
               TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
@@ -342,7 +345,8 @@ public class TMasterSink implements IMetricsSink {
               TypeUtils.getDuration(
                   tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS), ChronoUnit.MILLIS),
               TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)),
+              systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);

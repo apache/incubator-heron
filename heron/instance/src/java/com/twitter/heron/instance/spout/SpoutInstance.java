@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.spout;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
@@ -55,6 +57,8 @@ public class SpoutInstance implements IInstance {
 
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
+
+  private State<? extends Serializable, ? extends Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -134,7 +138,6 @@ public class SpoutInstance implements IInstance {
     // TODO(nlu): impelment this
   }
 
-  @Override
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
@@ -156,6 +159,12 @@ public class SpoutInstance implements IInstance {
     addSpoutsTasks();
 
     topologyState = TopologyAPI.TopologyState.RUNNING;
+  }
+
+  @Override
+  public void start(State<? extends Serializable, ? extends Serializable> state) {
+    this.instanceState = state;
+    start();
   }
 
   @Override

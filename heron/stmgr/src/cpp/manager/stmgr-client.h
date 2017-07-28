@@ -44,7 +44,7 @@ class StMgrClient : public Client {
   void Quit();
 
   // Return true if successful in sending the message. false otherwise
-  bool SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
+  bool SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg);
   void SendStartBackPressureMessage();
   void SendStopBackPressureMessage();
   void SendDownstreamStatefulCheckpoint(proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
@@ -56,7 +56,7 @@ class StMgrClient : public Client {
 
  private:
   void HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* _response, NetworkErrorCode);
-  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message);
+  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message);
 
   void OnReConnectTimer();
   void SendHelloRequest();

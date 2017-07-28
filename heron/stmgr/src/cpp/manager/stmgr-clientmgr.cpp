@@ -131,7 +131,7 @@ bool StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& 
   CHECK(iter != clients_.end());
 
   // Acquire the message
-  proto::stmgr::TupleStreamMessage2* out = nullptr;
+  proto::stmgr::TupleStreamMessage* out = nullptr;
   out = __global_protobuf_pool_acquire__(out);
   out->set_task_id(_task_id);
   out->set_src_task_id(_msg.src_task_id());

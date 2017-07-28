@@ -43,6 +43,11 @@ public final class SystemConfig {
     return Builder.create(loadDefaults);
   }
 
+  public ByteAmount getInstanceNetworkOptionsMaximumPacketSize() {
+    return getByteAmount(
+        SystemConfigKey.INSTANCE_NETWORK_OPTIONS_MAXIMUM_PACKETSIZE_BYTES);
+  }
+
   public int getInstanceInternalMetricsWriteQueueCapacity() {
     return getInteger(SystemConfigKey.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY);
   }
@@ -205,6 +210,10 @@ public final class SystemConfig {
 
   public ByteAmount getMetricsMgrNetworkOptionsSocketSendBufferSize() {
     return getByteAmount(SystemConfigKey.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE);
+  }
+
+  public ByteAmount getMetricsMgrNetworkOptionsMaximumPacketSize() {
+    return getByteAmount(SystemConfigKey.METRICSMGR_NETWORK_OPTIONS_MAXIMUM_PACKETSIZE_BYTES);
   }
 
   public int getHeronMetricsMaxExceptionsPerMessageCount() {

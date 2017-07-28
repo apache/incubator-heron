@@ -5,8 +5,8 @@ realpath() {
   echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
-DOCKER_DIR=$(dirname $(realpath $0))
-PROJECT_DIR=$(dirname $DOCKER_DIR )
+DOCKER_DIR=$(dirname $(dirname $(realpath $0)))
+PROJECT_DIR=$(dirname $DOCKER_DIR)
 SCRATCH_DIR="$HOME/.heron-compile"
 SRC_TAR="$SCRATCH_DIR/src.tar.gz"
 
@@ -91,7 +91,7 @@ verify_source_exists() {
 
 setup_scratch_dir() {
   mkdir -p $1/artifacts
-  cp $DOCKER_DIR/* $1
+  cp -r $DOCKER_DIR/* $1
 }
 
 setup_output_dir() {
@@ -130,9 +130,9 @@ run_build() {
   export HERON_TREE_STATUS="${HERON_TREE_STATUS:-$(heron_tree_status)}"
 
   if [ $TARGET_PLATFORM = "darwin" ]; then
-    docker/compile-platform.sh
+    docker/scripts/compile-platform.sh
   else
-    docker/compile-docker.sh
+    docker/scripts/compile-docker.sh
   fi
 }
 
