@@ -7,6 +7,7 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:network-java",
+        "//heron/common/src/java:config-java",
         "//heron/common/src/java:test-helpers-java",
         "//heron/metricsmgr/src/java:metricsmgr-java",
         "//heron/spi/src/java:metricsmgr-spi-java",
@@ -33,5 +34,6 @@ java_tests(
     runtime_deps = [
         ":metricsmgr-tests",
     ],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )

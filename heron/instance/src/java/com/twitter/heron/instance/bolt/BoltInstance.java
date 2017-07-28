@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
@@ -56,6 +58,8 @@ public class BoltInstance implements IInstance {
   protected final BoltMetrics boltMetrics;
   // The bolt will read Data tuples from streamInQueue
   private final Communicator<Message> streamInQueue;
+
+  private State<? extends Serializable, ? extends Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -118,7 +122,6 @@ public class BoltInstance implements IInstance {
     // TODO(nlu): implement this
   }
 
-  @Override
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
@@ -138,6 +141,12 @@ public class BoltInstance implements IInstance {
     helper.prepareForCustomStreamGrouping();
 
     addBoltTasks();
+  }
+
+  @Override
+  public void start(State<? extends Serializable, ? extends Serializable> state) {
+    this.instanceState = state;
+    start();
   }
 
   @Override
