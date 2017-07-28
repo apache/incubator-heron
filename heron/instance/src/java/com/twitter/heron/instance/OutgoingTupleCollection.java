@@ -14,14 +14,21 @@
 
 package com.twitter.heron.instance;
 
+import java.io.Serializable;
+
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -42,6 +49,8 @@ public class OutgoingTupleCollection {
   private final int dataTupleSetCapacity;
   private final int controlTupleSetCapacity;
 
+  private final IPluggableSerializer serializer;
+
   private HeronTuples.HeronDataTupleSet.Builder currentDataTuple;
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
 
@@ -59,6 +68,9 @@ public class OutgoingTupleCollection {
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
+    this.serializer =
+        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
+
     // Initialize the values in constructor
     this.totalDataEmittedInBytes = 0;
     this.currentDataTupleSizeInBytes = 0;
@@ -71,6 +83,27 @@ public class OutgoingTupleCollection {
 
   public void sendOutTuples() {
     flushRemaining();
+  }
+
+  /**
+   * Send out the instance's state with corresponding checkpointId
+   * @param state instance's state
+   * @param checkpointId the checkpointId
+   */
+  public void sendOutState(State<? extends Serializable, ? extends Serializable> state,
+                           String checkpointId) {
+    // Serialize the state
+    byte[] serializedState = serializer.serialize(state);
+
+    // Construct the instance state checkpoint
+    CheckpointManager.InstanceStateCheckpoint checkpoint =
+        CheckpointManager.InstanceStateCheckpoint.newBuilder()
+          .setCheckpointId(checkpointId)
+          .setState(ByteString.copyFrom(serializedState))
+          .build();
+
+    // Put the checkpoint to out stream queue
+    outQueue.offer(checkpoint);
   }
 
   public void addDataTuple(
