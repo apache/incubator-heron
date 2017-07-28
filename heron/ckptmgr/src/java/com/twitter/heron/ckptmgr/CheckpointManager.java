@@ -144,7 +144,8 @@ public class CheckpointManager {
             checkpointManagerConfig.getReadBatchSize(),
             checkpointManagerConfig.getReadBatchTime(),
             checkpointManagerConfig.getSocketSendSize(),
-            checkpointManagerConfig.getSocketReceiveSize());
+            checkpointManagerConfig.getSocketReceiveSize(),
+            checkpointManagerConfig.getMaximumPacketSize());
 
     // Setup the IStatefulStorage
     // TODO(mfu): This should be done in an executor driven by another thread, kind of async

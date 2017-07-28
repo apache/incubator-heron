@@ -30,19 +30,22 @@ public class HeronSocketOptions {
   private Duration networkReadBatchTime;
   private ByteAmount socketSendBufferSize;
   private ByteAmount socketReceivedBufferSize;
+  private ByteAmount maximumPacketSize;
 
   public HeronSocketOptions(ByteAmount networkWriteBatchSize,
                             Duration networkWriteBatchTime,
                             ByteAmount networkReadBatchSize,
                             Duration networkReadBatchTime,
                             ByteAmount socketSendBufferSize,
-                            ByteAmount socketReceivedBufferSize) {
+                            ByteAmount socketReceivedBufferSize,
+                            ByteAmount maximumPacketSize) {
     this.networkWriteBatchSize = networkWriteBatchSize;
     this.networkWriteBatchTime = networkWriteBatchTime;
     this.networkReadBatchSize = networkReadBatchSize;
     this.networkReadBatchTime = networkReadBatchTime;
     this.socketSendBufferSize = socketSendBufferSize;
     this.socketReceivedBufferSize = socketReceivedBufferSize;
+    this.maximumPacketSize = maximumPacketSize;
   }
 
   public ByteAmount getNetworkWriteBatchSize() {
@@ -67,5 +70,9 @@ public class HeronSocketOptions {
 
   public ByteAmount getSocketReceivedBufferSize() {
     return socketReceivedBufferSize;
+  }
+
+  public ByteAmount getMaximumPacketSize() {
+    return maximumPacketSize;
   }
 }
