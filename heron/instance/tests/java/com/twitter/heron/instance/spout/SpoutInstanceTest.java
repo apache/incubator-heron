@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import org.junit.After;
@@ -114,25 +115,27 @@ public class SpoutInstanceTest {
         for (int i = 0; i < Constants.RETRY_TIMES; i++) {
           if (slaveTester.getOutStreamQueue().size() != 0) {
             Message msg = slaveTester.getOutStreamQueue().poll();
-            if (msg instanceof HeronTuples.HeronTupleSet) {
-              HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
+            if (msg instanceof HeronTuples.HeronTupleSet2) {
+              HeronTuples.HeronTupleSet2 set = (HeronTuples.HeronTupleSet2) msg;
 
               Assert.assertTrue(set.isInitialized());
               Assert.assertFalse(set.hasControl());
               Assert.assertTrue(set.hasData());
 
-              HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+              HeronTuples.HeronDataTupleSet2 dataTupleSet = set.getData();
               streamId = dataTupleSet.getStream().getId();
               componentName = dataTupleSet.getStream().getComponentName();
               Assert.assertEquals(streamId, "default");
               Assert.assertEquals(componentName, "test-spout");
 
-              Assert.assertEquals(streamId, "default");
-              Assert.assertEquals(componentName, "test-spout");
-
-              for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
-                for (ByteString b : dataTuple.getValuesList()) {
-                  receivedTupleStrings += serializer.deserialize(b.toByteArray());
+              for (ByteString bs : dataTupleSet.getTuplesList()) {
+                try {
+                  HeronTuples.HeronDataTuple dataTuple = HeronTuples.HeronDataTuple.parseFrom(bs);
+                  for (ByteString b : dataTuple.getValuesList()) {
+                    receivedTupleStrings += serializer.deserialize(b.toByteArray());
+                  }
+                } catch (InvalidProtocolBufferException e) {
+                  Assert.assertTrue(false);
                 }
               }
               tupleReceived += dataTupleSet.getTuplesCount();
@@ -286,7 +289,7 @@ public class SpoutInstanceTest {
   private void constructAndSendAcks() {
     // We will construct the ack&fail tuples
     // We will construct 5 acks and 5 fails
-    HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+    HeronTuples.HeronTupleSet2.Builder bldr = HeronTuples.HeronTupleSet2.newBuilder();
     bldr.setSrcTaskId(SRC_TASK_ID);
     HeronTuples.HeronControlTupleSet.Builder controlTupleSet
         = HeronTuples.HeronControlTupleSet.newBuilder();
@@ -320,16 +323,23 @@ public class SpoutInstanceTest {
   private void drainOutStream() {
     while (slaveTester.getOutStreamQueue().size() != 0) {
       Message msg = slaveTester.getOutStreamQueue().poll();
-      if (msg instanceof HeronTuples.HeronTupleSet) {
-        HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
+      if (msg instanceof HeronTuples.HeronTupleSet2) {
+        HeronTuples.HeronTupleSet2 set = (HeronTuples.HeronTupleSet2) msg;
 
         Assert.assertTrue(set.isInitialized());
         Assert.assertTrue(set.hasData());
 
-        HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+        HeronTuples.HeronDataTupleSet2 dataTupleSet = set.getData();
 
         tupleReceived += dataTupleSet.getTuplesCount();
-        heronDataTupleList.addAll(dataTupleSet.getTuplesList());
+        for (ByteString bs : dataTupleSet.getTuplesList()) {
+          try {
+            HeronTuples.HeronDataTuple d = HeronTuples.HeronDataTuple.parseFrom(bs);
+            heronDataTupleList.add(d);
+          } catch (InvalidProtocolBufferException e) {
+            Assert.assertTrue(false);
+          }
+        }
       }
     }
   }
