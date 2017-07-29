@@ -160,6 +160,12 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-tools-lib",
+    package_dir = "lib",
+    files = heron_tools_lib_files(),
+)
+
+pkg_tar(
     name = "heron-tools-conf",
     package_dir = "conf",
     files = heron_tools_conf_files(),
@@ -171,6 +177,7 @@ pkg_tar(
     files = generated_release_files,
     deps = [
         ":heron-tools-bin",
+        ":heron-tools-lib",
         ":heron-tools-conf",
     ],
 )

@@ -10,10 +10,12 @@ def heron_tools_bin_files():
         "//heron/tools/ui/src/python:heron-ui",
     ]
 
+def heron_tools_lib_files():
+    return [
+        "//heron/tools/apiserver/src/java:heron-apiserver",
+    ]
+
 def heron_tools_conf_files():
     return [
         "//heron/tools/config/src/yaml:tracker-yaml",
     ]
-
-def heron_tools_lib_files():
-    return []
