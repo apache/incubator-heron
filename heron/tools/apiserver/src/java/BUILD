@@ -15,6 +15,9 @@ java_binary(
     name = 'heron-api-server-unshaded',
     srcs = glob(["**/apiserver/**/*.java"]),
     main_class = "com.twitter.heron.apiserver.Runtime",
+    resources = [
+        "//heron/config/src/yaml:conf-yaml",
+    ],
     deps = api_server_deps_files)
 
 genrule(
