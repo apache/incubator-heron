@@ -213,6 +213,10 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets(
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS].as<int>();
 }
 
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectMaxAttempts() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS].as<int>();
+}
+
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectIntervalSec() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC].as<int>();
 }

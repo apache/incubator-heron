@@ -146,6 +146,9 @@ class HeronInternalsConfigVars {
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
 
+  // The max reconnect attempts to other stream managers for stream manager client
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS;
+
   // The reconnect interval to other stream managers in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC;
 
