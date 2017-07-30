@@ -245,7 +245,7 @@ def get_heron_cluster(cluster_role_env):
 def parse_cluster_role_env(cluster_role_env, config_path):
   """Parse cluster/[role]/[environ], supply default, if not provided, not required"""
   parts = cluster_role_env.split('/')[:3]
-  Log.info("Using config file under %s" % config_path)
+  Log.debug("Using config file under %s" % config_path)
   if not os.path.isdir(config_path):
     Log.error("Config path cluster directory does not exist: %s" % config_path)
     raise Exception("Invalid config path")
