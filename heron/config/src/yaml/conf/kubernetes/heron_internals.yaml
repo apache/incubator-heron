@@ -68,7 +68,7 @@ heron.streammgr.mempool.max.message.number: 512
 heron.streammgr.client.reconnect.interval.sec: 1
 
 # The max reconnect attempts to other stream managers for stream manager client
-heron.streammgr.client.reconnect.max.attempts: 30
+heron.streammgr.client.reconnect.max.attempts: 300
 
 # The reconnect interval to tamster in second for stream manager client
 heron.streammgr.client.reconnect.tmaster.interval.sec: 10
