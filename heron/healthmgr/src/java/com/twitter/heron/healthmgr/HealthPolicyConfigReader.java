@@ -41,11 +41,12 @@ import com.twitter.heron.common.config.ConfigReader;
  * </pre>
  */
 public class HealthPolicyConfigReader {
-  enum PolicyConfigKey {
+  public enum PolicyConfigKey {
     CONF_FILE_NAME("healthmgr.yaml"),
     HEALTH_POLICIES("heron.class.health.policies"),
     HEALTH_POLICY_CLASS("health.policy.class"),
-    HEALTH_POLICY_INTERVAL("health.policy.interval.ms");
+    HEALTH_POLICY_INTERVAL("health.policy.interval.ms"),
+    CONF_SENSOR_DURATION_SUFFIX(".duration");
 
     private String key;
 
@@ -61,7 +62,7 @@ public class HealthPolicyConfigReader {
   private final Map<String, Map<String, Object>> configs = new HashMap<>();
   private String configFilename;
 
-  public HealthPolicyConfigReader(String filename) throws FileNotFoundException {
+  HealthPolicyConfigReader(String filename) throws FileNotFoundException {
     this.configFilename = filename;
   }
 
@@ -74,15 +75,15 @@ public class HealthPolicyConfigReader {
   }
 
   @VisibleForTesting
-  protected Map<String, Object> readConfigFromFile(String filename) {
+  Map<String, Object> readConfigFromFile(String filename) {
     return ConfigReader.loadFile(filename);
   }
 
-  public List<String> getPolicyIds() {
+  List<String> getPolicyIds() {
     return new ArrayList<>(configs.keySet());
   }
 
-  public Map<String, Object> getPolicyConfig(String policyId) {
+  Map<String, Object> getPolicyConfig(String policyId) {
     return configs.get(policyId);
   }
 

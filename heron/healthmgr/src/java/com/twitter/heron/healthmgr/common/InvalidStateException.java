@@ -17,8 +17,10 @@ package com.twitter.heron.healthmgr.common;
 /**
  * This exception is generated when desired state information is not found
  */
-public class InvalidStateException extends RuntimeException {
-  public InvalidStateException(String topologyName, String message) {
+class InvalidStateException extends RuntimeException {
+  private static final long serialVersionUID = 1649354922817533118L;
+
+  InvalidStateException(String topologyName, String message) {
     super(String.format("%s, topology:%s", message, topologyName));
   }
 }
