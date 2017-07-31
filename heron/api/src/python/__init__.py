@@ -19,6 +19,7 @@ __all__ = [
     'global_metrics',
     'metrics',
     'serializer',
+    'cloudpickle',
     'spout',
     'stream',
     'task_hook',

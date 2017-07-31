@@ -27,12 +27,13 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 13) {
+  if (argc != 15) {
     std::cout << "Usage: " << argv[0] << " "
               << "<topname> <topid> <topdefnfile> "
               << "<zknode> <zkroot> <stmgrid> "
               << "<instanceids> <myhost> <myport> <metricsmgrport> "
-                 "<shellport> <heron_internals_config_filename>"
+              << "<shellport> <heron_internals_config_filename> "
+              << "<ckptmgr_port> <ckptmgr_id>"
               << std::endl;
     std::cout << "If zknode is empty please say LOCALMODE\n";
     ::exit(1);
@@ -54,6 +55,8 @@ int main(int argc, char* argv[]) {
   sp_int32 metricsmgr_port = atoi(argv[10]);
   sp_int32 shell_port = atoi(argv[11]);
   sp_string heron_internals_config_filename = argv[12];
+  sp_int32 ckptmgr_port = atoi(argv[13]);
+  sp_string ckptmgr_id = argv[14];
 
   EventLoopImpl ss;
 
@@ -79,7 +82,7 @@ int main(int argc, char* argv[]) {
                                 1_MB;
   heron::stmgr::StMgr mgr(&ss, myhost, myport, topology_name, topology_id, topology, myid,
                           instances, zkhostportlist, topdir, metricsmgr_port, shell_port,
-                          high_watermark, low_watermark);
+                          ckptmgr_port, ckptmgr_id, high_watermark, low_watermark);
   mgr.Init();
   ss.loop();
   return 0;

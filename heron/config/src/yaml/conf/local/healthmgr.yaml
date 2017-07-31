@@ -4,7 +4,7 @@
 #
 ## configuration specific to individual policies listed above
 #dynamic-resource-allocation:
-#  health.policy.class: "com.twitter.heron.healthmgr.policy.DynamicResourceAllocationPolicy"
-#  health.policy.interval.ms: "120000"
-#  BackPressureDetector.noiseFilterMillis: "20"
-#  GrowingWaitQueueDetector.limit: "5"
+#  health.policy.class: com.twitter.heron.healthmgr.policy.DynamicResourceAllocationPolicy
+#  health.policy.interval.ms: 120000
+#  BackPressureDetector.noiseFilterMillis: 20
+#  GrowingWaitQueueDetector.limit: 5

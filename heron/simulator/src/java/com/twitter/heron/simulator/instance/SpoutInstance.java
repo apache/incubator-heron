@@ -35,6 +35,10 @@ public class SpoutInstance
   private final Duration instanceEmitBatchTime;
   private final ByteAmount instanceEmitBatchSize;
 
+  /**
+   * The SuppressWarnings should go away once TOPOLOGY_ENABLE_ACKING is removed
+   */
+  @SuppressWarnings("deprecation")
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<HeronTuples.HeronTupleSet> streamInQueue,
                        Communicator<HeronTuples.HeronTupleSet> streamOutQueue, SlaveLooper looper) {
@@ -46,7 +50,13 @@ public class SpoutInstance
     this.maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
     this.instanceEmitBatchTime = systemConfig.getInstanceEmitBatchTime();
     this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSize();
-    this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    if (config.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
+      this.ackEnabled = Config.TopologyReliabilityMode.ATLEAST_ONCE.equals(
+                              config.get(Config.TOPOLOGY_RELIABILITY_MODE).toString());
+    } else {
+      // This is strictly for backwards compatibility
+      this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    }
   }
 
   @Override

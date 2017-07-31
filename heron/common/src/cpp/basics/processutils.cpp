@@ -23,10 +23,43 @@ pid_t ProcessUtils::getPid() { return ::getpid(); }
 
 int ProcessUtils::getResourceUsage(struct rusage *usage) { return ::getrusage(RUSAGE_SELF, usage); }
 
+/* ``generic.heap_size'' also includes unmapped pages in heap. These bytes
+ * have been release back to OS. They always count towards virtual memory
+ * memory usage, and depending on OS, typically do nto count towards physical
+ * memory usage.
+ *
+ * See more at: https://gperftools.github.io/gperftools/tcmalloc.html
+ *
+ * Here is a sample output of heap usage statistic by
+ * ``MallocExtension::instance()->GetStats''
+ *
+ *       484254200 (  461.8 MiB) Bytes in use by application
+ *  +            0 (    0.0 MiB) Bytes in page heap freelist
+ *  +     22847400 (   21.8 MiB) Bytes in central cache freelist
+ *  +     11551232 (   11.0 MiB) Bytes in transfer cache freelist
+ *  +      5528672 (    5.3 MiB) Bytes in thread cache freelists
+ *  +      2617504 (    2.5 MiB) Bytes in malloc metadata
+ *    ------------
+ *  =    526799008 (  502.4 MiB) Actual memory used (physical + swap)
+ *  +     41000960 (   39.1 MiB) Bytes released to OS (aka unmapped)
+ *    ------------
+ *  =    567799968 (  541.5 MiB) Virtual address space used
+ *
+ *           17441              Spans in use
+ *               3              Thread heaps in use
+ *            8192              Tcmalloc page size
+ *
+ * In this example, ``generic.heap_size'' is 541.5 MiB, and
+ * ``tcmalloc.pageheap_unmapped_bytes'' is 39.1 MiB. Actual memory
+ * usage would be 502.4 MiB.
+ *
+ */
 size_t ProcessUtils::getTotalMemoryUsed() {
-  size_t total = 0;
+  size_t total = 0, unmapped = 0;
   MallocExtension::instance()->GetNumericProperty("generic.heap_size", &total);
-  return total;
+  MallocExtension::instance()->GetNumericProperty(
+      "tcmalloc.pageheap_unmapped_bytes", &unmapped);
+  return total - unmapped;
 }
 
 sp_string ProcessUtils::getCurrentWorkingDirectory() {
