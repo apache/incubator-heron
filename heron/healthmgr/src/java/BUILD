@@ -2,6 +2,8 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+load("/tools/rules/heron_deps", "heron_java_proto_files")
+
 healthmgr_deps_files = [
     "//heron/api/src/java:api-java",
     "//heron/api/src/java:classification",
@@ -13,9 +15,6 @@ healthmgr_deps_files = [
     "//heron/spi/src/java:statemgr-spi-java",
     "//heron/spi/src/java:utils-spi-java",
     "//heron/spi/src/java:metricsmgr-spi-java",
-    "//heron/proto:proto-java",
-    "//heron/proto:proto_packing_plan_java",
-    "//heron/proto:proto_topology_java",
     "//heron/metricsmgr/src/thrift:thrift_scribe_java",
     "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:jackson",
@@ -50,13 +49,13 @@ java_library(
     srcs = glob(
         ["**/*.java"],
          ),
-    deps = healthmgr_deps_files,
+    deps = heron_java_proto_files() + healthmgr_deps_files,
 )
 
 java_binary(
     name = "healthmgr-unshaded",
     srcs = glob(["**/*.java"]),
-    deps = healthmgr_deps_files,
+    deps = heron_java_proto_files() + healthmgr_deps_files,
 )
 
 genrule(

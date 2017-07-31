@@ -48,12 +48,13 @@ public abstract class BaseSensor implements ISensor {
   }
 
   private Duration duration;
-  protected HealthPolicyConfig config;
-  protected String metricName;
+  private final HealthPolicyConfig config;
+  private final String metricName;
 
-  BaseSensor(HealthPolicyConfig config, String metricName) {
+  BaseSensor(HealthPolicyConfig config, String metricName, String confPrefix) {
     this.config = config;
     this.metricName = metricName;
+    duration = getDurationFromConfig(confPrefix);
   }
 
   /**
@@ -61,23 +62,26 @@ public abstract class BaseSensor implements ISensor {
    *
    * @return duration in seconds
    */
-  protected synchronized Duration getDuration(String prefix) {
-    if (duration != null) {
-      return duration;
-    }
-
-    duration = DEFAULT_METRIC_DURATION;
-    String configName = prefix + PolicyConfigKey.CONF_SENSOR_DURATION_SUFFIX;
-
-    if (config == null || config.getConfig(configName) == null) {
-      return duration;
-    }
-
-    duration = Duration.ofSeconds((int) config.getConfig(configName));
+  protected synchronized Duration getDuration() {
     return duration;
+  }
+
+  private Duration getDurationFromConfig(String prefix) {
+    Duration value = DEFAULT_METRIC_DURATION;
+
+    String configName = prefix + PolicyConfigKey.CONF_SENSOR_DURATION_SUFFIX;
+    if (config != null && config.getConfig(configName) != null) {
+      value = Duration.ofSeconds((int) config.getConfig(configName));
+    }
+
+    return value;
   }
 
   public String getMetricName() {
     return metricName;
+  }
+
+  public HealthPolicyConfig getConfig() {
+    return config;
   }
 }
