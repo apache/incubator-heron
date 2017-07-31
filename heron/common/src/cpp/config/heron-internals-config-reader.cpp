@@ -188,10 +188,6 @@ sp_int32 HeronInternalsConfigReader::GetHeronTmasterStmgrStateTimeoutSec() {
   return config_[HeronInternalsConfigVars::HERON_TMASTER_STMGR_STATE_TIMEOUT_SEC].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronStreammgrPacketMaximumSizeBytes() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_PACKET_MAXIMUM_SIZE_BYTES].as<int>();
-}
-
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrCacheDrainFrequencyMs() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_FREQUENCY_MS].as<int>();
 }
