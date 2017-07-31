@@ -392,6 +392,12 @@ public final class SchedulerUtils {
       }
     }
 
+    // Cleanup the directory
+    if (!FileUtils.cleanDir(workingDirectory)) {
+      LOG.severe("Failed to clean directory: " + workingDirectory);
+      return false;
+    }
+
     // Curl and extract heron core release package and topology package
     // And then delete the downloaded release package
     boolean ret =

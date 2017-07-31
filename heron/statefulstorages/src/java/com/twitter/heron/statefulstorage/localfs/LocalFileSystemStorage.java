@@ -108,7 +108,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       String[] names = new File(topologyCheckpointRoot).list();
       for (String name : names) {
         if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          FileUtils.deleteDir(new File(topologyCheckpointRoot, name));
+          FileUtils.deleteDir(new File(topologyCheckpointRoot, name), true);
         }
       }
 
