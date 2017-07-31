@@ -23,43 +23,64 @@ import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LARGE_WAIT_Q;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_PROCESSING_RATE_SKEW;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
+import com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName;
 
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_PROCESSING_RATE_SKEW;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY;
 
-public abstract class BaseDiagnoser implements IDiagnoser {
-  protected List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
+abstract class BaseDiagnoser implements IDiagnoser {
+  enum DiagnosisName {
+    SYMPTOM_UNDER_PROVISIONING("SYMPTOM_UNDER_PROVISIONING"),
+    SYMPTOM_DATA_SKEW("SYMPTOM_DATA_SKEW"),
+    SYMPTOM_SLOW_INSTANCE("SYMPTOM_SLOW_INSTANCE"),
+
+    DIAGNOSIS_UNDER_PROVISIONING(UnderProvisioningDiagnoser.class.getSimpleName()),
+    DIAGNOSIS_SLOW_INSTANCE(SlowInstanceDiagnoser.class.getSimpleName()),
+    DIAGNOSIS_DATA_SKEW(DataSkewDiagnoser.class.getSimpleName());
+
+    private String text;
+
+    DiagnosisName(String name) {
+      this.text = name;
+    }
+
+    public String text() {
+      return text;
+    }
+
+    @Override
+    public String toString() {
+      return text();
+    }
+  }
+
+  List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
     return getFilteredSymptoms(symptoms, SYMPTOM_BACK_PRESSURE);
   }
 
-  protected Map<String, ComponentMetrics> getProcessingRateSkewComponents(List<Symptom> symptoms) {
+  Map<String, ComponentMetrics> getProcessingRateSkewComponents(List<Symptom> symptoms) {
     return getFilteredComponents(symptoms, SYMPTOM_PROCESSING_RATE_SKEW);
   }
 
-  protected Map<String, ComponentMetrics> getWaitQDisparityComponents(List<Symptom> symptoms) {
+  Map<String, ComponentMetrics> getWaitQDisparityComponents(List<Symptom> symptoms) {
     return getFilteredComponents(symptoms, SYMPTOM_WAIT_Q_DISPARITY);
   }
 
-  protected Map<String, ComponentMetrics> getLargeWaitQComponents(List<Symptom> symptoms) {
-    return getFilteredComponents(symptoms, SYMPTOM_LARGE_WAIT_Q);
-  }
-
-  private List<Symptom> getFilteredSymptoms(List<Symptom> symptoms, String type) {
+  private List<Symptom> getFilteredSymptoms(List<Symptom> symptoms, SymptomName type) {
     List<Symptom> result = new ArrayList<>();
     for (Symptom symptom : symptoms) {
-      if (symptom.getName().equals(type)) {
+      if (symptom.getName().equals(type.text())) {
         result.add(symptom);
       }
     }
     return result;
   }
 
-  private Map<String, ComponentMetrics> getFilteredComponents(List<Symptom> symptoms, String type) {
+  private Map<String, ComponentMetrics> getFilteredComponents(List<Symptom> symptoms, SymptomName type) {
     Map<String, ComponentMetrics> result = new HashMap<>();
     for (Symptom symptom : symptoms) {
-      if (symptom.getName().equals(type)) {
+      if (symptom.getName().equals(type.text())) {
         result.putAll(symptom.getComponents());
       }
     }

@@ -15,24 +15,19 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_PROCESSING_RATE_SKEW;
-
 public class ProcessingRateSkewDetector extends SkewDetector {
   public static final String CONF_SKEW_RATIO = "ProcessingRateSkewDetector.skewRatio";
-
-  private static final Logger LOG = Logger.getLogger(ProcessingRateSkewDetector.class.getName());
 
   @Inject
   ProcessingRateSkewDetector(ExecuteCountSensor exeCountSensor,
                              HealthPolicyConfig policyConfig) {
-    super(exeCountSensor, Double.valueOf(policyConfig.getConfig(CONF_SKEW_RATIO, "1.5")),
-        SYMPTOM_PROCESSING_RATE_SKEW);
+    super(exeCountSensor,
+        (double) policyConfig.getConfig(CONF_SKEW_RATIO, 1.5),
+        BaseDetector.SymptomName.SYMPTOM_PROCESSING_RATE_SKEW);
   }
-
 }

@@ -26,10 +26,10 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.common.MetricsStats;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DIAGNOSIS_SLOW_INSTANCE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
 
 public class SlowInstanceDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
@@ -66,16 +66,17 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
 
     Symptom resultSymptom = null;
     for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
-      double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE);
-      double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE);
+      double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE.text());
+      double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
       if (bufferStats.getMetricMax() < bufferSize * 2) {
         LOG.info(String.format("SLOW: %s back-pressure(%s) and high buffer size: %s "
-            + "and similar processing rates",
+                + "and similar processing rates",
             boltMetrics.getName(), bpValue, bufferSize));
-        resultSymptom = new Symptom(SYMPTOM_SLOW_INSTANCE, mergedData);
+        resultSymptom = new Symptom(SYMPTOM_SLOW_INSTANCE.text(), mergedData);
       }
     }
 
-    return resultSymptom != null ? new Diagnosis(DIAGNOSIS_SLOW_INSTANCE, resultSymptom) : null;
+    return resultSymptom != null ?
+        new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), resultSymptom) : null;
   }
 }

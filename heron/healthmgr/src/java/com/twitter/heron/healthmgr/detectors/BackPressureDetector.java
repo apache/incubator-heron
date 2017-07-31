@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -29,10 +30,10 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_BACK_PRESSURE;
 
 public class BackPressureDetector implements IDetector {
-  public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
+  static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
 
   private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
   private final BackPressureSensor bpSensor;
@@ -42,7 +43,7 @@ public class BackPressureDetector implements IDetector {
   BackPressureDetector(BackPressureSensor bpSensor,
                        HealthPolicyConfig policyConfig) {
     this.bpSensor = bpSensor;
-    noiseFilterMillis = Integer.valueOf(policyConfig.getConfig(CONF_NOISE_FILTER, "20"));
+    noiseFilterMillis = (int) policyConfig.getConfig(CONF_NOISE_FILTER, 20);
   }
 
   /**
@@ -62,7 +63,7 @@ public class BackPressureDetector implements IDetector {
       if (compStats.getTotalBackpressure() > noiseFilterMillis) {
         LOG.info(String.format("Detected back pressure for %s, total back pressure is %f",
             compMetrics.getName(), compStats.getTotalBackpressure()));
-        result.add(new Symptom(SYMPTOM_BACK_PRESSURE, compMetrics));
+        result.add(new Symptom(SYMPTOM_BACK_PRESSURE.text(), compMetrics));
       }
     }
 

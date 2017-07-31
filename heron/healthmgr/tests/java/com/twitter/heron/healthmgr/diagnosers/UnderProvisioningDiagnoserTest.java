@@ -14,15 +14,17 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
+import java.util.List;
+
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.twitter.heron.healthmgr.TestUtils;
+
 import org.junit.Test;
 
-import java.util.List;
+import com.twitter.heron.healthmgr.TestUtils;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -56,6 +58,7 @@ public class UnderProvisioningDiagnoserTest {
     assertEquals(1, result.getSymptoms().size());
     ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
     assertEquals(123,
-        data.getMetricValueSum("container_1_bolt_0", METRIC_BACK_PRESSURE).intValue());
+        data.getMetricValueSum("container_1_bolt_0", METRIC_BACK_PRESSURE.text())
+            .intValue());
   }
 }

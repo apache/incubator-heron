@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -30,21 +31,21 @@ import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.common.MetricsStats;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_LARGE_WAIT_Q;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_LARGE_WAIT_Q;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
 
 public class LargeWaitQueueDetector implements IDetector {
-  public static final String CONF_SIZE_LIMIT = "LargeWaitQueueDetector.limit";
+  static final String CONF_SIZE_LIMIT = "LargeWaitQueueDetector.limit";
 
   private static final Logger LOG = Logger.getLogger(LargeWaitQueueDetector.class.getName());
   private final BufferSizeSensor pendingBufferSensor;
-  private final double sizeLimit;
+  private final int sizeLimit;
 
   @Inject
   LargeWaitQueueDetector(BufferSizeSensor pendingBufferSensor,
                          HealthPolicyConfig policyConfig) {
     this.pendingBufferSensor = pendingBufferSensor;
-    sizeLimit = Double.valueOf(policyConfig.getConfig(CONF_SIZE_LIMIT, "1000"));
+    sizeLimit = (int) policyConfig.getConfig(CONF_SIZE_LIMIT, 1000);
   }
 
   /**
@@ -60,11 +61,11 @@ public class LargeWaitQueueDetector implements IDetector {
     Map<String, ComponentMetrics> bufferSizes = pendingBufferSensor.get();
     for (ComponentMetrics compMetrics : bufferSizes.values()) {
       ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      MetricsStats stats = compStats.computeMinMaxStats(METRIC_BUFFER_SIZE);
+      MetricsStats stats = compStats.computeMinMaxStats(METRIC_BUFFER_SIZE.text());
       if (stats.getMetricMin() > sizeLimit) {
         LOG.info(String.format("Detected large wait queues for %s, smallest queue is %f",
             compMetrics.getName(), stats.getMetricMin()));
-        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q, compMetrics));
+        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q.text(), compMetrics));
       }
     }
 

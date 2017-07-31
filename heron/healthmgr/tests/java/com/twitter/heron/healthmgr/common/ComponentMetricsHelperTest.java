@@ -14,6 +14,7 @@
 
 package com.twitter.heron.healthmgr.common;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,8 +23,8 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.junit.Test;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_WAIT_Q_GROWTH_RATE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_GROWTH_RATE;
 import static org.junit.Assert.assertEquals;
 
 public class ComponentMetricsHelperTest {
@@ -32,28 +33,28 @@ public class ComponentMetricsHelperTest {
   public void detectsMultipleCompIncreasingBuffer() {
     ComponentMetrics compMetrics;
     InstanceMetrics instanceMetrics;
-    Map<Long, Double> bufferSizes;
+    Map<Instant, Double> bufferSizes;
 
     compMetrics = new ComponentMetrics("bolt");
 
     instanceMetrics = new InstanceMetrics("i1");
     bufferSizes = new HashMap<>();
-    bufferSizes.put(1497892210L, 0.0);
-    bufferSizes.put(1497892270L, 300.0);
-    bufferSizes.put(1497892330L, 600.0);
-    bufferSizes.put(1497892390L, 900.0);
-    bufferSizes.put(1497892450L, 1200.0);
-    instanceMetrics.addMetric(METRIC_BUFFER_SIZE, bufferSizes);
+    bufferSizes.put(Instant.ofEpochSecond(1497892210), 0.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892270), 300.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892330), 600.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892390), 900.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892450), 1200.0);
+    instanceMetrics.addMetric(METRIC_BUFFER_SIZE.text(), bufferSizes);
 
     compMetrics.addInstanceMetric(instanceMetrics);
 
     instanceMetrics = new InstanceMetrics("i2");
     bufferSizes = new HashMap<>();
-    bufferSizes.put(1497892270L, 0.0);
-    bufferSizes.put(1497892330L, 180.0);
-    bufferSizes.put(1497892390L, 360.0);
-    bufferSizes.put(1497892450L, 540.0);
-    instanceMetrics.addMetric(METRIC_BUFFER_SIZE, bufferSizes);
+    bufferSizes.put(Instant.ofEpochSecond(1497892270), 0.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892330), 180.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892390), 360.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892450), 540.0);
+    instanceMetrics.addMetric(METRIC_BUFFER_SIZE.text(), bufferSizes);
 
     compMetrics.addInstanceMetric(instanceMetrics);
 
@@ -62,8 +63,8 @@ public class ComponentMetricsHelperTest {
     assertEquals(5, helper.getMaxBufferChangeRate(), 0.1);
 
     HashMap<String, InstanceMetrics> metrics = compMetrics.getMetrics();
-    assertEquals(1, metrics.get("i1").getMetrics().get(METRIC_WAIT_Q_GROWTH_RATE).size());
-    assertEquals(5, metrics.get("i1").getMetricValueSum(METRIC_WAIT_Q_GROWTH_RATE), 0.1);
-    assertEquals(3, metrics.get("i2").getMetricValueSum(METRIC_WAIT_Q_GROWTH_RATE), 0.1);
+    assertEquals(1, metrics.get("i1").getMetrics().get(METRIC_WAIT_Q_GROWTH_RATE.text()).size());
+    assertEquals(5, metrics.get("i1").getMetricValueSum(METRIC_WAIT_Q_GROWTH_RATE.text()), 0.1);
+    assertEquals(3, metrics.get("i2").getMetricValueSum(METRIC_WAIT_Q_GROWTH_RATE.text()), 0.1);
   }
 }

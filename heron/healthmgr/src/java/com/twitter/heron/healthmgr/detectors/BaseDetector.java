@@ -12,28 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.healthmgr.sensors;
+package com.twitter.heron.healthmgr.detectors;
 
-import java.time.Duration;
+import com.microsoft.dhalion.api.IDetector;
 
-import com.microsoft.dhalion.api.ISensor;
-
-import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
-
-public abstract class BaseSensor implements ISensor {
-  static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(300);
-  static final String COMPONENT_STMGR = "__stmgr__";
-
-  enum MetricName {
-    METRIC_EXE_COUNT("__execute-count/default"),
-    METRIC_BACK_PRESSURE("__time_spent_back_pressure_by_compid/"),
-    METRIC_BUFFER_SIZE("__connection_buffer_by_instanceid/"),
-    METRIC_BUFFER_SIZE_SUFFIX("/packets");
+public abstract class BaseDetector implements IDetector {
+  public enum SymptomName {
+    SYMPTOM_BACK_PRESSURE(BackPressureDetector.class.getSimpleName()),
+    SYMPTOM_GROWING_WAIT_Q(GrowingWaitQueueDetector.class.getSimpleName()),
+    SYMPTOM_LARGE_WAIT_Q(LargeWaitQueueDetector.class.getSimpleName()),
+    SYMPTOM_PROCESSING_RATE_SKEW(ProcessingRateSkewDetector.class.getSimpleName()),
+    SYMPTOM_WAIT_Q_DISPARITY(WaitQueueDisparityDetector.class.getSimpleName());
 
     private String text;
 
-    MetricName(String name) {
+    SymptomName(String name) {
       this.text = name;
     }
 
@@ -45,43 +38,5 @@ public abstract class BaseSensor implements ISensor {
     public String toString() {
       return text();
     }
-  }
-
-  private Duration duration;
-  private final HealthPolicyConfig config;
-  private final String metricName;
-
-  BaseSensor(HealthPolicyConfig config, String metricName, String confPrefix) {
-    this.config = config;
-    this.metricName = metricName;
-    duration = getDurationFromConfig(confPrefix);
-  }
-
-  /**
-   * Returns the duration for which the metrics need to be collected
-   *
-   * @return duration in seconds
-   */
-  protected synchronized Duration getDuration() {
-    return duration;
-  }
-
-  private Duration getDurationFromConfig(String prefix) {
-    Duration value = DEFAULT_METRIC_DURATION;
-
-    String configName = prefix + PolicyConfigKey.CONF_SENSOR_DURATION_SUFFIX;
-    if (config != null && config.getConfig(configName) != null) {
-      value = Duration.ofSeconds((int) config.getConfig(configName));
-    }
-
-    return value;
-  }
-
-  public String getMetricName() {
-    return metricName;
-  }
-
-  public HealthPolicyConfig getConfig() {
-    return config;
   }
 }

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,8 @@ import org.junit.Test;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
 import static com.twitter.heron.healthmgr.detectors.GrowingWaitQueueDetector.CONF_LIMIT;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,21 +38,21 @@ public class GrowingWaitQueueDetectorTest {
   @Test
   public void testDetector() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_LIMIT, "10")).thenReturn("5");
+    when(config.getConfig(CONF_LIMIT, 10.0)).thenReturn(5.0);
 
     ComponentMetrics compMetrics;
     InstanceMetrics instanceMetrics;
-    Map<Long, Double> bufferSizes;
+    Map<Instant, Double> bufferSizes;
     Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
 
     instanceMetrics = new InstanceMetrics("i1");
     bufferSizes = new HashMap<>();
-    bufferSizes.put(1497892222L, 0.0);
-    bufferSizes.put(1497892270L, 300.0);
-    bufferSizes.put(1497892330L, 700.0);
-    bufferSizes.put(1497892390L, 1000.0);
-    bufferSizes.put(1497892450L, 1300.0);
-    instanceMetrics.addMetric(METRIC_BUFFER_SIZE, bufferSizes);
+    bufferSizes.put(Instant.ofEpochSecond(1497892222), 0.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892270), 300.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892330), 700.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892390), 1000.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892450), 1300.0);
+    instanceMetrics.addMetric(METRIC_BUFFER_SIZE.text(), bufferSizes);
 
     compMetrics = new ComponentMetrics("bolt");
     compMetrics.addInstanceMetric(instanceMetrics);
@@ -68,12 +69,12 @@ public class GrowingWaitQueueDetectorTest {
 
     instanceMetrics = new InstanceMetrics("i1");
     bufferSizes = new HashMap<>();
-    bufferSizes.put(1497892222L, 0.0);
-    bufferSizes.put(1497892270L, 200.0);
-    bufferSizes.put(1497892330L, 400.0);
-    bufferSizes.put(1497892390L, 600.0);
-    bufferSizes.put(1497892450L, 800.0);
-    instanceMetrics.addMetric(METRIC_BUFFER_SIZE, bufferSizes);
+    bufferSizes.put(Instant.ofEpochSecond(1497892222), 0.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892270), 200.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892330), 400.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892390), 600.0);
+    bufferSizes.put(Instant.ofEpochSecond(1497892450), 800.0);
+    instanceMetrics.addMetric(METRIC_BUFFER_SIZE.text(), bufferSizes);
 
     compMetrics = new ComponentMetrics("bolt");
     compMetrics.addInstanceMetric(instanceMetrics);

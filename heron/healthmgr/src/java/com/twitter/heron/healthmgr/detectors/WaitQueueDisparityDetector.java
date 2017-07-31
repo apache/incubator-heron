@@ -15,26 +15,19 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_WAIT_Q_DISPARITY;
-
 public class WaitQueueDisparityDetector extends SkewDetector {
   public static final String CONF_DISPARITY_RATIO = "WaitQueueDisparityDetector.disparityRatio";
-
-  private static final Logger LOG = Logger.getLogger(WaitQueueDisparityDetector.class.getName());
 
   @Inject
   WaitQueueDisparityDetector(BufferSizeSensor pendingBufferSensor,
                              HealthPolicyConfig policyConfig) {
-    super(pendingBufferSensor, Double.valueOf(policyConfig.getConfig(CONF_DISPARITY_RATIO, "20")),
-        SYMPTOM_WAIT_Q_DISPARITY);
-
+    super(pendingBufferSensor,
+        (double) policyConfig.getConfig(CONF_DISPARITY_RATIO, 20),
+        BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY);
   }
-
-
 }

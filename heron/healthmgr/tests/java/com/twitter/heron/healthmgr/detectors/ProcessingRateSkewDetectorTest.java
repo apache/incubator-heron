@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
 import static com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector.CONF_SKEW_RATIO;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,18 +35,18 @@ public class ProcessingRateSkewDetectorTest {
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_SKEW_RATIO, "1.5")).thenReturn("2.5");
+    when(config.getConfig(CONF_SKEW_RATIO, 1.5)).thenReturn(2.5);
 
     ComponentMetrics compMetrics = new ComponentMetrics("bolt");
-    compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT, 1000));
-    compMetrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT, 200));
+    compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
+    compMetrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 200));
 
     Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
     topologyMetrics.put("bolt", compMetrics);
 
     ExecuteCountSensor sensor = mock(ExecuteCountSensor.class);
     when(sensor.get()).thenReturn(topologyMetrics);
-    when(sensor.getMetricName()).thenReturn(METRIC_EXE_COUNT);
+    when(sensor.getMetricName()).thenReturn(METRIC_EXE_COUNT.text());
 
     ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(sensor, config);
     List<Symptom> symptoms = detector.detect();
@@ -54,8 +54,8 @@ public class ProcessingRateSkewDetectorTest {
     assertEquals(1, symptoms.size());
 
     compMetrics = new ComponentMetrics("bolt");
-    compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT, 1000));
-    compMetrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT, 500));
+    compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
+    compMetrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 500));
     topologyMetrics.put("bolt", compMetrics);
 
     sensor = mock(ExecuteCountSensor.class);

@@ -27,11 +27,11 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.common.MetricsStats;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.DIAGNOSIS_DATA_SKEW;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_EXE_COUNT;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_DATA_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_DATA_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_DATA_SKEW;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 
 public class DataSkewDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(DataSkewDiagnoser.class.getName());
@@ -71,17 +71,17 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
 
     Symptom resultSymptom = null;
     for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
-      double exeCount = boltMetrics.getMetricValueSum(METRIC_EXE_COUNT);
-      double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE);
-      double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE);
+      double exeCount = boltMetrics.getMetricValueSum(METRIC_EXE_COUNT.text());
+      double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE.text());
+      double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
       if (exeStats.getMetricMax() < 1.10 * exeCount
           && bufferStats.getMetricMax() < 2 * bufferSize) {
         LOG.info(String.format("DataSkew: %s back-pressure(%s), high execution count: %s and "
             + "high buffer size %s", boltMetrics.getName(), bpValue, exeCount, bufferSize));
-        resultSymptom = new Symptom(SYMPTOM_DATA_SKEW, mergedData);
+        resultSymptom = new Symptom(SYMPTOM_DATA_SKEW.text(), mergedData);
       }
     }
 
-    return resultSymptom != null ? new Diagnosis(DIAGNOSIS_DATA_SKEW, resultSymptom) : null;
+    return resultSymptom != null ? new Diagnosis(DIAGNOSIS_DATA_SKEW.text(), resultSymptom) : null;
   }
 }

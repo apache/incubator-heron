@@ -14,14 +14,22 @@
 
 package com.twitter.heron.healthmgr;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName;
+import com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.*;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_PROCESSING_RATE_SKEW;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 
 public class TestUtils {
   public static List<Symptom> createBpSymptomList(int... bpValues) {
@@ -36,25 +44,21 @@ public class TestUtils {
     return createSymptom(SYMPTOM_WAIT_Q_DISPARITY, METRIC_BUFFER_SIZE, bufferSizes);
   }
 
-  public static Symptom createLargeWaitQSymptom(int... bufferSizes) {
-    return createSymptom(SYMPTOM_LARGE_WAIT_Q, METRIC_BUFFER_SIZE, bufferSizes);
-  }
-
-  public static Symptom createBPSymptom(int... bpValues) {
+  private static Symptom createBPSymptom(int... bpValues) {
     return createSymptom(SYMPTOM_BACK_PRESSURE, METRIC_BACK_PRESSURE, bpValues);
   }
 
-  public static void addInstanceMetric(ComponentMetrics metrics, int i, double val, String metric) {
+  private static void addInstanceMetric(ComponentMetrics metrics, int i, double val, String metric) {
     InstanceMetrics instanceMetric = new InstanceMetrics("container_1_bolt_" + i, metric, val);
     metrics.addInstanceMetric(instanceMetric);
   }
 
-  private static Symptom createSymptom(String symptomName, String metricName, int... values) {
+  private static Symptom createSymptom(SymptomName symptom, MetricName metric, int... values) {
     ComponentMetrics compMetrics = new ComponentMetrics("bolt");
     for (int i = 0; i < values.length; i++) {
-      addInstanceMetric(compMetrics, i, values[i], metricName);
+      addInstanceMetric(compMetrics, i, values[i], metric.text());
     }
-    return new Symptom(symptomName, compMetrics);
+    return new Symptom(symptom.text(), compMetrics);
   }
 
   private static List<Symptom> createListFromSymptom(Symptom symptom) {

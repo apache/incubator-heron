@@ -14,6 +14,7 @@
 
 package com.twitter.heron.healthmgr.common;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,11 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_BUFFER_SIZE;
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.METRIC_WAIT_Q_GROWTH_RATE;
+import com.twitter.heron.healthmgr.sensors.BaseSensor;
+
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_GROWTH_RATE;
 
 
 /**
@@ -44,7 +47,7 @@ public class ComponentMetricsHelper {
 
   public void computeBpStats() {
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      double bpValue = instanceMetrics.getMetricValueSum(METRIC_BACK_PRESSURE);
+      double bpValue = instanceMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
       if (bpValue > 0) {
         boltsWithBackpressure.add(instanceMetrics);
         totalBackpressure += bpValue;
@@ -54,19 +57,19 @@ public class ComponentMetricsHelper {
 
   public void computeBufferSizeTrend() {
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      Map<Long, Double> bufferMetrics = instanceMetrics.getMetrics().get(METRIC_BUFFER_SIZE);
+      Map<Instant, Double> bufferMetrics = instanceMetrics.getMetrics().get(METRIC_BUFFER_SIZE.text());
       if (bufferMetrics == null || bufferMetrics.size() < 3) {
         // missing of insufficient data for creating a trend line
         continue;
       }
 
       SimpleRegression simpleRegression = new SimpleRegression(true);
-      for (Long timeStampX : bufferMetrics.keySet()) {
-        simpleRegression.addData(timeStampX, bufferMetrics.get(timeStampX));
+      for (Instant timestamp : bufferMetrics.keySet()) {
+        simpleRegression.addData(timestamp.getEpochSecond(), bufferMetrics.get(timestamp));
       }
 
       double slope = simpleRegression.getSlope();
-      instanceMetrics.addMetric(METRIC_WAIT_Q_GROWTH_RATE, slope);
+      instanceMetrics.addMetric(METRIC_WAIT_Q_GROWTH_RATE.text(), slope);
 
       if (maxBufferChangeRate < slope) {
         maxBufferChangeRate = slope;
@@ -74,6 +77,9 @@ public class ComponentMetricsHelper {
     }
   }
 
+  public MetricsStats computeMinMaxStats(BaseSensor.MetricName metric) {
+    return computeMinMaxStats(metric.text());
+  }
 
   public MetricsStats computeMinMaxStats(String metric) {
     double metricMax = 0;
@@ -89,7 +95,6 @@ public class ComponentMetricsHelper {
     }
     return new MetricsStats(metricMin, metricMax);
   }
-
 
   public double getTotalBackpressure() {
     return totalBackpressure;

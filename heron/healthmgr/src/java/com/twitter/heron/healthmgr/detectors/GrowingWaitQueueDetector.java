@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -29,7 +30,7 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_GROWING_WAIT_Q;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_GROWING_WAIT_Q;
 
 
 public class GrowingWaitQueueDetector implements IDetector {
@@ -43,7 +44,7 @@ public class GrowingWaitQueueDetector implements IDetector {
   GrowingWaitQueueDetector(BufferSizeSensor pendingBufferSensor,
                            HealthPolicyConfig policyConfig) {
     this.pendingBufferSensor = pendingBufferSensor;
-    rateLimit = Double.valueOf(policyConfig.getConfig(CONF_LIMIT, "10"));
+    rateLimit = (double) policyConfig.getConfig(CONF_LIMIT, 10.0);
   }
 
   /**
@@ -63,7 +64,7 @@ public class GrowingWaitQueueDetector implements IDetector {
       if (compStats.getMaxBufferChangeRate() > rateLimit) {
         LOG.info(String.format("Detected growing wait queues for %s, max rate %f",
             compMetrics.getName(), compStats.getMaxBufferChangeRate()));
-        result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q, compMetrics));
+        result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q.text(), compMetrics));
       }
     }
 

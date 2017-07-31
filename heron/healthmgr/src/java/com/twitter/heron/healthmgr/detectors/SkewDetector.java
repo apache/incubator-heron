@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
@@ -29,19 +29,17 @@ import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.common.MetricsStats;
 import com.twitter.heron.healthmgr.sensors.BaseSensor;
 
-public class SkewDetector implements IDetector {
-  public static final String CONF_SKEW_RATIO = "SkewDetector.skewRatio";
-
+public class SkewDetector extends BaseDetector {
   private static final Logger LOG = Logger.getLogger(SkewDetector.class.getName());
   private final BaseSensor sensor;
   private final double skewRatio;
-  private final String symptomName;
+  private final BaseDetector.SymptomName symptomName;
 
   @Inject
-  SkewDetector(BaseSensor sensor, double skewRatio, String symptomName) {
+  SkewDetector(BaseSensor sensor, double skewRatio, BaseDetector.SymptomName symptom) {
     this.sensor = sensor;
     this.skewRatio = skewRatio;
-    this.symptomName = symptomName;
+    this.symptomName = symptom;
   }
 
   /**
@@ -60,7 +58,7 @@ public class SkewDetector implements IDetector {
       if (stats.getMetricMax() > skewRatio * stats.getMetricMin()) {
         LOG.info(String.format("Detected skew for %s, min = %f, max = %f",
             compMetrics.getName(), stats.getMetricMin(), stats.getMetricMax()));
-        result.add(new Symptom(symptomName, compMetrics));
+        result.add(new Symptom(symptomName.text(), compMetrics));
       }
     }
 
