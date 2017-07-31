@@ -29,6 +29,8 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+
 public class BackPressureSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
@@ -39,7 +41,7 @@ public class BackPressureSensor extends BaseSensor {
                             TopologyProvider topologyProvider,
                             HealthPolicyConfig policyConfig,
                             MetricsProvider metricsProvider) {
-    super(policyConfig, MetricName.METRIC_BACK_PRESSURE.text());
+    super(policyConfig, METRIC_BACK_PRESSURE.text(), BackPressureSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -62,10 +64,10 @@ public class BackPressureSensor extends BaseSensor {
     for (String boltComponent : boltComponents) {
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
 
-      Duration duration = getDuration(BackPressureSensor.class.getSimpleName());
+      Duration duration = getDuration();
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = this.metricName + boltInstanceName;
+        String metric = getMetricName() + boltInstanceName;
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric, duration, COMPONENT_STMGR);
 
@@ -79,7 +81,7 @@ public class BackPressureSensor extends BaseSensor {
         double averageBp = stmgrInstanceResult.getMetricValueSum(metric) / duration.getSeconds();
         averageBp = averageBp > 1000 ? 1000 : averageBp;
         InstanceMetrics boltInstanceMetric
-            = new InstanceMetrics(boltInstanceName, this.metricName, averageBp);
+            = new InstanceMetrics(boltInstanceName, getMetricName(), averageBp);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }

@@ -31,6 +31,8 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+
 public class BufferSizeSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
@@ -41,7 +43,7 @@ public class BufferSizeSensor extends BaseSensor {
                           PackingPlanProvider packingPlanProvider,
                           TopologyProvider topologyProvider,
                           MetricsProvider metricsProvider) {
-    super(policyConfig, MetricName.METRIC_BUFFER_SIZE.text());
+    super(policyConfig, METRIC_BUFFER_SIZE.text(), BufferSizeSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -75,11 +77,11 @@ public class BufferSizeSensor extends BaseSensor {
 
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
-        String metric = this.metricName + boltInstanceName + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
+        String metric = getMetricName() + boltInstanceName + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
 
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric,
-            getDuration(BufferSizeSensor.class.getSimpleName()),
+            getDuration(),
             COMPONENT_STMGR);
 
         HashMap<String, InstanceMetrics> streamManagerResult =
@@ -91,7 +93,7 @@ public class BufferSizeSensor extends BaseSensor {
             streamManagerResult.values().iterator().next().getMetricValueSum(metric);
 
         InstanceMetrics boltInstanceMetric =
-            new InstanceMetrics(boltInstanceName, this.metricName, stmgrInstanceResult);
+            new InstanceMetrics(boltInstanceName, getMetricName(), stmgrInstanceResult);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
