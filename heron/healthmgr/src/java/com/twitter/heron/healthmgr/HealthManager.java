@@ -47,6 +47,7 @@ import com.twitter.heron.classification.InterfaceStability.Unstable;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
+import com.twitter.heron.healthmgr.sensors.MetricsCacheMetricsProvider;
 import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
@@ -234,9 +235,9 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
-        if (metricsSourceType.equals("tracker")) {
+        if ("tracker".equals(metricsSourceType)) {
           bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
-        } else if (metricsSourceType.equals("metricsCache")) {
+        } else if ("metricsCache".equals(metricsSourceType)) {
           bind(MetricsProvider.class).to(MetricsCacheMetricsProvider.class).in(Singleton.class);
         }
       }
@@ -375,7 +376,7 @@ public class HealthManager {
         .hasArgs()
         .argName("data source url")
         .build();
-    
+
     // candidate metrics sources are: tracker, metricsCache
     Option metricsSourceType = Option.builder("s")
         .desc("metrics data source type")

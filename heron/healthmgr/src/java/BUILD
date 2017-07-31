@@ -16,6 +16,7 @@ healthmgr_deps_files = [
     "//heron/spi/src/java:utils-spi-java",
     "//heron/spi/src/java:metricsmgr-spi-java",
     "//heron/metricsmgr/src/thrift:thrift_scribe_java",
+    "//heron/metricscachemgr/src/java:metricscachemgr-java",
     "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:jackson",
     "@commons_cli_commons_cli//jar",

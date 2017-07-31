@@ -24,18 +24,12 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
+
 import com.twitter.heron.proto.system.Common.StatusCode;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricInterval;
@@ -43,8 +37,6 @@ import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualM
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric.IntervalValue;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
 import com.twitter.heron.spi.utils.NetworkUtils;
-
-import net.minidev.json.JSONArray;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
 import static com.twitter.heron.metricscachemgr.MetricsCacheManagerHttpServer.PATH_STATS;
@@ -70,7 +62,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
                                                            String... components) {
     Map<String, ComponentMetrics> result = new HashMap<>();
     for (String component : components) {
-      String response = getMetricsFromMetricsCache(metric, component, startTime, duration);
+      TopologyMaster.MetricResponse response =
+          getMetricsFromMetricsCache(metric, component, startTime, duration);
       Map<String, InstanceMetrics> metrics = parse(response, component, metric);
       ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
       result.put(component, componentMetric);
@@ -101,32 +94,26 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
       return metricsData;
     }
 
-    Map<String, Object> metricsMap = (Map<String, Object>) jsonArray.get(0);
-    if (metricsMap == null || metricsMap.isEmpty()) {
-      LOG.info(String.format("Did not get any metrics from tracker for %s:%s ", component, metric));
-      return metricsData;
-    }
-
     // convert heron.protobuf.taskMetrics to dhalion.InstanceMetrics
     for (TaskMetric tm :response.getMetricList()) {
       String instanceId = tm.getInstanceId();
-      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
+      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceId);
 
       for (IndividualMetric im: tm.getMetricList()) {
         String metricName = im.getName();
         Map<Instant, Double> values = new HashMap<>();
-        
+
         for (IntervalValue iv: im.getIntervalValuesList()) {
           MetricInterval mi = iv.getInterval();
           String value = iv.getValue();
           values.put(Instant.ofEpochSecond(mi.getStart()),  Double.parseDouble(value));
         }
-        
+
         if (!values.isEmpty()) {
           instanceMetrics.addMetric(metricName, values);
         }
       }
-      
+
       metricsData.put(instanceId, instanceMetrics);
     }
 
@@ -134,7 +121,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   }
 
   @VisibleForTesting
-  TopologyMaster.MetricResponse getMetricsFromMetricsCache(String metric, String component, Instant start, Duration duration) {
+  TopologyMaster.MetricResponse getMetricsFromMetricsCache(
+      String metric, String component, Instant start, Duration duration) {
     TopologyMaster.MetricRequest request = TopologyMaster.MetricRequest.newBuilder()
         .setComponentName(component)
         .setExplicitInterval(
@@ -148,11 +136,16 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
 
     NetworkUtils.sendHttpPostRequest(con, "X", request.toByteArray());
     byte[] responseData = NetworkUtils.readHttpResponse(con);
-    
-    TopologyMaster.MetricResponse response = 
-      TopologyMaster.MetricResponse.parseFrom(responseData);
-    LOG.info("MetricsCache Query response: " + response.toString());
-    return response;
+
+    try {
+      TopologyMaster.MetricResponse response =
+          TopologyMaster.MetricResponse.parseFrom(responseData);
+      LOG.info("MetricsCache Query response: " + response.toString());
+      return response;
+    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      LOG.severe("protobuf cannot parse the reply from MetricsCache " + e);
+      return null;
+    }
   }
 
   @VisibleForTesting

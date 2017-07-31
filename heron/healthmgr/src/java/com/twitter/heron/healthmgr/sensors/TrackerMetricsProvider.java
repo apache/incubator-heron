@@ -38,8 +38,8 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import net.minidev.json.JSONArray;
 
-import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 import static com.twitter.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
+import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 
 public class TrackerMetricsProvider implements MetricsProvider {
   public static final String CONF_CLUSTER = "CLUSTER";
