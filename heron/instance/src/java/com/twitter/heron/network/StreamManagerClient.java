@@ -31,6 +31,7 @@ import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -109,6 +110,11 @@ public class StreamManagerClient extends HeronClient {
   private void registerMessagesToHandle() {
     registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
     registerOnMessage(HeronTuples.HeronTupleSet2.newBuilder());
+
+    // Register stateful processing related messages
+    registerOnMessage(CheckpointManager.InitiateStatefulCheckpoint.newBuilder());
+    registerOnMessage(CheckpointManager.RestoreInstanceStateRequest.newBuilder());
+    registerOnMessage(CheckpointManager.StartInstanceStatefulProcessing.newBuilder());
   }
 
 
@@ -188,6 +194,12 @@ public class StreamManagerClient extends HeronClient {
       handleAssignmentMessage(m.getPplan());
     } else if (message instanceof HeronTuples.HeronTupleSet2) {
       handleNewTuples2((HeronTuples.HeronTupleSet2) message);
+    } else if (message instanceof CheckpointManager.InitiateStatefulCheckpoint)  {
+      handleCheckpointRequest((CheckpointManager.InitiateStatefulCheckpoint) message);
+    } else if (message instanceof CheckpointManager.RestoreInstanceStateRequest) {
+      handleRestoreInstanceStateRequest((CheckpointManager.RestoreInstanceStateRequest) message);
+    } else if (message instanceof CheckpointManager.StartInstanceStatefulProcessing) {
+      handleStartStatefulRequest((CheckpointManager.StartInstanceStatefulProcessing) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -257,6 +269,32 @@ public class StreamManagerClient extends HeronClient {
         lastNotConnectedLogTime = now;
       }
     }
+  }
+
+  private void handleStartStatefulRequest(
+      CheckpointManager.StartInstanceStatefulProcessing request) {
+    LOG.info("Received a StartInstanceStatefulProcessing request: " + request);
+
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setStartInstanceStatefulProcessing(request)
+        .build();
+    inControlQueue.offer(instanceControlMsg);
+  }
+
+  private void handleRestoreInstanceStateRequest(
+      CheckpointManager.RestoreInstanceStateRequest request) {
+    LOG.info("Received a RestoreInstanceState request: " + request);
+
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setRestoreInstanceStateRequest(request)
+        .build();
+    inControlQueue.offer(instanceControlMsg);
+  }
+
+  private void handleCheckpointRequest(
+      CheckpointManager.InitiateStatefulCheckpoint request) {
+    LOG.info("Handling instance checkpoint request: " + request);
+    inStreamQueue.offer(request);
   }
 
   private void handleRegisterResponse(StreamManager.RegisterInstanceResponse response) {

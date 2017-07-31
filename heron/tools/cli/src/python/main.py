@@ -240,7 +240,7 @@ def main():
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.', (end - start))
+    Log.debug('Elapsed time: %.3fs.', (end - start))
 
   return 0 if result.is_successful(results) else 1
 

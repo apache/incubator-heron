@@ -206,7 +206,7 @@ void drainer1(sp_int32 _task_id, heron::proto::system::HeronTupleSet2* _tup) {
   delete _tup;
 }
 
-void drainer2(heron::proto::stmgr::TupleStreamMessage2* _tup) {
+void drainer2(heron::proto::stmgr::TupleStreamMessage* _tup) {
   drainer2_tuples.push_back(_tup->task_id());
   delete _tup;
 }

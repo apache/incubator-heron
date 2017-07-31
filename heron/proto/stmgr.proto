@@ -47,12 +47,6 @@ message StrMgrHelloResponse {
   required heron.proto.system.Status status = 1;
 }
 
-// Tuples exchanged between stream managers
-message TupleStreamMessage {
-  required int32 task_id = 1;
-  required heron.proto.system.HeronTupleSet set = 2;
-}
-
 message StartBackPressureMessage {
   required string topology_name = 1;
   required string topology_id = 2;
@@ -67,13 +61,8 @@ message StopBackPressureMessage {
   required string message_id = 4;
 }
 
-// Tuples exchanged between stream managers and instances
-message TupleMessage2 {
-  required heron.proto.system.HeronTupleSet2 set = 1;
-}
-
 // Tuples exchanged between stream managers
-message TupleStreamMessage2 {
+message TupleStreamMessage {
   // The src_task of this message
   required int32 src_task_id = 3;
   // This is actually the destination task_id

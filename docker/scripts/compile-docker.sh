@@ -6,7 +6,7 @@ realpath() {
   echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
-DOCKER_DIR=$(dirname $(realpath $0))
+DOCKER_DIR=$(dirname $(dirname $(realpath $0)))
 PROJECT_DIR=$(dirname $DOCKER_DIR)
 
 verify_dockerfile_exists() {
@@ -17,7 +17,7 @@ verify_dockerfile_exists() {
 }
 
 dockerfile_path_for_platform() {
-  echo "$SCRATCH_DIR/Dockerfile.$1"
+  echo "$SCRATCH_DIR/compile/Dockerfile.$1"
 }
 
 copy_bazel_rc_to() {

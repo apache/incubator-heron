@@ -35,6 +35,7 @@ import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.metricsmgr.MetricsManagerServer;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
@@ -336,6 +337,8 @@ public class MetricsCacheSink implements IMetricsSink {
         throw new RuntimeException("Could not create the NIOLooper", e);
       }
 
+      SystemConfig systemConfig =
+          (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
               TypeUtils.getByteAmount(
@@ -349,7 +352,8 @@ public class MetricsCacheSink implements IMetricsSink {
               TypeUtils.getByteAmount(
                   metricsCacheClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
               TypeUtils.getByteAmount(
-                  metricsCacheClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+                  metricsCacheClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)),
+              systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);
