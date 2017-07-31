@@ -82,8 +82,6 @@ const sp_string HeronInternalsConfigVars::HERON_TMASTER_STMGR_STATE_TIMEOUT_SEC 
     "heron.tmaster.stmgr.state.timeout.sec";
 
 // heron.streammgr.* configs are for the stream manager
-const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_PACKET_MAXIMUM_SIZE_BYTES =
-    "heron.streammgr.packet.maximum.size.bytes";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_FREQUENCY_MS =
     "heron.streammgr.cache.drain.frequency.ms";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB =
