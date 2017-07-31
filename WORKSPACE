@@ -428,10 +428,10 @@ maven_jar(
   artifact = "com.101tec:zkclient:0.3"
 )
 
-#http_jar(
-#  name = "com_microsoft_dhalion",
-#  url = "https://github.com/Microsoft/Dhalion/releases/download/0.0.1_2/dhalion-0.0.1_2.jar",
-#)
+maven_jar(
+  name = "com_microsoft_dhalion",
+  artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
+)
 
 # Google Cloud
 maven_jar(
