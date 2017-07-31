@@ -75,9 +75,14 @@ class StMgrClient : public Client {
 
   // Configs to be read
   sp_int32 reconnect_other_streammgrs_interval_sec_;
+  sp_int32 reconnect_other_streammgrs_max_attempt_;
 
   // Counters
   sp_int64 ndropped_messages_;
+  sp_int32 reconnect_attempts_;
+
+  // Have we registered ourselves
+  bool is_registered_;
 };
 
 }  // namespace stmgr

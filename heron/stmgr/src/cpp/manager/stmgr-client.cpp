@@ -63,9 +63,13 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
       quit_(false),
       client_manager_(_client_manager),
       metrics_manager_client_(_metrics_manager_client),
-      ndropped_messages_(0) {
+      ndropped_messages_(0),
+      reconnect_attempts_(0),
+      is_registered_(false) {
   reconnect_other_streammgrs_interval_sec_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
+  reconnect_other_streammgrs_max_attempt_ =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectMaxAttempts();
 
   InstallResponseHandler(new proto::stmgr::StrMgrHelloRequest(), &StMgrClient::HandleHelloResponse);
   InstallMessageHandler(&StMgrClient::HandleTupleStreamMessage);
@@ -90,6 +94,10 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
     LOG(INFO) << "Connected to stmgr " << other_stmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
               << std::endl;
+
+    // reset the reconnect attempt once connection established
+    reconnect_attempts_ = 0;
+
     if (quit_) {
       Stop();
     } else {
@@ -100,7 +108,7 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
                  << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
                  << " due to: " << _status << std::endl;
     if (quit_) {
-      LOG(ERROR) << "Quitting";
+      LOG(ERROR) << "Instructed to quit. Quitting...";
       delete this;
       return;
     } else {
@@ -155,7 +163,16 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
   }
 }
 
-void StMgrClient::OnReConnectTimer() { Start(); }
+void StMgrClient::OnReConnectTimer() {
+  reconnect_attempts_ += 1;
+
+  if (reconnect_attempts_ < reconnect_other_streammgrs_max_attempt_) {
+    Start();
+  } else {
+    LOG(FATAL) << "Could not connect to stmgr " << other_stmgr_id_
+               << " after reaching the max reconnect attempts. Quitting...";
+  }
+}
 
 void StMgrClient::SendHelloRequest() {
   auto request = new proto::stmgr::StrMgrHelloRequest();
