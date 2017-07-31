@@ -39,6 +39,8 @@ import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.twitter.heron.proto.system.Common.StatusCode;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricInterval;
+import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric;
+import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric.IntervalValue;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -105,20 +107,28 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
       return metricsData;
     }
 
+    // convert heron.protobuf.taskMetrics to dhalion.InstanceMetrics
     for (TaskMetric tm :response.getMetricList()) {
-      // TODO(huijun): convert heron.protobuf.taskMetrics to dhalion.InstanceMetrics
+      String instanceId = tm.getInstanceId();
+      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
+
+      for (IndividualMetric im: tm.getMetricList()) {
+        String metricName = im.getName();
+        Map<Instant, Double> values = new HashMap<>();
+        
+        for (IntervalValue iv: im.getIntervalValuesList()) {
+          MetricInterval mi = iv.getInterval();
+          String value = iv.getValue();
+          values.put(Instant.ofEpochSecond(mi.getStart()),  Double.parseDouble(value));
+        }
+        
+        if (!values.isEmpty()) {
+          instanceMetrics.addMetric(metricName, values);
+        }
+      }
+      
+      metricsData.put(instanceId, instanceMetrics);
     }
-//    for (String instanceName : metricsMap.keySet()) {
-//      Map<String, String> tmpValues = (Map<String, String>) metricsMap.get(instanceName);
-//      Map<Instant, Double> values = new HashMap<>();
-//      for (String timeStamp : tmpValues.keySet()) {
-//        values.put(Instant.ofEpochSecond(Long.parseLong(timeStamp)),
-//            Double.parseDouble(tmpValues.get(timeStamp)));
-//      }
-//      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
-//      instanceMetrics.addMetric(metric, values);
-//      metricsData.put(instanceName, instanceMetrics);
-//    }
 
     return metricsData;
   }
