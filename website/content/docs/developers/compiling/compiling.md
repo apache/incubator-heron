@@ -27,7 +27,7 @@ You must have the following installed to compile Heron:
 * [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   is required by Bazel and Heron;
   [topologies](../../../concepts/topologies) can be written in Java 7 or above
-  , all Heron jars are required to run with Java 8.
+  , but Heron jars are required to run with a Java 8 JRE.
 * [Autoconf](http://www.gnu.org/software/autoconf/autoconf.html) >=
   2.6.3
 * [Automake](https://www.gnu.org/software/automake/) >= 1.11.1
