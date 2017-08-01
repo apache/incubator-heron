@@ -1,13 +1,47 @@
 package(default_visibility = ["//visibility:public"])
 
+load("/tools/rules/heron_deps", "heron_java_proto_files")
+
 api_deps_files = [
   "//heron/api/src/java:api-java",
+  "//heron/spi/src/java:heron-spi",
   "//heron/common/src/java:basics-java",
 ]
 
+scheduler_deps_files = [
+  "//heron/scheduler-core/src/java:scheduler-java",
+  "//heron/schedulers/src/java:local-scheduler-java",
+  "//heron/schedulers/src/java:kubernetes-scheduler-java",
+  "//heron/schedulers/src/java:marathon-scheduler-java",
+]
+
+packing_deps_files = [
+  "//heron/packing/src/java:roundrobin-packing",
+  "//heron/packing/src/java:binpacking-packing"
+]
+
+uploader_deps_files = [
+  "//heron/uploaders/src/java:localfs-uploader-java",
+  "//heron/uploaders/src/java:gcs-uploader-java",
+  "//heron/uploaders/src/java:s3-uploader-java",
+]
+
+state_manager_deps_files = [
+  "//heron/statemgrs/src/java:statemgrs-java",
+]
+
 apiserver_deps_files = \
-  api_deps_files + [
+  api_deps_files + \
+  heron_java_proto_files() + \
+  state_manager_deps_files + \
+  scheduler_deps_files + \
+  packing_deps_files + \
+  uploader_deps_files + [
+    "//third_party/java:cli",
+    "@org_yaml_snakeyaml//jar",
     "//third_party/java:jetty-jersey-java",
+    "//third_party/java:commons-compress",
+    "//third_party/java:jackson",
     "//third_party/java:logging",
   ]
 
@@ -16,9 +50,10 @@ java_binary(
     srcs = glob(["**/apiserver/**/*.java"]),
     main_class = "com.twitter.heron.apiserver.Runtime",
     resources = [
-        "//heron/config/src/yaml:conf-yaml",
+      "//heron/config/src/yaml:conf-yaml",
     ],
-    deps = apiserver_deps_files)
+    deps = apiserver_deps_files
+)
 
 genrule(
     name = "heron-apiserver",

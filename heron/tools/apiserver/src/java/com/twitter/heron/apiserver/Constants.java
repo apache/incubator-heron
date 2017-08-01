@@ -13,9 +13,28 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver;
 
+import com.twitter.heron.spi.common.Key;
+
 public final class Constants {
 
   static final int DEFAULT_PORT = 9000;
+
+  static final String DEFAULT_HERON_LOCAL = "~/.heron";
+
+  static final String DEFAULT_HERON_CLUSTER = "$HERON_HOME";
+
+  static final String DEFAULT_HERON_CONFIG_DIRECTORY = "../conf";
+
+  public static final String DEFAULT_HERON_SANDBOX_CONFIG =
+      Key.HERON_CLUSTER_CONF.getDefaultString();
+
+  public static final String OVERRIDE_FILE = "override.yaml";
+
+  public static final String STATE_MANAGER_FILE = "statemgr.yaml";
+
+  public static final String DEFAULT_HERON_ENVIRONMENT = "default";
+
+  public static final int HTTP_UNPROCESSABLE_ENTITY_CODE = 422;
 
   private Constants() {
   }

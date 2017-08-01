@@ -168,7 +168,16 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools-conf",
     package_dir = "conf",
-    files = heron_tools_conf_files(),
+    files = heron_tools_conf_files()
+)
+
+pkg_tar(
+    name = "heron-tools-cluster-conf",
+    strip_prefix = "/heron/config/src/yaml/conf",
+    package_dir = "conf",
+    files = [
+      "//heron/config/src/yaml:conf-yaml"
+    ], 
 )
 
 pkg_tar(
@@ -179,6 +188,7 @@ pkg_tar(
         ":heron-tools-bin",
         ":heron-tools-lib",
         ":heron-tools-conf",
+        ":heron-tools-cluster-conf",
     ],
 )
 

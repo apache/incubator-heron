@@ -18,11 +18,21 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+@SuppressWarnings("all")
 @Provider
 public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundException> {
   @Override
   public Response toResponse(NotFoundException exception) {
     // TODO custom response
-    return Response.status(Response.Status.NOT_FOUND).entity("not found").build();
+    final StringBuilder sb = new StringBuilder();
+
+    String response = "{\n" +
+        "  \"paths\": [\n" +
+        "    \"/api/v1/topologies\"\n" +
+        "  ]\n" +
+        "}\n";
+    return Response.status(Response.Status.NOT_FOUND)
+        .entity(response)
+        .build();
   }
 }

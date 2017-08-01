@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler;
 import java.io.PrintStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,13 +33,13 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.DryRunFormatType;
-import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
 import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
@@ -59,29 +60,6 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  */
 public class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
-
-  /**
-   * Load the topology config
-   *
-   * @param topologyPackage, tar ball containing user submitted jar/tar, defn and config
-   * @param topologyBinaryFile, name of the user submitted topology jar/tar/pex file
-   * @param topology, proto in memory version of topology definition
-   * @return config, the topology config
-   */
-  protected static Config topologyConfigs(
-      String topologyPackage, String topologyBinaryFile, String topologyDefnFile,
-      TopologyAPI.Topology topology) {
-    PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
-
-    return Config.newBuilder()
-        .put(Key.TOPOLOGY_ID, topology.getId())
-        .put(Key.TOPOLOGY_NAME, topology.getName())
-        .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
-        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage)
-        .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
-        .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
-        .build();
-  }
 
   /**
    * Load the config parameters from the command line
@@ -247,6 +225,7 @@ public class SubmitterMain {
     return cmd.hasOption("v");
   }
 
+  @SuppressWarnings("JavadocMethod")
   @VisibleForTesting
   public static Config loadConfig(CommandLine cmd, TopologyAPI.Topology topology) {
     String cluster = cmd.getOptionValue("cluster");
@@ -259,6 +238,21 @@ public class SubmitterMain {
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyBinaryFile = cmd.getOptionValue("topology_bin");
+
+
+    LOG.info("\n\noptions\n" + Arrays.toString(new String[] {
+        cluster,
+        role,
+        environ,
+        heronHome,
+        configPath,
+        overrideConfigFile,
+        releaseFile,
+        topologyPackage,
+        topologyDefnFile,
+        topologyBinaryFile
+    }) + "\n\n");
+
 
     Boolean dryRun = false;
     if (cmd.hasOption("u")) {
@@ -281,7 +275,8 @@ public class SubmitterMain {
     return Config.toLocalMode(Config.newBuilder()
         .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
         .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
-        .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
+        .putAll(SubmitterUtils.topologyConfigs(topologyPackage, topologyBinaryFile,
+            topologyDefnFile, topology))
         .build());
   }
 
@@ -317,8 +312,8 @@ public class SubmitterMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(cmd.getOptionValue("topology_defn"));
     Config config = loadConfig(cmd, topology);
 
-    LOG.fine("Static config loaded successfully");
-    LOG.fine(config.toString());
+    //LOG.info("Static config loaded successfully");
+    //LOG.info(config.toString());
 
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
     /* Meaning of exit status code:
@@ -461,6 +456,7 @@ public class SubmitterMain {
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException
+      //e.printStackTrace();
       uploader.undo();
       throw e;
     } finally {

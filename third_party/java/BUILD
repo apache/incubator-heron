@@ -232,6 +232,17 @@ java_library(
 )
 
 java_library(
+  name = "commons-compress",
+  srcs = [ "Empty.java" ],
+  exports = [
+      "@org_apache_commons_compress//jar",
+  ],
+  deps = [
+      "@org_apache_commons_compress//jar",
+  ]
+)
+
+java_library(
     name = "jetty-jersey-java",
     srcs = [ "Empty.java" ],
     exports = [ 
@@ -250,6 +261,7 @@ java_library(
         "@jersey_client//jar",
         "@jersey_common//jar",
         "@jersey_guava//jar",
+        "@jersey_media_multipart//jar",
         "@jersey_media_jaxb//jar",
         "@javax_inject//jar",
         "@javax_annotation//jar",
@@ -260,8 +272,8 @@ java_library(
         "@hk2_locator//jar",
         "@hk2_aopalliance_repackaged//jar",
         "@hk2_osgi_resource_locator//jar",
-        "@org_javassit//jar"
-
+        "@org_javassit//jar",
+        "@mimepull//jar",
     ],
     deps = [ 
         "@org_eclipse_jetty_server//jar",
@@ -279,6 +291,7 @@ java_library(
         "@jersey_client//jar",
         "@jersey_common//jar",
         "@jersey_guava//jar",
+        "@jersey_media_multipart//jar",
         "@jersey_media_jaxb//jar",
         "@javax_inject//jar",
         "@javax_annotation//jar",
@@ -289,6 +302,7 @@ java_library(
         "@hk2_locator//jar",
         "@hk2_aopalliance_repackaged//jar",
         "@hk2_osgi_resource_locator//jar",
-        "@org_javassit//jar"
+        "@org_javassit//jar",
+        "@mimepull//jar",
     ],   
 )

@@ -449,13 +449,18 @@ maven_jar(
 )
 
 maven_jar(
-  name = "jersey_media_jaxb",
-  artifact = "org.glassfish.jersey.media:jersey-media-jaxb:" + jersey_verion
+  name = "jersey_common",
+  artifact = "org.glassfish.jersey.core:jersey-common:jar:" + jersey_verion
 )
 
 maven_jar(
-  name = "jersey_common",
-  artifact = "org.glassfish.jersey.core:jersey-common:jar:" + jersey_verion
+  name = "jersey_media_multipart",
+  artifact = "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_media_jaxb",
+  artifact = "org.glassfish.jersey.media:jersey-media-jaxb:" + jersey_verion
 )
 
 maven_jar(
@@ -512,5 +517,15 @@ maven_jar(
 maven_jar(
   name = "org_javassit",
   artifact = "org.javassist:javassist:3.20.0-GA"
+)
+
+maven_jar(
+  name = "mimepull",
+  artifact = "org.jvnet.mimepull:mimepull:1.9.7"
+)
+
+maven_jar(
+  name = "org_apache_commons_compress",
+  artifact = "org.apache.commons:commons-compress:1.14",
 )
 # end heron api server

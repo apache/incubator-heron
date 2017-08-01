@@ -18,6 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+
+import com.twitter.heron.apiserver.resources.ConfigurationResource;
 import com.twitter.heron.apiserver.resources.NotFoundExceptionHandler;
 import com.twitter.heron.apiserver.resources.TopologyResource;
 
@@ -32,8 +35,10 @@ public final class Resources {
 
   private static List<Class<?>> getClasses() {
     return Arrays.asList(
+        ConfigurationResource.class,
         TopologyResource.class,
-        NotFoundExceptionHandler.class
+        NotFoundExceptionHandler.class,
+        MultiPartFeature.class
     );
   }
 }
