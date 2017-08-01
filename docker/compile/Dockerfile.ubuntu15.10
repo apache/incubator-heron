@@ -1,40 +1,34 @@
-FROM centos:centos7
+FROM ubuntu:15.10
 
 # This is passed to the heron build command via the --config flag
-ENV TARGET_PLATFORM centos
+ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 0.2.3
-ENV JAVA_VERSION 8u31
-ENV BUILD_VERSION b13
 
-RUN yum -y upgrade
-RUN yum -y install \
+RUN apt-get update && apt-get -y install \
       automake \
-      curl \
+      build-essential \
       cmake \
-      openssl-devel \
-      file \
-      gcc \
-      gcc-c++ \
+      curl \
+      libssl-dev \
       git \
-      kernel-devel \
       libtool \
-      make \
-      patch \
+      libtool-bin \
       python \
-      python-devel \
+      python2.7-dev \
+      python-software-properties \
+      software-properties-common \
       python-setuptools \
       zip \
       unzip \
-      wget \
-      which
+      wget
 
-RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel
+RUN apt-get -y install openjdk-8-jdk
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh
 
 ADD bazelrc /root/.bazelrc
-ADD compile-platform.sh /compile-platform.sh
+ADD scripts/compile-platform.sh /compile-platform.sh

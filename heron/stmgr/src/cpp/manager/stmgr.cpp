@@ -616,7 +616,7 @@ void StMgr::PopulateXorManagers(
 const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
 void StMgr::HandleStreamManagerData(const sp_string&,
-                                    proto::stmgr::TupleStreamMessage2* _message) {
+                                    proto::stmgr::TupleStreamMessage* _message) {
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from stmgr because we are in Restore";
     dropped_during_restore_metrics_->scope(RESTORE_DROPPED_STMGR_BYTES)

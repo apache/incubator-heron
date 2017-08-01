@@ -79,6 +79,10 @@ public class BackPressureSensor extends BaseSensor {
         InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
         double averageBp = stmgrInstanceResult.getMetricValueSum(metric) / duration.getSeconds();
+
+        // The maximum value of averageBp should be 1000, i.e. 1000 millis of BP per second. Due to
+        // a bug in Heron (Issue: 1753), this value could be higher in some cases. The following
+        // check partially corrects the reported BP value
         averageBp = averageBp > 1000 ? 1000 : averageBp;
         InstanceMetrics boltInstanceMetric
             = new InstanceMetrics(boltInstanceName, getMetricName(), averageBp);

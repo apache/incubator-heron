@@ -15,12 +15,17 @@
 package com.twitter.heron.instance;
 
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 
 public final class InstanceControlMsg {
   private PhysicalPlanHelper newPhysicalPlanHelper;
+  private CheckpointManager.RestoreInstanceStateRequest restoreInstanceStateRequest;
+  private CheckpointManager.StartInstanceStatefulProcessing startInstanceStatefulProcessing;
 
   private InstanceControlMsg(Builder builder) {
     this.newPhysicalPlanHelper = builder.newPhysicalPlanHelper;
+    this.restoreInstanceStateRequest = builder.restoreInstanceStateRequest;
+    this.startInstanceStatefulProcessing = builder.startInstanceStatefulProcessing;
   }
 
   public static Builder newBuilder() {
@@ -35,8 +40,26 @@ public final class InstanceControlMsg {
     return newPhysicalPlanHelper != null;
   }
 
+  public CheckpointManager.RestoreInstanceStateRequest getRestoreInstanceStateRequest() {
+    return this.restoreInstanceStateRequest;
+  }
+
+  public boolean isRestoreInstanceStateRequest() {
+    return this.restoreInstanceStateRequest != null;
+  }
+
+  public CheckpointManager.StartInstanceStatefulProcessing getStartInstanceStatefulProcessing() {
+    return this.startInstanceStatefulProcessing;
+  }
+
+  public boolean isStartInstanceStatefulProcessing() {
+    return this.startInstanceStatefulProcessing != null;
+  }
+
   public static final class Builder {
     private PhysicalPlanHelper newPhysicalPlanHelper;
+    private CheckpointManager.RestoreInstanceStateRequest restoreInstanceStateRequest;
+    private CheckpointManager.StartInstanceStatefulProcessing startInstanceStatefulProcessing;
 
     private Builder() {
 
@@ -44,6 +67,18 @@ public final class InstanceControlMsg {
 
     public Builder setNewPhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
       this.newPhysicalPlanHelper = physicalPlanHelper;
+      return this;
+    }
+
+    public Builder setRestoreInstanceStateRequest(
+        CheckpointManager.RestoreInstanceStateRequest request) {
+      this.restoreInstanceStateRequest = request;
+      return this;
+    }
+
+    public Builder setStartInstanceStatefulProcessing(
+        CheckpointManager.StartInstanceStatefulProcessing request) {
+      this.startInstanceStatefulProcessing = request;
       return this;
     }
 
