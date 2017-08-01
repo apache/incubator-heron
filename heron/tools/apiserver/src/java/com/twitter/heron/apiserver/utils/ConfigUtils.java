@@ -45,8 +45,6 @@ public final class ConfigUtils {
       final Yaml yaml = new Yaml();
       yaml.dump(overrides, writer);
 
-      System.out.println(new Yaml().dump(overrides));
-
       return overridesPath.toFile().getAbsolutePath();
     } finally {
       overridesPath.toFile().deleteOnExit();

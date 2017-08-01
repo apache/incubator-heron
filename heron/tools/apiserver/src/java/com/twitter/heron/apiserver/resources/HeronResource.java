@@ -54,8 +54,4 @@ public class HeronResource {
 
     return configurationOverridePath;
   }
-
-  String getBaseDirectory() {
-    return "/Users/chris/fs/heron";
-  }
 }

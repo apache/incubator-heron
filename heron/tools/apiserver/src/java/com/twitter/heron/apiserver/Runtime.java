@@ -22,6 +22,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -43,14 +44,15 @@ public final class Runtime {
 
   private static final String API_BASE_PATH = "/api/v1/*";
 
-  private enum ApiOption {
+  private enum Flag {
+    Help("h"),
     Cluster("cluster"),
     ConfigPath("config-path"),
     Property("D");
 
     final String name;
 
-    ApiOption(String name) {
+    Flag(String name) {
       this.name = name;
     }
   }
@@ -58,21 +60,21 @@ public final class Runtime {
   private static Options createOptions() {
     final Option cluster = Option.builder()
         .desc("Cluster in which to deploy topologies")
-        .longOpt(ApiOption.Cluster.name)
+        .longOpt(Flag.Cluster.name)
         .hasArgs()
-        .argName(ApiOption.Cluster.name)
+        .argName(Flag.Cluster.name)
         .required()
         .build();
 
     final Option config = Option.builder()
         .desc("Path to the base configuration for deploying topologies")
-        .longOpt(ApiOption.ConfigPath.name)
+        .longOpt(Flag.ConfigPath.name)
         .hasArgs()
-        .argName(ApiOption.ConfigPath.name)
+        .argName(Flag.ConfigPath.name)
         .required(false)
         .build();
 
-    final Option property = Option.builder(ApiOption.Property.name)
+    final Option property = Option.builder(Flag.Property.name)
         .argName("property=value")
         .numberOfArgs(2)
         .valueSeparator()
@@ -85,6 +87,18 @@ public final class Runtime {
         .addOption(property);
   }
 
+  private static Options constructHelpOptions() {
+    Option help = Option.builder(Flag.Help.name)
+        .desc("List all options and their description")
+        .longOpt("help")
+        .hasArg(false)
+        .required(false)
+        .build();
+
+    return new Options()
+        .addOption(help);
+  }
+
   // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
@@ -92,35 +106,47 @@ public final class Runtime {
   }
 
   private static String getConfigurationDirectory(CommandLine cmd) {
-    if (cmd.hasOption(ApiOption.ConfigPath.name)) {
-      return cmd.getOptionValue(ApiOption.ConfigPath.name);
+    if (cmd.hasOption(Flag.ConfigPath.name)) {
+      return cmd.getOptionValue(Flag.ConfigPath.name);
     }
     return Paths.get(Constants.DEFAULT_HERON_CONFIG_DIRECTORY,
-        cmd.getOptionValue(ApiOption.Cluster.name)).toFile().getAbsolutePath();
+        cmd.getOptionValue(Flag.Cluster.name)).toFile().getAbsolutePath();
   }
 
   private static String getHeronDirectory(CommandLine cmd) {
-    final String cluster = cmd.getOptionValue(ApiOption.Cluster.name);
+    final String cluster = cmd.getOptionValue(Flag.Cluster.name);
     return "local".equalsIgnoreCase(cluster)
         ? Constants.DEFAULT_HERON_LOCAL : Constants.DEFAULT_HERON_CLUSTER;
   }
 
   private static String loadOverrides(CommandLine cmd) throws IOException {
     return ConfigUtils.createOverrideConfiguration(
-        cmd.getOptionProperties(ApiOption.Property.name));
+        cmd.getOptionProperties(Flag.Property.name));
   }
 
   public static void main(String[] args) throws Exception {
+    final Options options = createOptions();
+    final Options helpOptions = constructHelpOptions();
 
-    Options options = createOptions();
-    //Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();
+
     // parse the help options first.
-    CommandLine cmd = parser.parse(options, args);
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+    if (cmd.hasOption(Flag.Help.name)) {
+      usage(options);
+      return;
+    }
+
+    try {
+      cmd = parser.parse(options, args);
+    } catch (ParseException pe) {
+      usage(options);
+      throw new RuntimeException("Error parsing command line options: ", pe);
+    }
 
     final String configurationOverrides = loadOverrides(cmd);
 
-    LOG.debug("overrides\n {}", cmd.getOptionProperties(ApiOption.Property.name));
+    LOG.debug("apiserver overrides:\n {}", cmd.getOptionProperties(Flag.Property.name));
 
     final String heronConfigurationDirectory = getConfigurationDirectory(cmd);
     final String heronDirectory = getHeronDirectory(cmd);
@@ -155,7 +181,7 @@ public final class Runtime {
     try {
       server.start();
 
-      LOG.info("Heron api server started at {}", server.getURI());
+      LOG.info("Heron apiserver started at {}", server.getURI());
 
       server.join();
     } finally {
