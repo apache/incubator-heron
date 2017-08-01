@@ -20,6 +20,7 @@ import traceback
 import signal
 import yaml
 
+from heron.api.src.python import api_constants
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
@@ -81,6 +82,7 @@ class SingleThreadHeronInstance(object):
     # my_instance is a AssignedInstance tuple
     self.my_instance = None
     self.is_instance_started = False
+    self.is_stateful_started = False
 
     # Debugging purposes
     def go_trace(_, stack):
@@ -130,6 +132,11 @@ class SingleThreadHeronInstance(object):
     if self.my_pplan_helper.is_topology_running():
       self.my_instance.py_class.process_incoming_tuples()
 
+  def handle_start_stateful_processing(self, start_msg):
+    Log.info("Received start stateful processing for %s" % start_msg.checkpoint_id)
+    self.is_stateful_started = True
+    self.start_instance_if_possible()
+
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
     while not self.out_stream.is_empty():
@@ -148,7 +155,7 @@ class SingleThreadHeronInstance(object):
       # handle state change
       if new_helper.is_topology_running():
         if not self.is_instance_started:
-          self.start_instance()
+          self.start_instance_if_possible()
         self.my_instance.py_class.invoke_activate()
       elif new_helper.is_topology_paused():
         self.my_instance.py_class.invoke_deactivate()
@@ -206,14 +213,24 @@ class SingleThreadHeronInstance(object):
 
     if pplan_helper.is_topology_running():
       try:
-        self.start_instance()
+        self.start_instance_if_possible()
       except Exception as e:
         Log.error("Error with starting bolt/spout instance: " + e.message)
         Log.error(traceback.format_exc())
     else:
       Log.info("The instance is deployed in deactivated state")
 
-  def start_instance(self):
+  def start_instance_if_possible(self):
+    if self.my_pplan_helper is None:
+      return
+    if not self.my_pplan_helper.is_topology_running():
+      return
+    context = self.my_pplan_helper.context
+    mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
+                                            api_constants.TopologyReliabilityMode.ATMOST_ONCE)
+    is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    if is_stateful and not self.is_stateful_started:
+      return
     try:
       Log.info("Starting bolt/spout instance now...")
       self.my_instance.py_class.start()
