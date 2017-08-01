@@ -17,7 +17,6 @@ package com.twitter.heron.scheduler;
 import java.io.PrintStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -239,21 +238,6 @@ public class SubmitterMain {
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyBinaryFile = cmd.getOptionValue("topology_bin");
 
-
-    LOG.info("\n\noptions\n" + Arrays.toString(new String[] {
-        cluster,
-        role,
-        environ,
-        heronHome,
-        configPath,
-        overrideConfigFile,
-        releaseFile,
-        topologyPackage,
-        topologyDefnFile,
-        topologyBinaryFile
-    }) + "\n\n");
-
-
     Boolean dryRun = false;
     if (cmd.hasOption("u")) {
       dryRun = true;
@@ -312,8 +296,8 @@ public class SubmitterMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(cmd.getOptionValue("topology_defn"));
     Config config = loadConfig(cmd, topology);
 
-    //LOG.info("Static config loaded successfully");
-    //LOG.info(config.toString());
+    LOG.fine("Static config loaded successfully");
+    LOG.fine(config.toString());
 
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
     /* Meaning of exit status code:
@@ -456,7 +440,6 @@ public class SubmitterMain {
     } catch (LauncherException | PackingException e) {
       // we undo uploading of topology package only if launcher fails to
       // launch topology, which will throw LauncherException or PackingException
-      //e.printStackTrace();
       uploader.undo();
       throw e;
     } finally {
