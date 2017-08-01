@@ -84,5 +84,10 @@ class HeronCommunicator(object):
       Log.debug("%s: Full in offer()" % str(self))
       return False
 
+  def clear(self):
+    """Clear the buffer"""
+    while not self.is_empty():
+      self.poll()
+
   def __str__(self):
     return "HeronCommunicator"

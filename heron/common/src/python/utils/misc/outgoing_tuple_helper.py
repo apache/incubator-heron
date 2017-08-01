@@ -117,6 +117,11 @@ class OutgoingTupleHelper(object):
     msg.state.CopyFrom(istate)
     self._push_tuple_to_stream(msg)
 
+  def clear(self):
+    """Clears current data and the streams"""
+    self._flush_remaining()
+    self.out_stream.clear()
+
   def _init_new_data_tuple(self, stream_id):
     self._flush_remaining()
     self.current_data_tuple_size_in_bytes = 0

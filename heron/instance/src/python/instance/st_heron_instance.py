@@ -78,11 +78,13 @@ class SingleThreadHeronInstance(object):
                            self.out_metrics, self.in_stream, self.out_stream,
                            self.socket_map, socket_options, self.gateway_metrics, self.py_metrics)
     self.my_pplan_helper = None
+    self.serializer = None
 
     # my_instance is a AssignedInstance tuple
     self.my_instance = None
     self.is_instance_started = False
     self.is_stateful_started = False
+    self.stateful_state = None
 
     # Debugging purposes
     def go_trace(_, stack):
@@ -137,6 +139,37 @@ class SingleThreadHeronInstance(object):
     self.is_stateful_started = True
     self.start_instance_if_possible()
 
+  def handle_restore_instance_state(self, restore_msg):
+    Log.info("Restoring instance state to checkpoint %s" % restore_msg.state.checkpoint_id)
+    self.is_stateful_started = False
+    # Stop the instance
+    if self.is_instance_started:
+      self.my_instance['py_class'].stop()
+      self.my_instance['py_class'].clear_collector()
+
+    # Clear all buffers
+    self.in_stream.clear()
+    self.out_stream.clear()
+
+    # Deser the state
+    if self.stateful_state is not None:
+      self.stateful_state.clear()
+    if restore_msg.state.state is not None:
+      try:
+        self.stateful_state = self.serializer.deserialize(restore_msg.state.state)
+      except:
+        raise RuntimeError("Could not serialize state during restore")
+    else:
+      Log.info("The restore request does not have an actual state")
+    if self.stateful_state is None:
+      self.stateful_state = HashMapState()
+
+    Log.info("Instance restore state deserialized")
+    resp = ckptmgr_pb2.RestoreInstanceStateResponse()
+    resp.status.status = common_pb2.StatusCode.Value("OK")
+    resp.checkpoint_id = restore_msg.state.checkpoint_id
+    self._stmgr_client.send_message(resp)
+
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
     while not self.out_stream.is_empty():
@@ -176,6 +209,7 @@ class SingleThreadHeronInstance(object):
     """
 
     self.my_pplan_helper = pplan_helper
+    self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
     self.my_pplan_helper.set_topology_context(self.metrics_collector)
 
     if pplan_helper.is_spout:
@@ -233,7 +267,7 @@ class SingleThreadHeronInstance(object):
       return
     try:
       Log.info("Starting bolt/spout instance now...")
-      self.my_instance.py_class.start()
+      self.my_instance.py_class.start(self.stateful_state)
       self.is_instance_started = True
       Log.info("Started instance successfully.")
     except Exception as e:

@@ -127,12 +127,15 @@ class BaseInstance(object):
       Log.info("Trying to checkponit a non stateful component. Send empty state")
     self.admit_ckpt_state(ckptmsg.checkpoint_id, self.stateful_state)
 
+  def clear_collector(self):
+    self.output_helper.clear()
+
   ##################################################################
   # The followings are to be implemented by Spout/Bolt independently
   ##################################################################
 
   @abstractmethod
-  def start(self):
+  def start(self, stateful_state):
     """Do the basic setup for Heron Instance"""
     raise NotImplementedError()
 

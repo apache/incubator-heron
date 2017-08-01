@@ -51,9 +51,12 @@ class BoltInstance(BaseInstance):
     bolt_impl_class = super(BoltInstance, self).load_py_instance(is_spout=False)
     self.bolt_impl = bolt_impl_class(delegate=self)
 
-  def start(self):
+  def start(self, stateful_state):
+    self.stateful_state = stateful_state
     context = self.pplan_helper.context
     self.bolt_metrics.register_metrics(context)
+    if self.is_stateful and isinstance(self.bolt_impl, IStatefulComponent):
+      self.bolt_impl.initState(stateful_state)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
 

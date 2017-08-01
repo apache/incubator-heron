@@ -61,9 +61,12 @@ class SpoutInstance(BaseInstance):
     spout_impl_class = super(SpoutInstance, self).load_py_instance(is_spout=True)
     self.spout_impl = spout_impl_class(delegate=self)
 
-  def start(self):
+  def start(self, stateful_state):
+    self.stateful_state = stateful_state
     context = self.pplan_helper.context
     self.spout_metrics.register_metrics(context)
+    if self.is_stateful and isinstance(self.spout_impl, IStatefulComponent):
+      self.spout_impl.initState(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
 
@@ -81,7 +84,6 @@ class SpoutInstance(BaseInstance):
   def stop(self):
     self.pplan_helper.context.invoke_hook_cleanup()
     self.spout_impl.close()
-
     self.looper.exit_loop()
 
   def invoke_activate(self):
