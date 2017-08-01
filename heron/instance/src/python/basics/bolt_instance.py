@@ -18,6 +18,7 @@ import Queue
 
 from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
+from heron.api.src.python import IStatefulComponent
 from heron.api.src.python import Stream
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
@@ -51,6 +52,7 @@ class BoltInstance(BaseInstance):
     bolt_impl_class = super(BoltInstance, self).load_py_instance(is_spout=False)
     self.bolt_impl = bolt_impl_class(delegate=self)
 
+  # pylint: disable=attribute-defined-outside-init
   def start(self, stateful_state):
     self.stateful_state = stateful_state
     context = self.pplan_helper.context

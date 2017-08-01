@@ -20,15 +20,16 @@ import traceback
 import signal
 import yaml
 
-from heron.api.src.python import api_constants
+from heron.api.src.python import api_constants, HashMapState
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
+from heron.common.src.python.utils.misc import SerializerHelper
 from heron.common.src.python.network import create_socket_options
 
-from heron.proto import physical_plan_pb2, tuple_pb2
+from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
@@ -135,11 +136,17 @@ class SingleThreadHeronInstance(object):
       self.my_instance.py_class.process_incoming_tuples()
 
   def handle_start_stateful_processing(self, start_msg):
+    """Called when we receive StartInstanceStatefulProcessing message
+    :param start_msg: StartInstanceStatefulProcessing type
+    """
     Log.info("Received start stateful processing for %s" % start_msg.checkpoint_id)
     self.is_stateful_started = True
     self.start_instance_if_possible()
 
   def handle_restore_instance_state(self, restore_msg):
+    """Called when we receive RestoreInstanceStateRequest message
+    :param restore_msg: RestoreInstanceStateRequest type
+    """
     Log.info("Restoring instance state to checkpoint %s" % restore_msg.state.checkpoint_id)
     self.is_stateful_started = False
     # Stop the instance
@@ -165,6 +172,8 @@ class SingleThreadHeronInstance(object):
       self.stateful_state = HashMapState()
 
     Log.info("Instance restore state deserialized")
+
+    # Send the response back
     resp = ckptmgr_pb2.RestoreInstanceStateResponse()
     resp.status.status = common_pb2.StatusCode.Value("OK")
     resp.checkpoint_id = restore_msg.state.checkpoint_id

@@ -19,6 +19,7 @@ import collections
 
 from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
+from heron.api.src.python import IStatefulComponent
 from heron.api.src.python import Stream
 from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
@@ -61,6 +62,7 @@ class SpoutInstance(BaseInstance):
     spout_impl_class = super(SpoutInstance, self).load_py_instance(is_spout=True)
     self.spout_impl = spout_impl_class(delegate=self)
 
+  # pylint: disable=attribute-defined-outside-init
   def start(self, stateful_state):
     self.stateful_state = stateful_state
     context = self.pplan_helper.context
