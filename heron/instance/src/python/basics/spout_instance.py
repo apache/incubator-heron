@@ -23,8 +23,7 @@ from heron.api.src.python import Stream
 from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.proto import topology_pb2, tuple_pb2
+from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as system_constants
 
@@ -43,7 +42,6 @@ class SpoutInstance(BaseInstance):
 
     context = self.pplan_helper.context
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
-    self.serializer = SerializerHelper.get_serializer(context)
 
     # acking related
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
@@ -196,6 +194,8 @@ class SpoutInstance(BaseInstance):
             self._handle_ack_tuple(fail_tuple, False)
         else:
           Log.error("Received tuple neither data nor control")
+      elif isinstance(tuples, ckptmgr_pb2.InitiateStatefulCheckpoint):
+        self.handle_initiate_stateful_checkpoint(tuples, self.spout_impl)
       else:
         Log.error("Received tuple not instance of HeronTupleSet")
 

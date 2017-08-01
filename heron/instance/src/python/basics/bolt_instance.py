@@ -22,8 +22,7 @@ from heron.api.src.python import Stream
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.proto import tuple_pb2
+from heron.proto import tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as system_constants
 
@@ -41,7 +40,6 @@ class BoltInstance(BaseInstance):
     # bolt_config is auto-typed, not <str -> str> only
     context = self.pplan_helper.context
     self.bolt_metrics = BoltMetrics(self.pplan_helper)
-    self.serializer = SerializerHelper.get_serializer(context)
 
     # acking related
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
@@ -188,6 +186,8 @@ class BoltInstance(BaseInstance):
             self._handle_data_tuple(data_tuple, stream)
         else:
           Log.error("Received tuple neither data nor control")
+      elif isinstance(tuples, ckptmgr_pb2.InitiateStatefulCheckpoint):
+        self.handle_initiate_stateful_checkpoint(tuples, self.bolt_impl)
       else:
         Log.error("Received tuple not instance of HeronTupleSet")
 

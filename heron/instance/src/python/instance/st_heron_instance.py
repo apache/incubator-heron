@@ -122,12 +122,21 @@ class SingleThreadHeronInstance(object):
       if self.my_pplan_helper.is_topology_running():
         self.my_instance.py_class.process_incoming_tuples()
 
+  def handle_initiate_stateful_checkpoint(self, ckptmsg):
+    """Called when we get InitiateStatefulCheckpoint message
+    :param ckptmsg: InitiateStatefulCheckpoint type
+    """
+    self.in_stream.offer(ckptmsg)
+    if self.my_pplan_helper.is_topology_running():
+      self.my_instance.py_class.process_incoming_tuples()
+
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
     while not self.out_stream.is_empty():
       tuple_set = self.out_stream.poll()
-      tuple_set.src_task_id = self.my_pplan_helper.my_task_id
-      self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
+      if isinstance(tuple_set, tuple_pb2.HeronTupleSet):
+        tuple_set.src_task_id = self.my_pplan_helper.my_task_id
+        self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
       self._stmgr_client.send_message(tuple_set)
 
   def handle_state_change_msg(self, new_helper):
