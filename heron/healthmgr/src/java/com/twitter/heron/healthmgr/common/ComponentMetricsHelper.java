@@ -57,7 +57,8 @@ public class ComponentMetricsHelper {
 
   public void computeBufferSizeTrend() {
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      Map<Instant, Double> bufferMetrics = instanceMetrics.getMetrics().get(METRIC_BUFFER_SIZE.text());
+      Map<Instant, Double> bufferMetrics
+          = instanceMetrics.getMetrics().get(METRIC_BUFFER_SIZE.text());
       if (bufferMetrics == null || bufferMetrics.size() < 3) {
         // missing of insufficient data for creating a trend line
         continue;

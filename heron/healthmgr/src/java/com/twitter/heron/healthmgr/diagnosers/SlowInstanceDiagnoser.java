@@ -76,7 +76,7 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
       }
     }
 
-    return resultSymptom != null ?
-        new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), resultSymptom) : null;
+    return resultSymptom != null
+        ? new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), resultSymptom) : null;
   }
 }

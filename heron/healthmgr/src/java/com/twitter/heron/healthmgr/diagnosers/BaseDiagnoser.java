@@ -77,7 +77,8 @@ abstract class BaseDiagnoser implements IDiagnoser {
     return result;
   }
 
-  private Map<String, ComponentMetrics> getFilteredComponents(List<Symptom> symptoms, SymptomName type) {
+  private Map<String, ComponentMetrics> getFilteredComponents(List<Symptom> symptoms,
+                                                              SymptomName type) {
     Map<String, ComponentMetrics> result = new HashMap<>();
     for (Symptom symptom : symptoms) {
       if (symptom.getName().equals(type.text())) {
