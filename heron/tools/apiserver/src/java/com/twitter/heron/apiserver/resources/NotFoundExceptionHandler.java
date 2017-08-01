@@ -18,7 +18,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-@SuppressWarnings("all")
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 @Provider
 public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundException> {
   @Override
@@ -26,11 +31,21 @@ public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundExcepti
     // TODO custom response
     final StringBuilder sb = new StringBuilder();
 
-    String response = "{\n" +
-        "  \"paths\": [\n" +
-        "    \"/api/v1/topologies\"\n" +
-        "  ]\n" +
-        "}\n";
+    final ObjectMapper mapper = new ObjectMapper()
+        .enable(SerializationFeature.INDENT_OUTPUT)
+        .enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);
+    final ObjectNode node = mapper.createObjectNode();
+    final ArrayNode arrayNode = node.putArray("paths");
+    arrayNode.add("/api/v1/config");
+    arrayNode.add("/api/v1/topologies");
+
+    final String response;
+    try {
+      response = mapper.writeValueAsString(node);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Error creating page not found response", e);
+    }
+
     return Response.status(Response.Status.NOT_FOUND)
         .entity(response)
         .build();

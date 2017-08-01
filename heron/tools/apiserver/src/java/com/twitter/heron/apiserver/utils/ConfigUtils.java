@@ -31,12 +31,14 @@ import com.twitter.heron.spi.common.ConfigLoader;
 
 public final class ConfigUtils {
 
+  private static final String CONFIG_SUFFIX = ".yaml";
+
   public static Config.Builder builder(Config baseConfiguration) {
     return Config.newBuilder().putAll(baseConfiguration);
   }
 
   public static String createOverrideConfiguration(Properties properties) throws IOException {
-    final Path overridesPath = Files.createTempFile("overrides-", ".yaml");
+    final Path overridesPath = Files.createTempFile("overrides-", CONFIG_SUFFIX);
     try (Writer writer = Files.newBufferedWriter(overridesPath)) {
       final Map<Object, Object> overrides = new HashMap<>();
       for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -74,7 +76,7 @@ public final class ConfigUtils {
   @SuppressWarnings("unchecked")
   public static void applyOverridesToStateManagerConfig(Path overridesPath,
         Path stateManagerPath) throws IOException {
-    final Path tempStateManagerPath = Files.createTempFile("statemgr-", ".yaml");
+    final Path tempStateManagerPath = Files.createTempFile("statemgr-", CONFIG_SUFFIX);
     try (
         Reader overrideReader = Files.newBufferedReader(overridesPath);
         Reader stateManagerReader = Files.newBufferedReader(stateManagerPath);
