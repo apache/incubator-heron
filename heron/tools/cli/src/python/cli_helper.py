@@ -58,25 +58,22 @@ def run_server(command, cl_args, action, extra_args=[]):
   :param action:        description of action taken
   :return:
   '''
-
-  service_endpoint = cl_args['service_endpoint']
-  service_apiurl = service_endpoint + rest.ROUTE_SIGNATURES[command][1]
-  service_method = rest.ROUTE_SIGNATURES[command][0]
-
   topology_name = cl_args['topology-name']
 
-  data = dict(
-      name=topology_name,
-      cluster=cl_args['cluster'],
-      role=cl_args['role'],
-      environment=cl_args['environ'],
-      user=cl_args['submit_user'],
+  service_endpoint = cl_args['service_endpoint']
+  apiroute = rest.ROUTE_SIGNATURES[command][1] % (
+      cl_args['cluster'],
+      cl_args['role'],
+      cl_args['environ'],
+      topology_name
   )
+  service_apiurl = service_endpoint + apiroute
+  service_method = rest.ROUTE_SIGNATURES[command][0]
 
   err_msg = "Failed to %s: %s" % (action, topology_name)
   succ_msg = "Successfully %s%s: %s" % (action, 'ed', topology_name)
 
-  r = service_method(service_apiurl, data=data)
+  r = service_method(service_apiurl)
   s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
   print r.json()
   return SimpleResult(s, err_msg, succ_msg)
