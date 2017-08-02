@@ -91,8 +91,14 @@ class SingleThreadStmgrClient(HeronClient):
     # pylint: disable=unnecessary-lambda
     new_instance_builder = lambda: stmgr_pb2.NewInstanceAssignmentMessage()
     hts2_msg_builder = lambda: tuple_pb2.HeronTupleSet2()
+    stateful_start_msg_builder = lambda: ckptmgr_pb2.StartInstanceStatefulProcessing()
+    stateful_restore_msg_builder = lambda: ckptmgr_pb2.RestoreInstanceStateRequest()
+    stateful_initiate_msg_builder = lambda: ckptmgr_pb2.InitiateStatefulCheckpoint()
     self.register_on_message(new_instance_builder)
     self.register_on_message(hts2_msg_builder)
+    self.register_on_message(stateful_start_msg_builder)
+    self.register_on_message(stateful_restore_msg_builder)
+    self.register_on_message(stateful_initiate_msg_builder)
 
   def _send_register_req(self):
     request = stmgr_pb2.RegisterInstanceRequest()
