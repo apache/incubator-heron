@@ -85,6 +85,14 @@ public class RuntimeManagerMain {
         .required()
         .build();
 
+    Option submitUser = Option.builder("s")
+        .desc("User submitting the topology")
+        .longOpt("submit_user")
+        .hasArgs()
+        .argName("submit userid")
+        .required()
+        .build();
+
     Option topologyName = Option.builder("n")
         .desc("Name of the topology")
         .longOpt("topology_name")
@@ -166,6 +174,7 @@ public class RuntimeManagerMain {
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
+    options.addOption(submitUser);
     options.addOption(topologyName);
     options.addOption(configFile);
     options.addOption(configOverrides);
@@ -229,6 +238,7 @@ public class RuntimeManagerMain {
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
     String environ = cmd.getOptionValue("environment");
+    String submitUser = cmd.getOptionValue("submit_user");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String overrideConfigFile = cmd.getOptionValue("override_config_file");
@@ -264,6 +274,7 @@ public class RuntimeManagerMain {
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
         .put(Key.ENVIRON, environ)
+        .put(Key.SUBMIT_USER, submitUser)
         .put(Key.DRY_RUN, dryRun)
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
