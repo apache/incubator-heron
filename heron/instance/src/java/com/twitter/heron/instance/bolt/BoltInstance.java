@@ -63,7 +63,7 @@ public class BoltInstance implements IInstance {
 
   private final boolean isTopologyStateful;
 
-  private State<? extends Serializable, ? extends Serializable> instanceState;
+  private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -144,6 +144,7 @@ public class BoltInstance implements IInstance {
     collector.sendOutState(instanceState, checkpointId);
   }
 
+  @SuppressWarnings("unchecked")
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
@@ -154,7 +155,7 @@ public class BoltInstance implements IInstance {
 
     // Initialize the instanceState if the bolt is stateful
     if (bolt instanceof IStatefulComponent) {
-      ((IStatefulComponent) bolt).initState(instanceState);
+      ((IStatefulComponent<Serializable, Serializable>) bolt).initState(instanceState);
     }
 
     // Delegate
@@ -171,7 +172,7 @@ public class BoltInstance implements IInstance {
   }
 
   @Override
-  public void start(State<? extends Serializable, ? extends Serializable> state) {
+  public void start(State<Serializable, Serializable> state) {
     this.instanceState = state;
     start();
   }
