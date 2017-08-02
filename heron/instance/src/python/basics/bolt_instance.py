@@ -54,7 +54,7 @@ class BoltInstance(BaseInstance):
 
   # pylint: disable=attribute-defined-outside-init
   def start(self, stateful_state):
-    self.stateful_state = stateful_state
+    self._stateful_state = stateful_state
     context = self.pplan_helper.context
     self.bolt_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.bolt_impl, IStatefulComponent):

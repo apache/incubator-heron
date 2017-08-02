@@ -64,7 +64,7 @@ class SpoutInstance(BaseInstance):
 
   # pylint: disable=attribute-defined-outside-init
   def start(self, stateful_state):
-    self.stateful_state = stateful_state
+    self._stateful_state = stateful_state
     context = self.pplan_helper.context
     self.spout_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.spout_impl, IStatefulComponent):
