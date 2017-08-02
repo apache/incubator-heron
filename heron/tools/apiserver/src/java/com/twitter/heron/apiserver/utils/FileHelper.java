@@ -71,11 +71,6 @@ public final class FileHelper {
     return true;
   }
 
-  public static boolean makeDirectories(String path) {
-    final File absoluteFile = new File(path).getAbsoluteFile();
-    return absoluteFile.exists() || absoluteFile.mkdirs() && absoluteFile.exists();
-  }
-
   public static boolean createTarGz(File archive, File... files) {
     try (
         FileOutputStream fileOutputStream = new FileOutputStream(archive);

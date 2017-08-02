@@ -25,6 +25,8 @@ public final class Constants {
 
   static final String DEFAULT_HERON_CONFIG_DIRECTORY = "../conf";
 
+  static final String DEFAULT_HERON_RELEASE_FILE = "../release.yaml";
+
   public static final String DEFAULT_HERON_SANDBOX_CONFIG =
       Key.HERON_CLUSTER_CONF.getDefaultString();
 
@@ -33,8 +35,6 @@ public final class Constants {
   public static final String STATE_MANAGER_FILE = "statemgr.yaml";
 
   public static final String DEFAULT_HERON_ENVIRONMENT = "default";
-
-  public static final int HTTP_UNPROCESSABLE_ENTITY_CODE = 422;
 
   private Constants() {
   }

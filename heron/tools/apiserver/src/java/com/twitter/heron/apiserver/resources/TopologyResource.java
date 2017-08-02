@@ -56,12 +56,16 @@ public class TopologyResource extends HeronResource {
 
   private static final String TOPOLOGY_TAR_GZ_FILENAME = "topology.tar.gz";
 
+  private static final int HTTP_UNPROCESSABLE_ENTITY_CODE = 422;
+
   private static final String FORM_KEY_NAME = "name";
   private static final String FORM_KEY_CLUSTER = "cluster";
   private static final String FORM_KEY_ROLE = "role";
   private static final String FORM_KEY_ENVIRONMENT = "environment";
   private static final String FORM_KEY_DEFINITION = "definition";
   private static final String FORM_KEY_TOPOLOGY = "topology";
+  private static final String FORM_KEY_USER = "user";
+  private static final String FORM_KEY_VERSION = "version";
 
   private static final String[] REQUIRED_SUBMIT_TOPOLOGY_PARAMS = {
       FORM_KEY_NAME,
@@ -86,7 +90,7 @@ public class TopologyResource extends HeronResource {
         verifyKeys(form.getFields().keySet(), REQUIRED_SUBMIT_TOPOLOGY_PARAMS);
     if (!missingDataKeys.isEmpty()) {
       // return error since we are missing required parameters
-      return Response.status(Constants.HTTP_UNPROCESSABLE_ENTITY_CODE)
+      return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
           .type(MediaType.APPLICATION_JSON)
           .entity(createValidationError("Validation failed", missingDataKeys))
           .build();
@@ -97,13 +101,14 @@ public class TopologyResource extends HeronResource {
     final String role = Forms.getString(form, FORM_KEY_ROLE);
     final String environment =
         Forms.getString(form, FORM_KEY_ENVIRONMENT, Constants.DEFAULT_HERON_ENVIRONMENT);
+    final String user = Forms.getString(form, FORM_KEY_USER, role);
+    // TODO make version required?
+    final String version = Forms.getString(form, FORM_KEY_VERSION, "unknown");
 
     final String topologyDirectory =
         Files.createTempDirectory(topologyName).toFile().getAbsolutePath();
 
     try {
-      FileHelper.makeDirectories(topologyDirectory);
-
       // upload the topology definition file to the topology directory
       final FormDataBodyPart definitionFilePart = form.getField(FORM_KEY_DEFINITION);
       final File topologyDefinitionFile = Forms.uploadFile(definitionFilePart, topologyDirectory);
@@ -118,8 +123,8 @@ public class TopologyResource extends HeronResource {
               Pair.create(Key.TOPOLOGY_NAME, topologyName),
               Pair.create(Key.ROLE, role),
               Pair.create(Key.ENVIRON, environment),
-              Pair.create(Key.BUILD_USER, role), // TODO add user
-              Pair.create(Key.BUILD_VERSION, "0.15") // TODO add version
+              Pair.create(Key.BUILD_USER, user),
+              Pair.create(Key.BUILD_VERSION, version)
           )
       );
 
@@ -159,13 +164,7 @@ public class TopologyResource extends HeronResource {
           URI.create(String.format(TOPOLOGY_PATH_FORMAT,
               cluster, role, environment, topologyName)))
           .type(MediaType.APPLICATION_JSON)
-          .entity(new ObjectMapper().createObjectNode()
-              .put("name", topologyName)
-              .put("cluster", cluster)
-              .put("role", role)
-              .put("environment", environment)
-              .toString()
-          ).build();
+          .entity(createdResponse(cluster, role, environment, topologyName)).build();
     } catch (RuntimeException ex) {
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
@@ -285,6 +284,16 @@ public class TopologyResource extends HeronResource {
       }
     }
     return missingKeys;
+  }
+
+  private static String createdResponse(String cluster, String role, String environment,
+        String topologyName) {
+    return new ObjectMapper().createObjectNode()
+        .put("name", topologyName)
+        .put("cluster", cluster)
+        .put("role", role)
+        .put("environment", environment)
+        .toString();
   }
 
   private static ObjectNode createBaseError(String message) {
