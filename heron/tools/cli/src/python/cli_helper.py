@@ -61,6 +61,7 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
       "--cluster", cl_args['cluster'],
       "--role", cl_args['role'],
       "--environment", cl_args['environ'],
+      "--submit_user", cl_args['submit_user'],
       "--heron_home", config.get_heron_dir(),
       "--config_path", cl_args['config_path'],
       "--override_config_file", cl_args['override_config_file'],

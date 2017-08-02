@@ -88,6 +88,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--cluster", cl_args['cluster'],
       "--role", cl_args['role'],
       "--environment", cl_args['environ'],
+      "--submit_user", cl_args['submit_user'],
       "--heron_home", config.get_heron_dir(),
       "--config_path", config_path,
       "--override_config_file", cl_args['override_config_file'],
