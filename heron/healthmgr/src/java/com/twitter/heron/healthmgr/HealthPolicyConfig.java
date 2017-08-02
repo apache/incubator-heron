@@ -20,17 +20,16 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 
-
 public class HealthPolicyConfig {
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
   private final Map<String, Object> configs;
 
-  public HealthPolicyConfig(Map<String, Object> configs) {
+  HealthPolicyConfig(Map<String, Object> configs) {
     this.configs = configs;
     LOG.info("Health Policy Configuration:" + configs);
   }
 
-  public String getPolicyClass() {
+  String getPolicyClass() {
     return (String) configs.get(PolicyConfigKey.HEALTH_POLICY_CLASS.key());
   }
 
@@ -39,7 +38,15 @@ public class HealthPolicyConfig {
   }
 
   public Object getConfig(String configName) {
-    return configs.get(configName);
+    return getConfig(configName, null);
+  }
+
+  public Object getConfig(String configName, Object defaultValue) {
+    Object value = configs.get(configName);
+    if (value == null) {
+      value = defaultValue;
+    }
+    return value;
   }
 
   @Override

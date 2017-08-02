@@ -92,18 +92,26 @@ public class OutgoingTupleCollection {
    */
   public void sendOutState(State<? extends Serializable, ? extends Serializable> state,
                            String checkpointId) {
+    // flush all the current data before sending the state
+    flushRemaining();
+
     // Serialize the state
     byte[] serializedState = serializer.serialize(state);
 
     // Construct the instance state checkpoint
-    CheckpointManager.InstanceStateCheckpoint checkpoint =
+    CheckpointManager.InstanceStateCheckpoint instanceState =
         CheckpointManager.InstanceStateCheckpoint.newBuilder()
           .setCheckpointId(checkpointId)
           .setState(ByteString.copyFrom(serializedState))
           .build();
 
+    CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
+        CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
+            .setState(instanceState)
+            .build();
+
     // Put the checkpoint to out stream queue
-    outQueue.offer(checkpoint);
+    outQueue.offer(storeRequest);
   }
 
   public void addDataTuple(

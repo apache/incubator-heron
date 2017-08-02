@@ -15,6 +15,7 @@
 package com.twitter.heron.healthmgr.common;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.logging.Logger;
 
@@ -58,9 +59,7 @@ public class PackingPlanProvider implements Provider<PackingPlan>, EventHandler<
 
   public String[] getBoltInstanceNames(String... boltComponents) {
     HashSet<String> boltComponentNames = new HashSet<>();
-    for (String boltComponentName : boltComponents) {
-      boltComponentNames.add(boltComponentName);
-    }
+    Collections.addAll(boltComponentNames, boltComponents);
 
     PackingPlan packing = get();
     ArrayList<String> boltInstanceNames = new ArrayList<>();

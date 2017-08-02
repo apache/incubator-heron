@@ -135,6 +135,15 @@ public class SchedulerUtilsTest {
     // OK to create dir
     PowerMockito.when(FileUtils.createDirectory(Mockito.anyString())).thenReturn(true);
 
+    // Fail to cleanup
+    PowerMockito.when(FileUtils.cleanDir(Mockito.anyString())).thenReturn(false);
+    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(
+            WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
+            TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
+
+    // Ok to cleanup
+    PowerMockito.when(FileUtils.cleanDir(Mockito.anyString())).thenReturn(true);
+
     PowerMockito.spy(SchedulerUtils.class);
     // OK to curl and extract core-release-package
     PowerMockito.doReturn(true).when(SchedulerUtils.class, "curlAndExtractPackage",
