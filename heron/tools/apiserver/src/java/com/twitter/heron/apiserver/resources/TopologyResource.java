@@ -65,7 +65,6 @@ public class TopologyResource extends HeronResource {
   private static final String FORM_KEY_DEFINITION = "definition";
   private static final String FORM_KEY_TOPOLOGY = "topology";
   private static final String FORM_KEY_USER = "user";
-  private static final String FORM_KEY_VERSION = "version";
 
   private static final String[] REQUIRED_SUBMIT_TOPOLOGY_PARAMS = {
       FORM_KEY_NAME,
@@ -102,8 +101,6 @@ public class TopologyResource extends HeronResource {
     final String environment =
         Forms.getString(form, FORM_KEY_ENVIRONMENT, Constants.DEFAULT_HERON_ENVIRONMENT);
     final String user = Forms.getString(form, FORM_KEY_USER, role);
-    // TODO make version required?
-    final String version = Forms.getString(form, FORM_KEY_VERSION, "unknown");
 
     final String topologyDirectory =
         Files.createTempDirectory(topologyName).toFile().getAbsolutePath();
@@ -123,8 +120,7 @@ public class TopologyResource extends HeronResource {
               Pair.create(Key.TOPOLOGY_NAME, topologyName),
               Pair.create(Key.ROLE, role),
               Pair.create(Key.ENVIRON, environment),
-              Pair.create(Key.BUILD_USER, user),
-              Pair.create(Key.BUILD_VERSION, version)
+              Pair.create(Key.SUBMIT_USER, user)
           )
       );
 
