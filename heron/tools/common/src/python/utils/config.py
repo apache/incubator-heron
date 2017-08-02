@@ -240,6 +240,9 @@ def get_heron_cluster(cluster_role_env):
   """Get the cluster to which topology is submitted"""
   return cluster_role_env.split('/')[0]
 
+def heron_rc_file():
+  """Get the full path name of the .heronrc file"""
+  return os.path.join(os.path.expanduser('~'), '.heronrc')
 
 # pylint: disable=too-many-branches
 def parse_cluster_role_env(cluster_role_env, config_path):

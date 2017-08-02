@@ -16,6 +16,7 @@ import glob
 import logging
 import os
 import tempfile
+import requests
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -25,10 +26,25 @@ import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.cli.src.python.result as result
+import heron.tools.cli.src.python.rest as rest
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.common.src.python.utils.classpath as classpath
 
 # pylint: disable=too-many-return-statements
+
+################################################################################
+def launch_mode_msg(cl_args):
+  '''
+  Depending on the mode of launching a topology provide a message
+  :param cl_args:
+  :return:
+  '''
+  if 'dry_run' in cl_args:
+    return " in dry-run mode"
+  elif 'service_endpoint' in cl_args:
+    return " in hosted mode"
+
+  return " in direct mode"
 
 ################################################################################
 def create_parser(subparsers):
@@ -68,6 +84,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   :param tmp_dir:
   :param topology_file:
   :param topology_defn_file:
+  :param topology_name:
   :return:
   '''
   # get the normalized path for topology.tar.gz
@@ -119,14 +136,45 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       extra_jars=extra_jars,
       args=args,
       java_defines=[])
-  err_context = "Failed to launch topology '%s'" % topology_name
-  if cl_args["dry_run"]:
-    err_context += " in dry-run mode"
-  succ_context = "Successfully launched topology '%s'" % topology_name
-  if cl_args["dry_run"]:
-    succ_context += " in dry-run mode"
-  res.add_context(err_context, succ_context)
+
+  err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+  succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+
+  res.add_context(err_ctxt, succ_ctxt)
   return res
+
+################################################################################
+def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_name):
+  '''
+  Launch a topology given topology jar, its definition file and configurations
+  :param cl_args:
+  :param topology_file:
+  :param topology_defn_file:
+  :param topology_name:
+  :return:
+  '''
+  service_apiurl = cl_args['service_endpoint'] + rest.ROUTE_SIGNATURES['submit'][1]
+  service_method = rest.ROUTE_SIGNATURES['submit'][0]
+  data = dict(
+      name=topology_name,
+      cluster=cl_args['cluster'],
+      role=cl_args['role'],
+      environment=cl_args['environ'],
+      user=cl_args['submit_user'],
+  )
+  files = dict(
+      definition=open(topology_defn_file, 'rb'),
+      topology=open(topology_file, 'rb'),
+  )
+
+  err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+  succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+
+  r = service_method(service_apiurl, data=data, files=files)
+  print r.json()
+  s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
+  return SimpleResult(s, err_ctxt, succ_ctxt)
+
 
 ################################################################################
 def launch_topologies(cl_args, topology_file, tmp_dir):
@@ -154,12 +202,20 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
     except Exception as e:
       err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
       return SimpleResult(Status.HeronError, err_context)
+
     # launch the topology
     mode = " in dry-run mode" if cl_args['dry_run'] else ''
     Log.info("Launching topology: \'%s\'%s", topology_defn.name, mode)
-    res = launch_a_topology(
-        cl_args, tmp_dir, topology_file, defn_file, topology_defn.name)
+
+    # check if we have to do server or direct based deployment
+    if 'service_endpoint' in cl_args:
+      res = launch_topology_server(
+          cl_args, topology_file, defn_file, topology_defn.name)
+    else:
+      res = launch_a_topology(
+          cl_args, tmp_dir, topology_file, defn_file, topology_defn.name)
     results.append(res)
+
   return results
 
 

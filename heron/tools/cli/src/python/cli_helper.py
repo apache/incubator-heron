@@ -13,10 +13,13 @@
 # limitations under the License.
 ''' cli_helper.py '''
 import logging
+import requests
 import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
+import heron.tools.cli.src.python.rest as rest
 
 from heron.common.src.python.utils.log import Log
 
@@ -44,10 +47,43 @@ def create_parser(subparsers, action, help_arg):
   parser.set_defaults(subcommand=action)
   return parser
 
+################################################################################
+# pylint: disable=dangerous-default-value
+# pylint: disable=unused-argument
+def run_server(command, cl_args, action, extra_args=[]):
+  '''
+  helper function to take action on topologies using REST API
+  :param command:
+  :param cl_args:
+  :param action:        description of action taken
+  :return:
+  '''
+
+  service_endpoint = cl_args['service_endpoint']
+  service_apiurl = service_endpoint + rest.ROUTE_SIGNATURES[command][1]
+  service_method = rest.ROUTE_SIGNATURES[command][0]
+
+  topology_name = cl_args['topology-name']
+
+  data = dict(
+      name=topology_name,
+      cluster=cl_args['cluster'],
+      role=cl_args['role'],
+      environment=cl_args['environ'],
+      user=cl_args['submit_user'],
+  )
+
+  err_msg = "Failed to %s: %s" % (action, topology_name)
+  succ_msg = "Successfully %s%s: %s" % (action, 'ed', topology_name)
+
+  r = service_method(service_apiurl, data=data)
+  s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
+  print r.json()
+  return SimpleResult(s, err_msg, succ_msg)
 
 ################################################################################
 # pylint: disable=dangerous-default-value
-def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
+def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
   '''
   helper function to take action on topologies
   :param command:
@@ -89,3 +125,10 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
   succ_msg = "Successfully %s: %s" % (action, topology_name)
   result.add_context(err_msg, succ_msg)
   return result
+
+################################################################################
+def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
+  if 'service_endpoint' in cl_args:
+    return run_server(command, cl_args, action, extra_args)
+  else:
+    return run_direct(command, cl_args, action, extra_args, extra_lib_jars)

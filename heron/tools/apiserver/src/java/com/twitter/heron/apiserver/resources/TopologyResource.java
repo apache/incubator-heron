@@ -161,7 +161,7 @@ public class TopologyResource extends HeronResource {
               cluster, role, environment, topologyName)))
           .type(MediaType.APPLICATION_JSON)
           .entity(createdResponse(cluster, role, environment, topologyName)).build();
-    } catch (RuntimeException ex) {
+    } catch (Exception ex) {
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -267,6 +267,7 @@ public class TopologyResource extends HeronResource {
     for (Pair<Key, String> keyValue : keyValues) {
       builder.put(keyValue.first, keyValue.second);
     }
+    builder.put(Key.VERBOSE, Boolean.TRUE);
     return Config.toLocalMode(builder.build());
   }
 

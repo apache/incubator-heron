@@ -22,6 +22,7 @@ import shutil
 import sys
 import time
 import traceback
+import ConfigParser
 
 import heron.common.src.python.utils.log as log
 import heron.tools.common.src.python.utils.config as config
@@ -144,6 +145,38 @@ def check_environment():
   if not config.check_release_file_exists():
     sys.exit(1)
 
+################################################################################
+def deduce_deployment_mode(cluster, cl_args, config_file):
+  '''
+  Detect the deployment mode for the given cluster
+  :param command:
+  :param parser:
+  :param cl_args:
+  :return:
+  '''
+  rc_config = ConfigParser.SafeConfigParser()
+  try:
+    files_read = rc_config.read(config_file)
+    if not files_read:
+      return cl_args
+  except ConfigParser.Error:
+    Log.error('Errors encountered during config parsing file %s', config_file)
+    sys.exit(1)
+
+  # extract the section referred by the cluster
+  try:
+    if not rc_config.has_section(cluster):
+      return cl_args
+    url = rc_config.get(cluster, "url")
+  except ConfigParser.NoOptionError:
+    Log.error('No service endpoint url for %s cluster', cluster)
+    sys.exit(1)
+
+  new_cl_args = dict()
+  new_cl_args['service_endpoint'] = url
+
+  cl_args.update(new_cl_args)
+  return cl_args
 
 ################################################################################
 def extract_common_args(command, parser, cl_args):
@@ -223,6 +256,11 @@ def main():
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
+    command_line_args = deduce_deployment_mode(
+        command_line_args['cluster'], command_line_args,
+        config.heron_rc_file())
+
+    print command_line_args
     # bail out if args are empty
     if not command_line_args:
       return 1
