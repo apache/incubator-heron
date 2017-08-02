@@ -20,6 +20,7 @@ __all__ = [
     'metrics',
     'serializer',
     'cloudpickle',
+    'state',
     'spout',
     'stream',
     'task_hook',
@@ -29,6 +30,7 @@ __all__ = [
 ]
 
 # Load basic topology modules
+from .state import State, StatefulComponent, HashMapState
 from .stream import Stream, Grouping
 from .topology import Topology, TopologyBuilder
 from .topology_context import TopologyContext

@@ -17,12 +17,16 @@ import logging
 import traceback
 from abc import abstractmethod
 
+from heron.api.src.python import api_constants, StatefulComponent
 from heron.common.src.python.config import system_config
+from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils.misc import SerializerHelper
 from heron.common.src.python.utils.misc import OutgoingTupleHelper
 from heron.proto import tuple_pb2
 
 import heron.common.src.python.pex_loader as pex_loader
 
+# pylint: disable=too-many-instance-attributes
 class BaseInstance(object):
   """The base class for heron bolt/spout instance
 
@@ -46,6 +50,12 @@ class BaseInstance(object):
 
     # will set a root logger here
     self.logger = logging.getLogger()
+    context = pplan_helper.context
+    mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
+                                            api_constants.TopologyReliabilityMode.ATMOST_ONCE)
+    self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    self._stateful_state = None
+    self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
 
   def log(self, message, level=None):
     """Log message, optionally providing a logging level
@@ -80,6 +90,9 @@ class BaseInstance(object):
   def admit_control_tuple(self, control_tuple, tuple_size_in_bytes, is_ack):
     self.output_helper.add_control_tuple(control_tuple, tuple_size_in_bytes, is_ack)
 
+  def admit_ckpt_state(self, ckpt_id, ckpt_state):
+    self.output_helper.add_ckpt_state(ckpt_id, self.serializer.serialize(ckpt_state))
+
   def get_total_data_emitted_in_bytes(self):
     return self.output_helper.total_data_emitted_in_bytes
 
@@ -104,12 +117,25 @@ class BaseInstance(object):
       raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, e.message))
     return spbl_class
 
+  def handle_initiate_stateful_checkpoint(self, ckptmsg, component):
+    Log.info("Received initiate state checkpoint message for %s" % ckptmsg.checkpoint_id)
+    if not self.is_stateful:
+      raise RuntimeError("Received state checkpoint message but we are not stateful topology")
+    if isinstance(component, StatefulComponent):
+      component.preSave(ckptmsg.checkpoint_id)
+    else:
+      Log.info("Trying to checkponit a non stateful component. Send empty state")
+    self.admit_ckpt_state(ckptmsg.checkpoint_id, self._stateful_state)
+
+  def clear_collector(self):
+    self.output_helper.clear()
+
   ##################################################################
   # The followings are to be implemented by Spout/Bolt independently
   ##################################################################
 
   @abstractmethod
-  def start(self):
+  def start(self, stateful_state):
     """Do the basic setup for Heron Instance"""
     raise NotImplementedError()
 
