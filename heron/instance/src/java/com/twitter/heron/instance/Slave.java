@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.state.HashMapState;
 import com.twitter.heron.api.state.State;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -256,6 +257,12 @@ public class Slave implements Runnable, AutoCloseable {
       instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
+    }
+
+    // First time a stateful topology is launched, there's no checkpoint
+    // to restore, heron needs to provide a proper initial empty state
+    if (instanceState == null) {
+      instanceState = new HashMapState<>();
     }
 
     LOG.info("Instance state restored for checkpoint id: "
