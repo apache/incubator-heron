@@ -152,7 +152,7 @@ public class BoltInstance implements IInstance {
 
     boltMetrics.registerMetrics(topologyContext);
 
-    // Initialize the bolt is it's stateful
+    // Initialize the instanceState if the bolt is stateful
     if (bolt instanceof IStatefulComponent) {
       ((IStatefulComponent) bolt).initState(instanceState);
     }
