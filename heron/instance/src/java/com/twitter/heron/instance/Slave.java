@@ -62,7 +62,7 @@ public class Slave implements Runnable, AutoCloseable {
 
   private boolean isInstanceStarted = false;
 
-  private State<? extends Serializable, ? extends Serializable> instanceState;
+  private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
 
   public Slave(SlaveLooper slaveLooper,
@@ -249,8 +249,8 @@ public class Slave implements Runnable, AutoCloseable {
     }
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
-      State<? extends Serializable, ? extends Serializable> stateToRestore =
-          (State<? extends Serializable, ? extends Serializable>) serializer.deserialize(
+      State<Serializable, Serializable> stateToRestore =
+          (State<Serializable, Serializable>) serializer.deserialize(
               request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;

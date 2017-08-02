@@ -60,7 +60,7 @@ public class SpoutInstance implements IInstance {
   private final boolean enableMessageTimeouts;
 
   private final boolean isTopologyStateful;
-  private State<? extends Serializable, ? extends Serializable> instanceState;
+  private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -156,6 +156,7 @@ public class SpoutInstance implements IInstance {
     collector.sendOutState(instanceState, checkpointId);
   }
 
+  @SuppressWarnings("unchecked")
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
@@ -163,6 +164,11 @@ public class SpoutInstance implements IInstance {
     GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportInterval());
 
     spoutMetrics.registerMetrics(topologyContext);
+
+    // Initialize the instanceState if the spout is stateful
+    if (spout instanceof IStatefulComponent) {
+      ((IStatefulComponent<Serializable, Serializable>) spout).initState(instanceState);
+    }
 
     spout.open(
         topologyContext.getTopologyConfig(), topologyContext, new SpoutOutputCollector(collector));
@@ -180,7 +186,7 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
-  public void start(State<? extends Serializable, ? extends Serializable> state) {
+  public void start(State<Serializable, Serializable> state) {
     this.instanceState = state;
     start();
   }

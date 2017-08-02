@@ -90,7 +90,7 @@ public class OutgoingTupleCollection {
    * @param state instance's state
    * @param checkpointId the checkpointId
    */
-  public void sendOutState(State<? extends Serializable, ? extends Serializable> state,
+  public void sendOutState(State<Serializable, Serializable> state,
                            String checkpointId) {
     // flush all the current data before sending the state
     flushRemaining();
