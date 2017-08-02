@@ -161,11 +161,11 @@ class SingleThreadHeronInstance(object):
     # Deser the state
     if self.stateful_state is not None:
       self.stateful_state.clear()
-    if restore_msg.state.state is not None:
+    if restore_msg.state.state is not None and restore_msg.state.state:
       try:
         self.stateful_state = self.serializer.deserialize(restore_msg.state.state)
-      except:
-        raise RuntimeError("Could not serialize state during restore")
+      except Exception as e:
+        raise RuntimeError("Could not serialize state during restore " + e.message)
     else:
       Log.info("The restore request does not have an actual state")
     if self.stateful_state is None:
