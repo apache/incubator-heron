@@ -28,9 +28,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundException> {
   @Override
   public Response toResponse(NotFoundException exception) {
-    // TODO custom response
-    final StringBuilder sb = new StringBuilder();
-
     final ObjectMapper mapper = new ObjectMapper()
         .enable(SerializationFeature.INDENT_OUTPUT)
         .enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);

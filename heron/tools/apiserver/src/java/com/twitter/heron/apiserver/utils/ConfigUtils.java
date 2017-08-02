@@ -55,11 +55,12 @@ public final class ConfigUtils {
 
   public static Config getBaseConfiguration(String heronDirectory,
         String heronConfigDirectory,
+        String releaseFile,
         String overrideConfigurationFile) {
     // TODO add release file
     return ConfigLoader.loadConfig(heronDirectory,
         heronConfigDirectory,
-        "",
+        releaseFile,
         overrideConfigurationFile);
   }
 

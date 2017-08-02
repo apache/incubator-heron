@@ -48,7 +48,8 @@ public final class Runtime {
     Help("h"),
     Cluster("cluster"),
     ConfigPath("config-path"),
-    Property("D");
+    Property("D"),
+    ReleaseFile("release-file");
 
     final String name;
 
@@ -81,9 +82,18 @@ public final class Runtime {
         .desc("use value for given property")
         .build();
 
+    final Option release = Option.builder()
+        .desc("Path to the release file")
+        .longOpt(Flag.ReleaseFile.name)
+        .hasArgs()
+        .argName(Flag.ReleaseFile.name)
+        .required(false)
+        .build();
+
     return new Options()
         .addOption(cluster)
         .addOption(config)
+        .addOption(release)
         .addOption(property);
   }
 
@@ -119,6 +129,13 @@ public final class Runtime {
         ? Constants.DEFAULT_HERON_LOCAL : Constants.DEFAULT_HERON_CLUSTER;
   }
 
+  private static String getReleaseFile(CommandLine cmd) {
+    if (cmd.hasOption(Flag.ReleaseFile.name)) {
+      return cmd.getOptionValue(Flag.ReleaseFile.name);
+    }
+    return Constants.DEFAULT_HERON_RELEASE_FILE;
+  }
+
   private static String loadOverrides(CommandLine cmd) throws IOException {
     return ConfigUtils.createOverrideConfiguration(
         cmd.getOptionProperties(Flag.Property.name));
@@ -150,10 +167,12 @@ public final class Runtime {
 
     final String heronConfigurationDirectory = getConfigurationDirectory(cmd);
     final String heronDirectory = getHeronDirectory(cmd);
+    final String releaseFile = getReleaseFile(cmd);
 
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
             heronConfigurationDirectory,
+            releaseFile,
             configurationOverrides);
 
     final ResourceConfig config = new ResourceConfig(Resources.get());
