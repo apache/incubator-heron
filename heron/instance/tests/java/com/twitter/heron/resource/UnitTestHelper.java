@@ -85,9 +85,9 @@ public final class UnitTestHelper {
     conf.setNumStmgrs(1);
     conf.setMaxSpoutPending(100);
     if (ackEnabled) {
-      conf.setEnableAcking(true);
+      conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
     } else {
-      conf.setEnableAcking(false);
+      conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATMOST_ONCE);
     }
     if (messageTimeout != -1) {
       conf.setMessageTimeoutSecs(messageTimeout);

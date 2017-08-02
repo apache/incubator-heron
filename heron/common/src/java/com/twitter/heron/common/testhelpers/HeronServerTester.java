@@ -52,7 +52,8 @@ public class HeronServerTester {
       ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(5),
-      ByteAmount.fromMegabytes(5));
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(10));
   private static final Duration DEFAULT_LATCH_TIMEOUT = Duration.ofSeconds(2);
   private static final Duration SERVER_START_TIMEOUT = Duration.ofSeconds(2);
   public static final Duration RESPONSE_RECEIVED_TIMEOUT = Duration.ofSeconds(4);

@@ -62,7 +62,13 @@ public enum CheckpointManagerConfigKey {
    * The size for socket receive buffer in bytes
    */
   SOCKET_RECEIVE_SIZE(
-      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.BYTE_AMOUNT);
+      "heron.ckptmgr.network.options.socket.receive.buffer.size.bytes", Type.BYTE_AMOUNT),
+
+  /**
+   * The maximum size of a packet that can be read by the checkpoint manager
+   */
+  MAXIMUM_PACKET_SIZE(
+      "heron.ckptmgr.network.options.maximum.packetsize.bytes", Type.BYTE_AMOUNT);
 
   private final String value;
   private final Object defaultValue;

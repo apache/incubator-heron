@@ -27,7 +27,7 @@ class SingleThreadStmgrClient(HeronClient):
   This class is intended to be used with SingleThreadHeronInstance.
 
   It will:
-  1. Register the message of NewInstanceAssignmentMessage and TupleMessage
+  1. Register the message of NewInstanceAssignmentMessage and HeronTupleSet2
   2. Send a register request when on_connect() is called
   3. Handle relative response for requests
   """
@@ -69,8 +69,6 @@ class SingleThreadStmgrClient(HeronClient):
     if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
       Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
       self._handle_assignment_message(message.pplan)
-    elif isinstance(message, stmgr_pb2.TupleMessage):
-      self._handle_new_tuples(message)
     elif isinstance(message, tuple_pb2.HeronTupleSet2):
       self._handle_new_tuples_2(message)
     else:
@@ -86,10 +84,8 @@ class SingleThreadStmgrClient(HeronClient):
   def _register_msg_to_handle(self):
     # pylint: disable=unnecessary-lambda
     new_instance_builder = lambda: stmgr_pb2.NewInstanceAssignmentMessage()
-    tuple_msg_builder = lambda: stmgr_pb2.TupleMessage()
     hts2_msg_builder = lambda: tuple_pb2.HeronTupleSet2()
     self.register_on_message(new_instance_builder)
-    self.register_on_message(tuple_msg_builder)
     self.register_on_message(hts2_msg_builder)
 
   def _send_register_req(self):
@@ -114,14 +110,8 @@ class SingleThreadStmgrClient(HeronClient):
     else:
       Log.debug("Received a register response with no pplan")
 
-  def _handle_new_tuples(self, tuple_msg):
-    """Called when new TupleMessage arrives"""
-    self.heron_instance_cls.handle_new_tuple_set(tuple_msg.set)
-
   def _handle_new_tuples_2(self, hts2):
     """Called when new HeronTupleSet2 arrives
-       Strange that we are not using TupleMessage2
-       but to keep consistency with Java part we use HeronTupleSet2
     """
     self.heron_instance_cls.handle_new_tuple_set_2(hts2)
 

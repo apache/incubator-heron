@@ -72,6 +72,7 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
+                                             String submitUser,
                                              Boolean dryRun,
                                              DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
@@ -79,6 +80,7 @@ public class SubmitterMain {
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
         .put(Key.ENVIRON, environ)
+        .put(Key.SUBMIT_USER, submitUser)
         .put(Key.DRY_RUN, dryRun)
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
@@ -116,6 +118,14 @@ public class SubmitterMain {
         .longOpt("environment")
         .hasArgs()
         .argName("environment")
+        .required()
+        .build();
+
+    Option submitUser = Option.builder("s")
+        .desc("User submitting the topology")
+        .longOpt("submit_user")
+        .hasArgs()
+        .argName("submit userid")
         .required()
         .build();
 
@@ -194,6 +204,7 @@ public class SubmitterMain {
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
+    options.addOption(submitUser);
     options.addOption(heronHome);
     options.addOption(configFile);
     options.addOption(configOverrides);
@@ -230,6 +241,7 @@ public class SubmitterMain {
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
     String environ = cmd.getOptionValue("environment");
+    String submitUser = cmd.getOptionValue("submit_user");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String overrideConfigFile = cmd.getOptionValue("override_config_file");
@@ -258,7 +270,8 @@ public class SubmitterMain {
     // build the final config by expanding all the variables
     return Config.toLocalMode(Config.newBuilder()
         .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
-        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
+        .putAll(commandLineConfigs(cluster, role, environ, submitUser, dryRun,
+            dryRunFormat, isVerbose(cmd)))
         .putAll(SubmitterUtils.topologyConfigs(topologyPackage, topologyBinaryFile,
             topologyDefnFile, topology))
         .build());
@@ -404,6 +417,9 @@ public class SubmitterMain {
       // initialize the state manager
       statemgr.initialize(config);
 
+      // initialize the uploader
+      uploader.initialize(config);
+
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
@@ -523,9 +539,6 @@ public class SubmitterMain {
   }
 
   protected URI uploadPackage(IUploader uploader) throws UploaderException {
-    // initialize the uploader
-    uploader.initialize(config);
-
     // upload the topology package to the storage
     return uploader.uploadPackage();
   }

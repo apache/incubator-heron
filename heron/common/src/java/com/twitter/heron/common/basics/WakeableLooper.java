@@ -60,6 +60,20 @@ public abstract class WakeableLooper {
     exitTasks = new ArrayList<>();
   }
 
+  public void clear() {
+    tasksOnWakeup.clear();
+    timers.clear();
+    exitTasks.clear();
+  }
+
+  public void clearTasksOnWakeup() {
+    tasksOnWakeup.clear();
+  }
+
+  public void clearTimers() {
+    timers.clear();
+  }
+
   public void loop() {
     while (!exitLoop) {
       runOnce();
