@@ -19,7 +19,7 @@ import collections
 
 from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
-from heron.api.src.python import IStatefulComponent
+from heron.api.src.python import StatefulComponent
 from heron.api.src.python import Stream
 from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
@@ -67,7 +67,7 @@ class SpoutInstance(BaseInstance):
     self._stateful_state = stateful_state
     context = self.pplan_helper.context
     self.spout_metrics.register_metrics(context)
-    if self.is_stateful and isinstance(self.spout_impl, IStatefulComponent):
+    if self.is_stateful and isinstance(self.spout_impl, StatefulComponent):
       self.spout_impl.initState(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()

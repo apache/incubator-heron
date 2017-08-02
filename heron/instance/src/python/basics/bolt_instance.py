@@ -18,7 +18,7 @@ import Queue
 
 from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
-from heron.api.src.python import IStatefulComponent
+from heron.api.src.python import StatefulComponent
 from heron.api.src.python import Stream
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
@@ -57,7 +57,7 @@ class BoltInstance(BaseInstance):
     self._stateful_state = stateful_state
     context = self.pplan_helper.context
     self.bolt_metrics.register_metrics(context)
-    if self.is_stateful and isinstance(self.bolt_impl, IStatefulComponent):
+    if self.is_stateful and isinstance(self.bolt_impl, StatefulComponent):
       self.bolt_impl.initState(stateful_state)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()

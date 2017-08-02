@@ -218,8 +218,8 @@ class SingleThreadHeronInstance(object):
     """
 
     self.my_pplan_helper = pplan_helper
-    self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
     self.my_pplan_helper.set_topology_context(self.metrics_collector)
+    self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
 
     if pplan_helper.is_spout:
       # Starting a spout
