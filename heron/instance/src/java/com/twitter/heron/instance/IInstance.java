@@ -33,7 +33,7 @@ public interface IInstance {
   /**
    * Do the basic setup for HeronInstance
    */
-  void start(State<? extends Serializable, ? extends Serializable> state);
+  void start(State<Serializable, Serializable> state);
 
   /**
    * Do the basic clean for HeronInstance
