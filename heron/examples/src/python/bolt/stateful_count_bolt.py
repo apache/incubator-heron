@@ -31,7 +31,7 @@ class StatefulCountBolt(Bolt, StatefulComponent):
   def preSave(self, checkpoint_id):
     self.logger.info("PreSave of %s" % checkpoint_id)
     for (k, v) in self.counter.items():
-      self.recovered_state[k] = v
+      self.recovered_state.put(k, v)
     self.logger.info(str(self.recovered_state))
 
   def initialize(self, config, context):

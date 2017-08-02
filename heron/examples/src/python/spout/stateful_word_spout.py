@@ -31,7 +31,7 @@ class StatefulWordSpout(Spout, StatefulComponent):
   def preSave(self, checkpoint_id):
     # Purely for debugging purposes
     for (k, v) in self.counter.items():
-      self.recovered_state[k] = v
+      self.recovered_state.put(k, v)
     self.logger.info("Checkpoint %s" % checkpoint_id)
     self.logger.info(str(self.recovered_state))
 
