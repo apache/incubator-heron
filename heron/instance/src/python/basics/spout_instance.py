@@ -176,9 +176,9 @@ class SpoutInstance(BaseInstance):
 
   # pylint: disable=no-self-use
   def process_incoming_tuples(self):
-    Log.debug("In spout, process_incoming_tuples() don't do anything")
+    self.looper.wake_up()
 
-  def _read_tuples_and_execute(self):
+  def _read_tuples(self):
     start_cycle_time = time.time()
     ack_batch_time = self.sys_config[system_constants.INSTANCE_ACK_BATCH_TIME_MS] * \
                      system_constants.MS_TO_SEC
@@ -243,6 +243,8 @@ class SpoutInstance(BaseInstance):
       if not self._is_topology_running():
         return
 
+      self._read_tuples()
+
       if self._should_produce_tuple():
         self._produce_tuple()
         self.output_helper.send_out_tuples()
@@ -251,7 +253,6 @@ class SpoutInstance(BaseInstance):
         self.spout_metrics.update_out_queue_full_count()
 
       if self.acking_enabled:
-        self._read_tuples_and_execute()
         self.spout_metrics.update_pending_tuples_count(len(self.in_flight_tuples))
       else:
         self._do_immediate_acks()
