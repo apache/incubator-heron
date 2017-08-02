@@ -153,11 +153,6 @@ class BaseInstance(object):
     raise NotImplementedError()
 
   @abstractmethod
-  def _read_tuples_and_execute(self):
-    """Read tuples from a queue and process the tuples"""
-    raise NotImplementedError()
-
-  @abstractmethod
   def invoke_activate(self):
     """Activate the instance"""
     raise NotImplementedError()
