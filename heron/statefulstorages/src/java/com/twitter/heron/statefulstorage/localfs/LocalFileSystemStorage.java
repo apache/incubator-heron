@@ -37,7 +37,9 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   @Override
   public void init(Map<String, Object> conf) throws StatefulStorageException {
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
-    checkpointRootPath = checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
+    if (checkpointRootPath != null) {
+      checkpointRootPath = checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
+    }
     LOG.info("Initialing... Checkpoint root path: " + checkpointRootPath);
   }
 
