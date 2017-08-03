@@ -50,7 +50,7 @@ public abstract class FileSystemStateManager implements IStateManager {
     PHYSICAL_PLAN("pplans", "Physical plan"),
     EXECUTION_STATE("executionstate", "Execution state"),
     SCHEDULER_LOCATION("schedulers", "Scheduler location"),
-    STATEFUL_CHECKPOINT("statefulcheckpoint", "Stateful checkpoint"),
+    STATEFUL_CHECKPOINT("statefulcheckpoints", "Stateful checkpoints"),
     LOCKS("locks", "Distributed locks");
 
     private final String dir;
