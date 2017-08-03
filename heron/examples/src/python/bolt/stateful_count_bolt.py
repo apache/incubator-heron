@@ -48,7 +48,7 @@ class StatefulCountBolt(Bolt, StatefulComponent):
 
   def process(self, tup):
     word = tup.values[0]
-    self._increment(word, 10 if word == "heron" else 1)
+    self._increment(word, 1)
     global_metrics.safe_incr('count')
     self.ack(tup)
 
