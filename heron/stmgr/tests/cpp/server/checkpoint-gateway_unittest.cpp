@@ -113,8 +113,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   // Set message timeout
   heron::proto::api::Config* topology_config = topology->mutable_topology_config();
   heron::proto::api::Config::KeyValue* kv = topology_config->add_kvs();
-  kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED);
-  kv->set_value("true");
+  kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE);
+  kv->set_value("ATLEAST_ONCE");
 
   // Set state
   topology->set_state(heron::proto::api::RUNNING);
@@ -206,7 +206,7 @@ void drainer1(sp_int32 _task_id, heron::proto::system::HeronTupleSet2* _tup) {
   delete _tup;
 }
 
-void drainer2(heron::proto::stmgr::TupleStreamMessage2* _tup) {
+void drainer2(heron::proto::stmgr::TupleStreamMessage* _tup) {
   drainer2_tuples.push_back(_tup->task_id());
   delete _tup;
 }

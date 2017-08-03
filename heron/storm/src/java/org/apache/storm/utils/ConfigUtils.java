@@ -54,7 +54,13 @@ public final class ConfigUtils {
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
       Integer nAckers =
           (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS);
-      com.twitter.heron.api.Config.setEnableAcking(heronConfig, nAckers > 0);
+      if (nAckers > 0) {
+        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
+      } else {
+        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+      }
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
       Integer nSecs =

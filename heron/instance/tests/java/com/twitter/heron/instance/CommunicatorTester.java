@@ -16,12 +16,13 @@ package com.twitter.heron.instance;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.testhelpers.CommunicatorTestHelper;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
@@ -34,11 +35,11 @@ public class CommunicatorTester {
   private final SlaveLooper slaveLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
   private final Communicator<InstanceControlMsg> inControlQueue;
   private final Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
 
@@ -59,10 +60,10 @@ public class CommunicatorTester {
     this.testLooper = testLooper;
     slaveLooper = new SlaveLooper();
     outStreamQueue = initCommunicator(
-        new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper),
+        new Communicator<Message>(slaveLooper, testLooper),
         outStreamQueueOfferLatch);
     inStreamQueue = initCommunicator(
-        new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper),
+        new Communicator<Message>(testLooper, slaveLooper),
         inStreamQueueOfferLatch);
     inControlQueue = initCommunicator(
         new Communicator<InstanceControlMsg>(testLooper, slaveLooper), inControlQueueOfferLatch);
@@ -107,11 +108,11 @@ public class CommunicatorTester {
     return inControlQueue;
   }
 
-  public Communicator<HeronTuples.HeronTupleSet> getInStreamQueue() {
+  public Communicator<Message> getInStreamQueue() {
     return inStreamQueue;
   }
 
-  public Communicator<HeronTuples.HeronTupleSet> getOutStreamQueue() {
+  public Communicator<Message> getOutStreamQueue() {
     return outStreamQueue;
   }
 }

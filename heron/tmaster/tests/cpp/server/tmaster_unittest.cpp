@@ -259,11 +259,12 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
                   const sp_string& dpath, const sp_string& tmaster_host, sp_int32 tmaster_port,
-                  sp_int32 tmaster_controller_port) {
+                  sp_int32 tmaster_controller_port, sp_int32 ckptmgr_port) {
   ss = new EventLoopImpl();
   tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, tmaster_port + 2,
-                                  tmaster_port + 3, metrics_sinks_config_filename, LOCALHOST, ss);
+                                  tmaster_port + 3, ckptmgr_port,
+                                  metrics_sinks_config_filename, LOCALHOST, ss);
   tmaster_thread = new std::thread(StartServer, ss);
   // tmaster_thread->start();
 }
@@ -293,6 +294,7 @@ struct CommonResources {
   sp_string tmaster_host_;
   sp_int32 tmaster_port_;
   sp_int32 tmaster_controller_port_;
+  sp_int32 ckptmgr_port_;
   sp_int32 stmgr_baseport_;
   sp_string zkhostportlist_;
   sp_string topology_name_;
@@ -361,7 +363,8 @@ void StartTMaster(CommonResources& common) {
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
                common.topology_name_, common.topology_id_, common.dpath_,
-               common.tmaster_host_, common.tmaster_port_, common.tmaster_controller_port_);
+               common.tmaster_host_, common.tmaster_port_, common.tmaster_controller_port_,
+               common.ckptmgr_port_);
   common.ss_list_.push_back(tmaster_eventLoop);
 }
 
@@ -425,6 +428,7 @@ void SetUpCommonResources(CommonResources& common) {
   common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 53001;
   common.tmaster_controller_port_ = 53002;
+  common.ckptmgr_port_ = 53003;
   common.stmgr_baseport_ = 53001;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";

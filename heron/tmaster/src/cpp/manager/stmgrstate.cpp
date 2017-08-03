@@ -31,7 +31,7 @@ namespace tmaster {
 
 StMgrState::StMgrState(Connection* _conn, const proto::system::StMgr& _stmgr,
                        const std::vector<proto::system::Instance*>& _instances,
-                       TMasterServer* _server) {
+                       Server* _server) {
   last_heartbeat_ = time(NULL);
   last_stats_ = NULL;
   instances_ = _instances;
