@@ -68,3 +68,6 @@ class HashMapState(State):
 
   def clear(self):
     self._dict.clear()
+
+  def __str__(self):
+    return str(self._dict)
