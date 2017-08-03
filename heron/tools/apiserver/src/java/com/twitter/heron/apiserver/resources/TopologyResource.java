@@ -234,7 +234,7 @@ public class TopologyResource extends HeronResource {
       final Config config = getConfig(cluster, role, environment, name);
       getActionFactory().createRuntimeAction(config, ActionType.KILL).execute();
 
-      return Response.status(Response.Status.NO_CONTENT)
+      return Response.ok()
           .type(MediaType.APPLICATION_JSON)
           .build();
     } catch (RuntimeException ex) {
