@@ -73,9 +73,9 @@ def run_server(command, cl_args, action, extra_args=[]):
   err_msg = "Failed to %s: %s" % (action, topology_name)
   succ_msg = "Successfully %s%s: %s" % (action, 'ed', topology_name)
 
+  print service_apiurl
   r = service_method(service_apiurl)
-  s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
-  print r.json()
+  s = Status.Ok if r.status_code == requests.codes.no_content else Status.HeronError
   return SimpleResult(s, err_msg, succ_msg)
 
 ################################################################################

@@ -39,7 +39,7 @@ def launch_mode_msg(cl_args):
   :param cl_args:
   :return:
   '''
-  if 'dry_run' in cl_args:
+  if cl_args['dry_run']:
     return " in dry-run mode"
   elif 'service_endpoint' in cl_args:
     return " in hosted mode"

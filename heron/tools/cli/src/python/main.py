@@ -22,7 +22,7 @@ import shutil
 import sys
 import time
 import traceback
-import ConfigParser
+import yaml
 
 import heron.common.src.python.utils.log as log
 import heron.tools.common.src.python.utils.config as config
@@ -146,37 +146,119 @@ def check_environment():
     sys.exit(1)
 
 ################################################################################
-def deduce_deployment_mode(cluster, cl_args, config_file):
+# pylint: disable=unused-argument
+def server_deployment_mode(command, parser, cluster, cl_args):
   '''
-  Detect the deployment mode for the given cluster
-  :param command:
-  :param parser:
+  check the server deployment mode for the given cluster
+  if it is valid return the valid set of args
+  :param cluster:
   :param cl_args:
   :return:
   '''
-  rc_config = ConfigParser.SafeConfigParser()
-  try:
-    files_read = rc_config.read(config_file)
-    if not files_read:
-      return cl_args
-  except ConfigParser.Error:
-    Log.error('Errors encountered during config parsing file %s', config_file)
+  config_file = config.heron_rc_file()
+  client_confs = dict()
+
+  # try reading ~/.heronrc file, if present
+  with open(config_file, 'r') as conf_file:
+    client_confs = yaml.load(conf_file)
+
+  # the return value of yaml.load can be None if conf_file is an empty file
+  if not client_confs:
+    return dict()
+
+  # if cluster definition is not found, return
+  if not cluster in client_confs:
+    return dict()
+
+  Log.info("Using cluster definition from file %s" % config_file)
+
+  config_map = client_confs[cluster]
+  if not 'url' in config_map:
+    Log.error('No service endpoint url for %s cluster in %s', cluster, config_file)
     sys.exit(1)
 
-  # extract the section referred by the cluster
   try:
-    if not rc_config.has_section(cluster):
-      return cl_args
-    url = rc_config.get(cluster, "url")
-  except ConfigParser.NoOptionError:
-    Log.error('No service endpoint url for %s cluster', cluster)
+    cluster_role_env = (cl_args['cluster'], cl_args['role'], cl_args['environ'])
+    config.server_mode_cluster_role_env(cluster_role_env, config_file)
+    cluster_tuple = config.defaults_cluster_role_env(cluster_role_env)
+  except Exception as ex:
+    Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
     sys.exit(1)
+
+  print cluster_tuple
 
   new_cl_args = dict()
-  new_cl_args['service_endpoint'] = url
+  new_cl_args['cluster'] = cluster_tuple[0]
+  new_cl_args['role'] = cluster_tuple[1]
+  new_cl_args['environ'] = cluster_tuple[2]
+  new_cl_args['service_endpoint'] = config_map['url']
+  new_cl_args['deploy_mode'] = config.SERVER_MODE
 
   cl_args.update(new_cl_args)
   return cl_args
+
+################################################################################
+def direct_deployment_mode(command, parser, cluster, cl_args):
+  '''
+  check the direct deployment mode for the given cluster
+  if it is valid return the valid set of args
+  :param command:
+  :param parser:
+  :param cluster:
+  :param cl_args:
+  :return:
+  '''
+  cluster = cl_args['cluster']
+  try:
+    config_path = cl_args['config_path']
+    override_config_file = config.parse_override_config(cl_args['config_property'])
+  except KeyError:
+    # if some of the arguments are not found, print error and exit
+    subparser = config.get_subparser(parser, command)
+    print subparser.format_help()
+    return dict()
+
+  # check if the cluster config directory exists
+  config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
+  if not os.path.isdir(config_path):
+    Log.error("Cluster config directory \'%s\' does not exist", config_path)
+    return dict()
+
+  Log.info("Using cluster definition in %s" % config_path)
+
+  try:
+    cluster_role_env = (cl_args['cluster'], cl_args['role'], cl_args['environ'])
+    config.direct_mode_cluster_role_env(cluster_role_env, config_path)
+    cluster_tuple = config.defaults_cluster_role_env(cluster_role_env)
+  except Exception as ex:
+    Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
+    return dict()
+
+  new_cl_args = dict()
+  new_cl_args['cluster'] = cluster_tuple[0]
+  new_cl_args['role'] = cluster_tuple[1]
+  new_cl_args['environ'] = cluster_tuple[2]
+  new_cl_args['config_path'] = config_path
+  new_cl_args['override_config_file'] = override_config_file
+  new_cl_args['deploy_mode'] = config.DIRECT_MODE
+
+  cl_args.update(new_cl_args)
+  return cl_args
+
+################################################################################
+def deployment_mode(command, parser, cl_args):
+  # first check if it is server mode
+  new_cl_args = server_deployment_mode(command, parser, cl_args['cluster'], cl_args)
+  if len(new_cl_args) > 0:
+    return new_cl_args
+
+  # now check if it is direct mode
+  new_cl_args = direct_deployment_mode(command, parser, cl_args['cluster'], cl_args)
+  if len(new_cl_args) > 0:
+    return new_cl_args
+
+  return dict()
+
 
 ################################################################################
 def extract_common_args(command, parser, cl_args):
@@ -189,36 +271,21 @@ def extract_common_args(command, parser, cl_args):
   '''
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
-    config_path = cl_args['config_path']
-    override_config_file = config.parse_override_config(cl_args['config_property'])
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = config.get_subparser(parser, command)
     print subparser.format_help()
     return dict()
 
-  cluster = config.get_heron_cluster(cluster_role_env)
-  config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
-  if not os.path.isdir(config_path):
-    Log.error("Config path cluster directory does not exist: %s", config_path)
-    return dict()
-
   new_cl_args = dict()
-  try:
-    cluster_tuple = config.parse_cluster_role_env(cluster_role_env, config_path)
-    new_cl_args['cluster'] = cluster_tuple[0]
-    new_cl_args['role'] = cluster_tuple[1]
-    new_cl_args['environ'] = cluster_tuple[2]
-    new_cl_args['submit_user'] = getpass.getuser()
-    new_cl_args['config_path'] = config_path
-    new_cl_args['override_config_file'] = override_config_file
-  except Exception as ex:
-    Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
-    return dict()
+  cluster_tuple = config.get_cluster_role_env(cluster_role_env)
+  new_cl_args['cluster'] = cluster_tuple[0]
+  new_cl_args['role'] = cluster_tuple[1]
+  new_cl_args['environ'] = cluster_tuple[2]
+  new_cl_args['submit_user'] = getpass.getuser()
 
   cl_args.update(new_cl_args)
   return cl_args
-
 
 ################################################################################
 def main():
@@ -256,31 +323,29 @@ def main():
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
-    command_line_args = deduce_deployment_mode(
-        command_line_args['cluster'], command_line_args,
-        config.heron_rc_file())
+    cl_args = deployment_mode(command, parser, command_line_args)
 
-    print command_line_args
     # bail out if args are empty
-    if not command_line_args:
+    if not cl_args:
       return 1
-    # register dirs cleanup function during exit
-    cleaned_up_files.append(command_line_args['override_config_file'])
 
-  atexit.register(cleanup, cleaned_up_files)
+    # register dirs cleanup function during exit
+    if cl_args['deploy_mode'] == config.DIRECT_MODE:
+      cleaned_up_files.append(cl_args['override_config_file'])
+      atexit.register(cleanup, cleaned_up_files)
 
   # print the input parameters, if verbose is enabled
-  Log.debug(command_line_args)
+  Log.debug(cl_args)
 
   start = time.time()
-  results = run(command, parser, command_line_args, unknown_args)
+  results = run(command, parser, cl_args, unknown_args)
   if command not in ('help', 'version'):
     result.render(results)
   end = time.time()
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
-    Log.debug('Elapsed time: %.3fs.', (end - start))
+    Log.info('Elapsed time: %.3fs.', (end - start))
 
   return 0 if result.is_successful(results) else 1
 
