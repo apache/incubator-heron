@@ -75,7 +75,7 @@ def run_server(command, cl_args, action, extra_args=[]):
 
   print service_apiurl
   r = service_method(service_apiurl)
-  s = Status.Ok if r.status_code == requests.codes.no_content else Status.HeronError
+  s = Status.Ok if r.status_code == requests.codes.ok else Status.HeronError
   return SimpleResult(s, err_msg, succ_msg)
 
 ################################################################################
