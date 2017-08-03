@@ -29,7 +29,6 @@ import com.microsoft.dhalion.resolver.Action;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
@@ -41,7 +40,8 @@ import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.TopologyTests;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -53,7 +53,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ScaleUpResolverTest {
-  static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
   private EventManager eventManager = new EventManager();
 
   @Test
@@ -68,8 +67,9 @@ public class ScaleUpResolverTest {
     ISchedulerClient scheduler = mock(ISchedulerClient.class);
     when(scheduler.updateTopology(any(UpdateTopologyRequest.class))).thenReturn(true);
 
-    ComponentMetrics metrics = new ComponentMetrics("bolt", "i1", BACK_PRESSURE, 123);
-    Symptom symptom = new Symptom(SYMPTOM_UNDER_PROVISIONING, metrics);
+    ComponentMetrics metrics
+        = new ComponentMetrics("bolt", "i1", METRIC_BACK_PRESSURE.text(), 123);
+    Symptom symptom = new Symptom(SYMPTOM_UNDER_PROVISIONING.text(), metrics);
     List<Diagnosis> diagnosis = new ArrayList<>();
     diagnosis.add(new Diagnosis("test", symptom));
 
@@ -144,23 +144,23 @@ public class ScaleUpResolverTest {
     ScaleUpResolver resolver = new ScaleUpResolver(null, null, null, eventManager, null);
 
     ComponentMetrics metrics = new ComponentMetrics("bolt");
-    metrics.addInstanceMetric(new InstanceMetrics("i1", BACK_PRESSURE, 500));
-    metrics.addInstanceMetric(new InstanceMetrics("i2", BACK_PRESSURE, 0));
+    metrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BACK_PRESSURE.text(), 500));
+    metrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_BACK_PRESSURE.text(), 0));
 
     int result = resolver.computeScaleUpFactor(metrics);
     assertEquals(4, result);
 
     metrics = new ComponentMetrics("bolt");
-    metrics.addInstanceMetric(new InstanceMetrics("i1", BACK_PRESSURE, 750));
-    metrics.addInstanceMetric(new InstanceMetrics("i2", BACK_PRESSURE, 0));
+    metrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BACK_PRESSURE.text(), 750));
+    metrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_BACK_PRESSURE.text(), 0));
 
     result = resolver.computeScaleUpFactor(metrics);
     assertEquals(8, result);
 
     metrics = new ComponentMetrics("bolt");
-    metrics.addInstanceMetric(new InstanceMetrics("i1", BACK_PRESSURE, 400));
-    metrics.addInstanceMetric(new InstanceMetrics("i2", BACK_PRESSURE, 100));
-    metrics.addInstanceMetric(new InstanceMetrics("i3", BACK_PRESSURE, 0));
+    metrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BACK_PRESSURE.text(), 400));
+    metrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_BACK_PRESSURE.text(), 100));
+    metrics.addInstanceMetric(new InstanceMetrics("i3", METRIC_BACK_PRESSURE.text(), 0));
 
     result = resolver.computeScaleUpFactor(metrics);
     assertEquals(6, result);

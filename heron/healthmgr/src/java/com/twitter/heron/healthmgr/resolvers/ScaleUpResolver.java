@@ -13,8 +13,13 @@
 // limitations under the License.
 package com.twitter.heron.healthmgr.resolvers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -29,7 +34,6 @@ import com.microsoft.dhalion.resolver.Action;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
-import com.twitter.heron.healthmgr.common.HealthMgrConstants;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -42,10 +46,11 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+
 
 public class ScaleUpResolver implements IResolver {
-  private static final String BACK_PRESSURE = HealthMgrConstants.METRIC_BACK_PRESSURE;
   private static final Logger LOG = Logger.getLogger(ScaleUpResolver.class.getName());
 
   private TopologyProvider topologyProvider;
@@ -70,7 +75,7 @@ public class ScaleUpResolver implements IResolver {
   @Override
   public List<Action> resolve(List<Diagnosis> diagnosis) {
     for (Diagnosis diagnoses : diagnosis) {
-      Symptom bpSymptom = diagnoses.getSymptoms().get(SYMPTOM_UNDER_PROVISIONING);
+      Symptom bpSymptom = diagnoses.getSymptoms().get(SYMPTOM_UNDER_PROVISIONING.text());
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
         // nothing to fix as there is no back pressure
         continue;
@@ -122,7 +127,7 @@ public class ScaleUpResolver implements IResolver {
     double totalCompBpTime = 0;
     String compName = componentMetrics.getName();
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      double instanceBp = instanceMetrics.getMetricValueSum(BACK_PRESSURE);
+      double instanceBp = instanceMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
       LOG.info(String.format("Instance:%s, bpTime:%.0f", instanceMetrics.getName(), instanceBp));
       totalCompBpTime += instanceBp;
     }
@@ -172,8 +177,7 @@ public class ScaleUpResolver implements IResolver {
     Topology topology = topologyProvider.get();
     try {
       packing.initialize(config, topology);
-      PackingPlan packedPlan = packing.repack(currentPackingPlan, componentDeltas);
-      return packedPlan;
+      return packing.repack(currentPackingPlan, componentDeltas);
     } finally {
       SysUtils.closeIgnoringExceptions(packing);
     }
@@ -192,8 +196,7 @@ public class ScaleUpResolver implements IResolver {
     return packing;
   }
 
-  @VisibleForTesting
-  PackingPlans.PackingPlan getSerializedPlan(PackingPlan packedPlan) {
+  private PackingPlans.PackingPlan getSerializedPlan(PackingPlan packedPlan) {
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     return serializer.toProto(packedPlan);
   }

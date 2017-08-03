@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IResolver;
@@ -39,13 +40,15 @@ import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.ScaleUpResolver;
 
-import static com.twitter.heron.healthmgr.common.HealthMgrConstants.HEALTH_POLICY_INTERVAL;
+import static com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
+
 
 public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     implements EventHandler<TopologyUpdate> {
 
-  public static final String CONF_WAIT_INTERVAL_MILLIS =
+  private static final String CONF_WAIT_INTERVAL_MILLIS =
       "DynamicResourceAllocationPolicy.conf_post_action_wait_interval_min";
+
   private static final Logger LOG
       = Logger.getLogger(DynamicResourceAllocationPolicy.class.getName());
   private HealthPolicyConfig policyConfig;
@@ -70,7 +73,7 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     registerDiagnosers(underProvisioningDiagnoser, dataSkewDiagnoser, slowInstanceDiagnoser);
 
     setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
-        Long.valueOf(policyConfig.getConfig(HEALTH_POLICY_INTERVAL, "60000")));
+        (Long) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000));
 
     eventManager.addEventListener(TopologyUpdate.class, this);
   }
@@ -95,7 +98,7 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
 
   @Override
   public void onEvent(TopologyUpdate event) {
-    int interval = Integer.valueOf(policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, "180000"));
+    int interval = (int) policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, 180000);
     LOG.info("Received topology update action event: " + event);
     setOneTimeDelay(TimeUnit.MILLISECONDS, interval);
   }
