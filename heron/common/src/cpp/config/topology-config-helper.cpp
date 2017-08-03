@@ -228,16 +228,17 @@ bool TopologyConfigHelper::StatefulTopologyStartClean(const proto::api::Topology
                                TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN, false);
 }
 
-sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecs(
-                               const proto::api::Topology& _topology) {
+sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(
+                               const proto::api::Topology& _topology,
+                               sp_int64 _default) {
   const proto::api::Config& cfg = _topology.topology_config();
   for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
     if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS) {
       return atol(cfg.kvs(i).value().c_str());
     }
   }
-  // There was no value specified. The default is 0.
-  return 0;
+  // There was no value specified. Return the default
+  return _default;
 }
 
 void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _topology,
