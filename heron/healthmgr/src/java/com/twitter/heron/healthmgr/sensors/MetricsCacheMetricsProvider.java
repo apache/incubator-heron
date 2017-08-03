@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -133,7 +134,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
             .build())
         .addMetric(metric)
         .build();
-    LOG.fine("MetricsCache Query request: " + request.toString());
+    LOG.log(Level.FINE, "MetricsCache Query request: %s", request);
 
     NetworkUtils.sendHttpPostRequest(con, "X", request.toByteArray());
     byte[] responseData = NetworkUtils.readHttpResponse(con);
@@ -141,7 +142,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     try {
       TopologyMaster.MetricResponse response =
           TopologyMaster.MetricResponse.parseFrom(responseData);
-      LOG.fine("MetricsCache Query response: " + response.toString());
+      LOG.log(Level.FINE, "MetricsCache Query response: %s", response);
       return response;
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
       LOG.severe("protobuf cannot parse the reply from MetricsCache " + e);

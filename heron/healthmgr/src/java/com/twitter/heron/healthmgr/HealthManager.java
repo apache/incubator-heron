@@ -47,7 +47,6 @@ import com.twitter.heron.classification.InterfaceStability.Unstable;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
-import com.twitter.heron.healthmgr.sensors.MetricsCacheMetricsProvider;
 import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
@@ -154,7 +153,10 @@ public class HealthManager {
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
-    AbstractModule module = buildMetricsProviderModule(config, metricsSourceUrl, metricsProviderClassName);
+    Class<? extends MetricsProvider> metricsProviderClass =
+        Class.forName(metricsProviderClassName).asSubclass(MetricsProvider.class);
+    AbstractModule module =
+        buildMetricsProviderModule(config, metricsSourceUrl, metricsProviderClass);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
@@ -220,7 +222,8 @@ public class HealthManager {
 
   @VisibleForTesting
   static AbstractModule buildMetricsProviderModule(
-      final Config config, final String metricsSourceUrl, final String metricsProviderClassName) {
+      final Config config, final String metricsSourceUrl,
+      final Class<? extends MetricsProvider> metricsProviderClass) {
     return new AbstractModule() {
       @Override
       protected void configure() {
@@ -236,7 +239,7 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
-        bind(MetricsProvider.class).to(Class.forName(metricsProviderClassName)).in(Singleton.class);
+        bind(MetricsProvider.class).to(metricsProviderClass).in(Singleton.class);
       }
     };
   }
@@ -374,7 +377,7 @@ public class HealthManager {
         .argName("data source url")
         .build();
 
-    // candidate metrics sources are: 
+    // candidate metrics sources are:
     // com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider (default)
     // com.twitter.heron.healthmgr.sensors.MetricsCacheMetricsProvider
     Option metricsSourceType = Option.builder("s")
