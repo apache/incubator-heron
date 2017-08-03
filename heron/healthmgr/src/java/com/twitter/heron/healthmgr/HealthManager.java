@@ -135,7 +135,8 @@ public class HealthManager {
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String metricsSourceUrl = cmd.getOptionValue("data_source_url", "http://localhost:8888");
-    String metricsSourceType = cmd.getOptionValue("data_source_type", "tracker");
+    String metricsProviderClassName = cmd.getOptionValue(
+        "data_source_type", "com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider");
 
     Boolean verbose = cmd.hasOption("verbose");
     Level loggingLevel = Level.INFO;
@@ -153,7 +154,7 @@ public class HealthManager {
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
-    AbstractModule module = buildMetricsProviderModule(config, metricsSourceUrl, metricsSourceType);
+    AbstractModule module = buildMetricsProviderModule(config, metricsSourceUrl, metricsProviderClassName);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
@@ -219,7 +220,7 @@ public class HealthManager {
 
   @VisibleForTesting
   static AbstractModule buildMetricsProviderModule(
-      final Config config, final String metricsSourceUrl, final String metricsSourceType) {
+      final Config config, final String metricsSourceUrl, final String metricsProviderClassName) {
     return new AbstractModule() {
       @Override
       protected void configure() {
@@ -235,11 +236,7 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
-        if ("tracker".equals(metricsSourceType)) {
-          bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
-        } else if ("metricsCache".equals(metricsSourceType)) {
-          bind(MetricsProvider.class).to(MetricsCacheMetricsProvider.class).in(Singleton.class);
-        }
+        bind(MetricsProvider.class).to(Class.forName(metricsProviderClassName)).in(Singleton.class);
       }
     };
   }
@@ -377,7 +374,9 @@ public class HealthManager {
         .argName("data source url")
         .build();
 
-    // candidate metrics sources are: tracker, metricsCache
+    // candidate metrics sources are: 
+    // com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider (default)
+    // com.twitter.heron.healthmgr.sensors.MetricsCacheMetricsProvider
     Option metricsSourceType = Option.builder("s")
         .desc("metrics data source type")
         .longOpt("data_source_type")

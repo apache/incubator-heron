@@ -39,9 +39,9 @@ import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
-import static com.twitter.heron.metricscachemgr.MetricsCacheManagerHttpServer.PATH_STATS;
 
 public class MetricsCacheMetricsProvider implements MetricsProvider {
+  private static final String PATH_STATS = "/stats";
   private static final Logger LOG = Logger.getLogger(MetricsCacheMetricsProvider.class.getName());
   private HttpURLConnection con;
 
@@ -90,7 +90,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     }
 
     if (response.getMetricCount() == 0) {
-      LOG.info(String.format("Did not get any metrics from tracker for %s:%s ", component, metric));
+      LOG.info(String.format(
+          "Did not get any metrics from MetricsCache for %s:%s ", component, metric));
       return metricsData;
     }
 
@@ -132,7 +133,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
             .build())
         .addMetric(metric)
         .build();
-    LOG.info("MetricsCache Query request: " + request.toString());
+    LOG.fine("MetricsCache Query request: " + request.toString());
 
     NetworkUtils.sendHttpPostRequest(con, "X", request.toByteArray());
     byte[] responseData = NetworkUtils.readHttpResponse(con);
@@ -140,7 +141,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     try {
       TopologyMaster.MetricResponse response =
           TopologyMaster.MetricResponse.parseFrom(responseData);
-      LOG.info("MetricsCache Query response: " + response.toString());
+      LOG.fine("MetricsCache Query response: " + response.toString());
       return response;
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
       LOG.severe("protobuf cannot parse the reply from MetricsCache " + e);

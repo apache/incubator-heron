@@ -52,7 +52,7 @@ import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
  */
 public class MetricsCacheManagerHttpServer {
   // http path, compatible with tmaster stat interface
-  public static final String PATH_STATS = "/stats";
+  private static final String PATH_STATS = "/stats";
   private static final String PATH_EXCEPTIONS = "/exceptions";
   private static final String PATH_EXCEPTIONSUMMARY = "/exceptionsummary";
 
