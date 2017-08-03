@@ -188,7 +188,7 @@ public class TopologyResource extends HeronResource {
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(String.format("%s activated", name)))
           .build();
-    } catch (RuntimeException ex) {
+    } catch (Exception ex) {
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -213,7 +213,7 @@ public class TopologyResource extends HeronResource {
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(String.format("%s deactivated", name)))
           .build();
-    } catch (RuntimeException ex) {
+    } catch (Exception ex) {
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -237,7 +237,7 @@ public class TopologyResource extends HeronResource {
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
           .build();
-    } catch (RuntimeException ex) {
+    } catch (Exception ex) {
       final String message = ex.getMessage();
       final Response.Status status = message.contains("does not exist")
           ? Response.Status.NOT_FOUND : Response.Status.INTERNAL_SERVER_ERROR;
