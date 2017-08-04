@@ -22,7 +22,7 @@ from heron.api.src.python import Stream
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
-from heron.proto import tuple_pb2, ckptmgr_pb2
+from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as system_constants
 
@@ -33,6 +33,7 @@ class BoltInstance(BaseInstance):
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper):
     super(BoltInstance, self).__init__(pplan_helper, in_stream, out_stream, looper)
+    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")
@@ -45,6 +46,7 @@ class BoltInstance(BaseInstance):
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
     self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
+    self._inited_metrics_and_tasks = False
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
 
     # load user's bolt class
@@ -53,22 +55,27 @@ class BoltInstance(BaseInstance):
 
   def start_component(self, stateful_state):
     context = self.pplan_helper.context
-    self.bolt_metrics.register_metrics(context)
+    if not self._inited_metrics_and_tasks:
+      self.bolt_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.bolt_impl, StatefulComponent):
       self.bolt_impl.initState(stateful_state)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     # prepare tick tuple
-    self._prepare_tick_tup_timer()
+    if not self._inited_metrics_and_tasks:
+      self._prepare_tick_tup_timer()
+    self._inited_metrics_and_tasks = True
+    self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
-  def stop(self):
-    self.pplan_helper.context.invoke_hook_cleanup()
-    self.cleanup()
+  def stop_component(self):
+    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
   def invoke_activate(self):
-    pass
+    Log.info("Activating Bolt")
+    self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def invoke_deactivate(self):
-    pass
+    Log.info("Deactivating Bolt")
+    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
   def emit(self, tup, stream=Stream.DEFAULT_STREAM_ID,
            anchors=None, direct_task=None, need_task_ids=False):
@@ -274,6 +281,3 @@ class BoltInstance(BaseInstance):
     fail_latency_ns = (time.time() - tup.creation_time) * system_constants.SEC_TO_NS
     self.pplan_helper.context.invoke_hook_bolt_fail(tup, fail_latency_ns)
     self.bolt_metrics.failed_tuple(tup.stream, tup.component, fail_latency_ns)
-
-  def cleanup(self):
-    pass

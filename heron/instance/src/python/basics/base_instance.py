@@ -59,6 +59,7 @@ class BaseInstance(object):
     self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
     self._stateful_state = None
     self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
+    self._inited_global_metrics = False
 
   def log(self, message, level=None):
     """Log message, optionally providing a logging level
@@ -140,12 +141,18 @@ class BaseInstance(object):
     context.invoke_hook_prepare()
 
     # prepare global metrics
-    interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
-    collector = context.get_metrics_collector()
-    global_metrics.init(collector, interval)
+    if not self._inited_global_metrics:
+      interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+      collector = context.get_metrics_collector()
+      global_metrics.init(collector, interval)
+      self._inited_global_metrics = True
 
     # prepare for custom grouping
     self.pplan_helper.prepare_custom_grouping(context)
+
+  def stop(self):
+    self.pplan_helper.context.invoke_hook_cleanup()
+    self.stop_component()
 
   ##################################################################
   # The followings are to be implemented by Spout/Bolt independently
@@ -157,7 +164,7 @@ class BaseInstance(object):
     raise NotImplementedError()
 
   @abstractmethod
-  def stop(self):
+  def stop_component(self):
     """Do the basic clean for Heron Instance
 
     Note that this method is not guaranteed to be invoked
