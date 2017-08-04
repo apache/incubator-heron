@@ -15,11 +15,11 @@
 
 package com.twitter.heron.healthmgr.policy;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -41,7 +41,9 @@ import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.ScaleUpResolver;
 
 import static com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
-
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_DATA_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_UNDER_PROVISIONING;
 
 public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     implements EventHandler<TopologyUpdate> {
@@ -80,16 +82,14 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
 
   @Override
   public IResolver selectResolver(List<Diagnosis> diagnosis) {
-    Map<String, Diagnosis> diagnosisMap = new HashMap<>();
-    for (Diagnosis diagnoses : diagnosis) {
-      diagnosisMap.put(diagnoses.getName(), diagnoses);
-    }
+    Map<String, Diagnosis> diagnosisMap
+        = diagnosis.stream().collect(Collectors.toMap(Diagnosis::getName, d -> d));
 
-    if (diagnosisMap.containsKey(DataSkewDiagnoser.class.getName())) {
+    if (diagnosisMap.containsKey(DIAGNOSIS_DATA_SKEW.text())) {
       LOG.warning("Data Skew diagnoses. This diagnosis does not have any resolver.");
-    } else if (diagnosisMap.containsKey(SlowInstanceDiagnoser.class.getName())) {
+    } else if (diagnosisMap.containsKey(DIAGNOSIS_SLOW_INSTANCE.text())) {
       LOG.warning("Slow Instance diagnoses. This diagnosis does not have any resolver.");
-    } else if (diagnosisMap.containsKey(UnderProvisioningDiagnoser.class.getSimpleName())) {
+    } else if (diagnosisMap.containsKey(DIAGNOSIS_UNDER_PROVISIONING.text())) {
       return scaleUpResolver;
     }
 
