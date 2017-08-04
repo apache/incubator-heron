@@ -59,7 +59,7 @@ class BaseInstance(object):
     self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
     self._stateful_state = None
     self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
-    self._inited_global_metrics = False
+    self._initialized_global_metrics = False
 
   def log(self, message, level=None):
     """Log message, optionally providing a logging level
@@ -141,11 +141,11 @@ class BaseInstance(object):
     context.invoke_hook_prepare()
 
     # prepare global metrics
-    if not self._inited_global_metrics:
+    if not self._initialized_global_metrics:
       interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
       collector = context.get_metrics_collector()
       global_metrics.init(collector, interval)
-      self._inited_global_metrics = True
+      self._initialized_global_metrics = True
 
     # prepare for custom grouping
     self.pplan_helper.prepare_custom_grouping(context)

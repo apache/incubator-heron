@@ -46,7 +46,7 @@ class BoltInstance(BaseInstance):
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
     self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
-    self._inited_metrics_and_tasks = False
+    self._initialized_metrics_and_tasks = False
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
 
     # load user's bolt class
@@ -55,15 +55,15 @@ class BoltInstance(BaseInstance):
 
   def start_component(self, stateful_state):
     context = self.pplan_helper.context
-    if not self._inited_metrics_and_tasks:
+    if not self._initialized_metrics_and_tasks:
       self.bolt_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.bolt_impl, StatefulComponent):
       self.bolt_impl.initState(stateful_state)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     # prepare tick tuple
-    if not self._inited_metrics_and_tasks:
+    if not self._initialized_metrics_and_tasks:
       self._prepare_tick_tup_timer()
-    self._inited_metrics_and_tasks = True
+    self._initialized_metrics_and_tasks = True
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def stop_component(self):

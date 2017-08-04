@@ -49,7 +49,7 @@ class SpoutInstance(BaseInstance):
     self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
     self.enable_message_timeouts = \
       context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
-    self._inited_metrics_and_tasks = False
+    self._initialized_metrics_and_tasks = False
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
     Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
 
@@ -64,14 +64,14 @@ class SpoutInstance(BaseInstance):
 
   def start_component(self, stateful_state):
     context = self.pplan_helper.context
-    if not self._inited_metrics_and_tasks:
+    if not self._initialized_metrics_and_tasks:
       self.spout_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.spout_impl, StatefulComponent):
       self.spout_impl.initState(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
-    if not self._inited_metrics_and_tasks:
+    if not self._initialized_metrics_and_tasks:
       self._add_spout_task()
-    self._inited_metrics_and_tasks = True
+    self._initialized_metrics_and_tasks = True
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def stop_component(self):
