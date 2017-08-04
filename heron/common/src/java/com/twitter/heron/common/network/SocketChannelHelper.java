@@ -78,6 +78,7 @@ public class SocketChannelHelper {
   private long totalPacketsWritten;
   private long totalBytesRead;
   private long totalBytesWritten;
+  private ByteAmount maximumPacketSize;
 
   public SocketChannelHelper(NIOLooper looper,
                              ISelectHandler selectHandler,
@@ -94,6 +95,8 @@ public class SocketChannelHelper {
 
     this.readBatchSize = options.getNetworkReadBatchSize();
     this.readReadBatchTime = options.getNetworkReadBatchTime();
+
+    this.maximumPacketSize = options.getMaximumPacketSize();
 
     // We will register Read by default when the connection is established
     // However, we will register Write only when we have something to write since
@@ -136,7 +139,7 @@ public class SocketChannelHelper {
     // 2. We have read large enough data
     while ((System.nanoTime() - startOfCycle - readReadBatchTime.toNanos()) < 0
         && (bytesRead < readBatchSize.asBytes())) {
-      int readState = incomingPacket.readFromChannel(socketChannel);
+      int readState = incomingPacket.readFromChannel(socketChannel, maximumPacketSize.asBytes());
 
       if (readState > 0) {
         // Partial Read, just break, and read next time when the socket is readable

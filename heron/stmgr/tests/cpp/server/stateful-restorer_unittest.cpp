@@ -120,8 +120,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   // Set message timeout
   heron::proto::api::Config* topology_config = topology->mutable_topology_config();
   heron::proto::api::Config::KeyValue* kv = topology_config->add_kvs();
-  kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED);
-  kv->set_value("true");
+  kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE);
+  kv->set_value("ATLEAST_ONCE");
 
   // Set state
   topology->set_state(heron::proto::api::RUNNING);
@@ -247,7 +247,9 @@ TEST(StatefulRestorer, normalcase) {
                                                      std::bind(&RestoreDone, &restore_done));
   // At the start the restore is not in progress
   EXPECT_FALSE(restorer->InProgress());
-  restorer->StartRestore(ckpt_id, 1, pplan);
+  std::unordered_set<sp_int32> local_taskids;
+  heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_taskids);
+  restorer->StartRestore(ckpt_id, 1, local_taskids, pplan);
   // Now we are in restore
   EXPECT_TRUE(restorer->InProgress());
   // Make sure that the ckpt messages were sent to our tasks
@@ -319,7 +321,9 @@ TEST(StatefulRestorer, deadinstances) {
                                                      std::bind(&RestoreDone, &restore_done));
   // At the start the restore is not in progress
   EXPECT_FALSE(restorer->InProgress());
-  restorer->StartRestore(ckpt_id, 1, pplan);
+  std::unordered_set<sp_int32> local_taskids;
+  heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_taskids);
+  restorer->StartRestore(ckpt_id, 1, local_taskids, pplan);
   // Now we are in restore
   EXPECT_TRUE(restorer->InProgress());
   // Just have all stmgrs connected to us
@@ -410,7 +414,9 @@ TEST(StatefulRestorer, deadckptmgr) {
                                                      std::bind(&RestoreDone, &restore_done));
   // At the start the restore is not in progress
   EXPECT_FALSE(restorer->InProgress());
-  restorer->StartRestore(ckpt_id, 1, pplan);
+  std::unordered_set<sp_int32> local_taskids;
+  heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_taskids);
+  restorer->StartRestore(ckpt_id, 1, local_taskids, pplan);
   // Now we are in restore
   EXPECT_TRUE(restorer->InProgress());
 

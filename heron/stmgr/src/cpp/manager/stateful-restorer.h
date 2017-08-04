@@ -19,8 +19,8 @@
 
 #include <ostream>
 #include <map>
-#include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <typeinfo>   // operator typeid
 #include "proto/messages.h"
@@ -88,6 +88,7 @@ class StatefulRestorer {
   // callback passing in it the status of the restore along with _checkpoint_id
   // and the _restore_txid
   void StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,
+                    const std::unordered_set<sp_int32>& _local_taskids,
                     proto::system::PhysicalPlan* _pplan);
   // Called when ckptmgr client restarts
   void HandleCkptMgrRestart();
@@ -123,10 +124,10 @@ class StatefulRestorer {
 
   // Set of task ids for which we have sent out get checkpoint requests
   // to the ckptmgr but haven't gotten response back
-  std::set<sp_int32> get_ckpt_pending_;
+  std::unordered_set<sp_int32> get_ckpt_pending_;
   // Set of task ids which still haven;'t gotten back after
   // restoring their state
-  std::set<sp_int32> restore_pending_;
+  std::unordered_set<sp_int32> restore_pending_;
   // Have we not connected with some of our peer stmgrs?
   bool clients_connections_pending_;
   // Are any of our local instances still not connected with us?
@@ -136,7 +137,7 @@ class StatefulRestorer {
   // What is the restore txid associated with our attempt of restoring
   sp_int64 restore_txid_;
   // What are all our local taskids that we need to restore
-  std::set<sp_int32> local_taskids_;
+  std::unordered_set<sp_int32> local_taskids_;
 
   CkptMgrClient* ckptmgr_;
   StMgrClientMgr* clientmgr_;

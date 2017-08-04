@@ -20,6 +20,7 @@
 #include "network/network_error.h"
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
+#include "proto/ckptmgr.pb.h"
 #include "basics/basics.h"
 
 namespace heron {
@@ -45,6 +46,17 @@ class TMasterServer : public Server {
   void HandleStMgrHeartbeatRequest(REQID _id, Connection* _conn,
                                    proto::tmaster::StMgrHeartbeatRequest* _request);
   void HandleMetricsMgrStats(Connection*, proto::tmaster::PublishMetrics* _request);
+
+  // Message sent by stmgr to tell tmaster that a particular checkpoint message
+  // was saved. This way the tmaster can keep track of which all instances have saved their
+  // state for any given checkpoint id.
+  void HandleInstanceStateStored(Connection*, proto::ckptmgr::InstanceStateStored* _message);
+  // Handle response from stmgr for the RestoreTopologyStateRequest
+  void HandleRestoreTopologyStateResponse(Connection*,
+                                     proto::ckptmgr::RestoreTopologyStateResponse* _message);
+  // Stmgr can request tmaster to reset the state of the topology in case it finds any errors.
+  void HandleResetTopologyStateMessage(Connection*,
+                                     proto::ckptmgr::ResetTopologyState* _message);
 
   // our tmaster
   TMetricsCollector* collector_;

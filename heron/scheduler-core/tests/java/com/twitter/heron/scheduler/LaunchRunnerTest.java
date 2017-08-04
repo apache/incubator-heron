@@ -70,6 +70,7 @@ public class LaunchRunnerTest {
   private static final String CLUSTER = "testCluster";
   private static final String ROLE = "testRole";
   private static final String ENVIRON = "testEnviron";
+  private static final String SUBMIT_USER = "testUser";
   private static final String BUILD_VERSION = "live";
   private static final String BUILD_USER = "user";
 
@@ -114,6 +115,7 @@ public class LaunchRunnerTest {
     when(config.getStringValue(Key.CLUSTER)).thenReturn(CLUSTER);
     when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
     when(config.getStringValue(Key.ENVIRON)).thenReturn(ENVIRON);
+    when(config.getStringValue(Key.SUBMIT_USER)).thenReturn(SUBMIT_USER);
     when(config.getStringValue(Key.BUILD_VERSION)).thenReturn(BUILD_VERSION);
     when(config.getStringValue(Key.BUILD_USER)).thenReturn(BUILD_USER);
 
@@ -205,7 +207,7 @@ public class LaunchRunnerTest {
     assertEquals(CLUSTER, executionState.getCluster());
     assertEquals(ROLE, executionState.getRole());
     assertEquals(ENVIRON, executionState.getEnviron());
-    assertEquals(System.getProperty("user.name"), executionState.getSubmissionUser());
+    assertEquals(SUBMIT_USER, executionState.getSubmissionUser());
 
     assertNotNull(executionState.getTopologyId());
     assertTrue(executionState.getSubmissionTime() <= (System.currentTimeMillis() / 1000));

@@ -30,13 +30,15 @@
 #include <string>
 #include "basics/basics.h"
 #include "proto/messages.h"
+#include "config/topology-config-vars.h"
 
 namespace heron {
 namespace config {
 
 class TopologyConfigHelper {
  public:
-  static bool IsAckingEnabled(const proto::api::Topology& _topology);
+  static TopologyConfigVars::TopologyReliabilityMode
+          GetReliabilityMode(const proto::api::Topology& _topology);
 
   // This returns the value of TOPOLOGY_STMGRS from the config
   static sp_int32 GetNumStMgrs(const proto::api::Topology& _topology);
@@ -76,17 +78,12 @@ class TopologyConfigHelper {
   // Gets the per container ram requested by this topology
   static sp_int64 GetContainerRamRequested(const proto::api::Topology& _topology);
 
-  // Is the topology stateful
-  static bool IsTopologyStateful(const proto::api::Topology& _topology);
-
-  // Is the topology exactly once
-  static bool IsTopologyExactlyOnce(const proto::api::Topology& _topology);
-
   // Should this stateful topology start from clean state
   static bool StatefulTopologyStartClean(const proto::api::Topology& _topology);
 
   // Gets the checkpoint interval for stateful topologies
-  static sp_int64 GetStatefulCheckpointIntervalSecs(const proto::api::Topology& _topology);
+  static sp_int64 GetStatefulCheckpointIntervalSecsWithDefault(
+                  const proto::api::Topology& _topology, sp_int64 _default);
 
   // Gets the list of all spout component names
   static void GetSpoutComponentNames(const proto::api::Topology& _topology,

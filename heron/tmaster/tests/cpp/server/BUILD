@@ -55,3 +55,30 @@ cc_test(
     flaky = 1,
     linkstatic = 1,
 )
+
+cc_test(
+    name = "stateful_restorer_unittest",
+    srcs = [
+        "stateful_restorer_unittest.cpp",
+        "dummytmaster.cpp",
+        "dummystmgr.cpp",
+        "dummytmaster.h",
+        "dummystmgr.h",
+    ],
+    deps = [
+        "//heron/tmaster/src/cpp:tmaster-cxx",
+        "//third_party/gtest:gtest-cxx",
+    ],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
+        "-Iheron/tmaster/src/cpp",
+        "-Iheron/tmaster/tests/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
+    size = "small",
+    flaky = 1,
+    linkstatic = 1,
+)

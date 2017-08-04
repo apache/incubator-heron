@@ -17,6 +17,11 @@
 ###########################  Constants for topology configuration ##################################
 ####################################################################################################
 
+class TopologyReliabilityMode(object):
+  ATMOST_ONCE = "ATMOST_ONCE"
+  ATLEAST_ONCE = "ATLEAST_ONCE"
+  EXACTLY_ONCE = "EXACTLY_ONCE"
+
 # Topology-specific options for the worker child process.
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
 # Per component jvm options.
@@ -39,8 +44,14 @@ TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending"
 TOPOLOGY_AUTO_TASK_HOOKS = "topology.auto.task.hooks"
 # The serialization class that is used to serialize/deserialize tuples
 TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname"
-# How many executors to spawn for ackers.
-TOPOLOGY_ENABLE_ACKING = "topology.acking"
+# Which reliability mode to run the topology?
+# Valid ones are all the enums in TopologyReliabilityMode
+TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode"
+# What's the checkpoint interval for stateful topologies in seconds
+TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS = "topology.stateful.checkpoint.interval.seconds"
+# Boolean flag that says that the stateful topology should start from
+# clean state, i.e. ignore any checkpoint state
+TOPOLOGY_STATEFUL_START_CLEAN = "topology.stateful.start.clean"
 
 # Number of cpu cores per container to be reserved for this topology.
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"

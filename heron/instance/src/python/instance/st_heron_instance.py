@@ -20,14 +20,16 @@ import traceback
 import signal
 import yaml
 
+from heron.api.src.python import api_constants, HashMapState
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
+from heron.common.src.python.utils.misc import SerializerHelper
 from heron.common.src.python.network import create_socket_options
 
-from heron.proto import physical_plan_pb2, tuple_pb2
+from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
@@ -77,10 +79,13 @@ class SingleThreadHeronInstance(object):
                            self.out_metrics, self.in_stream, self.out_stream,
                            self.socket_map, socket_options, self.gateway_metrics, self.py_metrics)
     self.my_pplan_helper = None
+    self.serializer = None
 
     # my_instance is a AssignedInstance tuple
     self.my_instance = None
     self.is_instance_started = False
+    self.is_stateful_started = False
+    self.stateful_state = None
 
     # Debugging purposes
     def go_trace(_, stack):
@@ -95,19 +100,6 @@ class SingleThreadHeronInstance(object):
     # call send_buffered_messages every time it is waken up
     self.looper.add_wakeup_task(self.send_buffered_messages)
     self.looper.loop()
-
-  def handle_new_tuple_set(self, tuple_msg_set):
-    """Called when new TupleMessage arrives
-
-    :param tuple_msg_set: HeronTupleSet type
-    """
-    if self.my_pplan_helper is None or self.my_instance is None:
-      Log.error("Got tuple set when no instance assigned yet")
-    else:
-      # First add message to the in_stream
-      self.in_stream.offer(tuple_msg_set)
-      if self.my_pplan_helper.is_topology_running():
-        self.my_instance.py_class.process_incoming_tuples()
 
   def handle_new_tuple_set_2(self, hts2):
     """Called when new HeronTupleSet2 arrives
@@ -135,12 +127,65 @@ class SingleThreadHeronInstance(object):
       if self.my_pplan_helper.is_topology_running():
         self.my_instance.py_class.process_incoming_tuples()
 
+  def handle_initiate_stateful_checkpoint(self, ckptmsg):
+    """Called when we get InitiateStatefulCheckpoint message
+    :param ckptmsg: InitiateStatefulCheckpoint type
+    """
+    self.in_stream.offer(ckptmsg)
+    if self.my_pplan_helper.is_topology_running():
+      self.my_instance.py_class.process_incoming_tuples()
+
+  def handle_start_stateful_processing(self, start_msg):
+    """Called when we receive StartInstanceStatefulProcessing message
+    :param start_msg: StartInstanceStatefulProcessing type
+    """
+    Log.info("Received start stateful processing for %s" % start_msg.checkpoint_id)
+    self.is_stateful_started = True
+    self.start_instance_if_possible()
+
+  def handle_restore_instance_state(self, restore_msg):
+    """Called when we receive RestoreInstanceStateRequest message
+    :param restore_msg: RestoreInstanceStateRequest type
+    """
+    Log.info("Restoring instance state to checkpoint %s" % restore_msg.state.checkpoint_id)
+    # Stop the instance
+    if self.is_stateful_started:
+      self.my_instance.py_class.stop()
+      self.my_instance.py_class.clear_collector()
+      self.is_stateful_started = False
+
+    # Clear all buffers
+    self.in_stream.clear()
+    self.out_stream.clear()
+
+    # Deser the state
+    if self.stateful_state is not None:
+      self.stateful_state.clear()
+    if restore_msg.state.state is not None and restore_msg.state.state:
+      try:
+        self.stateful_state = self.serializer.deserialize(restore_msg.state.state)
+      except Exception as e:
+        raise RuntimeError("Could not serialize state during restore " + e.message)
+    else:
+      Log.info("The restore request does not have an actual state")
+    if self.stateful_state is None:
+      self.stateful_state = HashMapState()
+
+    Log.info("Instance restore state deserialized")
+
+    # Send the response back
+    resp = ckptmgr_pb2.RestoreInstanceStateResponse()
+    resp.status.status = common_pb2.StatusCode.Value("OK")
+    resp.checkpoint_id = restore_msg.state.checkpoint_id
+    self._stmgr_client.send_message(resp)
+
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
     while not self.out_stream.is_empty():
       tuple_set = self.out_stream.poll()
-      tuple_set.src_task_id = self.my_pplan_helper.my_task_id
-      self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
+      if isinstance(tuple_set, tuple_pb2.HeronTupleSet):
+        tuple_set.src_task_id = self.my_pplan_helper.my_task_id
+        self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
       self._stmgr_client.send_message(tuple_set)
 
   def handle_state_change_msg(self, new_helper):
@@ -152,7 +197,7 @@ class SingleThreadHeronInstance(object):
       # handle state change
       if new_helper.is_topology_running():
         if not self.is_instance_started:
-          self.start_instance()
+          self.start_instance_if_possible()
         self.my_instance.py_class.invoke_activate()
       elif new_helper.is_topology_paused():
         self.my_instance.py_class.invoke_deactivate()
@@ -174,6 +219,7 @@ class SingleThreadHeronInstance(object):
 
     self.my_pplan_helper = pplan_helper
     self.my_pplan_helper.set_topology_context(self.metrics_collector)
+    self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
 
     if pplan_helper.is_spout:
       # Starting a spout
@@ -210,17 +256,27 @@ class SingleThreadHeronInstance(object):
 
     if pplan_helper.is_topology_running():
       try:
-        self.start_instance()
+        self.start_instance_if_possible()
       except Exception as e:
         Log.error("Error with starting bolt/spout instance: " + e.message)
         Log.error(traceback.format_exc())
     else:
       Log.info("The instance is deployed in deactivated state")
 
-  def start_instance(self):
+  def start_instance_if_possible(self):
+    if self.my_pplan_helper is None:
+      return
+    if not self.my_pplan_helper.is_topology_running():
+      return
+    context = self.my_pplan_helper.context
+    mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
+                                            api_constants.TopologyReliabilityMode.ATMOST_ONCE)
+    is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    if is_stateful and not self.is_stateful_started:
+      return
     try:
       Log.info("Starting bolt/spout instance now...")
-      self.my_instance.py_class.start()
+      self.my_instance.py_class.start(self.stateful_state)
       self.is_instance_started = True
       Log.info("Started instance successfully.")
     except Exception as e:

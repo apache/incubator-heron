@@ -24,6 +24,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.google.protobuf.Message;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -38,7 +40,6 @@ import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.instance.CommunicatorTester;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.resource.UnitTestHelper;
 
 import static org.junit.Assert.assertEquals;
@@ -122,7 +123,7 @@ public abstract class AbstractNetworkTest {
     return communicatorTester.getInControlQueue();
   }
 
-  protected Communicator<HeronTuples.HeronTupleSet> getInStreamQueue() {
+  protected Communicator<Message> getInStreamQueue() {
     return communicatorTester.getInStreamQueue();
   }
 
@@ -165,7 +166,8 @@ public abstract class AbstractNetworkTest {
          systemConfig.getInstanceNetworkReadBatchSize(),
          systemConfig.getInstanceNetworkReadBatchTime(),
          systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
-         systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize());
+         systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize(),
+         systemConfig.getInstanceNetworkOptionsMaximumPacketSize());
 
     final NIOLooper nioLooper = (NIOLooper) communicatorTester.getTestLooper();
     streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,

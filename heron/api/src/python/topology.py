@@ -32,7 +32,7 @@ class TopologyType(type):
       api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: "30",
       api_constants.TOPOLOGY_COMPONENT_PARALLELISM: "1",
       api_constants.TOPOLOGY_MAX_SPOUT_PENDING: "100",
-      api_constants.TOPOLOGY_ENABLE_ACKING: "false",
+      api_constants.TOPOLOGY_RELIABILITY_MODE: api_constants.TopologyReliabilityMode.ATMOST_ONCE,
       api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: "true"}
   def __new__(mcs, classname, bases, class_dict):
     bolt_specs = {}

@@ -54,7 +54,7 @@ class StMgrServer : public Server {
 
   // We own the message
   void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance2(proto::stmgr::TupleStreamMessage2* _message);
+  void SendToInstance2(proto::stmgr::TupleStreamMessage* _message);
 
   // When we get a checkpoint marker from _src_task_id destined for _destination_task_id
   // this function in invoked, so that we might register it in gateway
@@ -96,7 +96,7 @@ class StMgrServer : public Server {
 
  private:
   void DrainTupleSet(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void DrainTupleStream(proto::stmgr::TupleStreamMessage2* _message);
+  void DrainTupleStream(proto::stmgr::TupleStreamMessage* _message);
   void DrainCheckpoint(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
@@ -108,7 +108,7 @@ class StMgrServer : public Server {
   // First from other stream managers
   void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
                                proto::stmgr::StrMgrHelloRequest* _request);
-  void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage2* _message);
+  void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage* _message);
 
   // Handler for DownstreamStatefulCheckpoint from a peer stmgr
   void HandleDownstreamStatefulCheckpointMessage(Connection* _conn,

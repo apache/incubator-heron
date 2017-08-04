@@ -16,7 +16,7 @@ from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
-from heron.proto import common_pb2, stmgr_pb2, tuple_pb2
+from heron.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as constants
 
@@ -27,7 +27,7 @@ class SingleThreadStmgrClient(HeronClient):
   This class is intended to be used with SingleThreadHeronInstance.
 
   It will:
-  1. Register the message of NewInstanceAssignmentMessage and TupleMessage
+  1. Register the message of NewInstanceAssignmentMessage and HeronTupleSet2
   2. Send a register request when on_connect() is called
   3. Handle relative response for requests
   """
@@ -69,10 +69,14 @@ class SingleThreadStmgrClient(HeronClient):
     if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
       Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
       self._handle_assignment_message(message.pplan)
-    elif isinstance(message, stmgr_pb2.TupleMessage):
-      self._handle_new_tuples(message)
     elif isinstance(message, tuple_pb2.HeronTupleSet2):
       self._handle_new_tuples_2(message)
+    elif isinstance(message, ckptmgr_pb2.StartInstanceStatefulProcessing):
+      self._handle_start_stateful_processing(message)
+    elif isinstance(message, ckptmgr_pb2.RestoreInstanceStateRequest):
+      self._handle_restore_instance_state(message)
+    elif isinstance(message, ckptmgr_pb2.InitiateStatefulCheckpoint):
+      self._handle_initiate_stateful_checkpoint(message)
     else:
       raise RuntimeError("Unknown kind of message received from Stream Manager")
 
@@ -86,11 +90,15 @@ class SingleThreadStmgrClient(HeronClient):
   def _register_msg_to_handle(self):
     # pylint: disable=unnecessary-lambda
     new_instance_builder = lambda: stmgr_pb2.NewInstanceAssignmentMessage()
-    tuple_msg_builder = lambda: stmgr_pb2.TupleMessage()
     hts2_msg_builder = lambda: tuple_pb2.HeronTupleSet2()
+    stateful_start_msg_builder = lambda: ckptmgr_pb2.StartInstanceStatefulProcessing()
+    stateful_restore_msg_builder = lambda: ckptmgr_pb2.RestoreInstanceStateRequest()
+    stateful_initiate_msg_builder = lambda: ckptmgr_pb2.InitiateStatefulCheckpoint()
     self.register_on_message(new_instance_builder)
-    self.register_on_message(tuple_msg_builder)
     self.register_on_message(hts2_msg_builder)
+    self.register_on_message(stateful_start_msg_builder)
+    self.register_on_message(stateful_restore_msg_builder)
+    self.register_on_message(stateful_initiate_msg_builder)
 
   def _send_register_req(self):
     request = stmgr_pb2.RegisterInstanceRequest()
@@ -114,16 +122,25 @@ class SingleThreadStmgrClient(HeronClient):
     else:
       Log.debug("Received a register response with no pplan")
 
-  def _handle_new_tuples(self, tuple_msg):
-    """Called when new TupleMessage arrives"""
-    self.heron_instance_cls.handle_new_tuple_set(tuple_msg.set)
-
   def _handle_new_tuples_2(self, hts2):
     """Called when new HeronTupleSet2 arrives
-       Strange that we are not using TupleMessage2
-       but to keep consistency with Java part we use HeronTupleSet2
     """
     self.heron_instance_cls.handle_new_tuple_set_2(hts2)
+
+  def _handle_initiate_stateful_checkpoint(self, ckptmsg):
+    """Called when new InitiateStatefulCheckpoint arrives
+    """
+    self.heron_instance_cls.handle_initiate_stateful_checkpoint(ckptmsg)
+
+  def _handle_start_stateful_processing(self, startmsg):
+    """Called when new StartInstanceStatefulProcessing arrives
+    """
+    self.heron_instance_cls.handle_start_stateful_processing(startmsg)
+
+  def _handle_restore_instance_state(self, restoremsg):
+    """Called when new RestoreInstanceStateRequest arrives
+    """
+    self.heron_instance_cls.handle_restore_instance_state(restoremsg)
 
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""

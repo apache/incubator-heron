@@ -241,10 +241,8 @@ public final class SchedulerUtils {
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
 
-    Boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
-        topology.getTopologyConfig().getKvsList(),
-        com.twitter.heron.api.Config.TOPOLOGY_STATEFUL_ENABLED, false);
-    commands.add(Boolean.toString(isStatefulEnabled));
+    Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
+    commands.add(Boolean.toString(ckptMgrEnabled));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),
         Context.statefulStoragesClassPath(config),
@@ -392,6 +390,12 @@ public final class SchedulerUtils {
         LOG.severe("Failed to create directory: " + workingDirectory);
         return false;
       }
+    }
+
+    // Cleanup the directory
+    if (!FileUtils.cleanDir(workingDirectory)) {
+      LOG.severe("Failed to clean directory: " + workingDirectory);
+      return false;
     }
 
     // Curl and extract heron core release package and topology package
