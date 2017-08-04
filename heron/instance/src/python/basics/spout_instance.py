@@ -86,7 +86,6 @@ class SpoutInstance(BaseInstance):
   def stop(self):
     self.pplan_helper.context.invoke_hook_cleanup()
     self.spout_impl.close()
-    self.looper.exit_loop()
 
   def invoke_activate(self):
     Log.info("Spout is activated")
