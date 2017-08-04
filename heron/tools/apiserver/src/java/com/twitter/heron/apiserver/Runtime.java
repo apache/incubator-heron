@@ -74,7 +74,6 @@ public final class Runtime {
         .required(false)
         .build();
 
-
     final Option config = Option.builder()
         .desc("Path to the base configuration for deploying topologies")
         .longOpt(Flag.ConfigPath.name)
@@ -173,8 +172,9 @@ public final class Runtime {
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException pe) {
+      System.err.println(pe.getMessage());
       usage(options);
-      throw new RuntimeException("Error parsing command line options: ", pe);
+      System.exit(1);
     }
 
     final String configurationOverrides = loadOverrides(cmd);
