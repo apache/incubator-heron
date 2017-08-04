@@ -76,6 +76,7 @@ StatefulRestorer::~StatefulRestorer() {
 }
 
 void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,
+                                    const std::unordered_set<sp_int32>& _local_taskids,
                                     proto::system::PhysicalPlan* _pplan) {
   multi_count_metric_->scope(METRIC_START_RESTORE)->incr();
   if (in_progress_) {
@@ -99,12 +100,7 @@ void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, sp_int64 
   in_progress_ = true;
   clients_connections_pending_ = true;
   instance_connections_pending_ = true;
-  std::vector<proto::system::Instance*> instances;
-  server_->GetInstanceInfo(instances);
-  local_taskids_.clear();
-  for (auto instance : instances) {
-    local_taskids_.insert(instance->info().task_id());
-  }
+  local_taskids_ = _local_taskids;
   restore_pending_ = local_taskids_;
   get_ckpt_pending_ = local_taskids_;
   checkpoint_id_ = _checkpoint_id;
@@ -118,17 +114,26 @@ void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, sp_int64 
     // Its possible that this is really a restore while we were already in progress
     // and there was no change in pplan. In which case there would be no new
     // connections to restore
+    LOG(INFO) << "All Stmgr have already connected to their peers in this restore";
     clients_connections_pending_ = false;
   }
   if (server_->HaveAllInstancesConnectedToUs()) {
+    LOG(INFO) << "All Instances have already connected to us in this restore";
     instance_connections_pending_ = false;
   }
 }
 
 void StatefulRestorer::GetCheckpoints() {
   for (auto task_id : get_ckpt_pending_) {
-    ckptmgr_->GetInstanceState(*(server_->GetInstanceInfo(task_id)), checkpoint_id_);
-    multi_count_metric_->scope(METRIC_CKPT_REQUESTS)->incr();
+    auto instance_info = server_->GetInstanceInfo(task_id);
+    if (instance_info) {
+      ckptmgr_->GetInstanceState(*instance_info, checkpoint_id_);
+      multi_count_metric_->scope(METRIC_CKPT_REQUESTS)->incr();
+    } else {
+      LOG(ERROR) << "Could not send GetCheckpoint message for checkpoint "
+                 << checkpoint_id_ << " for task " << task_id
+                 << " because it is not connected to us";
+    }
   }
 }
 
