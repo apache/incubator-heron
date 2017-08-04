@@ -85,6 +85,14 @@ public final class Runtime {
         .required(false)
         .build();
 
+    final Option port = Option.builder()
+        .desc("Port to bind to")
+        .longOpt(Flag.Port.name)
+        .hasArg()
+        .argName(Flag.Port.name)
+        .required(false)
+        .build();
+
     final Option property = Option.builder(Flag.Property.name)
         .argName("property=value")
         .numberOfArgs(2)
@@ -104,6 +112,7 @@ public final class Runtime {
         .addOption(baseTemplate)
         .addOption(cluster)
         .addOption(config)
+        .addOption(port)
         .addOption(release)
         .addOption(property);
   }
@@ -148,6 +157,14 @@ public final class Runtime {
         .toFile().getAbsolutePath();
   }
 
+  private static int getPort(CommandLine cmd) {
+    if (cmd.hasOption(Flag.Port.name)) {
+      return Integer.valueOf(cmd.getOptionValue(Flag.Port.name));
+    }
+
+    return Constants.DEFAULT_PORT;
+  }
+
   private static String loadOverrides(CommandLine cmd) throws IOException {
     return ConfigUtils.createOverrideConfiguration(
         cmd.getOptionProperties(Flag.Property.name));
@@ -159,6 +176,7 @@ public final class Runtime {
     return Paths.get(jarLocation).getParent().getParent().toFile().getAbsolutePath();
   }
 
+  @SuppressWarnings({"IllegalCatch", "RegexpSinglelineJava"})
   public static void main(String[] args) throws Exception {
     final Options options = createOptions();
     final Options helpOptions = constructHelpOptions();
@@ -177,18 +195,20 @@ public final class Runtime {
     } catch (ParseException pe) {
       System.err.println(pe.getMessage());
       usage(options);
-      System.exit(1);
+      return;
     }
-
-    final String configurationOverrides = loadOverrides(cmd);
 
     LOG.debug("apiserver overrides:\n {}", cmd.getOptionProperties(Flag.Property.name));
 
     final String toolsHome = getToolsHome();
 
+    // read command line flags
     final String heronConfigurationDirectory = getConfigurationDirectory(toolsHome, cmd);
     final String heronDirectory = getHeronDirectory(cmd);
     final String releaseFile = getReleaseFile(toolsHome, cmd);
+    final String configurationOverrides = loadOverrides(cmd);
+    final int port = getPort(cmd);
+
 
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
@@ -197,7 +217,7 @@ public final class Runtime {
             configurationOverrides);
 
     final ResourceConfig config = new ResourceConfig(Resources.get());
-    final Server server = new Server(Constants.DEFAULT_PORT);
+    final Server server = new Server(port);
 
     final ServletContextHandler contextHandler =
         new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
@@ -225,7 +245,7 @@ public final class Runtime {
 
       server.join();
     } catch (Exception ex) {
-      final String message = getErrorMessage(server, Constants.DEFAULT_PORT, ex);
+      final String message = getErrorMessage(server, port, ex);
       LOG.error(message);
       System.err.println(message);
       System.exit(1);
