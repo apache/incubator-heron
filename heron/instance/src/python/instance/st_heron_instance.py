@@ -148,11 +148,11 @@ class SingleThreadHeronInstance(object):
     :param restore_msg: RestoreInstanceStateRequest type
     """
     Log.info("Restoring instance state to checkpoint %s" % restore_msg.state.checkpoint_id)
-    self.is_stateful_started = False
     # Stop the instance
-    if self.is_instance_started:
-      self.my_instance['py_class'].stop()
-      self.my_instance['py_class'].clear_collector()
+    if self.is_stateful_started:
+      self.my_instance.py_class.stop()
+      self.my_instance.py_class.clear_collector()
+      self.is_stateful_started = False
 
     # Clear all buffers
     self.in_stream.clear()
