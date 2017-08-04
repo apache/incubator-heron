@@ -14,6 +14,7 @@
 package com.twitter.heron.apiserver;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
 import org.apache.commons.cli.CommandLine;
@@ -23,14 +24,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +44,7 @@ public final class Runtime {
 
   private enum Flag {
     Help("h"),
+    BaseTemplate("base-template"),
     Cluster("cluster"),
     ConfigPath("config-path"),
     Property("D"),
@@ -62,15 +61,24 @@ public final class Runtime {
     final Option cluster = Option.builder()
         .desc("Cluster in which to deploy topologies")
         .longOpt(Flag.Cluster.name)
-        .hasArgs()
+        .hasArg()
         .argName(Flag.Cluster.name)
         .required()
         .build();
 
+    final Option baseTemplate = Option.builder()
+        .desc("Base configuration to use for deloying topologies")
+        .longOpt(Flag.BaseTemplate.name)
+        .hasArg()
+        .argName(Flag.BaseTemplate.name)
+        .required(false)
+        .build();
+
+
     final Option config = Option.builder()
         .desc("Path to the base configuration for deploying topologies")
         .longOpt(Flag.ConfigPath.name)
-        .hasArgs()
+        .hasArg()
         .argName(Flag.ConfigPath.name)
         .required(false)
         .build();
@@ -85,12 +93,13 @@ public final class Runtime {
     final Option release = Option.builder()
         .desc("Path to the release file")
         .longOpt(Flag.ReleaseFile.name)
-        .hasArgs()
+        .hasArg()
         .argName(Flag.ReleaseFile.name)
         .required(false)
         .build();
 
     return new Options()
+        .addOption(baseTemplate)
         .addOption(cluster)
         .addOption(config)
         .addOption(release)
@@ -115,12 +124,12 @@ public final class Runtime {
     formatter.printHelp("heron-apiserver", options);
   }
 
-  private static String getConfigurationDirectory(CommandLine cmd) {
+  private static String getConfigurationDirectory(String toolsHome, CommandLine cmd) {
     if (cmd.hasOption(Flag.ConfigPath.name)) {
       return cmd.getOptionValue(Flag.ConfigPath.name);
     }
-    return Paths.get(Constants.DEFAULT_HERON_CONFIG_DIRECTORY,
-        cmd.getOptionValue(Flag.Cluster.name)).toFile().getAbsolutePath();
+    return Paths.get(toolsHome, Constants.DEFAULT_HERON_CONFIG_DIRECTORY,
+        cmd.getOptionValue(Flag.BaseTemplate.name)).toFile().getAbsolutePath();
   }
 
   private static String getHeronDirectory(CommandLine cmd) {
@@ -129,16 +138,23 @@ public final class Runtime {
         ? Constants.DEFAULT_HERON_LOCAL : Constants.DEFAULT_HERON_CLUSTER;
   }
 
-  private static String getReleaseFile(CommandLine cmd) {
+  private static String getReleaseFile(String toolsHome, CommandLine cmd) {
     if (cmd.hasOption(Flag.ReleaseFile.name)) {
       return cmd.getOptionValue(Flag.ReleaseFile.name);
     }
-    return Constants.DEFAULT_HERON_RELEASE_FILE;
+    return Paths.get(toolsHome, Constants.DEFAULT_HERON_RELEASE_FILE)
+        .toFile().getAbsolutePath();
   }
 
   private static String loadOverrides(CommandLine cmd) throws IOException {
     return ConfigUtils.createOverrideConfiguration(
         cmd.getOptionProperties(Flag.Property.name));
+  }
+
+  private static String getToolsHome() throws URISyntaxException {
+    final String jarLocation =
+        Runtime.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+    return Paths.get(jarLocation).getParent().getParent().toFile().getAbsolutePath();
   }
 
   public static void main(String[] args) throws Exception {
@@ -165,9 +181,11 @@ public final class Runtime {
 
     LOG.debug("apiserver overrides:\n {}", cmd.getOptionProperties(Flag.Property.name));
 
-    final String heronConfigurationDirectory = getConfigurationDirectory(cmd);
+    final String toolsHome = getToolsHome();
+
+    final String heronConfigurationDirectory = getConfigurationDirectory(toolsHome, cmd);
     final String heronDirectory = getHeronDirectory(cmd);
-    final String releaseFile = getReleaseFile(cmd);
+    final String releaseFile = getReleaseFile(toolsHome, cmd);
 
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,

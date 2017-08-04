@@ -16,28 +16,4 @@ else
   JAVA=${JAVA_HOME}/bin/java
 fi
 
-
-help() {
-  cat <<EOF
-usage: heron-apiserver <cluster>
-  -D <property=value>                use value for given property
-EOF
-}
-
-start_apiserver() {
-  CLUSTER=$1; shift;
-  CLUSTER_CONFIG_PATH=$HERON_TOOLS_HOME/conf/$CLUSTER
-
-  exec $JAVA -jar $HERON_APISERVER_JAR \
-    --cluster $CLUSTER \
-    --config-path $CLUSTER_CONFIG_PATH \
-    --release-file $RELEASE_FILE \
-    $@
-}
-
-if [ "$#" -ge 1 ]; then
-  start_apiserver $@
-else
-  help
-  exit 1
-fi
+exec $JAVA -jar $HERON_APISERVER_JAR $@
