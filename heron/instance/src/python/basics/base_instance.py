@@ -17,12 +17,15 @@ import logging
 import traceback
 from abc import abstractmethod
 
+from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants, StatefulComponent
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.common.src.python.utils.misc import OutgoingTupleHelper
 from heron.proto import tuple_pb2
+
+import heron.common.src.python.system_constants as system_constants
 
 import heron.common.src.python.pex_loader as pex_loader
 
@@ -130,12 +133,26 @@ class BaseInstance(object):
   def clear_collector(self):
     self.output_helper.clear()
 
+  def start(self, stateful_state):
+    self._stateful_state = stateful_state
+    self.start_component(stateful_state)
+    context = self.pplan_helper.context
+    context.invoke_hook_prepare()
+
+    # prepare global metrics
+    interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
+    collector = context.get_metrics_collector()
+    global_metrics.init(collector, interval)
+
+    # prepare for custom grouping
+    self.pplan_helper.prepare_custom_grouping(context)
+
   ##################################################################
   # The followings are to be implemented by Spout/Bolt independently
   ##################################################################
 
   @abstractmethod
-  def start(self, stateful_state):
+  def start_component(self, stateful_state):
     """Do the basic setup for Heron Instance"""
     raise NotImplementedError()
 
