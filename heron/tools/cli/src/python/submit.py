@@ -40,11 +40,8 @@ def launch_mode_msg(cl_args):
   :return:
   '''
   if cl_args['dry_run']:
-    return " in dry-run mode"
-  elif 'service_endpoint' in cl_args:
-    return " in hosted mode"
-
-  return " in direct mode"
+    return "in dry-run mode"
+  return ""
 
 ################################################################################
 def create_parser(subparsers):
@@ -171,7 +168,6 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
   succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
 
   r = service_method(service_apiurl, data=data, files=files)
-  print r.json()
   s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
   return SimpleResult(s, err_ctxt, succ_ctxt)
 
@@ -204,11 +200,10 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
       return SimpleResult(Status.HeronError, err_context)
 
     # launch the topology
-    mode = " in dry-run mode" if cl_args['dry_run'] else ''
-    Log.info("Launching topology: \'%s\'%s", topology_defn.name, mode)
+    Log.info("Launching topology: \'%s\'%s", topology_defn.name, launch_mode_msg(cl_args))
 
     # check if we have to do server or direct based deployment
-    if 'service_endpoint' in cl_args:
+    if cl_args['deploy_mode'] == config.SERVER_MODE:
       res = launch_topology_server(
           cl_args, topology_file, defn_file, topology_defn.name)
     else:

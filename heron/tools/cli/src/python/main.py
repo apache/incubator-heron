@@ -185,8 +185,6 @@ def server_deployment_mode(command, parser, cluster, cl_args):
     Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
     sys.exit(1)
 
-  print cluster_tuple
-
   new_cl_args = dict()
   new_cl_args['cluster'] = cluster_tuple[0]
   new_cl_args['role'] = cluster_tuple[1]
