@@ -15,6 +15,7 @@ package com.twitter.heron.apiserver;
 
 import java.io.IOException;
 import java.net.BindException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
@@ -48,6 +49,7 @@ public final class Runtime {
     BaseTemplate("base-template"),
     Cluster("cluster"),
     ConfigPath("config-path"),
+    Port("port"),
     Property("D"),
     ReleaseFile("release-file");
 
@@ -223,12 +225,22 @@ public final class Runtime {
 
       server.join();
     } catch (Exception ex) {
-      LOG.error(ex.getMessage());
-      System.err.println(ex.getMessage());
+      final String message = getErrorMessage(server, Constants.DEFAULT_PORT, ex);
+      LOG.error(message);
+      System.err.println(message);
       System.exit(1);
     } finally {
       server.destroy();
     }
+  }
+
+  private static String getErrorMessage(Server server, int port, Exception ex) {
+    if (ex instanceof BindException) {
+      final URI uri = server.getURI();
+      return String.format("%s http://%s:%d", ex.getMessage(), uri.getHost(), port);
+    }
+
+    return ex.getMessage();
   }
 
   private Runtime() {
