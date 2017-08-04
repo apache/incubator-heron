@@ -39,6 +39,11 @@ TEST(FieldsGrouping, test_sametuple) {
   task_ids.push_back(2);
   task_ids.push_back(4);
   task_ids.push_back(8);
+  std::vector<sp_int32> unsorted_ids;
+  unsorted_ids.push_back(4);
+  unsorted_ids.push_back(2);
+  unsorted_ids.push_back(8);
+  unsorted_ids.push_back(0);
 
   heron::proto::api::InputStream is;
   heron::proto::api::StreamSchema* s = is.mutable_grouping_fields();
@@ -47,6 +52,7 @@ TEST(FieldsGrouping, test_sametuple) {
   kt->set_key("field1");
 
   heron::stmgr::FieldsGrouping* g = new heron::stmgr::FieldsGrouping(is, *s, task_ids);
+  heron::stmgr::FieldsGrouping* g_unsorted = new heron::stmgr::FieldsGrouping(is, *s, unsorted_ids);
   heron::proto::system::HeronDataTuple tuple;
   tuple.add_values("dummy");
 
@@ -54,13 +60,18 @@ TEST(FieldsGrouping, test_sametuple) {
   for (sp_int32 i = 0; i < 1000; ++i) {
     std::vector<sp_int32> dests;
     g->GetListToSend(tuple, dests);
+    std::vector<sp_int32> unsorted_dests;
+    g_unsorted->GetListToSend(tuple, unsorted_dests);
     EXPECT_EQ(dests.size(), (sp_uint32)1);
+    EXPECT_EQ(unsorted_dests.size(), (sp_uint32)1);
+    EXPECT_EQ(dests[0], unsorted_dests[0]);
     all_dests.insert(dests.front());
   }
 
   EXPECT_EQ(all_dests.size(), (sp_uint32)1);
 
   delete g;
+  delete g_unsorted;
 }
 
 // Test that only the relevant fields are hashed
