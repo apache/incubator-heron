@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-BINDIR=`dirname $0`
-HERON_TOOLS_HOME=`dirname ${BINDIR}`
+BINDIR=$(dirname $(readlink $0))
+HERON_TOOLS_HOME=$(dirname ${BINDIR})
 HERON_APISERVER_JAR=${HERON_TOOLS_HOME}/lib/heron-apiserver.jar
 RELEASE_FILE=${HERON_TOOLS_HOME}/release.yaml
 
