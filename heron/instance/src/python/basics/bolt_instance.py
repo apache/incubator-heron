@@ -16,7 +16,6 @@
 import time
 import Queue
 
-from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
 from heron.api.src.python import StatefulComponent
 from heron.api.src.python import Stream
@@ -52,24 +51,12 @@ class BoltInstance(BaseInstance):
     bolt_impl_class = super(BoltInstance, self).load_py_instance(is_spout=False)
     self.bolt_impl = bolt_impl_class(delegate=self)
 
-  # pylint: disable=attribute-defined-outside-init
-  def start(self, stateful_state):
-    self._stateful_state = stateful_state
+  def start_component(self, stateful_state):
     context = self.pplan_helper.context
     self.bolt_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.bolt_impl, StatefulComponent):
       self.bolt_impl.initState(stateful_state)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
-    context.invoke_hook_prepare()
-
-    # prepare global metrics
-    interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
-    collector = context.get_metrics_collector()
-    global_metrics.init(collector, interval)
-
-    # prepare for custom grouping
-    self.pplan_helper.prepare_custom_grouping(context)
-
     # prepare tick tuple
     self._prepare_tick_tup_timer()
 
