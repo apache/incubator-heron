@@ -8,7 +8,7 @@ def heron_tools_bin_files():
     return [
         "//heron/tools/tracker/src/python:heron-tracker",
         "//heron/tools/ui/src/python:heron-ui",
-        "//heron/tools/apiserver/bin:apiserver"
+        "//heron/tools/apiserver/src/shell:heron-apiserver"
     ]
 
 def heron_tools_lib_files():
