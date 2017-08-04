@@ -14,6 +14,7 @@
 package com.twitter.heron.apiserver;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
@@ -221,6 +222,10 @@ public final class Runtime {
       LOG.info("Heron apiserver started at {}", server.getURI());
 
       server.join();
+    } catch (Exception ex) {
+      LOG.error(ex.getMessage());
+      System.err.println(ex.getMessage());
+      System.exit(1);
     } finally {
       server.destroy();
     }
