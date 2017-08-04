@@ -1003,7 +1003,9 @@ void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txi
   CHECK(stateful_restorer_);
 
   // Start the restore process
-  stateful_restorer_->StartRestore(_checkpoint_id, _restore_txid, pplan_);
+  std::unordered_set<sp_int32> local_taskids;
+  config::PhysicalPlanHelper::GetTasks(*pplan_, stmgr_id_, local_taskids),
+  stateful_restorer_->StartRestore(_checkpoint_id, _restore_txid, local_taskids, pplan_);
 }
 
 // Called by TmasterClient when it receives directive from tmaster

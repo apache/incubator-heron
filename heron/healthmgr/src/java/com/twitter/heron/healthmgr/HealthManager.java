@@ -93,6 +93,7 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 @Evolving
 public class HealthManager {
   public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
+  public static final String CONF_METRICS_SOURCE_URL = "METRICS_SOURCE_URL";
 
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
@@ -132,7 +133,9 @@ public class HealthManager {
 
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String trackerUrl = cmd.getOptionValue("trackerURL", "http://localhost:8888");
+    String metricsSourceUrl = cmd.getOptionValue("data_source_url", "http://localhost:8888");
+    String metricsProviderClassName = cmd.getOptionValue(
+        "data_source_type", "com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider");
 
     Boolean verbose = cmd.hasOption("verbose");
     Level loggingLevel = Level.INFO;
@@ -150,7 +153,10 @@ public class HealthManager {
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
-    AbstractModule module = buildTrackerModule(config, trackerUrl);
+    Class<? extends MetricsProvider> metricsProviderClass =
+        Class.forName(metricsProviderClassName).asSubclass(MetricsProvider.class);
+    AbstractModule module =
+        buildMetricsProviderModule(config, metricsSourceUrl, metricsProviderClass);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
@@ -215,13 +221,15 @@ public class HealthManager {
   }
 
   @VisibleForTesting
-  static AbstractModule buildTrackerModule(final Config config, final String trackerUrl) {
+  static AbstractModule buildMetricsProviderModule(
+      final Config config, final String metricsSourceUrl,
+      final Class<? extends MetricsProvider> metricsProviderClass) {
     return new AbstractModule() {
       @Override
       protected void configure() {
         bind(String.class)
-            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_TRACKER_URL))
-            .toInstance(trackerUrl);
+            .annotatedWith(Names.named(CONF_METRICS_SOURCE_URL))
+            .toInstance(metricsSourceUrl);
         bind(String.class)
             .annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
             .toInstance(Context.topologyName(config));
@@ -231,7 +239,7 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
-        bind(MetricsProvider.class).to(TrackerMetricsProvider.class).in(Singleton.class);
+        bind(MetricsProvider.class).to(metricsProviderClass).in(Singleton.class);
       }
     };
   }
@@ -362,11 +370,21 @@ public class HealthManager {
         .required()
         .build();
 
-    Option trackerURL = Option.builder("t")
-        .desc("Tracker url with port number")
-        .longOpt("tracker_url")
+    Option metricsSourceURL = Option.builder("t")
+        .desc("metrics data source url with port number")
+        .longOpt("data_source_url")
         .hasArgs()
-        .argName("tracker url")
+        .argName("data source url")
+        .build();
+
+    // candidate metrics sources are:
+    // com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider (default)
+    // com.twitter.heron.healthmgr.sensors.MetricsCacheMetricsProvider
+    Option metricsSourceType = Option.builder("s")
+        .desc("metrics data source type")
+        .longOpt("data_source_type")
+        .hasArg()
+        .argName("data source type")
         .build();
 
     Option verbose = Option.builder("v")
@@ -380,7 +398,8 @@ public class HealthManager {
     options.addOption(heronHome);
     options.addOption(configFile);
     options.addOption(topologyName);
-    options.addOption(trackerURL);
+    options.addOption(metricsSourceType);
+    options.addOption(metricsSourceURL);
     options.addOption(verbose);
 
     return options;

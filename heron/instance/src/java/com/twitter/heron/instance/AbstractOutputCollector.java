@@ -103,7 +103,7 @@ public class AbstractOutputCollector {
   }
 
   // Flush the states
-  public void sendOutState(State<? extends Serializable, ? extends Serializable> state,
+  public void sendOutState(State<Serializable, Serializable> state,
                            String checkpointId) {
     outputter.sendOutState(state, checkpointId);
   }

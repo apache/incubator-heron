@@ -16,6 +16,7 @@
 ''' main.py '''
 import argparse
 import atexit
+import getpass
 import os
 import shutil
 import sys
@@ -175,6 +176,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['cluster'] = cluster_tuple[0]
     new_cl_args['role'] = cluster_tuple[1]
     new_cl_args['environ'] = cluster_tuple[2]
+    new_cl_args['submit_user'] = getpass.getuser()
     new_cl_args['config_path'] = config_path
     new_cl_args['override_config_file'] = override_config_file
   except Exception as ex:

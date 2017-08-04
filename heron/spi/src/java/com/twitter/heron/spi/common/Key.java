@@ -50,6 +50,7 @@ public enum Key {
   CLUSTER                  ("heron.config.cluster",             Type.STRING),
   ROLE                     ("heron.config.role",                Type.STRING),
   ENVIRON                  ("heron.config.environ",             Type.STRING),
+  SUBMIT_USER              ("heron.config.submit_user",         Type.STRING),
   DRY_RUN                  ("heron.config.dry_run",             Boolean.FALSE),
   DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
   VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),

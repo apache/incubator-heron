@@ -389,7 +389,7 @@ void TMaster::SetStatefulCheckpointsDone(proto::system::StatusCode _code,
 
 void TMaster::SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt) {
   sp_int64 stateful_checkpoint_interval =
-             config::TopologyConfigHelper::GetStatefulCheckpointIntervalSecs(*topology_);
+       config::TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(*topology_, 300);
   CHECK_GT(stateful_checkpoint_interval, 0);
 
   auto cb = [this](std::string _oldest_ckptid) {

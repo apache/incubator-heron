@@ -16,7 +16,7 @@ from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
-from heron.proto import common_pb2, stmgr_pb2, tuple_pb2
+from heron.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as constants
 
@@ -71,6 +71,12 @@ class SingleThreadStmgrClient(HeronClient):
       self._handle_assignment_message(message.pplan)
     elif isinstance(message, tuple_pb2.HeronTupleSet2):
       self._handle_new_tuples_2(message)
+    elif isinstance(message, ckptmgr_pb2.StartInstanceStatefulProcessing):
+      self._handle_start_stateful_processing(message)
+    elif isinstance(message, ckptmgr_pb2.RestoreInstanceStateRequest):
+      self._handle_restore_instance_state(message)
+    elif isinstance(message, ckptmgr_pb2.InitiateStatefulCheckpoint):
+      self._handle_initiate_stateful_checkpoint(message)
     else:
       raise RuntimeError("Unknown kind of message received from Stream Manager")
 
@@ -85,8 +91,14 @@ class SingleThreadStmgrClient(HeronClient):
     # pylint: disable=unnecessary-lambda
     new_instance_builder = lambda: stmgr_pb2.NewInstanceAssignmentMessage()
     hts2_msg_builder = lambda: tuple_pb2.HeronTupleSet2()
+    stateful_start_msg_builder = lambda: ckptmgr_pb2.StartInstanceStatefulProcessing()
+    stateful_restore_msg_builder = lambda: ckptmgr_pb2.RestoreInstanceStateRequest()
+    stateful_initiate_msg_builder = lambda: ckptmgr_pb2.InitiateStatefulCheckpoint()
     self.register_on_message(new_instance_builder)
     self.register_on_message(hts2_msg_builder)
+    self.register_on_message(stateful_start_msg_builder)
+    self.register_on_message(stateful_restore_msg_builder)
+    self.register_on_message(stateful_initiate_msg_builder)
 
   def _send_register_req(self):
     request = stmgr_pb2.RegisterInstanceRequest()
@@ -114,6 +126,21 @@ class SingleThreadStmgrClient(HeronClient):
     """Called when new HeronTupleSet2 arrives
     """
     self.heron_instance_cls.handle_new_tuple_set_2(hts2)
+
+  def _handle_initiate_stateful_checkpoint(self, ckptmsg):
+    """Called when new InitiateStatefulCheckpoint arrives
+    """
+    self.heron_instance_cls.handle_initiate_stateful_checkpoint(ckptmsg)
+
+  def _handle_start_stateful_processing(self, startmsg):
+    """Called when new StartInstanceStatefulProcessing arrives
+    """
+    self.heron_instance_cls.handle_start_stateful_processing(startmsg)
+
+  def _handle_restore_instance_state(self, restoremsg):
+    """Called when new RestoreInstanceStateRequest arrives
+    """
+    self.heron_instance_cls.handle_restore_instance_state(restoremsg)
 
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
