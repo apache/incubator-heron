@@ -14,13 +14,13 @@
 '''Stream Manager client for single-thread heron instance in python'''
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as constants
 
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-instance-attributes
 class SingleThreadStmgrClient(HeronClient):
   """SingleThreadStmgrClient is a Heron Client that communicates with Stream Manager
 
@@ -40,8 +40,8 @@ class SingleThreadStmgrClient(HeronClient):
     # physical_plan_pb2.Instance message
     self.instance = instance
     self.gateway_metrics = gateway_metrics
-    self._pplan_helper = None
     self.sys_config = system_config.get_sys_config()
+    self.is_registered = False
 
   # send register request
   def on_connect(self, status):
@@ -50,6 +50,7 @@ class SingleThreadStmgrClient(HeronClient):
       Log.error("Error connecting to Stream Manager with status: %s", str(status))
       retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC])
       self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
+      self.is_registered = False
       return
     self._register_msg_to_handle()
     self._send_register_req()
@@ -82,8 +83,6 @@ class SingleThreadStmgrClient(HeronClient):
 
   def on_error(self):
     Log.error("Disconnected from Stream Manager")
-    # cleaning up
-    self._pplan_helper = None
     # retry again
     self.on_connect(StatusCode.CONNECT_ERROR)
 
@@ -116,6 +115,7 @@ class SingleThreadStmgrClient(HeronClient):
       raise RuntimeError("Stream Manager returned a not OK response for register")
     Log.info("We registered ourselves to the Stream Manager")
 
+    self.is_registered = True
     if response.HasField("pplan"):
       Log.info("Handling assignment message from response")
       self._handle_assignment_message(response.pplan)
@@ -145,22 +145,5 @@ class SingleThreadStmgrClient(HeronClient):
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
     Log.debug("In handle_assignment_message() of STStmgrClient, Physical Plan: \n%s", str(pplan))
-    new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id,
-                                    self.heron_instance_cls.topo_pex_file_abs_path)
+    self.heron_instance_cls.handle_assignment_msg(pplan)
 
-    if self._pplan_helper is not None and \
-      (self._pplan_helper.my_component_name != new_helper.my_component_name or
-       self._pplan_helper.my_task_id != new_helper.my_task_id):
-      raise RuntimeError("Our Assignment has changed. We will die to pick it.")
-
-    if self._pplan_helper is None:
-      Log.info("Received a new Physical Plan")
-      Log.info("Push the new pplan_helper to Heron Instance")
-      self.heron_instance_cls.handle_assignment_msg(new_helper)
-    else:
-      Log.info("Received a new Physical Plan with the same assignment -- State Change")
-      Log.info("Old state: %s, new state: %s.",
-               self._pplan_helper.get_topology_state(), new_helper.get_topology_state())
-      self.heron_instance_cls.handle_state_change_msg(new_helper)
-
-    self._pplan_helper = new_helper
