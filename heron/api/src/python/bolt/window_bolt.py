@@ -32,8 +32,6 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
   # pylint: disable=attribute-defined-outside-init
   def initState(self, stateful_state):
     self.saved_state = stateful_state
-    if 'tuples' in self.saved_state:
-      self.current_tuples = self.saved_state['tuples']
 
   # pylint: disable=unused-argument
   def preSave(self, checkpoint_id):
@@ -73,6 +71,9 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
     # By modifying the config, we are able to setup the tick timer
     config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS] = str(self.slide_interval)
     self.current_tuples = deque()
+    if hasattr(self, 'saved_state'):
+      if 'tuples' in self.saved_state:
+        self.current_tuples = self.saved_state['tuples']
 
   def process(self, tup):
     """Process a single tuple of input
@@ -117,8 +118,6 @@ class TumblingWindowBolt(Bolt, StatefulComponent):
   # pylint: disable=attribute-defined-outside-init
   def initState(self, stateful_state):
     self.saved_state = stateful_state
-    if 'tuples' in self.saved_state:
-      self.current_tuples = self.saved_state['tuples']
 
   # pylint: disable=unused-argument
   def preSave(self, checkpoint_id):
@@ -152,6 +151,9 @@ class TumblingWindowBolt(Bolt, StatefulComponent):
     # By modifying the config, we are able to setup the tick timer
     config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS] = str(self.window_duration)
     self.current_tuples = deque()
+    if hasattr(self, 'saved_state'):
+      if 'tuples' in self.saved_state:
+        self.current_tuples = self.saved_state['tuples']
 
   def process(self, tup):
     """Process a single tuple of input
