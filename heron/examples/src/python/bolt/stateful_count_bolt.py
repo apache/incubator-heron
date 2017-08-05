@@ -25,14 +25,12 @@ class StatefulCountBolt(Bolt, StatefulComponent):
   # pylint: disable=attribute-defined-outside-init
   def initState(self, stateful_state):
     self.recovered_state = stateful_state
-    self.logger.info("Recovered state")
-    self.logger.info(str(self.recovered_state))
+    self.logger.info("Checkpoint Snapshot recovered : %s" % str(self.recovered_state))
 
   def preSave(self, checkpoint_id):
-    self.logger.info("PreSave of %s" % checkpoint_id)
     for (k, v) in self.counter.items():
       self.recovered_state.put(k, v)
-    self.logger.info(str(self.recovered_state))
+    self.logger.info("Checkpoint Snapshot %s : %s" % (checkpoint_id, str(self.recovered_state)))
 
   def initialize(self, config, context):
     self.logger.info("In prepare() of CountBolt")
@@ -40,7 +38,6 @@ class StatefulCountBolt(Bolt, StatefulComponent):
     self.total = 0
 
     self.logger.info("Component-specific config: \n%s" % str(config))
-    self.logger.info("Context: \n%s" % str(context))
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by
@@ -53,5 +50,4 @@ class StatefulCountBolt(Bolt, StatefulComponent):
     self.ack(tup)
 
   def process_tick(self, tup):
-    self.log("Got tick tuple!")
-    self.log("Current map: %s" % str(self.counter))
+    pass

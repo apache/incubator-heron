@@ -25,15 +25,13 @@ class StatefulWordSpout(Spout, StatefulComponent):
   # pylint: disable=attribute-defined-outside-init
   def initState(self, stateful_state):
     self.recovered_state = stateful_state
-    self.logger.info("Recovered state")
-    self.logger.info(str(self.recovered_state))
+    self.logger.info("Checkpoint Snapshot recovered : %s" % str(self.recovered_state))
 
   def preSave(self, checkpoint_id):
     # Purely for debugging purposes
     for (k, v) in self.counter.items():
       self.recovered_state.put(k, v)
-    self.logger.info("Checkpoint %s" % checkpoint_id)
-    self.logger.info(str(self.recovered_state))
+    self.logger.info("Checkpoint Snapshot %s : %s" % (checkpoint_id, str(self.recovered_state)))
 
   def initialize(self, config, context):
     self.logger.info("In initialize() of WordSpout")
@@ -45,7 +43,6 @@ class StatefulWordSpout(Spout, StatefulComponent):
     self.fail_count = 0
 
     self.logger.info("Component-specific config: \n%s" % str(config))
-    self.logger.info("Context: \n%s" % str(context))
 
   def next_tuple(self):
     word = next(self.words)
