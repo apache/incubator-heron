@@ -82,7 +82,7 @@ class HeronCommunicator(object):
       return True
     except Queue.Full:
       Log.debug("%s: Full in offer()" % str(self))
-      return False
+      raise Queue.Full
 
   def clear(self):
     """Clear the buffer"""

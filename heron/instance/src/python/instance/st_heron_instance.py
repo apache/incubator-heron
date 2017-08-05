@@ -27,6 +27,7 @@ from heron.common.src.python.utils import log
 from heron.common.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.utils.misc import SerializerHelper
+from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import create_socket_options
 
 from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
@@ -181,14 +182,14 @@ class SingleThreadHeronInstance(object):
 
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
-    while not self.out_stream.is_empty():
+    while not self.out_stream.is_empty() and self._stmgr_client.is_registered:
       tuple_set = self.out_stream.poll()
       if isinstance(tuple_set, tuple_pb2.HeronTupleSet):
         tuple_set.src_task_id = self.my_pplan_helper.my_task_id
         self.gateway_metrics.update_sent_packet(tuple_set.ByteSize())
       self._stmgr_client.send_message(tuple_set)
 
-  def handle_state_change_msg(self, new_helper):
+  def _handle_state_change_msg(self, new_helper):
     """Called when state change is commanded by stream manager"""
     assert self.my_pplan_helper is not None
     assert self.my_instance is not None and self.my_instance.py_class is not None
@@ -209,23 +210,42 @@ class SingleThreadHeronInstance(object):
     # update the pplan_helper
     self.my_pplan_helper = new_helper
 
-  def handle_assignment_msg(self, pplan_helper):
+  def handle_assignment_msg(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives
 
     Tells this instance to become either spout/bolt.
 
-    :param pplan_helper: PhysicalPlanHelper class to become
+    :param pplan: PhysicalPlan proto
     """
 
-    self.my_pplan_helper = pplan_helper
-    self.my_pplan_helper.set_topology_context(self.metrics_collector)
-    self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
+    new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id,
+                                    self.topo_pex_file_abs_path)
+    if self.my_pplan_helper is not None and \
+      (self.my_pplan_helper.my_component_name != new_helper.my_component_name or
+       self.my_pplan_helper.my_task_id != new_helper.my_task_id):
+      raise RuntimeError("Our Assignment has changed. We will die to pick it.")
 
-    if pplan_helper.is_spout:
+    new_helper.set_topology_context(self.metrics_collector)
+
+    if self.my_pplan_helper is None:
+      Log.info("Received a new Physical Plan")
+      Log.info("Push the new pplan_helper to Heron Instance")
+      self._handle_assignment_msg(new_helper)
+    else:
+      Log.info("Received a new Physical Plan with the same assignment -- State Change")
+      Log.info("Old state: %s, new state: %s.",
+               self.my_pplan_helper.get_topology_state(), new_helper.get_topology_state())
+      self._handle_state_change_msg(new_helper)
+
+  def _handle_assignment_msg(self, pplan_helper):
+    self.my_pplan_helper = pplan_helper
+    self.serializer = SerializerHelper.get_serializer(self.my_pplan_helper.context)
+
+    if self.my_pplan_helper.is_spout:
       # Starting a spout
-      my_spout = pplan_helper.get_my_spout()
+      my_spout = self.my_pplan_helper.get_my_spout()
       Log.info("Incarnating ourselves as spout: %s with task id %s",
-               pplan_helper.my_component_name, str(pplan_helper.my_task_id))
+               self.my_pplan_helper.my_component_name, str(self.my_pplan_helper.my_task_id))
 
       self.in_stream. \
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY])
@@ -239,9 +259,9 @@ class SingleThreadHeronInstance(object):
                                           py_class=py_spout_instance)
     else:
       # Starting a bolt
-      my_bolt = pplan_helper.get_my_bolt()
+      my_bolt = self.my_pplan_helper.get_my_bolt()
       Log.info("Incarnating ourselves as bolt: %s with task id %s",
-               pplan_helper.my_component_name, str(pplan_helper.my_task_id))
+               self.my_pplan_helper.my_component_name, str(self.my_pplan_helper.my_task_id))
 
       self.in_stream. \
         register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY])
@@ -254,7 +274,7 @@ class SingleThreadHeronInstance(object):
                                           protobuf=my_bolt,
                                           py_class=py_bolt_instance)
 
-    if pplan_helper.is_topology_running():
+    if self.my_pplan_helper.is_topology_running():
       try:
         self.start_instance_if_possible()
       except Exception as e:
