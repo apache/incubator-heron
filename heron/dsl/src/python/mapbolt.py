@@ -12,14 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for map bolt: MapBolt"""
-from heron.api.src.python import Bolt, Stream
+from heron.api.src.python import Bolt, Stream, StatefulComponent
 
 # pylint: disable=unused-argument
-class MapBolt(Bolt):
+class MapBolt(Bolt, StatefulComponent):
   """MapBolt"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
+
+  def initState(self, stateful_state):
+    # mapBolt does not have any state
+    pass
+
+  def preSave(self, checkpoint_id):
+    # mapBolt does not have any state
+    pass
 
   def initialize(self, config, context):
     self.logger.debug("MapBolt's Component-specific config: \n%s" % str(config))
