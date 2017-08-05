@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for map bolt: RepartitionBolt"""
-from heron.api.src.python import Bolt, Stream
+from heron.api.src.python import Bolt, Stream, StatefulComponent
 
 # pylint: disable=unused-argument
-class RepartitionBolt(Bolt):
+class RepartitionBolt(Bolt, StatefulComponent):
   """RepartitionBolt"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]
+
+  def initState(self, stateful_state):
+    # repartition does not have any state
+    pass
+
+  def preSave(self, checkpoint_id):
+    # repartition does not have any state
+    pass
 
   def initialize(self, config, context):
     self.logger.debug("RepartitionBolt's Component-specific config: \n%s" % str(config))
