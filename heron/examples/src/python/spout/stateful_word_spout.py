@@ -33,6 +33,7 @@ class StatefulWordSpout(Spout, StatefulComponent):
       self.recovered_state.put(k, v)
     self.logger.info("Checkpoint Snapshot %s : %s" % (checkpoint_id, str(self.recovered_state)))
 
+  # pylint: disable=unused-argument
   def initialize(self, config, context):
     self.logger.info("In initialize() of WordSpout")
     self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
