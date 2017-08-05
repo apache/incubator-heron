@@ -49,6 +49,7 @@ def create_parser(subparsers):
 
   args.add_config(parser)
   args.add_dry_run(parser)
+  args.add_service_url(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='update')

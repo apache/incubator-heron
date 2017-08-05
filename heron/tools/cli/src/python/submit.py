@@ -64,9 +64,10 @@ def create_parser(subparsers):
   cli_args.add_topology_class(parser)
   cli_args.add_config(parser)
   cli_args.add_deactive_deploy(parser)
-  cli_args.add_extra_launch_classpath(parser)
-  cli_args.add_system_property(parser)
   cli_args.add_dry_run(parser)
+  cli_args.add_extra_launch_classpath(parser)
+  cli_args.add_service_url(parser)
+  cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -150,7 +151,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
   :param topology_name:
   :return:
   '''
-  service_apiurl = cl_args['service_endpoint'] + rest.ROUTE_SIGNATURES['submit'][1]
+  service_apiurl = cl_args['service_url'] + rest.ROUTE_SIGNATURES['submit'][1]
   service_method = rest.ROUTE_SIGNATURES['submit'][0]
   data = dict(
       name=topology_name,

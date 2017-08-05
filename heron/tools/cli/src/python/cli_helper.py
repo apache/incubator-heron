@@ -42,6 +42,7 @@ def create_parser(subparsers, action, help_arg):
   args.add_topology(parser)
 
   args.add_config(parser)
+  args.add_service_url(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand=action)
@@ -60,7 +61,7 @@ def run_server(command, cl_args, action, extra_args=[]):
   '''
   topology_name = cl_args['topology-name']
 
-  service_endpoint = cl_args['service_endpoint']
+  service_endpoint = cl_args['service_url']
   apiroute = rest.ROUTE_SIGNATURES[command][1] % (
       cl_args['cluster'],
       cl_args['role'],
@@ -124,7 +125,7 @@ def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
 
 ################################################################################
 def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
-  if 'service_endpoint' in cl_args:
+  if cl_args['deploy_mode'] == config.SERVER_MODE:
     return run_server(command, cl_args, action, extra_args)
   else:
     return run_direct(command, cl_args, action, extra_args, extra_lib_jars)

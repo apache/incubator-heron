@@ -155,31 +155,43 @@ def server_deployment_mode(command, parser, cluster, cl_args):
   :param cl_args:
   :return:
   '''
+  print cl_args
   config_file = config.heron_rc_file()
   client_confs = dict()
 
-  # try reading ~/.heronrc file, if present
-  with open(config_file, 'r') as conf_file:
-    client_confs = yaml.load(conf_file)
+  # check if the ~/.heronrc exists, if it does, read it
+  if os.path.isfile(config_file):
+    with open(config_file, 'r') as conf_file:
+      client_confs = yaml.load(conf_file)
+
+  if not client_confs:
+    client_confs = dict()
+    client_confs[cluster] = dict()
+
+  print client_confs
+  # now check if the service-url from command line is set, if so override it
+  if cl_args['service_url']:
+    client_confs[cluster]['service_url'] = cl_args['service_url']
 
   # the return value of yaml.load can be None if conf_file is an empty file
-  if not client_confs:
-    return dict()
+  # or there is no service-url in command line, if needed.
 
   # if cluster definition is not found, return
-  if not cluster in client_confs:
+  if not client_confs[cluster]:
     return dict()
 
-  Log.info("Using cluster definition from file %s" % config_file)
+  if not cl_args['service_url']:
+    Log.info("Using cluster definition from file %s" % config_file)
+  else:
+    Log.info("Using cluster service url %s" % cl_args['service_url'])
 
-  config_map = client_confs[cluster]
-  if not 'url' in config_map:
-    Log.error('No service endpoint url for %s cluster in %s', cluster, config_file)
+  if not 'service_url' in client_confs[cluster]:
+    Log.error('No service url for %s cluster in %s', cluster, config_file)
     sys.exit(1)
 
   try:
     cluster_role_env = (cl_args['cluster'], cl_args['role'], cl_args['environ'])
-    config.server_mode_cluster_role_env(cluster_role_env, config_file)
+    config.server_mode_cluster_role_env(cluster_role_env, client_confs, config_file)
     cluster_tuple = config.defaults_cluster_role_env(cluster_role_env)
   except Exception as ex:
     Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
@@ -189,7 +201,7 @@ def server_deployment_mode(command, parser, cluster, cl_args):
   new_cl_args['cluster'] = cluster_tuple[0]
   new_cl_args['role'] = cluster_tuple[1]
   new_cl_args['environ'] = cluster_tuple[2]
-  new_cl_args['service_endpoint'] = config_map['url']
+  new_cl_args['service_url'] = client_confs[cluster]['service_url'].rstrip('/')
   new_cl_args['deploy_mode'] = config.SERVER_MODE
 
   cl_args.update(new_cl_args)
@@ -315,28 +327,30 @@ def main():
 
   command_line_args = vars(args)
 
+  print command_line_args
+
   # command to be execute
   command = command_line_args['subcommand']
 
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
-    cl_args = deployment_mode(command, parser, command_line_args)
+    command_line_args = deployment_mode(command, parser, command_line_args)
 
     # bail out if args are empty
-    if not cl_args:
+    if not command_line_args:
       return 1
 
     # register dirs cleanup function during exit
-    if cl_args['deploy_mode'] == config.DIRECT_MODE:
-      cleaned_up_files.append(cl_args['override_config_file'])
+    if command_line_args['deploy_mode'] == config.DIRECT_MODE:
+      cleaned_up_files.append(command_line_args['override_config_file'])
       atexit.register(cleanup, cleaned_up_files)
 
   # print the input parameters, if verbose is enabled
-  Log.debug(cl_args)
+  Log.debug(command_line_args)
 
   start = time.time()
-  results = run(command, parser, cl_args, unknown_args)
+  results = run(command, parser, command_line_args, unknown_args)
   if command not in ('help', 'version'):
     result.render(results)
   end = time.time()

@@ -353,34 +353,22 @@ def direct_mode_cluster_role_env(cluster_role_env, config_path):
   return True
 
 ################################################################################
-def server_mode_cluster_role_env(cluster_role_env, config_file):
+def server_mode_cluster_role_env(cluster_role_env, config_map, config_file):
   """Check cluster/[role]/[environ], if they are required"""
 
-  # if conf doesn't exist, return true
-  if not os.path.isfile(config_file):
-    return True
+  cmap = config_map[cluster_role_env[0]]
 
-  client_confs = {}
-  with open(config_file, 'r') as conf_file:
-    client_confs = yaml.load(conf_file)
+  # if role is required but not provided, raise exception
+  role_present = True if len(cluster_role_env[1]) > 0 else False
+  if ROLE_KEY in cmap and cmap[ROLE_KEY] and not role_present:
+    raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
+                    % (cluster_role_env, ROLE_KEY, config_file))
 
-    # the return value of yaml.load can be None if conf_file is an empty file
-    if not client_confs:
-      return True
-
-    config_map = client_confs[cluster_role_env[0]]
-
-    # if role is required but not provided, raise exception
-    role_present = True if len(cluster_role_env[1]) > 0 else False
-    if ROLE_KEY in config_map and config_map[ROLE_KEY] and not role_present:
-      raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
-                      % (cluster_role_env, ROLE_KEY, config_file))
-
-    # if environ is required but not provided, raise exception
-    environ_present = True if len(cluster_role_env[2]) > 0 else False
-    if ENVIRON_KEY in client_confs and client_confs[ENVIRON_KEY] and not environ_present:
-      raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
-                      % (cluster_role_env, ENVIRON_KEY, config_file))
+  # if environ is required but not provided, raise exception
+  environ_present = True if len(cluster_role_env[2]) > 0 else False
+  if ENVIRON_KEY in cmap and cmap[ENVIRON_KEY] and not environ_present:
+    raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
+                    % (cluster_role_env, ENVIRON_KEY, config_file))
 
   return True
 
