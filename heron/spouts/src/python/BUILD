@@ -8,7 +8,8 @@ pex_library(
     deps = [
         "//heron/api/src/python:heron-python-py",
     ],
-    reqs = ['pulsar-client==1.19.dev2']
+    # TODO:- We should turn this on as soon as bazel issues are resolved
+    # reqs = ['pulsar-client==1.19.dev2']
 )
 
 # for egg production
