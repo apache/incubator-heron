@@ -70,8 +70,6 @@ class DummyStMgr : public Server {
   // Handle st mgr hello message
   virtual void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
                                        heron::proto::stmgr::StrMgrHelloRequest* _request);
-  virtual void HandleTupleStreamMessage(Connection* _conn,
-                                        heron::proto::stmgr::TupleStreamMessage* _message);
   virtual void HandleStartBackPressureMessage(Connection*,
                                               heron::proto::stmgr::StartBackPressureMessage*);
   virtual void HandleStopBackPressureMessage(Connection*,

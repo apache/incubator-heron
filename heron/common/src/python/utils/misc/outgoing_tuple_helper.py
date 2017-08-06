@@ -16,7 +16,7 @@ import sys
 
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.proto import tuple_pb2, topology_pb2
+from heron.proto import tuple_pb2, topology_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as constants
 
@@ -101,6 +101,26 @@ class OutgoingTupleHelper(object):
     added_tuple.CopyFrom(new_control_tuple)
 
     self.total_data_emitted_in_bytes += tuple_size_in_bytes
+
+  def add_ckpt_state(self, ckpt_id, ckpt_state):
+    """Add the checkpoint state message to be sent back the stmgr
+
+    :param ckpt_id: The id of the checkpoint
+    :ckpt_state: The checkpoint state
+    """
+    # first flush any buffered tuples
+    self._flush_remaining()
+    msg = ckptmgr_pb2.StoreInstanceStateCheckpoint()
+    istate = ckptmgr_pb2.InstanceStateCheckpoint()
+    istate.checkpoint_id = ckpt_id
+    istate.state = ckpt_state
+    msg.state.CopyFrom(istate)
+    self._push_tuple_to_stream(msg)
+
+  def clear(self):
+    """Clears current data and the streams"""
+    self._flush_remaining()
+    self.out_stream.clear()
 
   def _init_new_data_tuple(self, stream_id):
     self._flush_remaining()

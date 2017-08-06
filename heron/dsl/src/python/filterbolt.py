@@ -12,14 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for filter bolt: FilterBolt"""
-from heron.api.src.python import Bolt, Stream
+from heron.api.src.python import Bolt, Stream, StatefulComponent
 
 # pylint: disable=unused-argument
-class FilterBolt(Bolt):
+class FilterBolt(Bolt, StatefulComponent):
   """FilterBolt"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
+
+  def initState(self, stateful_state):
+    # Filter does not have any state
+    pass
+
+  def preSave(self, checkpoint_id):
+    # Filter does not have any state
+    pass
 
   def initialize(self, config, context):
     self.logger.debug("FilterBolt's Component-specific config: \n%s" % str(config))

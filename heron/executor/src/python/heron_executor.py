@@ -428,7 +428,8 @@ class HeronExecutor(object):
         self.zkroot,
         self.heron_internals_config_file,
         self.metrics_sinks_config_file,
-        self.metricsmgr_port]
+        self.metricsmgr_port,
+        self.ckptmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()
@@ -581,7 +582,9 @@ class HeronExecutor(object):
         self.master_port,
         self.metricsmgr_port,
         self.shell_port,
-        self.heron_internals_config_file]
+        self.heron_internals_config_file,
+        self.ckptmgr_port,
+        self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -674,7 +677,7 @@ class HeronExecutor(object):
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_bin_file)
     elif self.pkg_type == "pex":
-      os.system("unzip %s" % self.topology_bin_file)
+      os.system("unzip -qq -n %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):

@@ -2,6 +2,15 @@ package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/jarjar_rules", "jarjar_binary")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
+load("/tools/rules/build_defs", "DOCLINT_HTML_AND_SYNTAX")
+load("/tools/rules/javadoc", "java_doc")
+
+java_doc(
+    name = "heron-spi-javadoc",
+    libs = [":heron-spi"],
+    pkgs = ["com/twitter/heron/spi"],
+    title = "Heron Spi Documentation",
+)
 
 java_library(
     name = 'heron-spi',
@@ -15,6 +24,7 @@ java_library(
         "**/spi/statemgr/**/*.java",
         "**/spi/metricsmgr/**/*.java",
     ]),
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:classification",

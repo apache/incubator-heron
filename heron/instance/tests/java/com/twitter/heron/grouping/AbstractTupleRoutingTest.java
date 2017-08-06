@@ -17,6 +17,8 @@ package com.twitter.heron.grouping;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.protobuf.Message;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,7 +121,11 @@ public abstract class AbstractTupleRoutingTest {
           if (slaveTester.getOutStreamQueue().isEmpty()) {
             continue;
           }
-          HeronTuples.HeronTupleSet set = slaveTester.getOutStreamQueue().poll();
+
+          Message msg = slaveTester.getOutStreamQueue().poll();
+          assertTrue(msg instanceof HeronTuples.HeronTupleSet);
+
+          HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
 
           assertTrue(set.isInitialized());
           assertFalse(set.hasControl());
@@ -165,7 +171,7 @@ public abstract class AbstractTupleRoutingTest {
     conf.setTopologyProjectName("heron-integration-test");
     conf.setNumStmgrs(1);
     conf.setMaxSpoutPending(100);
-    conf.setEnableAcking(false);
+    conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATMOST_ONCE);
 
     TopologyAPI.Topology topology = topologyBuilder.createTopology()
         .setName("topology-name")
@@ -212,13 +218,13 @@ public abstract class AbstractTupleRoutingTest {
   }
 
   protected void initBoltA(TopologyBuilder topologyBuilder,
-                         String boltId, String upstreamComponentId) {
+                           String boltId, String upstreamComponentId) {
     topologyBuilder.setBolt(boltId, new TestBolt(), 1)
         .shuffleGrouping(upstreamComponentId);
   }
 
   protected void initBoltB(TopologyBuilder topologyBuilder,
-                         String boltId, String upstreamComponentId) {
+                           String boltId, String upstreamComponentId) {
     topologyBuilder.setBolt(boltId, new TestBolt(), 1)
         .shuffleGrouping(upstreamComponentId);
   }

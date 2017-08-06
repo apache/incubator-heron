@@ -130,9 +130,6 @@ class HeronInternalsConfigVars {
   * HERON_STREAMMGR_* configs are for the stream manager
   **/
 
-  // Maximum size in bytes of a packet to be send out from stream manager
-  static const sp_string HERON_STREAMMGR_PACKET_MAXIMUM_SIZE_BYTES;
-
   // The tuple cache (used for batching) can be drained in two ways: (a) Time based (b) size based
   // The frequency in ms to drain the tuple cache in stream manager
   static const sp_string HERON_STREAMMGR_CACHE_DRAIN_FREQUENCY_MS;
@@ -140,8 +137,14 @@ class HeronInternalsConfigVars {
   // The sized based threshold in MB for draining the tuple cache
   static const sp_string HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB;
 
+  // The max number of messages in the memory pool for each message type
+  static const sp_string HERON_STREAMMGR_MEMPOOL_MAX_MESSAGE_NUMBER;
+
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
+
+  // The max reconnect attempts to other stream managers for stream manager client
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS;
 
   // The reconnect interval to other stream managers in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC;

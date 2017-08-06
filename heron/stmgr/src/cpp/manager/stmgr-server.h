@@ -54,7 +54,7 @@ class StMgrServer : public Server {
 
   // We own the message
   void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance2(proto::stmgr::TupleStreamMessage2* _message);
+  void SendToInstance2(proto::stmgr::TupleStreamMessage* _message);
 
   // When we get a checkpoint marker from _src_task_id destined for _destination_task_id
   // this function in invoked, so that we might register it in gateway
@@ -68,27 +68,27 @@ class StMgrServer : public Server {
   // Relieve back pressure
   void StopBackPressureClientCb(const sp_string& _other_stmgr_id);
 
-  bool HaveAllInstancesConnectedToUs() const {
+  virtual bool HaveAllInstancesConnectedToUs() const {
     return active_instances_.size() == expected_instances_.size();
   }
 
   // Gets all the Instance information
-  void GetInstanceInfo(std::vector<proto::system::Instance*>& _return);
+  virtual void GetInstanceInfo(std::vector<proto::system::Instance*>& _return);
   // Get instance info for this task_id
-  proto::system::Instance* GetInstanceInfo(sp_int32 _task_id);
+  virtual proto::system::Instance* GetInstanceInfo(sp_int32 _task_id);
 
   bool DidAnnounceBackPressure() { return !remote_ends_who_caused_back_pressure_.empty(); }
 
   // Send messages to all local spouts to start the process of checkpointing
   void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
   // Send a RestoreInstanceStateRequest to _task_id asking it to restore itself from _state
-  bool SendRestoreInstanceStateRequest(sp_int32 _task_id,
-                                       const proto::ckptmgr::InstanceStateCheckpoint& _state);
+  virtual bool SendRestoreInstanceStateRequest(sp_int32 _task_id,
+                                           const proto::ckptmgr::InstanceStateCheckpoint& _state);
   // Send StartInstanceStatefulProcessing message to all instances so that they can start
   // processing
   void SendStartInstanceStatefulProcessing(const std::string& _ckpt_id);
   // Clears all buffered state in stateful-gateway
-  void ClearCache();
+  virtual void ClearCache();
 
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
@@ -96,7 +96,7 @@ class StMgrServer : public Server {
 
  private:
   void DrainTupleSet(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void DrainTupleStream(proto::stmgr::TupleStreamMessage2* _message);
+  void DrainTupleStream(proto::stmgr::TupleStreamMessage* _message);
   void DrainCheckpoint(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
@@ -108,7 +108,7 @@ class StMgrServer : public Server {
   // First from other stream managers
   void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
                                proto::stmgr::StrMgrHelloRequest* _request);
-  void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage2* _message);
+  void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage* _message);
 
   // Handler for DownstreamStatefulCheckpoint from a peer stmgr
   void HandleDownstreamStatefulCheckpointMessage(Connection* _conn,

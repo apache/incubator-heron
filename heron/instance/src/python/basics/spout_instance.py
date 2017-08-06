@@ -17,14 +17,13 @@ import Queue
 import time
 import collections
 
-from heron.api.src.python import global_metrics
 from heron.api.src.python import api_constants
+from heron.api.src.python import StatefulComponent
 from heron.api.src.python import Stream
 from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.proto import topology_pb2, tuple_pb2
+from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as system_constants
 
@@ -43,13 +42,14 @@ class SpoutInstance(BaseInstance):
 
     context = self.pplan_helper.context
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
-    self.serializer = SerializerHelper.get_serializer(context)
 
     # acking related
-    self.acking_enabled = context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_ACKING,
-                                                           False)
+    mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
+                                            api_constants.TopologyReliabilityMode.ATMOST_ONCE)
+    self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
     self.enable_message_timeouts = \
       context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
+    self._initialized_metrics_and_tasks = False
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
     Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
 
@@ -62,28 +62,21 @@ class SpoutInstance(BaseInstance):
     spout_impl_class = super(SpoutInstance, self).load_py_instance(is_spout=True)
     self.spout_impl = spout_impl_class(delegate=self)
 
-  def start(self):
+  def start_component(self, stateful_state):
     context = self.pplan_helper.context
-    self.spout_metrics.register_metrics(context)
+    if not self._initialized_metrics_and_tasks:
+      self.spout_metrics.register_metrics(context)
+    if self.is_stateful and isinstance(self.spout_impl, StatefulComponent):
+      self.spout_impl.initState(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
-    context.invoke_hook_prepare()
-
-    # prepare global metrics
-    interval = float(self.sys_config[system_constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
-    collector = context.get_metrics_collector()
-    global_metrics.init(collector, interval)
-
-    # prepare for custom grouping
-    self.pplan_helper.prepare_custom_grouping(context)
-
-    self._add_spout_task()
+    if not self._initialized_metrics_and_tasks:
+      self._add_spout_task()
+    self._initialized_metrics_and_tasks = True
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
-  def stop(self):
-    self.pplan_helper.context.invoke_hook_cleanup()
+  def stop_component(self):
     self.spout_impl.close()
-
-    self.looper.exit_loop()
+    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
   def invoke_activate(self):
     Log.info("Spout is activated")
@@ -173,9 +166,9 @@ class SpoutInstance(BaseInstance):
 
   # pylint: disable=no-self-use
   def process_incoming_tuples(self):
-    Log.debug("In spout, process_incoming_tuples() don't do anything")
+    self.looper.wake_up()
 
-  def _read_tuples_and_execute(self):
+  def _read_tuples(self):
     start_cycle_time = time.time()
     ack_batch_time = self.sys_config[system_constants.INSTANCE_ACK_BATCH_TIME_MS] * \
                      system_constants.MS_TO_SEC
@@ -195,6 +188,8 @@ class SpoutInstance(BaseInstance):
             self._handle_ack_tuple(fail_tuple, False)
         else:
           Log.error("Received tuple neither data nor control")
+      elif isinstance(tuples, ckptmgr_pb2.InitiateStatefulCheckpoint):
+        self.handle_initiate_stateful_checkpoint(tuples, self.spout_impl)
       else:
         Log.error("Received tuple not instance of HeronTupleSet")
 
@@ -238,6 +233,8 @@ class SpoutInstance(BaseInstance):
       if not self._is_topology_running():
         return
 
+      self._read_tuples()
+
       if self._should_produce_tuple():
         self._produce_tuple()
         self.output_helper.send_out_tuples()
@@ -246,7 +243,6 @@ class SpoutInstance(BaseInstance):
         self.spout_metrics.update_out_queue_full_count()
 
       if self.acking_enabled:
-        self._read_tuples_and_execute()
         self.spout_metrics.update_pending_tuples_count(len(self.in_flight_tuples))
       else:
         self._do_immediate_acks()

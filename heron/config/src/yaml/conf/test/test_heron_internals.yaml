@@ -35,9 +35,6 @@ heron.metrics.max.exceptions.per.message.count: 1024
 
 ### heron.streammgr.* configs are for the stream manager
 
-# Maximum size in bytes of a packet to be send out from stream manager
-heron.streammgr.packet.maximum.size.bytes: 102400
-
 # The tuple cache (used for batching) can be drained in two ways: (a) Time based (b) size based
 
 # The frequency in ms to drain the tuple cache in stream manager
@@ -50,8 +47,14 @@ heron.streammgr.stateful.buffer.size.mb: 100
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100
 
+# The max number of messages in the memory pool for each message type
+heron.streammgr.mempool.max.message.number: 512
+
 # For efficient acknowledgement
 heron.streammgr.xormgr.rotatingmap.nbuckets: 3
+
+# The max reconnect attempts to other stream managers for stream manager client
+heron.streammgr.client.reconnect.max.attempts: 300
 
 # The reconnect interval to other stream managers in second for stream manager client
 heron.streammgr.client.reconnect.interval.sec: 1
@@ -60,7 +63,7 @@ heron.streammgr.client.reconnect.interval.sec: 1
 heron.streammgr.client.reconnect.tmaster.interval.sec: 1
 
 # The maximum packet size in MB of stream manager's network options
-heron.streammgr.network.options.maximum.packet.mb: 100
+heron.streammgr.network.options.maximum.packet.mb: 10
 
 # The interval in seconds to send heartbeat
 heron.streammgr.tmaster.heartbeat.interval.sec: 10
@@ -138,6 +141,9 @@ heron.metricsmgr.network.options.socket.send.buffer.size.bytes: 6553600
 # The maximum socket's received buffer size in bytes of metricsmgr's network options
 heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 8738000
 
+# The maximum packet size that metrics mgr can read
+heron.metricsmgr.network.options.maximum.packetsize.bytes: 1048576
+
 # Attempts to restart IMetricsSink once failure ia occurred
 # heron.metricsmgr.sink.retry.attempts: 10
 
@@ -145,6 +151,9 @@ heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 8738000
 # heron.metricsmgr.exit.in.sinks.failure: 0
 
 ### heron.instance.* configs are for the instances
+
+# The maximum size of packets that instance can read
+heron.instance.network.options.maximum.packetsize.bytes: 10485760
 
 # The queue capacity (num of items) in bolt for buffer packets to read from stream manager
 heron.instance.internal.bolt.read.queue.capacity: 128

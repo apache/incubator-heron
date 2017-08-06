@@ -28,6 +28,11 @@ maven_jar(
 )
 
 maven_jar(
+    name = "aopalliance_aopalliance",
+    artifact = "aopalliance:aopalliance:1.0",
+)
+
+maven_jar(
   name = "org_ow2_asm_asm_all",
   artifact = "org.ow2.asm:asm-all:5.1",
 )
@@ -113,6 +118,16 @@ maven_jar(
 )
 
 maven_jar(
+    name = "com_google_inject_guice",
+    artifact = "com.google.inject:guice:4.0",
+)
+
+maven_jar(
+    name = "com_google_inject_extensions_guice_assistedinject",
+    artifact = "com.google.inject.extensions:guice-assistedinject:4.0",
+)
+
+maven_jar(
   name = "org_apache_hadoop_hadoop_core",
   artifact = "org.apache.hadoop:hadoop-core:0.20.2",
 )
@@ -128,6 +143,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "com_jayway_jsonpath",
+  artifact = "com.jayway.jsonpath:json-path:2.1.0",
+)
+
+maven_jar(
   name = "com_fasterxml_jackson_core_jackson_annotations",
   artifact = "com.fasterxml.jackson.core:jackson-annotations:" + jackson_version,
 )
@@ -140,6 +160,11 @@ maven_jar(
 maven_jar(
   name = "com_fasterxml_jackson_core_jackson_databind",
   artifact = "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
+)
+
+maven_jar(
+  name = "net_minidev_json_smart",
+  artifact = "net.minidev:json-smart:2.2"
 )
 
 maven_jar(
@@ -160,6 +185,71 @@ maven_jar(
 maven_jar(
   name = "javax_inject_javax_inject",
   artifact = "javax.inject:javax.inject:1",
+)
+
+maven_jar(
+  name = "javax_ws_rs_javax_ws_rs_api",
+  artifact = "javax.ws.rs:javax.ws.rs-api:2.0.1",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_core_jersey_client",
+   artifact = "org.glassfish.jersey.core:jersey-client:2.24",
+)
+
+maven_jar(
+   name = "org_glassfish_hk2_hk2_api",
+   artifact = "org.glassfish.hk2:hk2-api:2.5.0-b05",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_ext_jersey_entity_filtering",
+   artifact = "org.glassfish.jersey.ext:jersey-entity-filtering:2.24",
+)
+
+maven_jar(
+   name = "javax_annotation_javax_annotation_api",
+   artifact = "javax.annotation:javax.annotation-api:1.2",
+)
+
+maven_jar(
+   name = "com_fasterxml_jackson_module_jackson_module_jaxb_annotations",
+   artifact = "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.5.4",
+)
+
+maven_jar(
+   name = "com_fasterxml_jackson_jaxrs_jackson_jaxrs_json_provider",
+   artifact = "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.5.4",
+)
+
+maven_jar(
+   name = "com_fasterxml_jackson_jaxrs_jackson_jaxrs_base",
+   artifact = "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.5.4",
+)
+
+maven_jar(
+   name = "org_glassfish_hk2_hk2_locator",
+   artifact = "org.glassfish.hk2:hk2-locator:2.5.0-b05",
+)
+
+maven_jar(
+   name = "org_glassfish_hk2_hk2_utils",
+   artifact = "org.glassfish.hk2:hk2-utils:2.5.0-b05",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_bundles_repackaged_jersey_guava",
+   artifact = "org.glassfish.jersey.bundles.repackaged:jersey-guava:2.24",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_core_jersey_common",
+   artifact = "org.glassfish.jersey.core:jersey-common:2.24",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_media_jersey_media_json_jackson",
+   artifact = "org.glassfish.jersey.media:jersey-media-json-jackson:2.24",
 )
 
 maven_jar(
@@ -338,6 +428,16 @@ maven_jar(
   artifact = "com.101tec:zkclient:0.3"
 )
 
+maven_jar(
+  name = "com_microsoft_dhalion",
+  artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
+)
+
+maven_jar(
+  name = "org_apache_commons_commons_math3",
+  artifact = "org.apache.commons:commons-math3:3.6.1"
+)
+
 # Google Cloud
 maven_jar(
   name = "google_api_services_storage",
@@ -364,3 +464,10 @@ maven_jar(
   artifact = "com.google.oauth-client:google-oauth-client:" + google_client_version
 )
 # end Google Cloud
+
+# Pulsar Client
+maven_jar(
+  name = "yahoo_pulsar_client",
+  artifact = "com.yahoo.pulsar:pulsar-client:jar:shaded:1.18"
+)
+# end Pulsar Client

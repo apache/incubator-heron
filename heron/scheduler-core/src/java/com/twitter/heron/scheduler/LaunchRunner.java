@@ -64,7 +64,7 @@ public class LaunchRunner {
     builder.setTopologyName(topology.getName()).
         setTopologyId(topology.getId())
         .setSubmissionTime(System.currentTimeMillis() / 1000)
-        .setSubmissionUser(System.getProperty("user.name"))
+        .setSubmissionUser(Context.submitUser(config))
         .setCluster(Context.cluster(config))
         .setRole(Context.role(config))
         .setEnviron(Context.environ(config));

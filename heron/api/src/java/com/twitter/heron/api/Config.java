@@ -100,12 +100,52 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
   /**
-   * How many executors to spawn for ackers.
+   * Is the topology running in atleast-once mode?
    * <p>
-   * <p>If this is set to 0, then Heron will immediately ack tuples as soon
+   * <p>If this is set to false, then Heron will immediately ack tuples as soon
    * as they come off the spout, effectively disabling reliability.</p>
+   * @deprecated use {@link #TOPOLOGY_RELIABILITY_MODE} instead.
    */
+  @Deprecated
   public static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
+  /**
+   * What is the reliability mode under which we are running this topology
+   * Topology writers must set TOPOLOGY_RELIABILITY_MODE to one
+   * one of the following modes
+   */
+  public enum TopologyReliabilityMode {
+    /**
+     * Heron provides no guarantees wrt tuple delivery. Tuples emitted by
+     * components can get lost for any reason(network issues, component failures,
+     * overloaded downstream component, etc).
+     */
+    ATMOST_ONCE,
+    /**
+     * Heron guarantees that each emitted tuple is seen by the downstream components
+     * atleast once. This is achieved via the anchoring process where emitted tuples
+     * are anchored based on input tuples. Note that in failure scenarios, downstream
+     * components can see the same tuple multiple times.
+     */
+    ATLEAST_ONCE,
+    /**
+     * Heron guarantees that each emitted tuple is seen by the downstream components
+     * exactly once. This is achieved via distributed snapshotting approach is described at
+     * https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit
+     * In this mode Heron will try to take the snapshots of
+     * all of the components of the topology every
+     * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure of
+     * any component or detection of any network failure, Heron will initiate a recovery
+     * mechanism to revert the topology to the last globally consistent checkpoint
+     */
+    EXACTLY_ONCE;
+  }
+  /**
+   * A Heron topology can be run in any one of the TopologyReliabilityMode
+   * mode. The format of this flag is the string encoded values of the
+   * underlying TopologyReliabilityMode value.
+   */
+  public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
+
   /**
    * Number of cpu cores per container to be reserved for this topology
    */
@@ -146,19 +186,6 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
-   * Is this topology stateful? The format of this flag is boolean
-   * When set to true, Heron will try to take the snapshots of
-   * all of the components of the topology every
-   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure of
-   * any component, its state is recovered to the last checkpoint saved. The
-   * spouts/bolts of the topology have to implement IStatefulComponent for state
-   * to be actually captured.
-   * Setting this flag to false does not initiate any checkpointing
-   * mechanism. This means that even if the components themselves are
-   * IStatefulComponents their state is not saved/recovered.
-   */
-  public static final String TOPOLOGY_STATEFUL_ENABLED = "topology.stateful.enabled";
-  /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
   public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
@@ -169,26 +196,6 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_STATEFUL_START_CLEAN =
                              "topology.stateful.start.clean";
-  /**
-   * Do we want to run this topology in exactly once semantics?
-   * The format of this flag is boolean.
-   * When set to true, Heron will try to do a distributed checkpoint
-   * based on Lamport's idea of distributed snapshotting every
-   * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. When any component
-   * of the topology dies, Heron initiates a recovery mechanism to restart
-   * the topology from the last globally consistent checkpoint.
-   * Heron topologies can be run in many modes.
-   * 1. When TOPOLOGY_ENABLE_ACKING is enabled, Heron will run the topology
-   * in the classic atleast-once semantics.
-   * 2. When TOPOLOGY_EXACTLYONCE_ENABLED is enabled, Heron will run the
-   * topology in exactly once sematics. Note that the spouts/bolts have to
-   * implement IStatefulComponents for them to really save/restore their state.
-   * 3. When neither is enabled, the topology is run in atmost-once semantics
-   * 4. If both TOPOLOGY_ENABLE_ACKING and TOPOLOGY_EXACTLYONCE_ENABLED are set
-   * then the TOPOLOGY_EXACTLYONCE_ENABLED semantics has preference and the
-   * topology is run in exactly once semantics
-   */
-  public static final String TOPOLOGY_EXACTLYONCE_ENABLED = "topology.exactlyonce.enabled";
   /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
@@ -243,7 +250,6 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_SERIALIZER_CLASSNAME);
     apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_SECS);
     apiVars.add(TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
-    apiVars.add(TOPOLOGY_ENABLE_ACKING);
     apiVars.add(TOPOLOGY_CONTAINER_CPU_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_DISK_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_RAM_REQUESTED);
@@ -254,8 +260,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
-    apiVars.add(TOPOLOGY_STATEFUL_ENABLED);
-    apiVars.add(TOPOLOGY_EXACTLYONCE_ENABLED);
+    apiVars.add(TOPOLOGY_RELIABILITY_MODE);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);
@@ -302,8 +307,17 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
+  /**
+   * Is topology running with acking enabled?
+   * @deprecated use {@link #setTopologyReliabilityMode()} instead.
+   */
+  @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
-    conf.put(Config.TOPOLOGY_ENABLE_ACKING, String.valueOf(acking));
+    if (acking) {
+      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATLEAST_ONCE);
+    } else {
+      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATMOST_ONCE);
+    }
   }
 
   public static void setMessageTimeoutSecs(Map<String, Object> conf, int secs) {
@@ -320,6 +334,11 @@ public class Config extends HashMap<String, Object> {
 
   public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
     conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
+  }
+
+  public static void setTopologyReliabilityMode(Map<String, Object> conf,
+                                                Config.TopologyReliabilityMode mode) {
+    conf.put(Config.TOPOLOGY_RELIABILITY_MODE, String.valueOf(mode));
   }
 
   public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
@@ -436,20 +455,12 @@ public class Config extends HashMap<String, Object> {
 
   }
 
-  public static void setTopologyStatefulEnabled(Map<String, Object> conf, boolean stateful) {
-    conf.put(Config.TOPOLOGY_STATEFUL_ENABLED, String.valueOf(stateful));
-  }
-
   public static void setTopologyStatefulCheckpointIntervalSecs(Map<String, Object> conf, int secs) {
     conf.put(Config.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS, Integer.toString(secs));
   }
 
   public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
-  }
-
-  public static void setTopologyExactlyOnceEnabled(Map<String, Object> conf, boolean exactOnce) {
-    conf.put(Config.TOPOLOGY_EXACTLYONCE_ENABLED, String.valueOf(exactOnce));
   }
 
   public void setDebug(boolean isOn) {
@@ -480,12 +491,23 @@ public class Config extends HashMap<String, Object> {
     setSerializationClassName(this, className);
   }
 
+  /**
+   * Is topology running with acking enabled?
+   * The SupressWarning will be removed once TOPOLOGY_ENABLE_ACKING is removed
+   * @deprecated use {@link #setTopologyReliabilityMode()} instead
+   */
+  @Deprecated
+  @SuppressWarnings("deprecation")
   public void setEnableAcking(boolean acking) {
     setEnableAcking(this, acking);
   }
 
   public void setMessageTimeoutSecs(int secs) {
     setMessageTimeoutSecs(this, secs);
+  }
+
+  public void setTopologyReliabilityMode(Config.TopologyReliabilityMode mode) {
+    setTopologyReliabilityMode(this, mode);
   }
 
   public void setComponentParallelism(int parallelism) {
@@ -574,19 +596,11 @@ public class Config extends HashMap<String, Object> {
     return apiVars;
   }
 
-  public void setTopologyStatefulEnabled(boolean stateful) {
-    setTopologyStatefulEnabled(this, stateful);
-  }
-
   public void setTopologyStatefulCheckpointIntervalSecs(int secs) {
     setTopologyStatefulCheckpointIntervalSecs(this, secs);
   }
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
-  }
-
-  public void setTopologyExactlyOnceEnabled(boolean exactOnce) {
-    setTopologyExactlyOnceEnabled(this, exactOnce);
   }
 }

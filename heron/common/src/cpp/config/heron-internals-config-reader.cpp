@@ -188,10 +188,6 @@ sp_int32 HeronInternalsConfigReader::GetHeronTmasterStmgrStateTimeoutSec() {
   return config_[HeronInternalsConfigVars::HERON_TMASTER_STMGR_STATE_TIMEOUT_SEC].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronStreammgrPacketMaximumSizeBytes() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_PACKET_MAXIMUM_SIZE_BYTES].as<int>();
-}
-
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrCacheDrainFrequencyMs() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_FREQUENCY_MS].as<int>();
 }
@@ -205,8 +201,16 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrStatefulBufferSizeMb() {
       .as<int>();
 }
 
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrMempoolMaxMessageNumber() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_MEMPOOL_MAX_MESSAGE_NUMBER].as<int>();
+}
+
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets() {
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS].as<int>();
+}
+
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectMaxAttempts() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS].as<int>();
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectIntervalSec() {

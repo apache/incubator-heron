@@ -32,8 +32,10 @@ TupleCache::TupleCache(EventLoop* eventLoop, sp_uint32 _drain_threshold)
     : eventLoop_(eventLoop), drain_threshold_bytes_(_drain_threshold) {
   cache_drain_frequency_ms_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainFrequencyMs();
+  // leave something for the headers
   tuples_cache_max_tuple_size_ =
-      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrPacketMaximumSizeBytes();
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrNetworkOptionsMaximumPacketMb()
+      * 1_MB - 1024;
 
   total_size_ = 0;
   auto drain_cb = [this](EventLoop::Status status) { this->drain(status); };

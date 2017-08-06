@@ -153,6 +153,7 @@ class MockHeronClient(HeronClient):
     self.called_handle_packet = False
     self.dispatcher = MockDispatcher()
     self.incoming_msg = None
+    self.on_error_called = False
 
   def on_connect(self, status):
     if status == StatusCode.OK:
@@ -160,6 +161,9 @@ class MockHeronClient(HeronClient):
 
   def on_response(self, status, context, response):
     self.on_response_status = status
+
+  def on_error(self):
+    self.on_error_called = True
 
   def on_incoming_message(self, message):
     self.incoming_msg = message
@@ -171,3 +175,6 @@ class MockHeronClient(HeronClient):
     # should only be called when packet is complete
     self.called_handle_packet = True
     HeronClient._handle_packet(self, packet)
+
+  def _handle_close(self):
+    pass

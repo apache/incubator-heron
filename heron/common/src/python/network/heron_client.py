@@ -81,6 +81,10 @@ class HeronClient(asyncore.dispatcher):
   # called when close is ready
   def handle_close(self):
     Log.info("%s: handle_close() called" % self._get_classname())
+    self._handle_close()
+    self.on_error()
+
+  def _handle_close(self):
     self._clean_up_state()
     self.close()
 
@@ -112,6 +116,7 @@ class HeronClient(asyncore.dispatcher):
       if self.incomplete_pkt is None:
         # incomplete packet doesn't exist
         pkt = HeronProtocol.read_new_packet(self)
+        pkt.read(self)
       else:
         # continue reading into the incomplete packet
         Log.debug("In handle_read(): Continue reading")
@@ -187,7 +192,7 @@ class HeronClient(asyncore.dispatcher):
   def stop(self):
     """Disconnects and stops the client"""
     # TODO: cleanup things and close the connection
-    self.handle_close()
+    self._handle_close()
 
   def register_on_message(self, msg_builder):
     """Registers protobuf message builders that this client wants to receive
@@ -240,10 +245,10 @@ class HeronClient(asyncore.dispatcher):
       # Error when trying to connect
       # first cleanup by handle_close(), and tells a subclass about this error.
       # the subclass can then call start_connect() again, if appropriate
-      self.handle_close()
+      self._handle_close()
       self.on_connect(StatusCode.CONNECT_ERROR)
     else:
-      self.handle_close()
+      self._handle_close()
       self.on_error()
 
   def _handle_packet(self, packet):
@@ -259,14 +264,16 @@ class HeronClient(asyncore.dispatcher):
         response_msg.ParseFromString(serialized_msg)
       except Exception as e:
         Log.error("Invalid Packet Error: %s" % e.message)
-        self.on_response(StatusCode.INVALID_PACKET, context, None)
+        self._handle_close()
+        self.on_error()
         return
 
       if response_msg.IsInitialized():
         self.on_response(StatusCode.OK, context, response_msg)
       else:
         Log.error("Response not initialized")
-        self.on_response(StatusCode.INVALID_PACKET, context, None)
+        self._handle_close()
+        self.on_error()
     elif reqid.is_zero():
       # this is a Message -- no need to send back response
       try:
@@ -282,6 +289,7 @@ class HeronClient(asyncore.dispatcher):
       except Exception as e:
         Log.error("Error when handling message packet: %s" % e.message)
         Log.error(traceback.format_exc())
+        raise RuntimeError("Problem reading message")
     else:
       # might be a timeout response
       Log.info("In handle_packet(): Received message whose REQID is not registered: %s"

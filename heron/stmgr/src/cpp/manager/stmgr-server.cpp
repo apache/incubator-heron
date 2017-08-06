@@ -326,7 +326,7 @@ void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
 }
 
 void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
-                                           proto::stmgr::TupleStreamMessage2* _message) {
+                                           proto::stmgr::TupleStreamMessage* _message) {
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
@@ -434,11 +434,11 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
   __global_protobuf_pool_release__(_message);
 }
 
-void StMgrServer::SendToInstance2(proto::stmgr::TupleStreamMessage2* _message) {
+void StMgrServer::SendToInstance2(proto::stmgr::TupleStreamMessage* _message) {
   stateful_gateway_->SendToInstance(_message);
 }
 
-void StMgrServer::DrainTupleStream(proto::stmgr::TupleStreamMessage2* _message) {
+void StMgrServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message) {
   sp_int32 task_id = _message->task_id();
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
@@ -759,7 +759,11 @@ void StMgrServer::HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _destin
 bool StMgrServer::SendRestoreInstanceStateRequest(sp_int32 _task_id,
             const proto::ckptmgr::InstanceStateCheckpoint& _state) {
   LOG(INFO) << "Sending RestoreInstanceState request to task " << _task_id;
-  CHECK(instance_info_.find(_task_id) != instance_info_.end());
+  if (instance_info_.find(_task_id) == instance_info_.end()) {
+    LOG(WARNING) << "Cannot send RestoreInstanceState Request to task "
+                 << _task_id << " because it is not connected to us";
+    return false;
+  }
   Connection* conn = instance_info_[_task_id]->conn_;
   if (conn) {
     proto::ckptmgr::RestoreInstanceStateRequest* message = nullptr;

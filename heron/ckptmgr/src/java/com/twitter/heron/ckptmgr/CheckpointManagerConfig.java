@@ -76,6 +76,10 @@ public final class CheckpointManagerConfig {
     return getByteAmount(CheckpointManagerConfigKey.SOCKET_RECEIVE_SIZE);
   }
 
+  public ByteAmount getMaximumPacketSize() {
+    return getByteAmount(CheckpointManagerConfigKey.MAXIMUM_PACKET_SIZE);
+  }
+
   private String getString(CheckpointManagerConfigKey key) {
     assertType(key, CheckpointManagerConfigKey.Type.STRING);
     return (String) get(key);
