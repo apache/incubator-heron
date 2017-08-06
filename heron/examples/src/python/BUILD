@@ -59,3 +59,13 @@ pex_binary(
     ],
 )
 
+pex_binary(
+    name = "pulsar_word_count_dsl",
+    srcs = ["pulsar_word_count_dsl.py"],
+    deps = [
+      '//heron/api/src/python:heron-python-py',
+      '//heron/dsl/src/python:heron-pythondsl-py',
+      '//heron/spouts/src/python:heron-pythonspouts-py',
+    ]
+)
+
