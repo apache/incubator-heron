@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.inject.AbstractModule;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;
@@ -28,6 +29,7 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
+import com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider;
 import com.twitter.heron.proto.scheduler.Scheduler.SchedulerLocation;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Config;
@@ -61,10 +63,12 @@ public class HealthManagerTest {
         .build();
     when(adaptor.getSchedulerLocation(anyString())).thenReturn(schedulerLocation);
 
-    HealthManager healthManager =
-        new HealthManager(config, HealthManager.buildTrackerModule(config, "localhost"));
+    AbstractModule baseModule = HealthManager
+        .buildMetricsProviderModule(config, "localhost", TrackerMetricsProvider.class);
 
-    Map policy = new HashMap<>();
+    HealthManager healthManager = new HealthManager(config, baseModule);
+
+    Map<String, Object> policy = new HashMap<>();
     policy.put(PolicyConfigKey.HEALTH_POLICY_CLASS.key(), TestPolicy.class.getName());
     policy.put("test-config", "test-value");
 

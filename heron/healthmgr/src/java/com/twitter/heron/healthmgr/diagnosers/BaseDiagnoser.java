@@ -29,8 +29,8 @@ import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYM
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_PROCESSING_RATE_SKEW;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY;
 
-abstract class BaseDiagnoser implements IDiagnoser {
-  enum DiagnosisName {
+public abstract class BaseDiagnoser implements IDiagnoser {
+  public enum DiagnosisName {
     SYMPTOM_UNDER_PROVISIONING("SYMPTOM_UNDER_PROVISIONING"),
     SYMPTOM_DATA_SKEW("SYMPTOM_DATA_SKEW"),
     SYMPTOM_SLOW_INSTANCE("SYMPTOM_SLOW_INSTANCE"),
