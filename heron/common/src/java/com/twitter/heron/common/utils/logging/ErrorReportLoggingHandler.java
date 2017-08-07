@@ -109,7 +109,7 @@ public class ErrorReportLoggingHandler extends Handler {
         //exceptionDataBuilder.setLogging(record.getMessage());
 
         if (record.getMessage() == null) {
-          exceptionDataBuilder.setLogging("null");
+          exceptionDataBuilder.setLogging("");
         } else {
           exceptionDataBuilder.setLogging(record.getMessage());
         }
