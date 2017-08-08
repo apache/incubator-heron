@@ -9,6 +9,7 @@ RUN apt-get -y install curl ; apt-get clean all
 RUN apt-get -y install openjdk-8-jdk; apt-get clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+RUN update-ca-certificates -f
 
 ADD artifacts /heron
 

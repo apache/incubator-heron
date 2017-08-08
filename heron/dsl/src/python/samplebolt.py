@@ -15,14 +15,22 @@
    SampleBolt is a more sophisticated FilterBolt which
    can do sampling of the data that it recieves and emit
    only sampled tuples"""
-from heron.api.src.python import Bolt, Stream
+from heron.api.src.python import Bolt, Stream, StatefulComponent
 
 # pylint: disable=unused-argument
-class SampleBolt(Bolt):
+class SampleBolt(Bolt, StatefulComponent):
   """SampleBolt"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]
   FRACTION = 'fraction'
+
+  def initState(self, stateful_state):
+    # sample does not have any state
+    pass
+
+  def preSave(self, checkpoint_id):
+    # sample does not have any state
+    pass
 
   def initialize(self, config, context):
     self.logger.debug("SampleBolt's Component-specific config: \n%s" % str(config))

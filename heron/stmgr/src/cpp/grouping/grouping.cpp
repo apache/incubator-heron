@@ -15,6 +15,7 @@
  */
 
 #include "grouping/grouping.h"
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -34,7 +35,10 @@
 namespace heron {
 namespace stmgr {
 
-Grouping::Grouping(const std::vector<sp_int32>& _task_ids) : task_ids_(_task_ids) {}
+Grouping::Grouping(const std::vector<sp_int32>& _task_ids)
+  : task_ids_(_task_ids) {
+  sort(task_ids_.begin(), task_ids_.end());
+}
 
 Grouping::~Grouping() {}
 
