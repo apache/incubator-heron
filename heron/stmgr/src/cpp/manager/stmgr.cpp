@@ -271,8 +271,7 @@ void StMgr::StartStmgrServer() {
   CHECK_EQ(server_->Start(), 0);
   stmgr_port_ = server_->get_serveroptions().get_port();
 
-  // If 'bind 0' is applied in Start(), set the actual port for the clients.
-  // The tmaster_client_ will be set just before it Start() in StartTMasterClient().
+  // metrics_manager_client_ picks the actual stmgr_port_ and starts
   metrics_manager_client_->Start(stmgr_host_, stmgr_port_, "__stmgr__", stmgr_id_, eventLoop_);
 }
 

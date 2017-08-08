@@ -54,8 +54,7 @@ MetricsMgrSt::~MetricsMgrSt() {
 
 void MetricsMgrSt::Start(const sp_string& _my_hostname, sp_int32 _my_port,
      const sp_string& _component, const sp_string& _task_id,  EventLoop* eventLoop) {
-  client_ = new MetricsMgrClient(
-      _my_hostname, _my_port, _component, _task_id, eventLoop, options);
+  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component, _task_id, eventLoop, options);
 }
 
 void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location) {
