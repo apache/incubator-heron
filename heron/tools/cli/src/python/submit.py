@@ -170,6 +170,8 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
 
   r = service_method(service_apiurl, data=data, files=files)
   s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
+  if r.status_code != requests.codes.created:
+    Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
   return SimpleResult(s, err_ctxt, succ_ctxt)
 
 
