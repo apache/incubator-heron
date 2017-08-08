@@ -99,8 +99,7 @@ void StMgr::Init() {
       ->GetHeronStreammgrMempoolMaxMessageNumber());
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
-      stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
-      metrics_export_interval_sec, eventLoop_);
+      metricsmgr_port_, metrics_export_interval_sec, eventLoop_);
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   restore_initiated_metrics_ = new heron::common::CountMetric();
@@ -127,6 +126,9 @@ void StMgr::Init() {
   // Create and Register Tuple cache
   CreateTupleCache();
 
+  // Create and start StmgrServer
+  StartStmgrServer();
+
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
@@ -139,9 +141,6 @@ void StMgr::Init() {
 
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
-
-  // Create and start StmgrServer
-  StartStmgrServer();
 
   if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Now start the stateful restorer
@@ -270,10 +269,11 @@ void StMgr::StartStmgrServer() {
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
+  stmgr_port_ = server_->get_serveroptions().get_port();
 
   // If 'bind 0' is applied in Start(), set the actual port for the clients.
   // The tmaster_client_ will be set just before it Start() in StartTMasterClient().
-  metrics_manager_client_->SetPublisherPort(server_->get_serveroptions().get_port());
+  metrics_manager_client_->Start(stmgr_host_, stmgr_port_, "__stmgr__", stmgr_id_, eventLoop_);
 }
 
 void StMgr::CreateCheckpointMgrClient() {
@@ -471,7 +471,6 @@ void StMgr::StartTMasterClient() {
     std::vector<proto::system::Instance*> all_instance_info;
     server_->GetInstanceInfo(all_instance_info);
     tmaster_client_->SetInstanceInfo(all_instance_info);
-    tmaster_client_->SetStmgrPort(server_->get_serveroptions().get_port());
     if (!tmaster_client_->IsConnected()) {
       LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();

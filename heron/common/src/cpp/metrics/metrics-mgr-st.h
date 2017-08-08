@@ -46,9 +46,7 @@ class IMetric;
 
 class MetricsMgrSt {
  public:
-  MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port, sp_int32 _metricsmgr_port,
-               const sp_string& _component, const sp_string& _task_id, sp_int32 _interval,
-               EventLoop* eventLoop);
+  MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop);
   virtual ~MetricsMgrSt();
 
   void register_metric(const sp_string& _metric_name, IMetric* _metric);
@@ -56,8 +54,9 @@ class MetricsMgrSt {
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
-  // Sets the port_ if port_ binds to port 0 originally
-  void SetPublisherPort(const sp_int32 _port);
+  // Start MetricsMgrClient object
+  void Start(const sp_string& _my_hostname, sp_int32 _my_port,
+             const sp_string& _component, const sp_string& _task_id,  EventLoop* eventLoop);
 
  private:
   void gather_metrics(EventLoop::Status);
@@ -65,6 +64,7 @@ class MetricsMgrSt {
   VCallback<EventLoop::Status> timer_cb_;
   std::map<sp_string, IMetric*> metrics_;
   MetricsMgrClient* client_;
+  NetworkOptions options;
   sp_int64 timerid_;
 };
 }  // namespace common

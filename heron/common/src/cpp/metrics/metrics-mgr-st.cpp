@@ -33,15 +33,12 @@
 namespace heron {
 namespace common {
 
-MetricsMgrSt::MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port,
-                           sp_int32 _metricsmgr_port, const sp_string& _component,
-                           const sp_string& _task_id, sp_int32 _interval, EventLoop* eventLoop) {
-  NetworkOptions options;
+MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop) {
   options.set_host("localhost");
   options.set_port(_metricsmgr_port);
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
-  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component, _task_id, eventLoop, options);
+  // client_ will be initialized in Start()
   timer_cb_ = [this](EventLoop::Status status) { this->gather_metrics(status); };
   timerid_ = eventLoop->registerTimer(timer_cb_, true, _interval * 1000000);
   CHECK_GE(timerid_, 0);
@@ -55,8 +52,10 @@ MetricsMgrSt::~MetricsMgrSt() {
   }
 }
 
-void MetricsMgrSt::SetPublisherPort(const sp_int32 _port) {
-  client_->SetPublisherPort(_port);
+void MetricsMgrSt::Start(const sp_string& _my_hostname, sp_int32 _my_port,
+     const sp_string& _component, const sp_string& _task_id,  EventLoop* eventLoop) {
+  client_ = new MetricsMgrClient(
+      _my_hostname, _my_port, _component, _task_id, eventLoop, options);
 }
 
 void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location) {
