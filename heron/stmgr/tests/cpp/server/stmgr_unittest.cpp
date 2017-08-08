@@ -278,10 +278,10 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
   mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, topology_name, topology_id,
-  EXPECT_EQ(0, stmgr_port);
                                 stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
                                 metricsmgr_port, shell_port, ckptmgr_port, ckptmgr_id,
                                 _high_watermark, _low_watermark);
+  EXPECT_EQ(0, stmgr_port);
   mgr->Init();
   stmgr_port = mgr->GetServerNetworkOptions().get_port();
   EXPECT_GT(stmgr_port, 0);
