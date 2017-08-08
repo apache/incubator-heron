@@ -113,6 +113,68 @@ public class ConfigUtilsTests {
     }
   }
 
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testApplyOverrides() throws IOException {
+    final Properties overrideProperties = createOverrideProperties(
+        Pair.create("heron.statemgr.connection.string", "zookeeper:2181"),
+        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+    );
+
+    final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
+
+    final Map<String, String> overrides = createOverrides(
+        Pair.create("my.override.key", "my.override.value")
+    );
+
+    ConfigUtils.applyOverrides(Paths.get(overridesPath), overrides);
+
+    final Map<String, String> combinedOverrides = new HashMap<>();
+    combinedOverrides.putAll(overrides);
+    for (String key : overrideProperties.stringPropertyNames()) {
+      combinedOverrides.put(key, overrideProperties.getProperty(key));
+    }
+
+    try (Reader reader = Files.newBufferedReader(Paths.get(overridesPath))) {
+      final Map<String, Object> newOverrides =
+          (Map<String, Object>) new Yaml().loadAs(reader, Map.class);
+      assertEquals(newOverrides, combinedOverrides);
+    }
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testApplyEmptyOverrides() throws IOException {
+    final Properties overrideProperties = createOverrideProperties(
+        Pair.create("heron.statemgr.connection.string", "zookeeper:2181"),
+        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+    );
+
+    final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
+
+    ConfigUtils.applyOverrides(Paths.get(overridesPath), new HashMap<>());
+
+    final Map<String, String> overrides = new HashMap<>();
+    for (String key : overrideProperties.stringPropertyNames()) {
+      overrides.put(key, overrideProperties.getProperty(key));
+    }
+
+    try (Reader reader = Files.newBufferedReader(Paths.get(overridesPath))) {
+      final Map<String, Object> newOverrides =
+          (Map<String, Object>) new Yaml().loadAs(reader, Map.class);
+      assertEquals(newOverrides, overrides);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<String, String> createOverrides(Pair<String, String>... keyValues) {
+    final Map<String, String> overrides = new HashMap<>();
+    for (Pair<String, String> kv : keyValues) {
+      overrides.put(kv.first, kv.second);
+    }
+    return overrides;
+  }
+
   @SuppressWarnings("unchecked")
   private Properties createOverrideProperties(Pair<String, String>... props) {
     final Properties properties = new Properties();
