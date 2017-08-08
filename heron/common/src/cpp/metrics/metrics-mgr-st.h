@@ -54,9 +54,21 @@ class MetricsMgrSt {
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
-  // Start MetricsMgrClient object
+  //
+  // proto::system::MetricPublisher()
+
+  /**
+      Start MetricsMgrClient object
+
+      @param _my_hostname to build message proto::system::MetricPublisher.
+      @param _my_port to build message proto::system::MetricPublisher.
+      @param _component to build message proto::system::MetricPublisher.
+      @param _task_id to build message proto::system::MetricPublisher.
+      @param eventLoop eventLoop for MetricsMgrClient object.
+  */
   void Start(const sp_string& _my_hostname, sp_int32 _my_port,
-             const sp_string& _component, const sp_string& _task_id,  EventLoop* eventLoop);
+             const sp_string& _component, const sp_string& _task_id,
+             EventLoop* eventLoop);
 
  private:
   void gather_metrics(EventLoop::Status);

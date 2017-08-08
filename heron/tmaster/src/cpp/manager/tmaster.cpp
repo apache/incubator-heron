@@ -83,9 +83,10 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
-      myhost_name_, master_port_, mMetricsMgrPort, "__tmaster__",
-      "0",  // MM expects task_id, so just giving 0 for tmaster.
-      metricsExportIntervalSec, eventLoop_);
+      mMetricsMgrPort, metricsExportIntervalSec, eventLoop_);
+  mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
+                           "0",  // MM expects task_id, so just giving 0 for tmaster.
+                           eventLoop_);
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
