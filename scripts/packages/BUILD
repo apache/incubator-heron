@@ -11,6 +11,7 @@ load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
 load("/tools/rules/heron_client", "heron_client_lib_uploader_files")
+load("/tools/rules/heron_client", "heron_client_lib_healthmgr_files")
 
 load("/tools/rules/heron_core", "heron_core_files")
 load("/tools/rules/heron_core", "heron_core_bin_files")
@@ -34,8 +35,8 @@ generated_release_files = [
     "release.yaml",
 ]
 
-generated_pyheron_egg_file = [
-    "pyheron.whl",
+generated_heronpy_egg_file = [
+    "heronpy.whl",
 ]
 
 filegroup(
@@ -63,9 +64,16 @@ filegroup(
 )
 
 filegroup(
+    name = "testpkgs",
+    srcs = [
+        ":heron-tests-install.sh",
+    ],
+)
+
+filegroup(
     name = "pypkgs",
     srcs = [
-        ":generate-pyheron-package",
+        ":generate-heronpy-package",
     ],
 )
 
@@ -202,6 +210,12 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-lib-healthmgr",
+    package_dir = "lib/healthmgr",
+    files = heron_client_lib_healthmgr_files(),
+)
+
+pkg_tar(
     name = "heron-client-lib-third_party",
     package_dir = "lib/third_party",
     files = heron_client_lib_third_party_files(),
@@ -262,6 +276,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-conf-kubernetes",
+    package_dir = "conf/kubernetes",
+    files = [
+        "//heron/config/src/yaml:conf-kubernetes-yaml",
+    ]
+)
+
+pkg_tar(
     name = "heron-client-conf",
     package_dir = "conf",
     files = heron_client_conf_files(),
@@ -286,6 +308,7 @@ pkg_tar(
         ":heron-client-conf-yarn",
         ":heron-client-conf-mesos",
         ":heron-client-conf-marathon",
+        ":heron-client-conf-kubernetes",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-third_party",
@@ -293,6 +316,56 @@ pkg_tar(
         ":heron-client-lib-packing",
         ":heron-client-lib-statemgr",
         ":heron-client-lib-uploader",
+        ":heron-client-lib-healthmgr",
+    ],
+)
+
+################################################################################
+# Heron test packaging
+################################################################################
+pkg_tar(
+    name = "heron-tests-bin",
+    package_dir = "bin",
+    files = [
+        "//integration_test/src/python/http_server:http-server",
+        "//integration_test/src/python/test_runner:test-runner",
+    ]
+)
+
+pkg_tar(
+    name = "heron-tests-data-java",
+    package_dir = "data/java",
+    files = [
+        "//integration_test/src/java:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-data-python",
+    package_dir = "data/python",
+    files = [
+        "//integration_test/src/python/integration_test/topology:test-data-files",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests-lib",
+    package_dir = "lib",
+    files = [
+       "//integration_test/src/java:integration-tests",
+       "//integration_test/src/python/integration_test/topology:heron_integ_topology",
+    ],
+)
+
+pkg_tar(
+    name = "heron-tests",
+    extension = "tar.gz",
+    files = generated_release_files,
+    deps = [
+        ":heron-tests-bin",
+        ":heron-tests-data-java",
+        ":heron-tests-data-python",
+        ":heron-tests-lib",
     ],
 )
 
@@ -307,48 +380,68 @@ pkg_tar(
 
 ################################################################################
 # Heron python packaging
+# 
+# When a new python module is being added into the heronpy package, please ensure 
+# that its dependencies are being added into the packaging as well. Sometimes,
+# the dependencies might already exist. For example, 
+#   heron/api depends on proto
+#   heron/dsl depends on proto and heron/api
+#
+# Hence the python package consists of the dependencies proto and heron/api.
+# Note that the heron/api is exported as external API for heronpy and it is
+# duplicated for dependency for heron/dsl.
 ################################################################################
 genrule(
-    name = "generate-pyheron-package",
+    name = "generate-heronpy-package",
     srcs = [
-        "pyheron/requirements.txt", 
-        "pyheron/setup.py.template",
+        "heronpy/requirements.txt", 
+        "heronpy/setup.py.template",
+        "heronpy/README.txt",
     ] + generated_release_files,
-    outs = generated_pyheron_egg_file,
+    outs = generated_heronpy_egg_file,
     stamp = 1,
     tools = [
-        "//heron/pyheron/src/python:pyheron-package"
+        "//heron/api/src/python:heron-python-package",
+        "//heron/dsl/src/python:heron-pythondsl-package",
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
         'export RELEASE_FILE_DIR=$$(pwd)',
-        'export TMP_DIR=$$(mktemp -d -t pyheron.XXXXX)',
+        'export TMP_DIR=$$(mktemp -d -t heronpy.XXXXX)',
         'echo $$TMP_DIR',
-        'export PYHERON_DIR=$$TMP_DIR/pyheron',
-        'export PYHERON_UNZIP=$$TMP_DIR/unzipped',
+        'export HERONPY_DIR=$$TMP_DIR/heronpy',
+        'export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip',
+        'export HERONPYDSL_UNZIP=$$TMP_DIR/herondslunzip',
         'export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk \'{print $$3}\')',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
         'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
         'echo $$HERON_VERSION',
-        'mkdir -p $$TMP_DIR $$PYHERON_DIR',
-        'unzip -qd $$PYHERON_UNZIP $(location //heron/pyheron/src/python:pyheron-package)',
-        'find $$PYHERON_UNZIP -name "*.pyc" -exec rm {} \;',
-        'mv $$PYHERON_UNZIP/heron/pyheron/src/python $$PYHERON_DIR/pyheron',
-        'rm -rf $$PYHERON_UNZIP/heron/pyheron',
-        'mv $$PYHERON_UNZIP/heron $$PYHERON_DIR/heron',
-        'cp $(SRCS) $$PYHERON_DIR',
-        'echo "PyHeron toplevel directory: $$PYHERON_DIR"',
-        'cd $$PYHERON_DIR',
+        'mkdir -p $$TMP_DIR $$HERONPY_DIR',
+        'unzip -qd $$HERONPYAPI_UNZIP $(location //heron/api/src/python:heron-python-package)',
+        'unzip -qd $$HERONPYDSL_UNZIP $(location //heron/dsl/src/python:heron-pythondsl-package)',
+        'find $$HERONPYAPI_UNZIP -name "*.pyc" -exec rm {} \;',
+        'find $$HERONPYDSL_UNZIP -name "*.pyc" -exec rm {} \;',
+        'mv $$HERONPYAPI_UNZIP/heron/api/src/python $$HERONPY_DIR/heronpy',
+        'mv $$HERONPYDSL_UNZIP/heron/dsl/src/python $$HERONPY_DIR/heronpy/streamlet',
+        'mv $$HERONPYDSL_UNZIP/heron/proto $$HERONPY_DIR/heronpy/_proto',
+        'rm -rf $$HERONPYAPI_UNZIP/heron/api',
+        'rm -rf $$HERONPYDSL_UNZIP/heron/dsl',
+        'cp $(SRCS) $$HERONPY_DIR',
+        'echo "Heron Python toplevel directory: $$HERONPY_DIR"',
+        'cd $$HERONPY_DIR',
+        'find heronpy -type f -name "*.py" -exec sed -i.bak "s/heron.api.src.python/heronpy/g" {} \;',
+        'find heronpy -type f -name "*.py" -exec sed -i.bak "s/heron.dsl.src.python/heronpy.streamlet/g" {} \;',
+        'find heronpy -type f -name "*.py" -exec sed -i.bak "s/heron.proto/heronpy._proto/g" {} \;',
         'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
+        'find heronpy -type f -name "*.bak" -delete',
         'rm setup.py.template',
-        'tree $$PYHERON_DIR',
         '/usr/bin/env python2.7 setup.py sdist',
         '/usr/bin/env python2.7 setup.py bdist_wheel',
-        'ls -l $$PYHERON_DIR/dist',
-        'cp $$PYHERON_DIR/dist/pyheron-*-py2-*.whl $$OUTPUT_DIR',
-        'cp $$PYHERON_DIR/dist/pyheron-*.tar.gz $$OUTPUT_DIR',
-        'touch $$OUTPUT_DIR/pyheron.whl',
+        'ls -l $$HERONPY_DIR/dist',
+        'cp $$HERONPY_DIR/dist/heronpy-*-py2-*.whl $$OUTPUT_DIR',
+        'cp $$HERONPY_DIR/dist/heronpy-*.tar.gz $$OUTPUT_DIR',
+        'touch $$OUTPUT_DIR/heronpy.whl',
         'rm -rf $$TMP_DIR',
     ]),
 )
@@ -405,6 +498,18 @@ genrule(
         """,
 )
 
+genrule(
+    name = "generate-tests-launcher",
+    srcs = ["tests_template_bin.sh", "bin_common.sh"] + generated_release_files,
+    outs = ["tests_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
+        template="$$(cat $(location tests_template_bin.sh))"
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
 load("self_extract_binary", "self_extract_binary")
 
 self_extract_binary(
@@ -431,6 +536,14 @@ self_extract_binary(
     launcher = ":tools_launcher_bin.sh",
 )
 
+self_extract_binary(
+    name = "heron-tests-install.sh",
+    flatten_resources = [
+        ":heron-tests",
+    ],
+    launcher = ":tests_launcher_bin.sh",
+)
+
 filegroup(
     name = "api-template-bin.sh",
     srcs = ["api_template_bin.sh"],
@@ -444,6 +557,11 @@ filegroup(
 filegroup(
     name = "tools-template-bin.sh",
     srcs = ["tools_template_bin.sh"],
+)
+
+filegroup(
+    name = "tests-template-bin.sh",
+    srcs = ["tests_template_bin.sh"],
 )
 
 filegroup(

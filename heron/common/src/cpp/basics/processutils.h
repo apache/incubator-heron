@@ -20,10 +20,11 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#include <sys/types.h>
-
 #if !defined(__PROCESS_UTILS_H)
 #define __PROCESS_UTILS_H
+
+#include <sys/types.h>
+#include "basics/sptypes.h"
 
 struct rusage;
 
@@ -37,6 +38,9 @@ class ProcessUtils {
 
   // get the total amount of memory used by the process
   static size_t getTotalMemoryUsed();
+
+  // get working directory
+  static sp_string getCurrentWorkingDirectory();
 };
 
 #endif

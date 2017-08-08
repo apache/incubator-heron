@@ -38,6 +38,6 @@ class FileDataHandler(tornado.web.RequestHandler):
     length = self.get_argument("length", default=-1)
     if not os.path.isfile(path):
       return {}
-    data = utils.read_chunk(path, offset, length)
+    data = utils.read_chunk(path, offset=offset, length=length, escape_data=True)
     self.write(json.dumps(data))
     self.finish()

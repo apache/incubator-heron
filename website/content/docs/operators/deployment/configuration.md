@@ -1,6 +1,8 @@
-# Configuring a Cluster
+---
+title: Configuring a Cluster
+---
 
-To setup a Heron cluster, you need to configure a few files. Each file configures 
+To setup a Heron cluster, you need to configure a few files. Each file configures
 a component of the Heron streaming framework.
 
 * **scheduler.yaml** --- This file specifies the required classes for launcher,
@@ -12,8 +14,8 @@ The state manager maintains the running state of the topology as logical plan, p
 scheduler state, and execution state.
 
 * **uploader.yaml** --- This file specifies the classes and configuration for the uploader,
-which uploads the topology jars to storage. Once the containers are scheduled, they will 
-download these jars from the storage for running. 
+which uploads the topology jars to storage. Once the containers are scheduled, they will
+download these jars from the storage for running.
 
 * **heron_internals.yaml** --- This file contains parameters that control
 how heron behaves. Tuning these parameters requires advanced knowledge of heron architecture and its
@@ -45,7 +47,7 @@ heron.class.scheduler: com.twitter.heron.scheduler.aurora.AuroraScheduler
 # launcher class for submitting and launching the topology
 heron.class.launcher: com.twitter.heron.scheduler.aurora.AuroraLauncher
 
-# location of java 
+# location of java
 heron.directory.sandbox.java.home: /usr/lib/jvm/java-1.8.0-openjdk-amd64/
 
 # Invoke the IScheduler as a library directly

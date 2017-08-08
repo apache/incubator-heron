@@ -88,13 +88,14 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--cluster", cl_args['cluster'],
       "--role", cl_args['role'],
       "--environment", cl_args['environ'],
+      "--submit_user", cl_args['submit_user'],
       "--heron_home", config.get_heron_dir(),
       "--config_path", config_path,
       "--override_config_file", cl_args['override_config_file'],
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_bin", topology_file   # pex file if pex specified
+      "--topology_bin", os.path.basename(topology_file)   # pex file if pex specified
   ]
 
   if Log.getEffectiveLevel() == logging.DEBUG:
@@ -193,7 +194,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   result.render(res)
 
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
@@ -237,7 +238,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   result.render(res)
 
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
@@ -258,7 +259,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
       topology_file, topology_class_name, tuple(unknown_args))
 
   result.render(res)
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (topology_class_name, topology_file)
     res.add_context(err_context)

@@ -76,6 +76,7 @@ class HeronStateMgr {
   virtual void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
   virtual void SetMetricsCacheLocationWatch(
                const std::string& _topology_name, VCallback<> _watcher) = 0;
+  virtual void SetPackingPlanWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
 
   // Sets/Gets the Tmaster
   virtual void GetTMasterLocation(const std::string& _topology_name,
@@ -109,6 +110,11 @@ class HeronStateMgr {
   virtual void GetPhysicalPlan(const std::string& _topology_name,
                                proto::system::PhysicalPlan* _return,
                                VCallback<proto::system::StatusCode> _cb) = 0;
+
+  // Gets PackingPlan
+  virtual void GetPackingPlan(const std::string& _topology_name,
+                              proto::system::PackingPlan* _return,
+                              VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets ExecutionState
   virtual void CreateExecutionState(const proto::system::ExecutionState& _st,
@@ -155,6 +161,7 @@ class HeronStateMgr {
   std::string GetMetricsCacheLocationPath(const std::string& _topology_name);
   std::string GetTopologyPath(const std::string& _topology_name);
   std::string GetPhysicalPlanPath(const std::string& _topology_name);
+  std::string GetPackingPlanPath(const std::string& _topology_name);
   std::string GetExecutionStatePath(const std::string& _topology_name);
   std::string GetStatefulCheckpointsPath(const std::string& _topology_name);
 
@@ -162,6 +169,7 @@ class HeronStateMgr {
   std::string GetMetricsCacheLocationDir();
   std::string GetTopologyDir();
   std::string GetPhysicalPlanDir();
+  std::string GetPackingPlanDir();
   std::string GetExecutionStateDir();
   std::string GetStatefulCheckpointsDir();
 

@@ -117,21 +117,29 @@ public final class FileUtils {
   }
 
   public static boolean deleteDir(String dir) {
-    return deleteDir(new File(dir));
+    return deleteDir(new File(dir), true);
   }
 
-  public static boolean deleteDir(File dir) {
+  public static boolean deleteDir(File dir, boolean deleteSelf) {
     if (dir.isDirectory()) {
       String[] children = dir.list();
 
       for (String child : children) {
-        boolean success = deleteDir(new File(dir, child));
+        boolean success = deleteDir(new File(dir, child), true);
         if (!success) {
           return false;
         }
       }
     }
 
-    return dir.delete();
+    if (deleteSelf) {
+      return dir.delete();
+    } else {
+      return true;
+    }
+  }
+
+  public static boolean cleanDir(String dir) {
+    return deleteDir(new File(dir), false);
   }
 }

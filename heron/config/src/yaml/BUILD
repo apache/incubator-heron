@@ -43,6 +43,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-kubernetes-yaml",
+    srcs = glob(["conf/kubernetes/*"]),
+)
+
+filegroup(
     name = "conf-local-heron-internals",
     srcs = ["conf/local/heron_internals.yaml"],
 )

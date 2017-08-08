@@ -14,7 +14,8 @@
 '''Example HalfAckingTopology'''
 import sys
 
-from heron.pyheron.src.python import Grouping, TopologyBuilder, constants
+import heron.api.src.python.api_constants as constants
+from heron.api.src.python import Grouping, TopologyBuilder
 
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import HalfAckBolt
@@ -33,7 +34,8 @@ if __name__ == '__main__':
                                    inputs={word_spout: Grouping.fields('word')},
                                    config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
 
-  topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True,
+  topology_config = {constants.TOPOLOGY_RELIABILITY_MODE:
+                     constants.TopologyReliabilityMode.ATLEAST_ONCE,
                      constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000,
                      constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: 300}
 

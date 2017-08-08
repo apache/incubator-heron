@@ -58,38 +58,8 @@ pex_test(
 )
 
 pex_test(
-    name = "metrics_unittest",
-    srcs = ["metrics_unittest.py"],
-    deps = [
-        "//heron/common/tests/python:pytest-py",
-        "//heron/common/tests/python/utils:common-utils-mock"
-    ],
-    reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
-    ],
-    size = "small",
-)
-
-pex_test(
     name = "outgoing_tuple_helper_unittest",
     srcs = ["outgoing_tuple_helper_unittest.py"],
-    deps = [
-        "//heron/common/tests/python:pytest-py",
-        "//heron/common/tests/python/utils:common-utils-mock"
-    ],
-    reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
-    ],
-    size = "small",
-)
-
-pex_test(
-    name = "serializer_unittest",
-    srcs = ["serializer_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
         "//heron/common/tests/python/utils:common-utils-mock"
@@ -118,8 +88,8 @@ pex_test(
 )
 
 pex_test(
-    name = "topology_context_unittest",
-    srcs = ["topology_context_unittest.py"],
+    name = "topology_context_impl_unittest",
+    srcs = ["topology_context_impl_unittest.py"],
     deps = [
         "//heron/common/tests/python:pytest-py",
         "//heron/common/tests/python/utils:common-utils-mock"

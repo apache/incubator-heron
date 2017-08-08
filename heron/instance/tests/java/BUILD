@@ -8,6 +8,7 @@ test_deps_files = \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
         "//heron/common/src/java:utils-java",
+        "//heron/common/src/java:test-helpers-java",
         "//heron/instance/src/java:instance-java",
         "//third_party/java:junit4",
         "//third_party/java:kryo",

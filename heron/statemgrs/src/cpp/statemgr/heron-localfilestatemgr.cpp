@@ -53,6 +53,9 @@ void HeronLocalFileStateMgr::InitTree() {
   path += "/pplans";
   FileUtils::makeDirectory(path);
   path = dpath;
+  path += "/packingplans";
+  FileUtils::makeDirectory(path);
+  path = dpath;
   path += "/executionstate";
   FileUtils::makeDirectory(path);
   path = dpath;
@@ -82,6 +85,19 @@ void HeronLocalFileStateMgr::SetMetricsCacheLocationWatch(const std::string& top
 
   auto cb = [topology_name, tmaster_last_change, watcher, this](EventLoop::Status status) {
     this->CheckMetricsCacheLocation(topology_name, tmaster_last_change, std::move(watcher), status);
+  };
+
+  CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
+}
+
+void HeronLocalFileStateMgr::SetPackingPlanWatch(const std::string& topology_name,
+                                                 VCallback<> watcher) {
+  CHECK(watcher);
+  // We kind of cheat here. We check periodically
+  time_t packingplan_last_change = FileUtils::getModifiedTime(GetPackingPlanPath(topology_name));
+
+  auto cb = [topology_name, packingplan_last_change, watcher, this](EventLoop::Status status) {
+    this->CheckPackingPlan(topology_name, packingplan_last_change, std::move(watcher), status);
   };
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
@@ -234,6 +250,31 @@ void HeronLocalFileStateMgr::GetPhysicalPlan(const std::string& _topology_name,
   std::string contents;
   proto::system::StatusCode status =
       ReadAllFileContents(GetPhysicalPlanPath(_topology_name), contents);
+  if (status == proto::system::OK) {
+    if (!_return->ParseFromString(contents)) {
+      status = proto::system::STATE_CORRUPTED;
+    }
+  }
+  auto wCb = [cb, status](EventLoop::Status) { cb(status); };
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
+}
+
+void HeronLocalFileStateMgr::CreatePackingPlan(const std::string& _topology_name,
+                                               const proto::system::PackingPlan& _packingPlan,
+                                               VCallback<proto::system::StatusCode> _cb) {
+  std::string fname = GetPackingPlanPath(_topology_name);
+  std::string contents;
+  _packingPlan.SerializeToString(&contents);
+
+  WriteToFile(fname, contents);
+}
+
+void HeronLocalFileStateMgr::GetPackingPlan(const std::string& _topology_name,
+                                             proto::system::PackingPlan* _return,
+                                             VCallback<proto::system::StatusCode> cb) {
+  std::string contents;
+  proto::system::StatusCode status =
+      ReadAllFileContents(GetPackingPlanPath(_topology_name), contents);
   if (status == proto::system::OK) {
     if (!_return->ParseFromString(contents)) {
       status = proto::system::STATE_CORRUPTED;
@@ -448,6 +489,22 @@ void HeronLocalFileStateMgr::CheckMetricsCacheLocation(
 
   auto cb = [topology_name, nlast_change, watcher, this](EventLoop::Status status) {
     this->CheckMetricsCacheLocation(topology_name, nlast_change, std::move(watcher), status);
+  };
+
+  CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
+}
+
+void HeronLocalFileStateMgr::CheckPackingPlan(std::string topology_name, time_t last_change,
+                                              VCallback<> watcher, EventLoop::Status) {
+  time_t nlast_change = FileUtils::getModifiedTime(GetPackingPlanPath(topology_name));
+  if (nlast_change > last_change) {
+    watcher();
+  } else {
+    nlast_change = last_change;
+  }
+
+  auto cb = [topology_name, nlast_change, watcher, this](EventLoop::Status status) {
+    this->CheckPackingPlan(topology_name, nlast_change, std::move(watcher), status);
   };
 
   CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);

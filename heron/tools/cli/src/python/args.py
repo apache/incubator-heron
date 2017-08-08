@@ -41,18 +41,6 @@ def add_verbose(parser):
   return parser
 
 
-def add_trace_execution(parser):
-  '''
-  :param parser:
-  :return:
-  '''
-  parser.add_argument(
-      '--trace-execution',
-      metavar='(a boolean; default: "false")',
-      default=False)
-  return parser
-
-
 def add_topology(parser):
   '''
   :param parser:

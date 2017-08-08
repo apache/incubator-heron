@@ -14,7 +14,6 @@
 
 package com.twitter.heron.common.basics;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +28,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 
 /**
@@ -135,7 +133,7 @@ public class FileUtilsTest {
   public void testDeleteDirWithFile() throws IOException {
     // Test delete a file
     Path file = Files.createTempFile("testDeleteFile", "txt");
-    Assert.assertEquals(true, FileUtils.deleteDir(file.toFile()));
+    Assert.assertEquals(true, FileUtils.deleteDir(file.toFile(), true));
     Assert.assertFalse(file.toFile().exists());
   }
 
@@ -155,12 +153,35 @@ public class FileUtilsTest {
 
     PowerMockito.spy(FileUtils.class);
 
-    FileUtils.deleteDir(parent.toFile());
+    FileUtils.deleteDir(parent.toFile(), true);
 
     PowerMockito.verifyStatic(times(4));
-    FileUtils.deleteDir(any(File.class));
 
     Assert.assertFalse(parent.toFile().exists());
+    Assert.assertFalse(child1.toFile().exists());
+    Assert.assertFalse(child2.toFile().exists());
+    Assert.assertFalse(child3.toFile().exists());
+  }
+
+  /**
+   * Method: cleanDir(String dir)
+   */
+  @Test
+  public void testCleanDir() throws IOException {
+    // Test clean dirs,
+    //  parent/ -- child1/ -- child3/
+    //          |
+    //          -- child2/
+    Path parent = Files.createTempDirectory("testDeleteDir");
+    Path child1 = Files.createTempDirectory(parent, "child1");
+    Path child2 = Files.createTempDirectory(parent, "child2");
+    Path child3 = Files.createTempDirectory(child1, "child3");
+
+    PowerMockito.spy(FileUtils.class);
+
+    FileUtils.cleanDir(parent.toString());
+
+    Assert.assertTrue(parent.toFile().exists());
     Assert.assertFalse(child1.toFile().exists());
     Assert.assertFalse(child2.toFile().exists());
     Assert.assertFalse(child3.toFile().exists());

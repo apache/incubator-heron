@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -31,7 +33,6 @@ import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.network.MetricsManagerClient;
 import com.twitter.heron.network.StreamManagerClient;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
@@ -66,8 +67,8 @@ public class Gateway implements Runnable, AutoCloseable {
    */
   public Gateway(String topologyName, String topologyId, PhysicalPlans.Instance instance,
                  int streamPort, int metricsPort, final NIOLooper gatewayLooper,
-                 final Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
-                 final Communicator<HeronTuples.HeronTupleSet> outStreamQueue,
+                 final Communicator<Message> inStreamQueue,
+                 final Communicator<Message> outStreamQueue,
                  final Communicator<InstanceControlMsg> inControlQueue,
                  final List<Communicator<Metrics.MetricPublisherPublishMessage>> outMetricsQueues)
       throws IOException {
@@ -99,7 +100,8 @@ public class Gateway implements Runnable, AutoCloseable {
         systemConfig.getInstanceNetworkReadBatchSize(),
         systemConfig.getInstanceNetworkReadBatchTime(),
         systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
-        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize()
+        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize(),
+        systemConfig.getInstanceNetworkOptionsMaximumPacketSize()
     );
     this.streamManagerClient =
         new StreamManagerClient(gatewayLooper, STREAM_MGR_HOST, streamPort,

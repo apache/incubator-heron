@@ -14,11 +14,15 @@
 
 package com.twitter.heron.instance;
 
+import java.io.Serializable;
+
+import com.google.protobuf.Message;
+
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.classification.InterfaceAudience;
 import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.proto.system.HeronTuples;
 
 /**
  * Implementing this interface allows an object to be target of HeronInstance
@@ -29,7 +33,7 @@ public interface IInstance {
   /**
    * Do the basic setup for HeronInstance
    */
-  void start();
+  void start(State<Serializable, Serializable> state);
 
   /**
    * Do the basic clean for HeronInstance
@@ -44,7 +48,7 @@ public interface IInstance {
    *
    * @param inQueue the queue to read tuples from
    */
-  void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
+  void readTuplesAndExecute(Communicator<Message> inQueue);
 
   /**
    * Activate the instance
@@ -61,4 +65,10 @@ public interface IInstance {
    * @param physicalPlanHelper
    */
   void update(PhysicalPlanHelper physicalPlanHelper);
+
+  /**
+   * Save the state and send it out for persistence
+   * @param checkpointId
+   */
+  void persistState(String checkpointId);
 }
