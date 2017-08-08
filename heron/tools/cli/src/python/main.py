@@ -155,7 +155,6 @@ def server_deployment_mode(command, parser, cluster, cl_args):
   :param cl_args:
   :return:
   '''
-  print cl_args
   config_file = config.heron_rc_file()
   client_confs = dict()
 
@@ -168,7 +167,6 @@ def server_deployment_mode(command, parser, cluster, cl_args):
     client_confs = dict()
     client_confs[cluster] = dict()
 
-  print client_confs
   # now check if the service-url from command line is set, if so override it
   if cl_args['service_url']:
     client_confs[cluster]['service_url'] = cl_args['service_url']
@@ -326,8 +324,6 @@ def main():
     sys.exit(1)
 
   command_line_args = vars(args)
-
-  print command_line_args
 
   # command to be execute
   command = command_line_args['subcommand']
