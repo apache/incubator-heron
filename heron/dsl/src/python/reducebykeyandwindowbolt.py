@@ -16,6 +16,11 @@ import collections
 
 from heron.api.src.python import SlidingWindowBolt, Stream
 from heron.api.src.python.custom_grouping import ICustomGrouping
+from heron.api.src.python.component import GlobalStreamId
+from heron.api.src.python.stream import Grouping
+
+from heron.dsl.src.python import Streamlet, TimeWindow
+from heron.dsl.src.python import OperationType
 
 # pylint: disable=unused-argument
 class ReduceByKeyAndWindowBolt(SlidingWindowBolt):
@@ -69,3 +74,43 @@ class ReduceGrouping(ICustomGrouping):
     hashvalue = hash(userdata[0])
     target_index = hashvalue % len(self.target_tasks)
     return [self.target_tasks[target_index]]
+
+# pylint: disable=protected-access
+class ReduceByKeyAndWindowStreamlet(Streamlet):
+  """ReduceByKeyAndWindowStreamlet"""
+  def __init__(self, time_window, reduce_function, parents, stage_name=None, parallelism=None):
+    op = OperationType.ReduceByKeyAndWindow
+    super(ReduceByKeyAndWindowStreamlet, self).__init__(parents=parents,
+                                                        operation=op,
+                                                        stage_name=stage_name,
+                                                        parallelism=parallelism)
+    self._time_window = time_window
+    self._reduce_function = reduce_function
+
+  def _calculate_inputs(self):
+    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
+            Grouping.custom("heron.dsl.src.python.reducebykeyandwindowbolt.ReduceGrouping")}
+
+  def _calculate_stage_name(self, existing_stage_names):
+    funcname = "reducebykeyandwindow-" + self._reduce_function.__name__
+    if funcname not in existing_stage_names:
+      return funcname
+    else:
+      index = 1
+      newfuncname = funcname + str(index)
+      while newfuncname in existing_stage_names:
+        index = index + 1
+        newfuncname = funcname + str(index)
+      return newfuncname
+
+  def _build_this(self, builder):
+    if not callable(self._reduce_function):
+      raise RuntimeError("reduce function must be callable")
+    if not isinstance(self._time_window, TimeWindow):
+      raise RuntimeError("reduce's time_window should be TimeWindow")
+    builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
+                     inputs=self._inputs,
+                     config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
+                             ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
+                             ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
+                             self._time_window.sliding_interval})
