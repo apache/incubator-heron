@@ -23,7 +23,7 @@ class FixedLinesStreamlet(Streamlet):
   """
   # pylint: disable=no-self-use
   def __init__(self, stage_name=None, parallelism=None):
-    super(FixedLinesStreamlet, self).__init__(operation=OperationType.Input,
+    super(FixedLinesStreamlet, self).__init__(parents=[], operation=OperationType.Input,
                                               stage_name=stage_name,
                                               parallelism=parallelism)
 
@@ -31,16 +31,21 @@ class FixedLinesStreamlet(Streamlet):
   def fixedLinesGenerator(stage_name=None, parallelism=None):
     return FixedLinesStreamlet(stage_name=stage_name, parallelism=parallelism)
 
-  def _build(self, bldr, stage_names):
-    if self._parallelism is None:
-      self._parallelism = 1
-    if self._parallelism < 1:
-      raise RuntimeError("FixedLines parallelism has to be >= 1")
-    if self._stage_name is None:
+  # pylint: disable=no-self-use
+  def _calculate_inputs(self):
+    return {}
+
+  def _calculate_stage_name(self, existing_stage_names):
+    stagename = "fixedlines"
+    if stagename not in existing_stage_names:
+      return stagename
+    else:
       index = 1
-      self._stage_name = "fixedlines"
-      while self._stage_name in stage_names:
+      newname = stagename + str(index)
+      while newname in existing_stage_names:
         index = index + 1
-        self._stage_name = "fixedlines" + str(index)
-      bldr.add_spout(self._stage_name, FixedLinesSpout, par=self._parallelism)
-    return bldr
+        newname = stagename + str(index)
+      return newname
+
+  def _build_this(self, bldr):
+    bldr.add_spout(self._stage_name, FixedLinesSpout, par=self._parallelism)
