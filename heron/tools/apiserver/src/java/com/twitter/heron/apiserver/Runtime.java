@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.twitter.heron.apiserver.resources.HeronResource;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
+import com.twitter.heron.apiserver.utils.Logging;
 import com.twitter.heron.spi.common.Config;
 
 public final class Runtime {
@@ -51,7 +52,8 @@ public final class Runtime {
     ConfigPath("config-path"),
     Port("port"),
     Property("D"),
-    ReleaseFile("release-file");
+    ReleaseFile("release-file"),
+    Verbose("verbose");
 
     final String name;
 
@@ -108,13 +110,22 @@ public final class Runtime {
         .required(false)
         .build();
 
+    final Option verbose = Option.builder()
+        .desc("Verbose mode. Increases logging level to show debug messages.")
+        .longOpt(Flag.Verbose.name)
+        .hasArg(false)
+        .argName(Flag.Verbose.name)
+        .required(false)
+        .build();
+
     return new Options()
         .addOption(baseTemplate)
         .addOption(cluster)
         .addOption(config)
         .addOption(port)
         .addOption(release)
-        .addOption(property);
+        .addOption(property)
+        .addOption(verbose);
   }
 
   private static Options constructHelpOptions() {
@@ -138,9 +149,12 @@ public final class Runtime {
   private static String getConfigurationDirectory(String toolsHome, CommandLine cmd) {
     if (cmd.hasOption(Flag.ConfigPath.name)) {
       return cmd.getOptionValue(Flag.ConfigPath.name);
+    } else if(cmd.hasOption(Flag.BaseTemplate.name)) {
+      return Paths.get(toolsHome, Constants.DEFAULT_HERON_CONFIG_DIRECTORY,
+          cmd.getOptionValue(Flag.BaseTemplate.name)).toFile().getAbsolutePath();
     }
     return Paths.get(toolsHome, Constants.DEFAULT_HERON_CONFIG_DIRECTORY,
-        cmd.getOptionValue(Flag.BaseTemplate.name)).toFile().getAbsolutePath();
+        cmd.getOptionValue(Flag.Cluster.name)).toFile().getAbsolutePath();
   }
 
   private static String getHeronDirectory(CommandLine cmd) {
@@ -174,6 +188,10 @@ public final class Runtime {
     final String jarLocation =
         Runtime.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
     return Paths.get(jarLocation).getParent().getParent().toFile().getAbsolutePath();
+  }
+
+  private static Boolean isVerbose(CommandLine cmd) {
+    return cmd.hasOption(Flag.Verbose.name) ? Boolean.TRUE : Boolean.FALSE;
   }
 
   @SuppressWarnings({"IllegalCatch", "RegexpSinglelineJava"})
@@ -232,6 +250,9 @@ public final class Runtime {
         configurationOverrides);
 
     server.setHandler(contextHandler);
+
+    // set logging level
+    Logging.setVerbose(isVerbose(cmd));
 
     final ServletHolder apiServlet =
         new ServletHolder(new ServletContainer(config));

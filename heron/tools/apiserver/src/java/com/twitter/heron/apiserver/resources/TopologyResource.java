@@ -45,6 +45,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.twitter.heron.apiserver.Constants;
 import com.twitter.heron.apiserver.actions.ActionFactory;
@@ -53,6 +55,7 @@ import com.twitter.heron.apiserver.actions.ActionType;
 import com.twitter.heron.apiserver.actions.Keys;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.FileHelper;
+import com.twitter.heron.apiserver.utils.Logging;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
@@ -60,6 +63,8 @@ import com.twitter.heron.spi.common.Key;
 
 @Path("/topologies")
 public class TopologyResource extends HeronResource {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TopologyResource.class);
 
   private static final String TOPOLOGY_TAR_GZ_FILENAME = "topology.tar.gz";
 
@@ -324,6 +329,7 @@ public class TopologyResource extends HeronResource {
           .entity(createMessage(String.format("%s updated", name)))
           .build();
     } catch (Exception ex) {
+      LOG.error("error updating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -378,7 +384,7 @@ public class TopologyResource extends HeronResource {
     for (Pair<String, Object> keyValue : keyValues) {
       builder.put(keyValue.first, keyValue.second);
     }
-    builder.put(Key.VERBOSE, Boolean.TRUE);
+    builder.put(Key.VERBOSE, Logging.isVerbose());
     return Config.toLocalMode(builder.build());
   }
 
