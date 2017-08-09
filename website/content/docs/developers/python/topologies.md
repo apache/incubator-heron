@@ -2,16 +2,15 @@
 title: Python Topologies
 ---
 
-> The current version of `py_heron` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
+> As of Heron versoin 0.15.0, there is an alternative [Python DSL](../python-dsl) for writing stream processing logic in a more functional style.
 
-Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy).
+Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy). The current version of `heronpy` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
 
-> #### Python API docs
-> You can find API docs for the `heronpy` library [here](/api/python).
+> You can find API docs for the latest version of the `heronpy` library [here](/api/python).
 
 ## Setup
 
-First, you need to install the `heronpy` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
+To create Heron topologies in Python, you first need to install the `heronpy` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
 
 ```shell
 $ pip install heronpy

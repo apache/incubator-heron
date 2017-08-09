@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-topology.py: module for defining Heron topologies in Python
-"""
 
 import os
 import uuid
@@ -249,34 +246,34 @@ class TopologyType(type):
     return sanitized
 
 class Topology(object):
-  """Topology is an abstract class for defining a topology
+  """Topology is an abstract class for defining a topology.
 
-  Topology writers can define their custom topology by inheriting this class.
-  The usage of this class is compatible with StreamParse API.
+  Topology writers can define their custom topologies by inheriting this class.
+  The usage of this class is compatible with the StreamParse API for Storm.
 
   Defining a topology is simple. Topology writers need to create a subclass, in which information
   about the components in their topology and how they connect to each other are specified
   by placing `HeronComponentSpec` as class instances.
-  For more information, refer to `spec()` method of both the `Bolt` and `Spout` classes.
+  For more information, refer to the `spec()` method of both the `Bolt` and `Spout` classes.
 
-  In addition, you can also set a topology-wide configuration, by adding a ``config`` class
-  attribute to your topology class, that is dict mapping from option names to their values.
-  Note that topology-wide configurations are overridden by component-specific configurations
-  that might be specified from ``spec()`` method of ``Bolt`` or ``Spout`` class.
+  In addition, you can also set a topology-wide configuration by adding a `config` class
+  attribute to your topology class, which is a dict mapping option names to their values.
+  Please note that topology-wide configurations are overridden by component-specific
+  configurations that might be specified in the `spec()` method of the `Bolt` or `Spout` class.
 
-  **Example**: A sample `WordCountTopology` can be defined as follows:
+  **Example**: A sample word count topology can be defined as follows:
 
-    #!python
-    from heron.api.src.python import Topology
-    from heron.examples.src.python import WordSpout, CountBolt
+      #!python
+      from heron.api.src.python import Topology
+      from heron.examples.src.python import WordSpout, CountBolt
 
-    class WordCount(Topology):
-        config = {"topology.wide.config": "some value"}
+      class WordCount(Topology):
+          config = {"topology.wide.config": "some value"}
 
-        word_spout = WordSpout.spec(par=1)
-        count_bolt = CountBolt.spec(par=1,
-                                    inputs={word_spout: Grouping.fields('word')},
-                                    config={"count_bolt.specific.config": "another value"})
+          word_spout = WordSpout.spec(par=1)
+          count_bolt = CountBolt.spec(par=1,
+                                      inputs={word_spout: Grouping.fields('word')},
+                                      config={"count_bolt.specific.config": "another value"})
   """
   __metaclass__ = TopologyType
 
@@ -303,21 +300,21 @@ class TopologyBuilder(object):
 
   **Example**: A sample `WordCountTopology` can be defined as follows:
 
-    #!python
-    import sys
-    from heron.api.src.python import TopologyBuilder
-    from heron.examples.spout import WordSpout
-    from heron.examples.bolt import CountBolt
+      #!python
+      import sys
+      from heron.api.src.python import TopologyBuilder
+      from heron.examples.spout import WordSpout
+      from heron.examples.bolt import CountBolt
 
-    if __name__ == '__main__':
-        builder = TopologyBuilder(name=sys.argv[1])
-        word_spout = builder.add_spout("word-spout", WordSpout, 2)
+      if __name__ == '__main__':
+          builder = TopologyBuilder(name=sys.argv[1])
+          word_spout = builder.add_spout("word-spout", WordSpout, 2)
 
-        builder.add_bolt("count-bolt", CountBolt, 2,
-                         inputs={word_spout: Grouping.fields('word')},
-                         config={"count_bolt.specific.config": "some value"})
+          builder.add_bolt("count-bolt", CountBolt, 2,
+                          inputs={word_spout: Grouping.fields('word')},
+                          config={"count_bolt.specific.config": "some value"})
 
-        builder.build_and_submit()
+          builder.build_and_submit()
   """
   def __init__(self, name):
     """Initialize this TopologyBuilder
