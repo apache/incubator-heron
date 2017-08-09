@@ -50,6 +50,7 @@ import com.twitter.heron.apiserver.Constants;
 import com.twitter.heron.apiserver.actions.ActionFactory;
 import com.twitter.heron.apiserver.actions.ActionFactoryImpl;
 import com.twitter.heron.apiserver.actions.ActionType;
+import com.twitter.heron.apiserver.actions.Keys;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.FileHelper;
 import com.twitter.heron.common.basics.FileUtils;
@@ -142,11 +143,11 @@ public class TopologyResource extends HeronResource {
 
       final Config config = configWithKeyValues(
           Arrays.asList(
-              Pair.create(Key.CLUSTER, cluster),
-              Pair.create(Key.TOPOLOGY_NAME, topologyName),
-              Pair.create(Key.ROLE, role),
-              Pair.create(Key.ENVIRON, environment),
-              Pair.create(Key.SUBMIT_USER, user)
+              Pair.create(Key.CLUSTER.value(), cluster),
+              Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
+              Pair.create(Key.ROLE.value(), role),
+              Pair.create(Key.ENVIRON.value(), environment),
+              Pair.create(Key.SUBMIT_USER.value(), user)
           )
       );
 
@@ -253,6 +254,7 @@ public class TopologyResource extends HeronResource {
   @POST
   @Path("/{cluster}/{role}/{environment}/{name}/restart")
   @Produces(MediaType.APPLICATION_JSON)
+  @SuppressWarnings("IllegalCatch")
   public Response restart(
       final @PathParam("cluster") String cluster,
       final @PathParam("role") String role,
@@ -260,16 +262,13 @@ public class TopologyResource extends HeronResource {
       final @PathParam("name") String name,
       final @DefaultValue("-1") @FormParam("container_id") int containerId) {
     try {
-
-      System.out.println("form keys: " + containerId);
-
-      final List<Pair<Key, Object>> keyValues = new ArrayList<>(
+      final List<Pair<String, Object>> keyValues = new ArrayList<>(
           Arrays.asList(
-            Pair.create(Key.CLUSTER, cluster),
-            Pair.create(Key.ROLE, role),
-            Pair.create(Key.ENVIRON, environment),
-            Pair.create(Key.TOPOLOGY_NAME, name),
-            Pair.create(Key.TOPOLOGY_CONTAINER_ID,  containerId)
+            Pair.create(Key.CLUSTER.value(), cluster),
+            Pair.create(Key.ROLE.value(), role),
+            Pair.create(Key.ENVIRON.value(), environment),
+            Pair.create(Key.TOPOLOGY_NAME.value(), name),
+            Pair.create(Key.TOPOLOGY_CONTAINER_ID.value(),  containerId)
           )
       );
 
@@ -279,6 +278,50 @@ public class TopologyResource extends HeronResource {
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(String.format("%s restarted", name)))
+          .build();
+    } catch (Exception ex) {
+      return Response.serverError()
+          .type(MediaType.APPLICATION_JSON)
+          .entity(createMessage(ex.getMessage()))
+          .build();
+    }
+  }
+
+  @POST
+  @Path("/{cluster}/{role}/{environment}/{name}/update")
+  @Produces(MediaType.APPLICATION_JSON)
+  @SuppressWarnings("IllegalCatch")
+  public Response update(
+      final @PathParam("cluster") String cluster,
+      final @PathParam("role") String role,
+      final @PathParam("environment") String environment,
+      final @PathParam("name") String name,
+      final @FormParam("component_parallelism") List<String> components) {
+    try {
+      if (components == null) {
+        return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
+            .type(MediaType.APPLICATION_JSON)
+            .entity(createMessage("missing component_parallelism param"))
+            .build();
+      }
+
+      final List<Pair<String, Object>> keyValues = new ArrayList<>(
+          Arrays.asList(
+              Pair.create(Key.CLUSTER.value(), cluster),
+              Pair.create(Key.ROLE.value(), role),
+              Pair.create(Key.ENVIRON.value(), environment),
+              Pair.create(Key.TOPOLOGY_NAME.value(), name),
+              Pair.create(Keys.NEW_COMPONENT_PARALLELISM_KEY,
+                  String.join(",", components))
+          )
+      );
+
+      final Config config = configWithKeyValues(keyValues);
+      getActionFactory().createRuntimeAction(config, ActionType.UPDATE).execute();
+
+      return Response.ok()
+          .type(MediaType.APPLICATION_JSON)
+          .entity(createMessage(String.format("%s updated", name)))
           .build();
     } catch (Exception ex) {
       return Response.serverError()
@@ -323,16 +366,16 @@ public class TopologyResource extends HeronResource {
   private Config getConfig(String cluster, String role, String environment, String topologyName) {
     return configWithKeyValues(
         Arrays.asList(
-            Pair.create(Key.CLUSTER, cluster),
-            Pair.create(Key.ROLE, role),
-            Pair.create(Key.ENVIRON, environment),
-            Pair.create(Key.TOPOLOGY_NAME, topologyName)
+            Pair.create(Key.CLUSTER.value(), cluster),
+            Pair.create(Key.ROLE.value(), role),
+            Pair.create(Key.ENVIRON.value(), environment),
+            Pair.create(Key.TOPOLOGY_NAME.value(), topologyName)
         ));
   }
 
-  private Config configWithKeyValues(Collection<Pair<Key, Object>> keyValues) {
+  private Config configWithKeyValues(Collection<Pair<String, Object>> keyValues) {
     final Config.Builder builder = Config.newBuilder().putAll(getBaseConfiguration());
-    for (Pair<Key, Object> keyValue : keyValues) {
+    for (Pair<String, Object> keyValue : keyValues) {
       builder.put(keyValue.first, keyValue.second);
     }
     builder.put(Key.VERBOSE, Boolean.TRUE);

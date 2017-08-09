@@ -42,7 +42,7 @@ import com.twitter.heron.spi.utils.TMasterException;
 import com.twitter.heron.spi.utils.TMasterUtils;
 
 public class RuntimeManagerRunner {
-  static final String NEW_COMPONENT_PARALLELISM_KEY = "NEW_COMPONENT_PARALLELISM";
+  public static final String NEW_COMPONENT_PARALLELISM_KEY = "NEW_COMPONENT_PARALLELISM";
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
   private final Config config;
   private final Config runtime;

@@ -13,18 +13,13 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver.actions;
 
-import com.twitter.heron.scheduler.Command;
+import com.twitter.heron.scheduler.RuntimeManagerRunner;
 
-public enum  ActionType {
-  KILL(Command.KILL),
-  ACTIVATE(Command.ACTIVATE),
-  DEACTIVATE(Command.DEACTIVATE),
-  RESTART(Command.RESTART),
-  UPDATE(Command.UPDATE);
+public final class Keys {
 
-  public final Command command;
+  public static final String NEW_COMPONENT_PARALLELISM_KEY =
+      RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY;
 
-  ActionType(Command command) {
-    this.command = command;
+  private Keys() {
   }
 }
