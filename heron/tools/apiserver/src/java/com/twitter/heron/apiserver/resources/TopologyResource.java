@@ -37,6 +37,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,6 +100,9 @@ public class TopologyResource extends HeronResource {
       FORM_KEY_DEFINITION,
       FORM_KEY_TOPOLOGY
   };
+
+  private static final String PARAM_COMPONENT_PARALLELISM = "component_parallelism";
+
 
   // path format /topologies/{cluster}/{role}/{environment}/{name}
   private static final String TOPOLOGY_PATH_FORMAT = "/topologies/%s/%s/%s/%s";
@@ -301,15 +305,17 @@ public class TopologyResource extends HeronResource {
       final @PathParam("role") String role,
       final @PathParam("environment") String environment,
       final @PathParam("name") String name,
-      final @FormParam("component_parallelism") List<String> components) {
+      MultivaluedMap<String, String> params) {
+    System.out.println("processing update request...");
     try {
-      if (components == null) {
+      if (params == null || !params.containsKey(PARAM_COMPONENT_PARALLELISM)) {
         return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
             .type(MediaType.APPLICATION_JSON)
             .entity(createMessage("missing component_parallelism param"))
             .build();
       }
 
+      List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
       final List<Pair<String, Object>> keyValues = new ArrayList<>(
           Arrays.asList(
               Pair.create(Key.CLUSTER.value(), cluster),
@@ -320,6 +326,12 @@ public class TopologyResource extends HeronResource {
                   String.join(",", components))
           )
       );
+
+      final Set<Pair<String, Object>> overrides = getUpdateOverrides(params);
+      // apply overrides if they exists
+      if (!overrides.isEmpty()) {
+        keyValues.addAll(overrides);
+      }
 
       final Config config = configWithKeyValues(keyValues);
       getActionFactory().createRuntimeAction(config, ActionType.UPDATE).execute();
@@ -405,6 +417,16 @@ public class TopologyResource extends HeronResource {
     for (String key : form.getFields().keySet()) {
       if (!SUBMIT_TOPOLOGY_PARAMS.contains(key)) {
         overrides.put(key, Forms.getString(form, key));
+      }
+    }
+    return overrides;
+  }
+
+  private static Set<Pair<String, Object>> getUpdateOverrides(MultivaluedMap<String, String> params) {
+    final Set<Pair<String, Object>> overrides = new HashSet<>();
+    for (String key : params.keySet()) {
+      if (!PARAM_COMPONENT_PARALLELISM.equalsIgnoreCase(key)) {
+        overrides.add(Pair.create(key, params.getFirst(key)));
       }
     }
     return overrides;
