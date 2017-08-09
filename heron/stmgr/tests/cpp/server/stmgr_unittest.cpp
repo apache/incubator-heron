@@ -285,6 +285,7 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
   mgr->Init();
   stmgr_port = mgr->GetServerNetworkOptions().get_port();
   EXPECT_GT(stmgr_port, 0);
+  std::cerr << "stmgr_port " << stmgr_port << std::endl;
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
