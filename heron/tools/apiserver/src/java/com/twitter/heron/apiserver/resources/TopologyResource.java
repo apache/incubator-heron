@@ -30,6 +30,8 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -248,6 +250,44 @@ public class TopologyResource extends HeronResource {
     }
   }
 
+  @POST
+  @Path("/{cluster}/{role}/{environment}/{name}/restart")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response restart(
+      final @PathParam("cluster") String cluster,
+      final @PathParam("role") String role,
+      final @PathParam("environment") String environment,
+      final @PathParam("name") String name,
+      final @DefaultValue("-1") @FormParam("container_id") int containerId) {
+    try {
+
+      System.out.println("form keys: " + containerId);
+
+      final List<Pair<Key, Object>> keyValues = new ArrayList<>(
+          Arrays.asList(
+            Pair.create(Key.CLUSTER, cluster),
+            Pair.create(Key.ROLE, role),
+            Pair.create(Key.ENVIRON, environment),
+            Pair.create(Key.TOPOLOGY_NAME, name),
+            Pair.create(Key.TOPOLOGY_CONTAINER_ID,  containerId)
+          )
+      );
+
+      final Config config = configWithKeyValues(keyValues);
+      getActionFactory().createRuntimeAction(config, ActionType.RESTART).execute();
+
+      return Response.ok()
+          .type(MediaType.APPLICATION_JSON)
+          .entity(createMessage(String.format("%s restarted", name)))
+          .build();
+    } catch (Exception ex) {
+      return Response.serverError()
+          .type(MediaType.APPLICATION_JSON)
+          .entity(createMessage(ex.getMessage()))
+          .build();
+    }
+  }
+
   @DELETE
   @Path("/{cluster}/{role}/{environment}/{name}")
   @Produces(MediaType.APPLICATION_JSON)
@@ -290,9 +330,9 @@ public class TopologyResource extends HeronResource {
         ));
   }
 
-  private Config configWithKeyValues(Collection<Pair<Key, String>> keyValues) {
+  private Config configWithKeyValues(Collection<Pair<Key, Object>> keyValues) {
     final Config.Builder builder = Config.newBuilder().putAll(getBaseConfiguration());
-    for (Pair<Key, String> keyValue : keyValues) {
+    for (Pair<Key, Object> keyValue : keyValues) {
       builder.put(keyValue.first, keyValue.second);
     }
     builder.put(Key.VERBOSE, Boolean.TRUE);

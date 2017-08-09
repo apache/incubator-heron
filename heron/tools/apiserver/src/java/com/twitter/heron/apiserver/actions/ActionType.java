@@ -18,7 +18,8 @@ import com.twitter.heron.scheduler.Command;
 public enum  ActionType {
   KILL(Command.KILL),
   ACTIVATE(Command.ACTIVATE),
-  DEACTIVATE(Command.DEACTIVATE);
+  DEACTIVATE(Command.DEACTIVATE),
+  RESTART(Command.RESTART);
 
   public final Command command;
 
