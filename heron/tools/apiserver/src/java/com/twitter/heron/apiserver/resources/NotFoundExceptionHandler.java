@@ -33,8 +33,8 @@ public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundExcepti
         .enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);
     final ObjectNode node = mapper.createObjectNode();
     final ArrayNode arrayNode = node.putArray("paths");
-    arrayNode.add("/api/v1/config");
     arrayNode.add("/api/v1/topologies");
+    arrayNode.add("/api/v1/version");
 
     final String response;
     try {

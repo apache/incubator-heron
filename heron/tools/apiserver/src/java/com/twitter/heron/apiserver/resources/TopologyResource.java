@@ -21,7 +21,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -66,6 +70,20 @@ public class TopologyResource extends HeronResource {
   private static final String FORM_KEY_TOPOLOGY = "topology";
   private static final String FORM_KEY_USER = "user";
 
+  private static final Set<String> SUBMIT_TOPOLOGY_PARAMS = Collections.unmodifiableSet(
+      new HashSet<>(
+        Arrays.asList(
+            FORM_KEY_NAME,
+            FORM_KEY_CLUSTER,
+            FORM_KEY_ROLE,
+            FORM_KEY_ENVIRONMENT,
+            FORM_KEY_DEFINITION,
+            FORM_KEY_TOPOLOGY,
+            FORM_KEY_USER
+        )
+      )
+  );
+
   private static final String[] REQUIRED_SUBMIT_TOPOLOGY_PARAMS = {
       FORM_KEY_NAME,
       FORM_KEY_CLUSTER,
@@ -89,9 +107,11 @@ public class TopologyResource extends HeronResource {
         verifyKeys(form.getFields().keySet(), REQUIRED_SUBMIT_TOPOLOGY_PARAMS);
     if (!missingDataKeys.isEmpty()) {
       // return error since we are missing required parameters
+      final String message = String.format("Validation failed missing required params: %s",
+          missingDataKeys.toString());
       return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
           .type(MediaType.APPLICATION_JSON)
-          .entity(createValidationError("Validation failed", missingDataKeys))
+          .entity(createValidationError(message, missingDataKeys))
           .build();
     }
 
@@ -101,6 +121,10 @@ public class TopologyResource extends HeronResource {
     final String environment =
         Forms.getString(form, FORM_KEY_ENVIRONMENT, Constants.DEFAULT_HERON_ENVIRONMENT);
     final String user = Forms.getString(form, FORM_KEY_USER, role);
+
+    // submit overrides are passed key=value
+    final Map<String, String> submitOverrides = getSubmitOverrides(form);
+
 
     final String topologyDirectory =
         Files.createTempDirectory(topologyName).toFile().getAbsolutePath();
@@ -130,15 +154,18 @@ public class TopologyResource extends HeronResource {
           Paths.get(getConfigurationDirectory()),
           Paths.get(topologyDirectory, Constants.DEFAULT_HERON_SANDBOX_CONFIG));
 
-      // copy override file into topology configuration directory
-      FileHelper.copy(Paths.get(getConfigurationOverridePath()),
+
+      java.nio.file.Path overridesPath =
           Paths.get(topologyDirectory, Constants.DEFAULT_HERON_SANDBOX_CONFIG,
-              Constants.OVERRIDE_FILE));
+              Constants.OVERRIDE_FILE);
+      // copy override file into topology configuration directory
+      FileHelper.copy(Paths.get(getConfigurationOverridePath()), overridesPath);
+
+      // apply submit overrides
+      ConfigUtils.applyOverrides(overridesPath, submitOverrides);
 
       // apply overrides to state manager config
-      ConfigUtils.applyOverridesToStateManagerConfig(
-          Paths.get(topologyDirectory, Constants.DEFAULT_HERON_SANDBOX_CONFIG,
-              Constants.OVERRIDE_FILE),
+      ConfigUtils.applyOverridesToStateManagerConfig(overridesPath,
           Paths.get(topologyDirectory, Constants.DEFAULT_HERON_SANDBOX_CONFIG,
               Constants.STATE_MANAGER_FILE)
       );
@@ -236,6 +263,7 @@ public class TopologyResource extends HeronResource {
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
+          .entity(createMessage(String.format("%s killed", name)))
           .build();
     } catch (Exception ex) {
       final String message = ex.getMessage();
@@ -281,6 +309,16 @@ public class TopologyResource extends HeronResource {
       }
     }
     return missingKeys;
+  }
+
+  private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {
+    final Map<String, String> overrides = new HashMap<>();
+    for (String key : form.getFields().keySet()) {
+      if (!SUBMIT_TOPOLOGY_PARAMS.contains(key)) {
+        overrides.put(key, Forms.getString(form, key));
+      }
+    }
+    return overrides;
   }
 
   private static String createdResponse(String cluster, String role, String environment,

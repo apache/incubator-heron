@@ -13,7 +13,6 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver.resources;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -30,35 +29,29 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import com.twitter.heron.spi.common.Config;
 
-@Path("/config")
+@Path("/")
 public class ConfigurationResource extends HeronResource {
 
+  @Path("version")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response config() throws JsonProcessingException {
+  public Response release() throws JsonProcessingException {
     final Config configuration = getBaseConfiguration();
     final ObjectMapper mapper = new ObjectMapper();
     final ObjectNode node = mapper.createObjectNode();
-    final Set<Map.Entry<String, Object>> sortedConfig = new TreeSet<>(keyComparator());
+    final Set<Map.Entry<String, Object>> sortedConfig = new TreeSet<>(Map.Entry.comparingByKey());
     sortedConfig.addAll(configuration.getEntrySet());
     for (Map.Entry<String, Object> entry : sortedConfig) {
-      node.put(entry.getKey(), entry.getValue().toString());
+      if (entry.getKey().contains("heron.build")) {
+        node.put(entry.getKey(), entry.getValue().toString());
+      }
     }
 
     return Response.ok()
         .type(MediaType.APPLICATION_JSON)
         .entity(mapper
-        .writerWithDefaultPrettyPrinter()
-        .writeValueAsString(node))
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(node))
         .build();
-  }
-
-  private static Comparator<Map.Entry<String, Object>> keyComparator() {
-    return new Comparator<Map.Entry<String, Object>>() {
-      @Override
-      public int compare(Map.Entry<String, Object> o1, Map.Entry<String, Object> o2) {
-        return o1.getKey().compareTo(o2.getKey());
-      }
-    };
   }
 }
