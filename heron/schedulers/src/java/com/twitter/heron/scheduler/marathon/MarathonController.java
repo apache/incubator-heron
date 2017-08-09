@@ -45,8 +45,8 @@ public class MarathonController {
    */
   public boolean killTopology() {
     // Setup Connection
-    String topologyURI = String.format("%s/v2/groups/%s?force=true", 
-      this.marathonURI, this.topologyName);
+    String topologyURI = String.format("%s/v2/groups/%s?force=true",
+        this.marathonURI, this.topologyName);
     HttpURLConnection conn = NetworkUtils.getHttpConnection(topologyURI);
 
     // Attach a token if there is one specified
