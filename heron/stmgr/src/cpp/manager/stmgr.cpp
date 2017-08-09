@@ -107,7 +107,9 @@ void StMgr::Init() {
   dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__dropped_during_restore",
                                            dropped_during_restore_metrics_);
-  state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
+  state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() {
+    LOG(INFO) << "SetTMasterLocationWatch FetchTMasterLocation" << std::endl;
+    this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
 
@@ -126,13 +128,6 @@ void StMgr::Init() {
   // Create and Register Tuple cache
   CreateTupleCache();
 
-  CHECK_GT(
-      eventLoop_->registerTimer(
-          [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
-          config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
-              1_s),
-      0);  // fire only once
-
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
 
@@ -150,8 +145,16 @@ void StMgr::Init() {
     stateful_restorer_ = nullptr;
   }
 
+  LOG(INFO) << "Init Stmgr FetchTMasterLocation" << std::endl;
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
+
+  CHECK_GT(
+      eventLoop_->registerTimer(
+          [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
+          config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
+              1_s),
+      0);  // fire only once
 
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
