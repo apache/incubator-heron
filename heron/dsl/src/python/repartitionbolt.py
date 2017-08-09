@@ -13,6 +13,11 @@
 # limitations under the License.
 """module for map bolt: RepartitionBolt"""
 from heron.api.src.python import Bolt, Stream, StatefulComponent
+from heron.api.src.python.component import GlobalStreamId
+from heron.api.src.python.stream import Grouping
+
+from heron.dsl.src.python import Streamlet
+from heron.dsl.src.python import OperationType
 
 # pylint: disable=unused-argument
 class RepartitionBolt(Bolt, StatefulComponent):
@@ -38,3 +43,32 @@ class RepartitionBolt(Bolt, StatefulComponent):
     self.processed += 1
     self.emitted += 1
     self.ack(tup)
+
+# pylint: disable=protected-access
+class RepartitionStreamlet(Streamlet):
+  """RepartitionStreamlet"""
+  def __init__(self, parallelism, parents, stage_name=None):
+    super(RepartitionStreamlet, self).__init__(parents=parents,
+                                               operation=OperationType.Repartition,
+                                               stage_name=stage_name, parallelism=parallelism)
+
+  # pylint: disable=no-self-use
+  def _calculate_inputs(self):
+    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
+            Grouping.SHUFFLE}
+
+  def _calculate_stage_name(self, existing_stage_names):
+    stagename = "repartition"
+    if stagename not in existing_stage_names:
+      return stagename
+    else:
+      index = 1
+      newfuncname = stagename + str(index)
+      while newfuncname in existing_stage_names:
+        index = index + 1
+        newfuncname = stagename + str(index)
+      return newfuncname
+
+  def _build_this(self, builder):
+    builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
+                     inputs=self._inputs)

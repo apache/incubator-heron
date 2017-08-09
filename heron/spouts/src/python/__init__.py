@@ -9,5 +9,5 @@ from .fixedlines.fixedlinesspout import FixedLinesSpout
 from .fixedlines.fixedlinesstreamlet import FixedLinesStreamlet
 from .textfiles.textfilespout import TextFileSpout
 from .textfiles.textfilestreamlet import TextFileStreamlet
-from .pulsar.pulsarspout import PulsarSpout
-from .pulsar.pulsarstreamlet import PulsarStreamlet
+# from .pulsar.pulsarspout import PulsarSpout
+# from .pulsar.pulsarstreamlet import PulsarStreamlet
