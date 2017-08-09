@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''Stream Manager client for single-thread heron instance in python'''
+import sys
+import traceback
+
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.network import HeronClient, StatusCode
@@ -67,19 +70,24 @@ class SingleThreadStmgrClient(HeronClient):
 
   def on_incoming_message(self, message):
     self.gateway_metrics.update_received_packet(message.ByteSize())
-    if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
-      Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
-      self._handle_assignment_message(message.pplan)
-    elif isinstance(message, tuple_pb2.HeronTupleSet2):
-      self._handle_new_tuples_2(message)
-    elif isinstance(message, ckptmgr_pb2.StartInstanceStatefulProcessing):
-      self._handle_start_stateful_processing(message)
-    elif isinstance(message, ckptmgr_pb2.RestoreInstanceStateRequest):
-      self._handle_restore_instance_state(message)
-    elif isinstance(message, ckptmgr_pb2.InitiateStatefulCheckpoint):
-      self._handle_initiate_stateful_checkpoint(message)
-    else:
-      raise RuntimeError("Unknown kind of message received from Stream Manager")
+    try:
+      if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
+        Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
+        self._handle_assignment_message(message.pplan)
+      elif isinstance(message, tuple_pb2.HeronTupleSet2):
+        self._handle_new_tuples_2(message)
+      elif isinstance(message, ckptmgr_pb2.StartInstanceStatefulProcessing):
+        self._handle_start_stateful_processing(message)
+      elif isinstance(message, ckptmgr_pb2.RestoreInstanceStateRequest):
+        self._handle_restore_instance_state(message)
+      elif isinstance(message, ckptmgr_pb2.InitiateStatefulCheckpoint):
+        self._handle_initiate_stateful_checkpoint(message)
+      else:
+        raise RuntimeError("Unknown kind of message received from Stream Manager")
+    except Exception as e:
+      Log.error("Error happened while handling a message from stmgr: " + e.message)
+      Log.error(traceback.format_exc())
+      sys.exit(1)
 
   def on_error(self):
     Log.error("Disconnected from Stream Manager")
