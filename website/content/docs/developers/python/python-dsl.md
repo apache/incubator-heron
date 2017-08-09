@@ -44,10 +44,36 @@ Function name | Description
 `repartition` | Returns a new streamlet with a new parallelism level
 `reduceByWindow` |
 
+## Stage names
+
+
+
 ## Creating streamlets
 
 ```python
+from heron.dsl.src.python import OperationType, Streamlet
+from heron.api.src.python import Spout
 
+class RandomFruitSpout(Spout):
+    def initialize(self, config, context):
+        self.words = ["apple", "orange", "banana", "lime", "tangelo"]
+
+    def next_tuple(self):
+        self.emit([])
+
+class RandomFruitStreamlet(Streamlet):
+    def __init__(self, stage_name=None, parallelism=None):
+        super(RandomFruitStreamlet, self).__init__(parents=[],
+                                                   operation=OperationType.Input,
+                                                   stage_name=stage_name,
+                                                   parallelism=parallelism)
+    
+    @staticmethod
+    def random_fruit_streamlet(stage_name=None):
+        return RandomFruitStreamlet(stage_name)
+    
+    def _build_this(self, builder):
+        builder.add_spout(self._stage_name, FooSpout, par=self._parallelism)
 ```
 
 ## Windowing
