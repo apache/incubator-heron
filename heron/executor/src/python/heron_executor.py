@@ -55,7 +55,8 @@ def print_usage():
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
       " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
-      " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file>")
+      " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file> "
+      " <healthmgr_mode> <healthmgr_classpath>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -214,6 +215,9 @@ class HeronExecutor(object):
     self.ckptmgr_classpath = parsed_args.ckptmgr_classpath
     self.ckptmgr_port = parsed_args.ckptmgr_port
     self.stateful_config_file = parsed_args.stateful_config_file
+    self.healthmgr_mode = parsed_args.healthmgr_mode
+    self.healthmgr_classpath = '%s:%s' % (self.scheduler_classpath, parsed_args.healthmgr_classpath)
+
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -283,6 +287,8 @@ class HeronExecutor(object):
     parser.add_argument("ckptmgr_classpath")
     parser.add_argument("ckptmgr_port")
     parser.add_argument("stateful_config_file")
+    parser.add_argument("healthmgr_mode")
+    parser.add_argument("healthmgr_classpath")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -413,6 +419,40 @@ class HeronExecutor(object):
 
     return metricscachemgr_cmd
 
+  def _get_healthmgr_cmd(self):
+    ''' get the command to start the topology health manager processes '''
+    healthmgr_main_class = 'com.twitter.heron.healthmgr.HealthManager'
+
+    healthmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
+                           # We could not rely on the default -Xmx setting, which could be very big,
+                           # for instance, the default -Xmx in Twitter mesos machine is around 18GB
+                           '-Xmx1024M',
+                           '-XX:+PrintCommandLineFlags',
+                           '-verbosegc',
+                           '-XX:+PrintGCDetails',
+                           '-XX:+PrintGCTimeStamps',
+                           '-XX:+PrintGCDateStamps',
+                           '-XX:+PrintGCCause',
+                           '-XX:+UseGCLogFileRotation',
+                           '-XX:NumberOfGCLogFiles=5',
+                           '-XX:GCLogFileSize=100M',
+                           '-XX:+PrintPromotionFailure',
+                           '-XX:+PrintTenuringDistribution',
+                           '-XX:+PrintHeapAtGC',
+                           '-XX:+HeapDumpOnOutOfMemoryError',
+                           '-XX:+UseConcMarkSweepGC',
+                           '-XX:+PrintCommandLineFlags',
+                           '-Xloggc:log-files/gc.healthmgr.log',
+                           '-Djava.net.preferIPv4Stack=true',
+                           '-cp', self.healthmgr_classpath,
+                           healthmgr_main_class,
+                           "--cluster", self.cluster,
+                           "--role", self.role,
+                           "--environment", self.environ,
+                           "--topology_name", self.topology_name]
+
+    return healthmgr_cmd
+
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
     retval = {}
@@ -434,7 +474,8 @@ class HeronExecutor(object):
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
-    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
+    if self.healthmgr_mode.lower() != "disabled":
+      retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(
         self.metricsmgr_ids[0],
