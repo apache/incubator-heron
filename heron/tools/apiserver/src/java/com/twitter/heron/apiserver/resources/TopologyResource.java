@@ -57,8 +57,13 @@ import com.twitter.heron.apiserver.actions.Keys;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.FileHelper;
 import com.twitter.heron.apiserver.utils.Logging;
+import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.Pair;
+import com.twitter.heron.scheduler.dryrun.DryRunResponse;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
+import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
+import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 
@@ -102,7 +107,9 @@ public class TopologyResource extends HeronResource {
   };
 
   private static final String PARAM_COMPONENT_PARALLELISM = "component_parallelism";
-
+  private static final String PARAM_DRY_RUN = "dry_run";
+  private static final String PARAM_DRY_RUN_FORMAT = "dry_run_format";
+  private static final String DEFAULT_DRY_RUN_FORMAT = DryRunFormatType.TABLE.toString();
 
   // path format /topologies/{cluster}/{role}/{environment}/{name}
   private static final String TOPOLOGY_PATH_FORMAT = "/topologies/%s/%s/%s/%s";
@@ -150,13 +157,15 @@ public class TopologyResource extends HeronResource {
       final FormDataBodyPart topologyFilePart = form.getField(FORM_KEY_TOPOLOGY);
       final File topologyBinaryFile = Forms.uploadFile(topologyFilePart, topologyDirectory);
 
+      final boolean isDryRun = form.getFields().containsKey(PARAM_DRY_RUN);
       final Config config = configWithKeyValues(
           Arrays.asList(
               Pair.create(Key.CLUSTER.value(), cluster),
               Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
               Pair.create(Key.ROLE.value(), role),
               Pair.create(Key.ENVIRON.value(), environment),
-              Pair.create(Key.SUBMIT_USER.value(), user)
+              Pair.create(Key.SUBMIT_USER.value(), user),
+              Pair.create(Key.DRY_RUN.value(), isDryRun)
           )
       );
 
@@ -167,7 +176,7 @@ public class TopologyResource extends HeronResource {
           Paths.get(topologyDirectory, Constants.DEFAULT_HERON_SANDBOX_CONFIG));
 
 
-      java.nio.file.Path overridesPath =
+      final java.nio.file.Path overridesPath =
           Paths.get(topologyDirectory, Constants.DEFAULT_HERON_SANDBOX_CONFIG,
               Constants.OVERRIDE_FILE);
       // copy override file into topology configuration directory
@@ -200,6 +209,9 @@ public class TopologyResource extends HeronResource {
               cluster, role, environment, topologyName)))
           .type(MediaType.APPLICATION_JSON)
           .entity(createdResponse(cluster, role, environment, topologyName)).build();
+    } catch (SubmitDryRunResponse response) {
+      return createDryRunResponse(response,
+          Forms.getString(form, PARAM_DRY_RUN_FORMAT, DEFAULT_DRY_RUN_FORMAT));
     } catch (Exception ex) {
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
@@ -299,7 +311,7 @@ public class TopologyResource extends HeronResource {
   @POST
   @Path("/{cluster}/{role}/{environment}/{name}/update")
   @Produces(MediaType.APPLICATION_JSON)
-  @SuppressWarnings("IllegalCatch")
+  @SuppressWarnings({"IllegalCatch", "JavadocMethod"})
   public Response update(
       final @PathParam("cluster") String cluster,
       final @PathParam("role") String role,
@@ -326,6 +338,11 @@ public class TopologyResource extends HeronResource {
           )
       );
 
+      // has a dry run been requested?
+      if (params.containsKey(PARAM_DRY_RUN)) {
+        keyValues.add(Pair.create(Key.DRY_RUN.value(), Boolean.TRUE));
+      }
+
       final Set<Pair<String, Object>> overrides = getUpdateOverrides(params);
       // apply overrides if they exists
       if (!overrides.isEmpty()) {
@@ -339,6 +356,9 @@ public class TopologyResource extends HeronResource {
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(String.format("%s updated", name)))
           .build();
+    } catch (UpdateDryRunResponse response) {
+      return createDryRunResponse(response,
+          Forms.getFirstOrDefault(params, PARAM_DRY_RUN_FORMAT, DEFAULT_DRY_RUN_FORMAT));
     } catch (Exception ex) {
       LOG.error("error updating topology {}", name, ex);
       return Response.serverError()
@@ -421,7 +441,8 @@ public class TopologyResource extends HeronResource {
     return overrides;
   }
 
-  private static Set<Pair<String, Object>> getUpdateOverrides(MultivaluedMap<String, String> params) {
+  private static Set<Pair<String, Object>> getUpdateOverrides(
+      MultivaluedMap<String, String> params) {
     final Set<Pair<String, Object>> overrides = new HashSet<>();
     for (String key : params.keySet()) {
       if (!PARAM_COMPONENT_PARALLELISM.equalsIgnoreCase(key)) {
@@ -429,6 +450,40 @@ public class TopologyResource extends HeronResource {
       }
     }
     return overrides;
+  }
+
+  @SuppressWarnings("IllegalCatch")
+  private static DryRunFormatType getDryRunFormatType(String type) {
+    try {
+      if (type != null) {
+        return DryRunFormatType.valueOf(type);
+      }
+    } catch (Exception ex) {
+      LOG.warn("unknown dry format render type {} defaulting to table", type);
+    }
+    return DryRunFormatType.TABLE;
+  }
+
+  private static String getDryRunResponse(DryRunResponse response, String type) {
+    if (response instanceof SubmitDryRunResponse) {
+      return DryRunRenders.render((SubmitDryRunResponse) response,
+          getDryRunFormatType(type));
+    } else if (response instanceof UpdateDryRunResponse) {
+      return DryRunRenders.render((UpdateDryRunResponse) response,
+          getDryRunFormatType(type));
+    }
+    return "Unknown dry run response type " + response.getClass().getName();
+  }
+
+  private static Response createDryRunResponse(DryRunResponse response, String type) {
+    final String body = new ObjectMapper().createObjectNode()
+        .put("response", getDryRunResponse(response, type))
+        .toString();
+
+    return Response.ok()
+        .type(MediaType.APPLICATION_JSON)
+        .entity(body)
+        .build();
   }
 
   private static String createdResponse(String cluster, String role, String environment,

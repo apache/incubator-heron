@@ -35,8 +35,7 @@ import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
-import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
-import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
+import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
@@ -330,7 +329,7 @@ public class SubmitterMain {
       LOG.log(Level.FINE, "Sending out dry-run response");
       // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
       PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
-      out.print(submitterMain.renderDryRunResponse(response));
+      out.print(DryRunRenders.render(response, Context.dryRunFormatType(config)));
       // Exit with status code 200 to indicate dry-run response is sent out
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(200);
@@ -548,16 +547,5 @@ public class SubmitterMain {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     launchRunner.call();
-  }
-
-  protected String renderDryRunResponse(SubmitDryRunResponse resp) {
-    DryRunFormatType formatType = Context.dryRunFormatType(config);
-    switch (formatType) {
-      case RAW : return new SubmitRawDryRunRenderer(resp).render();
-      case TABLE: return new SubmitTableDryRunRenderer(resp, false).render();
-      case COLORED_TABLE: return new SubmitTableDryRunRenderer(resp, true).render();
-      default: throw new IllegalArgumentException(
-          String.format("Unexpected rendering format: %s", formatType));
-    }
   }
 }

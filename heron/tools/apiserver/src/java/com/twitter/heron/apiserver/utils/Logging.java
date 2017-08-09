@@ -13,7 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver.utils;
 
-public class Logging {
+public final class Logging {
 
   private static volatile boolean isVerbose;
 

@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.ws.rs.core.MultivaluedMap;
+
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -32,6 +34,11 @@ final class Forms {
 
   static String getString(FormDataMultiPart form, String key, String defaultValue) {
     return form.getFields().containsKey(key) ? getValueAs(form, key, String.class) : defaultValue;
+  }
+
+  static String getFirstOrDefault(MultivaluedMap<String, String> params, String key,
+        String defaultValue) {
+    return params.containsKey(key) ? params.getFirst(key) : defaultValue;
   }
 
   static File uploadFile(FormDataBodyPart part, String directory) throws IOException {

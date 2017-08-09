@@ -149,7 +149,7 @@ public final class Runtime {
   private static String getConfigurationDirectory(String toolsHome, CommandLine cmd) {
     if (cmd.hasOption(Flag.ConfigPath.name)) {
       return cmd.getOptionValue(Flag.ConfigPath.name);
-    } else if(cmd.hasOption(Flag.BaseTemplate.name)) {
+    } else if (cmd.hasOption(Flag.BaseTemplate.name)) {
       return Paths.get(toolsHome, Constants.DEFAULT_HERON_CONFIG_DIRECTORY,
           cmd.getOptionValue(Flag.BaseTemplate.name)).toFile().getAbsolutePath();
     }
