@@ -342,6 +342,8 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
+  Log.debug("Submit Args %s", cl_args)
+
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 
