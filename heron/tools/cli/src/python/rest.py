@@ -21,4 +21,5 @@ ROUTE_SIGNATURES = {
     'restart': (requests.post, '/api/v1/topologies/%s/%s/%s/%s/restart', []),
     'submit': (requests.post, '/api/v1/topologies', ['name', 'cluster', 'role', 'env', 'user']),
     'update': (requests.post, '/api/v1/topologies/%s/%s/%s/%s/update', []),
+    'version': (requests.get, '/api/v1/version', []),
 }

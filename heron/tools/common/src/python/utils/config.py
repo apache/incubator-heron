@@ -442,9 +442,12 @@ def print_build_info(zipped_pex=False):
     release_file = get_zipped_heron_release_file()
   else:
     release_file = get_heron_release_file()
+
   with open(release_file) as release_info:
-    for line in release_info:
-      print line,
+    release_map = yaml.load(release_info)
+    release_items = sorted(release_map.items(), key=lambda tup: tup[0])
+    for key, value in release_items:
+      print "%s : %s" % (key, value)
 
 def get_version_number(zipped_pex=False):
   """Print version from release.yaml

@@ -22,10 +22,10 @@ import shutil
 import sys
 import time
 import traceback
-import yaml
 
 import heron.common.src.python.utils.log as log
 import heron.tools.common.src.python.utils.config as config
+import heron.tools.cli.src.python.cdefs as cdefs
 import heron.tools.cli.src.python.help as cli_help
 import heron.tools.cli.src.python.activate as activate
 import heron.tools.cli.src.python.deactivate as deactivate
@@ -156,33 +156,19 @@ def server_deployment_mode(command, parser, cluster, cl_args):
   :return:
   '''
   config_file = config.heron_rc_file()
-  client_confs = dict()
 
-  # check if the ~/.heronrc exists, if it does, read it
-  if os.path.isfile(config_file):
-    with open(config_file, 'r') as conf_file:
-      client_confs = yaml.load(conf_file)
-
-  if not client_confs:
-    client_confs = dict()
-    client_confs[cluster] = dict()
-
-  # now check if the service-url from command line is set, if so override it
-  if cl_args['service_url']:
-    client_confs[cluster]['service_url'] = cl_args['service_url']
-
-  # the return value of yaml.load can be None if conf_file is an empty file
-  # or there is no service-url in command line, if needed.
-
-  # if cluster definition is not found, return
+  # Read the cluster definition, if not found
+  client_confs = cdefs.read_server_mode_cluster_definition(cluster, cl_args, config_file)
   if not client_confs[cluster]:
     return dict()
 
+  # tell the user which definition that we are using
   if not cl_args['service_url']:
     Log.info("Using cluster definition from file %s" % config_file)
   else:
     Log.info("Using cluster service url %s" % cl_args['service_url'])
 
+  # if cluster definition exists, but service_url is not set, it is an error
   if not 'service_url' in client_confs[cluster]:
     Log.error('No service url for %s cluster in %s', cluster, config_file)
     sys.exit(1)
@@ -216,6 +202,7 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
   :param cl_args:
   :return:
   '''
+
   cluster = cl_args['cluster']
   try:
     config_path = cl_args['config_path']
@@ -227,6 +214,9 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
     return dict()
 
   # check if the cluster config directory exists
+  if not cdefs.check_direct_mode_cluster_definition(cluster, config_path):
+    return dict()
+
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
     Log.error("Cluster config directory \'%s\' does not exist", config_path)
@@ -280,10 +270,13 @@ def extract_common_args(command, parser, cl_args):
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
   except KeyError:
-    # if some of the arguments are not found, print error and exit
-    subparser = config.get_subparser(parser, command)
-    print subparser.format_help()
-    return dict()
+    try:
+      cluster_role_env = cl_args.pop('cluster')  # for version command
+    except KeyError:
+      # if some of the arguments are not found, print error and exit
+      subparser = config.get_subparser(parser, command)
+      print subparser.format_help()
+      return dict()
 
   new_cl_args = dict()
   cluster_tuple = config.get_cluster_role_env(cluster_role_env)
@@ -328,22 +321,29 @@ def main():
   # command to be execute
   command = command_line_args['subcommand']
 
+  if command == 'version':
+    results = run(command, parser, command_line_args, unknown_args)
+    return 0 if result.is_successful(results) else 1
+
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
+    Log.debug("Input Command Line Args: %s", command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
+    Log.debug("Extract Command Line Args: %s", command_line_args)
     command_line_args = deployment_mode(command, parser, command_line_args)
+    Log.debug("Deploy Command Line Args: %s", command_line_args)
 
     # bail out if args are empty
     if not command_line_args:
       return 1
 
     # register dirs cleanup function during exit
-    if command_line_args['deploy_mode'] == config.DIRECT_MODE:
+    if command_line_args['deploy_mode'] == config.DIRECT_MODE and command != "version":
       cleaned_up_files.append(command_line_args['override_config_file'])
       atexit.register(cleanup, cleaned_up_files)
 
   # print the input parameters, if verbose is enabled
-  Log.debug("Command Line Args: %s", command_line_args)
+  Log.debug("Processed Command Line Args: %s", command_line_args)
 
   start = time.time()
   results = run(command, parser, command_line_args, unknown_args)
