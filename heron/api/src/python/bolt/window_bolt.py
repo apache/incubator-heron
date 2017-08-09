@@ -16,11 +16,11 @@ from abc import abstractmethod
 from collections import namedtuple, deque
 import time
 from .bolt import Bolt
-from heron.api.src.python import api_constants
+from heron.api.src.python import api_constants, StatefulComponent
 
 WindowContext = namedtuple('WindowContext', ('start', 'end'))
 
-class SlidingWindowBolt(Bolt):
+class SlidingWindowBolt(Bolt, StatefulComponent):
   """SlidingWindowBolt is a higer level bolt for Heron users who want to deal with
      batches of tuples belonging to a certain time window. This bolt keeps track of
      managing the window, adding/expiring tuples based on window configuration.
@@ -28,6 +28,14 @@ class SlidingWindowBolt(Bolt):
   """
   WINDOW_DURATION_SECS = 'slidingwindowbolt_duration_secs'
   WINDOW_SLIDEINTERVAL_SECS = 'slidingwindowbolt_slideinterval_secs'
+
+  # pylint: disable=attribute-defined-outside-init
+  def initState(self, stateful_state):
+    self.saved_state = stateful_state
+
+  # pylint: disable=unused-argument
+  def preSave(self, checkpoint_id):
+    self.saved_state['tuples'] = self.current_tuples
 
   @abstractmethod
   def processWindow(self, window_info, tuples):
@@ -63,6 +71,9 @@ class SlidingWindowBolt(Bolt):
     # By modifying the config, we are able to setup the tick timer
     config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS] = str(self.slide_interval)
     self.current_tuples = deque()
+    if hasattr(self, 'saved_state'):
+      if 'tuples' in self.saved_state:
+        self.current_tuples = self.saved_state['tuples']
 
   def process(self, tup):
     """Process a single tuple of input
@@ -96,13 +107,21 @@ class SlidingWindowBolt(Bolt):
     self._expire(curtime)
 
 
-class TumblingWindowBolt(Bolt):
+class TumblingWindowBolt(Bolt, StatefulComponent):
   """TumblingWindowBolt is a higer level bolt for Heron users who want to deal with
      batches of tuples belonging to a certain time window. This bolt keeps track of
      managing the window, adding/expiring tuples based on window configuration.
      This way users will just have to deal with writing processWindow function
   """
   WINDOW_DURATION_SECS = 'tumblingwindowbolt_duration_secs'
+
+  # pylint: disable=attribute-defined-outside-init
+  def initState(self, stateful_state):
+    self.saved_state = stateful_state
+
+  # pylint: disable=unused-argument
+  def preSave(self, checkpoint_id):
+    self.saved_state['tuples'] = self.current_tuples
 
   @abstractmethod
   def processWindow(self, window_info, tuples):
@@ -132,6 +151,9 @@ class TumblingWindowBolt(Bolt):
     # By modifying the config, we are able to setup the tick timer
     config[api_constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS] = str(self.window_duration)
     self.current_tuples = deque()
+    if hasattr(self, 'saved_state'):
+      if 'tuples' in self.saved_state:
+        self.current_tuples = self.saved_state['tuples']
 
   def process(self, tup):
     """Process a single tuple of input

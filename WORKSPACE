@@ -439,6 +439,11 @@ maven_jar(
   artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
 )
 
+maven_jar(
+  name = "org_apache_commons_commons_math3",
+  artifact = "org.apache.commons:commons-math3:3.6.1"
+)
+
 # Google Cloud
 maven_jar(
   name = "google_api_services_storage",

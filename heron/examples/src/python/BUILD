@@ -29,6 +29,12 @@ pex_binary(
     deps = [":example-py"],
 )
 
+pex_binary(
+    name = "stateful_word_count",
+    srcs = ["stateful_word_count_topology.py"],
+    deps = [":example-py"],
+)
+
 # without main method
 pex_binary(
     name = "custom_grouping",
@@ -51,5 +57,15 @@ pex_binary(
       '//heron/dsl/src/python:heron-pythondsl-py',
       '//heron/spouts/src/python:heron-pythonspouts-py',
     ],
+)
+
+pex_binary(
+    name = "pulsar_word_count_dsl",
+    srcs = ["pulsar_word_count_dsl.py"],
+    deps = [
+      '//heron/api/src/python:heron-python-py',
+      '//heron/dsl/src/python:heron-pythondsl-py',
+      '//heron/spouts/src/python:heron-pythonspouts-py',
+    ]
 )
 

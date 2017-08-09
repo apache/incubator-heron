@@ -144,7 +144,7 @@ public class Config extends HashMap<String, Object> {
    * mode. The format of this flag is the string encoded values of the
    * underlying TopologyReliabilityMode value.
    */
-  public static final String TOPOLOGY_RELIABILITY_MODE = "topology.relability.mode";
+  public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
 
   /**
    * Number of cpu cores per container to be reserved for this topology

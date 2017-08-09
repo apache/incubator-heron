@@ -22,9 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
@@ -44,7 +46,7 @@ public final class ConfigUtils {
       for (Map.Entry<Object, Object> entry : properties.entrySet()) {
         overrides.put(entry.getKey(), entry.getValue());
       }
-      final Yaml yaml = new Yaml();
+      final Yaml yaml = newYaml();
       yaml.dump(overrides, writer);
 
       return overridesPath.toFile().getAbsolutePath();
@@ -73,16 +75,46 @@ public final class ConfigUtils {
         topology);
   }
 
+  @SuppressWarnings("unchecked")
+  public static void applyOverrides(Path overridesPath, Map<String, String> overrides)
+      throws IOException {
+    if (overrides.isEmpty()) {
+      return;
+    }
+    final Path tempOverridesPath = Files.createTempFile("overrides-", CONFIG_SUFFIX);
+
+    Reader overrideReader = null;
+    try (Writer writer = Files.newBufferedWriter(tempOverridesPath)) {
+      overrideReader = Files.newBufferedReader(overridesPath);
+      final Map<String, Object> currentOverrides =
+          (Map<String, Object>) new Yaml().load(overrideReader);
+      currentOverrides.putAll(overrides);
+
+      // write updated overrides
+      newYaml().dump(currentOverrides, writer);
+
+      // close override file so we can replace it with the updated overrides
+      overrideReader.close();
+
+      FileHelper.copy(tempOverridesPath, overridesPath);
+    } finally {
+      tempOverridesPath.toFile().delete();
+      SysUtils.closeIgnoringExceptions(overrideReader);
+    }
+  }
+
   // this is needed because the heron executor ignores the override.yaml
   @SuppressWarnings("unchecked")
   public static void applyOverridesToStateManagerConfig(Path overridesPath,
         Path stateManagerPath) throws IOException {
     final Path tempStateManagerPath = Files.createTempFile("statemgr-", CONFIG_SUFFIX);
+    Reader stateManagerReader = null;
     try (
         Reader overrideReader = Files.newBufferedReader(overridesPath);
-        Reader stateManagerReader = Files.newBufferedReader(stateManagerPath);
         Writer writer = Files.newBufferedWriter(tempStateManagerPath);
     ) {
+      stateManagerReader = Files.newBufferedReader(stateManagerPath);
+
       final Map<String, Object> overrides = (Map<String, Object>) new Yaml().load(overrideReader);
       final Map<String, Object> stateMangerConfig =
           (Map<String, Object>) new Yaml().load(stateManagerReader);
@@ -95,12 +127,24 @@ public final class ConfigUtils {
       }
 
       // write new state manager config
-      new Yaml().dump(stateMangerConfig, writer);
+      newYaml().dump(stateMangerConfig, writer);
+
+      // close state manager file so we can replace it with the updated configuration
+      stateManagerReader.close();
 
       FileHelper.copy(tempStateManagerPath, stateManagerPath);
     } finally {
       tempStateManagerPath.toFile().delete();
+      SysUtils.closeIgnoringExceptions(stateManagerReader);
     }
+  }
+
+  private static Yaml newYaml() {
+    final DumperOptions options = new DumperOptions();
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    options.setPrettyFlow(true);
+
+    return new Yaml(options);
   }
 
   private ConfigUtils() {

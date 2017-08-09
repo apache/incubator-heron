@@ -25,11 +25,12 @@ public abstract class BaseSensor implements ISensor {
   static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(300);
   static final String COMPONENT_STMGR = "__stmgr__";
 
-  enum MetricName {
+  public enum MetricName {
     METRIC_EXE_COUNT("__execute-count/default"),
     METRIC_BACK_PRESSURE("__time_spent_back_pressure_by_compid/"),
     METRIC_BUFFER_SIZE("__connection_buffer_by_instanceid/"),
-    METRIC_BUFFER_SIZE_SUFFIX("/packets");
+    METRIC_BUFFER_SIZE_SUFFIX("/packets"),
+    METRIC_WAIT_Q_GROWTH_RATE("METRIC_WAIT_Q_GROWTH_RATE");
 
     private String text;
 
