@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
+from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.cli_helper as cli_helper
 import heron.tools.cli.src.python.jars as jars
@@ -60,6 +61,8 @@ def create_parser(subparsers):
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
   """ run the update command """
+
+  Log.debug("Update Args: %s", cl_args)
   extra_lib_jars = jars.packing_jars()
   action = "update topology%s" % (' in dry-run mode' if cl_args["dry_run"] else '')
 

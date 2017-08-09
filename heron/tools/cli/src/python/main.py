@@ -343,7 +343,7 @@ def main():
       atexit.register(cleanup, cleaned_up_files)
 
   # print the input parameters, if verbose is enabled
-  Log.debug(command_line_args)
+  Log.debug("Command Line Args: %s", command_line_args)
 
   start = time.time()
   results = run(command, parser, command_line_args, unknown_args)

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
+from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.cli_helper as cli_helper
 import heron.tools.common.src.python.utils.config as config
@@ -55,11 +56,11 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
+  Log.debug("Restart Args: %s", cl_args)
   container_id = cl_args['container-id']
 
   if cl_args['deploy_mode'] == config.SERVER_MODE:
     dict_extra_args = {"container_id": str(container_id)}
-    print dict_extra_args
     return cli_helper.run_server(command, cl_args, "restart topology", extra_args=dict_extra_args)
   else:
     list_extra_args = ["--container_id", str(container_id)]
