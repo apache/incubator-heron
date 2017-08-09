@@ -306,7 +306,6 @@ public class TopologyResource extends HeronResource {
       final @PathParam("environment") String environment,
       final @PathParam("name") String name,
       MultivaluedMap<String, String> params) {
-    System.out.println("processing update request...");
     try {
       if (params == null || !params.containsKey(PARAM_COMPONENT_PARALLELISM)) {
         return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)

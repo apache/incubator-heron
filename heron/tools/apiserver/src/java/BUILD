@@ -13,11 +13,15 @@ scheduler_deps_files = [
   "//heron/schedulers/src/java:local-scheduler-java",
   "//heron/schedulers/src/java:kubernetes-scheduler-java",
   "//heron/schedulers/src/java:marathon-scheduler-java",
+  "//heron/schedulers/src/java:mesos-scheduler-java",
+  "//heron/schedulers/src/java:yarn-scheduler-java",
+  "//heron/schedulers/src/java:slurm-scheduler-java",
 ]
 
 packing_deps_files = [
   "//heron/packing/src/java:roundrobin-packing",
-  "//heron/packing/src/java:binpacking-packing"
+  "//heron/packing/src/java:binpacking-packing",
+  "//heron/packing/src/java:builder"
 ]
 
 uploader_deps_files = [
