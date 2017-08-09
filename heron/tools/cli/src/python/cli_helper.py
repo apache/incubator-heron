@@ -14,7 +14,6 @@
 ''' cli_helper.py '''
 import logging
 import requests
-import collections
 import heron.tools.common.src.python.utils.config as config
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as args
@@ -53,10 +52,10 @@ def create_parser(subparsers, action, help_arg):
 def flatten_args(fargs):
   temp_args = []
   for k, v in fargs.iteritems():
-    if isinstance(v, collections.Iterable):
+    if isinstance(v, list):
       temp_args.extend([(k, value) for value in v])
     else:
-      temp_args.extend((k, v))
+      temp_args.append((k, v))
   return temp_args
 
 ################################################################################

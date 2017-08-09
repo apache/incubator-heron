@@ -66,9 +66,9 @@ def run(command, parser, cl_args, unknown_args):
   if cl_args['deploy_mode'] == config.SERVER_MODE:
     dict_extra_args = {"component_parallelism": cl_args['component_parallelism']}
     if cl_args["dry_run"]:
-      dict_extra_args.update({'--dry_run': ""})
+      dict_extra_args.update({'dry_run': True})
       if "dry_run_format" in cl_args:
-        dict_extra_args.update({"--dry_run_format", cl_args["dry_run_format"]})
+        dict_extra_args.update({"dry_run_format", cl_args["dry_run_format"]})
 
     return cli_helper.run_server(command, cl_args, action, dict_extra_args)
   else:

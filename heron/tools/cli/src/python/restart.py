@@ -59,6 +59,7 @@ def run(command, parser, cl_args, unknown_args):
 
   if cl_args['deploy_mode'] == config.SERVER_MODE:
     dict_extra_args = {"container_id": str(container_id)}
+    print dict_extra_args
     return cli_helper.run_server(command, cl_args, "restart topology", extra_args=dict_extra_args)
   else:
     list_extra_args = ["--container_id", str(container_id)]
