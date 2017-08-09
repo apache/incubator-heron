@@ -54,9 +54,6 @@ class MetricsMgrSt {
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
 
-  //
-  // proto::system::MetricPublisher()
-
   /**
       Start MetricsMgrClient object
 

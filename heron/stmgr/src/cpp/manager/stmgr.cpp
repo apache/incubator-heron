@@ -126,12 +126,6 @@ void StMgr::Init() {
   // Create and Register Tuple cache
   CreateTupleCache();
 
-  // Create and start StmgrServer
-  StartStmgrServer();
-
-  FetchTMasterLocation();
-  FetchMetricsCacheLocation();
-
   CHECK_GT(
       eventLoop_->registerTimer(
           [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
@@ -141,6 +135,9 @@ void StMgr::Init() {
 
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
+
+  // Create and start StmgrServer
+  StartStmgrServer();
 
   if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Now start the stateful restorer
@@ -152,6 +149,9 @@ void StMgr::Init() {
   } else {
     stateful_restorer_ = nullptr;
   }
+
+  FetchTMasterLocation();
+  FetchMetricsCacheLocation();
 
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
