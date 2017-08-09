@@ -18,5 +18,7 @@ ROUTE_SIGNATURES = {
     'activate': (requests.post, '/api/v1/topologies/%s/%s/%s/%s/activate', []),
     'deactivate': (requests.post, '/api/v1/topologies/%s/%s/%s/%s/deactivate', []),
     'kill': (requests.delete, '/api/v1/topologies/%s/%s/%s/%s', []),
+    'restart': (requests.post, '/api/v1/topologies/%s/%s/%s/%s/restart', []),
     'submit': (requests.post, '/api/v1/topologies', ['name', 'cluster', 'role', 'env', 'user']),
+    'update': (requests.post, '/api/v1/topologies/%s/%s/%s/%s/update', []),
 }

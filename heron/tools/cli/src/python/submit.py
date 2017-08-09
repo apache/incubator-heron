@@ -168,10 +168,15 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
   err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
   succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
 
-  r = service_method(service_apiurl, data=data, files=files)
-  s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
-  if r.status_code != requests.codes.created:
-    Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+  try:
+    r = service_method(service_apiurl, data=data, files=files)
+    s = Status.Ok if r.status_code == requests.codes.created else Status.HeronError
+    if r.status_code != requests.codes.created:
+      Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+  except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+    Log.error(err)
+    return SimpleResult(Status.HeronError, err_ctxt, succ_ctxt)
+
   return SimpleResult(s, err_ctxt, succ_ctxt)
 
 
