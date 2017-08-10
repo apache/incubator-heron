@@ -328,10 +328,10 @@ def main():
   if command not in ('help', 'version'):
     log.set_logging_level(command_line_args)
     Log.debug("Input Command Line Args: %s", command_line_args)
+
+    # determine the mode of deployment
     command_line_args = extract_common_args(command, parser, command_line_args)
-    Log.debug("Extract Command Line Args: %s", command_line_args)
     command_line_args = deployment_mode(command, parser, command_line_args)
-    Log.debug("Deploy Command Line Args: %s", command_line_args)
 
     # bail out if args are empty
     if not command_line_args:
