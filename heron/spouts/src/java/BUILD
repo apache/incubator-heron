@@ -8,7 +8,7 @@ api_deps_files = [
 
 pulsar_deps_files = \
   api_deps_files + [
-    "//third_party/java:yahoo-pulsar-client",
+    "//third_party/java:apache-pulsar-client",
     "//third_party/java:logging"
   ]
 

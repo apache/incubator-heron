@@ -467,7 +467,7 @@ maven_jar(
 
 # Pulsar Client
 maven_jar(
-  name = "yahoo_pulsar_client",
-  artifact = "com.yahoo.pulsar:pulsar-client:jar:shaded:1.18"
+  name = "apache_pulsar_client",
+  artifact = "org.apache.pulsar:pulsar-client:jar:shaded:1.19.0-incubating"
 )
 # end Pulsar Client
