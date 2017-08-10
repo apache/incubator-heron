@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
+from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.cli_helper as cli_helper
-
+import heron.tools.common.src.python.utils.config as config
 
 def create_parser(subparsers):
   '''
@@ -39,6 +40,7 @@ def create_parser(subparsers):
       help='Identifier of the container to be restarted')
 
   args.add_config(parser)
+  args.add_service_url(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='restart')
@@ -54,7 +56,12 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
+  Log.debug("Restart Args: %s", cl_args)
   container_id = cl_args['container-id']
-  extra_args = ["--container_id", str(container_id)]
 
-  return cli_helper.run(command, cl_args, "restart topology", extra_args=extra_args)
+  if cl_args['deploy_mode'] == config.SERVER_MODE:
+    dict_extra_args = {"container_id": str(container_id)}
+    return cli_helper.run_server(command, cl_args, "restart topology", extra_args=dict_extra_args)
+  else:
+    list_extra_args = ["--container_id", str(container_id)]
+    return cli_helper.run_direct(command, cl_args, "restart topology", extra_args=list_extra_args)

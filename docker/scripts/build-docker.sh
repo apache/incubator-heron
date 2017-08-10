@@ -5,8 +5,7 @@ realpath() {
   echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
-DOCKER_DIR=$(dirname $(realpath $0))
-PROJECT_DIR=$(dirname $DOCKER_DIR )
+DOCKER_DIR=$(dirname $(dirname $(realpath $0)))
 SCRATCH_DIR="$HOME/.heron-docker"
 
 cleanup() {
@@ -25,7 +24,7 @@ setup_scratch_dir() {
     mkdir $1/artifacts
   fi
 
-  cp $DOCKER_DIR/* $1
+  cp $DOCKER_DIR/dist/* $1
 }
 
 run_build() {
@@ -37,13 +36,14 @@ run_build() {
 
   setup_scratch_dir $SCRATCH_DIR
 
-  echo "Building docker image with tag:$DOCKER_TAG"
   #need to copy artifacts locally
+  echo "Building docker image with tag:$DOCKER_TAG"
   cp -pr "$OUTPUT_DIRECTORY"/*$HERON_VERSION* "$SCRATCH_DIR/artifacts"
+  mv $SCRATCH_DIR/artifacts/heron-tools-install-$HERON_VERSION-$TARGET_PLATFORM.sh $SCRATCH_DIR/artifacts/heron-tools-install.sh
+  mv $SCRATCH_DIR/artifacts/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz $SCRATCH_DIR/artifacts/heron-core.tar.gz
 
   export HERON_VERSION
-  docker build --build-arg heronVersion=$HERON_VERSION -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
-
+  docker build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 }
 
 case $# in
