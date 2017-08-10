@@ -3,7 +3,6 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 api_deps_files = [
-  "//heron/api/src/java:api-java",
   "//heron/spi/src/java:heron-spi",
   "//heron/common/src/java:basics-java",
 ]
