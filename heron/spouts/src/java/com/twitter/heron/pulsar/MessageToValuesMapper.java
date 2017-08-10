@@ -15,7 +15,7 @@ package com.twitter.heron.pulsar;
 
 import java.io.Serializable;
 
-import com.yahoo.pulsar.client.api.Message;
+import org.apache.pulsar.client.api.Message;
 
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Values;
@@ -23,7 +23,7 @@ import com.twitter.heron.api.tuple.Values;
 public interface MessageToValuesMapper extends Serializable {
 
   /**
-   * Convert {@link com.yahoo.pulsar.client.api.Message} to tuple values.
+   * Convert {@link org.apache.pulsar.client.api.Message} to tuple values.
    *
    * @param message
    * @return

@@ -221,12 +221,12 @@ java_library(
 )
 
 java_library(
-    name = "yahoo-pulsar-client",
+    name = "apache-pulsar-client",
     srcs = [ "Empty.java" ],
     exports = [ 
-        "@yahoo_pulsar_client//jar" 
+        "@apache_pulsar_client//jar" 
     ],
     deps = [ 
-        "@yahoo_pulsar_client//jar",
+        "@apache_pulsar_client//jar",
     ],
 )
