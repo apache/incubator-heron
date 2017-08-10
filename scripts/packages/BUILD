@@ -39,6 +39,10 @@ generated_heronpy_egg_file = [
     "heronpy.whl",
 ]
 
+generated_devheronpy_egg_file = [
+    "devheronpy.whl",
+]
+
 filegroup(
     name = "release_files",
     srcs = generated_release_files,
@@ -74,6 +78,7 @@ filegroup(
     name = "pypkgs",
     srcs = [
         ":generate-heronpy-package",
+        ":generate-devheronpy-package",
     ],
 )
 
@@ -442,6 +447,68 @@ genrule(
         'cp $$HERONPY_DIR/dist/heronpy-*-py2-*.whl $$OUTPUT_DIR',
         'cp $$HERONPY_DIR/dist/heronpy-*.tar.gz $$OUTPUT_DIR',
         'touch $$OUTPUT_DIR/heronpy.whl',
+        'rm -rf $$TMP_DIR',
+    ]),
+)
+
+genrule(
+    name = "generate-devheronpy-package",
+    srcs = [
+        "devheronpy/requirements.txt", 
+        "devheronpy/setup.py.template",
+        "devheronpy/README.txt",
+    ] + generated_release_files,
+    outs = generated_devheronpy_egg_file,
+    stamp = 1,
+    tools = [
+        "//heron/api/src/python:heron-python-package",
+        "//heron/dsl/src/python:heron-pythondsl-package",
+        "//heron/spouts/src/python:heron-pythonspouts-package",
+    ],
+    cmd = "\n".join([
+        'export OUTPUT_DIR=$$(pwd)/$(@D)',
+        'export RELEASE_FILE_DIR=$$(pwd)',
+        'export TMP_DIR=$$(mktemp -d -t devheronpy.XXXXX)',
+        'echo $$TMP_DIR',
+        'export HERONPY_DIR=$$TMP_DIR/devheronpy',
+        'export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip',
+        'export HERONPYDSL_UNZIP=$$TMP_DIR/herondslunzip',
+        'export HERONPYSPOUTS_UNZIP=$$TMP_DIR/heronspoutsunzip',
+        'export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk \'{print $$3}\')',
+        'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
+        'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
+        'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.1" || echo $$HERON_VERSION)',
+        'echo $$HERON_VERSION',
+        'mkdir -p $$TMP_DIR $$HERONPY_DIR',
+        'unzip -qd $$HERONPYAPI_UNZIP $(location //heron/api/src/python:heron-python-package)',
+        'unzip -qd $$HERONPYDSL_UNZIP $(location //heron/dsl/src/python:heron-pythondsl-package)',
+        'unzip -qd $$HERONPYSPOUTS_UNZIP $(location //heron/spouts/src/python:heron-pythonspouts-package)',
+        'find $$HERONPYAPI_UNZIP -name "*.pyc" -exec rm {} \;',
+        'find $$HERONPYDSL_UNZIP -name "*.pyc" -exec rm {} \;',
+        'find $$HERONPYSPOUTS_UNZIP -name "*.pyc" -exec rm {} \;',
+        'mv $$HERONPYAPI_UNZIP/heron/api/src/python $$HERONPY_DIR/devheronpy',
+        'mv $$HERONPYDSL_UNZIP/heron/dsl/src/python $$HERONPY_DIR/devheronpy/streamlet',
+        'mv $$HERONPYSPOUTS_UNZIP/heron/spouts/src/python $$HERONPY_DIR/devheronpy/spouts',
+        'mv $$HERONPYDSL_UNZIP/heron/proto $$HERONPY_DIR/devheronpy/_proto',
+        'rm -rf $$HERONPYAPI_UNZIP/heron/api',
+        'rm -rf $$HERONPYDSL_UNZIP/heron/dsl',
+        'rm -rf $$HERONPYSPOUTS_UNZIP/heron/spouts',
+        'cp $(SRCS) $$HERONPY_DIR',
+        'echo "Heron Python toplevel directory: $$HERONPY_DIR"',
+        'cd $$HERONPY_DIR',
+        'find devheronpy -type f -name "*.py" -exec sed -i.bak "s/heron.api.src.python/devheronpy/g" {} \;',
+        'find devheronpy -type f -name "*.py" -exec sed -i.bak "s/heron.dsl.src.python/devheronpy.streamlet/g" {} \;',
+        'find devheronpy -type f -name "*.py" -exec sed -i.bak "s/heron.spouts.src.python/devheronpy.spouts/g" {} \;',
+        'find devheronpy -type f -name "*.py" -exec sed -i.bak "s/heron.proto/devheronpy._proto/g" {} \;',
+        'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
+        'find devheronpy -type f -name "*.bak" -delete',
+        'rm setup.py.template',
+        '/usr/bin/env python2.7 setup.py sdist',
+        '/usr/bin/env python2.7 setup.py bdist_wheel',
+        'ls -l $$HERONPY_DIR/dist',
+        'cp $$HERONPY_DIR/dist/devheronpy-*-py2-*.whl $$OUTPUT_DIR',
+        'cp $$HERONPY_DIR/dist/devheronpy-*.tar.gz $$OUTPUT_DIR',
+        'touch $$OUTPUT_DIR/devheronpy.whl',
         'rm -rf $$TMP_DIR',
     ]),
 )
