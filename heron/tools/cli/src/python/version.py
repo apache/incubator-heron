@@ -76,7 +76,7 @@ def run(command, parser, cl_args, unknown_args):
     # Read the cluster definition, if not found
     client_confs = cdefs.read_server_mode_cluster_definition(cluster, cl_args, config_file)
 
-    if not client_confs:
+    if not client_confs[cluster]:
       Log.error('Neither service url nor %s cluster definition in %s file', cluster, config_file)
       return SimpleResult(Status.HeronError)
 

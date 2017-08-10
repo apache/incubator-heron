@@ -46,10 +46,6 @@ def read_server_mode_cluster_definition(cluster, cl_args, config_file):
   # the return value of yaml.load can be None if conf_file is an empty file
   # or there is no service-url in command line, if needed.
 
-  # if cluster definition not found
-  if not client_confs[cluster]:
-    return dict()
-
   return client_confs
 
 ################################################################################
