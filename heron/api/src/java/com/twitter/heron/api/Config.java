@@ -309,7 +309,7 @@ public class Config extends HashMap<String, Object> {
 
   /**
    * Is topology running with acking enabled?
-   * @deprecated use {@link #setTopologyReliabilityMode()} instead.
+   * @deprecated use {@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)} instead.
    */
   @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
@@ -494,7 +494,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * Is topology running with acking enabled?
    * The SupressWarning will be removed once TOPOLOGY_ENABLE_ACKING is removed
-   * @deprecated use {@link #setTopologyReliabilityMode()} instead
+   * @deprecated use {@link #setTopologyReliabilityMode(TopologyReliabilityMode)} instead
    */
   @Deprecated
   @SuppressWarnings("deprecation")
