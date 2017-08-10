@@ -363,7 +363,7 @@ genrule(
     tools = [
         "//heron/api/src/python:heron-python-package",
         "//heron/dsl/src/python:heron-pythondsl-package",
-        "//heron/spouts/src/python:heron-pythonspouts-package",
+        "//heron/connectors/src/python:heron-pythonspouts-package",
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
