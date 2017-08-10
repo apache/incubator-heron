@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.yahoo.pulsar.client.api.Consumer;
-import com.yahoo.pulsar.client.api.ConsumerConfiguration;
-import com.yahoo.pulsar.client.api.Message;
-import com.yahoo.pulsar.client.api.MessageId;
-import com.yahoo.pulsar.client.api.PulsarClient;
-import com.yahoo.pulsar.client.api.PulsarClientException;
-import com.yahoo.pulsar.client.api.SubscriptionType;
+import org.apache.pulsar.client.api.Consumer;
+import org.apache.pulsar.client.api.ConsumerConfiguration;
+import org.apache.pulsar.client.api.Message;
+import org.apache.pulsar.client.api.MessageId;
+import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.PulsarClientException;
+import org.apache.pulsar.client.api.SubscriptionType;
 
 import org.junit.Before;
 import org.junit.Test;
