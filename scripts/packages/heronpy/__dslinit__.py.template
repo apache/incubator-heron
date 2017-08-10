@@ -12,5 +12,5 @@ that data as tuples (lists in Python) to
 """
 
 # Load basic dsl modules
-from .streamlet import Streamlet, TimeWindow
-from .operation import OperationType
+from heron.dsl.src.python.streamlet import Streamlet, TimeWindow
+from heron.dsl.src.python.operation import OperationType

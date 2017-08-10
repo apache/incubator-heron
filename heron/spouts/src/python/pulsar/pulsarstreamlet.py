@@ -13,8 +13,9 @@
 # limitations under the License.
 """Streamlet for Apache Pulsar"""
 
-from heron.dsl.src.python import Streamlet, OperationType
-from .pulsarspout import PulsarSpout
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.operation import OperationType
+from heron.spouts.src.python.pulsar.pulsarspout import PulsarSpout
 
 # pylint: disable=access-member-before-definition
 # pylint: disable=attribute-defined-outside-init

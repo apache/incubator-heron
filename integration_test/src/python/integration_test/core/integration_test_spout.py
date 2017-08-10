@@ -14,8 +14,9 @@
 """Base spout for integration tests"""
 import copy
 from heron.common.src.python.utils.log import Log
-from heron.api.src.python import Spout, Stream
-from heron.api.src.python.component import HeronComponentSpec
+from heron.api.src.python.spout.spout import Spout
+from heron.api.src.python.stream import Stream
+from heron.api.src.python.component.component_spec import HeronComponentSpec
 import heron.common.src.python.pex_loader as pex_loader
 
 from ..core import constants as integ_const

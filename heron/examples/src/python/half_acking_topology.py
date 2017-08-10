@@ -15,7 +15,8 @@
 import sys
 
 import heron.api.src.python.api_constants as constants
-from heron.api.src.python import Grouping, TopologyBuilder
+from heron.api.src.python.topology import TopologyBuilder
+from heron.api.src.python.streams import Grouping
 
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import HalfAckBolt

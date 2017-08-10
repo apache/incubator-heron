@@ -14,7 +14,8 @@
 """Word spout with error streams"""
 
 from itertools import cycle
-from heron.api.src.python import Spout, Stream
+from heron.api.src.python.spout.spout import Spout
+from heron.api.src.python.streams import Stream
 
 class MultiStreamSpout(Spout):
   """WordSpout: emits a set of words repeatedly"""

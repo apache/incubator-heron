@@ -14,13 +14,14 @@
 """module for join bolt: JoinBolt"""
 import collections
 
-from heron.api.src.python import SlidingWindowBolt, Stream
-from heron.api.src.python.component import GlobalStreamId
+from heron.api.src.python.stream import Stream
+from heron.api.src.python.bolt.window_bolt import SlidingWindowBolt
+from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.api.src.python.stream import Grouping
 
-from heron.dsl.src.python import Streamlet, TimeWindow
-from heron.dsl.src.python import OperationType
+from heron.dsl.src.python.streamlet import Streamlet, TimeWindow
+from heron.dsl.src.python.operation import OperationType
 
 # pylint: disable=unused-argument
 class JoinBolt(SlidingWindowBolt):

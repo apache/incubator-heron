@@ -18,11 +18,11 @@ topology.py: module for defining Heron topologies in Python
 import os
 import uuid
 
-import api_constants
-from .serializer import default_serializer
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.serializer import default_serializer
 from heron.proto import topology_pb2
 
-from .component import HeronComponentSpec
+from heron.api.src.python.component.component_spec import HeronComponentSpec
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""

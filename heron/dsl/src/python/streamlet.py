@@ -15,7 +15,7 @@
 from collections import namedtuple
 from abc import abstractmethod
 
-from heron.api.src.python import TopologyBuilder
+from heron.api.src.python.topology import TopologyBuilder
 
 from heron.dsl.src.python.operation import OperationType
 

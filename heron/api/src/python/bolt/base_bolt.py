@@ -14,10 +14,11 @@
 '''base_bolt.py'''
 import copy
 
-from ..tuple import TupleHelper
+from heron.api.src.python.tuple import TupleHelper
 
-from ..component import HeronComponentSpec, BaseComponent
-from ..stream import Stream
+from heron.api.src.python.component.component_spec import HeronComponentSpec
+from heron.api.src.python.component.base_component import BaseComponent
+from heron.api.src.python.stream import Stream
 
 class BaseBolt(BaseComponent):
   """BaseBolt class

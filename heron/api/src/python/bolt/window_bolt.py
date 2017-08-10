@@ -15,8 +15,9 @@
 from abc import abstractmethod
 from collections import namedtuple, deque
 import time
-from .bolt import Bolt
-from heron.api.src.python import api_constants, StatefulComponent
+from heron.api.src.python.bolt.bolt import Bolt
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.state.stateful_component import StatefulComponent
 
 WindowContext = namedtuple('WindowContext', ('start', 'end'))
 
