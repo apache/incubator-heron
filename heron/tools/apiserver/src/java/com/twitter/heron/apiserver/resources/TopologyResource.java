@@ -233,7 +233,7 @@ public class TopologyResource extends HeronResource {
       final @PathParam("name") String name) {
     try {
       final Config config = getConfig(cluster, role, environment, name);
-      getActionFactory().createRuntimeAction(config, ActionType.ACTIVATE);
+      getActionFactory().createRuntimeAction(config, ActionType.ACTIVATE).execute();
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
