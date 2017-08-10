@@ -49,7 +49,7 @@ def read_server_mode_cluster_definition(cluster, cl_args, config_file):
   return client_confs
 
 ################################################################################
-def check_direct_cluster_definition(cluster, config_path):
+def check_direct_mode_cluster_definition(cluster, config_path):
   '''
   Check the cluster definition for direct mode
   :param cluster:
