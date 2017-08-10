@@ -17,9 +17,10 @@ import Queue
 import time
 import collections
 
-from heron.api.src.python import api_constants
-from heron.api.src.python import StatefulComponent
-from heron.api.src.python import Stream
+from heron.api.src.python.stream import Stream
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.state.stateful_component import StatefulComponent
+
 from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
