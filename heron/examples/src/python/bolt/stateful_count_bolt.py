@@ -13,8 +13,9 @@
 # limitations under the License.
 """module for example bolt: CountBolt"""
 from collections import Counter
-from heron.api.src.python import global_metrics
-from heron.api.src.python import Bolt, StatefulComponent
+import heron.api.src.python.global_metrics as global_metrics
+from heron.api.src.python.bolt.bolt import Bolt
+from heron.api.src.python.state.stateful_component import StatefulComponent
 
 # pylint: disable=unused-argument
 class StatefulCountBolt(Bolt, StatefulComponent):
