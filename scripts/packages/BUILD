@@ -161,9 +161,24 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-tools-lib",
+    package_dir = "lib",
+    files = heron_tools_lib_files(),
+)
+
+pkg_tar(
     name = "heron-tools-conf",
     package_dir = "conf",
-    files = heron_tools_conf_files(),
+    files = heron_tools_conf_files()
+)
+
+pkg_tar(
+    name = "heron-tools-cluster-conf",
+    strip_prefix = "/heron/config/src/yaml/conf",
+    package_dir = "conf",
+    files = [
+      "//heron/config/src/yaml:conf-yaml"
+    ], 
 )
 
 pkg_tar(
@@ -172,7 +187,9 @@ pkg_tar(
     files = generated_release_files,
     deps = [
         ":heron-tools-bin",
+        ":heron-tools-lib",
         ":heron-tools-conf",
+        ":heron-tools-cluster-conf",
     ],
 )
 
@@ -228,65 +245,12 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-client-conf-local",
-    package_dir = "conf/local",
-    files = [
-        "//heron/config/src/yaml:conf-local-yaml",
-    ],
-)
-
-pkg_tar(
-    name = "heron-client-conf-slurm",
-    package_dir = "conf/slurm",
-    files = [
-        "//heron/config/src/yaml:conf-slurm-yaml",
-    ],
-)
-
-pkg_tar(
-    name = "heron-client-conf-aurora",
-    package_dir = "conf/aurora",
-    files = [
-        "//heron/config/src/yaml:conf-aurora-yaml",
-    ],
-)
-
-pkg_tar(
-    name = "heron-client-conf-yarn",
-    package_dir = "conf/yarn",
-    files = [
-        "//heron/config/src/yaml:conf-yarn-yaml",
-    ],
-)
-
-pkg_tar(
-     name = "heron-client-conf-mesos",
-     package_dir = "conf/mesos",
-     files = [
-         "//heron/config/src/yaml:conf-mesos-yaml",
-     ],
-)
-
-pkg_tar(
-    name = "heron-client-conf-marathon",
-    package_dir = "conf/marathon",
-    files = [
-        "//heron/config/src/yaml:conf-marathon-yaml",
-    ]
-)
-
-pkg_tar(
-    name = "heron-client-conf-kubernetes",
-    package_dir = "conf/kubernetes",
-    files = [
-        "//heron/config/src/yaml:conf-kubernetes-yaml",
-    ]
-)
-
-pkg_tar(
     name = "heron-client-conf",
+    strip_prefix = "/heron/config/src/yaml/conf",
     package_dir = "conf",
-    files = heron_client_conf_files(),
+    files = [
+        "//heron/config/src/yaml:conf-yaml",
+    ]
 )
 
 pkg_tar(
@@ -302,13 +266,6 @@ pkg_tar(
     deps = [
         ":heron-client-bin",
         ":heron-client-conf",
-        ":heron-client-conf-local",
-        ":heron-client-conf-aurora",
-        ":heron-client-conf-slurm",
-        ":heron-client-conf-yarn",
-        ":heron-client-conf-mesos",
-        ":heron-client-conf-marathon",
-        ":heron-client-conf-kubernetes",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-third_party",

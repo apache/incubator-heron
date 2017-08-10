@@ -1,7 +1,5 @@
 FROM centos:centos7
 
-ARG heronVersion
-
 RUN yum -y upgrade
 RUN yum -y install python; yum clean all
 RUN yum -y install unzip; yum clean all 

@@ -21,6 +21,7 @@ import subprocess
 import sys
 import tempfile
 import heron.tools.cli.src.python.main as main
+import heron.tools.cli.src.python.cdefs as cdefs
 import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.result as result
 import heron.tools.common.src.python.utils.config as config
@@ -51,6 +52,8 @@ class ClientCommandTest(unittest.TestCase):
     os.path.isdir = MagicMock(return_value=True)
     os.path.isfile = MagicMock(return_value=True)
     os.environ.copy = MagicMock(return_value={})
+    main.server_deployment_mode = MagicMock(return_value=dict())
+    cdefs.check_direct_mode_cluster_definition = MagicMock(return_value=True)
 
   def run_test(self, command, issued_commands, environ):
     calls = []
