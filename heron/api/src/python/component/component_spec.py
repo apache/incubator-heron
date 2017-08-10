@@ -14,11 +14,11 @@
 '''component_spec.py'''
 import uuid
 
-from ..serializer import default_serializer
-from ..api_constants import TOPOLOGY_COMPONENT_PARALLELISM
+from heron.api.src.python.serializer import default_serializer
+from heron.api.src.python.api_constants import TOPOLOGY_COMPONENT_PARALLELISM
 from heron.proto import topology_pb2
 
-from ..stream import Stream, Grouping
+from heron.api.src.python.stream import Stream, Grouping
 
 # pylint: disable=too-many-instance-attributes
 class HeronComponentSpec(object):

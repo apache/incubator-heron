@@ -18,7 +18,9 @@ import tempfile
 
 import pulsar
 
-from heron.api.src.python import Spout, api_constants, Stream
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.spout.spout import Spout
+from heron.api.src.python.stream import Stream
 
 def GenerateLogConfContents(logFileName):
   return """

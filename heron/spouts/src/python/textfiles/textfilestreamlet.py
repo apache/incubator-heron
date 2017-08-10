@@ -14,8 +14,9 @@
 '''textfilestreamlet.py: module defining a streamlet based on TextFileSpout'''
 import glob
 
-from heron.dsl.src.python import Streamlet, OperationType
-from .textfilespout import TextFileSpout
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.operation import OperationType
+from heron.spouts.src.python.textfiles.textfilespout import TextFileSpout
 
 # pylint: disable=access-member-before-definition
 # pylint: disable=attribute-defined-outside-init

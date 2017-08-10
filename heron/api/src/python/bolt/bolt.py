@@ -13,7 +13,7 @@
 # limitations under the License.
 '''bolt.py: API for defining bolt in python'''
 from abc import abstractmethod
-from .base_bolt import BaseBolt
+from heron.api.src.python.bolt.base_bolt import BaseBolt
 
 class Bolt(BaseBolt):
   """API for defining a bolt for Heron in Python

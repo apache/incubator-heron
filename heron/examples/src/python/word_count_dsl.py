@@ -14,8 +14,8 @@
 '''Example WordCountTopology'''
 import sys
 
-from heron.dsl.src.python import TimeWindow
-from heron.spouts.src.python import FixedLinesStreamlet
+from heron.dsl.src.python.streamlet import TimeWindow
+from heron.spouts.src.python.fixedlines.fixedlinesstreamlet import FixedLinesStreamlet
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:

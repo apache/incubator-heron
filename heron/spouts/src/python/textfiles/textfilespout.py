@@ -13,7 +13,7 @@
 # limitations under the License.
 '''textfilespout.py: module that defines a Heron Spout that reads data
    from a list of files and emits one tuple per line'''
-from heron.api.src.python import Spout
+from heron.api.src.python.spout.spout import Spout
 
 class TextFileSpout(Spout):
   """TextFileSpout: reads from a list of files"""

@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for filter bolt: FilterBolt"""
-from heron.api.src.python import Bolt, Stream, StatefulComponent
-from heron.api.src.python.component import GlobalStreamId
+from heron.api.src.python.stream import Stream
+from heron.api.src.python.state.stateful_component import StatefulComponent
+from heron.api.src.python.bolt.bolt import Bolt
+from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
-from heron.dsl.src.python import Streamlet
-from heron.dsl.src.python import OperationType
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.operation import OperationType
 
 # pylint: disable=unused-argument
 class FilterBolt(Bolt, StatefulComponent):

@@ -13,8 +13,9 @@
 # limitations under the License.
 '''fixedlinesstreamlet.py: module for defining a Streamlet based on FixedLinesSpout'''
 
-from heron.dsl.src.python import Streamlet, OperationType
-from .fixedlinesspout import FixedLinesSpout
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.operation import OperationType
+from heron.spouts.src.python.fixedlines.fixedlinesspout import FixedLinesSpout
 
 # pylint: disable=access-member-before-definition
 # pylint: disable=attribute-defined-outside-init
