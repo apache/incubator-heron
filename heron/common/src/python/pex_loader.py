@@ -112,7 +112,7 @@ def import_and_get_class(path_to_pex, python_class_name):
     try:
       mod = resolve_heron_suffix_issue(abs_path_to_pex, python_class_name)
       return getattr(mod, import_name)
-    except Exception as e:
+    except:
       Log.error("Could not resolve class %s with special handling" % python_class_name)
 
   mod = __import__(from_path, fromlist=[import_name], level=-1)
