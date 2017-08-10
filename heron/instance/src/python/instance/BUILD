@@ -8,6 +8,8 @@ pex_binary(
     srcs = ["st_heron_instance.py"],
     deps = [
         "//heron/api/src/python:heron-python-py",
+        "//heron/dsl/src/python:heron-pythondsl-py",
+        "//heron/spouts/src/python:heron-pythonspouts-py",
         "//heron/instance/src/python/basics:heron-basics-py",
         "//heron/instance/src/python/network:heron-network-py",
         "//heron/common/src/python:common-py",
