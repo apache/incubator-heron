@@ -7,6 +7,11 @@ powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 
+pex_rules_version = "0.3.8"
+pex_rules_url_prefix = "https://github.com/streamlio/bazel_rules_pex/archive/"
+pex_rules_url = pex_rules_url_prefix + pex_rules_version + ".tar.gz"
+pex_rules_sha256 = "071b75d24611910b9fd250366688581c813b62680267760b23389912714b6e72"
+
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
@@ -465,9 +470,19 @@ maven_jar(
 )
 # end Google Cloud
 
-# Pulsar Client
+# for pulsar Client
 maven_jar(
   name = "apache_pulsar_client",
   artifact = "org.apache.pulsar:pulsar-client:jar:shaded:1.19.0-incubating"
 )
-# end Pulsar Client
+
+# for pex rules
+http_archive(
+  name = "io_bazel_rules_pex",
+  url = pex_rules_url,
+  strip_prefix = "bazel_rules_pex-" + pex_rules_version,
+  sha256 = pex_rules_sha256,
+)
+
+load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_repositories")
+pex_repositories()
