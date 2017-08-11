@@ -23,6 +23,7 @@ java_library(
 java_tests(
   test_classes = [
     "com.twitter.heron.apiserver.utils.ConfigUtilsTests",
+    "com.twitter.heron.apiserver.resources.TopologyResourceTests",
   ],
   runtime_deps = [ ":tests" ],
   size = "small",
