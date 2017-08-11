@@ -19,9 +19,9 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Shared utilities for packing algorithms
