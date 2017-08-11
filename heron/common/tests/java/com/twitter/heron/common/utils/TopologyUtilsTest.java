@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.common.utils;
 
 import java.util.HashMap;
 import java.util.Map;
