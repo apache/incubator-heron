@@ -42,7 +42,6 @@ java_tests(
     test_classes = [
         "com.twitter.heron.spi.utils.ShellUtilsTest",
         "com.twitter.heron.spi.utils.NetworkUtilsTest",
-        "com.twitter.heron.spi.utils.TopologyUtilsTest",
         "com.twitter.heron.spi.utils.UploaderUtilsTest",
     ],
     runtime_deps = [ ":utils-tests" ],
