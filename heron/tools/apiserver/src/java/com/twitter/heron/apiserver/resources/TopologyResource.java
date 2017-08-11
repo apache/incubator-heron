@@ -395,11 +395,11 @@ public class TopologyResource extends HeronResource {
           .build();
     } catch (Exception ex) {
       final String message = ex.getMessage();
-      final Response.Status status = message.contains("does not exist")
+      final Response.Status status = message != null && message.contains("does not exist")
           ? Response.Status.NOT_FOUND : Response.Status.INTERNAL_SERVER_ERROR;
       return Response.status(status)
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(ex.getMessage()))
+          .entity(createMessage(message))
           .build();
     }
   }
@@ -410,6 +410,18 @@ public class TopologyResource extends HeronResource {
 
   private boolean doesClusterMatch(String cluster) {
     return getCluster().equalsIgnoreCase(cluster);
+  }
+
+  static List<String> verifyKeys(Set<String> keys, String... requiredKeys) {
+    final List<String> missingKeys = new ArrayList<>();
+    if (requiredKeys != null) {
+      for (String key : requiredKeys) {
+        if (!keys.contains(key)) {
+          missingKeys.add(key);
+        }
+      }
+    }
+    return missingKeys;
   }
 
   private Config getConfig(String cluster, String role, String environment, String topologyName) {
@@ -429,18 +441,6 @@ public class TopologyResource extends HeronResource {
     }
     builder.put(Key.VERBOSE, Logging.isVerbose());
     return Config.toLocalMode(builder.build());
-  }
-
-  private static List<String> verifyKeys(Set<String> keys, String... requiredKeys) {
-    final List<String> missingKeys = new ArrayList<>();
-    if (requiredKeys != null) {
-      for (String key : requiredKeys) {
-        if (!keys.contains(key)) {
-          missingKeys.add(key);
-        }
-      }
-    }
-    return missingKeys;
   }
 
   private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {
