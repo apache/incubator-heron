@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
@@ -35,7 +36,6 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED;

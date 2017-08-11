@@ -6,6 +6,7 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:utils-java",
     "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:junit4",
     "//third_party/java:mockito",

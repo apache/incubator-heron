@@ -22,14 +22,14 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyTests;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.PackingTestUtils;
-import com.twitter.heron.spi.utils.TopologyTests;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class RoundRobinPackingTest {
   private static final String BOLT_NAME = "bolt";
