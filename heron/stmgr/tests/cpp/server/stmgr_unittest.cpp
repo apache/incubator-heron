@@ -670,7 +670,7 @@ void TearCommonResources(CommonResources& common) {
     delete itr->second;
 
   // Clean up the local filesystem state
-  FileUtils::removeRecursive(common.dpath_, true);
+  // FileUtils::removeRecursive(common.dpath_, true);
 }
 
 void VerifyMetricsMgrTMaster(CommonResources& common) {
@@ -684,7 +684,7 @@ void VerifyMetricsMgrTMaster(CommonResources& common) {
 }
 
 // Test to make sure that the stmgr can decode the pplan
-TEST(StMgr, test_pplan_decode) {
+TEST(DISABLED_StMgr, test_pplan_decode) {
   CommonResources common;
   // Initialize dummy params
   common.tmaster_host_ = LOCALHOST;
@@ -767,7 +767,7 @@ TEST(StMgr, test_pplan_decode) {
 }
 
 // Test to make sure that the stmgr can route data properly
-TEST(StMgr, test_tuple_route) {
+TEST(DISABLED_StMgr, test_tuple_route) {
   CommonResources common;
 
   // Initialize dummy params
@@ -846,7 +846,7 @@ TEST(StMgr, test_tuple_route) {
 }
 
 // Test to make sure that custom grouping routing works
-TEST(StMgr, test_custom_grouping_route) {
+TEST(DISABLED_StMgr, test_custom_grouping_route) {
   CommonResources common;
 
   // Initialize dummy params
@@ -933,7 +933,7 @@ TEST(StMgr, test_custom_grouping_route) {
   TearCommonResources(common);
 }
 
-TEST(StMgr, test_back_pressure_instance) {
+TEST(DISABLED_StMgr, test_back_pressure_instance) {
   CommonResources common;
 
   // Initialize dummy params
@@ -1043,7 +1043,7 @@ TEST(StMgr, test_back_pressure_instance) {
 }
 
 // Tests that spout deaths during backpressure are handled correctly
-TEST(StMgr, test_spout_death_under_backpressure) {
+TEST(DISABLED_StMgr, test_spout_death_under_backpressure) {
   CommonResources common;
 
   // Initialize dummy params
@@ -1178,7 +1178,7 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   TearCommonResources(common);
 }
 
-TEST(StMgr, test_back_pressure_stmgr) {
+TEST(DISABLED_StMgr, test_back_pressure_stmgr) {
   CommonResources common;
 
   // Initialize dummy params
@@ -1297,7 +1297,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
   TearCommonResources(common);
 }
 
-TEST(StMgr, test_back_pressure_stmgr_reconnect) {
+TEST(DISABLED_StMgr, test_back_pressure_stmgr_reconnect) {
   CommonResources common;
 
   // Initialize dummy params
@@ -1547,7 +1547,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   TearCommonResources(common);
 }
 
-TEST(StMgr, test_tmaster_restart_on_same_address) {
+TEST(DISABLED_StMgr, test_tmaster_restart_on_same_address) {
   CommonResources common;
 
   // Initialize dummy params
@@ -1687,7 +1687,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
 
 // This tests to make sure that metrics mgr upon reconnect
 // will get the tmaster location
-TEST(StMgr, test_metricsmgr_reconnect) {
+TEST(DISABLED_StMgr, test_metricsmgr_reconnect) {
   CommonResources common;
   // Initialize dummy params
   common.tmaster_host_ = LOCALHOST;
