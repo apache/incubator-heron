@@ -32,18 +32,39 @@ run_build() {
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
   DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
-  DOCKER_TAG="heron:$HERON_VERSION-$TARGET_PLATFORM"
+  DOCKER_TAG="streamlio/heron-$TARGET_PLATFORM:$HERON_VERSION"
 
   setup_scratch_dir $SCRATCH_DIR
 
-  #need to copy artifacts locally
-  echo "Building docker image with tag:$DOCKER_TAG"
-  cp -pr "$OUTPUT_DIRECTORY"/*$HERON_VERSION* "$SCRATCH_DIR/artifacts"
-  mv $SCRATCH_DIR/artifacts/heron-tools-install-$HERON_VERSION-$TARGET_PLATFORM.sh $SCRATCH_DIR/artifacts/heron-tools-install.sh
-  mv $SCRATCH_DIR/artifacts/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz $SCRATCH_DIR/artifacts/heron-core.tar.gz
+  # need to copy artifacts locally
+  TOOLS_FILE="$OUTPUT_DIRECTORY/heron-tools-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
+  TOOLS_OUT_FILE="$SCRATCH_DIR/artifacts/heron-tools-install.sh"
+
+  CLIENT_FILE="$OUTPUT_DIRECTORY/heron-client-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
+  CLIENT_OUT_FILE="$SCRATCH_DIR/artifacts/heron-client-install.sh"
+
+  CORE_FILE="$OUTPUT_DIRECTORY/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz"
+  CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
+
+  SCRIPT_FILE="$DOCKER_DIR/start-services.sh"
+  SCRIPT_OUT_FILE="$SCRATCH_DIR/artifacts/start-services.sh"
+
+  cp $TOOLS_FILE $TOOLS_OUT_FILE
+  cp $CLIENT_FILE $CLIENT_OUT_FILE
+  cp $CORE_FILE $CORE_OUT_FILE
+  cp $SCRIPT_FILE $SCRIPT_OUT_FILE
 
   export HERON_VERSION
+
+  echo "Building docker image with tag:$DOCKER_TAG"
   docker build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+
+  # save the image as a tar file
+  DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
+
+  echo "Saving docker image to $DOCKER_IMAGE_FILE"
+  docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
+  gzip $DOCKER_IMAGE_FILE
 }
 
 case $# in
@@ -52,10 +73,19 @@ case $# in
     ;;
 
   *)
+    echo "  "
+    echo "Script to build heron docker image for different platforms"
+    echo "  Input - directory containing the artifacts from the <output-directory>"
+    echo "  Output - docker image tar file saved in the <output-directory> "
+    echo "  "
     echo "Usage: $0 <platform> <version_string> <output-directory> "
     echo "  "
+    echo "Platforms Supported: ubuntu, centos"
+    echo "  "
     echo "Example:"
-    echo "  ./build-docker.sh ubuntu14.04 0.12.0 ."
+    echo "  ./build-docker.sh ubuntu 0.12.0 ~/ubuntu"
+    echo "  "
+    echo "  ./build-docker.sh centos 0.15.0 ."
     echo "  "
     exit 1
     ;;

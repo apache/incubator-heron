@@ -12,6 +12,7 @@ RUN apt-get update && apt-get -y install \
       libssl-dev \
       git \
       libtool \
+      libtool-bin \
       libunwind8 \
       libunwind-setjmp0-dev \
       python \

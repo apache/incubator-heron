@@ -16,12 +16,14 @@ ADD artifacts /heron
 WORKDIR /heron
 
 # run heron installers
+RUN /heron/heron-client-install.sh
 RUN /heron/heron-tools-install.sh
 
 RUN mkdir -p /opt/heron && \
     tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /opt/heron
 
 RUN rm -f /heron/heron-tools-install.sh
+RUN rm -f /heron/heron-client-install.sh
 RUN rm -f /heron/heron-core.tar.gz
 
 ENV HERON_HOME /opt/heron/heron-core/
