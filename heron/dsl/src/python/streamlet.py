@@ -97,7 +97,8 @@ class Streamlet(object):
                                          parents=[self],
                                          stage_name=stage_name, parallelism=1)
 
-  def reduce_by_key_and_window(self, time_window, reduce_function, stage_name=None, parallelism=None):
+  def reduce_by_key_and_window(self, time_window, reduce_function,
+                               stage_name=None, parallelism=None):
     """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
        over the time_window and then reduced using the reduce_function
     """
