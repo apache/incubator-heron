@@ -7,17 +7,46 @@ aliases:
 
 > The current version of Heron is **{{% heronVersion %}}**.
 
-The easiest way to get started learning Heron is to install and run pre-compiled
-Heron binaries, which are currently available for:
+The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
-* Mac OS X
+* [MacOS](#macos)
 * Ubuntu >= 14.04
 * CentOS
 
 For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
 (../developers/compiling/compiling).
 
-## Step 1 --- Download Heron binaries using installation scripts
+## Step 1 --- Download the Heron tools
+
+Heron tools can be installed on [MacOS](#macos) using [Homebrew](https://brew.sh)
+
+## MacOS
+
+You can install the Heron client tools using [Homebrew](https://brew.sh). There are three tools currently available:
+
+* The Heron [command-line tool](../operators/heron-cli) (or client), which is used to submit, activate, and kill topologies (and more):
+
+    ```shell
+    $ brew install heron-client
+    ```
+
+* The [Heron UI](../operators/heron-ui) dashboard:
+
+    ```shell
+    $ brew install heron-ui
+    ```
+
+* The [Heron Tracker](../operators/heron-tracker), which powers Heron UI:
+
+    ```shell
+    $ brew install heron-tracker
+    ```
+
+For this tutorial we recommend installing all three tools.
+
+> If you're running MacOS and you'd prefer to install Heron binaries directly, see the... TODO
+
+## Using installation scripts
 
 Go to the [releases page](https://github.com/twitter/heron/releases) for Heron
 and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, would be named
