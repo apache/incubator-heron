@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
-    name = "heron-pythonspouts-py",
+    name = "heron-pythonconnectors-py",
     srcs = glob(["**/*.py"]),
     deps = [
         "//heron/api/src/python:heron-python-py",
@@ -14,10 +14,10 @@ pex_library(
 
 # for egg production
 pex_binary(
-    name = "heron-pythonspouts-package",
+    name = "heron-pythonconnectors-package",
     srcs = glob(["**/*.py"]),
     deps = [
-        ":heron-pythonspouts-py",
         "//heron/api/src/python:heron-python-py",
     ]
 )
+

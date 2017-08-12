@@ -17,8 +17,9 @@ api_deps_files = [
 java_test(
   name = "PulsarSpoutTests",
   srcs = glob(["**/pulsar/**/*.java"]),
+  size = "small",
   deps = common_deps_files + api_deps_files + [
-    "//heron/spouts/src/java:heron-pulsar-connectors",
+    "//heron/connectors/pulsar/src/java:heron-pulsar-connectors",
     "//third_party/java:apache-pulsar-client",
   ],  
 )
