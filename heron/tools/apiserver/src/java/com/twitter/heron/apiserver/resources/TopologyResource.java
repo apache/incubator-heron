@@ -134,8 +134,16 @@ public class TopologyResource extends HeronResource {
           .build();
     }
 
-    final String topologyName = Forms.getString(form, FORM_KEY_NAME);
     final String cluster = Forms.getString(form, FORM_KEY_CLUSTER);
+    if (!doesClusterMatch(cluster)) {
+      return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
+          .type(MediaType.APPLICATION_JSON)
+          .entity(createMessage(String.format("Unknown cluster %s expecting '%s'",
+              cluster, getCluster())))
+          .build();
+    }
+
+    final String topologyName = Forms.getString(form, FORM_KEY_NAME);
     final String role = Forms.getString(form, FORM_KEY_ROLE);
     final String environment =
         Forms.getString(form, FORM_KEY_ENVIRONMENT, Constants.DEFAULT_HERON_ENVIRONMENT);
@@ -400,6 +408,10 @@ public class TopologyResource extends HeronResource {
     return actionFactory;
   }
 
+  private boolean doesClusterMatch(String cluster) {
+    return getCluster().equalsIgnoreCase(cluster);
+  }
+
   static List<String> verifyKeys(Set<String> keys, String... requiredKeys) {
     final List<String> missingKeys = new ArrayList<>();
     if (requiredKeys != null) {
@@ -496,17 +508,17 @@ public class TopologyResource extends HeronResource {
         .toString();
   }
 
-  private static ObjectNode createBaseError(String message) {
+  private static ObjectNode createBaseMessage(String message) {
     final ObjectMapper mapper = new ObjectMapper();
     return mapper.createObjectNode().put("message", message);
   }
 
   private static String createMessage(String message) {
-    return createBaseError(message).toString();
+    return createBaseMessage(message).toString();
   }
 
   private static String createValidationError(String message, List<String> missing) {
-    ObjectNode node = createBaseError(message);
+    ObjectNode node = createBaseMessage(message);
     ObjectNode errors = node.putObject("errors");
     ArrayNode missingParameters = errors.putArray("missing_parameters");
     for (String param : missing) {
