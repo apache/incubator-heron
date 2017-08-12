@@ -159,7 +159,7 @@ public class HealthManager {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    String metricsSourceUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, "http://localhost:8888");
+    String metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, "http://localhost:8888");
     String metricsProviderClassName = getOptionValue(cmd,
         CliArgs.METRIC_SOURCE_TYPE, "com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider");
 
@@ -175,7 +175,7 @@ public class HealthManager {
       mode = HealthManagerMode.valueOf(getOptionValue(cmd, CliArgs.MODE));
     }
 
-    Config config = null;
+    Config config;
     switch (mode) {
       case cluster:
         config = Config.toClusterMode(Config.newBuilder()
@@ -183,6 +183,7 @@ public class HealthManager {
             .putAll(commandLineConfigs(cmd))
             .build());
         break;
+
       case local:
         if (!hasOption(cmd, CliArgs.HERON_HOME) || !hasOption(cmd, CliArgs.CONFIG_PATH)) {
           throw new IllegalArgumentException("Missing heron_home or config_path argument");
@@ -194,6 +195,9 @@ public class HealthManager {
             .putAll(commandLineConfigs(cmd))
             .build());
         break;
+
+      default:
+        throw new IllegalArgumentException("Invalid mode: " + getOptionValue(cmd, CliArgs.MODE));
     }
 
 
@@ -203,7 +207,7 @@ public class HealthManager {
     Class<? extends MetricsProvider> metricsProviderClass =
         Class.forName(metricsProviderClassName).asSubclass(MetricsProvider.class);
     AbstractModule module =
-        buildMetricsProviderModule(config, metricsSourceUrl, metricsProviderClass);
+        buildMetricsProviderModule(config, metricsUrl, metricsProviderClass);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
