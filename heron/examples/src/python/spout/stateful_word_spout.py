@@ -24,11 +24,11 @@ class StatefulWordSpout(Spout, StatefulComponent):
   outputs = ['word']
 
   # pylint: disable=attribute-defined-outside-init
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     self.recovered_state = stateful_state
     self.logger.info("Checkpoint Snapshot recovered : %s" % str(self.recovered_state))
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     # Purely for debugging purposes
     for (k, v) in self.counter.items():
       self.recovered_state.put(k, v)

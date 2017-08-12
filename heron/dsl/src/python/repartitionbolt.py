@@ -27,11 +27,11 @@ class RepartitionBolt(Bolt, StatefulComponent):
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]
 
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     # repartition does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     # repartition does not have any state
     pass
 

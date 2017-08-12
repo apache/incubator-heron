@@ -128,7 +128,7 @@ class BaseInstance(object):
     if not self.is_stateful:
       raise RuntimeError("Received state checkpoint message but we are not stateful topology")
     if isinstance(component, StatefulComponent):
-      component.preSave(ckptmsg.checkpoint_id)
+      component.pre_save(ckptmsg.checkpoint_id)
     else:
       Log.info("Trying to checkponit a non stateful component. Send empty state")
     self.admit_ckpt_state(ckptmsg.checkpoint_id, self._stateful_state)
