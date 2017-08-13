@@ -31,11 +31,11 @@ class SampleBolt(Bolt, StatefulComponent):
   outputs = [Stream(fields=['_output_'], name='output')]
   FRACTION = 'fraction'
 
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     # sample does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     # sample does not have any state
     pass
 

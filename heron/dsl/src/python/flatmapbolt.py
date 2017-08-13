@@ -29,11 +29,11 @@ class FlatMapBolt(Bolt, StatefulComponent):
   outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     # flat_map does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     # flat_map does not have any state
     pass
 
