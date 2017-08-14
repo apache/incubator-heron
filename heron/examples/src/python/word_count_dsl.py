@@ -15,7 +15,7 @@
 import sys
 
 from heron.dsl.src.python.streamlet import TimeWindow
-from heron.spouts.src.python.fixedlines.fixedlinesstreamlet import FixedLinesStreamlet
+from heron.connectors.mock.src.python.fixedlinesstreamlet import FixedLinesStreamlet
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
