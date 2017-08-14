@@ -134,7 +134,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
             .build())
         .addMetric(metric)
         .build();
-    LOG.log(Level.FINE, "MetricsCache Query request: %s", request);
+    LOG.log(Level.FINE, "MetricsCache Query request: {0}", request);
 
     NetworkUtils.sendHttpPostRequest(con, "X", request.toByteArray());
     byte[] responseData = NetworkUtils.readHttpResponse(con);
@@ -142,7 +142,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     try {
       TopologyMaster.MetricResponse response =
           TopologyMaster.MetricResponse.parseFrom(responseData);
-      LOG.log(Level.FINE, "MetricsCache Query response: %s", response);
+      LOG.log(Level.FINE, "MetricsCache Query response: {0}", response);
       return response;
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
       LOG.severe("protobuf cannot parse the reply from MetricsCache " + e);
