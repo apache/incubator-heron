@@ -71,8 +71,16 @@ public class BackPressureSensor extends BaseSensor {
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric, duration, COMPONENT_STMGR);
 
+        if (stmgrResult.get(COMPONENT_STMGR) == null) {
+          continue;
+        }
+
         HashMap<String, InstanceMetrics> streamManagerResult =
             stmgrResult.get(COMPONENT_STMGR).getMetrics();
+
+        if (streamManagerResult.isEmpty()) {
+          continue;
+        }
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
