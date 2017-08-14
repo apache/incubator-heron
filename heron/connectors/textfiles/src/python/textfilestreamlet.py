@@ -16,7 +16,7 @@ import glob
 
 from heron.dsl.src.python.streamlet import Streamlet
 from heron.dsl.src.python.operation import OperationType
-from heron.spouts.src.python.textfiles.textfilespout import TextFileSpout
+from heron.connectors.textfiles.src.python.textfilespout import TextFileSpout
 
 # pylint: disable=access-member-before-definition
 # pylint: disable=attribute-defined-outside-init
