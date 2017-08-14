@@ -54,7 +54,7 @@ class Config(object):
         "${USER}": "user",
     }
     dummy_formatted_viz_url = viz_url_format
-    for key, value in valid_parameters.iteritems():
+    for key, value in valid_parameters.items():
       dummy_formatted_viz_url = dummy_formatted_viz_url.replace(key, value)
 
     # All $ signs must have been replaced
@@ -81,7 +81,7 @@ class Config(object):
 
     formatted_viz_url = self.viz_url_format
 
-    for key, value in valid_parameters.iteritems():
+    for key, value in valid_parameters.items():
       formatted_viz_url = formatted_viz_url.replace(key, value)
 
     return formatted_viz_url

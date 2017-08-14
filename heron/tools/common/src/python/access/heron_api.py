@@ -376,7 +376,7 @@ def get_comp_instance_metrics(cluster, environ, topology, component,
   all_instances = instances if isinstance(instances, list) else [instances]
 
   # append each metric to the url
-  for _, metric_name in metrics.iteritems():
+  for _, metric_name in metrics.items():
     request_url = tornado.httputil.url_concat(request_url, dict(metricname=metric_name[0]))
 
   # append each instance to the url
