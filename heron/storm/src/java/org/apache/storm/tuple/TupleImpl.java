@@ -248,4 +248,9 @@ public class TupleImpl implements Tuple {
   public void resetValues() {
     delegate.resetValues();
   }
+
+  @Override
+  public String toString() {
+    return delegate.toString();
+  }
 }
