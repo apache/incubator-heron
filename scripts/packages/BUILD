@@ -17,10 +17,11 @@ load("/tools/rules/heron_core", "heron_core_files")
 load("/tools/rules/heron_core", "heron_core_bin_files")
 load("/tools/rules/heron_core", "heron_core_conf_files")
 load("/tools/rules/heron_core", "heron_core_lib_instance_files")
-load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
+load("/tools/rules/heron_core", "heron_core_lib_healthmgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_metricscachemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_packing_files")
+load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
 load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_ckptmgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_statefulstorage_files")
@@ -88,6 +89,7 @@ pkg_tar(
         ":heron-core-bin",
         ":heron-core-lib-scheduler",
         ":heron-core-lib-packing",
+        ":heron-core-lib-healthmgr",
         ":heron-core-lib-metricsmgr",
         ":heron-core-lib-metricscachemgr",
         ":heron-core-lib-statemgr",
@@ -113,6 +115,12 @@ pkg_tar(
     name = "heron-core-lib-packing",
     package_dir = "heron-core/lib/packing",
     files = heron_core_lib_packing_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-healthmgr",
+    package_dir = "heron-core/lib/healthmgr",
+    files = heron_core_lib_healthmgr_files(),
 )
 
 pkg_tar(
