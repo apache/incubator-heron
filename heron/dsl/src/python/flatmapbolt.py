@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for flatMap bolt: FlatMapBolt"""
+"""module for flat_map bolt: FlatMapBolt"""
 import collections
 from heron.api.src.python.bolt.bolt import Bolt
 from heron.api.src.python.stream import Stream
@@ -29,12 +29,12 @@ class FlatMapBolt(Bolt, StatefulComponent):
   outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
-  def initState(self, stateful_state):
-    # flatMap does not have any state
+  def init_state(self, stateful_state):
+    # flat_map does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
-    # flatMap does not have any state
+  def pre_save(self, checkpoint_id):
+    # flat_map does not have any state
     pass
 
   def initialize(self, config, context):
@@ -46,7 +46,7 @@ class FlatMapBolt(Bolt, StatefulComponent):
       if not callable(self.flatmap_function):
         raise RuntimeError("FlatMap function has to be callable")
     else:
-      raise RuntimeError("FlatMapBolt needs to be passed flatMap function")
+      raise RuntimeError("FlatMapBolt needs to be passed flat_map function")
 
   def process(self, tup):
     retval = self.flatmap_function(tup.values[0])

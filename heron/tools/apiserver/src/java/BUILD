@@ -5,6 +5,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 api_deps_files = [
   "//heron/spi/src/java:heron-spi",
   "//heron/common/src/java:basics-java",
+  "//heron/common/src/java:utils-java",
 ]
 
 scheduler_deps_files = [

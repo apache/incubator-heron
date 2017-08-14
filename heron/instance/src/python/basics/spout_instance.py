@@ -68,7 +68,7 @@ class SpoutInstance(BaseInstance):
     if not self._initialized_metrics_and_tasks:
       self.spout_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.spout_impl, StatefulComponent):
-      self.spout_impl.initState(stateful_state)
+      self.spout_impl.init_state(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     if not self._initialized_metrics_and_tasks:
       self._add_spout_task()

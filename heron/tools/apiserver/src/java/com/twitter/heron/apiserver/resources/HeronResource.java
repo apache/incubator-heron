@@ -20,6 +20,7 @@ import com.twitter.heron.spi.common.Config;
 
 public class HeronResource {
 
+  public static final String ATTRIBUTE_CLUSTER = "cluster";
   public static final String ATTRIBUTE_CONFIGURATION = "configuration";
   public static final String ATTRIBUTE_CONFIGURATION_DIRECTORY = "configuration_directory";
   public static final String ATTRIBUTE_CONFIGURATION_OVERRIDE_PATH = "configuration_override";
@@ -30,6 +31,7 @@ public class HeronResource {
   private Config baseConfiguration;
   private String configurationDirectory;
   private String configurationOverridePath;
+  private String cluster;
 
   Config getBaseConfiguration() {
     if (baseConfiguration == null) {
@@ -53,5 +55,13 @@ public class HeronResource {
     }
 
     return configurationOverridePath;
+  }
+
+  String getCluster() {
+    if (cluster == null) {
+      cluster = (String) servletContext.getAttribute(ATTRIBUTE_CLUSTER);
+    }
+
+    return cluster;
   }
 }

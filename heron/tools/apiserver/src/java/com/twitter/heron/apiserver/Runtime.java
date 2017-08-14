@@ -221,6 +221,7 @@ public final class Runtime {
     final String toolsHome = getToolsHome();
 
     // read command line flags
+    final String cluster = cmd.getOptionValue(Flag.Cluster.name);
     final String heronConfigurationDirectory = getConfigurationDirectory(toolsHome, cmd);
     final String heronDirectory = getHeronDirectory(cmd);
     final String releaseFile = getReleaseFile(toolsHome, cmd);
@@ -243,6 +244,7 @@ public final class Runtime {
 
     LOG.info("using configuration path: {}", heronConfigurationDirectory);
 
+    contextHandler.setAttribute(HeronResource.ATTRIBUTE_CLUSTER, cluster);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CONFIGURATION, baseConfiguration);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CONFIGURATION_DIRECTORY,
         heronConfigurationDirectory);

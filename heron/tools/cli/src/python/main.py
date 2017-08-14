@@ -164,9 +164,9 @@ def server_deployment_mode(command, parser, cluster, cl_args):
 
   # tell the user which definition that we are using
   if not cl_args['service_url']:
-    Log.info("Using cluster definition from file %s" % config_file)
+    Log.debug("Using cluster definition from file %s" % config_file)
   else:
-    Log.info("Using cluster service url %s" % cl_args['service_url'])
+    Log.debug("Using cluster service url %s" % cl_args['service_url'])
 
   # if cluster definition exists, but service_url is not set, it is an error
   if not 'service_url' in client_confs[cluster]:
@@ -353,7 +353,7 @@ def main():
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.', (end - start))
+    Log.debug('Elapsed time: %.3fs.', (end - start))
 
   return 0 if result.is_successful(results) else 1
 

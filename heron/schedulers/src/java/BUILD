@@ -4,6 +4,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
     "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:utils-java",
     "@commons_io_commons_io//jar",
     "@com_google_guava_guava//jar",
 ]
