@@ -297,7 +297,9 @@ class SpoutInstance(BaseInstance):
     now = time.time()
 
     timeout_lst = []
-    for key, tuple_info in self.in_flight_tuples.iteritems():
+    while self.in_flight_tuples:
+      key = next(iter(self.in_flight_tuples))
+      tuple_info = self.in_flight_tuples[key]
       if tuple_info.is_expired(now, timeout_sec):
         timeout_lst.append(tuple_info)
         self.in_flight_tuples.pop(key)

@@ -65,7 +65,7 @@ class TopologyType(type):
     """Takes a class `__dict__` and returns `HeronComponentSpec` entries"""
     specs = {}
 
-    for name, spec in class_dict.iteritems():
+    for name, spec in class_dict.items():
       if isinstance(spec, HeronComponentSpec):
         # Use the variable name as the specification name.
         if spec.name is None:
@@ -95,7 +95,7 @@ class TopologyType(type):
     # add defaults
     topo_config.update(mcs.DEFAULT_TOPOLOGY_CONFIG)
 
-    for name, custom_config in class_dict.iteritems():
+    for name, custom_config in class_dict.items():
       if name == 'config' and isinstance(custom_config, dict):
         sanitized_dict = mcs._sanitize_config(custom_config)
         topo_config.update(sanitized_dict)
@@ -123,7 +123,7 @@ class TopologyType(type):
     config = topology_pb2.Config()
     conf_dict = class_dict['_topo_config']
 
-    for key, value in conf_dict.iteritems():
+    for key, value in conf_dict.items():
       if isinstance(value, str):
         kvs = config.kvs.add()
         kvs.key = key
@@ -234,7 +234,7 @@ class TopologyType(type):
       These values will need to be serialized before adding to a protobuf message.
     """
     sanitized = {}
-    for key, value in custom_config.iteritems():
+    for key, value in custom_config.items():
       if not isinstance(key, str):
         raise TypeError("Key for topology-wide configuration must be string, given: %s: %s"
                         % (str(type(key)), str(key)))
