@@ -15,7 +15,7 @@
 
 from heron.dsl.src.python.streamlet import Streamlet
 from heron.dsl.src.python.operation import OperationType
-from heron.spouts.src.python.fixedlines.fixedlinesspout import FixedLinesSpout
+from heron.connectors.mock.src.python.fixedlinesspout import FixedLinesSpout
 
 # pylint: disable=access-member-before-definition
 # pylint: disable=attribute-defined-outside-init
