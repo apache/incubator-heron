@@ -100,7 +100,7 @@ class Topology(object):
     unregister the corresponding watch.
     """
     to_remove = []
-    for uid, callback in self.watches.iteritems():
+    for uid, callback in self.watches.items():
       try:
         callback(self)
       except Exception as e:
