@@ -33,7 +33,7 @@ class BaseMetricsHelper(object):
 
   def register_metrics(self, metrics_collector, interval):
     """Registers its metrics to a given metrics collector with a given interval"""
-    for field, metrics in self.metrics.iteritems():
+    for field, metrics in self.metrics.items():
       metrics_collector.register_metric(field, metrics, interval)
 
   def update_count(self, name, incr_by=1, key=None):
@@ -371,7 +371,7 @@ class MetricsCollector(object):
     if metric_value is None:
       return
     elif isinstance(metric_value, dict):
-      for key, value in metric_value.iteritems():
+      for key, value in metric_value.items():
         if key is not None and value is not None:
           self._add_data_to_message(message, name + "/" + str(key), value)
           self._add_data_to_message(message, "%s/%s" % (name, str(key)), value)
