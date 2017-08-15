@@ -107,9 +107,7 @@ void StMgr::Init() {
   dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__dropped_during_restore",
                                            dropped_during_restore_metrics_);
-  state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() {
-    LOG(INFO) << "SetTMasterLocationWatch FetchTMasterLocation" << std::endl;
-    this->FetchTMasterLocation(); });
+  state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
 
@@ -128,11 +126,21 @@ void StMgr::Init() {
   // Create and Register Tuple cache
   CreateTupleCache();
 
+  CHECK_GT(
+      eventLoop_->registerTimer(
+          [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
+          config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
+              1_s),
+      0);  // fire only once
+
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
 
   // Create and start StmgrServer
   StartStmgrServer();
+  // Initialize tmaster client after stmgr gets actual port
+  FetchTMasterLocation();
+  FetchMetricsCacheLocation();
 
   if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Now start the stateful restorer
@@ -144,17 +152,6 @@ void StMgr::Init() {
   } else {
     stateful_restorer_ = nullptr;
   }
-
-  LOG(INFO) << "Init Stmgr FetchTMasterLocation" << std::endl;
-  FetchTMasterLocation();
-  FetchMetricsCacheLocation();
-
-  CHECK_GT(
-      eventLoop_->registerTimer(
-          [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
-          config::HeronInternalsConfigReader::Instance()->GetCheckTMasterLocationIntervalSec() *
-              1_s),
-      0);  // fire only once
 
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
@@ -623,10 +620,7 @@ void StMgr::PopulateXorManagers(
   xor_mgrs_ = new XorManager(eventLoop_, _message_timeout, all_spout_tasks);
 }
 
-const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const {
-  LOG(INFO) << "StMgr::GetPhysicalPlan()";
-  return pplan_;
-}
+const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
 
 void StMgr::HandleStreamManagerData(const sp_string&,
                                     proto::stmgr::TupleStreamMessage* _message) {

@@ -1445,13 +1445,9 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
 
   // Start the metrics mgr, common.ss_list_[0]
   StartMetricsMgr(common, metricsMgrTmasterLatch, NULL);
-  LOG(INFO) << "test-main: dummy MetricsMgr started on port " << common.metricsmgr_port_;
 
   // Start the tmaster etc. common.ss_list_[1]
   StartTMaster(common);
-  LOG(INFO) << "test-main: TMaster started on master port " << common.tmaster_port_;
-  LOG(INFO) << "test-main: TMaster started on controller port " << common.tmaster_controller_port_;
-  LOG(INFO) << "test-main: TMaster started on stats port " << common.tmaster_stats_port_;
 
   // Check the count: should be 5-1=4
   // The Tmaster sends its location to MetircsMgr when MetircsMgrClient initializes.
@@ -1472,7 +1468,6 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   // common.ss_list_[2]
   common.ss_list_.push_back(regular_stmgr_ss);
-  LOG(INFO) << "test-main: Stmgr-0 started on port " << common.stmgr_ports_[0];
 
   // Check the count: should be 4-1=3
   // The Stmgr sends Tmaster location to MetricsMgr when MetircsMgrClient initializes
@@ -1488,17 +1483,13 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
                   common.stmgr_instance_list_[1]);
   // common.ss_list_[3]
   common.ss_list_.push_back(dummy_stmgr_ss);
-  LOG(INFO) << "test-main: dummy Stmgr-1 started on port " << common.stmgr_ports_[1];
 
   // Start the dummy workers
   StartWorkerComponents(common, num_msgs_sent_by_spout_instance, num_msgs_sent_by_spout_instance);
 
   // Wait till we get the physical plan populated on the stmgr. That way we know the
   // workers have connected
-  LOG(INFO) << "test-main: Stmgr-0 waits for pplan from TMaster.";
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
-  LOG(INFO) << "test-main: Stmgr-0 got pplan from TMaster."
-      << " It is ready to stop TMaster and dummy Stmgr-1";
 
   // Kill current tmaster
   common.ss_list_[1]->loopExit();
@@ -1512,9 +1503,6 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   delete dummy_stmgr_thread;
   delete dummy_stmgr;
 
-  LOG(INFO) << "test-main: TMaster and dummy Stmgr-1 died."
-      << " It is ready to start TMaster and dummy Stmgr-1";
-
   // Change tmaster on a different port
   common.tmaster_port_ = 18511;
 
@@ -1525,13 +1513,9 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
                   common.tmaster_port_, common.shell_port_, common.stmgrs_id_list_[1],
                   common.stmgr_instance_list_[1]);
   common.ss_list_.push_back(dummy_stmgr_ss_2);
-  LOG(INFO) << "test-main: dummy Stmgr-1 started on port " << common.stmgr_ports_[1];
 
   // Start tmaster on a different port
   StartTMaster(common);
-  LOG(INFO) << "test-main: TMaster started on master port " << common.tmaster_port_;
-  LOG(INFO) << "test-main: TMaster started on controller port " << common.tmaster_controller_port_;
-  LOG(INFO) << "test-main: TMaster started on stats port " << common.tmaster_stats_port_;
 
   // This confirms that metrics manager received the new tmaster location
   // Tmaster sends its location to MetricsMgr when MetricsMgrClient initialize: 3-1=2
@@ -1543,7 +1527,6 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   // No easy way to avoid sleep here.
   sleep(2);
 
-  LOG(INFO) << "test-main: final check physical plan";
   // Ensure that Stmgr connected to the new tmaster and has received new physical plan
   if (regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port() != common.stmgr_ports_[1]) {
     CHECK_EQ(regular_stmgr->GetPhysicalPlan()->stmgrs(0).data_port(), common.stmgr_ports_[1]);
@@ -1575,7 +1558,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   TearCommonResources(common);
 }
 
-TEST(DISABLED_StMgr, test_tmaster_restart_on_same_address) {
+TEST(StMgr, test_tmaster_restart_on_same_address) {
   CommonResources common;
 
   // Initialize dummy params
@@ -1602,15 +1585,19 @@ TEST(DISABLED_StMgr, test_tmaster_restart_on_same_address) {
   int num_msgs_sent_by_spout_instance = 100 * 1000 * 1000;  // 100M
 
   // A countdown latch to wait on, until metric mgr receives tmaster location
-  // The count is 2 here, since we need to ensure it is sent twice: once at
+  // The count is 2 here for stmgr, since we need to ensure it is sent twice: once at
   // start, and once after receiving new tmaster location
-  CountDownLatch* metricsMgrTmasterLatch = new CountDownLatch(2);
+  CountDownLatch* metricsMgrTmasterLatch = new CountDownLatch(5);
 
   // Start the metrics mgr
   StartMetricsMgr(common, metricsMgrTmasterLatch, NULL);
 
   // Start the tmaster etc.
   StartTMaster(common);
+
+  // Check the count: should be 5-1=4
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(4, std::chrono::seconds(5)));
+  EXPECT_EQ(static_cast<sp_uint32>(4), metricsMgrTmasterLatch->getCount());
 
   // Distribute workers across stmgrs
   DistributeWorkersAcrossStmgrs(common);
@@ -1625,6 +1612,10 @@ TEST(DISABLED_StMgr, test_tmaster_restart_on_same_address) {
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss);
+
+  // Check the count: should be 4-1=3
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(3, std::chrono::seconds(5)));
+  EXPECT_EQ(static_cast<sp_uint32>(3), metricsMgrTmasterLatch->getCount());
 
   // Start a dummy stmgr
   EventLoopImpl* dummy_stmgr_ss = NULL;
@@ -1641,10 +1632,6 @@ TEST(DISABLED_StMgr, test_tmaster_restart_on_same_address) {
   // Wait till we get the physical plan populated on the stmgr. That way we know the
   // workers have connected
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
-
-  // Check the count: should be 2-1=1
-  EXPECT_TRUE(metricsMgrTmasterLatch->wait(1, std::chrono::seconds(5)));
-  EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
 
   // Kill current tmaster
   common.ss_list_[1]->loopExit();
@@ -1672,7 +1659,11 @@ TEST(DISABLED_StMgr, test_tmaster_restart_on_same_address) {
   StartTMaster(common);
 
   // This confirms that metrics manager received the new tmaster location
-  EXPECT_TRUE(metricsMgrTmasterLatch->wait(0, std::chrono::seconds(5)));
+  // Check the count: should be 3-2=1
+  // Tmaster sends its location when MetricsMgrClient initialize
+  // Stmgr-0 watches and sends tmaster location
+  EXPECT_TRUE(metricsMgrTmasterLatch->wait(1, std::chrono::seconds(5)));
+  EXPECT_EQ(static_cast<sp_uint32>(1), metricsMgrTmasterLatch->getCount());
 
   // Now wait until stmgr receives the new physical plan.
   // No easy way to avoid sleep here.
