@@ -233,7 +233,7 @@ TEST(StatefulRestorer, normalcase) {
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
   auto tuple_cache = new DummyTupleCache(dummyLoop);
   auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
-  dummy_metrics_client->Start("localhost", 11000, "_stmgr", "_stmgr", dummyLoop);
+  dummy_metrics_client->Start("localhost", 11000, "_stmgr", "_stmgr");
   auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   auto dummy_stmgr_server = CreateDummyStMgrServer(dummyLoop, GenerateStMgrId(1),
@@ -306,7 +306,7 @@ TEST(StatefulRestorer, deadinstances) {
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
   auto tuple_cache = new DummyTupleCache(dummyLoop);
   auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
-  dummy_metrics_client->Start("localhost", 11000, "_stmgr", "_stmgr", dummyLoop);
+  dummy_metrics_client->Start("localhost", 11000, "_stmgr", "_stmgr");
   auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   auto dummy_stmgr_server = CreateDummyStMgrServer(dummyLoop, GenerateStMgrId(1),
@@ -396,7 +396,7 @@ TEST(StatefulRestorer, deadckptmgr) {
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
   auto tuple_cache = new DummyTupleCache(dummyLoop);
   auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
-  dummy_metrics_client->Start("localhost", 11000, "_stmgr", "_stmgr", dummyLoop);
+  dummy_metrics_client->Start("localhost", 11000, "_stmgr", "_stmgr");
   auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   dummy_stmgr_clientmgr->SetAllStMgrClientsRegistered(true);

@@ -136,9 +136,10 @@ void StMgr::Init() {
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
 
-  // Create and start StmgrServer
+  // Create and start StmgrServer. The actual stmgr server port is assgined.
   StartStmgrServer();
-  // Initialize tmaster client after stmgr gets actual port
+  // FetchTMasterLocation() triggers the StMgr::CreateTMasterClient() where the TMasterClient
+  // constructor needs actual Stmgr port, thus put FetchTMasterLocation() after StartStmgrServer()
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
@@ -272,7 +273,7 @@ void StMgr::StartStmgrServer() {
   stmgr_port_ = server_->get_serveroptions().get_port();
 
   // metrics_manager_client_ picks the actual stmgr_port_ and starts
-  metrics_manager_client_->Start(stmgr_host_, stmgr_port_, "__stmgr__", stmgr_id_, eventLoop_);
+  metrics_manager_client_->Start(stmgr_host_, stmgr_port_, "__stmgr__", stmgr_id_);
 }
 
 void StMgr::CreateCheckpointMgrClient() {

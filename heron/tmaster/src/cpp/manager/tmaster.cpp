@@ -85,8 +85,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
       mMetricsMgrPort, metricsExportIntervalSec, eventLoop_);
   mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
-                           "0",  // MM expects task_id, so just giving 0 for tmaster.
-                           eventLoop_);
+                           "0");  // MM expects task_id, so just giving 0 for tmaster.
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
