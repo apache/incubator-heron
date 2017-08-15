@@ -390,7 +390,7 @@ genrule(
         'mkdir -p $$TMP_DIR $$HERONPY_DIR',
         'unzip -qd $$HERONPYAPI_UNZIP $(location //heron/api/src/python:heron-python-package)',
         'unzip -qd $$HERONPYDSL_UNZIP $(location //heron/dsl/src/python:heron-pythondsl-package)',
-        'unzip -qd $$HERONPYCONNECTORS_UNZIP $(location //heron/spouts/src/python:heron-pythonconnectors-package)',
+        'unzip -qd $$HERONPYCONNECTORS_UNZIP $(location //heron/connectors:heron-pythonconnectors-package)',
         'find $$HERONPYAPI_UNZIP -name "*.pyc" -exec rm {} \;',
         'find $$HERONPYDSL_UNZIP -name "*.pyc" -exec rm {} \;',
         'find $$HERONPYCONNECTORS_UNZIP -name "*.pyc" -exec rm {} \;',
