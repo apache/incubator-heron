@@ -386,7 +386,6 @@ genrule(
         'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
         'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.16.0" || echo $$HERON_VERSION)',
-        'export HERON_VERSION="0.16.0"',
         'echo $$HERON_VERSION',
         'mkdir -p $$TMP_DIR $$HERONPY_DIR',
         'unzip -qd $$HERONPYAPI_UNZIP $(location //heron/api/src/python:heron-python-package)',
