@@ -51,7 +51,7 @@ def create_parser(subparsers, action, help_arg):
 ################################################################################
 def flatten_args(fargs):
   temp_args = []
-  for k, v in fargs.iteritems():
+  for k, v in fargs.items():
     if isinstance(v, list):
       temp_args.extend([(k, value) for value in v])
     else:

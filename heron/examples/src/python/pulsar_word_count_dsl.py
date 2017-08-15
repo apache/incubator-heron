@@ -15,7 +15,7 @@
 import sys
 
 from heron.dsl.src.python.streamlet import TimeWindow
-from heron.spouts.src.python.pulsar.pulsarstreamlet import PulsarStreamlet
+from heron.connectors.pulsar.src.python.pulsarstreamlet import PulsarStreamlet
 
 if __name__ == '__main__':
   if len(sys.argv) != 4:
