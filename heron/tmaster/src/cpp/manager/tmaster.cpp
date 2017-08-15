@@ -206,7 +206,6 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
 void TMaster::EstablishTMaster(EventLoop::Status) {
   auto cb = [this](proto::system::StatusCode code) { this->SetTMasterLocationDone(code); };
 
-  LOG(INFO) << "EstablishTMaster SetTMasterLocation";
   state_mgr_->SetTMasterLocation(*tmaster_location_, std::move(cb));
 
   // if zk lost the tmaster location, tmaster quits to bail out and re-establish its location

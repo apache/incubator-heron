@@ -670,7 +670,7 @@ void TearCommonResources(CommonResources& common) {
     delete itr->second;
 
   // Clean up the local filesystem state
-  // FileUtils::removeRecursive(common.dpath_, true);
+  FileUtils::removeRecursive(common.dpath_, true);
 }
 
 void VerifyMetricsMgrTMaster(CommonResources& common) {
@@ -1497,22 +1497,23 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   delete common.tmaster_;
   delete common.tmaster_thread_;
 
-  // Killing dummy stmgr so that we can restart it on another port, to change the physical plan.
+  // Killing dummy stmgr so that we can restart it on another port, to change
+  // the physical plan.
   dummy_stmgr_ss->loopExit();
   dummy_stmgr_thread->join();
   delete dummy_stmgr_thread;
   delete dummy_stmgr;
 
-  // Change tmaster on a different port
+  // Change the tmaster port
   common.tmaster_port_ = 18511;
 
-  // Start new dummy stmgr at different port, to generate a differnt pplan that we can verify
-  EventLoopImpl* dummy_stmgr_ss_2 = NULL;
+  // Start new dummy stmgr at different port, to generate a differnt pplan that we
+  // can verify
   common.stmgr_ports_[1] = 0;
-  StartDummyStMgr(dummy_stmgr_ss_2, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
+  StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
                   common.tmaster_port_, common.shell_port_, common.stmgrs_id_list_[1],
                   common.stmgr_instance_list_[1]);
-  common.ss_list_.push_back(dummy_stmgr_ss_2);
+  common.ss_list_.push_back(dummy_stmgr_ss);
 
   // Start tmaster on a different port
   StartTMaster(common);
@@ -1596,6 +1597,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   StartTMaster(common);
 
   // Check the count: should be 5-1=4
+  // Tmaster send its location to MetricsMgr when MetricsMgrClient initializes
   EXPECT_TRUE(metricsMgrTmasterLatch->wait(4, std::chrono::seconds(5)));
   EXPECT_EQ(static_cast<sp_uint32>(4), metricsMgrTmasterLatch->getCount());
 
@@ -1614,6 +1616,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Check the count: should be 4-1=3
+  // Stmgr-0 sends tmaster location to MetrcisMgr when MetricsMgrClient initializes.
   EXPECT_TRUE(metricsMgrTmasterLatch->wait(3, std::chrono::seconds(5)));
   EXPECT_EQ(static_cast<sp_uint32>(3), metricsMgrTmasterLatch->getCount());
 
