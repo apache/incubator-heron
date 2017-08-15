@@ -105,6 +105,6 @@ typedef std::string sp_string;
 
 #endif  // SP_UNICODE
 
-const std::string EMPTY_STRING = "";
+constexpr char const* EMPTY_STRING = "";
 
 #endif /* end of header file */
