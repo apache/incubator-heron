@@ -83,6 +83,7 @@ class Grouping(object):
   @classmethod
   def is_grouping_sane(cls, gtype):
     """Checks if a given gtype is sane"""
+    #pylint: disable=no-else-return
     if gtype == cls.SHUFFLE or gtype == cls.ALL or gtype == cls.LOWEST or gtype == cls.NONE:
       return True
     elif isinstance(gtype, cls.FIELDS):

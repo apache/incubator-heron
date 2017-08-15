@@ -252,8 +252,7 @@ class REQID(object):
   def __str__(self):
     if self.is_zero():
       return "ZERO"
-    else:
-      return ''.join([str(i) for i in list(self.bytes)])
+    return ''.join([str(i) for i in list(self.bytes)])
 
 class StatusCode(object):
   """StatusCode for Response"""

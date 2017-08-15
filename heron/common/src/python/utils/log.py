@@ -54,7 +54,6 @@ def configure(level=logging.INFO, logfile=None):
   # otherwise, use StreamHandler to output to stream (stdout, stderr...)
   else:
     log_format = "[%(asctime)s] %(log_color)s[%(levelname)s]%(reset)s: %(message)s"
-    # pylint: disable=redefined-variable-type
     formatter = colorlog.ColoredFormatter(fmt=log_format, datefmt=date_format)
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)

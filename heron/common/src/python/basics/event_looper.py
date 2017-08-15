@@ -125,7 +125,8 @@ class EventLooper(object):
     This should be used from do_wait().
     :returns (float) next_timeout, or 10.0 if there are no timer events
     """
-    if len(self.timer_tasks) == 0:
+    # pylint: disable=no-else-return
+    if not self.timer_tasks:
       return sys.maxint
     else:
       next_timeout_interval = self.timer_tasks[0][0] - time.time()
@@ -141,6 +142,6 @@ class EventLooper(object):
   def _trigger_timers(self):
     """Triggers expired timers"""
     current = time.time()
-    while len(self.timer_tasks) > 0 and (self.timer_tasks[0][0] - current <= 0):
+    while self.timer_tasks and (self.timer_tasks[0][0] - current <= 0):
       task = heappop(self.timer_tasks)[1]
       task()

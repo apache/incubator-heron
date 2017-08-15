@@ -351,7 +351,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
     return (code, f_globals, defaults, closure, dct, base_globals)
 
   def save_builtin_function(self, obj):
-    if obj.__module__ is "__builtin__":
+    if obj.__module__ is "__builtin__": # pylint: disable=literal-comparison
       return self.save_global(obj)
     return self.save_function(obj)
   dispatch[types.BuiltinFunctionType] = save_builtin_function
@@ -793,7 +793,7 @@ def _load_class(cls, d):
       if typ == 'property':
         v = property(*v)
       elif typ == 'staticmethod':
-        v = staticmethod(v) # pylint: disable=redefined-variable-type
+        v = staticmethod(v)
       elif typ == 'classmethod':
         v = classmethod(v)
     setattr(cls, k, v)

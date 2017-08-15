@@ -87,7 +87,7 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
     self._expire(curtime)
 
   def _expire(self, tm):
-    while len(self.current_tuples) > 0:
+    while self.current_tuples:
       if tm - self.window_duration > self.current_tuples[0][1]:
         (tup, _) = self.current_tuples.popleft()
         self.ack(tup)
@@ -96,7 +96,7 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
 
   # pylint: disable=unused-argument
   # pylint: disable=unused-variable
-  def process_tick(self, tup):
+  def process_tick(self, tick_tuple):
     """Called every slide_interval
     """
     curtime = int(time.time())
@@ -165,7 +165,7 @@ class TumblingWindowBolt(Bolt, StatefulComponent):
 
   # pylint: disable=unused-argument
   # pylint: disable=unused-variable
-  def process_tick(self, tup):
+  def process_tick(self, tick_tuple):
     """Called every window_duration
     """
     curtime = int(time.time())

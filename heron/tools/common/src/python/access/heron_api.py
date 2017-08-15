@@ -730,6 +730,7 @@ def get_filestats(cluster, environ, topology, container, path, role=None):
 class HeronQueryHandler(QueryHandler):
   ''' HeronQueryHandler '''
 
+  # pylint: disable=arguments-differ
   @tornado.gen.coroutine
   def fetch(self, cluster, metric, topology, component, instance, timerange, environ=None):
     '''
@@ -760,6 +761,7 @@ class HeronQueryHandler(QueryHandler):
 
     raise tornado.gen.Return(result)
 
+  # pylint: disable=arguments-differ
   @tornado.gen.coroutine
   def fetch_max(self, cluster, metric, topology, component, instance, timerange, environ=None):
     '''
@@ -822,7 +824,7 @@ class HeronQueryHandler(QueryHandler):
       for key in res:
         result = res[key]
         # Replacing stream manager instance name with component instance name
-        if len(result["timeline"]) > 0:
+        if result["timeline"]:
           result["timeline"][0]["instance"] = key
         timelines.extend(result["timeline"])
       result = self.get_metric_response(timerange, timelines, is_max)
@@ -838,7 +840,7 @@ class HeronQueryHandler(QueryHandler):
     :param multi_ts:
     :return:
     '''
-    if len(multi_ts) > 0 and len(multi_ts[0]["timeline"]) > 0:
+    if multi_ts and multi_ts[0]["timeline"]:
       keys = multi_ts[0]["timeline"][0]["data"].keys()
       timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in multi_ts)
       values = (max(v) for v in zip(*timelines))

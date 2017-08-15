@@ -60,8 +60,7 @@ class HeronComponentSpec(object):
     """Returns protobuf message (Spout or Bolt) of this component"""
     if self.is_spout:
       return self._get_spout()
-    else:
-      return self._get_bolt()
+    return self._get_bolt()
 
   def _get_spout(self):
     """Returns Spout protobuf message"""

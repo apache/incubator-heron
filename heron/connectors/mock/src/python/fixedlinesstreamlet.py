@@ -36,6 +36,7 @@ class FixedLinesStreamlet(Streamlet):
   def _calculate_inputs(self):
     return {}
 
+  # pylint: disable=no-else-return
   def _calculate_stage_name(self, existing_stage_names):
     stagename = "fixedlines"
     if stagename not in existing_stage_names:

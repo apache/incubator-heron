@@ -45,7 +45,7 @@ class TextFileSpout(Spout):
 
   def _get_next_lines(self):
     next_lines = []
-    while len(next_lines) == 0:
+    while not next_lines:
       next_lines = self._consume_next_file()
       if next_lines is None:
         return next_lines
@@ -65,7 +65,7 @@ class TextFileSpout(Spout):
       raise e
 
   def _get_next_file_to_consume(self):
-    if len(self.files_to_consume) == 0:
+    if not self.files_to_consume:
       return None
     return self.files_to_consume.pop()
 
@@ -73,7 +73,7 @@ class TextFileSpout(Spout):
     if self.lines_to_consume is None:
       return
     next_line = self.lines_to_consume.pop()
-    if len(self.lines_to_consume) == 0:
+    if not self.lines_to_consume:
       self.lines_to_consume = self._get_next_lines()
     self.emit(next_line)
     self.emit_count += 1

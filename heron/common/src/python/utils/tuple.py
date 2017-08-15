@@ -62,7 +62,7 @@ class TupleHelper(object):
     """
     component_name = stream.component_name
     stream_id = stream.id
-    gen_task = roots[0].taskid if roots is not None and len(roots) > 0 else None
+    gen_task = roots[0].taskid if roots is not None and roots else None
     return HeronTuple(id=str(tuple_key), component=component_name, stream=stream_id,
                       task=gen_task, values=values, creation_time=time.time(), roots=roots)
   @staticmethod

@@ -141,7 +141,7 @@ class HeronClient(asyncore.dispatcher):
       self._handle_packet(pkt)
 
   def handle_write(self):
-    if len(self.out_buffer) == 0:
+    if not self.out_buffer:
       return
     start_cycle_time = time.time()
     bytes_written = 0
@@ -151,7 +151,7 @@ class HeronClient(asyncore.dispatcher):
     write_batch_size_bytes = self.socket_options.nw_write_batch_size_bytes
 
     while (time.time() - start_cycle_time - write_batch_time_sec) < 0 and \
-            bytes_written < write_batch_size_bytes and len(self.out_buffer) > 0:
+            bytes_written < write_batch_size_bytes and self.out_buffer:
       outgoing_pkt = self.out_buffer[0]
       outgoing_pkt.send(self)
 

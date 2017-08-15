@@ -85,11 +85,11 @@ class OutgoingTupleHelper(object):
     """
     if self.current_control_tuple_set is None:
       self._init_new_control_tuple()
-    elif is_ack and (len(self.current_control_tuple_set.fails) > 0 or
+    elif is_ack and (self.current_control_tuple_set.fails or
                      len(self.current_control_tuple_set.acks) >= self.control_tuple_set_capacity):
       self._init_new_control_tuple()
     elif not is_ack and \
-        (len(self.current_control_tuple_set.acks) > 0 or
+        (self.current_control_tuple_set.acks or
          len(self.current_control_tuple_set.fails) >= self.control_tuple_set_capacity):
       self._init_new_control_tuple()
 

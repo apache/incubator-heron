@@ -94,8 +94,7 @@ class TopologyContextImpl(TopologyContext):
         key = StreamId(id=istream.stream.id, component_name=istream.stream.component_name)
         ret[key] = istream.gtype
       return ret
-    else:
-      return None
+    return None
 
   def get_this_sources(self):
     return self.get_sources(self.get_component_id())
@@ -211,7 +210,7 @@ class TopologyContextImpl(TopologyContext):
     :type out_tasks: list
     :param out_tasks: list of custom grouping target task id
     """
-    if len(self.task_hooks) > 0:
+    if self.task_hooks:
       emit_info = EmitInfo(values=values, stream_id=stream_id,
                            task_id=self.get_task_id(), out_tasks=out_tasks)
       for task_hook in self.task_hooks:
@@ -225,7 +224,7 @@ class TopologyContextImpl(TopologyContext):
     :type complete_latency_ns: float
     :param complete_latency_ns: complete latency in nano seconds
     """
-    if len(self.task_hooks) > 0:
+    if self.task_hooks:
       spout_ack_info = SpoutAckInfo(message_id=message_id,
                                     spout_task_id=self.get_task_id(),
                                     complete_latency_ms=complete_latency_ns *
@@ -241,7 +240,7 @@ class TopologyContextImpl(TopologyContext):
     :type fail_latency_ns: float
     :param fail_latency_ns: fail latency in nano seconds
     """
-    if len(self.task_hooks) > 0:
+    if self.task_hooks:
       spout_fail_info = SpoutFailInfo(message_id=message_id,
                                       spout_task_id=self.get_task_id(),
                                       fail_latency_ms=fail_latency_ns * system_constants.NS_TO_MS)
@@ -256,7 +255,7 @@ class TopologyContextImpl(TopologyContext):
     :type execute_latency_ns: float
     :param execute_latency_ns: execute latency in nano seconds
     """
-    if len(self.task_hooks) > 0:
+    if self.task_hooks:
       bolt_execute_info = \
         BoltExecuteInfo(heron_tuple=heron_tuple,
                         executing_task_id=self.get_task_id(),
@@ -272,7 +271,7 @@ class TopologyContextImpl(TopologyContext):
     :type process_latency_ns: float
     :param process_latency_ns: process latency in nano seconds
     """
-    if len(self.task_hooks) > 0:
+    if self.task_hooks:
       bolt_ack_info = BoltAckInfo(heron_tuple=heron_tuple,
                                   acking_task_id=self.get_task_id(),
                                   process_latency_ms=process_latency_ns * system_constants.NS_TO_MS)
@@ -287,7 +286,7 @@ class TopologyContextImpl(TopologyContext):
     :type fail_latency_ns: float
     :param fail_latency_ns: fail latency in nano seconds
     """
-    if len(self.task_hooks) > 0:
+    if self.task_hooks:
       bolt_fail_info = BoltFailInfo(heron_tuple=heron_tuple,
                                     failing_task_id=self.get_task_id(),
                                     fail_latency_ms=fail_latency_ns * system_constants.NS_TO_MS)

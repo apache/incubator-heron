@@ -91,8 +91,7 @@ class MeanReducer(IReducer):
   def extract(self):
     if self.count > 0:
       return float(self.sum)/self.count
-    else:
-      return None
+    return None
 
 class ReducedMetric(IMetric):
   """Reduced Metric"""

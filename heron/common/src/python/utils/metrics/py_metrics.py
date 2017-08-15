@@ -13,13 +13,13 @@
 # limitations under the License.
 """ Python program related metrics."""
 import gc
-import psutil
 import traceback
+import psutil
 from heron.api.src.python.metrics import AssignableMetrics, MultiAssignableMetrics
-from .metrics_helper import BaseMetricsHelper
 import heron.common.src.python.system_constants as constants
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
+from .metrics_helper import BaseMetricsHelper
 
 # pylint: disable=too-many-instance-attributes
 class PyMetrics(BaseMetricsHelper):

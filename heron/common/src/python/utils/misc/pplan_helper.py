@@ -114,15 +114,13 @@ class PhysicalPlanHelper(object):
     """Returns spout instance, or ``None`` if bolt is assigned"""
     if self.is_spout:
       return self._my_spbl
-    else:
-      return None
+    return None
 
   def get_my_bolt(self):
     """Returns bolt instance, or ``None`` if spout is assigned"""
     if self.is_spout:
       return None
-    else:
-      return self._my_spbl
+    return self._my_spbl
 
   def get_topology_state(self):
     """Returns the current topology state"""
@@ -144,8 +142,7 @@ class PhysicalPlanHelper(object):
     """Returns the topology config"""
     if self.pplan.topology.HasField("topology_config"):
       return self._get_dict_from_config(self.pplan.topology.topology_config)
-    else:
-      return {}
+    return {}
 
   def set_topology_context(self, metrics_collector):
     """Sets a new topology context"""

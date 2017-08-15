@@ -54,14 +54,13 @@ class HashMapState(State):
   def __init__(self):
     self._dict = {}
 
-  def put(self, k, v):
-    self._dict[k] = v
+  def put(self, key, value):
+    self._dict[key] = value
 
-  def get(self, k):
-    if k in self._dict:
-      return self._dict[k]
-    else:
-      return None
+  def get(self, key):
+    if key in self._dict:
+      return self._dict[key]
+    return None
 
   def enumerate(self):
     return enumerate(self._dict)

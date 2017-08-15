@@ -41,6 +41,7 @@ class TextFileStreamlet(Streamlet):
     return len(self._files)
 
   # pylint: disable=no-self-use
+  # pylint: disable=no-else-return
   def _calculate_stage_name(self, existing_stage_names):
     funcname = "textfileinput"
     if funcname not in existing_stage_names:

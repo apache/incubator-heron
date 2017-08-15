@@ -34,6 +34,7 @@ def format_mode(sres):
   group = (mode & 0070) >> 3
   user = (mode & 07)
 
+  # pylint: disable=no-else-return
   def stat_type(md):
     ''' stat type'''
     if stat.S_ISDIR(md):
