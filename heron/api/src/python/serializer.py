@@ -13,12 +13,13 @@
 # limitations under the License.
 '''serializer.py: common python serializer for heron'''
 from abc import abstractmethod
-import cloudpickle
 
 try:
   import cPickle as pickle
 except:
   import pickle
+
+import heron.api.src.python.cloudpickle as cloudpickle
 
 class IHeronSerializer(object):
   """Serializer interface for Heron"""

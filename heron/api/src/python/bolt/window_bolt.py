@@ -15,8 +15,9 @@
 from abc import abstractmethod
 from collections import namedtuple, deque
 import time
-from .bolt import Bolt
-from heron.api.src.python import api_constants, StatefulComponent
+from heron.api.src.python.bolt.bolt import Bolt
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.state.stateful_component import StatefulComponent
 
 WindowContext = namedtuple('WindowContext', ('start', 'end'))
 
@@ -30,11 +31,11 @@ class SlidingWindowBolt(Bolt, StatefulComponent):
   WINDOW_SLIDEINTERVAL_SECS = 'slidingwindowbolt_slideinterval_secs'
 
   # pylint: disable=attribute-defined-outside-init
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     self.saved_state = stateful_state
 
   # pylint: disable=unused-argument
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     self.saved_state['tuples'] = self.current_tuples
 
   @abstractmethod
@@ -116,11 +117,11 @@ class TumblingWindowBolt(Bolt, StatefulComponent):
   WINDOW_DURATION_SECS = 'tumblingwindowbolt_duration_secs'
 
   # pylint: disable=attribute-defined-outside-init
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     self.saved_state = stateful_state
 
   # pylint: disable=unused-argument
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     self.saved_state['tuples'] = self.current_tuples
 
   @abstractmethod

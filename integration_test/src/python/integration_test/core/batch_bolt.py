@@ -13,7 +13,7 @@
 # limitations under the License.
 """interface for batch bolt"""
 from abc import abstractmethod
-from heron.api.src.python import Bolt
+from heron.api.src.python.bolt.bolt import Bolt
 
 class BatchBolt(Bolt):
   """Batch bolt interface for integration test"""

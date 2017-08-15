@@ -4,9 +4,12 @@ java_library(
     name = "common-tests",
     srcs = glob(["**/*.java"]),
     deps = [
+        "//heron/proto:proto_topology_java",
+        "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
+        "//heron/common/src/java:utils-java",
         "//heron/common/src/java:test-helpers-java",
         "//heron/proto:proto_networktests_java",
         "//third_party/java:powermock",
@@ -29,6 +32,7 @@ java_tests(
         "com.twitter.heron.common.test.HeronServerTest",
         "com.twitter.heron.common.config.ConfigReaderTest",
         "com.twitter.heron.common.config.SystemConfigTest",
+        "com.twitter.heron.common.utils.TopologyUtilsTest",
     ],
     runtime_deps = [
         ":common-tests",

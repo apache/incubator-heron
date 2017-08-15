@@ -36,6 +36,7 @@ import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.scheduler.utils.Runtime;
@@ -49,7 +50,6 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.TMasterException;
 import com.twitter.heron.spi.utils.TMasterUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS;
 import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS;

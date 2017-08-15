@@ -13,59 +13,30 @@
 # limitations under the License.
 '''streamlet.py: module for defining the basic concept of the heron python dsl'''
 from collections import namedtuple
-from heron.api.src.python import TopologyBuilder
-from heron.api.src.python.component import GlobalStreamId
-from heron.api.src.python.stream import Grouping
+from abc import abstractmethod
 
-from .mapbolt import MapBolt
-from .flatmapbolt import FlatMapBolt
-from .filterbolt import FilterBolt
-from .samplebolt import SampleBolt
-from .joinbolt import JoinBolt
-from .repartitionbolt import RepartitionBolt
-from .reducebykeyandwindowbolt import ReduceByKeyAndWindowBolt
+from heron.api.src.python.topology import TopologyBuilder
 
-class OperationType(object):
-  Input = 1
-  Map = 2
-  FlatMap = 3
-  Filter = 4
-  Sample = 5
-  Join = 6
-  Repartition = 7
-  ReduceByKeyAndWindow = 8
-  Output = 10
-
-  AllOperations = [Input, Map, FlatMap, Filter, Sample, Join,
-                   Repartition, ReduceByKeyAndWindow, Output]
-
-  @staticmethod
-  def valid(typ):
-    return typ in OperationType.AllOperations
+from heron.dsl.src.python.operation import OperationType
 
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
 # pylint: disable=too-many-instance-attributes
 class Streamlet(object):
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
+     Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
+     csv files, HDFS files), or for that matter any other source. They are also created by
+     transforming existing Streamlets using operations such as map/flat_map, etc.
   """
-  # pylint: disable=too-many-arguments
-  # pylint: disable=too-many-function-args
-  def __init__(self, parents=None, operation=None, stage_name=None,
-               parallelism=None, inputs=None,
-               map_function=None, flatmap_function=None,
-               filter_function=None, time_window=None,
-               sample_fraction=None, reduce_function=None):
+  def __init__(self, parents, operation=None, stage_name=None,
+               parallelism=None, inputs=None):
     """
     """
     if operation is None:
       raise RuntimeError("Streamlet's operation cannot be None")
     if not OperationType.valid(operation):
       raise RuntimeError("Streamlet's operation must be of type OperationType")
-    if operation == OperationType.Input:
-      if parents is not None:
-        raise RuntimeError("A input Streamlet's parents should be None")
-    elif not isinstance(parents, list):
+    if not isinstance(parents, list):
       raise RuntimeError("Streamlet's parents have to be a list")
     self._parents = parents
     self._operation = operation
@@ -73,55 +44,74 @@ class Streamlet(object):
     self._parallelism = parallelism
     self._inputs = inputs
     self._output = 'output'
-    self._map_function = map_function
-    self._flatmap_function = flatmap_function
-    self._filter_function = filter_function
-    self._sample_fraction = sample_fraction
-    self._time_window = time_window
-    self._reduce_function = reduce_function
 
   def map(self, map_function, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self], operation=OperationType.Map,
-                     stage_name=stage_name, parallelism=parallelism,
-                     map_function=map_function)
+    """Return a new Streamlet by applying map_function to each element of this Streamlet.
+    """
+    from heron.dsl.src.python.mapbolt import MapStreamlet
+    return MapStreamlet(map_function, parents=[self], stage_name=stage_name,
+                        parallelism=parallelism)
 
-  def flatMap(self, flatmap_function, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self], operation=OperationType.FlatMap,
-                     stage_name=stage_name, parallelism=parallelism,
-                     flatmap_function=flatmap_function)
+  def flat_map(self, flatmap_function, stage_name=None, parallelism=None):
+    """Return a new Streamlet by applying map_function to each element of this Streamlet
+       and flattening the result
+    """
+    from heron.dsl.src.python.flatmapbolt import FlatMapStreamlet
+    return FlatMapStreamlet(flatmap_function, parents=[self], stage_name=stage_name,
+                            parallelism=parallelism)
 
   def filter(self, filter_function, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self], operation=OperationType.Filter,
-                     stage_name=stage_name, parallelism=parallelism,
-                     filter_function=filter_function)
+    """Return a new Streamlet containing only the elements that satisfy filter_function
+    """
+    from heron.dsl.src.python.filterbolt import FilterStreamlet
+    return FilterStreamlet(filter_function, parents=[self], stage_name=stage_name,
+                           parallelism=parallelism)
 
   def sample(self, sample_fraction, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self], operation=OperationType.Sample,
-                     stage_name=stage_name, parallelism=parallelism,
-                     sample_fraction=sample_fraction)
+    """Return a new Streamlet containing only sample_fraction fraction of elements
+    """
+    from heron.dsl.src.python.samplebolt import SampleStreamlet
+    return SampleStreamlet(sample_fraction, parents=[self], stage_name=stage_name,
+                           parallelism=parallelism)
 
   def repartition(self, parallelism, stage_name=None):
-    return Streamlet(parents=[self], operation=OperationType.Repartition,
-                     stage_name=stage_name, parallelism=parallelism)
+    """Return a new Streamlet with new parallelism level
+    """
+    from heron.dsl.src.python.repartitionbolt import RepartitionStreamlet
+    return RepartitionStreamlet(parallelism, parents=[self], stage_name=stage_name)
 
   def join(self, join_streamlet, time_window, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self, join_streamlet], time_window=time_window,
-                     operation=OperationType.Join,
-                     stage_name=stage_name, parallelism=parallelism)
+    """Return a new Streamlet by joining join_streamlet with this streamlet
+    """
+    from heron.dsl.src.python.joinbolt import JoinStreamlet
+    return JoinStreamlet(time_window, parents=[self, join_streamlet],
+                         operation=OperationType.Join,
+                         stage_name=stage_name, parallelism=parallelism)
 
-  def reduceByWindow(self, time_window, reduce_function, stage_name=None):
-    return Streamlet(parents=[self], operation=OperationType.ReduceByKeyAndWindow,
-                     stage_name=stage_name, parallelism=1,
-                     time_window=time_window,
-                     reduce_function=reduce_function)
+  def reduce_by_window(self, time_window, reduce_function, stage_name=None):
+    """A short cut for reduce_by_key_and_window with parallelism of 1
+       over the time_window and then reduced using the reduce_function
+    """
+    from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
+    return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
+                                         parents=[self],
+                                         stage_name=stage_name, parallelism=1)
 
-  def reduceByKeyAndWindow(self, time_window, reduce_function, stage_name=None, parallelism=None):
-    return Streamlet(parents=[self], operation=OperationType.ReduceByKeyAndWindow,
-                     stage_name=stage_name, parallelism=parallelism,
-                     time_window=time_window,
-                     reduce_function=reduce_function)
+  def reduce_by_key_and_window(self, time_window, reduce_function,
+                               stage_name=None, parallelism=None):
+    """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
+       over the time_window and then reduced using the reduce_function
+    """
+    from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
+    return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
+                                         parents=[self],
+                                         stage_name=stage_name, parallelism=parallelism)
 
   def run(self, name, config=None):
+    """Runs the Streamlet. This is run as a Heron python topology under the name
+       'name'. The config attached is passed on to this Heron topology
+       Once submitted, run returns immediately
+    """
     if name is None or not isinstance(name, str):
       raise RuntimeError("Job Name has to be a string")
     bldr = TopologyBuilder(name=name)
@@ -133,173 +123,55 @@ class Streamlet(object):
       bldr.set_config(config)
     bldr.build_and_submit()
 
+  ##################################################################
+  ### Internal functions
+  ##################################################################
+
   # pylint: disable=protected-access
   def _build(self, bldr, stage_names):
     for parent in self._parents:
       parent._build(bldr, stage_names)
-    self._calculate_inputs()
-    self._calculate_parallelism()
-    return self._build_this(bldr, stage_names)
-
-  # pylint: disable=too-many-branches
-  def _build_this(self, builder, stage_names):
-    if self._operation == OperationType.Input:
-      raise RuntimeError("_build_this called from Input. Did the input implement it")
-    elif self._operation == OperationType.Map:
-      self.check_callable(self._map_function)
-      self._generate_stage_name(stage_names, self._map_function, "map")
-      builder.add_bolt(self._stage_name, MapBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={MapBolt.FUNCTION : self._map_function})
-    elif self._operation == OperationType.FlatMap:
-      self.check_callable(self._flatmap_function)
-      self._generate_stage_name(stage_names, self._flatmap_function, "flatmap")
-      builder.add_bolt(self._stage_name, FlatMapBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={FlatMapBolt.FUNCTION : self._flatmap_function})
-    elif self._operation == OperationType.Filter:
-      self.check_callable(self._filter_function)
-      self._generate_stage_name(stage_names, self._filter_function, "filter")
-      builder.add_bolt(self._stage_name, FilterBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={FilterBolt.FUNCTION : self._filter_function})
-    elif self._operation == OperationType.Sample:
-      if not isinstance(self._sample_fraction, float):
-        raise RuntimeError("Sample Fraction has to be a float")
-      if self._sample_fraction > 1.0:
-        raise RuntimeError("Sample Fraction has to be <= 1.0")
-      self._generate_sample_stage_name(stage_names)
-      builder.add_bolt(self._stage_name, SampleBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={SampleBolt.FRACTION : self._sample_fraction})
-    elif self._operation == OperationType.Join:
-      self._generate_join_stage_name(stage_names)
-      if not isinstance(self._time_window, TimeWindow):
-        raise RuntimeError("Join's time_window should be TimeWindow")
-      builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={JoinBolt.WINDOWDURATION : self._time_window.duration,
-                               JoinBolt.SLIDEINTERVAL : self._time_window.sliding_interval})
-    elif self._operation == OperationType.Repartition:
-      self._generate_repartition_stage_name(stage_names)
-      builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
-                       inputs=self._inputs)
-    elif self._operation == OperationType.ReduceByKeyAndWindow:
-      self.check_callable(self._reduce_function)
-      self._generate_stage_name(stage_names, self._reduce_function, "reducebykeyandwindow")
-      if not isinstance(self._time_window, TimeWindow):
-        raise RuntimeError("ReduceByKeyAndWindow's time_window should be TimeWindow")
-      builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
-                       inputs=self._inputs,
-                       config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                               ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
-                               ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
-                               self._time_window.sliding_interval})
-    else:
-      raise RuntimeError("Unknown type of operator", self._operation)
-
-    return builder
-
-  @staticmethod
-  def check_callable(func):
-    if not callable(func):
-      raise RuntimeError("dsl functions must be callable")
-
-  def _generate_stage_name(self, stage_names, func, functype):
-    if self._stage_name is None:
-      funcname = functype + "-" + func.__name__
-      if funcname not in stage_names:
-        self._stage_name = funcname
-      else:
-        index = 1
-        while funcname in stage_names:
-          index = index + 1
-          funcname = functype + "-" + func.__name__ + str(index)
-        self._stage_name = funcname
-    elif self._stage_name in stage_names:
-      raise RuntimeError("duplicated stage name %s" % self._stage_name)
-    stage_names[self._stage_name] = 1
-
-  def _generate_sample_stage_name(self, stage_names):
-    if self._stage_name is None:
-      self._stage_name = "sample"
-      index = 1
-      while self._stage_name in stage_names:
-        index = index + 1
-        self._stage_name = "sample" + str(index)
-    elif self._stage_name in stage_names:
-      raise RuntimeError("duplicated stage name %s" % self._stage_name)
-    stage_names[self._stage_name] = 1
-
-
-  # pylint: disable=protected-access
-  def _generate_join_stage_name(self, stage_names):
-    stage_name = self._parents[0]._stage_name
-    for stage in self._parents[1:]:
-      stage_name = stage_name + '.join.' + stage._stage_name
-    if stage_name not in stage_names:
-      self._stage_name = stage_name
-    else:
-      index = 1
-      tmp_name = stage_name + str(index)
-      while tmp_name in stage_names:
-        index = index + 1
-        tmp_name = stage_name + str(index)
-      self._stage_name = tmp_name
-    stage_names[self._stage_name] = 1
-
-  def _generate_repartition_stage_name(self, stage_names):
-    stage_name = "repartition"
-    index = 1
-    tmp_name = stage_name
-    while tmp_name in stage_names:
-      index = index + 1
-      tmp_name = stage_name + str(index)
-    self._stage_name = tmp_name
-    stage_names[self._stage_name] = 1
-
-  # pylint: disable=protected-access
-  # pylint: disable=too-many-boolean-expressions
-  def _calculate_parallelism(self):
-    if self._parallelism is not None:
-      return
-    elif self._operation == OperationType.Map or \
-         self._operation == OperationType.FlatMap or \
-         self._operation == OperationType.Filter or \
-         self._operation == OperationType.Sample or \
-         self._operation == OperationType.Join or \
-         self._operation == OperationType.ReduceByKeyAndWindow or \
-         self._operation == OperationType.Output:
-      parallelism = 1
-      for parent in self._parents:
-        if parent._parallelism > parallelism:
-          parallelism = parent._parallelism
-      self._parallelism = parallelism
+    self._inputs = self._calculate_inputs()
     if self._parallelism is None:
-      raise RuntimeError("Missed figuring out parallelism for", self._operation)
+      self._parallelism = self._calculate_parallelism()
+    if self._stage_name is None:
+      self._stage_name = self._calculate_stage_name(stage_names)
+    if self._stage_name in stage_names:
+      raise RuntimeError("duplicated stage name %s" % self._stage_name)
+    stage_names[self._stage_name] = 1
+    self._build_this(bldr)
+    return bldr
+
+  @abstractmethod
+  def _build_this(self, builder):
+    """This is the method that's implemented by the operators.
+    :type builder: TopologyBuilder
+    :param builder: The operator adds in the current streamlet as a spout/bolt
+    """
+    raise RuntimeError("Streamlet's _build_this not implemented")
 
   # pylint: disable=protected-access
-  # pylint: disable=fixme
+  @abstractmethod
+  def _calculate_parallelism(self):
+    """This is the method that's implemented by the operators with a default impl
+    :return: The parallelism required for this operator
+    """
+    parallelism = 1
+    for parent in self._parents:
+      if parent._parallelism > parallelism:
+        parallelism = parent._parallelism
+    return parallelism
+
+  @abstractmethod
   def _calculate_inputs(self):
-    if self._operation == OperationType.Input:
-      self._inputs = None
-    elif self._operation == OperationType.Map or \
-         self._operation == OperationType.FlatMap or \
-         self._operation == OperationType.Filter or \
-         self._operation == OperationType.Sample or \
-         self._operation == OperationType.Repartition:
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-                      Grouping.SHUFFLE}
-    elif self._operation == OperationType.Join:
-      self._inputs = {}
-      for parent in self._parents:
-        self._inputs[GlobalStreamId(parent._stage_name, parent._output)] = \
-                     Grouping.custom("heron.dsl.src.python.joinbolt.JoinGrouping")
-    elif self._operation == OperationType.ReduceByKeyAndWindow:
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-                      Grouping.custom(\
-                      "heron.dsl.src.python.reducebykeyandwindowbolt.ReduceGrouping")}
-    elif self._operation == OperationType.Output:
-      # FIXME:- is this correct
-      self._inputs = {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-                      Grouping.SHUFFLE}
+    """This is the method that's implemented by the operators to get the inputs for this streamlet
+    :return: The inputs as a dict
+    """
+    raise RuntimeError("Streamlet's calculate inputs not implemented")
+
+  @abstractmethod
+  def _calculate_stage_name(self, existing_stage_names):
+    """This is the method that's implemented by the operators to get the name of the Streamlet
+    :return: The name of the operator
+    """
+    raise RuntimeError("Streamlet's calculate stage name not implemented")

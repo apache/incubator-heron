@@ -13,8 +13,8 @@
 # limitations under the License.
 '''integration test topology builder'''
 import copy
-from heron.api.src.python import api_constants
-from heron.api.src.python import Stream, Grouping
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.stream import Stream, Grouping
 from heron.api.src.python.topology import TopologyBuilder, Topology, TopologyType
 from ..core import constants as integ_const
 from .aggregator_bolt import AggregatorBolt

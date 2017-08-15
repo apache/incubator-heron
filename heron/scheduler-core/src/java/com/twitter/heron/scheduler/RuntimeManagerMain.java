@@ -35,8 +35,7 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.SchedulerClientFactory;
 import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
-import com.twitter.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
-import com.twitter.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
+import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
@@ -321,7 +320,7 @@ public class RuntimeManagerMain {
       LOG.log(Level.FINE, "Sending out dry-run response");
       // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
       PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
-      out.print(runtimeManagerMain.renderDryRunResponse(response));
+      out.print(DryRunRenders.render(response, Context.dryRunFormatType(config)));
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       // Exit with status code 200 to indicate dry-run response is sent out
       System.exit(200);
@@ -452,19 +451,5 @@ public class RuntimeManagerMain {
   protected ISchedulerClient getSchedulerClient(Config runtime)
       throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
-  }
-
-  protected String renderDryRunResponse(UpdateDryRunResponse resp) {
-    DryRunFormatType formatType = Context.dryRunFormatType(config);
-    switch (formatType) {
-      case RAW :
-        return new UpdateRawDryRunRenderer(resp).render();
-      case TABLE:
-        return new UpdateTableDryRunRenderer(resp, false).render();
-      case COLORED_TABLE:
-        return new UpdateTableDryRunRenderer(resp, true).render();
-      default: throw new IllegalArgumentException(
-          String.format("Unexpected rendering format: %s", formatType));
-    }
   }
 }

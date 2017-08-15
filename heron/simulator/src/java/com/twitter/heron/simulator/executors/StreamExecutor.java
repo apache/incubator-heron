@@ -247,9 +247,10 @@ public class StreamExecutor implements Runnable {
   }
 
   // Do the XOR control and send the ack tuples to instance if necessary
-  protected void processAcksAndFails(int taskId,
+  protected void processAcksAndFails(int srcTaskId, int taskId,
                                      HeronTuples.HeronControlTupleSet controlTupleSet) {
     HeronTuples.HeronTupleSet.Builder out = HeronTuples.HeronTupleSet.newBuilder();
+    out.setSrcTaskId(srcTaskId);
 
     // First go over emits. This makes sure that new emits makes
     // a tuples stay alive before we process its acks
@@ -329,7 +330,7 @@ public class StreamExecutor implements Runnable {
     }
 
     if (message.hasControl()) {
-      processAcksAndFails(taskId, message.getControl());
+      processAcksAndFails(message.getSrcTaskId(), taskId, message.getControl());
     }
   }
 

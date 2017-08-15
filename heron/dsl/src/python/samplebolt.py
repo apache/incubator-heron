@@ -15,7 +15,14 @@
    SampleBolt is a more sophisticated FilterBolt which
    can do sampling of the data that it recieves and emit
    only sampled tuples"""
-from heron.api.src.python import Bolt, Stream, StatefulComponent
+from heron.api.src.python.bolt.bolt import Bolt
+from heron.api.src.python.stream import Stream
+from heron.api.src.python.state.stateful_component import StatefulComponent
+from heron.api.src.python.component.component_spec import GlobalStreamId
+from heron.api.src.python.stream import Grouping
+
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.operation import OperationType
 
 # pylint: disable=unused-argument
 class SampleBolt(Bolt, StatefulComponent):
@@ -24,11 +31,11 @@ class SampleBolt(Bolt, StatefulComponent):
   outputs = [Stream(fields=['_output_'], name='output')]
   FRACTION = 'fraction'
 
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     # sample does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     # sample does not have any state
     pass
 
@@ -49,3 +56,36 @@ class SampleBolt(Bolt, StatefulComponent):
     self.processed += 1
     self.ack(tup)
     raise RuntimeError("SampleBolt not fully functional")
+
+# pylint: disable=protected-access
+class SampleStreamlet(Streamlet):
+  """SampleStreamlet"""
+  def __init__(self, sample_fraction, parents, stage_name=None, parallelism=None):
+    super(SampleStreamlet, self).__init__(parents=parents, operation=OperationType.Sample,
+                                          stage_name=stage_name, parallelism=parallelism)
+    self._sample_fraction = sample_fraction
+
+  def _calculate_inputs(self):
+    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
+            Grouping.SHUFFLE}
+
+  def _calculate_stage_name(self, existing_stage_names):
+    funcname = "sample-" + self._sample_function.__name__
+    if funcname not in existing_stage_names:
+      return funcname
+    else:
+      index = 1
+      newfuncname = funcname + str(index)
+      while newfuncname in existing_stage_names:
+        index = index + 1
+        newfuncname = funcname + str(index)
+      return newfuncname
+
+  def _build_this(self, builder):
+    if not isinstance(self._sample_fraction, float):
+      raise RuntimeError("Sample Fraction has to be a float")
+    if self._sample_fraction > 1.0:
+      raise RuntimeError("Sample Fraction has to be <= 1.0")
+    builder.add_bolt(self._stage_name, SampleBolt, par=self._parallelism,
+                     inputs=self._inputs,
+                     config={SampleBolt.FRACTION : self._sample_fraction})

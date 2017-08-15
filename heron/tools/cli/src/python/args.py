@@ -85,6 +85,16 @@ def add_cluster_role_env(parser):
   )
   return parser
 
+def add_service_url(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--service-url',
+      default="",
+      help='API service end point')
+  return parser
 
 def add_config(parser):
   '''

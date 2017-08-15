@@ -14,7 +14,7 @@ filegroup(
 
 filegroup(
     name = "conf-yaml",
-    srcs = glob(["conf/*.yaml"]),
+    srcs = glob(["conf/**/*.yaml"]),
 )
 
 filegroup(

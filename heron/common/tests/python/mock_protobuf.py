@@ -31,7 +31,7 @@ def get_mock_config(config_dict=None):
   proto_config = topology_pb2.Config()
   config_serializer = PythonSerializer()
   assert isinstance(config_dict, dict)
-  for key, value in config_dict.iteritems():
+  for key, value in config_dict.items():
     if isinstance(value, bool):
       kvs = proto_config.kvs.add()
       kvs.key = key

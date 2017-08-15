@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for example bolt: WindowSizeBolt"""
-from heron.api.src.python import SlidingWindowBolt
+from heron.api.src.python.bolt.window_bolt import SlidingWindowBolt
 
 # pylint: disable=unused-argument
 class WindowSizeBolt(SlidingWindowBolt):

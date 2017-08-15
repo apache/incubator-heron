@@ -13,8 +13,9 @@
 # limitations under the License.
 """module for example bolt: CountBolt"""
 from collections import Counter
-from heron.api.src.python import global_metrics
-from heron.api.src.python import Bolt, StatefulComponent
+import heron.api.src.python.global_metrics as global_metrics
+from heron.api.src.python.bolt.bolt import Bolt
+from heron.api.src.python.state.stateful_component import StatefulComponent
 
 # pylint: disable=unused-argument
 class StatefulCountBolt(Bolt, StatefulComponent):
@@ -23,11 +24,11 @@ class StatefulCountBolt(Bolt, StatefulComponent):
   #outputs = ['word', 'count']
 
   # pylint: disable=attribute-defined-outside-init
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     self.recovered_state = stateful_state
     self.logger.info("Checkpoint Snapshot recovered : %s" % str(self.recovered_state))
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     for (k, v) in self.counter.items():
       self.recovered_state.put(k, v)
     self.logger.info("Checkpoint Snapshot %s : %s" % (checkpoint_id, str(self.recovered_state)))
