@@ -87,6 +87,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
                            "0",  // MM expects task_id, so just giving 0 for tmaster.
                            eventLoop_);
+  std::cerr << "mMetricsMgrPort " << mMetricsMgrPort << std::endl;
+  std::cerr << "myhost_name_ " << myhost_name_ << std::endl;
+  std::cerr << "master_port_ " << master_port_ << std::endl;
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
@@ -206,6 +209,7 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
 void TMaster::EstablishTMaster(EventLoop::Status) {
   auto cb = [this](proto::system::StatusCode code) { this->SetTMasterLocationDone(code); };
 
+  LOG(INFO) << "EstablishTMaster SetTMasterLocation";
   state_mgr_->SetTMasterLocation(*tmaster_location_, std::move(cb));
 
   // if zk lost the tmaster location, tmaster quits to bail out and re-establish its location

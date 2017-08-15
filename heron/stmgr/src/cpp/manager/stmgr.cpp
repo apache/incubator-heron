@@ -623,7 +623,10 @@ void StMgr::PopulateXorManagers(
   xor_mgrs_ = new XorManager(eventLoop_, _message_timeout, all_spout_tasks);
 }
 
-const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan_; }
+const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const {
+  LOG(INFO) << "StMgr::GetPhysicalPlan()";
+  return pplan_;
+}
 
 void StMgr::HandleStreamManagerData(const sp_string&,
                                     proto::stmgr::TupleStreamMessage* _message) {

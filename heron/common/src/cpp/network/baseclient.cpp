@@ -99,7 +99,11 @@ void BaseClient::Start_Base() {
     return;
   } else {
     // connect failed. Bail out saying that the start failed.
-    PLOG(ERROR) << "Connect failed";
+    PLOG(ERROR) << "Connect failed "
+        << "; endpoint->get_fd() " << endpoint->get_fd()
+        << "; endpoint->addr() " << inet_ntoa(((struct sockaddr_in*)endpoint->addr())->sin_addr)
+        << ":" << ((struct sockaddr_in*)endpoint->addr())->sin_port
+        << "; endpoint->addrlen() " << endpoint->addrlen();
     close(endpoint->get_fd());
     delete endpoint;
     HandleConnect_Base(CONNECT_ERROR);
