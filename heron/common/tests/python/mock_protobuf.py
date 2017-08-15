@@ -18,7 +18,7 @@ written in Python.
 """
 
 from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
-from heron.common.src.python.utils.misc import PythonSerializer
+from heron.api.src.python.serializer import PythonSerializer
 
 # pylint: disable=dangerous-default-value
 # pylint: disable=redefined-builtin
@@ -31,7 +31,7 @@ def get_mock_config(config_dict=None):
   proto_config = topology_pb2.Config()
   config_serializer = PythonSerializer()
   assert isinstance(config_dict, dict)
-  for key, value in config_dict.iteritems():
+  for key, value in config_dict.items():
     if isinstance(value, bool):
       kvs = proto_config.kvs.add()
       kvs.key = key

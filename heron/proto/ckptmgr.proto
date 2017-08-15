@@ -112,8 +112,15 @@ message RestoreTopologyStateResponse {
 // to some valid checkpoint. This is sent either if stmgr dies
 // and comes back up or if an instance dies.
 message ResetTopologyState {
+  // Was there a dead/recovered stmgr connection that was the reason
+  // for this request?
   optional string dead_stmgr = 1;
+  // Was there a dead/recovered local instance connection that was the reason
+  // for this request?
   optional int32 dead_taskid = 2;
+  // This one describes the reason for sending the message.
+  // Used primarily for debugging
+  required string reason = 3;
 }
 
 // Message sent by stmgr to tmaster informing it about

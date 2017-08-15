@@ -29,7 +29,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.JavaSerializer;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.network.HeronServerTester;
+import com.twitter.heron.common.testhelpers.HeronServerTester;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.SlaveTester;
@@ -49,6 +49,7 @@ import com.twitter.heron.resource.UnitTestHelper;
  */
 public class BoltInstanceTest {
   private static final String BOLT_INSTANCE_ID = "bolt-id";
+  private static final int SRC_TASK_ID = 1;
   private static IPluggableSerializer serializer = new JavaSerializer();
 
   // Singleton to be changed globally for testing
@@ -103,6 +104,7 @@ public class BoltInstanceTest {
 
     // Send tuples to bolt instance
     HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
+    heronTupleSet.setSrcTaskId(SRC_TASK_ID);
     HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
     TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
     streamId.setComponentName("test-spout");

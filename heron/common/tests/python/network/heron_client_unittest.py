@@ -51,7 +51,7 @@ class ClientTest(unittest.TestCase):
     self.mock_client.context_map[reqid] = None
     self.mock_client.response_message_map[reqid] = None
     self.mock_client._handle_packet(packet)
-    self.assertEqual(self.mock_client.on_response_status, StatusCode.INVALID_PACKET)
+    self.assertEqual(self.mock_client.on_error_called, True)
 
     # message (REQID = zero) -- status OK
     pkt_list, msg_list, builder, typename = mock_generator.get_a_mock_message_list_and_builder()

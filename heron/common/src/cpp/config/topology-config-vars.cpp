@@ -36,14 +36,14 @@ const sp_string TopologyConfigVars::TOPOLOGY_SERIALIZER_CLASSNAME = "topology.se
 const sp_string TopologyConfigVars::TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
 const sp_string TopologyConfigVars::TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS =
     "topology.enable.message.timeouts";
+// This is deprecated and is strictly for backwards compatibility
 const sp_string TopologyConfigVars::TOPOLOGY_ENABLE_ACKING = "topology.acking";
+const sp_string TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
 const sp_string TopologyConfigVars::TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
 const sp_string TopologyConfigVars::TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
-const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED = "topology.stateful.enabled";
 const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
                             "topology.stateful.checkpoint.interval.seconds";
 const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN = "topology.stateful.start.clean";
-const sp_string TopologyConfigVars::TOPOLOGY_EXACTLYONCE_ENABLED = "topology.exactlyonce.enabled";
 const sp_string TopologyConfigVars::TOPOLOGY_NAME = "topology.name";
 const sp_string TopologyConfigVars::TOPOLOGY_TEAM_NAME = "topology.team.name";
 const sp_string TopologyConfigVars::TOPOLOGY_TEAM_EMAIL = "topology.team.email";

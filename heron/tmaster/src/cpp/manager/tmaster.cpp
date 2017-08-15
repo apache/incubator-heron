@@ -27,6 +27,8 @@
 #include "manager/stats-interface.h"
 #include "manager/tmasterserver.h"
 #include "manager/stmgrstate.h"
+#include "manager/stateful-controller.h"
+#include "manager/ckptmgr-client.h"
 #include "processor/processor.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -47,20 +49,22 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
+const sp_int64 STATE_MANAGER_RETRY_FREQUENCY = 10_s;
 const sp_int64 PROCESS_METRICS_FREQUENCY = 60_s;
 const sp_string METRIC_PREFIX = "__process";
 
 TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
                  const std::string& _topology_id, const std::string& _topdir,
-                 const std::vector<std::string>& _stmgrs, sp_int32 _controller_port,
+                 sp_int32 _tmaster_controller_port,
                  sp_int32 _master_port, sp_int32 _stats_port, sp_int32 metricsMgrPort,
+                 sp_int32 _ckptmgr_port,
                  const std::string& _metrics_sinks_yaml, const std::string& _myhost_name,
                  EventLoop* eventLoop) {
   start_time_ = std::chrono::high_resolution_clock::now();
   zk_hostport_ = _zk_hostport;
   topdir_ = _topdir;
-  controller_ = NULL;
-  controller_port_ = _controller_port;
+  tmaster_controller_ = nullptr;
+  tmaster_controller_port_ = _tmaster_controller_port;
   master_ = NULL;
   master_port_ = _master_port;
   stats_ = NULL;
@@ -79,19 +83,15 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
-      myhost_name_, master_port_, mMetricsMgrPort, "__tmaster__",
-      "0",  // MM expects task_id, so just giving 0 for tmaster.
-      metricsExportIntervalSec, eventLoop_);
+      mMetricsMgrPort, metricsExportIntervalSec, eventLoop_);
+  mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
+                           "0");  // MM expects task_id, so just giving 0 for tmaster.
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
 
-  // We will keep the list of stmgrs with us.
-  // In case a assignment already exists, we will throw this
-  // list out and re-init with whats in assignment.
-  for (sp_uint32 i = 0; i < _stmgrs.size(); ++i) {
-    absent_stmgrs_.insert(_stmgrs[i]);
-  }
+  ckptmgr_port_ = _ckptmgr_port;
+  ckptmgr_client_ = nullptr;
 
   current_pplan_ = NULL;
 
@@ -99,6 +99,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   // It shall only be used to construct the physical plan when TMaster first time starts
   // Any runtime changes shall be made to current_pplan_->topology
   topology_ = NULL;
+  packing_plan_ = NULL;
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zk_hostport_, topdir_, eventLoop_);
 
   assignment_in_progress_ = false;
@@ -112,11 +113,11 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_topology_name(_topology_name);
   tmaster_location_->set_topology_id(_topology_id);
   tmaster_location_->set_host(myhost_name_);
-  tmaster_location_->set_controller_port(controller_port_);
+  tmaster_location_->set_controller_port(tmaster_controller_port_);
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
   DCHECK(tmaster_location_->IsInitialized());
-  EstablishTMaster(EventLoop::TIMEOUT_EVENT);
+  FetchPackingPlan();
 
   // Send tmaster location to metrics mgr
   mMetricsMgrClient->RefreshTMasterLocation(*tmaster_location_);
@@ -139,6 +140,69 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateProcessMetrics(status);
   }, true, PROCESS_METRICS_FREQUENCY), 0);
+
+  stateful_controller_ = nullptr;
+}
+
+void TMaster::FetchPackingPlan() {
+  auto packing_plan = new proto::system::PackingPlan();
+
+  state_mgr_->GetPackingPlan(tmaster_location_->topology_name(), packing_plan,
+                             [packing_plan, this](proto::system::StatusCode status) {
+    this->OnPackingPlanFetch(packing_plan, status);
+  });
+}
+
+void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
+                                 proto::system::StatusCode _status) {
+  if (_status != proto::system::OK) {
+    LOG(INFO) << "PackingPlan Fetch failed with status " << _status;
+    LOG(INFO) << "Retrying after " << STATE_MANAGER_RETRY_FREQUENCY << " micro seconds ";
+    CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status) {
+      this->FetchPackingPlan();
+    }, false, STATE_MANAGER_RETRY_FREQUENCY), 0);
+  } else {
+    // We got a new PackingPlan.
+    LOG(INFO) << "Fetched PackingPlan of " << newPackingPlan->container_plans().size()
+              << " containers.";
+
+    if (!packing_plan_) {
+      LOG(INFO) << "Received initial packing plan. Initializing absent_stmgrs_";
+      packing_plan_ = newPackingPlan;
+      // We will keep the list of stmgrs with us.
+      // In case a assignment already exists, we will throw this
+      // list out and re-init with whats in assignment.
+      absent_stmgrs_.clear();
+      for (sp_uint32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
+        LOG(INFO) << "Adding container id " << packing_plan_->container_plans(i).id()
+                  << " to absent_stmgrs_";
+        // the packing plan represents container ids by the numerical id of the container. The
+        // physical plan prepends "stmgr-" to the integer and represents it as a string.
+        absent_stmgrs_.insert("stmgr-" + std::to_string(packing_plan_->container_plans(i).id()));
+      }
+
+      // this is part of the initialization process. Since we've got a packing plan we will
+      // register our self as the master
+      EstablishTMaster(EventLoop::TIMEOUT_EVENT);
+
+    } else {
+      // We must know for sure that we are TMaster before potentially deleting the physical plan
+      // in state manager. We know this to be the case here because we initially fetch
+      // packing_plan_ before becoming master, but we register the packing plan watcher only after
+      // becoming master. That guarantees that if packing_plan_ is already set and this method is
+      // invoked, it's due to the watch and we're master here.
+      if (packing_plan_ != newPackingPlan) {
+        LOG(INFO) << "Packing plan changed. Deleting physical plan and restarting TMaster to "
+                  << "reset internal state. Exiting.";
+        state_mgr_->DeletePhysicalPlan(tmaster_location_->topology_name(),
+          [this](proto::system::StatusCode status) {
+            ::exit(1);
+          });
+      } else {
+        LOG(INFO) << "New Packing plan matches existing one.";
+      }
+    }
+  }
 }
 
 const NetworkOptions& TMaster::getMasterOptions() const {
@@ -222,9 +286,10 @@ void TMaster::EstablishTMaster(EventLoop::Status) {
 
 TMaster::~TMaster() {
   delete topology_;
+  delete packing_plan_;
   delete current_pplan_;
   delete state_mgr_;
-  delete controller_;
+  delete tmaster_controller_;
   if (master_) {
     master_->Stop();
   }
@@ -240,6 +305,8 @@ TMaster::~TMaster() {
   mMetricsMgrClient->unregister_metric(METRIC_PREFIX);
   delete mMetricsMgrClient;
   delete tmasterProcessMetrics;
+  delete stateful_controller_;
+  delete ckptmgr_client_;
 }
 
 void TMaster::UpdateProcessMetrics(EventLoop::Status) {
@@ -278,7 +345,7 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
     }
     // There was an error setting our location
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error setting ourselves as TMaster. Errorcode is " << _code << std::endl;
+               << " Error setting ourselves as TMaster. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
@@ -286,18 +353,25 @@ void TMaster::SetTMasterLocationDone(proto::system::StatusCode _code) {
 
   // We are now the master
   LOG(INFO) << "Successfully set ourselves as master\n";
-  // Lets now read the topology
-  auto cb = [this](proto::system::StatusCode code) { this->GetTopologyDone(code); };
 
+  // Lets now read the topology
   topology_ = new proto::api::Topology();
-  state_mgr_->GetTopology(tmaster_location_->topology_name(), topology_, std::move(cb));
+  state_mgr_->GetTopology(tmaster_location_->topology_name(), topology_,
+                          [this](proto::system::StatusCode code) {
+    this->GetTopologyDone(code);
+  });
+
+  // and register packing plan watcher to pick up changes
+  state_mgr_->SetPackingPlanWatch(tmaster_location_->topology_name(), [this]() {
+    this->FetchPackingPlan();
+  });
 }
 
 void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   if (_code != proto::system::OK) {
     // Without Topology we can't do much
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error getting topology Errsettingorcode is " << _code << std::endl;
+               << " Error getting topology. Error code is " << _code << std::endl;
     ::exit(1);
   }
   // Ok things are fine. topology_ contains the result
@@ -308,8 +382,126 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
     LOG(ERROR) << "Topology invalid" << std::endl;
     ::exit(1);
   }
-  LOG(INFO) << "Topology Read and Validated\n";
-  // Now see if there is already a pplan
+  LOG(INFO) << "Topology read and validated\n";
+
+  if (heron::config::TopologyConfigHelper::GetReliabilityMode(*topology_)
+      == config::TopologyConfigVars::EXACTLY_ONCE) {
+    // Establish connection to ckptmgr
+    NetworkOptions ckpt_options;
+    ckpt_options.set_host("localhost");
+    ckpt_options.set_port(ckptmgr_port_);
+    ckpt_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
+                                           ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+                                       1024 * 1024);
+    ckptmgr_client_ = new CkptMgrClient(eventLoop_, ckpt_options,
+                                        topology_->name(), topology_->id(),
+                                        std::bind(&TMaster::HandleCleanStatefulCheckpointResponse,
+                                        this, std::placeholders::_1));
+    // Start the client
+    ckptmgr_client_->Start();
+
+    // We also need to load latest checkpoint state
+    auto ckpt = new proto::ckptmgr::StatefulConsistentCheckpoints();
+    auto cb = [ckpt, this](proto::system::StatusCode code) {
+      this->GetStatefulCheckpointsDone(ckpt, code);
+    };
+
+    state_mgr_->GetStatefulCheckpoints(tmaster_location_->topology_name(), ckpt, std::move(cb));
+  } else {
+    // Now see if there is already a pplan
+    FetchPhysicalPlan();
+  }
+}
+
+void TMaster::GetStatefulCheckpointsDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
+                                         proto::system::StatusCode _code) {
+  if (_code != proto::system::OK && _code != proto::system::PATH_DOES_NOT_EXIST) {
+    LOG(FATAL) << "For topology " << tmaster_location_->topology_name()
+               << " Getting Stateful Checkpoint failed with error " << _code;
+  }
+  if (_code == proto::system::PATH_DOES_NOT_EXIST) {
+    LOG(INFO) << "For topology " << tmaster_location_->topology_name()
+              << " No existing globally consistent checkpoint found "
+              << " inserting a empty one";
+    delete _ckpt;
+    // We need to set an empty one
+    auto ckpts = new proto::ckptmgr::StatefulConsistentCheckpoints;
+    auto ckpt = ckpts->add_consistent_checkpoints();
+    ckpt->set_checkpoint_id("");
+    ckpt->set_packing_plan_id(packing_plan_->id());
+    auto cb = [this, ckpts](proto::system::StatusCode code) {
+      this->SetStatefulCheckpointsDone(code, ckpts);
+    };
+
+    state_mgr_->CreateStatefulCheckpoints(tmaster_location_->topology_name(),
+                                          *ckpts, std::move(cb));
+  } else {
+    LOG(INFO) << "For topology " << tmaster_location_->topology_name()
+              << " An existing globally consistent checkpoint found "
+              << _ckpt->DebugString();
+    SetupStatefulController(_ckpt);
+    FetchPhysicalPlan();
+  }
+}
+
+void TMaster::SetStatefulCheckpointsDone(proto::system::StatusCode _code,
+                             proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt) {
+  if (_code != proto::system::OK) {
+    LOG(FATAL) << "For topology " << tmaster_location_->topology_name()
+               << " Setting empty Stateful Checkpoint failed with error " << _code;
+  }
+  SetupStatefulController(_ckpt);
+  FetchPhysicalPlan();
+}
+
+void TMaster::SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt) {
+  sp_int64 stateful_checkpoint_interval =
+       config::TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(*topology_, 300);
+  CHECK_GT(stateful_checkpoint_interval, 0);
+
+  auto cb = [this](std::string _oldest_ckptid) {
+    this->HandleStatefulCheckpointSave(_oldest_ckptid);
+  };
+  // Instantiate the stateful restorer/coordinator
+  stateful_controller_ = new StatefulController(topology_->name(), _ckpt, state_mgr_, start_time_,
+                                        mMetricsMgrClient, cb);
+  LOG(INFO) << "Starting timer to checkpoint state every "
+            << stateful_checkpoint_interval << " seconds";
+  CHECK_GT(eventLoop_->registerTimer(
+               [this](EventLoop::Status) { this->SendCheckpointMarker(); }, true,
+               stateful_checkpoint_interval * 1000 * 1000),
+           0);
+}
+
+void TMaster::ResetTopologyState(Connection* _conn, const std::string& _dead_stmgr,
+                                 int32_t _dead_instance, const std::string& _reason) {
+  LOG(INFO) << "Got a reset topology request with dead_stmgr " << _dead_stmgr
+            << " dead_instance " << _dead_instance << " and reason " << _reason;
+  if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
+    LOG(ERROR) << "The ResetTopology came from an unknown connection";
+    return;
+  }
+  const std::string& stmgr = connection_to_stmgr_id_[_conn];
+  LOG(INFO) << "The ResetTopology message came from stmgr " << stmgr;
+  if (stateful_controller_ && absent_stmgrs_.empty()) {
+    if (!stateful_controller_->RestoreInProgress()) {
+      LOG(INFO) << "We are not in restore, hence we are starting Restore";
+      stateful_controller_->StartRestore(stmgrs_, false);
+    } else if (stateful_controller_->GotRestoreResponse(stmgr)) {
+      // We are in Restore but we have already gotten response from this
+      // stmgr. Maybe some other connections dropped. So start afresh
+      LOG(INFO) << "We are in restore and have already received response from this stmgr";
+      LOG(INFO) << "Restarting the restore";
+      stateful_controller_->StartRestore(stmgrs_, false);
+    } else {
+      // So we can safely ignore this because the stmgr will later
+      // send us a RestoreResponse when things get better
+      LOG(INFO) << "We are in restore and have not yet received response from this stmgr";
+    }
+  }
+}
+
+void TMaster::FetchPhysicalPlan() {
   proto::system::PhysicalPlan* pplan = new proto::system::PhysicalPlan();
   auto cb = [pplan, this](proto::system::StatusCode code) {
     this->GetPhysicalPlanDone(pplan, code);
@@ -318,32 +510,109 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   state_mgr_->GetPhysicalPlan(tmaster_location_->topology_name(), pplan, std::move(cb));
 }
 
+void TMaster::SendCheckpointMarker() {
+  if (!absent_stmgrs_.empty()) {
+    LOG(INFO) << "Not sending checkpoint marker because not all stmgrs have connected to us";
+    return;
+  }
+  stateful_controller_->StartCheckpoint(stmgrs_);
+}
+
+void TMaster::HandleInstanceStateStored(const std::string& _checkpoint_id,
+                                        const proto::system::Instance& _instance) {
+  LOG(INFO) << "Got notification from stmgr that we saved checkpoint for task "
+            << _instance.info().task_id() << " for checkpoint " << _checkpoint_id;
+  if (stateful_controller_) {
+    stateful_controller_->HandleInstanceStateStored(_checkpoint_id, packing_plan_->id(), _instance);
+  }
+}
+
+void TMaster::HandleRestoreTopologyStateResponse(Connection* _conn,
+                                                 const std::string& _checkpoint_id,
+                                                 int64_t _restore_txid,
+                                                 proto::system::StatusCode _status) {
+  if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
+    LOG(ERROR) << "Got HandleRestoreState Response from unknown connection "
+               << _conn->getIPAddress() << " : " << _conn->getPort();
+    return;
+  }
+  if (stateful_controller_) {
+    stateful_controller_->HandleStMgrRestored(connection_to_stmgr_id_[_conn], _checkpoint_id,
+                                              _restore_txid, _status, stmgrs_);
+  }
+}
+
 void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
-  // Assignment need not exist. First check if some other
-  // error occured.
+  // Physical plan need not exist. First check if some other error occurred.
   if (_code != proto::system::OK && _code != proto::system::PATH_DOES_NOT_EXIST) {
     // Something bad happened. Bail out!
     // TODO(kramasamy): This is not as bad as it seems. Maybe we can delete this assignment
     // and have a new assignment instead.
     LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
-               << " Error getting assignment Errsettingorcode is " << _code << std::endl;
+               << " Error getting assignment. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
   if (_code == proto::system::PATH_DOES_NOT_EXIST) {
-    LOG(ERROR) << "There was no existing assignment\n";
+    LOG(ERROR) << "There was no existing physical plan\n";
     // We never did assignment in the first place
     delete _pplan;
   } else {
-    LOG(INFO) << "There was an existing assignment\n";
+    LOG(INFO) << "There was an existing physical plan\n";
     CHECK_EQ(_code, proto::system::OK);
     current_pplan_ = _pplan;
-    absent_stmgrs_.clear();
-    for (sp_int32 i = 0; i < current_pplan_->stmgrs_size(); ++i) {
-      absent_stmgrs_.insert(current_pplan_->stmgrs(i).id());
+    if (stateful_controller_) {
+      stateful_controller_->RegisterNewPhysicalPlan(*current_pplan_);
     }
   }
+
+  // Now that we have our state all setup, its time to start accepting requests
+  // Port for the stmgrs to connect to
+  NetworkOptions master_options;
+  master_options.set_host(myhost_name_);
+  master_options.set_port(master_port_);
+  master_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
+                                         ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
+                                     1_MB);
+  master_options.set_socket_family(PF_INET);
+  master_ = new TMasterServer(eventLoop_, master_options, metrics_collector_, this);
+
+  sp_int32 retval = master_->Start();
+  if (retval != SP_OK) {
+    LOG(FATAL) << "Failed to start TMaster Master Server with rcode: " << retval;
+  }
+
+  // Port for the scheduler to connect to
+  NetworkOptions controller_options;
+  controller_options.set_host(myhost_name_);
+  controller_options.set_port(tmaster_controller_port_);
+  controller_options.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronTmasterNetworkControllerOptionsMaximumPacketMb() *
+      1_MB);
+  controller_options.set_socket_family(PF_INET);
+  tmaster_controller_ = new TController(eventLoop_, controller_options, this);
+
+  retval = tmaster_controller_->Start();
+  if (retval != SP_OK) {
+    LOG(FATAL) << "Failed to start TMaster Controller Server with rcode: " << retval;
+  }
+
+  // Http port for stat queries
+  NetworkOptions stats_options;
+  if (config::HeronInternalsConfigReader::Instance()
+          ->GetHeronTmasterMetricsNetworkBindAllInterfaces()) {
+    stats_options.set_host("0.0.0.0");
+  } else {
+    stats_options.set_host(myhost_name_);
+  }
+  stats_options.set_port(stats_port_);
+  stats_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
+                                        ->GetHeronTmasterNetworkStatsOptionsMaximumPacketMb() *
+                                    1_MB);
+  stats_options.set_socket_family(PF_INET);
+  stats_ = new StatsInterface(eventLoop_, stats_options, metrics_collector_, this);
 }
 
 void TMaster::ActivateTopology(VCallback<proto::system::StatusCode> cb) {
@@ -378,6 +647,19 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
   };
 
   state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
+}
+
+void TMaster::CleanAllStatefulCheckpoint() {
+  ckptmgr_client_->SendCleanStatefulCheckpointRequest("", true);
+}
+
+void TMaster::HandleStatefulCheckpointSave(std::string _oldest_ckpt) {
+  ckptmgr_client_->SendCleanStatefulCheckpointRequest(_oldest_ckpt, false);
+}
+
+// Called when ckptmgr completes the clean stateful checkpoint request
+void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status) {
+  tmaster_controller_->HandleCleanStatefulCheckpointResponse(_status);
 }
 
 proto::system::Status* TMaster::RegisterStMgr(
@@ -486,7 +768,7 @@ void TMaster::DoPhysicalPlan(EventLoop::Status) {
 void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                                   proto::system::StatusCode _code) {
   if (_code != proto::system::OK) {
-    LOG(ERROR) << "Error writing assignment to statemgr. Errocode is " << _code << std::endl;
+    LOG(ERROR) << "Error writing assignment to statemgr. Error code is " << _code << std::endl;
     ::exit(1);
   }
 
@@ -500,18 +782,26 @@ void TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
     auto cb = [this](EventLoop::Status status) { this->DoPhysicalPlan(status); };
     CHECK_GE(eventLoop_->registerTimer(std::move(cb), false, 0), 0);
   } else {
+    bool first_time_pplan = current_pplan_ == nullptr;
     delete current_pplan_;
     current_pplan_ = _pplan;
     assignment_in_progress_ = false;
     // We need to pass that on to all streammanagers
     DistributePhysicalPlan();
+    if (stateful_controller_) {
+      stateful_controller_->RegisterNewPhysicalPlan(*current_pplan_);
+      LOG(INFO) << "Starting Stateful Restore now that all stmgrs have connected";
+      stateful_controller_->StartRestore(stmgrs_,
+        first_time_pplan &&
+        config::TopologyConfigHelper::StatefulTopologyStartClean(current_pplan_->topology()));
+    }
   }
 }
 
 bool TMaster::DistributePhysicalPlan() {
   if (current_pplan_) {
     // First valid the physical plan to distribute
-    LOG(INFO) << "To distribute new pplan:" << std::endl;
+    LOG(INFO) << "To distribute new physical plan:" << std::endl;
     config::PhysicalPlanHelper::LogPhysicalPlan(*current_pplan_);
 
     // Distribute physical plan to all active stmgrs
@@ -522,7 +812,7 @@ bool TMaster::DistributePhysicalPlan() {
     return true;
   }
 
-  LOG(ERROR) << "No valid assignment yet" << std::endl;
+  LOG(ERROR) << "No valid physical plan yet" << std::endl;
   return false;
 }
 
@@ -561,7 +851,7 @@ proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {
 
   // TMaster does not really have any control over who does what.
   // That has already been decided while launching the jobs.
-  // TMaster just stiches the info together to pass to everyone
+  // TMaster just stitches the info together to pass to everyone
 
   // Build the PhysicalPlan structure
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -584,7 +874,7 @@ proto::system::Status* TMaster::UpdateStMgrHeartbeat(Connection* _conn, sp_int64
   proto::system::Status* retval = new proto::system::Status();
   if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
     retval->set_status(proto::system::INVALID_STMGR);
-    retval->set_message("Uknown connection doing stmgr heartbeat");
+    retval->set_message("Unknown connection doing stmgr heartbeat");
     return retval;
   }
   const sp_string& stmgr = connection_to_stmgr_id_[_conn];
@@ -660,7 +950,7 @@ bool TMaster::ValidateTopology(proto::api::Topology _topology) {
 
 bool TMaster::ValidateStMgrsWithTopology(proto::api::Topology _topology) {
   // here we check to see if the total number of instances
-  // accross all stmgrs match up to all the spout/bolt
+  // across all stmgrs match up to all the spout/bolt
   // parallelism the topology has specified
   sp_int32 ntasks = 0;
   for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {

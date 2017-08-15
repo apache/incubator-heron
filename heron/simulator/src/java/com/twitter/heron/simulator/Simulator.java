@@ -29,12 +29,12 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.config.SystemConfigKey;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.executors.InstanceExecutor;
 import com.twitter.heron.simulator.executors.MetricsExecutor;
 import com.twitter.heron.simulator.executors.StreamExecutor;
 import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * One Simulator instance can only submit one topology. Please have multiple Simulator instances

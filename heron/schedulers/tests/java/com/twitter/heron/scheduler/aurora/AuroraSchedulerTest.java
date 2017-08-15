@@ -38,6 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.SubmitterMain;
@@ -48,7 +49,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
-import com.twitter.heron.spi.utils.TopologyTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -245,7 +245,7 @@ public class AuroraSchedulerTest {
     when(commandLine.getOptionValue("config_path")).thenReturn("/some/config/path");
     when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
     when(commandLine.getOptionValue("topology_defn")).thenReturn("/mock/defnFile.defn");
-    when(commandLine.getOptionValue("topology_bin")).thenReturn("/mock/binaryFile.jar");
+    when(commandLine.getOptionValue("topology_bin")).thenReturn("binaryFile.jar");
     Config config = Mockito.spy(SubmitterMain.loadConfig(commandLine, topology));
 
     AuroraScheduler testScheduler = new AuroraScheduler();
@@ -301,8 +301,8 @@ public class AuroraSchedulerTest {
         case JAVA_HOME:
           expected = "/usr/lib/jvm/default-java";
           break;
-        case IS_PRODUCTION:
-          expected = Boolean.FALSE.toString();
+        case TIER:
+          expected = "preemptible";
           break;
         case NUM_CONTAINERS:
           expected = "2";

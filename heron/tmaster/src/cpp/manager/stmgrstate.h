@@ -21,6 +21,7 @@
 #include <vector>
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
+#include "proto/ckptmgr.pb.h"
 #include "basics/basics.h"
 
 namespace heron {
@@ -41,7 +42,7 @@ class TMasterServer;
 class StMgrState {
  public:
   StMgrState(Connection* _conn, const proto::system::StMgr& _info,
-             const std::vector<proto::system::Instance*>& _instances, TMasterServer* _server);
+             const std::vector<proto::system::Instance*>& _instances, Server* _server);
   virtual ~StMgrState();
 
   void UpdateWithNewStMgr(const proto::system::StMgr& _info,
@@ -53,6 +54,17 @@ class StMgrState {
 
   // Send messages to the stmgr
   void NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
+
+
+  // Send RestoreTopologyStateMessage to stmgr
+  void SendRestoreTopologyStateMessage(const proto::ckptmgr::RestoreTopologyStateRequest& _message);
+
+  // Send StartStatefulProcessingMessage to stmgr
+  void SendStartStatefulProcessingMessage(const std::string& _checkpoint_id);
+
+  // Send stateful checkpoint message to the stmgr
+  void NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request);
+
 
   bool TimedOut() const;
 
@@ -78,7 +90,7 @@ class StMgrState {
   // The connection used by the nodemanager to contact us
   Connection* connection_;
   // Our link to our TMaster
-  TMasterServer* server_;
+  Server* server_;
 };
 }  // namespace tmaster
 }  // namespace heron

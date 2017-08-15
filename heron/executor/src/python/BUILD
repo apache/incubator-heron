@@ -9,7 +9,7 @@ pex_library(
         "//heron/statemgrs/src/python:statemgr-py",
         "//heron/common/src/python:common-py",
     ],
-    reqs = ["pyyaml==3.10"],
+    reqs = ["PyYAML==3.10"],
 )
 
 pex_binary(

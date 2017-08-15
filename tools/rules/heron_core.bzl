@@ -36,12 +36,18 @@ def heron_core_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-slurm-scheduler",
         "//heron/schedulers/src/java:heron-mesos-scheduler",
         "//heron/schedulers/src/java:heron-marathon-scheduler",
+        "//heron/schedulers/src/java:heron-kubernetes-scheduler",
     ]
 
 def heron_core_lib_packing_files():
     return [
         "//heron/packing/src/java:heron-roundrobin-packing",
-	"//heron/packing/src/java:heron-binpacking-packing"
+        "//heron/packing/src/java:heron-binpacking-packing"
+    ]
+
+def heron_core_lib_healthmgr_files():
+    return [
+        "//heron/healthmgr/src/java:heron-healthmgr",
     ]
 
 def heron_core_lib_metricsmgr_files():

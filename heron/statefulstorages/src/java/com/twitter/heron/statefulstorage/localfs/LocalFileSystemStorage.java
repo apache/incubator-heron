@@ -37,6 +37,9 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   @Override
   public void init(Map<String, Object> conf) throws StatefulStorageException {
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
+    if (checkpointRootPath != null) {
+      checkpointRootPath = checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
+    }
     LOG.info("Initialing... Checkpoint root path: " + checkpointRootPath);
   }
 
@@ -108,7 +111,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       String[] names = new File(topologyCheckpointRoot).list();
       for (String name : names) {
         if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          FileUtils.deleteDir(new File(topologyCheckpointRoot, name));
+          FileUtils.deleteDir(new File(topologyCheckpointRoot, name), true);
         }
       }
 

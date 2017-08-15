@@ -6,7 +6,6 @@ pex_library(
     name = "cli-py",
     srcs = glob(
         ["**/*.py"],
-        exclude = ["main.py"],
     ),
     deps = [
         "//heron/common/src/python:common-py",
@@ -14,8 +13,9 @@ pex_library(
         "//heron/proto:proto-py",
     ],
     reqs = [
-        "pyyaml==3.10",
-        "enum34==1.1.6"
+      "PyYAML==3.10",
+      "enum34==1.1.6",
+      "requests==2.12.3",
     ],
 )
 

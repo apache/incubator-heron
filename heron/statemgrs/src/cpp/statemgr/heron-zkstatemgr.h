@@ -66,6 +66,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   // Sets up a watch on tmaster location change
   void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
   void SetMetricsCacheLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
+  void SetPackingPlanWatch(const std::string& _topology_name, VCallback<> _watcher);
 
   // Sets the Tmaster
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
@@ -95,6 +96,9 @@ class HeronZKStateMgr : public HeronStateMgr {
                        VCallback<proto::system::StatusCode> _cb);
   void GetPhysicalPlan(const std::string& _topology_name, proto::system::PhysicalPlan* _return,
                        VCallback<proto::system::StatusCode> _cb);
+
+  void GetPackingPlan(const std::string& _topology_name, proto::system::PackingPlan* _return,
+                      VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets execution state
   void CreateExecutionState(const proto::system::ExecutionState& _state,
@@ -154,6 +158,8 @@ class HeronZKStateMgr : public HeronStateMgr {
   void SetPhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void GetPhysicalPlanDone(std::string* _contents, proto::system::PhysicalPlan* _return,
                            VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void GetPackingPlanDone(std::string* _contents, proto::system::PackingPlan* _return,
+                          VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreateExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeleteExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
@@ -176,6 +182,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   // clients about the change.
   void TMasterLocationWatch();
   void MetricsCacheLocationWatch();
+  void PackingPlanWatch();
   // Handles global events from ZKClient. For now, it handles the session
   // expired event, by deleting the current client, creating a new one,
   // setting the tmaster location watch, and notifying the client of a
@@ -184,20 +191,24 @@ class HeronZKStateMgr : public HeronStateMgr {
   // Sets a tmaster location watch through the ZKClient Exists method.
   void SetTMasterLocationWatchInternal();
   void SetMetricsCacheLocationWatchInternal();
+  void SetPackingPlanWatchInternal();
   // A wrapper to be passed to select server registerTimer call.
   // Ignores the status and call SetTMasterLocationWatchInternal
   void CallSetTMasterLocationWatch(EventLoop::Status status);
   void CallSetMetricsCacheLocationWatch(EventLoop::Status status);
+  void CallSetPackingPlanWatch(EventLoop::Status status);
   // A handler callback that gets called by ZkClient upon completion of
   // setting Tmaster watch. If the return code indicates failure, we
   // retry after SET_WATCH_RETRY_INTERVAL_S seconds.
   void SetTMasterWatchCompletionHandler(sp_int32 rc);
   void SetMetricsCacheWatchCompletionHandler(sp_int32 rc);
+  void SetPackingPlanWatchCompletionHandler(sp_int32 rc);
   // Essentially tells you whether SetTmasterLocationWatch has been
   // called by the client or not. It gets this info through
   // tmaster_location_watcher_info_
   bool IsTmasterWatchDefined();
   bool IsMetricsCacheWatchDefined();
+  bool IsPackingPlanWatchDefined();
   // Common functionality for c`tors. Should be called only once from c`tor
   void Init();
 
@@ -229,6 +240,7 @@ class HeronZKStateMgr : public HeronStateMgr {
 
   const TMasterLocationWatchInfo* tmaster_location_watcher_info_;
   const TMasterLocationWatchInfo* metricscache_location_watcher_info_;
+  const TMasterLocationWatchInfo* packing_plan_watcher_info_;
   // If true, we exit on zookeeper session expired event
   const bool exitOnSessionExpiry_;
   // Retry interval if setting a watch on zk node fails.

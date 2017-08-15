@@ -40,16 +40,23 @@ RELEASE_YAML = "release.yaml"
 ZIPPED_RELEASE_YAML = "scripts/packages/release.yaml"
 OVERRIDE_YAML = "override.yaml"
 
+# mode of deployment
+DIRECT_MODE = 'direct'
+SERVER_MODE = 'server'
+
 # directories for heron sandbox
 SANDBOX_CONF_DIR = "./heron-conf"
 
 # config file for heron cli
 CLIENT_YAML = "client.yaml"
 
-# cli configs for role and env
-IS_ROLE_REQUIRED = "heron.config.is.role.required"
-IS_ENV_REQUIRED = "heron.config.is.env.required"
+# client configs for role and env for direct deployment
+ROLE_REQUIRED = "heron.config.is.role.required"
+ENV_REQUIRED = "heron.config.is.env.required"
 
+# client config for role and env for server deployment
+ROLE_KEY = "role.required"
+ENVIRON_KEY = "env.required"
 
 def create_tar(tar_filename, files, config_dir, config_files):
   '''
@@ -240,12 +247,15 @@ def get_heron_cluster(cluster_role_env):
   """Get the cluster to which topology is submitted"""
   return cluster_role_env.split('/')[0]
 
+def heron_rc_file():
+  """Get the full path name of the .heronrc file"""
+  return os.path.join(os.path.expanduser('~'), '.heronrc')
 
+################################################################################
 # pylint: disable=too-many-branches
 def parse_cluster_role_env(cluster_role_env, config_path):
   """Parse cluster/[role]/[environ], supply default, if not provided, not required"""
   parts = cluster_role_env.split('/')[:3]
-  Log.info("Using config file under %s" % config_path)
   if not os.path.isdir(config_path):
     Log.error("Config path cluster directory does not exist: %s" % config_path)
     raise Exception("Invalid config path")
@@ -273,17 +283,17 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
-        if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] is True):
+        if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] is True):
           raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
-                          % (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
+                          % (cluster_role_env, ROLE_REQUIRED, cli_conf_file))
         else:
           parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
-        if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] is True):
+        if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] is True):
           raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
-                          % (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
+                          % (cluster_role_env, ENV_REQUIRED, cli_conf_file))
         else:
           parts.append(ENVIRON)
 
@@ -294,6 +304,84 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
   return (parts[0], parts[1], parts[2])
 
+################################################################################
+def get_cluster_role_env(cluster_role_env):
+  """Parse cluster/[role]/[environ], supply empty string, if not provided"""
+  parts = cluster_role_env.split('/')[:3]
+  if len(parts) == 3:
+    return (parts[0], parts[1], parts[2])
+
+  if len(parts) == 2:
+    return (parts[0], parts[1], "")
+
+  if len(parts) == 1:
+    return (parts[0], "", "")
+
+  return ("", "", "")
+
+################################################################################
+def direct_mode_cluster_role_env(cluster_role_env, config_path):
+  """Check cluster/[role]/[environ], if they are required"""
+
+  # otherwise, get the client.yaml file
+  cli_conf_file = os.path.join(config_path, CLIENT_YAML)
+
+  # if client conf doesn't exist, use default value
+  if not os.path.isfile(cli_conf_file):
+    return True
+
+  client_confs = {}
+  with open(cli_conf_file, 'r') as conf_file:
+    client_confs = yaml.load(conf_file)
+
+    # the return value of yaml.load can be None if conf_file is an empty file
+    if not client_confs:
+      return True
+
+    # if role is required but not provided, raise exception
+    role_present = True if len(cluster_role_env[1]) > 0 else False
+    if ROLE_REQUIRED in client_confs and client_confs[ROLE_REQUIRED] and not role_present:
+      raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
+                      % (cluster_role_env, ROLE_REQUIRED, cli_conf_file))
+
+    # if environ is required but not provided, raise exception
+    environ_present = True if len(cluster_role_env[2]) > 0 else False
+    if ENV_REQUIRED in client_confs and client_confs[ENV_REQUIRED] and not environ_present:
+      raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
+                      % (cluster_role_env, ENV_REQUIRED, cli_conf_file))
+
+  return True
+
+################################################################################
+def server_mode_cluster_role_env(cluster_role_env, config_map, config_file):
+  """Check cluster/[role]/[environ], if they are required"""
+
+  cmap = config_map[cluster_role_env[0]]
+
+  # if role is required but not provided, raise exception
+  role_present = True if len(cluster_role_env[1]) > 0 else False
+  if ROLE_KEY in cmap and cmap[ROLE_KEY] and not role_present:
+    raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
+                    % (cluster_role_env, ROLE_KEY, config_file))
+
+  # if environ is required but not provided, raise exception
+  environ_present = True if len(cluster_role_env[2]) > 0 else False
+  if ENVIRON_KEY in cmap and cmap[ENVIRON_KEY] and not environ_present:
+    raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
+                    % (cluster_role_env, ENVIRON_KEY, config_file))
+
+  return True
+
+################################################################################
+def defaults_cluster_role_env(cluster_role_env):
+  """
+  if role is not provided, supply userid
+  if environ is not provided, supply 'default'
+  """
+  if len(cluster_role_env[1]) == 0 and len(cluster_role_env[2]) == 0:
+    return (cluster_role_env[0], getpass.getuser(), ENVIRON)
+
+  return (cluster_role_env[0], cluster_role_env[1], cluster_role_env[2])
 
 ################################################################################
 # Parse the command line for overriding the defaults
@@ -354,9 +442,12 @@ def print_build_info(zipped_pex=False):
     release_file = get_zipped_heron_release_file()
   else:
     release_file = get_heron_release_file()
+
   with open(release_file) as release_info:
-    for line in release_info:
-      print line,
+    release_map = yaml.load(release_info)
+    release_items = sorted(release_map.items(), key=lambda tup: tup[0])
+    for key, value in release_items:
+      print "%s : %s" % (key, value)
 
 def get_version_number(zipped_pex=False):
   """Print version from release.yaml

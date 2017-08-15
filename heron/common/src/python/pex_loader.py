@@ -38,12 +38,12 @@ def load_pex(path_to_pex, include_deps=True):
   abs_path_to_pex = os.path.abspath(path_to_pex)
   Log.debug("Add a pex to the path: %s" % abs_path_to_pex)
   if abs_path_to_pex not in sys.path:
-    sys.path.insert(0, abs_path_to_pex)
+    sys.path.insert(0, os.path.dirname(abs_path_to_pex))
 
   # add dependencies to path
   if include_deps:
     for dep in _get_deps_list(abs_path_to_pex):
-      to_join = os.path.join(abs_path_to_pex, dep)
+      to_join = os.path.join(os.path.dirname(abs_path_to_pex), dep)
       if to_join not in sys.path:
         Log.debug("Add a new dependency to the path: %s" % dep)
         sys.path.insert(0, to_join)
@@ -109,8 +109,11 @@ def import_and_get_class(path_to_pex, python_class_name):
 
   # Resolve duplicate package suffix problem (heron.), if the top level package name is heron
   if python_class_name.startswith("heron."):
-    mod = resolve_heron_suffix_issue(abs_path_to_pex, python_class_name)
-    return getattr(mod, import_name)
+    try:
+      mod = resolve_heron_suffix_issue(abs_path_to_pex, python_class_name)
+      return getattr(mod, import_name)
+    except:
+      Log.error("Could not resolve class %s with special handling" % python_class_name)
 
   mod = __import__(from_path, fromlist=[import_name], level=-1)
   Log.debug("Imported module: %s" % str(mod))

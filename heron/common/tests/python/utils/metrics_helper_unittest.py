@@ -16,9 +16,9 @@
 
 import unittest
 
-from heron.common.src.python.utils.metrics import (CountMetric, MultiCountMetric,
-                                                   MeanReducedMetric, MultiMeanReducedMetric,
-                                                   BaseMetricsHelper)
+from heron.api.src.python.metrics import (CountMetric, MultiCountMetric,
+                                          MeanReducedMetric, MultiMeanReducedMetric)
+from heron.common.src.python.utils.metrics import BaseMetricsHelper
 from heron.proto import metrics_pb2
 import heron.common.tests.python.utils.mock_generator as mock_generator
 
@@ -38,7 +38,7 @@ class BaseMetricsHelperTest(unittest.TestCase):
 
   def test_register_metrics(self):
     self.metrics_helper.register_metrics(self.metrics_collector, 60)
-    for name, metric in self.metrics.iteritems():
+    for name, metric in self.metrics.items():
       self.assertEqual(self.metrics_collector.metrics_map[name], metric)
     self.assertEqual(len(self.metrics_collector.time_bucket_in_sec_to_metrics_name[60]), 4)
     self.assertIn(60, self.metrics_collector.registered_timers)

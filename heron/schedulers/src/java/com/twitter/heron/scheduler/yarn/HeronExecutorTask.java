@@ -33,6 +33,7 @@ import org.apache.reef.wake.EventHandler;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
@@ -48,7 +49,6 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.ShellUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 @Unit
 public class HeronExecutorTask implements Task {

@@ -93,7 +93,8 @@ heron.class.launcher:                        com.twitter.heron.scheduler.maratho
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:          $JAVA_HOME
 
-heron.directory.home:                       "./heron-core/"
+# location of heron - pick it up from shell environment
+heron.directory.home:                       $HERON_HOME
 
 heron.directory.conf:                       "./heron-conf/"
 
@@ -106,11 +107,8 @@ heron.marathon.scheduler.auth.token: "<auth_token>"
 # Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
 
-# location of the core package
-heron.package.core.uri:  https://github.com/twitter/heron/releases/download/0.14.7/heron-core-0.14.7-ubuntu.tar.gz
-
-# docker repo for executor
-heron.executor.docker.image: 'ndustrialio/heron-executor:jre8'
+# docker repo for heron with core packages installed
+heron.executor.docker.image: 'streamlio/heron:latest-ubuntu14.04'
 ```
 
 

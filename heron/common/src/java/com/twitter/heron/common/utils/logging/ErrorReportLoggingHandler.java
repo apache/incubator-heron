@@ -104,7 +104,15 @@ public class ErrorReportLoggingHandler extends Handler {
         exceptionDataBuilder.setCount(exceptionDataBuilder.getCount() + 1);
         exceptionDataBuilder.setLasttime(new Date().toString());
         exceptionDataBuilder.setStacktrace(trace);
-        exceptionDataBuilder.setLogging(record.getMessage());
+
+        // Can cause NPE and crash HI
+        //exceptionDataBuilder.setLogging(record.getMessage());
+
+        if (record.getMessage() == null) {
+          exceptionDataBuilder.setLogging("");
+        } else {
+          exceptionDataBuilder.setLogging(record.getMessage());
+        }
       }
     }
   }

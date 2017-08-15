@@ -7,7 +7,6 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 simulator_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java",
-        "//heron/spi/src/java:utils-spi-java",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",

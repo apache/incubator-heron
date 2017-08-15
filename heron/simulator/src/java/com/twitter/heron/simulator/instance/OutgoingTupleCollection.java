@@ -14,8 +14,10 @@
 
 package com.twitter.heron.simulator.instance;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.proto.system.HeronTuples;
+import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 
 /**
  * Implements OutgoingTupleCollection will be able to handle some basic methods for send out tuples
@@ -27,8 +29,8 @@ import com.twitter.heron.proto.system.HeronTuples;
  */
 public class OutgoingTupleCollection extends com.twitter.heron.instance.OutgoingTupleCollection {
 
-  public OutgoingTupleCollection(String componentName,
-                                 Communicator<HeronTuples.HeronTupleSet> outQueue) {
-    super(componentName, outQueue);
+  public OutgoingTupleCollection(PhysicalPlanHelper helper,
+                                 Communicator<Message> outQueue) {
+    super(helper, outQueue);
   }
 }

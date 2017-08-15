@@ -7,7 +7,8 @@ packing_deps_files = [
     "//heron/spi/src/java:packing-spi-java",
     "//heron/packing/src/java:roundrobin-packing",
     "//heron/packing/src/java:binpacking-packing",
-    "//heron/common/src/java:basics-java"
+    "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:utils-java"
 ]
 
 test_deps_files = [
@@ -46,6 +47,7 @@ java_library(
     ),
     deps = [
         "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:utils-java",
         "//heron/packing/src/java:binpacking-packing",
         "//heron/packing/src/java:builder",
         "//heron/packing/src/java:roundrobin-packing",

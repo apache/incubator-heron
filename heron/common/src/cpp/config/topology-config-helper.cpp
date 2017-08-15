@@ -29,19 +29,44 @@
 namespace heron {
 namespace config {
 
-bool TopologyConfigHelper::IsAckingEnabled(const proto::api::Topology& _topology) {
+TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::string& _mode) {
+  if (_mode == "ATMOST_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
+  } else if (_mode == "ATLEAST_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
+  } else if (_mode == "EXACTLY_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::EXACTLY_ONCE;
+  } else {
+    LOG(FATAL) << "Unknown Topology Reliability Mode " << _mode;
+    return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
+  }
+}
+
+TopologyConfigVars::TopologyReliabilityMode
+TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) {
   sp_string value_true_ = "true";
-  std::set<sp_string> topology_config;
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
+    // First search for reliabiliy mode
+    for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+      if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE) {
+        return StringToReliabilityMode(cfg.kvs(i).value());
+      }
+    }
+    // Nothing was found wrt reliability mode.
+    // The following is strictly for backwards compat
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
       if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_ENABLE_ACKING) {
-        return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+        if (value_true_.compare(cfg.kvs(i).value().c_str()) == 0) {
+          return TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
+        } else {
+          return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
+        }
       }
     }
   }
 
-  return false;
+  return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
 }
 
 sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topology) {
@@ -198,31 +223,22 @@ sp_int64 TopologyConfigHelper::GetContainerRamRequested(const proto::api::Topolo
   return max_components_per_container * 1073741824l;
 }
 
-bool TopologyConfigHelper::IsTopologyStateful(const proto::api::Topology& _topology) {
-  return GetBooleanConfigValue(_topology,
-                               TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED, false);
-}
-
-bool TopologyConfigHelper::IsTopologyExactlyOnce(const proto::api::Topology& _topology) {
-  return GetBooleanConfigValue(_topology,
-                               TopologyConfigVars::TOPOLOGY_EXACTLYONCE_ENABLED, false);
-}
-
 bool TopologyConfigHelper::StatefulTopologyStartClean(const proto::api::Topology& _topology) {
   return GetBooleanConfigValue(_topology,
                                TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN, false);
 }
 
-sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecs(
-                               const proto::api::Topology& _topology) {
+sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(
+                               const proto::api::Topology& _topology,
+                               sp_int64 _default) {
   const proto::api::Config& cfg = _topology.topology_config();
   for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
     if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS) {
       return atol(cfg.kvs(i).value().c_str());
     }
   }
-  // There was no value specified. The default is 0.
-  return 0;
+  // There was no value specified. Return the default
+  return _default;
 }
 
 void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _topology,

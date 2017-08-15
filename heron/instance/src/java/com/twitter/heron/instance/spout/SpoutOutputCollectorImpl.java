@@ -24,6 +24,8 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
 import com.twitter.heron.common.basics.Communicator;
@@ -61,7 +63,7 @@ public class SpoutOutputCollectorImpl
 
   protected SpoutOutputCollectorImpl(IPluggableSerializer serializer,
                                      PhysicalPlanHelper helper,
-                                     Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                                     Communicator<Message> streamOutQueue,
                                      ComponentMetrics spoutMetrics) {
     super(serializer, helper, streamOutQueue, spoutMetrics);
     if (helper.getMySpout() == null) {
@@ -94,6 +96,10 @@ public class SpoutOutputCollectorImpl
   @Override
   public void reportError(Throwable error) {
     LOG.log(Level.SEVERE, "Reporting an error in topology code ", error);
+  }
+
+  public boolean isAckEnabled() {
+    return ackEnabled;
   }
 
 

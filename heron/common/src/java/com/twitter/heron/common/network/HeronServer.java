@@ -71,7 +71,7 @@ public abstract class HeronServer implements ISelectHandler {
     activeConnections = new HashMap<SocketChannel, SocketChannelHelper>();
   }
 
-  InetSocketAddress getEndpoint() {
+  public InetSocketAddress getEndpoint() {
     return endpoint;
   }
 
@@ -297,19 +297,19 @@ public abstract class HeronServer implements ISelectHandler {
   /////////////////////////////////////////////////////////
   // Following protected methods are just used for testing
   /////////////////////////////////////////////////////////
-  protected Map<String, Message.Builder> getMessageMap() {
+  public Map<String, Message.Builder> getMessageMap() {
     return messageMap;
   }
 
-  protected Map<String, Message.Builder> getRequestMap() {
+  public Map<String, Message.Builder> getRequestMap() {
     return requestMap;
   }
 
-  protected ServerSocketChannel getAcceptChannel() {
+  public ServerSocketChannel getAcceptChannel() {
     return acceptChannel;
   }
 
-  protected Map<SocketChannel, SocketChannelHelper> getActiveConnections() {
+  public Map<SocketChannel, SocketChannelHelper> getActiveConnections() {
     return activeConnections;
   }
 }

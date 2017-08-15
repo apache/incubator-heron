@@ -89,11 +89,11 @@ class ListTopologiesJsonHandler(base.BaseHandler):
     result = dict()
 
     # now convert some of the fields to be displayable
-    for cluster, cluster_value in topologies.iteritems():
+    for cluster, cluster_value in topologies.items():
       result[cluster] = dict()
-      for environ, environ_value in cluster_value.iteritems():
+      for environ, environ_value in cluster_value.items():
         result[cluster][environ] = dict()
-        for topology, topology_value in environ_value.iteritems():
+        for topology, topology_value in environ_value.items():
           if "jobname" not in topology_value or topology_value["jobname"] is None:
             continue
 

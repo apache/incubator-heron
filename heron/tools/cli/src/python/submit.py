@@ -16,6 +16,7 @@ import glob
 import logging
 import os
 import tempfile
+import requests
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -25,10 +26,22 @@ import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.cli.src.python.result as result
+import heron.tools.cli.src.python.rest as rest
 import heron.tools.common.src.python.utils.config as config
 import heron.tools.common.src.python.utils.classpath as classpath
 
 # pylint: disable=too-many-return-statements
+
+################################################################################
+def launch_mode_msg(cl_args):
+  '''
+  Depending on the mode of launching a topology provide a message
+  :param cl_args:
+  :return:
+  '''
+  if cl_args['dry_run']:
+    return "in dry-run mode"
+  return ""
 
 ################################################################################
 def create_parser(subparsers):
@@ -51,9 +64,10 @@ def create_parser(subparsers):
   cli_args.add_topology_class(parser)
   cli_args.add_config(parser)
   cli_args.add_deactive_deploy(parser)
-  cli_args.add_extra_launch_classpath(parser)
-  cli_args.add_system_property(parser)
   cli_args.add_dry_run(parser)
+  cli_args.add_extra_launch_classpath(parser)
+  cli_args.add_service_url(parser)
+  cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -68,6 +82,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   :param tmp_dir:
   :param topology_file:
   :param topology_defn_file:
+  :param topology_name:
   :return:
   '''
   # get the normalized path for topology.tar.gz
@@ -88,13 +103,14 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--cluster", cl_args['cluster'],
       "--role", cl_args['role'],
       "--environment", cl_args['environ'],
+      "--submit_user", cl_args['submit_user'],
       "--heron_home", config.get_heron_dir(),
       "--config_path", config_path,
       "--override_config_file", cl_args['override_config_file'],
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_bin", topology_file   # pex file if pex specified
+      "--topology_bin", os.path.basename(topology_file)   # pex file if pex specified
   ]
 
   if Log.getEffectiveLevel() == logging.DEBUG:
@@ -118,14 +134,59 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       extra_jars=extra_jars,
       args=args,
       java_defines=[])
-  err_context = "Failed to launch topology '%s'" % topology_name
-  if cl_args["dry_run"]:
-    err_context += " in dry-run mode"
-  succ_context = "Successfully launched topology '%s'" % topology_name
-  if cl_args["dry_run"]:
-    succ_context += " in dry-run mode"
-  res.add_context(err_context, succ_context)
+
+  err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+  succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+
+  res.add_context(err_ctxt, succ_ctxt)
   return res
+
+################################################################################
+def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_name):
+  '''
+  Launch a topology given topology jar, its definition file and configurations
+  :param cl_args:
+  :param topology_file:
+  :param topology_defn_file:
+  :param topology_name:
+  :return:
+  '''
+  service_apiurl = cl_args['service_url'] + rest.ROUTE_SIGNATURES['submit'][1]
+  service_method = rest.ROUTE_SIGNATURES['submit'][0]
+  data = dict(
+      name=topology_name,
+      cluster=cl_args['cluster'],
+      role=cl_args['role'],
+      environment=cl_args['environ'],
+      user=cl_args['submit_user'],
+  )
+
+  if cl_args['dry_run']:
+    data["dry_run"] = True
+
+  files = dict(
+      definition=open(topology_defn_file, 'rb'),
+      topology=open(topology_file, 'rb'),
+  )
+
+  err_ctxt = "Failed to launch topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+  succ_ctxt = "Successfully launched topology '%s' %s" % (topology_name, launch_mode_msg(cl_args))
+
+  try:
+    r = service_method(service_apiurl, data=data, files=files)
+    ok = r.status_code is requests.codes.ok
+    created = r.status_code is requests.codes.created
+    s = Status.Ok if created or ok else Status.HeronError
+    if s is Status.HeronError:
+      Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+    elif ok:
+      # this case happens when we request a dry_run
+      print r.json().get("response")
+  except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+    Log.error(err)
+    return SimpleResult(Status.HeronError, err_ctxt, succ_ctxt)
+  return SimpleResult(s, err_ctxt, succ_ctxt)
+
 
 ################################################################################
 def launch_topologies(cl_args, topology_file, tmp_dir):
@@ -153,12 +214,19 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
     except Exception as e:
       err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
       return SimpleResult(Status.HeronError, err_context)
+
     # launch the topology
-    mode = " in dry-run mode" if cl_args['dry_run'] else ''
-    Log.info("Launching topology: \'%s\'%s", topology_defn.name, mode)
-    res = launch_a_topology(
-        cl_args, tmp_dir, topology_file, defn_file, topology_defn.name)
+    Log.info("Launching topology: \'%s\'%s", topology_defn.name, launch_mode_msg(cl_args))
+
+    # check if we have to do server or direct based deployment
+    if cl_args['deploy_mode'] == config.SERVER_MODE:
+      res = launch_topology_server(
+          cl_args, topology_file, defn_file, topology_defn.name)
+    else:
+      res = launch_a_topology(
+          cl_args, tmp_dir, topology_file, defn_file, topology_defn.name)
     results.append(res)
+
   return results
 
 
@@ -193,7 +261,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   result.render(res)
 
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
@@ -237,7 +305,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   result.render(res)
 
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (main_class, topology_file)
     res.add_context(err_context)
@@ -258,7 +326,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
       topology_file, topology_class_name, tuple(unknown_args))
 
   result.render(res)
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing class '%s' of file '%s'") % (topology_class_name, topology_file)
     res.add_context(err_context)
@@ -282,6 +350,8 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
+  Log.debug("Submit Args %s", cl_args)
+
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 

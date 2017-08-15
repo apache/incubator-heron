@@ -37,6 +37,10 @@ public class Context {
     return cfg.getStringValue(Key.ENVIRON);
   }
 
+  public static String submitUser(Config cfg) {
+    return cfg.getStringValue(Key.SUBMIT_USER);
+  }
+
   public static Boolean dryRun(Config cfg) {
     return cfg.getBooleanValue(Key.DRY_RUN);
   }

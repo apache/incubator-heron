@@ -91,7 +91,6 @@ DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const s
   tmaster_client_ = new DummyTMasterClient(ss, tmaster_options, stmgr_id, stmgr_host, stmgr_port,
                                            shell_port, _instances);
   InstallRequestHandler(&DummyStMgr::HandleStMgrHelloRequest);
-  InstallMessageHandler(&DummyStMgr::HandleTupleStreamMessage);
   InstallMessageHandler(&DummyStMgr::HandleStartBackPressureMessage);
   InstallMessageHandler(&DummyStMgr::HandleStopBackPressureMessage);
 }
@@ -123,8 +122,6 @@ void DummyStMgr::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
   SendResponse(_id, _conn, response);
   delete _request;
 }
-
-void DummyStMgr::HandleTupleStreamMessage(Connection*, heron::proto::stmgr::TupleStreamMessage*) {}
 
 void DummyStMgr::HandleStartBackPressureMessage(Connection*,
                                                 heron::proto::stmgr::StartBackPressureMessage*) {

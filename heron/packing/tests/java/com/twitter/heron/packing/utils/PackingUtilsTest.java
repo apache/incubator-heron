@@ -20,11 +20,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.PackingTestUtils;
-import com.twitter.heron.spi.utils.TopologyTests;
 
 public class PackingUtilsTest {
 

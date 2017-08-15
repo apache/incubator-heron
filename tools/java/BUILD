@@ -5,8 +5,8 @@ package(default_visibility = ["//visibility:public"])
 java_toolchain(
     name = "heron_java_toolchain",
     encoding = "UTF-8",
-    source_version = "7",
-    target_version = "7",
+    source_version = "8",
+    target_version = "8",
     bootclasspath = ["@bazel_tools//tools/jdk:bootclasspath"],
     extclasspath = ["@bazel_tools//tools/jdk:extdir"],
     javac = ["@bazel_tools//third_party/java/jdk/langtools:javac_jar"],

@@ -1,10 +1,17 @@
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 curator_version = "2.9.0"
+google_client_version = "1.22.0"
 jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
+
+# heron api server
+jetty_version = "9.4.6.v20170531"
+jersey_verion = "2.25.1"
+hk2_api = "2.5.0-b32"
+
 
 maven_server(
   name = "default",
@@ -24,6 +31,11 @@ maven_server(
 maven_jar(
   name = "antlr_antlr",
   artifact = "antlr:antlr:2.7.7",
+)
+
+maven_jar(
+    name = "aopalliance_aopalliance",
+    artifact = "aopalliance:aopalliance:1.0",
 )
 
 maven_jar(
@@ -112,6 +124,16 @@ maven_jar(
 )
 
 maven_jar(
+    name = "com_google_inject_guice",
+    artifact = "com.google.inject:guice:4.0",
+)
+
+maven_jar(
+    name = "com_google_inject_extensions_guice_assistedinject",
+    artifact = "com.google.inject.extensions:guice-assistedinject:4.0",
+)
+
+maven_jar(
   name = "org_apache_hadoop_hadoop_core",
   artifact = "org.apache.hadoop:hadoop-core:0.20.2",
 )
@@ -127,6 +149,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "com_jayway_jsonpath",
+  artifact = "com.jayway.jsonpath:json-path:2.1.0",
+)
+
+maven_jar(
   name = "com_fasterxml_jackson_core_jackson_annotations",
   artifact = "com.fasterxml.jackson.core:jackson-annotations:" + jackson_version,
 )
@@ -139,6 +166,11 @@ maven_jar(
 maven_jar(
   name = "com_fasterxml_jackson_core_jackson_databind",
   artifact = "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
+)
+
+maven_jar(
+  name = "net_minidev_json_smart",
+  artifact = "net.minidev:json-smart:2.2"
 )
 
 maven_jar(
@@ -159,6 +191,71 @@ maven_jar(
 maven_jar(
   name = "javax_inject_javax_inject",
   artifact = "javax.inject:javax.inject:1",
+)
+
+maven_jar(
+  name = "javax_ws_rs_javax_ws_rs_api",
+  artifact = "javax.ws.rs:javax.ws.rs-api:2.0.1",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_core_jersey_client",
+   artifact = "org.glassfish.jersey.core:jersey-client:2.24",
+)
+
+maven_jar(
+   name = "org_glassfish_hk2_hk2_api",
+   artifact = "org.glassfish.hk2:hk2-api:2.5.0-b05",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_ext_jersey_entity_filtering",
+   artifact = "org.glassfish.jersey.ext:jersey-entity-filtering:2.24",
+)
+
+maven_jar(
+   name = "javax_annotation_javax_annotation_api",
+   artifact = "javax.annotation:javax.annotation-api:1.2",
+)
+
+maven_jar(
+   name = "com_fasterxml_jackson_module_jackson_module_jaxb_annotations",
+   artifact = "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.5.4",
+)
+
+maven_jar(
+   name = "com_fasterxml_jackson_jaxrs_jackson_jaxrs_json_provider",
+   artifact = "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.5.4",
+)
+
+maven_jar(
+   name = "com_fasterxml_jackson_jaxrs_jackson_jaxrs_base",
+   artifact = "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.5.4",
+)
+
+maven_jar(
+   name = "org_glassfish_hk2_hk2_locator",
+   artifact = "org.glassfish.hk2:hk2-locator:2.5.0-b05",
+)
+
+maven_jar(
+   name = "org_glassfish_hk2_hk2_utils",
+   artifact = "org.glassfish.hk2:hk2-utils:2.5.0-b05",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_bundles_repackaged_jersey_guava",
+   artifact = "org.glassfish.jersey.bundles.repackaged:jersey-guava:2.24",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_core_jersey_common",
+   artifact = "org.glassfish.jersey.core:jersey-common:2.24",
+)
+
+maven_jar(
+   name = "org_glassfish_jersey_media_jersey_media_json_jackson",
+   artifact = "org.glassfish.jersey.media:jersey-media-json-jackson:2.24",
 )
 
 maven_jar(
@@ -336,3 +433,199 @@ maven_jar(
   name = "com_101tec_zkclient",
   artifact = "com.101tec:zkclient:0.3"
 )
+
+maven_jar(
+  name = "com_microsoft_dhalion",
+  artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
+)
+
+maven_jar(
+  name = "org_apache_commons_commons_math3",
+  artifact = "org.apache.commons:commons-math3:3.6.1"
+)
+
+# Google Cloud
+maven_jar(
+  name = "google_api_services_storage",
+  artifact = "com.google.apis:google-api-services-storage:v1-rev108-" + google_client_version
+)
+
+maven_jar(
+  name = "google_api_client",
+  artifact = "com.google.api-client:google-api-client:" + google_client_version
+)
+
+maven_jar(
+  name = "google_http_client",
+  artifact = "com.google.http-client:google-http-client:" + google_client_version
+)
+
+maven_jar(
+  name = "google_http_client_jackson2",
+  artifact = "com.google.http-client:google-http-client-jackson2:" + google_client_version
+)
+
+maven_jar(
+  name = "google_oauth_client",
+  artifact = "com.google.oauth-client:google-oauth-client:" + google_client_version
+)
+# end Google Cloud
+
+# Pulsar Client
+maven_jar(
+  name = "apache_pulsar_client",
+  artifact = "org.apache.pulsar:pulsar-client:jar:shaded:1.19.0-incubating"
+)
+# end Pulsar Client
+
+
+# heron api server
+# jetty
+maven_jar(
+  name = "org_eclipse_jetty_server",
+  artifact = "org.eclipse.jetty:jetty-server:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_http",
+  artifact = "org.eclipse.jetty:jetty-http:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_util",
+  artifact = "org.eclipse.jetty:jetty-util:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_io",
+  artifact = "org.eclipse.jetty:jetty-io:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_security",
+  artifact = "org.eclipse.jetty:jetty-security:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_servlet",
+  artifact = "org.eclipse.jetty:jetty-servlet:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_servlets",
+  artifact = "org.eclipse.jetty:jetty-servlets:" + jetty_version
+)
+
+maven_jar(
+  name = "org_eclipse_jetty_continuation",
+  artifact = "org.eclipse.jetty:jetty-continuation:" + jetty_version
+)
+
+maven_jar(
+  name = "javax_servlet_api",
+  artifact = "javax.servlet:javax.servlet-api:3.1.0"
+)
+# end jetty
+
+# jersey
+maven_jar(
+  name = "jersey_container_servlet_core",
+  artifact = "org.glassfish.jersey.containers:jersey-container-servlet-core:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_container_servlet",
+  artifact = "org.glassfish.jersey.containers:jersey-container-servlet:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_server",
+  artifact = "org.glassfish.jersey.core:jersey-server:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_client",
+  artifact = "org.glassfish.jersey.core:jersey-client:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_common",
+  artifact = "org.glassfish.jersey.core:jersey-common:jar:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_media_multipart",
+  artifact = "org.glassfish.jersey.media:jersey-media-multipart:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_media_jaxb",
+  artifact = "org.glassfish.jersey.media:jersey-media-jaxb:" + jersey_verion
+)
+
+maven_jar(
+  name = "jersey_guava",
+  artifact = "org.glassfish.jersey.bundles.repackaged:jersey-guava:" + jersey_verion
+)
+# end jersey
+
+maven_jar(
+  name = "javax_inject",
+  artifact = "org.glassfish.hk2.external:javax.inject:2.5.0-b32"
+)
+
+maven_jar(
+  name = "javax_annotation",
+  artifact = "javax.annotation:javax.annotation-api:1.2"
+)
+
+maven_jar(
+  name = "javax_validation",
+  artifact = "javax.validation:validation-api:1.1.0.Final"
+)
+
+maven_jar(
+  name = "javax_ws_rs_api",
+  artifact = "javax.ws.rs:javax.ws.rs-api:2.0.1"
+)
+
+maven_jar(
+  name = "hk2_api",
+  artifact = "org.glassfish.hk2:hk2-api:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_utils",
+  artifact = "org.glassfish.hk2:hk2-utils:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_aopalliance_repackaged",
+  artifact = "org.glassfish.hk2.external:aopalliance-repackaged:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_locator",
+  artifact = "org.glassfish.hk2:hk2-locator:" + hk2_api
+)
+
+maven_jar(
+  name = "hk2_osgi_resource_locator",
+  artifact = "org.glassfish.hk2:osgi-resource-locator:1.0.1"
+)
+
+maven_jar(
+  name = "org_javassit",
+  artifact = "org.javassist:javassist:3.20.0-GA"
+)
+
+maven_jar(
+  name = "mimepull",
+  artifact = "org.jvnet.mimepull:mimepull:1.9.7"
+)
+
+maven_jar(
+  name = "org_apache_commons_compress",
+  artifact = "org.apache.commons:commons-compress:1.14",
+)
+# end heron api server

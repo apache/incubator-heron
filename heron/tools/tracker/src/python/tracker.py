@@ -502,7 +502,7 @@ class Tracker(object):
     Raises exception if no such topology is found.
     """
     # Iterate over the values to filter the desired topology.
-    for (topology_name, _), topologyInfo in self.topologyInfos.iteritems():
+    for (topology_name, _), topologyInfo in self.topologyInfos.items():
       executionState = topologyInfo["execution_state"]
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and

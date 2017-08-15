@@ -36,6 +36,9 @@ class TController {
 
   const NetworkOptions& get_serveroptions() const { return http_server_->get_serveroptions(); }
 
+  // Called by the tmaster when it gets response form ckptmgr
+  void HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status);
+
  private:
   // Handlers for the requests
   // In all the below handlers, the incoming _request
@@ -46,12 +49,18 @@ class TController {
   void HandleActivateRequestDone(IncomingHTTPRequest* request, proto::system::StatusCode);
   void HandleDeActivateRequest(IncomingHTTPRequest* request);
   void HandleDeActivateRequestDone(IncomingHTTPRequest* request, proto::system::StatusCode);
+  void HandleCleanStatefulCheckpointRequest(IncomingHTTPRequest* request);
+  void HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* request,
+                                                proto::system::StatusCode);
 
   // We are a http server
   HTTPServer* http_server_;
 
   // our tmaster
   TMaster* tmaster_;
+
+  // The callback to be called upon receiving clean stateful checkpoint response
+  std::function<void(proto::system::StatusCode)> clean_stateful_checkpoint_cb_;
 };
 }  // namespace tmaster
 }  // namespace heron
