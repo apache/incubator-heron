@@ -116,7 +116,7 @@ public enum Key {
   STATEFUL_STORAGE_CUSTOM_CLASSPATH        ("heron.statefulstorage.custom.classpath", Type.STRING),
 
   // keys for health manager
-  HEALTHMGR_MODE             ("heron.topology.healthmgr.mode" , Type.STRING),
+  HEALTHMGR_MODE             ("heron.topology.healthmgr.mode", Type.STRING),
 
   //keys for config provided paths
   INSTANCE_CLASSPATH         ("heron.classpath.instance",             "${HERON_LIB}/instance/*"),
