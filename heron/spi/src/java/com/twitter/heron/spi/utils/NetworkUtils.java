@@ -43,7 +43,7 @@ import com.twitter.heron.spi.common.Config;
 public final class NetworkUtils {
   private static final String CONTENT_LENGTH = "Content-Length";
   private static final String CONTENT_TYPE = "Content-Type";
-  static final String LOCAL_HOST = "127.0.0.1";
+  static final String LOCAL_HOST = "localhost";
 
   public static final String JSON_TYPE = "application/json";
   public static final String URL_ENCODE_TYPE = "application/x-www-form-urlencoded";
@@ -403,7 +403,7 @@ public final class NetworkUtils {
       hostName = InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
       LOG.log(Level.SEVERE, "Unable to get local host name", e);
-      hostName = "127.0.0.1";
+      hostName = "localhost";
     }
 
     return hostName;
