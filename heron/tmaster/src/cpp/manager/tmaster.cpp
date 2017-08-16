@@ -321,7 +321,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
       == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Establish connection to ckptmgr
     NetworkOptions ckpt_options;
-    ckpt_options.set_host("localhost");
+    ckpt_options.set_host("127.0.0.1");
     ckpt_options.set_port(ckptmgr_port_);
     ckpt_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
                                            ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *

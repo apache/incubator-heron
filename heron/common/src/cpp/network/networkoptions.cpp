@@ -27,7 +27,7 @@ const sp_int64 systemHWMOutstandingBytes = 100_MB;
 const sp_int64 systemLWMOutstandingBytes = 50_MB;
 
 NetworkOptions::NetworkOptions() {
-  host_ = "localhost";
+  host_ = "127.0.0.1";
   port_ = 8080;
   max_packet_size_ = 1_KB;
   socket_family_ = PF_INET;

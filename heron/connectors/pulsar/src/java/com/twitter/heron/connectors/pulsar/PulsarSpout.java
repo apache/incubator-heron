@@ -48,7 +48,7 @@ import com.twitter.heron.api.tuple.Values;
  * Simple usage:
  *
  * new PulsarSpout.Builder()
- *  .setServiceUrl("pulsar://localhost:6650")
+ *  .setServiceUrl("pulsar://127.0.0.1:6650")
  *  .setTopic("persistent://sample/standalone/ns1/my-topic")
  *  .setSubscription("my-subscription")
  *  .setMessageToValuesMapper(new MyMessageToValuesMapper()
