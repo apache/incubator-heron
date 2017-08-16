@@ -203,6 +203,7 @@ class HeronExecutorTest(unittest.TestCase):
     scheduler_classpath scheduler_port python_instance_binary
     metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
     is_stateful_enabled ckptmgr_classpath ckptmgr-port stateful_config_file
+    healthmgr_mode healthmgr_classpath
     """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):

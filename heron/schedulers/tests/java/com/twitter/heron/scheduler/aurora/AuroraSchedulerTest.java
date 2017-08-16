@@ -372,6 +372,12 @@ public class AuroraSchedulerTest {
         case STATEFUL_CONFIG_YAML:
           expected = expectedConf + "/stateful.yaml";
           break;
+        case HEALTHMGR_MODE:
+          expected = "disabled";
+          break;
+        case HEALTHMGR_CLASSPATH:
+          expected = expectedLib + "/healthmgr/*:";
+          break;
         default:
           fail(String.format(
               "Expected value for Aurora field %s not found in test (found=%s)", field, found));
