@@ -112,6 +112,17 @@ class HeronExecutorTest(unittest.TestCase):
              "--system_config_file %s --sink_config_file metrics_sinks_config_file " \
              "--cluster cluster --role role --environment environ --verbose" % (INTERNAL_CONF_PATH)
 
+  def get_expected_healthmgr_command():
+      return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc " \
+             "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause " \
+             "-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=100M " \
+             "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
+             "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
+             "-Xloggc:log-files/gc.healthmgr.log -Djava.net.preferIPv4Stack=true " \
+             "-cp scheduler_classpath:healthmgr_classpath " \
+             "com.twitter.heron.healthmgr.HealthManager --cluster cluster --role role " \
+             "--environment environ --topology_name topname"
+
   def get_expected_instance_command(component_name, instance_id, container_id):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxMetaspaceSize=128M " \
@@ -130,15 +141,16 @@ class HeronExecutorTest(unittest.TestCase):
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
-      ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
-      ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-tmaster',
                   'tmaster_binary %s master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot '
                   '%s metrics_sinks_config_file metricsmgr_port '
                   'ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH )),
+      ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
+      ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
+      ProcessInfo(MockPOpen(), 'heron-healthmgr', get_expected_healthmgr_command()),
   ]
 
   MockPOpen.set_next_pid(37)

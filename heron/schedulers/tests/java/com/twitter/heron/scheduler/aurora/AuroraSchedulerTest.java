@@ -376,7 +376,7 @@ public class AuroraSchedulerTest {
           expected = "disabled";
           break;
         case HEALTHMGR_CLASSPATH:
-          expected = expectedLib + "/healthmgr/*:";
+          expected = expectedLib + "/healthmgr/*";
           break;
         default:
           fail(String.format(
