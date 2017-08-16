@@ -1,3 +1,5 @@
+HERONPY_VERSION = 0.15.0
+
 setup:
 	scripts/setup.sh
 
@@ -24,7 +26,7 @@ javadocs:
 	@scripts/javadocs.sh
 
 python-docs:
-	@scripts/python-doc-gen.sh
+	@scripts/python-doc-gen.sh $(HERONPY_VERSION)
 
 site:
 	@make clean
