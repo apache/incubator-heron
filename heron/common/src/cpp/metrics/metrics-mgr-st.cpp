@@ -34,7 +34,7 @@ namespace heron {
 namespace common {
 
 MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop) {
-  options_.set_host("localhost");
+  options_.set_host("127.0.0.1");
   options_.set_port(_metricsmgr_port);
   options_.set_max_packet_size(1024 * 1024);
   options_.set_socket_family(PF_INET);

@@ -36,7 +36,7 @@ class ZkStateManagerTest(unittest.TestCase):
 
   def setUp(self):
     # Create a a ZkStateManager that we will test with
-    self.statemanager = ZkStateManager('zk', [('localhost', 2181), ('localhost', 2281)], 'heron', 'reachable.host')
+    self.statemanager = ZkStateManager('zk', [('127.0.0.1', 2181), ('127.0.0.1', 2281)], 'heron', 'reachable.host')
     # replace creation of a KazooClient
     self.mock_kazoo = ZkStateManagerTest.MockKazooClient()
     self.opened_host_ports = []
@@ -65,7 +65,7 @@ class ZkStateManagerTest(unittest.TestCase):
       return True
     self.statemanager.is_host_port_reachable = connection_check
     self.statemanager.start()
-    self.assertEqual('localhost:2181,localhost:2281',self.opened_host_ports[0])
+    self.assertEqual('127.0.0.1:2181,127.0.0.1:2281',self.opened_host_ports[0])
 
   def test_start_opens_proxy_if_no_connection(self):
     def connection_check():
