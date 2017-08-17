@@ -261,8 +261,7 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   const sp_string& dpath, const sp_string& tmaster_host, sp_int32& tmaster_port,
                   sp_int32& tmaster_controller_port, sp_int32 ckptmgr_port) {
   ss = new EventLoopImpl();
-  tmaster =
-      new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
+  tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, 0,
                                   tmaster_port + 3, ckptmgr_port,
                                   metrics_sinks_config_filename, LOCALHOST, ss);
