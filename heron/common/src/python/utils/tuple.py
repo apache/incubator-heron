@@ -17,7 +17,7 @@ import time
 import random
 
 from collections import namedtuple
-from heron.api.src.python.tuple import Tuple
+from heronpy.tuple import Tuple
 
 HeronTuple = namedtuple('Tuple', Tuple._fields + ('creation_time', 'roots'))
 """Internal manifestation of the Heron Tuple

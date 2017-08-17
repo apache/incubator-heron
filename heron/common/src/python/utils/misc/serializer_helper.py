@@ -13,9 +13,9 @@
 # limitations under the License.
 '''serializer_helper.py'''
 
-from heron.api.src.python.serializer import PythonSerializer
+from heronpy.serializer import PythonSerializer
 
-import heron.api.src.python.api_constants as constants
+import heronpy.api_constants as constants
 import heron.common.src.python.pex_loader as pex_loader
 
 class SerializerHelper(object):

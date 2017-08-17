@@ -14,14 +14,14 @@
 """module for join bolt: ReduceByKeyAndWindowBolt"""
 import collections
 
-from heron.api.src.python.stream import Stream
-from heron.api.src.python.bolt.window_bolt import SlidingWindowBolt
-from heron.api.src.python.custom_grouping import ICustomGrouping
-from heron.api.src.python.component.component_spec import GlobalStreamId
-from heron.api.src.python.stream import Grouping
+from heronpy.stream import Stream
+from heronpy.bolt.window_bolt import SlidingWindowBolt
+from heronpy.custom_grouping import ICustomGrouping
+from heronpy.component.component_spec import GlobalStreamId
+from heronpy.stream import Grouping
 
-from heron.dsl.src.python.streamlet import Streamlet, TimeWindow
-from heron.dsl.src.python.operation import OperationType
+from heronpy.dsl.streamlet import Streamlet, TimeWindow
+from heronpy.dsl.operation import OperationType
 
 # pylint: disable=unused-argument
 class ReduceByKeyAndWindowBolt(SlidingWindowBolt):
@@ -90,7 +90,7 @@ class ReduceByKeyAndWindowStreamlet(Streamlet):
 
   def _calculate_inputs(self):
     return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-            Grouping.custom("heron.dsl.src.python.reducebykeyandwindowbolt.ReduceGrouping")}
+            Grouping.custom("heronpy.dsl.reducebykeyandwindowbolt.ReduceGrouping")}
 
   def _calculate_stage_name(self, existing_stage_names):
     funcname = "reducebykeyandwindow-" + self._reduce_function.__name__

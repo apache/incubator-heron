@@ -18,7 +18,7 @@ written in Python.
 """
 
 from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
-from heron.api.src.python.serializer import PythonSerializer
+from heronpy.serializer import PythonSerializer
 
 # pylint: disable=dangerous-default-value
 # pylint: disable=redefined-builtin

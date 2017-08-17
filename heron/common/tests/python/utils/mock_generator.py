@@ -19,9 +19,9 @@
 import random
 from mock import patch
 
-from heron.api.src.python.task_hook import ITaskHook
-from heron.api.src.python.custom_grouping import ICustomGrouping
-from heron.api.src.python.serializer import PythonSerializer
+from heronpy.task_hook import ITaskHook
+from heronpy.custom_grouping import ICustomGrouping
+from heronpy.serializer import PythonSerializer
 from heron.common.src.python.utils.metrics import MetricsCollector
 from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
                                                 HeronCommunicator)

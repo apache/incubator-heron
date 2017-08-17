@@ -15,9 +15,9 @@
 from collections import namedtuple
 from abc import abstractmethod
 
-from heron.api.src.python.topology import TopologyBuilder
+from heronpy.topology import TopologyBuilder
 
-from heron.dsl.src.python.operation import OperationType
+from heronpy.dsl.operation import OperationType
 
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
@@ -48,7 +48,7 @@ class Streamlet(object):
   def map(self, map_function, stage_name=None, parallelism=None):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.
     """
-    from heron.dsl.src.python.mapbolt import MapStreamlet
+    from heronpy.dsl.mapbolt import MapStreamlet
     return MapStreamlet(map_function, parents=[self], stage_name=stage_name,
                         parallelism=parallelism)
 
@@ -56,34 +56,34 @@ class Streamlet(object):
     """Return a new Streamlet by applying map_function to each element of this Streamlet
        and flattening the result
     """
-    from heron.dsl.src.python.flatmapbolt import FlatMapStreamlet
+    from heronpy.dsl.flatmapbolt import FlatMapStreamlet
     return FlatMapStreamlet(flatmap_function, parents=[self], stage_name=stage_name,
                             parallelism=parallelism)
 
   def filter(self, filter_function, stage_name=None, parallelism=None):
     """Return a new Streamlet containing only the elements that satisfy filter_function
     """
-    from heron.dsl.src.python.filterbolt import FilterStreamlet
+    from heronpy.dsl.filterbolt import FilterStreamlet
     return FilterStreamlet(filter_function, parents=[self], stage_name=stage_name,
                            parallelism=parallelism)
 
   def sample(self, sample_fraction, stage_name=None, parallelism=None):
     """Return a new Streamlet containing only sample_fraction fraction of elements
     """
-    from heron.dsl.src.python.samplebolt import SampleStreamlet
+    from heronpy.dsl.samplebolt import SampleStreamlet
     return SampleStreamlet(sample_fraction, parents=[self], stage_name=stage_name,
                            parallelism=parallelism)
 
   def repartition(self, parallelism, stage_name=None):
     """Return a new Streamlet with new parallelism level
     """
-    from heron.dsl.src.python.repartitionbolt import RepartitionStreamlet
+    from heronpy.dsl.repartitionbolt import RepartitionStreamlet
     return RepartitionStreamlet(parallelism, parents=[self], stage_name=stage_name)
 
   def join(self, join_streamlet, time_window, stage_name=None, parallelism=None):
     """Return a new Streamlet by joining join_streamlet with this streamlet
     """
-    from heron.dsl.src.python.joinbolt import JoinStreamlet
+    from heronpy.dsl.joinbolt import JoinStreamlet
     return JoinStreamlet(time_window, parents=[self, join_streamlet],
                          operation=OperationType.Join,
                          stage_name=stage_name, parallelism=parallelism)
@@ -92,7 +92,7 @@ class Streamlet(object):
     """A short cut for reduce_by_key_and_window with parallelism of 1
        over the time_window and then reduced using the reduce_function
     """
-    from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
+    from heronpy.dsl.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
     return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
                                          parents=[self],
                                          stage_name=stage_name, parallelism=1)
@@ -102,7 +102,7 @@ class Streamlet(object):
     """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
        over the time_window and then reduced using the reduce_function
     """
-    from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
+    from heronpy.dsl.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
     return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
                                          parents=[self],
                                          stage_name=stage_name, parallelism=parallelism)

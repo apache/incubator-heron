@@ -14,8 +14,8 @@
 '''fixedlinesspout.py: module that implements a very simple Spout that emits
    a bunch of fixed lines'''
 
-from heron.api.src.python.stream import Stream
-from heron.api.src.python.spout.spout import Spout
+from heronpy.stream import Stream
+from heronpy.spout.spout import Spout
 
 class FixedLinesSpout(Spout):
   """FixedLinesSpout: Generates a line from a set of static lines again and again

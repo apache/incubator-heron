@@ -15,8 +15,8 @@
 
 from itertools import cycle
 from collections import Counter
-from heron.api.src.python.spout.spout import Spout
-from heron.api.src.python.state.stateful_component import StatefulComponent
+from heronpy.spout.spout import Spout
+from heronpy.state.stateful_component import StatefulComponent
 
 class StatefulWordSpout(Spout, StatefulComponent):
   """StatefulWordSpout: emits a set of words repeatedly"""

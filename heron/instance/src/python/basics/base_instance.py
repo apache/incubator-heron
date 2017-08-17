@@ -17,9 +17,9 @@ import logging
 import traceback
 from abc import abstractmethod
 
-import heron.api.src.python.global_metrics as global_metrics
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.stateful_component import StatefulComponent
+import heronpy.global_metrics as global_metrics
+import heronpy.api_constants as api_constants
+from heronpy.state.stateful_component import StatefulComponent
 
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log

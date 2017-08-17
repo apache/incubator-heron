@@ -15,7 +15,7 @@
 import gc
 import psutil
 import traceback
-from heron.api.src.python.metrics import AssignableMetrics, MultiAssignableMetrics
+from heronpy.metrics import AssignableMetrics, MultiAssignableMetrics
 from .metrics_helper import BaseMetricsHelper
 import heron.common.src.python.system_constants as constants
 from heron.common.src.python.config import system_config

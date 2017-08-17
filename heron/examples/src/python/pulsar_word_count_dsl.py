@@ -14,7 +14,7 @@
 '''Example WordCountTopology'''
 import sys
 
-from heron.dsl.src.python.streamlet import TimeWindow
+from heronpy.dsl.streamlet import TimeWindow
 from heron.connectors.pulsar.src.python.pulsarstreamlet import PulsarStreamlet
 
 if __name__ == '__main__':

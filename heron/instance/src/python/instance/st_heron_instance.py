@@ -20,8 +20,8 @@ import traceback
 import signal
 import yaml
 
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.state import HashMapState
+import heronpy.api_constants as api_constants
+from heronpy.state.state import HashMapState
 
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
