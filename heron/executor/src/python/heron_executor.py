@@ -892,6 +892,12 @@ def main():
   # PEX_ROOT shell environment before forking the processes
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
+  # Refer to https://gperftools.github.io/gperftools/heapprofile.html
+  # for details of settings of gperftools heap profiler
+  shell_env["HEAPPROFILE"] = "stmgr.hprof"
+  shell_env["HEAP_PROFILE_ALLOCATION_INTERVAL"] = "0"
+  shell_env["HEAP_PROFILE_INUSE_INTERVAL"] = "0"
+  shell_env["HEAPPROFILESIGNAL"] = str(signal.SIGUSR1)
 
   # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)
