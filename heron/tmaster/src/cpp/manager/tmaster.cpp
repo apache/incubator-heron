@@ -84,8 +84,6 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
       mMetricsMgrPort, metricsExportIntervalSec, eventLoop_);
-  mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
-                           "0");  // MM expects task_id, so just giving 0 for tmaster.
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
@@ -107,7 +105,10 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
 
   master_establish_attempts_ = 0;
 
+  // start servers to get the actual ports before `tmaster_location_` related operation
   StartServers();
+  mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
+                           "0");  // MM expects task_id, so just giving 0 for tmaster.
 
   tmaster_location_ = new proto::tmaster::TMasterLocation();
   tmaster_location_->set_topology_name(_topology_name);
@@ -566,53 +567,6 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
       stateful_controller_->RegisterNewPhysicalPlan(*current_pplan_);
     }
   }
-
-  // Now that we have our state all setup, its time to start accepting requests
-  // Port for the stmgrs to connect to
-  NetworkOptions master_options;
-  master_options.set_host(myhost_name_);
-  master_options.set_port(master_port_);
-  master_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
-                                         ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
-                                     1_MB);
-  master_options.set_socket_family(PF_INET);
-  master_ = new TMasterServer(eventLoop_, master_options, metrics_collector_, this);
-
-  sp_int32 retval = master_->Start();
-  if (retval != SP_OK) {
-    LOG(FATAL) << "Failed to start TMaster Master Server with rcode: " << retval;
-  }
-
-  // Port for the scheduler to connect to
-  NetworkOptions controller_options;
-  controller_options.set_host(myhost_name_);
-  controller_options.set_port(tmaster_controller_port_);
-  controller_options.set_max_packet_size(
-      config::HeronInternalsConfigReader::Instance()
-          ->GetHeronTmasterNetworkControllerOptionsMaximumPacketMb() *
-      1_MB);
-  controller_options.set_socket_family(PF_INET);
-  tmaster_controller_ = new TController(eventLoop_, controller_options, this);
-
-  retval = tmaster_controller_->Start();
-  if (retval != SP_OK) {
-    LOG(FATAL) << "Failed to start TMaster Controller Server with rcode: " << retval;
-  }
-
-  // Http port for stat queries
-  NetworkOptions stats_options;
-  if (config::HeronInternalsConfigReader::Instance()
-          ->GetHeronTmasterMetricsNetworkBindAllInterfaces()) {
-    stats_options.set_host("0.0.0.0");
-  } else {
-    stats_options.set_host(myhost_name_);
-  }
-  stats_options.set_port(stats_port_);
-  stats_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
-                                        ->GetHeronTmasterNetworkStatsOptionsMaximumPacketMb() *
-                                    1_MB);
-  stats_options.set_socket_family(PF_INET);
-  stats_ = new StatsInterface(eventLoop_, stats_options, metrics_collector_, this);
 }
 
 void TMaster::ActivateTopology(VCallback<proto::system::StatusCode> cb) {

@@ -258,8 +258,7 @@ void StartServer(EventLoopImpl* ss) {
 void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
-                  const sp_string& dpath, const std::vector<sp_string>& stmgrs_id_list,
-                  const sp_string& tmaster_host, sp_int32& tmaster_port,
+                  const sp_string& dpath, const sp_string& tmaster_host, sp_int32& tmaster_port,
                   sp_int32& tmaster_controller_port, sp_int32 ckptmgr_port) {
   ss = new EventLoopImpl();
   tmaster =
@@ -506,8 +505,8 @@ TEST(StMgr, test_pplan_distribute) {
                                     common.num_stmgrs_);
   // Start the tmaster etc.
   StartTMaster(common);
-  std::cout << "tmaster master port " << common.tmaster_port_ << std::endl;
-  std::cout << "tmaster controller port " << common.tmaster_controller_port_ << std::endl;
+  LOG(INFO) << "tmaster master port " << common.tmaster_port_ << std::endl;
+  LOG(INFO) << "tmaster controller port " << common.tmaster_controller_port_ << std::endl;
 
   // Distribute workers across stmgrs
   DistributeWorkersAcrossStmgrs(common);
@@ -555,8 +554,8 @@ TEST(StMgr, test_activate_deactivate) {
                                     common.num_stmgrs_);
   // Start the tmaster etc.
   StartTMaster(common);
-  std::cout << "tmaster master port " << common.tmaster_port_ << std::endl;
-  std::cout << "tmaster controller port " << common.tmaster_controller_port_ << std::endl;
+  LOG(INFO) << "tmaster master port " << common.tmaster_port_ << std::endl;
+  LOG(INFO) << "tmaster controller port " << common.tmaster_controller_port_ << std::endl;
 
   // Distribute workers across stmgrs
   DistributeWorkersAcrossStmgrs(common);
