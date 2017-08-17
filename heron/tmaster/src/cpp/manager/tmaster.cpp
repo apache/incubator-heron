@@ -210,7 +210,7 @@ const NetworkOptions& TMaster::getMasterOptions() const {
   return master_->get_serveroptions();
 }
 const NetworkOptions& TMaster::getControllerOptions() const {
-  return controller_->get_serveroptions();
+  return tmaster_controller_->get_serveroptions();
 }
 const NetworkOptions& TMaster::getStatsOptions() const {
   return stats_->get_serveroptions();
@@ -238,19 +238,19 @@ void TMaster::StartServers() {
   // Port for the scheduler to connect to
   NetworkOptions controller_options;
   controller_options.set_host(myhost_name_);
-  controller_options.set_port(controller_port_);
+  controller_options.set_port(tmaster_controller_port_);
   controller_options.set_max_packet_size(
       config::HeronInternalsConfigReader::Instance()
           ->GetHeronTmasterNetworkControllerOptionsMaximumPacketMb() *
       1_MB);
   controller_options.set_socket_family(PF_INET);
-  controller_ = new TController(eventLoop_, controller_options, this);
+  tmaster_controller_ = new TController(eventLoop_, controller_options, this);
 
-  retval = controller_->Start();
+  retval = tmaster_controller_->Start();
   if (retval != SP_OK) {
     LOG(FATAL) << "Failed to start TMaster Controller Server with rcode: " << retval;
   } else {
-    controller_port_ = controller_->get_serveroptions().get_port();
+    tmaster_controller_port_ =   tmaster_controller_->get_serveroptions().get_port();
   }
 
   // Http port for stat queries
