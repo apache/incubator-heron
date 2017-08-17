@@ -51,7 +51,7 @@ sp_int32 HTTPServer::Start() {
   if (retval != nullptr) {
     // record the successfully bound hostport
     hostports_.push_back(std::make_pair(host, port));
-    // fetch the true port
+    // fetch the actual port
     if (0 == port) {
       evutil_socket_t fd = evhttp_bound_socket_get_fd(retval);
       struct sockaddr_storage ss;

@@ -217,8 +217,6 @@ const NetworkOptions& TMaster::getStatsOptions() const {
 }
 
 void TMaster::StartServers() {
-  // Now that we have our state all setup, its time to start accepting requests
-  // Port for the stmgrs to connect to
   NetworkOptions master_options;
   master_options.set_host(myhost_name_);
   master_options.set_port(master_port_);
