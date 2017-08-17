@@ -2,11 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "glog"
-package_version = "0.3.4"
+pkg_name = "glog"
+pkg_version = "0.3.4"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
 
 include_files = [
     "include/glog/log_severity.h",

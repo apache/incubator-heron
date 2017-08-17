@@ -6250,6 +6250,7 @@ def ProcessFile(filename, vlevel, extra_check_functions=None):
     bazel_gen_files = set([ 
         "external/local_config_cc/libtool",
         "external/local_config_cc/make_hashed_objlist.py", 
+        "external/local_config_cc/wrapped_ar",
         "external/local_config_cc/wrapped_clang",
         "external/local_config_cc/xcrunwrapper.sh",
     ])

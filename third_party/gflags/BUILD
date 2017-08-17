@@ -2,11 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "gflags"
-package_version = "2.0"
+pkg_name = "gflags"
+pkg_version = "2.0"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
 
 include_files = [
     "include/gflags/gflags.h",

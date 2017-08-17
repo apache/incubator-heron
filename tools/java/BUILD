@@ -8,7 +8,7 @@ java_toolchain(
     encoding = "UTF-8",
     extclasspath = ["@bazel_tools//tools/jdk:extdir"],
     forcibly_disable_header_compilation = 0,
-    genclass = ["@bazel_tools//tools/jdk:GenClass_deploy.jar"],
+    genclass = ["@bazel_tools//tools/jdk:genclass"],
     header_compiler = ["@bazel_tools//tools/jdk:turbine"],
     ijar = ["@bazel_tools//tools/jdk:ijar"],
     javabuilder = ["@bazel_tools//tools/jdk:javabuilder"],
@@ -18,7 +18,7 @@ java_toolchain(
         "-Xlint:all",
         "-Werror",
     ],
-    singlejar = ["@bazel_tools//tools/jdk:SingleJar_deploy.jar"],
+    singlejar = ["@bazel_tools//tools/jdk:singlejar"],
     source_version = "8",
     target_version = "8",
 )
