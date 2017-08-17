@@ -112,7 +112,7 @@ def get_mock_topology(id="topology_id", name="topology_name", state=1, spouts=[]
 
   return topology
 
-def get_mock_stmgr(id="Stmgr_id", host="localhost", port=9999, endpoint="hello"):
+def get_mock_stmgr(id="Stmgr_id", host="127.0.0.1", port=9999, endpoint="hello"):
   """Returns a mock protobuf StMgr object from physical_plan_pb2"""
   stmgr = physical_plan_pb2.StMgr()
   stmgr.id = id

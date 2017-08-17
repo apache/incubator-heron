@@ -211,7 +211,7 @@ public class MetricsCacheMetricsProviderTest {
 
   private MetricsCacheMetricsProvider createMetricsProviderSpy() {
     MetricsCacheMetricsProvider metricsProvider
-        = new MetricsCacheMetricsProvider("localhost");
+        = new MetricsCacheMetricsProvider("127.0.0.1");
 
     MetricsCacheMetricsProvider spyMetricsProvider = spy(metricsProvider);
     spyMetricsProvider.setClock(new TestClock(70000));
