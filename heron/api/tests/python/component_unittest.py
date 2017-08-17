@@ -16,8 +16,8 @@
 # pylint: disable=protected-access
 import unittest
 
-from heron.api.src.python.component.component_spec import HeronComponentSpec, GlobalStreamId
-from heron.api.src.python.stream import Grouping, Stream
+from heronpy.component.component_spec import HeronComponentSpec, GlobalStreamId
+from heronpy.stream import Grouping, Stream
 
 class ComponentSpecTest(unittest.TestCase):
   def test_sanitize_args(self):

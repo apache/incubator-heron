@@ -17,10 +17,10 @@
 import os
 import unittest
 
-from heron.api.src.python.serializer import default_serializer
-from heron.api.src.python.topology import Topology, TopologyBuilder, TopologyType
-from heron.api.src.python.stream import Stream, Grouping
-from heron.api.src.python.component.component_spec import HeronComponentSpec
+from heronpy.serializer import default_serializer
+from heronpy.topology import Topology, TopologyBuilder, TopologyType
+from heronpy.stream import Stream, Grouping
+from heronpy.component.component_spec import HeronComponentSpec
 from heron.proto import topology_pb2
 
 # required environment variable

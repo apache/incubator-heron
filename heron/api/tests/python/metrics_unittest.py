@@ -16,8 +16,8 @@
 
 import unittest
 
-from heron.api.src.python.metrics import (CountMetric, MultiCountMetric,
-                                          MeanReducedMetric, MultiMeanReducedMetric)
+from heronpy.metrics import (CountMetric, MultiCountMetric,
+                             MeanReducedMetric, MultiMeanReducedMetric)
 
 class MetricsTest(unittest.TestCase):
   def test_count_metric(self):

@@ -13,7 +13,7 @@
 # limitations under the License.
 '''bolt.py: API for defining bolt in python'''
 from abc import abstractmethod
-from heron.api.src.python.spout.base_spout import BaseSpout
+from heronpy.spout.base_spout import BaseSpout
 
 class Spout(BaseSpout):
   """API for defining a spout for Heron in Python

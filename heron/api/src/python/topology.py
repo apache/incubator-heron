@@ -18,11 +18,11 @@ topology.py: module for defining Heron topologies in Python
 import os
 import uuid
 
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.serializer import default_serializer
+import heronpy.api_constants as api_constants
+from heronpy.serializer import default_serializer
 from heron.proto import topology_pb2
 
-from heron.api.src.python.component.component_spec import HeronComponentSpec
+from heronpy.component.component_spec import HeronComponentSpec
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""
@@ -267,7 +267,7 @@ class Topology(object):
   **Example**: A sample `WordCountTopology` can be defined as follows:
 
     #!python
-    from heron.api.src.python import Topology
+    from heronpy import Topology
     from heron.examples.src.python import WordSpout, CountBolt
 
     class WordCount(Topology):
@@ -296,7 +296,7 @@ class Topology(object):
       f.write(cls.protobuf_topology.SerializeToString())
 
 class TopologyBuilder(object):
-  """Builder for heron.api.src.python topology
+  """Builder for heronpy topology
 
   This class dynamically creates a subclass of `Topology` with given spouts and
   bolts and writes its definition files when `build_and_submit()` is called.
@@ -305,7 +305,7 @@ class TopologyBuilder(object):
 
     #!python
     import sys
-    from heron.api.src.python import TopologyBuilder
+    from heronpy import TopologyBuilder
     from heron.examples.spout import WordSpout
     from heron.examples.bolt import CountBolt
 

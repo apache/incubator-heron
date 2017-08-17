@@ -29,7 +29,7 @@
 It serves the same functionality as GlobalMetrics.java
 """
 import threading
-from heron.api.src.python.metrics import MultiCountMetric
+from heronpy.metrics import MultiCountMetric
 
 metricsContainer = MultiCountMetric()
 registered = False

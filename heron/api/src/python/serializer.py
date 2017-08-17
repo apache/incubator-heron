@@ -19,7 +19,7 @@ try:
 except:
   import pickle
 
-import heron.api.src.python.cloudpickle as cloudpickle
+import heronpy.cloudpickle as cloudpickle
 
 class IHeronSerializer(object):
   """Serializer interface for Heron"""

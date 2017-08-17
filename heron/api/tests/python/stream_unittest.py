@@ -16,8 +16,8 @@
 # pylint: disable=protected-access
 import unittest
 
-from heron.api.src.python.stream import Stream, Grouping
-from heron.api.src.python.custom_grouping import ICustomGrouping
+from heronpy.stream import Stream, Grouping
+from heronpy.custom_grouping import ICustomGrouping
 from heron.proto import topology_pb2
 
 class DummyCustomGrouping(ICustomGrouping):

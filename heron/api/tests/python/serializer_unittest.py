@@ -16,7 +16,7 @@
 
 import unittest
 
-from heron.api.src.python.serializer import PythonSerializer
+from heronpy.serializer import PythonSerializer
 
 prim_list = [1000, -234, 0.00023, "string",
              ["abc", "def", "ghi"], True, False,

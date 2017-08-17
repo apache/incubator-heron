@@ -15,8 +15,8 @@
 
 import collections
 
-from heron.api.src.python.serializer import default_serializer
-from heron.api.src.python.custom_grouping import ICustomGrouping
+from heronpy.serializer import default_serializer
+from heronpy.custom_grouping import ICustomGrouping
 from heron.proto import topology_pb2
 
 class Stream(object):
