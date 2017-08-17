@@ -17,6 +17,8 @@
 #define MEM_POOL_H
 
 #include <google/protobuf/message.h>
+#include <utility>
+#include <string>
 #include <vector>
 #include <unordered_map>
 #include <mutex>
@@ -70,6 +72,19 @@ class MemPool {
     }
   }
 
+  std::unordered_map<std::string, std::pair<int, int64_t>> stat() {
+    std::unordered_map<std::string, std::pair<int, int64_t>> stat;
+    for (auto it = mem_pool_map_.begin(); it != mem_pool_map_.end(); ++it) {
+      int64_t bytes_used = 0;
+      for (int i = 0; i < it->second.size(); i++) {
+        bytes_used += it->second[i]->SpaceUsed();
+      }
+      std::pair<int, int64_t> nums_and_bytes = std::make_pair(it->second.size(), bytes_used);
+      stat[it->first.name()] = nums_and_bytes;
+    }
+    return stat;
+  }
+
   void set_pool_max_number_of_messages(sp_int32 _pool_limit) {
     pool_limit_ = _pool_limit;
   }
@@ -99,6 +114,7 @@ void __global_protobuf_pool_release__(T* _m) {
 }
 
 void __global_protobuf_pool_set_pool_max_number_of_messages__(sp_int32 _pool_limit);
+std::unordered_map<std::string, std::pair<int, int64_t>> __global_protobuf_pool_stat__();
 
 #endif
 
