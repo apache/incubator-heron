@@ -85,5 +85,5 @@ class FlatMapStreamlet(Streamlet):
     if not callable(self._flatmap_function):
       raise RuntimeError("flatmap function must be callable")
     builder.add_bolt(self._stage_name, FlatMapBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={FlatMapBolt.FUNCTION : self._flatmap_function})

@@ -84,5 +84,5 @@ class SampleStreamlet(Streamlet):
     if self._sample_fraction > 1.0:
       raise RuntimeError("Sample Fraction has to be <= 1.0")
     builder.add_bolt(self._stage_name, SampleBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={SampleBolt.FRACTION : self._sample_fraction})

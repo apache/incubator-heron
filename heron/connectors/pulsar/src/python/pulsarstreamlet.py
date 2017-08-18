@@ -41,10 +41,6 @@ class PulsarStreamlet(Streamlet):
                            parallelism=parallelism, receive_timeout_ms=receive_timeout_ms,
                            input_schema=input_schema)
 
-  # pylint: disable=no-self-use
-  def _calculate_inputs(self):
-    return {}
-
   def _calculate_stage_name(self, existing_stage_names):
     index = 1
     stage_name = "pulsarspout-" + self._pulsar_topic_name

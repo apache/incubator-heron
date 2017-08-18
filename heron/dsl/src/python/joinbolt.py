@@ -94,6 +94,6 @@ class JoinStreamlet(Streamlet):
     if not isinstance(self._time_window, TimeWindow):
       raise RuntimeError("Join's time_window should be TimeWindow")
     builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={JoinBolt.WINDOWDURATION : self._time_window.duration,
                              JoinBolt.SLIDEINTERVAL : self._time_window.sliding_interval})
