@@ -20,7 +20,6 @@ from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet, TimeWindow
-from heron.dsl.src.python.operation import OperationType
 from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
@@ -78,9 +77,7 @@ class ReduceGrouping(ICustomGrouping):
 class ReduceByKeyAndWindowStreamlet(Streamlet):
   """ReduceByKeyAndWindowStreamlet"""
   def __init__(self, time_window, reduce_function, parents, stage_name=None, parallelism=None):
-    op = OperationType.ReduceByKeyAndWindow
     super(ReduceByKeyAndWindowStreamlet, self).__init__(parents=parents,
-                                                        operation=op,
                                                         stage_name=stage_name,
                                                         parallelism=parallelism)
     self._time_window = time_window
