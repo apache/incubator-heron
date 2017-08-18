@@ -32,6 +32,10 @@ class JoinBolt(SlidingWindowBolt, DslBoltBase):
   def _add(self, key, value, src_component, mymap):
     if not key in mymap:
       mymap[key] = (None, None)
+    # Join Output should be Key -> (V1, V2) where
+    # V1 is coming from the left stream and V2 coming
+    # from the right stream. In this case, _joined_component
+    # represents the right stream
     if src_component == self._joined_component:
       mymap[key][1] = value
     else:
