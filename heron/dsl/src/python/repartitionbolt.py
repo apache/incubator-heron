@@ -18,7 +18,6 @@ from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
 from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
@@ -49,7 +48,6 @@ class RepartitionStreamlet(Streamlet):
   """RepartitionStreamlet"""
   def __init__(self, parallelism, parents, stage_name=None):
     super(RepartitionStreamlet, self).__init__(parents=parents,
-                                               operation=OperationType.Repartition,
                                                stage_name=stage_name, parallelism=parallelism)
 
   # pylint: disable=no-self-use

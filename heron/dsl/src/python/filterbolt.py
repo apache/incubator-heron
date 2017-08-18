@@ -18,7 +18,6 @@ from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
 from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
@@ -56,7 +55,7 @@ class FilterBolt(Bolt, StatefulComponent, DslBoltBase):
 class FilterStreamlet(Streamlet):
   """FilterStreamlet"""
   def __init__(self, filter_function, parents, stage_name=None, parallelism=None):
-    super(FilterStreamlet, self).__init__(parents=parents, operation=OperationType.Filter,
+    super(FilterStreamlet, self).__init__(parents=parents,
                                           stage_name=stage_name, parallelism=parallelism)
     self._filter_function = filter_function
 

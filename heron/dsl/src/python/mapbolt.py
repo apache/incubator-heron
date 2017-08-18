@@ -18,7 +18,6 @@ from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
 from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
@@ -56,7 +55,7 @@ class MapBolt(Bolt, StatefulComponent, DslBoltBase):
 class MapStreamlet(Streamlet):
   """MapStreamlet"""
   def __init__(self, map_function, parents, stage_name=None, parallelism=None):
-    super(MapStreamlet, self).__init__(parents=parents, operation=OperationType.Map,
+    super(MapStreamlet, self).__init__(parents=parents,
                                        stage_name=stage_name, parallelism=parallelism)
     self._map_function = map_function
 
