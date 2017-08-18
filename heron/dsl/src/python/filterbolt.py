@@ -12,20 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for filter bolt: FilterBolt"""
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.state.stateful_component import StatefulComponent
 from heron.api.src.python.bolt.bolt import Bolt
 from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class FilterBolt(Bolt, StatefulComponent):
+class FilterBolt(Bolt, StatefulComponent, DslBoltBase):
   """FilterBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
   def init_state(self, stateful_state):
@@ -58,7 +55,7 @@ class FilterBolt(Bolt, StatefulComponent):
 class FilterStreamlet(Streamlet):
   """FilterStreamlet"""
   def __init__(self, filter_function, parents, stage_name=None, parallelism=None):
-    super(FilterStreamlet, self).__init__(parents=parents, operation=OperationType.Filter,
+    super(FilterStreamlet, self).__init__(parents=parents,
                                           stage_name=stage_name, parallelism=parallelism)
     self._filter_function = filter_function
 

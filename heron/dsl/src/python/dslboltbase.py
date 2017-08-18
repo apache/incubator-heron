@@ -11,18 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' consts.py '''
-import heron.tools.common.src.python.utils.config as common_config
+"""module for base dsl bolt: DslBoltBase"""
+from heron.api.src.python.stream import Stream
 
-# default parameter - address for the web to ui to listen on
-DEFAULT_ADDRESS = "0.0.0.0"
-
-# default parameter - port for the web to ui to listen on
-DEFAULT_PORT = 8889
-
-# default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "http://127.0.0.1:8888"
-
-DEFAULT_BASE_URL = ""
-
-VERSION = common_config.get_version_number(zipped_pex=True)
+class DslBoltBase(object):
+  """DslBoltBase"""
+  # output declarer
+  outputs = [Stream(fields=['_output_'], name='output')]

@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 package_name = "libevent"
-package_version = "2.0.21-stable"
+package_version = "2.1.8-stable"
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
@@ -39,6 +39,7 @@ include_files = [
     "include/event2/http_compat.h",
     "include/event2/rpc_compat.h",
     "include/event2/util.h",
+    "include/event2/visibility.h",
 ]
 
 lib_files = [

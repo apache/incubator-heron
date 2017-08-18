@@ -14,19 +14,16 @@
 """module for flat_map bolt: FlatMapBolt"""
 import collections
 from heron.api.src.python.bolt.bolt import Bolt
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.state.stateful_component import StatefulComponent
 from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class FlatMapBolt(Bolt, StatefulComponent):
+class FlatMapBolt(Bolt, StatefulComponent, DslBoltBase):
   """FlatMapBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
   def init_state(self, stateful_state):
@@ -64,7 +61,7 @@ class FlatMapBolt(Bolt, StatefulComponent):
 class FlatMapStreamlet(Streamlet):
   """FlatMapStreamlet"""
   def __init__(self, flatmap_function, parents, stage_name=None, parallelism=None):
-    super(FlatMapStreamlet, self).__init__(parents=parents, operation=OperationType.FlatMap,
+    super(FlatMapStreamlet, self).__init__(parents=parents,
                                            stage_name=stage_name, parallelism=parallelism)
     self._flatmap_function = flatmap_function
 

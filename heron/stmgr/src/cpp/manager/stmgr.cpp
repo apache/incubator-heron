@@ -99,8 +99,7 @@ void StMgr::Init() {
       ->GetHeronStreammgrMempoolMaxMessageNumber());
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
-      stmgr_host_, stmgr_port_, metricsmgr_port_, "__stmgr__", stmgr_id_,
-      metrics_export_interval_sec, eventLoop_);
+      metricsmgr_port_, metrics_export_interval_sec, eventLoop_);
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
   metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
   restore_initiated_metrics_ = new heron::common::CountMetric();
@@ -127,9 +126,6 @@ void StMgr::Init() {
   // Create and Register Tuple cache
   CreateTupleCache();
 
-  FetchTMasterLocation();
-  FetchMetricsCacheLocation();
-
   CHECK_GT(
       eventLoop_->registerTimer(
           [this](EventLoop::Status status) { this->CheckTMasterLocation(status); }, false,
@@ -140,8 +136,12 @@ void StMgr::Init() {
   // Instantiate neighbour calculator. Required by stmgr server
   neighbour_calculator_ = new NeighbourCalculator();
 
-  // Create and start StmgrServer
+  // Create and start StmgrServer. The actual stmgr server port is assgined.
   StartStmgrServer();
+  // FetchTMasterLocation() triggers the StMgr::CreateTMasterClient() where the TMasterClient
+  // constructor needs actual Stmgr port, thus put FetchTMasterLocation() after StartStmgrServer()
+  FetchTMasterLocation();
+  FetchMetricsCacheLocation();
 
   if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Now start the stateful restorer
@@ -201,6 +201,10 @@ StMgr::~StMgr() {
 }
 
 bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
+
+const NetworkOptions&  StMgr::GetServerNetworkOptions() const {
+  return server_->get_serveroptions();
+}
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
   if (!tmaster_client_) {
@@ -266,12 +270,16 @@ void StMgr::StartStmgrServer() {
 
   // start the server
   CHECK_EQ(server_->Start(), 0);
+  stmgr_port_ = server_->get_serveroptions().get_port();
+
+  // metrics_manager_client_ picks the actual stmgr_port_ and starts
+  metrics_manager_client_->Start(stmgr_host_, stmgr_port_, "__stmgr__", stmgr_id_);
 }
 
 void StMgr::CreateCheckpointMgrClient() {
   LOG(INFO) << "Creating CheckpointMgr Client at " << stmgr_host_ << ":" << ckptmgr_port_;
   NetworkOptions client_options;
-  client_options.set_host("localhost");
+  client_options.set_host("127.0.0.1");
   client_options.set_port(ckptmgr_port_);
   client_options.set_socket_family(PF_INET);
   client_options.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);

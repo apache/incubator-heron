@@ -83,9 +83,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
-      myhost_name_, master_port_, mMetricsMgrPort, "__tmaster__",
-      "0",  // MM expects task_id, so just giving 0 for tmaster.
-      metricsExportIntervalSec, eventLoop_);
+      mMetricsMgrPort, metricsExportIntervalSec, eventLoop_);
+  mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
+                           "0");  // MM expects task_id, so just giving 0 for tmaster.
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
@@ -321,7 +321,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
       == config::TopologyConfigVars::EXACTLY_ONCE) {
     // Establish connection to ckptmgr
     NetworkOptions ckpt_options;
-    ckpt_options.set_host("localhost");
+    ckpt_options.set_host("127.0.0.1");
     ckpt_options.set_port(ckptmgr_port_);
     ckpt_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
                                            ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *

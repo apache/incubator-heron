@@ -28,16 +28,23 @@ java_library(
 )
 
 java_binary(
-    name = "api",
+    name = "api-unshaded",
     srcs = glob(["com/twitter/heron/api/**/*.java"]),
     deps = api_deps_files,
 )
 
 jarjar_binary(
-    name = "heron-api",
-    src = ":api_deploy.jar",
+    name = "api-shaded",
+    src = ":api-unshaded_deploy.jar",
     shade = "shade.conf",
     deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
+)
+
+genrule(
+    name = "heron-api",
+    srcs = [":api-shaded"],
+    outs = ["heron-api.jar"],
+    cmd = "cp $< $@",
 )
 
 java_library(

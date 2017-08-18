@@ -91,7 +91,7 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
  * <li>config directory: <code> -p ~/.heron/conf</code>, required if mode is local
  * <li>metrics type: <code>-s f.q.class.name</code>,
  * default: <code>com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider</code>
- * <li>metrics source: <code>-t http://host:port</code>, default: <code>http://localhost:8888</code>
+ * <li>metrics source: <code>-t http://host:port</code>, default: <code>http://127.0.0.1:8888</code>
  * <li>enable verbose mode: <code> -v</code>
  * </ul>
  */
@@ -166,7 +166,6 @@ public class HealthManager {
       mode = HealthManagerMode.valueOf(getOptionValue(cmd, CliArgs.MODE));
     }
 
-    LOG.info("Health manager mode: " + mode);
     Config config;
     switch (mode) {
       case cluster:

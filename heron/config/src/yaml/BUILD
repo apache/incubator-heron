@@ -8,6 +8,11 @@ filegroup(
 )
 
 filegroup(
+    name = "test-config-metrics-sinks-yaml",
+    srcs = ["conf/test/test_metrics_sinks.yaml"],
+)
+
+filegroup(
     name = "conf-yaml",
     srcs = glob(["conf/**/*.yaml"]),
 )

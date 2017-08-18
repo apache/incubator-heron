@@ -14,14 +14,13 @@
 '''fixedlinesspout.py: module that implements a very simple Spout that emits
    a bunch of fixed lines'''
 
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.spout.spout import Spout
 
-class FixedLinesSpout(Spout):
+from heron.dsl.src.python.dslboltbase import DslBoltBase
+
+class FixedLinesSpout(Spout, DslBoltBase):
   """FixedLinesSpout: Generates a line from a set of static lines again and again
   """
-  outputs = [Stream(fields=['_output_'], name='output')]
-
   # pylint: disable=unused-argument
   def initialize(self, config, context):
     """Implements FixedLines Spout's initialize method"""

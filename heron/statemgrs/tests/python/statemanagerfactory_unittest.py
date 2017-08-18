@@ -23,13 +23,13 @@ class StateManagerFacotryTest(unittest.TestCase):
   def test_all_zk_supports_comma_separated_hostports(self):
     """Verify that a comma separated list of host ports is ok"""
     conf = Config()
-    conf.set_state_locations([{'type':'zookeeper', 'name':'zk', 'hostport':'localhost:2181,localhost:2281',
-                              'rootpath':'/heron', 'tunnelhost':'localhost'}])
+    conf.set_state_locations([{'type':'zookeeper', 'name':'zk', 'hostport':'127.0.0.1:2181,127.0.0.1:2281',
+                              'rootpath':'/heron', 'tunnelhost':'127.0.0.1'}])
     statemanagers = statemanagerfactory.get_all_zk_state_managers(conf)
     # 1 state_location should result in 1 state manager
     self.assertEquals(1, len(statemanagers))
 
     statemanager = statemanagers[0]
     # statemanager.hostportlist should contain both host port pairs
-    self.assertTrue(('localhost', 2181) in statemanager.hostportlist)
-    self.assertTrue(('localhost', 2281) in statemanager.hostportlist)
+    self.assertTrue(('127.0.0.1', 2181) in statemanager.hostportlist)
+    self.assertTrue(('127.0.0.1', 2281) in statemanager.hostportlist)

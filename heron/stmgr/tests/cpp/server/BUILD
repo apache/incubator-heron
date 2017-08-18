@@ -21,7 +21,10 @@ cc_test(
         "//heron/tmaster/src/cpp:tmaster-cxx",
         "//third_party/gtest:gtest-cxx",
     ],
-    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
+    data = [
+        "//heron/config/src/yaml:test-config-internals-yaml",
+        "//heron/config/src/yaml:test-config-metrics-sinks-yaml",
+    ],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",

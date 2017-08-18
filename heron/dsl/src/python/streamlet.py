@@ -17,7 +17,7 @@ from abc import abstractmethod
 
 from heron.api.src.python.topology import TopologyBuilder
 
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
@@ -28,22 +28,17 @@ class Streamlet(object):
      csv files, HDFS files), or for that matter any other source. They are also created by
      transforming existing Streamlets using operations such as map/flat_map, etc.
   """
-  def __init__(self, parents, operation=None, stage_name=None,
+  def __init__(self, parents, stage_name=None,
                parallelism=None, inputs=None):
     """
     """
-    if operation is None:
-      raise RuntimeError("Streamlet's operation cannot be None")
-    if not OperationType.valid(operation):
-      raise RuntimeError("Streamlet's operation must be of type OperationType")
     if not isinstance(parents, list):
       raise RuntimeError("Streamlet's parents have to be a list")
     self._parents = parents
-    self._operation = operation
     self._stage_name = stage_name
     self._parallelism = parallelism
     self._inputs = inputs
-    self._output = 'output'
+    self._output = DslBoltBase.outputs[0].stream_id
 
   def map(self, map_function, stage_name=None, parallelism=None):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.
@@ -85,7 +80,6 @@ class Streamlet(object):
     """
     from heron.dsl.src.python.joinbolt import JoinStreamlet
     return JoinStreamlet(time_window, parents=[self, join_streamlet],
-                         operation=OperationType.Join,
                          stage_name=stage_name, parallelism=parallelism)
 
   def reduce_by_window(self, time_window, reduce_function, stage_name=None):
