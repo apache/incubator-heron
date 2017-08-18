@@ -20,7 +20,8 @@ import pulsar
 
 import heron.api.src.python.api_constants as api_constants
 from heron.api.src.python.spout.spout import Spout
-from heron.api.src.python.stream import Stream
+
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 def GenerateLogConfContents(logFileName):
   return """
@@ -45,13 +46,11 @@ def GenerateLogConfig(context):
   flHandler.close()
   return flHandler.name
 
-class PulsarSpout(Spout):
+class PulsarSpout(Spout, DslBoltBase):
   """PulsarSpout: reads from a pulsar topic"""
 
   # pylint: disable=too-many-instance-attributes
   # pylint: disable=no-self-use
-
-  outputs = [Stream(fields=['_output_'], name='output')]
 
   def default_deserializer(self, msg):
     return [str(msg)]
