@@ -31,10 +31,6 @@ class FixedLinesStreamlet(Streamlet):
   def fixedLinesGenerator(stage_name=None, parallelism=None):
     return FixedLinesStreamlet(stage_name=stage_name, parallelism=parallelism)
 
-  # pylint: disable=no-self-use
-  def _calculate_inputs(self):
-    return {}
-
   def _calculate_stage_name(self, existing_stage_names):
     stagename = "fixedlines"
     if stagename not in existing_stage_names:

@@ -69,4 +69,4 @@ class RepartitionStreamlet(Streamlet):
 
   def _build_this(self, builder):
     builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
-                     inputs=self._inputs)
+                     inputs=self._calculate_inputs())

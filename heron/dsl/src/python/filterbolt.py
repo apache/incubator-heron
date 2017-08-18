@@ -79,5 +79,5 @@ class FilterStreamlet(Streamlet):
     if not callable(self._filter_function):
       raise RuntimeError("filter function must be callable")
     builder.add_bolt(self._stage_name, FilterBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={FilterBolt.FUNCTION : self._filter_function})

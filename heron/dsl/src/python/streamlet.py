@@ -28,8 +28,7 @@ class Streamlet(object):
      csv files, HDFS files), or for that matter any other source. They are also created by
      transforming existing Streamlets using operations such as map/flat_map, etc.
   """
-  def __init__(self, parents, stage_name=None,
-               parallelism=None, inputs=None):
+  def __init__(self, parents, stage_name=None, parallelism=None):
     """
     """
     if not isinstance(parents, list):
@@ -37,7 +36,6 @@ class Streamlet(object):
     self._parents = parents
     self._stage_name = stage_name
     self._parallelism = parallelism
-    self._inputs = inputs
     self._output = DslBoltBase.outputs[0].stream_id
 
   def map(self, map_function, stage_name=None, parallelism=None):
@@ -125,7 +123,6 @@ class Streamlet(object):
   def _build(self, bldr, stage_names):
     for parent in self._parents:
       parent._build(bldr, stage_names)
-    self._inputs = self._calculate_inputs()
     if self._parallelism is None:
       self._parallelism = self._calculate_parallelism()
     if self._stage_name is None:
@@ -155,13 +152,6 @@ class Streamlet(object):
       if parent._parallelism > parallelism:
         parallelism = parent._parallelism
     return parallelism
-
-  @abstractmethod
-  def _calculate_inputs(self):
-    """This is the method that's implemented by the operators to get the inputs for this streamlet
-    :return: The inputs as a dict
-    """
-    raise RuntimeError("Streamlet's calculate inputs not implemented")
 
   @abstractmethod
   def _calculate_stage_name(self, existing_stage_names):

@@ -79,5 +79,5 @@ class MapStreamlet(Streamlet):
     if not callable(self._map_function):
       raise RuntimeError("map function must be callable")
     builder.add_bolt(self._stage_name, MapBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={MapBolt.FUNCTION : self._map_function})
