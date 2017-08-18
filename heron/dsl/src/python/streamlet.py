@@ -18,6 +18,7 @@ from abc import abstractmethod
 from heron.api.src.python.topology import TopologyBuilder
 
 from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
@@ -43,7 +44,7 @@ class Streamlet(object):
     self._stage_name = stage_name
     self._parallelism = parallelism
     self._inputs = inputs
-    self._output = 'output'
+    self._output = DslBoltBase.outputs[0].stream_id
 
   def map(self, map_function, stage_name=None, parallelism=None):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.

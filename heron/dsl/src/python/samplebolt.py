@@ -16,19 +16,17 @@
    can do sampling of the data that it recieves and emit
    only sampled tuples"""
 from heron.api.src.python.bolt.bolt import Bolt
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.state.stateful_component import StatefulComponent
 from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
 from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class SampleBolt(Bolt, StatefulComponent):
+class SampleBolt(Bolt, StatefulComponent, DslBoltBase):
   """SampleBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   FRACTION = 'fraction'
 
   def init_state(self, stateful_state):
