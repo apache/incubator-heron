@@ -32,10 +32,6 @@ class TextFileStreamlet(Streamlet):
   def textFile(filepattern, stage_name=None, parallelism=None):
     return TextFileStreamlet(filepattern, stage_name=stage_name, parallelism=parallelism)
 
-  # pylint: disable=no-self-use
-  def _calculate_inputs(self):
-    return {}
-
   def _calculate_parallelism(self):
     return len(self._files)
 
