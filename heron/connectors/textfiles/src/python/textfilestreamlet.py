@@ -15,7 +15,6 @@
 import glob
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
 from heron.connectors.textfiles.src.python.textfilespout import TextFileSpout
 
 # pylint: disable=access-member-before-definition
@@ -24,7 +23,7 @@ class TextFileStreamlet(Streamlet):
   """A TextFileStreamlet is a list of text input files
   """
   def __init__(self, filepattern, stage_name=None, parallelism=None):
-    super(TextFileStreamlet, self).__init__(parents=[], operation=OperationType.Input,
+    super(TextFileStreamlet, self).__init__(parents=[],
                                             stage_name=stage_name,
                                             parallelism=parallelism)
     self._files = glob.glob(filepattern)
