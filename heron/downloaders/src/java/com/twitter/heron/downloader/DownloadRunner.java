@@ -24,7 +24,7 @@ public final class DownloadRunner {
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.err.println("Usage: downloader <topology-package-uri> <extract-destination>");
-      System.exit(1);
+      return;
     }
 
     final String uri = args[0];
