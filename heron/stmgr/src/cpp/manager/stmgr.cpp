@@ -636,8 +636,7 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
   // Note:- Process data before control
   // This is to make sure that anchored emits are sent out
   // before any acks/fails
-  //
-  LOG(INFO) << "WEEEEEEE SRC TASK ID: " << _src_task_id;
+
   if (_message->has_data()) {
     proto::system::HeronDataTupleSet* d = _message->mutable_data();
     std::pair<sp_string, sp_string> stream =

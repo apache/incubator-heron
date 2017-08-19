@@ -14,6 +14,8 @@
 
 package com.twitter.heron.instance;
 
+import java.util.logging.Logger;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
@@ -30,6 +32,8 @@ import com.twitter.heron.proto.system.HeronTuples;
  * In fact, when talking about to send out tuples, we mean we push them to the out queues.
  */
 public class OutgoingTupleCollection {
+
+  private static final Logger LOG = Logger.getLogger(OutgoingTupleCollection.class.getName());
   protected final String componentName;
   // We have just one outQueue responsible for both control tuples and data tuples
   private final Communicator<HeronTuples.HeronTupleSet> outQueue;
@@ -81,6 +85,9 @@ public class OutgoingTupleCollection {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);
+    if (tupleSizeInBytes > 8 * 1024 * 1024) {
+      LOG.info("Large tuple size!!!!: " + tupleSizeInBytes);
+    }
 
     currentDataTupleSizeInBytes += tupleSizeInBytes;
     totalDataEmittedInBytes += tupleSizeInBytes;
