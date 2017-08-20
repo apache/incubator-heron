@@ -37,7 +37,7 @@ public class WaitQueueDisparityDetectorTest {
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_DISPARITY_RATIO, 20)).thenReturn(15.0);
+    when(config.getConfig(CONF_DISPARITY_RATIO, 20.0)).thenReturn(15.0);
 
     ComponentMetrics compMetrics = new ComponentMetrics("bolt");
     compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BUFFER_SIZE.text(), 1501));

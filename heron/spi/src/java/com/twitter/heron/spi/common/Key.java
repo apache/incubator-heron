@@ -38,6 +38,7 @@ public enum Key {
   //keys for heron configuration files
   CLUSTER_YAML             ("heron.config.file.cluster.yaml",   "${HERON_CONF}/cluster.yaml"),
   CLIENT_YAML              ("heron.config.file.client.yaml",    "${HERON_CONF}/client.yaml"),
+  HEALTHMGR_YAML           ("heron.config.file.healthmgr.yaml", "${HERON_CONF}/healthmgr.yaml"),
   METRICS_YAML             ("heron.config.file.metrics.yaml",   "${HERON_CONF}/metrics_sinks.yaml"),
   PACKING_YAML             ("heron.config.file.packing.yaml",   "${HERON_CONF}/packing.yaml"),
   SCHEDULER_YAML           ("heron.config.file.scheduler.yaml", "${HERON_CONF}/scheduler.yaml"),
@@ -114,8 +115,12 @@ public enum Key {
   STATEFUL_STORAGE_CONF                    ("heron.statefulstorage.config", Type.MAP),
   STATEFUL_STORAGE_CUSTOM_CLASSPATH        ("heron.statefulstorage.custom.classpath", Type.STRING),
 
+  // keys for health manager
+  HEALTHMGR_MODE             ("heron.topology.healthmgr.mode", Type.STRING),
+
   //keys for config provided paths
   INSTANCE_CLASSPATH         ("heron.classpath.instance",             "${HERON_LIB}/instance/*"),
+  HEALTHMGR_CLASSPATH        ("heron.classpath.healthmgr",            "${HERON_LIB}/healthmgr/*"),
   METRICSMGR_CLASSPATH       ("heron.classpath.metrics.manager",      "${HERON_LIB}/metricsmgr/*"),
   METRICSCACHEMGR_CLASSPATH  ("heron.classpath.metricscache.manager", "${HERON_LIB}/metricscachemgr/*"),
   PACKING_CLASSPATH          ("heron.classpath.packing",              "${HERON_LIB}/packing/*"),
