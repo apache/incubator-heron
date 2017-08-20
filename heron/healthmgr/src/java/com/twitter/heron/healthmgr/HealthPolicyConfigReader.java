@@ -46,7 +46,9 @@ public class HealthPolicyConfigReader {
     HEALTH_POLICIES("heron.class.health.policies"),
     HEALTH_POLICY_CLASS("health.policy.class"),
     HEALTH_POLICY_INTERVAL("health.policy.interval.ms"),
-    CONF_SENSOR_DURATION_SUFFIX(".duration");
+    CONF_SENSOR_DURATION_SUFFIX(".duration"),
+    METRIC_SOURCE_TYPE("heron.healthmgr.metricsource.type"),
+    METRIC_SOURCE_URL("heron.healthmgr.metricsource.url");
 
     private String key;
 
