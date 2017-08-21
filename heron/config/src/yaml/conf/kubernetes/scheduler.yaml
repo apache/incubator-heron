@@ -7,6 +7,8 @@ heron.class.launcher:                        com.twitter.heron.scheduler.kuberne
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:          $JAVA_HOME
 
+# kubernetes extracts the topology package at the entry point of the container
+# this will create a ./heron-conf/ directory
 heron.directory.conf:                       "./heron-conf/"
 
 heron.directory.home:                       $HERON_HOME
