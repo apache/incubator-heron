@@ -309,6 +309,10 @@ public class Context {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
   }
 
+  public static String downloaderBinary(Config cfg) {
+    return cfg.getStringValue(Key.DOWNLOADER_BINARY);
+  }
+
   @SuppressWarnings("unchecked")
   public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =

@@ -162,7 +162,9 @@ public enum Key {
   STMGR_BINARY          ("heron.binaries.stmgr",           "${HERON_BIN}/heron-stmgr"),
   TMASTER_BINARY        ("heron.binaries.tmaster",         "${HERON_BIN}/heron-tmaster"),
   SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
-  PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance");
+  PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
+  DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader");
+
 
   private final String value;
   private final Object defaultValue;

@@ -7,9 +7,9 @@ heron.class.launcher:                        com.twitter.heron.scheduler.kuberne
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:          $JAVA_HOME
 
-heron.directory.conf:                       "/opt/heron/heron-conf/"
+heron.directory.conf:                       "./heron-conf/"
 
-heron.directory.home:                       "/opt/heron/heron-core/"
+heron.directory.home:                       $HERON_HOME
 
 # The URI of kubernetes API
 heron.kubernetes.scheduler.uri:             <kubernetes_api_addr>
