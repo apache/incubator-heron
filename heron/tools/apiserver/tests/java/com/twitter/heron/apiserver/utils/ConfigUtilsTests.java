@@ -38,7 +38,7 @@ public class ConfigUtilsTests {
   public void testCreateOverrides() throws IOException {
     final Properties overrideProperties = createOverrideProperties(
         Pair.create("heron.statemgr.connection.string", "zookeeper:2181"),
-        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+        Pair.create("heron.kubernetes.scheduler.uri", "http://127.0.0.1:8001")
     );
 
     final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
@@ -57,7 +57,7 @@ public class ConfigUtilsTests {
   public void testStateManagerFileOverrides() throws IOException {
     final Properties overrideProperties = createOverrideProperties(
         Pair.create("heron.statemgr.connection.string", "zookeeper:2181"),
-        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+        Pair.create("heron.kubernetes.scheduler.uri", "http://127.0.0.1:8001")
     );
 
     final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
@@ -87,7 +87,7 @@ public class ConfigUtilsTests {
   @SuppressWarnings("unchecked")
   public void testNoOverridesAppliedToStateManager() throws IOException {
     final Properties overrideProperties = createOverrideProperties(
-        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+        Pair.create("heron.kubernetes.scheduler.uri", "http://127.0.0.1:8001")
     );
 
     final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
@@ -118,7 +118,7 @@ public class ConfigUtilsTests {
   public void testApplyOverrides() throws IOException {
     final Properties overrideProperties = createOverrideProperties(
         Pair.create("heron.statemgr.connection.string", "zookeeper:2181"),
-        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+        Pair.create("heron.kubernetes.scheduler.uri", "http://127.0.0.1:8001")
     );
 
     final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);
@@ -147,7 +147,7 @@ public class ConfigUtilsTests {
   public void testApplyEmptyOverrides() throws IOException {
     final Properties overrideProperties = createOverrideProperties(
         Pair.create("heron.statemgr.connection.string", "zookeeper:2181"),
-        Pair.create("heron.kubernetes.scheduler.uri", "http://localhost:8001")
+        Pair.create("heron.kubernetes.scheduler.uri", "http://127.0.0.1:8001")
     );
 
     final String overridesPath = ConfigUtils.createOverrideConfiguration(overrideProperties);

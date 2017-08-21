@@ -9,9 +9,9 @@ aliases:
 
 The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
-* [MacOS](#macos)
-* Ubuntu >= 14.04
-* CentOS
+* [MacOS](#macos-homebrew)
+* [Ubuntu >= 14.04](#using-installation-scripts)
+* [CentOS](#using-installation-scripts)
 
 For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
 (../developers/compiling/compiling).

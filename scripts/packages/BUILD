@@ -25,6 +25,7 @@ load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
 load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_ckptmgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_statefulstorage_files")
+load("/tools/rules/heron_core", "heron_core_lib_downloader_files")
 
 load("/tools/rules/heron_tools", "heron_tools_files")
 load("/tools/rules/heron_tools", "heron_tools_bin_files")
@@ -96,6 +97,7 @@ pkg_tar(
         ":heron-core-lib-instance",
         ":heron-core-lib-ckptmgr",
         ":heron-core-lib-statefulstorage",
+        ":heron-core-lib-downloader",
     ],
 )
 
@@ -157,6 +159,12 @@ pkg_tar(
     name = "heron-core-lib-statefulstorage",
     package_dir = "heron-core/lib/statefulstorage",
     files = heron_core_lib_statefulstorage_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-downloader",
+    package_dir = "heron-core/lib/downloaders",
+    files = heron_core_lib_downloader_files(),
 )
 
 ################################################################################

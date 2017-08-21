@@ -82,7 +82,7 @@ DEFAULT_STATE_MANAGER_NAME = "local"
 DEFAULT_STATE_MANAGER_ROOTPATH = "~/.herondata/repository/state/local"
 
 # default parameter - if ssh tunneling needs to be established to connect to it
-DEFAULT_STATE_MANAGER_TUNNELHOST = "localhost"
+DEFAULT_STATE_MANAGER_TUNNELHOST = "127.0.0.1"
 
 # default parameter - only used to connect to zk, must be of the form host:port
-DEFAULT_STATE_MANAGER_HOSTPORT = "localhost:2181"
+DEFAULT_STATE_MANAGER_HOSTPORT = "127.0.0.1:2181"

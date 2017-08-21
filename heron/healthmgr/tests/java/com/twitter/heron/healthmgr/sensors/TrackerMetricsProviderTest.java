@@ -151,7 +151,7 @@ public class TrackerMetricsProviderTest {
 
   private TrackerMetricsProvider createMetricsProviderSpy() {
     TrackerMetricsProvider metricsProvider
-        = new TrackerMetricsProvider("localhost", "topology", "dev", "env");
+        = new TrackerMetricsProvider("127.0.0.1", "topology", "dev", "env");
 
     TrackerMetricsProvider spyMetricsProvider = spy(metricsProvider);
     spyMetricsProvider.setClock(new TestClock(70000));

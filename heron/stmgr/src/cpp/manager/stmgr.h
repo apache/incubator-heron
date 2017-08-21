@@ -94,6 +94,7 @@ class StMgr {
   void SendStopBackPressureToOtherStMgrs();
   void StartTMasterClient();
   bool DidAnnounceBackPressure();
+  const NetworkOptions&  GetServerNetworkOptions() const;
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
   void HandleAllStMgrClientsRegistered();
   void HandleDeadInstance(sp_int32 _task_id);

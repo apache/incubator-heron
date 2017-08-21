@@ -14,7 +14,6 @@
 """Streamlet for Apache Pulsar"""
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
 from heron.connectors.pulsar.src.python.pulsarspout import PulsarSpout
 
 # pylint: disable=access-member-before-definition
@@ -23,7 +22,7 @@ class PulsarStreamlet(Streamlet):
   """Streamlet facade on top of PulsarSpout"""
   def __init__(self, service_url, topic_name, stage_name=None, parallelism=None,
                receive_timeout_ms=None, input_schema=None):
-    super(PulsarStreamlet, self).__init__(parents=[], operation=OperationType.Input,
+    super(PulsarStreamlet, self).__init__(parents=[],
                                           stage_name=stage_name,
                                           parallelism=parallelism)
     self._pulsar_service_url = service_url
@@ -41,10 +40,6 @@ class PulsarStreamlet(Streamlet):
     return PulsarStreamlet(service_url, topic_name, stage_name=stage_name,
                            parallelism=parallelism, receive_timeout_ms=receive_timeout_ms,
                            input_schema=input_schema)
-
-  # pylint: disable=no-self-use
-  def _calculate_inputs(self):
-    return {}
 
   def _calculate_stage_name(self, existing_stage_names):
     index = 1
