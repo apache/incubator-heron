@@ -26,11 +26,13 @@ Heron tools can be installed on [MacOS](#macos-homebrew) using [Homebrew](https:
 
 The easiest way to get started with Heron on MacOS is using [Homebrew](https://brew.sh). There are three tools currently available:
 
-* The Heron [command-line tool](../operators/heron-cli) (or client), which is used to submit, activate, and kill topologies (and more):
+* The Heron command-line client tools:
 
     ```shell
     $ brew install heron-client
     ```
+
+    This will install both the [`heron`](../operators/heron-cli) and [`heron-explorer`](../operators/heron-explorer) tools.
 
 * The [Heron UI](../operators/heron-ui) dashboard:
 
