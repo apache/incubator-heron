@@ -15,7 +15,6 @@
 package com.twitter.heron.spi.utils;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -80,6 +79,5 @@ public final class UploaderUtils {
       out.close();
     }
   }
-
 
 }

@@ -85,7 +85,7 @@ genrule(
 java_library(
     name = 'bk-uploader-java',
     srcs = glob(["**/bk/**/*.java"]),
-    deps = uploader_spi_files,
+    deps = bk_deps_files,
 )
 
 java_binary(

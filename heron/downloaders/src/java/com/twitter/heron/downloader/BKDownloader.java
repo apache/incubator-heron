@@ -1,0 +1,69 @@
+//  Copyright 2017 Twitter. All rights reserved.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+package com.twitter.heron.downloader;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Path;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.distributedlog.DistributedLogConfiguration;
+import org.apache.distributedlog.api.DistributedLogManager;
+import org.apache.distributedlog.api.namespace.Namespace;
+import org.apache.distributedlog.api.namespace.NamespaceBuilder;
+
+import com.twitter.heron.spi.utils.UploaderUtils;
+import com.twitter.heron.uploader.bk.DLInputStream;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
+public class BKDownloader implements Downloader {
+
+  private static final DistributedLogConfiguration conf = new DistributedLogConfiguration()
+      .setUseDaemonThread(true);                        // use daemon thread
+
+  private static InputStream openInputStream(Namespace ns,
+                                             String logName)
+      throws Exception {
+    DistributedLogManager dlm = ns.openLog(logName);
+    return new DLInputStream(dlm);
+  }
+
+  @Override
+  public void download(URI uri, Path destination) throws Exception {
+    String path = uri.getPath();
+    File pathFile = new File(path);
+    String logName = pathFile.getName();
+    String parentName = pathFile.getParent();
+    URI parentUri = new URI(
+        uri.getScheme(),
+        uri.getAuthority(),
+        parentName,
+        uri.getQuery(),
+        uri.getFragment());
+    Namespace ns = NamespaceBuilder.newBuilder()
+        .clientId("heron-downloader")
+        .conf(conf)
+        .uri(parentUri)
+        .build();
+    try {
+      // open input stream
+      InputStream in = openInputStream(ns, logName);
+      Extractor.extract(in, destination);
+    } finally {
+      ns.close();
+    }
+  }
+}

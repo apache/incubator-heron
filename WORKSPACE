@@ -637,7 +637,17 @@ maven_jar(
 # bookkeeper & distributedlog dependencies
 maven_jar(
   name = "org_apache_distributedlog_core",
-  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:0.5.0-SNAPSHOT",
+  artifact = "org.apache.distributedlog:distributedlog-core:jar:0.5.0-SNAPSHOT",
+)
+
+maven_jar(
+  name = "org_apache_distributedlog_protocol",
+  artifact = "org.apache.distributedlog:distributedlog-protocol:jar:0.5.0-SNAPSHOT",
+)
+
+maven_jar(
+  name = "org_apache_distributedlog_common",
+  artifact = "org.apache.distributedlog:distributedlog-common:jar:0.5.0-SNAPSHOT",
 )
 # end bookkeeper & distributedlog dependencies
 
