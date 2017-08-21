@@ -18,11 +18,6 @@ maven_server(
   url = "http://central.maven.org/maven2/",
 )
 
-maven_server(
-  name = "local",
-  url = "file:///Users/sijie/.m2/repository",
-)
-
 maven_jar(
   name = "org_apache_avro_avro",
   artifact = "org.apache.avro:avro:1.7.4"
