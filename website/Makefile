@@ -1,4 +1,4 @@
-HERONPY_VERSION = 0.15.0
+HERONPY_VERSION = $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
 
 setup:
 	scripts/setup.sh

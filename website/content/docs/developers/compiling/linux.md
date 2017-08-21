@@ -28,8 +28,8 @@ $ sudo apt-get install git build-essential automake cmake libtool-bin zip \
 #### Step 3 --- Set the following environment variables
 
 ```bash
-export CC=/usr/bin/gcc-4.8
-export CCX=/usr/bin/g++-4.8
+export CC=/usr/bin/gcc
+export CCX=/usr/bin/g++
 ```
 
 ### Step 4 --- Install JDK 8 and set JAVA_HOME
