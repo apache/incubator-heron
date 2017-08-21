@@ -20,6 +20,11 @@ gcs_deps_files = \
         "//third_party/java:guava",
     ]
 
+bk_deps_files = \
+    uploader_spi_files + [
+        "//third_party/java:distributedlog-java",
+    ]
+
 java_library(
     name = 'null-uploader-java',
     srcs = glob(["**/NullUploader.java"]),
@@ -74,6 +79,25 @@ genrule(
     name = "heron-hdfs-uploader",
     srcs = [":hdfs-uploader-unshaded_deploy.jar"],
     outs = ["heron-hdfs-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name = 'bk-uploader-java',
+    srcs = glob(["**/bk/**/*.java"]),
+    deps = uploader_spi_files,
+)
+
+java_binary(
+    name = 'bk-uploader-unshaded',
+    srcs = glob(["**/bk/**/*.java"]),
+    deps = bk_deps_files,
+)
+
+genrule(
+    name = "heron-bk-uploader",
+    srcs = [":bk-uploader-unshaded_deploy.jar"],
+    outs = ["heron-bk-uploader.jar"],
     cmd  = "cp $< $@",
 )
 

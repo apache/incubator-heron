@@ -18,6 +18,11 @@ maven_server(
   url = "http://central.maven.org/maven2/",
 )
 
+maven_server(
+  name = "local",
+  url = "file:///Users/sijie/.m2/repository",
+)
+
 maven_jar(
   name = "org_apache_avro_avro",
   artifact = "org.apache.avro:avro:1.7.4"
@@ -628,4 +633,12 @@ maven_jar(
   name = "org_apache_commons_compress",
   artifact = "org.apache.commons:commons-compress:1.14",
 )
+
+# bookkeeper & distributedlog dependencies
+maven_jar(
+  name = "org_apache_distributedlog_core",
+  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:0.5.0-SNAPSHOT",
+)
+# end bookkeeper & distributedlog dependencies
+
 # end heron api server

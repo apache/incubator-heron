@@ -306,3 +306,14 @@ java_library(
         "@mimepull//jar",
     ],   
 )
+
+java_library(
+    name = "distributedlog-java",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@org_apache_distributedlog_core//jar" 
+    ],
+    deps = [ 
+        "@org_apache_distributedlog_core//jar",
+    ],
+)
