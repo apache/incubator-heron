@@ -118,6 +118,9 @@ public class OutgoingTupleCollection {
       String streamId,
       HeronTuples.HeronDataTuple.Builder newTuple,
       long tupleSizeInBytes) {
+    if (tupleSizeInBytes > maxDataTupleSize.asBytes()) {
+      throw new RuntimeException(String.format("Data tuple is too large: %d bytes", tupleSizeInBytes));
+    }
     if (currentDataTuple == null
         || !currentDataTuple.getStream().getId().equals(streamId)
         || currentDataTuple.getTuplesCount() >= dataTupleSetCapacity
