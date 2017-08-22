@@ -27,11 +27,43 @@ import java.util.Set;
  transforming existing Streamlets using operations such as map/flatMap, etc.
  Besides the tuples, a Streamlet has the following properties associated with it
  a) name. User assigned or system generated name to refer the streamlet
- b) parallelism. Number of partitions that the streamlet is composed of. The parallelism
+ b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class Streamlet<R> {
-  <T> protected Streamlet<T> parent;
+public abstract class Streamlet<R> {
   protected String stageName;
-  protected int parallelism;
+  protected int nPartitions;
+  public Streamlet<R> setName(String stageName) {
+    this.stageName = stageName;
+    return this;
+  }
+  public Streamlet<R> setNumPartitions(int nPartitions) {
+    this.nPartitions = nPartitions;
+    return this;
+  }
+
+  <T> Streamlet<T> map(Function<R, T> mapFn) {
+    new MapStreamlet(mapFn);
+  }
+
+  <T> Streamlet<T> flatMap(Function<R, Collection<T>> flatMapFn) {
+    new FlatMapStreamlet(flatMapFn);
+  }
+
+  Streamlet<R> filter(Predicate<R> filterFn) {
+    return FilterStreamlet(filterFn);
+  }
+
+  Streamlet<R> repartition(int nPartitions) {
+    return RepartitionStreamlet(nPartitions);
+  }
+  protected Streamlet() {
+    this.stageName = "NotAssigned";
+    this.nPartitions = 1;
+  }
+
+  protected TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
+
+  public void run() {
+  }
 }
