@@ -14,42 +14,25 @@
 package com.twitter.heron.healthmgr.resolvers;
 
 import java.io.DataOutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.events.EventManager;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.microsoft.dhalion.resolver.Action;
 
-import com.twitter.heron.api.generated.TopologyAPI.Topology;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
-import com.twitter.heron.healthmgr.common.TopologyProvider;
-import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.proto.system.PackingPlans;
-import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.packing.IRepacking;
-import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
-import com.twitter.heron.spi.utils.ReflectionUtils;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
@@ -82,34 +65,46 @@ public class RestartContainerResolver implements IResolver {
         throw new UnsupportedOperationException("Multiple components with back pressure symptom");
       }
 
-      String stmgrId = bpSymptom.getComponents().get(0).getId();
-      String urlStr = "http://" + physicalPlanProvider.getShellUrl(stmgrId) + "/killexecutor";
-      URL url = new URL(urlStr);
-      HttpURLConnection con = (HttpURLConnection) url.openConnection();
-      con.setRequestMethod("POST");
+      try {
+        // TODO: want to know which stmgr has backpressure
+        String stmgrId = bpSymptom.getComponent().getName();
+        String shellUrl = physicalPlanProvider.getShellUrl(stmgrId);
+        if (shellUrl == null) {
+          throw new MalformedURLException("stmgr not found " + stmgrId);
+        }
+        String urlStr = "http://" + shellUrl + "/killexecutor";
+        URL url = new URL(urlStr);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
 
-      con.setDoOutput(true);
-      DataOutputStream out = new DataOutputStream(con.getOutputStream());
-      out.writeBytes("secret=" + topologyName);
-      out.flush();
-      out.close();
+        con.setDoOutput(true);
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+        out.writeBytes("secret=" + topologyName);
+        out.flush();
+        out.close();
 
-      int status = con.getResponseCode();
-      LOG.info("Restarting container: " + url.toString() + "; result: " + status);
-      con.disconnect();
+        int status = con.getResponseCode();
+        LOG.info("Restarting container: " + url.toString() + "; result: " + status);
+        con.disconnect();
 
-      ContainerRestart action = new ContainerRestart();
-      LOG.info("Broadcasting container restart event");
-      eventManager.onEvent(action);
+        ContainerRestart action = new ContainerRestart();
+        LOG.info("Broadcasting container restart event");
+        eventManager.onEvent(action);
 
-      List<Action> actions = new ArrayList<>();
-      actions.add(action);
-      return actions;
+        List<Action> actions = new ArrayList<>();
+        actions.add(action);
+        return actions;
+      } catch (MalformedURLException e) {
+        LOG.warning(e.getMessage());
+      } catch (IOException e) {
+        LOG.warning(e.getMessage());
+      }
     }
 
     return null;
   }
 
   @Override
-  public void close() {}
+  public void close() {
+  }
 }

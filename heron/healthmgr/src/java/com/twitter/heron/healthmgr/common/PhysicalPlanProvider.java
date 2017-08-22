@@ -14,9 +14,6 @@
 
 package com.twitter.heron.healthmgr.common;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -25,9 +22,9 @@ import javax.inject.Provider;
 
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
+
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
-import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans.PhysicalPlan;
 import com.twitter.heron.proto.system.PhysicalPlans.StMgr;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -38,7 +35,7 @@ import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
  * A topology's physical plan may get updated after initial deployment. This provider is used to
  * fetch the latest version from the state manager and provide to any dependent components.
  */
-public class PhysicalPlanProvider implements Provider<PhysicalPlan>, EventHandler<TopologyUpdate> {
+public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   private static final Logger LOG = Logger.getLogger(PhysicalPlanProvider.class.getName());
 
   private final SchedulerStateManagerAdaptor stateManagerAdaptor;
@@ -51,14 +48,38 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan>, EventHandle
       EventManager eventManager, @Named(CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
-    eventManager.addEventListener(TopologyUpdate.class, this);
+    eventManager.addEventListener(TopologyUpdate.class, new EventHandler<TopologyUpdate>() {
+      /**
+       * Invalidates cached physical plan on receiving topology update notification
+       */
+      @Override
+      public synchronized void onEvent(TopologyUpdate event) {
+        LOG.info("Received topology update event, invalidating cached PhysicalPlan: " + event);
+        physicalPlan = null;
+      }
+    });
+    eventManager.addEventListener(ContainerRestart.class, new EventHandler<ContainerRestart>() {
+      /**
+       * Invalidates cached physical plan on receiving container restart notification
+       */
+      @Override
+      public synchronized void onEvent(ContainerRestart event) {
+        LOG.info("Received conatiner restart event, invalidating cached PhysicalPlan: " + event);
+        physicalPlan = null;
+      }
+    });
   }
 
+  /**
+   * get the heron-shell url by stmgr id
+   * @param stmgrId the stmgr id in the same container as heron-shell
+   * @return heron-shell url. return null if the stmgr id is not found in the phyiscal plan
+   */
   public String getShellUrl(String stmgrId) {
     if (physicalPlan != null) {
       for (StMgr stmgr : physicalPlan.getStmgrsList()) {
         if (stmgr.getId().equals(stmgrId)) {
-          return stmgr.getHostName() + stmgr.getShellPort();
+          return stmgr.getHostName() + ":" + stmgr.getShellPort();
         }
       }
     }
@@ -71,24 +92,6 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan>, EventHandle
       fetchLatestPhysicalPlan();
     }
     return physicalPlan;
-  }
-
-  /**
-   * Invalidates cached physical plan on receiving update notification
-   */
-  @Override
-  public synchronized void onEvent(TopologyUpdate event) {
-    LOG.info("Received topology update event, invalidating cached PhysicalPlan: " + event);
-    physicalPlan = null;
-  }
-
-  /**
-   * Invalidates cached physical plan on receiving container restart notification
-   */
-  @Override
-  public synchronized void onEvent(ContainerRestart event) {
-    LOG.info("Received conatiner restart event, invalidating cached PhysicalPlan: " + event);
-    physicalPlan = null;
   }
 
   private synchronized void fetchLatestPhysicalPlan() {
