@@ -13,19 +13,16 @@
 # limitations under the License.
 """module for map bolt: MapBolt"""
 from heron.api.src.python.bolt.bolt import Bolt
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.state.stateful_component import StatefulComponent
 from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class MapBolt(Bolt, StatefulComponent):
+class MapBolt(Bolt, StatefulComponent, DslBoltBase):
   """MapBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
   def init_state(self, stateful_state):
@@ -58,7 +55,7 @@ class MapBolt(Bolt, StatefulComponent):
 class MapStreamlet(Streamlet):
   """MapStreamlet"""
   def __init__(self, map_function, parents, stage_name=None, parallelism=None):
-    super(MapStreamlet, self).__init__(parents=parents, operation=OperationType.Map,
+    super(MapStreamlet, self).__init__(parents=parents,
                                        stage_name=stage_name, parallelism=parallelism)
     self._map_function = map_function
 
@@ -82,5 +79,5 @@ class MapStreamlet(Streamlet):
     if not callable(self._map_function):
       raise RuntimeError("map function must be callable")
     builder.add_bolt(self._stage_name, MapBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={MapBolt.FUNCTION : self._map_function})

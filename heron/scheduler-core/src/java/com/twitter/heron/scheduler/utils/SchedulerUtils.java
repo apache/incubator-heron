@@ -251,6 +251,11 @@ public final class SchedulerUtils {
     commands.add(ckptmgrPort);
     commands.add(Context.statefulConfigFile(config));
 
+    String healthMgrMode =
+        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
+    commands.add(healthMgrMode);
+    commands.add(Context.healthMgrClassPath(config));
+
     return commands.toArray(new String[commands.size()]);
   }
 

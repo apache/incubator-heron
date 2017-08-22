@@ -12,7 +12,7 @@ statemgrs:
     type: "file"
     name: "local"
     rootpath: "~/.herondata/repository/state/local"
-    tunnelhost: "localhost"
+    tunnelhost: "127.0.0.1"
 #
 # To use 'localzk', launch a zookeeper server locally
 # and create the following path:
@@ -21,9 +21,9 @@ statemgrs:
 #  -
 #    type: "zookeeper"
 #    name: "localzk"
-#    hostport: "localhost:2181"
+#    hostport: "127.0.0.1:2181"
 #    rootpath: "/heron"
-#    tunnelhost: "localhost"
+#    tunnelhost: "127.0.0.1"
 
 #
 # To specify multiple Zookeeper Nodes for fallback
@@ -47,4 +47,4 @@ statemgrs:
 #
 # This is a sample, and should be changed to point to corresponding dashboard.
 #
-# viz.url.format: "http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"
+# viz.url.format: "http://127.0.0.1/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"

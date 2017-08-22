@@ -14,29 +14,38 @@
 """module for join bolt: JoinBolt"""
 import collections
 
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.bolt.window_bolt import SlidingWindowBolt
 from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet, TimeWindow
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class JoinBolt(SlidingWindowBolt):
+class JoinBolt(SlidingWindowBolt, DslBoltBase):
   """JoinBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
+  JOINEDCOMPONENT = '__joined_component__'
 
-  @staticmethod
-  def _add(key, value, mymap):
-    if key in mymap:
-      mymap[key].append(value)
+  def _add(self, key, value, src_component, mymap):
+    if not key in mymap:
+      mymap[key] = (None, None)
+    # Join Output should be Key -> (V1, V2) where
+    # V1 is coming from the left stream and V2 coming
+    # from the right stream. In this case, _joined_component
+    # represents the right stream
+    if src_component == self._joined_component:
+      mymap[key][1] = value
     else:
-      mymap[key] = [value]
+      mymap[key][0] = value
+
+  def initialize(self, config, context):
+    super(JoinBolt, self).__init__(config, context)
+    if not JoinBolt.JOINEDCOMPONENT in config:
+      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINEDCOMPONENT)
+    self._joined_component = config[JoinBolt.JOINEDCOMPONENT]
 
   def processWindow(self, window_config, tuples):
     # our temporary map
@@ -45,7 +54,7 @@ class JoinBolt(SlidingWindowBolt):
       userdata = tup.values[0]
       if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
         raise RuntimeError("Join tuples must be iterable of length 2")
-      self._add(userdata[0], userdata[1], mymap)
+      self._add(userdata[0], userdata[1], tup.component, mymap)
     for (key, values) in mymap.items():
       self.emit([(key, values)], stream='output')
 
@@ -68,7 +77,7 @@ class JoinGrouping(ICustomGrouping):
 class JoinStreamlet(Streamlet):
   """JoinStreamlet"""
   def __init__(self, time_window, parents, stage_name=None, parallelism=None):
-    super(JoinStreamlet, self).__init__(parents=parents, operation=OperationType.Join,
+    super(JoinStreamlet, self).__init__(parents=parents,
                                         stage_name=stage_name, parallelism=parallelism)
     self._time_window = time_window
 
@@ -97,6 +106,7 @@ class JoinStreamlet(Streamlet):
     if not isinstance(self._time_window, TimeWindow):
       raise RuntimeError("Join's time_window should be TimeWindow")
     builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={JoinBolt.WINDOWDURATION : self._time_window.duration,
-                             JoinBolt.SLIDEINTERVAL : self._time_window.sliding_interval})
+                             JoinBolt.SLIDEINTERVAL : self._time_window.sliding_interval,
+                             JoinBolt.JOINEDCOMPONENT : self._parent[1]._stage_name})

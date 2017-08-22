@@ -258,6 +258,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.CKPTMGR_CLASSPATH, completeCkptmgrProcessClassPath);
     auroraProperties.put(AuroraField.STATEFUL_CONFIG_YAML, Context.statefulConfigFile(config));
 
+    String healthMgrMode =
+        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
+    auroraProperties.put(AuroraField.HEALTHMGR_MODE, healthMgrMode);
+    auroraProperties.put(AuroraField.HEALTHMGR_CLASSPATH, Context.healthMgrClassPath(config));
+
     return auroraProperties;
   }
 }

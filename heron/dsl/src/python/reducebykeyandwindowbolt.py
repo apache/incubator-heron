@@ -14,20 +14,17 @@
 """module for join bolt: ReduceByKeyAndWindowBolt"""
 import collections
 
-from heron.api.src.python.stream import Stream
 from heron.api.src.python.bolt.window_bolt import SlidingWindowBolt
 from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
 from heron.dsl.src.python.streamlet import Streamlet, TimeWindow
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class ReduceByKeyAndWindowBolt(SlidingWindowBolt):
+class ReduceByKeyAndWindowBolt(SlidingWindowBolt, DslBoltBase):
   """ReduceByKeyAndWindowBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
   WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
@@ -80,9 +77,7 @@ class ReduceGrouping(ICustomGrouping):
 class ReduceByKeyAndWindowStreamlet(Streamlet):
   """ReduceByKeyAndWindowStreamlet"""
   def __init__(self, time_window, reduce_function, parents, stage_name=None, parallelism=None):
-    op = OperationType.ReduceByKeyAndWindow
     super(ReduceByKeyAndWindowStreamlet, self).__init__(parents=parents,
-                                                        operation=op,
                                                         stage_name=stage_name,
                                                         parallelism=parallelism)
     self._time_window = time_window
@@ -110,7 +105,7 @@ class ReduceByKeyAndWindowStreamlet(Streamlet):
     if not isinstance(self._time_window, TimeWindow):
       raise RuntimeError("reduce's time_window should be TimeWindow")
     builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
                              ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
                              ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
