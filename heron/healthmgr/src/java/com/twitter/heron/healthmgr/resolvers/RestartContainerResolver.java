@@ -40,9 +40,9 @@ import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName
 public class RestartContainerResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
 
-  private PhysicalPlanProvider physicalPlanProvider;
-  private EventManager eventManager;
-  private String topologyName;
+  final private PhysicalPlanProvider physicalPlanProvider;
+  final private EventManager eventManager;
+  final private String topologyName;
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
@@ -65,15 +65,11 @@ public class RestartContainerResolver implements IResolver {
         throw new UnsupportedOperationException("Multiple components with back pressure symptom");
       }
 
+      List<Action> actions = new ArrayList<>();
       try {
         // TODO: want to know which stmgr has backpressure
         String stmgrId = bpSymptom.getComponent().getName();
-        String shellUrl = physicalPlanProvider.getShellUrl(stmgrId);
-        if (shellUrl == null) {
-          throw new MalformedURLException("stmgr not found " + stmgrId);
-        }
-        String urlStr = "http://" + shellUrl + "/killexecutor";
-        URL url = new URL(urlStr);
+        URL url = new URL(physicalPlanProvider.getShellUrl(stmgrId) + "/killexecutor");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
 
@@ -91,14 +87,13 @@ public class RestartContainerResolver implements IResolver {
         LOG.info("Broadcasting container restart event");
         eventManager.onEvent(action);
 
-        List<Action> actions = new ArrayList<>();
         actions.add(action);
-        return actions;
       } catch (MalformedURLException e) {
         LOG.warning(e.getMessage());
       } catch (IOException e) {
         LOG.warning(e.getMessage());
       }
+      return actions;
     }
 
     return null;

@@ -90,6 +90,7 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
       LOG.warning("Under provisioning diagnoses. This diagnosis does not have any resolver.");
     }
 
+    LOG.warning("Unknown diagnoses. None resolver selected.");
     return null;
   }
 
