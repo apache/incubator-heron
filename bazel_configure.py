@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #
 # Verifies required libraries and tools exist and are valid versions.
 # Is so creates scripts/compile/env_exec.sh containing environment used
