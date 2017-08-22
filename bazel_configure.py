@@ -72,13 +72,15 @@ def discover_os_version():
 # Get the git sha of the branch - you are working
 ######################################################################
 def discover_git_sha():
-  return subprocess.check_output("git rev-parse HEAD", shell=True).strip("\n")
+  output = subprocess.check_output("git rev-parse HEAD", shell=True)
+  return output.decode('ascii', 'ignore').strip("\n")
 
 ######################################################################
 # Get the name of branch - you are working on
 ######################################################################
 def discover_git_branch():
-  return subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True).strip("\n")
+  output = subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True)
+  return output.decode('ascii', 'ignore').strip("\n")
 
 ######################################################################
 # Utility functions for system defines
@@ -141,7 +143,7 @@ def discover_version(path):
     version_flag = "--version"
   command = "%s %s" % (path, version_flag)
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-  first_line = version_output.split("\n")[0]
+  first_line = version_output.decode('ascii', 'ignore').split("\n")[0]
   version = get_trailing_version(first_line)
   if version:
     return version
@@ -391,7 +393,7 @@ def main():
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
   env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE', '2.6.4')
-  env_map['PYTHON2'] = discover_tool('python2.7', 'Python2', 'PYTHON2', '2.7')
+  env_map['PYTHON'] = discover_tool('python', 'Python', 'PYTHON', '2.7')
 
   if platform == 'Darwin':
     env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.2')
