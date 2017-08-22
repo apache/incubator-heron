@@ -13,8 +13,12 @@ java_toolchain(
     ijar = ["@bazel_tools//tools/jdk:ijar"],
     javabuilder = ["@bazel_tools//tools/jdk:javabuilder"],
     javac = ["@bazel_tools//third_party/java/jdk/langtools:javac_jar"],
+    jvm_opts = [
+        "-Xbootclasspath/p:$(location @bazel_tools//third_party/java/jdk/langtools:javac_jar)",
+    ],
     misc = [
-        "-extra_checks:on",
+#        "-XepDisableAllChecks",
+#        "-extra_checks:on",
         "-Xlint:all",
         "-Werror",
     ],
