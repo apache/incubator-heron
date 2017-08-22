@@ -2,14 +2,14 @@
 
 ## To compile source using a docker container:
 ```
-./docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
-# e.g.  ./docker/build-artifacts.sh ubuntu14.04 testbuild ~/heron-release
+./docker/scripts/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
+# e.g.  ./docker/scripts/build-artifacts.sh ubuntu14.04 testbuild ~/heron-release
 ```
 
 ## To build docker containers for running heron daemons:
 ```
-./docker/build-docker.sh <platform> <version_string> <output-directory>
-# e.g. ./docker/build-docker.sh ubuntu14.04 testbuild ~/heron-release
+./docker/scripts/build-docker.sh <platform> <version_string> <output-directory>
+# e.g. ./docker/scripts/build-docker.sh ubuntu14.04 testbuild ~/heron-release
 ```
 
 ### To run docker containers for local dev work:
