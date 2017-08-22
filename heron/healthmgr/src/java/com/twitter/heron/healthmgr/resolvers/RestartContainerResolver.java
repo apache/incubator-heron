@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.dhalion.api.IResolver;
@@ -37,8 +38,8 @@ import com.microsoft.dhalion.resolver.Action;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
-import com.twitter.heron.healthmgr.common.PackingPlanProvider;
+import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
+import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -50,26 +51,22 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
+import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
 
 public class RestartContainerResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
 
-  private TopologyProvider topologyProvider;
-  private PackingPlanProvider packingPlanProvider;
-  private ISchedulerClient schedulerClient;
+  private PhysicalPlanProvider physicalPlanProvider;
   private EventManager eventManager;
-  private Config config;
+  private String topologyName;
 
   @Inject
-  public RestartContainerResolver(TopologyProvider topologyProvider,
-      PackingPlanProvider packingPlanProvider, ISchedulerClient schedulerClient,
-      EventManager eventManager, Config config) {
-    this.topologyProvider = topologyProvider;
-    this.packingPlanProvider = packingPlanProvider;
-    this.schedulerClient = schedulerClient;
+  public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
+      PhysicalPlanProvider physicalPlanProvider, EventManager eventManager) {
+    this.topologyName = topologyName;
+    this.physicalPlanProvider = physicalPlanProvider;
     this.eventManager = eventManager;
-    this.config = config;
   }
 
   @Override
@@ -85,14 +82,15 @@ public class RestartContainerResolver implements IResolver {
         throw new UnsupportedOperationException("Multiple components with back pressure symptom");
       }
 
-      // TODO: get the backpressure stmgr id from Diagnosis, then get ip:port from physical plan
-      URL url = new URL("http://10.0.0.10:1234/killexecutor");
+      String stmgrId = bpSymptom.getComponents().get(0).getId();
+      String urlStr = "http://" + physicalPlanProvider.getShellUrl(stmgrId) + "/killexecutor";
+      URL url = new URL(urlStr);
       HttpURLConnection con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
 
       con.setDoOutput(true);
       DataOutputStream out = new DataOutputStream(con.getOutputStream());
-      out.writeBytes("secret=" + topologyProvider.get().getId());
+      out.writeBytes("secret=" + topologyName);
       out.flush();
       out.close();
 
@@ -100,8 +98,8 @@ public class RestartContainerResolver implements IResolver {
       LOG.info("Restarting container: " + url.toString() + "; result: " + status);
       con.disconnect();
 
-      TopologyUpdate action = new TopologyUpdate();
-      LOG.info("Broadcasting topology update event");
+      ContainerRestart action = new ContainerRestart();
+      LOG.info("Broadcasting container restart event");
       eventManager.onEvent(action);
 
       List<Action> actions = new ArrayList<>();
