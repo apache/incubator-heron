@@ -40,9 +40,9 @@ import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName
 public class RestartContainerResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
 
-  final private PhysicalPlanProvider physicalPlanProvider;
-  final private EventManager eventManager;
-  final private String topologyName;
+  private final PhysicalPlanProvider physicalPlanProvider;
+  private final EventManager eventManager;
+  private final String topologyName;
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
