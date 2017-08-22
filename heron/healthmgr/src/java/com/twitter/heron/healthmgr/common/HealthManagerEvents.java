@@ -26,4 +26,13 @@ public class HealthManagerEvents {
       super(TopologyUpdate.class.getSimpleName());
     }
   }
+  
+  /**
+   * This event is created when a resolver executes restart container action
+   */
+  public static class ContainerRestart extends Action {
+    public ContainerRestart() {
+      super(ContainerRestart.class.getSimpleName());
+    }
+  }
 }
