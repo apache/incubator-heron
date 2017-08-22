@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 pkg_name = "glog"
-pkg_version = "0.3.4"
+pkg_version = "0.3.5"
 
 package_file = pkg_name + "-" + pkg_version + ".tar.gz"
 package_dir = pkg_name + "-" + pkg_version

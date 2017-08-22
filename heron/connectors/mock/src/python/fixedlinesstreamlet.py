@@ -14,7 +14,6 @@
 '''fixedlinesstreamlet.py: module for defining a Streamlet based on FixedLinesSpout'''
 
 from heron.dsl.src.python.streamlet import Streamlet
-from heron.dsl.src.python.operation import OperationType
 from heron.connectors.mock.src.python.fixedlinesspout import FixedLinesSpout
 
 # pylint: disable=access-member-before-definition
@@ -24,17 +23,13 @@ class FixedLinesStreamlet(Streamlet):
   """
   # pylint: disable=no-self-use
   def __init__(self, stage_name=None, parallelism=None):
-    super(FixedLinesStreamlet, self).__init__(parents=[], operation=OperationType.Input,
+    super(FixedLinesStreamlet, self).__init__(parents=[],
                                               stage_name=stage_name,
                                               parallelism=parallelism)
 
   @staticmethod
   def fixedLinesGenerator(stage_name=None, parallelism=None):
     return FixedLinesStreamlet(stage_name=stage_name, parallelism=parallelism)
-
-  # pylint: disable=no-self-use
-  def _calculate_inputs(self):
-    return {}
 
   def _calculate_stage_name(self, existing_stage_names):
     stagename = "fixedlines"

@@ -15,6 +15,7 @@
 package com.twitter.heron.healthmgr;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.classification.InterfaceStability.Evolving;
 import com.twitter.heron.classification.InterfaceStability.Unstable;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
@@ -159,17 +161,6 @@ public class HealthManager {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    String metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, "http://127.0.0.1:8888");
-    String metricsProviderClassName = getOptionValue(cmd,
-        CliArgs.METRIC_SOURCE_TYPE, "com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider");
-
-    Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
-    Level loggingLevel = Level.INFO;
-    if (verbose) {
-      loggingLevel = Level.FINE;
-    }
-    LoggingHelper.loggerInit(loggingLevel, false);
-
     HealthManagerMode mode = HealthManagerMode.cluster;
     if (hasOption(cmd, CliArgs.MODE)) {
       mode = HealthManagerMode.valueOf(getOptionValue(cmd, CliArgs.MODE));
@@ -200,12 +191,20 @@ public class HealthManager {
         throw new IllegalArgumentException("Invalid mode: " + getOptionValue(cmd, CliArgs.MODE));
     }
 
+    setupLogging(cmd, config);
 
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
+    // load the default config value and override with any command line values
+    String metricSourceClassName = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_TYPE.key());
+    metricSourceClassName = getOptionValue(cmd, CliArgs.METRIC_SOURCE_TYPE, metricSourceClassName);
+
+    String metricsUrl = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_URL.key());
+    metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, metricsUrl);
+
     Class<? extends MetricsProvider> metricsProviderClass =
-        Class.forName(metricsProviderClassName).asSubclass(MetricsProvider.class);
+        Class.forName(metricSourceClassName).asSubclass(MetricsProvider.class);
     AbstractModule module =
         buildMetricsProviderModule(config, metricsUrl, metricsProviderClass);
     HealthManager healthManager = new HealthManager(config, module);
@@ -222,6 +221,31 @@ public class HealthManager {
     } finally {
       policyExecutor.destroy();
     }
+  }
+
+  private static void setupLogging(CommandLine cmd, Config config) throws IOException {
+    String systemConfigFilename = Context.systemConfigFile(config);
+
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .build();
+
+    Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
+    Level loggingLevel = Level.INFO;
+    if (verbose) {
+      loggingLevel = Level.FINE;
+    }
+
+    String loggingDir = systemConfig.getHeronLoggingDirectory();
+    LoggingHelper.loggerInit(loggingLevel, true);
+
+    String fileName = String.format("%s-%s-%s", "heron", Context.topologyName(config), "healthmgr");
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(fileName, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSize(),
+            systemConfig.getHeronLoggingMaximumFiles()));
+
+    LOG.info("Logging setup done.");
   }
 
   private static boolean hasOption(CommandLine cmd, CliArgs argName) {
