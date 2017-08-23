@@ -17,6 +17,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.function.Supplier;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
@@ -27,14 +30,27 @@ import com.twitter.heron.dlog.DLInputStream;
 
 public class DLDownloader implements Downloader {
 
-  private static final DistributedLogConfiguration CONF = new DistributedLogConfiguration()
+  static final DistributedLogConfiguration CONF = new DistributedLogConfiguration()
       .setUseDaemonThread(true);                        // use daemon thread
 
-  private static InputStream openInputStream(Namespace ns,
-                                             String logName)
+  static InputStream openInputStream(Namespace ns, String logName)
       throws Exception {
     DistributedLogManager dlm = ns.openLog(logName);
     return new DLInputStream(dlm);
+  }
+
+  private final NamespaceBuilder builder;
+  private final Extractor extractor;
+
+  public DLDownloader() {
+    this(() -> NamespaceBuilder.newBuilder(), Extractor.of());
+  }
+
+  @VisibleForTesting
+  public DLDownloader(Supplier<NamespaceBuilder> builderSupplier,
+                      Extractor extractor) {
+    this.builder = builderSupplier.get();
+    this.extractor = extractor;
   }
 
   @Override
@@ -49,7 +65,7 @@ public class DLDownloader implements Downloader {
         parentName,
         uri.getQuery(),
         uri.getFragment());
-    Namespace ns = NamespaceBuilder.newBuilder()
+    Namespace ns = builder
         .clientId("heron-downloader")
         .conf(CONF)
         .uri(parentUri)
@@ -57,7 +73,7 @@ public class DLDownloader implements Downloader {
     try {
       // open input stream
       InputStream in = openInputStream(ns, logName);
-      Extractor.extract(in, destination);
+      extractor.extract(in, destination);
     } finally {
       ns.close();
     }

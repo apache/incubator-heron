@@ -11,17 +11,25 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.downloader;
+package com.twitter.heron.uploader.dlog;
 
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class HttpDownloader implements Downloader {
+import com.twitter.heron.spi.utils.UploaderUtils;
+
+public class DLCopier implements Copier {
+
+  public static DLCopier of() {
+    return INSTANCE;
+  }
+
+  private static final DLCopier INSTANCE = new DLCopier();
+
+  private DLCopier() {}
 
   @Override
-  public void download(URI uri, Path destination) throws Exception {
-    final URL url = uri.toURL();
-    Extractor.of().extract(url.openStream(), destination);
+  public void copyFileToStream(String inFile, OutputStream out) throws IOException {
+    UploaderUtils.copyToOutputStream(inFile, out);
   }
 }

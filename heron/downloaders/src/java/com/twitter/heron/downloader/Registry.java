@@ -26,7 +26,7 @@ final class Registry {
   static {
     DOWNLOADERS.put("http", HttpDownloader.class);
     DOWNLOADERS.put("https", HttpDownloader.class);
-    DOWNLOADERS.put("distributedlog", Downloader.class);
+    DOWNLOADERS.put("distributedlog", DLDownloader.class);
   }
 
   private static final Registry INSTANCE = new Registry();

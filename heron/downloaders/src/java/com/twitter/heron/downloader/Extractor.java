@@ -26,9 +26,15 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
-final class Extractor {
+class Extractor {
 
-  static void extract(InputStream in, Path destination) throws IOException {
+  private static final Extractor INSTANCE = new Extractor();
+
+  static Extractor of() {
+    return INSTANCE;
+  }
+
+  void extract(InputStream in, Path destination) throws IOException {
     try (
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
         final GzipCompressorInputStream gzipInputStream =

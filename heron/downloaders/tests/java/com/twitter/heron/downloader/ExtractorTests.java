@@ -58,7 +58,7 @@ public class ExtractorTests {
         tempDirectory);
     assertTrue(Files.exists(tar));
 
-    Extractor.extract(new FileInputStream(tar.toFile()), Paths.get(workingDirectory));
+    Extractor.of().extract(new FileInputStream(tar.toFile()), Paths.get(workingDirectory));
 
     assertTrue(Files.exists(Paths.get(workingDirectory, "file1")));
     assertTrue(Files.exists(Paths.get(workingDirectory, "file2")));
@@ -79,7 +79,7 @@ public class ExtractorTests {
         tempDirectory);
     assertTrue(Files.exists(tar));
 
-    Extractor.extract(new FileInputStream(tar.toFile()), Paths.get(workingDirectory));
+    Extractor.of().extract(new FileInputStream(tar.toFile()), Paths.get(workingDirectory));
 
     assertTrue(Files.exists(Paths.get(workingDirectory, "file")));
     assertTrue(Files.exists(Paths.get(workingDirectory, "dir", "file")));
@@ -103,7 +103,7 @@ public class ExtractorTests {
         tempDirectory);
     assertTrue(Files.exists(tar));
 
-    Extractor.extract(new FileInputStream(tar.toFile()), Paths.get(workingDirectory));
+    Extractor.of().extract(new FileInputStream(tar.toFile()), Paths.get(workingDirectory));
 
     assertTrue(Files.exists(Paths.get(workingDirectory, "file1")));
     assertTrue(Files.exists(Paths.get(workingDirectory, "dir", "file")));

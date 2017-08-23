@@ -18,7 +18,7 @@ import com.twitter.heron.spi.common.Context;
 
 final class DLContext extends Context {
 
-  public static final String DL_TOPOLOGIES_NS_URI = "hero.uploader.bk.topologies.namespace.uri";
+  public static final String DL_TOPOLOGIES_NS_URI = "hero.uploader.dlog.topologies.namespace.uri";
 
   private DLContext() {
   }

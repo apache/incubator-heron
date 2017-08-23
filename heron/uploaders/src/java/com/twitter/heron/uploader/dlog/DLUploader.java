@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import org.apache.distributedlog.AppendOnlyStreamWriter;
@@ -39,14 +40,29 @@ public class DLUploader implements IUploader {
 
   private static final Logger LOG = Logger.getLogger(DLUploader.class.getName());
 
-  private String destTopologyNamespaceURI;
-  private Config config;
-  private String topologyPackageLocation;
-  private String packageName;
-  private URI packageURI;
+  // visible for testing
+  String destTopologyNamespaceURI;
+  Config config;
+  String topologyPackageLocation;
+  String packageName;
+  URI packageURI;
 
   // the namespace instance
+  private final Supplier<NamespaceBuilder> nsBuilderSupplier;
   private Namespace namespace;
+
+  // the copier
+  private final Copier copier;
+
+  public DLUploader() {
+    this(() -> NamespaceBuilder.newBuilder(), DLCopier.of());
+  }
+
+  public DLUploader(Supplier<NamespaceBuilder> nsBuilderSupplier,
+                    Copier copier) {
+    this.nsBuilderSupplier = nsBuilderSupplier;
+    this.copier = copier;
+  }
 
   @Override
   public void initialize(Config upConfig) {
@@ -88,7 +104,7 @@ public class DLUploader implements IUploader {
         "Initializing distributedlog namespace for uploading topologies : %s",
         uri));
 
-    this.namespace = NamespaceBuilder.newBuilder()
+    this.namespace = this.nsBuilderSupplier.get()
         .clientId("heron-uploader")
         .conf(conf)
         .uri(uri)
@@ -138,7 +154,7 @@ public class DLUploader implements IUploader {
 
     OutputStream out = openOutputStream(packageName);
     try {
-      UploaderUtils.copyToOutputStream(topologyPackageLocation, out);
+      copier.copyFileToStream(topologyPackageLocation, out);
     } finally {
       out.close();
     }
