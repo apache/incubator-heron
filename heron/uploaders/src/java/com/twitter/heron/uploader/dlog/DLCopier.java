@@ -18,7 +18,7 @@ import java.io.OutputStream;
 
 import com.twitter.heron.spi.utils.UploaderUtils;
 
-public class DLCopier implements Copier {
+class DLCopier implements Copier {
 
   public static DLCopier of() {
     return INSTANCE;
@@ -26,7 +26,8 @@ public class DLCopier implements Copier {
 
   private static final DLCopier INSTANCE = new DLCopier();
 
-  private DLCopier() {}
+  DLCopier() {
+  }
 
   @Override
   public void copyFileToStream(String inFile, OutputStream out) throws IOException {

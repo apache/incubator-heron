@@ -30,11 +30,17 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.UploaderException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 public class DlogUploaderTest {
@@ -60,16 +66,12 @@ public class DlogUploaderTest {
     uploader = new DLUploader(() -> nsBuilder, copier);
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testInitializeFailure() throws Exception {
     IOException ioe = new IOException("test-initialization");
     when(nsBuilder.build()).thenThrow(ioe);
 
-    try {
-      uploader.initialize(config);
-    } catch (RuntimeException re) {
-      assertEquals(ioe, re.getCause());
-    }
+    uploader.initialize(config);
   }
 
   @Test
@@ -79,12 +81,12 @@ public class DlogUploaderTest {
 
     uploader.initialize(config);
 
-    assertEquals(config, uploader.config);
-    assertEquals(DL_URI, uploader.destTopologyNamespaceURI);
-    assertEquals(Context.topologyPackageFile(config), uploader.topologyPackageLocation);
+    assertEquals(config, uploader.getConfig());
+    assertEquals(DL_URI, uploader.getDestTopologyNamespaceURI());
+    assertEquals(Context.topologyPackageFile(config), uploader.getTopologyPackageLocation());
     assertEquals(
-        URI.create(String.format("%s/%s", DL_URI, uploader.packageName)),
-        uploader.packageURI);
+        URI.create(String.format("%s/%s", DL_URI, uploader.getPackageName())),
+        uploader.getPackageURI());
   }
 
   @Test
@@ -95,7 +97,7 @@ public class DlogUploaderTest {
     uploader.initialize(config);
     assertTrue(uploader.undo());
 
-    verify(ns, times(1)).deleteLog(eq(uploader.packageName));
+    verify(ns, times(1)).deleteLog(eq(uploader.getPackageName()));
   }
 
   @Test
@@ -107,7 +109,7 @@ public class DlogUploaderTest {
     uploader.initialize(config);
     assertFalse(uploader.undo());
 
-    verify(ns, times(1)).deleteLog(eq(uploader.packageName));
+    verify(ns, times(1)).deleteLog(eq(uploader.getPackageName()));
   }
 
   @Test
@@ -156,9 +158,9 @@ public class DlogUploaderTest {
     uploader.initialize(config);
     uploader.uploadPackage();
 
-    verify(ns, never()).deleteLog(eq(uploader.packageName));
+    verify(ns, never()).deleteLog(eq(uploader.getPackageName()));
     verify(copier, times(1))
-        .copyFileToStream(eq(uploader.topologyPackageLocation), any(OutputStream.class));
+        .copyFileToStream(eq(uploader.getTopologyPackageLocation()), any(OutputStream.class));
     verify(asw, times(1)).close();
     verify(dlm, times(1)).close();
   }
@@ -180,9 +182,9 @@ public class DlogUploaderTest {
     uploader.initialize(config);
     uploader.uploadPackage();
 
-    verify(ns, times(1)).deleteLog(eq(uploader.packageName));
+    verify(ns, times(1)).deleteLog(eq(uploader.getPackageName()));
     verify(copier, times(1))
-        .copyFileToStream(eq(uploader.topologyPackageLocation), any(OutputStream.class));
+        .copyFileToStream(eq(uploader.getTopologyPackageLocation()), any(OutputStream.class));
     verify(asw, times(1)).close();
     verify(dlm, times(1)).close();
   }

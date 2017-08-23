@@ -20,6 +20,8 @@ import java.net.URI;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.distributedlog.AppendOnlyStreamWriter;
 import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
@@ -41,11 +43,11 @@ public class DLUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(DLUploader.class.getName());
 
   // visible for testing
-  String destTopologyNamespaceURI;
-  Config config;
-  String topologyPackageLocation;
-  String packageName;
-  URI packageURI;
+  private String destTopologyNamespaceURI;
+  private Config config;
+  private String topologyPackageLocation;
+  private String packageName;
+  private URI packageURI;
 
   // the namespace instance
   private final Supplier<NamespaceBuilder> nsBuilderSupplier;
@@ -62,6 +64,31 @@ public class DLUploader implements IUploader {
                     Copier copier) {
     this.nsBuilderSupplier = nsBuilderSupplier;
     this.copier = copier;
+  }
+
+  @VisibleForTesting
+  Config getConfig() {
+    return config;
+  }
+
+  @VisibleForTesting
+  String getTopologyPackageLocation() {
+    return topologyPackageLocation;
+  }
+
+  @VisibleForTesting
+  String getPackageName() {
+    return packageName;
+  }
+
+  @VisibleForTesting
+  URI getPackageURI() {
+    return packageURI;
+  }
+
+  @VisibleForTesting
+  String getDestTopologyNamespaceURI() {
+    return destTopologyNamespaceURI;
   }
 
   @Override

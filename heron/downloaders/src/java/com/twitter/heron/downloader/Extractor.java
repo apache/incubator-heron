@@ -34,7 +34,7 @@ class Extractor {
     return INSTANCE;
   }
 
-  void extract(InputStream in, Path destination) throws IOException {
+  public void extract(InputStream in, Path destination) throws IOException {
     try (
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
         final GzipCompressorInputStream gzipInputStream =
@@ -57,6 +57,8 @@ class Extractor {
     }
   }
 
-  private Extractor() {
+  // because we remove `final` from this class for being able to do mock unit test,
+  // make it non private to pass `FinalClass` check.
+  Extractor() {
   }
 }
