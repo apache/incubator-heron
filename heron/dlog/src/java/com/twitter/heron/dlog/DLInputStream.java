@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.uploader.bk;
+package com.twitter.heron.dlog;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +21,6 @@ import org.apache.distributedlog.LogRecordWithDLSN;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.LogReader;
 import org.apache.distributedlog.exceptions.EndOfStreamException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DLInputStream extends InputStream {
 
@@ -39,8 +37,6 @@ public class DLInputStream extends InputStream {
     private final LogRecordWithDLSN logRecord;
 
     LogRecordWithInputStream(LogRecordWithDLSN logRecord) {
-      checkNotNull(logRecord);
-
       this.logRecord = logRecord;
       this.payloadStream = logRecord.getPayLoadInputStream();
     }
@@ -126,7 +122,7 @@ public class DLInputStream extends InputStream {
     }
 
     while (read < len) {
-      int thisread = currentLogRecord.getPayLoadInputStream().read(b, off + read, (len - read));
+      int thisread = currentLogRecord.getPayLoadInputStream().read(b, off + read, len - read);
       if (thisread == -1) {
         currentLogRecord = nextLogRecord();
         if (currentLogRecord == null) {

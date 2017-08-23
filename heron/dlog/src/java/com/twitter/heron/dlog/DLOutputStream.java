@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.uploader.bk;
+package com.twitter.heron.dlog;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,7 +35,9 @@ public class DLOutputStream extends OutputStream {
 
   @Override
   public void write(int b) throws IOException {
-    byte[] data = new byte[] { (byte) b };
+    byte[] data = new byte[] {
+        (byte) b
+    };
     write(data);
   }
 

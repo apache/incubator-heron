@@ -20,9 +20,10 @@ gcs_deps_files = \
         "//third_party/java:guava",
     ]
 
-bk_deps_files = \
+dlog_deps_files = \
     uploader_spi_files + [
-        "//third_party/java:dlog-java",
+        "@org_apache_distributedlog_core//jar",
+        "//heron/dlog/src/java:dlog-lib",
     ]
 
 java_library(
@@ -83,21 +84,21 @@ genrule(
 )
 
 java_library(
-    name = 'bk-uploader-java',
-    srcs = glob(["**/bk/**/*.java"]),
-    deps = bk_deps_files,
+    name = 'dlog-uploader-java',
+    srcs = glob(["**/dlog/**/*.java"]),
+    deps = dlog_deps_files,
 )
 
 java_binary(
-    name = 'bk-uploader-unshaded',
-    srcs = glob(["**/bk/**/*.java"]),
-    deps = bk_deps_files,
+    name = 'dlog-uploader-unshaded',
+    srcs = glob(["**/dlog/**/*.java"]),
+    deps = dlog_deps_files,
 )
 
 genrule(
-    name = "heron-bk-uploader",
-    srcs = [":bk-uploader-unshaded_deploy.jar"],
-    outs = ["heron-bk-uploader.jar"],
+    name = "heron-dlog-uploader",
+    srcs = [":dlog-uploader-unshaded_deploy.jar"],
+    outs = ["heron-dlog-uploader.jar"],
     cmd  = "cp $< $@",
 )
 

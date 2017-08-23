@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.uploader.bk;
+package com.twitter.heron.uploader.dlog;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +25,7 @@ import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.namespace.Namespace;
 import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 
+import com.twitter.heron.dlog.DLOutputStream;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
@@ -34,9 +35,9 @@ import com.twitter.heron.spi.utils.UploaderUtils;
 /**
  * A bookkeeper based uploader implementation.
  */
-public class BKUploader implements IUploader {
+public class DLUploader implements IUploader {
 
-  private static final Logger LOG = Logger.getLogger(BKUploader.class.getName());
+  private static final Logger LOG = Logger.getLogger(DLUploader.class.getName());
 
   private String destTopologyNamespaceURI;
   private Config config;
@@ -59,7 +60,7 @@ public class BKUploader implements IUploader {
           "Failed to initialize distributedlog namespace for uploading topologies", ioe);
     }
 
-    this.destTopologyNamespaceURI = BKContext.dlTopologiesNamespaceURI(config);
+    this.destTopologyNamespaceURI = DLContext.dlTopologiesNamespaceURI(config);
     this.topologyPackageLocation = Context.topologyPackageFile(config);
 
     // name of the destination file is the same as the base name of the topology package file.
@@ -82,7 +83,7 @@ public class BKUploader implements IUploader {
         .setRetentionPeriodHours(Integer.MAX_VALUE)       // long retention
         .setUseDaemonThread(true);                        // use daemon thread
 
-    URI uri = URI.create(BKContext.dlTopologiesNamespaceURI(this.config));
+    URI uri = URI.create(DLContext.dlTopologiesNamespaceURI(this.config));
     LOG.info(String.format(
         "Initializing distributedlog namespace for uploading topologies : %s",
         uri));

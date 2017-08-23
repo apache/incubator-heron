@@ -11,16 +11,16 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.uploader.bk;
+package com.twitter.heron.uploader.dlog;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
-final class BKContext extends Context {
+final class DLContext extends Context {
 
   public static final String DL_TOPOLOGIES_NS_URI = "hero.uploader.bk.topologies.namespace.uri";
 
-  private BKContext() {
+  private DLContext() {
   }
 
   public static String dlTopologiesNamespaceURI(Config config) {

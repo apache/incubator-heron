@@ -18,18 +18,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.namespace.Namespace;
 import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 
-import com.twitter.heron.spi.utils.UploaderUtils;
-import com.twitter.heron.uploader.bk.DLInputStream;
+import com.twitter.heron.dlog.DLInputStream;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-public class BKDownloader implements Downloader {
+public class DLDownloader implements Downloader {
 
   private static final DistributedLogConfiguration conf = new DistributedLogConfiguration()
       .setUseDaemonThread(true);                        // use daemon thread
