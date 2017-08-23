@@ -15,10 +15,10 @@
 # pylint : disable=missing-docstring
 from heron.common.src.python.basics import EventLooper
 from heron.common.src.python.network import SocketOptions
-from heron.common.src.python.utils.misc import HeronCommunicator
-from heron.instance.src.python.network import SingleThreadStmgrClient, MetricsManagerClient
 import heron.common.src.python.system_constants as constants
-import heron.common.tests.python.mock_protobuf as mock_protobuf
+from heron.instance.src.python.utils.misc import HeronCommunicator
+from heron.instance.src.python.network import SingleThreadStmgrClient, MetricsManagerClient
+import heron.instance.tests.python.mock_protobuf as mock_protobuf
 from mock import Mock
 
 from mock import patch

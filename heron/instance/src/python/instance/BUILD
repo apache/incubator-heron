@@ -12,6 +12,7 @@ pex_binary(
         "//heron/connectors:heron-pythonconnectors-py",
         "//heron/instance/src/python/basics:heron-basics-py",
         "//heron/instance/src/python/network:heron-network-py",
+        "//heron/instance/src/python:instance-py",
         "//heron/common/src/python:common-py",
         "//heron/proto:proto-py",
     ],

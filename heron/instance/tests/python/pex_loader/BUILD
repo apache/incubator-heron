@@ -5,7 +5,7 @@ pex_test(
     name = "pex_loader_unittest",
     srcs = ["pex_loader_unittest.py", "constants.py"],
     deps = [
-        "//heron/common/src/python:common-py",
+        "//heron/instance/src/python:instance-py",
     ],
     reqs = [
         "py==1.4.27",

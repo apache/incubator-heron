@@ -18,7 +18,7 @@ from heron.common.src.python.utils.log import Log
 from heron.api.src.python.bolt.bolt import Bolt
 from heron.api.src.python.stream import Stream
 from heron.api.src.python.component.component_spec import HeronComponentSpec
-import heron.common.src.python.pex_loader as pex_loader
+import heron.instance.src.python.pex_loader as pex_loader
 
 from ..core import constants as integ_const
 from .batch_bolt import BatchBolt

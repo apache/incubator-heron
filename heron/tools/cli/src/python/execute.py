@@ -21,7 +21,7 @@ import traceback
 
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, ProcessResult, Status
-import heron.common.src.python.pex_loader as pex_loader
+import heron.instance.src.python.pex_loader as pex_loader
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.common.src.python.utils.config as config

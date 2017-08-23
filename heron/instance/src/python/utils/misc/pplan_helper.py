@@ -18,9 +18,9 @@ from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.api.src.python.serializer import default_serializer
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.topology import TopologyContextImpl
+from heron.instance.src.python.utils.topology import TopologyContextImpl
 
-import heron.common.src.python.pex_loader as pex_loader
+import heron.instance.src.python.pex_loader as pex_loader
 
 from .custom_grouping_helper import CustomGroupingHelper
 

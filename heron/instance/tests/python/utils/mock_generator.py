@@ -22,13 +22,13 @@ from mock import patch
 from heron.api.src.python.task_hook import ITaskHook
 from heron.api.src.python.custom_grouping import ICustomGrouping
 from heron.api.src.python.serializer import PythonSerializer
-from heron.common.src.python.utils.metrics import MetricsCollector
-from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
+from heron.instance.src.python.utils.metrics import MetricsCollector
+from heron.instance.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
                                                 HeronCommunicator)
 from heron.proto import tuple_pb2
 
 import heron.common.src.python.system_constants as constants
-import heron.common.tests.python.mock_protobuf as mock_protobuf
+import heron.instance.tests.python.mock_protobuf as mock_protobuf
 
 prim_list = [1000, -234, 0.00023, "string",
              ["abc", "def", "ghi"], True, False,

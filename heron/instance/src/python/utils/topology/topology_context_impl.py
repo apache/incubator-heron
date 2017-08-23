@@ -21,10 +21,10 @@ from heron.api.src.python.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
 from heron.api.src.python.topology_context import TopologyContext
 
 import heron.api.src.python.api_constants as api_constants
-from heron.common.src.python.utils.metrics import MetricsCollector
+from heron.instance.src.python.utils.metrics import MetricsCollector
 
 import heron.common.src.python.system_constants as system_constants
-import heron.common.src.python.pex_loader as pex_loader
+import heron.instance.src.python.pex_loader as pex_loader
 
 class TopologyContextImpl(TopologyContext):
   """Implemention of TopologyContext
@@ -111,7 +111,7 @@ class TopologyContextImpl(TopologyContext):
   def add_task_hook(self, task_hook):
     """Registers a specified task hook to this context
 
-    :type task_hook: heron.common.src.python.utils.topology.ITaskHook
+    :type task_hook: heron.instance.src.python.utils.topology.ITaskHook
     :param task_hook: Implementation of ITaskHook
     """
     if not isinstance(task_hook, ITaskHook):

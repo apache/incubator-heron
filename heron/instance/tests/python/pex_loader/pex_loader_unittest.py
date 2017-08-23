@@ -16,8 +16,8 @@ import os
 import unittest
 import re
 import sys
-import heron.common.src.python.pex_loader as pex_loader
-import heron.common.tests.python.pex_loader.constants as constants
+import heron.instance.src.python.pex_loader as pex_loader
+import heron.instance.tests.python.pex_loader.constants as constants
 
 # pylint: disable=missing-docstring
 class PexLoaderTest(unittest.TestCase):
