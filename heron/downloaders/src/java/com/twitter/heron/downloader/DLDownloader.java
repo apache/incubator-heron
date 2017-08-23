@@ -27,7 +27,7 @@ import com.twitter.heron.dlog.DLInputStream;
 
 public class DLDownloader implements Downloader {
 
-  private static final DistributedLogConfiguration conf = new DistributedLogConfiguration()
+  private static final DistributedLogConfiguration CONF = new DistributedLogConfiguration()
       .setUseDaemonThread(true);                        // use daemon thread
 
   private static InputStream openInputStream(Namespace ns,
@@ -51,7 +51,7 @@ public class DLDownloader implements Downloader {
         uri.getFragment());
     Namespace ns = NamespaceBuilder.newBuilder()
         .clientId("heron-downloader")
-        .conf(conf)
+        .conf(CONF)
         .uri(parentUri)
         .build();
     try {

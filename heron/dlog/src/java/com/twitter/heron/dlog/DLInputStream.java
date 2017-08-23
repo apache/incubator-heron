@@ -27,8 +27,6 @@ public class DLInputStream extends InputStream {
   private LogRecordWithInputStream currentLogRecord = null;
   private final DistributedLogManager dlm;
   private LogReader reader;
-  private long currentPosition;
-  private static final int SKIP_BUFFER_SIZE = 512;
   private boolean eos = false;
 
   // Cache the input stream for a log record.
@@ -64,7 +62,6 @@ public class DLInputStream extends InputStream {
   public DLInputStream(DistributedLogManager dlm) throws IOException {
     this.dlm = dlm;
     reader = dlm.getInputStream(DLSN.InitialDLSN);
-    currentPosition = 0;
   }
 
   /**
@@ -129,7 +126,6 @@ public class DLInputStream extends InputStream {
           return read;
         }
       } else {
-        currentPosition += thisread;
         read += thisread;
       }
     }

@@ -100,8 +100,8 @@ public class DLUploader implements IUploader {
     return new File(file).isFile();
   }
 
-  protected OutputStream openOutputStream(String packageName) throws IOException {
-    DistributedLogManager dlm = namespace.openLog(packageName);
+  protected OutputStream openOutputStream(String pkgName) throws IOException {
+    DistributedLogManager dlm = namespace.openLog(pkgName);
     AppendOnlyStreamWriter writer = dlm.getAppendOnlyStreamWriter();
     return new DLOutputStream(dlm, writer);
   }
