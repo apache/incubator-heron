@@ -308,12 +308,34 @@ java_library(
 )
 
 java_library(
-    name = "distributedlog-java",
+    name = "dlog-java",
     srcs = [ "Empty.java" ],
     exports = [ 
-        "@org_apache_distributedlog_core//jar" 
+        "@org_apache_distributedlog_common//jar",
+        "@org_apache_distributedlog_protocol//jar",
+        "@org_apache_distributedlog_core//jar",
+        "@org_apache_bookkeeper_stats_api//jar",
+        "@org_apache_bookkeeper_server//jar",
     ],
     deps = [ 
+        "@org_apache_distributedlog_common//jar",
+        "@org_apache_distributedlog_protocol//jar",
         "@org_apache_distributedlog_core//jar",
+        "@org_apache_bookkeeper_stats_api//jar",
+        "@org_apache_bookkeeper_server//jar",
+        "@com_google_guava_guava//jar",
+        "@org_apache_zookeeper_zookeeper//jar",
+        "@io_netty_netty_all//jar",
+        "@io_netty_netty_tcnative_boringssl_static//jar",
+        "@net_jpountz_lz4_lz4//jar",
+        "@commons_codec//jar",
+        "@commons_collections_commons_collections//jar",
+        "@commons_configuration_commons_configuration//jar",
+        "@commons_cli_commons_cli//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_logging_commons_logging//jar",
+        "@org_apache_commons_commons_lang3//jar",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_jdk14//jar",
     ],
 )

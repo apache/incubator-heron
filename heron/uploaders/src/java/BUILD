@@ -22,7 +22,7 @@ gcs_deps_files = \
 
 bk_deps_files = \
     uploader_spi_files + [
-        "//third_party/java:distributedlog-java",
+        "//third_party/java:dlog-java",
     ]
 
 java_library(

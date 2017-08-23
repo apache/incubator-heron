@@ -6,6 +6,8 @@ jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
+bookkeeper_version = "4.5.0"
+distributedlog_version = "0.5.0-SNAPSHOT"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
@@ -16,6 +18,11 @@ hk2_api = "2.5.0-b32"
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
+)
+
+maven_server(
+  name = "apache_snapshot",
+  url = "https://repository.apache.org/snapshots/",
 )
 
 maven_jar(
@@ -74,6 +81,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "commons_configuration_commons_configuration",
+  artifact = "commons-configuration:commons-configuration:1.6",
+)
+
+maven_jar(
   name = "commons_cli_commons_cli",
   artifact = "commons-cli:commons-cli:1.3.1",
 )
@@ -85,7 +97,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_commons_commons_lang3",
-  artifact = "org.apache.commons:commons-lang3:3.3.2",
+  artifact = "org.apache.commons:commons-lang3:3.4",
 )
 
 maven_jar(
@@ -120,7 +132,7 @@ maven_jar(
 
 maven_jar(
   name = "com_google_guava_guava",
-  artifact = "com.google.guava:guava:18.0",
+  artifact = "com.google.guava:guava:20.0",
 )
 
 maven_jar(
@@ -291,6 +303,11 @@ maven_jar(
 maven_jar(
   name = "io_netty_netty_all",
   artifact = "io.netty:netty-all:4.0.21.Final"
+)
+
+maven_jar(
+  name = "io_netty_netty_tcnative_boringssl_static",
+  artifact = "io.netty:netty-tcnative-boringssl-static:2.0.3.Final",
 )
 
 maven_jar(
@@ -631,18 +648,36 @@ maven_jar(
 
 # bookkeeper & distributedlog dependencies
 maven_jar(
+  name = "org_apache_bookkeeper_stats_api",
+  artifact = "org.apache.bookkeeper.stats:bookkeeper-stats-api:" + bookkeeper_version,
+)
+
+maven_jar(
+  name = "org_apache_bookkeeper_server",
+  artifact = "org.apache.bookkeeper:bookkeeper-server:" + bookkeeper_version,
+)
+
+maven_jar(
   name = "org_apache_distributedlog_core",
-  artifact = "org.apache.distributedlog:distributedlog-core:jar:0.5.0-SNAPSHOT",
+  artifact = "org.apache.distributedlog:distributedlog-core:jar:" + distributedlog_version,
+  server = "apache_snapshot",
 )
 
 maven_jar(
   name = "org_apache_distributedlog_protocol",
-  artifact = "org.apache.distributedlog:distributedlog-protocol:jar:0.5.0-SNAPSHOT",
+  artifact = "org.apache.distributedlog:distributedlog-protocol:jar:" + distributedlog_version,
+  server = "apache_snapshot",
 )
 
 maven_jar(
   name = "org_apache_distributedlog_common",
-  artifact = "org.apache.distributedlog:distributedlog-common:jar:0.5.0-SNAPSHOT",
+  artifact = "org.apache.distributedlog:distributedlog-common:jar:" + distributedlog_version,
+  server = "apache_snapshot",
+)
+
+maven_jar(
+  name = "net_jpountz_lz4_lz4",
+  artifact = "net.jpountz.lz4:lz4:1.3.0",
 )
 # end bookkeeper & distributedlog dependencies
 

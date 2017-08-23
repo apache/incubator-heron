@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 downloader_deps = [
   "//heron/spi/src/java:common-spi-java",
   "//third_party/java:commons-compress",
-  "//third_party/java:distributedlog-java",
+  "//third_party/java:dlog-java",
 ]
 
 java_binary(
