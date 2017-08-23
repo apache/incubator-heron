@@ -160,7 +160,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
         LOG.log(Level.FINE, "MetricsCache Query response: {0}", response);
         return response;
       } catch (InvalidProtocolBufferException e) {
-        LOG.log(Level.SEVERE,"protobuf cannot parse the reply from MetricsCache ", e);
+        LOG.log(Level.SEVERE, "protobuf cannot parse the reply from MetricsCache ", e);
         return null;
       }
     } finally {
