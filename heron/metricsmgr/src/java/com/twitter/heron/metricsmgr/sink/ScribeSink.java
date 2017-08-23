@@ -37,6 +37,7 @@ import org.apache.thrift.transport.TSocket;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.metricsmgr.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
@@ -218,7 +219,7 @@ public class ScribeSink implements IMetricsSink {
         config.get(KEY_SERVICE_NAMESPACE), topologyName);
     // The source format is "host:port/componentName/instanceId"
     // However, we need just "/componentName/instanceId"
-    String[] sources = record.getSource().split("/");
+    String[] sources = Metrics.splitRecordSource(record);
     String source = String.format("/%s/%s", sources[1], sources[2]);
     // The timestamp is in ms, however, we need to convert it in seconds to fit Twitter Infra
     long timestamp = Duration.ofMillis(record.getTimestamp()).getSeconds();

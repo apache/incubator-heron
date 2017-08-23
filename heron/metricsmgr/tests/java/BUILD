@@ -23,6 +23,7 @@ java_library(
 
 java_tests(
     test_classes = [
+        "com.twitter.heron.metricsmgr.MetricsTests",
         "com.twitter.heron.metricsmgr.HandleTMasterLocationTest",
         "com.twitter.heron.metricsmgr.MetricsManagerServerTest",
         "com.twitter.heron.metricsmgr.executor.SinkExecutorTest",
@@ -30,6 +31,7 @@ java_tests(
         "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSinkTest",
         "com.twitter.heron.metricsmgr.sink.FileSinkTest",
         "com.twitter.heron.metricsmgr.sink.WebSinkTest",
+        "com.twitter.heron.metricsmgr.sink.PrometheusSinkTests",
     ],
     runtime_deps = [
         ":metricsmgr-tests",
