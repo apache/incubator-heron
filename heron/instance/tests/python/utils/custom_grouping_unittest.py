@@ -14,8 +14,8 @@
 # pylint: disable=missing-docstring
 
 import unittest
-from heron.common.src.python.utils.misc import CustomGroupingHelper
-from heron.common.tests.python.utils.mock_generator import MockCustomGrouping
+from heron.instance.src.python.utils.misc import CustomGroupingHelper
+from heron.instance.tests.python.utils.mock_generator import MockCustomGrouping
 
 class CustomGroupingTest(unittest.TestCase):
   STREAM_ID = "default"
