@@ -72,7 +72,7 @@ class JoinBolt<K, V1, V2, VR> extends DslBolt, WindowBolt {
   public void handleWindow(List<Tuple> tuples) {
     Map<K, KeyValue<V1, V2>> joinMap = new HashMap<>();
     for (Tuple tuple : tuples) {
-      if (tuple.getSourceComponent() == leftComponent) {
+      if (tuple.getSourceComponent().equals(leftComponent)) {
         KeyValue<K, V1> tup = (KeyValue<K, V1>) tuple.getValue(0);
         addMapLeft(joinMap, tup);
       } else {
