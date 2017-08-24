@@ -24,7 +24,7 @@ dlog_deps_files = \
     uploader_spi_files + [
         "@com_google_guava_guava//jar",
         "@org_apache_distributedlog_core//jar",
-        "//heron/dlog/src/java:dlog-lib",
+        "//heron/io/dlog/src/java:dlog-lib",
     ]
 
 java_library(
