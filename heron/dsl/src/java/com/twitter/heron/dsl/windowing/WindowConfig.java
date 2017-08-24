@@ -14,11 +14,6 @@
 
 package com.twitter.heron.dsl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,7 +25,7 @@ import java.util.Set;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class WindowConfig {
+public final class WindowConfig {
   public static WindowConfig createTimeWindow(int windowDuration) {
     return new WindowConfig(WindowType.TIME, windowDuration, windowDuration);
   }
