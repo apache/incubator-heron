@@ -62,11 +62,11 @@ public abstract class Streamlet<R> {
     return new MapStreamlet<R, T>(this, mapFn);
   }
 
-  /*
-  <T> Streamlet<T> flatMap(Function<R, Collection<T>> flatMapFn) {
-    new FlatMapStreamlet(flatMapFn);
+  <T> Streamlet<T> flatMap(Function<R, Iterable<T>> flatMapFn) {
+    return new FlatMapStreamlet<R, T>(this, flatMapFn);
   }
 
+  /*
   Streamlet<R> filter(Predicate<R> filterFn) {
     return FilterStreamlet(filterFn);
   }
