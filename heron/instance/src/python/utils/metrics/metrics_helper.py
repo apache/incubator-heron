@@ -17,10 +17,10 @@ from heron.common.src.python.utils.log import Log
 from heron.common.src.python.config import system_config
 import heron.common.src.python.system_constants as constants
 
-from heron.proto import metrics_pb2
+from heronpy.proto import metrics_pb2
 
-from heron.api.src.python.metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
-                                          ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)
+from heronpy.api.metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
+                                 ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)
 
 class BaseMetricsHelper(object):
   """Helper class for metrics management

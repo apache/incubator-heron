@@ -6,7 +6,7 @@ pex_library(
     name = 'common-py',
     srcs = glob(['**/*.py']),
     deps = [
-        '//heron/proto:proto-py',
+        '//heronpy/proto:proto-py',
     ],
     reqs = [
         'colorlog==2.6.1',

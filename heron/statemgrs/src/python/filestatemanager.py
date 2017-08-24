@@ -19,12 +19,12 @@ from collections import defaultdict
 
 from heron.statemgrs.src.python.statemanager import StateManager
 
-from heron.proto.execution_state_pb2 import ExecutionState
-from heron.proto.packing_plan_pb2 import PackingPlan
-from heron.proto.physical_plan_pb2 import PhysicalPlan
-from heron.proto.scheduler_pb2 import SchedulerLocation
-from heron.proto.tmaster_pb2 import TMasterLocation
-from heron.proto.topology_pb2 import Topology
+from heronpy.proto.execution_state_pb2 import ExecutionState
+from heronpy.proto.packing_plan_pb2 import PackingPlan
+from heronpy.proto.physical_plan_pb2 import PhysicalPlan
+from heronpy.proto.scheduler_pb2 import SchedulerLocation
+from heronpy.proto.tmaster_pb2 import TMasterLocation
+from heronpy.proto.topology_pb2 import Topology
 
 # pylint: disable=too-many-instance-attributes
 class FileStateManager(StateManager):

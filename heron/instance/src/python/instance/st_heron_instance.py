@@ -20,14 +20,14 @@ import traceback
 import signal
 import yaml
 
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.state import HashMapState
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.state import HashMapState
 
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
 
-from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
+from heronpy.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
 
 from heron.instance.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.utils.misc import SerializerHelper

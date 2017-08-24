@@ -10,7 +10,7 @@ pex_library(
     deps = [
         "//heron/common/src/python:common-py",
         "//heron/tools/common/src/python:common-py",
-        "//heron/proto:proto-py",
+        "//heronpy/proto:proto-py",
     ],
     reqs = [
       "PyYAML==3.10",

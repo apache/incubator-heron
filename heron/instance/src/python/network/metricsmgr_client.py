@@ -20,7 +20,7 @@ from heron.common.src.python.utils.log import Log
 from heron.instance.src.python.network.heron_client import HeronClient
 from heron.instance.src.python.network import StatusCode
 
-from heron.proto import metrics_pb2, common_pb2
+from heronpy.proto import metrics_pb2, common_pb2
 
 import heron.common.src.python.system_constants as constants
 

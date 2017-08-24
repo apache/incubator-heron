@@ -19,7 +19,7 @@ import tempfile
 import requests
 
 from heron.common.src.python.utils.log import Log
-from heron.proto import topology_pb2
+from heronpy.proto import topology_pb2
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute

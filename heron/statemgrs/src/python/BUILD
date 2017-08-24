@@ -6,7 +6,7 @@ pex_library(
   name = 'statemgr-py',
   srcs = glob(['**/*.py']),
   deps = [
-    '//heron/proto:proto-py',
+    '//heronpy/proto:proto-py',
   ],
   reqs = [
     'PyYAML==3.10',

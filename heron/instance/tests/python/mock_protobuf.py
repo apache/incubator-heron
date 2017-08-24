@@ -17,8 +17,8 @@ This module is used mainly for testing Python Heron Instance as well as common m
 written in Python.
 """
 
-from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
-from heron.api.src.python.serializer import PythonSerializer
+from heronpy.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
+from heronpy.api.serializer import PythonSerializer
 
 # pylint: disable=dangerous-default-value
 # pylint: disable=redefined-builtin

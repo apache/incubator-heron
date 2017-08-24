@@ -5,8 +5,8 @@ pex_library(
   name = 'mock_proto',
   srcs = ["mock_proto.py"],
   deps = [
-    '//heron/proto:proto-py',
-    '//heron/api/src/python:heron-python-py',
+    '//heronpy/proto:proto-py',
+    '//heronpy/api:heron-python-py',
   ],
 )
 
@@ -15,7 +15,7 @@ pex_test(
     srcs = ["topology_helpers_unittest.py"],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
-        "//heron/api/src/python:heron-python-py",
+        "//heronpy/api:heron-python-py",
     ],
     reqs = [
         "mock==1.0.1",
@@ -76,7 +76,7 @@ pex_test(
     srcs = ["tracker_unittest.py"],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
-        "//heron/proto:proto-py",
+        "//heronpy/proto:proto-py",
     ],
     reqs = [
         "mock==1.0.1",

@@ -7,13 +7,14 @@ pex_binary(
     name = "heron-python-instance",
     srcs = ["st_heron_instance.py"],
     deps = [
-        "//heron/api/src/python:heron-python-py",
-        "//heron/dsl/src/python:heron-pythondsl-py",
+        "//heronpy/api:heron-python-py",
+        "//heronpy/dsl:heron-pythondsl-py",
+        "//heronpy/connectors:heron-pythonconnectors-py",
         "//heron/instance/src/python/basics:heron-basics-py",
         "//heron/instance/src/python/network:heron-network-py",
         "//heron/instance/src/python:instance-py",
         "//heron/common/src/python:common-py",
-        "//heron/proto:proto-py",
+        "//heronpy/proto:proto-py",
     ],
     reqs = ['colorlog==2.6.1', 'PyYAML==3.10'],
 )

@@ -17,7 +17,7 @@ import tornado.gen
 import tornado.web
 
 from heron.common.src.python.utils.log import Log
-from heron.proto import tmaster_pb2
+from heronpy.proto import tmaster_pb2
 from heron.tools.tracker.src.python.handlers import BaseHandler
 
 # pylint: disable=attribute-defined-outside-init
