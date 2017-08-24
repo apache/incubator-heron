@@ -6,7 +6,7 @@ pex_test(
     name = "bolt_instance_unittest",
     srcs = ["bolt_instance_unittest.py"],
     deps = [
-        "//heron/common/tests/python:pytest-py",
+        "//heron/instance/tests/python:instance-tests-py",
         "//heron/instance/src/python/basics:heron-basics-py",
     ],
     reqs = [
