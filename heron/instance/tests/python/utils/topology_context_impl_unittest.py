@@ -15,10 +15,10 @@
 # pylint: disable=missing-docstring
 import unittest
 
-from heron.common.src.python.utils.topology import TopologyContextImpl
+from heron.instance.src.python.utils.topology import TopologyContextImpl
 
-import heron.common.tests.python.utils.mock_generator as mock_generator
-import heron.common.tests.python.mock_protobuf as mock_protobuf
+import heron.instance.tests.python.utils.mock_generator as mock_generator
+import heron.instance.tests.python.mock_protobuf as mock_protobuf
 
 class TopologyContextImplTest(unittest.TestCase):
   def setUp(self):

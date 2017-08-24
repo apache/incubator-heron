@@ -17,9 +17,9 @@
 import unittest
 
 import time
-from heron.common.src.python.utils.tuple import TupleHelper
-import heron.common.tests.python.mock_protobuf as mock_protobuf
-import heron.common.tests.python.utils.mock_generator as mock_generator
+from heron.instance.src.python.utils.tuple import TupleHelper
+import heron.instance.tests.python.mock_protobuf as mock_protobuf
+import heron.instance.tests.python.utils.mock_generator as mock_generator
 
 class TupleHelperTest(unittest.TestCase):
   def test_normal_tuple(self):

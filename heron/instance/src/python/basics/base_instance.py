@@ -23,12 +23,13 @@ from heron.api.src.python.state.stateful_component import StatefulComponent
 
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.common.src.python.utils.misc import OutgoingTupleHelper
+
 from heron.proto import tuple_pb2
 
-import heron.common.src.python.system_constants as system_constants
+from heron.instance.src.python.utils.misc import SerializerHelper
+from heron.instance.src.python.utils.misc import OutgoingTupleHelper
 
+import heron.common.src.python.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
 # pylint: disable=too-many-instance-attributes

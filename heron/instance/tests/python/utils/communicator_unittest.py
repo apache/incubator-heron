@@ -16,8 +16,8 @@
 import Queue
 import unittest
 
-from heron.common.src.python.utils.misc import HeronCommunicator
-import heron.common.tests.python.utils.mock_generator as mock_generator
+from heron.instance.src.python.utils.misc import HeronCommunicator
+import heron.instance.tests.python.utils.mock_generator as mock_generator
 
 class CommunicatorTest(unittest.TestCase):
   def setUp(self):

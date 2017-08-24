@@ -15,7 +15,7 @@
 # pylint: disable=missing-docstring
 import unittest
 
-import heron.common.tests.python.utils.mock_generator as mock_generator
+import heron.instance.tests.python.utils.mock_generator as mock_generator
 
 class OutgoingTupleHelperTest(unittest.TestCase):
   DEFAULT_STREAM_ID = "stream_id"
