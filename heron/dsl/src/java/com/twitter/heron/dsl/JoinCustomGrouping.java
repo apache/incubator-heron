@@ -14,11 +14,11 @@
 
 package com.twitter.heron.dsl;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.topology.TopologyContext;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,8 +30,24 @@ import java.util.Set;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public abstract class KVStreamlet<K, V> extends Streamlet<Tuple2<K, V>> {
-  <V2> KVStreamlet<K, Tuple2<V, V2>> join(WindowConfig windowCfg, KVStreamlet<K, V2> other);
+class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
+  private static final long serialVersionUID = 2007892247960031525L;
+  private List<Integer> taskIds;
 
-  KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg, BinaryOperator<V> reduceFn);
+  public JoinCustomGrouping() {
+  }
+
+  @Override
+  public void prepare(TopologyContext context, String component, String streamId, List<Integer> targetTasks) {
+    this.taskIds = targetTasks;
+  }
+
+  @Override
+  public List<Integer> chooseTasks(List<Object> values) {
+    List<Integer> ret = new ArrayList<>();
+    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
+    int index = obj.getKey().hashCode() % taskIds.size();
+    ret.add(taskIds.get(index));
+    return ret;
+  }
 }

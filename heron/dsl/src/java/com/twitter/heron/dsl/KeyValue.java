@@ -24,17 +24,19 @@ package com.twitter.heron.dsl;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class Tuple2<K, V> {
+public class KeyValue<K, V> {
   private K k;
   private V v;
-  public Tuple2(K k, V v) {
+  public KeyValue(K k, V v) {
     this.k = k;
     this.v = v;
   }
   public K getKey() {
     return k;
   }
+  public void setKey(K k) { this.k = k; }
   public V getValue() {
     return v;
   }
+  public void setValue(V v) { this.v = v; }
 }

@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.dsl.windowing;
+package com.twitter.heron.dsl;
 
+import java.util.function.BiFunction;
+
+import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -25,26 +28,17 @@ package com.twitter.heron.dsl.windowing;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public final class WindowConfig {
-  public static WindowConfig createTimeWindow(int windowDuration) {
-    return new WindowConfig(WindowType.TIME, windowDuration, windowDuration);
+public abstract class KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
+  <V2, VR> KVStreamlet<K, VR> join(WindowConfig windowCfg,
+                                   KVStreamlet<K, V2> other,
+                                   BiFunction<V, V2, VR> joinFunction) {
+    return new JoinStreamlet<K, V, V2, VR>(this, other, windowCfg, joinFunction);
   }
-  public static WindowConfig createTimeWindow(int windowDuration, int slideInterval) {
-    return new WindowConfig(WindowType.TIME, windowDuration, slideInterval);
+
+  /*
+  KVStreamlet<K, V> reduceByKeyAndWindow(com.twitter.heron.dsl.WindowConfig windowCfg,
+                                         BinaryOperator<V> reduceFn) {
+
   }
-  public static WindowConfig createTupleWindow(int windowSize) {
-    return new WindowConfig(WindowType.COUNT, windowSize, windowSize);
-  }
-  public static WindowConfig createTupleWindow(int windowSize, int slideSize) {
-    return new WindowConfig(WindowType.COUNT, windowSize, slideSize);
-  }
-  private enum WindowType { TIME, COUNT }
-  private WindowType windowType;
-  private int windowSize;
-  private int slideInterval;
-  private WindowConfig(WindowType type, int windowSize, int slideInterval) {
-    this.windowType = type;
-    this.windowSize = windowSize;
-    this.slideInterval = slideInterval;
-  }
+  */
 }
