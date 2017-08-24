@@ -17,7 +17,7 @@ from heron.api.src.python.serializer import PythonSerializer
 
 import heron.api.src.python.api_constants as constants
 
-import heron.instance.src.python.pex_loader as pex_loader
+import heron.common.src.python.pex_loader as pex_loader
 
 class SerializerHelper(object):
   """Helper class for getting serializer for component"""
