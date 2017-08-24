@@ -14,11 +14,15 @@
 
 package com.twitter.heron.dsl;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.exception.AlreadyAliveException;
+import com.twitter.heron.api.exception.InvalidTopologyException;
+import com.twitter.heron.api.topology.TopologyBuilder;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,21 +35,34 @@ import java.util.Set;
  could be assigned by the user or computed by the system
  */
 public abstract class Streamlet<R> {
-  protected String stageName;
+  protected String name;
   protected int nPartitions;
-  public Streamlet<R> setName(String stageName) {
-    this.stageName = stageName;
+  public Streamlet<R> setName(String sName) {
+    if (sName == null) {
+      throw new IllegalArgumentException("Streamlet name cannot be null");
+    }
+    this.name = sName;
     return this;
   }
-  public Streamlet<R> setNumPartitions(int nPartitions) {
-    this.nPartitions = nPartitions;
+  public String getName() {
+    return name;
+  }
+  public Streamlet<R> setNumPartitions(int numPartitions) {
+    if (numPartitions < 1) {
+      throw new IllegalArgumentException("Streamlet's partitions cannot be < 1");
+    }
+    this.nPartitions = numPartitions;
     return this;
+  }
+  public int getNumPartitions() {
+    return nPartitions;
   }
 
   <T> Streamlet<T> map(Function<R, T> mapFn) {
-    new MapStreamlet(mapFn);
+    return new MapStreamlet<R, T>(this, mapFn);
   }
 
+  /*
   <T> Streamlet<T> flatMap(Function<R, Collection<T>> flatMapFn) {
     new FlatMapStreamlet(flatMapFn);
   }
@@ -57,13 +74,24 @@ public abstract class Streamlet<R> {
   Streamlet<R> repartition(int nPartitions) {
     return RepartitionStreamlet(nPartitions);
   }
+  */
+
   protected Streamlet() {
-    this.stageName = "NotAssigned";
-    this.nPartitions = 1;
+    this.nPartitions = -1;
   }
 
-  protected TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
+  abstract TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
 
-  public void run() {
+  public void run(String topologyName, Config config) {
+    Set<String> stageNames = new HashSet<>();
+    TopologyBuilder bldr = new TopologyBuilder();
+    bldr = build(bldr, stageNames);
+    try {
+      HeronSubmitter.submitTopology(topologyName, config, bldr.createTopology());
+    } catch (AlreadyAliveException e) {
+      e.printStackTrace();
+    } catch (InvalidTopologyException e) {
+      e.printStackTrace();
+    }
   }
 }
