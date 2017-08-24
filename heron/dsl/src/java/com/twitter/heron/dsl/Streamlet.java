@@ -71,11 +71,9 @@ public abstract class Streamlet<R> {
     return new FilterStreamlet<R>(this, filterFn);
   }
 
-  /*
-  Streamlet<R> repartition(int nPartitions) {
-    return RepartitionStreamlet(nPartitions);
+  Streamlet<R> repartition(int numPartitions) {
+    return this.map(Function.identity()).setNumPartitions(numPartitions);
   }
-  */
 
   protected Streamlet() {
     this.nPartitions = -1;
