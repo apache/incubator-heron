@@ -17,6 +17,7 @@ package com.twitter.heron.dsl;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
@@ -66,11 +67,11 @@ public abstract class Streamlet<R> {
     return new FlatMapStreamlet<R, T>(this, flatMapFn);
   }
 
-  /*
   Streamlet<R> filter(Predicate<R> filterFn) {
-    return FilterStreamlet(filterFn);
+    return new FilterStreamlet<R>(this, filterFn);
   }
 
+  /*
   Streamlet<R> repartition(int nPartitions) {
     return RepartitionStreamlet(nPartitions);
   }
