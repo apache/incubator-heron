@@ -15,12 +15,12 @@
 import os
 from collections import namedtuple
 
-from heron.api.src.python.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
-                                            SpoutFailInfo, BoltExecuteInfo,
-                                            BoltAckInfo, BoltFailInfo)
-from heron.api.src.python.topology_context import TopologyContext
+from heronpy.api.task_hook import (ITaskHook, EmitInfo, SpoutAckInfo,
+                                   SpoutFailInfo, BoltExecuteInfo,
+                                   BoltAckInfo, BoltFailInfo)
+from heronpy.api.topology_context import TopologyContext
 
-import heron.api.src.python.api_constants as api_constants
+import heronpy.api.api_constants as api_constants
 from heron.instance.src.python.utils.metrics import MetricsCollector
 
 import heron.common.src.python.system_constants as system_constants

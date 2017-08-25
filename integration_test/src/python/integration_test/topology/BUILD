@@ -14,7 +14,7 @@ pex_library(
         exclude = ["test_topology_main.py"],
     ),
     deps = [
-        "//heron/api/src/python:heron-python-py",
+        "//heronpy/api:heron-python-py",
         "//integration_test/src/python/integration_test/common:heron-integration-common-py",
         "//integration_test/src/python/integration_test/core:heron-integration-core-py",
     ],
