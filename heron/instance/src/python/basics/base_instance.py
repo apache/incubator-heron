@@ -24,7 +24,7 @@ from heronpy.api.state.stateful_component import StatefulComponent
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 
-from heronpy.proto import tuple_pb2
+from heron.proto import tuple_pb2
 
 from heron.instance.src.python.utils.misc import SerializerHelper
 from heron.instance.src.python.utils.misc import OutgoingTupleHelper

@@ -14,6 +14,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
 )
 
 proto_library(
@@ -22,6 +23,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
 )
 
 proto_library(
@@ -30,6 +32,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
 )
 
 proto_library(
@@ -38,6 +41,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
 )
 
 proto_library(
@@ -46,6 +50,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
 )
 
 proto_library(
@@ -54,6 +59,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [
         ":proto_common",
         ":proto_packing_plan"
@@ -66,6 +72,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [":proto_topology"],
 )
 
@@ -75,6 +82,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
 )
 
 proto_library(
@@ -83,6 +91,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [":proto_topology"],
 )
 
@@ -92,6 +101,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [
         ":proto_common",
         ":proto_physical_plan",
@@ -107,6 +117,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [
       ":proto_common",
       ":proto_tmaster",
@@ -119,6 +130,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [
         ":proto_common",
         ":proto_packing_plan",
@@ -135,6 +147,7 @@ proto_library(
     includes = ["heron/proto"],
     gen_cc = 1,
     gen_java = 1,
+    gen_py = 1,
     deps = [
         ":proto_common",
         ":proto_physical_plan",
@@ -164,7 +177,7 @@ java_library(
     ],
 )
 
-# This is for binaries that don't want protobuf
+# This is for binaries that don't want protobuf 
 # dependency to be included in the generated jar
 java_library(
     name = "proto-java-nl",
@@ -198,6 +211,28 @@ java_binary(
     ],
 )
 
+pex_library(
+    name = "proto-py",
+    deps = [
+        ":proto_common_py",
+        ":proto_execution_state_py",
+        ":proto_stats_py",
+        ":proto_topology_py",
+        ":proto_scheduler_py",
+        ":proto_packing_plan_py",
+        ":proto_physical_plan_py",
+        ":proto_metrics_py",
+        ":proto_tmaster_py",
+        ":proto_tuple_py",
+        ":proto_stmgr_py",
+        ":proto_ckptmgr_py",
+    ],
+    reqs = [
+        "protobuf==2.5.0",
+        "setuptools==18.0.1",
+    ],
+)
+
 cc_library(
     name = "proto-cxx",
     srcs = [
@@ -205,6 +240,7 @@ cc_library(
     ],
     hdrs = [
         "messages.h",
+
         "ckptmgr.pb.h",
         "common.pb.h",
         "execution_state.pb.h",

@@ -25,7 +25,7 @@ from heronpy.api.serializer import PythonSerializer
 from heron.instance.src.python.utils.metrics import MetricsCollector
 from heron.instance.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
                                                 HeronCommunicator)
-from heronpy.proto import tuple_pb2
+from heron.proto import tuple_pb2
 
 import heron.common.src.python.system_constants as constants
 import heron.instance.tests.python.mock_protobuf as mock_protobuf

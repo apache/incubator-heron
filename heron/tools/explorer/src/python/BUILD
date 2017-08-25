@@ -10,7 +10,7 @@ pex_library(
         "//heron/tools/common/src/python:common-py",
         "//heron/tools/common/src/python:tracker-py",
         "//heron/statemgrs/src/python:statemgr-py",
-        "//heronpy/proto:proto-py",
+        "//heron/proto:proto-py",
     ],
     reqs = [
         "tornado==4.0.2",

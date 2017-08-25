@@ -27,7 +27,7 @@ from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
 
-from heronpy.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
+from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
 
 from heron.instance.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.utils.misc import SerializerHelper

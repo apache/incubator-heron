@@ -14,7 +14,7 @@ pex_binary(
         "//heron/instance/src/python/network:heron-network-py",
         "//heron/instance/src/python:instance-py",
         "//heron/common/src/python:common-py",
-        "//heronpy/proto:proto-py",
+        "//heron/proto:proto-py",
     ],
     reqs = ['colorlog==2.6.1', 'PyYAML==3.10'],
 )

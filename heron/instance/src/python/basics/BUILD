@@ -8,7 +8,7 @@ pex_library(
    deps = [
        "//heron/common/src/python:common-py",
        "//heronpy/api:heron-python-py",
-       "//heronpy/proto:proto-py",
+       "//heron/proto:proto-py",
    ],
    reqs = ['colorlog==2.6.1', 'PyYAML==3.10'],
 )

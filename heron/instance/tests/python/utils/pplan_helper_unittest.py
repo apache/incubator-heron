@@ -17,7 +17,7 @@
 import unittest
 
 from heron.instance.src.python.utils.misc import PhysicalPlanHelper
-from heronpy.proto import topology_pb2
+from heron.proto import topology_pb2
 
 import heron.instance.tests.python.utils.mock_generator as mock_generator
 import heron.instance.tests.python.mock_protobuf as mock_protobuf

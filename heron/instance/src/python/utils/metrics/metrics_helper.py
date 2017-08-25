@@ -17,7 +17,7 @@ from heron.common.src.python.utils.log import Log
 from heron.common.src.python.config import system_config
 import heron.common.src.python.system_constants as constants
 
-from heronpy.proto import metrics_pb2
+from heron.proto import metrics_pb2
 
 from heronpy.api.metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
                                  ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)

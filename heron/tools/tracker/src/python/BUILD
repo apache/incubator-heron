@@ -13,7 +13,7 @@ pex_library(
         "//heronpy/api:heron-python-py",
         "//heron/tools/common/src/python:common-py",
         "//heron/statemgrs/src/python:statemgr-py",
-        "//heronpy/proto:proto-py",
+        "//heron/proto:proto-py",
     ],
     reqs = [
         "protobuf==2.5.0",

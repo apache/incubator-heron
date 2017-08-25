@@ -16,7 +16,7 @@ import sys
 
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heronpy.proto import tuple_pb2, topology_pb2, ckptmgr_pb2
+from heron.proto import tuple_pb2, topology_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as constants
 

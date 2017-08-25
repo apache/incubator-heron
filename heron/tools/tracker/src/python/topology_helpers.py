@@ -21,7 +21,7 @@ import sets
 
 from heronpy.api import api_constants
 from heron.common.src.python import system_constants
-from heronpy.proto import topology_pb2
+from heron.proto import topology_pb2
 
 def get_topology_config(topology, key):
   """

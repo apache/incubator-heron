@@ -22,7 +22,7 @@ from heronpy.api.stream import Stream
 
 from heron.common.src.python.utils.log import Log
 
-from heronpy.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
+from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
 from heron.instance.src.python.utils.metrics import BoltMetrics
 from heron.instance.src.python.utils.tuple import TupleHelper, HeronTuple

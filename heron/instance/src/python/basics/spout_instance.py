@@ -26,7 +26,7 @@ from heron.common.src.python.utils.log import Log
 from heron.instance.src.python.utils.metrics import SpoutMetrics
 from heron.instance.src.python.utils.tuple import TupleHelper
 
-from heronpy.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
+from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as system_constants
 

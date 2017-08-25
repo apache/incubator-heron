@@ -21,7 +21,7 @@ from heron.common.src.python.utils.log import Log
 from heron.instance.src.python.network.heron_client import HeronClient
 from heron.instance.src.python.network import StatusCode
 
-from heronpy.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
+from heron.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
 
 import heron.common.src.python.system_constants as constants
 

@@ -4,7 +4,7 @@
 import unittest2 as unittest
 from mock import call, patch, Mock
 
-import heronpy.proto.execution_state_pb2 as protoEState
+import heron.proto.execution_state_pb2 as protoEState
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python.tracker import Tracker

@@ -1,9 +1,9 @@
 ''' mock_proto.py '''
 from heronpy.api import api_constants
-import heronpy.proto.execution_state_pb2 as protoEState
-import heronpy.proto.physical_plan_pb2 as protoPPlan
-import heronpy.proto.tmaster_pb2 as protoTmaster
-import heronpy.proto.topology_pb2 as protoTopology
+import heron.proto.execution_state_pb2 as protoEState
+import heron.proto.physical_plan_pb2 as protoPPlan
+import heron.proto.tmaster_pb2 as protoTmaster
+import heron.proto.topology_pb2 as protoTopology
 
 # pylint: disable=no-self-use, missing-docstring
 class MockProto(object):

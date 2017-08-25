@@ -17,7 +17,7 @@ import json
 from functools import partial
 
 from heron.common.src.python.utils.log import Log
-from heronpy.proto import topology_pb2
+from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python import javaobj
