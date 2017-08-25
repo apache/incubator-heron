@@ -6,8 +6,8 @@ pex_library(
     name = 'instance-py',
     srcs = glob(['**/*.py']),
     deps = [
-        '//heron/proto:proto-py',
-        "//heron/api/src/python:heron-python-py",
+        '//heronpy/proto:proto-py',
+        "//heronpy/api:heron-python-py",
         '//heron/common/src/python:common-py'
     ],
 )
