@@ -16,7 +16,7 @@
 # pylint: disable=protected-access
 
 import unittest2 as unittest
-from heron.common.src.python.network import StatusCode
+from heron.instance.src.python.network import StatusCode
 import heron.instance.tests.python.network.mock_generator_client as mock_generator
 import heron.instance.tests.python.mock_protobuf as mock_protobuf
 
