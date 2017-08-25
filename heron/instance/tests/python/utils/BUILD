@@ -115,6 +115,7 @@ pex_test(
     name = "global_metrics_unittest",
     srcs = ["global_metrics_unittest.py"],
     deps = [
+        ":common-utils-mock",
         "//heron/instance/tests/python:instance-tests-py",
     ],
     reqs = [
