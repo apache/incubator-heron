@@ -1,3 +1,10 @@
+build --genrule_strategy=standalone
+build --ignore_unsupported_sandboxing
+build --java_toolchain=//tools/java:heron_java_toolchain
+build --python2_path /usr/bin/python2.7
+build --spawn_strategy=standalone
+build --workspace_status_command scripts/release/status.sh
+
 # For centos
 # To use it: bazel build --config=centos
 build:centos --experimental_action_listener=tools/cpp:compile_cpp

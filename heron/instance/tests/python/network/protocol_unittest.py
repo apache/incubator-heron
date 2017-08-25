@@ -14,8 +14,8 @@
 
 # pylint: disable=missing-docstring
 import unittest2 as unittest
-from heron.common.src.python.network import REQID, HeronProtocol, IncomingPacket
-import heron.common.tests.python.network.mock_generator as mock_generator
+from heron.instance.src.python.network import REQID, HeronProtocol, IncomingPacket
+import heron.instance.tests.python.network.mock_generator_client as mock_generator
 
 class ProtocolTest(unittest.TestCase):
   def setUp(self):
