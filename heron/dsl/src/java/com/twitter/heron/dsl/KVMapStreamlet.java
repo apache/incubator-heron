@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.dsl.windowing;
+package com.twitter.heron.dsl;
 
+import java.util.Set;
+import java.util.function.Function;
+
+import com.twitter.heron.api.topology.TopologyBuilder;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -25,26 +29,14 @@ package com.twitter.heron.dsl.windowing;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public final class WindowConfig {
-  public static WindowConfig createTimeWindow(int windowDuration) {
-    return new WindowConfig(WindowType.TIME, windowDuration, windowDuration);
+public class KVMapStreamlet<R, K, V> extends KVStreamlet<K, V> {
+  private MapStreamlet<R, KeyValue<K, V>> delegate;
+
+  public KVMapStreamlet(Streamlet<R> parent, Function<R, KeyValue<K, V>> mapFn) {
+    this.delegate = new MapStreamlet<>(parent, mapFn);
   }
-  public static WindowConfig createTimeWindow(int windowDuration, int slideInterval) {
-    return new WindowConfig(WindowType.TIME, windowDuration, slideInterval);
-  }
-  public static WindowConfig createTupleWindow(int windowSize) {
-    return new WindowConfig(WindowType.COUNT, windowSize, windowSize);
-  }
-  public static WindowConfig createTupleWindow(int windowSize, int slideSize) {
-    return new WindowConfig(WindowType.COUNT, windowSize, slideSize);
-  }
-  private enum WindowType { TIME, COUNT }
-  private WindowType windowType;
-  private int windowSize;
-  private int slideInterval;
-  private WindowConfig(WindowType type, int windowSize, int slideInterval) {
-    this.windowType = type;
-    this.windowSize = windowSize;
-    this.slideInterval = slideInterval;
+
+  protected TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
+    return this.delegate.build(bldr, stageNames);
   }
 }

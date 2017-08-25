@@ -62,9 +62,15 @@ public abstract class Streamlet<R> {
   <T> Streamlet<T> map(Function<R, T> mapFn) {
     return new MapStreamlet<R, T>(this, mapFn);
   }
+  <K, V> KVStreamlet<K, V> mapToKV(Function<R, KeyValue<K, V>> mapFn) {
+    return new KVMapStreamlet<R, K, V>(this, mapFn);
+  }
 
   <T> Streamlet<T> flatMap(Function<R, Iterable<T>> flatMapFn) {
     return new FlatMapStreamlet<R, T>(this, flatMapFn);
+  }
+  <K, V> KVStreamlet<K, V> flatMapToKV(Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
+    return new KVFlatMapStreamlet<R, K, V>(this, flatMapFn);
   }
 
   Streamlet<R> filter(Predicate<R> filterFn) {
