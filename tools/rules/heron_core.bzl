@@ -11,7 +11,7 @@ def heron_core_bin_files():
         "//heron/stmgr/src/cpp:heron-stmgr",
         "//heron/tmaster/src/cpp:heron-tmaster",
         "//heron/instance/src/python/instance:heron-python-instance",
-        "//heron/downloaders/src/shell:heron-downloader"
+        "//heron/downloaders/src/shell:heron-downloader-shell"
     ]
 
 def heron_core_conf_files():
