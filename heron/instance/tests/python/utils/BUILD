@@ -6,6 +6,7 @@ pex_library(
     srcs = ["mock_generator.py"],
     deps = [
         "//heron/instance/tests/python:instance-tests-py",
+        "//heron/instance/src/python:instance-py",
     ],
     reqs = [
         "mock==1.0.1",
@@ -16,7 +17,7 @@ pex_test(
     name = "communicator_unittest",
     srcs = ["communicator_unittest.py"],
     deps = [
-        "//heron/instance/tests/python/utils:common-utils-mock"
+        "//heron/instance/tests/python/utils:common-utils-mock",
     ],
     reqs = [
         "py==1.4.27",
