@@ -26,7 +26,6 @@ from heron.api.src.python.state.state import HashMapState
 from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
-from heron.common.src.python.network import create_socket_options
 
 from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
 
@@ -35,6 +34,7 @@ from heron.instance.src.python.utils.misc import SerializerHelper
 from heron.instance.src.python.utils.misc import PhysicalPlanHelper
 from heron.instance.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
+from heron.instance.src.python.network import create_socket_options
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
 import heron.common.src.python.system_constants as constants
