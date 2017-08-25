@@ -14,9 +14,9 @@
 """module for generating mock classes/objects for testing purposes"""
 import socket
 
-from heron.common.src.python.network import (REQID, OutgoingPacket,
-                                             IncomingPacket, StatusCode,
-                                             SocketOptions)
+from heron.instance.src.python.network import (REQID, OutgoingPacket,
+                                               IncomingPacket, StatusCode,
+                                               SocketOptions)
 from heron.instance.src.python.network import HeronClient
 import heron.instance.tests.python.mock_protobuf as mock_protobuf
 

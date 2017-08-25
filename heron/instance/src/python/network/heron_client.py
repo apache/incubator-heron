@@ -19,9 +19,9 @@ import traceback
 from abc import abstractmethod
 
 import time
-from heron.common.src.python.network import HeronProtocol, REQID, StatusCode, OutgoingPacket
 from heron.common.src.python.utils.log import Log
 import heron.common.src.python.system_constants as constants
+from heron.instance.src.python.network import HeronProtocol, REQID, StatusCode, OutgoingPacket
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=fixme

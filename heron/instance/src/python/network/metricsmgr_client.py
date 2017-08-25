@@ -16,9 +16,9 @@ import socket
 
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.network import StatusCode
 
 from heron.instance.src.python.network.heron_client import HeronClient
+from heron.instance.src.python.network import StatusCode
 
 from heron.proto import metrics_pb2, common_pb2
 
