@@ -14,8 +14,8 @@
 '''pplan_helper.py'''
 import socket
 
-from heron.api.src.python.custom_grouping import ICustomGrouping
-from heron.api.src.python.serializer import default_serializer
+from heronpy.api.custom_grouping import ICustomGrouping
+from heronpy.api.serializer import default_serializer
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.log import Log
 import heron.common.src.python.pex_loader as pex_loader

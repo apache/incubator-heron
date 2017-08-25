@@ -13,7 +13,7 @@
 # limitations under the License.
 '''stream aggregator'''
 from collections import Counter
-from heron.api.src.python.bolt.bolt import Bolt
+from heronpy.api.bolt.bolt import Bolt
 
 # pylint: disable=unused-argument
 class StreamAggregateBolt(Bolt):
