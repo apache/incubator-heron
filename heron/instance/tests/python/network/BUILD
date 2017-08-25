@@ -28,7 +28,9 @@ pex_test(
     name = "st_stmgrcli_unittest",
     srcs = ["st_stmgr_client_unittest.py"],
     deps = [
-        "//heron/instance/tests/python:instance-tests-py",
+        ":instance-network-mock-client",
+        ":instance-network-mock",
+        "//heron/instance/src/python:instance-py",
     ],
     reqs = [
         "py==1.4.27",
@@ -44,6 +46,7 @@ pex_test(
     deps = [
         ":pytest-network-py",
         "//heron/instance/tests/python:instance-tests-py",
+        "//heron/instance/src/python:instance-py",
     ],
     reqs = [
         "py==1.4.27",
@@ -57,7 +60,7 @@ pex_library(
     name = "pytest-network-py",
     srcs = ["mock_generator.py"],
     deps = [
-        "//heron/instance/tests/python:instance-tests-py",
+        ":instance-network-mock-client",
     ],
     reqs = [
         "py==1.4.27",
@@ -72,7 +75,7 @@ pex_test(
     deps = [
         ":pytest-network-py",
         "//heron/instance/tests/python:instance-tests-py",
-        ":instance-network-mock-client",
+        "//heron/instance/src/python:instance-py",
     ],
     reqs = [
         "py==1.4.27",
@@ -88,7 +91,7 @@ pex_test(
     deps = [
         ":pytest-network-py",
         "//heron/instance/tests/python:instance-tests-py",
-        ":instance-network-mock-client",
+        "//heron/instance/src/python:instance-py",
     ],
     reqs = [
         "py==1.4.27",
