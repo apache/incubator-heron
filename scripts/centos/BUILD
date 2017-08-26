@@ -240,7 +240,7 @@ filegroup(
 
 filegroup(
     name = "hpyinstance",
-    srcs = ["//heron/instance/src/python/instance:heron-python-instance"],
+    srcs = ["//heron/instance/src/python:heron-python-instance"],
 )
 
 filegroup(

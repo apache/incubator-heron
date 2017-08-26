@@ -194,7 +194,7 @@ pkg_tar(
     package_dir = "conf",
     srcs = [
       "//heron/config/src/yaml:conf-yaml"
-    ], 
+    ],
 )
 
 pkg_tar(
@@ -353,10 +353,10 @@ pkg_tar(
 
 ################################################################################
 # Heron python packaging
-# 
-# When a new python module is being added into the heronpy package, please ensure 
+#
+# When a new python module is being added into the heronpy package, please ensure
 # that its dependencies are being added into the packaging as well. Sometimes,
-# the dependencies might already exist. For example, 
+# the dependencies might already exist. For example,
 #   heron/api depends on proto
 #   heron/dsl depends on proto and heron/api
 #
@@ -367,19 +367,17 @@ pkg_tar(
 genrule(
     name = "generate-heronpy-package",
     srcs = [
-        "heronpy/requirements.txt", 
+        "heronpy/requirements.txt",
         "heronpy/setup.py.template",
         "heronpy/README.txt",
-        "heronpy/__apiinit__.py.template",
-        "heronpy/__dslinit__.py.template",
-        "heronpy/__connectorsinit__.py.template",
     ] + generated_release_files,
     outs = generated_heronpy_egg_file,
     stamp = 1,
     tools = [
-        "//heron/api/src/python:heron-python-package",
-        "//heron/dsl/src/python:heron-pythondsl-package",
-        "//heron/connectors:heron-pythonconnectors-package",
+        "//heronpy/api:heron-python-package",
+        "//heronpy/dsl:heron-pythondsl-package",
+        "//heronpy/connectors:heron-pythonconnectors-package",
+        "//heronpy/proto:proto-py-package",
     ],
     cmd = "\n".join([
         'export OUTPUT_DIR=$$(pwd)/$(@D)',
@@ -390,31 +388,35 @@ genrule(
         'export HERONPYAPI_UNZIP=$$TMP_DIR/heronapiunzip',
         'export HERONPYDSL_UNZIP=$$TMP_DIR/herondslunzip',
         'export HERONPYCONNECTORS_UNZIP=$$TMP_DIR/heronconnectorsunzip',
+        'export HERONPYPROTO_UNZIP=$$TMP_DIR/heronprotounzip',
         'export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk \'{print $$3}\')',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
         'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
         'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
         'echo $$HERON_VERSION',
         'mkdir -p $$TMP_DIR $$HERONPY_DIR',
-        'unzip -qd $$HERONPYAPI_UNZIP $(location //heron/api/src/python:heron-python-package)',
-        'unzip -qd $$HERONPYDSL_UNZIP $(location //heron/dsl/src/python:heron-pythondsl-package)',
-        'unzip -qd $$HERONPYCONNECTORS_UNZIP $(location //heron/connectors:heron-pythonconnectors-package)',
+        'unzip -qd $$HERONPYAPI_UNZIP $(location //heronpy/api:heron-python-package)',
+        'unzip -qd $$HERONPYDSL_UNZIP $(location //heronpy/dsl:heron-pythondsl-package)',
+        'unzip -qd $$HERONPYCONNECTORS_UNZIP $(location //heronpy/connectors:heron-pythonconnectors-package)',
+        'unzip -qd $$HERONPYPROTO_UNZIP $(location //heronpy/proto:proto-py-package)',
         'find $$HERONPYAPI_UNZIP -name "*.pyc" -exec rm {} \;',
         'find $$HERONPYDSL_UNZIP -name "*.pyc" -exec rm {} \;',
         'find $$HERONPYCONNECTORS_UNZIP -name "*.pyc" -exec rm {} \;',
-        'mkdir -p $$HERONPY_DIR/heronpy',
+        'find $$HERONPYPROTO_UNZIP -name "*.pyc" -exec rm {} \;',
+        'mkdir -p $$HERONPY_DIR/heronpy/api',
         'mkdir -p $$HERONPY_DIR/heronpy/dsl',
         'mkdir -p $$HERONPY_DIR/heronpy/connectors',
-        'mv $$HERONPYAPI_UNZIP/heron $$HERONPY_DIR',
-        'mv $$HERONPYDSL_UNZIP/heron/dsl $$HERONPY_DIR/heron',
-        'mv $$HERONPYCONNECTORS_UNZIP/heron/connectors $$HERONPY_DIR/heron',
+        'mkdir -p $$HERONPY_DIR/heronpy/proto',
+        'mv $$HERONPYAPI_UNZIP/heronpy/api $$HERONPY_DIR/heronpy/',
+        'mv $$HERONPYDSL_UNZIP/heronpy/dsl $$HERONPY_DIR/heronpy/',
+        'mv $$HERONPYCONNECTORS_UNZIP/heronpy/connectors $$HERONPY_DIR/heronpy/',
+        'mv $$HERONPYPROTO_UNZIP/heronpy/proto $$HERONPY_DIR/heronpy/',
+        'echo "__import__(\'pkg_resources\').declare_namespace(__name__)" > $$HERONPY_DIR/heronpy/__init__.py',
         'rm -rf $$HERONPYAPI_UNZIP/heron/api',
         'rm -rf $$HERONPYDSL_UNZIP/heron/dsl',
         'rm -rf $$HERONPYCONNECTORS_UNZIP/heron/connectors',
+        'rm -rf $$HERONPYPROTO_UNZIP/heron/proto',
         'cp $(SRCS) $$HERONPY_DIR',
-        'mv -f $$HERONPY_DIR/__apiinit__.py.template $$HERONPY_DIR/heronpy/__init__.py',
-        'mv -f $$HERONPY_DIR/__dslinit__.py.template $$HERONPY_DIR/heronpy/dsl/__init__.py',
-        'mv -f $$HERONPY_DIR/__connectorsinit__.py.template $$HERONPY_DIR/heronpy/connectors/__init__.py',
         'echo "Heron Python toplevel directory: $$HERONPY_DIR"',
         'cd $$HERONPY_DIR',
         'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',

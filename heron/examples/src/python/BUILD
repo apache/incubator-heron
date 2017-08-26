@@ -6,7 +6,7 @@ pex_library(
     name = "example-py",
     srcs = glob(['bolt/*.py', 'spout/*.py', 'misc/*.py']),
     deps = [
-      '//heron/api/src/python:heron-python-py',
+      '//heronpy/api:heron-python-py',
     ],
 )
 
@@ -53,9 +53,9 @@ pex_binary(
     name = "word_count_dsl",
     srcs = ["word_count_dsl.py"],
     deps = [
-      '//heron/api/src/python:heron-python-py',
-      '//heron/dsl/src/python:heron-pythondsl-py',
-      '//heron/connectors:heron-pythonconnectors-py',
+      '//heronpy/api:heron-python-py',
+      '//heronpy/dsl:heron-pythondsl-py',
+      '//heronpy/connectors:heron-pythonconnectors-py',
     ],
 )
 
@@ -63,9 +63,9 @@ pex_binary(
     name = "pulsar_word_count_dsl",
     srcs = ["pulsar_word_count_dsl.py"],
     deps = [
-      '//heron/api/src/python:heron-python-py',
-      '//heron/dsl/src/python:heron-pythondsl-py',
-      '//heron/connectors:heron-pythonconnectors-py',
+      '//heronpy/api:heron-python-py',
+      '//heronpy/dsl:heron-pythondsl-py',
+      '//heronpy/connectors:heron-pythonconnectors-py',
     ]
 )
 
