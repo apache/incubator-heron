@@ -22,7 +22,7 @@ from heron.instance.src.python.network import StatusCode
 
 from heron.proto import metrics_pb2, common_pb2
 
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 
 class MetricsManagerClient(HeronClient):
   """MetricsManagerClient, responsible for communicating with Metrics Manager"""

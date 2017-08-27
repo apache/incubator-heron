@@ -23,7 +23,7 @@ from heronpy.api.topology_context import TopologyContext
 import heronpy.api.api_constants as api_constants
 from heron.instance.src.python.utils.metrics import MetricsCollector
 
-import heron.common.src.python.system_constants as system_constants
+import heron.instance.src.python.utils.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
 class TopologyContextImpl(TopologyContext):

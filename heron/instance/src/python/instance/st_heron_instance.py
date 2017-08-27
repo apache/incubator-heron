@@ -37,7 +37,7 @@ from heron.instance.src.python.network import MetricsManagerClient, SingleThread
 from heron.instance.src.python.network import create_socket_options
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 
 Log = log.Log
 AssignedInstance = collections.namedtuple('AssignedInstance', 'is_spout, protobuf, py_class')
