@@ -29,7 +29,7 @@ Thread = namedtuple('Thread', ['id', 'user_time', 'system_time'])
 class PyMetricsTest(unittest.TestCase):
   def setUp(self):
     metrics_collector = mock_generator.MockMetricsCollector()
-    with patch("heron.common.src.python.config.system_config.get_sys_config",
+    with patch("heron.instance.src.python.utils.system_config.get_sys_config",
                side_effect=lambda: {constants.HERON_METRICS_EXPORT_INTERVAL_SEC: 10}):
           self.py_metrics = PyMetrics(metrics_collector)
     self.py_metrics.process = Mock()

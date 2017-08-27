@@ -23,7 +23,6 @@ import yaml
 import heronpy.api.api_constants as api_constants
 from heronpy.api.state.state import HashMapState
 
-from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
 
 from heron.proto import physical_plan_pb2, tuple_pb2, ckptmgr_pb2, common_pb2
@@ -36,8 +35,8 @@ from heron.instance.src.python.network import MetricsManagerClient, SingleThread
 from heron.instance.src.python.network import create_socket_options
 from heron.instance.src.python.network import GatewayLooper
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
-
 import heron.instance.src.python.utils.system_constants as constants
+from heron.instance.src.python.utils import system_config
 
 Log = log.Log
 AssignedInstance = collections.namedtuple('AssignedInstance', 'is_spout, protobuf, py_class')
