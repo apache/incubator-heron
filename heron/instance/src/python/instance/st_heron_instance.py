@@ -23,7 +23,6 @@ import yaml
 import heronpy.api.api_constants as api_constants
 from heronpy.api.state.state import HashMapState
 
-from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils import log
 
@@ -35,6 +34,7 @@ from heron.instance.src.python.utils.misc import PhysicalPlanHelper
 from heron.instance.src.python.utils.metrics import GatewayMetrics, PyMetrics, MetricsCollector
 from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 from heron.instance.src.python.network import create_socket_options
+from heron.instance.src.python.network import GatewayLooper
 from heron.instance.src.python.basics import SpoutInstance, BoltInstance
 
 import heron.instance.src.python.utils.system_constants as constants

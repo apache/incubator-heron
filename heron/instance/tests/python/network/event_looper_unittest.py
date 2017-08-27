@@ -15,7 +15,7 @@
 import time
 import unittest2 as unittest
 
-from heron.common.src.python.basics import EventLooper
+from heron.instance.src.python.network import EventLooper
 
 # pylint: disable=missing-docstring
 # pylint: disable=W0212
