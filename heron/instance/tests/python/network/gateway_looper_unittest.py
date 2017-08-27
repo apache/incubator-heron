@@ -16,7 +16,7 @@ import threading
 import time
 import unittest2 as unittest
 
-from heron.common.src.python.basics.gateway_looper import GatewayLooper
+from heron.instance.src.python.network.gateway_looper import GatewayLooper
 
 # pylint: disable=missing-docstring
 class GatewayLooperTest(unittest.TestCase):
