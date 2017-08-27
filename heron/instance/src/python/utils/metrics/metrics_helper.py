@@ -14,8 +14,8 @@
 '''metrics_helper: helper classes for managing common metrics'''
 
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.config import system_config
 import heron.instance.src.python.utils.system_constants as constants
+from heron.instance.src.python.utils import system_config
 
 from heron.proto import metrics_pb2
 
