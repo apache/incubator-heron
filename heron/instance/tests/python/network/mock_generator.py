@@ -13,7 +13,7 @@
 # limitations under the License.
 '''mock_generator for instance/network'''
 # pylint : disable=missing-docstring
-from heron.common.src.python.basics import EventLooper
+from heron.network.src.python.network import EventLooper
 import heron.instance.src.python.utils.system_constants as constants
 from heron.instance.src.python.utils.misc import HeronCommunicator
 from heron.instance.src.python.network import SingleThreadStmgrClient, MetricsManagerClient
