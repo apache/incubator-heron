@@ -29,7 +29,7 @@ class MockSTStmgrClient(SingleThreadStmgrClient):
 
   def __init__(self):
     socket_options = SocketOptions(32768, 16, 32768, 16, 1024000, 1024000)
-    with patch("heron.common.src.python.config.system_config.get_sys_config",
+    with patch("heron.instance.src.python.utils.system_config.get_sys_config",
                side_effect=lambda: {constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC: 10}):
       SingleThreadStmgrClient.__init__(self, EventLooper(), None, self.HOST, self.PORT,
                                        "topology_name", "topology_id",
@@ -50,7 +50,7 @@ class MockMetricsManagerClient(MetricsManagerClient):
   PORT = 9000
   def __init__(self):
     socket_options = SocketOptions(32768, 16, 32768, 16, 1024000, 1024000)
-    with patch("heron.common.src.python.config.system_config.get_sys_config",
+    with patch("heron.instance.src.python.utils.system_config.get_sys_config",
                side_effect=lambda: {constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC: 10,
                                     constants.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC: 10}):
       stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
