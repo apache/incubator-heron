@@ -19,7 +19,7 @@ import unittest
 import threading
 
 from heron.instance.src.python.utils.metrics.py_metrics import PyMetrics
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 import heron.instance.tests.python.utils.mock_generator as mock_generator
 
 Mem = namedtuple('Mem', ['rss', 'vms'])

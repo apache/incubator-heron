@@ -29,7 +29,7 @@ from heron.proto import tuple_pb2
 from heron.instance.src.python.utils.misc import SerializerHelper
 from heron.instance.src.python.utils.misc import OutgoingTupleHelper
 
-import heron.common.src.python.system_constants as system_constants
+import heron.instance.src.python.utils.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
 # pylint: disable=too-many-instance-attributes

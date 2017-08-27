@@ -23,7 +23,7 @@ from heron.instance.src.python.network import StatusCode
 
 from heron.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
 
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
