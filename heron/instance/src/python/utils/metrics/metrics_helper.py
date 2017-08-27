@@ -15,7 +15,7 @@
 
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.config import system_config
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 
 from heron.proto import metrics_pb2
 
