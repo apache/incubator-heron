@@ -11,22 +11,6 @@ pex_library(
 )
 
 pex_test(
-    name = "topology_helpers_unittest",
-    srcs = ["topology_helpers_unittest.py"],
-    deps = [
-        "//heron/tools/tracker/src/python:tracker-py",
-        "//heronpy/api:heron-python-py",
-    ],
-    reqs = [
-        "mock==1.0.1",
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
-    ],
-    size = "small",
-)
-
-pex_test(
     name = "topology_unittest",
     srcs = ["topology_unittest.py"],
     deps = [
