@@ -53,8 +53,8 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
        */
       @Override
       public synchronized void onEvent(TopologyUpdate event) {
-        LOG.info("Received topology update event, invalidating cached PhysicalPlan: "
-            + event.getName());
+        LOG.info(
+            "Received topology update event, invalidating cached PhysicalPlan: " + event.getName());
         physicalPlan = null;
       }
     });
@@ -74,15 +74,12 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   @Override
   public synchronized PhysicalPlan get() {
     if (physicalPlan == null) {
-      fetchLatestPhysicalPlan();
+      physicalPlan = stateManagerAdaptor.getPhysicalPlan(topologyName);
+      if (physicalPlan == null) {
+        throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
+      }
     }
     return physicalPlan;
   }
 
-  private void fetchLatestPhysicalPlan() {
-    physicalPlan = stateManagerAdaptor.getPhysicalPlan(topologyName);
-    if (physicalPlan == null) {
-      throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
-    }
-  }
 }
