@@ -22,4 +22,3 @@ heron.healthmgr.metricsource.url: http://localhost:8888
 #  health.policy.class: com.twitter.heron.healthmgr.policy.AutoRestartBackpressureContainerPolicy
 #  health.policy.interval.ms: 120000
 #  BackPressureDetector.noiseFilterMillis: 20
-#  GrowingWaitQueueDetector.limit: 5
