@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''half ack bolt'''
-from heron.api.src.python.bolt.bolt import Bolt
+from heronpy.api.bolt.bolt import Bolt
 
 class HalfAckBolt(Bolt):
   """Half of data tuples will be acked and the other half will be failed"""
