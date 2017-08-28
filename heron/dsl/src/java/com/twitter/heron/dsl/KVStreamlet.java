@@ -20,22 +20,32 @@ import java.util.function.BinaryOperator;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * Some transformations like join and reduce assume a certain structure of the tuples
+ * that it is processing. These transformations act on tuples of type KeyValue that have an
+ * identifiable Key and Value components. Thus a KVStreamlet is just a special kind of Streamlet.
  */
 public abstract class KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
+  /**
+   * Return a new KVStreamlet by joining ‘other’ streamlet with ‘this’ streamlet.
+   * The join is done over elements accumulated over a time window defined by TimeWindow.
+   * @param other The Streamlet that we are joining with.
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to
+   * have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param joinFunction The join function that needs to be applied
+  */
   <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
                                    WindowConfig windowCfg,
                                    BiFunction<V, V2, VR> joinFunction) {
     return new JoinStreamlet<K, V, V2, VR>(this, other, windowCfg, joinFunction);
   }
 
+  /**
+   * Return a new Streamlet in which for each time_window, all elements are belonging to the
+   * same key are reduced using the BinaryOperator and the result is emitted.
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
   KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg, BinaryOperator<V> reduceFn) {
     return new ReduceByKeyAndWindowStreamlet<K, V>(this, windowCfg, reduceFn);
   }
