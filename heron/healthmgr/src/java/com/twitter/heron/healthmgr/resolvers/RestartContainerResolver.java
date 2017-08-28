@@ -54,6 +54,8 @@ public class RestartContainerResolver implements IResolver {
 
   @Override
   public List<Action> resolve(List<Diagnosis> diagnosis) {
+    List<Action> actions = new ArrayList<>();
+
     for (Diagnosis diagnoses : diagnosis) {
       Symptom bpSymptom = diagnoses.getSymptoms().get(DIAGNOSIS_SLOW_INSTANCE.text());
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
@@ -76,12 +78,11 @@ public class RestartContainerResolver implements IResolver {
       LOG.info("Broadcasting container restart event");
       eventManager.onEvent(action);
 
-      List<Action> actions = new ArrayList<>();
       actions.add(action);
       return actions;
     }
 
-    return null;
+    return actions;
   }
 
   @Override
