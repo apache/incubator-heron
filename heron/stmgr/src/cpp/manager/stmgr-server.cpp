@@ -120,7 +120,8 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
-
+  max_herontupleset_size_in_bytes =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrHeronTupleSetMessageMaxBytes();
   // Update queue related metrics every 10 seconds
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateQueueMetrics(status);
@@ -128,8 +129,6 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
 
   sp_uint64 drain_threshold_bytes =
     config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrStatefulBufferSizeMb() * 1_MB;
-  sp_uint32 max_herontupleset_size_in_bytes =
-    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrHeronTupleSetMessageMaxBytes();
   stateful_gateway_ = new CheckpointGateway(drain_threshold_bytes, neighbour_calculator_,
                                             metrics_manager_client_,
     std::bind(&StMgrServer::DrainTupleSet, this, std::placeholders::_1, std::placeholders::_2),
