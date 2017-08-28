@@ -45,6 +45,12 @@ import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_UNDER_PROVISIONING;
 
+/**
+ * This Policy class
+ * 1. detector: find out the container that has been in backpressure
+ *              state for long time, which we believe the container cannot recover.
+ * 2. resolver: try to restart the backpressure container so as to be rescheduled.
+ */
 public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
     implements EventHandler<ContainerRestart> {
 
@@ -58,18 +64,15 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
 
   @Inject
   AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig, EventManager eventManager,
-      BackPressureDetector backPressureDetector, LargeWaitQueueDetector largeWaitQueueDetector,
-      ProcessingRateSkewDetector dataSkewDetector,
+      BackPressureDetector backPressureDetector,
       WaitQueueDisparityDetector waitQueueDisparityDetector,
-      UnderProvisioningDiagnoser underProvisioningDiagnoser, DataSkewDiagnoser dataSkewDiagnoser,
       SlowInstanceDiagnoser slowInstanceDiagnoser,
       RestartContainerResolver restartContainerResolver) {
     this.policyConfig = policyConfig;
     this.restartContainerResolver = restartContainerResolver;
 
-    registerDetectors(backPressureDetector, largeWaitQueueDetector, waitQueueDisparityDetector,
-        dataSkewDetector);
-    registerDiagnosers(underProvisioningDiagnoser, dataSkewDiagnoser, slowInstanceDiagnoser);
+    registerDetectors(backPressureDetector, waitQueueDisparityDetector);
+    registerDiagnosers(slowInstanceDiagnoser);
 
     setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
         (int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000));
@@ -82,12 +85,8 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
     Map<String, Diagnosis> diagnosisMap =
         diagnosis.stream().collect(Collectors.toMap(Diagnosis::getName, d -> d));
 
-    if (diagnosisMap.containsKey(DIAGNOSIS_DATA_SKEW.text())) {
-      LOG.warning("Data Skew diagnoses. This diagnosis does not have any resolver.");
-    } else if (diagnosisMap.containsKey(DIAGNOSIS_SLOW_INSTANCE.text())) {
+    if (diagnosisMap.containsKey(DIAGNOSIS_SLOW_INSTANCE.text())) {
       return restartContainerResolver;
-    } else if (diagnosisMap.containsKey(DIAGNOSIS_UNDER_PROVISIONING.text())) {
-      LOG.warning("Under provisioning diagnoses. This diagnosis does not have any resolver.");
     }
 
     LOG.warning("Unknown diagnoses. None resolver selected.");

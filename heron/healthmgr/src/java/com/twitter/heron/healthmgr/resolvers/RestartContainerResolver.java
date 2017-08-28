@@ -32,7 +32,9 @@ import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.resolver.Action;
 
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
+import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
+import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
@@ -43,13 +45,16 @@ public class RestartContainerResolver implements IResolver {
   private final PhysicalPlanProvider physicalPlanProvider;
   private final EventManager eventManager;
   private final String topologyName;
+  private final ISchedulerClient schedulerClient;
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
-      PhysicalPlanProvider physicalPlanProvider, EventManager eventManager) {
+      PhysicalPlanProvider physicalPlanProvider, EventManager eventManager,
+      ISchedulerClient schedulerClient) {
     this.topologyName = topologyName;
     this.physicalPlanProvider = physicalPlanProvider;
     this.eventManager = eventManager;
+    this.schedulerClient = schedulerClient;
   }
 
   @Override
@@ -69,15 +74,10 @@ public class RestartContainerResolver implements IResolver {
       try {
         // TODO: want to know which stmgr has backpressure
         String stmgrId = bpSymptom.getComponent().getName();
-        URL url = new URL(physicalPlanProvider.getShellUrl(stmgrId) + "/killexecutor");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
 
-        con.setDoOutput(true);
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());
-        out.writeBytes("secret=" + topologyName);
-        out.flush();
-        out.close();
+        boolean b = schedulerClient.restartTopology(RestartTopologyRequest.newBuilder()
+            .setContainerIndex(Integer.valueOf(stmgrId)).build());
+        LOG.info("Restarted container: " + stmgrId + "; result: " + b);
 
         int status = con.getResponseCode();
         LOG.info("Restarting container: " + url.toString() + "; result: " + status);
@@ -100,6 +100,5 @@ public class RestartContainerResolver implements IResolver {
   }
 
   @Override
-  public void close() {
-  }
+  public void close() {}
 }

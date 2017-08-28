@@ -71,22 +71,6 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
     });
   }
 
-  /**
-   * get the heron-shell url by stmgr id
-   * @param stmgrId the stmgr id in the same container as heron-shell
-   * @return heron-shell url. throw exception if the stmgr id is not found in the phyiscal plan
-   */
-  public String getShellUrl(String stmgrId) throws MalformedURLException {
-    if (physicalPlan != null) {
-      for (StMgr stmgr : physicalPlan.getStmgrsList()) {
-        if (stmgr.getId().equals(stmgrId)) {
-          return "http://" + stmgr.getHostName() + ":" + stmgr.getShellPort();
-        }
-      }
-    }
-    throw new MalformedURLException("stmgr not found " + stmgrId);
-  }
-
   @Override
   public synchronized PhysicalPlan get() {
     if (physicalPlan == null) {
