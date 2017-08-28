@@ -67,15 +67,49 @@ public class PrometheusSink extends AbstractWebSink {
       String component = sources[1];
       String instance = sources[2];
 
+      final boolean componentIsStreamManger = component.contains("stmgr");
+
       sourceMetrics.forEach((String metric, Double value) -> {
-        String metricName = String.format("%s_%s", HERON_PREFIX,
-            metric.replace("__", "").toLowerCase());
-        sb.append(Prometheus.sanitizeMetricName(metricName))
+
+        // some stream manager metrics in heron contain a instance id as part of the metric name
+        // this should be a label when exported to prometheus.
+        // Example: __connection_buffer_by_instanceid/container_1_word_5/packets or
+        // __time_spent_back_pressure_by_compid/container_1_exclaim1_1
+        // TODO convert to small classes for less string manipulation
+        final String metricName;
+        final String metricInstanceId;
+        if (componentIsStreamManger) {
+          final boolean metricHasInstanceId = metric.contains("_by_");
+          final String[] metricParts = metric.split("/");
+          if (metricHasInstanceId && metricParts.length == 3) {
+            metricName = String.format("%s_%s", metricParts[0], metricParts[2]);
+            metricInstanceId = metricParts[1];
+          } else if (metricHasInstanceId && metricParts.length == 2) {
+            metricName = metricParts[0];
+            metricInstanceId = metricParts[1];
+          } else {
+            metricName = metric;
+            metricInstanceId = null;
+          }
+
+        } else {
+          metricName = metric;
+          metricInstanceId = null;
+        }
+
+        String exportedMetricName = String.format("%s_%s", HERON_PREFIX,
+            metricName.replace("__", "").toLowerCase());
+        sb.append(Prometheus.sanitizeMetricName(exportedMetricName))
             .append("{")
             .append("topology=\"").append(topology).append("\",")
             .append("component=\"").append(component).append("\",")
-            .append("instance=\"").append(instance).append("\"")
-            .append("} ")
+            .append("instance_id=\"").append(instance).append("\"");
+
+        if (metricInstanceId != null) {
+          sb.append(",metric_instance_id=\"").append(metricInstanceId).append("\"");
+        }
+
+        sb.append("} ")
             .append(Prometheus.doubleToGoString(value))
             .append(" ").append(currentTimeMillis())
             .append(DELIMITER);

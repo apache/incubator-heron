@@ -105,8 +105,6 @@ public class PrometheusSinkTests {
 
     final String topology = "testTopology";
 
-    //heron_jvm_estimated_usage_par_eden_space_max {toponame="exclamationtopology"
-    // component="exclaim1" instance="container_1_exclaim1_1"} 26.0
     final List<String> expectedLines = Arrays.asList(
         createMetric(topology, "component", "instance_1", "metric_1", "1.0"),
         createMetric(topology, "component", "instance_1", "metric_2", "2.0"),
@@ -124,10 +122,61 @@ public class PrometheusSinkTests {
     });
   }
 
+  @Test
+  public void testResponseWhenMetricNamesHaveAnInstanceId() throws IOException {
+    Iterable<MetricsInfo> infos = Arrays.asList(
+        new MetricsInfo("__connection_buffer_by_instanceid/container_1_word_5/packets", "1.0"),
+        new MetricsInfo("__time_spent_back_pressure_by_compid/container_1_exclaim1_1", "1.0")
+    );
+
+    records = Arrays.asList(
+        newRecord("machine/__stmgr__/stmgr-1", infos, Collections.emptyList())
+    );
+
+    PrometheusTestSink sink = new PrometheusTestSink();
+    sink.init(defaultConf, context);
+    for (MetricsRecord r : records) {
+      sink.processRecord(r);
+    }
+
+    final String topology = "testTopology";
+
+    final List<String> expectedLines = Arrays.asList(
+        createMetric(topology, "__stmgr__", "stmgr-1",
+            "connection_buffer_by_instanceid_packets",
+            "container_1_word_5", "1.0"),
+        createMetric(topology, "__stmgr__", "stmgr-1",
+            "time_spent_back_pressure_by_compid",
+            "container_1_exclaim1_1", "1.0")
+    );
+
+    final Set<String> generatedLines =
+        new HashSet<>(Arrays.asList(new String(sink.generateResponse()).split("\n")));
+
+    assertEquals(expectedLines.size(), generatedLines.size());
+
+    expectedLines.forEach((String line) -> {
+      assertTrue(generatedLines.contains(line));
+    });
+  }
+
   private String createMetric(String topology, String component, String instance,
         String metric, String value) {
-    return String.format("heron_%s{topology=\"%s\",component=\"%s\",instance=\"%s\"} %s %d",
-        metric, topology, component, instance, value, NOW);
+    return createMetric(topology, component, instance, metric, null, value);
+  }
+
+  private String createMetric(String topology, String component, String instance,
+        String metric, String metricNameInstanceId, String value) {
+
+    if (metricNameInstanceId != null) {
+      return String.format("heron_%s"
+              + "{topology=\"%s\",component=\"%s\",instance_id=\"%s\",metric_instance_id=\"%s\"}"
+              + " %s %d",
+          metric, topology, component, instance, metricNameInstanceId, value, NOW);
+    } else {
+      return String.format("heron_%s{topology=\"%s\",component=\"%s\",instance_id=\"%s\"} %s %d",
+          metric, topology, component, instance, value, NOW);
+    }
   }
 
   private MetricsRecord newRecord(String source, Iterable<MetricsInfo> metrics,
