@@ -49,7 +49,7 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
     implements EventHandler<ContainerRestart> {
 
   private static final String CONF_WAIT_INTERVAL_MILLIS =
-      "AutoRestartBackpressureContainerPolicy.conf_post_action_wait_interval_min";
+      "AutoRestartBackpressureContainerPolicy.conf_post_action_wait_interval_ms";
   private static final Logger LOG =
       Logger.getLogger(AutoRestartBackpressureContainerPolicy.class.getName());
 
