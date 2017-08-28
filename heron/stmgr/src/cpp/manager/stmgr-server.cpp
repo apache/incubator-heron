@@ -432,7 +432,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
-  auto message_size = _message->ByteSize();
+  auto message_size = _message->SpaceUsed();
   if (message_size >= max_herontupleset_size_in_bytes) {
     LOG(WARNING) << "HeronTupleSet message has size " << message_size <<
       " bytes, exceeding limit " << max_herontupleset_size_in_bytes << " bytes." <<
