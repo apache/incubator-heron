@@ -128,6 +128,8 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
 
   sp_uint64 drain_threshold_bytes =
     config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrStatefulBufferSizeMb() * 1_MB;
+  sp_uint32 max_herontupleset_size_in_bytes =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrHeronTupleSetMessageMaxBytes();
   stateful_gateway_ = new CheckpointGateway(drain_threshold_bytes, neighbour_calculator_,
                                             metrics_manager_client_,
     std::bind(&StMgrServer::DrainTupleSet, this, std::placeholders::_1, std::placeholders::_2),
@@ -431,7 +433,15 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
-  __global_protobuf_pool_release__(_message);
+  auto message_size = _message->ByteSize();
+  if (message_size >= max_herontupleset_size_in_bytes) {
+    LOG(WARNING) << "HeronTupleSet message has size " << message_size <<
+      " bytes, exceeding limit " << max_herontupleset_size_in_bytes << " bytes." <<
+      " Release to memory allocator rather than memory pool.";
+    delete _message;
+  } else {
+    __global_protobuf_pool_release__(_message);
+  }
 }
 
 void StMgrServer::SendToInstance2(proto::stmgr::TupleStreamMessage* _message) {
