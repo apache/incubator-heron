@@ -28,13 +28,15 @@ import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;
-
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.RestartContainerResolver;
+
+import backtype.storm.utils.Utils;
 
 import static com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
@@ -53,8 +55,8 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
   private static final Logger LOG =
       Logger.getLogger(AutoRestartBackpressureContainerPolicy.class.getName());
 
-  private HealthPolicyConfig policyConfig;
-  private RestartContainerResolver restartContainerResolver;
+  private final HealthPolicyConfig policyConfig;
+  private final RestartContainerResolver restartContainerResolver;
 
   @Inject
   AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig, EventManager eventManager,
@@ -69,7 +71,7 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
     registerDiagnosers(slowInstanceDiagnoser);
 
     setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
-        (int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000));
+        TypeUtils.getInteger( policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
 
     eventManager.addEventListener(ContainerRestart.class, this);
   }
