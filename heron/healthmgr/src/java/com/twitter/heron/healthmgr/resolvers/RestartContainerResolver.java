@@ -13,11 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.healthmgr.resolvers;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -32,9 +27,9 @@ import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.resolver.Action;
 
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
-import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
+import com.twitter.heron.scheduler.client.ISchedulerClient;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
@@ -70,29 +65,19 @@ public class RestartContainerResolver implements IResolver {
         throw new UnsupportedOperationException("Multiple components with back pressure symptom");
       }
 
+      // TODO: want to know which stmgr has backpressure
+      String stmgrId = bpSymptom.getComponent().getName();
+
+      boolean b = schedulerClient.restartTopology(
+          RestartTopologyRequest.newBuilder().setContainerIndex(Integer.valueOf(stmgrId)).build());
+      LOG.info("Restarted container: " + stmgrId + "; result: " + b);
+
+      ContainerRestart action = new ContainerRestart();
+      LOG.info("Broadcasting container restart event");
+      eventManager.onEvent(action);
+
       List<Action> actions = new ArrayList<>();
-      try {
-        // TODO: want to know which stmgr has backpressure
-        String stmgrId = bpSymptom.getComponent().getName();
-
-        boolean b = schedulerClient.restartTopology(RestartTopologyRequest.newBuilder()
-            .setContainerIndex(Integer.valueOf(stmgrId)).build());
-        LOG.info("Restarted container: " + stmgrId + "; result: " + b);
-
-        int status = con.getResponseCode();
-        LOG.info("Restarting container: " + url.toString() + "; result: " + status);
-        con.disconnect();
-
-        ContainerRestart action = new ContainerRestart();
-        LOG.info("Broadcasting container restart event");
-        eventManager.onEvent(action);
-
-        actions.add(action);
-      } catch (MalformedURLException e) {
-        LOG.warning(e.getMessage());
-      } catch (IOException e) {
-        LOG.warning(e.getMessage());
-      }
+      actions.add(action);
       return actions;
     }
 
@@ -100,5 +85,6 @@ public class RestartContainerResolver implements IResolver {
   }
 
   @Override
-  public void close() {}
+  public void close() {
+  }
 }

@@ -14,7 +14,6 @@
 
 package com.twitter.heron.healthmgr.common;
 
-import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -27,7 +26,6 @@ import com.microsoft.dhalion.events.EventManager;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.proto.system.PhysicalPlans.PhysicalPlan;
-import com.twitter.heron.proto.system.PhysicalPlans.StMgr;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;

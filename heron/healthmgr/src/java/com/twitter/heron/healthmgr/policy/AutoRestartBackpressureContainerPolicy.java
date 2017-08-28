@@ -32,18 +32,12 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector;
-import com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
-import com.twitter.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
-import com.twitter.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.RestartContainerResolver;
 
 import static com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_DATA_SKEW;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_UNDER_PROVISIONING;
 
 /**
  * This Policy class
