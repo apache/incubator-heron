@@ -15,6 +15,8 @@
 package com.twitter.heron.scheduler.kubernetes;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -168,7 +170,6 @@ public class KubernetesSchedulerTest {
     Mockito.doReturn(Mockito.anyString()).when(controller).getBasePod(Mockito.anyString());
     Mockito.doNothing().when(controller).deployContainer(Mockito.anyString());
     scheduler.addContainers(containers);
-
   }
 
   @Test
@@ -209,5 +210,22 @@ public class KubernetesSchedulerTest {
     System.out.println(links.get(0));
     System.out.println(JOB_LINK);
     Assert.assertTrue(links.get(0).equals(JOB_LINK));
+  }
+
+  @Test
+  public void testFetchCommand() throws URISyntaxException {
+    final String expectedFetchCommand =
+        "/opt/heron/heron-core/bin/heron-downloader https://heron/topology.tar.gz .";
+
+    Config config = Mockito.mock(Config.class);
+    Mockito.when(config.getStringValue(Key.DOWNLOADER_BINARY))
+        .thenReturn("/opt/heron/heron-core/bin/heron-downloader");
+
+    Config runtime = Mockito.mock(Config.class);
+    Mockito.when(runtime.get(Key.TOPOLOGY_PACKAGE_URI))
+        .thenReturn(new URI("https://heron/topology.tar.gz"));
+
+    Assert.assertEquals(expectedFetchCommand,
+        KubernetesScheduler.getFetchCommand(config, runtime));
   }
 }

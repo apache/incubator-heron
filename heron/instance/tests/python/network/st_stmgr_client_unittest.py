@@ -15,10 +15,10 @@
 # pylint: disable=missing-docstring
 import unittest
 
-from heron.common.src.python.network import StatusCode
+from heron.instance.src.python.network import StatusCode
 from heron.instance.tests.python.network.mock_generator import MockSTStmgrClient
 
-import heron.common.tests.python.mock_protobuf as mock_protobuf
+import heron.instance.tests.python.mock_protobuf as mock_protobuf
 
 class STStmgrClientTest(unittest.TestCase):
   def setUp(self):

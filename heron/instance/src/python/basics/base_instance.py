@@ -17,18 +17,19 @@ import logging
 import traceback
 from abc import abstractmethod
 
-import heron.api.src.python.global_metrics as global_metrics
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.stateful_component import StatefulComponent
+import heronpy.api.global_metrics as global_metrics
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.stateful_component import StatefulComponent
 
-from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.common.src.python.utils.misc import OutgoingTupleHelper
+
 from heron.proto import tuple_pb2
 
-import heron.common.src.python.system_constants as system_constants
+from heron.instance.src.python.utils.misc import SerializerHelper
+from heron.instance.src.python.utils.misc import OutgoingTupleHelper
+from heron.instance.src.python.utils import system_config
 
+import heron.instance.src.python.utils.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
 # pylint: disable=too-many-instance-attributes
