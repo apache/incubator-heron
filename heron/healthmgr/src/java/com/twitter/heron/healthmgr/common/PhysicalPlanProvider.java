@@ -72,7 +72,7 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   }
 
   @Override
-  public PhysicalPlan get() {
+  public synchronized PhysicalPlan get() {
     if (physicalPlan == null) {
       fetchLatestPhysicalPlan();
     }
