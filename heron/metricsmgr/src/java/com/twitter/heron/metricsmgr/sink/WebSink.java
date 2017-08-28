@@ -27,7 +27,7 @@ import com.google.common.base.Ticker;
 import com.google.common.cache.Cache;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.metricsmgr.Metrics;
+import com.twitter.heron.metricsmgr.MetricsUtil;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
@@ -90,7 +90,7 @@ public class WebSink extends AbstractWebSink  {
 
   @Override
   public void processRecord(MetricsRecord record) {
-    final String[] sources = Metrics.splitRecordSource(record);
+    final String[] sources = MetricsUtil.splitRecordSource(record);
     final String source;
 
     if (sources.length > 2) {

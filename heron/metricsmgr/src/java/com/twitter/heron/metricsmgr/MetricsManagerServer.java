@@ -242,7 +242,7 @@ public class MetricsManagerServer extends HeronServer {
     }
 
     // Convert the message to MetricsRecord
-    String source = com.twitter.heron.metricsmgr.Metrics.createSource(
+    String source = MetricsUtil.createSource(
         request.getHostname(), request.getPort(),
         request.getComponentName(), request.getInstanceId());
 

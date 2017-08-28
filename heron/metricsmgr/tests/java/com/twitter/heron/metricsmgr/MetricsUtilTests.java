@@ -20,7 +20,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
 import static org.junit.Assert.assertEquals;
 
-public class MetricsTests {
+public class MetricsUtilTests {
 
   private final String host = "host";
   private final int port = 33;
@@ -31,18 +31,18 @@ public class MetricsTests {
   public void testCreateSource() {
     final String expectedSource =
         String.format("%s:%d/%s/%s", host, port, component, instance);
-    final String source = Metrics.createSource(host, port, component, instance);
+    final String source = MetricsUtil.createSource(host, port, component, instance);
 
     assertEquals(expectedSource, source);
   }
 
   @Test
   public void testSplitRecordSource() {
-    final String source = Metrics.createSource(host, port, component, instance);
+    final String source = MetricsUtil.createSource(host, port, component, instance);
     MetricsRecord record = Mockito.mock(MetricsRecord.class);
     Mockito.when(record.getSource()).thenReturn(source);
 
-    final String[] sourceComponents = Metrics.splitRecordSource(record);
+    final String[] sourceComponents = MetricsUtil.splitRecordSource(record);
 
     assertEquals(3, sourceComponents.length);
     assertEquals(String.format("%s:%d", host, port), sourceComponents[0]);

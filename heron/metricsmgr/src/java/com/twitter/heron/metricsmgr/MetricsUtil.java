@@ -15,7 +15,7 @@ package com.twitter.heron.metricsmgr;
 
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
-public final class Metrics {
+public final class MetricsUtil {
 
   private static final String SOURCE_DELIMITER = "/";
 
@@ -36,6 +36,6 @@ public final class Metrics {
     return record.getSource().split(SOURCE_DELIMITER);
   }
 
-  private Metrics() {
+  private MetricsUtil() {
   }
 }
