@@ -47,8 +47,9 @@ import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 public class MetricsCacheMetricsProvider implements MetricsProvider {
   private static final String PATH_STATS = "stats";
   private static final Logger LOG = Logger.getLogger(MetricsCacheMetricsProvider.class.getName());
-  private SchedulerStateManagerAdaptor stateManagerAdaptor;
-  private String topologyName;
+
+  private final SchedulerStateManagerAdaptor stateManagerAdaptor;
+  private final String topologyName;
 
   private Clock clock = new Clock();
   private String metricsCacheLocation;
@@ -59,7 +60,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
 
-    LOG.info("Metrics will be provided by MetricsCache at :" + getCacheLocation());
+    LOG.info("Metrics will be provided by MetricsCache at " + getCacheLocation());
   }
 
   @Override
