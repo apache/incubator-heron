@@ -16,7 +16,7 @@ from abc import abstractmethod
 
 class StatefulComponent(object):
   """Defines a component that saves its internal state using the State interface
-  When running under exactly once semantics, the state is periodically checkpointed
+  When running under effectively once semantics, the state is periodically checkpointed
   and is replayed when errors occur to a globally consistent checkpoint.
   """
   @abstractmethod
