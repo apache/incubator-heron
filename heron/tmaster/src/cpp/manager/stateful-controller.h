@@ -36,7 +36,7 @@ namespace tmaster {
 class StatefulRestorer;
 class StatefulCheckpointer;
 
-// For Heron topologies running in exactly once semantics, the tmaster
+// For Heron topologies running in effectively once semantics, the tmaster
 // utilizes the stateful controller to handle all the work related with
 // checkpointing and restoring from checkpoints. The statful controller
 // offers methods to start checkpoint/restore. It also manages the state
