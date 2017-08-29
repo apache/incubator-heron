@@ -156,6 +156,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The max number of messages in the memory pool for each message type
   sp_int32 GetHeronStreammgrMempoolMaxMessageNumber();
 
+  // The max byte size of HeronTupleSet message in stream manager
+  sp_int32 GetHeronStreammgrHeronTupleSetMessageMaxBytes();
+
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
 

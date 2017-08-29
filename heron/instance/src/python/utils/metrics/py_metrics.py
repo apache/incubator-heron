@@ -17,8 +17,8 @@ import psutil
 import traceback
 from heronpy.api.metrics import AssignableMetrics, MultiAssignableMetrics
 from .metrics_helper import BaseMetricsHelper
-import heron.common.src.python.system_constants as constants
-from heron.common.src.python.config import system_config
+import heron.instance.src.python.utils.system_constants as constants
+from heron.instance.src.python.utils import system_config
 from heron.common.src.python.utils.log import Log
 
 # pylint: disable=too-many-instance-attributes

@@ -65,6 +65,9 @@ heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 # The max number of messages in the memory pool for each message type
 heron.streammgr.mempool.max.message.number: 512
 
+# The max byte size of a HeronTupleSet message allowed in memory pool
+heron.streammgr.herontupleset.message.max.bytes: 83886080
+
 # The max reconnect attempts to other stream managers for stream manager client
 heron.streammgr.client.reconnect.max.attempts: 300
 
