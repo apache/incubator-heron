@@ -34,8 +34,8 @@ TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::s
     return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
   } else if (_mode == "ATLEAST_ONCE") {
     return TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
-  } else if (_mode == "EXACTLY_ONCE") {
-    return TopologyConfigVars::TopologyReliabilityMode::EXACTLY_ONCE;
+  } else if (_mode == "EFFECTIVELY_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::EFFECTIVELY_ONCE;
   } else {
     LOG(FATAL) << "Unknown Topology Reliability Mode " << _mode;
     return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
