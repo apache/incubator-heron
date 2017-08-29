@@ -318,7 +318,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   LOG(INFO) << "Topology read and validated\n";
 
   if (heron::config::TopologyConfigHelper::GetReliabilityMode(*topology_)
-      == config::TopologyConfigVars::EXACTLY_ONCE) {
+      == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Establish connection to ckptmgr
     NetworkOptions ckpt_options;
     ckpt_options.set_host("127.0.0.1");
