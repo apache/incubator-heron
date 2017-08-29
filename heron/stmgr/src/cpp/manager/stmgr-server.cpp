@@ -433,7 +433,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
-  space_check_counter = (space_check_counter + 1) % 4096;
+  space_check_counter = (space_check_counter + 1) % 1024;
   if (space_check_counter == 0) {
     auto message_size = _message->SpaceUsed();
     if (message_size >= max_herontupleset_size_in_bytes) {
