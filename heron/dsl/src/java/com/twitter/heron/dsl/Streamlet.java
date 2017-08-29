@@ -24,6 +24,7 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -143,6 +144,26 @@ public abstract class Streamlet<R> {
   Streamlet<R> repartition(int numPartitions) {
     return this.map(Function.identity()).setNumPartitions(numPartitions);
   }
+
+  /**
+   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
+   * windowConfig and applying reduceFn on those tuples
+   * @param windowConfig This is a specification of what kind of windowing strategy you like
+   * to have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
+   */
+  Streamlet<I> reduceByWindow(WindowConfig windowConfig, BinaryOperator<I> reduceFn) {
+    return new ReduceByWindowStreamlet<I>(this, windowConfig, reduceFn);
+  }
+
+  /**
+   * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
+   * the new streamlet will contain tuples belonging to both Streamlets
+  */
+  Streamlet<I> union(Streamlet<I> other) {
+    return new UnionStreamlet<I>(this, other);
+  }
+
 
   protected Streamlet() {
     this.nPartitions = -1;

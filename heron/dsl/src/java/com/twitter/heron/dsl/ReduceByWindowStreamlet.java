@@ -14,16 +14,10 @@
 
 package com.twitter.heron.dsl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.Set;
 import java.util.function.BinaryOperator;
 
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
@@ -36,41 +30,46 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
-  private static final long serialVersionUID = 2833576046687750496L;
+class ReduceByWindowStreamlet<I> extends Streamlet<I> {
+  private Streamlet<I> parent;
   private WindowConfig windowCfg;
-  private BinaryOperator<V> reduceFn;
-  private OutputCollector collector;
+  private BinaryOperator<I> reduceFn;
 
-  ReduceByKeyAndWindowBolt(WindowConfig windowCfg, BinaryOperator<V> reduceFn) {
+  public ReduceByWindowStreamlet(Streamlet<I> parent,
+                                 WindowConfig windowCfg,
+                                 BinaryOperator<I> reduceFn) {
+    this.parent = parent;
     this.windowCfg = windowCfg;
     this.reduceFn = reduceFn;
+    setNumPartitions(parent.getNumPartitions());
   }
 
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
+  private void calculateName(Set<String> stageNames) {
+    int index = 1;
+    String name;
+    while (true) {
+      name = new StringBuilder("reduceByWindow").append(index).toString();
+      if (!stageNames.contains(name)) {
+        break;
+      }
+      index++;
+    }
+    setName(name);
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public void handleWindow(List<Tuple> tuples) {
-    Map<K, V> reduceMap = new HashMap<>();
-    for (Tuple tuple : tuples) {
-      KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
-      addMap(reduceMap, tup);
+  protected TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
+    parent.build(bldr, stageNames);
+    if (getName() == null) {
+      calculateName(stageNames);
     }
-    for (K key : reduceMap.keySet()) {
-      collector.emit(new Values(new KeyValue<K, V>(key, reduceMap.get(key))));
+    if (stageNames.contains(getName())) {
+      throw new RuntimeException("Duplicate Names");
     }
-  }
-
-  private void addMap(Map<K, V> reduceMap, KeyValue<K, V> tup) {
-    if (reduceMap.containsKey(tup.getKey())) {
-      reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
-    } else {
-      reduceMap.put(tup.getKey(), tup.getValue());
-    }
+    stageNames.add(getName());
+    bldr.setBolt(getName(),
+        new ReduceByWindowBolt<I>(windowCfg, reduceFn),
+        getNumPartitions())
+        .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<I>());
+    return bldr;
   }
 }

@@ -35,7 +35,7 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-class JoinBolt<K, V1, V2, VR> extends DslBolt, WindowBolt {
+class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private static final long serialVersionUID = 4875450390444745407L;
   public static final String LEFT_COMPONENT_NAME = "_dsl_joinbolt_left_component_name_";
   public static final String RIGHT_COMPONENT_NAME = "_dsl_joinbolt_right_component_name_";
@@ -61,7 +61,7 @@ class JoinBolt<K, V1, V2, VR> extends DslBolt, WindowBolt {
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    Map<String, Object> cfg = new HashMap<>();
+    Map<String, Object> cfg = super.getComponentConfiguration();
     cfg.put(LEFT_COMPONENT_NAME, leftComponent);
     cfg.put(RIGHT_COMPONENT_NAME, rightComponent);
     return cfg;

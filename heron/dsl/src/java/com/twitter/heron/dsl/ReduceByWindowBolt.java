@@ -36,13 +36,12 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
-  private static final long serialVersionUID = 2833576046687750496L;
+class ReduceByWindowBolt<I> extends DslWindowBolt {
   private WindowConfig windowCfg;
-  private BinaryOperator<V> reduceFn;
+  private BinaryOperator<I> reduceFn;
   private OutputCollector collector;
 
-  ReduceByKeyAndWindowBolt(WindowConfig windowCfg, BinaryOperator<V> reduceFn) {
+  ReduceByWindowBolt(WindowConfig windowCfg, BinaryOperator<I> reduceFn) {
     this.windowCfg = windowCfg;
     this.reduceFn = reduceFn;
   }
@@ -56,21 +55,15 @@ class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
   @SuppressWarnings("unchecked")
   @Override
   public void handleWindow(List<Tuple> tuples) {
-    Map<K, V> reduceMap = new HashMap<>();
+    I reducedValue;
     for (Tuple tuple : tuples) {
-      KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
-      addMap(reduceMap, tup);
+      I tup = (I) tuple.getValue(0);
+      if (reducedValue == null) {
+        reducedValue = tup;
+      } else {
+        reducedValue = reduceFn.apply(reducedValue, tup);
+      }
     }
-    for (K key : reduceMap.keySet()) {
-      collector.emit(new Values(new KeyValue<K, V>(key, reduceMap.get(key))));
-    }
-  }
-
-  private void addMap(Map<K, V> reduceMap, KeyValue<K, V> tup) {
-    if (reduceMap.containsKey(tup.getKey())) {
-      reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
-    } else {
-      reduceMap.put(tup.getKey(), tup.getValue());
-    }
+    collector.emit(new Values(reducedValue));
   }
 }

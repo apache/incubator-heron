@@ -15,6 +15,8 @@
 package com.twitter.heron.dsl.windowing;
 
 
+import java.time.Duration;
+
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
  Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
@@ -26,24 +28,31 @@ package com.twitter.heron.dsl.windowing;
  could be assigned by the user or computed by the system
  */
 public final class WindowConfig {
-  public static WindowConfig createTimeWindow(int windowDuration) {
-    return new WindowConfig(WindowType.TIME, windowDuration, windowDuration);
+  public static WindowConfig createTimeWindow(Duration windowDuration) {
+    return new WindowConfig(windowDuration, windowDuration);
   }
-  public static WindowConfig createTimeWindow(int windowDuration, int slideInterval) {
-    return new WindowConfig(WindowType.TIME, windowDuration, slideInterval);
+  public static WindowConfig createTimeWindow(Duration windowDuration, Duration slideInterval) {
+    return new WindowConfig(windowDuration, slideInterval);
   }
-  public static WindowConfig createTupleWindow(int windowSize) {
-    return new WindowConfig(WindowType.COUNT, windowSize, windowSize);
+  public static WindowConfig createCountWindow(int windowSize) {
+    return new WindowConfig(windowSize, windowSize);
   }
-  public static WindowConfig createTupleWindow(int windowSize, int slideSize) {
-    return new WindowConfig(WindowType.COUNT, windowSize, slideSize);
+  public static WindowConfig createCountWindow(int windowSize, int slideSize) {
+    return new WindowConfig(windowSize, slideSize);
   }
   private enum WindowType { TIME, COUNT }
   private WindowType windowType;
   private int windowSize;
   private int slideInterval;
-  private WindowConfig(WindowType type, int windowSize, int slideInterval) {
-    this.windowType = type;
+  private Duration windowDuration;
+  private Duration slidingIntervalDuration;
+  private WindowConfig(Duration windowDuration, Duration slidingIntervalDuration) {
+    this.windowType = WindowType.TIME;
+    this.windowDuration = windowDuration;
+    this.slidingIntervalDuration = slidingIntervalDuration;
+  }
+  private WindowConfig(int windowSize, int slideInterval) {
+    this.windowType = WindowType.COUNT;
     this.windowSize = windowSize;
     this.slideInterval = slideInterval;
   }
