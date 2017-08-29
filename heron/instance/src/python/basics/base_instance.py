@@ -59,7 +59,7 @@ class BaseInstance(object):
     context = pplan_helper.context
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
-    self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EFFECTIVELY_ONCE)
     self._stateful_state = None
     self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
     self._initialized_global_metrics = False

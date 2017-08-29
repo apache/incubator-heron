@@ -91,7 +91,7 @@ public class SpoutInstance implements IInstance {
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
 
-    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EXACTLY_ONCE)
+    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);

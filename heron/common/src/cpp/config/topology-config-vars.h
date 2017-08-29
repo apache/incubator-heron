@@ -46,7 +46,7 @@ class TopologyConfigVars {
   enum TopologyReliabilityMode {
     ATMOST_ONCE,
     ATLEAST_ONCE,
-    EXACTLY_ONCE
+    EFFECTIVELY_ONCE
   };
   static const sp_string TOPOLOGY_RELIABILITY_MODE;
   static const sp_string TOPOLOGY_CONTAINER_CPU_REQUESTED;
