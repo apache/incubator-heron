@@ -202,6 +202,7 @@ class StMgrServer : public Server {
 
   bool spouts_under_back_pressure_;
   sp_uint32 max_herontupleset_size_in_bytes;
+  sp_uint32 space_check_counter;
 
   // Stateful processing related member variables
   NeighbourCalculator* neighbour_calculator_;
