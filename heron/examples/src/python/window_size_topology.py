@@ -14,9 +14,10 @@
 '''Example WindowSizeTopology'''
 import sys
 
-import heron.api.src.python.api_constants as constants
-from heron.api.src.python import Grouping, TopologyBuilder
-from heron.api.src.python.bolt import SlidingWindowBolt
+import heronpy.api.api_constants as constants
+from heronpy.api.topology import TopologyBuilder
+from heronpy.api.stream import Grouping
+from heronpy.api.bolt.window_bolt import SlidingWindowBolt
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import WindowSizeBolt
 
@@ -35,7 +36,8 @@ if __name__ == '__main__':
                                 config={SlidingWindowBolt.WINDOW_DURATION_SECS: 10,
                                         SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS: 2})
 
-  topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True}
+  topology_config = {constants.TOPOLOGY_RELIABILITY_MODE:
+                         constants.TopologyReliabilityMode.ATLEAST_ONCE}
   builder.set_config(topology_config)
 
   builder.build_and_submit()

@@ -26,6 +26,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
@@ -35,7 +36,6 @@ import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ShellUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 9;
@@ -241,10 +241,8 @@ public final class SchedulerUtils {
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
 
-    Boolean isStatefulEnabled = TopologyUtils.getConfigWithDefault(
-        topology.getTopologyConfig().getKvsList(),
-        com.twitter.heron.api.Config.TOPOLOGY_STATEFUL_ENABLED, false);
-    commands.add(Boolean.toString(isStatefulEnabled));
+    Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
+    commands.add(Boolean.toString(ckptMgrEnabled));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),
         Context.statefulStoragesClassPath(config),
@@ -252,6 +250,11 @@ public final class SchedulerUtils {
     commands.add(completeCkptmgrProcessClassPath);
     commands.add(ckptmgrPort);
     commands.add(Context.statefulConfigFile(config));
+
+    String healthMgrMode =
+        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
+    commands.add(healthMgrMode);
+    commands.add(Context.healthMgrClassPath(config));
 
     return commands.toArray(new String[commands.size()]);
   }
@@ -392,6 +395,12 @@ public final class SchedulerUtils {
         LOG.severe("Failed to create directory: " + workingDirectory);
         return false;
       }
+    }
+
+    // Cleanup the directory
+    if (!FileUtils.cleanDir(workingDirectory)) {
+      LOG.severe("Failed to clean directory: " + workingDirectory);
+      return false;
     }
 
     // Curl and extract heron core release package and topology package

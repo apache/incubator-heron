@@ -60,6 +60,12 @@ public enum SystemConfigKey {
       "heron.metrics.max.exceptions.per.message.count", Integer.MAX_VALUE),
 
   /**
+   * The maximum size of heron packet that's allowed by the instance
+   */
+  INSTANCE_NETWORK_OPTIONS_MAXIMUM_PACKETSIZE_BYTES(
+      "heron.instance.network.options.maximum.packetsize.bytes", Type.BYTE_AMOUNT),
+
+  /**
    * The queue capacity (num of items) in bolt for buffer packets to read from stream manager
    */
   INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY(
@@ -289,6 +295,12 @@ public enum SystemConfigKey {
    */
   METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE(
       "heron.metricsmgr.network.options.socket.send.buffer.size.bytes", Type.BYTE_AMOUNT),
+
+  /**
+   * The maximum size of heron packet that's allowed by the instance
+   */
+  METRICSMGR_NETWORK_OPTIONS_MAXIMUM_PACKETSIZE_BYTES(
+      "heron.metricsmgr.network.options.maximum.packetsize.bytes", Type.BYTE_AMOUNT),
 
   /**
    *The maximum exception count be kept in tmaster

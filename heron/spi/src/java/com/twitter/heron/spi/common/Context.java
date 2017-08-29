@@ -37,6 +37,10 @@ public class Context {
     return cfg.getStringValue(Key.ENVIRON);
   }
 
+  public static String submitUser(Config cfg) {
+    return cfg.getStringValue(Key.SUBMIT_USER);
+  }
+
   public static Boolean dryRun(Config cfg) {
     return cfg.getBooleanValue(Key.DRY_RUN);
   }
@@ -117,6 +121,10 @@ public class Context {
     return cfg.getStringValue(Key.CLIENT_YAML);
   }
 
+  public static String healthmgrFile(Config cfg) {
+    return cfg.getStringValue(Key.HEALTHMGR_YAML);
+  }
+
   public static String metricsSinksFile(Config cfg) {
     return cfg.getStringValue(Key.METRICS_YAML);
   }
@@ -163,6 +171,10 @@ public class Context {
 
   public static String corePackageUri(Config cfg) {
     return cfg.getStringValue(Key.CORE_PACKAGE_URI);
+  }
+
+  public static String healthMgrMode(Config cfg) {
+    return cfg.getStringValue(Key.HEALTHMGR_MODE);
   }
 
   public static String systemConfigFile(Config cfg) {
@@ -229,6 +241,10 @@ public class Context {
     return cfg.getStringValue(Key.INSTANCE_CLASSPATH);
   }
 
+  public static String healthMgrClassPath(Config cfg) {
+    return cfg.getStringValue(Key.HEALTHMGR_CLASSPATH);
+  }
+
   public static String metricsManagerClassPath(Config cfg) {
     return cfg.getStringValue(Key.METRICSMGR_CLASSPATH);
   }
@@ -291,6 +307,10 @@ public class Context {
 
   public static String pythonInstanceBinary(Config cfg) {
     return cfg.getStringValue(Key.PYTHON_INSTANCE_BINARY);
+  }
+
+  public static String downloaderBinary(Config cfg) {
+    return cfg.getStringValue(Key.DOWNLOADER_BINARY);
   }
 
   @SuppressWarnings("unchecked")

@@ -112,7 +112,8 @@ public class MetricsCacheManager {
             systemConfig.getMetricsMgrNetworkReadBatchSize(),
             systemConfig.getMetricsMgrNetworkReadBatchTime(),
             systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSize(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize());
+            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize(),
+            systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
     // Construct the server to accepts messages from sinks
     metricsCacheManagerServer = new MetricsCacheManagerServer(metricsCacheManagerServerLoop,

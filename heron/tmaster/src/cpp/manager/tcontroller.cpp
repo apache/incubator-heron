@@ -39,6 +39,12 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
   };
 
   http_server_->InstallCallBack("/deactivate", std::move(cbDeActivate));
+
+  auto cbCleanState = [this](IncomingHTTPRequest* request) {
+    this->HandleCleanStatefulCheckpointRequest(request);
+  };
+
+  http_server_->InstallCallBack("/clean_all_stateful_checkpoints", std::move(cbCleanState));
 }
 
 TController::~TController() { delete http_server_; }
@@ -142,6 +148,65 @@ void TController::HandleDeActivateRequestDone(IncomingHTTPRequest* request,
     LOG(INFO) << s;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
     response->AddResponse(s);
+    http_server_->SendReply(request, 200, response);
+  }
+  delete request;
+}
+
+void TController::HandleCleanStatefulCheckpointRequest(IncomingHTTPRequest* request) {
+  LOG(INFO) << "Got a CleanStatefulCheckpoint request from " << request->GetRemoteHost() << ":"
+            << request->GetRemotePort();
+  const sp_string& id = request->GetValue("topologyid");
+  if (id == "") {
+    LOG(ERROR) << "Request does not contain topology id";
+    http_server_->SendErrorReply(request, 400);
+    delete request;
+    return;
+  }
+  if (tmaster_->getPhysicalPlan() == nullptr) {
+    LOG(ERROR) << "Tmaster still not initialized";
+    http_server_->SendErrorReply(request, 500);
+    delete request;
+    return;
+  }
+  if (id != tmaster_->GetTopologyId()) {
+    LOG(ERROR) << "Topology id does not match";
+    http_server_->SendErrorReply(request, 400);
+    delete request;
+    return;
+  }
+  if (clean_stateful_checkpoint_cb_) {
+    LOG(ERROR) << "Another clean request is already pending";
+    http_server_->SendErrorReply(request, 400);
+    delete request;
+    return;
+  }
+
+  clean_stateful_checkpoint_cb_ = [request, this](proto::system::StatusCode status) {
+    this->HandleCleanStatefulCheckpointRequestDone(request, status);
+  };
+
+  tmaster_->CleanAllStatefulCheckpoint();
+}
+
+void TController::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status) {
+  if (clean_stateful_checkpoint_cb_) {
+    clean_stateful_checkpoint_cb_(_status);
+    clean_stateful_checkpoint_cb_ = nullptr;
+  }
+}
+
+void TController::HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* request,
+                                              proto::system::StatusCode _status) {
+  LOG(INFO) << "Done with CleanStatefulCheckpoint Request with " << _status;
+  if (_status != proto::system::OK) {
+    LOG(ERROR) << "Unable to CleanStatefulCheckpoint" << _status;
+    http_server_->SendErrorReply(request, 500);
+  } else {
+    sp_string msg = "Checkpoints successfully cleaned";
+    LOG(INFO) << msg;
+    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    response->AddResponse(msg);
     http_server_->SendReply(request, 200, response);
   }
   delete request;

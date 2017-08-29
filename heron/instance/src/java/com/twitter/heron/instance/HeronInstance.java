@@ -26,6 +26,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -35,7 +37,6 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
@@ -52,11 +53,11 @@ public class HeronInstance {
   private final SlaveLooper slaveLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
 
   // This queue is used to pass Control Message from Gateway to Slave
   // TODO:- currently it would just pass the PhysicalPlanHelper
@@ -93,8 +94,8 @@ public class HeronInstance {
     slaveLooper.addTasksOnExit(new SlaveExitTask());
 
     // For stream
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(gatewayLooper, slaveLooper);
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, gatewayLooper);
+    inStreamQueue = new Communicator<Message>(gatewayLooper, slaveLooper);
+    outStreamQueue = new Communicator<Message>(slaveLooper, gatewayLooper);
     inControlQueue = new Communicator<InstanceControlMsg>(gatewayLooper, slaveLooper);
 
     // Now for metrics
@@ -235,11 +236,14 @@ public class HeronInstance {
     private void handleException(Thread thread, Throwable exception) {
       // We would fail fast when errors occur to avoid unexpected bad situations
       if (exception instanceof Error) {
-        LOG.log(Level.SEVERE,
-            "Error caught in thread: " + thread.getName()
-                + " with thread id: " + thread.getId() + ". Process halting...",
-            exception);
-        Runtime.getRuntime().halt(1);
+        try {
+          LOG.log(Level.SEVERE, "Error caught in thread: " + thread.getName()
+                + " with thread id: " + thread.getId() + ". Process halting...", exception);
+        } finally {
+          // If an OOM happens, it is likely that logging above will
+          // cause another OOM.
+          Runtime.getRuntime().halt(1);
+        }
       }
 
       LOG.log(Level.SEVERE,

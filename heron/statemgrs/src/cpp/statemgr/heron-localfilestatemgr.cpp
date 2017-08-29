@@ -416,7 +416,7 @@ proto::system::StatusCode HeronLocalFileStateMgr::ReadAllFileContents(const std:
     return proto::system::OK;
   } else {
     // We could not open the file
-    LOG(ERROR) << "Error reading from " << _filename << " with errno " << errno << "\n";
+    PLOG(ERROR) << "Error reading from " << _filename;
     return proto::system::PATH_DOES_NOT_EXIST;
   }
 }

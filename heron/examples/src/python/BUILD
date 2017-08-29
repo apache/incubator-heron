@@ -6,7 +6,7 @@ pex_library(
     name = "example-py",
     srcs = glob(['bolt/*.py', 'spout/*.py', 'misc/*.py']),
     deps = [
-      '//heron/api/src/python:heron-python-py',
+      '//heronpy/api:heron-python-py',
     ],
 )
 
@@ -29,6 +29,12 @@ pex_binary(
     deps = [":example-py"],
 )
 
+pex_binary(
+    name = "stateful_word_count",
+    srcs = ["stateful_word_count_topology.py"],
+    deps = [":example-py"],
+)
+
 # without main method
 pex_binary(
     name = "custom_grouping",
@@ -41,3 +47,25 @@ pex_binary(
     srcs = ["multi_stream_topology.py"],
     deps = [":example-py"],
 )
+
+# dsl examples
+pex_binary(
+    name = "word_count_dsl",
+    srcs = ["word_count_dsl.py"],
+    deps = [
+      '//heronpy/api:heron-python-py',
+      '//heronpy/dsl:heron-pythondsl-py',
+      '//heronpy/connectors:heron-pythonconnectors-py',
+    ],
+)
+
+pex_binary(
+    name = "pulsar_word_count_dsl",
+    srcs = ["pulsar_word_count_dsl.py"],
+    deps = [
+      '//heronpy/api:heron-python-py',
+      '//heronpy/dsl:heron-pythondsl-py',
+      '//heronpy/connectors:heron-pythonconnectors-py',
+    ]
+)
+

@@ -26,7 +26,6 @@
 
 #include "config/yaml-file-reader.h"
 #include "config/topology-config-vars.h"
-#include "config/topology-config-reader.h"
 #include "config/cluster-config-vars.h"
 #include "config/cluster-config-reader.h"
 #include "config/operational-config-vars.h"

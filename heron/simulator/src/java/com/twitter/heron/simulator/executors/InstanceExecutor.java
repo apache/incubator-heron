@@ -17,12 +17,13 @@ package com.twitter.heron.simulator.executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.instance.BoltInstance;
@@ -45,8 +46,8 @@ public class InstanceExecutor implements Runnable {
 
   private final SlaveLooper looper;
 
-  private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
-  private final Communicator<HeronTuples.HeronTupleSet> streamOutQueue;
+  private final Communicator<Message> streamInQueue;
+  private final Communicator<Message> streamOutQueue;
   private final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutQueue;
 
   private IInstance instance;
@@ -74,11 +75,11 @@ public class InstanceExecutor implements Runnable {
         new Object[]{physicalPlanHelper.getMyComponent(), physicalPlanHelper.getMyTaskId()});
   }
 
-  public Communicator<HeronTuples.HeronTupleSet> getStreamInQueue() {
+  public Communicator<Message> getStreamInQueue() {
     return streamInQueue;
   }
 
-  public Communicator<HeronTuples.HeronTupleSet> getStreamOutQueue() {
+  public Communicator<Message> getStreamOutQueue() {
     return streamOutQueue;
   }
 

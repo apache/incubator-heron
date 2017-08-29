@@ -31,6 +31,7 @@ import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -38,7 +39,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 
 /**
  * StreamClient implements SocketClient and communicate with Stream Manager, it will:
- * 1. Register the message of NewInstanceAssignmentMessage and TupleMessage.
+ * 1. Register the message of NewInstanceAssignmentMessage and HeronTupleSet2.
  * 2. Send Register Request when it is onConnect()
  * 3. Handle relative response for requests
  * 4. if onIncomingMessage(message) is called, it will see whether it is NewAssignment or NewTuples.
@@ -55,9 +56,9 @@ public class StreamManagerClient extends HeronClient {
   private final PhysicalPlans.Instance instance;
 
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
 
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   private final Communicator<InstanceControlMsg> inControlQueue;
 
@@ -72,8 +73,8 @@ public class StreamManagerClient extends HeronClient {
   public StreamManagerClient(NIOLooper s, String streamManagerHost, int streamManagerPort,
                              String topologyName, String topologyId,
                              PhysicalPlans.Instance instance,
-                             Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
-                             Communicator<HeronTuples.HeronTupleSet> outStreamQueue,
+                             Communicator<Message> inStreamQueue,
+                             Communicator<Message> outStreamQueue,
                              Communicator<InstanceControlMsg> inControlQueue,
                              HeronSocketOptions options,
                              GatewayMetrics gatewayMetrics) {
@@ -108,8 +109,12 @@ public class StreamManagerClient extends HeronClient {
 
   private void registerMessagesToHandle() {
     registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
-    registerOnMessage(StreamManager.TupleMessage.newBuilder());
     registerOnMessage(HeronTuples.HeronTupleSet2.newBuilder());
+
+    // Register stateful processing related messages
+    registerOnMessage(CheckpointManager.InitiateStatefulCheckpoint.newBuilder());
+    registerOnMessage(CheckpointManager.RestoreInstanceStateRequest.newBuilder());
+    registerOnMessage(CheckpointManager.StartInstanceStatefulProcessing.newBuilder());
   }
 
 
@@ -187,10 +192,14 @@ public class StreamManagerClient extends HeronClient {
           (StreamManager.NewInstanceAssignmentMessage) message;
       LOG.info("Handling assignment message from direct NewInstanceAssignmentMessage");
       handleAssignmentMessage(m.getPplan());
-    } else if (message instanceof StreamManager.TupleMessage) {
-      handleNewTuples((StreamManager.TupleMessage) message);
     } else if (message instanceof HeronTuples.HeronTupleSet2) {
       handleNewTuples2((HeronTuples.HeronTupleSet2) message);
+    } else if (message instanceof CheckpointManager.InitiateStatefulCheckpoint)  {
+      handleCheckpointRequest((CheckpointManager.InitiateStatefulCheckpoint) message);
+    } else if (message instanceof CheckpointManager.RestoreInstanceStateRequest) {
+      handleRestoreInstanceStateRequest((CheckpointManager.RestoreInstanceStateRequest) message);
+    } else if (message instanceof CheckpointManager.StartInstanceStatefulProcessing) {
+      handleStartStatefulRequest((CheckpointManager.StartInstanceStatefulProcessing) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -211,10 +220,9 @@ public class StreamManagerClient extends HeronClient {
     // Collect all tuples in queue
     int size = outStreamQueue.size();
     for (int i = 0; i < size; i++) {
-      HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
-      StreamManager.TupleMessage msg = StreamManager.TupleMessage.newBuilder()
-          .setSet(tupleSet).build();
-      sendMessage(msg);
+      Message streamMessage = outStreamQueue.poll();
+
+      sendMessage(streamMessage);
     }
   }
 
@@ -224,7 +232,7 @@ public class StreamManagerClient extends HeronClient {
         // In order to avoid packets back up in Client side,
         // We would poll message from queue and send them only when there are no outstanding packets
         while (!outStreamQueue.isEmpty()) {
-          HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
+          Message tupleSet = outStreamQueue.poll();
 
           gatewayMetrics.updateSentPacketsCount(1);
           gatewayMetrics.updateSentPacketsSize(tupleSet.getSerializedSize());
@@ -263,6 +271,32 @@ public class StreamManagerClient extends HeronClient {
     }
   }
 
+  private void handleStartStatefulRequest(
+      CheckpointManager.StartInstanceStatefulProcessing request) {
+    LOG.info("Received a StartInstanceStatefulProcessing request: " + request);
+
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setStartInstanceStatefulProcessing(request)
+        .build();
+    inControlQueue.offer(instanceControlMsg);
+  }
+
+  private void handleRestoreInstanceStateRequest(
+      CheckpointManager.RestoreInstanceStateRequest request) {
+    LOG.info("Received a RestoreInstanceState request: " + request);
+
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setRestoreInstanceStateRequest(request)
+        .build();
+    inControlQueue.offer(instanceControlMsg);
+  }
+
+  private void handleCheckpointRequest(
+      CheckpointManager.InitiateStatefulCheckpoint request) {
+    LOG.info("Handling instance checkpoint request: " + request);
+    inStreamQueue.offer(request);
+  }
+
   private void handleRegisterResponse(StreamManager.RegisterInstanceResponse response) {
     if (response.getStatus().getStatus() != Common.StatusCode.OK) {
       throw new RuntimeException("Stream Manager returned a not ok response for register");
@@ -273,10 +307,6 @@ public class StreamManagerClient extends HeronClient {
       LOG.info("Handling assignment message from response");
       handleAssignmentMessage(response.getPplan());
     }
-  }
-
-  private void handleNewTuples(StreamManager.TupleMessage message) {
-    inStreamQueue.offer(message.getSet());
   }
 
   private void handleNewTuples2(HeronTuples.HeronTupleSet2 set) {

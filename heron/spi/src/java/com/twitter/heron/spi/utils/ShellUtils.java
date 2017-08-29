@@ -61,17 +61,17 @@ public final class ShellUtils {
   }
 
   public static int runProcess(String[] cmdline, StringBuilder outputBuilder) {
-    return runSyncProcess(false, cmdline, outputBuilder, null);
+    return runSyncProcess(true, false, cmdline, outputBuilder, null);
   }
 
   public static int runProcess(
       String cmdline, StringBuilder outputBuilder) {
-    return runSyncProcess(false, splitTokens(cmdline), outputBuilder, null);
+    return runSyncProcess(true, false, splitTokens(cmdline), outputBuilder, null);
   }
 
-  public static int runSyncProcess(
+  public static int runSyncProcess(boolean isVerbose,
       boolean isInheritIO, String[] cmdline, StringBuilder outputBuilder, File workingDirectory) {
-    return runSyncProcess(isInheritIO, cmdline, outputBuilder, workingDirectory,
+    return runSyncProcess(isVerbose, isInheritIO, cmdline, outputBuilder, workingDirectory,
         new HashMap<String, String>());
   }
 
@@ -87,12 +87,13 @@ public final class ShellUtils {
    * @return thread
    */
   private static Thread createAsyncStreamThread(final InputStream input,
-                                                final StringBuilder processOutputStringBuilder) {
+                                                final StringBuilder processOutputStringBuilder,
+                                                final boolean isVerbose) {
     Thread thread = new Thread() {
       @Override
       public void run() {
         // do not buffer
-        LOG.log(Level.INFO, "Process output (stdout+stderr):");
+        LOG.log(Level.FINE, "Process output (stdout+stderr):");
         BufferedReader reader = new BufferedReader(new InputStreamReader(input), 1);
         while (true) {
           String line = null;
@@ -104,7 +105,9 @@ public final class ShellUtils {
           if (line == null) {
             break;
           } else {
-            System.err.println(line);
+            if (isVerbose) {
+              System.err.println(line);
+            }
             if (processOutputStringBuilder != null) {
               processOutputStringBuilder.append(line);
             }
@@ -125,12 +128,12 @@ public final class ShellUtils {
    * run sync process
    */
   private static int runSyncProcess(
-      boolean isInheritIO, String[] cmdline,
+      boolean isVerbose, boolean isInheritIO, String[] cmdline,
       StringBuilder outputBuilder, File workingDirectory, Map<String, String> envs) {
     final StringBuilder builder = outputBuilder == null ? new StringBuilder() : outputBuilder;
 
     // Log the command for debugging
-    LOG.log(Level.INFO, "Running synced process: ``{0}''''", joinString(cmdline));
+    LOG.log(Level.FINE, "Running synced process: ``{0}''''", joinString(cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
     /* combine input stream and error stream into stderr because
        1. this preserves order of process's stdout/stderr message
@@ -153,7 +156,7 @@ public final class ShellUtils {
     // because stream is not read while waiting for the process to complete.
     // If buffer becomes full, it can block the "process" as well,
     // preventing all progress for both the "process" and the current thread.
-    Thread outputsThread = createAsyncStreamThread(process.getInputStream(), builder);
+    Thread outputsThread = createAsyncStreamThread(process.getInputStream(), builder, isVerbose);
 
     try {
       outputsThread.start();
@@ -195,7 +198,7 @@ public final class ShellUtils {
 
   private static Process runASyncProcess(String[] command, File workingDirectory,
       Map<String, String> envs, String logFileUuid, boolean logStderr) {
-    LOG.log(Level.INFO, "Running async process: ``{0}''''", joinString(command));
+    LOG.log(Level.FINE, "Running async process: ``{0}''''", joinString(command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
@@ -291,7 +294,7 @@ public final class ShellUtils {
 
     // using curl copy the url to the target file
     String cmd = String.format("curl %s -o %s", uri, destination);
-    int ret = runSyncProcess(isInheritIO,
+    int ret = runSyncProcess(isVerbose, isInheritIO,
         splitTokens(cmd), new StringBuilder(), parentDirectory);
 
     return ret == 0;
@@ -309,7 +312,7 @@ public final class ShellUtils {
       String packageName, String targetFolder, boolean isVerbose, boolean isInheritIO) {
     String cmd = String.format("tar -xvf %s", packageName);
 
-    int ret = runSyncProcess(isInheritIO,
+    int ret = runSyncProcess(isVerbose, isInheritIO,
         splitTokens(cmd), new StringBuilder(), new File(targetFolder));
 
     return ret == 0;

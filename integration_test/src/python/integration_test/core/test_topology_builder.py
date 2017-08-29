@@ -13,9 +13,9 @@
 # limitations under the License.
 '''integration test topology builder'''
 import copy
-from heron.api.src.python import api_constants
-from heron.api.src.python import Stream, Grouping
-from heron.api.src.python.topology import TopologyBuilder, Topology, TopologyType
+import heronpy.api.api_constants as api_constants
+from heronpy.api.stream import Stream, Grouping
+from heronpy.api.topology import TopologyBuilder, Topology, TopologyType
 from ..core import constants as integ_const
 from .aggregator_bolt import AggregatorBolt
 from .integration_test_spout import IntegrationTestSpout
@@ -30,7 +30,8 @@ class TestTopologyBuilder(TopologyBuilder):
   TERMINAL_BOLT_NAME = '__integration_test_aggregator_bolt'
   TERMINAL_BOLT_CLASS = AggregatorBolt
   DEFAULT_CONFIG = {api_constants.TOPOLOGY_DEBUG: True,
-                    api_constants.TOPOLOGY_ENABLE_ACKING: True,
+                    api_constants.TOPOLOGY_RELIABILITY_MODE:
+                    api_constants.TopologyReliabilityMode.ATLEAST_ONCE,
                     api_constants.TOPOLOGY_PROJECT_NAME: "heron-integration-test"}
   def __init__(self, name, http_server_url):
     super(TestTopologyBuilder, self).__init__(name)

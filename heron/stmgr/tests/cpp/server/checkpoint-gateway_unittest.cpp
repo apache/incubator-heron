@@ -113,8 +113,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   // Set message timeout
   heron::proto::api::Config* topology_config = topology->mutable_topology_config();
   heron::proto::api::Config::KeyValue* kv = topology_config->add_kvs();
-  kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_STATEFUL_ENABLED);
-  kv->set_value("true");
+  kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE);
+  kv->set_value("ATLEAST_ONCE");
 
   // Set state
   topology->set_state(heron::proto::api::RUNNING);
@@ -206,7 +206,7 @@ void drainer1(sp_int32 _task_id, heron::proto::system::HeronTupleSet2* _tup) {
   delete _tup;
 }
 
-void drainer2(heron::proto::stmgr::TupleStreamMessage2* _tup) {
+void drainer2(heron::proto::stmgr::TupleStreamMessage* _tup) {
   drainer2_tuples.push_back(_tup->task_id());
   delete _tup;
 }
@@ -224,9 +224,8 @@ TEST(CheckpointGateway, emptyckptid) {
       auto neighbour_calculator = new heron::stmgr::NeighbourCalculator();
       neighbour_calculator->Reconstruct(*pplan);
       EventLoop* dummyLoop = new EventLoopImpl();
-      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
-                                                                   "_stmgr", "_stmgr", 100,
-                                                                   dummyLoop);
+      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+      dummy_metrics_client_->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
       auto gateway = new heron::stmgr::CheckpointGateway(1024 * 1024, neighbour_calculator,
                                                          dummy_metrics_client_,
                                                          drainer1, drainer2, drainer3);
@@ -281,9 +280,8 @@ TEST(CheckpointGateway, normaloperation) {
       auto neighbour_calculator = new heron::stmgr::NeighbourCalculator();
       neighbour_calculator->Reconstruct(*pplan);
       EventLoop* dummyLoop = new EventLoopImpl();
-      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
-                                                                   "_stmgr", "_stmgr", 100,
-                                                                   dummyLoop);
+      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+      dummy_metrics_client_->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
       auto gateway = new heron::stmgr::CheckpointGateway(1024 * 1024, neighbour_calculator,
                                                          dummy_metrics_client_,
                                                          drainer1, drainer2, drainer3);
@@ -371,9 +369,8 @@ TEST(CheckpointGateway, overflow) {
       auto neighbour_calculator = new heron::stmgr::NeighbourCalculator();
       neighbour_calculator->Reconstruct(*pplan);
       EventLoop* dummyLoop = new EventLoopImpl();
-      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
-                                                                   "_stmgr", "_stmgr", 100,
-                                                                   dummyLoop);
+      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+      dummy_metrics_client_->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
       auto gateway = new heron::stmgr::CheckpointGateway(1024 * 1024, neighbour_calculator,
                                                          dummy_metrics_client_,
                                                          drainer1, drainer2, drainer3);

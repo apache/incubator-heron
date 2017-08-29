@@ -16,10 +16,12 @@ import unittest2 as unittest
 import mock
 from mock import call, patch, Mock, MagicMock
 import os
+import getpass
 import subprocess
 import sys
 import tempfile
 import heron.tools.cli.src.python.main as main
+import heron.tools.cli.src.python.cdefs as cdefs
 import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.result as result
 import heron.tools.common.src.python.utils.config as config
@@ -50,6 +52,8 @@ class ClientCommandTest(unittest.TestCase):
     os.path.isdir = MagicMock(return_value=True)
     os.path.isfile = MagicMock(return_value=True)
     os.environ.copy = MagicMock(return_value={})
+    main.server_deployment_mode = MagicMock(return_value=dict())
+    cdefs.check_direct_mode_cluster_definition = MagicMock(return_value=True)
 
   def run_test(self, command, issued_commands, environ):
     calls = []
@@ -78,11 +82,12 @@ class SubmitTest(ClientCommandTest):
                       ':/heron/lib/jars/scheduler/*:/heron/lib/jars/uploader/*:' \
                       '/heron/lib/jars/statemgr/*:/heron/lib/jars/packing/* ' \
                       'com.twitter.heron.scheduler.SubmitterMain --cluster local ' \
-                      '--role user --environment default --heron_home /heron/home ' \
+                      '--role user --environment default --submit_user %s ' \
+                      '--heron_home /heron/home ' \
                       '--config_path /heron/home/conf/local --override_config_file ' \
                       '/heron/home/override.yaml --release_file /heron/home/release.yaml ' \
                       '--topology_package /tmp/heron_tmp/topology.tar.gz --topology_defn T.defn ' \
-                      '--topology_bin heron-examples.jar'
+                      '--topology_bin heron-examples.jar' % (getpass.getuser())
     env = {'HERON_OPTIONS':
            'cmdline.topologydefn.tmpdirectory=/tmp/heron_tmp,cmdline.topology.initial.state=RUNNING'}
     ClientCommandTest.run_test(self, command, [create_defn_commands, submit_commands], env)

@@ -24,6 +24,7 @@ import java.util.Set;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Pair;
+import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
