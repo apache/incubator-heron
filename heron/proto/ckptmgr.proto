@@ -10,7 +10,7 @@ import "physical_plan.proto";
 // happen in a few(non exhaustive) scenarios
 //
 // On Startup
-//   For topologies needing exact once, the startup sequence of
+//   For topologies needing effectively once, the startup sequence of
 // tmaster/stmgr/instance is a little different. Normally, upon
 // startup, all stmgrs connect to tmaster and then tmaster computes pplan
 // and distributes to stmgrs, which in turn send it to all their
