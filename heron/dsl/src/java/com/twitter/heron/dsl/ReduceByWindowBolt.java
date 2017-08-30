@@ -54,9 +54,9 @@ class ReduceByWindowBolt<I> extends DslWindowBolt {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void handleWindow(List<Tuple> tuples) {
+  public void execute(TupleWindow inputWindow) {
     I reducedValue;
-    for (Tuple tuple : tuples) {
+    for (Tuple tuple : inputWindow.get()) {
       I tup = (I) tuple.getValue(0);
       if (reducedValue == null) {
         reducedValue = tup;

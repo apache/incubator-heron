@@ -69,9 +69,9 @@ class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void handleWindow(List<Tuple> tuples) {
+  public void execute(TupleWindow inputWindow) {
     Map<K, KeyValue<V1, V2>> joinMap = new HashMap<>();
-    for (Tuple tuple : tuples) {
+    for (Tuple tuple : inputWindow.get()) {
       if (tuple.getSourceComponent().equals(leftComponent)) {
         KeyValue<K, V1> tup = (KeyValue<K, V1>) tuple.getValue(0);
         addMapLeft(joinMap, tup);

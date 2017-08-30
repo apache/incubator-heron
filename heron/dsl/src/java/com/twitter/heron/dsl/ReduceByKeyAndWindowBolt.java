@@ -55,9 +55,9 @@ class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void handleWindow(List<Tuple> tuples) {
+  public void execute(TupleWindow inputWindow) {
     Map<K, V> reduceMap = new HashMap<>();
-    for (Tuple tuple : tuples) {
+    for (Tuple tuple : inputWindow.get()) {
       KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
       addMap(reduceMap, tup);
     }

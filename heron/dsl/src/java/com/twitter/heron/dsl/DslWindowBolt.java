@@ -18,7 +18,7 @@ import com.twitter.heron.api.bolt.BaseRichBolt;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
-abstract class DslWindowBolt extends IWindowedBolt {
+abstract class DslWindowBolt extends BaseWindowedBolt {
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields("output"));
