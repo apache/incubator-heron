@@ -2,11 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "googletest-release"
-package_version = "1.8.0"
+pkg_name = "googletest-release"
+pkg_version = "1.8.0"
 
-package_file = package_name + "-" + package_version + ".zip"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".zip"
+package_dir = pkg_name + "-" + pkg_version
 
 gtest_include_files = [
     "include/gtest/gtest-death-test.h",
