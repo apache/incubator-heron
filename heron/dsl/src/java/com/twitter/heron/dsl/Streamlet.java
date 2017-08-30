@@ -14,8 +14,12 @@
 
 package com.twitter.heron.dsl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -146,22 +150,43 @@ public abstract class Streamlet<R> {
   }
 
   /**
+   * A more generalized version of repartition where a user can determine which partitions
+   * any particular tuple should go to
+   */
+  Streamlet<R> repartition(int numPartitions, BiFunction<R, Integer, List<Integer>> partitionFn) {
+    return new ReMapStreamlet<R>(this, partitionFn).setNumPartitions(numPartitions);
+  }
+
+  /**
+   * Clones the current Streamlet. It returns an array of numClones Streamlets where each
+   * Streamlet contains all the tuples of the current Streamlet
+   * @param numClones The number of clones to clone
+   */
+  List<Streamlet<R>> clone(int numClones) {
+    List<Streamlet<R>> retval = new ArrayList<>();
+    for (int i = 0; i < numClones; ++i) {
+      retval.add(repartition(getNumPartitions()));
+    }
+    return retval;
+  }
+
+  /**
    * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
    * windowConfig and applying reduceFn on those tuples
    * @param windowConfig This is a specification of what kind of windowing strategy you like
    * to have. Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
    */
-  Streamlet<I> reduceByWindow(WindowConfig windowConfig, BinaryOperator<I> reduceFn) {
-    return new ReduceByWindowStreamlet<I>(this, windowConfig, reduceFn);
+  Streamlet<R> reduceByWindow(WindowConfig windowConfig, BinaryOperator<R> reduceFn) {
+    return new ReduceByWindowStreamlet<R>(this, windowConfig, reduceFn);
   }
 
   /**
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
-  Streamlet<I> union(Streamlet<I> other) {
-    return new UnionStreamlet<I>(this, other);
+  Streamlet<R> union(Streamlet<R> other) {
+    return new UnionStreamlet<R>(this, other);
   }
 
 
@@ -177,9 +202,7 @@ public abstract class Streamlet<R> {
     bldr = build(bldr, stageNames);
     try {
       HeronSubmitter.submitTopology(topologyName, config, bldr.createTopology());
-    } catch (AlreadyAliveException e) {
-      e.printStackTrace();
-    } catch (InvalidTopologyException e) {
+    } catch (AlreadyAliveException | InvalidTopologyException e) {
       e.printStackTrace();
     }
   }
