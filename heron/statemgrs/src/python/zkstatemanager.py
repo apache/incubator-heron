@@ -93,6 +93,11 @@ class ZkStateManager(StateManager):
         ret["result"] = data
 
     try:
+      # Ensure the topology path exists. If a topology has never been deployed
+      # then the path will not exist so create it and don't crash.
+      # TODO add a watch instead of creating the path?
+      self.client.ensure_path(self.get_topologies_path())
+
       self._get_topologies_with_watch(callback, isWatching)
     except NoNodeError:
       self.client.stop()
