@@ -92,7 +92,7 @@ class FileStateManager(StateManager):
       For all the topologies in the watchers, check if the data
       in directory has changed. Trigger the callback if it has.
       """
-      for topology, callbacks in watchers.iteritems():
+      for topology, callbacks in watchers.items():
         file_path = os.path.join(path, topology)
         data = ""
         if os.path.exists(file_path):

@@ -17,16 +17,18 @@ import Queue
 import time
 import collections
 
-from heron.api.src.python.stream import Stream
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.stateful_component import StatefulComponent
+from heronpy.api.stream import Stream
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.stateful_component import StatefulComponent
 
-from heron.common.src.python.utils.metrics import SpoutMetrics
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.tuple import TupleHelper
+
+from heron.instance.src.python.utils.metrics import SpoutMetrics
+from heron.instance.src.python.utils.tuple import TupleHelper
+
 from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
-import heron.common.src.python.system_constants as system_constants
+import heron.instance.src.python.utils.system_constants as system_constants
 
 from .base_instance import BaseInstance
 
@@ -68,7 +70,7 @@ class SpoutInstance(BaseInstance):
     if not self._initialized_metrics_and_tasks:
       self.spout_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.spout_impl, StatefulComponent):
-      self.spout_impl.initState(stateful_state)
+      self.spout_impl.init_state(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
     if not self._initialized_metrics_and_tasks:
       self._add_spout_task()
@@ -297,7 +299,9 @@ class SpoutInstance(BaseInstance):
     now = time.time()
 
     timeout_lst = []
-    for key, tuple_info in self.in_flight_tuples.iteritems():
+    while self.in_flight_tuples:
+      key = next(iter(self.in_flight_tuples))
+      tuple_info = self.in_flight_tuples[key]
       if tuple_info.is_expired(now, timeout_sec):
         timeout_lst.append(tuple_info)
         self.in_flight_tuples.pop(key)

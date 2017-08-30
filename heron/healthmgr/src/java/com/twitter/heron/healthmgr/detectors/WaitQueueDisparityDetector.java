@@ -27,7 +27,7 @@ public class WaitQueueDisparityDetector extends SkewDetector {
   WaitQueueDisparityDetector(BufferSizeSensor pendingBufferSensor,
                              HealthPolicyConfig policyConfig) {
     super(pendingBufferSensor,
-        (double) policyConfig.getConfig(CONF_DISPARITY_RATIO, 20),
+        (double) policyConfig.getConfig(CONF_DISPARITY_RATIO, 20.0),
         BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY);
   }
 }

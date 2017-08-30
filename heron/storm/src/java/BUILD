@@ -5,7 +5,7 @@ load("/tools/rules/build_defs", "DOCLINT_HTML_AND_SYNTAX")
 load("/tools/rules/javadoc", "java_doc")
 
 storm_deps_files = [
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:heron-api",
     "//heron/common/src/java:basics-java",
     "//heron/simulator/src/java:simulator-java",
     "@com_googlecode_json_simple_json_simple//jar",

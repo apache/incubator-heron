@@ -186,7 +186,7 @@ public class Slave implements Runnable, AutoCloseable {
     //     - If the topology is not stateful
     if (helper != null && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
       Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-      boolean isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EXACTLY_ONCE)
+      boolean isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
           .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
 
       if (!isTopologyStateful || isStatefulProcessingStarted) {

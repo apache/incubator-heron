@@ -90,7 +90,6 @@ DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const s
 
   tmaster_client_ = new DummyTMasterClient(ss, tmaster_options, stmgr_id, stmgr_host, stmgr_port,
                                            shell_port, _instances);
-  tmaster_client_->Start();
   InstallRequestHandler(&DummyStMgr::HandleStMgrHelloRequest);
   InstallMessageHandler(&DummyStMgr::HandleStartBackPressureMessage);
   InstallMessageHandler(&DummyStMgr::HandleStopBackPressureMessage);
@@ -99,6 +98,16 @@ DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const s
 DummyStMgr::~DummyStMgr() {
   tmaster_client_->Stop();
   delete tmaster_client_;
+}
+
+sp_int32 DummyStMgr::Start() {
+  if (SP_OK == Server::Start()) {
+    tmaster_client_->setStmgrPort(get_serveroptions().get_port());
+    tmaster_client_->Start();
+    return SP_OK;
+  } else {
+    return SP_NOTOK;
+  }
 }
 
 void DummyStMgr::HandleNewConnection(Connection* conn) {}

@@ -14,8 +14,8 @@
 '''Example WordCountTopology'''
 import sys
 
-from heron.dsl.src.python.streamlet import TimeWindow
-from heron.spouts.src.python.fixedlines.fixedlinesstreamlet import FixedLinesStreamlet
+from heronpy.dsl.streamlet import TimeWindow
+from heronpy.connectors.mock.fixedlinesstreamlet import FixedLinesStreamlet
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     sys.exit(1)
 
   counts = FixedLinesStreamlet.fixedLinesGenerator(parallelism=2) \
-           .flatMap(lambda line: line.split(), parallelism=2) \
+           .flat_map(lambda line: line.split(), parallelism=2) \
            .map(lambda word: (word, 1), parallelism=2) \
-           .reduceByWindow(TimeWindow(10, 2), lambda x, y: x + y)
+           .reduce_by_window(TimeWindow(10, 2), lambda x, y: x + y)
   counts.run(sys.argv[1])

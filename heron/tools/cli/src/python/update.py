@@ -35,7 +35,7 @@ def create_parser(subparsers):
   args.add_topology(parser)
 
   def parallelism_type(value):
-    pattern = re.compile(r"^[\w-]+:[\d]+$")
+    pattern = re.compile(r"^[\w\.-]+:[\d]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
           'Invalid syntax for component parallelism (<component_name>:<value>): %s' % value)
