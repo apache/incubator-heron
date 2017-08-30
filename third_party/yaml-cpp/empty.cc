@@ -1,2 +1,2 @@
-void _empty_xyz() {
+void _empty_yaml_xyz() {
 }
