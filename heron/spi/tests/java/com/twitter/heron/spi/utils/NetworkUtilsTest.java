@@ -18,10 +18,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.sun.net.httpserver.Headers;
@@ -167,10 +171,6 @@ public class NetworkUtilsTest {
   public void testReadHttpResponseFail() throws Exception {
     HttpURLConnection connection = Mockito.mock(HttpURLConnection.class);
 
-    // Unable to read response due to wrong response code
-    Mockito.doReturn(HttpURLConnection.HTTP_NOT_FOUND).when(connection).getResponseCode();
-    Assert.assertArrayEquals(new byte[0], NetworkUtils.readHttpResponse(connection));
-
     // Unable to read response due to wrong response content length
     Mockito.doReturn(HttpURLConnection.HTTP_OK).when(connection).getResponseCode();
     Mockito.doReturn(-1).when(connection).getContentLength();
@@ -187,12 +187,15 @@ public class NetworkUtilsTest {
     byte[] expectedBytes = expectedResponseString.getBytes();
     HttpURLConnection connection = Mockito.mock(HttpURLConnection.class);
 
-    Mockito.doReturn(HttpURLConnection.HTTP_OK).when(connection).getResponseCode();
+    // every response code should return a body if one exists
     Mockito.doReturn(expectedBytes.length).when(connection).getContentLength();
+    for (Integer responseCode : getAllHttpCodes()) {
+      Mockito.doReturn(responseCode).when(connection).getResponseCode();
 
-    InputStream is = new ByteArrayInputStream(expectedBytes);
-    Mockito.doReturn(is).when(connection).getInputStream();
-    Assert.assertArrayEquals(expectedBytes, NetworkUtils.readHttpResponse(connection));
+      InputStream is = new ByteArrayInputStream(expectedBytes);
+      Mockito.doReturn(is).when(connection).getInputStream();
+      Assert.assertArrayEquals(expectedBytes, NetworkUtils.readHttpResponse(connection));
+    }
   }
 
   /**
@@ -273,5 +276,18 @@ public class NetworkUtilsTest {
     Assert.assertEquals(host, address.getHostString());
     Assert.assertEquals(port, address.getPort());
     Assert.assertEquals(endpoint, address.toString());
+  }
+
+  private List<Integer> getAllHttpCodes() throws IllegalAccessException {
+    Field[] declaredFields = HttpURLConnection.class.getDeclaredFields();
+    List<Integer> responseCodes = new ArrayList<>();
+    for (Field field : declaredFields) {
+      if (Modifier.isStatic(field.getModifiers())) {
+        if (field.getName().contains("HTTP_")) {
+          responseCodes.add(field.getInt(null));
+        }
+      }
+    }
+    return responseCodes;
   }
 }

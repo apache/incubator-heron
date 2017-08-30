@@ -16,7 +16,6 @@ package com.twitter.heron.scheduler.utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -124,7 +123,7 @@ public class HttpJsonClient {
       if (!NetworkUtils.checkHttpResponseCode(conn, expectedResponseCode)) {
         byte[] bytes = NetworkUtils.readHttpResponse(conn);
         LOG.log(Level.SEVERE, "Failed to send POST request to endpoint");
-        LOG.log(Level.SEVERE, Arrays.toString(bytes));
+        LOG.log(Level.SEVERE, new String(bytes));
         throw new IOException("Unexpected response from connection. Expected "
             + expectedResponseCode + " but received " + conn.getResponseCode());
       }
