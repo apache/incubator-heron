@@ -61,6 +61,3 @@ ADD scripts /opt/$ZK_DIST/scripts
 RUN chmod +x /opt/$ZK_DIST/scripts/generate-zookeeper-config.sh \
     && chmod +x /opt/$ZK_DIST/scripts/zookeeper-ruok.sh \
     && chmod +x /opt/$ZK_DIST/scripts/start-zookeeper.sh
-
-ENV ZOOKEEPER_HOME /opt/zookeeper
-RUN export ZOOKEEPER_HOME
