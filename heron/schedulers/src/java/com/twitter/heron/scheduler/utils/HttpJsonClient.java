@@ -16,7 +16,6 @@ package com.twitter.heron.scheduler.utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
