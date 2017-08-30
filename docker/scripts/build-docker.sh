@@ -24,7 +24,7 @@ setup_scratch_dir() {
     mkdir $1/artifacts
   fi
 
-  cp $DOCKER_DIR/dist/* $1
+  cp -R $DOCKER_DIR/dist/* $1
 }
 
 run_build() {
