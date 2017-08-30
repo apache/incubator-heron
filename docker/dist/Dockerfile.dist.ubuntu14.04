@@ -34,7 +34,7 @@ ARG ZK_DIST=zookeeper-3.4.10
 RUN curl -O "http://www.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
     && tar -xzf /heron/$ZK_DIST.tar.gz -C /opt \
     && rm -r /heron/$ZK_DIST.tar.gz \
-    && ln -s /opt/$ZK_DIST /opt/zookeeper \
+    && mv /opt/$ZK_DIST /opt/zookeeper \
     && rm -rf /opt/zookeeper/CHANGES.txt \
     /opt/zookeeper/README.txt \
     /opt/zookeeper/NOTICE.txt \
@@ -54,10 +54,10 @@ RUN curl -O "http://www.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
     /opt/zookeeper/$ZK_DIST.jar.sha1
 
 
-ADD conf/zookeeper.conf /opt/$ZK_DIST/conf/zookeeper.conf
+ADD conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
 
-RUN mkdir -p /opt/$ZK_DIST/scripts
-ADD scripts /opt/$ZK_DIST/scripts
-RUN chmod +x /opt/$ZK_DIST/scripts/generate-zookeeper-config.sh \
-    && chmod +x /opt/$ZK_DIST/scripts/zookeeper-ruok.sh \
-    && chmod +x /opt/$ZK_DIST/scripts/start-zookeeper.sh
+RUN mkdir -p /opt/zookeeper/scripts
+ADD scripts /opt/zookeeper/scripts
+RUN chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh \
+    && chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh \
+    && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
