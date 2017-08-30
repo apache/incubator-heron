@@ -32,7 +32,7 @@ run_build() {
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
   DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
-  DOCKER_TAG="streamlio/heron-$TARGET_PLATFORM:$HERON_VERSION"
+  DOCKER_TAG="heron/heron-$TARGET_PLATFORM:$HERON_VERSION"
 
   setup_scratch_dir $SCRATCH_DIR
 
