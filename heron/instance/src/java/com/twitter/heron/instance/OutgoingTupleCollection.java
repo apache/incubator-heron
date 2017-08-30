@@ -120,7 +120,8 @@ public class OutgoingTupleCollection {
       long tupleSizeInBytes) {
     if (tupleSizeInBytes > maxDataTupleSize.asBytes()) {
       throw new RuntimeException(
-          String.format("Data tuple is too large: %d bytes", tupleSizeInBytes));
+          String.format("Data tuple (stream id: %s) is too large: %d bytes", streamId,
+              tupleSizeInBytes));
     }
     if (currentDataTuple == null
         || !currentDataTuple.getStream().getId().equals(streamId)

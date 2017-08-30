@@ -143,7 +143,7 @@ public final class TopologyUtils {
       return false;
     } else {
       return Config.TopologyReliabilityMode.valueOf(mode)
-             == Config.TopologyReliabilityMode.EXACTLY_ONCE;
+             == Config.TopologyReliabilityMode.EFFECTIVELY_ONCE;
     }
   }
 

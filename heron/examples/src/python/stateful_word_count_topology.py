@@ -35,7 +35,7 @@ if __name__ == '__main__':
                                 config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
 
   topology_config = {constants.TOPOLOGY_RELIABILITY_MODE:
-                         constants.TopologyReliabilityMode.EXACTLY_ONCE,
+                         constants.TopologyReliabilityMode.EFFECTIVELY_ONCE,
                      constants.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS: 30}
   builder.set_config(topology_config)
 

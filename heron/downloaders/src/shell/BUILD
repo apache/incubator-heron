@@ -1,8 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-genrule(
-  name = "heron-downloader-shell",
-  srcs = [":heron-downloader.sh"],
-  outs = ["heron-downloader"],
-  cmd  = "cp $< $@",
+sh_binary(
+  name = "heron-downloader",
+  srcs = ["heron-downloader.sh"],
 )

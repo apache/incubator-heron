@@ -293,7 +293,7 @@ class SingleThreadHeronInstance(object):
     context = self.my_pplan_helper.context
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
-    is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EFFECTIVELY_ONCE)
     if is_stateful and not self.is_stateful_started:
       return
     try:

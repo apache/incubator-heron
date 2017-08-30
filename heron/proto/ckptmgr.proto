@@ -6,11 +6,11 @@ import "common.proto";
 import "physical_plan.proto";
 
 // The messages in this file are for stateful processing and providing
-// exactly once semantics. Below are the various sequence of events that
+// effectively once semantics. Below are the various sequence of events that
 // happen in a few(non exhaustive) scenarios
 //
 // On Startup
-//   For topologies needing exact once, the startup sequence of
+//   For topologies needing effectively once, the startup sequence of
 // tmaster/stmgr/instance is a little different. Normally, upon
 // startup, all stmgrs connect to tmaster and then tmaster computes pplan
 // and distributes to stmgrs, which in turn send it to all their

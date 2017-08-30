@@ -388,11 +388,11 @@ struct CommonResources {
   sp_string zkhostportlist_;
   sp_string topology_name_;
   sp_string topology_id_;
-  sp_int32 num_stmgrs_;
-  sp_int32 num_spouts_;
-  sp_int32 num_spout_instances_;
-  sp_int32 num_bolts_;
-  sp_int32 num_bolt_instances_;
+  size_t num_stmgrs_;
+  size_t num_spouts_;
+  size_t num_spout_instances_;
+  size_t num_bolts_;
+  size_t num_bolt_instances_;
 
   // store the stmgr server port returned by bind/listen 0
   std::vector<sp_int32> stmgr_ports_;
