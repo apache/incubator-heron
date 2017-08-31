@@ -12,14 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.bolts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.tuple.Values;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,26 +32,28 @@ import com.twitter.heron.dsl.KeyValue;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGrouping {
-  private static final long serialVersionUID = -7630948017550637716L;
-  private List<Integer> taskIds;
+public class FilterBolt<R> extends DslBolt {
+  private static final long serialVersionUID = -4748646871471052706L;
+  private Predicate<R> filterFn;
 
-  ReduceByKeyAndWindowCustomGrouping() {
+  private OutputCollector collector;
+
+  public FilterBolt(Predicate<R> filterFn) {
+    this.filterFn = filterFn;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
-  public void prepare(TopologyContext context, String component,
-                      String streamId, List<Integer> targetTasks) {
-    this.taskIds = targetTasks;
+  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Integer> chooseTasks(List<Object> values) {
-    List<Integer> ret = new ArrayList<>();
-    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
-    int index = obj.getKey().hashCode() % taskIds.size();
-    ret.add(taskIds.get(index));
-    return ret;
+  public void execute(Tuple tuple) {
+    R obj = (R) tuple.getValue(0);
+    if (filterFn.test(obj)) {
+      collector.emit(new Values(obj));
+    }
   }
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.ArrayList;
 import java.util.HashSet;

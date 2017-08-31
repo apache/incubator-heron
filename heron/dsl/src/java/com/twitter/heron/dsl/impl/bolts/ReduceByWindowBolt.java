@@ -12,14 +12,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.bolts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.function.BinaryOperator;
 
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.windowing.TupleWindow;
+import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,26 +34,35 @@ import com.twitter.heron.dsl.KeyValue;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
-  private static final long serialVersionUID = 2007892247960031525L;
-  private List<Integer> taskIds;
+public class ReduceByWindowBolt<I> extends DslWindowBolt {
+  private static final long serialVersionUID = 6513775685209414130L;
+  private WindowConfig windowCfg;
+  private BinaryOperator<I> reduceFn;
+  private OutputCollector collector;
 
-  JoinCustomGrouping() {
+  public ReduceByWindowBolt(WindowConfig windowCfg, BinaryOperator<I> reduceFn) {
+    this.windowCfg = windowCfg;
+    this.reduceFn = reduceFn;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
-  public void prepare(TopologyContext context, String component,
-                      String streamId, List<Integer> targetTasks) {
-    this.taskIds = targetTasks;
+  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Integer> chooseTasks(List<Object> values) {
-    List<Integer> ret = new ArrayList<>();
-    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
-    int index = obj.getKey().hashCode() % taskIds.size();
-    ret.add(taskIds.get(index));
-    return ret;
+  public void execute(TupleWindow inputWindow) {
+    I reducedValue = null;
+    for (Tuple tuple : inputWindow.get()) {
+      I tup = (I) tuple.getValue(0);
+      if (reducedValue == null) {
+        reducedValue = tup;
+      } else {
+        reducedValue = reduceFn.apply(reducedValue, tup);
+      }
+    }
+    collector.emit(new Values(reducedValue));
   }
 }

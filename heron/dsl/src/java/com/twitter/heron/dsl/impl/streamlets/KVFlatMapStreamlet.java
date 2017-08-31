@@ -12,15 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.bolts;
+package com.twitter.heron.dsl.impl.streamlets;
 
-import java.util.Map;
-import java.util.function.Predicate;
+import java.util.Set;
+import java.util.function.Function;
 
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.KeyValue;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -32,28 +30,15 @@ import com.twitter.heron.api.tuple.Values;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FilterBolt<R> extends DslBolt {
-  private static final long serialVersionUID = -4748646871471052706L;
-  private Predicate<R> filterFn;
+public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
+  private FlatMapStreamlet<R, KeyValue<K, V>> delegate;
 
-  private OutputCollector collector;
-
-  public FilterBolt(Predicate<R> filterFn) {
-    this.filterFn = filterFn;
+  public KVFlatMapStreamlet(StreamletImpl<R> parent,
+                            Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
+    this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
   }
 
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public void execute(Tuple tuple) {
-    R obj = (R) tuple.getValue(0);
-    if (filterFn.test(obj)) {
-      collector.emit(new Values(obj));
-    }
+  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
+    return this.delegate.build(bldr, stageNames);
   }
 }

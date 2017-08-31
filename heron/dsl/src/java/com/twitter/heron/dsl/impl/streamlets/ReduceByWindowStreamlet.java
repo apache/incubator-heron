@@ -12,15 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
-import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.bolts.MapBolt;
+import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.impl.bolts.ReduceByWindowBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -32,13 +31,17 @@ import com.twitter.heron.dsl.bolts.MapBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReMapStreamlet<R> extends StreamletImpl<R> {
-  private StreamletImpl<R> parent;
-  private BiFunction<R, Integer, List<Integer>> remapFn;
+public class ReduceByWindowStreamlet<I> extends StreamletImpl<I> {
+  private StreamletImpl<I> parent;
+  private WindowConfig windowCfg;
+  private BinaryOperator<I> reduceFn;
 
-  public ReMapStreamlet(StreamletImpl<R> parent, BiFunction<R, Integer, List<Integer>> remapFn) {
+  public ReduceByWindowStreamlet(StreamletImpl<I> parent,
+                                 WindowConfig windowCfg,
+                                 BinaryOperator<I> reduceFn) {
     this.parent = parent;
-    this.remapFn = remapFn;
+    this.windowCfg = windowCfg;
+    this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -46,7 +49,7 @@ public class ReMapStreamlet<R> extends StreamletImpl<R> {
     int index = 1;
     String name;
     while (true) {
-      name = new StringBuilder("remap").append(index).toString();
+      name = new StringBuilder("reduceByWindow").append(index).toString();
       if (!stageNames.contains(name)) {
         break;
       }
@@ -64,9 +67,10 @@ public class ReMapStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapBolt<R, R>(Function.identity()),
+    bldr.setBolt(getName(),
+        new ReduceByWindowBolt<I>(windowCfg, reduceFn),
         getNumPartitions())
-        .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
+        .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<I>());
     return bldr;
   }
 }

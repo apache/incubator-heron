@@ -12,14 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.WindowConfig;
-import com.twitter.heron.dsl.bolts.JoinBolt;
+import com.twitter.heron.dsl.impl.bolts.UnionBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,19 +29,13 @@ import com.twitter.heron.dsl.bolts.JoinBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
-  private KVStreamletImpl<K, V1> left;
-  private KVStreamletImpl<K, V2> right;
-  private WindowConfig windowCfg;
-  private BiFunction<V1, V2, VR> joinFn;
+public class UnionStreamlet<I> extends StreamletImpl<I> {
+  private StreamletImpl<I> left;
+  private StreamletImpl<I> right;
 
-  public JoinStreamlet(KVStreamletImpl<K, V1> left, KVStreamletImpl<K, V2> right,
-                       WindowConfig windowCfg,
-                       BiFunction<V1, V2, VR> joinFn) {
+  public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<I> right) {
     this.left = left;
     this.right = right;
-    this.windowCfg = windowCfg;
-    this.joinFn = joinFn;
     setNumPartitions(left.getNumPartitions());
   }
 
@@ -51,7 +43,7 @@ public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
     int index = 1;
     String name;
     while (true) {
-      name = new StringBuilder("join").append(index).toString();
+      name = new StringBuilder("union").append(index).toString();
       if (!stageNames.contains(name)) {
         break;
       }
@@ -70,11 +62,8 @@ public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(),
-        new JoinBolt<K, V1, V2, VR>(left.getName(), right.getName(), windowCfg, joinFn),
-        getNumPartitions())
-        .customGrouping(left.getName(), new JoinCustomGrouping<K, V1>())
-        .customGrouping(right.getName(), new JoinCustomGrouping<K, V2>());
+    bldr.setBolt(getName(), new UnionBolt<I>(),
+        getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
     return bldr;
   }
 }

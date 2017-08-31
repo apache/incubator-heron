@@ -12,19 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.bolts;
+package com.twitter.heron.dsl.impl.bolts;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.windowing.TupleWindow;
-import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -36,15 +32,14 @@ import com.twitter.heron.dsl.WindowConfig;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
-  private static final long serialVersionUID = 2833576046687750496L;
-  private WindowConfig windowCfg;
-  private BinaryOperator<V> reduceFn;
+public class MapBolt<R, T> extends DslBolt {
+  private static final long serialVersionUID = -1303096133107278700L;
+  private Function<R, T> mapFn;
+
   private OutputCollector collector;
 
-  public ReduceByKeyAndWindowBolt(WindowConfig windowCfg, BinaryOperator<V> reduceFn) {
-    this.windowCfg = windowCfg;
-    this.reduceFn = reduceFn;
+  public MapBolt(Function<R, T> mapFn) {
+    this.mapFn = mapFn;
   }
 
   @SuppressWarnings("rawtypes")
@@ -55,22 +50,9 @@ public class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void execute(TupleWindow inputWindow) {
-    Map<K, V> reduceMap = new HashMap<>();
-    for (Tuple tuple : inputWindow.get()) {
-      KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
-      addMap(reduceMap, tup);
-    }
-    for (K key : reduceMap.keySet()) {
-      collector.emit(new Values(new KeyValue<K, V>(key, reduceMap.get(key))));
-    }
-  }
-
-  private void addMap(Map<K, V> reduceMap, KeyValue<K, V> tup) {
-    if (reduceMap.containsKey(tup.getKey())) {
-      reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
-    } else {
-      reduceMap.put(tup.getKey(), tup.getValue());
-    }
+  public void execute(Tuple tuple) {
+    R obj = (R) tuple.getValue(0);
+    T result = mapFn.apply(obj);
+    collector.emit(new Values(result));
   }
 }

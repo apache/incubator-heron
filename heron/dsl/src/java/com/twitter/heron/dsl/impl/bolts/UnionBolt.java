@@ -12,13 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.bolts;
 
-import java.util.Set;
-import java.util.function.Function;
+import java.util.Map;
 
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.bolts.MapBolt;
+import com.twitter.heron.api.bolt.OutputCollector;
+import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.tuple.Values;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,40 +31,23 @@ import com.twitter.heron.dsl.bolts.MapBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class MapStreamlet<R, T> extends StreamletImpl<T> {
-  private StreamletImpl<R> parent;
-  private Function<R, T> mapFn;
+public class UnionBolt<I> extends DslBolt {
+  private static final long serialVersionUID = -7326832064961413315L;
+  private OutputCollector collector;
 
-  public MapStreamlet(StreamletImpl<R> parent, Function<R, T> mapFn) {
-    this.parent = parent;
-    this.mapFn = mapFn;
-    setNumPartitions(parent.getNumPartitions());
+  public UnionBolt() {
   }
 
-  private void calculateName(Set<String> stageNames) {
-    int index = 1;
-    String name;
-    while (true) {
-      name = new StringBuilder("map").append(index).toString();
-      if (!stageNames.contains(name)) {
-        break;
-      }
-      index++;
-    }
-    setName(name);
+  @SuppressWarnings("rawtypes")
+  @Override
+  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    collector = outputCollector;
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
-    if (getName() == null) {
-      calculateName(stageNames);
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
-    bldr.setBolt(getName(), new MapBolt<R, T>(mapFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
-    return bldr;
+  @SuppressWarnings("unchecked")
+  @Override
+  public void execute(Tuple tuple) {
+    I obj = (I) tuple.getValue(0);
+    collector.emit(new Values(obj));
   }
 }

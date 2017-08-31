@@ -12,12 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.bolts.UnionBolt;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.dsl.KeyValue;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -29,41 +31,26 @@ import com.twitter.heron.dsl.bolts.UnionBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class UnionStreamlet<I> extends StreamletImpl<I> {
-  private StreamletImpl<I> left;
-  private StreamletImpl<I> right;
+public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGrouping {
+  private static final long serialVersionUID = -7630948017550637716L;
+  private List<Integer> taskIds;
 
-  public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<I> right) {
-    this.left = left;
-    this.right = right;
-    setNumPartitions(left.getNumPartitions());
+  ReduceByKeyAndWindowCustomGrouping() {
   }
 
-  private void calculateName(Set<String> stageNames) {
-    int index = 1;
-    String name;
-    while (true) {
-      name = new StringBuilder("union").append(index).toString();
-      if (!stageNames.contains(name)) {
-        break;
-      }
-      index++;
-    }
-    setName(name);
+  @Override
+  public void prepare(TopologyContext context, String component,
+                      String streamId, List<Integer> targetTasks) {
+    this.taskIds = targetTasks;
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    left.build(bldr, stageNames);
-    right.build(bldr, stageNames);
-    if (getName() == null) {
-      calculateName(stageNames);
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
-    bldr.setBolt(getName(), new UnionBolt<I>(),
-        getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
-    return bldr;
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<Integer> chooseTasks(List<Object> values) {
+    List<Integer> ret = new ArrayList<>();
+    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
+    int index = obj.getKey().hashCode() % taskIds.size();
+    ret.add(taskIds.get(index));
+    return ret;
   }
 }

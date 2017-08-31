@@ -12,13 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.bolts.FilterBolt;
+import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.impl.bolts.ReduceByKeyAndWindowBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,13 +31,17 @@ import com.twitter.heron.dsl.bolts.FilterBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FilterStreamlet<R> extends StreamletImpl<R> {
-  private StreamletImpl<R> parent;
-  private Predicate<R> filterFn;
+public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
+  private KVStreamletImpl<K, V> parent;
+  private WindowConfig windowCfg;
+  private BinaryOperator<V> reduceFn;
 
-  public FilterStreamlet(StreamletImpl<R> parent, Predicate<R> filterFn) {
+  public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
+                       WindowConfig windowCfg,
+                       BinaryOperator<V> reduceFn) {
     this.parent = parent;
-    this.filterFn = filterFn;
+    this.windowCfg = windowCfg;
+    this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -44,7 +49,7 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
     int index = 1;
     String name;
     while (true) {
-      name = new StringBuilder("filter").append(index).toString();
+      name = new StringBuilder("reduceByKeyAndWindow").append(index).toString();
       if (!stageNames.contains(name)) {
         break;
       }
@@ -62,8 +67,10 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new FilterBolt<R>(filterFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+    bldr.setBolt(getName(),
+        new ReduceByKeyAndWindowBolt<K, V>(windowCfg, reduceFn),
+        getNumPartitions())
+        .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
     return bldr;
   }
 }

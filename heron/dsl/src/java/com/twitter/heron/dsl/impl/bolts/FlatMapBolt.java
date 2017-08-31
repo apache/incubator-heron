@@ -12,17 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.bolts;
+package com.twitter.heron.dsl.impl.bolts;
 
 import java.util.Map;
-import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.windowing.TupleWindow;
-import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -34,15 +32,14 @@ import com.twitter.heron.dsl.WindowConfig;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReduceByWindowBolt<I> extends DslWindowBolt {
-  private static final long serialVersionUID = 6513775685209414130L;
-  private WindowConfig windowCfg;
-  private BinaryOperator<I> reduceFn;
+public class FlatMapBolt<R, T> extends DslBolt {
+  private static final long serialVersionUID = -2418329215159618998L;
+  private Function<R, Iterable<T>> flatMapFn;
+
   private OutputCollector collector;
 
-  public ReduceByWindowBolt(WindowConfig windowCfg, BinaryOperator<I> reduceFn) {
-    this.windowCfg = windowCfg;
-    this.reduceFn = reduceFn;
+  public FlatMapBolt(Function<R, Iterable<T>> flatMapFn) {
+    this.flatMapFn = flatMapFn;
   }
 
   @SuppressWarnings("rawtypes")
@@ -53,16 +50,11 @@ public class ReduceByWindowBolt<I> extends DslWindowBolt {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void execute(TupleWindow inputWindow) {
-    I reducedValue = null;
-    for (Tuple tuple : inputWindow.get()) {
-      I tup = (I) tuple.getValue(0);
-      if (reducedValue == null) {
-        reducedValue = tup;
-      } else {
-        reducedValue = reduceFn.apply(reducedValue, tup);
-      }
+  public void execute(Tuple tuple) {
+    R obj = (R) tuple.getValue(0);
+    Iterable<T> result = flatMapFn.apply(obj);
+    for (T o : result) {
+      collector.emit(new Values(o));
     }
-    collector.emit(new Values(reducedValue));
   }
 }

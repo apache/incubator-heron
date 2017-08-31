@@ -12,15 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.bolts;
+package com.twitter.heron.dsl.impl.streamlets;
 
-import java.util.Map;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
 
-import com.twitter.heron.api.bolt.OutputCollector;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -32,29 +31,30 @@ import com.twitter.heron.api.tuple.Values;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FlatMapBolt<R, T> extends DslBolt {
-  private static final long serialVersionUID = -2418329215159618998L;
-  private Function<R, Iterable<T>> flatMapFn;
+public class ReMapCustomGrouping<R> implements CustomStreamGrouping {
+  private static final long serialVersionUID = 8118844912340601079L;
+  private List<Integer> taskIds;
+  private BiFunction<R, Integer, List<Integer>> remapFn;
 
-  private OutputCollector collector;
-
-  public FlatMapBolt(Function<R, Iterable<T>> flatMapFn) {
-    this.flatMapFn = flatMapFn;
+  ReMapCustomGrouping(BiFunction<R, Integer, List<Integer>> remapFn) {
+    this.remapFn = remapFn;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
+  public void prepare(TopologyContext context, String component,
+                      String streamId, List<Integer> targetTasks) {
+    this.taskIds = targetTasks;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public void execute(Tuple tuple) {
-    R obj = (R) tuple.getValue(0);
-    Iterable<T> result = flatMapFn.apply(obj);
-    for (T o : result) {
-      collector.emit(new Values(o));
+  public List<Integer> chooseTasks(List<Object> values) {
+    List<Integer> ret = new ArrayList<>();
+    R obj = (R) values.get(0);
+    List<Integer> targets = remapFn.apply(obj, ret.size());
+    for (Integer target : targets) {
+      ret.add(taskIds.get(target % taskIds.size()));
     }
+    return ret;
   }
 }

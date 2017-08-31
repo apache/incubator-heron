@@ -12,14 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.bolts;
+package com.twitter.heron.dsl.impl.bolts;
 
-import com.twitter.heron.api.bolt.BaseRichBolt;
+import com.twitter.heron.api.bolt.BaseWindowedBolt;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
-public abstract class DslBolt extends BaseRichBolt {
-  private static final long serialVersionUID = 8524238140745238942L;
+public abstract class DslWindowBolt extends BaseWindowedBolt {
+  private static final long serialVersionUID = -4836560876041237959L;
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {

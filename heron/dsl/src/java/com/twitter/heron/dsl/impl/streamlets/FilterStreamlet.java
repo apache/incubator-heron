@@ -12,13 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.impl.bolts.FilterBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,14 +30,40 @@ import com.twitter.heron.dsl.KeyValue;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class KVMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
-  private MapStreamlet<R, KeyValue<K, V>> delegate;
+public class FilterStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
+  private Predicate<R> filterFn;
 
-  public KVMapStreamlet(StreamletImpl<R> parent, Function<R, KeyValue<K, V>> mapFn) {
-    this.delegate = new MapStreamlet<>(parent, mapFn);
+  public FilterStreamlet(StreamletImpl<R> parent, Predicate<R> filterFn) {
+    this.parent = parent;
+    this.filterFn = filterFn;
+    setNumPartitions(parent.getNumPartitions());
+  }
+
+  private void calculateName(Set<String> stageNames) {
+    int index = 1;
+    String name;
+    while (true) {
+      name = new StringBuilder("filter").append(index).toString();
+      if (!stageNames.contains(name)) {
+        break;
+      }
+      index++;
+    }
+    setName(name);
   }
 
   public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    return this.delegate.build(bldr, stageNames);
+    parent.build(bldr, stageNames);
+    if (getName() == null) {
+      calculateName(stageNames);
+    }
+    if (stageNames.contains(getName())) {
+      throw new RuntimeException("Duplicate Names");
+    }
+    stageNames.add(getName());
+    bldr.setBolt(getName(), new FilterBolt<R>(filterFn),
+        getNumPartitions()).shuffleGrouping(parent.getName());
+    return bldr;
   }
 }

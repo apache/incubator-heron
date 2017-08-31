@@ -12,13 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
-import java.util.Set;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.topology.TopologyContext;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,15 +30,26 @@ import com.twitter.heron.dsl.KeyValue;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
-  private FlatMapStreamlet<R, KeyValue<K, V>> delegate;
+public class ReduceByWindowCustomGrouping<I> implements CustomStreamGrouping {
+  private static final long serialVersionUID = -2533339197867000330L;
+  private List<Integer> taskIds;
 
-  public KVFlatMapStreamlet(StreamletImpl<R> parent,
-                            Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
-    this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
+  ReduceByWindowCustomGrouping() {
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    return this.delegate.build(bldr, stageNames);
+  @Override
+  public void prepare(TopologyContext context, String component,
+                      String streamId, List<Integer> targetTasks) {
+    this.taskIds = targetTasks;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<Integer> chooseTasks(List<Object> values) {
+    List<Integer> ret = new ArrayList<>();
+    I obj = (I) values.get(0);
+    int index = obj.hashCode() % taskIds.size();
+    ret.add(taskIds.get(index));
+    return ret;
   }
 }

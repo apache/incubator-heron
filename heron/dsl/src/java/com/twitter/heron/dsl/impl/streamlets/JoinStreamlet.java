@@ -12,13 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.bolts.FlatMapBolt;
+import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.impl.bolts.JoinBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,21 +31,27 @@ import com.twitter.heron.dsl.bolts.FlatMapBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
-  private StreamletImpl<R> parent;
-  private Function<R, Iterable<T>> flatMapFn;
+public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
+  private KVStreamletImpl<K, V1> left;
+  private KVStreamletImpl<K, V2> right;
+  private WindowConfig windowCfg;
+  private BiFunction<V1, V2, VR> joinFn;
 
-  public FlatMapStreamlet(StreamletImpl<R> parent, Function<R, Iterable<T>> flatMapFn) {
-    this.parent = parent;
-    this.flatMapFn = flatMapFn;
-    setNumPartitions(parent.getNumPartitions());
+  public JoinStreamlet(KVStreamletImpl<K, V1> left, KVStreamletImpl<K, V2> right,
+                       WindowConfig windowCfg,
+                       BiFunction<V1, V2, VR> joinFn) {
+    this.left = left;
+    this.right = right;
+    this.windowCfg = windowCfg;
+    this.joinFn = joinFn;
+    setNumPartitions(left.getNumPartitions());
   }
 
   private void calculateName(Set<String> stageNames) {
     int index = 1;
     String name;
     while (true) {
-      name = new StringBuilder("flatmap").append(index).toString();
+      name = new StringBuilder("join").append(index).toString();
       if (!stageNames.contains(name)) {
         break;
       }
@@ -54,7 +61,8 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   }
 
   public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+    left.build(bldr, stageNames);
+    right.build(bldr, stageNames);
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -62,8 +70,11 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new FlatMapBolt<R, T>(flatMapFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+    bldr.setBolt(getName(),
+        new JoinBolt<K, V1, V2, VR>(left.getName(), right.getName(), windowCfg, joinFn),
+        getNumPartitions())
+        .customGrouping(left.getName(), new JoinCustomGrouping<K, V1>())
+        .customGrouping(right.getName(), new JoinCustomGrouping<K, V2>());
     return bldr;
   }
 }

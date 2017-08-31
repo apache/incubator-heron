@@ -12,14 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Set;
+import java.util.function.Function;
 
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.impl.bolts.MapBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,30 +30,40 @@ import com.twitter.heron.api.topology.TopologyContext;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReMapCustomGrouping<R> implements CustomStreamGrouping {
-  private static final long serialVersionUID = 8118844912340601079L;
-  private List<Integer> taskIds;
-  private BiFunction<R, Integer, List<Integer>> remapFn;
+public class MapStreamlet<R, T> extends StreamletImpl<T> {
+  private StreamletImpl<R> parent;
+  private Function<R, T> mapFn;
 
-  ReMapCustomGrouping(BiFunction<R, Integer, List<Integer>> remapFn) {
-    this.remapFn = remapFn;
+  public MapStreamlet(StreamletImpl<R> parent, Function<R, T> mapFn) {
+    this.parent = parent;
+    this.mapFn = mapFn;
+    setNumPartitions(parent.getNumPartitions());
   }
 
-  @Override
-  public void prepare(TopologyContext context, String component,
-                      String streamId, List<Integer> targetTasks) {
-    this.taskIds = targetTasks;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<Integer> chooseTasks(List<Object> values) {
-    List<Integer> ret = new ArrayList<>();
-    R obj = (R) values.get(0);
-    List<Integer> targets = remapFn.apply(obj, ret.size());
-    for (Integer target : targets) {
-      ret.add(taskIds.get(target % taskIds.size()));
+  private void calculateName(Set<String> stageNames) {
+    int index = 1;
+    String name;
+    while (true) {
+      name = new StringBuilder("map").append(index).toString();
+      if (!stageNames.contains(name)) {
+        break;
+      }
+      index++;
     }
-    return ret;
+    setName(name);
+  }
+
+  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
+    parent.build(bldr, stageNames);
+    if (getName() == null) {
+      calculateName(stageNames);
+    }
+    if (stageNames.contains(getName())) {
+      throw new RuntimeException("Duplicate Names");
+    }
+    stageNames.add(getName());
+    bldr.setBolt(getName(), new MapBolt<R, T>(mapFn),
+        getNumPartitions()).shuffleGrouping(parent.getName());
+    return bldr;
   }
 }

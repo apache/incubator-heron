@@ -12,14 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.streamlets;
+package com.twitter.heron.dsl.impl.streamlets;
 
+import java.util.List;
 import java.util.Set;
-import java.util.function.BinaryOperator;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.WindowConfig;
-import com.twitter.heron.dsl.bolts.ReduceByKeyAndWindowBolt;
+import com.twitter.heron.dsl.impl.bolts.MapBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,17 +32,13 @@ import com.twitter.heron.dsl.bolts.ReduceByKeyAndWindowBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
-  private KVStreamletImpl<K, V> parent;
-  private WindowConfig windowCfg;
-  private BinaryOperator<V> reduceFn;
+public class ReMapStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
+  private BiFunction<R, Integer, List<Integer>> remapFn;
 
-  public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
-                       WindowConfig windowCfg,
-                       BinaryOperator<V> reduceFn) {
+  public ReMapStreamlet(StreamletImpl<R> parent, BiFunction<R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
-    this.windowCfg = windowCfg;
-    this.reduceFn = reduceFn;
+    this.remapFn = remapFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -49,7 +46,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
     int index = 1;
     String name;
     while (true) {
-      name = new StringBuilder("reduceByKeyAndWindow").append(index).toString();
+      name = new StringBuilder("remap").append(index).toString();
       if (!stageNames.contains(name)) {
         break;
       }
@@ -67,10 +64,9 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(),
-        new ReduceByKeyAndWindowBolt<K, V>(windowCfg, reduceFn),
+    bldr.setBolt(getName(), new MapBolt<R, R>(Function.identity()),
         getNumPartitions())
-        .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
+        .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
     return bldr;
   }
 }
