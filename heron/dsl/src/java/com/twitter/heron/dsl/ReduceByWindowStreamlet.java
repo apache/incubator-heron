@@ -35,7 +35,7 @@ class ReduceByWindowStreamlet<I> extends Streamlet<I> {
   private WindowConfig windowCfg;
   private BinaryOperator<I> reduceFn;
 
-  public ReduceByWindowStreamlet(Streamlet<I> parent,
+  ReduceByWindowStreamlet(Streamlet<I> parent,
                                  WindowConfig windowCfg,
                                  BinaryOperator<I> reduceFn) {
     this.parent = parent;

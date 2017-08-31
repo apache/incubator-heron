@@ -35,7 +35,7 @@ class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamlet<K, V> {
   private WindowConfig windowCfg;
   private BinaryOperator<V> reduceFn;
 
-  public ReduceByKeyAndWindowStreamlet(KVStreamlet<K, V> parent,
+  ReduceByKeyAndWindowStreamlet(KVStreamlet<K, V> parent,
                        WindowConfig windowCfg,
                        BinaryOperator<V> reduceFn) {
     this.parent = parent;

@@ -14,10 +14,7 @@
 
 package com.twitter.heron.dsl;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.bolt.OutputCollector;

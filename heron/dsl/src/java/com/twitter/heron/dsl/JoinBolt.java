@@ -15,7 +15,6 @@
 package com.twitter.heron.dsl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -40,8 +39,8 @@ class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private static final long serialVersionUID = 4875450390444745407L;
   public static final String LEFT_COMPONENT_NAME = "_dsl_joinbolt_left_component_name_";
   public static final String RIGHT_COMPONENT_NAME = "_dsl_joinbolt_right_component_name_";
-  String leftComponent;
-  String rightComponent;
+  private String leftComponent;
+  private String rightComponent;
   private WindowConfig windowCfg;
   private BiFunction<V1, V2, VR> joinFn;
   private OutputCollector collector;

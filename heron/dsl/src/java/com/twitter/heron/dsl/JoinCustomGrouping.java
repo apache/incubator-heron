@@ -34,11 +34,12 @@ class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
   private static final long serialVersionUID = 2007892247960031525L;
   private List<Integer> taskIds;
 
-  public JoinCustomGrouping() {
+  JoinCustomGrouping() {
   }
 
   @Override
-  public void prepare(TopologyContext context, String component, String streamId, List<Integer> targetTasks) {
+  public void prepare(TopologyContext context, String component,
+                      String streamId, List<Integer> targetTasks) {
     this.taskIds = targetTasks;
   }
 

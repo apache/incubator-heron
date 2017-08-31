@@ -25,18 +25,22 @@ package com.twitter.heron.dsl;
  could be assigned by the user or computed by the system
  */
 public class KeyValue<K, V> {
-  private K k;
-  private V v;
+  private K key;
+  private V value;
   public KeyValue(K k, V v) {
-    this.k = k;
-    this.v = v;
+    this.key = k;
+    this.value = v;
   }
   public K getKey() {
-    return k;
+    return key;
   }
-  public void setKey(K k) { this.k = k; }
+  public void setKey(K k) {
+    this.key = k;
+  }
   public V getValue() {
-    return v;
+    return value;
   }
-  public void setValue(V v) { this.v = v; }
+  public void setValue(V v) {
+    this.value = v;
+  }
 }

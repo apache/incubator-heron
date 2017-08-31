@@ -15,7 +15,6 @@
 package com.twitter.heron.dsl;
 
 import java.util.Map;
-import java.util.function.Function;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;

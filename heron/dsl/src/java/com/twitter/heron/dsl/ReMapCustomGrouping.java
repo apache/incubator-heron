@@ -41,7 +41,8 @@ class ReMapCustomGrouping<R> implements CustomStreamGrouping {
   }
 
   @Override
-  public void prepare(TopologyContext context, String component, String streamId, List<Integer> targetTasks) {
+  public void prepare(TopologyContext context, String component,
+                      String streamId, List<Integer> targetTasks) {
     this.taskIds = targetTasks;
   }
 
