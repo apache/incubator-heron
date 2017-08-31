@@ -18,7 +18,6 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 
 import com.twitter.heron.classification.InterfaceStability;
-import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
  * Some transformations like join and reduce assume a certain structure of the tuples

@@ -19,7 +19,7 @@ import java.util.function.BinaryOperator;
 
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.windowing.WindowConfig;
+import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * Some transformations like join and reduce assume a certain structure of the tuples

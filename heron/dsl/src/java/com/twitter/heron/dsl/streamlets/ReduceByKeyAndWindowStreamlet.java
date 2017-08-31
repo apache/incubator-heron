@@ -18,8 +18,8 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.bolts.ReduceByKeyAndWindowBolt;
-import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.

@@ -22,7 +22,6 @@ import java.util.function.Predicate;
 
 
 import com.twitter.heron.classification.InterfaceStability;
-import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.

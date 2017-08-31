@@ -31,7 +31,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.Streamlet;
-import com.twitter.heron.dsl.windowing.WindowConfig;
+import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
