@@ -14,6 +14,8 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.util.regex.Pattern;
+
 public final class KubernetesConstants {
   private KubernetesConstants() {
 
@@ -69,5 +71,10 @@ public final class KubernetesConstants {
 
   public static final String JOB_LINK =
       "/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/pod";
+
+
+  public static final Pattern VALID_POD_NAME_REGEX =
+      Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",
+          Pattern.CASE_INSENSITIVE);
 
 }

@@ -170,7 +170,7 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
       // In case a assignment already exists, we will throw this
       // list out and re-init with whats in assignment.
       absent_stmgrs_.clear();
-      for (sp_uint32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
+      for (sp_int32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
         LOG(INFO) << "Adding container id " << packing_plan_->container_plans(i).id()
                   << " to absent_stmgrs_";
         // the packing plan represents container ids by the numerical id of the container. The
@@ -318,7 +318,7 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   LOG(INFO) << "Topology read and validated\n";
 
   if (heron::config::TopologyConfigHelper::GetReliabilityMode(*topology_)
-      == config::TopologyConfigVars::EXACTLY_ONCE) {
+      == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Establish connection to ckptmgr
     NetworkOptions ckpt_options;
     ckpt_options.set_host("127.0.0.1");
