@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.bolts.FilterBolt;
 
 /**
@@ -31,11 +30,11 @@ import com.twitter.heron.dsl.bolts.FilterBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FilterStreamlet<R> extends Streamlet<R> {
-  private Streamlet<R> parent;
+public class FilterStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
   private Predicate<R> filterFn;
 
-  public FilterStreamlet(Streamlet<R> parent, Predicate<R> filterFn) {
+  public FilterStreamlet(StreamletImpl<R> parent, Predicate<R> filterFn) {
     this.parent = parent;
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());

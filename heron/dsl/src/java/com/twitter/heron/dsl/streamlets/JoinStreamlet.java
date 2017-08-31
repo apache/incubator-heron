@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.bolts.JoinBolt;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
@@ -32,13 +31,13 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class JoinStreamlet<K, V1, V2, VR> extends KVStreamlet<K, VR> {
-  private KVStreamlet<K, V1> left;
-  private KVStreamlet<K, V2> right;
+public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
+  private KVStreamletImpl<K, V1> left;
+  private KVStreamletImpl<K, V2> right;
   private WindowConfig windowCfg;
   private BiFunction<V1, V2, VR> joinFn;
 
-  public JoinStreamlet(KVStreamlet<K, V1> left, KVStreamlet<K, V2> right,
+  public JoinStreamlet(KVStreamletImpl<K, V1> left, KVStreamletImpl<K, V2> right,
                        WindowConfig windowCfg,
                        BiFunction<V1, V2, VR> joinFn) {
     this.left = left;

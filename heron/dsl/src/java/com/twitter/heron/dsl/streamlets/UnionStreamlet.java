@@ -17,7 +17,6 @@ package com.twitter.heron.dsl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.bolts.UnionBolt;
 
 /**
@@ -30,11 +29,11 @@ import com.twitter.heron.dsl.bolts.UnionBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class UnionStreamlet<I> extends Streamlet<I> {
-  private Streamlet<I> left;
-  private Streamlet<I> right;
+public class UnionStreamlet<I> extends StreamletImpl<I> {
+  private StreamletImpl<I> left;
+  private StreamletImpl<I> right;
 
-  public UnionStreamlet(Streamlet<I> left, Streamlet<I> right) {
+  public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<I> right) {
     this.left = left;
     this.right = right;
     setNumPartitions(left.getNumPartitions());

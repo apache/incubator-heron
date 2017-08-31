@@ -18,9 +18,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.Streamlet;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -32,10 +30,11 @@ import com.twitter.heron.dsl.Streamlet;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class KVFlatMapStreamlet<R, K, V> extends KVStreamlet<K, V> {
+public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   private FlatMapStreamlet<R, KeyValue<K, V>> delegate;
 
-  public KVFlatMapStreamlet(Streamlet<R> parent, Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
+  public KVFlatMapStreamlet(StreamletImpl<R> parent,
+                            Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
     this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
   }
 

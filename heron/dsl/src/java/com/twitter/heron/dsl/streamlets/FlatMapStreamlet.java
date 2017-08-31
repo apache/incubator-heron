@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.bolts.FlatMapBolt;
 
 /**
@@ -31,11 +30,11 @@ import com.twitter.heron.dsl.bolts.FlatMapBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FlatMapStreamlet<R, T> extends Streamlet<T> {
-  private Streamlet<R> parent;
+public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
+  private StreamletImpl<R> parent;
   private Function<R, Iterable<T>> flatMapFn;
 
-  public FlatMapStreamlet(Streamlet<R> parent, Function<R, Iterable<T>> flatMapFn) {
+  public FlatMapStreamlet(StreamletImpl<R> parent, Function<R, Iterable<T>> flatMapFn) {
     this.parent = parent;
     this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());

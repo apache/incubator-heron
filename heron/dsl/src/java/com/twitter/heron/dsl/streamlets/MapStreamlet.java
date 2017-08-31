@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.bolts.MapBolt;
 
 /**
@@ -31,11 +30,11 @@ import com.twitter.heron.dsl.bolts.MapBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class MapStreamlet<R, T> extends Streamlet<T> {
-  private Streamlet<R> parent;
+public class MapStreamlet<R, T> extends StreamletImpl<T> {
+  private StreamletImpl<R> parent;
   private Function<R, T> mapFn;
 
-  public MapStreamlet(Streamlet<R> parent, Function<R, T> mapFn) {
+  public MapStreamlet(StreamletImpl<R> parent, Function<R, T> mapFn) {
     this.parent = parent;
     this.mapFn = mapFn;
     setNumPartitions(parent.getNumPartitions());

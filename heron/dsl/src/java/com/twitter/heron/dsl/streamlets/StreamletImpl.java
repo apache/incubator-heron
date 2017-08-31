@@ -12,16 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.dsl;
+package com.twitter.heron.dsl.streamlets;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-
-import com.twitter.heron.classification.InterfaceStability;
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.exception.AlreadyAliveException;
+import com.twitter.heron.api.exception.InvalidTopologyException;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.KVStreamlet;
+import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
@@ -43,40 +52,64 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  * tranformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
-@InterfaceStability.Evolving
-public interface Streamlet<R> {
+public abstract class StreamletImpl<R> implements Streamlet<R> {
+  protected String name;
+  protected int nPartitions;
+
   /**
    * Sets the name of the Streamlet.
    * @param sName The name given by the user for this streamlet
    * @return Returns back the Streamlet with changed name
   */
-  Streamlet<R> setName(String sName);
+  @Override
+  public Streamlet<R> setName(String sName) {
+    if (sName == null) {
+      throw new IllegalArgumentException("Streamlet name cannot be null");
+    }
+    this.name = sName;
+    return this;
+  }
 
   /**
    * Gets the name of the Streamlet.
    * @return Returns the name of the Streamlet
    */
-  String getName();
+  @Override
+  public String getName() {
+    return name;
+  }
 
   /**
    * Sets the number of partitions of the streamlet
    * @param numPartitions The user assigned number of partitions
    * @return Returns back the Streamlet with changed number of partitions
    */
-  Streamlet<R> setNumPartitions(int numPartitions);
+  @Override
+  public Streamlet<R> setNumPartitions(int numPartitions) {
+    if (numPartitions < 1) {
+      throw new IllegalArgumentException("Streamlet's partitions cannot be < 1");
+    }
+    this.nPartitions = numPartitions;
+    return this;
+  }
 
   /**
    * Gerts the number of partitions of this Streamlet.
    * @return the number of partitions of this Streamlet
    */
-  int getNumPartitions();
+  @Override
+  public int getNumPartitions() {
+    return nPartitions;
+  }
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
   */
-
-  <T> Streamlet<T> map(Function<R, T> mapFn);
+  @Override
+  public <T> Streamlet<T> map(Function<R, T> mapFn) {
+    return new MapStreamlet<R, T>(this, mapFn);
+  }
 
   /**
    * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
@@ -84,14 +117,20 @@ public interface Streamlet<R> {
    * instead of a plain Streamlet.
    * @param mapFn The Map function that should be applied to each element
   */
-  <K, V> KVStreamlet<K, V> mapToKV(Function<R, KeyValue<K, V>> mapFn);
+  @Override
+  public <K, V> KVStreamlet<K, V> mapToKV(Function<R, KeyValue<K, V>> mapFn) {
+    return new KVMapStreamlet<R, K, V>(this, mapFn);
+  }
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <T> Streamlet<T> flatMap(Function<R, Iterable<T>> flatMapFn);
+  @Override
+  public <T> Streamlet<T> flatMap(Function<R, Iterable<T>> flatMapFn) {
+    return new FlatMapStreamlet<R, T>(this, flatMapFn);
+  }
 
   /**
    * Return a new KVStreamlet by applying map_function to each element of this Streamlet
@@ -99,32 +138,52 @@ public interface Streamlet<R> {
    * KVStreamlet instead of a plain Streamlet
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <K, V> KVStreamlet<K, V> flatMapToKV(Function<R, Iterable<KeyValue<K, V>>> flatMapFn);
+  @Override
+  public <K, V> KVStreamlet<K, V> flatMapToKV(Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
+    return new KVFlatMapStreamlet<R, K, V>(this, flatMapFn);
+  }
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
    * and including only those elements that satisfy the filterFn
    * @param filterFn The filter Function that should be applied to each element
   */
-  Streamlet<R> filter(Predicate<R> filterFn);
+  @Override
+  public Streamlet<R> filter(Predicate<R> filterFn) {
+    return new FilterStreamlet<R>(this, filterFn);
+  }
 
   /**
    * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
   */
-  Streamlet<R> repartition(int numPartitions);
+  @Override
+  public Streamlet<R> repartition(int numPartitions) {
+    return this.map(Function.identity()).setNumPartitions(numPartitions);
+  }
 
   /**
    * A more generalized version of repartition where a user can determine which partitions
    * any particular tuple should go to
    */
-  Streamlet<R> repartition(int numPartitions, BiFunction<R, Integer, List<Integer>> partitionFn);
+  @Override
+  public Streamlet<R> repartition(int numPartitions,
+                                  BiFunction<R, Integer, List<Integer>> partitionFn) {
+    return new ReMapStreamlet<R>(this, partitionFn).setNumPartitions(numPartitions);
+  }
 
   /**
    * Clones the current Streamlet. It returns an array of numClones Streamlets where each
    * Streamlet contains all the tuples of the current Streamlet
    * @param numClones The number of clones to clone
    */
-  List<Streamlet<R>> clone(int numClones);
+  @Override
+  public List<Streamlet<R>> clone(int numClones) {
+    List<Streamlet<R>> retval = new ArrayList<>();
+    for (int i = 0; i < numClones; ++i) {
+      retval.add(repartition(getNumPartitions()));
+    }
+    return retval;
+  }
 
   /**
    * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
@@ -133,11 +192,36 @@ public interface Streamlet<R> {
    * to have. Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
    */
-  Streamlet<R> reduceByWindow(WindowConfig windowConfig, BinaryOperator<R> reduceFn);
+  @Override
+  public Streamlet<R> reduceByWindow(WindowConfig windowConfig, BinaryOperator<R> reduceFn) {
+    return new ReduceByWindowStreamlet<R>(this, windowConfig, reduceFn);
+  }
 
   /**
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
-  Streamlet<R> union(Streamlet<R> other);
+  @Override
+  public Streamlet<R> union(Streamlet<R> other) {
+    StreamletImpl<R> joinee = (StreamletImpl<R>) other;
+    return new UnionStreamlet<R>(this, joinee);
+  }
+
+
+  protected StreamletImpl() {
+    this.nPartitions = -1;
+  }
+
+  public abstract TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
+
+  public void run(String topologyName, Config config) {
+    Set<String> stageNames = new HashSet<>();
+    TopologyBuilder bldr = new TopologyBuilder();
+    bldr = build(bldr, stageNames);
+    try {
+      HeronSubmitter.submitTopology(topologyName, config, bldr.createTopology());
+    } catch (AlreadyAliveException | InvalidTopologyException e) {
+      e.printStackTrace();
+    }
+  }
 }

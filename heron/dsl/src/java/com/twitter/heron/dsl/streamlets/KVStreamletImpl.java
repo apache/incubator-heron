@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.dsl;
+package com.twitter.heron.dsl.streamlets;
 
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 
-import com.twitter.heron.classification.InterfaceStability;
+import com.twitter.heron.dsl.KVStreamlet;
+import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
@@ -25,8 +26,8 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  * that it is processing. These transformations act on tuples of type KeyValue that have an
  * identifiable Key and Value components. Thus a KVStreamlet is just a special kind of Streamlet.
  */
-@InterfaceStability.Evolving
-public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
+public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>>
+    implements KVStreamlet<K, V> {
   /**
    * Return a new KVStreamlet by joining ‘other’ streamlet with ‘this’ streamlet.
    * The join is done over elements accumulated over a time window defined by TimeWindow.
@@ -35,9 +36,12 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * have. Typical windowing strategies are sliding windows and tumbling windows
    * @param joinFunction The join function that needs to be applied
   */
-  <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
+  public <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
                                    WindowConfig windowCfg,
-                                   BiFunction<V, V2, VR> joinFunction);
+                                   BiFunction<V, V2, VR> joinFunction) {
+    KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
+    return new JoinStreamlet<K, V, V2, VR>(this, joinee, windowCfg, joinFunction);
+  }
 
   /**
    * Return a new Streamlet in which for each time_window, all elements are belonging to the
@@ -46,5 +50,8 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg, BinaryOperator<V> reduceFn);
+  public KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg,
+                                                BinaryOperator<V> reduceFn) {
+    return new ReduceByKeyAndWindowStreamlet<K, V>(this, windowCfg, reduceFn);
+  }
 }

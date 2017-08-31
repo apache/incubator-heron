@@ -20,7 +20,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.bolts.MapBolt;
 
 /**
@@ -33,11 +32,11 @@ import com.twitter.heron.dsl.bolts.MapBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReMapStreamlet<R> extends Streamlet<R> {
-  private Streamlet<R> parent;
+public class ReMapStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
   private BiFunction<R, Integer, List<Integer>> remapFn;
 
-  public ReMapStreamlet(Streamlet<R> parent, BiFunction<R, Integer, List<Integer>> remapFn) {
+  public ReMapStreamlet(StreamletImpl<R> parent, BiFunction<R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;
     setNumPartitions(parent.getNumPartitions());
