@@ -14,11 +14,13 @@
 
 package com.twitter.heron.dsl;
 
-import com.twitter.heron.api.bolt.BaseRichBolt;
+import com.twitter.heron.api.bolt.BaseWindowedBolt;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
 abstract class DslWindowBolt extends BaseWindowedBolt {
+  private static final long serialVersionUID = -4836560876041237959L;
+
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields("output"));

@@ -42,6 +42,7 @@ class ReduceByWindowCustomGrouping<I> implements CustomStreamGrouping {
     this.taskIds = targetTasks;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();

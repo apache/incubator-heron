@@ -65,7 +65,7 @@ public class ReMapStreamlet<R> extends Streamlet<R> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new MapBolt<R, R>(Function.identity()),
         getNumPartitions())
-        .customGrouping(parent.getName(), new ReMapCustomGrouping(remapFn));
+        .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
     return bldr;
   }
 }

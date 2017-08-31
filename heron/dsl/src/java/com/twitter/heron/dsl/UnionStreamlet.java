@@ -33,7 +33,7 @@ public class UnionStreamlet<I> extends Streamlet<I> {
   private Streamlet<I> left;
   private Streamlet<I> right;
 
-  public UnionStreamlet(Streamlet<I> left, Streamlet<I> other) {
+  public UnionStreamlet(Streamlet<I> left, Streamlet<I> right) {
     this.left = left;
     this.right = right;
     setNumPartitions(left.getNumPartitions());

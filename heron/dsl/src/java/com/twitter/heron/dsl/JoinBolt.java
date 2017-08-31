@@ -23,6 +23,7 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
@@ -82,7 +83,7 @@ class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
     }
     for (K key : joinMap.keySet()) {
       KeyValue<V1, V2> val = joinMap.get(key);
-      KeyValue<K, VR> t = new KeyValue(key, joinFn.apply(val.getKey(), val.getValue()));
+      KeyValue<K, VR> t = new KeyValue<K, VR>(key, joinFn.apply(val.getKey(), val.getValue()));
       collector.emit(new Values(t));
     }
   }

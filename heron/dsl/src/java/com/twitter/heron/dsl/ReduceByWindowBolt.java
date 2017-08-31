@@ -24,6 +24,7 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
@@ -37,6 +38,7 @@ import com.twitter.heron.dsl.windowing.WindowConfig;
  could be assigned by the user or computed by the system
  */
 class ReduceByWindowBolt<I> extends DslWindowBolt {
+  private static final long serialVersionUID = 6513775685209414130L;
   private WindowConfig windowCfg;
   private BinaryOperator<I> reduceFn;
   private OutputCollector collector;
@@ -55,7 +57,7 @@ class ReduceByWindowBolt<I> extends DslWindowBolt {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(TupleWindow inputWindow) {
-    I reducedValue;
+    I reducedValue = null;
     for (Tuple tuple : inputWindow.get()) {
       I tup = (I) tuple.getValue(0);
       if (reducedValue == null) {
