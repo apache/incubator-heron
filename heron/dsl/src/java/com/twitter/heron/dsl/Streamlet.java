@@ -75,7 +75,7 @@ public interface Streamlet<R> {
    * @param mapFn The Map Function that should be applied to each element
   */
 
-  <T> Streamlet<T> map(Function<R, T> mapFn);
+  <T> Streamlet<T> map(Function<? super R, ? extends T> mapFn);
 
   /**
    * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
@@ -83,14 +83,14 @@ public interface Streamlet<R> {
    * instead of a plain Streamlet.
    * @param mapFn The Map function that should be applied to each element
   */
-  <K, V> KVStreamlet<K, V> mapToKV(Function<R, KeyValue<K, V>> mapFn);
+  <K, V> KVStreamlet<K, V> mapToKV(Function<? super R, ? extends KeyValue<K, V>> mapFn);
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <T> Streamlet<T> flatMap(Function<R, Iterable<T>> flatMapFn);
+  <T> Streamlet<T> flatMap(Function<? super R, Iterable<? extends T>> flatMapFn);
 
   /**
    * Return a new KVStreamlet by applying map_function to each element of this Streamlet
@@ -98,14 +98,15 @@ public interface Streamlet<R> {
    * KVStreamlet instead of a plain Streamlet
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <K, V> KVStreamlet<K, V> flatMapToKV(Function<R, Iterable<KeyValue<K, V>>> flatMapFn);
+  <K, V> KVStreamlet<K, V> flatMapToKV(Function<? super R,
+      Iterable<? extends KeyValue<K, V>>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
    * and including only those elements that satisfy the filterFn
    * @param filterFn The filter Function that should be applied to each element
   */
-  Streamlet<R> filter(Predicate<R> filterFn);
+  Streamlet<R> filter(Predicate<? super R> filterFn);
 
   /**
    * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
@@ -116,7 +117,8 @@ public interface Streamlet<R> {
    * A more generalized version of repartition where a user can determine which partitions
    * any particular tuple should go to
    */
-  Streamlet<R> repartition(int numPartitions, BiFunction<R, Integer, List<Integer>> partitionFn);
+  Streamlet<R> repartition(int numPartitions,
+                           BiFunction<? super R, Integer, List<Integer>> partitionFn);
 
   /**
    * Clones the current Streamlet. It returns an array of numClones Streamlets where each
@@ -138,5 +140,5 @@ public interface Streamlet<R> {
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
-  Streamlet<R> union(Streamlet<R> other);
+  Streamlet<R> union(Streamlet<? extends R> other);
 }

@@ -36,7 +36,7 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
   */
   <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
                                    WindowConfig windowCfg,
-                                   BiFunction<V, V2, VR> joinFunction);
+                                   BiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 
   /**
    * Return a new Streamlet in which for each time_window, all elements are belonging to the

@@ -34,11 +34,11 @@ import com.twitter.heron.api.tuple.Values;
  */
 public class FlatMapBolt<R, T> extends DslBolt {
   private static final long serialVersionUID = -2418329215159618998L;
-  private Function<R, Iterable<T>> flatMapFn;
+  private Function<? super R, Iterable<? extends T>> flatMapFn;
 
   private OutputCollector collector;
 
-  public FlatMapBolt(Function<R, Iterable<T>> flatMapFn) {
+  public FlatMapBolt(Function<? super R, Iterable<? extends T>> flatMapFn) {
     this.flatMapFn = flatMapFn;
   }
 
@@ -52,7 +52,7 @@ public class FlatMapBolt<R, T> extends DslBolt {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    Iterable<T> result = flatMapFn.apply(obj);
+    Iterable<? extends T> result = flatMapFn.apply(obj);
     for (T o : result) {
       collector.emit(new Values(o));
     }

@@ -43,11 +43,11 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private String leftComponent;
   private String rightComponent;
   private WindowConfig windowCfg;
-  private BiFunction<V1, V2, VR> joinFn;
+  private BiFunction<? super V1, ? super V2, ? extends VR> joinFn;
   private OutputCollector collector;
 
   public JoinBolt(String leftComponent, String rightComponent, WindowConfig windowCfg,
-           BiFunction<V1, V2, VR> joinFn) {
+           BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
     this.leftComponent = leftComponent;
     this.rightComponent = rightComponent;
     this.windowCfg = windowCfg;

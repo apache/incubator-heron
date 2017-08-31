@@ -34,9 +34,10 @@ import com.twitter.heron.dsl.impl.bolts.MapBolt;
  */
 public class ReMapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private BiFunction<R, Integer, List<Integer>> remapFn;
+  private BiFunction<? super R, Integer, List<Integer>> remapFn;
 
-  public ReMapStreamlet(StreamletImpl<R> parent, BiFunction<R, Integer, List<Integer>> remapFn) {
+  public ReMapStreamlet(StreamletImpl<R> parent,
+                        BiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;
     setNumPartitions(parent.getNumPartitions());

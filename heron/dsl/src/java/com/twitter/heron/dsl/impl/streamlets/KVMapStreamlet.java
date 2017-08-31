@@ -33,8 +33,9 @@ import com.twitter.heron.dsl.KeyValue;
 public class KVMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   private MapStreamlet<R, KeyValue<K, V>> delegate;
 
-  public KVMapStreamlet(StreamletImpl<R> parent, Function<R, KeyValue<K, V>> mapFn) {
-    this.delegate = new MapStreamlet<>(parent, mapFn);
+  public KVMapStreamlet(StreamletImpl<R> parent,
+                        Function<? super R, ? extends KeyValue<K, V>> mapFn) {
+    this.delegate = new MapStreamlet<R, KeyValue<K, V>>(parent, mapFn);
   }
 
   public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {

@@ -31,9 +31,9 @@ import com.twitter.heron.dsl.impl.bolts.UnionBolt;
  */
 public class UnionStreamlet<I> extends StreamletImpl<I> {
   private StreamletImpl<I> left;
-  private StreamletImpl<I> right;
+  private StreamletImpl<? extends I> right;
 
-  public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<I> right) {
+  public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<? extends I> right) {
     this.left = left;
     this.right = right;
     setNumPartitions(left.getNumPartitions());

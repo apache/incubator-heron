@@ -107,7 +107,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param mapFn The Map Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> map(Function<R, T> mapFn) {
+  public <T> Streamlet<T> map(Function<? super R, ? extends T> mapFn) {
     return new MapStreamlet<R, T>(this, mapFn);
   }
 
@@ -118,7 +118,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param mapFn The Map function that should be applied to each element
   */
   @Override
-  public <K, V> KVStreamlet<K, V> mapToKV(Function<R, KeyValue<K, V>> mapFn) {
+  public <K, V> KVStreamlet<K, V> mapToKV(Function<? super R, ? extends KeyValue<K, V>> mapFn) {
     return new KVMapStreamlet<R, K, V>(this, mapFn);
   }
 
@@ -128,7 +128,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> flatMap(Function<R, Iterable<T>> flatMapFn) {
+  public <T> Streamlet<T> flatMap(Function<? super R, Iterable<? extends T>> flatMapFn) {
     return new FlatMapStreamlet<R, T>(this, flatMapFn);
   }
 
@@ -139,7 +139,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
   @Override
-  public <K, V> KVStreamlet<K, V> flatMapToKV(Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
+  public <K, V> KVStreamlet<K, V> flatMapToKV(Function<? super R,
+      Iterable<? extends KeyValue<K, V>>> flatMapFn) {
     return new KVFlatMapStreamlet<R, K, V>(this, flatMapFn);
   }
 
@@ -149,7 +150,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param filterFn The filter Function that should be applied to each element
   */
   @Override
-  public Streamlet<R> filter(Predicate<R> filterFn) {
+  public Streamlet<R> filter(Predicate<? super R> filterFn) {
     return new FilterStreamlet<R>(this, filterFn);
   }
 
@@ -167,7 +168,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> repartition(int numPartitions,
-                                  BiFunction<R, Integer, List<Integer>> partitionFn) {
+                                  BiFunction<? super R, Integer, List<Integer>> partitionFn) {
     return new ReMapStreamlet<R>(this, partitionFn).setNumPartitions(numPartitions);
   }
 
@@ -202,8 +203,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * the new streamlet will contain tuples belonging to both Streamlets
   */
   @Override
-  public Streamlet<R> union(Streamlet<R> other) {
-    StreamletImpl<R> joinee = (StreamletImpl<R>) other;
+  public Streamlet<R> union(Streamlet<? extends R> other) {
+    StreamletImpl<? extends R> joinee = (StreamletImpl<? extends R>) other;
     return new UnionStreamlet<R>(this, joinee);
   }
 

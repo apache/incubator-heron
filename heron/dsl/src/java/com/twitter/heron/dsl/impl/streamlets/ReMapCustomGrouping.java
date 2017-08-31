@@ -34,9 +34,9 @@ import com.twitter.heron.api.topology.TopologyContext;
 public class ReMapCustomGrouping<R> implements CustomStreamGrouping {
   private static final long serialVersionUID = 8118844912340601079L;
   private List<Integer> taskIds;
-  private BiFunction<R, Integer, List<Integer>> remapFn;
+  private BiFunction<? super R, Integer, List<Integer>> remapFn;
 
-  ReMapCustomGrouping(BiFunction<R, Integer, List<Integer>> remapFn) {
+  ReMapCustomGrouping(BiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.remapFn = remapFn;
   }
 

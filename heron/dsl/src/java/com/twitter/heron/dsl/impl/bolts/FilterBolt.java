@@ -34,11 +34,11 @@ import com.twitter.heron.api.tuple.Values;
  */
 public class FilterBolt<R> extends DslBolt {
   private static final long serialVersionUID = -4748646871471052706L;
-  private Predicate<R> filterFn;
+  private Predicate<? super R> filterFn;
 
   private OutputCollector collector;
 
-  public FilterBolt(Predicate<R> filterFn) {
+  public FilterBolt(Predicate<? super R> filterFn) {
     this.filterFn = filterFn;
   }
 

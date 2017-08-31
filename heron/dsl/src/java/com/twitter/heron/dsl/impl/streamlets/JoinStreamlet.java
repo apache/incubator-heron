@@ -35,11 +35,11 @@ public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   private KVStreamletImpl<K, V1> left;
   private KVStreamletImpl<K, V2> right;
   private WindowConfig windowCfg;
-  private BiFunction<V1, V2, VR> joinFn;
+  private BiFunction<? super V1, ? super V2, ? extends VR> joinFn;
 
   public JoinStreamlet(KVStreamletImpl<K, V1> left, KVStreamletImpl<K, V2> right,
                        WindowConfig windowCfg,
-                       BiFunction<V1, V2, VR> joinFn) {
+                       BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
     this.left = left;
     this.right = right;
     this.windowCfg = windowCfg;

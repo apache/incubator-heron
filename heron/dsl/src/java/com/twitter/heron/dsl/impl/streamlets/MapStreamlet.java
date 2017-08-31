@@ -32,9 +32,9 @@ import com.twitter.heron.dsl.impl.bolts.MapBolt;
  */
 public class MapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private Function<R, T> mapFn;
+  private Function<? super R, ? extends T> mapFn;
 
-  public MapStreamlet(StreamletImpl<R> parent, Function<R, T> mapFn) {
+  public MapStreamlet(StreamletImpl<R> parent, Function<? super R, ? extends T> mapFn) {
     this.parent = parent;
     this.mapFn = mapFn;
     setNumPartitions(parent.getNumPartitions());

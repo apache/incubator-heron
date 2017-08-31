@@ -38,7 +38,7 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
   */
   public <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
                                    WindowConfig windowCfg,
-                                   BiFunction<V, V2, VR> joinFunction) {
+                                   BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
     return new JoinStreamlet<K, V, V2, VR>(this, joinee, windowCfg, joinFunction);
   }

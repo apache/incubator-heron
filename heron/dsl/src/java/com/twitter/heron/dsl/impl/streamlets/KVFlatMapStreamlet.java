@@ -31,10 +31,10 @@ import com.twitter.heron.dsl.KeyValue;
  could be assigned by the user or computed by the system
  */
 public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
-  private FlatMapStreamlet<R, KeyValue<K, V>> delegate;
+  private FlatMapStreamlet<? super R, ? extends KeyValue<K, V>> delegate;
 
   public KVFlatMapStreamlet(StreamletImpl<R> parent,
-                            Function<R, Iterable<KeyValue<K, V>>> flatMapFn) {
+                            Function<? super R, Iterable<? extends KeyValue<K, V>>> flatMapFn) {
     this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
   }
 

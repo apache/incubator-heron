@@ -32,9 +32,10 @@ import com.twitter.heron.dsl.impl.bolts.FlatMapBolt;
  */
 public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private Function<R, Iterable<T>> flatMapFn;
+  private Function<? super R, Iterable<? extends T>> flatMapFn;
 
-  public FlatMapStreamlet(StreamletImpl<R> parent, Function<R, Iterable<T>> flatMapFn) {
+  public FlatMapStreamlet(StreamletImpl<R> parent,
+                          Function<? super R, Iterable<? extends T>> flatMapFn) {
     this.parent = parent;
     this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());

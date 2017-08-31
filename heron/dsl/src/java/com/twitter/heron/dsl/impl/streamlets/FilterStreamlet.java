@@ -32,9 +32,9 @@ import com.twitter.heron.dsl.impl.bolts.FilterBolt;
  */
 public class FilterStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private Predicate<R> filterFn;
+  private Predicate<? super R> filterFn;
 
-  public FilterStreamlet(StreamletImpl<R> parent, Predicate<R> filterFn) {
+  public FilterStreamlet(StreamletImpl<R> parent, Predicate<? super R> filterFn) {
     this.parent = parent;
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());

@@ -34,11 +34,11 @@ import com.twitter.heron.api.tuple.Values;
  */
 public class MapBolt<R, T> extends DslBolt {
   private static final long serialVersionUID = -1303096133107278700L;
-  private Function<R, T> mapFn;
+  private Function<? super R, ? extends T> mapFn;
 
   private OutputCollector collector;
 
-  public MapBolt(Function<R, T> mapFn) {
+  public MapBolt(Function<? super R, ? extends T> mapFn) {
     this.mapFn = mapFn;
   }
 
