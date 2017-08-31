@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,11 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config config, Config runtime) {
+    // validate the topology name before moving forward
+    if (!topologyNameIsValid(Runtime.topologyName(runtime))) {
+      throw new RuntimeException(getInvalidTopologyNameMessage(Runtime.topologyName(runtime)));
+    }
+
     this.configuration = config;
     this.runtimeConfiguration = runtime;
     this.controller = getController();
@@ -493,5 +499,17 @@ public class KubernetesScheduler implements IScheduler, IScalable {
             + container.getId(), ioe);
       }
     }
+  }
+
+  static boolean topologyNameIsValid(String topologyName) {
+    final Matcher matcher = KubernetesConstants.VALID_POD_NAME_REGEX.matcher(topologyName);
+    return matcher.matches();
+  }
+
+  private static String getInvalidTopologyNameMessage(String topologyName) {
+    return String.format("Invalid topology name: \"%s\": "
+        + "topology names in kubernetes must consist of lower case alphanumeric "
+        + "characters, '-' or '.', and must start and end with an alphanumeric "
+        + "character.", topologyName);
   }
 }
