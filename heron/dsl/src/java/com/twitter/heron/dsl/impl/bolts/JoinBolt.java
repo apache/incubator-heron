@@ -24,7 +24,6 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -40,17 +39,24 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private static final long serialVersionUID = 4875450390444745407L;
   public static final String LEFT_COMPONENT_NAME = "_dsl_joinbolt_left_component_name_";
   public static final String RIGHT_COMPONENT_NAME = "_dsl_joinbolt_right_component_name_";
+
+  public enum JoinType {
+    INNER,
+    LEFT,
+    OUTER;
+  }
+
+  private JoinType joinType;
   private String leftComponent;
   private String rightComponent;
-  private WindowConfig windowCfg;
   private BiFunction<? super V1, ? super V2, ? extends VR> joinFn;
   private OutputCollector collector;
 
-  public JoinBolt(String leftComponent, String rightComponent, WindowConfig windowCfg,
-           BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+  public JoinBolt(JoinType joinType, String leftComponent, String rightComponent,
+                  BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+    this.joinType = joinType;
     this.leftComponent = leftComponent;
     this.rightComponent = rightComponent;
-    this.windowCfg = windowCfg;
     this.joinFn = joinFn;
   }
 
@@ -75,16 +81,35 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
     for (Tuple tuple : inputWindow.get()) {
       if (tuple.getSourceComponent().equals(leftComponent)) {
         KeyValue<K, V1> tup = (KeyValue<K, V1>) tuple.getValue(0);
-        addMapLeft(joinMap, tup);
+        if (tup.getKey() != null) {
+          addMapLeft(joinMap, tup);
+        }
       } else {
         KeyValue<K, V2> tup = (KeyValue<K, V2>) tuple.getValue(0);
-        addMapRight(joinMap, tup);
+        if (tup.getKey() != null) {
+          addMapRight(joinMap, tup);
+        }
       }
     }
     for (K key : joinMap.keySet()) {
       KeyValue<V1, V2> val = joinMap.get(key);
-      KeyValue<K, VR> t = new KeyValue<K, VR>(key, joinFn.apply(val.getKey(), val.getValue()));
-      collector.emit(new Values(t));
+      switch (joinType) {
+        case INNER:
+          if (val.getKey() != null && val.getValue() != null) {
+            joinAndEmit(key, val);
+          }
+          break;
+        case LEFT:
+          if (val.getKey() != null) {
+            joinAndEmit(key, val);
+          }
+          break;
+        case OUTER:
+          joinAndEmit(key, val);
+          break;
+        default:
+          throw new RuntimeException("Unknown jointype");
+      }
     }
   }
 
@@ -102,5 +127,10 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
     } else {
       joinMap.put(tup.getKey(), new KeyValue<V1, V2>(null, tup.getValue()));
     }
+  }
+
+  private void joinAndEmit(K key, KeyValue<V1, V2> val) {
+    KeyValue<K, VR> t = new KeyValue<K, VR>(key, joinFn.apply(val.getKey(), val.getValue()));
+    collector.emit(new Values(t));
   }
 }

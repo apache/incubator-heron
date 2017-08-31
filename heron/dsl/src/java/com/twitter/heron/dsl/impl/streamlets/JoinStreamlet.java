@@ -31,15 +31,39 @@ import com.twitter.heron.dsl.impl.bolts.JoinBolt;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
+public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
+  private JoinBolt.JoinType joinType;
   private KVStreamletImpl<K, V1> left;
   private KVStreamletImpl<K, V2> right;
   private WindowConfig windowCfg;
   private BiFunction<? super V1, ? super V2, ? extends VR> joinFn;
 
-  public JoinStreamlet(KVStreamletImpl<K, V1> left, KVStreamletImpl<K, V2> right,
-                       WindowConfig windowCfg,
-                       BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+  static <A, B, C, D> JoinStreamlet<A, B, C, D> createInnerJoinStreamlet(KVStreamletImpl<A, B> left,
+                                          KVStreamletImpl<A, C> right,
+                                          WindowConfig windowCfg,
+                                          BiFunction<? super B, ? super C, ? extends D> joinFn) {
+    return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.INNER, left, right, windowCfg, joinFn);
+  }
+
+  static <A, B, C, D> JoinStreamlet<A, B, C, D> createLeftJoinStreamlet(KVStreamletImpl<A, B> left,
+                                          KVStreamletImpl<A, C> right,
+                                          WindowConfig windowCfg,
+                                          BiFunction<? super B, ? super C, ? extends D> joinFn) {
+    return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.LEFT, left, right, windowCfg, joinFn);
+  }
+
+  static <A, B, C, D> JoinStreamlet<A, B, C, D> createOuterJoinStreamlet(KVStreamletImpl<A, B> left,
+                                          KVStreamletImpl<A, C> right,
+                                          WindowConfig windowCfg,
+                                          BiFunction<? super B, ? super C, ? extends D> joinFn) {
+    return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.OUTER, left, right, windowCfg, joinFn);
+  }
+
+  private JoinStreamlet(JoinBolt.JoinType joinType, KVStreamletImpl<K, V1> left,
+                        KVStreamletImpl<K, V2> right,
+                        WindowConfig windowCfg,
+                        BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+    this.joinType = joinType;
     this.left = left;
     this.right = right;
     this.windowCfg = windowCfg;
@@ -71,7 +95,7 @@ public class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
     }
     stageNames.add(getName());
     bldr.setBolt(getName(),
-        new JoinBolt<K, V1, V2, VR>(left.getName(), right.getName(), windowCfg, joinFn),
+        new JoinBolt<K, V1, V2, VR>(joinType, left.getName(), right.getName(), joinFn),
         getNumPartitions())
         .customGrouping(left.getName(), new JoinCustomGrouping<K, V1>())
         .customGrouping(right.getName(), new JoinCustomGrouping<K, V2>());
