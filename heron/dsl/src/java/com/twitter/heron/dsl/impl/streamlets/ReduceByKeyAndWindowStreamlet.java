@@ -67,9 +67,9 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(),
-        new ReduceByKeyAndWindowBolt<K, V>(windowCfg, reduceFn),
-        getNumPartitions())
+    ReduceByKeyAndWindowBolt<K, V> bolt = new ReduceByKeyAndWindowBolt<>(reduceFn);
+    windowCfg.attachWindowConfig(bolt);
+    bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
     return bldr;
   }

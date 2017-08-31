@@ -67,9 +67,9 @@ public class ReduceByWindowStreamlet<I> extends StreamletImpl<I> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(),
-        new ReduceByWindowBolt<I>(windowCfg, reduceFn),
-        getNumPartitions())
+    ReduceByWindowBolt<I> bolt = new ReduceByWindowBolt<>(reduceFn);
+    windowCfg.attachWindowConfig(bolt);
+    bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<I>());
     return bldr;
   }

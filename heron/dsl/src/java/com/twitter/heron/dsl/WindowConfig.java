@@ -17,6 +17,8 @@ package com.twitter.heron.dsl;
 
 import java.time.Duration;
 
+import com.twitter.heron.api.bolt.BaseWindowedBolt;
+
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
  Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
@@ -39,6 +41,14 @@ public final class WindowConfig {
   }
   public static WindowConfig createCountWindow(int windowSize, int slideSize) {
     return new WindowConfig(windowSize, slideSize);
+  }
+  public void attachWindowConfig(BaseWindowedBolt bolt) {
+    if (windowType == WindowType.COUNT) {
+      bolt.withWindow(BaseWindowedBolt.Count.of(windowSize),
+          BaseWindowedBolt.Count.of(slideInterval));
+    } else {
+      bolt.withWindow(windowDuration, slidingIntervalDuration);
+    }
   }
   private enum WindowType { TIME, COUNT }
   private WindowType windowType;

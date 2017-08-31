@@ -24,7 +24,6 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.WindowConfig;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -38,12 +37,10 @@ import com.twitter.heron.dsl.WindowConfig;
  */
 public class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
   private static final long serialVersionUID = 2833576046687750496L;
-  private WindowConfig windowCfg;
   private BinaryOperator<V> reduceFn;
   private OutputCollector collector;
 
-  public ReduceByKeyAndWindowBolt(WindowConfig windowCfg, BinaryOperator<V> reduceFn) {
-    this.windowCfg = windowCfg;
+  public ReduceByKeyAndWindowBolt(BinaryOperator<V> reduceFn) {
     this.reduceFn = reduceFn;
   }
 

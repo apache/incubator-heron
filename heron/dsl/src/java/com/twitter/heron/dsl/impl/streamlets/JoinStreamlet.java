@@ -94,9 +94,10 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(),
-        new JoinBolt<K, V1, V2, VR>(joinType, left.getName(), right.getName(), joinFn),
-        getNumPartitions())
+    JoinBolt<K, V1, V2, VR> bolt = new JoinBolt<>(joinType, left.getName(),
+        right.getName(), joinFn);
+    windowCfg.attachWindowConfig(bolt);
+    bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(left.getName(), new JoinCustomGrouping<K, V1>())
         .customGrouping(right.getName(), new JoinCustomGrouping<K, V2>());
     return bldr;
