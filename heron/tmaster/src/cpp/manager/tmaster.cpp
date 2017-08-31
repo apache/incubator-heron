@@ -917,9 +917,12 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan)
   }
   for (StMgrMapIter iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
     if (stmgr_to_instance_map.find(iter->first) == stmgr_to_instance_map.end()) {
+      LOG(ERROR) << "Instances info from " << iter->first
+                 << " is missing. Bailing out..." << std::endl;
       return false;
     }
     if (!iter->second->VerifyInstances(stmgr_to_instance_map[iter->first])) {
+      LOG(ERROR) << "Instances verification failed. Bailing out..." << std::endl;
       return false;
     }
   }
