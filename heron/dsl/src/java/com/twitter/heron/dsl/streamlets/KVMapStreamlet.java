@@ -1,23 +1,26 @@
-// Copyright 2016 Twitter. All rights reserved.
+//  Copyright 2017 Twitter. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-package com.twitter.heron.dsl;
+package com.twitter.heron.dsl.streamlets;
 
 import java.util.Set;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.KVStreamlet;
+import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.Streamlet;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -36,7 +39,7 @@ public class KVMapStreamlet<R, K, V> extends KVStreamlet<K, V> {
     this.delegate = new MapStreamlet<>(parent, mapFn);
   }
 
-  protected TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
+  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
     return this.delegate.build(bldr, stageNames);
   }
 }

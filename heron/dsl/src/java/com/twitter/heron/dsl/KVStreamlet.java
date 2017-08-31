@@ -17,6 +17,8 @@ package com.twitter.heron.dsl;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 
+import com.twitter.heron.dsl.streamlets.JoinStreamlet;
+import com.twitter.heron.dsl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**

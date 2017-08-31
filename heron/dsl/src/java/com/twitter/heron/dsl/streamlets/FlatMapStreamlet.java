@@ -1,25 +1,25 @@
-// Copyright 2016 Twitter. All rights reserved.
+//  Copyright 2017 Twitter. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-package com.twitter.heron.dsl;
+package com.twitter.heron.dsl.streamlets;
 
-import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.Streamlet;
+import com.twitter.heron.dsl.bolts.FlatMapBolt;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,13 +31,13 @@ import com.twitter.heron.api.topology.TopologyBuilder;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReMapStreamlet<R> extends Streamlet<R> {
+public class FlatMapStreamlet<R, T> extends Streamlet<T> {
   private Streamlet<R> parent;
-  private BiFunction<R, Integer, List<Integer>> remapFn;
+  private Function<R, Iterable<T>> flatMapFn;
 
-  public ReMapStreamlet(Streamlet<R> parent, BiFunction<R, Integer, List<Integer>> remapFn) {
+  public FlatMapStreamlet(Streamlet<R> parent, Function<R, Iterable<T>> flatMapFn) {
     this.parent = parent;
-    this.remapFn = remapFn;
+    this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -45,7 +45,7 @@ public class ReMapStreamlet<R> extends Streamlet<R> {
     int index = 1;
     String name;
     while (true) {
-      name = new StringBuilder("remap").append(index).toString();
+      name = new StringBuilder("flatmap").append(index).toString();
       if (!stageNames.contains(name)) {
         break;
       }
@@ -54,7 +54,7 @@ public class ReMapStreamlet<R> extends Streamlet<R> {
     setName(name);
   }
 
-  protected TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
+  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
     parent.build(bldr, stageNames);
     if (getName() == null) {
       calculateName(stageNames);
@@ -63,9 +63,8 @@ public class ReMapStreamlet<R> extends Streamlet<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapBolt<R, R>(Function.identity()),
-        getNumPartitions())
-        .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
+    bldr.setBolt(getName(), new FlatMapBolt<R, T>(flatMapFn),
+        getNumPartitions()).shuffleGrouping(parent.getName());
     return bldr;
   }
 }

@@ -28,6 +28,14 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.streamlets.FilterStreamlet;
+import com.twitter.heron.dsl.streamlets.FlatMapStreamlet;
+import com.twitter.heron.dsl.streamlets.KVFlatMapStreamlet;
+import com.twitter.heron.dsl.streamlets.KVMapStreamlet;
+import com.twitter.heron.dsl.streamlets.MapStreamlet;
+import com.twitter.heron.dsl.streamlets.ReMapStreamlet;
+import com.twitter.heron.dsl.streamlets.ReduceByWindowStreamlet;
+import com.twitter.heron.dsl.streamlets.UnionStreamlet;
 import com.twitter.heron.dsl.windowing.WindowConfig;
 
 /**
@@ -194,7 +202,7 @@ public abstract class Streamlet<R> {
     this.nPartitions = -1;
   }
 
-  abstract TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
+  public abstract TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
 
   public void run(String topologyName, Config config) {
     Set<String> stageNames = new HashSet<>();
