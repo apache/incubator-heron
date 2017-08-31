@@ -15,9 +15,9 @@
 from collections import namedtuple
 from abc import abstractmethod
 
-from heron.api.src.python import TopologyBuilder
+from heron.api.src.python.topology import TopologyBuilder
 
-from heron.dsl.src.python.operation import OperationType
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
@@ -26,24 +26,17 @@ class Streamlet(object):
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
      Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
      csv files, HDFS files), or for that matter any other source. They are also created by
-     transforming existing Streamlets using operations such as map/flatMap, etc.
+     transforming existing Streamlets using operations such as map/flat_map, etc.
   """
-  def __init__(self, parents, operation=None, stage_name=None,
-               parallelism=None, inputs=None):
+  def __init__(self, parents, stage_name=None, parallelism=None):
     """
     """
-    if operation is None:
-      raise RuntimeError("Streamlet's operation cannot be None")
-    if not OperationType.valid(operation):
-      raise RuntimeError("Streamlet's operation must be of type OperationType")
     if not isinstance(parents, list):
       raise RuntimeError("Streamlet's parents have to be a list")
     self._parents = parents
-    self._operation = operation
     self._stage_name = stage_name
     self._parallelism = parallelism
-    self._inputs = inputs
-    self._output = 'output'
+    self._output = DslBoltBase.outputs[0].stream_id
 
   def map(self, map_function, stage_name=None, parallelism=None):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.
@@ -52,7 +45,7 @@ class Streamlet(object):
     return MapStreamlet(map_function, parents=[self], stage_name=stage_name,
                         parallelism=parallelism)
 
-  def flatMap(self, flatmap_function, stage_name=None, parallelism=None):
+  def flat_map(self, flatmap_function, stage_name=None, parallelism=None):
     """Return a new Streamlet by applying map_function to each element of this Streamlet
        and flattening the result
     """
@@ -85,11 +78,10 @@ class Streamlet(object):
     """
     from heron.dsl.src.python.joinbolt import JoinStreamlet
     return JoinStreamlet(time_window, parents=[self, join_streamlet],
-                         operation=OperationType.Join,
                          stage_name=stage_name, parallelism=parallelism)
 
-  def reduceByWindow(self, time_window, reduce_function, stage_name=None):
-    """A short cut for reduceByKeyAndWindow with parallelism of 1
+  def reduce_by_window(self, time_window, reduce_function, stage_name=None):
+    """A short cut for reduce_by_key_and_window with parallelism of 1
        over the time_window and then reduced using the reduce_function
     """
     from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
@@ -97,7 +89,8 @@ class Streamlet(object):
                                          parents=[self],
                                          stage_name=stage_name, parallelism=1)
 
-  def reduceByKeyAndWindow(self, time_window, reduce_function, stage_name=None, parallelism=None):
+  def reduce_by_key_and_window(self, time_window, reduce_function,
+                               stage_name=None, parallelism=None):
     """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
        over the time_window and then reduced using the reduce_function
     """
@@ -130,7 +123,6 @@ class Streamlet(object):
   def _build(self, bldr, stage_names):
     for parent in self._parents:
       parent._build(bldr, stage_names)
-    self._inputs = self._calculate_inputs()
     if self._parallelism is None:
       self._parallelism = self._calculate_parallelism()
     if self._stage_name is None:
@@ -160,13 +152,6 @@ class Streamlet(object):
       if parent._parallelism > parallelism:
         parallelism = parent._parallelism
     return parallelism
-
-  @abstractmethod
-  def _calculate_inputs(self):
-    """This is the method that's implemented by the operators to get the inputs for this streamlet
-    :return: The inputs as a dict
-    """
-    raise RuntimeError("Streamlet's calculate inputs not implemented")
 
   @abstractmethod
   def _calculate_stage_name(self, existing_stage_names):

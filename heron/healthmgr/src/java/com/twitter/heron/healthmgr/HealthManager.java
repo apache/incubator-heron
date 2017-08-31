@@ -15,6 +15,7 @@
 package com.twitter.heron.healthmgr;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.classification.InterfaceStability.Evolving;
 import com.twitter.heron.classification.InterfaceStability.Unstable;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
@@ -78,14 +80,18 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
  * <li>cluster name: <code>-c local</code>
  * <li>role: <code> -r dev</code>
  * <li>environment: <code> -e default</code>
- * <li>heron home directory: <code> -d ~/.heron</code>
- * <li>config directory: <code> -p ~/.heron/conf</code>
  * <li>topology name: <code> -n AckingTopology</code>
+ * <p>
  * </ul>
  * <p>
  * Optional command line options for the {@link HealthManager} include
  * <ul>
- * <li>tracker url: <code>-t http://host:port</code>, default: <code>http://localhost:8888</code>
+ * <li>health manager mode: <code> -m local</code>, default cluster
+ * <li>heron home directory: <code> -d ~/.heron</code>, required if mode is local
+ * <li>config directory: <code> -p ~/.heron/conf</code>, required if mode is local
+ * <li>metrics type: <code>-s f.q.class.name</code>,
+ * default: <code>com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider</code>
+ * <li>metrics source: <code>-t http://host:port</code>, default: <code>http://127.0.0.1:8888</code>
  * <li>enable verbose mode: <code> -v</code>
  * </ul>
  */
@@ -106,6 +112,30 @@ public class HealthManager {
 
   private List<IHealthPolicy> healthPolicies = new ArrayList<>();
   private HealthPolicyConfigReader policyConfigReader;
+
+  public enum HealthManagerMode {
+    cluster,
+    local
+  }
+
+  private enum CliArgs {
+    CLUSTER("cluster"),
+    ROLE("role"),
+    ENVIRONMENT("environment"),
+    TOPOLOGY_NAME("topology_name"),
+    METRIC_SOURCE_URL("metric_source_url"),
+    METRIC_SOURCE_TYPE("metric_source_type"),
+    HERON_HOME("heron_home"),
+    CONFIG_PATH("config_path"),
+    MODE("mode"),
+    VERBOSE("verbose");
+
+    private String text;
+
+    CliArgs(String name) {
+      this.text = name;
+    }
+  }
 
   public HealthManager(Config config, AbstractModule baseModule) {
     this.config = config;
@@ -131,32 +161,52 @@ public class HealthManager {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    String heronHome = cmd.getOptionValue("heron_home");
-    String configPath = cmd.getOptionValue("config_path");
-    String metricsSourceUrl = cmd.getOptionValue("data_source_url", "http://localhost:8888");
-    String metricsProviderClassName = cmd.getOptionValue(
-        "data_source_type", "com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider");
-
-    Boolean verbose = cmd.hasOption("verbose");
-    Level loggingLevel = Level.INFO;
-    if (verbose) {
-      loggingLevel = Level.FINE;
+    HealthManagerMode mode = HealthManagerMode.cluster;
+    if (hasOption(cmd, CliArgs.MODE)) {
+      mode = HealthManagerMode.valueOf(getOptionValue(cmd, CliArgs.MODE));
     }
-    LoggingHelper.loggerInit(loggingLevel, false);
 
-    // build the final config by expanding all the variables
-    Config config = Config.toLocalMode(Config.newBuilder()
-        .putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
-        .putAll(commandLineConfigs(cmd))
-        .build());
+    Config config;
+    switch (mode) {
+      case cluster:
+        config = Config.toClusterMode(Config.newBuilder()
+            .putAll(ConfigLoader.loadClusterConfig())
+            .putAll(commandLineConfigs(cmd))
+            .build());
+        break;
+
+      case local:
+        if (!hasOption(cmd, CliArgs.HERON_HOME) || !hasOption(cmd, CliArgs.CONFIG_PATH)) {
+          throw new IllegalArgumentException("Missing heron_home or config_path argument");
+        }
+        String heronHome = getOptionValue(cmd, CliArgs.HERON_HOME);
+        String configPath = getOptionValue(cmd, CliArgs.CONFIG_PATH);
+        config = Config.toLocalMode(Config.newBuilder()
+            .putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
+            .putAll(commandLineConfigs(cmd))
+            .build());
+        break;
+
+      default:
+        throw new IllegalArgumentException("Invalid mode: " + getOptionValue(cmd, CliArgs.MODE));
+    }
+
+    setupLogging(cmd, config);
 
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
+    // load the default config value and override with any command line values
+    String metricSourceClassName = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_TYPE.key());
+    metricSourceClassName = getOptionValue(cmd, CliArgs.METRIC_SOURCE_TYPE, metricSourceClassName);
+
+    String metricsUrl = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_URL.key());
+    metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, metricsUrl);
+
     Class<? extends MetricsProvider> metricsProviderClass =
-        Class.forName(metricsProviderClassName).asSubclass(MetricsProvider.class);
+        Class.forName(metricSourceClassName).asSubclass(MetricsProvider.class);
     AbstractModule module =
-        buildMetricsProviderModule(config, metricsSourceUrl, metricsProviderClass);
+        buildMetricsProviderModule(config, metricsUrl, metricsProviderClass);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
@@ -171,6 +221,43 @@ public class HealthManager {
     } finally {
       policyExecutor.destroy();
     }
+  }
+
+  private static void setupLogging(CommandLine cmd, Config config) throws IOException {
+    String systemConfigFilename = Context.systemConfigFile(config);
+
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .build();
+
+    Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
+    Level loggingLevel = Level.INFO;
+    if (verbose) {
+      loggingLevel = Level.FINE;
+    }
+
+    String loggingDir = systemConfig.getHeronLoggingDirectory();
+    LoggingHelper.loggerInit(loggingLevel, true);
+
+    String fileName = String.format("%s-%s-%s", "heron", Context.topologyName(config), "healthmgr");
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(fileName, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSize(),
+            systemConfig.getHeronLoggingMaximumFiles()));
+
+    LOG.info("Logging setup done.");
+  }
+
+  private static boolean hasOption(CommandLine cmd, CliArgs argName) {
+    return cmd.hasOption(argName.text);
+  }
+
+  private static String getOptionValue(CommandLine cmd, CliArgs argName) {
+    return cmd.getOptionValue(argName.text, null);
+  }
+
+  private static String getOptionValue(CommandLine cmd, CliArgs argName, String defaultValue) {
+    return cmd.getOptionValue(argName.text, defaultValue);
   }
 
   public void initialize() throws ReflectiveOperationException, FileNotFoundException {
@@ -285,11 +372,11 @@ public class HealthManager {
    * @return config, the command line config
    */
   private static Config commandLineConfigs(CommandLine cmd) {
-    String cluster = cmd.getOptionValue("cluster");
-    String role = cmd.getOptionValue("role");
-    String environ = cmd.getOptionValue("environment");
-    String topologyName = cmd.getOptionValue("topology_name");
-    Boolean verbose = cmd.hasOption("verbose");
+    String cluster = getOptionValue(cmd, CliArgs.CLUSTER);
+    String role = getOptionValue(cmd, CliArgs.ROLE);
+    String environ = getOptionValue(cmd, CliArgs.ENVIRONMENT);
+    String topologyName = getOptionValue(cmd, CliArgs.TOPOLOGY_NAME);
+    Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
 
     Config.Builder commandLineConfig = Config.newBuilder()
         .put(Key.CLUSTER, cluster)
@@ -325,46 +412,44 @@ public class HealthManager {
 
     Option cluster = Option.builder("c")
         .desc("Cluster name in which the topology needs to run on")
-        .longOpt("cluster")
+        .longOpt(CliArgs.CLUSTER.text)
         .hasArgs()
-        .argName("cluster")
+        .argName(CliArgs.CLUSTER.text)
         .required()
         .build();
 
     Option role = Option.builder("r")
         .desc("Role under which the topology needs to run")
-        .longOpt("role")
+        .longOpt(CliArgs.ROLE.text)
         .hasArgs()
-        .argName("role")
+        .argName(CliArgs.ROLE.text)
         .required()
         .build();
 
     Option environment = Option.builder("e")
         .desc("Environment under which the topology needs to run")
-        .longOpt("environment")
+        .longOpt(CliArgs.ENVIRONMENT.text)
         .hasArgs()
-        .argName("environment")
+        .argName(CliArgs.ENVIRONMENT.text)
         .build();
 
     Option heronHome = Option.builder("d")
         .desc("Directory where heron is installed")
-        .longOpt("heron_home")
+        .longOpt(CliArgs.HERON_HOME.text)
         .hasArgs()
         .argName("heron home dir")
-        .required()
         .build();
 
     Option configFile = Option.builder("p")
         .desc("Path of the config files")
-        .longOpt("config_path")
+        .longOpt(CliArgs.CONFIG_PATH.text)
         .hasArgs()
         .argName("config path")
-        .required()
         .build();
 
     Option topologyName = Option.builder("n")
         .desc("Name of the topology")
-        .longOpt("topology_name")
+        .longOpt(CliArgs.TOPOLOGY_NAME.text)
         .hasArgs()
         .argName("topology name")
         .required()
@@ -372,7 +457,7 @@ public class HealthManager {
 
     Option metricsSourceURL = Option.builder("t")
         .desc("metrics data source url with port number")
-        .longOpt("data_source_url")
+        .longOpt(CliArgs.METRIC_SOURCE_URL.text)
         .hasArgs()
         .argName("data source url")
         .build();
@@ -382,14 +467,24 @@ public class HealthManager {
     // com.twitter.heron.healthmgr.sensors.MetricsCacheMetricsProvider
     Option metricsSourceType = Option.builder("s")
         .desc("metrics data source type")
-        .longOpt("data_source_type")
+        .longOpt(CliArgs.METRIC_SOURCE_TYPE.text)
         .hasArg()
         .argName("data source type")
         .build();
 
+    // candidates:
+    // local: Health manager is started manually
+    // cluster: Health manager is started by executor on container 0 (default)
+    Option mode = Option.builder("m")
+        .desc("Health manager process mode, cluster or local")
+        .longOpt(CliArgs.MODE.text)
+        .hasArg()
+        .argName("process mode")
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
-        .longOpt("verbose")
+        .longOpt(CliArgs.VERBOSE.text)
         .build();
 
     options.addOption(cluster);
@@ -400,6 +495,7 @@ public class HealthManager {
     options.addOption(topologyName);
     options.addOption(metricsSourceType);
     options.addOption(metricsSourceURL);
+    options.addOption(mode);
     options.addOption(verbose);
 
     return options;

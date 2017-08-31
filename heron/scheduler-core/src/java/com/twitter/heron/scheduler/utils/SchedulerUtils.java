@@ -26,6 +26,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
@@ -35,7 +36,6 @@ import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ShellUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 9;
@@ -250,6 +250,11 @@ public final class SchedulerUtils {
     commands.add(completeCkptmgrProcessClassPath);
     commands.add(ckptmgrPort);
     commands.add(Context.statefulConfigFile(config));
+
+    String healthMgrMode =
+        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
+    commands.add(healthMgrMode);
+    commands.add(Context.healthMgrClassPath(config));
 
     return commands.toArray(new String[commands.size()]);
   }

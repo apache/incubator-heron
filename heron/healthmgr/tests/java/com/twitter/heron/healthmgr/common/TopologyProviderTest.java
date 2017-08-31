@@ -27,7 +27,7 @@ import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.TopologyTests;
+import com.twitter.heron.common.utils.topology.TopologyTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

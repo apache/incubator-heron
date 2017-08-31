@@ -32,6 +32,7 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
@@ -48,7 +49,6 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Main class of scheduler.

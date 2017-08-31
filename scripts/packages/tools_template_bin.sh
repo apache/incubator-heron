@@ -73,6 +73,9 @@ fi
 if [ -L "${bin}/heron-ui" ]; then
   rm -f "${bin}/heron-ui"
 fi
+if [ -L "${bin}/heron-apiserver" ]; then
+  rm -f "${bin}/heron-apiserver"
+fi
 if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
   rm -fr "${base}"
 fi
@@ -84,14 +87,16 @@ unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 untar ${base}/heron-tools.tar.gz ${base}
 echo -n .
 chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
+chmod 0755 ${base}/bin/heron-apiserver
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
-ln -s "${base}/bin/heron-ui"      "${bin}/heron-ui"
+ln -s "${base}/bin/heron-tracker"   "${bin}/heron-tracker"
+ln -s "${base}/bin/heron-ui"        "${bin}/heron-ui"
+ln -s "${base}/bin/heron-apiserver" "${bin}/heron-apiserver"
 echo -n .
 
 rm "${base}/heron-tools.tar.gz"

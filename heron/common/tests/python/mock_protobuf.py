@@ -31,7 +31,7 @@ def get_mock_config(config_dict=None):
   proto_config = topology_pb2.Config()
   config_serializer = PythonSerializer()
   assert isinstance(config_dict, dict)
-  for key, value in config_dict.iteritems():
+  for key, value in config_dict.items():
     if isinstance(value, bool):
       kvs = proto_config.kvs.add()
       kvs.key = key
@@ -112,7 +112,7 @@ def get_mock_topology(id="topology_id", name="topology_name", state=1, spouts=[]
 
   return topology
 
-def get_mock_stmgr(id="Stmgr_id", host="localhost", port=9999, endpoint="hello"):
+def get_mock_stmgr(id="Stmgr_id", host="127.0.0.1", port=9999, endpoint="hello"):
   """Returns a mock protobuf StMgr object from physical_plan_pb2"""
   stmgr = physical_plan_pb2.StMgr()
   stmgr.id = id

@@ -46,7 +46,7 @@ class ConfigLoaderTest(unittest.TestCase):
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/local',
-      'tunnelhost': 'localhost',
+      'tunnelhost': '127.0.0.1',
       'type': 'file'
     }], self.load_locations('local'))
 
@@ -64,7 +64,7 @@ class ConfigLoaderTest(unittest.TestCase):
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/marathon',
-      'tunnelhost': 'localhost',
+      'tunnelhost': '127.0.0.1',
       'type': 'file'
     }], self.load_locations('marathon'))
 
@@ -73,7 +73,7 @@ class ConfigLoaderTest(unittest.TestCase):
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/mesos',
-      'tunnelhost': 'localhost',
+      'tunnelhost': '127.0.0.1',
       'type': 'file'
     }], self.load_locations('mesos'))
 
@@ -82,7 +82,7 @@ class ConfigLoaderTest(unittest.TestCase):
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/slurm',
-      'tunnelhost': 'localhost',
+      'tunnelhost': '127.0.0.1',
       'type': 'file'
     }], self.load_locations('slurm'))
 
@@ -91,6 +91,6 @@ class ConfigLoaderTest(unittest.TestCase):
       'hostport': 'LOCALMODE',
       'name': 'local',
       'rootpath': '/user/fake/.herondata/repository/state/yarn',
-      'tunnelhost': 'localhost',
+      'tunnelhost': '127.0.0.1',
       'type': 'file'
     }], self.load_locations('yarn'))

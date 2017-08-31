@@ -11,28 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for flatMap bolt: FlatMapBolt"""
+"""module for flat_map bolt: FlatMapBolt"""
 import collections
-from heron.api.src.python import Bolt, Stream, StatefulComponent
-from heron.api.src.python.component import GlobalStreamId
+from heron.api.src.python.bolt.bolt import Bolt
+from heron.api.src.python.state.stateful_component import StatefulComponent
+from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
-from heron.dsl.src.python import Streamlet
-from heron.dsl.src.python import OperationType
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class FlatMapBolt(Bolt, StatefulComponent):
+class FlatMapBolt(Bolt, StatefulComponent, DslBoltBase):
   """FlatMapBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
   FUNCTION = 'function'
 
-  def initState(self, stateful_state):
-    # flatMap does not have any state
+  def init_state(self, stateful_state):
+    # flat_map does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
-    # flatMap does not have any state
+  def pre_save(self, checkpoint_id):
+    # flat_map does not have any state
     pass
 
   def initialize(self, config, context):
@@ -44,7 +43,7 @@ class FlatMapBolt(Bolt, StatefulComponent):
       if not callable(self.flatmap_function):
         raise RuntimeError("FlatMap function has to be callable")
     else:
-      raise RuntimeError("FlatMapBolt needs to be passed flatMap function")
+      raise RuntimeError("FlatMapBolt needs to be passed flat_map function")
 
   def process(self, tup):
     retval = self.flatmap_function(tup.values[0])
@@ -62,7 +61,7 @@ class FlatMapBolt(Bolt, StatefulComponent):
 class FlatMapStreamlet(Streamlet):
   """FlatMapStreamlet"""
   def __init__(self, flatmap_function, parents, stage_name=None, parallelism=None):
-    super(FlatMapStreamlet, self).__init__(parents=parents, operation=OperationType.FlatMap,
+    super(FlatMapStreamlet, self).__init__(parents=parents,
                                            stage_name=stage_name, parallelism=parallelism)
     self._flatmap_function = flatmap_function
 
@@ -86,5 +85,5 @@ class FlatMapStreamlet(Streamlet):
     if not callable(self._flatmap_function):
       raise RuntimeError("flatmap function must be callable")
     builder.add_bolt(self._stage_name, FlatMapBolt, par=self._parallelism,
-                     inputs=self._inputs,
+                     inputs=self._calculate_inputs(),
                      config={FlatMapBolt.FUNCTION : self._flatmap_function})

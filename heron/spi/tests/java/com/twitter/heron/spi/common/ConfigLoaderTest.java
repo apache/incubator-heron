@@ -82,7 +82,7 @@ public class ConfigLoaderTest {
                                    String heronConfigPath) {
     // assert that the config filenames passed to loadConfig are never null. If they are, the
     // configs defaults are not producing the config files.
-    PowerMockito.verifyStatic(times(9));
+    PowerMockito.verifyStatic(times(10));
     ConfigLoader.loadConfig(isNotNull(String.class));
     PowerMockito.verifyStatic(never());
     ConfigLoader.loadConfig(isNull(String.class));

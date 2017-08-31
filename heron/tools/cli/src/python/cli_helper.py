@@ -13,10 +13,13 @@
 # limitations under the License.
 ''' cli_helper.py '''
 import logging
+import requests
 import heron.tools.common.src.python.utils.config as config
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
+import heron.tools.cli.src.python.rest as rest
 
 from heron.common.src.python.utils.log import Log
 
@@ -39,15 +42,64 @@ def create_parser(subparsers, action, help_arg):
   args.add_topology(parser)
 
   args.add_config(parser)
+  args.add_service_url(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand=action)
   return parser
 
+################################################################################
+def flatten_args(fargs):
+  temp_args = []
+  for k, v in fargs.items():
+    if isinstance(v, list):
+      temp_args.extend([(k, value) for value in v])
+    else:
+      temp_args.append((k, v))
+  return temp_args
 
 ################################################################################
 # pylint: disable=dangerous-default-value
-def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
+def run_server(command, cl_args, action, extra_args=dict()):
+  '''
+  helper function to take action on topologies using REST API
+  :param command:
+  :param cl_args:
+  :param action:        description of action taken
+  :return:
+  '''
+  topology_name = cl_args['topology-name']
+
+  service_endpoint = cl_args['service_url']
+  apiroute = rest.ROUTE_SIGNATURES[command][1] % (
+      cl_args['cluster'],
+      cl_args['role'],
+      cl_args['environ'],
+      topology_name
+  )
+  service_apiurl = service_endpoint + apiroute
+  service_method = rest.ROUTE_SIGNATURES[command][0]
+
+  # convert the dictionary to a list of tuples
+  data = flatten_args(extra_args)
+
+  err_msg = "Failed to %s: %s" % (action, topology_name)
+  succ_msg = "Successfully %s: %s" % (action, topology_name)
+
+  try:
+    r = service_method(service_apiurl, data=data)
+    s = Status.Ok if r.status_code == requests.codes.ok else Status.HeronError
+    if r.status_code != requests.codes.ok:
+      Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+  except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+    Log.error(err)
+    return SimpleResult(Status.HeronError, err_msg, succ_msg)
+
+  return SimpleResult(s, err_msg, succ_msg)
+
+################################################################################
+# pylint: disable=dangerous-default-value
+def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
   '''
   helper function to take action on topologies
   :param command:
@@ -89,3 +141,10 @@ def run(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
   succ_msg = "Successfully %s: %s" % (action, topology_name)
   result.add_context(err_msg, succ_msg)
   return result
+
+################################################################################
+def run(command, cl_args, action, extra_lib_jars=[]):
+  if cl_args['deploy_mode'] == config.SERVER_MODE:
+    return run_server(command, cl_args, action, extra_args=dict())
+  else:
+    return run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=extra_lib_jars)

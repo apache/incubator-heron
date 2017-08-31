@@ -17,8 +17,10 @@ import logging
 import traceback
 from abc import abstractmethod
 
-from heron.api.src.python import global_metrics
-from heron.api.src.python import api_constants, StatefulComponent
+import heron.api.src.python.global_metrics as global_metrics
+import heron.api.src.python.api_constants as api_constants
+from heron.api.src.python.state.stateful_component import StatefulComponent
+
 from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import SerializerHelper
@@ -126,7 +128,7 @@ class BaseInstance(object):
     if not self.is_stateful:
       raise RuntimeError("Received state checkpoint message but we are not stateful topology")
     if isinstance(component, StatefulComponent):
-      component.preSave(ckptmsg.checkpoint_id)
+      component.pre_save(ckptmsg.checkpoint_id)
     else:
       Log.info("Trying to checkponit a non stateful component. Send empty state")
     self.admit_ckpt_state(ckptmsg.checkpoint_id, self._stateful_state)

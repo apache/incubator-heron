@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;
@@ -32,7 +33,6 @@ import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class ResourceCompliantRRPackingTest extends CommonPackingTests {
 

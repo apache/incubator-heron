@@ -37,7 +37,7 @@ class Metrics(object):
   def floorTimestamps(self, start, end, timeline):
     """ floor timestamp """
     ret = {}
-    for timestamp, value in timeline.iteritems():
+    for timestamp, value in timeline.items():
       ts = timestamp / 60 * 60
       if start <= ts <= end:
         ret[ts] = value
@@ -126,9 +126,9 @@ class TS(Operator):
       }
     timelines = metrics["timeline"][self.metricName]
     allMetrics = []
-    for instance, timeline in timelines.iteritems():
+    for instance, timeline in timelines.items():
       toBeDeletedKeys = []
-      for key, value in timeline.iteritems():
+      for key, value in timeline.items():
         floatValue = float(value)
         # Check if the value is really float or not.
         # In python, float("nan") returns "nan" which is actually a float value,
@@ -208,7 +208,7 @@ class Sum(Operator):
 
     # Aggregate all of the them
     for metric in allMetrics:
-      for timestamp, value in metric.timeline.iteritems():
+      for timestamp, value in metric.timeline.items():
         if timestamp in retMetrics.timeline:
           retMetrics.timeline[timestamp] += value
     raise tornado.gen.Return([retMetrics])
@@ -252,7 +252,7 @@ class Max(Operator):
 
     # Aggregate all of the them
     for metric in allMetrics:
-      for timestamp, value in metric.timeline.iteritems():
+      for timestamp, value in metric.timeline.items():
         if start <= timestamp <= end:
           if timestamp not in retMetrics.timeline:
             retMetrics.timeline[timestamp] = value
@@ -306,14 +306,14 @@ class Percentile(Operator):
 
     # Aggregate all of the them
     for metric in allMetrics:
-      for timestamp, value in metric.timeline.iteritems():
+      for timestamp, value in metric.timeline.items():
         if start <= timestamp <= end:
           if timestamp not in timeline:
             timeline[timestamp] = []
           timeline[timestamp].append(value)
 
     retTimeline = {}
-    for timestamp, values in timeline.iteritems():
+    for timestamp, values in timeline.items():
       if not values:
         continue
       index = int(self.quantile * 1.0 * (len(values) - 1) / 100.0)
@@ -423,7 +423,7 @@ class Divide(Operator):
     # If first is univariate
     elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
-      for key, metric in metrics2.iteritems():
+      for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
@@ -437,7 +437,7 @@ class Divide(Operator):
     # If second is univariate
     else:
       allMetrics = []
-      for key, metric in metrics.iteritems():
+      for key, metric in metrics.items():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
         for timestamp in met.timeline.keys():
@@ -548,7 +548,7 @@ class Multiply(Operator):
     # If first is univariate
     elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
-      for key, metric in metrics2.iteritems():
+      for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
@@ -562,7 +562,7 @@ class Multiply(Operator):
     # If second is univariate
     else:
       allMetrics = []
-      for key, metric in metrics.iteritems():
+      for key, metric in metrics.items():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
         for timestamp in met.timeline.keys():
@@ -671,7 +671,7 @@ class Subtract(Operator):
     # If first is univariate
     elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
-      for key, metric in metrics2.iteritems():
+      for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
@@ -685,7 +685,7 @@ class Subtract(Operator):
     # If second is univariate
     else:
       allMetrics = []
-      for key, metric in metrics.iteritems():
+      for key, metric in metrics.items():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
         for timestamp in met.timeline.keys():

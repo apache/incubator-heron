@@ -297,6 +297,10 @@ public class Config {
     return cfgMap.keySet();
   }
 
+  public Set<Map.Entry<String, Object>> getEntrySet() {
+    return cfgMap.entrySet();
+  }
+
   @Override
   public String toString() {
     Map<String, Object> treeMap = new TreeMap<>(cfgMap);

@@ -12,24 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for map bolt: RepartitionBolt"""
-from heron.api.src.python import Bolt, Stream, StatefulComponent
-from heron.api.src.python.component import GlobalStreamId
+from heron.api.src.python.bolt.bolt import Bolt
+from heron.api.src.python.state.stateful_component import StatefulComponent
+from heron.api.src.python.component.component_spec import GlobalStreamId
 from heron.api.src.python.stream import Grouping
 
-from heron.dsl.src.python import Streamlet
-from heron.dsl.src.python import OperationType
+from heron.dsl.src.python.streamlet import Streamlet
+from heron.dsl.src.python.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class RepartitionBolt(Bolt, StatefulComponent):
+class RepartitionBolt(Bolt, StatefulComponent, DslBoltBase):
   """RepartitionBolt"""
-  # output declarer
-  outputs = [Stream(fields=['_output_'], name='output')]
 
-  def initState(self, stateful_state):
+  def init_state(self, stateful_state):
     # repartition does not have any state
     pass
 
-  def preSave(self, checkpoint_id):
+  def pre_save(self, checkpoint_id):
     # repartition does not have any state
     pass
 
@@ -49,7 +48,6 @@ class RepartitionStreamlet(Streamlet):
   """RepartitionStreamlet"""
   def __init__(self, parallelism, parents, stage_name=None):
     super(RepartitionStreamlet, self).__init__(parents=parents,
-                                               operation=OperationType.Repartition,
                                                stage_name=stage_name, parallelism=parallelism)
 
   # pylint: disable=no-self-use
@@ -71,4 +69,4 @@ class RepartitionStreamlet(Streamlet):
 
   def _build_this(self, builder):
     builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
-                     inputs=self._inputs)
+                     inputs=self._calculate_inputs())

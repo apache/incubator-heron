@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -133,7 +134,7 @@ public class TrackerMetricsProvider implements MetricsProvider {
         .queryParam("starttime", start.getEpochSecond())
         .queryParam("endtime", start.getEpochSecond() + duration.getSeconds());
 
-    LOG.info("Tracker Query URI: " + target.getUri());
+    LOG.log(Level.FINE, "Tracker Query URI: {0}", target.getUri());
 
     Response r = target.request(MediaType.APPLICATION_JSON_TYPE).get();
     return r.readEntity(String.class);
