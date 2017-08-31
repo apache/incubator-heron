@@ -56,5 +56,6 @@ public class FlatMapBolt<R, T> extends DslBolt {
     for (T o : result) {
       collector.emit(new Values(o));
     }
+    collector.ack(tuple);
   }
 }

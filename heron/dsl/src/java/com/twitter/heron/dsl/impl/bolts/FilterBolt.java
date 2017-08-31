@@ -55,5 +55,6 @@ public class FilterBolt<R> extends DslBolt {
     if (filterFn.test(obj)) {
       collector.emit(new Values(obj));
     }
+    collector.ack(tuple);
   }
 }

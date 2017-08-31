@@ -49,5 +49,6 @@ public class UnionBolt<I> extends DslBolt {
   public void execute(Tuple tuple) {
     I obj = (I) tuple.getValue(0);
     collector.emit(new Values(obj));
+    collector.ack(tuple);
   }
 }

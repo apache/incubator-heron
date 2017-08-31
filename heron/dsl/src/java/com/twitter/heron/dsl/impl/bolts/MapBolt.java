@@ -54,5 +54,6 @@ public class MapBolt<R, T> extends DslBolt {
     R obj = (R) tuple.getValue(0);
     T result = mapFn.apply(obj);
     collector.emit(new Values(result));
+    collector.ack(tuple);
   }
 }
