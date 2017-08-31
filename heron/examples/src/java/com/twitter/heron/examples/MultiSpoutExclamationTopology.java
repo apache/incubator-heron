@@ -17,6 +17,7 @@ package com.twitter.heron.examples;
 import java.util.Map;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.examples.spout.TestWordSpout;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
