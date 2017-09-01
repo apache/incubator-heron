@@ -14,12 +14,23 @@
 
 package com.twitter.heron.dsl.impl.bolts;
 
+import java.io.Serializable;
+
 import com.twitter.heron.api.bolt.BaseRichBolt;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
-public abstract class DslBolt extends BaseRichBolt {
+public abstract class DslBolt extends BaseRichBolt
+    implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 8524238140745238942L;
+
+  @Override
+  public void initState(State<Serializable, Serializable> state) { }
+
+  @Override
+  public void preSave(String checkpointId) { }
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
