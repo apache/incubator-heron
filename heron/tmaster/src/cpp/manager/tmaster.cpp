@@ -922,7 +922,8 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan)
       return false;
     }
     if (!iter->second->VerifyInstances(stmgr_to_instance_map[iter->first])) {
-      LOG(ERROR) << "Instances verification failed. Bailing out..." << std::endl;
+      LOG(ERROR) << "Instances verification failed for " << iter->first
+                 << ". Bailing out..." << std::endl;
       return false;
     }
   }
