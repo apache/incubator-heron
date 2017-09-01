@@ -28,11 +28,21 @@ setup_scratch_dir() {
 }
 
 run_build() {
-  TARGET_PLATFORM=$1
+  INPUT_TARGET_PLATFORM=$1
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
   DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="heron/heron-$TARGET_PLATFORM:$HERON_VERSION"
+
+  if [ "$INPUT_TARGET_PLATFORM" == "ubuntu14.04" ]; then
+    TARGET_PLATFORM="ubuntu"
+    DOCKER_TAG="heron/heron:$HERON_VERSION"
+    DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$HERON_VERSION.tar"
+  else
+    TARGET_PLATFORM="$INPUT_TARGET_PLATFORM"
+    DOCKER_TAG="$DOCKER_TAG_PREFIX/heron-$TARGET_PLATFORM:$HERON_VERSION"
+    DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$TARGET_PLATFORM-$HERON_VERSION.tar"
+  fi
 
   setup_scratch_dir $SCRATCH_DIR
 
@@ -75,10 +85,10 @@ case $# in
   *)
     echo "  "
     echo "Script to build heron docker image for different platforms"
-    echo "  Input - directory containing the artifacts from the <output-directory>"
-    echo "  Output - docker image tar file saved in the <output-directory> "
+    echo "  Input - directory containing the artifacts from the directory <artifact-directory>"
+    echo "  Output - docker image tar file saved in the directory <artifact-directory> "
     echo "  "
-    echo "Usage: $0 <platform> <version_string> <output-directory> "
+    echo "Usage: $0 <platform> <version_string> <artifact-directory> "
     echo "  "
     echo "Platforms Supported: ubuntu, centos"
     echo "  "
