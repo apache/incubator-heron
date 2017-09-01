@@ -52,6 +52,8 @@ public class MetricsManagerClient extends HeronClient {
 
   private final GatewayMetrics gatewayMetrics;
 
+  private String hostname;
+
   public MetricsManagerClient(NIOLooper s, String metricsHost, int metricsPort,
                               PhysicalPlans.Instance instance,
                               List<Communicator<Metrics.MetricPublisherPublishMessage>> outs,
@@ -68,6 +70,12 @@ public class MetricsManagerClient extends HeronClient {
     this.gatewayMetrics = gatewayMetrics;
 
     addMetricsManagerClientTasksOnWakeUp();
+
+    try {
+      this.hostname = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      throw new RuntimeException("GetHostName failed");
+    }
   }
 
   private void addMetricsManagerClientTasksOnWakeUp() {
@@ -145,13 +153,6 @@ public class MetricsManagerClient extends HeronClient {
 
   // Build register request and send to metrics mgr
   private void sendRegisterRequest() {
-    String hostname;
-    try {
-      hostname = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e) {
-      throw new RuntimeException("GetHostName failed");
-    }
-
     Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
         setHostname(hostname).
         setPort(instance.getInfo().getTaskId()).
