@@ -75,7 +75,7 @@ public class IncomingPacket {
       int size = header.getInt();
       if (size > limit) {
         LOG.log(Level.SEVERE, "packet size " + size + " exceeds limit " + limit);
-        return -1;
+        // return -1;
       }
       data = ByteBuffer.allocate(size);
     }
