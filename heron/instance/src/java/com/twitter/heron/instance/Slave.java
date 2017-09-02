@@ -66,6 +66,11 @@ public class Slave implements Runnable, AutoCloseable {
   private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
 
+  /**
+   * Default values used to initialize in and out queues prior to downloading the physical plan
+   * These values are transient and will be overwritten when the queue gets reinitialized after
+   * the physical plan is downloaded to values set in heron_interals.yaml
+   */
   private static final int INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY = 128;
   private static final int INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE = 8;
   private static final double INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT = 0.8;
