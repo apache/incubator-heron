@@ -17,6 +17,8 @@ package com.twitter.heron.examples;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.metric.api.GlobalMetrics;
@@ -62,7 +64,18 @@ public final class MultiStageAckingTopology {
     conf.setNumAckers(1);
 
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setNumWorkers(1);
+
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(500));
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromMegabytes(500));
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim2", ByteAmount.fromMegabytes(500));
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 3);
+
+    conf.setNumWorkers(2);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 
