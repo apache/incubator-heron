@@ -93,9 +93,9 @@ public class Slave implements Runnable, AutoCloseable {
     this.metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
 
     /**
-     * initializing queues with default values
-     * this is done after the physical plan is download and here since
-     * components might download physical plans at different rates causing
+     * Initializing queues with default values.
+     * This is done after the physical plan is downloaded and here since
+     * components might download physical plans at different rates
      * and components upstream might already start sending tuples downstream
      */
     this.streamInCommunicator.init(INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY,
