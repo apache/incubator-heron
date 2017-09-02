@@ -28,21 +28,12 @@ setup_scratch_dir() {
 }
 
 run_build() {
-  INPUT_TARGET_PLATFORM=$1
+  TARGET_PLATFORM=$1
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
   DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
-  DOCKER_TAG="heron/heron-$TARGET_PLATFORM:$HERON_VERSION"
-
-  if [ "$INPUT_TARGET_PLATFORM" == "ubuntu14.04" ]; then
-    TARGET_PLATFORM="ubuntu"
-    DOCKER_TAG="heron/heron:$HERON_VERSION"
-    DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$HERON_VERSION.tar"
-  else
-    TARGET_PLATFORM="$INPUT_TARGET_PLATFORM"
-    DOCKER_TAG="$DOCKER_TAG_PREFIX/heron-$TARGET_PLATFORM:$HERON_VERSION"
-    DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$TARGET_PLATFORM-$HERON_VERSION.tar"
-  fi
+  DOCKER_TAG="heron/heron:$HERON_VERSION"
+  DOCKER_LATEST_TAG="heron/heron:latest"
 
   setup_scratch_dir $SCRATCH_DIR
 
@@ -67,7 +58,7 @@ run_build() {
   export HERON_VERSION
 
   echo "Building docker image with tag:$DOCKER_TAG"
-  docker build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
@@ -90,12 +81,10 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <artifact-directory> "
     echo "  "
-    echo "Platforms Supported: ubuntu, centos"
+    echo "Platforms Supported: ubuntu14.04"
     echo "  "
     echo "Example:"
-    echo "  ./build-docker.sh ubuntu 0.12.0 ~/ubuntu"
-    echo "  "
-    echo "  ./build-docker.sh centos 0.15.0 ."
+    echo "  ./build-docker.sh ubuntu14.04 0.12.0 ~/ubuntu"
     echo "  "
     exit 1
     ;;
