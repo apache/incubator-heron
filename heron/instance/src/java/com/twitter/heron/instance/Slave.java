@@ -66,6 +66,12 @@ public class Slave implements Runnable, AutoCloseable {
   private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
 
+  private static final int INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY = 128;
+  private static final int INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE = 8;
+  private static final double INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT = 0.8;
+  private static final int INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY = 128;
+  private static final int INSTANCE_TUNING_EXPECTED_BOLT_WRITE_QUEUE_SIZE = 8;
+
   public Slave(SlaveLooper slaveLooper,
                final Communicator<Message> streamInCommunicator,
                final Communicator<Message> streamOutCommunicator,
@@ -85,6 +91,19 @@ public class Slave implements Runnable, AutoCloseable {
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+
+    /**
+     * initializing queues with default values
+     * this is done after the physical plan is download and here since
+     * components might download physical plans at different rates causing
+     * and components upstream might already start sending tuples downstream
+     */
+    this.streamInCommunicator.init(INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY,
+        INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE,
+        INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT);
+    this.streamOutCommunicator.init(INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY,
+        INSTANCE_TUNING_EXPECTED_BOLT_WRITE_QUEUE_SIZE,
+        INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT);
 
     handleControlMessage();
   }
