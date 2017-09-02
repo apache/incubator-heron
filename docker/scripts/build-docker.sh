@@ -81,7 +81,7 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <artifact-directory> "
     echo "  "
-    echo "Platforms Supported: ubuntu14.04"
+    echo "Platforms Supported: ubuntu14.04, ubuntu15.10, ubuntu16.04, centos7"
     echo "  "
     echo "Example:"
     echo "  ./build-docker.sh ubuntu14.04 0.12.0 ~/ubuntu"
