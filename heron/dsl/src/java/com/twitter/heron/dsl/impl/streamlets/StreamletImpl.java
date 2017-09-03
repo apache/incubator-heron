@@ -15,7 +15,7 @@
 package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -23,10 +23,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.exception.AlreadyAliveException;
-import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
@@ -55,6 +51,7 @@ import com.twitter.heron.dsl.WindowConfig;
 public abstract class StreamletImpl<R> implements Streamlet<R> {
   protected String name;
   protected int nPartitions;
+  private List<StreamletImpl<?>> children;
 
   /**
    * Sets the name of the Streamlet.
@@ -108,7 +105,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   */
   @Override
   public <T> Streamlet<T> map(Function<? super R, ? extends T> mapFn) {
-    return new MapStreamlet<R, T>(this, mapFn);
+    MapStreamlet<R, T> retval = new MapStreamlet<>(this, mapFn);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -119,7 +118,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   */
   @Override
   public <K, V> KVStreamlet<K, V> mapToKV(Function<? super R, ? extends KeyValue<K, V>> mapFn) {
-    return new KVMapStreamlet<R, K, V>(this, mapFn);
+    KVMapStreamlet<R, K, V> retval = new KVMapStreamlet<>(this, mapFn);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -129,7 +130,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   */
   @Override
   public <T> Streamlet<T> flatMap(Function<? super R, Iterable<? extends T>> flatMapFn) {
-    return new FlatMapStreamlet<R, T>(this, flatMapFn);
+    FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -141,7 +144,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public <K, V> KVStreamlet<K, V> flatMapToKV(Function<? super R,
       Iterable<? extends KeyValue<K, V>>> flatMapFn) {
-    return new KVFlatMapStreamlet<R, K, V>(this, flatMapFn);
+    KVFlatMapStreamlet<R, K, V> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -151,7 +156,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   */
   @Override
   public Streamlet<R> filter(Predicate<? super R> filterFn) {
-    return new FilterStreamlet<R>(this, filterFn);
+    FilterStreamlet<R> retval = new FilterStreamlet<>(this, filterFn);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -169,7 +176,10 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public Streamlet<R> repartition(int numPartitions,
                                   BiFunction<? super R, Integer, List<Integer>> partitionFn) {
-    return new ReMapStreamlet<R>(this, partitionFn).setNumPartitions(numPartitions);
+    ReMapStreamlet<R> retval = new ReMapStreamlet<>(this, partitionFn);
+    retval.setNumPartitions(numPartitions);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -195,7 +205,10 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> reduceByWindow(WindowConfig windowConfig, BinaryOperator<R> reduceFn) {
-    return new ReduceByWindowStreamlet<R>(this, windowConfig, reduceFn);
+    ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this,
+                                                                      windowConfig, reduceFn);
+    addChild(retval);
+    return retval;
   }
 
   /**
@@ -205,24 +218,21 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public Streamlet<R> union(Streamlet<? extends R> other) {
     StreamletImpl<? extends R> joinee = (StreamletImpl<? extends R>) other;
-    return new UnionStreamlet<R>(this, joinee);
+    UnionStreamlet<R> retval = new UnionStreamlet<>(this, joinee);
+    addChild(retval);
+    joinee.addChild(retval);
+    return retval;
   }
 
 
   protected StreamletImpl() {
     this.nPartitions = -1;
+    this.children = new LinkedList<>();
   }
 
   public abstract TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
 
-  public void run(String topologyName, Config config) {
-    Set<String> stageNames = new HashSet<>();
-    TopologyBuilder bldr = new TopologyBuilder();
-    bldr = build(bldr, stageNames);
-    try {
-      HeronSubmitter.submitTopology(topologyName, config, bldr.createTopology());
-    } catch (AlreadyAliveException | InvalidTopologyException e) {
-      e.printStackTrace();
-    }
+  public  <T> void addChild(StreamletImpl<T> child) {
+    children.add(child);
   }
 }
