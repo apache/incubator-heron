@@ -12,6 +12,10 @@ spec:
       labels:
         app: heron-apiserver
     spec:
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: heron-gcs-key
       containers:
         - name: heron-apiserver
           image: heron/heron:latest
@@ -23,23 +27,26 @@ spec:
               --cluster kubernetes
               -D heron.statemgr.connection.string=zookeeper:2181
               -D heron.kubernetes.scheduler.uri=http://localhost:8001
-              -D heron.executor.docker.image=heron/heron:latest
+              -D heron.executor.docker.image=cckellogg/heron-downloader:latest
               -D heron.class.uploader=com.twitter.heron.uploader.gcs.GcsUploader
-              -D heron.uploader.gcs.bucket=<gcs-bucket-name>
-              -D heron.uploader.gcs.credentials_path=/heron/secret/heron-gcs-key.json
+              -D heron.uploader.gcs.bucket=$GCS_BUCKET
           volumeMounts:
-            - name: google-cloud-service-account
-              mountPath: /heron/secret/
+            - name: google-cloud-key
+              mountPath: /heron/secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /heron/secret/key.json
+            - name: GCS_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: heron-apiserver-config
+                  key: gcs.bucket
         - name: kubectl-proxy
           image: heron/kubectl:latest
           command: ["sh", "-c"]
           args:
             - >
               kubectl proxy -p 8001
-      volumes:
-        - name: google-cloud-service-account
-          secret:
-            secretName: <google-cloud-secret-name>
 
 ---
 
