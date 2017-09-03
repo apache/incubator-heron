@@ -26,7 +26,7 @@ spec:
               -D heron.executor.docker.image=heron/heron:latest
               -D heron.class.uploader=com.twitter.heron.uploader.gcs.GcsUploader
               -D heron.uploader.gcs.bucket=<gcs-bucket-name>
-              -D heron.uploader.gcs.credentials_path=/heron/secret/<google-cloud-credentials-file>
+              -D heron.uploader.gcs.credentials_path=/heron/secret/heron-gcs-key.json
           volumeMounts:
             - name: google-cloud-service-account
               mountPath: /heron/secret/
@@ -40,3 +40,20 @@ spec:
         - name: google-cloud-service-account
           secret:
             secretName: <google-cloud-secret-name>
+
+---
+
+##
+## Service to expose the heron api server
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: heron-apiserver
+spec:
+  selector:
+    app: heron-apiserver
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
