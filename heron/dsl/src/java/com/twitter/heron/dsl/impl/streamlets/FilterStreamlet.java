@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.FilterBolt;
 
 /**

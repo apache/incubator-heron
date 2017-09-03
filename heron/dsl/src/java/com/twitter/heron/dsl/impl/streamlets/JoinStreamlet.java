@@ -19,6 +19,7 @@ import java.util.function.BiFunction;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.JoinBolt;
 
 /**
@@ -38,21 +39,24 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   private WindowConfig windowCfg;
   private BiFunction<? super V1, ? super V2, ? extends VR> joinFn;
 
-  static <A, B, C, D> JoinStreamlet<A, B, C, D> createInnerJoinStreamlet(KVStreamletImpl<A, B> left,
+  public static <A, B, C, D> JoinStreamlet<A, B, C, D>
+      createInnerJoinStreamlet(KVStreamletImpl<A, B> left,
                                           KVStreamletImpl<A, C> right,
                                           WindowConfig windowCfg,
                                           BiFunction<? super B, ? super C, ? extends D> joinFn) {
     return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.INNER, left, right, windowCfg, joinFn);
   }
 
-  static <A, B, C, D> JoinStreamlet<A, B, C, D> createLeftJoinStreamlet(KVStreamletImpl<A, B> left,
+  public static <A, B, C, D> JoinStreamlet<A, B, C, D>
+      createLeftJoinStreamlet(KVStreamletImpl<A, B> left,
                                           KVStreamletImpl<A, C> right,
                                           WindowConfig windowCfg,
                                           BiFunction<? super B, ? super C, ? extends D> joinFn) {
     return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.LEFT, left, right, windowCfg, joinFn);
   }
 
-  static <A, B, C, D> JoinStreamlet<A, B, C, D> createOuterJoinStreamlet(KVStreamletImpl<A, B> left,
+  public static <A, B, C, D> JoinStreamlet<A, B, C, D>
+      createOuterJoinStreamlet(KVStreamletImpl<A, B> left,
                                           KVStreamletImpl<A, C> right,
                                           WindowConfig windowCfg,
                                           BiFunction<? super B, ? super C, ? extends D> joinFn) {

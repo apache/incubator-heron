@@ -20,6 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.MapBolt;
 
 /**

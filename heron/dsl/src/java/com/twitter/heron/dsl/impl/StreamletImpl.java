@@ -1,18 +1,18 @@
-// Copyright 2016 Twitter. All rights reserved.
+//  Copyright 2017 Twitter. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-package com.twitter.heron.dsl.impl.streamlets;
+package com.twitter.heron.dsl.impl;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -28,6 +28,14 @@ import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.FlatMapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.KVMapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.ReMapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -51,7 +59,17 @@ import com.twitter.heron.dsl.WindowConfig;
 public abstract class StreamletImpl<R> implements Streamlet<R> {
   protected String name;
   protected int nPartitions;
-  private List<StreamletImpl<?>> children;
+  protected List<StreamletImpl<?>> children;
+
+  public boolean isBuilt() {
+    return built;
+  }
+
+  public void setBuilt(boolean built) {
+    this.built = built;
+  }
+
+  private boolean built;
 
   /**
    * Sets the name of the Streamlet.

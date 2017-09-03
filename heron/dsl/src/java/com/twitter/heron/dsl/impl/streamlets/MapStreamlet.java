@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.MapBolt;
 
 /**
@@ -54,7 +55,7 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
   }
 
   public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+    assert parent.isBuilt();
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -64,6 +65,7 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new MapBolt<R, T>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
+    setBuilt(true);
     return bldr;
   }
 }

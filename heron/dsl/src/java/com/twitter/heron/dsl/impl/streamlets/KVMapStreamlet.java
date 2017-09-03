@@ -19,6 +19,8 @@ import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.impl.KVStreamletImpl;
+import com.twitter.heron.dsl.impl.StreamletImpl;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.

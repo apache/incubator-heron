@@ -23,7 +23,6 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.Builder;
 import com.twitter.heron.dsl.Streamlet;
-import com.twitter.heron.dsl.impl.streamlets.StreamletImpl;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
