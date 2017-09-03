@@ -21,6 +21,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.JoinBolt;
+import com.twitter.heron.dsl.impl.groupings.JoinCustomGrouping;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.

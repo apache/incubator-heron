@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.streamlets;
+package com.twitter.heron.dsl.impl.groupings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
   private static final long serialVersionUID = 2007892247960031525L;
   private List<Integer> taskIds;
 
-  JoinCustomGrouping() {
+  public JoinCustomGrouping() {
   }
 
   @Override

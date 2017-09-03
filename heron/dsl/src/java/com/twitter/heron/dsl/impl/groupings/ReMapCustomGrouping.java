@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.streamlets;
+package com.twitter.heron.dsl.impl.groupings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ReMapCustomGrouping<R> implements CustomStreamGrouping {
   private List<Integer> taskIds;
   private BiFunction<? super R, Integer, List<Integer>> remapFn;
 
-  ReMapCustomGrouping(BiFunction<? super R, Integer, List<Integer>> remapFn) {
+  public ReMapCustomGrouping(BiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.remapFn = remapFn;
   }
 

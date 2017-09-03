@@ -12,13 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.streamlets;
+package com.twitter.heron.dsl.impl.groupings;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.dsl.KeyValue;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -30,11 +31,11 @@ import com.twitter.heron.api.topology.TopologyContext;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReduceByWindowCustomGrouping<I> implements CustomStreamGrouping {
-  private static final long serialVersionUID = -2533339197867000330L;
+public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGrouping {
+  private static final long serialVersionUID = -7630948017550637716L;
   private List<Integer> taskIds;
 
-  ReduceByWindowCustomGrouping() {
+  public ReduceByKeyAndWindowCustomGrouping() {
   }
 
   @Override
@@ -47,8 +48,8 @@ public class ReduceByWindowCustomGrouping<I> implements CustomStreamGrouping {
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
-    I obj = (I) values.get(0);
-    int index = obj.hashCode() % taskIds.size();
+    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
+    int index = obj.getKey().hashCode() % taskIds.size();
     ret.add(taskIds.get(index));
     return ret;
   }
