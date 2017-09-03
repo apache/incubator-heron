@@ -54,8 +54,8 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -65,6 +65,6 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new FilterBolt<R>(filterFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
-    return bldr;
+    return true;
   }
 }

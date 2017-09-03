@@ -54,8 +54,8 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    assert parent.isBuilt();
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -65,7 +65,6 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new MapBolt<R, T>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
-    setBuilt(true);
-    return bldr;
+    return true;
   }
 }

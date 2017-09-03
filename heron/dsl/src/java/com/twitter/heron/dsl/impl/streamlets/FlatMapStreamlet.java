@@ -55,8 +55,8 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -66,6 +66,6 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new FlatMapBolt<R, T>(flatMapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
-    return bldr;
+    return true;
   }
 }

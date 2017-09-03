@@ -60,8 +60,8 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -73,6 +73,6 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
-    return bldr;
+    return true;
   }
 }

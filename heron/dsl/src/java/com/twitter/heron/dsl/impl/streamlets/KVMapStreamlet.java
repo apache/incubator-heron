@@ -40,7 +40,8 @@ public class KVMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
     this.delegate = new MapStreamlet<R, KeyValue<K, V>>(parent, mapFn);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    return this.delegate.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+    return this.delegate.build_this(bldr, stageNames);
   }
 }

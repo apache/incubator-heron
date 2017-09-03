@@ -60,8 +60,8 @@ public class ReduceByWindowStreamlet<I> extends StreamletImpl<I> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -73,6 +73,6 @@ public class ReduceByWindowStreamlet<I> extends StreamletImpl<I> {
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<I>());
-    return bldr;
+    return true;
   }
 }

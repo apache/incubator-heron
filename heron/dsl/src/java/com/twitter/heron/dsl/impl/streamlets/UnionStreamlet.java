@@ -53,9 +53,11 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    left.build(bldr, stageNames);
-    right.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+    if (!left.isBuilt() || !right.isBuilt()) {
+      return false;
+    }
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -65,6 +67,6 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new UnionBolt<I>(),
         getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
-    return bldr;
+    return true;
   }
 }

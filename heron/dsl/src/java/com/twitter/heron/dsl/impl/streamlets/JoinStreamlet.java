@@ -89,9 +89,11 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    left.build(bldr, stageNames);
-    right.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+    if (!left.isBuilt() || !right.isBuilt()) {
+      return false;
+    }
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -105,6 +107,6 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(left.getName(), new JoinCustomGrouping<K, V1>())
         .customGrouping(right.getName(), new JoinCustomGrouping<K, V2>());
-    return bldr;
+    return true;
   }
 }

@@ -58,8 +58,8 @@ public class ReMapStreamlet<R> extends StreamletImpl<R> {
     setName(name);
   }
 
-  public TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames) {
-    parent.build(bldr, stageNames);
+  @Override
+  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }
@@ -70,6 +70,6 @@ public class ReMapStreamlet<R> extends StreamletImpl<R> {
     bldr.setBolt(getName(), new MapBolt<R, R>(Function.identity()),
         getNumPartitions())
         .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
-    return bldr;
+    return true;
   }
 }

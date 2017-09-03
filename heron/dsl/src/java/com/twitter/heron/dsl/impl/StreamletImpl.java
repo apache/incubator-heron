@@ -59,17 +59,12 @@ import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
 public abstract class StreamletImpl<R> implements Streamlet<R> {
   protected String name;
   protected int nPartitions;
-  protected List<StreamletImpl<?>> children;
+  private List<StreamletImpl<?>> children;
+  private boolean built;
 
   public boolean isBuilt() {
     return built;
   }
-
-  public void setBuilt(boolean built) {
-    this.built = built;
-  }
-
-  private boolean built;
 
   /**
    * Sets the name of the Streamlet.
@@ -248,7 +243,19 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     this.children = new LinkedList<>();
   }
 
-  public abstract TopologyBuilder build(TopologyBuilder bldr, Set<String> stageNames);
+  public void build(TopologyBuilder bldr, Set<String> stageNames) {
+    if (built) {
+      throw new RuntimeException("Logic Error While building");
+    }
+    if (build_this(bldr, stageNames)) {
+      built = true;
+      for (Streamlet<?> streamlet : children) {
+        build(bldr, stageNames);
+      }
+    }
+  }
+
+  public abstract boolean build_this(TopologyBuilder bldr, Set<String> stageNames);
 
   public  <T> void addChild(StreamletImpl<T> child) {
     children.add(child);
