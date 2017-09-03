@@ -44,7 +44,7 @@ spec:
 ---
 
 ##
-##
+## Service to expose the heron api server
 ##
 apiVersion: v1
 kind: Service
