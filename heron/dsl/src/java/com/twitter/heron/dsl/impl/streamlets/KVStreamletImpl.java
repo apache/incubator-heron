@@ -41,7 +41,11 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
                                    WindowConfig windowCfg,
                                    BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
-    return JoinStreamlet.createInnerJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    JoinStreamlet<K, V, V2, VR> retval =
+        JoinStreamlet.createInnerJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    addChild(retval);
+    joinee.addChild(retval);
+    return retval;
   }
 
   /**
@@ -59,7 +63,11 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
                                  WindowConfig windowCfg,
                                  BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
-    return JoinStreamlet.createLeftJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    JoinStreamlet<K, V, V2, VR> retval =
+        JoinStreamlet.createLeftJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    addChild(retval);
+    joinee.addChild(retval);
+    return retval;
   }
 
   /**
@@ -77,7 +85,11 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
                                    WindowConfig windowCfg,
                                    BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
-    return JoinStreamlet.createOuterJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    JoinStreamlet<K, V, V2, VR> retval =
+        JoinStreamlet.createOuterJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    addChild(retval);
+    joinee.addChild(retval);
+    return retval;
   }
 
   /**
@@ -90,6 +102,9 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
   @Override
   public KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg,
                                                 BinaryOperator<V> reduceFn) {
-    return new ReduceByKeyAndWindowStreamlet<K, V>(this, windowCfg, reduceFn);
+    ReduceByKeyAndWindowStreamlet<K, V> retval =
+        new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, reduceFn);
+    addChild(retval);
+    return retval;
   }
 }
