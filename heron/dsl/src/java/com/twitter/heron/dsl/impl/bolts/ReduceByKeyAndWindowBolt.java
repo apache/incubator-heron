@@ -16,7 +16,6 @@ package com.twitter.heron.dsl.impl.bolts;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
@@ -24,6 +23,7 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableBinaryOperator;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -37,10 +37,10 @@ import com.twitter.heron.dsl.KeyValue;
  */
 public class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
   private static final long serialVersionUID = 2833576046687750496L;
-  private BinaryOperator<V> reduceFn;
+  private SerializableBinaryOperator<V> reduceFn;
   private OutputCollector collector;
 
-  public ReduceByKeyAndWindowBolt(BinaryOperator<V> reduceFn) {
+  public ReduceByKeyAndWindowBolt(SerializableBinaryOperator<V> reduceFn) {
     this.reduceFn = reduceFn;
   }
 

@@ -15,10 +15,10 @@
 package com.twitter.heron.dsl.impl;
 
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByKeyAndWindowStreamlet;
@@ -103,7 +103,7 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
    */
   @Override
   public KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg,
-                                                BinaryOperator<V> reduceFn) {
+                                                SerializableBinaryOperator<V> reduceFn) {
     ReduceByKeyAndWindowStreamlet<K, V> retval =
         new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, reduceFn);
     addChild(retval);

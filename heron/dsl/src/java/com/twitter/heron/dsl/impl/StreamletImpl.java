@@ -19,12 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
@@ -227,7 +227,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
    */
   @Override
-  public Streamlet<R> reduceByWindow(WindowConfig windowConfig, BinaryOperator<R> reduceFn) {
+  public Streamlet<R> reduceByWindow(WindowConfig windowConfig,
+                                     SerializableBinaryOperator<R> reduceFn) {
     ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this,
                                                                       windowConfig, reduceFn);
     addChild(retval);

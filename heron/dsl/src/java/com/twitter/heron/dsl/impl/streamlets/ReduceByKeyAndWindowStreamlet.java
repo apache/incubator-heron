@@ -15,9 +15,9 @@
 package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.ReduceByKeyAndWindowBolt;
@@ -36,11 +36,11 @@ import com.twitter.heron.dsl.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
   private WindowConfig windowCfg;
-  private BinaryOperator<V> reduceFn;
+  private SerializableBinaryOperator<V> reduceFn;
 
   public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
                        WindowConfig windowCfg,
-                       BinaryOperator<V> reduceFn) {
+                       SerializableBinaryOperator<V> reduceFn) {
     this.parent = parent;
     this.windowCfg = windowCfg;
     this.reduceFn = reduceFn;

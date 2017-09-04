@@ -15,13 +15,13 @@
 package com.twitter.heron.dsl.impl.bolts;
 
 import java.util.Map;
-import java.util.function.BinaryOperator;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
+import com.twitter.heron.dsl.SerializableBinaryOperator;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -35,10 +35,10 @@ import com.twitter.heron.api.windowing.TupleWindow;
  */
 public class ReduceByWindowBolt<I> extends DslWindowBolt {
   private static final long serialVersionUID = 6513775685209414130L;
-  private BinaryOperator<I> reduceFn;
+  private SerializableBinaryOperator<I> reduceFn;
   private OutputCollector collector;
 
-  public ReduceByWindowBolt(BinaryOperator<I> reduceFn) {
+  public ReduceByWindowBolt(SerializableBinaryOperator<I> reduceFn) {
     this.reduceFn = reduceFn;
   }
 

@@ -15,7 +15,6 @@
 package com.twitter.heron.dsl;
 
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 
 import com.twitter.heron.classification.InterfaceStability;
 
@@ -74,5 +73,6 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg, BinaryOperator<V> reduceFn);
+  KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg,
+                                         SerializableBinaryOperator<V> reduceFn);
 }
