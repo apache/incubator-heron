@@ -5,6 +5,7 @@ java_binary(
     srcs = glob(["**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/dsl/src/java:dsl-java",
         "//heron/common/src/java:basics-java",
         "//heron/storm/src/java:storm-compatibility-java",
     ],

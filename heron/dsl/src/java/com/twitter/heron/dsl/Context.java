@@ -35,7 +35,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
  could be assigned by the user or computed by the system
  */
 public final class Context {
-  static void run(String name, Config config, Builder builder) {
+  public static void run(String name, Config config, Builder builder) {
     Set<String> stageNames = new HashSet<>();
     TopologyBuilder topologyBuilder = builder.build();
     try {
