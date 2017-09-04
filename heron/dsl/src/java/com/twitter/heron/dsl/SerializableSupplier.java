@@ -12,14 +12,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.spouts;
+package com.twitter.heron.dsl;
 
-import java.util.Map;
-
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializableSupplier;
+import java.io.Serializable;
+import java.util.function.Supplier;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,24 +27,5 @@ import com.twitter.heron.dsl.SerializableSupplier;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class SupplierSpout<R> extends DslSpout {
-  private static final long serialVersionUID = 6476611751545430216L;
-  private SerializableSupplier<R> supplier;
-
-  private SpoutOutputCollector collector;
-
-  public SupplierSpout(SerializableSupplier<R> supplier) {
-    this.supplier = supplier;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector outputCollector) {
-    collector = outputCollector;
-  }
-
-  @Override
-  public void nextTuple() {
-    collector.emit(new Values(supplier.get()));
-  }
+public interface SerializableSupplier<T> extends Supplier<T>, Serializable {
 }

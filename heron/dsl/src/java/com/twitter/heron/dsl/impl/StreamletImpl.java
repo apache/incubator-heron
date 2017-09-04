@@ -22,11 +22,11 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
@@ -118,7 +118,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * Create a Streamlet based on the supplier function
    * @param supplier The Supplier function to generate the elements
    */
-  public static <T> StreamletImpl<T> createSupplierStreamlet(Supplier<T> supplier) {
+  public static <T> StreamletImpl<T> createSupplierStreamlet(SerializableSupplier<T> supplier) {
     return new SupplierStreamlet<T>(supplier);
   }
 

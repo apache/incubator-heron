@@ -15,9 +15,9 @@
 package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Supplier;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.spouts.SupplierSpout;
 
@@ -32,9 +32,9 @@ import com.twitter.heron.dsl.impl.spouts.SupplierSpout;
  could be assigned by the user or computed by the system
  */
 public class SupplierStreamlet<R> extends StreamletImpl<R> {
-  private Supplier<R> supplier;
+  private SerializableSupplier<R> supplier;
 
-  public SupplierStreamlet(Supplier<R> supplier) {
+  public SupplierStreamlet(SerializableSupplier<R> supplier) {
     this.supplier = supplier;
     setNumPartitions(1);
   }
