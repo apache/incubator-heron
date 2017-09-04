@@ -16,7 +16,6 @@ package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
@@ -67,7 +66,7 @@ public class ReMapStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapBolt<R, R>(Function.identity()),
+    bldr.setBolt(getName(), new MapBolt<R, R>((a) -> a),
         getNumPartitions())
         .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
     return true;

@@ -18,13 +18,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
+import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
@@ -127,7 +127,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param mapFn The Map Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> map(Function<? super R, ? extends T> mapFn) {
+  public <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn) {
     MapStreamlet<R, T> retval = new MapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -140,7 +140,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param mapFn The Map function that should be applied to each element
   */
   @Override
-  public <K, V> KVStreamlet<K, V> mapToKV(Function<? super R, ? extends KeyValue<K, V>> mapFn) {
+  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R,
+                                                               ? extends KeyValue<K, V>> mapFn) {
     KVMapStreamlet<R, K, V> retval = new KVMapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -152,7 +153,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> flatMap(Function<? super R, Iterable<? extends T>> flatMapFn) {
+  public <T> Streamlet<T> flatMap(SerializableFunction<? super R,
+                                                       Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -165,7 +167,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
   @Override
-  public <K, V> KVStreamlet<K, V> flatMapToKV(Function<? super R,
+  public <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
       Iterable<? extends KeyValue<K, V>>> flatMapFn) {
     KVFlatMapStreamlet<R, K, V> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
@@ -189,7 +191,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   */
   @Override
   public Streamlet<R> repartition(int numPartitions) {
-    return this.map(Function.identity()).setNumPartitions(numPartitions);
+    return this.map((a) -> a).setNumPartitions(numPartitions);
   }
 
   /**

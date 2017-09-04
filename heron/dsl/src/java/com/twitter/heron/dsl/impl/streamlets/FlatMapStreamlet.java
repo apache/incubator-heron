@@ -15,9 +15,9 @@
 package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.FlatMapBolt;
 
@@ -33,10 +33,10 @@ import com.twitter.heron.dsl.impl.bolts.FlatMapBolt;
  */
 public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private Function<? super R, Iterable<? extends T>> flatMapFn;
+  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
 
   public FlatMapStreamlet(StreamletImpl<R> parent,
-                          Function<? super R, Iterable<? extends T>> flatMapFn) {
+                          SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
     this.parent = parent;
     this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());

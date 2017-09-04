@@ -15,10 +15,10 @@
 package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 
@@ -36,7 +36,7 @@ public class KVMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   private MapStreamlet<R, KeyValue<K, V>> delegate;
 
   public KVMapStreamlet(StreamletImpl<R> parent,
-                        Function<? super R, ? extends KeyValue<K, V>> mapFn) {
+                        SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn) {
     this.delegate = new MapStreamlet<R, KeyValue<K, V>>(parent, mapFn);
     setNumPartitions(delegate.getNumPartitions());
   }

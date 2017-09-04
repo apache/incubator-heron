@@ -12,15 +12,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.streamlets;
+package com.twitter.heron.dsl;
 
-import java.util.Set;
-
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.impl.KVStreamletImpl;
-import com.twitter.heron.dsl.impl.StreamletImpl;
+import java.io.Serializable;
+import java.util.function.Function;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -32,20 +27,6 @@ import com.twitter.heron.dsl.impl.StreamletImpl;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
-  private FlatMapStreamlet<? super R, ? extends KeyValue<K, V>> delegate;
-
-  public KVFlatMapStreamlet(StreamletImpl<R> parent,
-                            SerializableFunction<? super R,
-                                                 Iterable<? extends KeyValue<K, V>>> flatMapFn) {
-    this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
-    setNumPartitions(delegate.getNumPartitions());
-  }
-
-  @Override
-  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
-    boolean retval = this.delegate.build_this(bldr, stageNames);
-    setName(delegate.getName());
-    return retval;
-  }
+public interface SerializableFunction<A, B> extends Function<A, B>,
+    Serializable {
 }

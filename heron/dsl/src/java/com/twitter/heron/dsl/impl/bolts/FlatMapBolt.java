@@ -15,12 +15,12 @@
 package com.twitter.heron.dsl.impl.bolts;
 
 import java.util.Map;
-import java.util.function.Function;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.dsl.SerializableFunction;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -34,11 +34,11 @@ import com.twitter.heron.api.tuple.Values;
  */
 public class FlatMapBolt<R, T> extends DslBolt {
   private static final long serialVersionUID = -2418329215159618998L;
-  private Function<? super R, Iterable<? extends T>> flatMapFn;
+  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
 
   private OutputCollector collector;
 
-  public FlatMapBolt(Function<? super R, Iterable<? extends T>> flatMapFn) {
+  public FlatMapBolt(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
     this.flatMapFn = flatMapFn;
   }
 

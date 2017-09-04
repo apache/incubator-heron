@@ -15,8 +15,6 @@
 package com.twitter.heron.dsl;
 
 import java.util.List;
-import java.util.function.Function;
-
 
 import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.dsl.impl.StreamletImpl;
@@ -77,7 +75,7 @@ public interface Streamlet<R> {
    * @param mapFn The Map Function that should be applied to each element
   */
 
-  <T> Streamlet<T> map(Function<? super R, ? extends T> mapFn);
+  <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn);
 
   /**
    * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
@@ -85,14 +83,14 @@ public interface Streamlet<R> {
    * instead of a plain Streamlet.
    * @param mapFn The Map function that should be applied to each element
   */
-  <K, V> KVStreamlet<K, V> mapToKV(Function<? super R, ? extends KeyValue<K, V>> mapFn);
+  <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn);
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <T> Streamlet<T> flatMap(Function<? super R, Iterable<? extends T>> flatMapFn);
+  <T> Streamlet<T> flatMap(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn);
 
   /**
    * Return a new KVStreamlet by applying map_function to each element of this Streamlet
@@ -100,7 +98,7 @@ public interface Streamlet<R> {
    * KVStreamlet instead of a plain Streamlet
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <K, V> KVStreamlet<K, V> flatMapToKV(Function<? super R,
+  <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
       Iterable<? extends KeyValue<K, V>>> flatMapFn);
 
   /**
