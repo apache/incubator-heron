@@ -12,14 +12,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.groupings;
+package com.twitter.heron.dsl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.dsl.SerializableBiFunction;
+import java.io.Serializable;
+import java.util.function.BiFunction;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -31,30 +27,6 @@ import com.twitter.heron.dsl.SerializableBiFunction;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReMapCustomGrouping<R> implements CustomStreamGrouping {
-  private static final long serialVersionUID = 8118844912340601079L;
-  private List<Integer> taskIds;
-  private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
-
-  public ReMapCustomGrouping(SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
-    this.remapFn = remapFn;
-  }
-
-  @Override
-  public void prepare(TopologyContext context, String component,
-                      String streamId, List<Integer> targetTasks) {
-    this.taskIds = targetTasks;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<Integer> chooseTasks(List<Object> values) {
-    List<Integer> ret = new ArrayList<>();
-    R obj = (R) values.get(0);
-    List<Integer> targets = remapFn.apply(obj, ret.size());
-    for (Integer target : targets) {
-      ret.add(taskIds.get(target % taskIds.size()));
-    }
-    return ret;
-  }
+public interface SerializableBiFunction<A, B, C> extends BiFunction<A, B, C>,
+    Serializable {
 }

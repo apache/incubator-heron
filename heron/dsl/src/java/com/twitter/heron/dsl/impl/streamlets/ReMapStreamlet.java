@@ -16,10 +16,10 @@ package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.MapBolt;
 import com.twitter.heron.dsl.impl.groupings.ReMapCustomGrouping;
@@ -36,10 +36,10 @@ import com.twitter.heron.dsl.impl.groupings.ReMapCustomGrouping;
  */
 public class ReMapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private BiFunction<? super R, Integer, List<Integer>> remapFn;
+  private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
 
   public ReMapStreamlet(StreamletImpl<R> parent,
-                        BiFunction<? super R, Integer, List<Integer>> remapFn) {
+                        SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;
     setNumPartitions(parent.getNumPartitions());

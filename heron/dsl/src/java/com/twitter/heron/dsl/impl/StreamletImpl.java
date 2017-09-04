@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
@@ -198,7 +198,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> repartition(int numPartitions,
-                                  BiFunction<? super R, Integer, List<Integer>> partitionFn) {
+                           SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn) {
     ReMapStreamlet<R> retval = new ReMapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);

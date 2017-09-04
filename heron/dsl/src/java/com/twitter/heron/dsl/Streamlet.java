@@ -15,7 +15,6 @@
 package com.twitter.heron.dsl;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
@@ -121,7 +120,7 @@ public interface Streamlet<R> {
    * any particular tuple should go to
    */
   Streamlet<R> repartition(int numPartitions,
-                           BiFunction<? super R, Integer, List<Integer>> partitionFn);
+                           SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn);
 
   /**
    * Clones the current Streamlet. It returns an array of numClones Streamlets where each

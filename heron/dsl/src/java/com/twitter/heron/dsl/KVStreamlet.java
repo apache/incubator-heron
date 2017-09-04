@@ -14,8 +14,6 @@
 
 package com.twitter.heron.dsl;
 
-import java.util.function.BiFunction;
-
 import com.twitter.heron.classification.InterfaceStability;
 
 /**
@@ -34,8 +32,8 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * @param joinFunction The join function that needs to be applied
   */
   <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
-                                   WindowConfig windowCfg,
-                                   BiFunction<? super V, ? super V2, ? extends VR> joinFunction);
+                          WindowConfig windowCfg,
+                          SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 
   /**
    * Return a new KVStreamlet by left joining ‘this’ streamlet with ‘other’ streamlet.
@@ -48,8 +46,8 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * @param joinFunction The join function that needs to be applied
    */
   <V2, VR> KVStreamlet<K, VR> leftJoin(KVStreamlet<K, V2> other,
-                                   WindowConfig windowCfg,
-                                   BiFunction<? super V, ? super V2, ? extends VR> joinFunction);
+                          WindowConfig windowCfg,
+                          SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 
   /**
    * Return a new KVStreamlet by outer joining ‘this’ streamlet with ‘other’ streamlet.
@@ -62,8 +60,8 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * @param joinFunction The join function that needs to be applied
    */
   <V2, VR> KVStreamlet<K, VR> outerJoin(KVStreamlet<K, V2> other,
-                                        WindowConfig windowCfg,
-                                      BiFunction<? super V, ? super V2, ? extends VR> joinFunction);
+                          WindowConfig windowCfg,
+                          SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 
 
   /**

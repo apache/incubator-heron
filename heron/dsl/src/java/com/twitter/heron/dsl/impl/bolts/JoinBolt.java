@@ -16,7 +16,6 @@ package com.twitter.heron.dsl.impl.bolts;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
@@ -24,6 +23,7 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableBiFunction;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -49,11 +49,11 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private JoinType joinType;
   private String leftComponent;
   private String rightComponent;
-  private BiFunction<? super V1, ? super V2, ? extends VR> joinFn;
+  private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
   private OutputCollector collector;
 
   public JoinBolt(JoinType joinType, String leftComponent, String rightComponent,
-                  BiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+                  SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
     this.joinType = joinType;
     this.leftComponent = leftComponent;
     this.rightComponent = rightComponent;

@@ -14,10 +14,9 @@
 
 package com.twitter.heron.dsl.impl;
 
-import java.util.function.BiFunction;
-
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.streamlets.JoinStreamlet;
@@ -40,8 +39,8 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
   */
   @Override
   public <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
-                                   WindowConfig windowCfg,
-                                   BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
+                       WindowConfig windowCfg,
+                       SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
     JoinStreamlet<K, V, V2, VR> retval =
         JoinStreamlet.createInnerJoinStreamlet(this, joinee, windowCfg, joinFunction);
@@ -62,8 +61,8 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
    */
   @Override
   public <V2, VR> KVStreamlet<K, VR> leftJoin(KVStreamlet<K, V2> other,
-                                 WindowConfig windowCfg,
-                                 BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
+                      WindowConfig windowCfg,
+                      SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
     JoinStreamlet<K, V, V2, VR> retval =
         JoinStreamlet.createLeftJoinStreamlet(this, joinee, windowCfg, joinFunction);
@@ -84,8 +83,8 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
    */
   @Override
   public <V2, VR> KVStreamlet<K, VR> outerJoin(KVStreamlet<K, V2> other,
-                                   WindowConfig windowCfg,
-                                   BiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
+                         WindowConfig windowCfg,
+                         SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
     JoinStreamlet<K, V, V2, VR> retval =
         JoinStreamlet.createOuterJoinStreamlet(this, joinee, windowCfg, joinFunction);
