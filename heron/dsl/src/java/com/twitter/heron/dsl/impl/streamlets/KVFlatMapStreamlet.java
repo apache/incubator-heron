@@ -38,10 +38,13 @@ public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   public KVFlatMapStreamlet(StreamletImpl<R> parent,
                             Function<? super R, Iterable<? extends KeyValue<K, V>>> flatMapFn) {
     this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
+    setNumPartitions(delegate.getNumPartitions());
   }
 
   @Override
   public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
-    return this.delegate.build_this(bldr, stageNames);
+    boolean retval = this.delegate.build_this(bldr, stageNames);
+    setName(delegate.getName());
+    return retval;
   }
 }

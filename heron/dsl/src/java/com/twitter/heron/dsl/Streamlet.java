@@ -73,7 +73,7 @@ public interface Streamlet<R> {
   int getNumPartitions();
 
   static <T> Streamlet<T> createStreamlet(Supplier<T> supplier) {
-    return StreamletImpl.createSupplierStreamlet(supplier);
+    return StreamletImpl.createSupplierStreamlet(supplier).setNumPartitions(1);
   }
 
   /**

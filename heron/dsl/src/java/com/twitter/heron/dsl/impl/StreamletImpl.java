@@ -251,16 +251,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   protected StreamletImpl() {
     this.nPartitions = -1;
     this.children = new LinkedList<>();
+    this.built = false;
   }
 
   public void build(TopologyBuilder bldr, Set<String> stageNames) {
     if (built) {
-      throw new RuntimeException("Logic Error While building");
+      throw new RuntimeException("Logic Error While building " + getName());
     }
     if (build_this(bldr, stageNames)) {
       built = true;
-      for (Streamlet<?> streamlet : children) {
-        build(bldr, stageNames);
+      for (StreamletImpl<?> streamlet : children) {
+        streamlet.build(bldr, stageNames);
       }
     }
   }

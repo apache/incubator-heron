@@ -56,10 +56,10 @@ public final class WordCountDslTopology {
     Streamlet<String> source = Streamlet.createStreamlet(() -> "Mary had a little lamb");
     builder.addSource(source);
     source.flatMap((word) -> Arrays.asList(word.split("\\s+")))
-          .mapToKV((word) -> new KeyValue<String, Integer>(word, 1))
+          .mapToKV((word) -> new KeyValue<>(word, 1))
           .reduceByKeyAndWindow(windowConfig, (x, y) -> x + y);
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
-    Context.run("WordCount", conf, builder);
+    Context.run(args[0], conf, builder);
   }
 }
