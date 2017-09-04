@@ -14,6 +14,8 @@
 
 package com.twitter.heron.dsl;
 
+import java.io.Serializable;
+
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
  Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
@@ -24,7 +26,8 @@ package com.twitter.heron.dsl;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class KeyValue<K, V> {
+public class KeyValue<K, V> implements Serializable {
+  private static final long serialVersionUID = -7120757965590727554L;
   private K key;
   private V value;
   public KeyValue(K k, V v) {
