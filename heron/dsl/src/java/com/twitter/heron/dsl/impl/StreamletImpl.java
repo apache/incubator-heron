@@ -21,11 +21,11 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.WindowConfig;
@@ -178,7 +178,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param filterFn The filter Function that should be applied to each element
   */
   @Override
-  public Streamlet<R> filter(Predicate<? super R> filterFn) {
+  public Streamlet<R> filter(SerializablePredicate<? super R> filterFn) {
     FilterStreamlet<R> retval = new FilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;

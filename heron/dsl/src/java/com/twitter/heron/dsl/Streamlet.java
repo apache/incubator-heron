@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 
 import com.twitter.heron.classification.InterfaceStability;
@@ -111,7 +110,7 @@ public interface Streamlet<R> {
    * and including only those elements that satisfy the filterFn
    * @param filterFn The filter Function that should be applied to each element
   */
-  Streamlet<R> filter(Predicate<? super R> filterFn);
+  Streamlet<R> filter(SerializablePredicate<? super R> filterFn);
 
   /**
    * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity

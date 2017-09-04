@@ -12,15 +12,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.bolts;
+package com.twitter.heron.dsl;
 
-import java.util.Map;
-
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializablePredicate;
+import java.io.Serializable;
+import java.util.function.Predicate;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -32,29 +27,5 @@ import com.twitter.heron.dsl.SerializablePredicate;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class FilterBolt<R> extends DslBolt {
-  private static final long serialVersionUID = -4748646871471052706L;
-  private SerializablePredicate<? super R> filterFn;
-
-  private OutputCollector collector;
-
-  public FilterBolt(SerializablePredicate<? super R> filterFn) {
-    this.filterFn = filterFn;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public void execute(Tuple tuple) {
-    R obj = (R) tuple.getValue(0);
-    if (filterFn.test(obj)) {
-      collector.emit(new Values(obj));
-    }
-    collector.ack(tuple);
-  }
+public interface SerializablePredicate<T> extends Predicate<T>, Serializable {
 }

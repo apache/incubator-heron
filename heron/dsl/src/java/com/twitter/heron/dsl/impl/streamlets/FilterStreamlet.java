@@ -15,9 +15,9 @@
 package com.twitter.heron.dsl.impl.streamlets;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.FilterBolt;
 
@@ -33,9 +33,9 @@ import com.twitter.heron.dsl.impl.bolts.FilterBolt;
  */
 public class FilterStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private Predicate<? super R> filterFn;
+  private SerializablePredicate<? super R> filterFn;
 
-  public FilterStreamlet(StreamletImpl<R> parent, Predicate<? super R> filterFn) {
+  public FilterStreamlet(StreamletImpl<R> parent, SerializablePredicate<? super R> filterFn) {
     this.parent = parent;
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());
