@@ -19,9 +19,11 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 import com.twitter.heron.classification.InterfaceStability;
+import com.twitter.heron.dsl.impl.StreamletImpl;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -69,6 +71,10 @@ public interface Streamlet<R> {
    * @return the number of partitions of this Streamlet
    */
   int getNumPartitions();
+
+  static <T> Streamlet<T> createStreamlet(Supplier<T> supplier) {
+    return StreamletImpl.createSupplierStreamlet(supplier);
+  }
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet

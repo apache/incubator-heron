@@ -22,6 +22,7 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
@@ -35,6 +36,7 @@ import com.twitter.heron.dsl.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
 
 /**
@@ -110,6 +112,14 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public int getNumPartitions() {
     return nPartitions;
+  }
+
+  /**
+   * Create a Streamlet based on the supplier function
+   * @param supplier The Supplier function to generate the elements
+   */
+  public static <T> StreamletImpl<T> createSupplierStreamlet(Supplier<T> supplier) {
+    return new SupplierStreamlet<T>(supplier);
   }
 
   /**
