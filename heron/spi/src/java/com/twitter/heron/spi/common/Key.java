@@ -65,12 +65,14 @@ public enum Key {
   BUILD_USER               ("heron.build.user",      Type.STRING),
 
   //keys for config provided user classes
-  UPLOADER_CLASS           ("heron.class.uploader",            Type.STRING),
-  LAUNCHER_CLASS           ("heron.class.launcher",            Type.STRING),
-  SCHEDULER_CLASS          ("heron.class.scheduler",           Type.STRING),
-  PACKING_CLASS            ("heron.class.packing.algorithm",   Type.STRING),
-  REPACKING_CLASS          ("heron.class.repacking.algorithm", Type.STRING),
-  STATE_MANAGER_CLASS      ("heron.class.state.manager",       Type.STRING),
+  UPLOADER_CLASS           ("heron.class.uploader",                    Type.STRING),
+  LAUNCHER_CLASS           ("heron.class.launcher",                    Type.STRING),
+  SCHEDULER_CLASS          ("heron.class.scheduler",                   Type.STRING),
+  PACKING_CLASS            ("heron.class.packing.algorithm",           Type.STRING),
+  REPACKING_CLASS          ("heron.class.repacking.algorithm",         Type.STRING),
+  STATE_MANAGER_CLASS      ("heron.class.state.manager",               Type.STRING),
+  AURORA_CONTROLLER_CLASS  ("heron.class.scheduler.aurora.controller",
+      "com.twitter.heron.scheduler.aurora.AuroraCLIController"),
 
   //keys for scheduler config
   SCHEDULER_IS_SERVICE     ("heron.scheduler.is.service", Boolean.TRUE),
