@@ -19,6 +19,8 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.WindowInfo;
+import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.ReduceByWindowBolt;
 import com.twitter.heron.dsl.impl.groupings.ReduceByWindowCustomGrouping;
@@ -33,7 +35,7 @@ import com.twitter.heron.dsl.impl.groupings.ReduceByWindowCustomGrouping;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public class ReduceByWindowStreamlet<I> extends StreamletImpl<I> {
+public class ReduceByWindowStreamlet<I> extends KVStreamletImpl<WindowInfo, I> {
   private StreamletImpl<I> parent;
   private WindowConfig windowCfg;
   private SerializableBinaryOperator<I> reduceFn;

@@ -71,6 +71,6 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg,
+  KVStreamlet<KeyedWindowInfo<K>, V> reduceByKeyAndWindow(WindowConfig windowCfg,
                                          SerializableBinaryOperator<V> reduceFn);
 }

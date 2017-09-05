@@ -23,7 +23,9 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.KeyedWindowInfo;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
+import com.twitter.heron.dsl.WindowInfo;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -58,8 +60,22 @@ public class ReduceByKeyAndWindowBolt<K, V> extends DslWindowBolt {
       KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
       addMap(reduceMap, tup);
     }
+    long startWindow;
+    long endWindow;
+    if (inputWindow.getStartTimestamp() == null) {
+      startWindow = 0;
+    } else {
+      startWindow = inputWindow.getStartTimestamp();
+    }
+    if (inputWindow.getEndTimestamp() == null) {
+      endWindow = 0;
+    } else {
+      endWindow = inputWindow.getEndTimestamp();
+    }
+    WindowInfo windowInfo = new WindowInfo(startWindow, endWindow);
     for (K key : reduceMap.keySet()) {
-      collector.emit(new Values(new KeyValue<K, V>(key, reduceMap.get(key))));
+      KeyedWindowInfo<K> keyedWindowInfo = new KeyedWindowInfo<>(key, windowInfo);
+      collector.emit(new Values(new KeyValue<>(keyedWindowInfo, reduceMap.get(key))));
     }
   }
 

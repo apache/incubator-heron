@@ -16,6 +16,7 @@ package com.twitter.heron.dsl.impl;
 
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.KeyedWindowInfo;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
@@ -101,8 +102,8 @@ public abstract class KVStreamletImpl<K, V> extends StreamletImpl<KeyValue<K, V>
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
   @Override
-  public KVStreamlet<K, V> reduceByKeyAndWindow(WindowConfig windowCfg,
-                                                SerializableBinaryOperator<V> reduceFn) {
+  public KVStreamlet<KeyedWindowInfo<K>, V>
+      reduceByKeyAndWindow(WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn) {
     ReduceByKeyAndWindowStreamlet<K, V> retval =
         new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, reduceFn);
     addChild(retval);

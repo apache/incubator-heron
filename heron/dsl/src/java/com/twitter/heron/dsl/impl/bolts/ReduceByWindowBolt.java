@@ -21,7 +21,9 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
+import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
+import com.twitter.heron.dsl.WindowInfo;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -60,6 +62,19 @@ public class ReduceByWindowBolt<I> extends DslWindowBolt {
         reducedValue = reduceFn.apply(reducedValue, tup);
       }
     }
-    collector.emit(new Values(reducedValue));
+    long startWindow;
+    long endWindow;
+    if (inputWindow.getStartTimestamp() == null) {
+      startWindow = 0;
+    } else {
+      startWindow = inputWindow.getStartTimestamp();
+    }
+    if (inputWindow.getEndTimestamp() == null) {
+      endWindow = 0;
+    } else {
+      endWindow = inputWindow.getEndTimestamp();
+    }
+    WindowInfo windowInfo = new WindowInfo(startWindow, endWindow);
+    collector.emit(new Values(new KeyValue<>(windowInfo, reducedValue)));
   }
 }

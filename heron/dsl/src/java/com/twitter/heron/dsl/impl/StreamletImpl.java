@@ -29,6 +29,7 @@ import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.WindowInfo;
 import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
@@ -230,8 +231,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
    */
   @Override
-  public Streamlet<R> reduceByWindow(WindowConfig windowConfig,
-                                     SerializableBinaryOperator<R> reduceFn) {
+  public KVStreamlet<WindowInfo, R> reduceByWindow(WindowConfig windowConfig,
+                                                   SerializableBinaryOperator<R> reduceFn) {
     ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this,
                                                                       windowConfig, reduceFn);
     addChild(retval);
