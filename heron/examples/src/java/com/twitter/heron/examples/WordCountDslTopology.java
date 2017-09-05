@@ -57,7 +57,8 @@ public final class WordCountDslTopology {
     builder.addSource(source);
     source.flatMap((word) -> Arrays.asList(word.split("\\s+")))
           .mapToKV((word) -> new KeyValue<>(word, 1))
-          .reduceByKeyAndWindow(windowConfig, (x, y) -> x + y);
+          .reduceByKeyAndWindow(windowConfig, (x, y) -> x + y)
+          .log();
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
     Context.run(args[0], conf, builder);

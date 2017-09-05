@@ -46,4 +46,9 @@ public class KeyValue<K, V> implements Serializable {
   public void setValue(V v) {
     this.value = v;
   }
+
+  @Override
+  public String toString() {
+    return "{ " + String.valueOf(key) + " : " + String.valueOf(value) + " }";
+  }
 }

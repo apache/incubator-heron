@@ -33,6 +33,7 @@ import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVMapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.LogStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
@@ -248,6 +249,16 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     addChild(retval);
     joinee.addChild(retval);
     return retval;
+  }
+
+  /**
+   * Logs every element of the streamlet using String.valueOf function
+   */
+  @Override
+  public void log() {
+    LogStreamlet<R> logger = new LogStreamlet<>(this);
+    addChild(logger);
+    return;
   }
 
 

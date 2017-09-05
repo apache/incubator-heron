@@ -141,4 +141,10 @@ public interface Streamlet<R> {
    * the new streamlet will contain tuples belonging to both Streamlets
   */
   Streamlet<R> union(Streamlet<? extends R> other);
+
+  /**
+   * Logs every element of the streamlet using String.valueOf function
+   * This is one of the sink functions in the sense that this operation returns void
+   */
+  void log();
 }
