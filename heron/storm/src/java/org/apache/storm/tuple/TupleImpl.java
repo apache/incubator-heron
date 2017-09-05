@@ -248,4 +248,20 @@ public class TupleImpl implements Tuple {
   public void resetValues() {
     delegate.resetValues();
   }
+
+  @Override
+  public String toString() {
+    return "source: " + getSourceComponent() + ":" + getSourceTask()
+        + ", stream: " + getSourceStreamId() + ", " + getValues().toString();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return this == other;
+  }
+
+  @Override
+  public int hashCode() {
+    return System.identityHashCode(this);
+  }
 }
