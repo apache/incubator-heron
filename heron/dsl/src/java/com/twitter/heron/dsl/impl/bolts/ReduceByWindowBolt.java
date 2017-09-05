@@ -26,14 +26,10 @@ import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowInfo;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * ReduceByWindowBolt is the class that implements the reduceByWindow functionality.
+ * It takes in a reduceFn Function as input.
+ * For every window, the bolt applies reduceFn to all the tuples in that window, and emits
+ * the resulting value as output
  */
 public class ReduceByWindowBolt<I> extends DslWindowBolt {
   private static final long serialVersionUID = 6513775685209414130L;

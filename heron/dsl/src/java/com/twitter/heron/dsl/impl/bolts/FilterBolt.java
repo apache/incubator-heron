@@ -23,14 +23,10 @@ import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.dsl.SerializablePredicate;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * FilterBolt implements the  functionality of the filter operation
+ * It takes in a filterFunction predicate as the input.
+ * For every tuple that it encounters, the filter function is run
+ * and the tuple is re-emitted if the predicate evaluates to true
  */
 public class FilterBolt<R> extends DslBolt {
   private static final long serialVersionUID = -4748646871471052706L;

@@ -26,14 +26,10 @@ import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableBiFunction;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * JoinBolt is the bolt that implements the join/leftJoin/innerJoin functionality.
+ * It embeds the logic of the type of join(outer, left, inner) which it takes in as
+ * a config parameter. Also taken as parameters are which source is left and right.
+ * This is needed for the semantics of outer/left/inner joins.
  */
 public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private static final long serialVersionUID = 4875450390444745407L;
@@ -47,8 +43,11 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   }
 
   private JoinType joinType;
+  // The source component that represent the left join component
   private String leftComponent;
+  // The source component that represent the right join component
   private String rightComponent;
+  // The user supplied join function
   private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
   private OutputCollector collector;
 
