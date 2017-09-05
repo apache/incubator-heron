@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,9 +71,13 @@ public class AuroraScheduler implements IScheduler, IScalable {
     switch (klass) {
       case "com.twitter.heron.scheduler.aurora.AuroraCLIController":
         Config localConfig = Config.toLocalMode(this.config);
-        return new AuroraCLIController(Runtime.topologyName(runtime), Context.cluster(localConfig),
-            Context.role(localConfig), Context.environ(localConfig),
-            AuroraContext.getHeronAuroraPath(localConfig), Context.verbose(localConfig));
+        return new AuroraCLIController(
+            Runtime.topologyName(runtime),
+            Context.cluster(localConfig),
+            Context.role(localConfig),
+            Context.environ(localConfig),
+            AuroraContext.getHeronAuroraPath(localConfig),
+            Context.verbose(localConfig));
       case "com.twitter.heron.scheduler.aurora.AuroraHeronShellController":
         return new AuroraHeronShellController(Runtime.topologyName(runtime));
       default:
@@ -116,7 +120,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
   public List<String> getJobLinks() {
     List<String> jobLinks = new ArrayList<>();
 
-    // Only the aurora job page is returned
+    //Only the aurora job page is returned
     String jobLinkFormat = AuroraContext.getJobLinkTemplate(config);
     if (jobLinkFormat != null && !jobLinkFormat.isEmpty()) {
       String jobLink = TokenSub.substitute(config, jobLinkFormat);
@@ -143,8 +147,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
   @Override
   public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
     try {
-      updateTopologyManager.updateTopology(request.getCurrentPackingPlan(),
-          request.getProposedPackingPlan());
+      updateTopologyManager.updateTopology(
+          request.getCurrentPackingPlan(), request.getProposedPackingPlan());
     } catch (ExecutionException | InterruptedException e) {
       LOG.log(Level.SEVERE, "Could not update topology for request: " + request, e);
       return false;
@@ -168,8 +172,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
    * @return encoded string
    */
   protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 =
-        DatatypeConverter.printBase64Binary(javaOpts.getBytes(StandardCharsets.UTF_8));
+    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
+        javaOpts.getBytes(StandardCharsets.UTF_8));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
@@ -179,7 +183,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    auroraProperties.put(AuroraField.EXECUTOR_BINARY, Context.executorBinary(config));
+    auroraProperties.put(AuroraField.EXECUTOR_BINARY,
+        Context.executorBinary(config));
     auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
     auroraProperties.put(AuroraField.TOPOLOGY_ID, topology.getId());
     auroraProperties.put(AuroraField.TOPOLOGY_DEFINITION_FILE,
@@ -189,7 +194,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.STATEMGR_ROOT_PATH, Context.stateManagerRootPath(config));
     auroraProperties.put(AuroraField.TMASTER_BINARY, Context.tmasterBinary(config));
     auroraProperties.put(AuroraField.STMGR_BINARY, Context.stmgrBinary(config));
-    auroraProperties.put(AuroraField.METRICSMGR_CLASSPATH, Context.metricsManagerClassPath(config));
+    auroraProperties.put(AuroraField.METRICSMGR_CLASSPATH,
+        Context.metricsManagerClassPath(config));
     auroraProperties.put(AuroraField.INSTANCE_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     auroraProperties.put(AuroraField.TOPOLOGY_CLASSPATH,
@@ -201,11 +207,13 @@ public class AuroraScheduler implements IScheduler, IScalable {
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_TYPE,
         Context.topologyPackageType(config).name().toLowerCase());
-    auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE, Context.topologyBinaryFile(config));
+    auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
+        Context.topologyBinaryFile(config));
     auroraProperties.put(AuroraField.JAVA_HOME, Context.clusterJavaHome(config));
 
     auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
-    auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY, Context.pythonInstanceBinary(config));
+    auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY,
+        Context.pythonInstanceBinary(config));
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
         Double.toString(containerResource.getCpu()));
@@ -233,9 +241,10 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.INSTANCE_CLASSPATH, Context.instanceClassPath(config));
     auroraProperties.put(AuroraField.METRICS_YAML, Context.metricsSinksFile(config));
 
-    String completeSchedulerClassPath =
-        String.format("%s:%s:%s", Context.schedulerClassPath(config),
-            Context.packingClassPath(config), Context.stateManagerClassPath(config));
+    String completeSchedulerClassPath = String.format("%s:%s:%s",
+        Context.schedulerClassPath(config),
+        Context.packingClassPath(config),
+        Context.stateManagerClassPath(config));
 
     auroraProperties.put(AuroraField.SCHEDULER_CLASSPATH, completeSchedulerClassPath);
 
@@ -252,7 +261,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.IS_STATEFUL_ENABLED, Boolean.toString(isStatefulEnabled));
 
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
-        Context.ckptmgrClassPath(config), Context.statefulStoragesClassPath(config),
+        Context.ckptmgrClassPath(config),
+        Context.statefulStoragesClassPath(config),
         Context.statefulStorageCustomClassPath(config));
     auroraProperties.put(AuroraField.CKPTMGR_CLASSPATH, completeCkptmgrProcessClassPath);
     auroraProperties.put(AuroraField.STATEFUL_CONFIG_YAML, Context.statefulConfigFile(config));
