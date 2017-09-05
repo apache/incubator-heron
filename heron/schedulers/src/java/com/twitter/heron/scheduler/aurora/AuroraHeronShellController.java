@@ -30,16 +30,26 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 /**
- * Implementation of AuroraController that delegates the `restart` container to heron-shell
+ * Implementation of AuroraController that is a wrapper of AuroraCLIController
+ * The difference is: the `restart` method implementation is changed to heron-shell
  */
 class AuroraHeronShellController implements AuroraController {
   private static final Logger LOG = Logger.getLogger(AuroraHeronShellController.class.getName());
 
   private final String topologyName;
+  private final AuroraCLIController cliController;
   private SchedulerStateManagerAdaptor stateMgrAdaptor;
 
-  AuroraHeronShellController(String jobName) {
+  AuroraHeronShellController(
+      String jobName,
+      String cluster,
+      String role,
+      String env,
+      String auroraFilename,
+      boolean isVerbose) {
     this.topologyName = jobName;
+    this.cliController = new AuroraCLIController(
+        jobName, cluster, role, env, auroraFilename, isVerbose);
 
     stateMgrAdaptor = null;
     Config config =
@@ -62,12 +72,12 @@ class AuroraHeronShellController implements AuroraController {
 
   @Override
   public boolean createJob(Map<AuroraField, String> bindings) {
-    throw new UnsupportedOperationException("Not implemented");
+    return cliController.createJob(bindings);
   }
 
   @Override
   public boolean killJob() {
-    throw new UnsupportedOperationException("Not implemented");
+    return cliController.killJob();
   }
 
   // Restart an aurora container
@@ -99,11 +109,11 @@ class AuroraHeronShellController implements AuroraController {
 
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
-    throw new UnsupportedOperationException("Not implemented");
+    cliController.removeContainers(containersToRemove);
   }
 
   @Override
   public void addContainers(Integer count) {
-    throw new UnsupportedOperationException("Not implemented");
+    cliController.addContainers(count);
   }
 }

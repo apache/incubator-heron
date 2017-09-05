@@ -68,9 +68,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
    */
   protected AuroraController getController() {
     String klass = config.getStringValue(Key.AURORA_CONTROLLER_CLASS);
+    Config localConfig = Config.toLocalMode(this.config);
     switch (klass) {
       case "com.twitter.heron.scheduler.aurora.AuroraCLIController":
-        Config localConfig = Config.toLocalMode(this.config);
         return new AuroraCLIController(
             Runtime.topologyName(runtime),
             Context.cluster(localConfig),
@@ -79,7 +79,13 @@ public class AuroraScheduler implements IScheduler, IScalable {
             AuroraContext.getHeronAuroraPath(localConfig),
             Context.verbose(localConfig));
       case "com.twitter.heron.scheduler.aurora.AuroraHeronShellController":
-        return new AuroraHeronShellController(Runtime.topologyName(runtime));
+        return new AuroraHeronShellController(
+            Runtime.topologyName(runtime),
+            Context.cluster(localConfig),
+            Context.role(localConfig),
+            Context.environ(localConfig),
+            AuroraContext.getHeronAuroraPath(localConfig),
+            Context.verbose(localConfig));
       default:
         throw new RuntimeException("aurora controller class not found " + klass);
     }
