@@ -177,14 +177,17 @@ public final class WordCountTopology {
     Config conf = new Config();
     conf.setNumWorkers(parallelism);
 
-    /*
-    Set resources here
-    */
+    // configure component resources
+    com.twitter.heron.api.Config.setComponentRam(conf, "word",
+        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
+    com.twitter.heron.api.Config.setComponentRam(conf, "consumer",
+        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
 
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromGigabytes(1));
-    com.twitter.heron.api.Config.setComponentRam(conf, "consumer", ByteAmount.fromGigabytes(1));
-
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    // configure container resources
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+        ExampleResources.getContainerDisk(2 * parallelism, parallelism));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+        ExampleResources.getContainerRam(2 * parallelism, parallelism));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
 
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());

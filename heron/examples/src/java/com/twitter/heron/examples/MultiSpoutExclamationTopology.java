@@ -56,15 +56,19 @@ public final class MultiSpoutExclamationTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word0", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "word1", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "word2", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(1));
+    com.twitter.heron.api.Config.setComponentRam(conf, "word0",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word1",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word2",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
 
     // container resource configuration
     com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(3));
     com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 3);
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(3);

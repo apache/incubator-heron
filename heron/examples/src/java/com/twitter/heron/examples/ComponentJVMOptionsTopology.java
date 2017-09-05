@@ -49,8 +49,6 @@ public final class ComponentJVMOptionsTopology {
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(1));
 
     // TOPOLOGY_WORKER_CHILDOPTS will be a global one
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
