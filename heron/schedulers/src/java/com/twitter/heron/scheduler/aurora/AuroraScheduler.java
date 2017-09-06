@@ -69,29 +69,27 @@ public class AuroraScheduler implements IScheduler, IScalable {
    * Get an AuroraController based on the config and runtime
    *
    * @return AuroraController
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws ClassNotFoundException 
    */
-  protected AuroraController getController() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+  protected AuroraController getController()
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     Boolean cliController = config.getBooleanValue(Key.AURORA_CONTROLLER_CLASS);
     Config localConfig = Config.toLocalMode(this.config);
     if (cliController) {
-        return new AuroraCLIController(
-            Runtime.topologyName(runtime),
-            Context.cluster(localConfig),
-            Context.role(localConfig),
-            Context.environ(localConfig),
-            AuroraContext.getHeronAuroraPath(localConfig),
-            Context.verbose(localConfig));
+      return new AuroraCLIController(
+          Runtime.topologyName(runtime),
+          Context.cluster(localConfig),
+          Context.role(localConfig),
+          Context.environ(localConfig),
+          AuroraContext.getHeronAuroraPath(localConfig),
+          Context.verbose(localConfig));
     } else {
-        return new AuroraHeronShellController(
-            Runtime.topologyName(runtime),
-            Context.cluster(localConfig),
-            Context.role(localConfig),
-            Context.environ(localConfig),
-            AuroraContext.getHeronAuroraPath(localConfig),
-            Context.verbose(localConfig));
+      return new AuroraHeronShellController(
+          Runtime.topologyName(runtime),
+          Context.cluster(localConfig),
+          Context.role(localConfig),
+          Context.environ(localConfig),
+          AuroraContext.getHeronAuroraPath(localConfig),
+          Context.verbose(localConfig));
     }
   }
 
