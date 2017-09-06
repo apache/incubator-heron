@@ -68,10 +68,10 @@
       "expectedResultRelativePath" : "OneBoltMultiTasks.json"
     },
     {
-      "topologyName" : "IntegrationTest_OneSpoutBoltMultiTasks",		
-      "classPath"    : "one_spout_bolt_multi_tasks.OneSpoutBoltMultiTasks",		
-      "expectedResultRelativePath" : "OneSpoutBoltMultiTasks.json"		
-    },		
+      "topologyName" : "IntegrationTest_OneSpoutBoltMultiTasks",
+      "classPath"    : "one_spout_bolt_multi_tasks.OneSpoutBoltMultiTasks",
+      "expectedResultRelativePath" : "OneSpoutBoltMultiTasks.json"
+    },
     {
       "topologyName" : "IntegrationTest_OneSpoutMultiTasks",
       "classPath"    : "one_spout_multi_tasks.OneSpoutMultiTasks",
@@ -86,6 +86,46 @@
       "topologyName" : "IntegrationTest_CustomSerialization",
       "classPath"    : "serialization.SerializationTopology",
       "expectedResultRelativePath" : "SerializationTopology.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_SlidingCountWindow1",
+      "classPath"    : "windowing.count.SlidingCountWindowTest1",
+      "expectedResultRelativePath" : "SlidingCountWindowTest1.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_SlidingCountWindow2",
+      "classPath"    : "windowing.count.SlidingCountWindowTest2",
+      "expectedResultRelativePath" : "SlidingCountWindowTest2.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_SlidingCountWindow3",
+      "classPath"    : "windowing.count.SlidingCountWindowTest3",
+      "expectedResultRelativePath" : "SlidingCountWindowTest3.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_TumblingCountWindow1",
+      "classPath"    : "windowing.count.TumblingCountWindowTest1",
+      "expectedResultRelativePath" : "TumblingCountWindowTest1.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_TumblingCountWindow2",
+      "classPath"    : "windowing.count.TumblingCountWindowTest2",
+      "expectedResultRelativePath" : "TumblingCountWindowTest2.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_TumblingCountWindow3",
+      "classPath"    : "windowing.count.TumblingCountWindowTest3",
+      "expectedResultRelativePath" : "TumblingCountWindowTest3.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_SlidingTimeWindow1",
+      "classPath"    : "windowing.time.SlidingTimeWindowTest1",
+      "expectedResultRelativePath" : "SlidingTimeWindowTest1.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_SlidingWatermarkEventTimeWindow1",
+      "classPath"    : "windowing.watermark.SlidingWatermarkEventTimeWindowTest1",
+      "expectedResultRelativePath" : "SlidingWatermarkEventTimeWindowTest1.json"
     }
   ],
   "pythonTopologies": [
