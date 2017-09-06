@@ -22,14 +22,9 @@ import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.dsl.SerializableSupplier;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * SupplierSpout is a way to wrap a supplier function inside a Heron Spout.
+ * The SupplierSpout just calls the get method of the supplied function
+ * to generate the next tuple.
  */
 public class SupplierSpout<R> extends DslSpout {
   private static final long serialVersionUID = 6476611751545430216L;

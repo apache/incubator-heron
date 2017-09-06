@@ -22,6 +22,10 @@ import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
+/**
+ * DslSpout is the base class for all dsl spouts.
+ * The only common stuff amongst all of them is the output streams
+ */
 public abstract class DslSpout extends BaseRichSpout
     implements IStatefulComponent<Serializable, Serializable> {
 
@@ -33,6 +37,12 @@ public abstract class DslSpout extends BaseRichSpout
   @Override
   public void preSave(String checkpointId) { }
 
+  /**
+   * The spouts implementing dsl functionality have some properties.
+   * 1. They all output only one stream
+   * 2. All dsl bolts should be able to consume their output
+   * This imply that the output stream should be named same for all of them.
+   */
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields("output"));
