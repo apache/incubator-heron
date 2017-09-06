@@ -97,10 +97,10 @@ public final class SlidingWindowTopology {
     conf.setDebug(true);
     String topoName = "test";
 
-    Config.setComponentRam(conf, "integer", ByteAmount.fromGigabytes(3));
-    Config.setComponentRam(conf, "slidingsum", ByteAmount.fromGigabytes(3));
-    Config.setComponentRam(conf, "tumblingavg", ByteAmount.fromGigabytes(3));
-    Config.setComponentRam(conf, "printer", ByteAmount.fromGigabytes(3));
+    Config.setComponentRam(conf, "integer", ByteAmount.fromGigabytes(1));
+    Config.setComponentRam(conf, "slidingsum", ByteAmount.fromGigabytes(1));
+    Config.setComponentRam(conf, "tumblingavg", ByteAmount.fromGigabytes(1));
+    Config.setComponentRam(conf, "printer", ByteAmount.fromGigabytes(1));
 
     Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(5));
     Config.setContainerCpuRequested(conf, 4);
