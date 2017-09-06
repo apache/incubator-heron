@@ -90,42 +90,42 @@
     {
       "topologyName" : "IntegrationTest_SlidingCountWindow1",
       "classPath"    : "windowing.count.SlidingCountWindowTest1",
-      "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest1.json"
+      "expectedResultRelativePath" : "SlidingCountWindowTest1.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingCountWindow2",
       "classPath"    : "windowing.count.SlidingCountWindowTest2",
-      "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest2.json"
+      "expectedResultRelativePath" : "SlidingCountWindowTest2.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingCountWindow3",
       "classPath"    : "windowing.count.SlidingCountWindowTest3",
-      "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest3.json"
+      "expectedResultRelativePath" : "SlidingCountWindowTest3.json"
     },
     {
       "topologyName" : "IntegrationTest_TumblingCountWindow1",
       "classPath"    : "windowing.count.TumblingCountWindowTest1",
-      "expectedResultRelativePath" : "windowing/count/TumblingCountWindowTest1.json"
+      "expectedResultRelativePath" : "TumblingCountWindowTest1.json"
     },
     {
       "topologyName" : "IntegrationTest_TumblingCountWindow2",
       "classPath"    : "windowing.count.TumblingCountWindowTest2",
-      "expectedResultRelativePath" : "windowing/count/TumblingCountWindowTest2.json"
+      "expectedResultRelativePath" : "TumblingCountWindowTest2.json"
     },
     {
       "topologyName" : "IntegrationTest_TumblingCountWindow3",
       "classPath"    : "windowing.count.TumblingCountWindowTest3",
-      "expectedResultRelativePath" : "windowing/count/TumblingCountWindowTest3.json"
+      "expectedResultRelativePath" : "TumblingCountWindowTest3.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingTimeWindow1",
       "classPath"    : "windowing.time.SlidingTimeWindowTest1",
-      "expectedResultRelativePath" : "windowing/time/SlidingTimeWindowTest1.json"
+      "expectedResultRelativePath" : "SlidingTimeWindowTest1.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingWatermarkEventTimeWindow1",
       "classPath"    : "windowing.watermark.SlidingWatermarkEventTimeWindowTest1",
-      "expectedResultRelativePath" : "windowing/watermark/SlidingWatermarkEventTimeWindowTest1.json"
+      "expectedResultRelativePath" : "SlidingWatermarkEventTimeWindowTest1.json"
     }
   ],
   "pythonTopologies": [
