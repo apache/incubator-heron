@@ -62,7 +62,6 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-hdfs-uploader",
         "//heron/uploaders/src/java:heron-scp-uploader",
         "//heron/uploaders/src/java:heron-gcs-uploader",
-        "//heron/uploaders/src/java:heron-gcs-uploader",
         "//heron/uploaders/src/java:heron-dlog-uploader",
     ]
 
