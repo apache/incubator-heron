@@ -71,7 +71,7 @@ public class WindowedBoltExecutor implements IRichBolt {
   private transient EvictionPolicy<Tuple> evictionPolicy;
   private transient Long windowLengthDurationMs;
   // package level for unit tests
-  private transient WaterMarkEventGenerator<Tuple> waterMarkEventGenerator;
+  protected transient WaterMarkEventGenerator<Tuple> waterMarkEventGenerator;
 
   public WindowedBoltExecutor(IWindowedBolt bolt) {
     this.bolt = bolt;
@@ -149,7 +149,6 @@ public class WindowedBoltExecutor implements IRichBolt {
   private WindowManager<Tuple> initWindowManager(WindowLifecycleListener<Tuple>
                                                      lifecycleListener, Map<String, Object>
       topoConf, TopologyContext context, Collection<Event<Tuple>> queue) {
-
 
     WindowManager<Tuple> manager = new WindowManager<>(lifecycleListener, queue);
 
