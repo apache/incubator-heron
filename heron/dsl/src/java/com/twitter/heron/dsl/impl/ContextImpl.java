@@ -12,9 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl;
+package com.twitter.heron.dsl.impl;
 
-import com.twitter.heron.dsl.impl.BuilderImpl;
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.exception.AlreadyAliveException;
+import com.twitter.heron.api.exception.InvalidTopologyException;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.Builder;
+import com.twitter.heron.dsl.Context;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -26,9 +32,17 @@ import com.twitter.heron.dsl.impl.BuilderImpl;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public interface Builder {
-  static Builder CreateBuilder() {
-    return new BuilderImpl();
+public final class ContextImpl implements Context {
+  @Override
+  public void run(String name, Config config, Builder builder) {
+    BuilderImpl bldr = (BuilderImpl) builder;
+    TopologyBuilder topologyBuilder = bldr.build();
+    try {
+      HeronSubmitter.submitTopology(name, config, topologyBuilder.createTopology());
+    } catch (AlreadyAliveException | InvalidTopologyException e) {
+      e.printStackTrace();
+    }
   }
-  <R> void addSource(Streamlet<R> newSource);
+
+  public ContextImpl() { }
 }

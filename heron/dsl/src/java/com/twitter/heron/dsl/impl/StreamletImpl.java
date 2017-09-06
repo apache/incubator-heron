@@ -254,6 +254,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   /**
    * Logs every element of the streamlet using String.valueOf function
+   * Note that LogStreamlet is an empty streamlet. That is its a streamlet
+   * that does not contain any tuple. Thus this function returns void.
    */
   @Override
   public void log() {
@@ -262,7 +264,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return;
   }
 
-
+  /**
+   * Only used by the implementors
+   */
   protected StreamletImpl() {
     this.nPartitions = -1;
     this.children = new LinkedList<>();
@@ -281,6 +285,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     }
   }
 
+  // This is the main interface that every Streamlet implementation should implement
+  // The main tasks are generally to make sure that appropriate names/partitions are
+  // computed and add a spout/bolt to the TopologyBuilder
   public abstract boolean build_this(TopologyBuilder bldr, Set<String> stageNames);
 
   public  <T> void addChild(StreamletImpl<T> child) {

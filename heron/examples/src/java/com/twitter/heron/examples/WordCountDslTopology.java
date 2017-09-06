@@ -61,6 +61,7 @@ public final class WordCountDslTopology {
           .log();
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
-    Context.run(args[0], conf, builder);
+    Context context = Context.CreateContext();
+    context.run(args[0], conf, builder);
   }
 }

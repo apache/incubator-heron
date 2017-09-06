@@ -14,15 +14,8 @@
 
 package com.twitter.heron.dsl;
 
-
-import java.util.HashSet;
-import java.util.Set;
-
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.exception.AlreadyAliveException;
-import com.twitter.heron.api.exception.InvalidTopologyException;
-import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.impl.ContextImpl;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -34,18 +27,10 @@ import com.twitter.heron.api.topology.TopologyBuilder;
  b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
  could be assigned by the user or computed by the system
  */
-public final class Context {
-  public static void run(String name, Config config, Builder builder) {
-    Set<String> stageNames = new HashSet<>();
-    TopologyBuilder topologyBuilder = builder.build();
-    try {
-      HeronSubmitter.submitTopology(name, config, topologyBuilder.createTopology());
-    } catch (AlreadyAliveException e) {
-      e.printStackTrace();
-    } catch (InvalidTopologyException e) {
-      e.printStackTrace();
-    }
+public interface Context {
+  static Context CreateContext() {
+    return new ContextImpl();
   }
 
-  private Context() { }
+  void run(String name, Config config, Builder builder);
 }
