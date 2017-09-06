@@ -19,12 +19,19 @@ import com.twitter.heron.spi.common.Context;
 final class DLContext extends Context {
 
   public static final String DL_TOPOLOGIES_NS_URI = "heron.uploader.dlog.topologies.namespace.uri";
+  public static final String DL_TOPOLOGIES_NUM_REPLICAS =
+      "heron.uploader.dlog.topologies.num.replicas";
 
   private DLContext() {
   }
 
   public static String dlTopologiesNamespaceURI(Config config) {
     return config.getStringValue(DL_TOPOLOGIES_NS_URI);
+  }
+
+  public static int dlTopologiesNumReplicas(Config config) {
+    // by default save 3 replicas for each topology
+    return config.getIntegerValue(DL_TOPOLOGIES_NUM_REPLICAS, 3);
   }
 
 }

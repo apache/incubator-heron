@@ -90,7 +90,7 @@ public class DLUploader implements IUploader {
 
     // initialize the distributedlog namespace for uploading jars
     try {
-      initializeNamespace();
+      initializeNamespace(upConfig);
     } catch (IOException ioe) {
       throw new RuntimeException(
           "Failed to initialize distributedlog namespace for uploading topologies", ioe);
@@ -107,7 +107,9 @@ public class DLUploader implements IUploader {
     this.packageURI = URI.create(String.format("%s/%s", destTopologyNamespaceURI, packageName));
   }
 
-  private void initializeNamespace() throws IOException {
+  private void initializeNamespace(Config upConfig) throws IOException {
+    int numReplicas = DLContext.dlTopologiesNumReplicas(upConfig);
+
     DistributedLogConfiguration conf = new DistributedLogConfiguration()
         .setWriteLockEnabled(true)
         .setOutputBufferSize(256 * 1024)                  // 256k
@@ -117,6 +119,9 @@ public class DLUploader implements IUploader {
         .setMaxLogSegmentBytes(Long.MAX_VALUE)            // disable size-based rolling
         .setExplicitTruncationByApplication(true)         // no auto-truncation
         .setRetentionPeriodHours(Integer.MAX_VALUE)       // long retention
+        .setEnsembleSize(numReplicas)                     // replica settings
+        .setWriteQuorumSize(numReplicas)
+        .setAckQuorumSize(numReplicas)
         .setUseDaemonThread(true);                        // use daemon thread
 
     URI uri = URI.create(DLContext.dlTopologiesNamespaceURI(this.config));
