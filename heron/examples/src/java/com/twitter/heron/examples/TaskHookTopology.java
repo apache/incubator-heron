@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.hooks.ITaskHook;
@@ -70,7 +72,17 @@ public final class TaskHookTopology {
     taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
     com.twitter.heron.api.Config.setAutoTaskHooks(conf, taskHooks);
 
-    conf.setNumWorkers(1);
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "count", ByteAmount.fromMegabytes(512));
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+
+
+    conf.setNumWorkers(2);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

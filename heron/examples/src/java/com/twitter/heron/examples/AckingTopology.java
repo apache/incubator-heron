@@ -46,8 +46,10 @@ public final class AckingTopology {
     }
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("word", new AckingTestWordSpout(), 2);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 2)
+    int spouts = 2;
+    int bolts = 2;
+    builder.setSpout("word", new AckingTestWordSpout(), spouts);
+    builder.setBolt("exclaim1", new ExclamationBolt(), bolts)
         .shuffleGrouping("word");
 
     Config conf = new Config();
@@ -60,8 +62,20 @@ public final class AckingTopology {
     conf.setNumAckers(1);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+        ExampleResources.getContainerDisk(spouts + bolts, 2));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+        ExampleResources.getContainerRam(spouts + bolts, 2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
+
     // Set the number of workers or stream managers
-    conf.setNumWorkers(1);
+    conf.setNumWorkers(2);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

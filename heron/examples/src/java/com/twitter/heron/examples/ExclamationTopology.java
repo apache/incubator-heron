@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.twitter.heron.api.topology.IUpdatable;
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.examples.spout.TestWordSpout;
 
 import backtype.storm.Config;
@@ -46,8 +45,10 @@ public final class ExclamationTopology {
     TopologyBuilder builder = new TopologyBuilder();
     int parallelism = 2;
 
-    builder.setSpout("word", new TestWordSpout(Duration.ofMillis(50)), parallelism);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 2 * parallelism)
+    int spouts = parallelism;
+    builder.setSpout("word", new TestWordSpout(Duration.ofMillis(50)), spouts);
+    int bolts = 2 * parallelism;
+    builder.setBolt("exclaim1", new ExclamationBolt(), bolts)
         .shuffleGrouping("word");
 
     Config conf = new Config();
@@ -55,10 +56,17 @@ public final class ExclamationTopology {
     conf.setMaxSpoutPending(10);
     conf.setMessageTimeoutSecs(600);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromGigabytes(3));
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(3));
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(5));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 5);
+
+    // resources configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
+
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+        ExampleResources.getContainerDisk(spouts + bolts, parallelism));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+        ExampleResources.getContainerRam(spouts + bolts, parallelism));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(parallelism);
