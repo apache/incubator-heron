@@ -24,14 +24,11 @@ import com.twitter.heron.dsl.impl.bolts.MapBolt;
 import com.twitter.heron.dsl.impl.groupings.ReMapCustomGrouping;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * ReMapStreamlet represents a Streamlet that is the result of
+ * applying user supplied remapFn on all elements of its parent Streamlet.
+ * ReMapStreamlet as such is a generalized version of the Map/FlatMapStreamlets
+ * that give users more flexibility over the operation. The remapFn allows for
+ * users to choose which destination shards every transformed element can go.
  */
 public class ReMapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;

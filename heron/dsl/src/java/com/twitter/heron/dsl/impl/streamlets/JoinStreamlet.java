@@ -24,14 +24,11 @@ import com.twitter.heron.dsl.impl.bolts.JoinBolt;
 import com.twitter.heron.dsl.impl.groupings.JoinCustomGrouping;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * JoinStreamlet represents a KVStreamlet that is the result of joining two KVStreamlets left
+ * and right using a WindowConfig. For all left and right tuples in the window whose keys
+ * match, the user supplied joinFunction is applied on the values to get the resulting value.
+ * JoinStreamlet's elements are of KeyValue type where the key is KeyWindowInfo<K> type
+ * and the value is of type VR.
  */
 public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   private JoinBolt.JoinType joinType;

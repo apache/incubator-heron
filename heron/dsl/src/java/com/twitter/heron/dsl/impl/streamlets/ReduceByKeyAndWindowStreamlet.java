@@ -25,14 +25,11 @@ import com.twitter.heron.dsl.impl.bolts.ReduceByKeyAndWindowBolt;
 import com.twitter.heron.dsl.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
+ * applying user supplied reduceFn on all elements within each window defined by a
+ * user supplied Window Config.
+ * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
+ * KeyWindowInfo<K> type and the value is of type V.
  */
 public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<KeyedWindowInfo<K>, V> {
   private KVStreamletImpl<K, V> parent;

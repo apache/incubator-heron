@@ -23,14 +23,10 @@ import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * KVFlatMapStreamlet represents a KVStreamlet that is made up of applying the user
+ * supplied flatMap function to each element of the parent streamlet and flattening
+ * out the result. The only difference between this and FlatMapStreamlet is that
+ * KVFlatMapStreamlet ensures that resulting elements are of type KeyValue.
  */
 public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   private FlatMapStreamlet<? super R, ? extends KeyValue<K, V>> delegate;
