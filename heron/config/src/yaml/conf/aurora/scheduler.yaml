@@ -11,7 +11,7 @@ heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd
 heron.scheduler.is.service:                  False
 
 # Aurora Controller Class
-# heron.class.scheduler.aurora.controller:     com.twitter.heron.scheduler.aurora.AuroraHeronShellController
+# heron.class.scheduler.aurora.controller.cli:     False
 
 ####################################################################
 # Following are config for tunneling
