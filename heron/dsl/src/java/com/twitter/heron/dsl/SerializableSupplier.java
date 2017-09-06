@@ -18,14 +18,11 @@ import java.io.Serializable;
 import java.util.function.Supplier;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * All user supplied transformation functions have to be serializable.
+ * Thus all Strealmet transformation definitions take Serializable
+ * Functions as their input. We simply decorate java.util. function
+ * definitions with a Serializable tag to ensure that any supplied
+ * lambda functions automatically become serializable.
  */
 public interface SerializableSupplier<T> extends Supplier<T>, Serializable {
 }

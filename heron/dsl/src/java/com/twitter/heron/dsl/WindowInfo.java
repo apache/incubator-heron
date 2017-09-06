@@ -18,29 +18,27 @@ package com.twitter.heron.dsl;
 import java.io.Serializable;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * WindowInfo is a container containing information about a particular window.
+ * Transformations that depend on Windowing, pass the window information
+ * inside their streamlets using this container.
  */
 public final class WindowInfo implements Serializable {
   private static final long serialVersionUID = 5103471810104775854L;
   private long startTimeMs;
   private long endTimeMs;
+
   public WindowInfo(long startTimeMs, long endTimeMs) {
     this.startTimeMs = startTimeMs;
     this.endTimeMs = endTimeMs;
   }
+
   public long getStartTime() {
     return startTimeMs;
   }
   public long getEndTime() {
     return endTimeMs;
   }
+
   @Override
   public String toString() {
     return "{WindowStart: " + String.valueOf(startTimeMs) + " WindowEnd: "

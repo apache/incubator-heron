@@ -21,6 +21,7 @@ import com.twitter.heron.dsl.KeyedWindowInfo;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
+import com.twitter.heron.dsl.impl.WindowConfigImpl;
 import com.twitter.heron.dsl.impl.bolts.ReduceByKeyAndWindowBolt;
 import com.twitter.heron.dsl.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 
@@ -33,14 +34,14 @@ import com.twitter.heron.dsl.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
  */
 public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<KeyedWindowInfo<K>, V> {
   private KVStreamletImpl<K, V> parent;
-  private WindowConfig windowCfg;
+  private WindowConfigImpl windowCfg;
   private SerializableBinaryOperator<V> reduceFn;
 
   public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
                        WindowConfig windowCfg,
                        SerializableBinaryOperator<V> reduceFn) {
     this.parent = parent;
-    this.windowCfg = windowCfg;
+    this.windowCfg = (WindowConfigImpl) windowCfg;
     this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }

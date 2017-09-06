@@ -20,6 +20,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
+import com.twitter.heron.dsl.impl.WindowConfigImpl;
 import com.twitter.heron.dsl.impl.bolts.JoinBolt;
 import com.twitter.heron.dsl.impl.groupings.JoinCustomGrouping;
 
@@ -34,7 +35,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   private JoinBolt.JoinType joinType;
   private KVStreamletImpl<K, V1> left;
   private KVStreamletImpl<K, V2> right;
-  private WindowConfig windowCfg;
+  private WindowConfigImpl windowCfg;
   private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
@@ -68,7 +69,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
     this.joinType = joinType;
     this.left = left;
     this.right = right;
-    this.windowCfg = windowCfg;
+    this.windowCfg = (WindowConfigImpl) windowCfg;
     this.joinFn = joinFn;
     setNumPartitions(left.getNumPartitions());
   }

@@ -17,53 +17,51 @@ package com.twitter.heron.dsl;
 
 import java.time.Duration;
 
-import com.twitter.heron.api.bolt.BaseWindowedBolt;
+import com.twitter.heron.dsl.impl.WindowConfigImpl;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * WindowConfig allows dsl users to program window configuration for operations
+ * that rely on windowing. Currently we only support time/count based
+ * sliding/tumbling windows.
  */
-public final class WindowConfig {
-  public static WindowConfig createTimeWindow(Duration windowDuration) {
-    return new WindowConfig(windowDuration, windowDuration);
+public interface WindowConfig {
+  /**
+   * Creates a time based tumbling window of windowDuration
+   * @param windowDuration the duration of the tumbling window
+   * @return WindowConfig that can be passed to the transformation
+   */
+  static WindowConfig createTimeWindow(Duration windowDuration) {
+    return new WindowConfigImpl(windowDuration, windowDuration);
   }
-  public static WindowConfig createTimeWindow(Duration windowDuration, Duration slideInterval) {
-    return new WindowConfig(windowDuration, slideInterval);
+
+  /**
+   * Creates a time based sliding window with windowDuration as the window duration
+   * and slideInterval as slideInterval
+   * @param windowDuration The Sliding Window duration
+   * @param slideInterval The sliding duration
+   * @return WindowConfig that can be passed to the transformation
+   */
+  static WindowConfig createTimeWindow(Duration windowDuration, Duration slideInterval) {
+    return new WindowConfigImpl(windowDuration, slideInterval);
   }
-  public static WindowConfig createCountWindow(int windowSize) {
-    return new WindowConfig(windowSize, windowSize);
+
+  /**
+   * Creates a count based tumbling window of size windowSize
+   * @param windowSize the size of the tumbling window
+   * @return WindowConfig that can be passed to the transformation
+   */
+  static WindowConfig createCountWindow(int windowSize) {
+    return new WindowConfigImpl(windowSize, windowSize);
   }
-  public static WindowConfig createCountWindow(int windowSize, int slideSize) {
-    return new WindowConfig(windowSize, slideSize);
-  }
-  public void attachWindowConfig(BaseWindowedBolt bolt) {
-    if (windowType == WindowType.COUNT) {
-      bolt.withWindow(BaseWindowedBolt.Count.of(windowSize),
-          BaseWindowedBolt.Count.of(slideInterval));
-    } else {
-      bolt.withWindow(windowDuration, slidingIntervalDuration);
-    }
-  }
-  private enum WindowType { TIME, COUNT }
-  private WindowType windowType;
-  private int windowSize;
-  private int slideInterval;
-  private Duration windowDuration;
-  private Duration slidingIntervalDuration;
-  private WindowConfig(Duration windowDuration, Duration slidingIntervalDuration) {
-    this.windowType = WindowType.TIME;
-    this.windowDuration = windowDuration;
-    this.slidingIntervalDuration = slidingIntervalDuration;
-  }
-  private WindowConfig(int windowSize, int slideInterval) {
-    this.windowType = WindowType.COUNT;
-    this.windowSize = windowSize;
-    this.slideInterval = slideInterval;
+
+  /**
+   * Creates a count based sliding window with windowSize as the window countsize
+   * and slideSize as slide size
+   * @param windowSize The Window Count Size
+   * @param slideSize The slide size
+   * @return WindowConfig that can be passed to the transformation
+   */
+  static WindowConfig createCountWindow(int windowSize, int slideSize) {
+    return new WindowConfigImpl(windowSize, slideSize);
   }
 }

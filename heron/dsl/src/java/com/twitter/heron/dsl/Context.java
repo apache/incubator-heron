@@ -18,19 +18,19 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.dsl.impl.ContextImpl;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * Context is used to run a topology that is built by the builder.
+ * It exports a sole function called run that takes care of constructing the topology
  */
 public interface Context {
   static Context CreateContext() {
     return new ContextImpl();
   }
 
+  /**
+   * Runs the computation
+   * @param name The name of the topology
+   * @param config Any config thats passed to the topology
+   * @param builder The builder used to keep track of the sources.
+   */
   void run(String name, Config config, Builder builder);
 }

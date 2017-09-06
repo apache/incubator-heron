@@ -17,18 +17,18 @@ package com.twitter.heron.dsl;
 import com.twitter.heron.dsl.impl.BuilderImpl;
 
 /**
- * A Streamlet is a (potentially unbounded) ordered collection of tuples.
- Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
- csv files, HDFS files), or for that matter any other source. They are also created by
- transforming existing Streamlets using operations such as map/flatMap, etc.
- Besides the tuples, a Streamlet has the following properties associated with it
- a) name. User assigned or system generated name to refer the streamlet
- b) nPartitions. Number of partitions that the streamlet is composed of. The nPartitions
- could be assigned by the user or computed by the system
+ * Builder is used to register all sources. Builder thus keeps track
+ * of all the starting points of the computation dag and uses this
+ * information to build the topology
  */
 public interface Builder {
   static Builder CreateBuilder() {
     return new BuilderImpl();
   }
+
+  /**
+   * All sources of the computation should register using addSource.
+   * @param newSource The source Streamlet that is being registered
+   */
   <R> void addSource(Streamlet<R> newSource);
 }
