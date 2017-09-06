@@ -111,7 +111,7 @@ public class DLUploader implements IUploader {
     int numReplicas = DLContext.dlTopologiesNumReplicas(upConfig);
 
     DistributedLogConfiguration conf = new DistributedLogConfiguration()
-        .setWriteLockEnabled(true)
+
         .setOutputBufferSize(256 * 1024)                  // 256k
         .setPeriodicFlushFrequencyMilliSeconds(0)         // disable periodical flush
         .setImmediateFlushEnabled(false)                  // disable immediate flush

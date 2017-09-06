@@ -48,3 +48,21 @@ java_tests(
   runtime_deps = [ ":hdfs-tests" ],
   size = "small",
 )
+
+dlog_deps_files = [
+  "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
+  "@org_apache_distributedlog_core//jar",
+]
+
+java_library(
+  name = "dlog-tests",
+  srcs = glob(["**/dlog/*.java", "**/StatefulStorageTestContext.java"]),
+  deps = test_deps_files + dlog_deps_files,
+)
+
+java_test(
+  name = "DlogStorageTest",
+  srcs = glob(["**/dlog/*.java", "**/StatefulStorageTestContext.java"]),
+  size = "small",
+  deps = test_deps_files + dlog_deps_files,
+)

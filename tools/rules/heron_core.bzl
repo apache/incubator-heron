@@ -82,6 +82,7 @@ def heron_core_lib_statefulstorage_files():
     return [
         "//heron/statefulstorages/src/java:heron-localfs-statefulstorage",
         "//heron/statefulstorages/src/java:heron-hdfs-statefulstorage",
+        "//heron/statefulstorages/src/java:heron-dlog-statefulstorage",
     ]
 
 def heron_core_lib_downloader_files():
