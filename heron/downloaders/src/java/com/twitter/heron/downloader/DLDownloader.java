@@ -19,6 +19,8 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.namespace.Namespace;
@@ -44,6 +46,7 @@ public class DLDownloader implements Downloader {
     this(() -> NamespaceBuilder.newBuilder(), Extractor.of());
   }
 
+  @VisibleForTesting
   public DLDownloader(Supplier<NamespaceBuilder> builderSupplier,
                       Extractor extractor) {
     this.builder = builderSupplier.get();

@@ -10,6 +10,7 @@ common_deps_files = [
 dlog_test_deps_files = \
   common_deps_files + [
     "@org_apache_distributedlog_core//jar",
+    "@org_apache_distributedlog_protocol//jar",
     "//heron/io/dlog/src/java:dlog-lib",
   ]
   
