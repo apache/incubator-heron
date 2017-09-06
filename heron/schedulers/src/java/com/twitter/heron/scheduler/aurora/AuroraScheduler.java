@@ -56,7 +56,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
-    this.controller = getController();
+    try {
+      this.controller = getController();
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      LOG.severe("AuroraController initialization failed " + e.getMessage());
+    }
     this.updateTopologyManager =
         new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
   }
@@ -65,8 +69,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
    * Get an AuroraController based on the config and runtime
    *
    * @return AuroraController
+   * @throws IllegalAccessException 
+   * @throws InstantiationException 
+   * @throws ClassNotFoundException 
    */
-  protected AuroraController getController() {
+  protected AuroraController getController() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     Boolean cliController = config.getBooleanValue(Key.AURORA_CONTROLLER_CLASS);
     Config localConfig = Config.toLocalMode(this.config);
     if (cliController) {

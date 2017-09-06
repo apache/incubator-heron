@@ -30,44 +30,29 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 /**
- * Implementation of AuroraController that is a wrapper of AuroraCLIController
- * The difference is: the `restart` method implementation is changed to heron-shell
+ * Implementation of AuroraController that is a wrapper of AuroraCLIController The difference is:
+ * the `restart` method implementation is changed to heron-shell
  */
 class AuroraHeronShellController implements AuroraController {
   private static final Logger LOG = Logger.getLogger(AuroraHeronShellController.class.getName());
 
   private final String topologyName;
   private final AuroraCLIController cliController;
-  private SchedulerStateManagerAdaptor stateMgrAdaptor;
+  private final SchedulerStateManagerAdaptor stateMgrAdaptor;
 
-  AuroraHeronShellController(
-      String jobName,
-      String cluster,
-      String role,
-      String env,
-      String auroraFilename,
-      boolean isVerbose) {
+  AuroraHeronShellController(String jobName, String cluster, String role, String env,
+      String auroraFilename, boolean isVerbose)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     this.topologyName = jobName;
-    this.cliController = new AuroraCLIController(
-        jobName, cluster, role, env, auroraFilename, isVerbose);
+    this.cliController =
+        new AuroraCLIController(jobName, cluster, role, env, auroraFilename, isVerbose);
 
-    stateMgrAdaptor = null;
     Config config =
         Config.toClusterMode(Config.newBuilder().putAll(ConfigLoader.loadClusterConfig()).build());
     String stateMgrClass = Context.stateManagerClass(config);
-    IStateManager stateMgr = null;
-    try {
-      stateMgr = ReflectionUtils.newInstance(stateMgrClass);
-
-      stateMgr.initialize(config);
-      stateMgrAdaptor = new SchedulerStateManagerAdaptor(stateMgr, 5000);
-    } catch (ClassNotFoundException e) {
-      LOG.severe(e.getMessage());
-    } catch (InstantiationException e) {
-      LOG.severe(e.getMessage());
-    } catch (IllegalAccessException e) {
-      LOG.severe(e.getMessage());
-    }
+    IStateManager stateMgr = ReflectionUtils.newInstance(stateMgrClass);
+    stateMgr.initialize(config);
+    stateMgrAdaptor = new SchedulerStateManagerAdaptor(stateMgr, 5000);
   }
 
   @Override
