@@ -311,6 +311,7 @@ pkg_tar(
     srcs = [
         "//integration_test/src/java:test-data-files",
     ],
+    strip_prefix = '.'
 )
 
 pkg_tar(
@@ -319,6 +320,7 @@ pkg_tar(
     srcs = [
         "//integration_test/src/python/integration_test/topology:test-data-files",
     ],
+    strip_prefix = '.'
 )
 
 pkg_tar(
