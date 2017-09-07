@@ -44,12 +44,12 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
       stmgr_host_(_stmgr_host),
       stmgr_port_(_stmgr_port),
       shell_port_(_shell_port),
+      register_request_set_(false),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
       stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
       restore_topology_watch_(std::move(_restore_topology_watch)),
       start_stateful_watch_(std::move(_start_stateful_watch)),
-      register_request_(nullptr),
       reconnect_timer_id(0),
       heartbeat_timer_id(0) {
   reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
@@ -70,9 +70,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   InstallMessageHandler(&TMasterClient::HandleStartStmgrStatefulProcessing);
 }
 
-TMasterClient::~TMasterClient() {
-  delete register_request_;
-}
+TMasterClient::~TMasterClient() {}
 
 void TMasterClient::Die() {
   LOG(INFO) << "Tmaster client is being destroyed " << std::endl;
@@ -210,23 +208,20 @@ void TMasterClient::OnHeartbeatTimer() {
 }
 
 void TMasterClient::SendRegisterRequest() {
-  CHECK_NOTNULL(register_request_);
-  SendRequest(register_request_, nullptr);
+  CHECK(register_request_set_);
+  proto::tmaster::StMgrRegisterRequest* request =
+    new proto::tmaster::StMgrRegisterRequest(register_request_);
+  SendRequest(request, nullptr);
   return;
 }
 
 void TMasterClient::SetStmgrRegisterRequest(
                                     const std::vector<proto::system::Instance*>& _instances) {
-    // clean the request from last call
-    if (register_request_ != nullptr) {
-      delete register_request_;
-    }
-
-    register_request_ = new proto::tmaster::StMgrRegisterRequest();
+    register_request_set_ = true;
 
     sp_string cwd;
     FileUtils::getCwd(cwd);
-    proto::system::StMgr* stmgr = register_request_->mutable_stmgr();
+    proto::system::StMgr* stmgr = register_request_.mutable_stmgr();
     stmgr->set_id(stmgr_id_);
     stmgr->set_host_name(stmgr_host_);
     stmgr->set_data_port(stmgr_port_);
@@ -235,7 +230,7 @@ void TMasterClient::SetStmgrRegisterRequest(
     stmgr->set_pid((sp_int32)ProcessUtils::getPid());
     stmgr->set_shell_port(shell_port_);
     for (auto iter = _instances.begin(); iter != _instances.end(); ++iter) {
-      register_request_->add_instances()->CopyFrom(*(*iter));
+      register_request_.add_instances()->CopyFrom(*(*iter));
     }
 }
 

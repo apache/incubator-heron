@@ -84,7 +84,9 @@ class TMasterClient : public Client {
   sp_string stmgr_host_;
   sp_int32 stmgr_port_;
   sp_int32 shell_port_;
-  proto::tmaster::StMgrRegisterRequest* register_request_;
+
+  bool register_request_set_;
+  proto::tmaster::StMgrRegisterRequest register_request_;
 
   bool to_die_;
   // We invoke this callback upon a new physical plan from tmaster
