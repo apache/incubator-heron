@@ -317,5 +317,8 @@ java_library(
         "@org_apache_distributedlog_core//jar",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
+        "@commons_collections_commons_collections//jar",
+        "@commons_configuration_commons_configuration//jar",
+        "@commons_logging_commons_logging//jar",
     ],
 )

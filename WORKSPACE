@@ -80,6 +80,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "commons_configuration_commons_configuration",
+  artifact = "commons-configuration:commons-configuration:1.6",
+)
+
+maven_jar(
   name = "commons_cli_commons_cli",
   artifact = "commons-cli:commons-cli:1.3.1",
 )
