@@ -319,6 +319,7 @@ java_library(
         "@org_slf4j_slf4j_jdk14//jar",
         "@commons_collections_commons_collections//jar",
         "@commons_configuration_commons_configuration//jar",
+        "@commons_lang_commons_lang//jar",
         "@commons_logging_commons_logging//jar",
     ],
 )

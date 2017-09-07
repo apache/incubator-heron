@@ -6,7 +6,7 @@ jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-distributedlog_version = "0.5.0-SNAPSHOT"
+distributedlog_version = "0.6.0-SNAPSHOT"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
