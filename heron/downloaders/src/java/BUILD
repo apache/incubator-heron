@@ -1,7 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 downloader_deps = [
-  "@com_google_guava_guava//jar",
   "@org_apache_distributedlog_core//jar",
   "//heron/spi/src/java:common-spi-java",
   "//heron/io/dlog/src/java:dlog-lib",
