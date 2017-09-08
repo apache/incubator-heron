@@ -1,11 +1,11 @@
 #ifndef __ECHOSERVER_H
 #define __ECHOSERVER_H
 
-#include "core/network/misc/tests.pb.h"
-#include "core/network/public/event_loop_impl.h"
-#include "core/network/public/server.h"
-#include "core/network/public/networkoptions.h"
-#include "network/network_error.h"
+#include "basics/basics.h"
+#include "errors/errors.h"
+#include "threads/threads.h"
+#include "network/network.h"
+#include "proto/messages.h"
 
 class EchoServer : public Server
 {
@@ -16,9 +16,7 @@ class EchoServer : public Server
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
-  virtual void HandleEchoRequest(REQID id, Connection* connection,
-                                 EchoServerRequest* request);
-
+  virtual void HandleEchoMessage(Connection* conn, heron::proto::system::RootId* message);
 };
 
 #endif

@@ -30,6 +30,8 @@
 #include "network/event_loop.h"
 #include "network/network_error.h"
 
+struct bufferevent;
+
 /**
  * This denotes the endpoint of an connection. It consists of the socket
  * address of the endpoint as well as the file descriptor that we use
@@ -93,9 +95,6 @@ class BaseConnection {
     TO_BE_DISCONNECTED,
   };
 
-  // Whether a read/write would block?
-  enum ReadWriteState { NOTREGISTERED, READY, NOTREADY, ERROR };
-
   BaseConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options, EventLoop* eventLoop);
   virtual ~BaseConnection();
 
@@ -125,52 +124,40 @@ class BaseConnection {
 
   sp_int32 getPort();
 
+  /**
+   * Gets the total outstanding bytes pending to be sent
+   */
+  sp_int32 getOutstandingBytes() const;
+
  protected:
   /**
-   * Writes data out on this connection
-   * This method is called by the base class if the connection fd is
-   * registeredForWrite and it is writable.
+   * Appends the evbuffer _buffer to the output buffer of bufferevent
+   * Note that we may not be able to write out immediately.
+   * Thus when the function returns, the bytes might not have
+   * been sent out, but will be sent later when the socket becomes
+   * writable.
    *
    * A return value of:
-   *  - 0 indicates the data is successfully written.
+   *  - 0 indicates the data is successfully appended to be written
    *  - negative indicates some error.
    */
-  virtual sp_int32 writeIntoEndPoint(sp_int32 _fd) = 0;
+  sp_int32 write(struct evbuffer* _buffer);
 
   /**
-   * A way for base class to know if the derived class still has data to be written.
-   * This is called after WriteIntoEndPoint.
-   * If true, base class will registerForWrite until this method returns false.
-   */
-  virtual bool stillHaveDataToWrite() = 0;
-
-  /**
-   * Called after WriteIntoEndPoint is successful.
-   * Usually meant for cleaning up packets that have been sent.
-   */
-  virtual void handleDataWritten() = 0;
-
-  /**
-   * Called by the base class when the connection fd is readable.
+   * Called by the base class when the connection has something readable
    * The derived classes read in the data coming into the connection.
    *
   * A return value of:
    *  - 0 indicates the data is successfully read.
    *  - negative indicates some error.
    */
-  virtual sp_int32 readFromEndPoint(sp_int32 _fd) = 0;
+  virtual sp_int32 readFromEndPoint(bufferevent* _buffer) = 0;
 
   /**
-   * Called after ReadFromEndPoint is successful.
-   * Meant for processing packets that have been received.
+   * Called by the base class when the amount of data pending
+   * in the write buffer falls below a low watermark.
    */
-  virtual void handleDataRead() = 0;
-
-  /*
-   * Derived class calls this method when there is data to be sent over the connection.
-   * Base class will registerForWrite on the connection fd to be notified when it is writable.
-   */
-  sp_int32 registerForWrite();
+  virtual void releiveBackPressure() = 0;
 
   // Get the fd
   sp_int32 getConnectionFd() const { return mEndpoint->get_fd(); }
@@ -183,40 +170,40 @@ class BaseConnection {
   ConnectionOptions* mOptions;
 
  private:
+  // friend classes that can access the protected functions
+  friend void readcb(struct bufferevent *bev, void *ctx);
+  friend void writecb(struct bufferevent *bev, void *ctx);
+  friend void eventcb(struct bufferevent *bev, sp_int16 events, void *ctx);
+
   // Internal callback that is invoked when a read event happens on a
   // connected sate.
-  void handleRead(EventLoop::Status);
+  void handleRead();
 
   // Internal callback that is invoked when a write event happens on a
-  // connected sate. In this routine we actually send the packets out.
-  void handleWrite(EventLoop::Status);
+  // connected sate.
+  void handleWrite();
+
+  // Internal callback that is invoked when a control event(eof/close)
+  // happens on a connected state.
+  void handleEvent(sp_int16 events);
 
   // A Connection can get closed by the connection class itself(because
   // of an io error). This is the method used to do that.
-  void internalClose();
+  void internalClose(NetworkErrorCode status);
 
   // Connect status of this connection
   State mState;
 
-  // Whether we are ready to read.
-  ReadWriteState mReadState;
-
-  // Whether we are ready to write.
-  ReadWriteState mWriteState;
-
   // The user registered callbacks
   VCallback<NetworkErrorCode> mOnClose;
-
-  // Our own callbacks that we register for internal reads/write events.
-  VCallback<EventLoop::Status> mOnRead;
-  VCallback<EventLoop::Status> mOnWrite;
 
   // Connection Endpoint
   ConnectionEndPoint* mEndpoint;
 
   // The underlying event loop
   EventLoop* mEventLoop;
-  bool mCanCloseConnection;
+  // The underlying bufferevent
+  struct bufferevent* buffer_;
 };
 
 #endif  // HERON_COMMON_SRC_CPP_NETWORK_BASECONNECTION_H_

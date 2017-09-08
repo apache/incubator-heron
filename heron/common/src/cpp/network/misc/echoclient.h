@@ -1,17 +1,16 @@
 #ifndef __ECHOCLIENT_H
 #define __ECHOCLIENT_H
 
-#include "core/network/misc/tests.pb.h"
-#include "core/network/public/event_loop_impl.h"
-#include "core/network/public/client.h"
-#include "core/network/public/networkoptions.h"
-#include "network/network_error.h"
-#include "core/common/public/sptypes.h"
+#include "basics/basics.h"
+#include "errors/errors.h"
+#include "threads/threads.h"
+#include "network/network.h"
+#include "proto/messages.h"
 
 class EchoClient : public Client
 {
  public:
-  EchoClient(EventLoopImpl* ss, const NetworkOptions& options, bool _perf);
+  EchoClient(EventLoopImpl* ss, const NetworkOptions& options);
   ~EchoClient();
 
  protected:
@@ -19,11 +18,9 @@ class EchoClient : public Client
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleEchoResponse(void*, EchoServerResponse* response,
-                          NetworkErrorCode status);
-  void CreateAndSendRequest();
+  void HandleEchoMessage(heron::proto::system::RootId* message);
+  void CreateAndSendMessage();
   sp_int32 nrequests_;
-  bool perf_;
 };
 
 #endif

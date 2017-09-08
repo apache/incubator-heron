@@ -210,9 +210,11 @@ void Client::OnPacketTimer(REQID _id, EventLoop::Status) {
 }
 
 void Client::StartBackPressureConnectionCb(Connection* conn) {
+  LOG(INFO) << "SANJEEV IN BARE CLIENT START BP";
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }
 
 void Client::StopBackPressureConnectionCb(Connection* conn) {
+  LOG(INFO) << "SANJEEV IN BARE CLIENT STOP BP";
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }

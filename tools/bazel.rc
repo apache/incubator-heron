@@ -22,7 +22,7 @@ build:centos --workspace_status_command scripts/release/status.sh
 
 # For Mac
 # To use it: bazel build --config=darwin
-build:darwin --experimental_action_listener=tools/cpp:compile_cpp
+# build:darwin --experimental_action_listener=tools/cpp:compile_cpp
 build:darwin --experimental_action_listener=tools/java:compile_java
 build:darwin --experimental_action_listener=tools/python:compile_python
 build:darwin --genrule_strategy=standalone
