@@ -127,7 +127,8 @@ void BaseConnection::handleEvent(sp_int16 events) {
     LOG(FATAL) << "BaseConnetion does not process connected event";
   }
   if (events & (BEV_EVENT_ERROR|BEV_EVENT_EOF)) {
-    LOG(ERROR) << "BufferEvent reported error on connection";
+    LOG(ERROR) << "BufferEvent reported error on connection " << this;
+    mState = TO_BE_DISCONNECTED;
     internalClose(WRITE_ERROR);
   }
 }
