@@ -79,8 +79,12 @@ class DummySpoutInstance : public DummyInstance {
   virtual void HandleNewInstanceAssignmentMsg(
       heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
   void CreateAndSendTupleMessages();
-  virtual void StartBackPressureConnectionCb(Connection* connection) { under_backpressure_ = true; }
-  virtual void StopBackPressureConnectionCb(Connection* _connection) { under_backpressure_ = false; }
+  virtual void StartBackPressureConnectionCb(Connection* connection) {
+    under_backpressure_ = true;
+  }
+  virtual void StopBackPressureConnectionCb(Connection* _connection) {
+    under_backpressure_ = false;
+  }
 
  private:
   sp_string stream_id_;

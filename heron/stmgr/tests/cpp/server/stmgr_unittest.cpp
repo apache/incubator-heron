@@ -996,19 +996,15 @@ TEST(StMgr, test_back_pressure_instance) {
   // workers have connected
   while (!regular_stmgr->GetPhysicalPlan()) sleep(1);
 
-  std::cout << "Got PPLAN" << std::endl;
-
   // Stop the bolt schedulers at this point so that they stop receiving
   // This will build up back pressure
   for (size_t i = 0; i < common.bolt_workers_list_.size(); ++i) {
     common.bolt_workers_list_[i]->getEventLoop()->loopExit();
   }
 
-  std::cout << "LoopExit PPLAN" << std::endl;
   // Wait till we get the back pressure notification
   while (dummy_stmgr->NumStartBPMsgs() == 0) sleep(1);
 
-  std::cout << "Got BPs " << std::endl;
   // Now kill the bolts - at that point the back pressure should be removed
   for (size_t i = 0; i < common.bolt_workers_threads_list_.size(); ++i) {
     common.bolt_workers_threads_list_[i]->join();
@@ -1018,11 +1014,9 @@ TEST(StMgr, test_back_pressure_instance) {
   }
   // Clear the list so that we don't double delete in TearCommonResources
   common.bolt_workers_list_.clear();
-  std::cout << "Killed Bolts " << std::endl;
 
   // Wait till we get the back pressure notification
   while (dummy_stmgr->NumStopBPMsgs() == 0) sleep(1);
-  std::cout << "Lifted BPs " << std::endl;
 
   EXPECT_EQ(dummy_stmgr->NumStopBPMsgs(), 1);
 
