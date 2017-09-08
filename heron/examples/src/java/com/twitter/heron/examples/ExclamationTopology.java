@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.examples.spout.TestWordSpout;
+import com.twitter.heron.examples.util.ExampleResources;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.examples.util.ExampleResources;
 
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;

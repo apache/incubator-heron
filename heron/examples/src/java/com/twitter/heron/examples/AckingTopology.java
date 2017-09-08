@@ -17,6 +17,8 @@ package com.twitter.heron.examples;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.examples.util.ExampleResources;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.metric.api.GlobalMetrics;

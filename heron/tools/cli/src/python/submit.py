@@ -39,7 +39,7 @@ def launch_mode_msg(cl_args):
   :param cl_args:
   :return:
   '''
-  if cl_args['dry_run']:
+  if cl_args.get('dry_run', False):
     return "in dry-run mode"
   return ""
 
@@ -116,7 +116,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
-  if cl_args["dry_run"]:
+  if cl_args.get("dry_run", False):
     args.append("--dry_run")
     if "dry_run_format" in cl_args:
       args += ["--dry_run_format", cl_args["dry_run_format"]]
@@ -124,7 +124,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
-  extra_jars = cl_args['extra_launch_classpath'].split(':')
+  extra_jars = cl_args.get('extra_launch_classpath', "").split(':')
 
   # invoke the submitter to submit and launch the topology
   main_class = 'com.twitter.heron.scheduler.SubmitterMain'
@@ -161,7 +161,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
       user=cl_args['submit_user'],
   )
 
-  if cl_args['dry_run']:
+  if cl_args.get('dry_run', False):
     data["dry_run"] = True
 
   files = dict(
@@ -257,7 +257,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
       lib_jars=config.get_heron_libs(jars.topology_jars()),
       extra_jars=[topology_file],
       args=tuple(unknown_args),
-      java_defines=cl_args['topology_main_jvm_property'])
+      java_defines=cl_args.get('topology_main_jvm_property', ""))
 
   result.render(res)
 
@@ -371,7 +371,7 @@ def run(command, parser, cl_args, unknown_args):
     return SimpleResult(Status.InvocationError, err_context)
 
   # check if extra launch classpath is provided and if it is validate
-  if cl_args['extra_launch_classpath']:
+  if cl_args.get('extra_launch_classpath', None):
     valid_classpath = classpath.valid_java_classpath(cl_args['extra_launch_classpath'])
     if not valid_classpath:
       err_context = "One of jar or directory in extra launch classpath does not exist: %s" % \
@@ -383,7 +383,7 @@ def run(command, parser, cl_args, unknown_args):
   opts.cleaned_up_files.append(tmp_dir)
 
   # if topology needs to be launched in deactivated state, do it so
-  if cl_args['deploy_deactivated']:
+  if cl_args.get('deploy_deactivated', False):
     initial_state = topology_pb2.TopologyState.Name(topology_pb2.PAUSED)
   else:
     initial_state = topology_pb2.TopologyState.Name(topology_pb2.RUNNING)
