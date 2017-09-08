@@ -92,9 +92,6 @@ def get_subparser(parser, command):
   subparsers_actions = [action for action in parser._actions
                         if isinstance(action, argparse._SubParsersAction)]
 
-  print "subparser", command
-  print str(parser._actions)
-  print subparsers_actions
   # there will probably only be one subparser_action,
   # but better save than sorry
   for subparsers_action in subparsers_actions:

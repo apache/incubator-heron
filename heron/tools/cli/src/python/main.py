@@ -275,8 +275,6 @@ def extract_common_args(command, parser, cl_args):
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
   except KeyError:
     try:
-      print command, parser, cl_args
-      Log.info(command)
       cluster_role_env = cl_args.pop('cluster')  # for version command
     except KeyError:
       # if some of the arguments are not found, print error and exit
