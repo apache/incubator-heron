@@ -13,7 +13,6 @@
 //  limitations under the License.
 package com.twitter.heron.integration_test.topology.windowing.count;
 
-
 import java.net.MalformedURLException;
 
 import com.twitter.heron.api.bolt.BaseWindowedBolt;
