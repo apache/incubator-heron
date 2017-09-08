@@ -221,6 +221,7 @@ public class TopologyResource extends HeronResource {
       return createDryRunResponse(response,
           Forms.getString(form, PARAM_DRY_RUN_FORMAT, DEFAULT_DRY_RUN_FORMAT));
     } catch (Exception ex) {
+      LOG.error("error submitting topology {}", topologyName, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -248,6 +249,7 @@ public class TopologyResource extends HeronResource {
           .entity(createMessage(String.format("%s activated", name)))
           .build();
     } catch (Exception ex) {
+      LOG.error("error updating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -273,6 +275,7 @@ public class TopologyResource extends HeronResource {
           .entity(createMessage(String.format("%s deactivated", name)))
           .build();
     } catch (Exception ex) {
+      LOG.error("error deactivating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -309,6 +312,7 @@ public class TopologyResource extends HeronResource {
           .entity(createMessage(String.format("%s restarted", name)))
           .build();
     } catch (Exception ex) {
+      LOG.error("error restarting topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
@@ -394,6 +398,7 @@ public class TopologyResource extends HeronResource {
           .entity(createMessage(String.format("%s killed", name)))
           .build();
     } catch (Exception ex) {
+      LOG.error("error killing topology {}", name, ex);
       final String message = ex.getMessage();
       final Response.Status status = message != null && message.contains("does not exist")
           ? Response.Status.NOT_FOUND : Response.Status.INTERNAL_SERVER_ERROR;
