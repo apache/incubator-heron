@@ -36,11 +36,11 @@ class DummyInstance : public Client {
   void Retry() { Start(); }
 
   // Handle incoming message
-  virtual void HandleInstanceResponse(void* ctx,
-                                      heron::proto::stmgr::RegisterInstanceResponse* _message,
-                                      NetworkErrorCode status);
+  virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
   // Handle incoming tuples
   virtual void HandleTupleMessage(heron::proto::system::HeronTupleSet2* _message);
+  // Send tuples
+  virtual void CreateAndSendTupleMessages();
   // Handle the instance assignment message
   virtual void HandleNewInstanceAssignmentMsg(heron::proto::stmgr::NewInstanceAssignmentMessage*);
 
@@ -76,15 +76,10 @@ class DummySpoutInstance : public DummyInstance {
 
  protected:
   // Handle incoming message
+  virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
   virtual void HandleNewInstanceAssignmentMsg(
       heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
-  void CreateAndSendTupleMessages();
-  virtual void StartBackPressureConnectionCb(Connection* connection) {
-    under_backpressure_ = true;
-  }
-  virtual void StopBackPressureConnectionCb(Connection* _connection) {
-    under_backpressure_ = false;
-  }
+  virtual void CreateAndSendTupleMessages();
 
  private:
   sp_string stream_id_;
@@ -92,7 +87,6 @@ class DummySpoutInstance : public DummyInstance {
   sp_int32 total_msgs_sent_;
   sp_int32 batch_size_;
   bool do_custom_grouping_;
-  bool under_backpressure_;
   // only valid when the above is true
   sp_int32 custom_grouping_dest_task_;
 };
@@ -109,6 +103,7 @@ class DummyBoltInstance : public DummyInstance {
 
  protected:
   // Handle incoming message
+  virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
   // Handle incoming tuples
   virtual void HandleTupleMessage(heron::proto::system::HeronTupleSet2* _message);
   virtual void HandleNewInstanceAssignmentMsg(
