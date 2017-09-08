@@ -683,7 +683,6 @@ void VerifyMetricsMgrTMaster(CommonResources& common) {
   EXPECT_EQ(common.metrics_mgr_->get_tmaster()->stats_port(), common.tmaster_stats_port_);
 }
 
-/*
 // Test to make sure that the stmgr can decode the pplan
 TEST(StMgr, test_pplan_decode) {
   CommonResources common;
@@ -766,9 +765,6 @@ TEST(StMgr, test_pplan_decode) {
   // Delete the common resources
   TearCommonResources(common);
 }
-*/
-
-/*
 
 // Test to make sure that the stmgr can route data properly
 TEST(StMgr, test_tuple_route) {
@@ -848,10 +844,6 @@ TEST(StMgr, test_tuple_route) {
 
   TearCommonResources(common);
 }
-
-*/
-
-/*
 
 // Test to make sure that custom grouping routing works
 TEST(StMgr, test_custom_grouping_route) {
@@ -940,8 +932,6 @@ TEST(StMgr, test_custom_grouping_route) {
 
   TearCommonResources(common);
 }
-
-*/
 
 TEST(StMgr, test_back_pressure_instance) {
   CommonResources common;
