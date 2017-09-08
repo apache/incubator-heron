@@ -28,8 +28,8 @@ $ sudo apt-get install git build-essential automake cmake libtool-bin zip \
 #### Step 3 --- Set the following environment variables
 
 ```bash
-export CC=/usr/bin/gcc-4.8
-export CCX=/usr/bin/g++-4.8
+export CC=/usr/bin/gcc
+export CCX=/usr/bin/g++
 ```
 
 ### Step 4 --- Install JDK 8 and set JAVA_HOME
@@ -44,7 +44,7 @@ $ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
@@ -195,7 +195,7 @@ export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```

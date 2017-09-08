@@ -16,16 +16,18 @@
 import time
 import Queue
 
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.stateful_component import StatefulComponent
-from heron.api.src.python.stream import Stream
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.stateful_component import StatefulComponent
+from heronpy.api.stream import Stream
 
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
-from heron.common.src.python.utils.metrics import BoltMetrics
+
 from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
-import heron.common.src.python.system_constants as system_constants
+from heron.instance.src.python.utils.metrics import BoltMetrics
+from heron.instance.src.python.utils.tuple import TupleHelper, HeronTuple
+
+import heron.instance.src.python.utils.system_constants as system_constants
 
 from .base_instance import BaseInstance
 

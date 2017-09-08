@@ -84,7 +84,7 @@ public class BoltInstance implements IInstance {
         SystemConfig.HERON_SYSTEM_CONFIG);
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EXACTLY_ONCE)
+    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);

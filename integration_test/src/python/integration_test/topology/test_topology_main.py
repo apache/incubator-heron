@@ -17,45 +17,45 @@ import argparse
 import logging
 import sys
 
-from integration_test.src.python.integration_test.topology.all_grouping \
-  import all_grouping_buidler
+from integration_test.src.python.integration_test.topology.all_grouping.all_grouping \
+    import all_grouping_builder
 
-from integration_test.src.python.integration_test.topology.basic_one_task \
+from integration_test.src.python.integration_test.topology.basic_one_task.basic_one_task \
   import basic_one_task_builder
 
-from integration_test.src.python.integration_test.topology.bolt_double_emit_tuples \
-  import bolt_double_emit_tuples_builder
+from integration_test.src.python.integration_test.topology.bolt_double_emit_tuples\
+    .bolt_double_emit_tuples import bolt_double_emit_tuples_builder
 
-from integration_test.src.python.integration_test.topology.fields_grouping \
+from integration_test.src.python.integration_test.topology.fields_grouping.fields_grouping \
   import fields_grouping_builder
 
-from integration_test.src.python.integration_test.topology.global_grouping \
+from integration_test.src.python.integration_test.topology.global_grouping.global_grouping \
   import global_grouping_builder
 
-from integration_test.src.python.integration_test.topology.multi_spouts_multi_tasks \
-  import multi_spouts_multi_tasks_builder
+from integration_test.src.python.integration_test.topology.multi_spouts_multi_tasks\
+    .multi_spouts_multi_tasks import multi_spouts_multi_tasks_builder
 
-from integration_test.src.python.integration_test.topology.none_grouping \
+from integration_test.src.python.integration_test.topology.none_grouping.none_grouping \
   import none_grouping_builder
 
-from integration_test.src.python.integration_test.topology.one_bolt_multi_tasks \
-  import one_bolt_multi_tasks_builder
+from integration_test.src.python.integration_test.topology. one_bolt_multi_tasks\
+    .one_bolt_multi_tasks import one_bolt_multi_tasks_builder
 
-from integration_test.src.python.integration_test.topology.one_spout_bolt_multi_tasks \
-  import one_spout_bolt_multi_tasks_builder
+from integration_test.src.python.integration_test.topology.one_spout_bolt_multi_tasks\
+    .one_spout_bolt_multi_tasks import one_spout_bolt_multi_tasks_builder
 
-from integration_test.src.python.integration_test.topology.one_spout_multi_tasks \
-  import one_spout_multi_tasks_builder
+from integration_test.src.python.integration_test.topology.one_spout_multi_tasks\
+    .one_spout_multi_tasks import one_spout_multi_tasks_builder
 
-from integration_test.src.python.integration_test.topology.one_spout_two_bolts \
-  import one_spout_two_bolts_builder
+from integration_test.src.python.integration_test.topology.one_spout_two_bolts\
+    .one_spout_two_bolts  import one_spout_two_bolts_builder
 
-from integration_test.src.python.integration_test.topology.shuffle_grouping \
+from integration_test.src.python.integration_test.topology.shuffle_grouping.shuffle_grouping \
   import shuffle_grouping_builder
 
 TOPOLOGY_BUILDERS = {
     'Heron_IntegrationTest_BasicOneTask': basic_one_task_builder,
-    'Heron_IntegrationTest_AllGrouping': all_grouping_buidler,
+    'Heron_IntegrationTest_AllGrouping': all_grouping_builder,
     'Heron_IntegrationTest_NoneGrouping': none_grouping_builder,
     'Heron_IntegrationTest_OneBoltMultiTasks': one_bolt_multi_tasks_builder,
     'Heron_IntegrationTest_OneSpoutBoltMultiTasks': one_spout_bolt_multi_tasks_builder,

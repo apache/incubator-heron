@@ -14,9 +14,9 @@
 '''Example WordCountTopology'''
 import sys
 
-import heron.api.src.python.api_constants as constants
-from heron.api.src.python.topology import TopologyBuilder
-from heron.api.src.python.stream import Grouping
+import heronpy.api.api_constants as constants
+from heronpy.api.topology import TopologyBuilder
+from heronpy.api.stream import Grouping
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import CountBolt
 

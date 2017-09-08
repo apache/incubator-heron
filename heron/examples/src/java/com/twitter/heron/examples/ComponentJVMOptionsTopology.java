@@ -17,6 +17,7 @@ package com.twitter.heron.examples;
 import java.util.Map;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.examples.spout.TestWordSpout;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -48,8 +49,6 @@ public final class ComponentJVMOptionsTopology {
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(1));
 
     // TOPOLOGY_WORKER_CHILDOPTS will be a global one
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
@@ -59,8 +58,17 @@ public final class ComponentJVMOptionsTopology {
     com.twitter.heron.api.Config.setComponentJvmOptions(conf, "word", "-XX:NewSize=300m");
     com.twitter.heron.api.Config.setComponentJvmOptions(conf, "exclaim1", "-XX:NewSize=800m");
 
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromMegabytes(512));
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+
     if (args != null && args.length > 0) {
-      conf.setNumWorkers(1);
+      conf.setNumWorkers(2);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       LocalCluster cluster = new LocalCluster();
