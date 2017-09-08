@@ -24,6 +24,9 @@
 #include "basics/basics.h"
 #include "network/regevent.h"
 
+const sp_int32 __SYSTEM_NETWORK_READ_BATCH_SIZE__ = 1048576;           // 1M
+const sp_int32 __SYSTEM_NETWORK_DEFAULT_WRITE_BATCH_SIZE__ = 1048576;  // 1M
+
 // 'C' style callback for libevent on read events
 void readcb(struct bufferevent *bev, void *ctx) {
   auto* conn = reinterpret_cast<BaseConnection*>(ctx);
@@ -61,6 +64,9 @@ sp_int32 BaseConnection::start() {
     return -1;
   }
   bufferevent_setwatermark(buffer_, EV_WRITE, mOptions->low_watermark_, 0);
+  CHECK_EQ(bufferevent_set_max_single_read(buffer_, __SYSTEM_NETWORK_READ_BATCH_SIZE__), 0);
+  CHECK_EQ(bufferevent_set_max_single_write(buffer_,
+                                            __SYSTEM_NETWORK_DEFAULT_WRITE_BATCH_SIZE__), 0);
   bufferevent_setcb(buffer_, readcb, writecb, eventcb, this);
   if (bufferevent_enable(buffer_, EV_READ|EV_WRITE) < 0) {
     LOG(ERROR) << "Could not register for read/write of the buffer during start\n";

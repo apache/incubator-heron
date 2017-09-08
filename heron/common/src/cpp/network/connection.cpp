@@ -26,8 +26,6 @@
 #include "glog/logging.h"
 #include "network/regevent.h"
 
-const sp_int32 __SYSTEM_NETWORK_READ_BATCH_SIZE__ = 1048576;           // 1M
-
 // How many times should we wait to see a buffer full while enqueueing data
 // before declaring start of back pressure
 const sp_uint8 __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__ = 3;
@@ -93,7 +91,6 @@ void Connection::releiveBackPressure() {
 }
 
 sp_int32 Connection::readFromEndPoint(struct bufferevent* _buffer) {
-  sp_int32 bytesRead = 0;
   std::queue<IncomingPacket*> received_packets;
   while (1) {
     sp_int32 read_status = mIncomingPacket->Read(_buffer);
@@ -102,10 +99,6 @@ sp_int32 Connection::readFromEndPoint(struct bufferevent* _buffer) {
       IncomingPacket* packet = mIncomingPacket;
       mIncomingPacket = new IncomingPacket(mOptions->max_packet_size_);
       received_packets.push(packet);
-      bytesRead += packet->GetTotalPacketSize();
-      if (bytesRead >= __SYSTEM_NETWORK_READ_BATCH_SIZE__) {
-        break;
-      }
     } else if (read_status > 0) {
       // packet was read partially
       break;
