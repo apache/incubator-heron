@@ -175,16 +175,13 @@ class BaseConnection {
   friend void writecb(struct bufferevent *bev, void *ctx);
   friend void eventcb(struct bufferevent *bev, sp_int16 events, void *ctx);
 
-  // Internal callback that is invoked when a read event happens on a
-  // connected sate.
+  // Called by readcb above
   void handleRead();
 
-  // Internal callback that is invoked when a write event happens on a
-  // connected sate.
+  // Called by writecb above
   void handleWrite();
 
-  // Internal callback that is invoked when a control event(eof/close)
-  // happens on a connected state.
+  // Called by eventcb above
   void handleEvent(sp_int16 events);
 
   // A Connection can get closed by the connection class itself(because
