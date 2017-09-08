@@ -249,7 +249,7 @@ public class TopologyResource extends HeronResource {
           .entity(createMessage(String.format("%s activated", name)))
           .build();
     } catch (Exception ex) {
-      LOG.error("error updating topology {}", name, ex);
+      LOG.error("error activating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
           .entity(createMessage(ex.getMessage()))
