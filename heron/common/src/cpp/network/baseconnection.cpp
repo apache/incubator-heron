@@ -104,17 +104,17 @@ void BaseConnection::internalClose(NetworkErrorCode status) {
 
 void BaseConnection::registerForClose(VCallback<NetworkErrorCode> cb) { mOnClose = std::move(cb); }
 
+void BaseConnection::handleWrite() {
+  LOG(INFO) << "CAME IN handleWrite " << this;
+  releiveBackPressure();
+}
+
 void BaseConnection::handleRead() {
   sp_int32 readStatus = readFromEndPoint(buffer_);
   if (readStatus < 0) {
     mState = TO_BE_DISCONNECTED;
     internalClose(READ_ERROR);
   }
-}
-
-void BaseConnection::handleWrite() {
-  LOG(INFO) << "CAME IN handleWrite " << this;
-  releiveBackPressure();
 }
 
 sp_int32 BaseConnection::write(struct evbuffer* _buffer) {
