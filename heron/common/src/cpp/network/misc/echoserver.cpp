@@ -1,15 +1,10 @@
-#include "network/misc/echoserver.h"
+#include "core/network/misc/echoserver.h"
 #include <iostream>
-#include "basics/basics.h"
-#include "errors/errors.h"
-#include "threads/threads.h"
-#include "network/network.h"
-#include "proto/messages.h"
 
 EchoServer::EchoServer(EventLoopImpl* eventLoop, const NetworkOptions& _options)
   : Server(eventLoop, _options)
 {
-  InstallMessageHandler(&EchoServer::HandleEchoMessage);
+  InstallRequestHandler(&EchoServer::HandleEchoRequest);
 }
 
 EchoServer::~EchoServer()
@@ -26,11 +21,12 @@ void EchoServer::HandleConnectionClose(Connection*, NetworkErrorCode _status)
   std::cout << "Connection dropped from echoserver with status " << _status << "\n";
 }
 
-void EchoServer::HandleEchoMessage(Connection* conn, heron::proto::system::RootId* message) {
-  std::cout << "Got a rootid request " << message->taskid() << std::endl;
-  delete message;
-  heron::proto::system::RootId msg;
-  msg.set_taskid(1);
-  msg.set_key(112);
-  SendMessage(conn, msg);
+void EchoServer::HandleEchoRequest(REQID _id, Connection* _connection,
+                                   EchoServerRequest* _request)
+{
+  // cout << "Got a echo request " << _request->echo_request() << endl;
+  EchoServerResponse response;
+  response.set_echo_response(_request->echo_request());
+  SendResponse(_id, _connection, response);
+  delete _request;
 }
