@@ -110,7 +110,9 @@ sp_int32 DummyStMgr::Start() {
   }
 }
 
-void DummyStMgr::HandleNewConnection(Connection* conn) {}
+void DummyStMgr::HandleNewConnection(Connection* conn) {
+  LOG(INFO) << "Dummy StMgr " << this << " got connection " << conn;
+}
 
 void DummyStMgr::HandleConnectionClose(Connection*, NetworkErrorCode) {}
 

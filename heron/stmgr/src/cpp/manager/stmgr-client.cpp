@@ -93,7 +93,7 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
     LOG(INFO) << "Connected to stmgr " << other_stmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
-              << std::endl;
+              << " " << this;
 
     // reset the reconnect attempt once connection established
     reconnect_attempts_ = 0;

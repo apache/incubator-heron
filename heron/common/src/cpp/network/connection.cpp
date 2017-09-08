@@ -55,10 +55,6 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
   struct evbuffer* packet_buffer =  packet->release_buffer();
   delete packet;
   if (write(packet_buffer) < 0) return -1;
-  LOG(INFO) << "After SendingPacket in connection, outstanding is "
-            << getOutstandingBytes() << " and hasCausedBP "
-            << hasCausedBackPressure() << " and highwatermark "
-            << mOptions->high_watermark_ << " " << this;
 
   if (!hasCausedBackPressure()) {
     // Are we above the threshold?
@@ -67,7 +63,6 @@ sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
       if (++mNumEnqueuesWithBufferFull > __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__) {
         mNumEnqueuesWithBufferFull = 0;
         if (mOnConnectionBufferFull) {
-          LOG(INFO) << "Calling BackPressure Callback";
           mOnConnectionBufferFull(this);
         }
       }
@@ -93,7 +88,6 @@ void Connection::releiveBackPressure() {
   // Check if we reduced the write buffer to something below the back
   // pressure threshold
   if (hasCausedBackPressure()) {
-    LOG(INFO) << "Has Caused Back Pressure to relieveing it " << this;
     mOnConnectionBufferEmpty(this);
   }
 }

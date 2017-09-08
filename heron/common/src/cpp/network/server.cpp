@@ -250,11 +250,9 @@ void Server::HandleResponse(google::protobuf::Message* _response, void*, Network
 }
 
 void Server::StartBackPressureConnectionCb(Connection* conn) {
-  LOG(INFO) << "SANJEEV IN BARE SERVER START BP";
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }
 
 void Server::StopBackPressureConnectionCb(Connection* conn) {
-  LOG(INFO) << "SANJEEV IN BARE SERVER STOP BP";
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }

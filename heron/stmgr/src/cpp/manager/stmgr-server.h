@@ -133,9 +133,9 @@ class StMgrServer : public Server {
 
   // Back pressure related connection callbacks
   // Do back pressure
-  void StartBackPressureConnectionCb(Connection* _connection);
+  virtual void StartBackPressureConnectionCb(Connection* _connection);
   // Relieve back pressure
-  void StopBackPressureConnectionCb(Connection* _connection);
+  virtual void StopBackPressureConnectionCb(Connection* _connection);
 
   // Can we free the back pressure on the spouts?
   void AttemptStopBackPressureFromSpouts();

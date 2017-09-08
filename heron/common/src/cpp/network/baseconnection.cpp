@@ -105,7 +105,6 @@ void BaseConnection::internalClose(NetworkErrorCode status) {
 void BaseConnection::registerForClose(VCallback<NetworkErrorCode> cb) { mOnClose = std::move(cb); }
 
 void BaseConnection::handleWrite() {
-  LOG(INFO) << "CAME IN handleWrite " << this;
   releiveBackPressure();
 }
 
