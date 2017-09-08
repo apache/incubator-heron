@@ -11,32 +11,32 @@
     {
       "topologyName" : "IntegrationTest_FieldsGrouping",
       "classPath"    : "fields_grouping.FieldsGrouping",
-      "expectedResultRelativePath" : "FieldsGrouping.json"
+      "expectedResultRelativePath" : "fields_grouping/FieldsGroupingResults.json"
     },
     {
       "topologyName" : "IntegrationTest_AllGrouping",
       "classPath"    : "all_grouping.AllGrouping",
-      "expectedResultRelativePath" : "AllGrouping.json"
+      "expectedResultRelativePath" : "all_grouping/AllGroupingResults.json"
     },
     {
       "topologyName" : "IntegrationTest_GlobalGrouping",
       "classPath"    : "global_grouping.GlobalGrouping",
-      "expectedResultRelativePath" : "GlobalGrouping.json"
+      "expectedResultRelativePath" : "global_grouping/GlobalGroupingResults.json"
     },
     {
       "topologyName" : "IntegrationTest_NonGrouping",
       "classPath"    : "non_grouping.NonGrouping",
-      "expectedResultRelativePath" : "NonGrouping.json"
+      "expectedResultRelativePath" : "non_grouping/NonGroupingResults.json"
     },
     {
       "topologyName" : "IntegrationTest_ShuffleGrouping",
       "classPath"    : "shuffle_grouping.ShuffleGrouping",
-      "expectedResultRelativePath" : "ShuffleGrouping.json"
+      "expectedResultRelativePath" : "shuffle_grouping/ShuffleGroupingResults.json"
     },
     {
       "topologyName" : "IntegrationTest_BasicTopologyOneTask",
       "classPath"    : "basic_topology_one_task.BasicTopologyOneTask",
-      "expectedResultRelativePath" : "BasicTopologyOneTask.json"
+      "expectedResultRelativePath" : "basic_topology_one_task/BasicTopologyOneTaskResults.json"
     },
     {
       "topologyName" : "IntegrationTest_BasicTopologyOneTaskScaleUp",
@@ -55,144 +55,144 @@
     {
       "topologyName" : "IntegrationTest_BoltDoubleEmitTuples",
       "classPath"    : "bolt_double_emit_tuples.BoltDoubleEmitTuples",
-      "expectedResultRelativePath" : "BoltDoubleEmitTuples.json"
+      "expectedResultRelativePath" : "bolt_double_emit_tuples/BoltDoubleEmitTuplesResults.json"
     },
     {
       "topologyName" : "IntegrationTest_MultiSpoutsMultiTasks",
       "classPath"    : "multi_spouts_multi_tasks.MultiSpoutsMultiTasks",
-      "expectedResultRelativePath" : "MultiSpoutsMultiTasks.json"
+      "expectedResultRelativePath" : "multi_spouts_multi_tasks/MultiSpoutsMultiTasksResults.json"
     },
     {
       "topologyName" : "IntegrationTest_OneBoltMultiTasks",
       "classPath"    : "one_bolt_multi_tasks.OneBoltMultiTasks",
-      "expectedResultRelativePath" : "OneBoltMultiTasks.json"
+      "expectedResultRelativePath" : "one_bolt_multi_tasks/OneBoltMultiTasksResults.json"
     },
     {
       "topologyName" : "IntegrationTest_OneSpoutBoltMultiTasks",
       "classPath"    : "one_spout_bolt_multi_tasks.OneSpoutBoltMultiTasks",
-      "expectedResultRelativePath" : "OneSpoutBoltMultiTasks.json"
+      "expectedResultRelativePath" : "one_spout_bolt_multi_tasks/OneSpoutBoltMultiTasksResults.json"
     },
     {
       "topologyName" : "IntegrationTest_OneSpoutMultiTasks",
       "classPath"    : "one_spout_multi_tasks.OneSpoutMultiTasks",
-      "expectedResultRelativePath" : "OneSpoutMultiTasks.json"
+      "expectedResultRelativePath" : "one_spout_multi_tasks/OneSpoutMultiTasksResults.json"
     },
     {
       "topologyName" : "IntegrationTest_OneSpoutTwoBolts",
       "classPath"    : "one_spout_two_bolts.OneSpoutTwoBolts",
-      "expectedResultRelativePath" : "OneSpoutTwoBolts.json"
+      "expectedResultRelativePath" : "one_spout_two_bolts/OneSpoutTwoBoltsResults.json"
     },
     {
       "topologyName" : "IntegrationTest_CustomSerialization",
       "classPath"    : "serialization.SerializationTopology",
-      "expectedResultRelativePath" : "SerializationTopology.json"
+      "expectedResultRelativePath" : "serialization/SerializationTopologyResults.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingCountWindow1",
       "classPath"    : "windowing.count.SlidingCountWindowTest1",
-      "expectedResultRelativePath" : "SlidingCountWindowTest1.json"
+      "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest1Results.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingCountWindow2",
       "classPath"    : "windowing.count.SlidingCountWindowTest2",
-      "expectedResultRelativePath" : "SlidingCountWindowTest2.json"
+      "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest2Results.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingCountWindow3",
       "classPath"    : "windowing.count.SlidingCountWindowTest3",
-      "expectedResultRelativePath" : "SlidingCountWindowTest3.json"
+      "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest3Results.json"
     },
     {
       "topologyName" : "IntegrationTest_TumblingCountWindow1",
       "classPath"    : "windowing.count.TumblingCountWindowTest1",
-      "expectedResultRelativePath" : "TumblingCountWindowTest1.json"
+      "expectedResultRelativePath" : "windowing/count/TumblingCountWindowTest1Results.json"
     },
     {
       "topologyName" : "IntegrationTest_TumblingCountWindow2",
       "classPath"    : "windowing.count.TumblingCountWindowTest2",
-      "expectedResultRelativePath" : "TumblingCountWindowTest2.json"
+      "expectedResultRelativePath" : "windowing/count/TumblingCountWindowTest2Results.json"
     },
     {
       "topologyName" : "IntegrationTest_TumblingCountWindow3",
       "classPath"    : "windowing.count.TumblingCountWindowTest3",
-      "expectedResultRelativePath" : "TumblingCountWindowTest3.json"
+      "expectedResultRelativePath" : "windowing/count/TumblingCountWindowTest3Results.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingTimeWindow1",
       "classPath"    : "windowing.time.SlidingTimeWindowTest1",
-      "expectedResultRelativePath" : "SlidingTimeWindowTest1.json"
+      "expectedResultRelativePath" : "windowing/time/SlidingTimeWindowTest1Results.json"
     },
     {
       "topologyName" : "IntegrationTest_SlidingWatermarkEventTimeWindow1",
       "classPath"    : "windowing.watermark.SlidingWatermarkEventTimeWindowTest1",
-      "expectedResultRelativePath" : "SlidingWatermarkEventTimeWindowTest1.json"
+      "expectedResultRelativePath" : "windowing/watermark/SlidingWatermarkEventTimeWindowTest1Results.json"
     }
   ],
   "pythonTopologies": [
     {
       "topologyName" : "Heron_IntegrationTest_AllGrouping",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "all_grouping_result.json"
+      "expectedResultRelativePath" : "all_grouping/all_grouping_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_BasicOneTask",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "basic_one_task_result.json"
+      "expectedResultRelativePath" : "basic_one_task/basic_one_task_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_NoneGrouping",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "none_grouping_result.json"
+      "expectedResultRelativePath" : "none_grouping/none_grouping_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_OneBoltMultiTasks",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "one_bolt_multi_tasks_result.json"
+      "expectedResultRelativePath" : "one_bolt_multi_tasks/one_bolt_multi_tasks_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_OneSpoutBoltMultiTasks",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "one_spout_bolt_multi_tasks_result.json"
+      "expectedResultRelativePath" : "one_spout_bolt_multi_tasks/one_spout_bolt_multi_tasks_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_ShuffleGrouping",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "shuffle_grouping_result.json"
+      "expectedResultRelativePath" : "shuffle_grouping/shuffle_grouping_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_OneSpoutTwoBolts",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "one_spout_two_bolts_result.json"
+      "expectedResultRelativePath" : "one_spout_two_bolts/one_spout_two_bolts_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_OneSpoutTwoBolts",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "one_spout_two_bolts_result.json"
+      "expectedResultRelativePath" : "one_spout_two_bolts/one_spout_two_bolts_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_OneSpoutMultiTasks",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "one_spout_multi_tasks_result.json"
+      "expectedResultRelativePath" : "one_spout_multi_tasks/one_spout_multi_tasks_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_MultiSpoutsMultiTasks",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "multi_spouts_multi_tasks_result.json"
+      "expectedResultRelativePath" : "multi_spouts_multi_tasks/multi_spouts_multi_tasks_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_FieldsGrouping",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "fields_grouping_result.json"
+      "expectedResultRelativePath" : "fields_grouping/fields_grouping_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_BoltDoubleEmitTuples",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "bolt_double_emit_tuples_result.json"
+      "expectedResultRelativePath" : "bolt_double_emit_tuples/bolt_double_emit_tuples_result.json"
     },
     {
       "topologyName" : "Heron_IntegrationTest_GlobalGrouping",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "global_grouping_result.json"
+      "expectedResultRelativePath" : "global_grouping/global_grouping_result.json"
     }
   ]
 }
