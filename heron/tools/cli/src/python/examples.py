@@ -73,7 +73,6 @@ def classname(example_id):
   return None
 
 def example_id_error(example_id):
-  #ex_topos = "\n".join(map(str, ("  %s" % e["name"] for e in examples())))
   args = (example_id, examples_string())
   return "Example id '%s' does not exist.\nAvailable examples:\n%s" % args
 
@@ -144,7 +143,6 @@ def create_parser(subparsers):
   cli_args.add_config(run_parser)
   cli_args.add_service_url(run_parser)
   cli_args.add_verbose(run_parser)
-
 
   return parser
 
