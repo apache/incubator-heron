@@ -14,6 +14,7 @@
 package com.twitter.heron.api.windowing;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class WindowingConfigs extends HashMap<String, Object> {
 
@@ -69,4 +70,62 @@ public class WindowingConfigs extends HashMap<String, Object> {
      */
   public static final String TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS = "topology.bolts"
       + ".watermark.event.interval.ms";
+
+  public void setTopologyBoltsWindowLengthCount(long value) {
+    setTopologyBoltsWindowLengthCount(this, value);
+  }
+
+  public static void setTopologyBoltsWindowLengthCount(Map<String, Object> conf, long value) {
+    conf.put(TOPOLOGY_BOLTS_WINDOW_LENGTH_COUNT, value);
+  }
+
+  public void setTopologyBoltsWindowLengthDurationMs(long value) {
+    setTopologyBoltsWindowLengthDurationMs(this, value);
+  }
+
+  public static void setTopologyBoltsWindowLengthDurationMs(Map<String, Object> conf, long value) {
+    conf.put(TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS, value);
+  }
+
+  public void setTopologyBoltsSlidingIntervalCount(long value) {
+    setTopologyBoltsSlidingIntervalCount(this, value);
+  }
+
+  public static void setTopologyBoltsSlidingIntervalCount(Map<String, Object> conf, long value) {
+    conf.put(TOPOLOGY_BOLTS_SLIDING_INTERVAL_COUNT, value);
+  }
+
+  public void setTopologyBoltsSlidingIntervalDurationMs(long value) {
+    setTopologyBoltsSlidingIntervalDurationMs(this, value);
+  }
+
+  public static void setTopologyBoltsSlidingIntervalDurationMs(
+      Map<String, Object> conf, long value) {
+    conf.put(TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS, value);
+  }
+
+  public void setTopologyBoltsLateTupleStream(String value) {
+    setTopologyBoltsLateTupleStream(this, value);
+  }
+
+  public static void setTopologyBoltsLateTupleStream(Map<String, Object> conf, String value) {
+    conf.put(TOPOLOGY_BOLTS_LATE_TUPLE_STREAM, value);
+  }
+
+  public void setTopologyBoltsTupleTimestampMaxLagMs(long value) {
+    setTopologyBoltsTupleTimestampMaxLagMs(this, value);
+  }
+
+  public static void setTopologyBoltsTupleTimestampMaxLagMs(Map<String, Object> conf, long value) {
+    conf.put(TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS, value);
+  }
+
+  public void setTopologyBoltsWatermarkEventIntervalMs(long value) {
+    setTopologyBoltsWatermarkEventIntervalMs(this, value);
+  }
+
+  public static void setTopologyBoltsWatermarkEventIntervalMs(
+      Map<String, Object> conf, long value) {
+    conf.put(TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS, value);
+  }
 }
