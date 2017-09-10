@@ -43,7 +43,7 @@ pex_library(
     ],
     reqs = [
         "protobuf==2.5.0",
-        "setuptools==18.0.1",
+        "setuptools==33.1.0",
     ],
 )
 
@@ -66,7 +66,7 @@ pex_binary(
     ],
     reqs = [
         "protobuf==2.5.0",
-        "setuptools==18.0.1",
+        "setuptools==33.1.0",
     ],
 )
 

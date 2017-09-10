@@ -1,10 +1,10 @@
 # Copyright 2014 Pants project contributors (see CONTRIBUTORS.md).
 # Licensed under the Apache License, Version 2.0 (see LICENSE).
 
-import contextlib
 import os
 import sys
-import zipfile
+
+from .common import open_zip
 
 __all__ = ('bootstrap_pex',)
 
@@ -24,7 +24,7 @@ def read_pexinfo_from_directory(entry_point):
 
 
 def read_pexinfo_from_zip(entry_point):
-  with contextlib.closing(zipfile.ZipFile(entry_point)) as zf:
+  with open_zip(entry_point) as zf:
     return zf.read('PEX-INFO')
 
 
@@ -44,20 +44,6 @@ def get_pex_info(entry_point):
   if pex_info_content:
     return pex_info.PexInfo.from_json(pex_info_content)
   raise ValueError('Invalid entry_point: %s' % entry_point)
-
-
-# TODO(wickman) Remove once resolved (#91):
-#   https://bitbucket.org/pypa/setuptools/issue/154/build_zipmanifest-results-should-be
-def monkeypatch_build_zipmanifest():
-  import pkg_resources
-  if not hasattr(pkg_resources, 'build_zipmanifest'):
-    return
-  old_build_zipmanifest = pkg_resources.build_zipmanifest
-  def memoized_build_zipmanifest(archive, memo={}):
-    if archive not in memo:
-      memo[archive] = old_build_zipmanifest(archive)
-    return memo[archive]
-  pkg_resources.build_zipmanifest = memoized_build_zipmanifest
 
 
 def find_in_path(target_interpreter):
@@ -90,7 +76,6 @@ def maybe_reexec_pex():
 
 def bootstrap_pex(entry_point):
   from .finders import register_finders
-  monkeypatch_build_zipmanifest()
   register_finders()
   maybe_reexec_pex()
 
@@ -104,7 +89,6 @@ def bootstrap_pex_env(entry_point):
   from .finders import register_finders
   from .pex_info import PexInfo
 
-  monkeypatch_build_zipmanifest()
   register_finders()
 
   PEXEnvironment(entry_point, PexInfo.from_pex(entry_point)).activate()

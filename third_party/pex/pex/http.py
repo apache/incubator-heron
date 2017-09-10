@@ -23,6 +23,12 @@ except ImportError:
 try:
   from cachecontrol import CacheControl
   from cachecontrol.caches import FileCache
+
+  # Newer versions of CacheControl move the importing of `lockfile` to
+  # class instansiation, and raise an ImportError in the __init__ method.
+  #
+  # https://github.com/ionrock/cachecontrol/commit/a561ac9c1ef15db9bc6ead5d08443e6198cc69e1
+  FileCache(directory=None)  # noqa
 except ImportError:
   CacheControl = FileCache = None
 
@@ -31,10 +37,12 @@ if PY3:
 else:
   import urllib2 as urllib_request
 
-# This is available as hashlib.algorithms_guaranteed in >=3.2 and as
-# hashlib.algorithms in >=2.7, but not available in 2.6, so we enumerate
-# here.
-HASHLIB_ALGORITHMS = frozenset(['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'])
+try:
+  # The hashlib.algorithms_guaranteed function is available in >=2.7.9 and >=3.2.
+  HASHLIB_ALGORITHMS = frozenset(hashlib.algorithms_guaranteed)
+except AttributeError:
+  # And the hashlib.algorithms function covers the rest of the 2.7 versions we support.
+  HASHLIB_ALGORITHMS = frozenset(hashlib.algorithms)
 
 
 class Context(AbstractClass):
@@ -113,6 +121,13 @@ class Context(AbstractClass):
     os.rename(target_tmp, target)
     return target
 
+  def resolve(self, link):
+    """Resolves final link throught all the redirections.
+
+    :param link: The :class:`Link` to open.
+    """
+    return link
+
 
 class UrllibContext(Context):
   """Default Python standard library Context."""
@@ -127,6 +142,12 @@ class UrllibContext(Context):
     with contextlib.closing(self.open(link)) as fp:
       encoding = message_from_string(str(fp.headers)).get_content_charset(self.DEFAULT_ENCODING)
       return fp.read().decode(encoding, 'replace')
+
+  def resolve(self, link):
+    request = urllib_request.Request(link.url)
+    request.get_method = lambda: 'HEAD'
+    with contextlib.closing(urllib_request.urlopen(request)) as response:
+      return link.wrap(response.url)
 
   def __init__(self, *args, **kw):
     TRACER.log('Warning, using a UrllibContext which is known to be flaky.')
@@ -239,6 +260,12 @@ class RequestsContext(Context):
 
     with contextlib.closing(self.open(link)) as request:
       return request.read().decode(request.encoding or self.DEFAULT_ENCODING, 'replace')
+
+  def resolve(self, link):
+    return link.wrap(self._session.head(
+        link.url, verify=self._verify, allow_redirects=True,
+        headers={'User-Agent': self.USER_AGENT}
+    ).url)
 
 
 if requests:
