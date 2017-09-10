@@ -290,7 +290,7 @@ public class Config {
   }
 
   public boolean containsKey(Key key) {
-    return cfgMap.containsKey(key);
+    return cfgMap.containsKey(key.value());
   }
 
   public Set<String> getKeySet() {

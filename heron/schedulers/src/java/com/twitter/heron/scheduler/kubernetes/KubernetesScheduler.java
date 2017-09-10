@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,26 +49,32 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 public class KubernetesScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(KubernetesScheduler.class.getName());
 
-  private Config config;
-  private Config runtime;
+  private Config configuration;
+  private Config runtimeConfiguration;
   private KubernetesController controller;
   private UpdateTopologyManager updateTopologyManager;
 
   protected KubernetesController getController() {
     return new KubernetesController(
-        KubernetesContext.getSchedulerURI(config),
-        KubernetesContext.getKubernetesNamespace(config),
-        Runtime.topologyName(runtime),
-        Context.verbose(config));
+        KubernetesContext.getSchedulerURI(configuration),
+        KubernetesContext.getKubernetesNamespace(configuration),
+        Runtime.topologyName(runtimeConfiguration),
+        Context.verbose(configuration));
   }
 
   @Override
-  public void initialize(Config aConfig, Config aRuntime) {
-    this.config = aConfig;
-    this.runtime = aRuntime;
+  public void initialize(Config config, Config runtime) {
+    // validate the topology name before moving forward
+    if (!topologyNameIsValid(Runtime.topologyName(runtime))) {
+      throw new RuntimeException(getInvalidTopologyNameMessage(Runtime.topologyName(runtime)));
+    }
+
+    this.configuration = config;
+    this.runtimeConfiguration = runtime;
     this.controller = getController();
     this.updateTopologyManager =
-        new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
+        new UpdateTopologyManager(configuration, runtimeConfiguration,
+            Optional.<IScalable>of(this));
   }
 
   @Override
@@ -92,7 +99,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   @Override
   public List<String> getJobLinks() {
     List<String> jobLinks = new LinkedList<>();
-    String kubernetesPodsLink = KubernetesContext.getSchedulerURI(config)
+    String kubernetesPodsLink = KubernetesContext.getSchedulerURI(configuration)
         + KubernetesConstants.JOB_LINK;
     jobLinks.add(kubernetesPodsLink);
     return jobLinks;
@@ -130,26 +137,27 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    */
   protected String[] getTopologyConf(PackingPlan packing) {
 
-    config = Config.newBuilder()
-        .putAll(config)
+    configuration = Config.newBuilder()
+        .putAll(configuration)
         .put(Key.TOPOLOGY_BINARY_FILE,
-            FileUtils.getBaseName(Context.topologyBinaryFile(config)))
+            FileUtils.getBaseName(Context.topologyBinaryFile(configuration)))
         .build();
 
     ObjectMapper mapper = new ObjectMapper();
 
     // Align resources to maximal requested resource
     PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
-    SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime),
-        updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtime));
+    SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtimeConfiguration),
+        updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtimeConfiguration));
 
     Resource containerResource = updatedPackingPlan.getContainers()
         .iterator().next().getScheduledResource().get();
 
     // Create app conf list for each container
 
-    String[] deploymentConfs = new String[Ints.checkedCast(Runtime.numContainers(runtime))];
-    for (int i = 0; i < Runtime.numContainers(runtime); i++) {
+    String[] deploymentConfs =
+        new String[Ints.checkedCast(Runtime.numContainers(runtimeConfiguration))];
+    for (int i = 0; i < Runtime.numContainers(runtimeConfiguration); i++) {
 
       deploymentConfs[i] = buildKubernetesPodSpec(mapper, i, containerResource);
     }
@@ -224,10 +232,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
     ObjectNode metadataNode = mapper.createObjectNode();
     metadataNode.put(KubernetesConstants.NAME,
-        Joiner.on("-").join(Runtime.topologyName(runtime), containerIndex));
+        Joiner.on("-").join(Runtime.topologyName(runtimeConfiguration), containerIndex));
 
     ObjectNode labels = mapper.createObjectNode();
-    labels.put(KubernetesConstants.TOPOLOGY_LABEL, Runtime.topologyName(runtime));
+    labels.put(KubernetesConstants.TOPOLOGY_LABEL, Runtime.topologyName(runtimeConfiguration));
 
     metadataNode.set(KubernetesConstants.METADATA_LABELS, labels);
 
@@ -285,9 +293,11 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       // The rest of the command will stay the same
       ArrayNode commandsArray = mapper.createArrayNode();
       for (JsonNode cmd : existingContainer.get("command")) {
-        String oldPattern = " " + oldContainerIndex + " " + Runtime.topologyName(runtime);
+        String oldPattern = " " + oldContainerIndex + " "
+            + Runtime.topologyName(runtimeConfiguration);
         commandsArray.add(cmd.asText().replaceAll(oldPattern,
-            " " + containerPlan.getId() + " " + Runtime.topologyName(runtime)));
+            " " + containerPlan.getId() + " "
+                + Runtime.topologyName(runtimeConfiguration)));
       }
       containerInfo.set(KubernetesConstants.COMMAND, commandsArray);
 
@@ -346,7 +356,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     // Image information for this container
     containerInfo.put(KubernetesConstants.DOCKER_IMAGE,
-        KubernetesContext.getExecutorDockerImage(config));
+        KubernetesContext.getExecutorDockerImage(configuration));
 
     // Port information for this container
     containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
@@ -400,9 +410,9 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   /**
    * Get the command that will be used to retrieve the topology JAR
    */
-  protected String getFetchCommand() {
-    return "cd /opt/heron/ && curl " + Runtime.topologyPackageUri(runtime).toString()
-            + " | tar xvz";
+  static String getFetchCommand(Config config, Config runtime) {
+    return String.format("%s %s .", Context.downloaderBinary(config),
+        Runtime.topologyPackageUri(runtime).toString());
   }
 
   /**
@@ -411,12 +421,14 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * @param containerIndex
    */
   protected String[] getExecutorCommand(int containerIndex) {
-    String[] executorCommand = SchedulerUtils.getExecutorCommand(config, runtime,
+    String[] executorCommand =
+        SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
         containerIndex, Arrays.asList(KubernetesConstants.PORT_LIST));
     String[] command = {
         "sh",
         "-c",
-        getFetchCommand() + " && " + Joiner.on(" ").join(executorCommand)
+        getFetchCommand(configuration, runtimeConfiguration)
+        + " && " + Joiner.on(" ").join(executorCommand)
     };
 
     return command;
@@ -436,7 +448,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   @Override
   public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     // grab the base pod so we can copy and modify some stuff
-    String basePodName = Runtime.topologyName(runtime) + "-0";
+    String basePodName = Runtime.topologyName(runtimeConfiguration) + "-0";
     JsonNode podConfig;
     try {
       podConfig = controller.getBasePod(basePodName);
@@ -479,7 +491,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     for (PackingPlan.ContainerPlan container : containersToRemove) {
-      String podName = Runtime.topologyName(runtime) + "-" + container.getId();
+      String podName = Runtime.topologyName(runtimeConfiguration) + "-" + container.getId();
       try {
         controller.removeContainer(podName);
       } catch (IOException ioe) {
@@ -487,5 +499,17 @@ public class KubernetesScheduler implements IScheduler, IScalable {
             + container.getId(), ioe);
       }
     }
+  }
+
+  static boolean topologyNameIsValid(String topologyName) {
+    final Matcher matcher = KubernetesConstants.VALID_POD_NAME_REGEX.matcher(topologyName);
+    return matcher.matches();
+  }
+
+  private static String getInvalidTopologyNameMessage(String topologyName) {
+    return String.format("Invalid topology name: \"%s\": "
+        + "topology names in kubernetes must consist of lower case alphanumeric "
+        + "characters, '-' or '.', and must start and end with an alphanumeric "
+        + "character.", topologyName);
   }
 }

@@ -16,6 +16,8 @@ package com.twitter.heron.api.tuple;
 
 import java.util.List;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+
 /**
  * The tuple is the main data structure in Heron. A tuple is a named list of values,
  * where each value can be any type. Tuples are dynamically typed -- the types of the fields
@@ -139,14 +141,11 @@ public interface Tuple {
    */
   List<Object> select(Fields selector);
 
-
   /**
    * Returns the global stream id (component + stream) of this tuple.
    */
-    /*
-    TODO:- One can get this using getSourceStreamId and getSourceComponent
-    public GlobalStreamId getSourceGlobalStreamid();
-    */
+
+  TopologyAPI.StreamId getSourceGlobalStreamId();
 
   /**
    * Gets the id of the component that created this tuple.

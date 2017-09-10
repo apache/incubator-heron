@@ -17,6 +17,7 @@ package com.twitter.heron.examples;
 import java.util.Map;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.examples.spout.TestWordSpout;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -48,20 +49,29 @@ public final class MultiSpoutExclamationTopology {
         .shuffleGrouping("word0")
         .shuffleGrouping("word1")
         .shuffleGrouping("word2");
-    //builder.setBolt("exclaim2", new ExclamationBolt(), 2)
-    //        .shuffleGrouping("exclaim1");
 
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    com.twitter.heron.api.Config.setComponentRam(conf, "word0", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "word1", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "word2", ByteAmount.fromMegabytes(500));
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromGigabytes(1));
+
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word0",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word1",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word2",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
     if (args != null && args.length > 0) {
-      conf.setNumWorkers(1);
+      conf.setNumWorkers(3);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       LocalCluster cluster = new LocalCluster();

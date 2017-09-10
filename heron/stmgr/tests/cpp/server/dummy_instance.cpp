@@ -40,7 +40,8 @@ DummyInstance::DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _op
       stmgr_id_(_stmgr_id),
       recvd_stmgr_pplan_(NULL),
       register_response_status(heron::proto::system::STMGR_DIDNT_REGISTER) {
-  InstallMessageHandler(&DummyInstance::HandleInstanceResponse);
+  InstallResponseHandler(new heron::proto::stmgr::RegisterInstanceRequest(),
+                         &DummyInstance::HandleInstanceResponse);
   InstallMessageHandler(&DummyInstance::HandleTupleMessage);
   InstallMessageHandler(&DummyInstance::HandleNewInstanceAssignmentMsg);
 
@@ -62,14 +63,18 @@ void DummyInstance::HandleConnect(NetworkErrorCode _status) {
   }
 }
 
-void DummyInstance::HandleClose(NetworkErrorCode) {}
+void DummyInstance::HandleClose(NetworkErrorCode) {
+  AddTimer(retry_cb_, 100);
+}
 
 heron::proto::system::StatusCode DummyInstance::GetRegisterResponseStatus() {
   return register_response_status;
 }
 
-void DummyInstance::HandleInstanceResponse(
-    heron::proto::stmgr::RegisterInstanceResponse* _message) {
+void DummyInstance::HandleInstanceResponse(void*,
+    heron::proto::stmgr::RegisterInstanceResponse* _message,
+    NetworkErrorCode status) {
+  CHECK_EQ(status, OK);
   if (_message->has_pplan()) {
     if (recvd_stmgr_pplan_) {
       delete recvd_stmgr_pplan_;
@@ -87,20 +92,18 @@ void DummyInstance::HandleNewInstanceAssignmentMsg(
     heron::proto::stmgr::NewInstanceAssignmentMessage*) {}
 
 void DummyInstance::CreateAndSendInstanceRequest() {
-  heron::proto::stmgr::RegisterInstanceRequest message;
-  heron::proto::system::Instance* instance = message.mutable_instance();
+  auto request = new heron::proto::stmgr::RegisterInstanceRequest();
+  heron::proto::system::Instance* instance = request->mutable_instance();
   instance->set_instance_id(instance_id_);
   instance->set_stmgr_id(stmgr_id_);
   instance->mutable_info()->set_task_id(task_id_);
   instance->mutable_info()->set_component_index(component_index_);
   instance->mutable_info()->set_component_name(component_name_);
-  message.set_topology_name(topology_name_);
-  message.set_topology_id(topology_id_);
-  SendMessage(message);
+  request->set_topology_name(topology_name_);
+  request->set_topology_id(topology_id_);
+  SendRequest(request, nullptr);
   return;
 }
-
-void DummyInstance::CreateAndSendTupleMessages() {}
 
 //////////////////////////////////////// DummySpoutInstance ////////////////////////////////////
 DummySpoutInstance::DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
@@ -116,12 +119,8 @@ DummySpoutInstance::DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOp
       max_msgs_to_send_(max_msgs_to_send),
       total_msgs_sent_(0),
       batch_size_(1000),
-      do_custom_grouping_(_do_custom_grouping) {}
-
-void DummySpoutInstance::HandleInstanceResponse(
-    heron::proto::stmgr::RegisterInstanceResponse* _message) {
-  DummyInstance::HandleInstanceResponse(_message);
-}
+      do_custom_grouping_(_do_custom_grouping),
+      under_backpressure_(false) {}
 
 void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
     heron::proto::stmgr::NewInstanceAssignmentMessage* _msg) {
@@ -140,23 +139,25 @@ void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
 }
 
 void DummySpoutInstance::CreateAndSendTupleMessages() {
-  for (int i = 0; (i < batch_size_) && (total_msgs_sent_ < max_msgs_to_send_);
-       ++total_msgs_sent_, ++i) {
-    heron::proto::system::HeronTupleSet tuple_set;
-    heron::proto::system::HeronDataTupleSet* data_set = tuple_set.mutable_data();
-    heron::proto::api::StreamId* tstream = data_set->mutable_stream();
-    tstream->set_id(stream_id_);
-    tstream->set_component_name(component_name_);
-    heron::proto::system::HeronDataTuple* tuple = data_set->add_tuples();
-    tuple->set_key(0);
-    // Add lots of data
-    for (size_t i = 0; i < 500; ++i) *(tuple->add_values()) = "dummy data";
+  if (!under_backpressure_) {
+    for (int i = 0; (i < batch_size_) && (total_msgs_sent_ < max_msgs_to_send_);
+         ++total_msgs_sent_, ++i) {
+      heron::proto::system::HeronTupleSet tuple_set;
+      heron::proto::system::HeronDataTupleSet* data_set = tuple_set.mutable_data();
+      heron::proto::api::StreamId* tstream = data_set->mutable_stream();
+      tstream->set_id(stream_id_);
+      tstream->set_component_name(component_name_);
+      heron::proto::system::HeronDataTuple* tuple = data_set->add_tuples();
+      tuple->set_key(0);
+      // Add lots of data
+      for (size_t i = 0; i < 500; ++i) *(tuple->add_values()) = "dummy data";
 
-    // Add custom grouping if need be
-    if (do_custom_grouping_) {
-      tuple->add_dest_task_ids(custom_grouping_dest_task_);
+      // Add custom grouping if need be
+      if (do_custom_grouping_) {
+        tuple->add_dest_task_ids(custom_grouping_dest_task_);
+      }
+      SendMessage(tuple_set);
     }
-    SendMessage(tuple_set);
   }
   if (total_msgs_sent_ != max_msgs_to_send_) {
     AddTimer([this]() { this->CreateAndSendTupleMessages(); }, 1000);
@@ -174,11 +175,6 @@ DummyBoltInstance::DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOpti
                     _component_name, _task_id, _component_index, _stmgr_id),
       expected_msgs_to_recv_(_expected_msgs_to_recv),
       msgs_recvd_(0) {}
-
-void DummyBoltInstance::HandleInstanceResponse(
-    heron::proto::stmgr::RegisterInstanceResponse* _message) {
-  DummyInstance::HandleInstanceResponse(_message);
-}
 
 void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();

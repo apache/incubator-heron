@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,15 @@ public class HealthManagerEvents {
   public static class TopologyUpdate extends Action {
     public TopologyUpdate() {
       super(TopologyUpdate.class.getSimpleName());
+    }
+  }
+
+  /**
+   * This event is created when a resolver executes restart container action
+   */
+  public static class ContainerRestart extends Action {
+    public ContainerRestart() {
+      super(ContainerRestart.class.getSimpleName());
     }
   }
 }

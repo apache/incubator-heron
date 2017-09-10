@@ -47,6 +47,7 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
+        "@com_googlecode_json_simple_json_simple//jar",
         "@commons_cli_commons_cli//jar",
         ":common",
         ":core"
@@ -75,6 +76,7 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
         "@commons_cli_commons_cli//jar",
+        "@com_googlecode_json_simple_json_simple//jar",
         ":common",
         ":core"
     ],
