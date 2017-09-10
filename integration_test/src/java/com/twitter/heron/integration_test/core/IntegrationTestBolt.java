@@ -42,8 +42,12 @@ public class IntegrationTestBolt implements IRichBolt, IUpdatable {
   private Tuple currentTupleProcessing = null;
   private OutputCollector collector;
 
-  public IntegrationTestBolt(IRichBolt delegate) {
+  //whether automatically acking should be done
+  private boolean ackAuto;
+
+  public IntegrationTestBolt(IRichBolt delegate, boolean ackAuto) {
     this.delegateBolt = delegate;
+    this.ackAuto = ackAuto;
   }
 
   @Override
@@ -61,7 +65,7 @@ public class IntegrationTestBolt implements IRichBolt, IUpdatable {
                       OutputCollector outputCollector) {
     update(context);
     this.collector = new OutputCollector(new IntegrationTestBoltCollector(outputCollector));
-    this.delegateBolt.prepare(map, context, collector);
+    this.delegateBolt.prepare(map, new TestTopologyContext(context), collector);
   }
 
   private int calculateTerminalsToReceive(TopologyContext context) {
@@ -108,7 +112,9 @@ public class IntegrationTestBolt implements IRichBolt, IUpdatable {
       currentTupleProcessing = tuple;
       delegateBolt.execute(tuple);
       // We ack only the tuples in user's logic
-      collector.ack(tuple);
+      if (this.ackAuto) {
+        collector.ack(tuple);
+      }
     }
   }
 

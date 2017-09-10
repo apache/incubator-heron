@@ -208,6 +208,7 @@ public class NIOLooper extends WakeableLooper {
                            int operation,
                            ISelectHandler callback)
       throws ClosedChannelException {
+
     SelectionKey key = channel.keyFor(selector);
 
     if (key == null) {
