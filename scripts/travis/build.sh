@@ -22,7 +22,7 @@ fi
 # verify that eggs have not been added to the repo
 # ./third_party/pex/wheel-0.23.0-py2.7.egg should be the only one
 set +e
-EGGS=`find . -name "*.egg" | grep -v "third_party/pex/wheel"`
+EGGS=`find . -name "*.egg"`
 set -e
 if [ "$EGGS" ]; then
   echo 'ERROR: The following eggs were found in the repo, '\
@@ -35,7 +35,7 @@ fi
 # verify that wheels have not been added to the repo
 # ./third_party/pex/setuptools-18.0.1-py2.py3-none-any.whl should be the only one
 set +e
-WHEELS=`find . -name "*.whl" | grep -v "third_party/pex/setuptools"`
+WHEELS=`find . -name "*.whl" | grep -v "third_party/pex/setuptools" | grep -v "third_party/pex/wheel"`
 set -e
 if [ "$WHEELS" ]; then
   echo 'ERROR: The following wheels were found in the repo, '\
