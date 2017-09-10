@@ -83,6 +83,9 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   private BaseWindowedBolt withWindowLength(Count count) {
+    if (count == null) {
+      throw new IllegalArgumentException("Window length cannot be set null");
+    }
     if (count.value <= 0) {
       throw new IllegalArgumentException("Window length must be positive [" + count + "]");
     }
@@ -91,7 +94,10 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   private BaseWindowedBolt withWindowLength(Duration duration) {
-    if (duration.isNegative()) {
+    if (duration == null) {
+      throw new IllegalArgumentException("Window length cannot be set null");
+    }
+    if (duration.isNegative() || duration.isZero()) {
       throw new IllegalArgumentException("Window length must be positive [" + duration + "]");
     }
 
@@ -101,6 +107,9 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   private BaseWindowedBolt withSlidingInterval(Count count) {
+    if (count == null) {
+      throw new IllegalArgumentException("Sliding interval cannot be set null");
+    }
     if (count.value <= 0) {
       throw new IllegalArgumentException("Sliding interval must be positive [" + count + "]");
     }
@@ -109,7 +118,10 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   private BaseWindowedBolt withSlidingInterval(Duration duration) {
-    if (duration.isNegative()) {
+    if (duration == null) {
+      throw new IllegalArgumentException("Sliding interval cannot be set null");
+    }
+    if (duration.isNegative() || duration.isZero()) {
       throw new IllegalArgumentException("Sliding interval must be positive [" + duration + "]");
     }
     windowConfiguration.put(WindowingConfigs.TOPOLOGY_BOLTS_SLIDING_INTERVAL_DURATION_MS,
@@ -194,8 +206,9 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   /**
-   * Specify a field in the tuple that represents the timestamp as a long value. If this
-   * field is not present in the incoming tuple, an {@link IllegalArgumentException} will be thrown.
+   * Specify a field in the tuple that represents the timestamp as a long value. The timestamp
+   * should also be in milliseconds. If this field is not present in the
+   * incoming tuple, an {@link IllegalArgumentException} will be thrown.
    *
    * @param fieldName the name of the field that contains the timestamp
    */
@@ -210,6 +223,9 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
    */
   @SuppressWarnings("HiddenField")
   public BaseWindowedBolt withTimestampExtractor(TimestampExtractor timestampExtractor) {
+    if (timestampExtractor == null) {
+      throw new IllegalArgumentException("Timestamp extractor cannot be set to null");
+    }
     if (this.timestampExtractor != null) {
       throw new IllegalArgumentException(
           "Window is already configured with a timestamp " + "extractor: " + timestampExtractor);
@@ -234,6 +250,9 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
    * @param streamId the name of the stream used to emit late tuples on
    */
   public BaseWindowedBolt withLateTupleStream(String streamId) {
+    if (streamId == null) {
+      throw new IllegalArgumentException("Cannot set late tuple stream id to null");
+    }
     windowConfiguration.put(WindowingConfigs.TOPOLOGY_BOLTS_LATE_TUPLE_STREAM, streamId);
     return this;
   }
@@ -247,6 +266,12 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
    * @param duration the max lag duration
    */
   public BaseWindowedBolt withLag(Duration duration) {
+    if (duration == null) {
+      throw new IllegalArgumentException("Lag duration cannot be set null");
+    }
+    if (duration.isNegative() || duration.isZero()) {
+      throw new IllegalArgumentException("Lag duration must be positive [" + duration + "]");
+    }
     windowConfiguration.put(WindowingConfigs.TOPOLOGY_BOLTS_TUPLE_TIMESTAMP_MAX_LAG_MS,
         duration.toMillis());
     return this;
@@ -259,6 +284,12 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
    * @param interval the interval at which watermark events are generated
    */
   public BaseWindowedBolt withWatermarkInterval(Duration interval) {
+    if (interval == null) {
+      throw new IllegalArgumentException("Watermark interval cannot be set null");
+    }
+    if (interval.isNegative() || interval.isZero()) {
+      throw new IllegalArgumentException("Watermark interval must be positive [" + interval + "]");
+    }
     windowConfiguration.put(WindowingConfigs.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS,
         interval.toMillis());
     return this;
