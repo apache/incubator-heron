@@ -20,7 +20,6 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.dsl.Builder;
 import com.twitter.heron.dsl.Context;
 import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.WindowConfig;
 
 /**
@@ -53,12 +52,11 @@ public final class WordCountDslTopology {
     }
     WindowConfig windowConfig = WindowConfig.createCountWindow(10);
     Builder builder = Builder.CreateBuilder();
-    Streamlet<String> source = Streamlet.createStreamlet(() -> "Mary had a little lamb");
-    builder.addSource(source);
-    source.flatMap((word) -> Arrays.asList(word.split("\\s+")))
-          .mapToKV((word) -> new KeyValue<>(word, 1))
-          .reduceByKeyAndWindow(windowConfig, (x, y) -> x + y)
-          .log();
+    builder.newStreamlet(() -> "Mary had a little lamb")
+        .flatMap((word) -> Arrays.asList(word.split("\\s+")))
+        .mapToKV((word) -> new KeyValue<>(word, 1))
+        .reduceByKeyAndWindow(windowConfig, (x, y) -> x + y)
+        .log();
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
     Context context = Context.CreateContext();
