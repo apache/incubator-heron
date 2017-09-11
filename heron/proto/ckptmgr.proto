@@ -1,3 +1,4 @@
+syntax = "proto2";
 package heron.proto.ckptmgr;
 option java_package = "com.twitter.heron.proto.ckptmgr";
 option java_outer_classname = "CheckpointManager";

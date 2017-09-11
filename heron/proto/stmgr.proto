@@ -5,7 +5,6 @@ option java_outer_classname = "StreamManager";
 
 import "common.proto";
 import "physical_plan.proto";
-import "tuple.proto";
 
 //
 // Messages sent by topologymaster

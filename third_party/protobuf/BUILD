@@ -2,12 +2,12 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "protobuf"
-package_version = "3.1.0"
+pkg_name = "protobuf"
+pkg_version = "3.1.0"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
-package_patch = package_name + "-" + package_version + ".patch"
+pkg_file = pkg_name + "-" + pkg_version + ".tar.gz"
+pkg_dir = pkg_name + "-" + pkg_version
+pkg_patch = pkg_name + "-" + pkg_version + ".patch"
 
 gmock_name = "gmock"
 gmock_version = "1.7.0"
@@ -16,7 +16,7 @@ gmock_dir = gmock_name + "-" + gmock_version
 
 genrule(
     name = "protobuf-srcs",
-    srcs = [package_file, package_patch, gmock_file],
+    srcs = [pkg_file, pkg_patch, gmock_file],
     outs = [
         "bin/protoc",
 
@@ -101,9 +101,9 @@ genrule(
         "mkdir -p $$TMP_DIR",
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
-        "tar xfz " + package_file,
-        "patch -d " + package_dir + " -p1 < " + package_patch,
-        "cd " + package_dir,
+        "tar xfz " + pkg_file,
+        "patch -d " + pkg_dir + " -p1 < " + pkg_patch,
+        "cd " + pkg_dir,
         "unzip -q -o " + "../" + gmock_file,
         "mv " + gmock_dir + " gmock",
         "./autogen.sh",
