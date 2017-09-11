@@ -50,12 +50,11 @@ public final class WordCountDslTopology {
     if (args.length > 1) {
       parallelism = Integer.parseInt(args[1]);
     }
-    WindowConfig windowConfig = WindowConfig.createCountWindow(10);
     Builder builder = Builder.CreateBuilder();
     builder.newStreamlet(() -> "Mary had a little lamb")
         .flatMap((word) -> Arrays.asList(word.split("\\s+")))
         .mapToKV((word) -> new KeyValue<>(word, 1))
-        .reduceByKeyAndWindow(windowConfig, (x, y) -> x + y)
+        .reduceByKeyAndWindow(WindowConfig.TumblingWindow(10), (x, y) -> x + y)
         .log();
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);

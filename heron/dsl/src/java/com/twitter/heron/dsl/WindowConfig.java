@@ -30,7 +30,7 @@ public interface WindowConfig {
    * @param windowDuration the duration of the tumbling window
    * @return WindowConfig that can be passed to the transformation
    */
-  static WindowConfig createTimeWindow(Duration windowDuration) {
+  static WindowConfig TumblingWindow(Duration windowDuration) {
     return new WindowConfigImpl(windowDuration, windowDuration);
   }
 
@@ -41,7 +41,7 @@ public interface WindowConfig {
    * @param slideInterval The sliding duration
    * @return WindowConfig that can be passed to the transformation
    */
-  static WindowConfig createTimeWindow(Duration windowDuration, Duration slideInterval) {
+  static WindowConfig SlidingWindow(Duration windowDuration, Duration slideInterval) {
     return new WindowConfigImpl(windowDuration, slideInterval);
   }
 
@@ -50,7 +50,7 @@ public interface WindowConfig {
    * @param windowSize the size of the tumbling window
    * @return WindowConfig that can be passed to the transformation
    */
-  static WindowConfig createCountWindow(int windowSize) {
+  static WindowConfig TumblingWindow(int windowSize) {
     return new WindowConfigImpl(windowSize, windowSize);
   }
 
@@ -61,7 +61,7 @@ public interface WindowConfig {
    * @param slideSize The slide size
    * @return WindowConfig that can be passed to the transformation
    */
-  static WindowConfig createCountWindow(int windowSize, int slideSize) {
+  static WindowConfig SlidingWindow(int windowSize, int slideSize) {
     return new WindowConfigImpl(windowSize, slideSize);
   }
 }
