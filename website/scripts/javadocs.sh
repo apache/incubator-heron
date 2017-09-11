@@ -46,7 +46,7 @@ $JAVADOC $FLAGS \
   -windowtitle "Heron Java API" \
   -doctitle "The Heron Java API" \
   -overview $OVERVIEW_HTML_FILE \
-  -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
+  -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES || true
 
 # Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
 # for the following two reasons:
