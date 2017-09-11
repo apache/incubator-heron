@@ -14,5 +14,5 @@ def heron_examples_conf_files():
 
 def heron_examples_lib_files():
     return [
-        "//heron/examples/src/java:heron-examples",
+        "//examples/src/java:heron-examples",
     ]
