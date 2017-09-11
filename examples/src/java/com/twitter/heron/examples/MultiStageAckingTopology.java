@@ -31,6 +31,7 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.simulator.Simulator;
 
 /**
  * This is three stage topology. Spout emits to bolt to bolt.
@@ -79,8 +80,16 @@ public final class MultiStageAckingTopology {
         ExampleResources.getContainerRam(3 * parallelism, parallelism));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
-    conf.setNumStmgrs(parallelism);
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    if (args != null && args.length > 0) {
+      conf.setNumStmgrs(parallelism);
+      HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    } else {
+      Simulator simulator = new Simulator();
+      simulator.submitTopology("test", conf, builder.createTopology());
+      Utils.sleep(10000);
+      simulator.killTopology("test");
+      simulator.shutdown();
+    }
   }
 
   public static class AckingTestWordSpout extends BaseRichSpout {

@@ -28,7 +28,9 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.spout.TestWordSpout;
+import com.twitter.heron.simulator.Simulator;
 
 /**
  * This is a basic example of a Storm topology.
@@ -65,8 +67,18 @@ public final class ExclamationTopology {
         ExampleResources.getContainerRam(spouts + bolts, parallelism));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
-    conf.setNumStmgrs(parallelism);
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    if (args != null && args.length > 0) {
+      conf.setNumStmgrs(parallelism);
+      HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    } else {
+      System.out.println("Topology name not provided as an argument, running in simulator mode.");
+      Simulator simulator = new Simulator();
+      simulator.submitTopology("test", conf, builder.createTopology());
+      Utils.sleep(10000);
+      simulator.killTopology("test");
+      simulator.shutdown();
+    }
+
 
   }
 
