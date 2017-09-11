@@ -36,8 +36,8 @@ import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.LogStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
-import com.twitter.heron.dsl.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
 
