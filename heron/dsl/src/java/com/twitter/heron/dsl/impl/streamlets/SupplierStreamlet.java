@@ -48,7 +48,7 @@ public class SupplierStreamlet<R> extends StreamletImpl<R> {
   }
 
   @Override
-  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+  public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }

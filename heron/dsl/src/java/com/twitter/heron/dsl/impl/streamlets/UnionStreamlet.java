@@ -48,7 +48,7 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
   }
 
   @Override
-  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+  public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (!left.isBuilt() || !right.isBuilt()) {
       return false;
     }

@@ -277,7 +277,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     if (built) {
       throw new RuntimeException("Logic Error While building " + getName());
     }
-    if (build_this(bldr, stageNames)) {
+    if (doBuild(bldr, stageNames)) {
       built = true;
       for (StreamletImpl<?> streamlet : children) {
         streamlet.build(bldr, stageNames);
@@ -288,7 +288,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   // This is the main interface that every Streamlet implementation should implement
   // The main tasks are generally to make sure that appropriate names/partitions are
   // computed and add a spout/bolt to the TopologyBuilder
-  public abstract boolean build_this(TopologyBuilder bldr, Set<String> stageNames);
+  protected abstract boolean doBuild(TopologyBuilder bldr, Set<String> stageNames);
 
   public  <T> void addChild(StreamletImpl<T> child) {
     children.add(child);

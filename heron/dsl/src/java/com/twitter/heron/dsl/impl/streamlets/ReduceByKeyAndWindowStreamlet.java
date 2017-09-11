@@ -60,7 +60,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<KeyedWi
   }
 
   @Override
-  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+  public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
       calculateName(stageNames);
     }

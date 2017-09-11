@@ -22,10 +22,15 @@ import java.io.Serializable;
  * the KeyValue class serializable to allow it to be serialized between
  * components.
  */
-public class KeyValue<K, V> implements Serializable {
+public final class KeyValue<K, V> implements Serializable {
   private static final long serialVersionUID = -7120757965590727554L;
   private K key;
   private V value;
+
+  static <R, T> KeyValue<R, T> create(R k, T v) {
+    return new KeyValue<R, T>(k, v);
+  }
+
   public KeyValue(K k, V v) {
     this.key = k;
     this.value = v;

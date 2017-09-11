@@ -88,7 +88,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   }
 
   @Override
-  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
+  public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (!left.isBuilt() || !right.isBuilt()) {
       return false;
     }

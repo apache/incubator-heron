@@ -38,8 +38,8 @@ public class KVMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   }
 
   @Override
-  public boolean build_this(TopologyBuilder bldr, Set<String> stageNames) {
-    boolean retval = this.delegate.build_this(bldr, stageNames);
+  public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    boolean retval = this.delegate.doBuild(bldr, stageNames);
     setName(delegate.getName());
     return retval;
   }
