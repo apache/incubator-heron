@@ -30,5 +30,5 @@ public interface Builder {
    * All sources of the computation should register using addSource.
    * @param newSource The source Streamlet that is being registered
    */
-  <R> void addSource(Streamlet<R> newSource);
+  <R> Streamlet<R> newStreamlet(SerializableSupplier<R> supplier);
 }

@@ -17,7 +17,6 @@ package com.twitter.heron.dsl;
 import java.util.List;
 
 import com.twitter.heron.classification.InterfaceStability;
-import com.twitter.heron.dsl.impl.StreamletImpl;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -65,10 +64,6 @@ public interface Streamlet<R> {
    * @return the number of partitions of this Streamlet
    */
   int getNumPartitions();
-
-  static <T> Streamlet<T> createStreamlet(SerializableSupplier<T> supplier) {
-    return StreamletImpl.createSupplierStreamlet(supplier).setNumPartitions(1);
-  }
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet

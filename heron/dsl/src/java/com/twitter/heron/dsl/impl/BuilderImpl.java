@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.Builder;
+import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
 
 /**
@@ -37,10 +38,11 @@ public final class BuilderImpl implements Builder {
   }
 
   @Override
-  public <R> void addSource(Streamlet<R> newSource) {
-    StreamletImpl<R> source = (StreamletImpl<R>) newSource;
-    sources.add(source);
-    return;
+  public <R> Streamlet<R> newStreamlet(SerializableSupplier<R> supplier) {
+    StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
+    retval.setNumPartitions(1);
+    sources.add(retval);
+    return retval;
   }
 
   /**
