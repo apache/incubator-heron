@@ -380,7 +380,7 @@ filegroup(
 
 filegroup(
     name = "hstorm",
-    srcs = ["//heron/storm/src/java:heron-storm"],
+    srcs = ["//storm-compatibility/src/java:heron-storm"],
 )
 
 filegroup(
