@@ -14,6 +14,7 @@
 package com.twitter.heron.scheduler;
 
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -34,6 +35,8 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.scheduler.utils.Runtime;
@@ -45,8 +48,8 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.TMasterException;
 import com.twitter.heron.spi.utils.TMasterUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS;
 import static com.twitter.heron.api.Config.TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS;
@@ -141,7 +144,7 @@ public class UpdateTopologyManager implements Closeable {
     Preconditions.checkState(newContainerCount + removableContainerCount == 0
         || scalableScheduler.isPresent(), message);
 
-    TopologyAPI.Topology topology = stateManager.getTopology(topologyName);
+    TopologyAPI.Topology topology = getTopology(stateManager, topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
 
     // fetch the topology, which will need to be updated
@@ -150,7 +153,8 @@ public class UpdateTopologyManager implements Closeable {
 
     // deactivate and sleep
     if (initiallyRunning) {
-      deactivateTopology(stateManager, updatedTopology);
+      // Update the topology since the state should have changed from RUNNING to PAUSED
+      updatedTopology = deactivateTopology(stateManager, updatedTopology, proposedPackingPlan);
     }
 
     // request new resources if necessary. Once containers are allocated we should make the changes
@@ -167,11 +171,12 @@ public class UpdateTopologyManager implements Closeable {
     logFine("Update new PackingPlan: %s",
         stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
 
-    // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
-    logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
-
     // reactivate topology
     if (initiallyRunning) {
+      // wait before reactivating to give the tmaster a chance to receive the packing update and
+      // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
+      // and/or possibly even update the packing plan directly
+      SysUtils.sleep(Duration.ofSeconds(10));
       reactivateTopology(stateManager, updatedTopology, removableContainerCount);
     }
 
@@ -181,9 +186,10 @@ public class UpdateTopologyManager implements Closeable {
   }
 
   @VisibleForTesting
-  void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
-                          final TopologyAPI.Topology topology)
-      throws InterruptedException {
+  TopologyAPI.Topology deactivateTopology(SchedulerStateManagerAdaptor stateManager,
+                          final TopologyAPI.Topology topology,
+                          PackingPlan proposedPackingPlan)
+      throws InterruptedException, TMasterException {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long deactivateSleepSeconds = TopologyUtils.getConfigWithDefault(
@@ -192,12 +198,9 @@ public class UpdateTopologyManager implements Closeable {
     logInfo("Deactivating topology %s before handling update request", topology.getName());
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    Preconditions.checkState(TMasterUtils.transitionTopologyState(
-        topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
-        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig),
-        String.format("Failed to deactivate topology %s. Aborting update request",
-            topology.getName()));
-
+    TMasterUtils.transitionTopologyState(
+            topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
+            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
     if (deactivateSleepSeconds > 0) {
       logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
           topology.getName(), deactivateSleepSeconds);
@@ -205,6 +208,8 @@ public class UpdateTopologyManager implements Closeable {
     } else {
       logInfo("Deactivated topology %s.", topology.getName());
     }
+
+    return getUpdatedTopology(topology.getName(), proposedPackingPlan, stateManager);
   }
 
   @VisibleForTesting
@@ -218,7 +223,7 @@ public class UpdateTopologyManager implements Closeable {
         topologyConfig, TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS, 10 * 60L);
     long delaySeconds = 10;
 
-    logInfo("Waiting for packing plan to be set before re-activating topology %s. "
+    logInfo("Waiting for physical plan to be set before re-activating topology %s. "
             + "Will wait up to %s seconds for packing plan to be reset",
         topology.getName(), waitSeconds);
     Enabler enabler = new Enabler(stateManager, topology, waitSeconds, removableContainerCount);
@@ -277,21 +282,24 @@ public class UpdateTopologyManager implements Closeable {
             + "Reactivating topology after scaling event", topologyName);
         NetworkUtils.TunnelConfig tunnelConfig =
             NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-        boolean reactivated = TMasterUtils.transitionTopologyState(
-            topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
-            TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
-
-        cancel();
-
-        if (removableContainerCount < 1) {
-          Preconditions.checkState(reactivated, String.format("Topology reactivation failed for "
-              + "topology %s after topology update", topologyName));
-        } else {
-          Preconditions.checkState(reactivated, String.format("Topology reactivation failed for "
-              + "topology %s after topology update but before releasing %d no longer used "
-              + "containers", topologyName, removableContainerCount));
+        try {
+          TMasterUtils.transitionTopologyState(
+              topologyName, TMasterUtils.TMasterCommand.ACTIVATE, stateManager,
+              TopologyAPI.TopologyState.PAUSED, TopologyAPI.TopologyState.RUNNING, tunnelConfig);
+        } catch (TMasterException e) {
+          if (removableContainerCount < 1) {
+            throw new TopologyRuntimeManagementException(String.format(
+                "Topology reactivation failed for topology %s after topology update",
+                topologyName), e);
+          } else {
+            throw new TopologyRuntimeManagementException(String.format(
+                "Topology reactivation failed for topology %s after topology "
+                  + "update but before releasing %d no longer used containers",
+                topologyName, removableContainerCount), e);
+          }
+        } finally {
+          cancel();
         }
-        return;
       }
 
       if (System.currentTimeMillis() > this.timeoutTime) {
@@ -306,11 +314,10 @@ public class UpdateTopologyManager implements Closeable {
     }
   }
 
-  @VisibleForTesting
-  TopologyAPI.Topology getUpdatedTopology(String topologyName,
-                                          PackingPlan proposedPackingPlan,
-                                          SchedulerStateManagerAdaptor stateManager) {
-    TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
+  private TopologyAPI.Topology getUpdatedTopology(String topologyName,
+                                                  PackingPlan proposedPackingPlan,
+                                                  SchedulerStateManagerAdaptor stateManager) {
+    TopologyAPI.Topology updatedTopology = getTopology(stateManager, topologyName);
     Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
     return mergeTopology(updatedTopology, proposedComponentCounts);
   }
@@ -319,6 +326,16 @@ public class UpdateTopologyManager implements Closeable {
   PackingPlans.PackingPlan getPackingPlan(SchedulerStateManagerAdaptor stateManager,
                                           String topologyName) {
     return stateManager.getPackingPlan(topologyName);
+  }
+
+  /**
+   * Returns the topology. It's key that we get the topology from the physical plan to reflect any
+   * state changes since launch. The stateManager.getTopology(name) method returns the topology from
+   * the time of submission. See additional commentary in topology.proto and physical_plan.proto.
+   */
+  @VisibleForTesting
+  TopologyAPI.Topology getTopology(SchedulerStateManagerAdaptor stateManager, String topologyName) {
+    return stateManager.getPhysicalPlan(topologyName).getTopology();
   }
 
   /**

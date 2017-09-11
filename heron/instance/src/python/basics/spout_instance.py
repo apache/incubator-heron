@@ -17,14 +17,18 @@ import Queue
 import time
 import collections
 
-from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.tuple import TupleHelper
-from heron.common.src.python.utils.metrics import global_metrics, SpoutMetrics
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.proto import topology_pb2, tuple_pb2
-from heron.pyheron.src.python import Stream
+from heronpy.api.stream import Stream
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.stateful_component import StatefulComponent
 
-import heron.common.src.python.constants as constants
+from heron.common.src.python.utils.log import Log
+
+from heron.instance.src.python.utils.metrics import SpoutMetrics
+from heron.instance.src.python.utils.tuple import TupleHelper
+
+from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
+
+import heron.instance.src.python.utils.system_constants as system_constants
 
 from .base_instance import BaseInstance
 
@@ -41,12 +45,14 @@ class SpoutInstance(BaseInstance):
 
     context = self.pplan_helper.context
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
-    self.serializer = SerializerHelper.get_serializer(context)
 
     # acking related
-    self.acking_enabled = context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_ACKING, False)
+    mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
+                                            api_constants.TopologyReliabilityMode.ATMOST_ONCE)
+    self.acking_enabled = bool(mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE)
     self.enable_message_timeouts = \
-      context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
+      context.get_cluster_config().get(api_constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
+    self._initialized_metrics_and_tasks = False
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
     Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
 
@@ -59,28 +65,21 @@ class SpoutInstance(BaseInstance):
     spout_impl_class = super(SpoutInstance, self).load_py_instance(is_spout=True)
     self.spout_impl = spout_impl_class(delegate=self)
 
-  def start(self):
+  def start_component(self, stateful_state):
     context = self.pplan_helper.context
-    self.spout_metrics.register_metrics(context)
+    if not self._initialized_metrics_and_tasks:
+      self.spout_metrics.register_metrics(context)
+    if self.is_stateful and isinstance(self.spout_impl, StatefulComponent):
+      self.spout_impl.init_state(stateful_state)
     self.spout_impl.initialize(config=context.get_cluster_config(), context=context)
-    context.invoke_hook_prepare()
-
-    # prepare global metrics
-    interval = float(self.sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
-    collector = context.get_metrics_collector()
-    global_metrics.init(collector, interval)
-
-    # prepare for custom grouping
-    self.pplan_helper.prepare_custom_grouping(context)
-
-    self._add_spout_task()
+    if not self._initialized_metrics_and_tasks:
+      self._add_spout_task()
+    self._initialized_metrics_and_tasks = True
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
-  def stop(self):
-    self.pplan_helper.context.invoke_hook_cleanup()
+  def stop_component(self):
     self.spout_impl.close()
-
-    self.looper.exit_loop()
+    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
   def invoke_activate(self):
     Log.info("Spout is activated")
@@ -155,7 +154,7 @@ class SpoutInstance(BaseInstance):
       data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
 
-    serialize_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+    serialize_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
     self.spout_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
     super(SpoutInstance, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
@@ -170,11 +169,12 @@ class SpoutInstance(BaseInstance):
 
   # pylint: disable=no-self-use
   def process_incoming_tuples(self):
-    Log.debug("In spout, process_incoming_tuples() don't do anything")
+    self.looper.wake_up()
 
-  def _read_tuples_and_execute(self):
+  def _read_tuples(self):
     start_cycle_time = time.time()
-    ack_batch_time = self.sys_config[constants.INSTANCE_ACK_BATCH_TIME_MS] * constants.MS_TO_SEC
+    ack_batch_time = self.sys_config[system_constants.INSTANCE_ACK_BATCH_TIME_MS] * \
+                     system_constants.MS_TO_SEC
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
@@ -191,6 +191,8 @@ class SpoutInstance(BaseInstance):
             self._handle_ack_tuple(fail_tuple, False)
         else:
           Log.error("Received tuple neither data nor control")
+      elif isinstance(tuples, ckptmgr_pb2.InitiateStatefulCheckpoint):
+        self.handle_initiate_stateful_checkpoint(tuples, self.spout_impl)
       else:
         Log.error("Received tuple not instance of HeronTupleSet")
 
@@ -201,20 +203,21 @@ class SpoutInstance(BaseInstance):
   def _produce_tuple(self):
     # TOPOLOGY_MAX_SPOUT_PENDING must be provided (if not included, raise KeyError)
     max_spout_pending = \
-      self.pplan_helper.context.get_cluster_config().get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
+      self.pplan_helper.context.get_cluster_config().get(api_constants.TOPOLOGY_MAX_SPOUT_PENDING)
 
     total_tuples_emitted_before = self.total_tuples_emitted
     total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
     emit_batch_time = \
-      float(self.sys_config[constants.INSTANCE_EMIT_BATCH_TIME_MS]) * constants.MS_TO_SEC
-    emit_batch_size = int(self.sys_config[constants.INSTANCE_EMIT_BATCH_SIZE_BYTES])
+      float(self.sys_config[system_constants.INSTANCE_EMIT_BATCH_TIME_MS]) * \
+      system_constants.MS_TO_SEC
+    emit_batch_size = int(self.sys_config[system_constants.INSTANCE_EMIT_BATCH_SIZE_BYTES])
     start_cycle_time = time.time()
 
     while (self.acking_enabled and max_spout_pending > len(self.in_flight_tuples)) or \
         not self.acking_enabled:
       start_time = time.time()
       self.spout_impl.next_tuple()
-      next_tuple_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+      next_tuple_latency_ns = (time.time() - start_time) * system_constants.SEC_TO_NS
       self.spout_metrics.next_tuple(next_tuple_latency_ns)
 
       if (self.total_tuples_emitted == total_tuples_emitted_before) or \
@@ -233,6 +236,8 @@ class SpoutInstance(BaseInstance):
       if not self._is_topology_running():
         return
 
+      self._read_tuples()
+
       if self._should_produce_tuple():
         self._produce_tuple()
         self.output_helper.send_out_tuples()
@@ -241,7 +246,6 @@ class SpoutInstance(BaseInstance):
         self.spout_metrics.update_out_queue_full_count()
 
       if self.acking_enabled:
-        self._read_tuples_and_execute()
         self.spout_metrics.update_pending_tuples_count(len(self.in_flight_tuples))
       else:
         self._do_immediate_acks()
@@ -276,7 +280,7 @@ class SpoutInstance(BaseInstance):
       return False
 
     max_spout_pending = \
-      self.pplan_helper.context.get_cluster_config().get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
+      self.pplan_helper.context.get_cluster_config().get(api_constants.TOPOLOGY_MAX_SPOUT_PENDING)
 
     if not self.acking_enabled and self.output_helper.is_out_queue_available():
       return True
@@ -290,12 +294,14 @@ class SpoutInstance(BaseInstance):
 
   def _look_for_timeouts(self):
     spout_config = self.pplan_helper.context.get_cluster_config()
-    timeout_sec = spout_config.get(constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS)
-    n_bucket = self.sys_config.get(constants.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS)
+    timeout_sec = spout_config.get(api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS)
+    n_bucket = self.sys_config.get(system_constants.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS)
     now = time.time()
 
     timeout_lst = []
-    for key, tuple_info in self.in_flight_tuples.iteritems():
+    while self.in_flight_tuples:
+      key = next(iter(self.in_flight_tuples))
+      tuple_info = self.in_flight_tuples[key]
       if tuple_info.is_expired(now, timeout_sec):
         timeout_lst.append(tuple_info)
         self.in_flight_tuples.pop(key)
@@ -306,7 +312,7 @@ class SpoutInstance(BaseInstance):
     for tuple_info in timeout_lst:
       self.spout_metrics.timeout_tuple(tuple_info.stream_id)
       self._invoke_fail(tuple_info.tuple_id, tuple_info.stream_id,
-                        timeout_sec * constants.SEC_TO_NS)
+                        timeout_sec * system_constants.SEC_TO_NS)
 
     # register this method to timer again
     self.looper.register_timer_task_in_sec(self._look_for_timeouts, float(timeout_sec) / n_bucket)
@@ -325,7 +331,7 @@ class SpoutInstance(BaseInstance):
 
       # pylint: disable=no-member
       if tuple_info.tuple_id is not None:
-        latency_ns = (time.time() - tuple_info.insertion_time) * constants.SEC_TO_NS
+        latency_ns = (time.time() - tuple_info.insertion_time) * system_constants.SEC_TO_NS
         if is_success:
           self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, latency_ns)
         else:

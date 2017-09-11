@@ -109,6 +109,7 @@ public final class JavaCheckstyle {
   private static String[] getHeronSourceFiles(String extraActionFile) {
     return getSourceFiles(extraActionFile, Predicates.not(Predicates.or(
         Predicates.containsPattern("heron/storm.src.java"),
+        Predicates.containsPattern("tools/test/LcovMerger"),
         Predicates.containsPattern("contrib")
     )));
   }

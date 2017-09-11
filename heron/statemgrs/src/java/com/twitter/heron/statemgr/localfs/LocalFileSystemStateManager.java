@@ -26,13 +26,14 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
@@ -187,6 +188,16 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location, String topologyName) {
+    // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+    // This is because when running in simulator we control when a tmaster dies and
+    // comes up deterministically.
+    LOG.info("setMetricsCacheLocation: ");
+    return setData(StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
     return setData(StateLocation.TOPOLOGY, topologyName, topology.toByteArray(), false);
   }
@@ -213,6 +224,12 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint, String topologyName) {
+    return setData(StateLocation.STATEFUL_CHECKPOINT, topologyName, checkpoint.toByteArray(), true);
+  }
+
+  @Override
   protected Lock getLock(String path) {
     return new FileSystemLock(path);
   }
@@ -226,7 +243,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(),
+        .put(Key.STATEMGR_ROOT_PATH,
             System.getProperty("user.home") + "/.herondata/repository/state/local")
         .build();
     LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();

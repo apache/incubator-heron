@@ -29,7 +29,8 @@ import backtype.storm.hooks.info.SpoutFailInfo;
 import backtype.storm.task.TopologyContext;
 
 public interface ITaskHook {
-  void prepare(Map<String, Object> conf, TopologyContext context);
+  @SuppressWarnings("rawtypes")
+  void prepare(Map conf, TopologyContext context);
 
   void cleanup();
 

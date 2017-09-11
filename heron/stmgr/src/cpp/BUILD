@@ -5,6 +5,7 @@ cc_library(
     srcs = [
         "grouping/all-grouping.cpp",
         "grouping/custom-grouping.cpp",
+        "grouping/direct-grouping.cpp",
         "grouping/fields-grouping.cpp",
         "grouping/grouping.cpp",
         "grouping/lowest-grouping.cpp",
@@ -14,6 +15,7 @@ cc_library(
         "grouping/grouping.h",
         "grouping/all-grouping.h",
         "grouping/custom-grouping.h",
+        "grouping/direct-grouping.h",
         "grouping/fields-grouping.h",
         "grouping/lowest-grouping.h",
         "grouping/shuffle-grouping.h",
@@ -40,10 +42,12 @@ cc_library(
         "util/rotating-map.cpp",
         "util/tuple-cache.cpp",
         "util/xor-manager.cpp",
+        "util/neighbour-calculator.cpp",
 
         "util/rotating-map.h",
         "util/tuple-cache.h",
         "util/xor-manager.h",
+        "util/neighbour-calculator.h",
     ],
     copts = [
         "-Iheron",
@@ -71,6 +75,9 @@ cc_library(
         "manager/stmgr.cpp",
         "manager/stream-consumers.cpp",
         "manager/tmaster-client.cpp",
+        "manager/ckptmgr-client.cpp",
+        "manager/checkpoint-gateway.cpp",
+        "manager/stateful-restorer.cpp",
 
         "manager/stmgr-client.h",
         "manager/stmgr-clientmgr.h",
@@ -78,6 +85,9 @@ cc_library(
         "manager/stmgr.h",
         "manager/stream-consumers.h",
         "manager/tmaster-client.h",
+        "manager/ckptmgr-client.h",
+        "manager/checkpoint-gateway.h",
+        "manager/stateful-restorer.h",
     ],
     copts = [
         "-Iheron",

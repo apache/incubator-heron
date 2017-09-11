@@ -45,9 +45,6 @@ heron.metrics.max.exceptions.per.message.count: 1024
 # Configs related to Stream Manager, starts with heron.streammgr.*
 ################################################################################
 
-# Maximum size in bytes of a packet to be send out from stream manager
-heron.streammgr.packet.maximum.size.bytes: 102400
-
 # The tuple cache (used for batching) can be drained in two ways:
 # (a) Time based
 # (b) size based
@@ -55,11 +52,21 @@ heron.streammgr.packet.maximum.size.bytes: 102400
 # The frequency in ms to drain the tuple cache in stream manager
 heron.streammgr.cache.drain.frequency.ms: 10
 
+# The sized based threshold in MB for buffering data tuples
+# waiting for checkpoint markers before giving up
+heron.streammgr.stateful.buffer.size.mb: 100
+
 # The sized based threshold in MB for draining the tuple cache
 heron.streammgr.cache.drain.size.mb: 100
 
 # For efficient acknowledgements
 heron.streammgr.xormgr.rotatingmap.nbuckets: 3
+
+# The max number of messages in the memory pool for each message type
+heron.streammgr.mempool.max.message.number: 512
+
+# The max reconnect attempts to other stream managers for stream manager client
+heron.streammgr.client.reconnect.max.attempts: 300
 
 # The reconnect interval to other stream managers in secs for stream manager client
 heron.streammgr.client.reconnect.interval.sec: 1
@@ -68,7 +75,7 @@ heron.streammgr.client.reconnect.interval.sec: 1
 heron.streammgr.client.reconnect.tmaster.interval.sec: 10
 
 # The maximum packet size in MB of stream manager's network options
-heron.streammgr.network.options.maximum.packet.mb: 100
+heron.streammgr.network.options.maximum.packet.mb: 10
 
 # The interval in seconds to send heartbeat
 heron.streammgr.tmaster.heartbeat.interval.sec: 10
@@ -84,10 +91,10 @@ heron.streammgr.connection.write.batch.size.mb: 1
 heron.streammgr.network.backpressure.threshold: 3
 
 # High water mark on the num in MB that can be left outstanding on a connection
-heron.streammgr.network.backpressure.highwatermark.mb: 50
+heron.streammgr.network.backpressure.highwatermark.mb: 100
 
 # Low water mark on the num in MB that can be left outstanding on a connection
-heron.streammgr.network.backpressure.lowwatermark.mb: 30
+heron.streammgr.network.backpressure.lowwatermark.mb: 50
 
 ################################################################################
 # Configs related to Topology Master, starts with heron.tmaster.*
@@ -153,9 +160,15 @@ heron.metricsmgr.network.options.socket.send.buffer.size.bytes: 6553600
 # The maximum socket's received buffer size in bytes of metricsmgr's network options
 heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 8738000
 
+# The maximum packet size that metrics mgr can read
+heron.metricsmgr.network.options.maximum.packetsize.bytes: 1048576
+
 ################################################################################
 # Configs related to Heron Instance, starts with heron.instance.*
 ################################################################################
+
+# The maximum size of packets that instance can read
+heron.instance.network.options.maximum.packetsize.bytes: 10485760
 
 # The queue capacity (num of items) in bolt for buffer packets to read from stream manager
 heron.instance.internal.bolt.read.queue.capacity: 128
@@ -223,10 +236,6 @@ heron.instance.execute.batch.time.ms: 16
 # The maximum batch size in bytes for an bolt instance to execute tuples per attempt
 heron.instance.execute.batch.size.bytes: 32768
 
-# The time interval for an instance to check the state change,
-# for example, the interval a spout uses to check whether activate/deactivate is invoked
-heron.instance.state.check.interval.sec: 5
-
 # The time to wait before the instance exits forcibly when uncaught exception happens
 heron.instance.force.exit.timeout.ms: 2000
 
@@ -240,8 +249,6 @@ heron.instance.reconnect.metricsmgr.times: 60
 
 # The interval in second for an instance to sample its system metrics, for instance, cpu load.
 heron.instance.metrics.system.sample.interval.sec: 10
-
-heron.instance.slave.fetch.pplan.interval.sec: 1
 
 # For efficient acknowledgement
 heron.instance.acknowledgement.nbuckets: 10

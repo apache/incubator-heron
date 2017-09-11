@@ -27,7 +27,8 @@ public class SleepSpoutWaitStrategy implements ISpoutWaitStrategy {
   private long sleepMillis;
 
   @Override
-  public void prepare(Map<String, Object> conf) {
+  @SuppressWarnings("rawtypes")
+  public void prepare(Map conf) {
     sleepMillis =
         ((Number) conf.get(Config.TOPOLOGY_SLEEP_SPOUT_WAIT_STRATEGY_TIME_MS)).longValue();
   }

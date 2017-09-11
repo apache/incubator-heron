@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
 
   HeronStateMgr* state_mgr = HeronStateMgr::MakeStateMgr(host_port, top_level_dir, &ss);
   state_mgr->SetTMasterLocationWatch(topology_name, []() { TMasterLocationWatchHandler(); });
+  state_mgr->SetPackingPlanWatch(topology_name, []() { PackingPlanWatchHandler(); });
   ss.loop();
   return 0;
 }

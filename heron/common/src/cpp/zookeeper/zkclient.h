@@ -66,7 +66,7 @@ class ZKClient {
   virtual void Exists(const std::string& _node, VCallback<sp_int32> _cb);
 
   // creates a node. The node is created at _node. If _is_ephemeral is set,
-  // then the node is created as a ephimeral node. _cb is called with
+  // then the node is created as a ephemeral node. _cb is called with
   // the status code after the Create completes.
   virtual void CreateNode(const std::string& _node, const std::string& _value, bool _is_ephimeral,
                           VCallback<sp_int32> _cb);
@@ -118,7 +118,6 @@ class ZKClient {
   ZKClient()
       : zk_handle_(NULL),
         eventLoop_(NULL),
-        zkaction_responses_(NULL),
         client_global_watcher_cb_(VCallback<ZkWatchEvent>()) {}
 
  private:
@@ -128,18 +127,11 @@ class ZKClient {
   // The function that actually inits the handle
   void InitZKHandle();
 
-  // This is the function used to signal the main thread
-  void SignalMainThread();
-
-  // When the zk callback wants to wake the main thread, it uses the SignalMainThread function.
-  // This function will get executed in the main thread.
-  void OnZkActionResponse(EventLoop::Status _status);
-
   // We wrap all user zk calls with this completion function
   // This completion function runs in the context of the
-  // zk completion thread. It basically appends to
-  // zkaction_responses_ and calls SignalMainThread
-  void ZkActionCb(VCallback<sp_int32> cb, sp_int32 rc);
+  // zk completion thread. It basically calls the piper
+  // to execute the cb in eventLoop thread
+  void ZkActionCb(sp_int32 rc, VCallback<sp_int32> cb);
 
   // This is the watcher function that gets called
   // when a node changes
@@ -157,9 +149,8 @@ class ZKClient {
 
   // We use libzookeeper_mt as our zk library. This means that
   // zk callbacks are all executed in the context of a zk thread.
-  // These pipers are how they communicate it accross to our thread
-  sp_int32 pipers_[2];
-  PCQueue* zkaction_responses_;
+  // Piper are how they communicate it accross to our main thread
+  Piper* piper_;
   // A callback to notify the clients of this class about global session events.
   VCallback<ZkWatchEvent> client_global_watcher_cb_;
 };

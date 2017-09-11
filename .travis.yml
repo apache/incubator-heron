@@ -1,3 +1,5 @@
+group: edge
+
 sudo: required
 
 language: java
@@ -22,27 +24,23 @@ env:
   - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
 
 before_install:
-
-  # download and install libunwind
-  - wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
-  - tar xfz libunwind-1.1.tar.gz
-  - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
-
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.3.1-installer-linux-x86_64.sh
-  - ./bazel-0.3.1-installer-linux-x86_64.sh --user
+  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh'
+  - chmod +x bazel-0.5.4-installer-linux-x86_64.sh
+  - ./bazel-0.5.4-installer-linux-x86_64.sh --user
 
 before_script:
-  # required for building the website docs
-  - (cd website && npm install && npm install gulp && which gulp)
-  - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
-  - sudo dpkg -i hugo*.deb
-  - hugo version
+  # install python module for wheel files
+  # required for python packaging
+  - sudo pip install wheel
 
 script:
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
   - g++ --version
+  - which python
+  - python -V
+  - which python2.7
+  - python2.7 -V
   - scripts/travis/ci.sh

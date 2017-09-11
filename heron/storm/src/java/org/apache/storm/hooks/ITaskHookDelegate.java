@@ -42,9 +42,10 @@ import com.twitter.heron.common.basics.TypeUtils;
  * is invoked.
  * 2. task hook added dynamically by invoking addHook(ITaskHook)
  */
+@SuppressWarnings("rawtypes")
 public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook {
   private List<ITaskHook> hooks;
-  private Map<String, Object> conf;
+  private Map conf;
 
   // zero arg constructor
   public ITaskHookDelegate() {
@@ -59,7 +60,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
     return hooks;
   }
 
-  public Map<String, Object> getConf() {
+  public Map getConf() {
     return conf;
   }
 

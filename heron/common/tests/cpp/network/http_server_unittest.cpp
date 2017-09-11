@@ -36,7 +36,7 @@ TestHttpServer::TestHttpServer(EventLoopImpl* eventLoop, NetworkOptions& _option
   server_->InstallGenericCallBack(
       [this](IncomingHTTPRequest* request) { this->HandleGenericRequest(request); });
 
-  server_->Start();
+  EXPECT_EQ(SP_OK, server_->Start());
 }
 
 TestHttpServer::~TestHttpServer() { delete server_; }

@@ -73,7 +73,7 @@ public class MetricsExecutor implements Runnable {
 
     // Attach sample Runnable to gatewayMetricsCollector
     this.metricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
-        systemConfig.getHeronMetricsExportIntervalSec() / 2);
+        systemConfig.getHeronMetricsExportInterval().dividedBy(2));
   }
 
   @Override

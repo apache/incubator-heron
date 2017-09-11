@@ -18,7 +18,7 @@
   <meta charset="utf-8">
   <title></title>
 
-  <link href="/static/css/bootstrap.css" rel="stylesheet">
+  <link href="{{ static_url('css/bootstrap.css') }}" rel="stylesheet">
   <style type="text/css">
     .log {
       font-family: "Inconsolata", "Monaco", "Courier New", "Courier";
@@ -32,8 +32,8 @@
       background: #000000;
     }
   </style>
-  <script src="/static/js/jquery.min.js"></script>
-  <script src="/static/js/jquery.pailer.js"></script>
+  <script src="{{ static_url('js/jquery.min.js') }}"></script>
+  <script src="{{ static_url('js/jquery.pailer.js') }}"></script>
 </head>
 
 <style type="text/css">
@@ -47,7 +47,7 @@ div.tight
 <title>Path {{ path }}</title>
 <body>
 <div> <strong> Path </strong> {{ path }} </div>
-<div> <strong> dl </strong> <a href='/topologies/{{cluster}}/{{environ}}/{{topology}}/{{container}}/filedownload?path={{path}}'><font size=1>download</font></a> </div>
+<div> <strong> dl </strong> <a href='{{ baseUrl }}/topologies/{{cluster}}/{{environ}}/{{topology}}/{{container}}/filedownload?path={{path}}'><font size=1>download</font></a> </div>
   <div style="position: absolute; left: 5px; top: 0px;">
     <p id="indicator" class="log invert"></p>
   </div>
@@ -76,7 +76,7 @@ div.tight
           'length': -1
         }, options);
 
-        var url = "/topologies/{{ cluster }}/{{ environ }}/{{ topology }}/{{ container }}/filedata" +
+        var url = "{{ baseUrl }}/topologies/{{ cluster }}/{{ environ }}/{{ topology }}/{{ container }}/filedata" +
                    "?offset=" + settings.offset +
                    "&length=" + settings.length +
                    "&path={{ path }}";

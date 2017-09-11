@@ -14,17 +14,19 @@
 
 package com.twitter.heron.api.hooks.info;
 
+import java.time.Duration;
+
 import com.twitter.heron.api.tuple.Tuple;
 
 public class BoltExecuteInfo {
-  private Tuple tuple;
-  private int executingTaskId;
-  private Long executeLatencyMs; // null if it wasn't sampled
+  private final Tuple tuple;
+  private final int executingTaskId;
+  private final Duration executeLatency; // null if it wasn't sampled
 
-  public BoltExecuteInfo(Tuple tuple, int executingTaskId, Long executeLatencyMs) {
+  public BoltExecuteInfo(Tuple tuple, int executingTaskId, Duration executeLatency) {
     this.tuple = tuple;
     this.executingTaskId = executingTaskId;
-    this.executeLatencyMs = executeLatencyMs;
+    this.executeLatency = executeLatency;
   }
 
   public Tuple getTuple() {
@@ -35,7 +37,7 @@ public class BoltExecuteInfo {
     return executingTaskId;
   }
 
-  public Long getExecuteLatencyMs() {
-    return executeLatencyMs;
+  public Duration getExecuteLatency() {
+    return executeLatency;
   }
 }

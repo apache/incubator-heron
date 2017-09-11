@@ -18,9 +18,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.sun.net.httpserver.Headers;
@@ -166,10 +171,6 @@ public class NetworkUtilsTest {
   public void testReadHttpResponseFail() throws Exception {
     HttpURLConnection connection = Mockito.mock(HttpURLConnection.class);
 
-    // Unable to read response due to wrong response code
-    Mockito.doReturn(HttpURLConnection.HTTP_NOT_FOUND).when(connection).getResponseCode();
-    Assert.assertArrayEquals(new byte[0], NetworkUtils.readHttpResponse(connection));
-
     // Unable to read response due to wrong response content length
     Mockito.doReturn(HttpURLConnection.HTTP_OK).when(connection).getResponseCode();
     Mockito.doReturn(-1).when(connection).getContentLength();
@@ -186,12 +187,15 @@ public class NetworkUtilsTest {
     byte[] expectedBytes = expectedResponseString.getBytes();
     HttpURLConnection connection = Mockito.mock(HttpURLConnection.class);
 
-    Mockito.doReturn(HttpURLConnection.HTTP_OK).when(connection).getResponseCode();
+    // every response code should return a body if one exists
     Mockito.doReturn(expectedBytes.length).when(connection).getContentLength();
+    for (Integer responseCode : getAllHttpCodes()) {
+      Mockito.doReturn(responseCode).when(connection).getResponseCode();
 
-    InputStream is = new ByteArrayInputStream(expectedBytes);
-    Mockito.doReturn(is).when(connection).getInputStream();
-    Assert.assertArrayEquals(expectedBytes, NetworkUtils.readHttpResponse(connection));
+      InputStream is = new ByteArrayInputStream(expectedBytes);
+      Mockito.doReturn(is).when(connection).getInputStream();
+      Assert.assertArrayEquals(expectedBytes, NetworkUtils.readHttpResponse(connection));
+    }
   }
 
   /**
@@ -208,18 +212,17 @@ public class NetworkUtilsTest {
     int mockFreePort = 9519;
 
     String tunnelHost = "tunnelHost";
-    int timeout = -1;
+    Duration timeout = Duration.ofMillis(-1);
     int retryCount = -1;
-    int retryIntervalMs = -1;
+    Duration retryInterval = Duration.ofMillis(-1);
     int verifyCount = -1;
-    boolean isVerbose = true;
     NetworkUtils.TunnelConfig tunnelConfig = new NetworkUtils.TunnelConfig(
-        true, tunnelHost, timeout, retryCount, retryIntervalMs, verifyCount);
+        true, tunnelHost, timeout, retryCount, retryInterval, verifyCount);
 
     // Can reach directly, no need to ssh tunnel
     PowerMockito.spy(NetworkUtils.class);
     PowerMockito.doReturn(true).when(NetworkUtils.class, "isLocationReachable",
-        Mockito.eq(mockAddr), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
+        Mockito.eq(mockAddr), Mockito.eq(timeout), Mockito.anyInt(), Mockito.eq(retryInterval));
 
     Pair<InetSocketAddress, Process> ret =
         NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
@@ -231,7 +234,7 @@ public class NetworkUtilsTest {
 
     // Can not reach directly, basic setup
     PowerMockito.doReturn(false).when(NetworkUtils.class, "isLocationReachable",
-        Mockito.eq(mockAddr), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
+        Mockito.eq(mockAddr), Mockito.eq(timeout), Mockito.anyInt(), Mockito.eq(retryInterval));
     PowerMockito.spy(SysUtils.class);
     PowerMockito.doReturn(mockFreePort).when(SysUtils.class, "getFreePort");
     Process process = Mockito.mock(Process.class);
@@ -248,7 +251,7 @@ public class NetworkUtilsTest {
             String.format("%s:%d", NetworkUtils.LOCAL_HOST, mockFreePort));
 
     PowerMockito.doReturn(false).when(NetworkUtils.class, "isLocationReachable",
-        Mockito.eq(newAddress), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
+        Mockito.eq(newAddress), Mockito.eq(timeout), Mockito.anyInt(), Mockito.eq(retryInterval));
     ret = NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
             tunnelConfig, NetworkUtils.TunnelType.PORT_FORWARD);
     Assert.assertNull(ret.first);
@@ -256,7 +259,7 @@ public class NetworkUtilsTest {
 
     // Can not reach directly, but can establish ssh tunnel to reach the destination
     PowerMockito.doReturn(true).when(NetworkUtils.class, "isLocationReachable",
-        Mockito.eq(newAddress), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
+        Mockito.eq(newAddress), Mockito.eq(timeout), Mockito.anyInt(), Mockito.eq(retryInterval));
     ret = NetworkUtils.establishSSHTunnelIfNeeded(NetworkUtils.getInetSocketAddress(mockEndpoint),
         tunnelConfig, NetworkUtils.TunnelType.PORT_FORWARD);
     Assert.assertEquals(NetworkUtils.LOCAL_HOST, ret.first.getHostName());
@@ -273,5 +276,18 @@ public class NetworkUtilsTest {
     Assert.assertEquals(host, address.getHostString());
     Assert.assertEquals(port, address.getPort());
     Assert.assertEquals(endpoint, address.toString());
+  }
+
+  private List<Integer> getAllHttpCodes() throws IllegalAccessException {
+    Field[] declaredFields = HttpURLConnection.class.getDeclaredFields();
+    List<Integer> responseCodes = new ArrayList<>();
+    for (Field field : declaredFields) {
+      if (Modifier.isStatic(field.getModifiers())) {
+        if (field.getName().contains("HTTP_")) {
+          responseCodes.add(field.getInt(null));
+        }
+      }
+    }
+    return responseCodes;
   }
 }

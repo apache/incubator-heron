@@ -28,10 +28,11 @@ import org.apache.storm.utils.ConfigUtils;
 
 import com.twitter.heron.simulator.Simulator;
 
+@SuppressWarnings("rawtypes")
 public class LocalCluster implements ILocalCluster {
   private final Simulator simulator;
   private String topologyName;
-  private Map<String, Object> conf;
+  private Map conf;
   private StormTopology topology;
 
   public LocalCluster() {

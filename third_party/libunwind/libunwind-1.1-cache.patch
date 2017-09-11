@@ -1,0 +1,39 @@
+diff --git autom4te.cache/output.0 autom4te.cache/output.0
+index ee2c0fc..5cee198 100644
+--- autom4te.cache/output.0
++++ autom4te.cache/output.0
+@@ -16959,7 +16959,7 @@ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lzma_lzma_mf_is_supported" >&5
+ $as_echo "$ac_cv_lib_lzma_lzma_mf_is_supported" >&6; }
+ if test "x$ac_cv_lib_lzma_lzma_mf_is_supported" = xyes; then :
+-  LIBLZMA=-lzma
++  LIBLZMA=-llzma
+ 
+     
+ $as_echo "@%:@define HAVE_LZMA 1" >>confdefs.h
+diff --git autom4te.cache/output.1 autom4te.cache/output.1
+index bb5278a..e801cd0 100644
+--- autom4te.cache/output.1
++++ autom4te.cache/output.1
+@@ -16955,7 +16955,7 @@ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lzma_lzma_mf_is_supported" >&5
+ $as_echo "$ac_cv_lib_lzma_lzma_mf_is_supported" >&6; }
+ if test "x$ac_cv_lib_lzma_lzma_mf_is_supported" = xyes; then :
+-  LIBLZMA=-lzma
++  LIBLZMA=-llzma
+ 
+     
+ $as_echo "@%:@define HAVE_LZMA 1" >>confdefs.h
+diff --git autom4te.cache/traces.1 autom4te.cache/traces.1
+index 8e83080..3ee4b46 100644
+--- autom4te.cache/traces.1
++++ autom4te.cache/traces.1
+@@ -905,7 +905,7 @@ m4trace:configure.ac:233: -1- AC_DEFINE_TRACE_LITERAL([CONFIG_MSABI_SUPPORT])
+ m4trace:configure.ac:233: -1- m4_pattern_allow([^CONFIG_MSABI_SUPPORT$])
+ m4trace:configure.ac:233: -1- AH_OUTPUT([CONFIG_MSABI_SUPPORT], [/* Support for Microsoft ABI extensions */
+ @%:@undef CONFIG_MSABI_SUPPORT])
+-m4trace:configure.ac:242: -1- AC_SUBST([LIBLZMA], [-lzma])
++m4trace:configure.ac:242: -1- AC_SUBST([LIBLZMA], [-llzma])
+ m4trace:configure.ac:242: -1- AC_SUBST_TRACE([LIBLZMA])
+ m4trace:configure.ac:242: -1- m4_pattern_allow([^LIBLZMA$])
+ m4trace:configure.ac:242: -1- AC_DEFINE_TRACE_LITERAL([HAVE_LZMA])

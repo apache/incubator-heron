@@ -13,13 +13,12 @@ cc_library(
         "operational-config-vars.cpp",
         "physical-plan-helper.cpp",
         "topology-config-helper.cpp",
-        "topology-config-reader.cpp",
         "topology-config-vars.cpp",
         "yaml-file-reader.cpp",
 
         "cluster-config-reader.h",
         "cluster-config-vars.h",
-        "config.h",
+        "allconfig.h",
         "helper.h",
         "heron-internals-config-reader.h",
         "heron-internals-config-vars.h",
@@ -29,7 +28,6 @@ cc_library(
         "physical-plan-helper.h",
         "reader.h",
         "topology-config-helper.h",
-        "topology-config-reader.h",
         "topology-config-vars.h",
     ],
     hdrs = [ 

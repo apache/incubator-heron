@@ -29,9 +29,10 @@ import backtype.storm.tuple.Fields;
 public class WorkerTopologyContext extends GeneralTopologyContext {
   private com.twitter.heron.api.topology.TopologyContext delegate;
 
+  @SuppressWarnings("rawtypes")
   public WorkerTopologyContext(
       StormTopology topology,
-      Map<String, Object> stormConf,
+      Map stormConf,
       Map<Integer, String> taskToComponent,
       Map<String, List<Integer>> componentToSortedTasks,
       Map<String, Map<String, Fields>> componentToStreamToFields,

@@ -24,6 +24,7 @@ package org.apache.storm.topology;
 import org.apache.storm.generated.StormTopology;
 
 import com.twitter.heron.api.HeronTopology;
+import com.twitter.heron.api.bolt.WindowedBoltExecutor;
 
 public class TopologyBuilder {
   private com.twitter.heron.api.topology.TopologyBuilder delegate =
@@ -51,6 +52,19 @@ public class TopologyBuilder {
 
   public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelismHint) {
     return setBolt(id, new BasicBoltExecutor(bolt), parallelismHint);
+  }
+
+  public BoltDeclarer setBolt(String id, IWindowedBolt bolt) throws IllegalArgumentException {
+    return setBolt(id, bolt, null);
+  }
+
+  public BoltDeclarer setBolt(String id, IWindowedBolt bolt, Number parallelismHint) throws
+      IllegalArgumentException {
+    return new BoltDeclarerImpl(
+        this.delegate.setBolt(
+            id, new WindowedBoltExecutor(new IWindowedBoltDelegate(bolt)),
+            parallelismHint)
+    );
   }
 
   public SpoutDeclarer setSpout(String id, IRichSpout spout) {

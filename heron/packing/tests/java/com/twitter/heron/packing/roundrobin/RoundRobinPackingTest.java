@@ -22,15 +22,14 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyTests;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.AssertPacking;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyTests;
-import com.twitter.heron.spi.utils.TopologyUtils;
+import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class RoundRobinPackingTest {
   private static final String BOLT_NAME = "bolt";
@@ -45,11 +44,7 @@ public class RoundRobinPackingTest {
   }
 
   private PackingPlan getRoundRobinPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .putAll(ClusterDefaults.getDefaults())
-        .build();
+    Config config = PackingTestUtils.newTestConfig(topology);
 
     RoundRobinPacking packing = new RoundRobinPacking();
     packing.initialize(config, topology);

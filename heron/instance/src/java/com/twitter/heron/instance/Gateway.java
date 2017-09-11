@@ -15,11 +15,13 @@
 package com.twitter.heron.instance;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -31,7 +33,6 @@ import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.network.MetricsManagerClient;
 import com.twitter.heron.network.StreamManagerClient;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
@@ -66,8 +67,8 @@ public class Gateway implements Runnable, AutoCloseable {
    */
   public Gateway(String topologyName, String topologyId, PhysicalPlans.Instance instance,
                  int streamPort, int metricsPort, final NIOLooper gatewayLooper,
-                 final Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
-                 final Communicator<HeronTuples.HeronTupleSet> outStreamQueue,
+                 final Communicator<Message> inStreamQueue,
+                 final Communicator<Message> outStreamQueue,
                  final Communicator<InstanceControlMsg> inControlQueue,
                  final List<Communicator<Metrics.MetricPublisherPublishMessage>> outMetricsQueues)
       throws IOException {
@@ -88,19 +89,19 @@ public class Gateway implements Runnable, AutoCloseable {
     gatewayMetrics.registerMetrics(gatewayMetricsCollector);
 
     // Init the ErrorReportHandler
-    ErrorReportLoggingHandler.init(
-        instance.getInstanceId(), gatewayMetricsCollector,
-        systemConfig.getHeronMetricsExportIntervalSec(),
+    ErrorReportLoggingHandler.init(gatewayMetricsCollector,
+        systemConfig.getHeronMetricsExportInterval(),
         systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
 
     // Initialize the corresponding 2 socket clients with corresponding socket options
     HeronSocketOptions socketOptions = new HeronSocketOptions(
-        systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
-        systemConfig.getInstanceNetworkWriteBatchTimeMs(),
-        systemConfig.getInstanceNetworkReadBatchSizeBytes(),
-        systemConfig.getInstanceNetworkReadBatchTimeMs(),
-        systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
-        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
+        systemConfig.getInstanceNetworkWriteBatchSize(),
+        systemConfig.getInstanceNetworkWriteBatchTime(),
+        systemConfig.getInstanceNetworkReadBatchSize(),
+        systemConfig.getInstanceNetworkReadBatchTime(),
+        systemConfig.getInstanceNetworkOptionsSocketSendBufferSize(),
+        systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize(),
+        systemConfig.getInstanceNetworkOptionsMaximumPacketSize()
     );
     this.streamManagerClient =
         new StreamManagerClient(gatewayLooper, STREAM_MGR_HOST, streamPort,
@@ -112,7 +113,7 @@ public class Gateway implements Runnable, AutoCloseable {
 
     // Attach sample Runnable to gatewayMetricsCollector
     gatewayMetricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
-        systemConfig.getInstanceMetricsSystemSampleIntervalSec());
+        systemConfig.getInstanceMetricsSystemSampleInterval());
     Runnable sampleStreamQueuesSize = new Runnable() {
       @Override
       public void run() {
@@ -125,10 +126,9 @@ public class Gateway implements Runnable, AutoCloseable {
       }
     };
     gatewayMetricsCollector.registerMetricSampleRunnable(sampleStreamQueuesSize,
-        systemConfig.getInstanceMetricsSystemSampleIntervalSec());
+        systemConfig.getInstanceMetricsSystemSampleInterval());
 
-    final long instanceTuningIntervalMs = systemConfig.getInstanceTuningIntervalMs()
-        * Constants.MILLISECONDS_TO_NANOSECONDS;
+    final Duration instanceTuningInterval = systemConfig.getInstanceTuningInterval();
 
     // Attache Runnable to update the expected stream's expected available capacity
     Runnable tuningStreamQueueSize = new Runnable() {
@@ -138,11 +138,11 @@ public class Gateway implements Runnable, AutoCloseable {
       public void run() {
         inStreamQueue.updateExpectedAvailableCapacity();
         outStreamQueue.updateExpectedAvailableCapacity();
-        gatewayLooper.registerTimerEventInNanoSeconds(instanceTuningIntervalMs, this);
+        gatewayLooper.registerTimerEvent(instanceTuningInterval, this);
       }
     };
-    gatewayLooper.registerTimerEventInSeconds(
-        systemConfig.getInstanceMetricsSystemSampleIntervalSec(),
+    gatewayLooper.registerTimerEvent(
+        systemConfig.getInstanceMetricsSystemSampleInterval(),
         tuningStreamQueueSize);
   }
 

@@ -42,7 +42,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
   state_manager_location = {
       'type': 'file',
       'name': 'local',
-      'tunnelhost': 'localhost',
+      'tunnelhost': '127.0.0.1',
       'rootpath': '~/.herondata/repository/state/local',
   }
 

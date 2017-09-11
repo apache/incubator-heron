@@ -16,6 +16,8 @@ package com.twitter.heron.common.basics;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +75,17 @@ public final class TypeUtils {
       } catch (NumberFormatException nfe) {
         throw new IllegalArgumentException("Failed to convert " + o + " to double");
       }
+    }
+  }
+
+  public static Duration getDuration(Object o, TemporalUnit unit) {
+    if (o != null && o instanceof Duration) {
+      return (Duration) o;
+    }
+    try {
+      return Duration.of(getLong(o), unit);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Don't know how to convert " + o + " to Duration", e);
     }
   }
 

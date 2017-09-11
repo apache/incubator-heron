@@ -21,13 +21,18 @@ import tornado.gen
 import base
 import common
 import heron.tools.common.src.python.access as access
+import heron.common.src.python.utils.log as log
 
+Log = log.Log
 
 ################################################################################
 # pylint: disable=abstract-method
 # pylint: disable=arguments-differ
 class TopologyConfigHandler(base.BaseHandler):
   ''' Handler for displaying the config for a topology '''
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   def get(self, cluster, environ, topology):
     '''
@@ -42,13 +47,17 @@ class TopologyConfigHandler(base.BaseHandler):
         environ=environ,
         topology=topology,
         active="topologies",
-        function=common.className)
+        function=common.className,
+        baseUrl=self.baseUrl)
     self.render("config.html", **options)
 
 
 ################################################################################
 class TopologyExceptionsPageHandler(base.BaseHandler):
   ''' Handler for displaying all the exceptions of a topology '''
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   def get(self, cluster, environ, topology, comp_name, instance):
     '''
@@ -67,13 +76,17 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
         comp_name=comp_name,
         instance=instance,
         active="topologies",
-        function=common.className)
+        function=common.className,
+        baseUrl=self.baseUrl)
     # send the exception
     self.render("exception.html", **options)
 
 
 class ListTopologiesHandler(base.BaseHandler):
   ''' Handler for displaying all the topologies - defaults to 'local'''
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self):
@@ -87,7 +100,8 @@ class ListTopologiesHandler(base.BaseHandler):
         topologies=[],  # no topologies
         clusters=[str(cluster) for cluster in clusters],
         active="topologies",  # active icon the nav bar
-        function=common.className
+        function=common.className,
+        baseUrl=self.baseUrl
     )
 
     # send the all topologies page
@@ -97,6 +111,9 @@ class ListTopologiesHandler(base.BaseHandler):
 ################################################################################
 class TopologyPlanHandler(base.BaseHandler):
   ''' Handler for displaying the logical plan of a topology '''
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology):
@@ -108,7 +125,7 @@ class TopologyPlanHandler(base.BaseHandler):
     '''
 
     # fetch the execution of the topology asynchronously
-    estate = yield access.get_execution_state(cluster, environ, topology)
+    execution_state = yield access.get_execution_state(cluster, environ, topology)
 
     # fetch scheduler location of the topology
     scheduler_location = yield access.get_scheduler_location(cluster, environ, topology)
@@ -116,7 +133,7 @@ class TopologyPlanHandler(base.BaseHandler):
     job_page_link = scheduler_location["job_page_link"]
 
     # convert the topology launch time to display format
-    launched_at = datetime.utcfromtimestamp(estate['submission_time'])
+    launched_at = datetime.utcfromtimestamp(execution_state['submission_time'])
     launched_time = launched_at.strftime('%Y-%m-%d %H:%M:%S UTC')
 
     # pylint: disable=no-member
@@ -124,12 +141,13 @@ class TopologyPlanHandler(base.BaseHandler):
         cluster=cluster,
         environ=environ,
         topology=topology,
-        estate=estate,
+        execution_state=execution_state,
         launched=launched_time,
         status="running" if random.randint(0, 1) else "errors",
         active="topologies",
         job_page_link=job_page_link,
-        function=common.className
+        function=common.className,
+        baseUrl=self.baseUrl
     )
 
     # send the single topology page
@@ -143,6 +161,9 @@ class ContainerFileHandler(base.BaseHandler):
   Responsible for creating the web page for files. The html
   will in turn call another endpoint to get the file data.
   """
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
@@ -160,7 +181,8 @@ class ContainerFileHandler(base.BaseHandler):
         environ=environ,
         topology=topology,
         container=container,
-        path=path
+        path=path,
+        baseUrl=self.baseUrl
     )
 
     self.render("file.html", **options)
@@ -172,6 +194,9 @@ class ContainerFileDataHandler(base.BaseHandler):
   """
   Responsible for getting the data for a file in a container of a topology.
   """
+
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
@@ -200,6 +225,9 @@ class ContainerFileStatsHandler(base.BaseHandler):
   Responsible for getting the file stats for a container.
   """
 
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
     '''
@@ -219,7 +247,7 @@ class ContainerFileStatsHandler(base.BaseHandler):
         container=container,
         path=path,
         filestats=data,
-    )
+        baseUrl=self.baseUrl)
     self.render("browse.html", **options)
 
 
@@ -229,6 +257,8 @@ class ContainerFileDownloadHandler(base.BaseHandler):
   """
   Responsible for downloading the file from a container.
   """
+  def initialize(self, baseUrl):
+    self.baseUrl = baseUrl
 
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, container):
@@ -257,19 +287,18 @@ class ContainerFileDownloadHandler(base.BaseHandler):
 
     # 4 MB gives good enough chunk size giving good speed for small files.
     # If files are large, a single threaded download may not be enough.
-    length = 4 * 1024 * 1024
-    offset = 0
-    while True:
-      response = yield access.get_container_file_data(cluster, environ, topology, container,
-                                                      path, offset, length)
-      if self.connection_closed or 'data' not in response or len(response['data']) < length:
-        break
-      offset += length
-      self.write(response['data'])
+    file_download_url = access.get_container_file_download_url(cluster, environ,
+                                                               topology, container, path)
+
+    Log.debug("file download url: %s", str(file_download_url))
+    def streaming_callback(chunk):
+      self.write(chunk)
       self.flush()
 
-    self.write(response['data'])
+    http_client = tornado.httpclient.AsyncHTTPClient()
+    yield http_client.fetch(file_download_url, streaming_callback=streaming_callback)
     self.finish()
+
 
   def on_connection_close(self):
     '''

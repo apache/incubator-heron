@@ -18,6 +18,7 @@
 
 package org.apache.storm.spout;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.apache.storm.tuple.Fields;
@@ -29,8 +30,10 @@ public class RawMultiScheme implements MultiScheme {
   private static final long serialVersionUID = 4272415692741188347L;
 
   @Override
-  public Iterable<List<Object>> deserialize(byte[] ser) {
-    return asList(tuple(ser));
+  public Iterable<List<Object>> deserialize(ByteBuffer ser) {
+    byte[] bytes = new byte[ser.remaining()];
+    ser.get(bytes);
+    return asList(tuple(bytes));
   }
 
   @Override

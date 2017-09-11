@@ -1,2 +1,0 @@
-# default value for the config key that specifies the working directory
-WORKING_DIRECTORY:       ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}

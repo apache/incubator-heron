@@ -16,7 +16,7 @@
 # pylint: disable=protected-access
 import unittest
 
-from heron.common.src.python.network import StatusCode
+from heron.instance.src.python.network import StatusCode
 from heron.instance.tests.python.network.mock_generator import MockMetricsManagerClient
 
 class MetricsMgrClientTest(unittest.TestCase):

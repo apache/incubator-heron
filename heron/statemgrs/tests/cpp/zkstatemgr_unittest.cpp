@@ -80,6 +80,9 @@ class HeronZKStateMgrTest : public ::testing::Test {
   static void CallTMasterLocationWatch(HeronZKStateMgr* heron_zkstatemgr) {
     heron_zkstatemgr->TMasterLocationWatch();
   }
+  static void CallPackingPlanWatch(HeronZKStateMgr* heron_zkstatemgr) {
+    heron_zkstatemgr->PackingPlanWatch();
+  }
 
   // a proxy for the call since the tests cannot call directly
   // (friendship inheritance is not supported)
@@ -89,6 +92,7 @@ class HeronZKStateMgrTest : public ::testing::Test {
   }
 
   static void TmasterLocationWatchHandler() { tmaster_watch_handler_count++; }
+  static void PackingPlanWatchHandler() { packing_plan_watch_handler_count++; }
 
   MockZKClient* mock_zkclient;
   MockZKClientFactory* mock_zkclient_factory;
@@ -97,10 +101,12 @@ class HeronZKStateMgrTest : public ::testing::Test {
   std::string topleveldir;
   // used to verify the number of calls to TmasterLocationWatchHandler
   static int tmaster_watch_handler_count;
+  static int packing_plan_watch_handler_count;
 };
 
 // static member needs to be defined outside class... sigh :(
 int HeronZKStateMgrTest::tmaster_watch_handler_count = 0;
+int HeronZKStateMgrTest::packing_plan_watch_handler_count = 0;
 
 // Ensure that ZKClient is created and deleted appropriately.
 TEST_F(HeronZKStateMgrTest, testCreateDelete) {
@@ -155,6 +161,29 @@ TEST_F(HeronZKStateMgrTest, testTMasterLocationWatch) {
   CallTMasterLocationWatch(heron_zkstatemgr);
   // ensure watch handler is called.
   ASSERT_EQ(tmaster_watch_handler_count, 1);
+
+  EXPECT_CALL(*mock_zkclient, Die()).Times(1);
+  EXPECT_CALL(*mock_zkclient_factory, Die()).Times(1);
+
+  delete heron_zkstatemgr;
+}
+
+TEST_F(HeronZKStateMgrTest, testPackingPlanWatch) {
+  const std::string topology_name = "dummy_topology";
+  const std::string expected_path = topleveldir + "/packingplans/" + topology_name;
+
+  HeronZKStateMgr* heron_zkstatemgr =
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
+
+  heron_zkstatemgr->SetPackingPlanWatch(topology_name, []() { PackingPlanWatchHandler(); });
+
+  // ensure TmasterLocationWatch resets the watch
+  EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
+
+  packing_plan_watch_handler_count = 0;
+  CallPackingPlanWatch(heron_zkstatemgr);
+  // ensure watch handler is called.
+  ASSERT_EQ(packing_plan_watch_handler_count, 1);
 
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
   EXPECT_CALL(*mock_zkclient_factory, Die()).Times(1);

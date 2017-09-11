@@ -47,9 +47,10 @@ public final class StormSubmitter {
    * @throws AlreadyAliveException if a topology with this name is already running
    * @throws InvalidTopologyException if an invalid topology was submitted
    */
+  @SuppressWarnings("rawtypes")
   public static void submitTopology(
       String name,
-      Map<String, Object> stormConfig,
+      Map stormConfig,
       StormTopology topology) throws AlreadyAliveException, InvalidTopologyException {
 
     // First do config translation

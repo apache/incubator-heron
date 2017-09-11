@@ -81,6 +81,12 @@ def add_arguments(parser):
       type=int,
       default=consts.DEFAULT_PORT)
 
+  parser.add_argument(
+      '--base_url',
+      metavar='(a string; the base url path if operating behind proxy; default: '
+      + str(consts.DEFAULT_BASE_URL) + ')',
+      default=consts.DEFAULT_BASE_URL)
+
   return parser
 
 

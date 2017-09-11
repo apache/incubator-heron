@@ -23,6 +23,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class SchedulerClientFactory {
@@ -43,7 +44,7 @@ public class SchedulerClientFactory {
    *
    * @return getSchedulerClient created. return null if failed to create ISchedulerClient instance
    */
-  public ISchedulerClient getSchedulerClient() {
+  public ISchedulerClient getSchedulerClient() throws SchedulerException {
     LOG.fine("Creating scheduler client");
     ISchedulerClient schedulerClient;
 
@@ -55,8 +56,7 @@ public class SchedulerClientFactory {
           statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
 
       if (schedulerLocation == null) {
-        LOG.log(Level.SEVERE, "Failed to get scheduler location");
-        return null;
+        throw new SchedulerException("Failed to get scheduler location from state manager");
       }
 
       LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
@@ -67,9 +67,6 @@ public class SchedulerClientFactory {
       // create an instance of scheduler
       final IScheduler scheduler = LauncherUtils.getInstance()
           .getSchedulerInstance(config, runtime);
-      if (scheduler == null) {
-        return null;
-      }
 
       LOG.fine("Invoke scheduler as a library");
       schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);

@@ -28,6 +28,9 @@ public final class ReflectionUtils {
   @SuppressWarnings("unchecked") // we don't know what T is until runtime
   public static <T> T newInstance(ClassLoader classLoader, String className)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    if (className == null) {
+      throw new ClassNotFoundException("Can not instantiate class. className must not be null");
+    }
     return (T) classLoader.loadClass(className).newInstance();
   }
 }

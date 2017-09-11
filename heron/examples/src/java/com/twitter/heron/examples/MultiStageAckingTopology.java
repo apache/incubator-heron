@@ -46,10 +46,11 @@ public final class MultiStageAckingTopology {
     }
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("word", new AckingTestWordSpout(), 2);
-    builder.setBolt("exclaim1", new ExclamationBolt(true), 2)
+    int parallelism = 2;
+    builder.setSpout("word", new AckingTestWordSpout(), parallelism);
+    builder.setBolt("exclaim1", new ExclamationBolt(true), parallelism)
         .shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(false), 2)
+    builder.setBolt("exclaim2", new ExclamationBolt(false), parallelism)
         .shuffleGrouping("exclaim1");
 
     Config conf = new Config();
@@ -59,10 +60,26 @@ public final class MultiStageAckingTopology {
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
     // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
+    conf.setNumAckers(1);
 
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setNumStmgrs(1);
+
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim2",
+        ExampleResources.getComponentRam());
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+        ExampleResources.getContainerDisk(3 * parallelism, parallelism));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+        ExampleResources.getContainerRam(3 * parallelism, parallelism));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
+
+    conf.setNumWorkers(parallelism);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 
@@ -75,8 +92,9 @@ public final class MultiStageAckingTopology {
     public AckingTestWordSpout() {
     }
 
+    @SuppressWarnings("rawtypes")
     public void open(
-        Map<String, Object> conf,
+        Map conf,
         TopologyContext context,
         SpoutOutputCollector acollector) {
       collector = acollector;

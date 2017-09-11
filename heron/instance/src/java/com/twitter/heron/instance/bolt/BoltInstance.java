@@ -14,8 +14,15 @@
 
 package com.twitter.heron.instance.bolt;
 
+import java.io.Serializable;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IBolt;
@@ -23,50 +30,64 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
+import com.twitter.heron.common.utils.metrics.FullBoltMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class BoltInstance implements IInstance {
+  private static final Logger LOG = Logger.getLogger(BoltInstance.class.getName());
 
-  protected final PhysicalPlanHelper helper;
+  protected PhysicalPlanHelper helper;
   protected final IBolt bolt;
   protected final BoltOutputCollectorImpl collector;
   protected final IPluggableSerializer serializer;
   protected final BoltMetrics boltMetrics;
   // The bolt will read Data tuples from streamInQueue
-  private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
+  private final Communicator<Message> streamInQueue;
+
+  private final boolean isTopologyStateful;
+
+  private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
 
   private final SystemConfig systemConfig;
 
   public BoltInstance(PhysicalPlanHelper helper,
-                      Communicator<HeronTuples.HeronTupleSet> streamInQueue,
-                      Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                      Communicator<Message> streamInQueue,
+                      Communicator<Message> streamOutQueue,
                       SlaveLooper looper) {
     this.helper = helper;
     this.looper = looper;
     this.streamInQueue = streamInQueue;
-    this.boltMetrics = new BoltMetrics();
+    this.boltMetrics = new FullBoltMetrics();
     this.boltMetrics.initMultiCountMetrics(helper);
     this.serializer =
         SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
+
+    Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
+    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
+        .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+
+    LOG.info("Is this topology stateful: " + isTopologyStateful);
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");
@@ -99,16 +120,43 @@ public class BoltInstance implements IInstance {
       ((IUpdatable) bolt).update(physicalPlanHelper.getTopologyContext());
     }
     collector.updatePhysicalPlanHelper(physicalPlanHelper);
+
+    // Re-prepare the CustomStreamGrouping since the downstream tasks can change
+    physicalPlanHelper.prepareForCustomStreamGrouping();
+    // Reset the helper
+    helper = physicalPlanHelper;
   }
 
   @Override
+  public void persistState(String checkpointId) {
+    if (!isTopologyStateful) {
+      throw new RuntimeException("Could not save a non-stateful topology's state");
+    }
+
+    // Checkpoint
+    if (bolt instanceof IStatefulComponent) {
+      LOG.info("Starting checkpoint");
+      ((IStatefulComponent) bolt).preSave(checkpointId);
+    } else {
+      LOG.info("Trying to checkponit a non stateful component. Send empty state");
+    }
+
+    collector.sendOutState(instanceState, checkpointId);
+  }
+
+  @SuppressWarnings("unchecked")
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
-    GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
+    GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportInterval());
 
     boltMetrics.registerMetrics(topologyContext);
+
+    // Initialize the instanceState if the bolt is stateful
+    if (bolt instanceof IStatefulComponent) {
+      ((IStatefulComponent<Serializable, Serializable>) bolt).initState(instanceState);
+    }
 
     // Delegate
     bolt.prepare(
@@ -121,6 +169,12 @@ public class BoltInstance implements IInstance {
     helper.prepareForCustomStreamGrouping();
 
     addBoltTasks();
+  }
+
+  @Override
+  public void start(State<Serializable, Serializable> state) {
+    this.instanceState = state;
+    start();
   }
 
   @Override
@@ -166,58 +220,67 @@ public class BoltInstance implements IInstance {
   }
 
   @Override
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+  public void readTuplesAndExecute(Communicator<Message> inQueue) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
-    long instanceExecuteBatchTime
-        = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
+    Duration instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
 
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
     while (!inQueue.isEmpty()) {
-      HeronTuples.HeronTupleSet tuples = inQueue.poll();
+      Message msg = inQueue.poll();
 
-      // Handle the tuples
-      if (tuples.hasControl()) {
-        throw new RuntimeException("Bolt cannot get acks/fails from other components");
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        String checkpointId =
+            ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
+        LOG.info("Start checkpoint for: " + checkpointId);
+        persistState(checkpointId);
       }
 
-      // Get meta data of tuples
-      TopologyAPI.StreamId stream = tuples.getData().getStream();
-      int nValues = topologyContext.getComponentOutputFields(
-          stream.getComponentName(), stream.getId()).size();
-
-      // We would reuse the System.nanoTime()
-      long currentTime = startOfCycle;
-      for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
-        // Create the value list and fill the value
-        List<Object> values = new ArrayList<>(nValues);
-        for (int i = 0; i < nValues; i++) {
-          values.add(serializer.deserialize(dataTuple.getValues(i).toByteArray()));
+      if (msg instanceof HeronTuples.HeronTupleSet) {
+        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
+        // Handle the tuples
+        if (tuples.hasControl()) {
+          throw new RuntimeException("Bolt cannot get acks/fails from other components");
         }
 
-        // Decode the tuple
-        TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
-            dataTuple.getRootsList(), values, currentTime, false);
+        // Get meta data of tuples
+        TopologyAPI.StreamId stream = tuples.getData().getStream();
+        int nValues = topologyContext.getComponentOutputFields(
+            stream.getComponentName(), stream.getId()).size();
+        int sourceTaskId = tuples.getSrcTaskId();
 
-        // Delegate to the use defined bolt
-        bolt.execute(t);
+        for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
+          long startExecuteTuple = System.nanoTime();
+          // Create the value list and fill the value
+          List<Object> values = new ArrayList<>(nValues);
+          for (int i = 0; i < nValues; i++) {
+            values.add(serializer.deserialize(dataTuple.getValues(i).toByteArray()));
+          }
 
-        // Swap
-        long startTime = currentTime;
-        currentTime = System.nanoTime();
+          // Decode the tuple
+          TupleImpl t = new TupleImpl(topologyContext, stream, dataTuple.getKey(),
+              dataTuple.getRootsList(), values, startExecuteTuple, false, sourceTaskId);
 
-        long executeLatency = currentTime - startTime;
+          // Delegate to the use defined bolt
+          bolt.execute(t);
 
-        // Invoke user-defined execute task hook
-        topologyContext.invokeHookBoltExecute(t, executeLatency);
+          // record the end of a tuple execution
+          long endExecuteTuple = System.nanoTime();
 
-        // Update metrics
-        boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
-      }
+          long executeLatency = endExecuteTuple - startExecuteTuple;
 
-      // To avoid spending too much time
-      if (currentTime - startOfCycle - instanceExecuteBatchTime > 0) {
-        break;
+          // Invoke user-defined execute task hook
+          topologyContext.invokeHookBoltExecute(t, Duration.ofNanos(executeLatency));
+
+          // Update metrics
+          boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
+        }
+
+        // To avoid spending too much time
+        long currentTime = System.nanoTime();
+        if (currentTime - startOfCycle - instanceExecuteBatchTime.toNanos() > 0) {
+          break;
+        }
       }
     }
   }
@@ -235,7 +298,7 @@ public class BoltInstance implements IInstance {
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
 
     if (tickTupleFreqSecs != null) {
-      int freq = TypeUtils.getInteger(tickTupleFreqSecs);
+      Duration freq = TypeUtils.getDuration(tickTupleFreqSecs, ChronoUnit.SECONDS);
 
       Runnable r = new Runnable() {
         public void run() {
@@ -243,7 +306,7 @@ public class BoltInstance implements IInstance {
         }
       };
 
-      looper.registerTimerEventInSeconds(freq, r);
+      looper.registerTimerEvent(freq, r);
     }
   }
 

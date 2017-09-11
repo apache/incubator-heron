@@ -125,6 +125,10 @@ public class Communicator<E> {
 
     // We set the default expected available capacity half as the capacity
     this.expectedAvailableCapacity = capacity / 2;
+
+    // Notify both sides to pick up new values
+    informConsumer();
+    informProducer();
   }
 
   /**

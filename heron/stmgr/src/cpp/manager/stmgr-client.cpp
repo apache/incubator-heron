@@ -63,9 +63,13 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
       quit_(false),
       client_manager_(_client_manager),
       metrics_manager_client_(_metrics_manager_client),
-      ndropped_messages_(0) {
+      ndropped_messages_(0),
+      reconnect_attempts_(0),
+      is_registered_(false) {
   reconnect_other_streammgrs_interval_sec_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
+  reconnect_other_streammgrs_max_attempt_ =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectMaxAttempts();
 
   InstallResponseHandler(new proto::stmgr::StrMgrHelloRequest(), &StMgrClient::HandleHelloResponse);
   InstallMessageHandler(&StMgrClient::HandleTupleStreamMessage);
@@ -90,6 +94,10 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
     LOG(INFO) << "Connected to stmgr " << other_stmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
               << std::endl;
+
+    // reset the reconnect attempt once connection established
+    reconnect_attempts_ = 0;
+
     if (quit_) {
       Stop();
     } else {
@@ -100,7 +108,7 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
                  << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
                  << " due to: " << _status << std::endl;
     if (quit_) {
-      LOG(ERROR) << "Quitting";
+      LOG(ERROR) << "Instructed to quit. Quitting...";
       delete this;
       return;
     } else {
@@ -112,6 +120,7 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
 }
 
 void StMgrClient::HandleClose(NetworkErrorCode _code) {
+  is_registered_ = false;
   if (_code == OK) {
     LOG(INFO) << "We closed our server connection with stmgr " << other_stmgr_id_ << " running at "
               << get_clientoptions().get_host() << ":" << get_clientoptions().get_port()
@@ -124,6 +133,7 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
   if (quit_) {
     delete this;
   } else {
+    client_manager_->HandleDeadStMgrConnection(other_stmgr_id_);
     LOG(INFO) << "Will try to reconnect again after 1 seconds" << std::endl;
     AddTimer([this]() { this->OnReConnectTimer(); },
              reconnect_other_streammgrs_interval_sec_ * 1000 * 1000);
@@ -136,7 +146,7 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
     LOG(ERROR) << "NonOK network code " << _status << " for register response from stmgr "
                << other_stmgr_id_ << " running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
-    delete _response;
+    __global_protobuf_pool_release__(_response);
     Stop();
     return;
   }
@@ -145,15 +155,28 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
     LOG(ERROR) << "NonOK register response " << status << " from stmgr " << other_stmgr_id_
                << " running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
+    __global_protobuf_pool_release__(_response);
     Stop();
+    return;
   }
-  delete _response;
+  __global_protobuf_pool_release__(_response);
+  is_registered_ = true;
   if (client_manager_->DidAnnounceBackPressure()) {
     SendStartBackPressureMessage();
   }
+  client_manager_->HandleStMgrClientRegistered();
 }
 
-void StMgrClient::OnReConnectTimer() { Start(); }
+void StMgrClient::OnReConnectTimer() {
+  reconnect_attempts_ += 1;
+
+  if (reconnect_attempts_ < reconnect_other_streammgrs_max_attempt_) {
+    Start();
+  } else {
+    LOG(FATAL) << "Could not connect to stmgr " << other_stmgr_id_
+               << " after reaching the max reconnect attempts. Quitting...";
+  }
+}
 
 void StMgrClient::SendHelloRequest() {
   auto request = new proto::stmgr::StrMgrHelloRequest();
@@ -165,19 +188,21 @@ void StMgrClient::SendHelloRequest() {
   return;
 }
 
-void StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg) {
+bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg) {
   if (IsConnected()) {
     SendMessage(_msg);
+    return true;
   } else {
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << other_stmgr_id_ << " because it is not connected";
     }
+    return false;
   }
 }
 
-void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message) {
-  release(_message);
+void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
+  __global_protobuf_pool_release__(_message);
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 
@@ -199,29 +224,40 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StartBackPressureMessage* message = acquire(message);
+  proto::stmgr::StartBackPressureMessage* message = nullptr;
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
 
-  release(message);
+  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendStopBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StopBackPressureMessage* message = acquire(message);
+  proto::stmgr::StopBackPressureMessage* message = nullptr;
+  message = __global_protobuf_pool_acquire__(message);
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
 
-  release(message);
+  __global_protobuf_pool_release__(message);
 }
 
+void StMgrClient::SendDownstreamStatefulCheckpoint(
+                  proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  LOG(INFO) << "Sending Downstream Checkpoint message for src_task_id: "
+            << _message->origin_task_id() << " dest_task_id: "
+            << _message->destination_task_id() << " checkpoint: "
+            << _message->checkpoint_id();
+  SendMessage(*_message);
+  __global_protobuf_pool_release__(_message);
+}
 }  // namespace stmgr
 }  // namespace heron

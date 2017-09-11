@@ -15,6 +15,7 @@
 package com.twitter.heron.simulator.utils;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -195,6 +196,6 @@ public class PhysicalPlanUtilTest implements Serializable {
    */
   @Test
   public void testExtractTopologyTimeout() throws Exception {
-    Assert.assertEquals(1, PhysicalPlanUtil.extractTopologyTimeout(topology));
+    Assert.assertEquals(Duration.ofSeconds(1), PhysicalPlanUtil.extractTopologyTimeout(topology));
   }
 }

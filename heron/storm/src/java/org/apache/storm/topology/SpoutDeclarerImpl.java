@@ -28,8 +28,9 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
   }
 
   @Override
-  public SpoutDeclarer addConfigurations(Map<String, Object> conf) {
-    delegate.addConfigurations(conf);
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public SpoutDeclarer addConfigurations(Map conf) {
+    delegate.addConfigurations((Map<String, Object>) conf);
     return this;
   }
 

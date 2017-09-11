@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.hooks.ITaskHook;
@@ -62,15 +64,25 @@ public final class TaskHookTopology {
     // Put an arbitrary large number here if you don't want to slow the topology down
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
     // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
+    conf.setNumAckers(1);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // Set the task hook
     List<String> taskHooks = new LinkedList<>();
     taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
-    conf.setAutoTaskHooks(taskHooks);
+    com.twitter.heron.api.Config.setAutoTaskHooks(conf, taskHooks);
 
-    conf.setNumStmgrs(1);
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "count", ByteAmount.fromMegabytes(512));
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+
+
+    conf.setNumWorkers(2);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 
@@ -94,7 +106,8 @@ public final class TaskHookTopology {
     }
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context) {
+    @SuppressWarnings("rawtypes")
+    public void prepare(Map conf, TopologyContext context) {
       GlobalMetrics.incr("hook_prepare");
       System.out.println(constructString);
       System.out.println("prepare() is invoked in hook");
@@ -191,8 +204,9 @@ public final class TaskHookTopology {
     public AckingTestWordSpout() {
     }
 
+    @SuppressWarnings("rawtypes")
     public void open(
-        Map<String, Object> conf,
+        Map conf,
         TopologyContext context,
         SpoutOutputCollector acollector) {
       collector = acollector;

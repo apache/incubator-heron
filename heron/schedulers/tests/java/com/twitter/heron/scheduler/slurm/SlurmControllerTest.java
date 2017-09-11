@@ -65,15 +65,13 @@ public class SlurmControllerTest {
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyString(),
-        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
-        Matchers.any(StringBuilder.class));
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class));
     Assert.assertFalse(controller.createJob(slurmFileName, "slurm",
         expectedCommand, WORKING_DIRECTORY, 1));
 
     // Happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyString(),
-        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
-        Matchers.any(StringBuilder.class));
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class));
     Assert.assertTrue(controller.createJob(slurmFileName, "slurm",
         expectedCommand, WORKING_DIRECTORY, 1));
   }
@@ -87,14 +85,12 @@ public class SlurmControllerTest {
     Assert.assertFalse(controller.killJob(jobIdFile));
     // fail if process creation fails
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyString(),
-        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
-        Matchers.any(StringBuilder.class));
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class));
     Mockito.doReturn(jobIds).when(controller).readFromFile(jobIdFile);
     Assert.assertFalse(controller.killJob(jobIdFile));
     // happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyString(),
-        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
-        Matchers.any(StringBuilder.class));
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class));
     Mockito.doReturn(jobIds).when(controller).readFromFile(jobIdFile);
     Assert.assertTrue(controller.killJob(jobIdFile));
   }

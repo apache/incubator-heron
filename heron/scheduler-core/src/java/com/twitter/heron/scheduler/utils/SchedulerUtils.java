@@ -26,6 +26,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
@@ -35,11 +36,11 @@ import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ShellUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public final class SchedulerUtils {
-  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
+  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 9;
   public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
+  public static final String SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION = "P";
 
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
@@ -61,16 +62,15 @@ public final class SchedulerUtils {
     List<String> commands = new ArrayList<>();
 
     // The java executable should be "{JAVA_HOME}/bin/java"
-    String javaExecutable = String.format("%s/%s", Context.javaSandboxHome(config), "bin/java");
+    String javaExecutable = String.format("%s/%s", Context.clusterJavaHome(config), "bin/java");
     commands.add(javaExecutable);
     commands.add("-cp");
 
     // Construct the complete classpath to start scheduler
-    String completeSchedulerProcessClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
+    String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
+        Context.schedulerClassPath(config),
+        Context.packingClassPath(config),
+        Context.stateManagerClassPath(config));
     commands.add(completeSchedulerProcessClassPath);
     commands.add("com.twitter.heron.scheduler.SchedulerMain");
 
@@ -168,7 +168,7 @@ public final class SchedulerUtils {
       int containerIndex,
       List<String> ports) {
     List<String> commands = new ArrayList<>();
-    commands.add(Context.executorSandboxBinary(config));
+    commands.add(Context.executorBinary(config));
     commands.add(Integer.toString(containerIndex));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
@@ -196,6 +196,9 @@ public final class SchedulerUtils {
     String shellPort = freePorts.get(3);
     String metricsmgrPort = freePorts.get(4);
     String schedulerPort = freePorts.get(5);
+    String metricsCacheMasterPort = freePorts.get(6);
+    String metricsCacheStatsPort = freePorts.get(7);
+    String ckptmgrPort = freePorts.get(8);
 
     List<String> commands = new ArrayList<>();
     commands.add(topology.getName());
@@ -203,38 +206,55 @@ public final class SchedulerUtils {
     commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
     commands.add(Context.stateManagerConnectionString(config));
     commands.add(Context.stateManagerRootPath(config));
-    commands.add(Context.tmasterSandboxBinary(config));
-    commands.add(Context.stmgrSandboxBinary(config));
-    commands.add(Context.metricsManagerSandboxClassPath(config));
+    commands.add(Context.tmasterBinary(config));
+    commands.add(Context.stmgrBinary(config));
+    commands.add(Context.metricsManagerClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
     commands.add(masterPort);
     commands.add(tmasterControllerPort);
     commands.add(tmasterStatsPort);
-    commands.add(Context.systemConfigSandboxFile(config));
+    commands.add(Context.systemConfigFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config).name().toLowerCase());
     commands.add(Context.topologyBinaryFile(config));
-    commands.add(Context.javaSandboxHome(config));
+    commands.add(Context.clusterJavaHome(config));
     commands.add(shellPort);
-    commands.add(Context.shellSandboxBinary(config));
+    commands.add(Context.shellBinary(config));
     commands.add(metricsmgrPort);
     commands.add(Context.cluster(config));
     commands.add(Context.role(config));
     commands.add(Context.environ(config));
-    commands.add(Context.instanceSandboxClassPath(config));
-    commands.add(Context.metricsSinksSandboxFile(config));
+    commands.add(Context.instanceClassPath(config));
+    commands.add(Context.metricsSinksFile(config));
 
-    String completeSchedulerProcessClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
+    String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
+        Context.schedulerClassPath(config),
+        Context.packingClassPath(config),
+        Context.stateManagerClassPath(config));
 
     commands.add(completeSchedulerProcessClassPath);
     commands.add(schedulerPort);
-    commands.add(Context.pythonInstanceSandboxBinary(config));
+    commands.add(Context.pythonInstanceBinary(config));
+    commands.add(Context.metricsCacheManagerClassPath(config));
+    commands.add(metricsCacheMasterPort);
+    commands.add(metricsCacheStatsPort);
+
+    Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
+    commands.add(Boolean.toString(ckptMgrEnabled));
+    String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
+        Context.ckptmgrClassPath(config),
+        Context.statefulStoragesClassPath(config),
+        Context.statefulStorageCustomClassPath(config));
+    commands.add(completeCkptmgrProcessClassPath);
+    commands.add(ckptmgrPort);
+    commands.add(Context.statefulConfigFile(config));
+
+    String healthMgrMode =
+        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
+    commands.add(healthMgrMode);
+    commands.add(Context.healthMgrClassPath(config));
 
     return commands.toArray(new String[commands.size()]);
   }
@@ -282,7 +302,7 @@ public final class SchedulerUtils {
 
     Scheduler.SchedulerLocation location = builder.build();
 
-    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
+    LOG.log(Level.INFO, "Setting Scheduler locations: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Boolean result =
         statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
@@ -375,6 +395,12 @@ public final class SchedulerUtils {
         LOG.severe("Failed to create directory: " + workingDirectory);
         return false;
       }
+    }
+
+    // Cleanup the directory
+    if (!FileUtils.cleanDir(workingDirectory)) {
+      LOG.severe("Failed to clean directory: " + workingDirectory);
+      return false;
     }
 
     // Curl and extract heron core release package and topology package

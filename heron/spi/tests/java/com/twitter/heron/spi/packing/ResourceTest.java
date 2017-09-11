@@ -45,6 +45,16 @@ public class ResourceTest {
   }
 
   @Test
+  public void testPlus() {
+    Resource firstResource = new Resource(2, TWO, TWO);
+    Resource secondResource = new Resource(5, ByteAmount.fromBytes(3), ONE);
+    Resource totalResource = firstResource.plus(secondResource);
+    Assert.assertEquals(7, (long) totalResource.getCpu());
+    Assert.assertEquals(ByteAmount.fromBytes(5), totalResource.getRam());
+    Assert.assertEquals(ByteAmount.fromBytes(3), totalResource.getDisk());
+  }
+
+  @Test
   public void testDivideBy() {
     Resource firstResource = new Resource(12, ByteAmount.fromBytes(13), ByteAmount.fromBytes(15));
     Resource secondResource = new Resource(2, TWO, TWO);

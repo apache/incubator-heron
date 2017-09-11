@@ -15,10 +15,7 @@
 package com.twitter.heron.api;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-
-import com.google.protobuf.ByteString;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.Utils;
@@ -37,25 +34,6 @@ public class HeronTopology {
     this.topologyBuilder = topologyBuilder;
   }
 
-  private static TopologyAPI.Config.Builder getConfigBuilder(Config config) {
-    TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
-    Set<String> apiVars = config.getApiVars();
-    for (Map.Entry<String, Object> entry : config.entrySet()) {
-      TopologyAPI.Config.KeyValue.Builder b = TopologyAPI.Config.KeyValue.newBuilder();
-      b.setKey(entry.getKey());
-      if (apiVars.contains(entry.getKey())) {
-        b.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
-        b.setValue(entry.getValue().toString());
-      } else {
-        b.setType(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE);
-        b.setSerializedValue(ByteString.copyFrom(Utils.serialize(entry.getValue())));
-      }
-      cBldr.addKvs(b);
-    }
-
-    return cBldr;
-  }
-
   private static void addDefaultTopologyConfig(Map<String, Object> userConfig) {
     if (!userConfig.containsKey(Config.TOPOLOGY_DEBUG)) {
       userConfig.put(Config.TOPOLOGY_DEBUG, "false");
@@ -72,8 +50,9 @@ public class HeronTopology {
     if (!userConfig.containsKey(Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
       userConfig.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, "100");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_ACKING)) {
-      userConfig.put(Config.TOPOLOGY_ENABLE_ACKING, "false");
+    if (!userConfig.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
+      userConfig.put(Config.TOPOLOGY_RELIABILITY_MODE,
+                     String.valueOf(Config.TopologyReliabilityMode.ATLEAST_ONCE));
     }
     if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       userConfig.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
@@ -95,7 +74,7 @@ public class HeronTopology {
     addDefaultTopologyConfig(heronConfig);
     heronConfig.put(Config.TOPOLOGY_NAME, name);
 
-    topologyBuilder.setTopologyConfig(getConfigBuilder(heronConfig));
+    topologyBuilder.setTopologyConfig(Utils.getConfigBuilder(heronConfig));
 
     return topologyBuilder.build();
   }

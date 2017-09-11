@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.packing.builder.ContainerIdScorer;
@@ -33,10 +34,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
-import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED;
@@ -164,7 +163,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
       } catch (ResourceExceededException e) {
         //Not enough containers. Adjust the number of containers.
-        LOG.info(String.format(
+        LOG.finest(String.format(
             "%s Increasing the number of containers to %s and attempting to place again.",
             e.getMessage(), this.numContainers + 1));
         increaseNumContainers(1);
@@ -236,11 +235,14 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
       PackingPlanBuilder planBuilder) throws ResourceExceededException {
 
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    int totalInstance = TopologyUtils.getTotalInstance(topology);
+    int totalInstances = TopologyUtils.getTotalInstance(topology);
 
-    if (numContainers > totalInstance) {
-      throw new PackingException("More containers allocated than instances. " + numContainers
-          + " containers allocated to host " + totalInstance + " instances.");
+    if (numContainers > totalInstances) {
+      LOG.warning(String.format(
+          "More containers requested (%s) than total instances (%s). Reducing containers to %s",
+          numContainers, totalInstances, totalInstances));
+      numContainers = totalInstances;
+      planBuilder.updateNumContainers(numContainers);
     }
 
     assignInstancesToContainers(planBuilder, parallelismMap, PolicyType.STRICT);

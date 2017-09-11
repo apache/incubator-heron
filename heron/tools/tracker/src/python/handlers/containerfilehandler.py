@@ -74,6 +74,59 @@ class ContainerFileDataHandler(BaseHandler):
       Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
+# pylint: disable=attribute-defined-outside-init
+class ContainerFileDownloadHandler(BaseHandler):
+  """
+  URL - /topologies/containerfiledownload?cluster=<cluster>&topology=<topology> \
+        &environ=<environment>&container=<container>
+  Parameters:
+   - cluster - Name of cluster.
+   - environ - Running environment.
+   - role - (optional) Role used to submit the topology.
+   - topology - Name of topology (Note: Case sensitive. Can only
+                include [a-zA-Z0-9-_]+)
+   - container - Container number
+   - path - Relative path to the file
+
+  Download the file for the given topology, container and path.
+  """
+  def initialize(self, tracker):
+    """ initialize """
+    self.tracker = tracker
+
+  @tornado.gen.coroutine
+  def get(self):
+    try:
+      cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
+      environ = self.get_argument_environ()
+      topology_name = self.get_argument_topology()
+      container = self.get_argument(constants.PARAM_CONTAINER)
+      path = self.get_argument(constants.PARAM_PATH)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
+
+      stmgr_id = "stmgr-" + container
+      stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]
+      host = stmgr["host"]
+      shell_port = stmgr["shell_port"]
+      file_download_url = "http://%s:%d/download/%s" % (host, shell_port, path)
+      Log.debug("download file url: %s", file_download_url)
+
+      path = self.get_argument("path")
+      filename = path.split("/")[-1]
+      self.set_header("Content-Disposition", "attachment; filename=%s" % filename)
+
+      def streaming_callback(chunk):
+        self.write(chunk)
+        self.flush()
+
+      http_client = tornado.httpclient.AsyncHTTPClient()
+      yield http_client.fetch(file_download_url, streaming_callback=streaming_callback)
+      self.finish()
+    except Exception as e:
+      Log.debug(traceback.format_exc())
+      self.write_error_response(e)
+
 
 class ContainerFileStatsHandler(BaseHandler):
   """

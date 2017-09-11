@@ -9,8 +9,10 @@ instance_deps_files =  \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java",
         "//heron/api/src/java:classification",
-        "//heron/common/src/java:common-java",
-        "//third_party/java:logging", 
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:config-java",
+        "//heron/common/src/java:network-java",
+        "//heron/common/src/java:utils-java",
     ]
 
 java_library(
@@ -24,16 +26,9 @@ java_library(
 
 java_binary(
     name = "instance-unshaded",
-    srcs = glob(["**/HeronInstance.java"]),
+    srcs = glob(["**/*/*.java"]),
     main_class = "com.twitter.heron.instance.HeronInstance",
-    deps = [
-        ":instance-java",
-        "//heron/common/src/java:common-java",
-        # Heron does not need it, we supply this,
-        # since we exclude them explicitly in target "heron_binary".
-        # Later we might remove it.
-        "//third_party/java:logging",
-    ] + heron_java_proto_files(),
+    deps = instance_deps_files,
 )
 
 jarjar_binary(

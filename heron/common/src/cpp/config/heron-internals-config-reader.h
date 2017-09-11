@@ -143,17 +143,24 @@ class HeronInternalsConfigReader : public YamlFileReader {
   /**
   * Stream manager Config Getters
   **/
-  // Maximum size in bytes of a packet to be send out from stream manager
-  sp_int32 GetHeronStreammgrPacketMaximumSizeBytes();
-
   // The frequency in ms to drain the tuple cache in stream manager
   sp_int32 GetHeronStreammgrCacheDrainFrequencyMs();
 
   // The sized based threshold in MB for draining the tuple cache
   sp_int32 GetHeronStreammgrCacheDrainSizeMb();
 
+  // The size based threshold in MB for buffering data tuples waiting for
+  // checkpoint markers to arrive before giving up
+  sp_int32 GetHeronStreammgrStatefulBufferSizeMb();
+
+  // The max number of messages in the memory pool for each message type
+  sp_int32 GetHeronStreammgrMempoolMaxMessageNumber();
+
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
+
+  // The max reconnect attempts to other stream managers for stream manager client
+  sp_int32 GetHeronStreammgrClientReconnectMaxAttempts();
 
   // The reconnect interval to other stream managers in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectIntervalSec();

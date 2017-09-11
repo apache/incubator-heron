@@ -21,7 +21,7 @@
 // Please see mean-metric.cpp for details
 //////////////////////////////////////////////////////////////////////////////
 #include "metrics/mean-metric.h"
-#include <sstream>
+#include <string>
 #include "metrics/imetric.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -47,11 +47,9 @@ void MeanMetric::GetAndReset(const sp_string& _prefix,
   if (denominator_ > 0) {
     result = numerator_ / denominator_;
   }
-  std::ostringstream o;
-  o << result;
   proto::system::MetricDatum* d = _message->add_metrics();
   d->set_name(_prefix);
-  d->set_value(o.str());
+  d->set_value(std::to_string(result));
 
   // Reset
   denominator_ = 0;

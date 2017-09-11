@@ -15,6 +15,7 @@
 package com.twitter.heron.api.metric;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 /**
  * Singleton class which exposes a simple globally available counter for heron jobs.
@@ -77,10 +78,11 @@ public enum GlobalMetrics implements Serializable {
    * TODO: Investigate if it is possible to do this part in ctor. One thing to note is how this will
    * affect the serialization of CounterFactory.
    */
-  public static void init(IMetricsRegister metricsRegister, int metricsBucket) {
+  public static void init(IMetricsRegister metricsRegister, Duration metricsBucket) {
     synchronized (INSTANCE) {
       if (!INSTANCE.registered) {
-        metricsRegister.registerMetric(ROOT_NAME, INSTANCE.metricsContainer, metricsBucket);
+        metricsRegister.registerMetric(
+            ROOT_NAME, INSTANCE.metricsContainer, (int) metricsBucket.getSeconds());
         INSTANCE.registered = true;
       }
     }

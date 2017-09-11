@@ -34,6 +34,6 @@ public class BoltAckInfo {
   public BoltAckInfo(com.twitter.heron.api.hooks.info.BoltAckInfo info) {
     this.tuple = new org.apache.storm.tuple.TupleImpl(info.getTuple());
     this.ackingTaskId = info.getAckingTaskId();
-    this.processLatencyMs = info.getProcessLatencyMs();
+    this.processLatencyMs = info.getProcessLatency().toMillis();
   }
 }

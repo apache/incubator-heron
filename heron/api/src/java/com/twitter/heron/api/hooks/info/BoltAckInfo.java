@@ -14,17 +14,19 @@
 
 package com.twitter.heron.api.hooks.info;
 
+import java.time.Duration;
+
 import com.twitter.heron.api.tuple.Tuple;
 
 public class BoltAckInfo {
   private Tuple tuple;
   private int ackingTaskId;
-  private Long processLatencyMs; // null if it wasn't sampled
+  private Duration processLatency; // null if it wasn't sampled
 
-  public BoltAckInfo(Tuple tuple, int ackingTaskId, Long processLatencyMs) {
+  public BoltAckInfo(Tuple tuple, int ackingTaskId, Duration processLatency) {
     this.tuple = tuple;
     this.ackingTaskId = ackingTaskId;
-    this.processLatencyMs = processLatencyMs;
+    this.processLatency = processLatency;
   }
 
   public Tuple getTuple() {
@@ -35,7 +37,7 @@ public class BoltAckInfo {
     return ackingTaskId;
   }
 
-  public Long getProcessLatencyMs() {
-    return processLatencyMs;
+  public Duration getProcessLatency() {
+    return processLatency;
   }
 }

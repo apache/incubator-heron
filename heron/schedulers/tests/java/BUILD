@@ -6,6 +6,7 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:utils-java",
     "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:junit4",
     "//third_party/java:mockito",
@@ -62,17 +63,22 @@ marathon_deps_files = [
     "//heron/schedulers/src/java:marathon-scheduler-java",
 ]
 
+kubernetes_deps_files = [
+    "//heron/schedulers/src/java:kubernetes-scheduler-java",
+    "//heron/schedulers/src/java:scheduler-utils-java",
+]
+
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
-  deps = scheduler_deps_files + aurora_deps_files,
+  deps = scheduler_deps_files + aurora_deps_files + ["@commons_cli_commons_cli//jar"],
 )
 
 java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.aurora.AuroraSchedulerTest",
     "com.twitter.heron.scheduler.aurora.AuroraLauncherTest",
-    "com.twitter.heron.scheduler.aurora.AuroraControllerTest",
+    "com.twitter.heron.scheduler.aurora.AuroraCLIControllerTest",
     "com.twitter.heron.scheduler.aurora.AuroraContextTest",
   ],
   runtime_deps = [ ":aurora-tests" ],
@@ -159,5 +165,21 @@ java_tests(
     "com.twitter.heron.scheduler.marathon.MarathonControllerTest",
   ],
   runtime_deps = [ ":marathon-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "kubernetes-tests",
+  srcs = glob(["**/kubernetes/*.java"]),
+  deps = scheduler_deps_files + kubernetes_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
+    "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest",
+    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest"
+  ],
+  runtime_deps = [ ":kubernetes-tests" ],
   size = "small",
 )

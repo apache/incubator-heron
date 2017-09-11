@@ -5,14 +5,19 @@ html lang={{.Site.LanguageCode}}
     {{partial "docs/page-meta.html" .}}
     title {{.Site.Title}} Documentation - {{.Title}}
     {{partial "css.includes.html" .}}
-  body
-    {{partial "navbar.html" .}}
-    .hn-main
-      .container
-        .row
-          aside.hn-sidebar.hidden-xs.col-sm-4.col-md-3.col-lg-2.collapse
-            {{partial "sidenav.html" .}}
-          section.hn-docs-main.col-sm-8.col-md-9.col-lg-10.col-sm-offset-4.col-md-offset-3.col-lg-offset-2
-            {{partial "docs/main.html" .}}
+    = javascript
+      var shiftWindow = function() { scrollBy(0, -100) };
+      window.addEventListener("hashchange", shiftWindow);
+      function load() { if (window.location.hash) shiftWindow(); }
+  body.body
+    main.main
+      {{partial "navbar.html" .}}
+      .hn-main
+        .container
+          .row
+            aside.hn-sidebar.hidden-xs.col-sm-4.col-md-3.col-lg-2.collapse
+              {{partial "sidenav.html" .}}
+            section.hn-docs-main.col-sm-8.col-md-9.col-lg-10.col-sm-offset-4.col-md-offset-3.col-lg-offset-2
+              {{partial "docs/main.html" .}}
     script src=https://code.jquery.com/jquery-2.2.1.min.js
     script src=/js/app.min.js

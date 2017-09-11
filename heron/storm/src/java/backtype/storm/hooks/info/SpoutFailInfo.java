@@ -32,6 +32,6 @@ public class SpoutFailInfo {
   public SpoutFailInfo(com.twitter.heron.api.hooks.info.SpoutFailInfo info) {
     this.messageId = info.getMessageId();
     this.spoutTaskId = info.getSpoutTaskId();
-    this.failLatencyMs = info.getFailLatencyMs();
+    this.failLatencyMs = info.getFailLatency().toMillis();
   }
 }

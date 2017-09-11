@@ -31,8 +31,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 
 public class MesosFrameworkTest {
   private static final String TOPOLOGY_NAME = "testTopology";
@@ -90,15 +89,15 @@ public class MesosFrameworkTest {
   @Before
   public void before() throws Exception {
     config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
-    Mockito.when(config.getStringValue(Keys.role())).thenReturn(ROLE);
-    Mockito.when(config.getStringValue(Keys.corePackageUri())).thenReturn(CORE_PACKAGE_URI);
+    Mockito.when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
+    Mockito.when(config.getStringValue(Key.CORE_PACKAGE_URI)).thenReturn(CORE_PACKAGE_URI);
 
     runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.getLongValue(Keys.numContainers())).thenReturn(NUM_CONTAINER);
+    Mockito.when(runtime.getLongValue(Key.NUM_CONTAINERS)).thenReturn(NUM_CONTAINER);
     Properties properties = new Properties();
-    properties.put(Keys.topologyPackageUri(), TOPOLOGY_PACKAGE_URI);
-    Mockito.when(runtime.get(Keys.SCHEDULER_PROPERTIES)).thenReturn(properties);
+    properties.put(Key.TOPOLOGY_PACKAGE_URI.value(), TOPOLOGY_PACKAGE_URI);
+    Mockito.when(runtime.get(Key.SCHEDULER_PROPERTIES)).thenReturn(properties);
 
     mesosFramework = Mockito.spy(new MesosFramework(config, runtime));
     SchedulerDriver driver = Mockito.mock(SchedulerDriver.class);

@@ -71,6 +71,8 @@ class ConnectionEndPoint {
  */
 struct ConnectionOptions {
   sp_uint32 max_packet_size_;
+  sp_int64 high_watermark_;
+  sp_int64 low_watermark_;
 };
 
 /*

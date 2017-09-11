@@ -28,10 +28,11 @@ import backtype.storm.generated.NotAliveException;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.utils.ConfigUtils;
 
+@SuppressWarnings("rawtypes")
 public class LocalCluster implements ILocalCluster {
   private final Simulator simulator;
   private String topologyName;
-  private Map<String, Object> conf;
+  private Map conf;
   private StormTopology topology;
 
   public LocalCluster() {

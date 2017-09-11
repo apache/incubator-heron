@@ -56,7 +56,8 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   // Constructor to match the signature of the storm's TopologyContext
   // Note that here, we fake the clojure.lang.Atom by creating our own class
   // This is real hacking a hack!
-  public TopologyContext(StormTopology topology, Map<String, Object> stormConf,
+  @SuppressWarnings("rawtypes")
+  public TopologyContext(StormTopology topology, Map stormConf,
                          Map<Integer, String> taskToComponent,
                          Map<String, List<Integer>> componentToSortedTasks,
                          Map<String, Map<String, Fields>> componentToStreamToFields,

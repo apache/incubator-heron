@@ -56,6 +56,7 @@ public interface ISpout extends Serializable {
    * @param context This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
    * @param collector The collector is used to emit tuples from this spout. Tuples can be emitted at any time, including the open and close methods. The collector is thread-safe and should be saved as an instance variable of this spout object.
    */
+  @SuppressWarnings("rawtypes")
   void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
 
   /**

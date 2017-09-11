@@ -14,12 +14,15 @@
 '''metrics manager client'''
 import socket
 
-from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.network import HeronClient, StatusCode
+
+from heron.instance.src.python.network.heron_client import HeronClient
+from heron.instance.src.python.network import StatusCode
+from heron.instance.src.python.utils import system_config
+
 from heron.proto import metrics_pb2, common_pb2
 
-import heron.common.src.python.constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 
 class MetricsManagerClient(HeronClient):
   """MetricsManagerClient, responsible for communicating with Metrics Manager"""
@@ -72,6 +75,7 @@ class MetricsManagerClient(HeronClient):
       Log.error("Error connecting to Metrics Manager with status: %s" % str(status))
       retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
       self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
+      return
     self._send_register_req()
 
   def on_response(self, status, context, response):

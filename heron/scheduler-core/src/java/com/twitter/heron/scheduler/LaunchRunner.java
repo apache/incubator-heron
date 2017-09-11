@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
@@ -63,7 +64,7 @@ public class LaunchRunner {
     builder.setTopologyName(topology.getName()).
         setTopologyId(topology.getId())
         .setSubmissionTime(System.currentTimeMillis() / 1000)
-        .setSubmissionUser(System.getProperty("user.name"))
+        .setSubmissionUser(Context.submitUser(config))
         .setCluster(Context.cluster(config))
         .setRole(Context.role(config))
         .setEnviron(Context.environ(config));
@@ -119,24 +120,27 @@ public class LaunchRunner {
    *
    * @throws LauncherException
    * @throws PackingException
+   * @throws SubmitDryRunResponse
    */
-  public void call() throws LauncherException, PackingException {
+  public void call() throws LauncherException, PackingException, SubmitDryRunResponse {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
     PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
 
+    if (Context.dryRun(config)) {
+      throw new SubmitDryRunResponse(topology, config, packedPlan);
+    }
+
     // initialize the launcher
     launcher.initialize(config, runtime);
-
-    Boolean result;
 
     // Set topology def first since we determine whether a topology is running
     // by checking the existence of topology def
     // store the trimmed topology definition into the state manager
     // TODO(rli): log-and-false anti-pattern is too nested on this path. will not refactor
-    result = statemgr.setTopology(trimTopology(topology), topologyName);
+    Boolean result = statemgr.setTopology(trimTopology(topology), topologyName);
     if (result == null || !result) {
       throw new LauncherException(String.format(
           "Failed to set topology definition for topology '%s'", topologyName));

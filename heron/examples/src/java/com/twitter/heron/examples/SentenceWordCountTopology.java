@@ -173,11 +173,18 @@ public final class SentenceWordCountTopology {
     builder.setBolt("count", new WordCount(), 2).fieldsGrouping("split", new Fields("word"));
 
     Config conf = new Config();
-    conf.setComponentRam("split", ByteAmount.fromGigabytes(2));
-    conf.setComponentRam("count", ByteAmount.fromGigabytes(3));
-    conf.setNumWorkers(1);
-    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(5));
-    conf.setContainerCpuRequested(8);
+
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "spout", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "split", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "count", ByteAmount.fromMegabytes(512));
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(3));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+
+    conf.setNumWorkers(2);
 
     StormSubmitter.submitTopology(name, conf, builder.createTopology());
   }

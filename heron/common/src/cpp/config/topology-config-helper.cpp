@@ -17,7 +17,6 @@
 #include "config/topology-config-helper.h"
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
 #include "basics/basics.h"
 #include "config/operational-config-vars.h"
@@ -30,19 +29,44 @@
 namespace heron {
 namespace config {
 
-bool TopologyConfigHelper::IsAckingEnabled(const proto::api::Topology& _topology) {
+TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::string& _mode) {
+  if (_mode == "ATMOST_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
+  } else if (_mode == "ATLEAST_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
+  } else if (_mode == "EFFECTIVELY_ONCE") {
+    return TopologyConfigVars::TopologyReliabilityMode::EFFECTIVELY_ONCE;
+  } else {
+    LOG(FATAL) << "Unknown Topology Reliability Mode " << _mode;
+    return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
+  }
+}
+
+TopologyConfigVars::TopologyReliabilityMode
+TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) {
   sp_string value_true_ = "true";
-  std::set<sp_string> topology_config;
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
+    // First search for reliabiliy mode
+    for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+      if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_RELIABILITY_MODE) {
+        return StringToReliabilityMode(cfg.kvs(i).value());
+      }
+    }
+    // Nothing was found wrt reliability mode.
+    // The following is strictly for backwards compat
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
       if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_ENABLE_ACKING) {
-        return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+        if (value_true_.compare(cfg.kvs(i).value().c_str()) == 0) {
+          return TopologyConfigVars::TopologyReliabilityMode::ATLEAST_ONCE;
+        } else {
+          return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
+        }
       }
     }
   }
 
-  return false;
+  return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
 }
 
 sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topology) {
@@ -100,9 +124,7 @@ void TopologyConfigHelper::SetComponentParallelism(proto::api::Config* _config,
                                                    sp_int32 _parallelism) {
   proto::api::Config::KeyValue* kv = _config->add_kvs();
   kv->set_key(TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM);
-  std::ostringstream ostr;
-  ostr << _parallelism;
-  kv->set_value(ostr.str());
+  kv->set_value(std::to_string(_parallelism));
 }
 
 sp_string TopologyConfigHelper::GetWorkerChildOpts(const proto::api::Topology& _topology) {
@@ -199,6 +221,44 @@ sp_int64 TopologyConfigHelper::GetContainerRamRequested(const proto::api::Topolo
   sp_int64 max_components_per_container =
       (total_parallelism / nstmgrs) + (total_parallelism % nstmgrs);
   return max_components_per_container * 1073741824l;
+}
+
+bool TopologyConfigHelper::StatefulTopologyStartClean(const proto::api::Topology& _topology) {
+  return GetBooleanConfigValue(_topology,
+                               TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN, false);
+}
+
+sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(
+                               const proto::api::Topology& _topology,
+                               sp_int64 _default) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS) {
+      return atol(cfg.kvs(i).value().c_str());
+    }
+  }
+  // There was no value specified. Return the default
+  return _default;
+}
+
+void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _topology,
+                                                  std::unordered_set<std::string> spouts) {
+  for (int i = 0; i < _topology.spouts_size(); ++i) {
+    spouts.insert(_topology.spouts(i).comp().name());
+  }
+}
+
+bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
+                                                 const std::string& _config_name,
+                                                 bool _default_value) {
+  sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
+    if (cfg.kvs(i).key() == _config_name) {
+      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+    }
+  }
+  return _default_value;
 }
 }  // namespace config
 }  // namespace heron

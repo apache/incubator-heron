@@ -36,7 +36,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
  * 4. Expose methods which could be called externally to change the value of metrics
  */
 
-public class FullBoltMetrics {
+public class FullBoltMetrics extends BoltMetrics {
   private final MultiCountMetric ackCount;
   private final MultiReducedMetric<MeanReducerState, Number, Double> processLatency;
   private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
@@ -74,7 +74,7 @@ public class FullBoltMetrics {
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
-    int interval = systemConfig.getHeronMetricsExportIntervalSec();
+    int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
     topologyContext.registerMetric("__ack-count", ackCount, interval);
     topologyContext.registerMetric("__process-latency", processLatency, interval);

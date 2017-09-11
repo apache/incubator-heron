@@ -1,4 +1,0 @@
-role: role
-environ: environ
-group: group
-heron.launcher.class: com.twitter.heron.scheduler.aurora.AuroraLauncher

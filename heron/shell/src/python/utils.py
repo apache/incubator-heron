@@ -14,11 +14,15 @@
 ''' utils.py '''
 import grp
 import os
+import pkgutil
 import pwd
 import stat
+import subprocess
 
 from datetime import datetime
 from xml.sax.saxutils import escape
+
+from heron.common.src.python.utils import proc
 
 def format_mode(sres):
   """
@@ -100,13 +104,10 @@ def get_stat(path, filename):
   ''' get stat '''
   return os.stat(os.path.join(path, filename))
 
-def read_chunk(filename, offset=None, length=None):
+def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   """
   Read a chunk of a file from an offset upto the length.
   """
-  offset = offset or -1
-  length = length or -1
-
   try:
     length = long(length)
     offset = long(offset)
@@ -135,6 +136,57 @@ def read_chunk(filename, offset=None, length=None):
       return {}
 
   if data:
-    return dict(offset=offset, length=len(data), data=escape(data.decode('utf8', 'replace')))
+    data = _escape_data(data) if escape_data else data
+    return dict(offset=offset, length=len(data), data=data)
 
   return dict(offset=offset, length=0)
+
+def _escape_data(data):
+  return escape(data.decode('utf8', 'replace'))
+
+def pipe(prev_proc, to_cmd):
+  """
+  Pipes output of prev_proc into to_cmd.
+  Returns piped process
+  """
+  stdin = None if prev_proc is None else prev_proc.stdout
+  process = subprocess.Popen(to_cmd,
+                             stdout=subprocess.PIPE,
+                             stdin=stdin)
+  if prev_proc is not None:
+    prev_proc.stdout.close() # Allow prev_proc to receive a SIGPIPE
+  return process
+
+def str_cmd(cmd, cwd, env):
+  """
+  Runs the command and returns its stdout and stderr.
+  """
+  process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, cwd=cwd, env=env)
+  stdout_builder, stderr_builder = proc.async_stdout_stderr_builder(process)
+  process.wait()
+  stdout, stderr = stdout_builder.result(), stderr_builder.result()
+  return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
+
+# pylint: disable=unnecessary-lambda
+def chain(cmd_list):
+  """
+  Feed output of one command to the next and return final output
+  Returns string output of chained application of commands.
+  """
+  command = ' | '.join(map(lambda x: ' '.join(x), cmd_list))
+  chained_proc = reduce(pipe, [None] + cmd_list)
+  stdout_builder = proc.async_stdout_builder(chained_proc)
+  chained_proc.wait()
+  return {
+      'command': command,
+      'stdout': stdout_builder.result()
+  }
+
+def get_container_id(instance_id):
+  ''' get container id '''
+  return instance_id.split('_')[1]  # Format: container_<index>_component_name_<index>
+
+def get_asset(asset_name):
+  ''' get assset '''
+  return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))

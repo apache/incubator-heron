@@ -4,21 +4,27 @@ package(default_visibility = ["//visibility:public"])
 
 java_toolchain(
     name = "heron_java_toolchain",
-    encoding = "UTF-8",
-    source_version = "7",
-    target_version = "7",
     bootclasspath = ["@bazel_tools//tools/jdk:bootclasspath"],
+    encoding = "UTF-8",
     extclasspath = ["@bazel_tools//tools/jdk:extdir"],
-    javac = ["@bazel_tools//third_party/java/jdk/langtools:javac_jar"],
-    javabuilder = ["@bazel_tools//tools/jdk:JavaBuilder_deploy.jar"],
-    singlejar = ["@bazel_tools//tools/jdk:SingleJar_deploy.jar"],
-    genclass = ["@bazel_tools//tools/jdk:GenClass_deploy.jar"],
+    forcibly_disable_header_compilation = 0,
+    genclass = ["@bazel_tools//tools/jdk:genclass"],
+    header_compiler = ["@bazel_tools//tools/jdk:turbine"],
     ijar = ["@bazel_tools//tools/jdk:ijar"],
+    javabuilder = ["@bazel_tools//tools/jdk:javabuilder"],
+    javac = ["@bazel_tools//third_party/java/jdk/langtools:javac_jar"],
+    jvm_opts = [
+        "-Xbootclasspath/p:$(location @bazel_tools//third_party/java/jdk/langtools:javac_jar)",
+    ],
     misc = [
-        "-extra_checks:on",
+#        "-XepDisableAllChecks",
+#        "-extra_checks:on",
         "-Xlint:all",
         "-Werror",
     ],
+    singlejar = ["@bazel_tools//tools/jdk:singlejar"],
+    source_version = "8",
+    target_version = "8",
 )
 
 action_listener(

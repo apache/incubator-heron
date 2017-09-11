@@ -14,21 +14,21 @@
 
 package com.twitter.heron.scheduler.utils;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.SchedulerException;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link LauncherUtils} contains helper methods used by the server and client side launch
@@ -109,15 +109,16 @@ public class LauncherUtils {
    *
    * @return initialized scheduler instances
    */
-  public IScheduler getSchedulerInstance(Config config, Config runtime) {
+  public IScheduler getSchedulerInstance(Config config, Config runtime)
+      throws SchedulerException {
     String schedulerClass = Context.schedulerClass(config);
     IScheduler scheduler;
     try {
       // create an instance of scheduler
       scheduler = ReflectionUtils.newInstance(schedulerClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-      LOG.log(Level.SEVERE, "Failed to instantiate scheduler", e);
-      return null;
+      throw new SchedulerException(String.format("Failed to instantiate scheduler using class '%s'",
+          schedulerClass));
     }
 
     scheduler.initialize(config, runtime);
@@ -125,31 +126,39 @@ public class LauncherUtils {
   }
 
   /**
-   * Builds initial runtime config instance using topology information.
+   * Creates initial runtime config instance using topology information.
    *
    * @return initial runtime config instance
    */
-  public Config getPrimaryRuntime(TopologyAPI.Topology topology,
-                                  SchedulerStateManagerAdaptor adaptor) {
+  public Config createPrimaryRuntime(TopologyAPI.Topology topology) {
     return Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-        .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+        .put(Key.TOPOLOGY_ID, topology.getId())
+        .put(Key.TOPOLOGY_NAME, topology.getName())
+        .put(Key.TOPOLOGY_DEFINITION, topology)
+        .put(Key.NUM_CONTAINERS, 1 + TopologyUtils.getNumContainers(topology))
         .build();
   }
 
   /**
+   * Creates initial runtime config of scheduler state manager adaptor
+   *
+   * @return adaptor config
+   */
+  public Config createAdaptorRuntime(SchedulerStateManagerAdaptor adaptor) {
+    return Config.newBuilder()
+        .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, adaptor).build();
+  }
+
+  /**
    * Creates a config instance with packing plan info added to runtime config
+   *
+   * @return packing details config
    */
   public Config createConfigWithPackingDetails(Config runtime, PackingPlan packing) {
-    Config ytruntime;
-    ytruntime = Config.newBuilder()
+    return Config.newBuilder()
         .putAll(runtime)
-        .put(Keys.componentRamMap(), packing.getComponentRamDistribution())
-        .put(Keys.numContainers(), 1 + packing.getContainers().size())
+        .put(Key.COMPONENT_RAMMAP, packing.getComponentRamDistribution())
+        .put(Key.NUM_CONTAINERS, 1 + packing.getContainers().size())
         .build();
-    return ytruntime;
   }
 }

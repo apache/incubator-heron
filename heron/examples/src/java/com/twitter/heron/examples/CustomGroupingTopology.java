@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.examples.spout.TestWordSpout;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.GlobalStreamId;
@@ -47,7 +50,17 @@ public final class CustomGroupingTopology {
 
     Config conf = new Config();
 
-    conf.setNumStmgrs(1);
+    // component resource configuration
+    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "mybolt", ByteAmount.fromMegabytes(512));
+
+    // container resource configuration
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+
+    conf.setNumWorkers(2);
+
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 

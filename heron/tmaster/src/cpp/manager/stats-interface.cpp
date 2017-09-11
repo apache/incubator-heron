@@ -16,7 +16,7 @@
 
 #include "tmaster/src/cpp/manager/stats-interface.h"
 #include <iostream>
-#include <sstream>
+#include <string>
 #include "manager/tmaster.h"
 #include "manager/tmetrics-collector.h"
 #include "metrics/tmaster-metrics.h"
@@ -44,6 +44,10 @@ StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _opti
     this->HandleExceptionSummaryRequest(request);
   };
 
+  auto cbHandleStmgrsRegistrationSummary = [this](IncomingHTTPRequest* request) {
+    this->HandleStmgrsRegistrationSummaryRequest(request);
+  };
+
   auto cbHandleUnknown = [this](IncomingHTTPRequest* request) {
     this->HandleUnknownRequest(request);
   };
@@ -51,6 +55,8 @@ StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _opti
   http_server_->InstallCallBack("/stats", std::move(cbHandleStats));
   http_server_->InstallCallBack("/exceptions", std::move(cbHandleException));
   http_server_->InstallCallBack("/exceptionsummary", std::move(cbHandleExceptionSummary));
+  http_server_->InstallCallBack("/stmgrsregistrationsummary",
+      std::move(cbHandleStmgrsRegistrationSummary));
   http_server_->InstallGenericCallBack(std::move(cbHandleUnknown));
   CHECK(http_server_->Start() == SP_OK);
 }
@@ -63,7 +69,7 @@ void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request) {
   unsigned char* pb = _request->ExtractFromPostData(0, _request->GetPayloadSize());
   proto::tmaster::MetricRequest req;
   if (!req.ParseFromArray(pb, _request->GetPayloadSize())) {
-    LOG(ERROR) << "Unable to decipher post data specified in StatsRequest";
+    LOG(ERROR) << "Unable to deserialize post data specified in StatsRequest";
     http_server_->SendErrorReply(_request, 400);
     delete _request;
     return;
@@ -74,9 +80,7 @@ void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request) {
   CHECK(res->SerializeToString(&response_string));
   OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);
   response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream content_length;
-  content_length << response_string.size();
-  response->AddHeader("Content-Length", content_length.str());
+  response->AddHeader("Content-Length", std::to_string(response_string.size()));
   response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, response);
   delete res;
@@ -90,7 +94,7 @@ void StatsInterface::HandleExceptionRequest(IncomingHTTPRequest* _request) {
   unsigned char* request_data = _request->ExtractFromPostData(0, _request->GetPayloadSize());
   heron::proto::tmaster::ExceptionLogRequest exception_request;
   if (!exception_request.ParseFromArray(request_data, _request->GetPayloadSize())) {
-    LOG(ERROR) << "Unable to decipher post data specified in ExceptionRequest" << std::endl;
+    LOG(ERROR) << "Unable to deserialize post data specified in ExceptionRequest" << std::endl;
     http_server_->SendErrorReply(_request, 400);
     delete _request;
     return;
@@ -101,9 +105,7 @@ void StatsInterface::HandleExceptionRequest(IncomingHTTPRequest* _request) {
   CHECK(exception_response->SerializeToString(&response_string));
   OutgoingHTTPResponse* http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream length_str;
-  length_str << response_string.size();
-  http_response->AddHeader("Content-Length", length_str.str());
+  http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
   http_response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, http_response);
   delete exception_response;
@@ -116,7 +118,7 @@ void StatsInterface::HandleExceptionSummaryRequest(IncomingHTTPRequest* _request
   unsigned char* request_data = _request->ExtractFromPostData(0, _request->GetPayloadSize());
   heron::proto::tmaster::ExceptionLogRequest exception_request;
   if (!exception_request.ParseFromArray(request_data, _request->GetPayloadSize())) {
-    LOG(ERROR) << "Unable to decipher post data specified in ExceptionRequest" << std::endl;
+    LOG(ERROR) << "Unable to deserialize post data specified in ExceptionRequest" << std::endl;
     http_server_->SendErrorReply(_request, 400);
     delete _request;
     return;
@@ -127,14 +129,37 @@ void StatsInterface::HandleExceptionSummaryRequest(IncomingHTTPRequest* _request
   CHECK(exception_response->SerializeToString(&response_string));
   OutgoingHTTPResponse* http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream length_str;
-  length_str << response_string.size();
-  http_response->AddHeader("Content-Length", length_str.str());
+  http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
   http_response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, http_response);
   delete exception_response;
   delete _request;
   LOG(INFO) << "Returned exceptions response";
+}
+
+void StatsInterface::HandleStmgrsRegistrationSummaryRequest(IncomingHTTPRequest* _request) {
+  LOG(INFO) << "Request for stream managers registration summary " << _request->GetQuery();
+  unsigned char* request_data =
+    _request->ExtractFromPostData(0, _request->GetPayloadSize());
+  heron::proto::tmaster::StmgrsRegistrationSummaryRequest stmgrs_reg_request;
+  if (!stmgrs_reg_request.ParseFromArray(request_data, _request->GetPayloadSize())) {
+    LOG(ERROR) << "Unable to deserialize post data specified in" <<
+      "StmgrsRegistrationSummaryRequest" << std::endl;
+    http_server_->SendErrorReply(_request, 400);
+    delete _request;
+    return;
+  }
+  auto stmgrs_reg_summary_response = tmaster_->GetStmgrsRegSummary();
+  sp_string response_string;
+  CHECK(stmgrs_reg_summary_response->SerializeToString(&response_string));
+  auto http_response = new OutgoingHTTPResponse(_request);
+  http_response->AddHeader("Content-Type", "application/octet-stream");
+  http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
+  http_response->AddResponse(response_string);
+  http_server_->SendReply(_request, 200, http_response);
+  delete stmgrs_reg_summary_response;
+  delete _request;
+  LOG(INFO) << "Returned stream managers registration summary response";
 }
 
 void StatsInterface::HandleUnknownRequest(IncomingHTTPRequest* _request) {

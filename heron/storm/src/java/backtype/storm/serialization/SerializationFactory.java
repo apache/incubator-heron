@@ -53,7 +53,7 @@ public final class SerializationFactory {
    * @return Kryo
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public static Kryo getKryo(Map<String, Object> conf) {
+  public static Kryo getKryo(Map conf) {
     IKryoFactory kryoFactory =
         (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
     Kryo k = kryoFactory.getKryo(conf);
@@ -175,7 +175,7 @@ public final class SerializationFactory {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static Map<String, String> normalizeKryoRegister(Map<String, Object> conf) {
+  private static Map<String, String> normalizeKryoRegister(Map conf) {
     // TODO: de-duplicate this logic with the code in nimbus
     Object res = conf.get(Config.TOPOLOGY_KRYO_REGISTER);
     if (res == null) {

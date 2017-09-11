@@ -29,13 +29,13 @@ class TopologiesHandler(BaseHandler):
   {
     <cluster1>: {
       <default>: [
-        top1,
-        top2,
+        topology1,
+        topology2,
         ...
       ],
       <environ1>: [
-        top1,
-        top2,
+        topology1,
+        topology2,
         ...
       ],
       <environ2>: [...],

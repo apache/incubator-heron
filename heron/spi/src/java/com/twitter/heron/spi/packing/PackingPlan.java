@@ -83,6 +83,10 @@ public class PackingPlan {
     return containers;
   }
 
+  public Map<Integer, ContainerPlan> getContainersMap() {
+    return containersMap;
+  }
+
   public Optional<ContainerPlan> getContainer(int containerId) {
     return Optional.fromNullable(this.containersMap.get(containerId));
   }

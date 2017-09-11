@@ -15,15 +15,18 @@
 package com.twitter.heron.common.utils.misc;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
-import com.twitter.heron.api.serializer.KryoSerializer;
+import com.twitter.heron.api.serializer.JavaSerializer;
 
 /**
  * Get the serializer according to the serializerClassName
  */
 public final class SerializeDeSerializeHelper {
+  private static final Logger LOG = Logger.getLogger(SerializeDeSerializeHelper.class.getName());
 
   private SerializeDeSerializeHelper() {
   }
@@ -33,7 +36,12 @@ public final class SerializeDeSerializeHelper {
     try {
       String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);
       if (serializerClassName == null) {
-        serializer = new KryoSerializer();
+        LOG.log(Level.WARNING, "Serializer class name not provided. "
+            + "Fall back to Java serializer. "
+            + "This could cause serious performance degradation. "
+            + "You can specify to use Kryo as serializer. "
+            + "See https://twitter.github.io/heron/docs/developers/serialization/ for details");
+        serializer = new JavaSerializer();
       } else {
         serializer = (IPluggableSerializer) Class.forName(serializerClassName).newInstance();
       }

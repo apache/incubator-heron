@@ -15,6 +15,7 @@
 package com.twitter.heron.common.utils.metrics;
 
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -71,7 +72,7 @@ public class MetricsCollector implements IMetricsRegister {
         }
       };
 
-      runnableToGatherMetrics.registerTimerEventInSeconds(timeBucketSizeInSecs, r);
+      runnableToGatherMetrics.registerTimerEvent(Duration.ofSeconds(timeBucketSizeInSecs), r);
     }
 
     return metric;
@@ -79,16 +80,16 @@ public class MetricsCollector implements IMetricsRegister {
 
   public void registerMetricSampleRunnable(
       final Runnable sampleRunnable,
-      final long sampleInterval) {
+      final Duration sampleInterval) {
     Runnable sampleTimer = new Runnable() {
       @Override
       public void run() {
         sampleRunnable.run();
-        runnableToGatherMetrics.registerTimerEventInSeconds(sampleInterval, this);
+        runnableToGatherMetrics.registerTimerEvent(sampleInterval, this);
       }
     };
 
-    runnableToGatherMetrics.registerTimerEventInSeconds(sampleInterval, sampleTimer);
+    runnableToGatherMetrics.registerTimerEvent(sampleInterval, sampleTimer);
   }
 
   // Force to gather all metrics and put them into the queue
@@ -150,7 +151,7 @@ public class MetricsCollector implements IMetricsRegister {
           gatherMetrics(timeBucketSizeInSecs);
         }
       };
-      runnableToGatherMetrics.registerTimerEventInSeconds(timeBucketSizeInSecs, r);
+      runnableToGatherMetrics.registerTimerEvent(Duration.ofSeconds(timeBucketSizeInSecs), r);
     }
   }
 

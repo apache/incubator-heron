@@ -14,39 +14,50 @@
 
 package com.twitter.heron.simulator.instance;
 
+import java.time.Duration;
 import java.util.Map;
 
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.Config;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.proto.system.HeronTuples;
 
 public class SpoutInstance
     extends com.twitter.heron.instance.spout.SpoutInstance implements IInstance {
 
   private final boolean ackEnabled;
   private final int maxSpoutPending;
-  private final long instanceEmitBatchTime;
-  private final long instanceEmitBatchSize;
+  private final Duration instanceEmitBatchTime;
+  private final ByteAmount instanceEmitBatchSize;
 
+  /**
+   * The SuppressWarnings should go away once TOPOLOGY_ENABLE_ACKING is removed
+   */
+  @SuppressWarnings("deprecation")
   public SpoutInstance(PhysicalPlanHelper helper,
-                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
-                       Communicator<HeronTuples.HeronTupleSet> streamOutQueue, SlaveLooper looper) {
+                       Communicator<Message> streamInQueue,
+                       Communicator<Message> streamOutQueue, SlaveLooper looper) {
     super(helper, streamInQueue, streamOutQueue, looper);
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
-    this.instanceEmitBatchTime =
-        systemConfig.getInstanceEmitBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
-    this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSizeBytes();
-    this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    this.instanceEmitBatchTime = systemConfig.getInstanceEmitBatchTime();
+    this.instanceEmitBatchSize = systemConfig.getInstanceEmitBatchSize();
+    if (config.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
+      this.ackEnabled = Config.TopologyReliabilityMode.ATLEAST_ONCE.equals(
+                              config.get(Config.TOPOLOGY_RELIABILITY_MODE).toString());
+    } else {
+      // This is strictly for backwards compatibility
+      this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    }
   }
 
   @Override
@@ -73,12 +84,12 @@ public class SpoutInstance
       totalTuplesEmitted = newTotalTuplesEmitted;
 
       // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - instanceEmitBatchTime > 0) {
+      if (System.nanoTime() - startOfCycle - instanceEmitBatchTime.toNanos() > 0) {
         break;
       }
 
       if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceEmitBatchSize) {
+          > instanceEmitBatchSize.asBytes()) {
         break;
       }
     }

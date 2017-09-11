@@ -151,8 +151,12 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer directGrouping(String componentName, String streamId) {
-    // TODO:- revisit this
-    throw new RuntimeException("direct Grouping not implemented");
+    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setGtype(TopologyAPI.Grouping.DIRECT);
+    bldr.setType(TopologyAPI.CustomGroupingObjectType.JAVA_OBJECT);
+    return grouping(bldr);
   }
 
   public BoltDeclarer customGrouping(String componentName, CustomStreamGrouping grouping) {

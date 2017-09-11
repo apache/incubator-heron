@@ -116,4 +116,30 @@ public final class FileUtils {
     return new File(file).getName();
   }
 
+  public static boolean deleteDir(String dir) {
+    return deleteDir(new File(dir), true);
+  }
+
+  public static boolean deleteDir(File dir, boolean deleteSelf) {
+    if (dir.isDirectory()) {
+      String[] children = dir.list();
+
+      for (String child : children) {
+        boolean success = deleteDir(new File(dir, child), true);
+        if (!success) {
+          return false;
+        }
+      }
+    }
+
+    if (deleteSelf) {
+      return dir.delete();
+    } else {
+      return true;
+    }
+  }
+
+  public static boolean cleanDir(String dir) {
+    return deleteDir(new File(dir), false);
+  }
 }

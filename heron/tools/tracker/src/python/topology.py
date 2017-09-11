@@ -15,7 +15,7 @@
 import traceback
 import uuid
 
-from heron.common.src.python import constants
+from heronpy.api import api_constants
 from heron.common.src.python.utils.log import Log
 
 # pylint: disable=too-many-instance-attributes
@@ -100,7 +100,7 @@ class Topology(object):
     unregister the corresponding watch.
     """
     to_remove = []
-    for uid, callback in self.watches.iteritems():
+    for uid, callback in self.watches.items():
       try:
         callback(self)
       except Exception as e:
@@ -166,7 +166,7 @@ class Topology(object):
     for component in components:
       config = component.comp.config
       for kvs in config.kvs:
-        if kvs.key == constants.TOPOLOGY_COMPONENT_PARALLELISM:
+        if kvs.key == api_constants.TOPOLOGY_COMPONENT_PARALLELISM:
           num += int(kvs.value)
           break
 
@@ -209,3 +209,23 @@ class Topology(object):
       stmgrs = list(self.physical_plan.stmgrs)
       return map(lambda s: s.host_name, stmgrs)
     return []
+
+  def get_status(self):
+    """
+    Get the current state of this topology.
+    The state values are from the topology.proto
+    RUNNING = 1, PAUSED = 2, KILLED = 3
+    if the state is None "Unknown" is returned.
+    """
+    status = None
+    if self.physical_plan and self.physical_plan.topology:
+      status = self.physical_plan.topology.state
+
+    if status == 1:
+      return "Running"
+    elif status == 2:
+      return "Paused"
+    elif status == 3:
+      return "Killed"
+    else:
+      return "Unknown"
