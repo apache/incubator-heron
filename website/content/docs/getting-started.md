@@ -5,7 +5,7 @@ aliases:
   - /docs/install.html
 ---
 
-> The current version of Heron is **{{% heronVersion %}}**.
+> The current version of Heron is **{{% heronVersion %}}**
 
 The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
