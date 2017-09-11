@@ -24,12 +24,14 @@ import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
+import com.twitter.heron.dsl.SerializableConsumer;
 import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.WindowInfo;
+import com.twitter.heron.dsl.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
@@ -261,6 +263,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void log() {
     LogStreamlet<R> logger = new LogStreamlet<>(this);
     addChild(logger);
+    return;
+  }
+
+  /**
+   * Applies the consumer function for every element of this streamlet
+   * @param consumer The user supplied consumer function that is invoked for each element
+   */
+  @Override
+  public void to(SerializableConsumer<R> consumer) {
+    ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
+    addChild(consumerStreamlet);
     return;
   }
 

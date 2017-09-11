@@ -143,4 +143,12 @@ public interface Streamlet<R> {
    * This is one of the sink functions in the sense that this operation returns void
    */
   void log();
+
+  /**
+   * Applies the consumer function to every element of the stream
+   * This function does not return anything.
+   * @param consumer The user supplied consumer function that is invoked for each element
+   * of this streamlet.
+   */
+  void to(SerializableConsumer<R> consumer);
 }
