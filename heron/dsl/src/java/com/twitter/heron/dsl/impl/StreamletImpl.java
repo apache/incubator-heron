@@ -36,7 +36,7 @@ import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.LogStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
-import com.twitter.heron.dsl.impl.streamlets.ReMapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
@@ -203,7 +203,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public Streamlet<R> repartition(int numPartitions,
                            SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn) {
-    ReMapStreamlet<R> retval = new ReMapStreamlet<>(this, partitionFn);
+    RemapStreamlet<R> retval = new RemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);
     return retval;

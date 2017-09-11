@@ -22,16 +22,16 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.dsl.SerializableBiFunction;
 
 /**
- * ReMapCustomGrouping is the class that routes the incoming tuples
+ * RemapCustomGrouping is the class that routes the incoming tuples
  * into the ReMapBolt. It takes in a user defined remapFn as input.
  * The remapFn defines how tuples should be redirected.
  */
-public class ReMapCustomGrouping<R> implements CustomStreamGrouping {
+public class RemapCustomGrouping<R> implements CustomStreamGrouping {
   private static final long serialVersionUID = 8118844912340601079L;
   private List<Integer> taskIds;
   private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
 
-  public ReMapCustomGrouping(SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
+  public RemapCustomGrouping(SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.remapFn = remapFn;
   }
 

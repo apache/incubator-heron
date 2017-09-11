@@ -21,20 +21,20 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.bolts.MapBolt;
-import com.twitter.heron.dsl.impl.groupings.ReMapCustomGrouping;
+import com.twitter.heron.dsl.impl.groupings.RemapCustomGrouping;
 
 /**
- * ReMapStreamlet represents a Streamlet that is the result of
+ * RemapStreamlet represents a Streamlet that is the result of
  * applying user supplied remapFn on all elements of its parent Streamlet.
- * ReMapStreamlet as such is a generalized version of the Map/FlatMapStreamlets
+ * RemapStreamlet as such is a generalized version of the Map/FlatMapStreamlets
  * that give users more flexibility over the operation. The remapFn allows for
  * users to choose which destination shards every transformed element can go.
  */
-public class ReMapStreamlet<R> extends StreamletImpl<R> {
+public class RemapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
 
-  public ReMapStreamlet(StreamletImpl<R> parent,
+  public RemapStreamlet(StreamletImpl<R> parent,
                         SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;
@@ -65,7 +65,7 @@ public class ReMapStreamlet<R> extends StreamletImpl<R> {
     stageNames.add(getName());
     bldr.setBolt(getName(), new MapBolt<R, R>((a) -> a),
         getNumPartitions())
-        .customGrouping(parent.getName(), new ReMapCustomGrouping<R>(remapFn));
+        .customGrouping(parent.getName(), new RemapCustomGrouping<R>(remapFn));
     return true;
   }
 }
