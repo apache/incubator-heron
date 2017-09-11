@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.bolts.MapBolt;
+import com.twitter.heron.dsl.impl.operators.MapBolt;
 
 /**
  * MapStreamlet represents a Streamlet that is made up of applying the user

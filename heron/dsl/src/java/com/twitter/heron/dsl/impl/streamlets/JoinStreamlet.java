@@ -21,8 +21,8 @@ import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.WindowConfigImpl;
-import com.twitter.heron.dsl.impl.bolts.JoinBolt;
 import com.twitter.heron.dsl.impl.groupings.JoinCustomGrouping;
+import com.twitter.heron.dsl.impl.operators.JoinBolt;
 
 /**
  * JoinStreamlet represents a KVStreamlet that is the result of joining two KVStreamlets left

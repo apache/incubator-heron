@@ -12,45 +12,35 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.bolts;
+package com.twitter.heron.dsl.impl.operators;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializablePredicate;
 
 /**
- * FilterBolt implements the  functionality of the filter operation
- * It takes in a filterFunction predicate as the input.
- * For every tuple that it encounters, the filter function is run
- * and the tuple is re-emitted if the predicate evaluates to true
+ * LogBolt is a very simple Bolt that implements the log functionality.
+ * It basically logs every tuple.
  */
-public class FilterBolt<R> extends DslBolt {
-  private static final long serialVersionUID = -4748646871471052706L;
-  private SerializablePredicate<? super R> filterFn;
+public class LogBolt<R> extends DslBolt {
+  private static final long serialVersionUID = -6392422646613189818L;
+  private static final Logger LOG = Logger.getLogger(LogBolt.class.getName());
 
-  private OutputCollector collector;
-
-  public FilterBolt(SerializablePredicate<? super R> filterFn) {
-    this.filterFn = filterFn;
+  public LogBolt() {
   }
 
   @SuppressWarnings("rawtypes")
   @Override
   public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    if (filterFn.test(obj)) {
-      collector.emit(new Values(obj));
-    }
-    collector.ack(tuple);
+    LOG.info(String.valueOf(obj));
   }
 }

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.bolts;
+package com.twitter.heron.dsl.impl.operators;
 
 import java.util.Map;
 
@@ -20,21 +20,16 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializableFunction;
 
 /**
- * MapBolt is the class that implements the map functionality.
- * It takes in the mapFunction Function as the input.
- * For every tuple, it applies the mapFunction, and emits the resulting value
+ * UnionBolt is the class that implements the union functionality.
+ * Its a very simple bolt that re-emits every tuple that it sees.
  */
-public class MapBolt<R, T> extends DslBolt {
-  private static final long serialVersionUID = -1303096133107278700L;
-  private SerializableFunction<? super R, ? extends T> mapFn;
-
+public class UnionBolt<I> extends DslBolt {
+  private static final long serialVersionUID = -7326832064961413315L;
   private OutputCollector collector;
 
-  public MapBolt(SerializableFunction<? super R, ? extends T> mapFn) {
-    this.mapFn = mapFn;
+  public UnionBolt() {
   }
 
   @SuppressWarnings("rawtypes")
@@ -46,9 +41,8 @@ public class MapBolt<R, T> extends DslBolt {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
-    R obj = (R) tuple.getValue(0);
-    T result = mapFn.apply(obj);
-    collector.emit(new Values(result));
+    I obj = (I) tuple.getValue(0);
+    collector.emit(new Values(obj));
     collector.ack(tuple);
   }
 }

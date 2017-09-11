@@ -23,8 +23,8 @@ import com.twitter.heron.dsl.WindowInfo;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.WindowConfigImpl;
-import com.twitter.heron.dsl.impl.bolts.ReduceByWindowBolt;
 import com.twitter.heron.dsl.impl.groupings.ReduceByWindowCustomGrouping;
+import com.twitter.heron.dsl.impl.operators.ReduceByWindowBolt;
 
 /**
  * ReduceByWindowStreamlet represents a KVStreamlet that is the result of

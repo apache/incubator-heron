@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.bolts.UnionBolt;
+import com.twitter.heron.dsl.impl.operators.UnionBolt;
 
 /**
  * UnionStreamlet is a Streamlet composed of all the elements of two

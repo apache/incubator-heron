@@ -12,38 +12,46 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.bolts;
+package com.twitter.heron.dsl.impl.operators;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.dsl.SerializableConsumer;
+import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.dsl.SerializableFunction;
 
 /**
- * LogBolt is a very simple Bolt that implements the log functionality.
- * It basically logs every tuple.
+ * FlatMapBolt is the class that implements the flatMap functionality.
+ * It takes in the flatMapFunction Function as the input.
+ * For every tuple, it applies the flatMapFunction, flattens the resulting
+ * tuples and emits them
  */
-public class ConsumerBolt<R> extends DslBolt {
-  private static final Logger LOG = Logger.getLogger(ConsumerBolt.class.getName());
-  private static final long serialVersionUID = 8716140142187667638L;
-  private SerializableConsumer<R> consumer;
+public class FlatMapBolt<R, T> extends DslBolt {
+  private static final long serialVersionUID = -2418329215159618998L;
+  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
 
-  public ConsumerBolt(SerializableConsumer<R> consumer) {
-    this.consumer = consumer;
+  private OutputCollector collector;
+
+  public FlatMapBolt(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
+    this.flatMapFn = flatMapFn;
   }
 
   @SuppressWarnings("rawtypes")
   @Override
   public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    consumer.accept(obj);
+    Iterable<? extends T> result = flatMapFn.apply(obj);
+    for (T o : result) {
+      collector.emit(new Values(o));
+    }
+    collector.ack(tuple);
   }
 }

@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.spouts.SupplierSpout;
+import com.twitter.heron.dsl.impl.sources.SupplierSpout;
 
 /**
  * SupplierStreamlet is a very quick and flexible way of creating a Streamlet

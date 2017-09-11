@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.bolts;
+package com.twitter.heron.dsl.impl.operators;
 
 import java.util.Map;
 
@@ -20,16 +20,22 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.dsl.SerializablePredicate;
 
 /**
- * UnionBolt is the class that implements the union functionality.
- * Its a very simple bolt that re-emits every tuple that it sees.
+ * FilterBolt implements the  functionality of the filter operation
+ * It takes in a filterFunction predicate as the input.
+ * For every tuple that it encounters, the filter function is run
+ * and the tuple is re-emitted if the predicate evaluates to true
  */
-public class UnionBolt<I> extends DslBolt {
-  private static final long serialVersionUID = -7326832064961413315L;
+public class FilterBolt<R> extends DslBolt {
+  private static final long serialVersionUID = -4748646871471052706L;
+  private SerializablePredicate<? super R> filterFn;
+
   private OutputCollector collector;
 
-  public UnionBolt() {
+  public FilterBolt(SerializablePredicate<? super R> filterFn) {
+    this.filterFn = filterFn;
   }
 
   @SuppressWarnings("rawtypes")
@@ -41,8 +47,10 @@ public class UnionBolt<I> extends DslBolt {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
-    I obj = (I) tuple.getValue(0);
-    collector.emit(new Values(obj));
+    R obj = (R) tuple.getValue(0);
+    if (filterFn.test(obj)) {
+      collector.emit(new Values(obj));
+    }
     collector.ack(tuple);
   }
 }

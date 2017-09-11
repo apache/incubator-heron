@@ -22,8 +22,8 @@ import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.WindowConfigImpl;
-import com.twitter.heron.dsl.impl.bolts.ReduceByKeyAndWindowBolt;
 import com.twitter.heron.dsl.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
+import com.twitter.heron.dsl.impl.operators.ReduceByKeyAndWindowBolt;
 
 /**
  * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of

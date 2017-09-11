@@ -20,8 +20,8 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.bolts.MapBolt;
 import com.twitter.heron.dsl.impl.groupings.RemapCustomGrouping;
+import com.twitter.heron.dsl.impl.operators.MapBolt;
 
 /**
  * RemapStreamlet represents a Streamlet that is the result of
