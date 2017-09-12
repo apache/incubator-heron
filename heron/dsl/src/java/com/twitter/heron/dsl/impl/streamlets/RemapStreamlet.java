@@ -19,7 +19,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
-import com.twitter.heron.dsl.impl.StreamletImpl;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
 import com.twitter.heron.dsl.impl.groupings.RemapCustomGrouping;
 import com.twitter.heron.dsl.impl.operators.MapOperator;
 
@@ -30,11 +30,11 @@ import com.twitter.heron.dsl.impl.operators.MapOperator;
  * that give users more flexibility over the operation. The remapFn allows for
  * users to choose which destination shards every transformed element can go.
  */
-public class RemapStreamlet<R> extends StreamletImpl<R> {
-  private StreamletImpl<R> parent;
+public class RemapStreamlet<R> extends BaseStreamlet<R> {
+  private BaseStreamlet<R> parent;
   private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
 
-  public RemapStreamlet(StreamletImpl<R> parent,
+  public RemapStreamlet(BaseStreamlet<R> parent,
                         SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;

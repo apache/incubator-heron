@@ -18,18 +18,18 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.impl.StreamletImpl;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
 import com.twitter.heron.dsl.impl.operators.MapOperator;
 
 /**
  * MapStreamlet represents a Streamlet that is made up of applying the user
  * supplied map function to each element of the parent streamlet.
  */
-public class MapStreamlet<R, T> extends StreamletImpl<T> {
-  private StreamletImpl<R> parent;
+public class MapStreamlet<R, T> extends BaseStreamlet<T> {
+  private BaseStreamlet<R> parent;
   private SerializableFunction<? super R, ? extends T> mapFn;
 
-  public MapStreamlet(StreamletImpl<R> parent, SerializableFunction<? super R, ? extends T> mapFn) {
+  public MapStreamlet(BaseStreamlet<R> parent, SerializableFunction<? super R, ? extends T> mapFn) {
     this.parent = parent;
     this.mapFn = mapFn;
     setNumPartitions(parent.getNumPartitions());

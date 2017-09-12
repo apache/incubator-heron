@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.impl.StreamletImpl;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
 import com.twitter.heron.dsl.impl.operators.FlatMapOperator;
 
 /**
@@ -26,11 +26,11 @@ import com.twitter.heron.dsl.impl.operators.FlatMapOperator;
  * supplied flatMap function to each element of the parent streamlet and flattening
  * out the result.
  */
-public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
-  private StreamletImpl<R> parent;
+public class FlatMapStreamlet<R, T> extends BaseStreamlet<T> {
+  private BaseStreamlet<R> parent;
   private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
 
-  public FlatMapStreamlet(StreamletImpl<R> parent,
+  public FlatMapStreamlet(BaseStreamlet<R> parent,
                           SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
     this.parent = parent;
     this.flatMapFn = flatMapFn;

@@ -62,10 +62,10 @@ import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
  * tranformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
-public abstract class StreamletImpl<R> implements Streamlet<R> {
+public abstract class BaseStreamlet<R> implements Streamlet<R> {
   protected String name;
   protected int nPartitions;
-  private List<StreamletImpl<?>> children;
+  private List<BaseStreamlet<?>> children;
   private boolean built;
 
   public boolean isBuilt() {
@@ -122,7 +122,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * Create a Streamlet based on the supplier function
    * @param supplier The Supplier function to generate the elements
    */
-  public static <T> StreamletImpl<T> createSupplierStreamlet(SerializableSupplier<T> supplier) {
+  public static <T> BaseStreamlet<T> createSupplierStreamlet(SerializableSupplier<T> supplier) {
     return new SupplierStreamlet<T>(supplier);
   }
 
@@ -247,7 +247,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   */
   @Override
   public Streamlet<R> union(Streamlet<? extends R> other) {
-    StreamletImpl<? extends R> joinee = (StreamletImpl<? extends R>) other;
+    BaseStreamlet<? extends R> joinee = (BaseStreamlet<? extends R>) other;
     UnionStreamlet<R> retval = new UnionStreamlet<>(this, joinee);
     addChild(retval);
     joinee.addChild(retval);
@@ -280,7 +280,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   /**
    * Only used by the implementors
    */
-  protected StreamletImpl() {
+  protected BaseStreamlet() {
     this.nPartitions = -1;
     this.children = new LinkedList<>();
     this.built = false;
@@ -292,7 +292,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     }
     if (doBuild(bldr, stageNames)) {
       built = true;
-      for (StreamletImpl<?> streamlet : children) {
+      for (BaseStreamlet<?> streamlet : children) {
         streamlet.build(bldr, stageNames);
       }
     }
@@ -303,7 +303,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   // computed and add a spout/bolt to the TopologyBuilder
   protected abstract boolean doBuild(TopologyBuilder bldr, Set<String> stageNames);
 
-  public  <T> void addChild(StreamletImpl<T> child) {
+  public  <T> void addChild(BaseStreamlet<T> child) {
     children.add(child);
   }
 }

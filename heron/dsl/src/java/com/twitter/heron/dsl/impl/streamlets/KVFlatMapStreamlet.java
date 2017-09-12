@@ -19,8 +19,8 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.impl.KVStreamletImpl;
-import com.twitter.heron.dsl.impl.StreamletImpl;
+import com.twitter.heron.dsl.impl.BaseKVStreamlet;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
 
 /**
  * KVFlatMapStreamlet represents a KVStreamlet that is made up of applying the user
@@ -28,10 +28,10 @@ import com.twitter.heron.dsl.impl.StreamletImpl;
  * out the result. The only difference between this and FlatMapStreamlet is that
  * KVFlatMapStreamlet ensures that resulting elements are of type KeyValue.
  */
-public class KVFlatMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
+public class KVFlatMapStreamlet<R, K, V> extends BaseKVStreamlet<K, V> {
   private FlatMapStreamlet<? super R, ? extends KeyValue<K, V>> delegate;
 
-  public KVFlatMapStreamlet(StreamletImpl<R> parent,
+  public KVFlatMapStreamlet(BaseStreamlet<R> parent,
                             SerializableFunction<? super R,
                                                  Iterable<? extends KeyValue<K, V>>> flatMapFn) {
     this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);

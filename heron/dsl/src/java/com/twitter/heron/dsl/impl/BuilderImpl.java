@@ -32,14 +32,14 @@ import com.twitter.heron.dsl.Streamlet;
  * the computation nodes.
  */
 public final class BuilderImpl implements Builder {
-  private List<StreamletImpl<?>> sources;
+  private List<BaseStreamlet<?>> sources;
   public BuilderImpl() {
     sources = new LinkedList<>();
   }
 
   @Override
   public <R> Streamlet<R> newStreamlet(SerializableSupplier<R> supplier) {
-    StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
+    BaseStreamlet<R> retval = BaseStreamlet.createSupplierStreamlet(supplier);
     retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
@@ -52,7 +52,7 @@ public final class BuilderImpl implements Builder {
   public TopologyBuilder build() {
     TopologyBuilder builder = new TopologyBuilder();
     Set<String> stageNames = new HashSet<>();
-    for (StreamletImpl<?> streamlet : sources) {
+    for (BaseStreamlet<?> streamlet : sources) {
       streamlet.build(builder, stageNames);
     }
     return builder;

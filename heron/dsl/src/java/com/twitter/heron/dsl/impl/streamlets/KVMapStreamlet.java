@@ -19,8 +19,8 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.impl.KVStreamletImpl;
-import com.twitter.heron.dsl.impl.StreamletImpl;
+import com.twitter.heron.dsl.impl.BaseKVStreamlet;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
 
 /**
  * KVMapStreamlet represents a KVStreamlet that is made up of applying the user
@@ -28,10 +28,10 @@ import com.twitter.heron.dsl.impl.StreamletImpl;
  * between this and MapStreamlet is that KVMapStreamlet ensures that resulting elements
  * are of type KeyValue.
  */
-public class KVMapStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
+public class KVMapStreamlet<R, K, V> extends BaseKVStreamlet<K, V> {
   private MapStreamlet<R, KeyValue<K, V>> delegate;
 
-  public KVMapStreamlet(StreamletImpl<R> parent,
+  public KVMapStreamlet(BaseStreamlet<R> parent,
                         SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn) {
     this.delegate = new MapStreamlet<R, KeyValue<K, V>>(parent, mapFn);
     setNumPartitions(delegate.getNumPartitions());

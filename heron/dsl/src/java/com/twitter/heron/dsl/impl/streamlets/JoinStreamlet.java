@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.WindowConfig;
-import com.twitter.heron.dsl.impl.KVStreamletImpl;
+import com.twitter.heron.dsl.impl.BaseKVStreamlet;
 import com.twitter.heron.dsl.impl.WindowConfigImpl;
 import com.twitter.heron.dsl.impl.groupings.JoinCustomGrouping;
 import com.twitter.heron.dsl.impl.operators.JoinOperator;
@@ -31,16 +31,16 @@ import com.twitter.heron.dsl.impl.operators.JoinOperator;
  * JoinStreamlet's elements are of KeyValue type where the key is KeyWindowInfo<K> type
  * and the value is of type VR.
  */
-public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
+public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<K, VR> {
   private JoinOperator.JoinType joinType;
-  private KVStreamletImpl<K, V1> left;
-  private KVStreamletImpl<K, V2> right;
+  private BaseKVStreamlet<K, V1> left;
+  private BaseKVStreamlet<K, V2> right;
   private WindowConfigImpl windowCfg;
   private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createInnerJoinStreamlet(KVStreamletImpl<A, B> left,
-                               KVStreamletImpl<A, C> right,
+      createInnerJoinStreamlet(BaseKVStreamlet<A, B> left,
+                               BaseKVStreamlet<A, C> right,
                                WindowConfig windowCfg,
                                SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
     return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.INNER, left,
@@ -48,8 +48,8 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   }
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createLeftJoinStreamlet(KVStreamletImpl<A, B> left,
-                              KVStreamletImpl<A, C> right,
+      createLeftJoinStreamlet(BaseKVStreamlet<A, B> left,
+                              BaseKVStreamlet<A, C> right,
                               WindowConfig windowCfg,
                               SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
     return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.LEFT, left,
@@ -57,16 +57,16 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
   }
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createOuterJoinStreamlet(KVStreamletImpl<A, B> left,
-                               KVStreamletImpl<A, C> right,
+      createOuterJoinStreamlet(BaseKVStreamlet<A, B> left,
+                               BaseKVStreamlet<A, C> right,
                                WindowConfig windowCfg,
                                SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
     return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER, left,
                                          right, windowCfg, joinFn);
   }
 
-  private JoinStreamlet(JoinOperator.JoinType joinType, KVStreamletImpl<K, V1> left,
-                        KVStreamletImpl<K, V2> right,
+  private JoinStreamlet(JoinOperator.JoinType joinType, BaseKVStreamlet<K, V1> left,
+                        BaseKVStreamlet<K, V2> right,
                         WindowConfig windowCfg,
                         SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
     this.joinType = joinType;
