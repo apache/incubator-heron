@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.sinks.LogBolt;
+import com.twitter.heron.dsl.impl.sinks.LogSink;
 
 /**
  * LogStreamlet represents en empty Streamlet that is made up of elements from the parent
@@ -55,7 +55,7 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new LogBolt<R>(),
+    bldr.setBolt(getName(), new LogSink<R>(),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

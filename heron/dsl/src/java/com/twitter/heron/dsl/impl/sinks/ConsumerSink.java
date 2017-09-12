@@ -20,17 +20,20 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.dsl.SerializableConsumer;
 import com.twitter.heron.dsl.impl.operators.DslOperator;
 
 /**
- * LogBolt is a very simple Bolt that implements the log functionality.
+ * LogSink is a very simple Bolt that implements the log functionality.
  * It basically logs every tuple.
  */
-public class LogBolt<R> extends DslOperator {
-  private static final long serialVersionUID = -6392422646613189818L;
-  private static final Logger LOG = Logger.getLogger(LogBolt.class.getName());
+public class ConsumerSink<R> extends DslOperator {
+  private static final Logger LOG = Logger.getLogger(ConsumerSink.class.getName());
+  private static final long serialVersionUID = 8716140142187667638L;
+  private SerializableConsumer<R> consumer;
 
-  public LogBolt() {
+  public ConsumerSink(SerializableConsumer<R> consumer) {
+    this.consumer = consumer;
   }
 
   @SuppressWarnings("rawtypes")
@@ -42,6 +45,6 @@ public class LogBolt<R> extends DslOperator {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    LOG.info(String.valueOf(obj));
+    consumer.accept(obj);
   }
 }

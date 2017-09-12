@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableConsumer;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.sinks.ConsumerBolt;
+import com.twitter.heron.dsl.impl.sinks.ConsumerSink;
 
 /**
  * LogStreamlet represents en empty Streamlet that is made up of elements from the parent
@@ -58,7 +58,7 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new ConsumerBolt<>(consumer),
+    bldr.setBolt(getName(), new ConsumerSink<>(consumer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }
