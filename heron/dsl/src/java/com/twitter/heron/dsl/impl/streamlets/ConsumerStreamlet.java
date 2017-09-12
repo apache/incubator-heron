@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableConsumer;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.operators.ConsumerBolt;
+import com.twitter.heron.dsl.impl.sinks.ConsumerBolt;
 
 /**
  * LogStreamlet represents en empty Streamlet that is made up of elements from the parent
