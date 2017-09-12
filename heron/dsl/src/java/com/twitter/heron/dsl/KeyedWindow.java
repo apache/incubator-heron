@@ -21,22 +21,22 @@ import java.io.Serializable;
  * Transformation depending on Windowing pass on the window/key information
  * using this class
  */
-public class KeyedWindowInfo<T> implements Serializable {
+public class KeyedWindow<T> implements Serializable {
   private static final long serialVersionUID = 4193319775040181971L;
   private T key;
-  private WindowInfo windowInfo;
-  public KeyedWindowInfo(T key, WindowInfo windowInfo) {
+  private Window window;
+  public KeyedWindow(T key, Window window) {
     this.key = key;
-    this.windowInfo = windowInfo;
+    this.window = window;
   }
   public T getKey() {
     return key;
   }
-  public WindowInfo getWindowInfo() {
-    return windowInfo;
+  public Window getWindow() {
+    return window;
   }
   @Override
   public String toString() {
-    return "{ Key: " + String.valueOf(key) + " WindowInfo: " + windowInfo.toString() + " }";
+    return "{ Key: " + String.valueOf(key) + " Window: " + window.toString() + " }";
   }
 }

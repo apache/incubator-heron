@@ -60,7 +60,7 @@ public interface Streamlet<R> {
   Streamlet<R> setNumPartitions(int numPartitions);
 
   /**
-   * Gerts the number of partitions of this Streamlet.
+   * Gets the number of partitions of this Streamlet.
    * @return the number of partitions of this Streamlet
    */
   int getNumPartitions();
@@ -129,8 +129,8 @@ public interface Streamlet<R> {
    * to have. Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
    */
-  KVStreamlet<WindowInfo, R> reduceByWindow(WindowConfig windowConfig,
-                                            SerializableBinaryOperator<R> reduceFn);
+  KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
+                                        SerializableBinaryOperator<R> reduceFn);
 
   /**
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially

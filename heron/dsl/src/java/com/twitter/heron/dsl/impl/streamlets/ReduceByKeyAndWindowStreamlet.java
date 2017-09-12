@@ -17,7 +17,7 @@ package com.twitter.heron.dsl.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KeyedWindowInfo;
+import com.twitter.heron.dsl.KeyedWindow;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.BaseKVStreamlet;
@@ -32,7 +32,7 @@ import com.twitter.heron.dsl.impl.operators.ReduceByKeyAndWindowOperator;
  * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo<K> type and the value is of type V.
  */
-public class ReduceByKeyAndWindowStreamlet<K, V> extends BaseKVStreamlet<KeyedWindowInfo<K>, V> {
+public class ReduceByKeyAndWindowStreamlet<K, V> extends BaseKVStreamlet<KeyedWindow<K>, V> {
   private BaseKVStreamlet<K, V> parent;
   private WindowConfigImpl windowCfg;
   private SerializableBinaryOperator<V> reduceFn;

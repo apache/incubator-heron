@@ -107,7 +107,7 @@ public class JoinOperator<K, V1, V2, VR> extends DslWindowOperator {
           joinAndEmit(key, val);
           break;
         default:
-          throw new RuntimeException("Unknown jointype");
+          throw new RuntimeException("Unknown join type " + joinType.name());
       }
     }
   }

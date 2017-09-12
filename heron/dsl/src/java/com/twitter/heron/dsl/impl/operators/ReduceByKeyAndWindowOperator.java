@@ -23,15 +23,15 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.KeyedWindowInfo;
+import com.twitter.heron.dsl.KeyedWindow;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
-import com.twitter.heron.dsl.WindowInfo;
+import com.twitter.heron.dsl.Window;
 
 /**
  * ReduceByKeyAndWindowOperator is the class that implements reduceByKeyAndWindow functionality.
  * It takes in a reduceFunction Function as an input.
  * For every time window, the bolt goes over all the tuples in that window and applies the reduce
- * function grouped by keys. It emits a KeyedWindowInfo, reduced Value KeyPairs as outputs
+ * function grouped by keys. It emits a KeyedWindow, reduced Value KeyPairs as outputs
  */
 public class ReduceByKeyAndWindowOperator<K, V> extends DslWindowOperator {
   private static final long serialVersionUID = 2833576046687750496L;
@@ -68,10 +68,10 @@ public class ReduceByKeyAndWindowOperator<K, V> extends DslWindowOperator {
     } else {
       endWindow = inputWindow.getEndTimestamp();
     }
-    WindowInfo windowInfo = new WindowInfo(startWindow, endWindow);
+    Window window = new Window(startWindow, endWindow);
     for (K key : reduceMap.keySet()) {
-      KeyedWindowInfo<K> keyedWindowInfo = new KeyedWindowInfo<>(key, windowInfo);
-      collector.emit(new Values(new KeyValue<>(keyedWindowInfo, reduceMap.get(key))));
+      KeyedWindow<K> keyedWindow = new KeyedWindow<>(key, window);
+      collector.emit(new Values(new KeyValue<>(keyedWindow, reduceMap.get(key))));
     }
   }
 

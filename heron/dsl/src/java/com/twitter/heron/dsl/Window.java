@@ -18,16 +18,16 @@ package com.twitter.heron.dsl;
 import java.io.Serializable;
 
 /**
- * WindowInfo is a container containing information about a particular window.
+ * Window is a container containing information about a particular window.
  * Transformations that depend on Windowing, pass the window information
  * inside their streamlets using this container.
  */
-public final class WindowInfo implements Serializable {
+public final class Window implements Serializable {
   private static final long serialVersionUID = 5103471810104775854L;
   private long startTimeMs;
   private long endTimeMs;
 
-  public WindowInfo(long startTimeMs, long endTimeMs) {
+  public Window(long startTimeMs, long endTimeMs) {
     this.startTimeMs = startTimeMs;
     this.endTimeMs = endTimeMs;
   }

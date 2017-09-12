@@ -23,7 +23,7 @@ import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
-import com.twitter.heron.dsl.WindowInfo;
+import com.twitter.heron.dsl.Window;
 
 /**
  * ReduceByWindowOperator is the class that implements the reduceByWindow functionality.
@@ -70,7 +70,7 @@ public class ReduceByWindowOperator<I> extends DslWindowOperator {
     } else {
       endWindow = inputWindow.getEndTimestamp();
     }
-    WindowInfo windowInfo = new WindowInfo(startWindow, endWindow);
-    collector.emit(new Values(new KeyValue<>(windowInfo, reducedValue)));
+    Window window = new Window(startWindow, endWindow);
+    collector.emit(new Values(new KeyValue<>(window, reducedValue)));
   }
 }
