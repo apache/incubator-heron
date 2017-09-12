@@ -76,6 +76,7 @@ public final class LoggingHelper {
     if (rootLogger.getLevel().intValue() < Level.WARNING.intValue()) {
       // zookeeper logging scares me. if people want this, we can patch to config-drive this
       Logger.getLogger("org.apache.zookeeper").setLevel(Level.WARNING);
+      Logger.getLogger("org.apache.storm.shade.org.apache.zookeeper").setLevel(Level.WARNING);
     }
 
     if (isRedirectStdOutErr) {

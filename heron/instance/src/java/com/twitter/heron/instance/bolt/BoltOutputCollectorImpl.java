@@ -15,6 +15,7 @@
 package com.twitter.heron.instance.bolt;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -128,8 +129,8 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
 
     sendTuple(bldr, streamId, tuple);
 
-    // TODO:- remove this after changing the api
-    return null;
+    // TODO: this used to return null. modified to make Trident work. Verify this is correct
+    return new ArrayList<>();
   }
 
   private void admitAckTuple(Tuple tuple) {

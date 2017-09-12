@@ -7,6 +7,7 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
         "//heron/storm/src/java:storm-compatibility-java",
+        "@org_apache_storm_core//jar",
     ],
     create_executable = 0,
 )

@@ -19,13 +19,18 @@
 package org.apache.storm.topology;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
+import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.generated.Grouping;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.grouping.CustomStreamGroupingDelegate;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.utils.Utils;
 
 public class BoltDeclarerImpl implements BoltDeclarer {
+  private static final Logger LOG = Logger.getLogger(BoltDeclarerImpl.class.getName());
+
   private com.twitter.heron.api.topology.BoltDeclarer delegate;
 
   public BoltDeclarerImpl(com.twitter.heron.api.topology.BoltDeclarer delegate) {
@@ -156,5 +161,61 @@ public class BoltDeclarerImpl implements BoltDeclarer {
       String componentId, String streamId, CustomStreamGrouping grouping) {
     delegate.customGrouping(componentId, streamId, new CustomStreamGroupingDelegate(grouping));
     return this;
+  }
+
+  @Override
+  public BoltDeclarer partialKeyGrouping(String componentId, Fields fields) {
+    throw new RuntimeException("partialKeyGrouping not supported");
+  }
+
+  @Override
+  public BoltDeclarer partialKeyGrouping(String componentId, String streamId, Fields fields) {
+    throw new RuntimeException("partialKeyGrouping not supported");
+  }
+
+  @Override
+  public BoltDeclarer grouping(GlobalStreamId id, Grouping grouping) {
+    switch (grouping.getSetField()) {
+      case ALL:
+        return allGrouping(id.get_componentId(), id.get_streamId());
+      case DIRECT:
+        return directGrouping(id.get_componentId(), id.get_streamId());
+      case FIELDS:
+        return fieldsGrouping(id.get_componentId(), id.get_streamId(), new Fields(grouping.get_fields()));
+      case LOCAL_OR_SHUFFLE:
+        return localOrShuffleGrouping(id.get_componentId(), id.get_streamId());
+      case SHUFFLE:
+        return shuffleGrouping(id.get_componentId(), id.get_streamId());
+      case NONE:
+        return noneGrouping(id.get_componentId(), id.get_streamId());
+      case CUSTOM_SERIALIZED:
+        grouping.get_custom_serialized();
+        LOG.warning(String.format(
+            "%s.grouping(GlobalStreamId id, Grouping grouping) not supported for %s, swapping in "
+                + "noneGrouping. The tuple stream routing will be broken for streamId %s",
+            getClass().getName(), grouping.getSetField(), id));
+        return noneGrouping(id.get_componentId(), id.get_streamId());
+      case CUSTOM_OBJECT:
+        //grouping.get_custom_object();
+      default:
+        throw new RuntimeException(
+            "grouping(GlobalStreamId id, Grouping grouping) not supported for "
+                + grouping.getSetField());
+    }
+  }
+
+  @Override
+  public BoltDeclarer setMemoryLoad(Number onHeap) {
+    return null;
+  }
+
+  @Override
+  public BoltDeclarer setMemoryLoad(Number onHeap, Number offHeap) {
+    return null;
+  }
+
+  @Override
+  public BoltDeclarer setCPULoad(Number amount) {
+    return null;
   }
 }

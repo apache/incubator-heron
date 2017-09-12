@@ -63,4 +63,19 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
     // Heron does not support this
     return this;
   }
+
+  @Override
+  public SpoutDeclarer setMemoryLoad(Number onHeap) {
+    return null;
+  }
+
+  @Override
+  public SpoutDeclarer setMemoryLoad(Number onHeap, Number offHeap) {
+    return null;
+  }
+
+  @Override
+  public SpoutDeclarer setCPULoad(Number amount) {
+    return null;
+  }
 }

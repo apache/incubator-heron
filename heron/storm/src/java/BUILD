@@ -10,6 +10,15 @@ storm_deps_files = [
     "//heron/simulator/src/java:simulator-java",
     "//heron/proto:proto_topology_java",
     "@com_googlecode_json_simple_json_simple//jar",
+    "//heron/proto:proto_topology_java",  # added for trident prototype
+    "@commons_io_commons_io//jar",        # added for trident prototype
+    "@commons_lang_commons_lang//jar",    # added for trident prototype
+    "@org_apache_storm_core//jar",        # added for trident prototype
+    "@org_clojure_clojure//jar",          # added for trident prototype
+    "@org_slf4j_slf4j_api//jar",          # added for trident prototype
+    "@org_slf4j_slf4j_jdk14//jar",          # added for trident prototype
+    "@org_yaml_snakeyaml//jar",           # added for trident prototype
+    "@org_ow2_asm_asm_all//jar",          # added for trident prototype, required at runtime
     "//third_party/java:kryo-neverlink",
 ]
 

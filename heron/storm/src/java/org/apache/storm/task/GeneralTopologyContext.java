@@ -18,13 +18,19 @@
 
 package org.apache.storm.task;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.generated.Grouping;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.tuple.Fields;
 import org.json.simple.JSONAware;
+
+import com.twitter.heron.api.generated.TopologyAPI;
 
 // import org.apache.storm.generated.ComponentCommon;
 // import org.apache.storm.generated.GlobalStreamId;
@@ -104,10 +110,9 @@ public class GeneralTopologyContext implements JSONAware {
   /**
    * Gets the declared output fields for the specified global stream id.
    */
-  /*
   public Fields getComponentOutputFields(GlobalStreamId id) {
+    return getComponentOutputFields(id.get_componentId(), id.get_streamId());
   }
-  */
 
   /**
    * Gets the declared inputs to the specified component.
@@ -119,6 +124,61 @@ public class GeneralTopologyContext implements JSONAware {
     return getComponentCommon(componentId).get_inputs();
   }
   */
+
+  // TODO: this is total jank
+  public Map<GlobalStreamId, Grouping> getSources(String componentId) {
+    Map<TopologyAPI.StreamId, TopologyAPI.Grouping> heron = delegate.getSources(componentId);
+    Map<GlobalStreamId, Grouping> converted = new NoValueMap<>();
+    for (TopologyAPI.StreamId heronStreamId : heron.keySet()) {
+      converted.put(new GlobalStreamId(heronStreamId.getComponentName(), heronStreamId.getId()), null);
+    }
+    return converted;
+  }
+
+  // TODO: this is total jank
+  private class NoValueMap<K, V> extends HashMap<K, V> {
+    private static final long serialVersionUID = -729425631561874300L;
+
+    @Override
+    public Collection<V> values() {
+      throw new RuntimeException("Values not supported. Map only being used in context where callers want keyset");
+    }
+
+    @Override
+    public Set<Entry<K, V>> entrySet() {
+      throw new RuntimeException("Values not supported. Map only being used in context where callers want keyset");
+    }
+
+    @Override
+    public V get(Object key) {
+      throw new RuntimeException("Values not supported. Map only being used in context where callers want keyset");
+    }
+  }
+
+  /**
+   * Gets information about who is consuming the outputs of the specified component,
+   * and how.
+   *
+   * @return Map from stream id to component id to the Grouping used.
+   */
+//  public Map<String, Map<String, TopologyAPI.Grouping>> getHeronTargets(String componentId) {
+//    return delegate.getTargets(componentId);
+//  }
+
+  public Map<String, Map<String, Grouping>> getTargets(String componentId) {
+    Map<String, Map<String, TopologyAPI.Grouping>> heron = delegate.getTargets(componentId);
+    Map<String, Map<String, Grouping>> converted = new HashMap<>();
+    for (String streamId : heron.keySet()) {
+      // TODO: this is total jank
+      Map<String, TopologyAPI.Grouping> heronGrouping = heron.get(streamId);
+      HashMap<String, Grouping> groupingConverted = new NoValueMap<>();
+      for (String key : heronGrouping.keySet()) {
+        groupingConverted.put(key, null);
+      }
+      converted.put(streamId, groupingConverted);
+    }
+    return converted;
+  }
 
   /**
    * Gets information about who is consuming the outputs of the specified component,
