@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.operators.FilterBolt;
+import com.twitter.heron.dsl.impl.operators.FilterOperator;
 
 /**
  * FilterStreamlet represents a Streamlet that is made up of elements from
@@ -57,7 +57,7 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new FilterBolt<R>(filterFn),
+    bldr.setBolt(getName(), new FilterOperator<R>(filterFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

@@ -22,7 +22,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 
 /**
  * ReduceByWindowCustomGrouping is the class that routes the incoming tuples
- * into the ReduceByWindowBolt. It essentially does hash grouping.
+ * into the ReduceByWindowOperator. It essentially does hash grouping.
  */
 public class ReduceByWindowCustomGrouping<I> implements CustomStreamGrouping {
   private static final long serialVersionUID = -2533339197867000330L;

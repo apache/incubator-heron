@@ -23,7 +23,7 @@ import com.twitter.heron.dsl.KeyValue;
 
 /**
  * ReduceByKeyAndWindowCustomGrouping is the class that routes the incoming tuples
- * into the ReduceByKeyAndWindowBolt. It essentially ensures that the values being
+ * into the ReduceByKeyAndWindowOperator. It essentially ensures that the values being
  * routed are of type KeyValue uses the key to route the tuple to the destination.
  * The current implementation is identical to JoinCustomGrouping but it might
  * evolve in the future.

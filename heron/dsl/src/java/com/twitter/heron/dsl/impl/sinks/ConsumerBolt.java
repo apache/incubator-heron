@@ -21,13 +21,13 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.dsl.SerializableConsumer;
-import com.twitter.heron.dsl.impl.operators.DslBolt;
+import com.twitter.heron.dsl.impl.operators.DslOperator;
 
 /**
  * LogBolt is a very simple Bolt that implements the log functionality.
  * It basically logs every tuple.
  */
-public class ConsumerBolt<R> extends DslBolt {
+public class ConsumerBolt<R> extends DslOperator {
   private static final Logger LOG = Logger.getLogger(ConsumerBolt.class.getName());
   private static final long serialVersionUID = 8716140142187667638L;
   private SerializableConsumer<R> consumer;

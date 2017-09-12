@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.operators.MapBolt;
+import com.twitter.heron.dsl.impl.operators.MapOperator;
 
 /**
  * MapStreamlet represents a Streamlet that is made up of applying the user
@@ -57,7 +57,7 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapBolt<R, T>(mapFn),
+    bldr.setBolt(getName(), new MapOperator<R, T>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

@@ -24,7 +24,7 @@ import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.WindowConfigImpl;
 import com.twitter.heron.dsl.impl.groupings.ReduceByWindowCustomGrouping;
-import com.twitter.heron.dsl.impl.operators.ReduceByWindowBolt;
+import com.twitter.heron.dsl.impl.operators.ReduceByWindowOperator;
 
 /**
  * ReduceByWindowStreamlet represents a KVStreamlet that is the result of
@@ -69,7 +69,7 @@ public class ReduceByWindowStreamlet<I> extends KVStreamletImpl<WindowInfo, I> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    ReduceByWindowBolt<I> bolt = new ReduceByWindowBolt<>(reduceFn);
+    ReduceByWindowOperator<I> bolt = new ReduceByWindowOperator<>(reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<I>());

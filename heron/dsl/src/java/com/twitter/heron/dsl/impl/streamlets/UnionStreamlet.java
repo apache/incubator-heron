@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.operators.UnionBolt;
+import com.twitter.heron.dsl.impl.operators.UnionOperator;
 
 /**
  * UnionStreamlet is a Streamlet composed of all the elements of two
@@ -59,7 +59,7 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new UnionBolt<I>(),
+    bldr.setBolt(getName(), new UnionOperator<I>(),
         getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
     return true;
   }

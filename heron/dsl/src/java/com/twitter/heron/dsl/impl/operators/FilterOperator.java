@@ -20,21 +20,22 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializableFunction;
+import com.twitter.heron.dsl.SerializablePredicate;
 
 /**
- * MapBolt is the class that implements the map functionality.
- * It takes in the mapFunction Function as the input.
- * For every tuple, it applies the mapFunction, and emits the resulting value
+ * FilterOperator implements the  functionality of the filter operation
+ * It takes in a filterFunction predicate as the input.
+ * For every tuple that it encounters, the filter function is run
+ * and the tuple is re-emitted if the predicate evaluates to true
  */
-public class MapBolt<R, T> extends DslBolt {
-  private static final long serialVersionUID = -1303096133107278700L;
-  private SerializableFunction<? super R, ? extends T> mapFn;
+public class FilterOperator<R> extends DslOperator {
+  private static final long serialVersionUID = -4748646871471052706L;
+  private SerializablePredicate<? super R> filterFn;
 
   private OutputCollector collector;
 
-  public MapBolt(SerializableFunction<? super R, ? extends T> mapFn) {
-    this.mapFn = mapFn;
+  public FilterOperator(SerializablePredicate<? super R> filterFn) {
+    this.filterFn = filterFn;
   }
 
   @SuppressWarnings("rawtypes")
@@ -47,8 +48,9 @@ public class MapBolt<R, T> extends DslBolt {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    T result = mapFn.apply(obj);
-    collector.emit(new Values(result));
+    if (filterFn.test(obj)) {
+      collector.emit(new Values(obj));
+    }
     collector.ack(tuple);
   }
 }

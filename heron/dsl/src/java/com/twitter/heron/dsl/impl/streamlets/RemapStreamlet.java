@@ -21,7 +21,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
 import com.twitter.heron.dsl.impl.groupings.RemapCustomGrouping;
-import com.twitter.heron.dsl.impl.operators.MapBolt;
+import com.twitter.heron.dsl.impl.operators.MapOperator;
 
 /**
  * RemapStreamlet represents a Streamlet that is the result of
@@ -63,7 +63,7 @@ public class RemapStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapBolt<R, R>((a) -> a),
+    bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a),
         getNumPartitions())
         .customGrouping(parent.getName(), new RemapCustomGrouping<R>(remapFn));
     return true;

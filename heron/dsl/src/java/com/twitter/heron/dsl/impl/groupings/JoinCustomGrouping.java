@@ -23,7 +23,7 @@ import com.twitter.heron.dsl.KeyValue;
 
 /**
  * JoinCustomGrouping is the class that routes the incoming tuples into the
- * JoinBolt. It essentially ensures that the values being routed are of type
+ * JoinOperator. It essentially ensures that the values being routed are of type
  * KeyValue uses the key to route the tuple to the destination.
  */
 public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {

@@ -22,7 +22,7 @@ import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.KVStreamletImpl;
 import com.twitter.heron.dsl.impl.WindowConfigImpl;
 import com.twitter.heron.dsl.impl.groupings.JoinCustomGrouping;
-import com.twitter.heron.dsl.impl.operators.JoinBolt;
+import com.twitter.heron.dsl.impl.operators.JoinOperator;
 
 /**
  * JoinStreamlet represents a KVStreamlet that is the result of joining two KVStreamlets left
@@ -32,7 +32,7 @@ import com.twitter.heron.dsl.impl.operators.JoinBolt;
  * and the value is of type VR.
  */
 public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
-  private JoinBolt.JoinType joinType;
+  private JoinOperator.JoinType joinType;
   private KVStreamletImpl<K, V1> left;
   private KVStreamletImpl<K, V2> right;
   private WindowConfigImpl windowCfg;
@@ -43,7 +43,8 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
                                KVStreamletImpl<A, C> right,
                                WindowConfig windowCfg,
                                SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.INNER, left, right, windowCfg, joinFn);
+    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.INNER, left,
+                                         right, windowCfg, joinFn);
   }
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
@@ -51,7 +52,8 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
                               KVStreamletImpl<A, C> right,
                               WindowConfig windowCfg,
                               SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.LEFT, left, right, windowCfg, joinFn);
+    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.LEFT, left,
+                                         right, windowCfg, joinFn);
   }
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
@@ -59,10 +61,11 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
                                KVStreamletImpl<A, C> right,
                                WindowConfig windowCfg,
                                SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinBolt.JoinType.OUTER, left, right, windowCfg, joinFn);
+    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER, left,
+                                         right, windowCfg, joinFn);
   }
 
-  private JoinStreamlet(JoinBolt.JoinType joinType, KVStreamletImpl<K, V1> left,
+  private JoinStreamlet(JoinOperator.JoinType joinType, KVStreamletImpl<K, V1> left,
                         KVStreamletImpl<K, V2> right,
                         WindowConfig windowCfg,
                         SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
@@ -99,7 +102,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<K, VR> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    JoinBolt<K, V1, V2, VR> bolt = new JoinBolt<>(joinType, left.getName(),
+    JoinOperator<K, V1, V2, VR> bolt = new JoinOperator<>(joinType, left.getName(),
         right.getName(), joinFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())

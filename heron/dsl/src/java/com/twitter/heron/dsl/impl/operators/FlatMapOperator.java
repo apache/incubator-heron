@@ -20,22 +20,22 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializablePredicate;
+import com.twitter.heron.dsl.SerializableFunction;
 
 /**
- * FilterBolt implements the  functionality of the filter operation
- * It takes in a filterFunction predicate as the input.
- * For every tuple that it encounters, the filter function is run
- * and the tuple is re-emitted if the predicate evaluates to true
+ * FlatMapOperator is the class that implements the flatMap functionality.
+ * It takes in the flatMapFunction Function as the input.
+ * For every tuple, it applies the flatMapFunction, flattens the resulting
+ * tuples and emits them
  */
-public class FilterBolt<R> extends DslBolt {
-  private static final long serialVersionUID = -4748646871471052706L;
-  private SerializablePredicate<? super R> filterFn;
+public class FlatMapOperator<R, T> extends DslOperator {
+  private static final long serialVersionUID = -2418329215159618998L;
+  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
 
   private OutputCollector collector;
 
-  public FilterBolt(SerializablePredicate<? super R> filterFn) {
-    this.filterFn = filterFn;
+  public FlatMapOperator(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
+    this.flatMapFn = flatMapFn;
   }
 
   @SuppressWarnings("rawtypes")
@@ -48,8 +48,9 @@ public class FilterBolt<R> extends DslBolt {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    if (filterFn.test(obj)) {
-      collector.emit(new Values(obj));
+    Iterable<? extends T> result = flatMapFn.apply(obj);
+    for (T o : result) {
+      collector.emit(new Values(o));
     }
     collector.ack(tuple);
   }

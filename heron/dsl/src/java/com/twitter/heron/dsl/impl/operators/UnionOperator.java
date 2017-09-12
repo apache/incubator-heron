@@ -20,22 +20,16 @@ import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.dsl.SerializableFunction;
 
 /**
- * FlatMapBolt is the class that implements the flatMap functionality.
- * It takes in the flatMapFunction Function as the input.
- * For every tuple, it applies the flatMapFunction, flattens the resulting
- * tuples and emits them
+ * UnionOperator is the class that implements the union functionality.
+ * Its a very simple bolt that re-emits every tuple that it sees.
  */
-public class FlatMapBolt<R, T> extends DslBolt {
-  private static final long serialVersionUID = -2418329215159618998L;
-  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
-
+public class UnionOperator<I> extends DslOperator {
+  private static final long serialVersionUID = -7326832064961413315L;
   private OutputCollector collector;
 
-  public FlatMapBolt(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
-    this.flatMapFn = flatMapFn;
+  public UnionOperator() {
   }
 
   @SuppressWarnings("rawtypes")
@@ -47,11 +41,8 @@ public class FlatMapBolt<R, T> extends DslBolt {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
-    R obj = (R) tuple.getValue(0);
-    Iterable<? extends T> result = flatMapFn.apply(obj);
-    for (T o : result) {
-      collector.emit(new Values(o));
-    }
+    I obj = (I) tuple.getValue(0);
+    collector.emit(new Values(obj));
     collector.ack(tuple);
   }
 }

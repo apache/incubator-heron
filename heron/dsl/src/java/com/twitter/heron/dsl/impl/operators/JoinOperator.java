@@ -26,12 +26,12 @@ import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.SerializableBiFunction;
 
 /**
- * JoinBolt is the bolt that implements the join/leftJoin/innerJoin functionality.
+ * JoinOperator is the bolt that implements the join/leftJoin/innerJoin functionality.
  * It embeds the logic of the type of join(outer, left, inner) which it takes in as
  * a config parameter. Also taken as parameters are which source is left and right.
  * This is needed for the semantics of outer/left/inner joins.
  */
-public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
+public class JoinOperator<K, V1, V2, VR> extends DslWindowOperator {
   private static final long serialVersionUID = 4875450390444745407L;
   public static final String LEFT_COMPONENT_NAME = "_dsl_joinbolt_left_component_name_";
   public static final String RIGHT_COMPONENT_NAME = "_dsl_joinbolt_right_component_name_";
@@ -51,8 +51,8 @@ public class JoinBolt<K, V1, V2, VR> extends DslWindowBolt {
   private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
   private OutputCollector collector;
 
-  public JoinBolt(JoinType joinType, String leftComponent, String rightComponent,
-                  SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+  public JoinOperator(JoinType joinType, String leftComponent, String rightComponent,
+                      SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
     this.joinType = joinType;
     this.leftComponent = leftComponent;
     this.rightComponent = rightComponent;

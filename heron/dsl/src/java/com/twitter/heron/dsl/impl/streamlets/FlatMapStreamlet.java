@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.impl.StreamletImpl;
-import com.twitter.heron.dsl.impl.operators.FlatMapBolt;
+import com.twitter.heron.dsl.impl.operators.FlatMapOperator;
 
 /**
  * FlatMapStreamlet represents a Streamlet that is made up of applying the user
@@ -59,7 +59,7 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new FlatMapBolt<R, T>(flatMapFn),
+    bldr.setBolt(getName(), new FlatMapOperator<R, T>(flatMapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

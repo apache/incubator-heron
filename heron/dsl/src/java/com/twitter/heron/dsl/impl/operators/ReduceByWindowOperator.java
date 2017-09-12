@@ -26,17 +26,17 @@ import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.WindowInfo;
 
 /**
- * ReduceByWindowBolt is the class that implements the reduceByWindow functionality.
+ * ReduceByWindowOperator is the class that implements the reduceByWindow functionality.
  * It takes in a reduceFn Function as input.
  * For every window, the bolt applies reduceFn to all the tuples in that window, and emits
  * the resulting value as output
  */
-public class ReduceByWindowBolt<I> extends DslWindowBolt {
+public class ReduceByWindowOperator<I> extends DslWindowOperator {
   private static final long serialVersionUID = 6513775685209414130L;
   private SerializableBinaryOperator<I> reduceFn;
   private OutputCollector collector;
 
-  public ReduceByWindowBolt(SerializableBinaryOperator<I> reduceFn) {
+  public ReduceByWindowOperator(SerializableBinaryOperator<I> reduceFn) {
     this.reduceFn = reduceFn;
   }
 

@@ -22,7 +22,7 @@ import com.twitter.heron.api.tuple.Fields;
  * The Bolt interface that other windowed operators of the dsl packages extend.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class DslWindowBolt extends BaseWindowedBolt {
+public abstract class DslWindowOperator extends BaseWindowedBolt {
   private static final long serialVersionUID = -4836560876041237959L;
 
   /**

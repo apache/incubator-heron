@@ -26,7 +26,7 @@ import com.twitter.heron.api.tuple.Fields;
  * The Bolt interface that other operators of the dsl packages extend.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class DslBolt extends BaseRichBolt
+public abstract class DslOperator extends BaseRichBolt
     implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 8524238140745238942L;
 
