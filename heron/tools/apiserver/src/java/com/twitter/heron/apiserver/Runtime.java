@@ -216,6 +216,11 @@ public final class Runtime {
       return;
     }
 
+    final boolean verbose = isVerbose(cmd);
+    // set and configure logging level
+    Logging.setVerbose(verbose);
+    Logging.configure(verbose);
+
     LOG.debug("apiserver overrides:\n {}", cmd.getOptionProperties(Flag.Property.name));
 
     final String toolsHome = getToolsHome();
@@ -227,7 +232,6 @@ public final class Runtime {
     final String releaseFile = getReleaseFile(toolsHome, cmd);
     final String configurationOverrides = loadOverrides(cmd);
     final int port = getPort(cmd);
-
 
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
@@ -253,13 +257,12 @@ public final class Runtime {
 
     server.setHandler(contextHandler);
 
-    // set logging level
-    Logging.setVerbose(isVerbose(cmd));
-
     final ServletHolder apiServlet =
         new ServletHolder(new ServletContainer(config));
 
     contextHandler.addServlet(apiServlet, API_BASE_PATH);
+
+
 
     try {
       server.start();
