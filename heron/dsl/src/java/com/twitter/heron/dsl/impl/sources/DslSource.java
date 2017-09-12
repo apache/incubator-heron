@@ -23,10 +23,10 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
 /**
- * DslSpout is the base class for all dsl sources.
+ * DslSource is the base class for all dsl sources.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class DslSpout extends BaseRichSpout
+public abstract class DslSource extends BaseRichSpout
     implements IStatefulComponent<Serializable, Serializable> {
 
   private static final long serialVersionUID = 8583965332619565343L;

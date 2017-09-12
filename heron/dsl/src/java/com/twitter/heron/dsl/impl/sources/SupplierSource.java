@@ -22,17 +22,17 @@ import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.dsl.SerializableSupplier;
 
 /**
- * SupplierSpout is a way to wrap a supplier function inside a Heron Spout.
- * The SupplierSpout just calls the get method of the supplied function
+ * SupplierSource is a way to wrap a supplier function inside a Heron Spout.
+ * The SupplierSource just calls the get method of the supplied function
  * to generate the next tuple.
  */
-public class SupplierSpout<R> extends DslSpout {
+public class SupplierSource<R> extends DslSource {
   private static final long serialVersionUID = 6476611751545430216L;
   private SerializableSupplier<R> supplier;
 
   private SpoutOutputCollector collector;
 
-  public SupplierSpout(SerializableSupplier<R> supplier) {
+  public SupplierSource(SerializableSupplier<R> supplier) {
     this.supplier = supplier;
   }
 
