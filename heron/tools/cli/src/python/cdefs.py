@@ -40,7 +40,7 @@ def read_server_mode_cluster_definition(cluster, cl_args, config_file):
     client_confs[cluster] = dict()
 
   # now check if the service-url from command line is set, if so override it
-  if cl_args['service_url']:
+  if cl_args.get('service_url', None):
     client_confs[cluster]['service_url'] = cl_args['service_url']
 
   # the return value of yaml.load can be None if conf_file is an empty file

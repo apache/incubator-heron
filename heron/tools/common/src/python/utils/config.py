@@ -34,6 +34,8 @@ ENVIRON = "default"
 BIN_DIR = "bin"
 CONF_DIR = "conf"
 ETC_DIR = "etc"
+EXAMPLES_DIR = "examples"
+EXAMPLES_JAR = "heron-examples.jar"
 LIB_DIR = "lib"
 CLI_DIR = ".heron"
 RELEASE_YAML = "release.yaml"
@@ -95,6 +97,7 @@ def get_subparser(parser, command):
   for subparsers_action in subparsers_actions:
     # get all subparsers
     for choice, subparser in subparsers_action.choices.items():
+      print choice, subparser
       if choice == command:
         return subparser
   return None
@@ -181,6 +184,24 @@ def get_heron_bin_dir():
   """
   bin_path = os.path.join(get_heron_dir(), BIN_DIR)
   return bin_path
+
+
+def get_heron_examples_dir():
+  """
+  This will provide heron examples directory from .pex file.
+  :return: absolute path of heron examples directory
+  """
+  conf_path = os.path.join(get_heron_dir(), EXAMPLES_DIR)
+  return conf_path
+
+
+def get_heron_examples_jar():
+  """
+  This will provide heron examples jar from .pex file.
+  :return: absolute path of heron examples jar
+  """
+  path = os.path.join(get_heron_examples_dir(), EXAMPLES_JAR)
+  return path
 
 
 def get_heron_conf_dir():

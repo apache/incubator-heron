@@ -29,6 +29,7 @@ import heron.tools.cli.src.python.cdefs as cdefs
 import heron.tools.cli.src.python.help as cli_help
 import heron.tools.cli.src.python.activate as activate
 import heron.tools.cli.src.python.deactivate as deactivate
+import heron.tools.cli.src.python.examples as examples
 import heron.tools.cli.src.python.kill as kill
 import heron.tools.cli.src.python.result as result
 import heron.tools.cli.src.python.restart as restart
@@ -90,6 +91,7 @@ def create_parser():
   submit.create_parser(subparsers)
   update.create_parser(subparsers)
   version.create_parser(subparsers)
+  examples.create_parser(subparsers)
 
   return parser
 
@@ -107,6 +109,8 @@ def run(command, parser, command_args, unknown_args):
   runners = {
       'activate':activate,
       'deactivate':deactivate,
+      'examples-list': examples,
+      'examples-run': examples,
       'kill':kill,
       'restart':restart,
       'submit':submit,
@@ -275,7 +279,8 @@ def extract_common_args(command, parser, cl_args):
     except KeyError:
       # if some of the arguments are not found, print error and exit
       subparser = config.get_subparser(parser, command)
-      print subparser.format_help()
+      if subparser:
+        print subparser.format_help()
       return dict()
 
   new_cl_args = dict()
@@ -287,6 +292,15 @@ def extract_common_args(command, parser, cl_args):
 
   cl_args.update(new_cl_args)
   return cl_args
+
+################################################################################
+def is_example(command):
+  '''
+  :param command:
+  :return: True if the command is an example command
+  '''
+  return command == 'examples-list'
+
 
 ################################################################################
 def main():
@@ -325,7 +339,7 @@ def main():
     results = run(command, parser, command_line_args, unknown_args)
     return 0 if result.is_successful(results) else 1
 
-  if command not in ('help', 'version'):
+  if command not in ('help', 'version') and not is_example(command):
     log.set_logging_level(command_line_args)
     Log.debug("Input Command Line Args: %s", command_line_args)
 
@@ -347,11 +361,11 @@ def main():
 
   start = time.time()
   results = run(command, parser, command_line_args, unknown_args)
-  if command not in ('help', 'version'):
+  if command not in ('help', 'version') and not is_example(command):
     result.render(results)
   end = time.time()
 
-  if command not in ('help', 'version'):
+  if command not in ('help', 'version') and not is_example(command):
     sys.stdout.flush()
     Log.debug('Elapsed time: %.3fs.', (end - start))
 
