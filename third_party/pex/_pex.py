@@ -1,5 +1,3 @@
-#!/usr/bin/env python2.7
-
 from __future__ import print_function
 import os
 import sys
@@ -90,7 +88,7 @@ def main():
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
     parser.add_option('--disable-cache', action='store_true', dest='disable_cache', default=False)
     parser.add_option('--not-zip-safe', action='store_false', dest='zip_safe', default=True)
-    parser.add_option('--python', default="/usr/bin/python2.7")
+    parser.add_option('--python', default="/usr/bin/python")
     parser.add_option('--find-links', dest='find_links', default='')
     options, args = parser.parse_args()
 
