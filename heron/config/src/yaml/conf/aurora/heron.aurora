@@ -20,7 +20,7 @@ fetch_user_package = Process(
   cmdline = 'curl %s -o %s && tar zxf %s' % (heron_topology_jar_uri, topology_package_file, topology_package_file)
 )
 
-command_to_start_executor =
+command_to_start_executor = \
   '{{EXECUTOR_BINARY}}' \
   '{{mesos.instance}}' \
   '{{TOPOLOGY_NAME}}' \
