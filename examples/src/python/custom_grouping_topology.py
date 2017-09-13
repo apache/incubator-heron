@@ -20,8 +20,8 @@ import heronpy.api.api_constants as constants
 from heronpy.api.topology import Topology
 from heronpy.api.stream import Grouping
 
-from heron.examples.src.python.spout import WordSpout
-from heron.examples.src.python.bolt import ConsumeBolt
+from examples.src.python.spout import WordSpout
+from examples.src.python.bolt import ConsumeBolt
 
 # pylint: disable=unused-argument
 class SampleCustomGrouping(ICustomGrouping):
