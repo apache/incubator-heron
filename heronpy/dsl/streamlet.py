@@ -130,6 +130,7 @@ class Streamlet(object):
     if self._stage_name in stage_names:
       raise RuntimeError("duplicated stage name %s" % self._stage_name)
     stage_names[self._stage_name] = 1
+
     self._build_this(bldr)
     return bldr
 

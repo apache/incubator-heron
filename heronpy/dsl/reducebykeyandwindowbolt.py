@@ -55,7 +55,7 @@ class ReduceByKeyAndWindowBolt(SlidingWindowBolt, DslBoltBase):
     for (key, values) in mymap.items():
       result = values[0]
       for value in values[1:]:
-        self.reduce_function(result, value)
+        result = self.reduce_function(result, value)
       self.emit([(key, result)], stream='output')
 
 # pylint: disable=unused-argument
