@@ -99,7 +99,6 @@ class TestTopologyBuilder(TopologyBuilder):
     test_spec = IntegrationTestBolt.spec(name, par, inputs, _config,
                                          user_bolt_classpath=bolt_classpath,
                                          user_output_fields=user_outputs)
-
     self.add_spec(test_spec)
     self.bolts[name] = test_spec
     return test_spec

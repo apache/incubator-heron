@@ -104,7 +104,6 @@ class ExactlyOnceResultsChecker(object):
 
   def _compare(self, expected_results, actual_results):
     # Compare the actual and expected result
-
     if actual_results == expected_results:
       return status.TestSuccess(
           "Topology %s result matches expected result: %s expected tuples found exactly once" %
@@ -385,7 +384,6 @@ def main():
   decoder = json.JSONDecoder(strict=False)
   # Convert the conf file to a json format
   conf = decoder.decode(conf_string)
-  logging.info("conf: %s", conf)
 
   # Parse the arguments passed via command line
   parser = argparse.ArgumentParser(description='This is the heron integration test framework')
